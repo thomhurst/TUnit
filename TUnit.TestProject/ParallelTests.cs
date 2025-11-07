@@ -12,27 +12,30 @@ public class ParallelTests
     [After(Test)]
     public async Task TestOverlaps()
     {
-        TestDateTimeRanges.Add(new DateTimeRange(TestContext.Current!.Execution.TestStart!.Value.DateTime, TestContext.Current.Execution.Result!.End!.Value.DateTime));
+        TestDateTimeRanges.Add(new DateTimeRange(TestContext.Current!.Execution.TestStart!.Value, TestContext.Current.Execution.Result!.End!.Value));
 
         await AssertOverlaps();
     }
 
     [Test, Repeat(3)]
-    public async Task Parallel_Test1()
+    public async Task Parallel_Test1(CancellationToken cancellationToken)
     {
-        await Task.Delay(5000);
+        var timeProvider = TestContext.Current!.GetService<TimeProvider>();
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(5000), cancellationToken);
     }
 
     [Test, Repeat(3)]
-    public async Task Parallel_Test2()
+    public async Task Parallel_Test2(CancellationToken cancellationToken)
     {
-        await Task.Delay(5000);
+        var timeProvider = TestContext.Current!.GetService<TimeProvider>();
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(5000), cancellationToken);
     }
 
     [Test, Repeat(3)]
-    public async Task Parallel_Test3()
+    public async Task Parallel_Test3(CancellationToken cancellationToken)
     {
-        await Task.Delay(5000);
+        var timeProvider = TestContext.Current!.GetService<TimeProvider>();
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(5000), cancellationToken);
     }
 
     private async Task AssertOverlaps()
@@ -51,10 +54,10 @@ public class ParallelTests
         }
     }
 
-    private class DateTimeRange(DateTime start, DateTime end)
+    private class DateTimeRange(DateTimeOffset start, DateTimeOffset end)
     {
-        public DateTime Start { get; } = start;
-        public DateTime End { get; } = end;
+        public DateTimeOffset Start { get; } = start;
+        public DateTimeOffset End { get; } = end;
 
         public bool Overlap(DateTimeRange other)
         {

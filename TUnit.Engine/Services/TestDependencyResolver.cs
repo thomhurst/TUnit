@@ -255,7 +255,7 @@ internal sealed class TestDependencyResolver
     private static void CreateDependencyResolutionFailedResult(AbstractExecutableTest test)
     {
         test.State = TestState.Failed;
-        var now = DateTimeOffset.UtcNow;
+        var now = test.Context.TimeProvider.GetUtcNow();
         test.Result = new TestResult
         {
             State = TestState.Failed,

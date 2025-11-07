@@ -162,7 +162,8 @@ internal sealed class TestCoordinator : ITestCoordinator
                     },
                     testTimeout,
                     cancellationToken,
-                    timeoutMessage).ConfigureAwait(false);
+                    timeoutMessage,
+                    test.Context.TimeProvider).ConfigureAwait(false);
             }).ConfigureAwait(false);
 
             await _stateManager.MarkCompletedAsync(test).ConfigureAwait(false);

@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using TUnit.Core;
 using TUnit.Core.Hooks;
 using TUnit.Core.Interfaces;
@@ -17,30 +18,23 @@ internal static class HookTimeoutHelper
         T context,
         CancellationToken cancellationToken)
     {
-        // CENTRAL POINT: At execution time, check if we should use a custom hook executor
-        // This happens AFTER OnTestRegistered, so CustomHookExecutor will be set if the user called SetHookExecutor
         var timeout = hook.Timeout;
 
         if (timeout == null)
         {
-            // No timeout specified, execute with potential custom executor
             return async () => await ExecuteHookWithPotentialCustomExecutor(hook, context, cancellationToken);
         }
 
+        var timeProvider = (context as TestContext)?.TimeProvider ?? TimeProvider.System;
+
         return async () =>
         {
-            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            var timeoutMs = (int)timeout.Value.TotalMilliseconds;
-            cts.CancelAfter(timeoutMs);
-
-            try
-            {
-                await ExecuteHookWithPotentialCustomExecutor(hook, context, cts.Token);
-            }
-            catch (OperationCanceledException) when (cts.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
-            {
-                throw new TimeoutException($"Hook '{hook.Name}' exceeded timeout of {timeoutMs}ms");
-            }
+            await ExecuteWithTimeoutAsync(
+                async ct => await ExecuteHookWithPotentialCustomExecutor(hook, context, ct),
+                timeout.Value,
+                cancellationToken,
+                $"Hook '{hook.Name}' exceeded timeout of {(int)timeout.Value.TotalMilliseconds}ms",
+                timeProvider);
         };
     }
 
@@ -49,13 +43,10 @@ internal static class HookTimeoutHelper
     /// </summary>
     private static ValueTask ExecuteHookWithPotentialCustomExecutor<T>(StaticHookMethod<T> hook, T context, CancellationToken cancellationToken)
     {
-        // Check if this is a TestContext with a custom hook executor
         if (context is TestContext testContext && testContext.CustomHookExecutor != null)
         {
-            // BYPASS the hook's default executor and call the custom executor directly with the hook's body
             var customExecutor = testContext.CustomHookExecutor;
 
-            // Determine which executor method to call based on hook type
             if (hook is BeforeTestHookMethod || hook is InstanceHookMethod)
             {
                 return customExecutor.ExecuteBeforeTestHook(
@@ -74,7 +65,6 @@ internal static class HookTimeoutHelper
             }
         }
 
-        // No custom executor, use the hook's default executor
         return hook.ExecuteAsync(context, cancellationToken);
     }
 
@@ -90,24 +80,19 @@ internal static class HookTimeoutHelper
     {
         if (timeout == null)
         {
-            // No timeout specified, execute normally
             return async () => await hookDelegate(context, cancellationToken);
         }
 
+        var timeProvider = (context as TestContext)?.TimeProvider ?? TimeProvider.System;
+
         return async () =>
         {
-            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            var timeoutMs = (int)timeout.Value.TotalMilliseconds;
-            cts.CancelAfter(timeoutMs);
-
-            try
-            {
-                await hookDelegate(context, cts.Token);
-            }
-            catch (OperationCanceledException) when (cts.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
-            {
-                throw new TimeoutException($"Hook '{hookName}' exceeded timeout of {timeoutMs}ms");
-            }
+            await ExecuteWithTimeoutAsync(
+                async ct => await hookDelegate(context, ct),
+                timeout.Value,
+                cancellationToken,
+                $"Hook '{hookName}' exceeded timeout of {(int)timeout.Value.TotalMilliseconds}ms",
+                timeProvider);
         };
     }
 
@@ -125,24 +110,65 @@ internal static class HookTimeoutHelper
     {
         if (timeout == null)
         {
-            // No timeout specified, execute normally
             return async () => await hookDelegate(context, cancellationToken);
         }
 
+        var timeProvider = (context as TestContext)?.TimeProvider ?? TimeProvider.System;
+
         return async () =>
         {
-            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            var timeoutMs = (int)timeout.Value.TotalMilliseconds;
-            cts.CancelAfter(timeoutMs);
+            await ExecuteWithTimeoutAsync(
+                async ct => await hookDelegate(context, ct),
+                timeout.Value,
+                cancellationToken,
+                $"Hook '{hookName}' exceeded timeout of {(int)timeout.Value.TotalMilliseconds}ms",
+                timeProvider);
+        };
+    }
+
+    /// <summary>
+    /// Executes a task with timeout using TimeProvider for testability
+    /// </summary>
+    private static async Task ExecuteWithTimeoutAsync(
+        Func<CancellationToken, Task> taskFactory,
+        TimeSpan timeout,
+        CancellationToken cancellationToken,
+        string timeoutMessage,
+        TimeProvider timeProvider)
+    {
+        using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        timeoutCts.CancelAfter(timeout);
+
+        var executionTask = taskFactory(timeoutCts.Token);
+
+        // Use a cancellable timeout task to avoid leaving Task.Delay running in the background
+        using var timeoutTaskCts = new CancellationTokenSource();
+        var timeoutTask = timeProvider.Delay(timeout, timeoutTaskCts.Token);
+
+        var completedTask = await Task.WhenAny(executionTask, timeoutTask).ConfigureAwait(false);
+
+        if (completedTask == timeoutTask)
+        {
+            timeoutCts.Cancel();
 
             try
             {
-                await hookDelegate(context, cts.Token);
+                await executionTask.ConfigureAwait(false);
             }
-            catch (OperationCanceledException) when (cts.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+            catch (OperationCanceledException)
             {
-                throw new TimeoutException($"Hook '{hookName}' exceeded timeout of {timeoutMs}ms");
             }
-        };
+            catch
+            {
+            }
+
+            throw new TimeoutException(timeoutMessage);
+        }
+
+        // Task completed normally - cancel the timeout task to free resources immediately
+        timeoutTaskCts.Cancel();
+
+        // Await the result to propagate any exceptions
+        await executionTask.ConfigureAwait(false);
     }
 }

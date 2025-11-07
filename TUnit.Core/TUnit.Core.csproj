@@ -5,6 +5,7 @@
     <ItemGroup>
         <InternalsVisibleTo Include="TUnit.Engine" />
         <InternalsVisibleTo Include="TUnit.UnitTests" />
+        <InternalsVisibleTo Include="TUnit.TestProject" />
     </ItemGroup>
 
     <ItemGroup>
@@ -64,6 +65,10 @@
         <PackageReference Include="Microsoft.CSharp" />
         <PackageReference Include="System.Text.Json" />
         <PackageReference Include="System.Collections.Immutable" />
+        <PackageReference Include="Microsoft.Bcl.TimeProvider" />
+    </ItemGroup>
+    <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
+        <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
     </ItemGroup>
     <ItemGroup>
       <Compile Remove="IClassDataSourceAttribute.cs" />

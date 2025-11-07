@@ -1,4 +1,4 @@
-﻿using TUnit.TestProject.Attributes;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._2935;
 
@@ -9,16 +9,18 @@ public class Tests
     private string _valueTaskHook = string.Empty;
 
     [Before(Test)]
-    public async Task BeforeTest_Task()
+    public async Task BeforeTest_Task(CancellationToken cancellationToken)
     {
-        await Task.Delay(TimeSpan.FromSeconds(5));
+        var timeProvider = TestContext.Current!.GetService<TimeProvider>();
+        await timeProvider.Delay(TimeSpan.FromSeconds(5), cancellationToken);
         _taskHook = "Task Hook Executed";
     }
 
     [Before(Test)]
-    public async ValueTask BeforeTest_ValueTask()
+    public async ValueTask BeforeTest_ValueTask(CancellationToken cancellationToken)
     {
-        await Task.Delay(TimeSpan.FromSeconds(5));
+        var timeProvider = TestContext.Current!.GetService<TimeProvider>();
+        await timeProvider.Delay(TimeSpan.FromSeconds(5), cancellationToken);
         _valueTaskHook = "ValueTask Hook Executed";
     }
 

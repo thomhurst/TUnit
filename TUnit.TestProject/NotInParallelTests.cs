@@ -12,27 +12,30 @@ public class NotInParallelTests
     [After(Test)]
     public async Task TestOverlaps()
     {
-        TestDateTimeRanges.Add(new DateTimeRange(TestContext.Current!.Execution.TestStart!.Value.DateTime, TestContext.Current.Execution.Result!.End!.Value.DateTime));
+        TestDateTimeRanges.Add(new DateTimeRange(TestContext.Current!.Execution.TestStart!.Value, TestContext.Current.Execution.Result!.End!.Value));
 
         await AssertNoOverlaps();
     }
 
     [Test, NotInParallel, Repeat(3)]
-    public async Task NotInParallel_Test1()
+    public async Task NotInParallel_Test1(CancellationToken cancellationToken)
     {
-        await Task.Delay(500);
+        var timeProvider = TestContext.Current!.GetService<TimeProvider>();
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(500), cancellationToken);
     }
 
     [Test, NotInParallel, Repeat(3)]
-    public async Task NotInParallel_Test2()
+    public async Task NotInParallel_Test2(CancellationToken cancellationToken)
     {
-        await Task.Delay(500);
+        var timeProvider = TestContext.Current!.GetService<TimeProvider>();
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(500), cancellationToken);
     }
 
     [Test, NotInParallel, Repeat(3)]
-    public async Task NotInParallel_Test3()
+    public async Task NotInParallel_Test3(CancellationToken cancellationToken)
     {
-        await Task.Delay(500);
+        var timeProvider = TestContext.Current!.GetService<TimeProvider>();
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(500), cancellationToken);
     }
 
     private async Task AssertNoOverlaps()
@@ -46,10 +49,10 @@ public class NotInParallelTests
         }
     }
 
-    private class DateTimeRange(DateTime start, DateTime end)
+    private class DateTimeRange(DateTimeOffset start, DateTimeOffset end)
     {
-        public DateTime Start { get; } = start;
-        public DateTime End { get; } = end;
+        public DateTimeOffset Start { get; } = start;
+        public DateTimeOffset End { get; } = end;
 
         public bool Overlap(DateTimeRange other)
         {

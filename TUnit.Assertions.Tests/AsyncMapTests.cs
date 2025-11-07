@@ -141,7 +141,8 @@ public class ToIntValueAssertion : Assertion<int>
     public ToIntValueAssertion(AssertionContext<AsyncMapTests.Container> context)
         : base(context.Map<int>(async container =>
         {
-            await Task.Delay(1); // Simulate async work
+            var timeProvider = TestContext.Current!.TimeProvider;
+            await timeProvider.Delay(TimeSpan.FromMilliseconds(1)); // Simulate async work
             if (container?.Data is null)
             {
                 throw new InvalidOperationException("Container data is null");

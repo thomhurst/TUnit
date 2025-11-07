@@ -6,12 +6,12 @@ namespace TUnit.TestProject;
 [InheritsTests]
 public class DependsOnWithBaseTests : DependsOnBase
 {
-    private static DateTime _subTypeTestStart;
+    private static DateTimeOffset _subTypeTestStart;
 
     [Test, DependsOn(nameof(BaseTest))]
     public async Task SubTypeTest()
     {
-        _subTypeTestStart = TestContext.Current!.Execution.TestStart!.Value.DateTime;
+        _subTypeTestStart = TestContext.Current!.Execution.TestStart!.Value;
         await Task.CompletedTask;
     }
 
@@ -19,18 +19,19 @@ public class DependsOnWithBaseTests : DependsOnBase
     public static async Task AssertStartTimes()
     {
         await Assert.That(BaseTestStart).IsNotDefault();
-        await Assert.That(_subTypeTestStart).IsAfterOrEqualTo(BaseTestStart.AddSeconds(4.9));
+        await Assert.That(_subTypeTestStart).IsAfterOrEqualTo(BaseTestStart.AddSeconds(5));
     }
 }
 
 public abstract class DependsOnBase
 {
-    protected static DateTime BaseTestStart { get; private set; }
+    protected static DateTimeOffset BaseTestStart { get; private set; }
 
     [Test]
-    public async Task BaseTest()
+    public async Task BaseTest(CancellationToken cancellationToken)
     {
-        BaseTestStart = TestContext.Current!.Execution.TestStart!.Value.DateTime;
-        await Task.Delay(TimeSpan.FromSeconds(5));
+        BaseTestStart = TestContext.Current!.Execution.TestStart!.Value;
+        var timeProvider = TestContext.Current!.GetService<TimeProvider>();
+        await timeProvider.Delay(TimeSpan.FromSeconds(5), cancellationToken);
     }
 }

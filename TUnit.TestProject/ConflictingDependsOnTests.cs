@@ -8,9 +8,10 @@ namespace TUnit.TestProject;
 public class ConflictingDependsOnTests
 {
     [Test, DependsOn(nameof(Test2))]
-    public async Task Test1()
+    public async Task Test1(CancellationToken cancellationToken)
     {
-        await Task.Delay(TimeSpan.FromSeconds(5));
+        var timeProvider = TestContext.Current!.GetService<TimeProvider>();
+        await timeProvider.Delay(TimeSpan.FromSeconds(5), cancellationToken);
     }
 
     [Test, DependsOn(nameof(Test1))]

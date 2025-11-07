@@ -1,4 +1,4 @@
-﻿using TUnit.TestProject.Attributes;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
@@ -15,7 +15,8 @@ public class TimeoutCancellationTokenTests
     [EngineTest(ExpectedResult.Pass)]
     public async Task DefaultTest(CancellationToken cancellationToken)
     {
-        await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
+        var timeProvider = TestContext.Current!.GetService<TimeProvider>();
+        await timeProvider.Delay(TimeSpan.FromSeconds(5), cancellationToken);
     }
 
     [Test]
@@ -24,7 +25,8 @@ public class TimeoutCancellationTokenTests
     [EngineTest(ExpectedResult.Failure)]
     public async Task BasicTest(CancellationToken cancellationToken)
     {
-        await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
+        var timeProvider = TestContext.Current!.GetService<TimeProvider>();
+        await timeProvider.Delay(TimeSpan.FromMinutes(1), cancellationToken);
     }
 
     [Test]
@@ -32,7 +34,8 @@ public class TimeoutCancellationTokenTests
     [EngineTest(ExpectedResult.Failure)]
     public async Task InheritedTimeoutAttribute(CancellationToken cancellationToken)
     {
-        await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
+        var timeProvider = TestContext.Current!.GetService<TimeProvider>();
+        await timeProvider.Delay(TimeSpan.FromMinutes(1), cancellationToken);
     }
 
     [Test]
@@ -42,7 +45,8 @@ public class TimeoutCancellationTokenTests
     public async Task DataTest(int value, CancellationToken cancellationToken)
     {
         await Assert.That(value).IsEqualTo(1);
-        await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
+        var timeProvider = TestContext.Current!.GetService<TimeProvider>();
+        await timeProvider.Delay(TimeSpan.FromMinutes(1), cancellationToken);
     }
 
     [MethodDataSource(nameof(DataSource))]
@@ -52,7 +56,8 @@ public class TimeoutCancellationTokenTests
     public async Task DataSourceTest(int value, CancellationToken cancellationToken)
     {
         await Assert.That(value).IsEqualTo(1);
-        await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
+        var timeProvider = TestContext.Current!.GetService<TimeProvider>();
+        await timeProvider.Delay(TimeSpan.FromMinutes(1), cancellationToken);
     }
 
     [Test]
@@ -65,7 +70,8 @@ public class TimeoutCancellationTokenTests
         CancellationToken cancellationToken)
     {
         await Assert.That(value).IsEqualTo(1).Or.IsEqualTo(2).Or.IsEqualTo(3);
-        await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
+        var timeProvider = TestContext.Current!.GetService<TimeProvider>();
+        await timeProvider.Delay(TimeSpan.FromMinutes(1), cancellationToken);
     }
 
     public static IEnumerable<int> DataSource()

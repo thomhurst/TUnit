@@ -5,39 +5,42 @@ namespace TUnit.TestProject;
 [EngineTest(ExpectedResult.Pass)]
 public class DependsOnTests3
 {
-    private static DateTime _test3Start;
+    private static DateTimeOffset _test3Start;
 
-    private static DateTime _test1End;
-    private static DateTime _test2End;
+    private static DateTimeOffset _test1End;
+    private static DateTimeOffset _test2End;
 
     [Test]
-    public async Task Test1()
+    public async Task Test1(CancellationToken cancellationToken)
     {
-        await Task.Delay(TimeSpan.FromSeconds(1));
+        var timeProvider = TestContext.Current!.GetService<TimeProvider>();
+        await timeProvider.Delay(TimeSpan.FromSeconds(1), cancellationToken);
 
         TestContext.Current!.StateBag.Items["Test1"] = "1";
 
-        _test1End = DateTime.UtcNow;
+        _test1End = timeProvider.GetUtcNow();
     }
 
     [Test]
-    public async Task Test2()
+    public async Task Test2(CancellationToken cancellationToken)
     {
-        await Task.Delay(TimeSpan.FromSeconds(1));
+        var timeProvider = TestContext.Current!.GetService<TimeProvider>();
+        await timeProvider.Delay(TimeSpan.FromSeconds(1), cancellationToken);
 
         TestContext.Current!.StateBag.Items["Test2"] = "2";
 
-        _test2End = DateTime.UtcNow;
+        _test2End = timeProvider.GetUtcNow();
     }
 
     [Test]
     [DependsOn(nameof(Test1))]
     [DependsOn(nameof(Test2))]
-    public async Task Test3()
+    public async Task Test3(CancellationToken cancellationToken)
     {
-        _test3Start = DateTime.UtcNow;
+        var timeProvider = TestContext.Current!.GetService<TimeProvider>();
+        _test3Start = timeProvider.GetUtcNow();
 
-        await Task.Delay(TimeSpan.FromSeconds(1));
+        await timeProvider.Delay(TimeSpan.FromSeconds(1), cancellationToken);
 
         var test1 = TestContext.Current!.Dependencies.GetTests(nameof(Test1));
         var test2 = TestContext.Current.Dependencies.GetTests(nameof(Test2));
