@@ -7,11 +7,11 @@
 .heroBanner {
   position: relative;
   overflow: hidden;
-  min-height: calc(100vh - 60px);
+  min-height: auto;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
-  padding: 2rem 0;
+  padding: 4rem 0;
   width: 100%;
   box-sizing: border-box;
 }
