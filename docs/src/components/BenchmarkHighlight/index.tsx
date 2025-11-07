@@ -99,7 +99,7 @@ export default function BenchmarkHighlight(): JSX.Element {
           <p>
             Benchmarks automatically updated daily from real-world test scenarios.
             <br />
-            <Link to="/docs/benchmarks/methodology">See our methodology</Link>
+            <Link to="/docs/benchmarks/methodology">See the methodology</Link>
           </p>
         </div>
       </div>

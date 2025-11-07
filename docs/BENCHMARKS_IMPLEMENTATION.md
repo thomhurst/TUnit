@@ -14,14 +14,18 @@ Added a new job `aggregate-and-commit-results` that:
 - Runs after all benchmark jobs complete
 - Downloads all benchmark artifacts (runtime + build benchmarks)
 - Processes results with Node.js script
-- Commits updated documentation automatically
+- **Creates a Pull Request with updated documentation**
 - Only runs on `main` branch to avoid conflicts
 
 **Key Features:**
 - Automatic daily execution (existing schedule)
 - Manual trigger support (`workflow_dispatch`)
-- Safe commit with `[skip ci]` to avoid loops
+- **Respects branch protection rules** by creating PRs instead of direct pushes
+- **Fully automated**: Enables auto-merge so PRs merge when CI passes
+- Auto-deletes the feature branch after merge
 - Proper artifact handling with merge support
+- Professional PR description with workflow metadata
+- Zero manual intervention required
 
 ---
 
@@ -213,12 +217,20 @@ These files ensure the site works before the first benchmark run. They'll be rep
    │   ├─► Calculate statistics
    │   ├─► Generate markdown docs
    │   └─► Update JSON data
-   └─► Commit changes to main branch
+   └─► Create Pull Request with changes
 
-3. Documentation Site
-   ├─► Deploys automatically with new data
+3. Automated Review and Merge
+   ├─► Automated PR created with benchmark updates
+   ├─► Auto-merge enabled on the PR
+   ├─► CI checks run on PR
+   └─► PR automatically merges when checks pass
+
+4. Documentation Site
+   ├─► Deploys automatically after PR merge
    ├─► Interactive components load latest.json
    └─► Users see updated benchmarks
+
+✨ Fully automated - zero manual intervention required!
 ```
 
 ### Data Flow
@@ -307,17 +319,23 @@ Visit:
 
 2. **Verify Automation:**
    - Check workflow completes successfully
-   - Verify commit appears: `chore: update benchmark results [skip ci]`
-   - Check files updated:
-     - `docs/docs/benchmarks/index.md`
-     - `docs/static/benchmarks/latest.json`
-     - `docs/static/benchmarks/historical.json`
+   - **Look for automated PR**: "🤖 Update Benchmark Results"
+   - PR will have "Auto-merge enabled" badge
+   - CI checks will run automatically
 
-3. **Verify Site:**
+3. **Wait for Auto-Merge:**
+   - PR merges automatically when CI checks pass (no action needed!)
+   - Branch automatically deletes after merge
+   - Typically takes 2-5 minutes from PR creation to merge
+
+4. **Verify Site:**
+   - Visit the deployed site after merge
    - Homepage shows real speedup numbers
    - Benchmarks page shows all test categories
    - Calculator uses real data
    - Charts render correctly
+
+**Note:** You can review the PRs if desired, but they will merge automatically without intervention.
 
 ---
 
@@ -423,14 +441,15 @@ ls docs/static/benchmarks/latest.json
 cat docs/static/benchmarks/latest.json | jq
 ```
 
-### Workflow Fails to Commit
+### Workflow Fails to Create PR
 
-**Cause:** Git conflicts or permissions
+**Cause:** Git conflicts, permissions, or branch protection
 
 **Fix:**
-- Check `GITHUB_TOKEN` has write permissions
-- Ensure no manual edits to auto-generated files
-- Check `[skip ci]` tag is in commit message
+- Check `GITHUB_TOKEN` has `contents: write` and `pull-requests: write` permissions
+- Ensure no manual edits conflict with auto-generated files
+- Check that branch protection allows PRs from GitHub Actions
+- Close any existing `automated-benchmarks-update` PR if it exists
 
 ### Benchmark Data Not Updating
 
@@ -454,13 +473,33 @@ cat docs/static/benchmarks/latest.json | jq
 
 ## Key Benefits
 
-✅ **Fully Automated**: Zero manual work after setup
+✅ **Fully Automated**: Zero manual work after setup - creates PR and auto-merges
 ✅ **Always Up-to-Date**: Daily refreshes with latest data
 ✅ **Interactive**: Users can explore and calculate impact
 ✅ **Transparent**: All code and methodology visible
 ✅ **Performant**: No external dependencies, minimal overhead
 ✅ **Maintainable**: Clear structure, well-documented
 ✅ **Extensible**: Easy to add new charts/features
+
+---
+
+## Prerequisites for Auto-Merge
+
+For the automated PR to merge, ensure:
+
+1. **Repository Settings:**
+   - "Allow auto-merge" is enabled in Settings → General → Pull Requests
+
+2. **Branch Protection (optional but recommended):**
+   - Require status checks to pass before merging
+   - This ensures CI validates the benchmark data before merging
+
+3. **GitHub Actions Permissions:**
+   - `contents: write` permission (for creating commits)
+   - `pull-requests: write` permission (for creating/merging PRs)
+   - Both are already configured in the workflow
+
+If auto-merge is not enabled in the repository, the PR will still be created but will require manual merge.
 
 ---
 

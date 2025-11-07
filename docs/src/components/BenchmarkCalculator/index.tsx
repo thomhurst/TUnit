@@ -190,9 +190,9 @@ export default function BenchmarkCalculator(): JSX.Element {
 
         <div className={styles.disclaimer}>
           <p>
-            <strong>Note:</strong> These estimates are based on real benchmark data from our automated tests.
+            <strong>Note:</strong> These estimates are based on real benchmark data from automated tests.
             Actual results depend on test complexity, infrastructure, and parallelization potential.
-            See our <a href="/docs/benchmarks/">detailed benchmarks</a> for methodology.
+            See the <a href="/docs/benchmarks/">detailed benchmarks</a> for methodology.
           </p>
         </div>
       </div>

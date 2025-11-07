@@ -54,7 +54,7 @@ For complete methodology details, see the [Methodology](/docs/benchmarks/methodo
 ## Interactive Tools
 
 - **[Benchmark Calculator](/docs/benchmarks/calculator)** - Calculate potential time savings for your test suite
-- **[Methodology](/docs/benchmarks/methodology)** - Understand how we measure performance
+- **[Methodology](/docs/benchmarks/methodology)** - Learn how performance is measured
 
 ---
 

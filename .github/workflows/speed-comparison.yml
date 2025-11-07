@@ -129,6 +129,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     permissions:
       contents: write
+      pull-requests: write
 
     steps:
       - uses: actions/checkout@v5
@@ -159,15 +160,56 @@ jobs:
         run: |
           node .github/scripts/process-benchmarks.js
 
-      - name: Commit Updated Benchmarks
+      - name: Check for Changes
+        id: check_changes
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add docs/docs/benchmarks/ docs/static/benchmarks/
-          if ! git diff --quiet --staged; then
-            git commit -m "chore: update benchmark results [skip ci]"
-            git push
+          if git diff --quiet --staged; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "No benchmark changes detected"
           else
-            echo "No benchmark changes to commit"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "Benchmark changes detected"
           fi
+
+      - name: Create Pull Request
+        if: steps.check_changes.outputs.has_changes == 'true'
+        id: create_pr
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore: update benchmark results'
+          branch: automated-benchmarks-update
+          delete-branch: true
+          title: '🤖 Update Benchmark Results'
+          body: |
+            ## Automated Benchmark Update
+
+            This PR updates the benchmark documentation with the latest results from the Speed Comparison workflow.
+
+            ### Changes
+            - Updated benchmark data in `docs/static/benchmarks/latest.json`
+            - Updated historical trends in `docs/static/benchmarks/historical.json`
+            - Regenerated benchmark documentation in `docs/docs/benchmarks/index.md`
+
+            ### Workflow Run
+            - **Run ID**: ${{ github.run_id }}
+            - **Triggered**: ${{ github.event_name }}
+            - **Date**: ${{ github.event.head_commit.timestamp }}
+
+            ---
+
+            🤖 This PR was automatically created and will be merged automatically once CI checks pass.
+          labels: |
+            automated
+            benchmarks
+            documentation
+          draft: false
+
+      - name: Enable Auto-Merge
+        if: steps.check_changes.outputs.has_changes == 'true' && steps.create_pr.outputs.pull-request-number != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr merge ${{ steps.create_pr.outputs.pull-request-number }} --auto --squash --delete-branch
 

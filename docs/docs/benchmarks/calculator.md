@@ -16,7 +16,7 @@ import BenchmarkCalculator from '@site/src/components/BenchmarkCalculator';
 
 ## How It Works
 
-This calculator uses real benchmark data from our daily automated tests to estimate:
+This calculator uses real benchmark data from daily automated tests to estimate:
 
 1. **Your current test execution time** based on test count and framework
 2. **Estimated TUnit execution time** with standard JIT compilation
@@ -25,7 +25,7 @@ This calculator uses real benchmark data from our daily automated tests to estim
 
 ## Assumptions
 
-- Calculations are based on average execution times from our benchmark suite
+- Calculations are based on average execution times from the benchmark suite
 - Real-world results may vary based on test complexity and infrastructure
 - Native AOT provides additional benefits like faster cold starts and lower memory usage
 
@@ -43,7 +43,7 @@ This calculator uses real benchmark data from our daily automated tests to estim
 
 ## Real-World Impact
 
-Based on our benchmark data:
+Based on benchmark data:
 
 - **Small projects** (50-200 tests): Save 2-10 seconds per run
 - **Medium projects** (200-1000 tests): Save 10-60 seconds per run
@@ -55,6 +55,6 @@ For a development team running tests:
 
 ## Try It In Action
 
-Want to see real benchmark data? Check out our [detailed benchmarks](/docs/benchmarks/) with actual execution times across different test scenarios.
+Want to see real benchmark data? Check out the [detailed benchmarks](/docs/benchmarks/) with actual execution times across different test scenarios.
 
-Ready to migrate? See our [Migration Guides](/docs/migration/xunit) for step-by-step instructions.
+Ready to migrate? See the [Migration Guides](/docs/migration/xunit) for step-by-step instructions.

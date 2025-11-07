@@ -1,17 +1,17 @@
 ---
 title: Benchmark Methodology
-description: How we measure and compare test framework performance
+description: How TUnit's performance benchmarks are measured and compared
 sidebar_position: 3
 ---
 
 # Benchmark Methodology
 
-This document explains how TUnit's performance benchmarks are conducted to ensure fair, accurate, and reproducible results.
+This page explains how TUnit's performance benchmarks are conducted to ensure fair, accurate, and reproducible results.
 
 ## Core Principles
 
 ### 1. Real-World Scenarios
-We test realistic patterns, not artificial micro-benchmarks:
+Benchmarks test realistic patterns, not artificial micro-benchmarks:
 - Actual assertion logic
 - Real data source patterns
 - Typical setup/teardown workflows
@@ -25,7 +25,7 @@ Every framework implements identical test logic:
 - Equivalent configuration
 
 ### 3. Statistical Rigor
-We use [BenchmarkDotNet](https://benchmarkdotnet.org/), the industry-standard .NET benchmarking library:
+All benchmarks use [BenchmarkDotNet](https://benchmarkdotnet.org/), the industry-standard .NET benchmarking library:
 - Multiple iterations per benchmark
 - Statistical outlier detection
 - Warm-up phase excluded from measurements
@@ -38,7 +38,7 @@ We use [BenchmarkDotNet](https://benchmarkdotnet.org/), the industry-standard .N
 #### DataDrivenTests
 **Purpose**: Measure parameterized test performance
 
-**What we test**:
+**What's tested**:
 ```csharp
 [Test]
 [Arguments(1, 2, 3)]
@@ -57,7 +57,7 @@ public void TestAddition(int a, int b, int expected)
 #### AsyncTests
 **Purpose**: Measure async/await pattern performance
 
-**What we test**:
+**What's tested**:
 ```csharp
 [Test]
 public async Task TestAsyncOperation()
@@ -74,7 +74,7 @@ public async Task TestAsyncOperation()
 #### ScaleTests
 **Purpose**: Measure scalability with large test counts
 
-**What we test**:
+**What's tested**:
 - 1000+ test methods
 - Parallel execution
 - Memory efficiency
@@ -86,7 +86,7 @@ public async Task TestAsyncOperation()
 #### MatrixTests
 **Purpose**: Measure combinatorial test generation
 
-**What we test**:
+**What's tested**:
 ```csharp
 [Test]
 [Matrix("Create", "Update", "Delete")] // Operation
@@ -104,7 +104,7 @@ public void TestPermissions(string op, string role)
 #### MassiveParallelTests
 **Purpose**: Stress test parallel execution
 
-**What we test**:
+**What's tested**:
 - 100+ tests running concurrently
 - Resource contention
 - Thread safety
@@ -117,7 +117,7 @@ public void TestPermissions(string op, string role)
 
 **Purpose**: Measure compilation time impact
 
-**What we test**:
+**What's tested**:
 - Clean build time
 - Incremental build time
 - Source generator overhead
@@ -169,7 +169,7 @@ public async Task TUnit()
 - Results exported to markdown
 - Historical trends tracked
 
-## What We Measure
+## What Gets Measured
 
 ### Primary Metrics
 
@@ -277,7 +277,7 @@ All benchmark code is open source:
 - [CI Workflow](https://github.com/thomhurst/TUnit/blob/main/.github/workflows/speed-comparison.yml)
 
 ### Community Verification
-Found an issue with our benchmarks? [Open an issue](https://github.com/thomhurst/TUnit/issues) or submit a PR!
+Found an issue with the benchmarks? [Open an issue](https://github.com/thomhurst/TUnit/issues) or submit a PR!
 
 ---
 
