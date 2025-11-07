@@ -4,6 +4,7 @@ import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
 import HomepageFeatures from '@site/src/components/HomepageFeatures';
 import BenchmarkHighlight from '@site/src/components/BenchmarkHighlight';
+import ChooseYourJourney from '@site/src/components/ChooseYourJourney';
 import Heading from '@theme/Heading';
 import CodeBlock from '@theme/CodeBlock';
 
@@ -221,6 +222,7 @@ export default function Home(): JSX.Element {
       <HomepageHeader />
       <main>
         <QuickStartSection />
+        <ChooseYourJourney />
         <BenchmarkHighlight />
         <HomepageFeatures />
         <WhyTUnit />

@@ -250,6 +250,134 @@ await Assert.That(number).IsEqualTo(42);
 // await Assert.That(number).IsEqualTo("42");
 ```
 
+## Common Mistakes & Best Practices
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+### Forgetting to Await
+
+<Tabs>
+  <TabItem value="bad" label="❌ Bad - Missing Await" default>
+
+```csharp
+[Test]
+public void TestValue()
+{
+    // Compiler warning: assertion not awaited
+    Assert.That(result).IsEqualTo(42);
+}
+```
+
+**Problem:** Assertion never executes, test always passes even if it should fail.
+
+  </TabItem>
+  <TabItem value="good" label="✅ Good - Awaited Properly">
+
+```csharp
+[Test]
+public async Task TestValue()
+{
+    await Assert.That(result).IsEqualTo(42);
+}
+```
+
+**Why:** Awaiting ensures the assertion executes and can fail the test.
+
+  </TabItem>
+</Tabs>
+
+### Comparing Different Types
+
+<Tabs>
+  <TabItem value="bad" label="❌ Bad - Type Confusion">
+
+```csharp
+int number = 42;
+// This won't compile - can't compare int to string
+// await Assert.That(number).IsEqualTo("42");
+
+// Or this pattern that converts implicitly
+string value = GetValue();
+await Assert.That(value).IsEqualTo(42); // Won't compile
+```
+
+**Problem:** Type mismatches are caught at compile time, preventing runtime surprises.
+
+  </TabItem>
+  <TabItem value="good" label="✅ Good - Explicit Conversion">
+
+```csharp
+string value = GetValue();
+int parsed = int.Parse(value);
+await Assert.That(parsed).IsEqualTo(42);
+
+// Or test the string directly
+await Assert.That(value).IsEqualTo("42");
+```
+
+**Why:** Be explicit about what you're testing - the string value or its parsed equivalent.
+
+  </TabItem>
+</Tabs>
+
+### Collection Ordering
+
+<Tabs>
+  <TabItem value="bad" label="❌ Bad - Assuming Order">
+
+```csharp
+var items = GetItemsFromDatabase(); // Order not guaranteed
+await Assert.That(items).IsEqualTo(new[] { 1, 2, 3 });
+```
+
+**Problem:** Fails unexpectedly if database returns `[3, 1, 2]` even though items are equivalent.
+
+  </TabItem>
+  <TabItem value="good" label="✅ Good - Order-Independent">
+
+```csharp
+var items = GetItemsFromDatabase();
+await Assert.That(items).IsEquivalentTo(new[] { 1, 2, 3 });
+```
+
+**Why:** `IsEquivalentTo` checks for same items regardless of order, making tests more resilient.
+
+  </TabItem>
+</Tabs>
+
+### Multiple Related Assertions
+
+<Tabs>
+  <TabItem value="bad" label="❌ Bad - Sequential Assertions">
+
+```csharp
+await Assert.That(user.FirstName).IsEqualTo("John");
+await Assert.That(user.LastName).IsEqualTo("Doe");
+await Assert.That(user.Age).IsGreaterThan(18);
+// If first assertion fails, you won't see the other failures
+```
+
+**Problem:** Stops at first failure, hiding other issues.
+
+  </TabItem>
+  <TabItem value="good" label="✅ Good - Assert.Multiple">
+
+```csharp
+await using (Assert.Multiple())
+{
+    await Assert.That(user.FirstName).IsEqualTo("John");
+    await Assert.That(user.LastName).IsEqualTo("Doe");
+    await Assert.That(user.Age).IsGreaterThan(18);
+}
+// Shows ALL failures at once
+```
+
+**Why:** See all failures in one test run, saving debugging time.
+
+  </TabItem>
+</Tabs>
+
 ## Next Steps
 
 Now that you understand the basics, explore specific assertion types:

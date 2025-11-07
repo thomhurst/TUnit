@@ -837,3 +837,161 @@ div[class*="codeScrollWrapper"] > div {
     padding: 0.75rem;
   }
 }
+
+/* ==================== Custom Admonitions ==================== */
+
+/* Performance Admonition - Highlights TUnit's speed benefits */
+.theme-admonition.alert--performance {
+  --ifm-alert-background-color: rgba(168, 85, 247, 0.1);
+  --ifm-alert-border-color: #a855f7;
+  --ifm-alert-color: #e9d5ff;
+  background: linear-gradient(90deg, rgba(168, 85, 247, 0.15) 0%, rgba(168, 85, 247, 0.05) 100%);
+  border-left: 4px solid #a855f7;
+  box-shadow: 0 2px 8px rgba(168, 85, 247, 0.1);
+}
+
+[data-theme='dark'] .theme-admonition.alert--performance {
+  --ifm-alert-background-color: rgba(168, 85, 247, 0.1);
+  --ifm-alert-border-color: #a855f7;
+  --ifm-alert-color: #e9d5ff;
+  background: linear-gradient(90deg, rgba(168, 85, 247, 0.15) 0%, rgba(168, 85, 247, 0.05) 100%);
+  border-left: 4px solid #a855f7;
+}
+
+.theme-admonition.alert--performance .admonition-heading h5 {
+  color: #a855f7 !important;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.theme-admonition.alert--performance .admonition-heading h5::before {
+  content: '⚡';
+  font-size: 1.25rem;
+}
+
+.theme-admonition.alert--performance .admonition-content {
+  color: #e9d5ff !important;
+}
+
+[data-theme='dark'] .theme-admonition.alert--performance .admonition-content {
+  color: #e9d5ff !important;
+}
+
+/* From xUnit Admonition - Migration tips from xUnit */
+.theme-admonition.alert--from-xunit {
+  --ifm-alert-background-color: rgba(59, 130, 246, 0.1);
+  --ifm-alert-border-color: #3b82f6;
+  --ifm-alert-color: #dbeafe;
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.05) 100%);
+  border-left: 4px solid #3b82f6;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+}
+
+[data-theme='dark'] .theme-admonition.alert--from-xunit {
+  --ifm-alert-background-color: rgba(59, 130, 246, 0.1);
+  --ifm-alert-border-color: #3b82f6;
+  --ifm-alert-color: #dbeafe;
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.05) 100%);
+  border-left: 4px solid #3b82f6;
+}
+
+.theme-admonition.alert--from-xunit .admonition-heading h5 {
+  color: #3b82f6 !important;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.theme-admonition.alert--from-xunit .admonition-heading h5::before {
+  content: '🔄';
+  font-size: 1.25rem;
+}
+
+.theme-admonition.alert--from-xunit .admonition-content {
+  color: #dbeafe !important;
+}
+
+[data-theme='dark'] .theme-admonition.alert--from-xunit .admonition-content {
+  color: #dbeafe !important;
+}
+
+/* From NUnit Admonition - Migration tips from NUnit */
+.theme-admonition.alert--from-nunit {
+  --ifm-alert-background-color: rgba(34, 197, 94, 0.1);
+  --ifm-alert-border-color: #22c55e;
+  --ifm-alert-color: #dcfce7;
+  background: linear-gradient(90deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.05) 100%);
+  border-left: 4px solid #22c55e;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.1);
+}
+
+[data-theme='dark'] .theme-admonition.alert--from-nunit {
+  --ifm-alert-background-color: rgba(34, 197, 94, 0.1);
+  --ifm-alert-border-color: #22c55e;
+  --ifm-alert-color: #dcfce7;
+  background: linear-gradient(90deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.05) 100%);
+  border-left: 4px solid #22c55e;
+}
+
+.theme-admonition.alert--from-nunit .admonition-heading h5 {
+  color: #22c55e !important;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.theme-admonition.alert--from-nunit .admonition-heading h5::before {
+  content: '🔄';
+  font-size: 1.25rem;
+}
+
+.theme-admonition.alert--from-nunit .admonition-content {
+  color: #dcfce7 !important;
+}
+
+[data-theme='dark'] .theme-admonition.alert--from-nunit .admonition-content {
+  color: #dcfce7 !important;
+}
+
+/* From MSTest Admonition - Migration tips from MSTest */
+.theme-admonition.alert--from-mstest {
+  --ifm-alert-background-color: rgba(249, 115, 22, 0.1);
+  --ifm-alert-border-color: #f97316;
+  --ifm-alert-color: #fed7aa;
+  background: linear-gradient(90deg, rgba(249, 115, 22, 0.15) 0%, rgba(249, 115, 22, 0.05) 100%);
+  border-left: 4px solid #f97316;
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.1);
+}
+
+[data-theme='dark'] .theme-admonition.alert--from-mstest {
+  --ifm-alert-background-color: rgba(249, 115, 22, 0.1);
+  --ifm-alert-border-color: #f97316;
+  --ifm-alert-color: #fed7aa;
+  background: linear-gradient(90deg, rgba(249, 115, 22, 0.15) 0%, rgba(249, 115, 22, 0.05) 100%);
+  border-left: 4px solid #f97316;
+}
+
+.theme-admonition.alert--from-mstest .admonition-heading h5 {
+  color: #f97316 !important;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.theme-admonition.alert--from-mstest .admonition-heading h5::before {
+  content: '🔄';
+  font-size: 1.25rem;
+}
+
+.theme-admonition.alert--from-mstest .admonition-content {
+  color: #fed7aa !important;
+}
+
+[data-theme='dark'] .theme-admonition.alert--from-mstest .admonition-content {
+  color: #fed7aa !important;
+}

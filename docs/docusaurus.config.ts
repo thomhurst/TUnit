@@ -37,6 +37,9 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
+          admonitions: {
+            keywords: ['performance', 'from-xunit', 'from-nunit', 'from-mstest'],
+          },
         },
         // blog: {
         //   showReadingTime: true,

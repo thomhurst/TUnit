@@ -1,0 +1,260 @@
+.assertionsLibrary {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.header h1 {
+  font-family: 'Orbitron', 'Space Grotesk', monospace;
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 50%, #0ea5e9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+}
+
+.header p {
+  color: #cbd5e1;
+  font-size: 1.1rem;
+}
+
+.controls {
+  margin-bottom: 2rem;
+}
+
+.searchBox {
+  margin-bottom: 1.5rem;
+}
+
+.searchInput {
+  width: 100%;
+  max-width: 600px;
+  padding: 0.875rem 1.25rem;
+  font-size: 1rem;
+  background: rgba(20, 184, 166, 0.1);
+  border: 2px solid rgba(20, 184, 166, 0.2);
+  border-radius: 0.75rem;
+  color: #f1f5f9;
+  transition: all 0.2s ease;
+  display: block;
+  margin: 0 auto;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #14b8a6;
+  background: rgba(20, 184, 166, 0.15);
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+}
+
+.searchInput::placeholder {
+  color: #94a3b8;
+}
+
+.categoryFilter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.categoryButton {
+  padding: 0.5rem 1rem;
+  background: rgba(20, 184, 166, 0.1);
+  border: 1px solid rgba(20, 184, 166, 0.2);
+  border-radius: 0.5rem;
+  color: #cbd5e1;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.categoryButton:hover {
+  background: rgba(20, 184, 166, 0.15);
+  border-color: rgba(20, 184, 166, 0.3);
+  color: #f1f5f9;
+}
+
+.categoryButton.active {
+  background: #14b8a6;
+  border-color: #14b8a6;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.results {
+  margin-top: 2rem;
+}
+
+.resultCount {
+  color: #94a3b8;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.assertionsList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+  gap: 1.5rem;
+}
+
+.assertionCard {
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.05) 0%, rgba(14, 165, 233, 0.05) 100%);
+  border: 1px solid rgba(20, 184, 166, 0.2);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.assertionCard:hover {
+  transform: translateY(-2px);
+  border-color: #14b8a6;
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.2);
+}
+
+.assertionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.assertionName {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  margin: 0;
+}
+
+.assertionCategory {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.75rem;
+  background: rgba(20, 184, 166, 0.2);
+  border: 1px solid rgba(20, 184, 166, 0.3);
+  border-radius: 1rem;
+  color: #5eead4;
+  font-weight: 500;
+}
+
+.assertionDescription {
+  color: #cbd5e1;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.assertionSyntax {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(20, 184, 166, 0.2);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.assertionSyntax code {
+  color: #a5f3fc;
+  font-family: 'Fira Code', 'Courier New', monospace;
+  font-size: 0.875rem;
+  word-break: break-all;
+}
+
+.assertionExample {
+  background: rgba(168, 85, 247, 0.1);
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.exampleLabel {
+  color: #a855f7;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.assertionExample code {
+  color: #e9d5ff;
+  font-family: 'Fira Code', 'Courier New', monospace;
+  font-size: 0.875rem;
+  word-break: break-all;
+}
+
+.noResults {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #94a3b8;
+}
+
+.noResults p {
+  margin: 0.5rem 0;
+}
+
+.noResults p:first-child {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .assertionsLibrary {
+    padding: 1rem;
+  }
+
+  .header h1 {
+    font-size: 2rem;
+  }
+
+  .header p {
+    font-size: 0.95rem;
+  }
+
+  .searchInput {
+    font-size: 0.95rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .categoryFilter {
+    gap: 0.5rem;
+  }
+
+  .categoryButton {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  .assertionsList {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .assertionCard {
+    padding: 1.25rem;
+  }
+
+  .assertionName {
+    font-size: 1.1rem;
+  }
+
+  .assertionCategory {
+    font-size: 0.7rem;
+  }
+
+  .assertionSyntax code,
+  .assertionExample code {
+    font-size: 0.8rem;
+  }
+}

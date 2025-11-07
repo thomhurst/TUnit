@@ -2,6 +2,10 @@
 
 This guide provides recommendations for optimizing test performance and ensuring your TUnit test suite runs efficiently.
 
+:::performance
+Want to see how fast TUnit can be? Check out the [performance benchmarks](/docs/benchmarks) showing real-world speed comparisons, or use the [benchmark calculator](/docs/benchmarks/calculator) to estimate potential time savings for your specific test suite.
+:::
+
 ## Test Discovery Performance
 
 ### Use AOT Mode
@@ -14,6 +18,10 @@ TUnit's AOT (Ahead-of-Time) compilation mode provides the best performance for t
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
 </PropertyGroup>
 ```
+
+:::performance Native AOT Performance
+TUnit with Native AOT compilation delivers exceptional speed improvements - benchmarks show **11.65x faster** execution compared to regular JIT. See the [AOT benchmarks](/docs/benchmarks) for detailed measurements.
+:::
 
 Benefits:
 - Faster test discovery

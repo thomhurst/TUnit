@@ -31,7 +31,11 @@ Then `MyTest1` and `MyTest2` will have a different instance of `MyTests`.
 
 This isn't that important unless you're storing state.
 
-So you can't do this:
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs>
+  <TabItem value="bad" label="❌ Bad - Will Fail" default>
 
 ```csharp
 public class MyTests
@@ -42,15 +46,19 @@ public class MyTests
     public void MyTest1() { _value = 99; }
 
     [Test, NotInParallel]
-    public async Task MyTest2() { await Assert.That(_value).IsEqualTo(99); }
+    public async Task MyTest2()
+    {
+        // This will FAIL because _value is 0
+        // Different test instance = different _value
+        await Assert.That(_value).IsEqualTo(99);
+    }
 }
 ```
 
-The above will compile fine and run, but it will result in a failing test.
+**Why this fails:** Each test gets a new instance of `MyTests`, so `_value` in `MyTest2` is a different field than in `MyTest1`.
 
-Because `MyTests` in `MyTest2` is different from `MyTests` in `MyTest1`, therefore the `_value` field is a different reference.
-
-If you really want to perform a test like the above, you can make your field static, and then that field will persist across any instance. The `static` keyword makes it clear to the user that data persists outside of instances.
+  </TabItem>
+  <TabItem value="good" label="✅ Good - Use Static">
 
 ```csharp
 public class MyTests
@@ -61,6 +69,15 @@ public class MyTests
     public void MyTest1() { _value = 99; }
 
     [Test, NotInParallel]
-    public async Task MyTest2() { await Assert.That(_value).IsEqualTo(99); }
+    public async Task MyTest2()
+    {
+        // This works because _value is static
+        await Assert.That(_value).IsEqualTo(99);
+    }
 }
 ```
+
+**Why this works:** The `static` keyword makes the field persist across instances, making it clear that data is shared.
+
+  </TabItem>
+</Tabs>

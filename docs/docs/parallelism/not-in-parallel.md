@@ -1,6 +1,10 @@
 # Not in Parallel
 
-By default, TUnit tests will run in parallel. 
+By default, TUnit tests will run in parallel.
+
+:::performance
+Parallel execution is a major contributor to TUnit's speed advantage. Running tests in parallel can dramatically reduce total test suite execution time. See the [performance benchmarks](/docs/benchmarks) for real-world performance data.
+::: 
 
 To remove this behaviour, we can add a `[NotInParallel]` attribute to our test methods or classes.
 

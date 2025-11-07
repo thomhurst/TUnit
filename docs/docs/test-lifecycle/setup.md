@@ -155,6 +155,180 @@ public class MyTestClass
     }
 }
 ```
+## Common Mistakes & Best Practices
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+### Confusing Instance vs Static Hooks
+
+<Tabs>
+  <TabItem value="bad" label="❌ Bad - Wrong Hook Scope" default>
+
+```csharp
+public class DatabaseTests
+{
+    // ❌ Won't compile - Class-level hooks must be static
+    [Before(Class)]
+    public async Task SetupDatabase()
+    {
+        await InitializeDatabaseAsync();
+    }
+
+    // ❌ Won't compile - Test hooks cannot be static
+    [Before(Test)]
+    public static void SetupTest()
+    {
+        // Cannot access instance fields
+    }
+}
+```
+
+**Problem:** Hook scope (instance/static) must match the hook level.
+
+  </TabItem>
+  <TabItem value="good" label="✅ Good - Correct Hook Scopes">
+
+```csharp
+public class DatabaseTests
+{
+    // ✅ Class hooks must be static
+    [Before(Class)]
+    public static async Task SetupDatabase()
+    {
+        await InitializeDatabaseAsync();
+    }
+
+    // ✅ Test hooks must be instance methods
+    [Before(Test)]
+    public void SetupTest()
+    {
+        _testData = CreateTestData();
+    }
+}
+```
+
+**Why:** Class-level hooks run once and cannot access instance state. Test-level hooks run per test and can access instance fields.
+
+  </TabItem>
+</Tabs>
+
+### Mixing Sync and Async Incorrectly
+
+<Tabs>
+  <TabItem value="bad" label="❌ Bad - Async Void">
+
+```csharp
+// ❌ Won't compile - async void is not allowed
+[Before(Test)]
+public async void SetupAsync()
+{
+    await Task.Delay(100);
+}
+
+// ❌ Blocking on async code
+[Before(Test)]
+public void Setup()
+{
+    SomeAsyncMethod().Wait(); // Can cause deadlocks
+}
+```
+
+**Problem:** Async void can't be awaited and blocking async code can cause deadlocks.
+
+  </TabItem>
+  <TabItem value="good" label="✅ Good - Proper Async">
+
+```csharp
+// ✅ Use async Task for asynchronous operations
+[Before(Test)]
+public async Task SetupAsync()
+{
+    await Task.Delay(100);
+}
+
+// ✅ Use synchronous method for synchronous work
+[Before(Test)]
+public void Setup()
+{
+    _value = 42;
+}
+```
+
+**Why:** `async Task` allows proper awaiting and error handling. Synchronous hooks are fine for non-async work.
+
+  </TabItem>
+</Tabs>
+
+### Expensive Setup at Wrong Level
+
+<Tabs>
+  <TabItem value="bad" label="❌ Bad - Repeated Expensive Setup">
+
+```csharp
+public class ApiTests
+{
+    private HttpClient _client;
+
+    // ❌ Creates new client for EVERY test
+    [Before(Test)]
+    public void Setup()
+    {
+        _client = new HttpClient
+        {
+            BaseAddress = new Uri("https://api.example.com")
+        };
+    }
+
+    [Test]
+    public async Task Test1() { /* ... */ }
+
+    [Test]
+    public async Task Test2() { /* ... */ }
+    // Client created 2 times unnecessarily
+}
+```
+
+**Problem:** Creating expensive resources per test wastes time and resources.
+
+  </TabItem>
+  <TabItem value="good" label="✅ Good - Shared Setup">
+
+```csharp
+public class ApiTests
+{
+    private static HttpClient _client;
+
+    // ✅ Creates client once for all tests
+    [Before(Class)]
+    public static void SetupOnce()
+    {
+        _client = new HttpClient
+        {
+            BaseAddress = new Uri("https://api.example.com")
+        };
+    }
+
+    [After(Class)]
+    public static void CleanupOnce()
+    {
+        _client?.Dispose();
+    }
+
+    [Test]
+    public async Task Test1() { /* ... */ }
+
+    [Test]
+    public async Task Test2() { /* ... */ }
+    // Client created only once
+}
+```
+
+**Why:** Class-level setup runs once, sharing expensive resources across tests. Much faster!
+
+  </TabItem>
+</Tabs>
+
 ## AsyncLocal
 
 If you are wanting to set AsyncLocal values within your `[Before(...)]` hooks, this is supported.
