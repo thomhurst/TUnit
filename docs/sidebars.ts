@@ -26,47 +26,6 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: '💡 About TUnit',
-      collapsed: true,
-      items: [
-        'guides/philosophy',
-        {
-          type: 'category',
-          label: 'Comparison with Other Frameworks',
-          collapsed: false,
-          items: [
-            'comparison/framework-differences',
-            {
-              type: 'link',
-              label: 'Migrating from xUnit',
-              href: '/docs/migration/xunit',
-            },
-            {
-              type: 'link',
-              label: 'Migrating from NUnit',
-              href: '/docs/migration/nunit',
-            },
-            {
-              type: 'link',
-              label: 'Migrating from MSTest',
-              href: '/docs/migration/mstest',
-            },
-          ],
-        },
-        {
-          type: 'category',
-          label: 'Benchmarks & Performance',
-          collapsed: true,
-          items: [
-            'benchmarks/index',
-            'benchmarks/calculator',
-            'benchmarks/methodology',
-          ],
-        },
-      ],
-    },
-    {
-      type: 'category',
       label: '📖 Core Concepts',
       collapsed: true,
       items: [
@@ -167,9 +126,10 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: '📋 How-To Guides',
+      label: '📋 Guides & Recipes',
       collapsed: true,
       items: [
+        'examples/intro',
         {
           type: 'category',
           label: 'Common Testing Techniques',
@@ -201,7 +161,18 @@ const sidebars: SidebarsConfig = {
             'execution/repeating',
           ],
         },
-        'execution/ci-cd-reporting',
+        {
+          type: 'category',
+          label: 'Integrations',
+          collapsed: false,
+          items: [
+            'examples/aspnet',
+            'examples/playwright',
+            'examples/complex-test-infrastructure',
+            'execution/ci-cd-reporting',
+            'examples/tunit-ci-pipeline',
+          ],
+        },
         {
           type: 'category',
           label: 'Platform-Specific Scenarios',
@@ -209,16 +180,8 @@ const sidebars: SidebarsConfig = {
           items: [
             'test-authoring/aot-compatibility',
             'test-authoring/culture',
-          ],
-        },
-        {
-          type: 'category',
-          label: 'Integration Guides',
-          collapsed: false,
-          items: [
-            'examples/aspnet',
-            'examples/playwright',
-            'examples/complex-test-infrastructure',
+            'examples/fsharp-interactive',
+            'examples/filebased-csharp',
           ],
         },
         {
@@ -228,18 +191,19 @@ const sidebars: SidebarsConfig = {
           items: [
             'guides/best-practices',
             'guides/cookbook',
+            'examples/instrumenting-global-test-ids',
           ],
         },
       ],
     },
     {
       type: 'category',
-      label: '⚡ Advanced Topics',
+      label: '🛠️ Advanced & Extensibility',
       collapsed: true,
       items: [
         {
           type: 'category',
-          label: 'Advanced Patterns',
+          label: 'TUnit Internals',
           collapsed: false,
           items: [
             'execution/executors',
@@ -247,29 +211,6 @@ const sidebars: SidebarsConfig = {
             'advanced/exception-handling',
             'advanced/extension-points',
             'advanced/test-variants',
-          ],
-        },
-        {
-          type: 'category',
-          label: 'Experimental Features',
-          collapsed: false,
-          items: [
-            'experimental/dynamic-tests',
-          ],
-        },
-      ],
-    },
-    {
-      type: 'category',
-      label: '🛠️ Extending TUnit',
-      collapsed: true,
-      items: [
-        {
-          type: 'category',
-          label: 'Built-in Extensions',
-          collapsed: false,
-          items: [
-            'extensions/extensions',
           ],
         },
         {
@@ -282,6 +223,22 @@ const sidebars: SidebarsConfig = {
             'customization-extensibility/display-names',
             'customization-extensibility/logging',
             'customization-extensibility/libraries',
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Built-in Extensions',
+          collapsed: false,
+          items: [
+            'extensions/extensions',
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Experimental Features',
+          collapsed: false,
+          items: [
+            'experimental/dynamic-tests',
           ],
         },
       ],
@@ -330,33 +287,19 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: '📘 Examples & Cookbook',
+      label: '💡 About TUnit',
       collapsed: true,
       items: [
-        'examples/intro',
+        'guides/philosophy',
+        'comparison/framework-differences',
         {
           type: 'category',
-          label: 'CI/CD Examples',
+          label: 'Benchmarks & Performance',
           collapsed: false,
           items: [
-            'examples/tunit-ci-pipeline',
-          ],
-        },
-        {
-          type: 'category',
-          label: 'Language-Specific',
-          collapsed: false,
-          items: [
-            'examples/fsharp-interactive',
-            'examples/filebased-csharp',
-          ],
-        },
-        {
-          type: 'category',
-          label: 'Advanced Patterns',
-          collapsed: false,
-          items: [
-            'examples/instrumenting-global-test-ids',
+            'benchmarks/index',
+            'benchmarks/calculator',
+            'benchmarks/methodology',
           ],
         },
       ],
