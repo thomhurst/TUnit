@@ -13,13 +13,13 @@ internal sealed class TestStateManager
     public Task MarkRunningAsync(AbstractExecutableTest test)
     {
         test.State = TestState.Running;
-        test.StartTime = DateTimeOffset.UtcNow;
+        test.StartTime = test.Context.TimeProvider.GetUtcNow();
         return Task.CompletedTask;
     }
 
     public Task MarkCompletedAsync(AbstractExecutableTest test)
     {
-        var now = DateTimeOffset.UtcNow;
+        var now = test.Context.TimeProvider.GetUtcNow();
 
         test.Result ??= new TestResult
         {
@@ -43,12 +43,12 @@ internal sealed class TestStateManager
         if (test.Context.Execution.Result?.IsOverridden == true)
         {
             test.State = test.Context.Execution.Result.State;
-            test.EndTime = test.Context.Execution.Result.End ?? DateTimeOffset.UtcNow;
+            test.EndTime = test.Context.Execution.Result.End ?? test.Context.TimeProvider.GetUtcNow();
         }
         else
         {
             test.State = TestState.Failed;
-            test.EndTime = DateTimeOffset.UtcNow;
+            test.EndTime = test.Context.TimeProvider.GetUtcNow();
             test.Result = new TestResult
             {
                 State = TestState.Failed,
@@ -66,7 +66,7 @@ internal sealed class TestStateManager
     public Task MarkSkippedAsync(AbstractExecutableTest test, string reason)
     {
         test.State = TestState.Skipped;
-        var now = DateTimeOffset.UtcNow;
+        var now = test.Context.TimeProvider.GetUtcNow();
 
         // Ensure StartTime is set if it wasn't already
         if (!test.StartTime.HasValue)
@@ -91,7 +91,7 @@ internal sealed class TestStateManager
     public Task MarkCircularDependencyFailedAsync(AbstractExecutableTest test, Exception exception)
     {
         test.State = TestState.Failed;
-        var now = DateTimeOffset.UtcNow;
+        var now = test.Context.TimeProvider.GetUtcNow();
         test.Result = new TestResult
         {
             State = TestState.Failed,
@@ -109,7 +109,7 @@ internal sealed class TestStateManager
     {
         test.State = TestState.Failed;
 
-        var now = DateTimeOffset.UtcNow;
+        var now = test.Context.TimeProvider.GetUtcNow();
 
         test.Result = new TestResult
         {

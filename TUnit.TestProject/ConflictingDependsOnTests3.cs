@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
@@ -8,9 +8,10 @@ namespace TUnit.TestProject;
 public class ConflictingDependsOnTests3
 {
     [Test, DependsOn(nameof(Test5))]
-    public async Task Test1()
+    public async Task Test1(CancellationToken cancellationToken)
     {
-        await Task.Delay(TimeSpan.FromSeconds(5));
+        var timeProvider = TestContext.Current!.GetService<TimeProvider>();
+        await timeProvider.Delay(TimeSpan.FromSeconds(5), cancellationToken);
     }
 
     [Test, DependsOn(nameof(Test1))]

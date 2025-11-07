@@ -23,6 +23,12 @@ public partial class TestContext
     internal IHookExecutor? CustomHookExecutor { get; set; }
     internal bool ReportResult { get; set; } = true;
 
+    /// <summary>
+    /// For internal use only. Do not use directly in test code.
+    /// </summary>
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    public TimeProvider TimeProvider { get; set; } = TimeProvider.System;
+
     // Explicit interface implementations for ITestExecution
     TestPhase ITestExecution.Phase => Phase;
     TestResult? ITestExecution.Result
@@ -103,15 +109,16 @@ public partial class TestContext
                 exceptionForResult = null;
             }
 
+            var now = TimeProvider.GetUtcNow();
             Result = new TestResult
             {
                 State = state,
                 OverrideReason = reason,
                 IsOverridden = true,
                 OriginalException = originalException,
-                Start = TestStart ?? DateTimeOffset.UtcNow,
-                End = DateTimeOffset.UtcNow,
-                Duration = DateTimeOffset.UtcNow - (TestStart ?? DateTimeOffset.UtcNow),
+                Start = TestStart ?? now,
+                End = now,
+                Duration = now - (TestStart ?? now),
                 Exception = exceptionForResult,
                 ComputerName = EnvironmentHelper.MachineName,
                 TestContext = this

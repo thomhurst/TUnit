@@ -8,7 +8,8 @@ public class ExecutionTimeTests
     [Test]
     public async Task Completes_Within_Happy()
     {
-        var action = () => Thread.Sleep(1);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        var action = () => Thread.Sleep(1); // Still using Thread.Sleep as it's synchronous blocking
 
         await Assert.That(action).CompletesWithin(TimeSpan.FromSeconds(10));
     }
@@ -16,9 +17,10 @@ public class ExecutionTimeTests
     [Test]
     public async Task Completes_Within_Unhappy()
     {
+        var timeProvider = TestContext.Current!.TimeProvider;
         var stopwatch = Stopwatch.StartNew();
 
-        var action = () => Thread.Sleep(10000);
+        var action = () => Thread.Sleep(10000); // Still using Thread.Sleep as it's synchronous blocking
 
         await Assert.That(
             async () => await Assert.That(action).CompletesWithin(TimeSpan.FromMilliseconds(250))
@@ -33,7 +35,8 @@ public class ExecutionTimeTests
     [Test]
     public async Task Completes_Within_Happy2()
     {
-        var action = () => Task.Delay(1);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        var action = () => timeProvider.Delay(TimeSpan.FromMilliseconds(1));
 
         await Assert.That(action).CompletesWithin(TimeSpan.FromSeconds(10));
     }
@@ -41,9 +44,10 @@ public class ExecutionTimeTests
     [Test]
     public async Task Completes_Within_Unhappy2()
     {
+        var timeProvider = TestContext.Current!.TimeProvider;
         var stopwatch = Stopwatch.StartNew();
 
-        var action = () => Task.Delay(10000);
+        var action = () => timeProvider.Delay(TimeSpan.FromSeconds(10));
 
         await Assert.That(
             async () => await Assert.That(action).CompletesWithin(TimeSpan.FromMilliseconds(250))

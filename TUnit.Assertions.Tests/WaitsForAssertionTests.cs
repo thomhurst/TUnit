@@ -113,11 +113,12 @@ public class WaitsForAssertionTests
     public async Task WaitsFor_With_Eventually_Changing_Value()
     {
         var value = 0;
+        var timeProvider = TestContext.Current!.TimeProvider;
 
         // Start a task that changes the value after 100ms
         _ = Task.Run(async () =>
         {
-            await Task.Delay(100);
+            await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
             Interlocked.Exchange(ref value, 42);
         });
 
@@ -132,11 +133,12 @@ public class WaitsForAssertionTests
     public async Task WaitsFor_Works_With_Complex_Assertions()
     {
         var list = new List<int> { 1, 2, 3 };
+        var timeProvider = TestContext.Current!.TimeProvider;
 
         // Start a task that adds to the list after 50ms
         _ = Task.Run(async () =>
         {
-            await Task.Delay(50);
+            await timeProvider.Delay(TimeSpan.FromMilliseconds(50));
             lock (list)
             {
                 list.Add(4);
@@ -225,11 +227,12 @@ public class WaitsForAssertionTests
         // Testing GPIO events that take time to propagate
 
         var pinValue = false;
+        var timeProvider = TestContext.Current!.TimeProvider;
 
         // Simulate an async GPIO event that changes state after 75ms
         _ = Task.Run(async () =>
         {
-            await Task.Delay(75);
+            await timeProvider.Delay(TimeSpan.FromMilliseconds(75));
             pinValue = true;
         });
 
@@ -312,11 +315,12 @@ public class WaitsForAssertionTests
     {
         // Simulate the real-world scenario from the GitHub issue
         var entity = new TestEntity { Id = 1, Name = "Test", IsReady = false };
+        var timeProvider = TestContext.Current!.TimeProvider;
 
         // Simulate async state change
         _ = Task.Run(async () =>
         {
-            await Task.Delay(50);
+            await timeProvider.Delay(TimeSpan.FromMilliseconds(50));
             entity.IsReady = true;
         });
 

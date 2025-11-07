@@ -128,6 +128,11 @@ public partial class TestContext : Context,
         get;
     }
 
+    internal T GetService<T>() where T : notnull
+    {
+        return (T)ServiceProvider.GetService(typeof(T))!;
+    }
+
     internal override void SetAsyncLocalContext()
     {
         TestContexts.Value = this;
