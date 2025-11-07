@@ -30,6 +30,7 @@ const sidebars: SidebarsConfig = {
             'troubleshooting',
           ],
         },
+        'guides/philosophy',
         {
           type: 'category',
           label: 'Test Authoring',
@@ -65,30 +66,75 @@ const sidebars: SidebarsConfig = {
         {
           type: 'category',
           label: 'Assertions',
+          collapsed: false,
           items: [
             'assertions/getting-started',
-            'assertions/equality-and-comparison',
-            'assertions/null-and-default',
-            'assertions/awaiting',
-            'assertions/and-conditions',
-            'assertions/or-conditions',
-            'assertions/boolean',
-            'assertions/numeric',
-            'assertions/string',
-            'assertions/collections',
-            'assertions/dictionaries',
-            'assertions/datetime',
-            'assertions/exceptions',
-            'assertions/types',
-            'assertions/tasks-and-async',
-            'assertions/specialized-types',
-            'assertions/member-assertions',
-            'assertions/scopes',
-            'assertions/assertion-groups',
-            'assertions/fsharp',
+            'assertions/library',
+            {
+              type: 'category',
+              label: 'Core Assertions',
+              collapsed: true,
+              items: [
+                'assertions/equality-and-comparison',
+                'assertions/null-and-default',
+                'assertions/awaiting',
+                'assertions/boolean',
+              ],
+            },
+            {
+              type: 'category',
+              label: 'Value Assertions',
+              collapsed: true,
+              items: [
+                'assertions/numeric',
+                'assertions/string',
+                'assertions/datetime',
+              ],
+            },
+            {
+              type: 'category',
+              label: 'Collection Assertions',
+              collapsed: true,
+              items: [
+                'assertions/collections',
+                'assertions/dictionaries',
+              ],
+            },
+            {
+              type: 'category',
+              label: 'Advanced Assertions',
+              collapsed: true,
+              items: [
+                'assertions/exceptions',
+                'assertions/types',
+                'assertions/tasks-and-async',
+                'assertions/specialized-types',
+                'assertions/member-assertions',
+              ],
+            },
+            {
+              type: 'category',
+              label: 'Assertion Composition',
+              collapsed: true,
+              items: [
+                'assertions/and-conditions',
+                'assertions/or-conditions',
+                'assertions/scopes',
+                'assertions/assertion-groups',
+              ],
+            },
+            {
+              type: 'category',
+              label: 'Specialized',
+              collapsed: true,
+              items: [
+                'assertions/fsharp',
+              ],
+            },
             {
               type: 'category',
               label: 'Extensibility',
+              collapsed: true,
               items: [
                 'assertions/extensibility/custom-assertions',
                 'assertions/extensibility/source-generator-assertions',
@@ -112,6 +158,18 @@ const sidebars: SidebarsConfig = {
             'test-lifecycle/dependency-injection',
           ],
         },
+        'guides/best-practices',
+      ],
+    },
+    {
+      type: 'category',
+      label: '🔄 Migrating to TUnit',
+      collapsed: false,
+      items: [
+        'migration/testcontext-interface-organization',
+        'migration/xunit',
+        'migration/nunit',
+        'migration/mstest',
       ],
     },
     {
@@ -171,7 +229,7 @@ const sidebars: SidebarsConfig = {
         },
         {
           type: 'category',
-          label: 'Advanced',
+          label: 'Deep Dive',
           items: [
             'advanced/exception-handling',
             'advanced/extension-points',
@@ -195,15 +253,6 @@ const sidebars: SidebarsConfig = {
       items: [
         {
           type: 'category',
-          label: 'Guides',
-          items: [
-            'guides/philosophy',
-            'guides/best-practices',
-            'guides/cookbook',
-          ],
-        },
-        {
-          type: 'category',
           label: 'Examples & Use Cases',
           items: [
             'examples/intro',
@@ -220,20 +269,11 @@ const sidebars: SidebarsConfig = {
           type: 'category',
           label: 'Reference',
           items: [
+            'guides/cookbook',
             'comparison/framework-differences',
             'comparison/attributes',
             'reference/test-configuration',
             'reference/command-line-flags',
-          ],
-        },
-        {
-          type: 'category',
-          label: 'Migration Guides',
-          items: [
-            'migration/testcontext-interface-organization',
-            'migration/xunit',
-            'migration/nunit',
-            'migration/mstest',
           ],
         },
       ],
