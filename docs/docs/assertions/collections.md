@@ -349,7 +349,7 @@ public async Task Any_Item_Matches()
 
 ### IsEquivalentTo
 
-Tests that two collections contain the same items, regardless of order:
+Tests that two collections contain the same items. By default, order is ignored (use `CollectionOrdering.Matching` to require matching order):
 
 ```csharp
 [Test]
@@ -414,7 +414,9 @@ public async Task Equivalent_With_Predicate()
 }
 ```
 
-#### Explicitly Ignoring Order
+#### Order-Independent Comparison (Default)
+
+By default, `IsEquivalentTo` ignores the order of elements:
 
 ```csharp
 [Test]
@@ -423,9 +425,37 @@ public async Task Equivalent_Ignoring_Order()
     var actual = new[] { 1, 2, 3 };
     var expected = new[] { 3, 2, 1 };
 
-    await Assert.That(actual)
-        .IsEquivalentTo(expected)
-        .IgnoringOrder();
+    // Order is ignored by default
+    await Assert.That(actual).IsEquivalentTo(expected);
+}
+```
+
+#### Requiring Matching Order
+
+To require elements to be in the same order, pass `CollectionOrdering.Matching`:
+
+```csharp
+[Test]
+public async Task Equivalent_With_Matching_Order()
+{
+    var actual = new[] { 1, 2, 3 };
+    var expected = new[] { 1, 2, 3 };
+
+    await Assert.That(actual).IsEquivalentTo(expected, CollectionOrdering.Matching);
+}
+```
+
+This will fail if elements are in different positions:
+
+```csharp
+[Test]
+public async Task Not_Equivalent_Different_Order()
+{
+    var actual = new[] { 1, 2, 3 };
+    var expected = new[] { 3, 2, 1 };
+
+    // This will fail when requiring matching order
+    // await Assert.That(actual).IsEquivalentTo(expected, CollectionOrdering.Matching);
 }
 ```
 
