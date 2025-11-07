@@ -26,7 +26,7 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: '📖 Core Concepts',
+      label: '📖 Writing Tests',
       collapsed: true,
       items: [
         'test-authoring/things-to-know',
@@ -60,6 +60,19 @@ const sidebars: SidebarsConfig = {
         },
         {
           type: 'category',
+          label: 'Controlling Test Execution',
+          collapsed: false,
+          items: [
+            'test-authoring/skip',
+            'test-authoring/explicit',
+            'test-authoring/order',
+            'test-authoring/depends-on',
+            'execution/test-filters',
+            'execution/timeouts',
+          ],
+        },
+        {
+          type: 'category',
           label: 'Parallelism & Performance',
           collapsed: false,
           items: [
@@ -67,6 +80,24 @@ const sidebars: SidebarsConfig = {
             'parallelism/parallel-groups',
             'parallelism/parallel-limiter',
             'advanced/performance-best-practices',
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Reliability & Resilience',
+          collapsed: false,
+          items: [
+            'execution/retrying',
+            'execution/repeating',
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Common Testing Techniques',
+          collapsed: false,
+          items: [
+            'test-authoring/mocking',
+            'test-authoring/generic-attributes',
           ],
         },
       ],
@@ -126,53 +157,25 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: '📋 Guides & Recipes',
+      label: '🔌 Integrations',
+      collapsed: true,
+      items: [
+        'examples/aspnet',
+        'examples/playwright',
+        'examples/complex-test-infrastructure',
+        'execution/ci-cd-reporting',
+        'examples/tunit-ci-pipeline',
+      ],
+    },
+    {
+      type: 'category',
+      label: '💡 Best Practices',
       collapsed: true,
       items: [
         'examples/intro',
-        {
-          type: 'category',
-          label: 'Common Testing Techniques',
-          collapsed: false,
-          items: [
-            'test-authoring/mocking',
-            'test-authoring/generic-attributes',
-          ],
-        },
-        {
-          type: 'category',
-          label: 'Controlling Test Execution',
-          collapsed: false,
-          items: [
-            'test-authoring/skip',
-            'test-authoring/explicit',
-            'test-authoring/order',
-            'test-authoring/depends-on',
-            'execution/test-filters',
-            'execution/timeouts',
-          ],
-        },
-        {
-          type: 'category',
-          label: 'Reliability & Resilience',
-          collapsed: false,
-          items: [
-            'execution/retrying',
-            'execution/repeating',
-          ],
-        },
-        {
-          type: 'category',
-          label: 'Integrations',
-          collapsed: false,
-          items: [
-            'examples/aspnet',
-            'examples/playwright',
-            'examples/complex-test-infrastructure',
-            'execution/ci-cd-reporting',
-            'examples/tunit-ci-pipeline',
-          ],
-        },
+        'guides/best-practices',
+        'guides/cookbook',
+        'examples/instrumenting-global-test-ids',
         {
           type: 'category',
           label: 'Platform-Specific Scenarios',
@@ -182,16 +185,6 @@ const sidebars: SidebarsConfig = {
             'test-authoring/culture',
             'examples/fsharp-interactive',
             'examples/filebased-csharp',
-          ],
-        },
-        {
-          type: 'category',
-          label: 'Best Practices & Patterns',
-          collapsed: false,
-          items: [
-            'guides/best-practices',
-            'guides/cookbook',
-            'examples/instrumenting-global-test-ids',
           ],
         },
       ],
@@ -287,7 +280,7 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: '💡 About TUnit',
+      label: 'ℹ️ About TUnit',
       collapsed: true,
       items: [
         'guides/philosophy',
