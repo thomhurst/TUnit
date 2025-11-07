@@ -22,6 +22,11 @@ const sidebars: SidebarsConfig = {
         'getting-started/writing-your-first-test',
         'getting-started/running-your-tests',
         {
+          type: 'link',
+          label: 'Coming from xUnit/NUnit/MSTest?',
+          href: '/docs/migration/xunit',
+        },
+        {
           type: 'category',
           label: 'Understanding TUnit',
           collapsed: true,
@@ -70,6 +75,19 @@ const sidebars: SidebarsConfig = {
             'test-authoring/nested-data-sources',
           ],
         },
+        {
+          type: 'category',
+          label: 'Parallelism & Performance',
+          collapsed: false,
+          items: [
+            'parallelism/not-in-parallel',
+            'parallelism/parallel-groups',
+            'parallelism/parallel-limiter',
+            'advanced/performance-best-practices',
+          ],
+        },
+        'test-authoring/aot-compatibility',
+        'test-authoring/culture',
       ],
     },
     {
@@ -152,8 +170,17 @@ const sidebars: SidebarsConfig = {
             'execution/repeating',
           ],
         },
-        'test-authoring/culture',
-        'test-authoring/aot-compatibility',
+        'execution/ci-cd-reporting',
+        {
+          type: 'category',
+          label: 'Integration Guides',
+          collapsed: false,
+          items: [
+            'examples/aspnet',
+            'examples/playwright',
+            'examples/complex-test-infrastructure',
+          ],
+        },
         'test-authoring/generic-attributes',
         'guides/best-practices',
         'guides/cookbook',
@@ -161,26 +188,9 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: '⚡ Advanced',
+      label: '⚡ Advanced Topics',
       collapsed: true,
       items: [
-        {
-          type: 'category',
-          label: 'Parallelism & Performance',
-          items: [
-            'parallelism/not-in-parallel',
-            'parallelism/parallel-groups',
-            'parallelism/parallel-limiter',
-            'advanced/performance-best-practices',
-          ],
-        },
-        {
-          type: 'category',
-          label: 'CI/CD Integration',
-          items: [
-            'execution/ci-cd-reporting',
-          ],
-        },
         {
           type: 'category',
           label: 'Advanced Patterns',
@@ -267,30 +277,13 @@ const sidebars: SidebarsConfig = {
         },
         {
           type: 'category',
-          label: 'Examples',
+          label: 'Advanced Examples',
           items: [
             'examples/intro',
-            {
-              type: 'category',
-              label: 'Integration Examples',
-              collapsed: true,
-              items: [
-                'examples/aspnet',
-                'examples/playwright',
-                'examples/complex-test-infrastructure',
-              ],
-            },
-            {
-              type: 'category',
-              label: 'Advanced Examples',
-              collapsed: true,
-              items: [
-                'examples/instrumenting-global-test-ids',
-                'examples/tunit-ci-pipeline',
-                'examples/fsharp-interactive',
-                'examples/filebased-csharp',
-              ],
-            },
+            'examples/instrumenting-global-test-ids',
+            'examples/tunit-ci-pipeline',
+            'examples/fsharp-interactive',
+            'examples/filebased-csharp',
           ],
         },
       ],
