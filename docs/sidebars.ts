@@ -2,13 +2,13 @@ import type { SidebarsConfig } from '@docusaurus/plugin-content-docs';
 
 /**
  * Creating a sidebar enables you to:
- - create an ordered group of docs
- - render a sidebar for each doc of that group
- - provide next/previous navigation
-
- The sidebars can be generated from the filesystem, or explicitly defined here.
-
- Create as many sidebars as you want.
+ * - create an ordered group of docs
+ * - render a sidebar for each doc of that group
+ * - provide next/previous navigation
+ *
+ * The sidebars can be generated from the filesystem, or explicitly defined here.
+ *
+ * Create as many sidebars as you want.
  */
 const sidebars: SidebarsConfig = {
   docs: [
@@ -21,24 +21,48 @@ const sidebars: SidebarsConfig = {
         'getting-started/installation',
         'getting-started/writing-your-first-test',
         'getting-started/running-your-tests',
+        'troubleshooting',
+      ],
+    },
+    {
+      type: 'category',
+      label: '💡 About TUnit',
+      collapsed: true,
+      items: [
+        'guides/philosophy',
         {
-          type: 'link',
-          label: 'Coming from xUnit/NUnit/MSTest?',
-          href: '/docs/migration/xunit',
+          type: 'category',
+          label: 'Comparison with Other Frameworks',
+          collapsed: false,
+          items: [
+            'comparison/framework-differences',
+            {
+              type: 'link',
+              label: 'Migrating from xUnit',
+              href: '/docs/migration/xunit',
+            },
+            {
+              type: 'link',
+              label: 'Migrating from NUnit',
+              href: '/docs/migration/nunit',
+            },
+            {
+              type: 'link',
+              label: 'Migrating from MSTest',
+              href: '/docs/migration/mstest',
+            },
+          ],
         },
         {
           type: 'category',
-          label: 'Understanding TUnit',
+          label: 'Benchmarks & Performance',
           collapsed: true,
           items: [
-            'guides/philosophy',
-            'comparison/framework-differences',
             'benchmarks/index',
             'benchmarks/calculator',
             'benchmarks/methodology',
           ],
         },
-        'troubleshooting',
       ],
     },
     {
@@ -86,8 +110,6 @@ const sidebars: SidebarsConfig = {
             'advanced/performance-best-practices',
           ],
         },
-        'test-authoring/aot-compatibility',
-        'test-authoring/culture',
       ],
     },
     {
@@ -156,9 +178,10 @@ const sidebars: SidebarsConfig = {
           items: [
             'test-authoring/skip',
             'test-authoring/explicit',
+            'test-authoring/order',
+            'test-authoring/depends-on',
             'execution/test-filters',
             'execution/timeouts',
-            'test-authoring/order',
           ],
         },
         {
@@ -171,6 +194,15 @@ const sidebars: SidebarsConfig = {
           ],
         },
         'execution/ci-cd-reporting',
+        {
+          type: 'category',
+          label: 'Platform-Specific Scenarios',
+          collapsed: false,
+          items: [
+            'test-authoring/aot-compatibility',
+            'test-authoring/culture',
+          ],
+        },
         {
           type: 'category',
           label: 'Integration Guides',
@@ -194,18 +226,19 @@ const sidebars: SidebarsConfig = {
         {
           type: 'category',
           label: 'Advanced Patterns',
+          collapsed: false,
           items: [
             'execution/executors',
             'execution/engine-modes',
             'advanced/exception-handling',
             'advanced/extension-points',
             'advanced/test-variants',
-            'test-authoring/depends-on',
           ],
         },
         {
           type: 'category',
-          label: 'Experimental',
+          label: 'Experimental Features',
+          collapsed: false,
           items: [
             'experimental/dynamic-tests',
           ],
@@ -220,6 +253,7 @@ const sidebars: SidebarsConfig = {
         {
           type: 'category',
           label: 'Built-in Extensions',
+          collapsed: false,
           items: [
             'extensions/extensions',
           ],
@@ -227,6 +261,7 @@ const sidebars: SidebarsConfig = {
         {
           type: 'category',
           label: 'Creating Extensions',
+          collapsed: false,
           items: [
             'customization-extensibility/data-source-generators',
             'customization-extensibility/argument-formatters',
@@ -263,6 +298,7 @@ const sidebars: SidebarsConfig = {
         {
           type: 'category',
           label: 'Command Line & Configuration',
+          collapsed: false,
           items: [
             'reference/command-line-flags',
             'reference/test-configuration',
@@ -271,21 +307,23 @@ const sidebars: SidebarsConfig = {
         {
           type: 'category',
           label: 'API Reference',
+          collapsed: false,
           items: [
             'comparison/attributes',
           ],
         },
-        {
-          type: 'category',
-          label: 'Advanced Examples',
-          items: [
-            'examples/intro',
-            'examples/instrumenting-global-test-ids',
-            'examples/tunit-ci-pipeline',
-            'examples/fsharp-interactive',
-            'examples/filebased-csharp',
-          ],
-        },
+      ],
+    },
+    {
+      type: 'category',
+      label: '📘 Examples & Cookbook',
+      collapsed: true,
+      items: [
+        'examples/intro',
+        'examples/instrumenting-global-test-ids',
+        'examples/tunit-ci-pipeline',
+        'examples/fsharp-interactive',
+        'examples/filebased-csharp',
       ],
     },
   ],
