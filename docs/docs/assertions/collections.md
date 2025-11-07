@@ -347,9 +347,11 @@ public async Task Any_Item_Matches()
 
 ## Equivalency Assertions
 
+Collection equivalency checks whether two collections contain the same elements. By default, **order is ignored** - only the presence and count of elements matter. To require matching order, use the `CollectionOrdering.Matching` parameter.
+
 ### IsEquivalentTo
 
-Tests that two collections contain the same items, regardless of order:
+Tests that two collections contain the same items. By default, order is ignored (use `CollectionOrdering.Matching` to require matching order):
 
 ```csharp
 [Test]
@@ -414,7 +416,9 @@ public async Task Equivalent_With_Predicate()
 }
 ```
 
-#### Explicitly Ignoring Order
+#### Order-Independent Comparison (Default)
+
+By default, `IsEquivalentTo` ignores the order of elements:
 
 ```csharp
 [Test]
@@ -423,9 +427,37 @@ public async Task Equivalent_Ignoring_Order()
     var actual = new[] { 1, 2, 3 };
     var expected = new[] { 3, 2, 1 };
 
-    await Assert.That(actual)
-        .IsEquivalentTo(expected)
-        .IgnoringOrder();
+    // Order is ignored by default
+    await Assert.That(actual).IsEquivalentTo(expected);
+}
+```
+
+#### Requiring Matching Order
+
+To require elements to be in the same order, pass `CollectionOrdering.Matching`:
+
+```csharp
+[Test]
+public async Task Equivalent_With_Matching_Order()
+{
+    var actual = new[] { 1, 2, 3 };
+    var expected = new[] { 1, 2, 3 };
+
+    await Assert.That(actual).IsEquivalentTo(expected, CollectionOrdering.Matching);
+}
+```
+
+This will fail if elements are in different positions:
+
+```csharp
+[Test]
+public async Task Not_Equivalent_Different_Order()
+{
+    var actual = new[] { 1, 2, 3 };
+    var expected = new[] { 3, 2, 1 };
+
+    // This will fail when requiring matching order
+    // await Assert.That(actual).IsEquivalentTo(expected, CollectionOrdering.Matching);
 }
 ```
 
@@ -441,6 +473,82 @@ public async Task Collections_Not_Equivalent()
     var different = new[] { 4, 5, 6 };
 
     await Assert.That(actual).IsNotEquivalentTo(different);
+}
+```
+
+### Practical Tips for Collection Ordering
+
+#### When to Use `CollectionOrdering.Any` (Default)
+
+The default behavior (ignoring order) is ideal for:
+- Testing set operations and results
+- Verifying database query results where order isn't guaranteed
+- Checking API responses where element order doesn't matter
+- Testing collection transformations that may reorder elements
+
+```csharp
+[Test]
+public async Task Database_Query_Results()
+{
+    var results = await database.GetActiveUsersAsync();
+    
+    // Order doesn't matter for this assertion
+    await Assert.That(results)
+        .IsEquivalentTo(new[] { user1, user2, user3 });
+}
+```
+
+#### When to Use `CollectionOrdering.Matching`
+
+Use order-sensitive comparison when:
+- Testing sorting algorithms
+- Verifying ordered results (e.g., ORDER BY queries)
+- Checking sequences where position matters
+- Testing priority queues or ordered data structures
+
+```csharp
+[Test]
+public async Task Sorted_Query_Results()
+{
+    var results = await database.GetUsersSortedByNameAsync();
+    
+    // Order matters here
+    await Assert.That(results)
+        .IsEquivalentTo(
+            new[] { alice, bob, charlie },
+            CollectionOrdering.Matching
+        );
+}
+```
+
+#### Multiple Assertions with Same Ordering
+
+If you need multiple order-sensitive assertions in the same test, consider extracting a helper or being explicit:
+
+```csharp
+[Test]
+public async Task Multiple_Order_Sensitive_Checks()
+{
+    var list1 = GetSortedList1();
+    var list2 = GetSortedList2();
+    
+    // Be explicit about ordering requirements
+    await Assert.That(list1).IsEquivalentTo(expected1, CollectionOrdering.Matching);
+    await Assert.That(list2).IsEquivalentTo(expected2, CollectionOrdering.Matching);
+}
+```
+
+For ordered comparisons, you can also use `IsInOrder()`:
+
+```csharp
+[Test]
+public async Task Verify_Ordering_Separately()
+{
+    var actual = new[] { 1, 2, 3 };
+    
+    // Check both equivalency and ordering
+    await Assert.That(actual).IsEquivalentTo(new[] { 1, 2, 3 });
+    await Assert.That(actual).IsInOrder();
 }
 ```
 

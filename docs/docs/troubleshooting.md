@@ -298,7 +298,17 @@ await Assert.That(actual).IsEqualTo(expected);  // Fails
 await Assert.That(actual).IsEquivalentTo(expected);  // Passes
 ```
 
-Note that `IsEquivalentTo` ignores order. If order matters, assert on elements individually:
+Note that `IsEquivalentTo` ignores order by default. If order matters, use `CollectionOrdering.Matching`:
+
+```csharp
+// Order doesn't matter (default)
+await Assert.That(actual).IsEquivalentTo(expected);  // Passes even if order differs
+
+// Order must match exactly
+await Assert.That(actual).IsEquivalentTo(expected, CollectionOrdering.Matching);
+```
+
+Or assert on elements individually:
 
 ```csharp
 await Assert.That(actual).HasCount().EqualTo(expected.Length);
@@ -360,8 +370,9 @@ await Assert.That(list).DoesNotContain(5);
 ```
 
 **General Approach:**
-- Use `IsEquivalentTo` for unordered collection comparison
-- Iterate and assert elements for ordered comparison
+- Use `IsEquivalentTo` for unordered collection comparison (default)
+- Use `IsEquivalentTo(expected, CollectionOrdering.Matching)` for ordered comparison
+- Iterate and assert elements individually for complex ordered comparisons
 - Assert on key properties for complex types
 - Consider implementing `IEquatable<T>` on your types for cleaner assertions
 
