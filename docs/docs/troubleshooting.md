@@ -979,6 +979,675 @@ public class DocumentServiceTests
 }
 ```
 
+## Configuration and Secrets Management
+
+One of the most common challenges in testing is loading configuration from `appsettings.json`, environment variables, or user secrets.
+
+### Configuration File Not Found
+
+**Symptoms:**
+- `FileNotFoundException: Could not find file 'appsettings.json'`
+- Configuration values are null or default
+- "The configuration file 'appsettings.json' was not found"
+
+**Common Error Messages:**
+- `System.IO.FileNotFoundException: Could not find file 'C:\...\bin\Debug\net8.0\appsettings.json'`
+
+**Root Cause:**
+
+Test projects run from the `bin/Debug/net8.0` directory, but your `appsettings.json` file is in the project root. The file isn't being copied to the output directory.
+
+**Solution:**
+
+#### 1. Configure CopyToOutputDirectory in .csproj
+
+```xml
+<ItemGroup>
+  <None Update="appsettings.json">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </None>
+  <None Update="appsettings.Development.json">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </None>
+</ItemGroup>
+```
+
+**Options:**
+- `PreserveNewest` - Copy only if the file is newer (recommended)
+- `Always` - Always copy the file (slower builds)
+
+### Loading IConfiguration in Tests
+
+**Recommended Pattern:**
+
+```csharp
+public class ConfigurationTests
+{
+    private static IConfiguration _configuration;
+
+    [Before(HookType.Class)]
+    public static void SetupConfiguration()
+    {
+        _configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: false)
+            .AddJsonFile("appsettings.Development.json", optional: true)
+            .AddEnvironmentVariables()
+            .Build();
+    }
+
+    [Test]
+    public async Task CanLoadConfiguration()
+    {
+        var connectionString = _configuration.GetConnectionString("Default");
+        await Assert.That(connectionString).IsNotNull();
+    }
+}
+```
+
+### Environment-Specific Configuration
+
+**Problem:** Need different settings for Development, CI, Production testing.
+
+**Solution:**
+
+#### 1. Use Environment-Specific Files
+
+```csharp
+[Before(HookType.Class)]
+public static void SetupConfiguration()
+{
+    var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
+
+    _configuration = new ConfigurationBuilder()
+        .SetBasePath(Directory.GetCurrentDirectory())
+        .AddJsonFile("appsettings.json", optional: false)
+        .AddJsonFile($"appsettings.{environment}.json", optional: true)
+        .AddEnvironmentVariables()
+        .Build();
+}
+```
+
+**In .csproj:**
+```xml
+<ItemGroup>
+  <None Update="appsettings*.json">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </None>
+</ItemGroup>
+```
+
+#### 2. Set Environment in CI/CD
+
+**GitHub Actions:**
+```yaml
+- name: Run tests
+  env:
+    ASPNETCORE_ENVIRONMENT: CI
+  run: dotnet run --project tests/MyProject.Tests
+```
+
+**Azure Pipelines:**
+```yaml
+- task: DotNetCoreCLI@2
+  env:
+    ASPNETCORE_ENVIRONMENT: CI
+  inputs:
+    command: 'run'
+    projects: 'tests/**/*.csproj'
+```
+
+### User Secrets in Tests
+
+**Problem:** Need to test with secrets (API keys, passwords) without committing them.
+
+**Solution:**
+
+#### 1. Initialize User Secrets (One Time)
+
+```bash
+cd MyProject.Tests
+dotnet user-secrets init
+```
+
+This adds a `UserSecretsId` to your `.csproj`:
+```xml
+<PropertyGroup>
+  <UserSecretsId>your-unique-guid</UserSecretsId>
+</PropertyGroup>
+```
+
+#### 2. Add Secrets
+
+```bash
+dotnet user-secrets set "ApiKey" "my-secret-key"
+dotnet user-secrets set "ConnectionStrings:Database" "Server=localhost;..."
+```
+
+#### 3. Load Secrets in Tests
+
+```csharp
+[Before(HookType.Class)]
+public static void SetupConfiguration()
+{
+    _configuration = new ConfigurationBuilder()
+        .SetBasePath(Directory.GetCurrentDirectory())
+        .AddJsonFile("appsettings.json", optional: false)
+        .AddUserSecrets<ConfigurationTests>() // Load user secrets
+        .AddEnvironmentVariables()
+        .Build();
+}
+```
+
+**Install Package:**
+```xml
+<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="*" />
+```
+
+### Configuration from Environment Variables
+
+**Recommended for CI/CD:**
+
+```csharp
+[Before(HookType.Class)]
+public static void SetupConfiguration()
+{
+    _configuration = new ConfigurationBuilder()
+        .AddEnvironmentVariables("MYAPP_") // Prefix optional
+        .Build();
+}
+
+[Test]
+public async Task UsesEnvironmentVariable()
+{
+    var apiKey = _configuration["ApiKey"]; // Reads MYAPP_ApiKey
+    await Assert.That(apiKey).IsNotNull();
+}
+```
+
+**Setting Environment Variables:**
+
+**Windows (PowerShell):**
+```powershell
+$env:MYAPP_ApiKey = "secret-key"
+dotnet run --project tests/MyProject.Tests
+```
+
+**Linux/macOS:**
+```bash
+export MYAPP_ApiKey="secret-key"
+dotnet run --project tests/MyProject.Tests
+```
+
+**Inline:**
+```bash
+MYAPP_ApiKey="secret-key" dotnet run --project tests/MyProject.Tests
+```
+
+### Strongly-Typed Configuration
+
+**Recommended Pattern:**
+
+```csharp
+// Configuration class
+public class AppSettings
+{
+    public string ApiUrl { get; set; }
+    public int Timeout { get; set; }
+    public ConnectionStrings ConnectionStrings { get; set; }
+}
+
+public class ConnectionStrings
+{
+    public string Default { get; set; }
+}
+
+// In tests
+public class ConfigurationTests
+{
+    private static AppSettings _settings;
+
+    [Before(HookType.Class)]
+    public static void SetupConfiguration()
+    {
+        var config = new ConfigurationBuilder()
+            .AddJsonFile("appsettings.json")
+            .Build();
+
+        _settings = config.Get<AppSettings>();
+    }
+
+    [Test]
+    public async Task CanAccessTypedConfiguration()
+    {
+        await Assert.That(_settings.ApiUrl).IsNotNull();
+        await Assert.That(_settings.Timeout).IsGreaterThan(0);
+    }
+}
+```
+
+### Common Configuration Patterns
+
+#### Pattern 1: Shared Configuration for All Tests
+
+```csharp
+public class TestBase
+{
+    protected static IConfiguration Configuration { get; private set; }
+
+    [Before(HookType.Assembly)]
+    public static void SetupSharedConfiguration()
+    {
+        Configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json")
+            .AddEnvironmentVariables()
+            .Build();
+    }
+}
+
+// In your tests
+public class MyTests : TestBase
+{
+    [Test]
+    public async Task UsesSharedConfiguration()
+    {
+        var value = Configuration["Setting"];
+        await Assert.That(value).IsNotNull();
+    }
+}
+```
+
+#### Pattern 2: Per-Test Configuration
+
+```csharp
+public class PerTestConfigTests
+{
+    private IConfiguration _configuration;
+
+    [Before(Test)]
+    public void SetupTestConfiguration()
+    {
+        _configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string>
+            {
+                ["TestSetting"] = "test-value"
+            })
+            .Build();
+    }
+
+    [Test]
+    public async Task UsesTestSpecificConfiguration()
+    {
+        await Assert.That(_configuration["TestSetting"]).IsEqualTo("test-value");
+    }
+}
+```
+
+### Troubleshooting Configuration Issues
+
+#### Issue: Configuration is null after loading
+
+**Check:**
+1. Is the file being copied? Check `bin/Debug/net8.0/` for `appsettings.json`
+2. Is the file path correct? Use `SetBasePath(Directory.GetCurrentDirectory())`
+3. Is the file marked as `Content` or `None` with `CopyToOutputDirectory`?
+
+**Debug:**
+```csharp
+[Before(HookType.Class)]
+public static void SetupConfiguration()
+{
+    var currentDir = Directory.GetCurrentDirectory();
+    TestContext.Current?.WriteLine($"Current directory: {currentDir}");
+
+    var files = Directory.GetFiles(currentDir, "*.json");
+    TestContext.Current?.WriteLine($"JSON files: {string.Join(", ", files)}");
+
+    _configuration = new ConfigurationBuilder()
+        .SetBasePath(currentDir)
+        .AddJsonFile("appsettings.json", optional: false)
+        .Build();
+}
+```
+
+#### Issue: Configuration values are wrong
+
+**Check binding:**
+```csharp
+[Test]
+public void DebugConfiguration()
+{
+    var allConfig = _configuration.AsEnumerable();
+    foreach (var kvp in allConfig)
+    {
+        TestContext.Current?.WriteLine($"{kvp.Key} = {kvp.Value}");
+    }
+}
+```
+
+#### Issue: Secrets not loading in CI/CD
+
+**Solution:** User secrets only work locally. In CI/CD, use environment variables:
+
+```yaml
+# GitHub Actions
+- name: Run tests
+  env:
+    ApiKey: ${{ secrets.API_KEY }}
+  run: dotnet run --project tests/MyProject.Tests
+```
+
+## Test Filtering and Grouping Issues
+
+When you have hundreds or thousands of tests, filtering becomes critical for running the right subset.
+
+### Filter Not Selecting Expected Tests
+
+**Symptoms:**
+- `--filter` command selects no tests or wrong tests
+- All tests run when you expected a subset
+- Category filters don't work
+
+**Common Error Messages:**
+- `No tests matched the specified filter`
+- `0 tests discovered`
+
+**Root Cause:**
+
+TUnit uses a **tree-node filter syntax**, not the legacy VSTest filter syntax.
+
+### Tree-Node Filter Syntax
+
+**Pattern:** `/Assembly/Namespace/Class/Method[Property=Value]`
+
+**Examples:**
+
+```bash
+# Run all tests in a specific class
+dotnet run -- --treenode-filter "/*/*/MyTestClass/*"
+
+# Run a specific test method
+dotnet run -- --treenode-filter "/*/*/MyTestClass/MyTestMethod"
+
+# Run tests with a specific category
+dotnet run -- --treenode-filter "/*/*/*/*[Category=Integration]"
+
+# Run tests NOT in a category
+dotnet run -- --treenode-filter "/*/*/*/*[Category!=Performance]"
+
+# Multiple filters (OR)
+dotnet run -- --treenode-filter "/*/*/ClassA/*|/*/*/ClassB/*"
+
+# Combine filters (AND)
+dotnet run -- --treenode-filter "/*/*/*/*[Category=Integration][Priority=High]"
+```
+
+### Common Filter Patterns
+
+#### Run All Tests in Namespace
+
+```bash
+dotnet run -- --treenode-filter "/*/MyNamespace.*/*"
+```
+
+#### Run Tests by Category
+
+```csharp
+[Test]
+[Category("Integration")]
+public async Task DatabaseTest() { }
+
+[Test]
+[Category("Unit")]
+public async Task CalculationTest() { }
+```
+
+```bash
+# Run integration tests
+dotnet run -- --treenode-filter "/*/*/*/*[Category=Integration]"
+
+# Run unit tests
+dotnet run -- --treenode-filter "/*/*/*/*[Category=Unit]"
+
+# Run everything except performance tests
+dotnet run -- --treenode-filter "/*/*/*/*[Category!=Performance]"
+```
+
+#### Run Tests by Property
+
+```csharp
+[Test]
+[Property("Owner", "TeamA")]
+public async Task FeatureTest() { }
+```
+
+```bash
+dotnet run -- --treenode-filter "/*/*/*/*[Owner=TeamA]"
+```
+
+### Categories Not Being Applied
+
+**Symptoms:**
+- Category filter returns no tests
+- Tests don't appear with expected category
+
+**Common Causes:**
+
+#### 1. Category Attribute on Class vs Method
+
+```csharp
+// ✅ Category on test method
+[Test]
+[Category("Integration")]
+public async Task MyTest() { }
+
+// ✅ Category on class (applies to all tests in class)
+[Category("Integration")]
+public class IntegrationTests
+{
+    [Test]
+    public async Task Test1() { }
+
+    [Test]
+    public async Task Test2() { }
+}
+```
+
+#### 2. Typo in Category Name
+
+```csharp
+[Test]
+[Category("Intergration")] // ❌ Typo!
+public async Task MyTest() { }
+```
+
+```bash
+# Won't find the test
+dotnet run -- --treenode-filter "/*/*/*/*[Category=Integration]"
+```
+
+**Solution:** Use constants to avoid typos:
+
+```csharp
+public static class TestCategories
+{
+    public const string Integration = nameof(Integration);
+    public const string Unit = nameof(Unit);
+    public const string Performance = nameof(Performance);
+}
+
+[Test]
+[Category(TestCategories.Integration)]
+public async Task MyTest() { }
+```
+
+### Combining Filters in CI/CD
+
+**Problem:** Need different test suites for different CI stages.
+
+**Solution:**
+
+#### GitHub Actions Example
+
+```yaml
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run unit tests
+        run: dotnet run --project tests/MyProject.Tests -- --treenode-filter "/*/*/*/*[Category=Unit]"
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    needs: unit-tests
+    steps:
+      - name: Run integration tests
+        run: dotnet run --project tests/MyProject.Tests -- --treenode-filter "/*/*/*/*[Category=Integration]"
+
+  smoke-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run smoke tests only
+        run: dotnet run --project tests/MyProject.Tests -- --treenode-filter "/*/*/*/*[Category=Smoke]"
+```
+
+#### Azure Pipelines Example
+
+```yaml
+- task: DotNetCoreCLI@2
+  displayName: 'Unit Tests'
+  inputs:
+    command: 'run'
+    projects: 'tests/**/*.csproj'
+    arguments: '-- --treenode-filter "/*/*/*/*[Category=Unit]"'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Integration Tests'
+  inputs:
+    command: 'run'
+    projects: 'tests/**/*.csproj'
+    arguments: '-- --treenode-filter "/*/*/*/*[Category=Integration]"'
+```
+
+### Excluding Tests from Runs
+
+**Problem:** Some tests should never run in CI (e.g., manual tests, local-only tests).
+
+**Solution:**
+
+#### 1. Use Explicit Attribute
+
+```csharp
+[Test]
+[Explicit] // Won't run unless explicitly requested
+public async Task ManualTest() { }
+```
+
+#### 2. Use Custom Category
+
+```csharp
+[Test]
+[Category("ManualOnly")]
+public async Task InteractiveTest() { }
+```
+
+```bash
+# CI runs everything except manual tests
+dotnet run -- --treenode-filter "/*/*/*/*[Category!=ManualOnly]"
+```
+
+### Multiple Categories on Same Test
+
+```csharp
+[Test]
+[Category("Integration")]
+[Category("Database")]
+[Category("Slow")]
+public async Task ComplexTest() { }
+```
+
+```bash
+# Run tests that are BOTH Integration AND Database
+dotnet run -- --treenode-filter "/*/*/*/*[Category=Integration][Category=Database]"
+
+# Run tests that are Integration OR Unit
+dotnet run -- --treenode-filter "/*/*/*/*[Category=Integration]|/*/*/*/*[Category=Unit]"
+```
+
+### Debugging Filter Issues
+
+**Enable Diagnostic Output:**
+
+```bash
+dotnet run -- --treenode-filter "your-filter" --diagnostic
+```
+
+This shows which tests are discovered and why they were included/excluded.
+
+**List All Tests Without Running:**
+
+```bash
+# Use --list-tests flag if available, or run with dry-run
+dotnet run -- --help
+```
+
+**Verify Test Discovery:**
+
+```bash
+# Run without filter to see all tests
+dotnet run
+
+# Count tests discovered
+dotnet run | grep "Test Passed"
+```
+
+### Best Practices for Test Organization
+
+**1. Use Hierarchical Categories**
+
+```csharp
+public static class TestCategories
+{
+    public const string Unit = "Unit";
+    public const string Integration = "Integration";
+
+    public static class Integration
+    {
+        public const string Database = "Integration.Database";
+        public const string Api = "Integration.Api";
+        public const string FileSystem = "Integration.FileSystem";
+    }
+}
+```
+
+**2. Consistent Naming**
+
+```csharp
+// ✅ Good: Clear, consistent
+[Category("Integration")]
+[Category("Database")]
+
+// ❌ Bad: Inconsistent
+[Category("integration")] // lowercase
+[Category("DB")] // abbreviation
+```
+
+**3. Document Your Categories**
+
+Create a `TestCategories.md` in your test project:
+
+```markdown
+# Test Categories
+
+- `Unit` - Fast, isolated unit tests
+- `Integration` - Tests with external dependencies
+- `Integration.Database` - Database integration tests
+- `Integration.Api` - API integration tests
+- `Performance` - Performance/load tests (excluded from CI)
+- `Smoke` - Critical path smoke tests (run first in CI)
+```
+
 ## Diagnosing Flaky Tests
 
 Flaky tests pass or fail inconsistently. They're one of the most frustrating issues in test suites.
