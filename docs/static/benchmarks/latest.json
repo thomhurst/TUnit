@@ -1,0 +1,69 @@
+{
+  "timestamp": "2025-01-07T00:00:00.000Z",
+  "environment": {
+    "os": "Ubuntu Latest",
+    "sdk": ".NET 10",
+    "host": ".NET 10.0"
+  },
+  "categories": {
+    "AsyncTests": [
+      {
+        "Method": "TUnit",
+        "Version": "0.x.x",
+        "Mean": "350.0 ms",
+        "Median": "348.0 ms",
+        "StdDev": "12.0 ms"
+      },
+      {
+        "Method": "xUnit3",
+        "Version": "3.x.x",
+        "Mean": "910.0 ms",
+        "Median": "905.0 ms",
+        "StdDev": "25.0 ms"
+      },
+      {
+        "Method": "NUnit",
+        "Version": "4.x.x",
+        "Mean": "1575.0 ms",
+        "Median": "1570.0 ms",
+        "StdDev": "35.0 ms"
+      },
+      {
+        "Method": "MSTest",
+        "Version": "4.x.x",
+        "Mean": "1785.0 ms",
+        "Median": "1780.0 ms",
+        "StdDev": "40.0 ms"
+      },
+      {
+        "Method": "TUnit_AOT",
+        "Version": "0.x.x",
+        "Mean": "100.0 ms",
+        "Median": "98.0 ms",
+        "StdDev": "8.0 ms"
+      }
+    ]
+  },
+  "build": {},
+  "comparisons": {
+    "AsyncTests": {
+      "tunitMean": 350.0,
+      "tunitAOTMean": 100.0,
+      "vsXUnit": "2.6",
+      "vsNUnit": "4.5",
+      "vsMSTest": "5.1",
+      "aotSpeedup": "3.5"
+    }
+  },
+  "averageSpeedups": {
+    "vsXUnit": "2.6",
+    "vsNUnit": "4.5",
+    "vsMSTest": "5.1"
+  },
+  "stats": {
+    "runtimeCategories": 1,
+    "buildCategories": 0,
+    "totalBenchmarks": 1,
+    "lastUpdated": "2025-01-07T00:00:00.000Z"
+  }
+}

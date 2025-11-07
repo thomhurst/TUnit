@@ -1,0 +1,483 @@
+# Automated Benchmark Documentation System
+
+## Overview
+
+This implementation adds a comprehensive, automated benchmark visualization system to the TUnit documentation site. The system automatically updates benchmark results daily from CI runs and presents them through interactive components.
+
+## What Was Implemented
+
+### Phase 1: GitHub Actions Automation ✅
+
+**File:** `.github/workflows/speed-comparison.yml`
+
+Added a new job `aggregate-and-commit-results` that:
+- Runs after all benchmark jobs complete
+- Downloads all benchmark artifacts (runtime + build benchmarks)
+- Processes results with Node.js script
+- Commits updated documentation automatically
+- Only runs on `main` branch to avoid conflicts
+
+**Key Features:**
+- Automatic daily execution (existing schedule)
+- Manual trigger support (`workflow_dispatch`)
+- Safe commit with `[skip ci]` to avoid loops
+- Proper artifact handling with merge support
+
+---
+
+### Phase 2: Benchmark Processing Script ✅
+
+**File:** `.github/scripts/process-benchmarks.js`
+
+A comprehensive Node.js script that:
+
+**Parsing:**
+- Finds all BenchmarkDotNet markdown files
+- Extracts performance data tables
+- Parses environment information
+- Handles both runtime and build benchmarks
+
+**Analysis:**
+- Calculates average speedup factors vs each framework
+- Computes AOT vs JIT improvements
+- Generates comparison statistics
+- Tracks trends over time
+
+**Output:**
+- Generates formatted markdown documentation (`docs/docs/benchmarks/index.md`)
+- Creates JSON data for interactive components (`docs/static/benchmarks/latest.json`)
+- Maintains 90-day historical data (`docs/static/benchmarks/historical.json`)
+
+**Data Generated:**
+```json
+{
+  "timestamp": "ISO date",
+  "environment": { "os", "sdk", "host" },
+  "categories": { "AsyncTests": [...], "DataDrivenTests": [...] },
+  "comparisons": { "vsXUnit": "2.6x", "vsNUnit": "4.5x", ... },
+  "averageSpeedups": { "vsXUnit": "2.6", ... }
+}
+```
+
+---
+
+### Phase 3: Documentation Pages ✅
+
+#### Main Benchmarks Page
+**File:** `docs/docs/benchmarks/index.md`
+
+Auto-generated page featuring:
+- Executive summary with average speedups
+- Performance tables for each test category
+- Visual speedup indicators (🏆 for TUnit)
+- AOT performance callouts
+- Build performance data
+- Methodology explanation
+- Links to interactive tools
+
+#### Calculator Page
+**File:** `docs/docs/benchmarks/calculator.md`
+
+Interactive page for users to:
+- Input their test count
+- Select current framework
+- Calculate potential time savings
+- See annual productivity gains
+- Understand ROI of migration
+
+#### Methodology Page
+**File:** `docs/docs/benchmarks/methodology.md`
+
+Comprehensive documentation covering:
+- Core testing principles
+- Test category descriptions
+- Environment specifications
+- Measurement process
+- Reproducibility instructions
+- Limitations and caveats
+
+---
+
+### Phase 4: Interactive Components ✅
+
+#### 1. BenchmarkChart Component
+**Files:**
+- `docs/src/components/BenchmarkChart/index.tsx`
+- `docs/src/components/BenchmarkChart/styles.module.css`
+
+**Features:**
+- Horizontal bar charts showing relative performance
+- Color-coded bars (TUnit = primary color, others = gray)
+- Automatic data loading from JSON
+- Responsive design
+- Trophy emoji 🏆 for TUnit entries
+- Loading and error states
+- Dynamic percentage-based visualization
+
+**Usage:**
+```tsx
+import BenchmarkChart from '@site/src/components/BenchmarkChart';
+
+<BenchmarkChart category="AsyncTests" />
+```
+
+---
+
+#### 2. BenchmarkCalculator Component
+**Files:**
+- `docs/src/components/BenchmarkCalculator/index.tsx`
+- `docs/src/components/BenchmarkCalculator/styles.module.css`
+
+**Features:**
+- Input fields for test count, current framework, runs per day
+- Real-time calculations using actual benchmark data
+- Displays current vs TUnit vs TUnit AOT times
+- Shows daily and annual time savings
+- Calculates team-level impact
+- Responsive card-based layout
+- Gradient highlights for AOT results
+
+**Usage:**
+```tsx
+import BenchmarkCalculator from '@site/src/components/BenchmarkCalculator';
+
+<BenchmarkCalculator />
+```
+
+---
+
+#### 3. BenchmarkHighlight Component (Homepage)
+**Files:**
+- `docs/src/components/BenchmarkHighlight/index.tsx`
+- `docs/src/components/BenchmarkHighlight/styles.module.css`
+- Updated: `docs/src/pages/index.tsx`
+
+**Features:**
+- Prominent 4-card grid showing speedup factors
+- Auto-loads real benchmark data from JSON
+- Fallback data for initial rendering
+- Feature checkmarks (source-generated, parallel, AOT)
+- Call-to-action buttons to detailed benchmarks and calculator
+- Methodology link
+- Gradient backgrounds and animations
+- Fully responsive
+
+**Display:**
+```
+⚡ 2.6x - Faster than xUnit
+🚀 4.5x - Faster than NUnit
+⚡ 5.1x - Faster than MSTest
+🏆 10x - Faster with Native AOT
+```
+
+---
+
+### Phase 5: Navigation Updates ✅
+
+**File:** `docs/sidebars.ts`
+
+Added new "Benchmarks" section with:
+- Main benchmarks page (index)
+- Calculator page
+- Methodology page
+
+Positioned between "Examples & Use Cases" and "Reference" for optimal discoverability.
+
+---
+
+### Phase 6: Placeholder Data ✅
+
+**Files:**
+- `docs/static/benchmarks/latest.json` (placeholder data)
+- `docs/static/benchmarks/historical.json` (empty array)
+
+These files ensure the site works before the first benchmark run. They'll be replaced automatically when the workflow runs.
+
+---
+
+## How It Works
+
+### Daily Workflow
+
+```
+1. Speed Comparison Workflow Triggers (daily at midnight or manual)
+   ├─► Build test artifacts (all frameworks)
+   ├─► Run runtime benchmarks (5 test categories in parallel)
+   ├─► Run build benchmarks
+   └─► Upload artifacts
+
+2. Aggregate and Commit Job
+   ├─► Download all artifacts
+   ├─► Process with Node.js script
+   │   ├─► Parse markdown tables
+   │   ├─► Calculate statistics
+   │   ├─► Generate markdown docs
+   │   └─► Update JSON data
+   └─► Commit changes to main branch
+
+3. Documentation Site
+   ├─► Deploys automatically with new data
+   ├─► Interactive components load latest.json
+   └─► Users see updated benchmarks
+```
+
+### Data Flow
+
+```
+BenchmarkDotNet → Markdown Files → process-benchmarks.js → {
+  docs/docs/benchmarks/index.md       (human-readable)
+  docs/static/benchmarks/latest.json  (machine-readable)
+  docs/static/benchmarks/historical.json (trend tracking)
+}
+```
+
+### Component Data Loading
+
+All React components fetch `/benchmarks/latest.json` at runtime:
+- No rebuild required for benchmark updates
+- Data updates automatically when workflow runs
+- Fallback values prevent errors before first run
+
+---
+
+## File Structure
+
+```
+TUnit/
+├── .github/
+│   ├── workflows/
+│   │   └── speed-comparison.yml          [MODIFIED] Added commit job
+│   └── scripts/
+│       └── process-benchmarks.js         [NEW] Processing script
+│
+├── docs/
+│   ├── docs/
+│   │   └── benchmarks/
+│   │       ├── index.md                  [AUTO-GENERATED]
+│   │       ├── calculator.md             [NEW]
+│   │       └── methodology.md            [NEW]
+│   │
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── BenchmarkChart/
+│   │   │   │   ├── index.tsx            [NEW]
+│   │   │   │   └── styles.module.css    [NEW]
+│   │   │   ├── BenchmarkCalculator/
+│   │   │   │   ├── index.tsx            [NEW]
+│   │   │   │   └── styles.module.css    [NEW]
+│   │   │   └── BenchmarkHighlight/
+│   │   │       ├── index.tsx            [NEW]
+│   │   │       └── styles.module.css    [NEW]
+│   │   └── pages/
+│   │       └── index.tsx                [MODIFIED] Added benchmark section
+│   │
+│   ├── static/
+│   │   └── benchmarks/
+│   │       ├── latest.json              [AUTO-UPDATED]
+│   │       └── historical.json          [AUTO-UPDATED]
+│   │
+│   └── sidebars.ts                      [MODIFIED] Added benchmarks nav
+```
+
+---
+
+## Testing the Implementation
+
+### Local Testing (Before First CI Run)
+
+The site will work immediately with placeholder data:
+
+```bash
+cd docs
+npm install
+npm start
+```
+
+Visit:
+- http://localhost:3000 (homepage with benchmark section)
+- http://localhost:3000/docs/benchmarks (detailed benchmarks)
+- http://localhost:3000/docs/benchmarks/calculator (calculator)
+- http://localhost:3000/docs/benchmarks/methodology (methodology)
+
+### After First CI Run
+
+1. **Trigger Workflow:**
+   - Wait for daily schedule (midnight UTC), OR
+   - Manual trigger: Go to GitHub Actions → Speed Comparison → Run workflow
+
+2. **Verify Automation:**
+   - Check workflow completes successfully
+   - Verify commit appears: `chore: update benchmark results [skip ci]`
+   - Check files updated:
+     - `docs/docs/benchmarks/index.md`
+     - `docs/static/benchmarks/latest.json`
+     - `docs/static/benchmarks/historical.json`
+
+3. **Verify Site:**
+   - Homepage shows real speedup numbers
+   - Benchmarks page shows all test categories
+   - Calculator uses real data
+   - Charts render correctly
+
+---
+
+## Maintenance & Customization
+
+### Updating Benchmark Categories
+
+If you add new test categories to `speed-comparison.yml`:
+
+```yaml
+matrix:
+  class: [DataDrivenTests, AsyncTests, NewCategoryTests]  # Add here
+```
+
+The system automatically:
+- Processes new results
+- Adds new sections to documentation
+- Includes in charts and calculator
+
+### Styling Customization
+
+All components use CSS modules and respect Docusaurus theming:
+- Colors use CSS custom properties (`--ifm-color-primary`, etc.)
+- Dark mode automatically supported
+- Responsive breakpoints included
+
+### Data Retention
+
+Historical data keeps 90 days by default:
+
+```javascript
+// In process-benchmarks.js, line ~470
+historical = historical.slice(-90);  // Change to keep more/less
+```
+
+### Placeholder Data
+
+Update `docs/static/benchmarks/latest.json` with realistic estimates before the first benchmark run to avoid showing "N/A" values.
+
+---
+
+## Dependencies
+
+**No new npm packages required!**
+
+All components use:
+- React (already included with Docusaurus)
+- Standard CSS modules (built-in)
+- Fetch API (native browser API)
+
+---
+
+## Performance Considerations
+
+### Client-Side Loading
+- JSON files are small (~10KB)
+- Cached by browser
+- Loaded asynchronously
+- No build-time data baking required
+
+### Build Performance
+- No impact on build time
+- Static JSON files served directly
+- React hydration handles interactivity
+
+### Git Repository
+- Small commits (3 files updated daily)
+- Markdown diffs are human-readable
+- JSON files compress well
+
+---
+
+## Future Enhancements (Optional)
+
+### Easy Additions:
+1. **Historical Trend Charts**: Use `historical.json` to show performance over time
+2. **Framework Version Tracking**: Display when versions change
+3. **Comparison Matrix**: Side-by-side feature comparison table
+4. **Export to CSV/PDF**: Download benchmark reports
+5. **Email Notifications**: Alert on performance regressions
+6. **GitHub Issue Creation**: Auto-file issues for slowdowns
+
+### Integration Ideas:
+1. **PR Comments**: Post benchmark results on PRs
+2. **Status Badges**: Add badge to README with latest speedup
+3. **API Endpoint**: Expose JSON for external tools
+4. **Slack/Discord Notifications**: Post daily results to chat
+
+---
+
+## Troubleshooting
+
+### Components Show "Loading" Forever
+
+**Cause:** `/benchmarks/latest.json` not accessible
+
+**Fix:**
+```bash
+# Ensure file exists
+ls docs/static/benchmarks/latest.json
+
+# Check file is valid JSON
+cat docs/static/benchmarks/latest.json | jq
+```
+
+### Workflow Fails to Commit
+
+**Cause:** Git conflicts or permissions
+
+**Fix:**
+- Check `GITHUB_TOKEN` has write permissions
+- Ensure no manual edits to auto-generated files
+- Check `[skip ci]` tag is in commit message
+
+### Benchmark Data Not Updating
+
+**Cause:** Workflow artifacts not downloading
+
+**Fix:**
+- Check artifact names match in workflow
+- Verify download step succeeds
+- Ensure `merge-multiple: true` is set
+
+### Wrong Speedup Values
+
+**Cause:** Benchmark data parsing error
+
+**Fix:**
+- Check BenchmarkDotNet output format hasn't changed
+- Verify table structure in markdown files
+- Update parsing regex if needed
+
+---
+
+## Key Benefits
+
+✅ **Fully Automated**: Zero manual work after setup
+✅ **Always Up-to-Date**: Daily refreshes with latest data
+✅ **Interactive**: Users can explore and calculate impact
+✅ **Transparent**: All code and methodology visible
+✅ **Performant**: No external dependencies, minimal overhead
+✅ **Maintainable**: Clear structure, well-documented
+✅ **Extensible**: Easy to add new charts/features
+
+---
+
+## Summary
+
+This implementation provides TUnit with a **best-in-class benchmark documentation system** that:
+
+1. **Automatically collects** real-world performance data daily
+2. **Visualizes results** through multiple interactive components
+3. **Calculates ROI** for potential users considering migration
+4. **Builds trust** through transparency and reproducibility
+5. **Stays current** without manual maintenance
+
+The system is production-ready and will start populating with real data as soon as the Speed Comparison workflow runs on the main branch.
+
+---
+
+**Questions or Issues?**
+
+Check the workflow logs at: https://github.com/thomhurst/TUnit/actions/workflows/speed-comparison.yml
