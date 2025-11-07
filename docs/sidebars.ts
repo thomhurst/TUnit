@@ -32,17 +32,28 @@ const sidebars: SidebarsConfig = {
         'test-authoring/things-to-know',
         {
           type: 'category',
-          label: 'Test Lifecycle & Hooks',
+          label: 'Core Concepts',
           collapsed: false,
           items: [
             'test-lifecycle/setup',
             'test-lifecycle/cleanup',
-            'test-lifecycle/property-injection',
-            'test-lifecycle/event-subscribing',
             'test-lifecycle/test-context',
             'test-lifecycle/properties',
+            'test-lifecycle/property-injection',
+            'test-lifecycle/event-subscribing',
             'test-lifecycle/class-constructors',
             'test-lifecycle/dependency-injection',
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Controlling Test Behavior',
+          collapsed: false,
+          items: [
+            'test-authoring/skip',
+            'test-authoring/explicit',
+            'test-authoring/order',
+            'test-authoring/depends-on',
           ],
         },
         {
@@ -56,30 +67,6 @@ const sidebars: SidebarsConfig = {
             'test-authoring/matrix-tests',
             'test-authoring/combined-data-source',
             'test-authoring/nested-data-sources',
-          ],
-        },
-        {
-          type: 'category',
-          label: 'Controlling Test Execution',
-          collapsed: false,
-          items: [
-            'test-authoring/skip',
-            'test-authoring/explicit',
-            'test-authoring/order',
-            'test-authoring/depends-on',
-            'execution/test-filters',
-            'execution/timeouts',
-          ],
-        },
-        {
-          type: 'category',
-          label: 'Parallelism & Performance',
-          collapsed: false,
-          items: [
-            'parallelism/not-in-parallel',
-            'parallelism/parallel-groups',
-            'parallelism/parallel-limiter',
-            'advanced/performance-best-practices',
           ],
         },
         {
@@ -141,7 +128,6 @@ const sidebars: SidebarsConfig = {
             'assertions/assertion-groups',
           ],
         },
-        'assertions/fsharp',
         {
           type: 'category',
           label: 'Custom Assertions',
@@ -153,6 +139,35 @@ const sidebars: SidebarsConfig = {
             'assertions/extensibility/extensibility-returning-items-from-await',
           ],
         },
+      ],
+    },
+    {
+      type: 'category',
+      label: '⚙️ Execution & Configuration',
+      collapsed: true,
+      items: [
+        {
+          type: 'category',
+          label: 'Running Tests',
+          collapsed: false,
+          items: [
+            'reference/command-line-flags',
+            'reference/test-configuration',
+          ],
+        },
+        'execution/test-filters',
+        {
+          type: 'category',
+          label: 'Parallelism',
+          collapsed: false,
+          items: [
+            'parallelism/not-in-parallel',
+            'parallelism/parallel-groups',
+            'parallelism/parallel-limiter',
+            'advanced/performance-best-practices',
+          ],
+        },
+        'execution/timeouts',
       ],
     },
     {
@@ -169,7 +184,7 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: '💡 Best Practices',
+      label: '💡 Guides & Recipes',
       collapsed: true,
       items: [
         'examples/intro',
@@ -181,10 +196,22 @@ const sidebars: SidebarsConfig = {
           label: 'Platform-Specific Scenarios',
           collapsed: false,
           items: [
+            'assertions/fsharp',
+            'examples/fsharp-interactive',
             'test-authoring/aot-compatibility',
             'test-authoring/culture',
-            'examples/fsharp-interactive',
             'examples/filebased-csharp',
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Migration Guides',
+          collapsed: false,
+          items: [
+            'migration/xunit',
+            'migration/nunit',
+            'migration/mstest',
+            'migration/testcontext-interface-organization',
           ],
         },
       ],
@@ -238,36 +265,9 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: '🔄 Migration Guides',
-      collapsed: true,
-      items: [
-        {
-          type: 'category',
-          label: 'From Other Frameworks',
-          collapsed: false,
-          items: [
-            'migration/xunit',
-            'migration/nunit',
-            'migration/mstest',
-          ],
-        },
-        'migration/testcontext-interface-organization',
-      ],
-    },
-    {
-      type: 'category',
       label: '📚 Reference',
       collapsed: true,
       items: [
-        {
-          type: 'category',
-          label: 'Command Line & Configuration',
-          collapsed: false,
-          items: [
-            'reference/command-line-flags',
-            'reference/test-configuration',
-          ],
-        },
         {
           type: 'category',
           label: 'API Reference',
