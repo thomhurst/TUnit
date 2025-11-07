@@ -87,3 +87,28 @@ Visual Studio Code is supported.
 
 ![Visual Studio Code Settings](../../static/img/visual-studio-code.png)
 
+## What's Next?
+
+You've successfully learned the basics of TUnit! You can now:
+- Write tests with the `[Test]` attribute
+- Run them via command line or your IDE
+- See your test results
+
+To continue your journey with TUnit, explore these topics:
+
+**Core Testing Concepts:**
+- **[Assertions](../assertions/getting-started.md)** - Learn TUnit's fluent assertion syntax
+- **[Test Lifecycle](../test-lifecycle/setup.md)** - Set up and tear down test state with hooks
+- **[Data-Driven Testing](../test-authoring/arguments.md)** - Run tests with multiple input values
+
+**Common Tasks:**
+- **[Mocking](../test-authoring/mocking.md)** - Use mocks and fakes in your tests
+- **[Best Practices](../guides/best-practices.md)** - Write maintainable, reliable tests
+- **[Cookbook](../guides/cookbook.md)** - Common testing patterns and recipes
+
+**Advanced Features:**
+- **[Parallelism](../parallelism/not-in-parallel.md)** - Control how tests run in parallel
+- **[CI/CD Integration](../execution/ci-cd-reporting.md)** - Integrate TUnit into your pipeline
+
+Need help? Check the [FAQ](../faq.md) or [Troubleshooting](../troubleshooting.md) guide.
+
