@@ -170,7 +170,15 @@ const sidebars: SidebarsConfig = {
       label: '📋 How-To Guides',
       collapsed: true,
       items: [
-        'test-authoring/mocking',
+        {
+          type: 'category',
+          label: 'Common Testing Techniques',
+          collapsed: false,
+          items: [
+            'test-authoring/mocking',
+            'test-authoring/generic-attributes',
+          ],
+        },
         {
           type: 'category',
           label: 'Controlling Test Execution',
@@ -213,9 +221,15 @@ const sidebars: SidebarsConfig = {
             'examples/complex-test-infrastructure',
           ],
         },
-        'test-authoring/generic-attributes',
-        'guides/best-practices',
-        'guides/cookbook',
+        {
+          type: 'category',
+          label: 'Best Practices & Patterns',
+          collapsed: false,
+          items: [
+            'guides/best-practices',
+            'guides/cookbook',
+          ],
+        },
       ],
     },
     {
@@ -320,10 +334,31 @@ const sidebars: SidebarsConfig = {
       collapsed: true,
       items: [
         'examples/intro',
-        'examples/instrumenting-global-test-ids',
-        'examples/tunit-ci-pipeline',
-        'examples/fsharp-interactive',
-        'examples/filebased-csharp',
+        {
+          type: 'category',
+          label: 'CI/CD Examples',
+          collapsed: false,
+          items: [
+            'examples/tunit-ci-pipeline',
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Language-Specific',
+          collapsed: false,
+          items: [
+            'examples/fsharp-interactive',
+            'examples/filebased-csharp',
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Advanced Patterns',
+          collapsed: false,
+          items: [
+            'examples/instrumenting-global-test-ids',
+          ],
+        },
       ],
     },
   ],
