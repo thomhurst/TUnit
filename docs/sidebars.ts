@@ -33,7 +33,6 @@ const sidebars: SidebarsConfig = {
             'benchmarks/methodology',
           ],
         },
-        'faq',
         'troubleshooting',
       ],
     },

@@ -110,5 +110,5 @@ To continue your journey with TUnit, explore these topics:
 - **[Parallelism](../parallelism/not-in-parallel.md)** - Control how tests run in parallel
 - **[CI/CD Integration](../execution/ci-cd-reporting.md)** - Integrate TUnit into your pipeline
 
-Need help? Check the [FAQ](../faq.md) or [Troubleshooting](../troubleshooting.md) guide.
+Need help? Check the [Troubleshooting & FAQ](../troubleshooting.md) guide.
 

@@ -1,6 +1,135 @@
-# Troubleshooting Guide
+# Troubleshooting & FAQ
 
-This guide covers common issues you might encounter when using TUnit and their solutions.
+This guide covers common questions and issues you might encounter when using TUnit.
+
+## Frequently Asked Questions
+
+These are conceptual questions about TUnit's design and capabilities.
+
+### Why do I have to await all assertions? Can I use synchronous assertions?
+
+All TUnit assertions must be awaited. There's no synchronous alternative.
+
+**Important:** Test methods themselves can be either synchronous (`void`) or asynchronous (`async Task`). However, if your test uses TUnit's assertion library (`Assert.That(...)`), the test method **must** be `async Task` because assertions return awaitable objects that must be awaited to execute. Tests without assertions can remain synchronous. See [Test Method Signatures](getting-started/writing-your-first-test.md#test-method-signatures) for examples.
+
+**Why this design?**
+
+TUnit's assertion library uses the awaitable pattern (custom objects with `GetAwaiter()` methods). This means:
+- Assertions don't execute until they're awaited - this is when the actual verification happens
+- All assertions work consistently, whether they're simple value checks or complex async operations
+- Custom assertions can perform async work (like database queries or HTTP calls)
+- No sync-over-async patterns that cause deadlocks
+- Assertions can be chained fluently before execution
+
+**What this means when migrating:**
+
+You need to convert your tests to `async Task` and add `await` before assertions.
+
+Before (xUnit/NUnit/MSTest):
+```csharp
+[Test]
+public void MyTest()
+{
+    var result = Calculate(2, 3);
+    Assert.Equal(5, result);
+}
+```
+
+After (TUnit):
+```csharp
+[Test]
+public async Task MyTest()
+{
+    var result = Calculate(2, 3);
+    await Assert.That(result).IsEqualTo(5);
+}
+```
+
+**Automated migration**
+
+TUnit includes code fixers that handle most of this conversion for you:
+
+```bash
+# For xUnit
+dotnet format analyzers --severity info --diagnostics TUXU0001
+
+# For NUnit
+dotnet format analyzers --severity info --diagnostics TUNU0001
+
+# For MSTest
+dotnet format analyzers --severity info --diagnostics TUMS0001
+```
+
+The code fixer converts test methods to async, adds await to assertions, and updates attribute names. It handles most common cases automatically, though you may need to adjust complex scenarios manually.
+
+See the migration guides for step-by-step instructions:
+- [xUnit migration](migration/xunit.md#automated-migration-with-code-fixers)
+- [NUnit migration](migration/nunit.md#automated-migration-with-code-fixers)
+- [MSTest migration](migration/mstest.md#automated-migration-with-code-fixers)
+
+**What you gain**
+
+Async assertions enable patterns that aren't possible with synchronous assertions:
+
+```csharp
+[Test]
+public async Task AsyncAssertion_Example()
+{
+    // Await async operations in assertions
+    await Assert.That(async () => await GetUserAsync(123))
+        .Throws<UserNotFoundException>();
+
+    // Chain assertions naturally
+    var user = await GetUserAsync(456);
+    await Assert.That(user.Email)
+        .IsNotNull()
+        .And.Contains("@example.com");
+}
+```
+
+**Watch out for missing awaits**
+
+The most common mistake is forgetting `await`. The compiler warns you, but the test will pass without actually running the assertion:
+
+```csharp
+// Wrong - test passes without checking anything
+Assert.That(result).IsEqualTo(5);  // Returns an awaitable object that's never executed
+
+// Correct
+await Assert.That(result).IsEqualTo(5);  // The await triggers the actual assertion execution
+```
+
+### Does TUnit work with Coverlet for code coverage?
+
+**No.** Coverlet (`coverlet.collector` or `coverlet.msbuild`) is **not compatible** with TUnit.
+
+**Why?** TUnit uses the modern `Microsoft.Testing.Platform` instead of the legacy VSTest platform. Coverlet only works with VSTest.
+
+**Solution:** Use `Microsoft.Testing.Extensions.CodeCoverage` instead, which is:
+- ✅ **Automatically included** with the TUnit meta package
+- ✅ Provides the same functionality as Coverlet
+- ✅ Outputs Cobertura and XML formats
+- ✅ Works with all major CI/CD systems
+
+See the [Code Coverage section](#code-coverage-issues) below for usage instructions.
+
+### What code coverage tool should I use with TUnit?
+
+Use **Microsoft.Testing.Extensions.CodeCoverage**, which is:
+- ✅ **Already included** with the TUnit package (no manual installation)
+- ✅ Built and maintained by Microsoft
+- ✅ Works seamlessly with Microsoft.Testing.Platform
+- ✅ Outputs industry-standard formats (Cobertura, XML)
+- ✅ Compatible with all major CI/CD systems and coverage viewers
+
+**Do not use:**
+- ❌ Coverlet (incompatible with Microsoft.Testing.Platform)
+
+---
+
+## Common Problems & Solutions
+
+This section provides symptom-based troubleshooting for specific issues.
 
 ## Test Discovery Issues
 
@@ -10,6 +139,10 @@ This guide covers common issues you might encounter when using TUnit and their s
 - No tests appear in test explorer
 - `dotnet test` reports 0 tests
 - IDE doesn't show test indicators
+
+**Common Error Messages:**
+- `[Microsoft.Testing.Platform] No test found`
+- `0 Tests Passed, 0 Tests Failed, 0 Tests Skipped`
 
 **Common Causes and Solutions:**
 
@@ -24,6 +157,8 @@ This guide covers common issues you might encounter when using TUnit and their s
 <!-- Remove this package - it conflicts with TUnit -->
 <!-- <PackageReference Include="Microsoft.NET.Test.Sdk" /> -->
 ```
+
+**Error Message:** `Program has more than one entry point defined`
 
 #### 3. Missing Test Attribute
 ```csharp
@@ -55,6 +190,18 @@ public static void MyTest() { }
 // ✅ Instance methods are supported
 [Test]
 public void MyTest() { }
+```
+
+#### 6. Wrong OutputType in Project File
+
+**Error Message:** `A fatal error occurred. The required library hostfxr.dll could not be found.`
+
+```xml
+<!-- ❌ Wrong output type -->
+<OutputType>Library</OutputType>
+
+<!-- ✅ Correct output type -->
+<OutputType>Exe</OutputType>
 ```
 
 ### AOT Compilation Errors
@@ -146,6 +293,10 @@ public void Test2() { }
 - Tests fail after specific duration
 - "Test execution timed out" messages
 
+**Common Error Messages:**
+- `System.TimeoutException: The operation has timed out`
+- `Test execution exceeded timeout of 30000ms`
+
 **Solutions:**
 
 #### 1. Increase Timeout
@@ -230,6 +381,9 @@ await Assert.That(0.1 + 0.2).IsEqualTo(0.3).Within(0.0001);
 - Compiler warning: "This async method lacks 'await' operators"
 - Test passes when it should fail
 
+**Common Error Messages:**
+- `CS4014: Because this call is not awaited, execution of the current method continues before the call is completed`
+
 **Root Cause:**
 
 Forgetting to `await` an assertion means it returns a `Task` that's never executed. The test completes immediately without checking anything.
@@ -271,8 +425,6 @@ The compiler warns you about this (CS4014: "Because this call is not awaited..."
   <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 </PropertyGroup>
 ```
-
-See also: [FAQ: Why do I have to await all assertions?](faq.md#why-do-i-have-to-await-all-assertions-can-i-use-synchronous-assertions)
 
 ### Array and Collection Comparison Issues
 
@@ -413,6 +565,584 @@ await Assert.That(nullableInt.HasValue).IsTrue();
 await Assert.That(nullableInt.GetValueOrDefault()).IsEqualTo(5);
 ```
 
+## Common Migration Pitfalls (from xUnit/NUnit/MSTest)
+
+If you're migrating from another testing framework, these are the most common issues you'll encounter.
+
+### Understanding the Platform Change
+
+**The Core Shift:** TUnit uses `Microsoft.Testing.Platform` instead of the legacy `VSTest` platform. This fundamental change affects several aspects of your testing workflow.
+
+**What This Means:**
+
+1. **Different Test Runners**
+   - VSTest used `vstest.console.exe` and `Microsoft.NET.Test.Sdk`
+   - TUnit uses the modern `Microsoft.Testing.Platform`
+   - They are **mutually exclusive** - you cannot use both
+
+2. **Different Commands**
+   ```bash
+   # Old (VSTest)
+   dotnet test --collect:"XPlat Code Coverage"
+
+   # New (TUnit)
+   dotnet run --configuration Release --coverage
+   ```
+
+3. **Different Package Requirements**
+   ```xml
+   <!-- Old (VSTest) -->
+   <PackageReference Include="Microsoft.NET.Test.Sdk" Version="*" />
+   <PackageReference Include="coverlet.collector" Version="*" />
+
+   <!-- New (TUnit) -->
+   <PackageReference Include="TUnit" Version="*" />
+   <!-- Coverage is included automatically -->
+   ```
+
+### Tests Don't Appear in IDE Test Explorer
+
+**Symptoms:**
+- Tests worked in xUnit/NUnit but don't show in Visual Studio/Rider
+- Test Explorer is empty
+- "Run Test" gutter icons don't appear
+
+**Root Cause:** IDE needs to be configured for Microsoft.Testing.Platform support.
+
+**Solutions:**
+
+**Visual Studio:**
+1. Go to Tools > Options > Preview Features
+2. Enable "Use testing platform server mode"
+3. Restart Visual Studio
+4. Rebuild your solution
+
+**Rider:**
+1. Go to Settings > Build, Execution, Deployment > Unit Testing > Testing Platform
+2. Enable "Testing Platform support"
+3. Restart Rider
+4. Rebuild your solution
+
+**VS Code:**
+1. Install C# Dev Kit extension
+2. Go to extension settings
+3. Enable "Dotnet > Test Window > Use Testing Platform Protocol"
+4. Reload window
+
+### Command Line Differences
+
+**Old Way (VSTest):**
+```bash
+dotnet test
+dotnet test --filter "Category=Integration"
+dotnet test --logger "trx;LogFileName=results.trx"
+```
+
+**New Way (TUnit):**
+```bash
+dotnet run
+dotnet run -- --treenode-filter "/*/*/*/*[Category=Integration]"
+dotnet run -- --report-trx --report-trx-filename results.trx
+```
+
+**Key Differences:**
+- Use `dotnet run` instead of `dotnet test` for best experience
+- Arguments after `--` are passed to the test application
+- Filter syntax is different (tree-node based)
+- Reporting flags have different names
+
+### .runsettings File Migration
+
+**Old (.runsettings for VSTest):**
+```xml
+<RunConfiguration>
+  <MaxCpuCount>4</MaxCpuCount>
+  <ResultsDirectory>./TestResults</ResultsDirectory>
+</RunConfiguration>
+```
+
+**New (TUnit configuration):**
+
+TUnit uses command-line flags or programmatic configuration instead of `.runsettings`:
+
+```bash
+# Parallel execution
+dotnet run -- --parallel
+
+# Custom results directory
+dotnet run -- --results-directory ./TestResults
+```
+
+For more complex configuration, use the programmatic API in your test setup.
+
+## Testing with External Dependencies
+
+Real-world tests often interact with databases, APIs, and file systems. Here's how to handle these effectively.
+
+### Database Testing
+
+**Strategy 1: In-Memory Providers**
+
+Best for unit tests that need a database but don't test database-specific behavior.
+
+```csharp
+public class UserRepositoryTests
+{
+    private DbContext _context;
+
+    [Before(Test)]
+    public void Setup()
+    {
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .Options;
+
+        _context = new AppDbContext(options);
+    }
+
+    [Test]
+    public async Task CanSaveAndRetrieveUser()
+    {
+        // Arrange
+        var user = new User { Name = "Alice", Email = "alice@example.com" };
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var retrieved = await _context.Users.FirstOrDefaultAsync(u => u.Email == "alice@example.com");
+
+        // Assert
+        await Assert.That(retrieved).IsNotNull();
+        await Assert.That(retrieved!.Name).IsEqualTo("Alice");
+    }
+
+    [After(Test)]
+    public void Cleanup()
+    {
+        _context.Dispose();
+    }
+}
+```
+
+**Strategy 2: Test Containers (Testcontainers)**
+
+Best for integration tests that need real database behavior.
+
+```csharp
+public class DatabaseIntegrationTests : IAsyncInitializer, IAsyncDisposable
+{
+    private PostgreSqlContainer _container;
+    private DbContext _context;
+
+    public async Task InitializeAsync()
+    {
+        _container = new PostgreSqlBuilder()
+            .WithDatabase("testdb")
+            .WithUsername("test")
+            .WithPassword("test")
+            .Build();
+
+        await _container.StartAsync();
+
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseNpgsql(_container.GetConnectionString())
+            .Options;
+
+        _context = new AppDbContext(options);
+        await _context.Database.MigrateAsync();
+    }
+
+    [Test]
+    public async Task DatabaseTransactionTest()
+    {
+        // Test with real database
+        var user = new User { Name = "Bob" };
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+
+        await Assert.That(user.Id).IsGreaterThan(0);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _context?.Dispose();
+        if (_container != null)
+            await _container.DisposeAsync();
+    }
+}
+```
+
+**Strategy 3: Shared Database Fixture**
+
+For multiple tests sharing the same database setup:
+
+```csharp
+[NotInParallel("SharedDatabase")]
+public class SharedDatabaseTests
+{
+    private static DbContext _sharedContext;
+
+    [Before(HookType.Class)]
+    public static async Task ClassSetup()
+    {
+        _sharedContext = await SetupDatabaseAsync();
+    }
+
+    [Before(HookType.Test)]
+    public async Task TestSetup()
+    {
+        // Clear data between tests
+        _sharedContext.Users.RemoveRange(_sharedContext.Users);
+        await _sharedContext.SaveChangesAsync();
+    }
+
+    [Test]
+    public async Task Test1()
+    {
+        // Use _sharedContext
+    }
+
+    [After(HookType.Class)]
+    public static async Task ClassCleanup()
+    {
+        _sharedContext?.Dispose();
+    }
+}
+```
+
+### Mocking HTTP Calls and External APIs
+
+**Strategy 1: Using Moq with HttpClient**
+
+```csharp
+public class WeatherServiceTests
+{
+    [Test]
+    public async Task GetWeather_ReturnsTemperature()
+    {
+        // Arrange
+        var mockHandler = new Mock<HttpMessageHandler>();
+        mockHandler.Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>())
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent("{\"temperature\": 22.5}")
+            });
+
+        var httpClient = new HttpClient(mockHandler.Object);
+        var service = new WeatherService(httpClient);
+
+        // Act
+        var weather = await service.GetWeatherAsync("London");
+
+        // Assert
+        await Assert.That(weather.Temperature).IsEqualTo(22.5);
+    }
+}
+```
+
+**Strategy 2: WireMock for Integration Tests**
+
+```csharp
+public class ApiIntegrationTests : IAsyncInitializer, IAsyncDisposable
+{
+    private WireMockServer _mockServer;
+    private HttpClient _httpClient;
+
+    public async Task InitializeAsync()
+    {
+        _mockServer = WireMockServer.Start();
+        _httpClient = new HttpClient { BaseAddress = new Uri(_mockServer.Urls[0]) };
+
+        await Task.CompletedTask;
+    }
+
+    [Test]
+    public async Task ApiCall_HandlesSuccessResponse()
+    {
+        // Setup mock response
+        _mockServer
+            .Given(Request.Create().WithPath("/api/users").UsingGet())
+            .RespondWith(Response.Create()
+                .WithStatusCode(200)
+                .WithHeader("Content-Type", "application/json")
+                .WithBody("[{\"id\": 1, \"name\": \"Alice\"}]"));
+
+        // Act
+        var response = await _httpClient.GetStringAsync("/api/users");
+
+        // Assert
+        await Assert.That(response).Contains("Alice");
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _httpClient?.Dispose();
+        _mockServer?.Stop();
+        await Task.CompletedTask;
+    }
+}
+```
+
+### File System Testing
+
+**Best Practices:**
+
+1. **Use Temporary Directories**
+2. **Clean Up After Tests**
+3. **Use Path.Combine for Cross-Platform Compatibility**
+
+```csharp
+public class FileProcessorTests
+{
+    private string _testDirectory;
+
+    [Before(Test)]
+    public void Setup()
+    {
+        _testDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+        Directory.CreateDirectory(_testDirectory);
+    }
+
+    [Test]
+    public async Task ProcessFile_CreatesOutputFile()
+    {
+        // Arrange
+        var inputFile = Path.Combine(_testDirectory, "input.txt");
+        var outputFile = Path.Combine(_testDirectory, "output.txt");
+
+        await File.WriteAllTextAsync(inputFile, "test content");
+
+        var processor = new FileProcessor();
+
+        // Act
+        await processor.ProcessFileAsync(inputFile, outputFile);
+
+        // Assert
+        await Assert.That(File.Exists(outputFile)).IsTrue();
+        var content = await File.ReadAllTextAsync(outputFile);
+        await Assert.That(content).Contains("processed");
+    }
+
+    [After(Test)]
+    public void Cleanup()
+    {
+        if (Directory.Exists(_testDirectory))
+        {
+            Directory.Delete(_testDirectory, recursive: true);
+        }
+    }
+}
+```
+
+**Using IFileSystem Abstraction (Recommended):**
+
+```csharp
+// Production code uses IFileSystem interface
+public class DocumentService
+{
+    private readonly IFileSystem _fileSystem;
+
+    public DocumentService(IFileSystem fileSystem)
+    {
+        _fileSystem = fileSystem;
+    }
+
+    public async Task SaveDocumentAsync(string path, string content)
+    {
+        await _fileSystem.File.WriteAllTextAsync(path, content);
+    }
+}
+
+// Test with mock file system
+public class DocumentServiceTests
+{
+    [Test]
+    public async Task SaveDocument_WritesToFile()
+    {
+        // Arrange
+        var mockFileSystem = new MockFileSystem();
+        var service = new DocumentService(mockFileSystem);
+
+        // Act
+        await service.SaveDocumentAsync("/docs/test.txt", "content");
+
+        // Assert
+        await Assert.That(mockFileSystem.File.Exists("/docs/test.txt")).IsTrue();
+        var content = await mockFileSystem.File.ReadAllTextAsync("/docs/test.txt");
+        await Assert.That(content).IsEqualTo("content");
+    }
+}
+```
+
+## Diagnosing Flaky Tests
+
+Flaky tests pass or fail inconsistently. They're one of the most frustrating issues in test suites.
+
+### Common Causes
+
+#### 1. Race Conditions in Parallel Tests
+
+**Symptom:** Test passes when run alone but fails when run with other tests.
+
+```csharp
+// ❌ Flaky - tests modify shared state
+public class CounterTests
+{
+    private static int _counter = 0;
+
+    [Test]
+    public async Task IncrementCounter()
+    {
+        _counter++;
+        await Assert.That(_counter).IsEqualTo(1); // Fails in parallel
+    }
+}
+
+// ✅ Fixed - use NotInParallel or instance state
+[NotInParallel("Counter")]
+public class CounterTests
+{
+    private int _counter = 0; // Instance variable, not static
+
+    [Test]
+    public async Task IncrementCounter()
+    {
+        _counter++;
+        await Assert.That(_counter).IsEqualTo(1); // Always passes
+    }
+}
+```
+
+#### 2. Un-Awaited Async Operations
+
+**Symptom:** Test sometimes passes, sometimes times out or fails.
+
+```csharp
+// ❌ Flaky - not waiting for background work
+[Test]
+public async Task ProcessData()
+{
+    var processor = new DataProcessor();
+    processor.StartBackgroundWork(); // Fire-and-forget
+
+    await Assert.That(processor.IsComplete).IsTrue(); // Race condition!
+}
+
+// ✅ Fixed - properly await async work
+[Test]
+public async Task ProcessData()
+{
+    var processor = new DataProcessor();
+    await processor.ProcessAsync(); // Wait for completion
+
+    await Assert.That(processor.IsComplete).IsTrue();
+}
+```
+
+#### 3. System Time Dependencies
+
+**Symptom:** Test fails at different times of day or in different time zones.
+
+```csharp
+// ❌ Flaky - depends on current time
+[Test]
+public async Task IsBusinessHours()
+{
+    var service = new BusinessHoursService();
+    var result = service.IsBusinessHours(); // Uses DateTime.Now
+
+    await Assert.That(result).IsTrue(); // Fails at night!
+}
+
+// ✅ Fixed - inject time provider
+[Test]
+public async Task IsBusinessHours()
+{
+    var mockTime = new Mock<ITimeProvider>();
+    mockTime.Setup(t => t.Now).Returns(new DateTime(2024, 1, 15, 10, 0, 0)); // Monday 10 AM
+
+    var service = new BusinessHoursService(mockTime.Object);
+    var result = service.IsBusinessHours();
+
+    await Assert.That(result).IsTrue(); // Always passes
+}
+```
+
+#### 4. External Service Dependencies
+
+**Symptom:** Test fails when network is slow or service is down.
+
+```csharp
+// ❌ Flaky - depends on external API
+[Test]
+public async Task FetchUserData()
+{
+    var client = new HttpClient();
+    var response = await client.GetStringAsync("https://api.example.com/users/1");
+
+    await Assert.That(response).Contains("username"); // Fails if API is down
+}
+
+// ✅ Fixed - mock the HTTP call
+[Test]
+public async Task FetchUserData()
+{
+    var mockHandler = new Mock<HttpMessageHandler>();
+    mockHandler.Protected()
+        .Setup<Task<HttpResponseMessage>>("SendAsync",
+            ItExpr.IsAny<HttpRequestMessage>(),
+            ItExpr.IsAny<CancellationToken>())
+        .ReturnsAsync(new HttpResponseMessage
+        {
+            Content = new StringContent("{\"username\": \"alice\"}")
+        });
+
+    var client = new HttpClient(mockHandler.Object);
+    var response = await client.GetStringAsync("https://api.example.com/users/1");
+
+    await Assert.That(response).Contains("username"); // Always passes
+}
+```
+
+### Strategies for Reproducing Flaky Tests
+
+1. **Run Tests Multiple Times**
+   ```bash
+   # Run test 100 times to expose flakiness
+   for i in {1..100}; do dotnet run -- --treenode-filter "/*/*/*/FlakyTest"; done
+   ```
+
+2. **Run with Maximum Parallelism**
+   ```bash
+   dotnet run -- --parallel --max-parallel-threads 8
+   ```
+
+3. **Add Delays to Expose Race Conditions**
+   ```csharp
+   [Test]
+   public async Task TestWithDelay()
+   {
+       await Task.Delay(Random.Shared.Next(0, 100)); // Random delay
+       // Test logic
+   }
+   ```
+
+4. **Enable Detailed Logging**
+   ```csharp
+   [Test]
+   public async Task TestWithLogging()
+   {
+       TestContext.Current?.WriteLine($"Starting test at {DateTime.Now:O}");
+       // Test logic
+       TestContext.Current?.WriteLine($"Completed test at {DateTime.Now:O}");
+   }
+   ```
+
 ## Dependency Injection Issues
 
 ### Services Not Available
@@ -421,6 +1151,9 @@ await Assert.That(nullableInt.GetValueOrDefault()).IsEqualTo(5);
 - `GetRequiredService` throws exceptions
 - Null reference exceptions in tests
 - "No service registered" errors
+
+**Common Error Messages:**
+- `InvalidOperationException: No service for type 'IMyService' has been registered`
 
 **Solutions:**
 
@@ -513,6 +1246,9 @@ public static IEnumerable<User> GetUsers()
 - Slow test execution
 - System becomes unresponsive
 
+**Common Error Messages:**
+- `OutOfMemoryException: Insufficient memory to continue the execution`
+
 **Solutions:**
 
 #### 1. Dispose Resources Properly
@@ -595,13 +1331,13 @@ public static void ClassSetup() { } // Works!
 public class DatabaseTests : IAsyncInitializer
 {
     private DatabaseConnection _connection;
-    
+
     // Async initialization
     public async Task InitializeAsync()
     {
         _connection = await DatabaseConnection.CreateAsync();
     }
-    
+
     [Test]
     public async Task TestDatabase()
     {
@@ -621,21 +1357,34 @@ public class DatabaseTests : IAsyncInitializer
 
 **Solutions:**
 
-1. **Clean and Rebuild**
+1. **Enable Testing Platform Support**
+   - Tools > Options > Preview Features
+   - Enable "Use testing platform server mode"
+   - Restart Visual Studio
+
+2. **Clean and Rebuild**
    ```bash
    dotnet clean
    dotnet build
    ```
 
-2. **Clear Test Cache**
+3. **Clear Test Cache**
    - Close Visual Studio
    - Delete `.vs` folder
    - Reopen and rebuild
 
-3. **Update Test Platform**
-   ```xml
-   <PackageReference Include="Microsoft.TestPlatform" Version="*" />
-   ```
+### Rider Test Explorer Issues
+
+**Solutions:**
+
+1. **Enable Testing Platform Support**
+   - Settings > Build, Execution, Deployment > Unit Testing > Testing Platform
+   - Enable "Testing Platform support"
+   - Restart Rider
+
+2. **Invalidate Caches**
+   - File > Invalidate Caches / Restart
+   - Choose "Invalidate and Restart"
 
 ### VS Code Test Explorer Issues
 
@@ -643,13 +1392,17 @@ public class DatabaseTests : IAsyncInitializer
 
 1. **Install C# Dev Kit**
    - Ensure latest version is installed
+   - Install from Extensions marketplace
 
 2. **Configure Test Settings**
    ```json
    {
-     "dotnetCoreExplorer.testProjectPath": "**/*.csproj"
+     "dotnet.testWindow.useTestingPlatformProtocol": true
    }
    ```
+
+3. **Reload Window**
+   - Ctrl+Shift+P > "Developer: Reload Window"
 
 ## Platform-Specific Issues
 
@@ -688,6 +1441,10 @@ var expected = $"Line1{Environment.NewLine}Line2";
 - `--coverage` flag has no effect
 - Coverage reports empty or missing
 
+**Common Error Messages:**
+- `No coverage data collected`
+- `Coverage tool initialization failed`
+
 **Common Causes and Solutions:**
 
 #### 1. Using TUnit.Engine Without Extensions
@@ -705,25 +1462,22 @@ var expected = $"Line1{Environment.NewLine}Line2";
 <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" Version="*" />
 ```
 
-#### 2. Using .NET 7 or Earlier
-```bash
-# Check your .NET version
-dotnet --version
-```
-
-**Requirements:**
-- Ensure you have a recent .NET SDK installed
-- Microsoft.Testing.Platform supports .NET Standard 2.0+
-
-**Tip:** Use a recent .NET SDK version for the best experience:
-```xml
-<TargetFramework>net8.0</TargetFramework>
-```
-
-#### 3. Configuration Not Set to Release
+#### 2. Configuration Not Set to Release
 ```bash
 # It's generally better to run coverage in Release configuration
-dotnet test --configuration Release --coverage
+dotnet run --configuration Release --coverage
+```
+
+#### 3. Basic Coverage Commands
+```bash
+# Basic usage
+dotnet run --configuration Release --coverage
+
+# With output location
+dotnet run --configuration Release --coverage --coverage-output ./coverage/
+
+# Specify format (cobertura, xml, etc.)
+dotnet run --configuration Release --coverage --coverage-output-format cobertura
 ```
 
 ### Coverlet Still Installed
@@ -732,6 +1486,9 @@ dotnet test --configuration Release --coverage
 - Coverage stopped working after migrating to TUnit
 - Conflicts between coverage tools
 - "Could not load file or assembly" errors related to coverage
+
+**Common Error Messages:**
+- `System.IO.FileNotFoundException: Could not load file or assembly 'Coverlet.Core'`
 
 **Root Cause:** Coverlet is **not compatible** with TUnit because:
 - Coverlet requires VSTest platform
@@ -760,8 +1517,6 @@ dotnet test --collect:"XPlat Code Coverage"
 # New (TUnit + Microsoft Coverage)
 dotnet run --configuration Release --coverage
 ```
-
-See the [Code Coverage FAQ](faq.md#does-tunit-work-with-coverlet-for-code-coverage) for more details.
 
 ### Missing Coverage for Some Assemblies
 
@@ -848,7 +1603,7 @@ ls TestResults/
 - name: Upload coverage to Codecov
   uses: codecov/codecov-action@v3
   with:
-    files: ./tests/MyProject.Tests/TestResults/coverage.cobertura.xml
+    files: ./tests/MyProject.Tests/TestResults/**/coverage.cobertura.xml
 ```
 
 **Azure Pipelines:**
@@ -906,16 +1661,6 @@ ls TestResults/
 </ModulePaths>
 ```
 
-### Need More Help with Coverage?
-
-See also:
-- [Code Coverage FAQ](faq.md#does-tunit-work-with-coverlet-for-code-coverage)
-- [Code Coverage Documentation](extensions/extensions.md#code-coverage)
-- [xUnit Migration - Code Coverage](migration/xunit.md#code-coverage)
-- [NUnit Migration - Code Coverage](migration/nunit.md#code-coverage)
-- [MSTest Migration - Code Coverage](migration/mstest.md#code-coverage)
-- [Microsoft's Coverage Documentation](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-code-coverage)
-
 ## Debugging Tips
 
 ### Enable Diagnostic Logging
@@ -925,7 +1670,7 @@ See also:
 dotnet test --logger "console;verbosity=detailed"
 
 # Enable TUnit diagnostics
-dotnet test -- --diagnostic
+dotnet run -- --diagnostic
 ```
 
 ### Attach Debugger to Test
@@ -937,7 +1682,7 @@ public void DebuggableTest()
     #if DEBUG
     Debugger.Launch(); // Prompts to attach debugger
     #endif
-    
+
     // Test logic
 }
 ```
@@ -949,11 +1694,11 @@ public void DebuggableTest()
 public async Task TestWithOutput()
 {
     TestContext.Current?.WriteLine("Debug: Starting test");
-    
+
     var result = await Operation();
-    
+
     TestContext.Current?.WriteLine($"Debug: Result = {result}");
-    
+
     await Assert.That(result).IsNotNull();
 }
 ```
