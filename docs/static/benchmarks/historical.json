@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "date": "2025-11-07",
+    "averageSpeedups": {
+      "vsXUnit": "1.3",
+      "vsNUnit": "1.2",
+      "vsMSTest": "1.3",
+      "count": 1
+    },
+    "environment": "Ubuntu"
+  }
+]
