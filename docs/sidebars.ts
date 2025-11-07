@@ -21,12 +21,23 @@ const sidebars: SidebarsConfig = {
         'getting-started/installation',
         'getting-started/writing-your-first-test',
         'getting-started/running-your-tests',
-        'troubleshooting',
+        'comparison/framework-differences',
       ],
     },
     {
       type: 'category',
-      label: '📖 Writing Tests',
+      label: '🔄 Migration Guides',
+      collapsed: true,
+      items: [
+        'migration/xunit',
+        'migration/nunit',
+        'migration/mstest',
+        'migration/testcontext-interface-organization',
+      ],
+    },
+    {
+      type: 'category',
+      label: '✍️ Test Authoring',
       collapsed: true,
       items: [
         'test-authoring/things-to-know',
@@ -47,13 +58,33 @@ const sidebars: SidebarsConfig = {
         },
         {
           type: 'category',
-          label: 'Controlling Test Behavior',
+          label: 'Assertions',
           collapsed: false,
           items: [
-            'test-authoring/skip',
-            'test-authoring/explicit',
-            'test-authoring/order',
-            'test-authoring/depends-on',
+            'assertions/getting-started',
+            'assertions/library',
+            'assertions/equality-and-comparison',
+            'assertions/null-and-default',
+            'assertions/boolean',
+            'assertions/awaiting',
+            'assertions/numeric',
+            'assertions/string',
+            'assertions/datetime',
+            'assertions/collections',
+            'assertions/dictionaries',
+            'assertions/types',
+            'assertions/specialized-types',
+            'assertions/exceptions',
+            'assertions/tasks-and-async',
+            'assertions/member-assertions',
+            'assertions/and-conditions',
+            'assertions/or-conditions',
+            'assertions/scopes',
+            'assertions/assertion-groups',
+            'assertions/extensibility/custom-assertions',
+            'assertions/extensibility/source-generator-assertions',
+            'assertions/extensibility/extensibility-chaining-and-converting',
+            'assertions/extensibility/extensibility-returning-items-from-await',
           ],
         },
         {
@@ -71,16 +102,20 @@ const sidebars: SidebarsConfig = {
         },
         {
           type: 'category',
-          label: 'Reliability & Resilience',
+          label: 'Controlling Execution',
           collapsed: false,
           items: [
+            'test-authoring/skip',
+            'test-authoring/explicit',
+            'test-authoring/order',
+            'test-authoring/depends-on',
             'execution/retrying',
             'execution/repeating',
           ],
         },
         {
           type: 'category',
-          label: 'Common Testing Techniques',
+          label: 'Advanced Techniques',
           collapsed: false,
           items: [
             'test-authoring/mocking',
@@ -91,70 +126,11 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: '✅ Assertions',
+      label: '⚙️ Running & Integrating',
       collapsed: true,
       items: [
-        'assertions/getting-started',
-        'assertions/library',
-        'assertions/equality-and-comparison',
-        'assertions/null-and-default',
-        'assertions/boolean',
-        'assertions/awaiting',
-        {
-          type: 'category',
-          label: 'Type-Specific Assertions',
-          collapsed: false,
-          items: [
-            'assertions/numeric',
-            'assertions/string',
-            'assertions/datetime',
-            'assertions/collections',
-            'assertions/dictionaries',
-            'assertions/types',
-            'assertions/specialized-types',
-          ],
-        },
-        {
-          type: 'category',
-          label: 'Advanced Assertions',
-          collapsed: false,
-          items: [
-            'assertions/exceptions',
-            'assertions/tasks-and-async',
-            'assertions/member-assertions',
-            'assertions/and-conditions',
-            'assertions/or-conditions',
-            'assertions/scopes',
-            'assertions/assertion-groups',
-          ],
-        },
-        {
-          type: 'category',
-          label: 'Custom Assertions',
-          collapsed: false,
-          items: [
-            'assertions/extensibility/custom-assertions',
-            'assertions/extensibility/source-generator-assertions',
-            'assertions/extensibility/extensibility-chaining-and-converting',
-            'assertions/extensibility/extensibility-returning-items-from-await',
-          ],
-        },
-      ],
-    },
-    {
-      type: 'category',
-      label: '⚙️ Execution & Configuration',
-      collapsed: true,
-      items: [
-        {
-          type: 'category',
-          label: 'Running Tests',
-          collapsed: false,
-          items: [
-            'reference/command-line-flags',
-            'reference/test-configuration',
-          ],
-        },
+        'reference/command-line-flags',
+        'reference/test-configuration',
         'execution/test-filters',
         {
           type: 'category',
@@ -168,28 +144,35 @@ const sidebars: SidebarsConfig = {
           ],
         },
         'execution/timeouts',
+        {
+          type: 'category',
+          label: 'CI/CD & Reporting',
+          collapsed: false,
+          items: [
+            'execution/ci-cd-reporting',
+            'examples/tunit-ci-pipeline',
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Integrations & Tooling',
+          collapsed: false,
+          items: [
+            'examples/aspnet',
+            'examples/playwright',
+            'examples/complex-test-infrastructure',
+          ],
+        },
       ],
     },
     {
       type: 'category',
-      label: '🔌 Integrations',
+      label: '💡 Guides & Best Practices',
       collapsed: true,
       items: [
-        'examples/aspnet',
-        'examples/playwright',
-        'examples/complex-test-infrastructure',
-        'execution/ci-cd-reporting',
-        'examples/tunit-ci-pipeline',
-      ],
-    },
-    {
-      type: 'category',
-      label: '💡 Guides & Recipes',
-      collapsed: true,
-      items: [
-        'examples/intro',
         'guides/best-practices',
         'guides/cookbook',
+        'examples/intro',
         'examples/instrumenting-global-test-ids',
         {
           type: 'category',
@@ -203,22 +186,12 @@ const sidebars: SidebarsConfig = {
             'examples/filebased-csharp',
           ],
         },
-        {
-          type: 'category',
-          label: 'Migration Guides',
-          collapsed: false,
-          items: [
-            'migration/xunit',
-            'migration/nunit',
-            'migration/mstest',
-            'migration/testcontext-interface-organization',
-          ],
-        },
+        'troubleshooting',
       ],
     },
     {
       type: 'category',
-      label: '🛠️ Advanced & Extensibility',
+      label: '🛠️ Extensibility',
       collapsed: true,
       items: [
         {
@@ -268,14 +241,7 @@ const sidebars: SidebarsConfig = {
       label: '📚 Reference',
       collapsed: true,
       items: [
-        {
-          type: 'category',
-          label: 'API Reference',
-          collapsed: false,
-          items: [
-            'comparison/attributes',
-          ],
-        },
+        'comparison/attributes',
       ],
     },
     {
@@ -284,10 +250,9 @@ const sidebars: SidebarsConfig = {
       collapsed: true,
       items: [
         'guides/philosophy',
-        'comparison/framework-differences',
         {
           type: 'category',
-          label: 'Benchmarks & Performance',
+          label: 'Performance & Benchmarks',
           collapsed: false,
           items: [
             'benchmarks/index',
