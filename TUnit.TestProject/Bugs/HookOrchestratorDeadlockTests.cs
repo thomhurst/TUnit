@@ -85,7 +85,7 @@ public class HookOrchestratorDeadlockTests
         if (context.Metadata.TestDetails.ClassType == typeof(HookOrchestratorDeadlockTests))
         {
             ExecutionLog.Add($"BeforeTest_{context.Metadata.TestDetails.TestName}");
-            await context.TimeProvider.Delay(TimeSpan.FromMilliseconds(5)); // Small delay to potentially trigger coordination issues
+            await TimeProviderContext.Current.Delay(TimeSpan.FromMilliseconds(5)); // Small delay to potentially trigger coordination issues
         }
     }
 
@@ -95,7 +95,7 @@ public class HookOrchestratorDeadlockTests
         if (context.Metadata.TestDetails.ClassType == typeof(HookOrchestratorDeadlockTests))
         {
             ExecutionLog.Add($"AfterTest_{context.Metadata.TestDetails.TestName}");
-            await context.TimeProvider.Delay(TimeSpan.FromMilliseconds(5)); // Small delay to potentially trigger coordination issues
+            await TimeProviderContext.Current.Delay(TimeSpan.FromMilliseconds(5)); // Small delay to potentially trigger coordination issues
         }
     }
 }
@@ -160,7 +160,7 @@ public class SequentialCoordinationDeadlockTests
         if (context.Metadata.TestDetails.ClassType == typeof(SequentialCoordinationDeadlockTests))
         {
             SequentialExecutionLog.Add($"SequentialBeforeTest_{context.Metadata.TestDetails.TestName}");
-            await context.TimeProvider.Delay(TimeSpan.FromMilliseconds(10));
+            await TimeProviderContext.Current.Delay(TimeSpan.FromMilliseconds(10));
         }
     }
 
@@ -170,7 +170,7 @@ public class SequentialCoordinationDeadlockTests
         if (context.Metadata.TestDetails.ClassType == typeof(SequentialCoordinationDeadlockTests))
         {
             SequentialExecutionLog.Add($"SequentialAfterTest_{context.Metadata.TestDetails.TestName}");
-            await context.TimeProvider.Delay(TimeSpan.FromMilliseconds(10));
+            await TimeProviderContext.Current.Delay(TimeSpan.FromMilliseconds(10));
         }
     }
 }
