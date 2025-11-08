@@ -7,7 +7,8 @@ public class DatabaseFactory : IAsyncInitializer
     public Task InitializeAsync()
     {
         // setup database
-        return Task.Delay(10);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        return timeProvider.Delay(TimeSpan.FromMilliseconds(10)).AsTask();
     }
 
     public static int DoStuff() => 12;

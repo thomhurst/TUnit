@@ -17,7 +17,8 @@ public class PriorityTests
         {
             ExecutionOrder.Add(nameof(CriticalPriority_Test));
         }
-        await Task.Delay(100);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
     }
 
     [Test, ExecutionPriority(Priority.High)]
@@ -27,7 +28,8 @@ public class PriorityTests
         {
             ExecutionOrder.Add(nameof(HighPriority_Test1));
         }
-        await Task.Delay(100);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
     }
 
     [Test, ExecutionPriority(Priority.High)]
@@ -37,7 +39,8 @@ public class PriorityTests
         {
             ExecutionOrder.Add(nameof(HighPriority_Test2));
         }
-        await Task.Delay(100);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
     }
 
     [Test, ExecutionPriority(Priority.Normal)]
@@ -47,7 +50,8 @@ public class PriorityTests
         {
             ExecutionOrder.Add(nameof(NormalPriority_Test));
         }
-        await Task.Delay(100);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
     }
 
     [Test, ExecutionPriority(Priority.Low)]
@@ -57,7 +61,8 @@ public class PriorityTests
         {
             ExecutionOrder.Add(nameof(LowPriority_Test));
         }
-        await Task.Delay(100);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
     }
 
     [After(Class)]

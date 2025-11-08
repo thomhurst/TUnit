@@ -1,5 +1,4 @@
 <Project>
-    <Import Project="$(MSBuildThisFileDirectory)StrongNaming.props" />
     <Import Project="$(MSBuildThisFileDirectory)TestLibrary.props" />
 
     <Import Project="$(MSBuildThisFileDirectory)TUnit.Engine\TUnit.Engine.props" />

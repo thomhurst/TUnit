@@ -41,7 +41,8 @@ public class ScopedEventReceiverTests
     public async Task TestWithMethodLevelEventReceivers()
     {
         // Wait a bit to ensure events have been recorded
-        await Task.Delay(100);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
 
         // Method-level attributes should override assembly level
         List<string> startEvents;
@@ -63,7 +64,8 @@ public class ScopedEventReceiverTests
     public async Task TestWithClassLevelEventReceivers()
     {
         // Wait a bit to ensure events have been recorded
-        await Task.Delay(100);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
 
         // Should use assembly-level since no class-level overrides exist
         List<string> startEvents;
@@ -89,7 +91,8 @@ public class ScopedEventReceiverTests2
     public async Task TestWithOnlyClassLevelEventReceivers()
     {
         // Wait a bit to ensure events have been recorded
-        await Task.Delay(100);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
 
         // Should use class-level since it overrides assembly level
         var methodName = nameof(TestWithOnlyClassLevelEventReceivers);

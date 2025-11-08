@@ -27,7 +27,8 @@ public class Context : IAsyncInitializer
     public async Task InitializeAsync()
     {
         Console.WriteLine(@"in context init async");
-        await Task.Delay(2);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(2));
         Console.WriteLine(@"context init async done");
     }
 }

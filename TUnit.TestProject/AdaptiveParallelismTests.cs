@@ -27,7 +27,8 @@ public class AdaptiveParallelismTests
         try
         {
             // Simulate I/O work
-            await Task.Delay(1000);
+            var timeProvider = TestContext.Current!.TimeProvider;
+            await timeProvider.Delay(TimeSpan.FromMilliseconds(1000));
         }
         finally
         {

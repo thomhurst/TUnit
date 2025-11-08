@@ -59,31 +59,36 @@ public class NotInParallelExecutionTests
     [Test, NotInParallel, Repeat(3)]
     public async Task NotInParallel_ExecutionTest1()
     {
-        await Task.Delay(300);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(300));
     }
 
     [Test, NotInParallel, Repeat(3)]
     public async Task NotInParallel_ExecutionTest2()
     {
-        await Task.Delay(300);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(300));
     }
 
     [Test, NotInParallel, Repeat(3)]
     public async Task NotInParallel_ExecutionTest3()
     {
-        await Task.Delay(300);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(300));
     }
 
     [Test, NotInParallel, Repeat(3)]
     public async Task NotInParallel_ExecutionTest4()
     {
-        await Task.Delay(300);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(300));
     }
 
     [Test, NotInParallel, Repeat(3)]
     public async Task NotInParallel_ExecutionTest5()
     {
-        await Task.Delay(300);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(300));
     }
 
     private async Task AssertNoParallelExecution()

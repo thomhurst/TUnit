@@ -76,7 +76,8 @@ public class HookCleanupOnFailureTests
     public async Task Parameterized_Test_With_Mixed_Results(int value)
     {
         Interlocked.Increment(ref _testExecutionCount);
-        await Task.Delay(10); // Small delay to ensure parallel execution
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(10)); // Small delay to ensure parallel execution
         
         // Output removed($"Parameterized_Test_With_Mixed_Results({value}) executing");
         
@@ -130,7 +131,8 @@ public class ParallelHookCleanupTests
     public async Task Sequential_Tests_With_Failures(int testNumber)
     {
         // Output removed($"[PARALLEL] Test {testNumber} starting");
-        await Task.Delay(new Random().Next(10, 50)); // Random delay
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(new Random().Next(10, 50))); // Random delay
         
         // Fail odd-numbered tests
         if (testNumber % 2 == 1)

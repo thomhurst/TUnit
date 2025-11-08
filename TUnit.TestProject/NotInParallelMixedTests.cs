@@ -77,114 +77,132 @@ public class NotInParallelMixedTests
     [Test, NotInParallel]
     public async Task NoKey_Test1()
     {
-        await Task.Delay(200);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(200));
     }
 
     [Test, NotInParallel]
     public async Task NoKey_Test2()
     {
-        await Task.Delay(200);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(200));
     }
 
     [Test, NotInParallel]
     public async Task NoKey_Test3()
     {
-        await Task.Delay(200);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(200));
     }
 
     // Tests with "GroupA" key and order - should run sequentially in order
     [Test, NotInParallel("GroupA", Order = 2)]
     public async Task GroupA_Second()
     {
-        await Task.Delay(150);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(150));
     }
 
     [Test, NotInParallel("GroupA", Order = 1)]
     public async Task GroupA_First()
     {
-        await Task.Delay(150);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(150));
     }
 
     [Test, NotInParallel("GroupA", Order = 3)]
     public async Task GroupA_Third()
     {
-        await Task.Delay(150);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(150));
     }
 
     // Tests with "GroupB" key without order - should not run in parallel with each other
     [Test, NotInParallel("GroupB")]
     public async Task GroupB_Test1()
     {
-        await Task.Delay(100);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
     }
 
     [Test, NotInParallel("GroupB")]
     public async Task GroupB_Test2()
     {
-        await Task.Delay(100);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
     }
 
     [Test, NotInParallel("GroupB")]
     public async Task GroupB_Test3()
     {
-        await Task.Delay(100);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
     }
 
     // Tests with "GroupC" key and mixed orders
     [Test, NotInParallel("GroupC", Order = 10)]
     public async Task GroupC_Last()
     {
-        await Task.Delay(80);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(80));
     }
 
     [Test, NotInParallel("GroupC", Order = 1)]
     public async Task GroupC_First()
     {
-        await Task.Delay(80);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(80));
     }
 
     [Test, NotInParallel("GroupC", Order = 5)]
     public async Task GroupC_Middle()
     {
-        await Task.Delay(80);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(80));
     }
 
     // Tests without NotInParallel - can run in parallel with everything
     [Test]
     public async Task Parallel_Test1()
     {
-        await Task.Delay(50);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(50));
     }
 
     [Test]
     public async Task Parallel_Test2()
     {
-        await Task.Delay(50);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(50));
     }
 
     [Test]
     public async Task Parallel_Test3()
     {
-        await Task.Delay(50);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(50));
     }
 
     // Tests with multiple constraint keys
     [Test, NotInParallel(["GroupD", "GroupE"])]
     public async Task MultiGroup_Test1()
     {
-        await Task.Delay(120);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(120));
     }
 
     [Test, NotInParallel(["GroupD", "GroupF"])]
     public async Task MultiGroup_Test2()
     {
-        await Task.Delay(120);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(120));
     }
 
     [Test, NotInParallel(["GroupE", "GroupF"])]
     public async Task MultiGroup_Test3()
     {
-        await Task.Delay(120);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(120));
     }
 
     [After(Class)]

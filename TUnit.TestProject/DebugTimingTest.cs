@@ -14,7 +14,8 @@ public class DebugTimingTest
         Console.WriteLine($"TestStart at test start: {context.Execution.TestStart?.ToString("O") ?? "NULL"}");
         Console.WriteLine($"TestEnd at test start: {context.Execution.TestEnd?.ToString("O") ?? "NULL"}");
 
-        await Task.Delay(100);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
 
         Console.WriteLine($"TestStart after delay: {context.Execution.TestStart?.ToString("O") ?? "NULL"}");
         Console.WriteLine($"TestEnd after delay: {context.Execution.TestEnd?.ToString("O") ?? "NULL"}");

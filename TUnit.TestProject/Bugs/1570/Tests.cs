@@ -11,7 +11,8 @@ public class Tests(int number)
     [Test]
     public async Task Dependency()
     {
-        await Task.Delay(TimeSpan.FromSeconds(number));
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromSeconds(number));
 
         TestContext.Current!.StateBag.Items["number"] = number;
     }

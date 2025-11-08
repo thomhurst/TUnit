@@ -51,6 +51,7 @@ public class OrderedTests
 
     private async Task Wait()
     {
-        await Task.Delay(1500);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(1500));
     }
 }

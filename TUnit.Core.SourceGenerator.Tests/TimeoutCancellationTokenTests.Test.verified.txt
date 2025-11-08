@@ -186,7 +186,7 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_BasicTest_
             PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
-            LineNumber = 21,
+            LineNumber = 22,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
@@ -321,7 +321,7 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_InheritedT
             PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
-            LineNumber = 30,
+            LineNumber = 32,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
@@ -459,7 +459,7 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_DataTest__
             PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
-            LineNumber = 38,
+            LineNumber = 41,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
@@ -632,7 +632,7 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_DataSource
             PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
-            LineNumber = 48,
+            LineNumber = 52,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
@@ -785,7 +785,7 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_MatrixTest
             PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
-            LineNumber = 58,
+            LineNumber = 63,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),

@@ -187,7 +187,8 @@ public class PerClassSharedDisposalTest : IAsyncDisposable
         Console.WriteLine($"[AfterClass] Checking disposal...");
         
         // Give disposal events a chance to complete
-        await Task.Delay(500);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(500));
         
         // After all tests in the class complete, shared instances should be disposed
         var webAppId = _webAppIds.FirstOrDefault();
@@ -269,7 +270,8 @@ public class PerAssemblySharedDisposalTest2
         Console.WriteLine($"[AfterTestSession] Checking disposal...");
         
         // Give disposal events a chance to complete
-        await Task.Delay(500);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(500));
         
         // After all tests in the test session complete, shared instance should be disposed
         var webAppId = PerAssemblySharedDisposalTest1.SharedWebAppId;

@@ -20,7 +20,8 @@ public class Issue3219DataClass : IAsyncInitializer, IAsyncDisposable
     {
         Console.WriteLine($"Issue3219DataClass disposing, Value was {Value}");
         Value = -1;
-        await Task.Delay(10); // Simulate some async disposal work
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(10)); // Simulate some async disposal work
     }
 }
 

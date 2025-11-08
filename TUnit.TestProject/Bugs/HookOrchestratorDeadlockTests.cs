@@ -20,9 +20,10 @@ public class HookOrchestratorDeadlockTests
         {
             Interlocked.Increment(ref _beforeClassCounter);
             ExecutionLog.Add($"BeforeClass_Executed_{_beforeClassCounter}");
-            
+
             // Simulate some work that might cause coordination issues
-            await Task.Delay(10);
+            var timeProvider = context.GetServiceProvider().GetRequiredService<TimeProvider>();
+            await timeProvider.Delay(TimeSpan.FromMilliseconds(10));
         }
     }
 
@@ -33,8 +34,9 @@ public class HookOrchestratorDeadlockTests
         {
             Interlocked.Increment(ref _afterClassCounter);
             ExecutionLog.Add($"AfterClass_Executed_{_afterClassCounter}");
-            
-            await Task.Delay(10);
+
+            var timeProvider = context.GetServiceProvider().GetRequiredService<TimeProvider>();
+            await timeProvider.Delay(TimeSpan.FromMilliseconds(10));
         }
     }
 
@@ -44,11 +46,12 @@ public class HookOrchestratorDeadlockTests
     {
         var testId = Interlocked.Increment(ref _testCounter);
         ExecutionLog.Add($"Test1_Start_{testId}");
-        
+
         // Simulate some async work
+        var timeProvider = TestContext.Current!.TimeProvider;
         var random = new Random();
-        await Task.Delay(random.Next(1, 50));
-        
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(random.Next(1, 50)));
+
         ExecutionLog.Add($"Test1_End_{testId}");
     }
 
@@ -57,10 +60,11 @@ public class HookOrchestratorDeadlockTests
     {
         var testId = Interlocked.Increment(ref _testCounter);
         ExecutionLog.Add($"Test2_Start_{testId}");
-        
+
+        var timeProvider = TestContext.Current!.TimeProvider;
         var random = new Random();
-        await Task.Delay(random.Next(1, 50));
-        
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(random.Next(1, 50)));
+
         ExecutionLog.Add($"Test2_End_{testId}");
     }
 
@@ -69,10 +73,11 @@ public class HookOrchestratorDeadlockTests
     {
         var testId = Interlocked.Increment(ref _testCounter);
         ExecutionLog.Add($"Test3_Start_{testId}");
-        
+
+        var timeProvider = TestContext.Current!.TimeProvider;
         var random = new Random();
-        await Task.Delay(random.Next(1, 50));
-        
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(random.Next(1, 50)));
+
         ExecutionLog.Add($"Test3_End_{testId}");
     }
 
@@ -82,7 +87,7 @@ public class HookOrchestratorDeadlockTests
         if (context.Metadata.TestDetails.ClassType == typeof(HookOrchestratorDeadlockTests))
         {
             ExecutionLog.Add($"BeforeTest_{context.Metadata.TestDetails.TestName}");
-            await Task.Delay(5); // Small delay to potentially trigger coordination issues
+            await context.TimeProvider.Delay(TimeSpan.FromMilliseconds(5)); // Small delay to potentially trigger coordination issues
         }
     }
 
@@ -92,7 +97,7 @@ public class HookOrchestratorDeadlockTests
         if (context.Metadata.TestDetails.ClassType == typeof(HookOrchestratorDeadlockTests))
         {
             ExecutionLog.Add($"AfterTest_{context.Metadata.TestDetails.TestName}");
-            await Task.Delay(5); // Small delay to potentially trigger coordination issues
+            await context.TimeProvider.Delay(TimeSpan.FromMilliseconds(5)); // Small delay to potentially trigger coordination issues
         }
     }
 }
@@ -112,17 +117,19 @@ public class SequentialCoordinationDeadlockTests
         if (context.ClassType == typeof(SequentialCoordinationDeadlockTests))
         {
             SequentialExecutionLog.Add("SequentialBeforeClass_Executed");
-            await Task.Delay(20); // Longer delay to stress sequential coordination
+            var timeProvider = context.GetServiceProvider().GetRequiredService<TimeProvider>();
+            await timeProvider.Delay(TimeSpan.FromMilliseconds(20)); // Longer delay to stress sequential coordination
         }
     }
 
-    [After(Class)] 
+    [After(Class)]
     public static async Task SequentialAfterClass(ClassHookContext context)
     {
         if (context.ClassType == typeof(SequentialCoordinationDeadlockTests))
         {
             SequentialExecutionLog.Add("SequentialAfterClass_Executed");
-            await Task.Delay(20);
+            var timeProvider = context.GetServiceProvider().GetRequiredService<TimeProvider>();
+            await timeProvider.Delay(TimeSpan.FromMilliseconds(20));
         }
     }
 
@@ -131,10 +138,11 @@ public class SequentialCoordinationDeadlockTests
     {
         var testId = Interlocked.Increment(ref _sequentialTestCounter);
         SequentialExecutionLog.Add($"SequentialTest1_{testId}_Start");
-        
+
         // These should execute one at a time due to NotInParallel
-        await Task.Delay(30);
-        
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(30));
+
         SequentialExecutionLog.Add($"SequentialTest1_{testId}_End");
     }
 
@@ -143,9 +151,10 @@ public class SequentialCoordinationDeadlockTests
     {
         var testId = Interlocked.Increment(ref _sequentialTestCounter);
         SequentialExecutionLog.Add($"SequentialTest2_{testId}_Start");
-        
-        await Task.Delay(30);
-        
+
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(30));
+
         SequentialExecutionLog.Add($"SequentialTest2_{testId}_End");
     }
 
@@ -155,7 +164,7 @@ public class SequentialCoordinationDeadlockTests
         if (context.Metadata.TestDetails.ClassType == typeof(SequentialCoordinationDeadlockTests))
         {
             SequentialExecutionLog.Add($"SequentialBeforeTest_{context.Metadata.TestDetails.TestName}");
-            await Task.Delay(10);
+            await context.TimeProvider.Delay(TimeSpan.FromMilliseconds(10));
         }
     }
 
@@ -165,7 +174,7 @@ public class SequentialCoordinationDeadlockTests
         if (context.Metadata.TestDetails.ClassType == typeof(SequentialCoordinationDeadlockTests))
         {
             SequentialExecutionLog.Add($"SequentialAfterTest_{context.Metadata.TestDetails.TestName}");
-            await Task.Delay(10);
+            await context.TimeProvider.Delay(TimeSpan.FromMilliseconds(10));
         }
     }
 }
@@ -182,7 +191,8 @@ public class KeyedSequentialDeadlockTests_Group1
     public async Task KeyedTest_Group1_Test1()
     {
         KeyedExecutionLog.Add("Group1_Test1_Start");
-        await Task.Delay(25);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(25));
         KeyedExecutionLog.Add("Group1_Test1_End");
     }
 
@@ -190,7 +200,8 @@ public class KeyedSequentialDeadlockTests_Group1
     public async Task KeyedTest_Group1_Test2()
     {
         KeyedExecutionLog.Add("Group1_Test2_Start");
-        await Task.Delay(25);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(25));
         KeyedExecutionLog.Add("Group1_Test2_End");
     }
 }
@@ -204,7 +215,8 @@ public class KeyedSequentialDeadlockTests_Group2
     public async Task KeyedTest_Group2_Test1()
     {
         KeyedExecutionLog2.Add("Group2_Test1_Start");
-        await Task.Delay(25);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(25));
         KeyedExecutionLog2.Add("Group2_Test1_End");
     }
 
@@ -212,7 +224,8 @@ public class KeyedSequentialDeadlockTests_Group2
     public async Task KeyedTest_Group2_Test2()
     {
         KeyedExecutionLog2.Add("Group2_Test2_Start");
-        await Task.Delay(25);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(25));
         KeyedExecutionLog2.Add("Group2_Test2_End");
     }
 }
