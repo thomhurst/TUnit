@@ -1247,7 +1247,9 @@ namespace
         public .IDataSourceAttribute? DataSourceAttribute { get; set; }
         public string DefinitionId { get; }
         public .TestContextEvents Events { get; set; }
-        public .<string, object?> ObjectBag { get; set; }
+        [("Use StateBag property instead.")]
+        public .<string, object?> ObjectBag { get; }
+        public .<string, object?> StateBag { get; set; }
         public required .MethodMetadata TestMetadata { get; init; }
         public static .TestBuilderContext? Current { get; }
         public void RegisterForInitialization(object? obj) { }
@@ -1452,7 +1454,9 @@ namespace
         public TestRegisteredContext(.TestContext testContext) { }
         public string? CustomDisplayName { get; }
         public .DiscoveredTest DiscoveredTest { get; set; }
+        [("Use StateBag property instead.")]
         public .<string, object?> ObjectBag { get; }
+        public .<string, object?> StateBag { get; }
         public .TestContext TestContext { get; }
         public .TestDetails TestDetails { get; }
         public string TestName { get; }

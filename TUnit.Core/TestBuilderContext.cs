@@ -20,7 +20,15 @@ public record TestBuilderContext
     }
 
     public string DefinitionId { get; } = Guid.NewGuid().ToString();
-    public ConcurrentDictionary<string, object?> ObjectBag { get; set; } = new();
+
+     [Obsolete("Use StateBag property instead.")]
+     public ConcurrentDictionary<string, object?> ObjectBag => StateBag;
+
+    /// <summary>
+    /// Gets the state bag for storing arbitrary data during test building.
+    /// </summary>
+    public ConcurrentDictionary<string, object?> StateBag { get; set; } = new();
+
     public TestContextEvents Events { get; set; } = new();
 
     public IDataSourceAttribute? DataSourceAttribute { get; set; }
@@ -49,7 +57,7 @@ public record TestBuilderContext
     {
         return new TestBuilderContext
         {
-            Events = testContext.InternalEvents, TestMetadata = testContext.Metadata.TestDetails.MethodMetadata, DataSourceAttribute = dataSourceAttribute, ObjectBag = testContext.StateBag.Items,
+            Events = testContext.InternalEvents, TestMetadata = testContext.Metadata.TestDetails.MethodMetadata, DataSourceAttribute = dataSourceAttribute, StateBag = testContext.StateBag.Items,
         };
     }
 }

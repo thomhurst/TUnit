@@ -143,7 +143,7 @@ public partial class TestContext : Context,
     internal object[]? CachedEligibleEventObjects { get; set; }
 
 
-    internal ConcurrentDictionary<string, object?> ObjectBag => _testBuilderContext.ObjectBag;
+    internal ConcurrentDictionary<string, object?> ObjectBag => _testBuilderContext.StateBag;
 
 
     internal AbstractExecutableTest InternalExecutableTest { get; set; } = null!;

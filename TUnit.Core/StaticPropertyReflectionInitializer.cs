@@ -103,7 +103,7 @@ public static class StaticPropertyReflectionInitializer
                 DataSourceAttribute = dataSourceAttr,
                 TestMetadata = null!,
                 Events = new TestContextEvents(),
-                ObjectBag = new ConcurrentDictionary<string, object?>()
+                StateBag = new ConcurrentDictionary<string, object?>()
             }),
             MembersToGenerate = [],
             TestInformation = null!,
