@@ -17,21 +17,24 @@ public class NotInParallelClassGroupingTests_ClassA
     public async Task Test1()
     {
         ExecutionOrder.Enqueue($"ClassA.Test1");
-        await Task.Delay(10);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(10));
     }
 
     [Test, NotInParallel(Order = 2)]
     public async Task Test2()
     {
         ExecutionOrder.Enqueue($"ClassA.Test2");
-        await Task.Delay(10);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(10));
     }
 
     [Test, NotInParallel(Order = 3)]
     public async Task Test3()
     {
         ExecutionOrder.Enqueue($"ClassA.Test3");
-        await Task.Delay(10);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(10));
     }
 }
 
@@ -43,14 +46,16 @@ public class NotInParallelClassGroupingTests_ClassB
     public async Task Test1()
     {
         NotInParallelClassGroupingTests_ClassA.ExecutionOrder.Enqueue($"ClassB.Test1");
-        await Task.Delay(10);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(10));
     }
 
     [Test, NotInParallel(Order = 2)]
     public async Task Test2()
     {
         NotInParallelClassGroupingTests_ClassA.ExecutionOrder.Enqueue($"ClassB.Test2");
-        await Task.Delay(10);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(10));
     }
 }
 
@@ -62,21 +67,24 @@ public class NotInParallelClassGroupingTests_ClassC
     public async Task Test1()
     {
         NotInParallelClassGroupingTests_ClassA.ExecutionOrder.Enqueue($"ClassC.Test1");
-        await Task.Delay(10);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(10));
     }
 
     [Test, NotInParallel(Order = 2)]
     public async Task Test2()
     {
         NotInParallelClassGroupingTests_ClassA.ExecutionOrder.Enqueue($"ClassC.Test2");
-        await Task.Delay(10);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(10));
     }
 
     [Test, NotInParallel(Order = 3)]
     public async Task Test3()
     {
         NotInParallelClassGroupingTests_ClassA.ExecutionOrder.Enqueue($"ClassC.Test3");
-        await Task.Delay(10);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(10));
     }
 }
 
@@ -98,7 +106,8 @@ public class NotInParallelClassGroupingTests_Verify
             order = NotInParallelClassGroupingTests_ClassA.ExecutionOrder.ToList();
             if (order.Count >= 8)
                 break;
-            await Task.Delay(retryDelay);
+            var timeProvider = TestContext.Current!.TimeProvider;
+                await timeProvider.Delay(retryDelay);
         }
 
         // We should have 8 test executions (3 from ClassA, 2 from ClassB, 3 from ClassC)

@@ -15,7 +15,8 @@ public class FilteredDependencyTests
     public async Task BaseTest()
     {
         // This test should run even when filtering for DependentTest only
-        await Task.Delay(100);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
 
         // Store data in StateBag to verify this test actually ran
         TestContext.Current!.StateBag.Items["BaseTestExecuted"] = true;

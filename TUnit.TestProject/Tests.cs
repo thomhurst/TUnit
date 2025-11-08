@@ -235,7 +235,8 @@ public class Tests
     [Category("Fail")]
     public async Task Timeout1(CancellationToken cancellationToken)
     {
-        await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromSeconds(5), cancellationToken);
     }
 
     [Test]
@@ -364,7 +365,8 @@ public class Tests
     [Test]
     public async Task OneSecond()
     {
-        await Task.Delay(TimeSpan.FromSeconds(1));
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromSeconds(1));
     }
 
     [Test]

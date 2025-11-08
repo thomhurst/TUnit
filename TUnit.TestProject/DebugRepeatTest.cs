@@ -20,6 +20,7 @@ public class DebugRepeatTest
         Console.WriteLine($"  TestName: {context.Metadata.TestDetails.TestName}");
         Console.WriteLine($"  Thread: {Thread.CurrentThread.ManagedThreadId}");
         
-        await Task.Delay(100);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
     }
 }

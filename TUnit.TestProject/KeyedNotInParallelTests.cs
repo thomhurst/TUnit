@@ -20,19 +20,22 @@ public class KeyedNotInParallelTests
     [Test, NotInParallel("1"), Repeat(3)]
     public async Task NotInParallel_Test1()
     {
-        await Task.Delay(500);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(500));
     }
 
     [Test, NotInParallel("1"), Repeat(3)]
     public async Task NotInParallel_Test2()
     {
-        await Task.Delay(500);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(500));
     }
 
     [Test, NotInParallel("3"), Repeat(3)]
     public async Task NotInParallel_Test3()
     {
-        await Task.Delay(500);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(500));
     }
 
     private async Task AssertNoOverlaps()

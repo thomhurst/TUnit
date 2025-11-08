@@ -434,7 +434,8 @@ public class CombinedDataSourceTests
         public async Task InitializeAsync()
         {
             // Simulate async initialization work
-            await Task.Delay(10);
+            var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(10));
             IsInitialized = true;
             InitializationTime = DateTime.UtcNow;
         }
@@ -463,7 +464,8 @@ public class CombinedDataSourceTests
         public async Task InitializeAsync()
         {
             // Simulate database connection
-            await Task.Delay(5);
+            var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(5));
             ConnectionAttempts++;
             IsConnected = true;
         }
@@ -498,7 +500,8 @@ public class CombinedDataSourceTests
         public async Task InitializeAsync()
         {
             // Simulate async initialization that depends on injected properties
-            await Task.Delay(5);
+            var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(5));
 
             // This verifies that property injection happens BEFORE IAsyncInitializer
             if (Config == null)
@@ -550,7 +553,8 @@ public class CombinedDataSourceTests
         public async Task InitializeAsync()
         {
             // Simulate validation that requires the injected Location
-            await Task.Delay(5);
+            var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(5));
 
             if (Location == null || Location.Coordinates == null)
             {
@@ -577,7 +581,8 @@ public class CombinedDataSourceTests
         public async Task InitializeAsync()
         {
             // Simulate geolocation service call
-            await Task.Delay(3);
+            var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(3));
             IsGeolocated = true;
         }
 

@@ -12,7 +12,8 @@ public class StateBagWithDependsOnTests
     [Test]
     public async Task FirstTest_SetupData()
     {
-        await Task.Delay(100);
+        var timeProvider = TestContext.Current!.TimeProvider;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
 
         TestContext.Current!.StateBag.Items["MessageSentAt"] = DateTime.UtcNow;
         TestContext.Current.StateBag.Items["TestData"] = "Hello from FirstTest";
