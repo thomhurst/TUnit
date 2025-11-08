@@ -51,8 +51,8 @@ public partial class Tests
             .ScrubFilePaths()
             .OnVerifyMismatch(async (pair, message, verify) =>
             {
-                var received = await FilePolyfill.ReadAllTextAsync(pair.ReceivedPath);
-                var verified = await FilePolyfill.ReadAllTextAsync(pair.VerifiedPath);
+                var received = await File.ReadAllTextAsync(pair.ReceivedPath);
+                var verified = await File.ReadAllTextAsync(pair.VerifiedPath);
 
                 // Better diff message since original one is too large
                 await Assert.That(Scrub(received)).IsEqualTo(Scrub(verified));

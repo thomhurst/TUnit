@@ -1,5 +1,18 @@
 <Project>
+    <Import Project="$(MSBuildThisFileDirectory)StrongNaming.props" />
     <Import Project="$(MSBuildThisFileDirectory)TestLibrary.props" />
+
+    <PropertyGroup>
+        <EnableTUnitPolyfills>false</EnableTUnitPolyfills>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Polyfill">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>compile; analyzers</IncludeAssets>
+            <ExcludeAssets>runtime; native; contentfiles; build; buildtransitive</ExcludeAssets>
+        </PackageReference>
+    </ItemGroup>
 
     <Import Project="$(MSBuildThisFileDirectory)TUnit.Engine\TUnit.Engine.props" />
     <Import Project="$(MSBuildThisFileDirectory)TUnit.Assertions\TUnit.Assertions.props" />
