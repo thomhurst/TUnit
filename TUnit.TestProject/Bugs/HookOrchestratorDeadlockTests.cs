@@ -34,8 +34,7 @@ public class HookOrchestratorDeadlockTests
             Interlocked.Increment(ref _afterClassCounter);
             ExecutionLog.Add($"AfterClass_Executed_{_afterClassCounter}");
 
-            var timeProvider = context.GetServiceProvider().GetRequiredService<TimeProvider>();
-            await timeProvider.Delay(TimeSpan.FromMilliseconds(10));
+            await Task.Delay(TimeSpan.FromMilliseconds(10));
         }
     }
 
