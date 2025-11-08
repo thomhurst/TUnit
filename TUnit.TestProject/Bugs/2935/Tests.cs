@@ -11,7 +11,7 @@ public class Tests
     [Before(Test)]
     public async Task BeforeTest_Task(CancellationToken cancellationToken)
     {
-        var timeProvider = TestContext.Current!.GetService<TimeProvider>();
+        var timeProvider = TestContext.Current!.TimeProvider;
         await timeProvider.Delay(TimeSpan.FromSeconds(5), cancellationToken);
         _taskHook = "Task Hook Executed";
     }
@@ -19,7 +19,7 @@ public class Tests
     [Before(Test)]
     public async ValueTask BeforeTest_ValueTask(CancellationToken cancellationToken)
     {
-        var timeProvider = TestContext.Current!.GetService<TimeProvider>();
+        var timeProvider = TestContext.Current!.TimeProvider;
         await timeProvider.Delay(TimeSpan.FromSeconds(5), cancellationToken);
         _valueTaskHook = "ValueTask Hook Executed";
     }

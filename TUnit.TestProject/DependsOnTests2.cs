@@ -13,7 +13,7 @@ public class DependsOnTests2
     public async Task Test1(string one, int two, bool three, CancellationToken cancellationToken)
     {
         _test1Start = TestContext.Current!.Execution.TestStart!.Value;
-        var timeProvider = TestContext.Current!.GetService<TimeProvider>();
+        var timeProvider = TestContext.Current!.TimeProvider;
         await timeProvider.Delay(TimeSpan.FromSeconds(5), cancellationToken);
     }
 

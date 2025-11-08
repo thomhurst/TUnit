@@ -95,7 +95,7 @@ internal class UnifiedReflectionFreeTests : TestsBase<TestMetadataGenerator>
     private async Task RunTestWithInlineSource(string source)
     {
         var tempFile = Path.GetTempFileName() + ".cs";
-        await File.WriteAllTextAsync(tempFile, source);
+        await FilePolyfill.WriteAllTextAsync(tempFile, source);
 
         try
         {

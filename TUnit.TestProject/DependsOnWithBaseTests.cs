@@ -31,7 +31,7 @@ public abstract class DependsOnBase
     public async Task BaseTest(CancellationToken cancellationToken)
     {
         BaseTestStart = TestContext.Current!.Execution.TestStart!.Value;
-        var timeProvider = TestContext.Current!.GetService<TimeProvider>();
+        var timeProvider = TestContext.Current!.TimeProvider;
         await timeProvider.Delay(TimeSpan.FromSeconds(5), cancellationToken);
     }
 }

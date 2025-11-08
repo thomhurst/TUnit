@@ -11,7 +11,7 @@ public class TestDiscoveryBeforeHooks
     [BeforeEvery(TestDiscovery)]
     public static async Task BeforeEveryTestDiscovery(BeforeTestDiscoveryContext context)
     {
-        await File.WriteAllTextAsync($"TestDiscoveryBeforeTests{Guid.NewGuid():N}.txt", $"Blah!");
+        await FilePolyfill.WriteAllTextAsync($"TestDiscoveryBeforeTests{Guid.NewGuid():N}.txt", $"Blah!");
     }
 }
 

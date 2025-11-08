@@ -13,7 +13,7 @@ public class DependsOnTests3
     [Test]
     public async Task Test1(CancellationToken cancellationToken)
     {
-        var timeProvider = TestContext.Current!.GetService<TimeProvider>();
+        var timeProvider = TestContext.Current!.TimeProvider;
         await timeProvider.Delay(TimeSpan.FromSeconds(1), cancellationToken);
 
         TestContext.Current!.StateBag.Items["Test1"] = "1";
@@ -24,7 +24,7 @@ public class DependsOnTests3
     [Test]
     public async Task Test2(CancellationToken cancellationToken)
     {
-        var timeProvider = TestContext.Current!.GetService<TimeProvider>();
+        var timeProvider = TestContext.Current!.TimeProvider;
         await timeProvider.Delay(TimeSpan.FromSeconds(1), cancellationToken);
 
         TestContext.Current!.StateBag.Items["Test2"] = "2";
@@ -37,7 +37,7 @@ public class DependsOnTests3
     [DependsOn(nameof(Test2))]
     public async Task Test3(CancellationToken cancellationToken)
     {
-        var timeProvider = TestContext.Current!.GetService<TimeProvider>();
+        var timeProvider = TestContext.Current!.TimeProvider;
         _test3Start = timeProvider.GetUtcNow();
 
         await timeProvider.Delay(TimeSpan.FromSeconds(1), cancellationToken);

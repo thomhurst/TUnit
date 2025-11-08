@@ -43,7 +43,7 @@ public class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, new
     public async Task RunTest(string inputFile, RunTestOptions runTestOptions, Func<string[], Task> assertions)
     {
 #if NET
-        var source = await File.ReadAllTextAsync(inputFile);
+        var source = await FilePolyfill.ReadAllTextAsync(inputFile);
 #else
         var source = File.ReadAllText(inputFile);
 #endif
@@ -172,8 +172,8 @@ public class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, new
         {
             verifyTask = verifyTask.OnVerifyMismatch(async (pair, message, verify) =>
             {
-                var received = await File.ReadAllTextAsync(pair.ReceivedPath);
-                var verified = await File.ReadAllTextAsync(pair.VerifiedPath);
+                var received = await FilePolyfill.ReadAllTextAsync(pair.ReceivedPath);
+                var verified = await FilePolyfill.ReadAllTextAsync(pair.VerifiedPath);
 
                 // Better diff message since original one is too large
                 await Assert.That(Scrub(received)).IsEqualTo(Scrub(verified));

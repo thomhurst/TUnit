@@ -11,7 +11,7 @@ public class DependsOnTests
     [Test]
     public async Task Test1(CancellationToken cancellationToken)
     {
-        var timeProvider = TestContext.Current!.GetService<TimeProvider>();
+        var timeProvider = TestContext.Current!.TimeProvider;
         _test1Start = timeProvider.GetUtcNow();
         await timeProvider.Delay(TimeSpan.FromSeconds(5), cancellationToken);
     }
@@ -19,7 +19,7 @@ public class DependsOnTests
     [Test, DependsOn(nameof(Test1))]
     public async Task Test2()
     {
-        var timeProvider = TestContext.Current!.GetService<TimeProvider>();
+        var timeProvider = TestContext.Current!.TimeProvider;
         _test2Start = timeProvider.GetUtcNow();
         await Task.CompletedTask;
     }

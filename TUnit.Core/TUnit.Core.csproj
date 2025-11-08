@@ -5,7 +5,6 @@
     <ItemGroup>
         <InternalsVisibleTo Include="TUnit.Engine" />
         <InternalsVisibleTo Include="TUnit.UnitTests" />
-        <InternalsVisibleTo Include="TUnit.TestProject" />
     </ItemGroup>
 
     <ItemGroup>
