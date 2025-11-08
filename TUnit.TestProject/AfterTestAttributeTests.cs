@@ -19,7 +19,7 @@ public class AfterTestAttributeTests
         {
             Console.WriteLine(@"Writing file inside WriteFileAfterTestAttribute!");
 
-            await FilePolyfill.WriteAllTextAsync(Filename, "Foo!");
+            await File.WriteAllTextAsync(Filename, "Foo!");
         }
 
         public int Order => 0;
