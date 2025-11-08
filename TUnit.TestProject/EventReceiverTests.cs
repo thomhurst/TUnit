@@ -42,7 +42,7 @@ public class EventReceiverTests
     [EventReceiver]
     public async Task Test_With_Event_Receiver_Attribute()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(10));
         await Assert.That(EventReceiverAttribute.Events).Contains("TestStart: Test_With_Event_Receiver_Attribute()");
     }
@@ -51,14 +51,14 @@ public class EventReceiverTests
     [EventReceiver]
     public async Task Skipped_Test_With_Event_Receiver()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(10));
     }
     
     [After(Test)]
     public async Task VerifyEventsReceived(TestContext context)
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(50)); // Give time for event to be recorded
         
         var displayName = context. Metadata.DisplayName;

@@ -46,7 +46,7 @@ public class HookOrchestratorDeadlockTests
         ExecutionLog.Add($"Test1_Start_{testId}");
 
         // Simulate some async work
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         var random = new Random();
         await timeProvider.Delay(TimeSpan.FromMilliseconds(random.Next(1, 50)));
 
@@ -59,7 +59,7 @@ public class HookOrchestratorDeadlockTests
         var testId = Interlocked.Increment(ref _testCounter);
         ExecutionLog.Add($"Test2_Start_{testId}");
 
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         var random = new Random();
         await timeProvider.Delay(TimeSpan.FromMilliseconds(random.Next(1, 50)));
 
@@ -72,7 +72,7 @@ public class HookOrchestratorDeadlockTests
         var testId = Interlocked.Increment(ref _testCounter);
         ExecutionLog.Add($"Test3_Start_{testId}");
 
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         var random = new Random();
         await timeProvider.Delay(TimeSpan.FromMilliseconds(random.Next(1, 50)));
 
@@ -136,7 +136,7 @@ public class SequentialCoordinationDeadlockTests
         SequentialExecutionLog.Add($"SequentialTest1_{testId}_Start");
 
         // These should execute one at a time due to NotInParallel
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(30));
 
         SequentialExecutionLog.Add($"SequentialTest1_{testId}_End");
@@ -148,7 +148,7 @@ public class SequentialCoordinationDeadlockTests
         var testId = Interlocked.Increment(ref _sequentialTestCounter);
         SequentialExecutionLog.Add($"SequentialTest2_{testId}_Start");
 
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(30));
 
         SequentialExecutionLog.Add($"SequentialTest2_{testId}_End");
@@ -187,7 +187,7 @@ public class KeyedSequentialDeadlockTests_Group1
     public async Task KeyedTest_Group1_Test1()
     {
         KeyedExecutionLog.Add("Group1_Test1_Start");
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(25));
         KeyedExecutionLog.Add("Group1_Test1_End");
     }
@@ -196,7 +196,7 @@ public class KeyedSequentialDeadlockTests_Group1
     public async Task KeyedTest_Group1_Test2()
     {
         KeyedExecutionLog.Add("Group1_Test2_Start");
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(25));
         KeyedExecutionLog.Add("Group1_Test2_End");
     }
@@ -211,7 +211,7 @@ public class KeyedSequentialDeadlockTests_Group2
     public async Task KeyedTest_Group2_Test1()
     {
         KeyedExecutionLog2.Add("Group2_Test1_Start");
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(25));
         KeyedExecutionLog2.Add("Group2_Test1_End");
     }
@@ -220,7 +220,7 @@ public class KeyedSequentialDeadlockTests_Group2
     public async Task KeyedTest_Group2_Test2()
     {
         KeyedExecutionLog2.Add("Group2_Test2_Start");
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(25));
         KeyedExecutionLog2.Add("Group2_Test2_End");
     }

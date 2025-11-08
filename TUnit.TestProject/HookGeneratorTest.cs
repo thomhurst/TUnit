@@ -15,7 +15,7 @@ public class HookGeneratorTest
     public static async Task AfterEachTest()
     {
         _afterTestCount++;
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(1));
     }
 

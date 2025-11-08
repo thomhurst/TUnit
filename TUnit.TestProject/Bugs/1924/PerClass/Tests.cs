@@ -16,7 +16,7 @@ public class BaseClass
     public async Task Test(int value)
     {
         await Data.DoSomething();
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(50));
     }
 }

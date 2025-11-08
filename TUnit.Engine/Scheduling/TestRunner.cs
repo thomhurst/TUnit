@@ -84,7 +84,7 @@ public sealed class TestRunner
             }
 
             test.State = TestState.Running;
-            test.StartTime = test.Context.TimeProvider.GetUtcNow();
+            test.StartTime = TimeProviderContext.Current.GetUtcNow();
 
             // TestCoordinator handles sending InProgress message
             await _testCoordinator.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
@@ -116,7 +116,7 @@ public sealed class TestRunner
         }
         finally
         {
-            test.EndTime = test.Context.TimeProvider.GetUtcNow();
+            test.EndTime = TimeProviderContext.Current.GetUtcNow();
         }
     }
 

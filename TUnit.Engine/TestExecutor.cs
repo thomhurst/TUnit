@@ -158,7 +158,7 @@ internal class TestExecutor
         }
 
         // Set the test start time when we actually begin executing the test
-        executableTest.Context.TestStart = executableTest.Context.TimeProvider.GetUtcNow();
+        executableTest.Context.TestStart = TimeProviderContext.Current.GetUtcNow();
 
         if (executableTest.Context.InternalDiscoveredTest?.TestExecutor is { } testExecutor)
         {

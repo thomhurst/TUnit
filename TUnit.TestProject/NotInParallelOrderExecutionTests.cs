@@ -68,56 +68,56 @@ public class NotInParallelOrderExecutionTests
     [Test, NotInParallel("OrderGroup1", Order = 3)]
     public async Task OrderedTest_Third()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(200));
     }
 
     [Test, NotInParallel("OrderGroup1", Order = 1)]
     public async Task OrderedTest_First()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(200));
     }
 
     [Test, NotInParallel("OrderGroup1", Order = 5)]
     public async Task OrderedTest_Fifth()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(200));
     }
 
     [Test, NotInParallel("OrderGroup1", Order = 2)]
     public async Task OrderedTest_Second()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(200));
     }
 
     [Test, NotInParallel("OrderGroup1", Order = 4)]
     public async Task OrderedTest_Fourth()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(200));
     }
 
     [Test, NotInParallel("OrderGroup2", Order = 2)]
     public async Task OrderedGroup2_Second()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(150));
     }
 
     [Test, NotInParallel("OrderGroup2", Order = 1)]
     public async Task OrderedGroup2_First()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(150));
     }
 
     [Test, NotInParallel("OrderGroup2", Order = 3)]
     public async Task OrderedGroup2_Third()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(150));
     }
 

@@ -25,8 +25,6 @@ internal static class HookTimeoutHelper
             return async () => await ExecuteHookWithPotentialCustomExecutor(hook, context, cancellationToken);
         }
 
-        var timeProvider = (context as TestContext)?.TimeProvider ?? TimeProvider.System;
-
         return async () =>
         {
             await ExecuteWithTimeoutAsync(
@@ -34,7 +32,7 @@ internal static class HookTimeoutHelper
                 timeout.Value,
                 cancellationToken,
                 $"Hook '{hook.Name}' exceeded timeout of {(int)timeout.Value.TotalMilliseconds}ms",
-                timeProvider);
+                TimeProviderContext.Current);
         };
     }
 
@@ -83,8 +81,6 @@ internal static class HookTimeoutHelper
             return async () => await hookDelegate(context, cancellationToken);
         }
 
-        var timeProvider = (context as TestContext)?.TimeProvider ?? TimeProvider.System;
-
         return async () =>
         {
             await ExecuteWithTimeoutAsync(
@@ -92,7 +88,7 @@ internal static class HookTimeoutHelper
                 timeout.Value,
                 cancellationToken,
                 $"Hook '{hookName}' exceeded timeout of {(int)timeout.Value.TotalMilliseconds}ms",
-                timeProvider);
+                TimeProviderContext.Current);
         };
     }
 
@@ -113,8 +109,6 @@ internal static class HookTimeoutHelper
             return async () => await hookDelegate(context, cancellationToken);
         }
 
-        var timeProvider = (context as TestContext)?.TimeProvider ?? TimeProvider.System;
-
         return async () =>
         {
             await ExecuteWithTimeoutAsync(
@@ -122,7 +116,7 @@ internal static class HookTimeoutHelper
                 timeout.Value,
                 cancellationToken,
                 $"Hook '{hookName}' exceeded timeout of {(int)timeout.Value.TotalMilliseconds}ms",
-                timeProvider);
+                TimeProviderContext.Current);
         };
     }
 

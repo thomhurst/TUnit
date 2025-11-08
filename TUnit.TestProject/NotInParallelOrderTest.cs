@@ -10,7 +10,7 @@ public sealed class Test1
     [Test]
     public async Task TestCase1()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
         Console.WriteLine("Test 1 - Order 2");
     }

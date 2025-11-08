@@ -17,7 +17,7 @@ public class LastTestEventReceiverTests
     [LastTestEventReceiver]
     public async Task Test1()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(10));
     }
 
@@ -25,7 +25,7 @@ public class LastTestEventReceiverTests
     [LastTestEventReceiver]
     public async Task Test2()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(10));
     }
 
@@ -33,7 +33,7 @@ public class LastTestEventReceiverTests
     [LastTestEventReceiver]
     public async Task Test3()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(10));
     }
 
@@ -41,7 +41,7 @@ public class LastTestEventReceiverTests
     public async Task VerifyLastTestEventFired(TestContext context)
     {
         // Give some time for async event receivers to complete
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
 
         var displayName = context. Metadata.DisplayName;
@@ -96,7 +96,7 @@ public class LastTestInAssemblyEventReceiverTests
     [LastTestInAssemblyEventReceiver]
     public async Task AssemblyTest()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(10));
     }
 }
@@ -131,7 +131,7 @@ public class SkippedEventReceiverTests
     [SkipEventReceiverAttribute]
     public async Task SkippedTestWithCustomReason()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(10));
     }
 
@@ -139,7 +139,7 @@ public class SkippedEventReceiverTests
     public async Task VerifySkipEventFired(TestContext context)
     {
         // Give some time for async event receivers to complete
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
 
         if (context. Metadata.DisplayName.Contains("SkippedTestWithCustomReason"))
@@ -196,7 +196,7 @@ public class RuntimeSkipEventReceiverTests
     public async Task VerifyRuntimeSkipEventFired(TestContext context)
     {
         // Give some time for async event receivers to complete
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
 
         if (context. Metadata.DisplayName.Contains("RuntimeSkippedTestWithCustomReason"))

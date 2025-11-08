@@ -90,11 +90,6 @@ public class ContextProvider(IServiceProvider serviceProvider, string testSessio
 
         var testContext = new TestContext(testName, serviceProvider, classContext, testBuilderContext, cancellationToken);
 
-        // Inject TimeProvider from service provider if available
-        if (serviceProvider.GetService(typeof(TimeProvider)) is TimeProvider timeProvider)
-        {
-            testContext.TimeProvider = timeProvider;
-        }
 
         classContext.AddTest(testContext);
 

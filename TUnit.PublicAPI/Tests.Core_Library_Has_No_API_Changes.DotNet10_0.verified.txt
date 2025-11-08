@@ -1286,7 +1286,6 @@ namespace
         public . Output { get; }
         public . Parallelism { get; }
         public . StateBag { get; }
-        public  TimeProvider { get; set; }
         public static . Configuration { get; }
         public new static .TestContext? Current { get; }
         public static string? OutputDirectory { get; }
@@ -1511,6 +1510,10 @@ namespace
         public static bool IsFinal(this .TestState state) { }
         public static bool IsSuccess(this .TestState state) { }
         public static bool IsTransient(this .TestState state) { }
+    }
+    public static class TimeProviderContext
+    {
+        public static  Current { get; set; }
     }
     [(.Assembly | .Class | .Method)]
     public class TimeoutAttribute : .TUnitAttribute, .IScopedAttribute, ., ., .

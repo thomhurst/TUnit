@@ -17,7 +17,7 @@ public class DebugTimingTest2
         Console.WriteLine($"[During Test] TestEnd: {context.Execution.TestEnd?.ToString("O") ?? "NULL"}");
         Console.WriteLine($"[During Test] Result: {context.Execution.Result?.ToString() ?? "NULL"}");
 
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(300));
     }
 

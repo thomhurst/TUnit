@@ -15,7 +15,7 @@ public class TimeoutCancellationTokenTests
     [EngineTest(ExpectedResult.Pass)]
     public async Task DefaultTest(CancellationToken cancellationToken)
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromSeconds(5), cancellationToken);
     }
 
@@ -25,7 +25,7 @@ public class TimeoutCancellationTokenTests
     [EngineTest(ExpectedResult.Failure)]
     public async Task BasicTest(CancellationToken cancellationToken)
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMinutes(1), cancellationToken);
     }
 
@@ -34,7 +34,7 @@ public class TimeoutCancellationTokenTests
     [EngineTest(ExpectedResult.Failure)]
     public async Task InheritedTimeoutAttribute(CancellationToken cancellationToken)
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMinutes(1), cancellationToken);
     }
 
@@ -45,7 +45,7 @@ public class TimeoutCancellationTokenTests
     public async Task DataTest(int value, CancellationToken cancellationToken)
     {
         await Assert.That(value).IsEqualTo(1);
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMinutes(1), cancellationToken);
     }
 
@@ -56,7 +56,7 @@ public class TimeoutCancellationTokenTests
     public async Task DataSourceTest(int value, CancellationToken cancellationToken)
     {
         await Assert.That(value).IsEqualTo(1);
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMinutes(1), cancellationToken);
     }
 
@@ -70,7 +70,7 @@ public class TimeoutCancellationTokenTests
         CancellationToken cancellationToken)
     {
         await Assert.That(value).IsEqualTo(1).Or.IsEqualTo(2).Or.IsEqualTo(3);
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMinutes(1), cancellationToken);
     }
 

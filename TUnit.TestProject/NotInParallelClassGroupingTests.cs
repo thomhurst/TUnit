@@ -17,7 +17,7 @@ public class NotInParallelClassGroupingTests_ClassA
     public async Task Test1()
     {
         ExecutionOrder.Enqueue($"ClassA.Test1");
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(10));
     }
 
@@ -25,7 +25,7 @@ public class NotInParallelClassGroupingTests_ClassA
     public async Task Test2()
     {
         ExecutionOrder.Enqueue($"ClassA.Test2");
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(10));
     }
 
@@ -33,7 +33,7 @@ public class NotInParallelClassGroupingTests_ClassA
     public async Task Test3()
     {
         ExecutionOrder.Enqueue($"ClassA.Test3");
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(10));
     }
 }
@@ -46,7 +46,7 @@ public class NotInParallelClassGroupingTests_ClassB
     public async Task Test1()
     {
         NotInParallelClassGroupingTests_ClassA.ExecutionOrder.Enqueue($"ClassB.Test1");
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(10));
     }
 
@@ -54,7 +54,7 @@ public class NotInParallelClassGroupingTests_ClassB
     public async Task Test2()
     {
         NotInParallelClassGroupingTests_ClassA.ExecutionOrder.Enqueue($"ClassB.Test2");
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(10));
     }
 }
@@ -67,7 +67,7 @@ public class NotInParallelClassGroupingTests_ClassC
     public async Task Test1()
     {
         NotInParallelClassGroupingTests_ClassA.ExecutionOrder.Enqueue($"ClassC.Test1");
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(10));
     }
 
@@ -75,7 +75,7 @@ public class NotInParallelClassGroupingTests_ClassC
     public async Task Test2()
     {
         NotInParallelClassGroupingTests_ClassA.ExecutionOrder.Enqueue($"ClassC.Test2");
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(10));
     }
 
@@ -83,7 +83,7 @@ public class NotInParallelClassGroupingTests_ClassC
     public async Task Test3()
     {
         NotInParallelClassGroupingTests_ClassA.ExecutionOrder.Enqueue($"ClassC.Test3");
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(10));
     }
 }
@@ -106,7 +106,7 @@ public class NotInParallelClassGroupingTests_Verify
             order = NotInParallelClassGroupingTests_ClassA.ExecutionOrder.ToList();
             if (order.Count >= 8)
                 break;
-            var timeProvider = TestContext.Current!.TimeProvider;
+            var timeProvider = TimeProviderContext.Current;
                 await timeProvider.Delay(TimeSpan.FromMilliseconds(retryDelay));
         }
 

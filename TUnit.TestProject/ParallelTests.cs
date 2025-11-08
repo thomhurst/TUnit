@@ -20,21 +20,21 @@ public class ParallelTests
     [Test, Repeat(3)]
     public async Task Parallel_Test1(CancellationToken cancellationToken)
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(5000), cancellationToken);
     }
 
     [Test, Repeat(3)]
     public async Task Parallel_Test2(CancellationToken cancellationToken)
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(5000), cancellationToken);
     }
 
     [Test, Repeat(3)]
     public async Task Parallel_Test3(CancellationToken cancellationToken)
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(5000), cancellationToken);
     }
 

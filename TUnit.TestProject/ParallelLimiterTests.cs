@@ -10,21 +10,21 @@ public class ParallelLimiterTests
     [Test, Repeat(3)]
     public async Task Parallel_Test1()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(500));
     }
 
     [Test, Repeat(3)]
     public async Task Parallel_Test2()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(500));
     }
 
     [Test, Repeat(3)]
     public async Task Parallel_Test3()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(500));
     }
 }
