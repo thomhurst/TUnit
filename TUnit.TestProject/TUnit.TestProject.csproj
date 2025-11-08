@@ -30,6 +30,7 @@
         <PackageReference Include="coverlet.collector" />
         <PackageReference Include="Microsoft.Testing.Extensions.CrashDump" />
         <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
+        <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
         <PackageReference Include="OneOf" />
         <PackageReference Include="OneOf.SourceGenerator" />
         <PackageReference Include="RandomDataGenerator.Net" />
