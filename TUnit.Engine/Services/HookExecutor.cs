@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Services;
@@ -46,8 +47,16 @@ internal sealed class HookExecutor
             }
             catch (Exception ex)
             {
-                // Wrap hook exceptions in specific exception types
-                // This allows the test runner to handle hook failures appropriately
+                if (ex is SkipTestException)
+                {
+                    throw;
+                }
+
+                if (ex.InnerException is SkipTestException skipEx)
+                {
+                    ExceptionDispatchInfo.Capture(skipEx).Throw();
+                }
+
                 throw new BeforeTestSessionException("BeforeTestSession hook failed", ex);
             }
         }
@@ -100,6 +109,16 @@ internal sealed class HookExecutor
             }
             catch (Exception ex)
             {
+                if (ex is SkipTestException)
+                {
+                    throw;
+                }
+
+                if (ex.InnerException is SkipTestException skipEx)
+                {
+                    ExceptionDispatchInfo.Capture(skipEx).Throw();
+                }
+
                 throw new BeforeAssemblyException("BeforeAssembly hook failed", ex);
             }
         }
@@ -155,6 +174,16 @@ internal sealed class HookExecutor
             }
             catch (Exception ex)
             {
+                if (ex is SkipTestException)
+                {
+                    throw;
+                }
+
+                if (ex.InnerException is SkipTestException skipEx)
+                {
+                    ExceptionDispatchInfo.Capture(skipEx).Throw();
+                }
+
                 throw new BeforeClassException("BeforeClass hook failed", ex);
             }
         }
@@ -209,6 +238,16 @@ internal sealed class HookExecutor
                 }
                 catch (Exception ex)
                 {
+                    if (ex is SkipTestException)
+                    {
+                        throw;
+                    }
+
+                    if (ex.InnerException is SkipTestException skipEx)
+                    {
+                        ExceptionDispatchInfo.Capture(skipEx).Throw();
+                    }
+
                     throw new BeforeTestException("BeforeEveryTest hook failed", ex);
                 }
             }
@@ -228,6 +267,16 @@ internal sealed class HookExecutor
                 }
                 catch (Exception ex)
                 {
+                    if (ex is SkipTestException)
+                    {
+                        throw;
+                    }
+
+                    if (ex.InnerException is SkipTestException skipEx)
+                    {
+                        ExceptionDispatchInfo.Capture(skipEx).Throw();
+                    }
+
                     throw new BeforeTestException("BeforeTest hook failed", ex);
                 }
             }
