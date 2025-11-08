@@ -291,7 +291,6 @@ const sidebars: SidebarsConfig = {
           collapsed: false,
           items: [
             'benchmarks/index',
-            'benchmarks/calculator',
             'benchmarks/methodology',
           ],
         },

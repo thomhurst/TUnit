@@ -3,7 +3,7 @@
 This guide provides recommendations for optimizing test performance and ensuring your TUnit test suite runs efficiently.
 
 :::performance
-Want to see how fast TUnit can be? Check out the [performance benchmarks](/docs/benchmarks) showing real-world speed comparisons, or use the [benchmark calculator](/docs/benchmarks/calculator) to estimate potential time savings for your specific test suite.
+Want to see how fast TUnit can be? Check out the [performance benchmarks](/docs/benchmarks) showing real-world speed comparisons.
 :::
 
 ## Test Discovery Performance
