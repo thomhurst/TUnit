@@ -148,7 +148,7 @@ internal class GenericTypeResolverTests : TestsBase<Generators.TestMetadataGener
     private async Task RunTestWithInlineSource(string source)
     {
         var tempFile = Path.GetTempFileName() + ".cs";
-        await File.WriteAllTextAsync(tempFile, source);
+        await FilePolyfill.WriteAllTextAsync(tempFile, source);
 
         try
         {

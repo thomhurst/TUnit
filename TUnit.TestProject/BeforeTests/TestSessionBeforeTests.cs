@@ -11,7 +11,7 @@ public class TestSessionBeforeHooks
     [BeforeEvery(TestSession)]
     public static async Task BeforeEveryTestSession(TestSessionContext context)
     {
-        await File.WriteAllTextAsync($"TestSessionBeforeTests{Guid.NewGuid():N}.txt", $"{context.AllTests.Count()} tests in session");
+        await FilePolyfill.WriteAllTextAsync($"TestSessionBeforeTests{Guid.NewGuid():N}.txt", $"{context.AllTests.Count()} tests in session");
 
         var test = context.AllTests.FirstOrDefault(x =>
             x.Metadata.TestDetails.TestName == nameof(TestSessionBeforeTests.EnsureBeforeEveryTestSessionHit));

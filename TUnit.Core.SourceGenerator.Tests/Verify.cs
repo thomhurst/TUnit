@@ -157,15 +157,15 @@ public sealed class VerifySettingsTask
 
         if (!File.Exists(_verifiedPath))
         {
-            await File.WriteAllTextAsync(_receivedPath, NormalizeNewline(final));
+            await FilePolyfill.WriteAllTextAsync(_receivedPath, NormalizeNewline(final));
             throw new InvalidOperationException($"No verified file found for '{name}'.");
         }
 
-        var approved = await File.ReadAllTextAsync(_verifiedPath);
+        var approved = await FilePolyfill.ReadAllTextAsync(_verifiedPath);
 
         if (!string.Equals(NormalizeNewline(final), NormalizeNewline(approved), StringComparison.Ordinal))
         {
-            await File.WriteAllTextAsync(_receivedPath, NormalizeNewline(final));
+            await FilePolyfill.WriteAllTextAsync(_receivedPath, NormalizeNewline(final));
 
             if (_onVerifyMismatch != null)
             {
