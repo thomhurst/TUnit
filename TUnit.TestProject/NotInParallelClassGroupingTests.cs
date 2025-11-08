@@ -107,7 +107,7 @@ public class NotInParallelClassGroupingTests_Verify
             if (order.Count >= 8)
                 break;
             var timeProvider = TestContext.Current!.TimeProvider;
-                await timeProvider.Delay(retryDelay);
+                await timeProvider.Delay(TimeSpan.FromMilliseconds(retryDelay));
         }
 
         // We should have 8 test executions (3 from ClassA, 2 from ClassB, 3 from ClassC)
