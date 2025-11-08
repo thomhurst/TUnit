@@ -22,8 +22,7 @@ public class HookOrchestratorDeadlockTests
             ExecutionLog.Add($"BeforeClass_Executed_{_beforeClassCounter}");
 
             // Simulate some work that might cause coordination issues
-            var timeProvider = context.GetServiceProvider().GetRequiredService<TimeProvider>();
-            await timeProvider.Delay(TimeSpan.FromMilliseconds(10));
+            await Task.Delay(TimeSpan.FromMilliseconds(10));
         }
     }
 
@@ -117,8 +116,7 @@ public class SequentialCoordinationDeadlockTests
         if (context.ClassType == typeof(SequentialCoordinationDeadlockTests))
         {
             SequentialExecutionLog.Add("SequentialBeforeClass_Executed");
-            var timeProvider = context.GetServiceProvider().GetRequiredService<TimeProvider>();
-            await timeProvider.Delay(TimeSpan.FromMilliseconds(20)); // Longer delay to stress sequential coordination
+            await Task.Delay(TimeSpan.FromMilliseconds(20)); // Longer delay to stress sequential coordination
         }
     }
 
@@ -128,8 +126,7 @@ public class SequentialCoordinationDeadlockTests
         if (context.ClassType == typeof(SequentialCoordinationDeadlockTests))
         {
             SequentialExecutionLog.Add("SequentialAfterClass_Executed");
-            var timeProvider = context.GetServiceProvider().GetRequiredService<TimeProvider>();
-            await timeProvider.Delay(TimeSpan.FromMilliseconds(20));
+            await Task.Delay(TimeSpan.FromMilliseconds(20));
         }
     }
 
