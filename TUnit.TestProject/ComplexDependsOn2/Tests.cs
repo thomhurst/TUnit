@@ -9,7 +9,7 @@ public abstract class BaseClass
     [Test]
     public async Task Test1()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(50));
     }
 
@@ -17,7 +17,7 @@ public abstract class BaseClass
     [DependsOn(nameof(Test1))]
     public async Task Test2()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(50));
     }
 }

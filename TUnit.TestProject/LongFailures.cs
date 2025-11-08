@@ -12,8 +12,8 @@ public class LongFailures
     [Test]
     public async Task LongFailure()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
-        await timeProvider.Delay(TimeSpan.FromSeconds(Interlocked.Increment(ref _counter)));
+        var timeProvider = TimeProviderContext.Current;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(Interlocked.Increment(ref _counter)));
         throw new Exception($"Failure after {_counter} seconds");
     }
 }

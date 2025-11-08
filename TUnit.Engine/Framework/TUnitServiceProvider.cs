@@ -253,42 +253,10 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         Register<ITestRegistry>(new TestRegistry(TestBuilderPipeline, testCoordinator, dynamicTestQueue, TestSessionId, CancellationToken.Token));
 
-        // Register TimeProvider (defaults to InstantTimeProvider for fast test execution, can be overridden via configuration for tests)
-        var timeProvider = GetTimeProviderFromConfiguration(configuration) ?? InstantTimeProvider.Instance;
-        Register(timeProvider);
 
         InitializeConsoleInterceptors();
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "TimeProvider type configuration is optional and used only for testing")]
-    [UnconditionalSuppressMessage("Trimming", "IL2057", Justification = "TimeProvider type name from configuration is validated before activation")]
-    [UnconditionalSuppressMessage("Trimming", "IL2062", Justification = "TimeProvider type is created only when explicitly configured for testing scenarios")]
-    private static TimeProvider? GetTimeProviderFromConfiguration(Microsoft.Testing.Platform.Configurations.IConfiguration configuration)
-    {
-        // Check if a custom TimeProvider type is configured
-        // This allows tests to inject FakeTimeProvider for deterministic testing
-        const string timeProviderConfigKey = "TUnit.TimeProvider";
-        var timeProviderTypeName = configuration[timeProviderConfigKey];
-        if (string.IsNullOrWhiteSpace(timeProviderTypeName))
-        {
-            return null;
-        }
-
-        try
-        {
-            var type = Type.GetType(timeProviderTypeName);
-            if (type != null && typeof(TimeProvider).IsAssignableFrom(type))
-            {
-                return Activator.CreateInstance(type) as TimeProvider;
-            }
-        }
-        catch
-        {
-            // If activation fails, fall back to system TimeProvider
-        }
-
-        return null;
-    }
 
     public ContextProvider ContextProvider { get; }
 

@@ -92,7 +92,7 @@ public class TypedDataSourceTests
         {
             for (var i = 0; i < _count; i++)
             {
-                var timeProvider = TestContext.Current!.TimeProvider;
+                var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(1)); // Simulate async work
                 var value = i * 10;
                 yield return () => Task.FromResult(value);
@@ -104,7 +104,7 @@ public class TypedDataSourceTests
     [AsyncIntDataSource(3)]
     public async Task AsyncTypedDataSource(int value)
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(1));
         await Assert.That(value % 10).IsEqualTo(0);
     }

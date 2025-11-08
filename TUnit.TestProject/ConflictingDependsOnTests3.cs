@@ -10,7 +10,7 @@ public class ConflictingDependsOnTests3
     [Test, DependsOn(nameof(Test5))]
     public async Task Test1(CancellationToken cancellationToken)
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromSeconds(5), cancellationToken);
     }
 

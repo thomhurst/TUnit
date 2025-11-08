@@ -86,7 +86,7 @@ public class SharedDisposalTest
         Console.WriteLine($"[AfterClass] Before delay - Instances: {DisposableSharedInstance.InstanceCount}, Disposed: {DisposableSharedInstance.DisposedCount}");
         
         // Give disposal a chance to complete
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(1000));
         
         Console.WriteLine($"[AfterClass] After delay - Instances: {DisposableSharedInstance.InstanceCount}, Disposed: {DisposableSharedInstance.DisposedCount}");

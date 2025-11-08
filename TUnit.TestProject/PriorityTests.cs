@@ -17,7 +17,7 @@ public class PriorityTests
         {
             ExecutionOrder.Add(nameof(CriticalPriority_Test));
         }
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
     }
 
@@ -28,7 +28,7 @@ public class PriorityTests
         {
             ExecutionOrder.Add(nameof(HighPriority_Test1));
         }
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
     }
 
@@ -39,7 +39,7 @@ public class PriorityTests
         {
             ExecutionOrder.Add(nameof(HighPriority_Test2));
         }
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
     }
 
@@ -50,7 +50,7 @@ public class PriorityTests
         {
             ExecutionOrder.Add(nameof(NormalPriority_Test));
         }
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
     }
 
@@ -61,7 +61,7 @@ public class PriorityTests
         {
             ExecutionOrder.Add(nameof(LowPriority_Test));
         }
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
     }
 

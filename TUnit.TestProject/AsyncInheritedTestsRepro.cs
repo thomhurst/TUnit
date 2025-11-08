@@ -11,7 +11,7 @@ public class AsyncInheritedTestsRepro : AsyncBaseTests
     [Test]
     public async Task DerivedAsyncTest()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(1));
         Console.WriteLine("Derived async test executed");
     }

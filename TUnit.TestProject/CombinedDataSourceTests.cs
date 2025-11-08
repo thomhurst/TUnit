@@ -434,7 +434,7 @@ public class CombinedDataSourceTests
         public async Task InitializeAsync()
         {
             // Simulate async initialization work
-            var timeProvider = TestContext.Current!.TimeProvider;
+            var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(10));
             IsInitialized = true;
             InitializationTime = DateTime.UtcNow;
@@ -464,7 +464,7 @@ public class CombinedDataSourceTests
         public async Task InitializeAsync()
         {
             // Simulate database connection
-            var timeProvider = TestContext.Current!.TimeProvider;
+            var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(5));
             ConnectionAttempts++;
             IsConnected = true;
@@ -500,7 +500,7 @@ public class CombinedDataSourceTests
         public async Task InitializeAsync()
         {
             // Simulate async initialization that depends on injected properties
-            var timeProvider = TestContext.Current!.TimeProvider;
+            var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(5));
 
             // This verifies that property injection happens BEFORE IAsyncInitializer
@@ -553,7 +553,7 @@ public class CombinedDataSourceTests
         public async Task InitializeAsync()
         {
             // Simulate validation that requires the injected Location
-            var timeProvider = TestContext.Current!.TimeProvider;
+            var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(5));
 
             if (Location == null || Location.Coordinates == null)
@@ -581,7 +581,7 @@ public class CombinedDataSourceTests
         public async Task InitializeAsync()
         {
             // Simulate geolocation service call
-            var timeProvider = TestContext.Current!.TimeProvider;
+            var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(3));
             IsGeolocated = true;
         }

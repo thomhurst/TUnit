@@ -77,21 +77,21 @@ public class NotInParallelMixedTests
     [Test, NotInParallel]
     public async Task NoKey_Test1()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(200));
     }
 
     [Test, NotInParallel]
     public async Task NoKey_Test2()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(200));
     }
 
     [Test, NotInParallel]
     public async Task NoKey_Test3()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(200));
     }
 
@@ -99,21 +99,21 @@ public class NotInParallelMixedTests
     [Test, NotInParallel("GroupA", Order = 2)]
     public async Task GroupA_Second()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(150));
     }
 
     [Test, NotInParallel("GroupA", Order = 1)]
     public async Task GroupA_First()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(150));
     }
 
     [Test, NotInParallel("GroupA", Order = 3)]
     public async Task GroupA_Third()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(150));
     }
 
@@ -121,21 +121,21 @@ public class NotInParallelMixedTests
     [Test, NotInParallel("GroupB")]
     public async Task GroupB_Test1()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
     }
 
     [Test, NotInParallel("GroupB")]
     public async Task GroupB_Test2()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
     }
 
     [Test, NotInParallel("GroupB")]
     public async Task GroupB_Test3()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
     }
 
@@ -143,21 +143,21 @@ public class NotInParallelMixedTests
     [Test, NotInParallel("GroupC", Order = 10)]
     public async Task GroupC_Last()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(80));
     }
 
     [Test, NotInParallel("GroupC", Order = 1)]
     public async Task GroupC_First()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(80));
     }
 
     [Test, NotInParallel("GroupC", Order = 5)]
     public async Task GroupC_Middle()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(80));
     }
 
@@ -165,21 +165,21 @@ public class NotInParallelMixedTests
     [Test]
     public async Task Parallel_Test1()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(50));
     }
 
     [Test]
     public async Task Parallel_Test2()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(50));
     }
 
     [Test]
     public async Task Parallel_Test3()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(50));
     }
 
@@ -187,21 +187,21 @@ public class NotInParallelMixedTests
     [Test, NotInParallel(["GroupD", "GroupE"])]
     public async Task MultiGroup_Test1()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(120));
     }
 
     [Test, NotInParallel(["GroupD", "GroupF"])]
     public async Task MultiGroup_Test2()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(120));
     }
 
     [Test, NotInParallel(["GroupE", "GroupF"])]
     public async Task MultiGroup_Test3()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(120));
     }
 

@@ -20,7 +20,7 @@ public class CombinedConstraints_SchemaTests
         {
             ExecutionLog.Add(("SchemaTests.Before(Class)", DateTime.UtcNow, DateTime.UtcNow));
         }
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(50)); // Simulate schema setup
     }
     
@@ -28,7 +28,7 @@ public class CombinedConstraints_SchemaTests
     public async Task MigrateSchema_V1()
     {
         var start = DateTime.UtcNow;
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(100)); // Simulate migration work
         var end = DateTime.UtcNow;
         
@@ -42,7 +42,7 @@ public class CombinedConstraints_SchemaTests
     public async Task MigrateSchema_V2()
     {
         var start = DateTime.UtcNow;
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(100)); // Simulate migration work
         var end = DateTime.UtcNow;
         
@@ -55,7 +55,7 @@ public class CombinedConstraints_SchemaTests
     [After(Class)]
     public static async Task TeardownSchema()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(50)); // Simulate cleanup
         lock (SchemaLock)
         {
@@ -76,7 +76,7 @@ public class CombinedConstraints_DataTests
         {
             CombinedConstraints_SchemaTests.ExecutionLog.Add(("DataTests.Before(Class)", DateTime.UtcNow, DateTime.UtcNow));
         }
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(50));
     }
     
@@ -84,7 +84,7 @@ public class CombinedConstraints_DataTests
     public async Task LoadTestData_Set1()
     {
         var start = DateTime.UtcNow;
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
         var end = DateTime.UtcNow;
         
@@ -98,7 +98,7 @@ public class CombinedConstraints_DataTests
     public async Task LoadTestData_Set2()
     {
         var start = DateTime.UtcNow;
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
         var end = DateTime.UtcNow;
         
@@ -111,7 +111,7 @@ public class CombinedConstraints_DataTests
     [After(Class)]
     public static async Task TeardownData()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(50));
         lock (CombinedConstraints_SchemaTests.ExecutionLog)
         {
@@ -133,7 +133,7 @@ public class CombinedConstraints_QueryTests
         {
             CombinedConstraints_SchemaTests.ExecutionLog.Add(("QueryTests.Before(Class)", DateTime.UtcNow, DateTime.UtcNow));
         }
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(50));
     }
     
@@ -141,7 +141,7 @@ public class CombinedConstraints_QueryTests
     public async Task QueryTest1()
     {
         var start = DateTime.UtcNow;
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
         var end = DateTime.UtcNow;
         
@@ -155,7 +155,7 @@ public class CombinedConstraints_QueryTests
     public async Task QueryTest2()
     {
         var start = DateTime.UtcNow;
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
         var end = DateTime.UtcNow;
         
@@ -168,7 +168,7 @@ public class CombinedConstraints_QueryTests
     [After(Class)]
     public static async Task TeardownQueries()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(50));
         lock (CombinedConstraints_SchemaTests.ExecutionLog)
         {
@@ -187,7 +187,7 @@ public class CombinedConstraints_ApiTests
     public async Task ApiTest1()
     {
         var start = DateTime.UtcNow;
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
         var end = DateTime.UtcNow;
         
@@ -201,7 +201,7 @@ public class CombinedConstraints_ApiTests
     public async Task ApiTest2()
     {
         var start = DateTime.UtcNow;
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
         var end = DateTime.UtcNow;
         
@@ -221,7 +221,7 @@ public class CombinedConstraints_VerificationTest
     public async Task VerifyCombinedConstraints()
     {
         // Wait for all tests to complete
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(500));
         
         var log = CombinedConstraints_SchemaTests.ExecutionLog.OrderBy(x => x.Start).ToList();

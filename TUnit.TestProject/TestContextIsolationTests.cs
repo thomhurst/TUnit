@@ -45,7 +45,7 @@ public class TestContextIsolationTests
         await Assert.That(testId).IsNotNull();
 
         // Simulate some async work
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(RandomInstance.Next(10, 50)));
 
         // Verify context hasn't changed
@@ -76,7 +76,7 @@ public class TestContextIsolationTests
         await Assert.That(testId).IsNotNull();
 
         // Different delay pattern
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(RandomInstance.Next(5, 30)));
 
         // Verify isolation
@@ -118,7 +118,7 @@ public class TestContextIsolationTests
     public async Task Verify_All_Contexts_Were_Unique()
     {
         // Wait a bit to ensure all tests have completed storing their contexts
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
             await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
 
         // Each test execution should have had a unique context
@@ -179,7 +179,7 @@ public class TestContextNestedAsyncIsolationTests
 
     private async Task NestedAsyncMethod1(TestContext expectedContext)
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
             await timeProvider.Delay(TimeSpan.FromMilliseconds(10));
         await Assert.That(TestContext.Current).IsSameReferenceAs(expectedContext);
 
@@ -187,7 +187,7 @@ public class TestContextNestedAsyncIsolationTests
         {
             // Even in Task.Run, context should be preserved
             await Assert.That(TestContext.Current).IsSameReferenceAs(expectedContext);
-            var timeProvider = TestContext.Current!.TimeProvider;
+            var timeProvider = TimeProviderContext.Current;
             await timeProvider.Delay(TimeSpan.FromMilliseconds(5));
             await Assert.That(TestContext.Current).IsSameReferenceAs(expectedContext);
         });
@@ -203,7 +203,7 @@ public class TestContextNestedAsyncIsolationTests
 
         var tasks = Enumerable.Range(0, 3).Select(async i =>
         {
-            var timeProvider = TestContext.Current!.TimeProvider;
+            var timeProvider = TimeProviderContext.Current;
                 await timeProvider.Delay(TimeSpan.FromMilliseconds(i * 5));
             await Assert.That(TestContext.Current).IsSameReferenceAs(expectedContext);
         });
@@ -258,7 +258,7 @@ public class TestContextRaceConditionTests
                         DetectedContextMismatches.Add($"TestId mismatch in {myTestName}: Expected {myTestId}, Got {currentContext?.StateBag.Items.GetValueOrDefault("UniqueTestId")}");
                     }
 
-                    var timeProvider = TestContext.Current!.TimeProvider;
+                    var timeProvider = TimeProviderContext.Current;
             await timeProvider.Delay(TimeSpan.FromMilliseconds(1));
                 }
             }));

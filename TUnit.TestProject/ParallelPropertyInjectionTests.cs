@@ -17,7 +17,7 @@ public class ParallelPropertyInjectionTests
         {
             var startTime = DateTime.UtcNow;
             // Simulate Redis container startup
-            var timeProvider = TestContext.Current!.TimeProvider;
+            var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
             InitializedAt = DateTime.UtcNow;
             InitializationDuration = InitializedAt - startTime;
@@ -34,7 +34,7 @@ public class ParallelPropertyInjectionTests
         {
             var startTime = DateTime.UtcNow;
             // Simulate SQL container startup
-            var timeProvider = TestContext.Current!.TimeProvider;
+            var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(150));
             InitializedAt = DateTime.UtcNow;
             InitializationDuration = InitializedAt - startTime;
@@ -51,7 +51,7 @@ public class ParallelPropertyInjectionTests
         {
             var startTime = DateTime.UtcNow;
             // Simulate message bus container startup
-            var timeProvider = TestContext.Current!.TimeProvider;
+            var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(120));
             InitializedAt = DateTime.UtcNow;
             InitializationDuration = InitializedAt - startTime;

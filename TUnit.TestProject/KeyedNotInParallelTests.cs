@@ -20,21 +20,21 @@ public class KeyedNotInParallelTests
     [Test, NotInParallel("1"), Repeat(3)]
     public async Task NotInParallel_Test1()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(500));
     }
 
     [Test, NotInParallel("1"), Repeat(3)]
     public async Task NotInParallel_Test2()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(500));
     }
 
     [Test, NotInParallel("3"), Repeat(3)]
     public async Task NotInParallel_Test3()
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(500));
     }
 

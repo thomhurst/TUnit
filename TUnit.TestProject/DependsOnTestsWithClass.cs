@@ -10,7 +10,7 @@ public class DependsOnTestsOtherClass
     public async Task Test1(CancellationToken cancellationToken)
     {
         Test1Start = TestContext.Current!.Execution.TestStart!.Value;
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromSeconds(5), cancellationToken);
     }
 }

@@ -406,8 +406,8 @@ internal sealed class TestBuilderPipeline
             Result = new TestResult
             {
                 State = TestState.Failed,
-                Start = context.TimeProvider.GetUtcNow(),
-                End = context.TimeProvider.GetUtcNow(),
+                Start = TimeProviderContext.Current.GetUtcNow(),
+                End = TimeProviderContext.Current.GetUtcNow(),
                 Duration = TimeSpan.Zero,
                 Exception = exception,
                 ComputerName = EnvironmentHelper.MachineName,
@@ -457,8 +457,8 @@ internal sealed class TestBuilderPipeline
             Result = new TestResult
             {
                 State = TestState.Failed,
-                Start = context.TimeProvider.GetUtcNow(),
-                End = context.TimeProvider.GetUtcNow(),
+                Start = TimeProviderContext.Current.GetUtcNow(),
+                End = TimeProviderContext.Current.GetUtcNow(),
                 Duration = TimeSpan.Zero,
                 Exception = exception,
                 ComputerName = EnvironmentHelper.MachineName,

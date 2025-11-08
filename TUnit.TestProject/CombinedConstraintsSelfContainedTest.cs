@@ -18,7 +18,7 @@ public class CombinedConstraintTest1
     public async Task Test1A()
     {
         var start = DateTime.UtcNow;
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(200));
         var end = DateTime.UtcNow;
 
@@ -32,7 +32,7 @@ public class CombinedConstraintTest1
     public async Task Test1B()
     {
         var start = DateTime.UtcNow;
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(200));
         var end = DateTime.UtcNow;
 
@@ -51,7 +51,7 @@ public class CombinedConstraintTest2
     public async Task Test2A()
     {
         var start = DateTime.UtcNow;
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(200));
         var end = DateTime.UtcNow;
 
@@ -65,7 +65,7 @@ public class CombinedConstraintTest2
     public async Task Test2B()
     {
         var start = DateTime.UtcNow;
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(200));
         var end = DateTime.UtcNow;
 
@@ -83,7 +83,7 @@ public class CombinedConstraintTest3
     public async Task Test3A()
     {
         var start = DateTime.UtcNow;
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(200));
         var end = DateTime.UtcNow;
 
@@ -97,7 +97,7 @@ public class CombinedConstraintTest3
     public async Task Test3B()
     {
         var start = DateTime.UtcNow;
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(200));
         var end = DateTime.UtcNow;
 
@@ -117,7 +117,7 @@ public class CombinedConstraintVerifier
     public async Task VerifyConstraintsCombineCorrectly()
     {
         // Wait a bit to ensure all tests have completed
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
 
         var log = CombinedConstraintTracker.ExecutionLog.OrderBy(x => x.Start).ToList();

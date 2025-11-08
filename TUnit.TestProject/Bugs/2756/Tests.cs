@@ -8,7 +8,7 @@ public class Tests
     [MethodDataSource(nameof(Ints))]
     public async Task Test1(int i)
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(100));
         await Assert.That(i).IsGreaterThan(0);
     }

@@ -20,21 +20,21 @@ public class NotInParallelTests
     [Test, NotInParallel, Repeat(3)]
     public async Task NotInParallel_Test1(CancellationToken cancellationToken)
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(500), cancellationToken);
     }
 
     [Test, NotInParallel, Repeat(3)]
     public async Task NotInParallel_Test2(CancellationToken cancellationToken)
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(500), cancellationToken);
     }
 
     [Test, NotInParallel, Repeat(3)]
     public async Task NotInParallel_Test3(CancellationToken cancellationToken)
     {
-        var timeProvider = TestContext.Current!.TimeProvider;
+        var timeProvider = TimeProviderContext.Current;
         await timeProvider.Delay(TimeSpan.FromMilliseconds(500), cancellationToken);
     }
 
