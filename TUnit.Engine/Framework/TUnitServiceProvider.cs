@@ -253,8 +253,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         Register<ITestRegistry>(new TestRegistry(TestBuilderPipeline, testCoordinator, dynamicTestQueue, TestSessionId, CancellationToken.Token));
 
-        // Register TimeProvider (defaults to System, can be overridden via configuration for tests)
-        var timeProvider = GetTimeProviderFromConfiguration(configuration) ?? TimeProvider.System;
+        // Register TimeProvider (defaults to InstantTimeProvider for fast test execution, can be overridden via configuration for tests)
+        var timeProvider = GetTimeProviderFromConfiguration(configuration) ?? InstantTimeProvider.Instance;
         Register(timeProvider);
 
         InitializeConsoleInterceptors();
