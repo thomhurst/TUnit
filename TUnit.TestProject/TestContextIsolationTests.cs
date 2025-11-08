@@ -101,7 +101,7 @@ public class TestContextIsolationTests
         await Assert.That(testId).IsNotNull();
 
         // Simulate work
-        Thread.Sleep(RandomInstance.Next(10, 50));
+        await TimeProviderContext.Current.Delay(TimeSpan.FromMilliseconds(RandomInstance.Next(10, 50)));
 
         // Verify context remains the same
         await Assert.That(TestContext.Current).IsSameReferenceAs(context);

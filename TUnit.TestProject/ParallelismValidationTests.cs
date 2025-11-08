@@ -27,7 +27,7 @@ public class UnconstrainedParallelTests
         [After(Class)]
         public static async Task VerifyParallelExecution()
         {
-            await Task.Delay(100); // Ensure all tests recorded
+            await TimeProviderContext.Current.Delay(TimeSpan.FromMilliseconds(100)); // Ensure all tests recorded
 
             var times = _executionTimes.ToArray();
 
@@ -56,32 +56,32 @@ public class UnconstrainedParallelTests
         [Test, Repeat(3)]
         public async Task UnconstrainedTest1()
         {
-            TrackConcurrency();
-            await Task.Delay(100);
+            await TrackConcurrency();
+            await TimeProviderContext.Current.Delay(TimeSpan.FromMilliseconds(100));
         }
 
         [Test, Repeat(3)]
         public async Task UnconstrainedTest2()
         {
-            TrackConcurrency();
-            await Task.Delay(100);
+            await TrackConcurrency();
+            await TimeProviderContext.Current.Delay(TimeSpan.FromMilliseconds(100));
         }
 
         [Test, Repeat(3)]
         public async Task UnconstrainedTest3()
         {
-            TrackConcurrency();
-            await Task.Delay(100);
+            await TrackConcurrency();
+            await TimeProviderContext.Current.Delay(TimeSpan.FromMilliseconds(100));
         }
 
         [Test, Repeat(3)]
         public async Task UnconstrainedTest4()
         {
-            TrackConcurrency();
-            await Task.Delay(100);
+            await TrackConcurrency();
+            await TimeProviderContext.Current.Delay(TimeSpan.FromMilliseconds(100));
         }
 
-        private static void TrackConcurrency()
+        private static async Task TrackConcurrency()
         {
             var current = Interlocked.Increment(ref _concurrentCount);
             lock (_lock)
@@ -91,7 +91,7 @@ public class UnconstrainedParallelTests
                     _maxConcurrent = current;
                 }
             }
-            Thread.Sleep(50);
+            await TimeProviderContext.Current.Delay(TimeSpan.FromMilliseconds(50));
             Interlocked.Decrement(ref _concurrentCount);
         }
 }
@@ -129,7 +129,7 @@ public class LimitedParallelTests
         [After(Class)]
         public static async Task VerifyLimitedParallelExecution()
         {
-            await Task.Delay(100); // Ensure all tests recorded
+            await TimeProviderContext.Current.Delay(TimeSpan.FromMilliseconds(100)); // Ensure all tests recorded
 
             var times = _executionTimes.ToArray();
 
@@ -163,32 +163,32 @@ public class LimitedParallelTests
         [Test, Repeat(3)]
         public async Task LimitedTest1()
         {
-            TrackConcurrency();
-            await Task.Delay(100);
+            await TrackConcurrency();
+            await TimeProviderContext.Current.Delay(TimeSpan.FromMilliseconds(100));
         }
 
         [Test, Repeat(3)]
         public async Task LimitedTest2()
         {
-            TrackConcurrency();
-            await Task.Delay(100);
+            await TrackConcurrency();
+            await TimeProviderContext.Current.Delay(TimeSpan.FromMilliseconds(100));
         }
 
         [Test, Repeat(3)]
         public async Task LimitedTest3()
         {
-            TrackConcurrency();
-            await Task.Delay(100);
+            await TrackConcurrency();
+            await TimeProviderContext.Current.Delay(TimeSpan.FromMilliseconds(100));
         }
 
         [Test, Repeat(3)]
         public async Task LimitedTest4()
         {
-            TrackConcurrency();
-            await Task.Delay(100);
+            await TrackConcurrency();
+            await TimeProviderContext.Current.Delay(TimeSpan.FromMilliseconds(100));
         }
 
-        private static void TrackConcurrency()
+        private static async Task TrackConcurrency()
         {
             var current = Interlocked.Increment(ref _concurrentCount);
             lock (_lock)
@@ -202,7 +202,7 @@ public class LimitedParallelTests
                     _exceededLimit++;
                 }
             }
-            Thread.Sleep(50);
+            await TimeProviderContext.Current.Delay(TimeSpan.FromMilliseconds(50));
             Interlocked.Decrement(ref _concurrentCount);
         }
 }
@@ -240,7 +240,7 @@ public class StrictlySerialTests
         [After(Class)]
         public static async Task VerifySerialExecution()
         {
-            await Task.Delay(100); // Ensure all tests recorded
+            await TimeProviderContext.Current.Delay(TimeSpan.FromMilliseconds(100)); // Ensure all tests recorded
 
             var times = _executionTimes.ToArray();
 
@@ -272,32 +272,32 @@ public class StrictlySerialTests
         [Test, Repeat(2)]
         public async Task SerialTest1()
         {
-            TrackConcurrency();
-            await Task.Delay(100);
+            await TrackConcurrency();
+            await TimeProviderContext.Current.Delay(TimeSpan.FromMilliseconds(100));
         }
 
         [Test, Repeat(2)]
         public async Task SerialTest2()
         {
-            TrackConcurrency();
-            await Task.Delay(100);
+            await TrackConcurrency();
+            await TimeProviderContext.Current.Delay(TimeSpan.FromMilliseconds(100));
         }
 
         [Test, Repeat(2)]
         public async Task SerialTest3()
         {
-            TrackConcurrency();
-            await Task.Delay(100);
+            await TrackConcurrency();
+            await TimeProviderContext.Current.Delay(TimeSpan.FromMilliseconds(100));
         }
 
         [Test, Repeat(2)]
         public async Task SerialTest4()
         {
-            TrackConcurrency();
-            await Task.Delay(100);
+            await TrackConcurrency();
+            await TimeProviderContext.Current.Delay(TimeSpan.FromMilliseconds(100));
         }
 
-        private static void TrackConcurrency()
+        private static async Task TrackConcurrency()
         {
             var current = Interlocked.Increment(ref _concurrentCount);
             lock (_lock)
@@ -311,7 +311,7 @@ public class StrictlySerialTests
                     _exceededLimit++;
                 }
             }
-            Thread.Sleep(50);
+            await TimeProviderContext.Current.Delay(TimeSpan.FromMilliseconds(50));
             Interlocked.Decrement(ref _concurrentCount);
         }
 }
@@ -348,7 +348,7 @@ public class HighParallelismTests
         [After(Class)]
         public static async Task VerifyHighParallelExecution()
         {
-            await Task.Delay(100); // Ensure all tests recorded
+            await TimeProviderContext.Current.Delay(TimeSpan.FromMilliseconds(100)); // Ensure all tests recorded
 
             var times = _executionTimes.ToArray();
 
@@ -378,32 +378,32 @@ public class HighParallelismTests
         [Test, Repeat(3)]
         public async Task HighParallelTest1()
         {
-            TrackConcurrency();
-            await Task.Delay(100);
+            await TrackConcurrency();
+            await TimeProviderContext.Current.Delay(TimeSpan.FromMilliseconds(100));
         }
 
         [Test, Repeat(3)]
         public async Task HighParallelTest2()
         {
-            TrackConcurrency();
-            await Task.Delay(100);
+            await TrackConcurrency();
+            await TimeProviderContext.Current.Delay(TimeSpan.FromMilliseconds(100));
         }
 
         [Test, Repeat(3)]
         public async Task HighParallelTest3()
         {
-            TrackConcurrency();
-            await Task.Delay(100);
+            await TrackConcurrency();
+            await TimeProviderContext.Current.Delay(TimeSpan.FromMilliseconds(100));
         }
 
         [Test, Repeat(3)]
         public async Task HighParallelTest4()
         {
-            TrackConcurrency();
-            await Task.Delay(100);
+            await TrackConcurrency();
+            await TimeProviderContext.Current.Delay(TimeSpan.FromMilliseconds(100));
         }
 
-        private static void TrackConcurrency()
+        private static async Task TrackConcurrency()
         {
             var current = Interlocked.Increment(ref _concurrentCount);
             lock (_lock)
@@ -413,7 +413,7 @@ public class HighParallelismTests
                     _maxConcurrent = current;
                 }
             }
-            Thread.Sleep(50);
+            await TimeProviderContext.Current.Delay(TimeSpan.FromMilliseconds(50));
             Interlocked.Decrement(ref _concurrentCount);
         }
 }
