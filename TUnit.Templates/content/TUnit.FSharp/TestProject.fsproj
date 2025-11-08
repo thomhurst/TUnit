@@ -10,8 +10,8 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.10" />
-		<PackageReference Include="TUnit" Version="1.0.27" />
-		<PackageReference Include="TUnit.Assertions.FSharp" Version="1.0.27" />	
+		<PackageReference Include="TUnit" Version="1.0.30" />
+		<PackageReference Include="TUnit.Assertions.FSharp" Version="1.0.30" />	
 	</ItemGroup>
 
 	<ItemGroup>
