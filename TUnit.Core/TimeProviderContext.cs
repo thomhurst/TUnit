@@ -4,15 +4,18 @@ namespace TUnit.Core;
 
 /// <summary>
 /// Global TimeProvider configuration for TUnit test execution.
-/// For internal engine use. Set TimeProvider in a [ModuleInitializer] to use FakeTimeProvider for deterministic testing.
+/// Uses AsyncLocal to ensure isolation between parallel tests.
+/// For internal engine use. Set TimeProvider per test context for deterministic testing.
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
 public static class TimeProviderContext
 {
+    private static readonly AsyncLocal<TimeProvider?> _current = new();
+
     /// <summary>
     /// The TimeProvider used by the TUnit engine and all tests.
     /// Defaults to TimeProvider.System for real time.
-    /// Set to FakeTimeProvider in a [ModuleInitializer] for deterministic test timing.
+    /// Uses AsyncLocal to ensure each test execution flow has isolated TimeProvider state.
     /// </summary>
     /// <example>
     /// <code>
@@ -20,15 +23,20 @@ public static class TimeProviderContext
     /// using Microsoft.Extensions.Time.Testing;
     /// using TUnit.Core;
     ///
-    /// public static class TestSetup
+    /// [Test]
+    /// public async Task MyTest()
     /// {
-    ///     [ModuleInitializer]
-    ///     public static void Initialize()
-    ///     {
-    ///         TimeProviderContext.Current = new FakeTimeProvider();
-    ///     }
+    ///     var fakeTimeProvider = new FakeTimeProvider();
+    ///     TimeProviderContext.Current = fakeTimeProvider;
+    ///
+    ///     // Test code using TimeProviderContext.Current
+    ///     // Each test gets its own isolated TimeProvider
     /// }
     /// </code>
     /// </example>
-    public static TimeProvider Current { get; set; } = TimeProvider.System;
+    public static TimeProvider Current
+    {
+        get => _current.Value ?? TimeProvider.System;
+        set => _current.Value = value;
+    }
 }
