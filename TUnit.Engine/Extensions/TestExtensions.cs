@@ -18,22 +18,17 @@ internal static class TestExtensions
 
         var isTrxEnabled = isFinalState && IsTrxEnabled(testContext);
 
-        var estimatedCount =
-                3 + // State + FileLocation + MethodIdentifier
-                testDetails.Categories.Count +
-                testDetails.CustomProperties.Count +
-                testContext.Artifacts.Count +
-                (isFinalState ? 3 : 0) + // Timing + StdOut + StdErr;
-                (isTrxEnabled ? 3 : 0) // TRX TypeName + TRX Categories + TRX Messages
-            ;
+        var estimatedCount = EstimateCount(testContext, stateProperty, isTrxEnabled);
 
         var properties = new List<IProperty>(estimatedCount)
         {
             stateProperty,
+
             new TestFileLocationProperty(testDetails.TestFilePath, new LinePositionSpan(
                 new LinePosition(testDetails.TestLineNumber, 0),
                 new LinePosition(testDetails.TestLineNumber, 0)
             )),
+
             new TestMethodIdentifierProperty(
                 @namespace: testDetails.MethodMetadata.Class.Type.Namespace ?? "",
                 assemblyFullName: testDetails.MethodMetadata.Class.Type.Assembly.GetName().FullName,
@@ -90,6 +85,20 @@ internal static class TestExtensions
             {
                 properties.Add(new TrxMessagesProperty(trxMessages));
             }
+
+            if(stateProperty is ErrorTestNodeStateProperty or FailedTestNodeStateProperty or TimeoutTestNodeStateProperty)
+            {
+                var (exception, explanation) = GetException(stateProperty);
+
+                if (exception is not null)
+                {
+                    properties.Add(new TrxExceptionProperty(exception.Message, exception.StackTrace));
+                }
+                else if (!string.IsNullOrEmpty(explanation))
+                {
+                    properties.Add(new TrxExceptionProperty(explanation, string.Empty));
+                }
+            }
         }
 
         if(isFinalState)
@@ -105,6 +114,60 @@ internal static class TestExtensions
         };
 
         return testNode;
+    }
+
+    private static (Exception? Exception, string? Reason) GetException(TestNodeStateProperty stateProperty)
+    {
+        if (stateProperty is ErrorTestNodeStateProperty errorState)
+        {
+            return (errorState.Exception, errorState.Explanation);
+        }
+
+        if (stateProperty is FailedTestNodeStateProperty failedState)
+        {
+            return (failedState.Exception, failedState.Explanation);
+        }
+
+        if (stateProperty is TimeoutTestNodeStateProperty timeoutState)
+        {
+            return (timeoutState.Exception, timeoutState.Explanation);
+        }
+
+        return (null, null);
+    }
+
+    private static int EstimateCount(TestContext testContext, TestNodeStateProperty stateProperty, bool isTrxEnabled)
+    {
+        var isFinalState = stateProperty is not DiscoveredTestNodeStateProperty and not InProgressTestNodeStateProperty;
+
+        var testDetails = testContext.Metadata.TestDetails ?? throw new ArgumentNullException(nameof(testContext.Metadata.TestDetails));
+
+        var count = 3; // State + FileLocation + MethodIdentifier
+
+        count += testDetails.CustomProperties.Count;
+        count += testDetails.Categories.Count;
+
+        if (isFinalState)
+        {
+            count += 3; // Timing + StdOut + StdErr;
+        }
+
+        if (isTrxEnabled)
+        {
+            count += 2; // TRX TypeName + TRX Messages
+
+            if(testDetails.Categories.Count > 0)
+            {
+                count += 1; // TRX Categories
+            }
+
+            if(stateProperty is ErrorTestNodeStateProperty or FailedTestNodeStateProperty or TimeoutTestNodeStateProperty)
+            {
+                count += 1; // Trx Exception
+            }
+        }
+
+        return count;
     }
 
     private static bool IsTrxEnabled(TestContext testContext)
