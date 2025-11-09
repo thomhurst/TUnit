@@ -4,16 +4,32 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
 using TUnit.Core.Extensions;
 using TUnit.Engine.Capabilities;
+#pragma warning disable TPEXP
 
 namespace TUnit.Engine.Extensions;
 
 internal static class TestExtensions
 {
-    internal static TestNode ToTestNode(this TestContext testContext)
+    internal static TestNode ToTestNode(this TestContext testContext, TestNodeStateProperty stateProperty)
     {
         var testDetails = testContext.Metadata.TestDetails ?? throw new ArgumentNullException(nameof(testContext.Metadata.TestDetails));
 
-        var properties = new List<IProperty>
+        var isFinalState = stateProperty is not DiscoveredTestNodeStateProperty and not InProgressTestNodeStateProperty;
+
+        var capabilities = (ITestFrameworkCapabilities)testContext.Services.GetService(typeof(ITestFrameworkCapabilities))!;
+        var trxCapability = capabilities.GetCapability<ITrxReportCapability>();
+        var isTrxEnabled = ((TrxReportCapability)trxCapability!).IsTrxEnabled;
+
+        var estimatedCount =
+                3 + // State + FileLocation + MethodIdentifier
+                testDetails.Categories.Count +
+                testDetails.CustomProperties.Count +
+                testContext.Artifacts.Count +
+                (isFinalState ? 3 : 0) + // Timing + StdOut + StdErr;
+                (isTrxEnabled ? 3 : 0) // TRX TypeName + TRX Categories + TRX Messages
+            ;
+
+        var properties = new List<IProperty>(estimatedCount)
         {
             new TestFileLocationProperty(testDetails.TestFilePath, new LinePositionSpan(
                 new LinePosition(testDetails.TestLineNumber, 0),
@@ -47,13 +63,39 @@ internal static class TestExtensions
             properties.AddRange(testContext.Artifacts.Select(static x => new FileArtifactProperty(x.File, x.DisplayName, x.Description)));
         }
 
+        string? output = null;
+        if (isFinalState && testContext.GetStandardOutput() is {} standardOutput && !string.IsNullOrEmpty(standardOutput))
+        {
+            output = standardOutput;
+            properties.Add(new StandardOutputProperty(standardOutput));
+        }
+
+        string? error = null;
+        if (isFinalState && testContext.GetErrorOutput() is {} standardError && !string.IsNullOrEmpty(standardError))
+        {
+            error = standardError;
+            properties.Add(new StandardErrorProperty(standardError));
+        }
+
         // TRX Report Properties
-        var capabilities = (ITestFrameworkCapabilities)testContext.Services.GetService(typeof(ITestFrameworkCapabilities))!;
-        var trxCapability = capabilities.GetCapability<ITrxReportCapability>();
-        if (((TrxReportCapability)trxCapability!).IsTrxEnabled)
+        if (isTrxEnabled)
         {
             properties.Add(new TrxFullyQualifiedTypeNameProperty(testDetails.MethodMetadata.Class.Type.FullName ?? testDetails.ClassType.FullName ?? "UnknownType"));
-            properties.Add(new TrxCategoriesProperty([..testDetails.Categories]));
+
+            if(testDetails.Categories.Count > 0)
+            {
+                properties.Add(new TrxCategoriesProperty([..testDetails.Categories]));
+            }
+
+            if (isFinalState && GetTrxMessages(testContext, output, error).ToArray() is { Length: > 0 } trxMessages)
+            {
+                properties.Add(new TrxMessagesProperty(trxMessages));
+            }
+        }
+
+        if(isFinalState)
+        {
+            properties.Add(GetTimingProperty(testContext, testContext.Execution.TestStart.GetValueOrDefault()));
         }
 
         var testNode = new TestNode
@@ -66,7 +108,7 @@ internal static class TestExtensions
         return testNode;
     }
 
-    public static IEnumerable<TestMetadataProperty> ExtractProperties(this TestDetails testDetails)
+    private static IEnumerable<TestMetadataProperty> ExtractProperties(TestDetails testDetails)
     {
         foreach (var propertyGroup in testDetails.CustomProperties)
         {
@@ -77,10 +119,34 @@ internal static class TestExtensions
         }
     }
 
-    internal static TestNode WithProperty(this TestNode testNode, IProperty property)
+    private static TimingProperty GetTimingProperty(TestContext testContext, DateTimeOffset overallStart)
     {
-        testNode.Properties.Add(property);
-        return testNode;
+        if (overallStart == default(DateTimeOffset))
+        {
+            return new TimingProperty(new TimingInfo());
+        }
+
+        var end = DateTimeOffset.Now;
+
+        return new TimingProperty(new TimingInfo(overallStart, end, end - overallStart), testContext.Timings.Select(x => new StepTimingInfo(x.StepName, x.StepName, new TimingInfo(x.Start, x.End, x.Duration))).ToArray());
+    }
+
+    private static IEnumerable<TrxMessage> GetTrxMessages(TestContext testContext, string? standardOutput, string? standardError)
+    {
+        if (!string.IsNullOrEmpty(standardOutput))
+        {
+            yield return new StandardOutputTrxMessage(standardOutput);
+        }
+
+        if (!string.IsNullOrEmpty(standardError))
+        {
+            yield return new StandardErrorTrxMessage(standardError);
+        }
+
+        if (!string.IsNullOrEmpty(testContext.SkipReason))
+        {
+            yield return new DebugOrTraceTrxMessage($"Skipped: {testContext.SkipReason}");
+        }
     }
 
     /// <summary>
