@@ -6,19 +6,22 @@ using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Services;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
+using TUnit.Engine.Capabilities;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Exceptions;
 using TUnit.Engine.Extensions;
-using TUnit.Engine.Logging;
 using TUnit.Engine.Services;
 
 #pragma warning disable TPEXP
 
 namespace TUnit.Engine;
 
-internal class TUnitMessageBus(IExtension extension, ICommandLineOptions commandLineOptions, VerbosityService verbosityService, IServiceProvider serviceProvider, ExecuteRequestContext context) : ITUnitMessageBus, IDataProducer
+internal class TUnitMessageBus(IExtension extension, ICommandLineOptions commandLineOptions, VerbosityService verbosityService, IServiceProvider serviceProvider, ITrxReportCapability trxReportCapability, ExecuteRequestContext context) : ITUnitMessageBus, IDataProducer
 {
     private readonly SessionUid _sessionSessionUid = context.Request.Session.SessionUid;
+
+    private bool? _isTrxEnabled;
+    private bool IsTrxEnabled => _isTrxEnabled ??= ((TrxReportCapability)trxReportCapability).IsTrxEnabled;
 
     private bool? _isConsole;
     private bool IsConsole => _isConsole ??= serviceProvider.GetClientInfo().Id.Contains("console", StringComparison.InvariantCultureIgnoreCase);
@@ -51,16 +54,29 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
         var standardOutput = testContext.GetStandardOutput() ?? string.Empty;
         var standardError = testContext.GetErrorOutput() ?? string.Empty;
 
-        var trxMessages = GetTrxMessages(testContext, standardOutput, standardError).ToArray();
+
+        var testNode = testContext.ToTestNode()
+            .WithProperty(PassedTestNodeStateProperty.CachedInstance)
+            .WithProperty(GetTimingProperty(testContext, start));
+
+        if (!string.IsNullOrEmpty(standardOutput))
+        {
+            testNode.WithProperty(new StandardOutputProperty(standardOutput));
+        }
+
+        if (!string.IsNullOrEmpty(standardError))
+        {
+            testNode.WithProperty(new StandardErrorProperty(standardError));
+        }
+
+        if (IsTrxEnabled && GetTrxMessages(testContext, standardOutput, standardError).ToArray() is { Length: > 0 } trxMessages)
+        {
+            testNode.WithProperty(new TrxMessagesProperty(trxMessages));
+        }
 
         await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
             sessionUid: _sessionSessionUid,
-            testNode: testContext.ToTestNode()
-                .WithProperty(PassedTestNodeStateProperty.CachedInstance)
-                .WithProperty(new StandardOutputProperty(standardOutput))
-                .WithProperty(new StandardErrorProperty(standardError))
-                .WithProperty(GetTimingProperty(testContext, start))
-                .WithProperty(new TrxMessagesProperty(trxMessages))
+            testNode: testNode
         ));
     }
 
@@ -81,17 +97,30 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
         var standardOutput = testContext.GetStandardOutput() ?? string.Empty;
         var standardError = testContext.GetErrorOutput() ?? string.Empty;
 
-        var trxMessages = GetTrxMessages(testContext, standardOutput, standardError).ToArray();
+        var testNode = testContext.ToTestNode()
+            .WithProperty(updateType)
+            .WithProperty(timingProperty);
+
+        if (!string.IsNullOrEmpty(standardOutput))
+        {
+            testNode.WithProperty(new StandardOutputProperty(standardOutput));
+        }
+
+        if (!string.IsNullOrEmpty(standardError))
+        {
+            testNode.WithProperty(new StandardErrorProperty(standardError));
+        }
+
+        if (IsTrxEnabled && GetTrxMessages(testContext, standardOutput, standardError).ToArray() is { Length: > 0 } trxMessages)
+        {
+            testNode
+                .WithProperty(new TrxExceptionProperty(exception.Message, exception.StackTrace))
+                .WithProperty(new TrxMessagesProperty(trxMessages));
+        }
 
         await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
             sessionUid: _sessionSessionUid,
-            testNode: testContext.ToTestNode()
-                .WithProperty(updateType)
-                .WithProperty(timingProperty)
-                .WithProperty(new StandardOutputProperty(standardOutput))
-                .WithProperty(new StandardErrorProperty(standardError))
-                .WithProperty(new TrxExceptionProperty(exception.Message, exception.StackTrace))
-                .WithProperty(new TrxMessagesProperty(trxMessages))
+            testNode: testNode
         ));
     }
 
@@ -119,15 +148,28 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
         var standardOutput = testContext.GetStandardOutput() ?? string.Empty;
         var standardError = testContext.GetErrorOutput() ?? string.Empty;
 
-        var trxMessages = GetTrxMessages(testContext, standardOutput, standardError).ToArray();
+
+        var testNode = testContext.ToTestNode()
+            .WithProperty(new SkippedTestNodeStateProperty(reason));
+
+        if (!string.IsNullOrEmpty(standardOutput))
+        {
+            testNode.WithProperty(new StandardOutputProperty(standardOutput));
+        }
+
+        if (!string.IsNullOrEmpty(standardError))
+        {
+            testNode.WithProperty(new StandardErrorProperty(standardError));
+        }
+
+        if (IsTrxEnabled && GetTrxMessages(testContext, standardOutput, standardError).ToArray() is { Length: > 0 } trxMessages)
+        {
+            testNode.WithProperty(new TrxMessagesProperty(trxMessages));
+        }
 
         await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
             sessionUid: _sessionSessionUid,
-            testNode: testContext.ToTestNode()
-                .WithProperty(new SkippedTestNodeStateProperty(reason))
-                .WithProperty(new StandardOutputProperty(standardOutput))
-                .WithProperty(new StandardErrorProperty(standardError))
-                .WithProperty(new TrxMessagesProperty(trxMessages))
+            testNode: testNode
         ));
     }
 
@@ -138,16 +180,28 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
         var standardOutput = testContext.GetStandardOutput() ?? string.Empty;
         var standardError = testContext.GetErrorOutput() ?? string.Empty;
 
-        var trxMessages = GetTrxMessages(testContext, standardOutput, standardError).ToArray();
+        var testNode = testContext.ToTestNode()
+            .WithProperty(new CancelledTestNodeStateProperty())
+            .WithProperty(timingProperty);
+
+        if (!string.IsNullOrEmpty(standardOutput))
+        {
+            testNode.WithProperty(new StandardOutputProperty(standardOutput));
+        }
+
+        if (!string.IsNullOrEmpty(standardError))
+        {
+            testNode.WithProperty(new StandardErrorProperty(standardError));
+        }
+
+        if (IsTrxEnabled && GetTrxMessages(testContext, standardOutput, standardError).ToArray() is { Length: > 0 } trxMessages)
+        {
+            testNode.WithProperty(new TrxMessagesProperty(trxMessages));
+        }
 
         await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
             sessionUid: _sessionSessionUid,
-            testNode: testContext.ToTestNode()
-                .WithProperty(new CancelledTestNodeStateProperty())
-                .WithProperty(timingProperty)
-                .WithProperty(new StandardOutputProperty(standardOutput))
-                .WithProperty(new StandardErrorProperty(standardError))
-                .WithProperty(new TrxMessagesProperty(trxMessages))
+            testNode: testNode
         ));
     }
 
@@ -171,6 +225,7 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
         }
 
         var end = DateTimeOffset.Now;
+
         return new TimingProperty(new TimingInfo(overallStart, end, end - overallStart), testContext.Timings.Select(x => new StepTimingInfo(x.StepName, x.StepName, new TimingInfo(x.Start, x.End, x.Duration))).ToArray());
     }
 
@@ -193,6 +248,11 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
 
     private IEnumerable<TrxMessage> GetTrxMessages(TestContext testContext, string standardOutput, string standardError)
     {
+        if (!IsTrxEnabled)
+        {
+            yield break;
+        }
+
         if (!string.IsNullOrEmpty(standardOutput))
         {
             yield return new StandardOutputTrxMessage(standardOutput);
@@ -203,7 +263,7 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
             yield return new StandardErrorTrxMessage(standardError);
         }
 
-        if (!string.IsNullOrEmpty(testContext.SkipReason))
+        if (IsTrxEnabled && !string.IsNullOrEmpty(testContext.SkipReason))
         {
             yield return new DebugOrTraceTrxMessage($"Skipped: {testContext.SkipReason}");
         }

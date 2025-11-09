@@ -70,6 +70,12 @@ public abstract class Context : IContext, IDisposable
     public string GetStandardOutput()
     {
         _outputLock.EnterReadLock();
+
+        if (_outputBuilder.Length == 0)
+        {
+            return string.Empty;
+        }
+
         try
         {
             return _outputBuilder.ToString().Trim();
@@ -83,6 +89,12 @@ public abstract class Context : IContext, IDisposable
     public string GetErrorOutput()
     {
         _errorOutputLock.EnterReadLock();
+
+        if (_outputBuilder.Length == 0)
+        {
+            return string.Empty;
+        }
+
         try
         {
             return _errorOutputBuilder.ToString().Trim();
