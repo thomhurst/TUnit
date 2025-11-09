@@ -75,6 +75,9 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         TestContext.Configuration = new ConfigurationAdapter(configuration);
 
+        // Register capabilities so they're available to test contexts
+        Register<ITestFrameworkCapabilities>(capabilities);
+
         VerbosityService = Register(new VerbosityService(CommandLineOptions, frameworkServiceProvider));
 
         var logLevelProvider = Register(new LogLevelProvider(CommandLineOptions));

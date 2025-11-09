@@ -6,7 +6,10 @@ internal class TrxReportCapability : ITrxReportCapability
 {
     public void Enable()
     {
+        IsTrxEnabled = true;
     }
+
+    public bool IsTrxEnabled { get; private set; }
 
     public bool IsSupported => true;
 }
