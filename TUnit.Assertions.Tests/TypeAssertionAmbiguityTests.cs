@@ -319,4 +319,87 @@ public class TypeAssertionAmbiguityTests
             .And
             .IsNotAssignableTo<DerivedElement>();
     }
+
+    // ============ LAMBDA ASSERTION CONTEXTS (.Member) ============
+
+    private class Container
+    {
+        public object? Value { get; init; }
+        public IElement? ElementProperty { get; init; }
+    }
+
+    [Test]
+    public async Task IsTypeOf_InMemberLambda_NoAmbiguity()
+    {
+        var container = new Container { Value = "test" };
+
+        await Assert.That(container)
+            .Member(c => c.Value, assert => assert.IsTypeOf<string>());
+    }
+
+    [Test]
+    public async Task IsNotTypeOf_InMemberLambda_NoAmbiguity()
+    {
+        var container = new Container { Value = "test" };
+
+        await Assert.That(container)
+            .Member(c => c.Value, assert => assert.IsNotTypeOf<int>());
+    }
+
+    [Test]
+    public async Task IsAssignableTo_InMemberLambda_NoAmbiguity()
+    {
+        var container = new Container { ElementProperty = new Element() };
+
+        await Assert.That(container)
+            .Member(c => c.ElementProperty, assert => assert.IsAssignableTo<IElement>());
+    }
+
+    [Test]
+    public async Task IsNotAssignableTo_InMemberLambda_NoAmbiguity()
+    {
+        var container = new Container { ElementProperty = new Element() };
+
+        await Assert.That(container)
+            .Member(c => c.ElementProperty, assert => assert.IsNotAssignableTo<DerivedElement>());
+    }
+
+    [Test]
+    public async Task AllFourMethods_InMemberLambdas_NoAmbiguity()
+    {
+        var container = new Container { Value = new Element() };
+
+        await Assert.That(container)
+            .Member(c => c.Value, assert => assert.IsNotTypeOf<string>())
+            .And
+            .Member(c => c.Value, assert => assert.IsTypeOf<Element>())
+            .And
+            .Member(c => c.Value, assert => assert.IsAssignableTo<IElement>())
+            .And
+            .Member(c => c.Value, assert => assert.IsNotAssignableTo<DerivedElement>());
+    }
+
+    [Test]
+    public async Task IsTypeOf_WithMemberChaining_NoAmbiguity()
+    {
+        var container = new Container { Value = "test" };
+
+        await Assert.That(container)
+            .Member(c => c.Value, assert => assert.IsNotNull())
+            .And
+            .Member(c => c.Value, assert => assert.IsTypeOf<string>());
+    }
+
+    [Test]
+    public async Task IsAssignableTo_WithMemberChaining_NoAmbiguity()
+    {
+        var container = new Container { ElementProperty = new Element() };
+
+        await Assert.That(container)
+            .Member(c => c.ElementProperty, assert => assert.IsNotNull())
+            .And
+            .Member(c => c.ElementProperty, assert => assert.IsAssignableTo<IElement>())
+            .And
+            .Member(c => c.ElementProperty, assert => assert.IsNotAssignableTo<DerivedElement>());
+    }
 }
