@@ -140,7 +140,7 @@ internal static class TestExtensions
             return new TimingProperty(new TimingInfo());
         }
 
-        var end = DateTimeOffset.Now;
+        var end = testContext.Execution.TestEnd ?? DateTimeOffset.Now;
 
         return new TimingProperty(new TimingInfo(overallStart, end, end - overallStart), testContext.Timings.Select(x => new StepTimingInfo(x.StepName, x.StepName, new TimingInfo(x.Start, x.End, x.Duration))).ToArray());
     }
