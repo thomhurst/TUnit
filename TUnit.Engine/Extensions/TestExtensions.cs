@@ -58,7 +58,7 @@ internal static class TestExtensions
         }
 
         // Artifacts
-        if(testContext.Output.Artifacts.Count > 0)
+        if(isFinalState && testContext.Output.Artifacts.Count > 0)
         {
             properties.AddRange(testContext.Artifacts.Select(static x => new FileArtifactProperty(x.File, x.DisplayName, x.Description)));
         }
@@ -78,7 +78,7 @@ internal static class TestExtensions
         }
 
         // TRX Report Properties
-        if (isTrxEnabled)
+        if (isFinalState && isTrxEnabled)
         {
             properties.Add(new TrxFullyQualifiedTypeNameProperty(testDetails.MethodMetadata.Class.Type.FullName ?? testDetails.ClassType.FullName ?? "UnknownType"));
 
