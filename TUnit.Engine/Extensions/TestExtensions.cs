@@ -16,9 +16,9 @@ internal static class TestExtensions
 
         var isFinalState = stateProperty is not DiscoveredTestNodeStateProperty and not InProgressTestNodeStateProperty;
 
-        var capabilities = (ITestFrameworkCapabilities)testContext.Services.GetService(typeof(ITestFrameworkCapabilities))!;
-        var trxCapability = capabilities.GetCapability<ITrxReportCapability>();
-        var isTrxEnabled = ((TrxReportCapability)trxCapability!).IsTrxEnabled;
+        var capabilities = (ITestFrameworkCapabilities?)testContext.Services.GetService(typeof(ITestFrameworkCapabilities));
+        var trxCapability = capabilities?.GetCapability<ITrxReportCapability>();
+        var isTrxEnabled = trxCapability is TrxReportCapability trxCap && trxCap.IsTrxEnabled;
 
         var estimatedCount =
                 3 + // State + FileLocation + MethodIdentifier
