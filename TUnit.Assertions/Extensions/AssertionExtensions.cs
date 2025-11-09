@@ -1532,33 +1532,4 @@ public static class AssertionExtensions
         return new Assertions.Enums.DoesNotHaveSameValueAsAssertion<TEnum>(source.Context, otherEnumValue);
     }
 
-    /// <summary>
-    /// Asserts that a value's type is assignable to a specific type (specialized for object).
-    /// </summary>
-    public static IsAssignableToAssertion<TTarget, object> IsAssignableTo<TTarget>(
-        this IAssertionSource<object> source)
-    {
-        source.Context.ExpressionBuilder.Append($".IsAssignableTo<{typeof(TTarget).Name}>()");
-        return new IsAssignableToAssertion<TTarget, object>(source.Context);
-    }
-
-    /// <summary>
-    /// Asserts that a value's type is assignable to a specific type.
-    /// </summary>
-    public static IsAssignableToAssertion<TTarget, TValue> IsAssignableTo<TTarget, TValue>(
-        this IAssertionSource<TValue> source)
-    {
-        source.Context.ExpressionBuilder.Append($".IsAssignableTo<{typeof(TTarget).Name}>()");
-        return new IsAssignableToAssertion<TTarget, TValue>(source.Context);
-    }
-
-    /// <summary>
-    /// Asserts that a value's type is NOT assignable to a specific type.
-    /// </summary>
-    public static IsNotAssignableToAssertion<TTarget, TValue> IsNotAssignableTo<TTarget, TValue>(
-        this IAssertionSource<TValue> source)
-    {
-        source.Context.ExpressionBuilder.Append($".IsNotAssignableTo<{typeof(TTarget).Name}>()");
-        return new IsNotAssignableToAssertion<TTarget, TValue>(source.Context);
-    }
 }

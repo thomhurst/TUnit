@@ -141,6 +141,58 @@ public class AsyncDelegateAssertion : IAssertionSource<object?>, IDelegateAssert
         return new TypeOfAssertion<Task, TExpected>(TaskContext);
     }
 
+    public IsAssignableToAssertion<TTarget, object?> IsAssignableTo<TTarget>()
+    {
+        Context.ExpressionBuilder.Append($".IsAssignableTo<{typeof(TTarget).Name}>()");
+        return new IsAssignableToAssertion<TTarget, object?>(Context);
+    }
+
+    public IsNotAssignableToAssertion<TTarget, object?> IsNotAssignableTo<TTarget>()
+    {
+        Context.ExpressionBuilder.Append($".IsNotAssignableTo<{typeof(TTarget).Name}>()");
+        return new IsNotAssignableToAssertion<TTarget, object?>(Context);
+    }
+
+    /// <summary>
+    /// Explicit interface implementation for Task assignability checking.
+    /// Asserts that the task itself is assignable to the specified type.
+    /// </summary>
+    IsAssignableToAssertion<TTarget, Task> IAssertionSource<Task>.IsAssignableTo<TTarget>()
+    {
+        TaskContext.ExpressionBuilder.Append($".IsAssignableTo<{typeof(TTarget).Name}>()");
+        return new IsAssignableToAssertion<TTarget, Task>(TaskContext);
+    }
+
+    /// <summary>
+    /// Explicit interface implementation for Task assignability checking.
+    /// Asserts that the task itself is not assignable to the specified type.
+    /// </summary>
+    IsNotAssignableToAssertion<TTarget, Task> IAssertionSource<Task>.IsNotAssignableTo<TTarget>()
+    {
+        TaskContext.ExpressionBuilder.Append($".IsNotAssignableTo<{typeof(TTarget).Name}>()");
+        return new IsNotAssignableToAssertion<TTarget, Task>(TaskContext);
+    }
+
+    /// <summary>
+    /// Asserts that the value is NOT of the specified type.
+    /// Example: await Assert.That(async () => await SomeMethodAsync()).IsNotTypeOf<int>();
+    /// </summary>
+    public IsNotTypeOfAssertion<object?, TExpected> IsNotTypeOf<TExpected>()
+    {
+        Context.ExpressionBuilder.Append($".IsNotTypeOf<{typeof(TExpected).Name}>()");
+        return new IsNotTypeOfAssertion<object?, TExpected>(Context);
+    }
+
+    /// <summary>
+    /// Explicit interface implementation for Task type checking.
+    /// Asserts that the task itself is NOT of the specified type.
+    /// </summary>
+    IsNotTypeOfAssertion<Task, TExpected> IAssertionSource<Task>.IsNotTypeOf<TExpected>()
+    {
+        TaskContext.ExpressionBuilder.Append($".IsNotTypeOf<{typeof(TExpected).Name}>()");
+        return new IsNotTypeOfAssertion<Task, TExpected>(TaskContext);
+    }
+
     /// <summary>
     /// Asserts that the async delegate throws the specified exception type (or subclass).
     /// Instance method to avoid C# type inference issues with extension methods.

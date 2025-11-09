@@ -46,6 +46,28 @@ public class DelegateAssertion : IAssertionSource<object?>, IDelegateAssertionSo
         return new TypeOfAssertion<object?, TExpected>(Context);
     }
 
+    public IsAssignableToAssertion<TTarget, object?> IsAssignableTo<TTarget>()
+    {
+        Context.ExpressionBuilder.Append($".IsAssignableTo<{typeof(TTarget).Name}>()");
+        return new IsAssignableToAssertion<TTarget, object?>(Context);
+    }
+
+    public IsNotAssignableToAssertion<TTarget, object?> IsNotAssignableTo<TTarget>()
+    {
+        Context.ExpressionBuilder.Append($".IsNotAssignableTo<{typeof(TTarget).Name}>()");
+        return new IsNotAssignableToAssertion<TTarget, object?>(Context);
+    }
+
+    /// <summary>
+    /// Asserts that the value is NOT of the specified type.
+    /// Example: await Assert.That(() => SomeMethod()).IsNotTypeOf<int>();
+    /// </summary>
+    public IsNotTypeOfAssertion<object?, TExpected> IsNotTypeOf<TExpected>()
+    {
+        Context.ExpressionBuilder.Append($".IsNotTypeOf<{typeof(TExpected).Name}>()");
+        return new IsNotTypeOfAssertion<object?, TExpected>(Context);
+    }
+
     /// <summary>
     /// Asserts that the delegate throws the specified exception type (or subclass).
     /// Instance method to avoid C# type inference issues with extension methods.

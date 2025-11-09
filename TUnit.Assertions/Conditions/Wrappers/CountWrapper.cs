@@ -34,6 +34,36 @@ public class CountWrapper<TCollection, TItem> : IAssertionSource<TCollection>
     }
 
     /// <summary>
+    /// Not supported on CountWrapper - use IsAssignableTo on the assertion source before calling HasCount().
+    /// </summary>
+    IsAssignableToAssertion<TTarget, TCollection> IAssertionSource<TCollection>.IsAssignableTo<TTarget>()
+    {
+        throw new NotSupportedException(
+            "IsAssignableTo is not supported after HasCount(). " +
+            "Use: Assert.That(value).IsAssignableTo<IList<int>>().HasCount().EqualTo(5)");
+    }
+
+    /// <summary>
+    /// Not supported on CountWrapper - use IsNotAssignableTo on the assertion source before calling HasCount().
+    /// </summary>
+    IsNotAssignableToAssertion<TTarget, TCollection> IAssertionSource<TCollection>.IsNotAssignableTo<TTarget>()
+    {
+        throw new NotSupportedException(
+            "IsNotAssignableTo is not supported after HasCount(). " +
+            "Use: Assert.That(value).IsNotAssignableTo<IList<int>>().HasCount().EqualTo(5)");
+    }
+
+    /// <summary>
+    /// Not supported on CountWrapper - use IsNotTypeOf on the assertion source before calling HasCount().
+    /// </summary>
+    IsNotTypeOfAssertion<TCollection, TExpected> IAssertionSource<TCollection>.IsNotTypeOf<TExpected>()
+    {
+        throw new NotSupportedException(
+            "IsNotTypeOf is not supported after HasCount(). " +
+            "Use: Assert.That(value).IsNotTypeOf<List<int>>().HasCount().EqualTo(5)");
+    }
+
+    /// <summary>
     /// Asserts that the collection count is equal to the expected count.
     /// </summary>
     public CollectionCountAssertion<TCollection, TItem> EqualTo(

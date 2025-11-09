@@ -55,6 +55,29 @@ public abstract class CollectionAssertionBase<TCollection, TItem> : Assertion<TC
         return new TypeOfAssertion<TCollection, TExpected>(Context);
     }
 
+    public IsAssignableToAssertion<TTarget, TCollection> IsAssignableTo<TTarget>()
+    {
+        Context.ExpressionBuilder.Append($".IsAssignableTo<{typeof(TTarget).Name}>()");
+        return new IsAssignableToAssertion<TTarget, TCollection>(Context);
+    }
+
+    public IsNotAssignableToAssertion<TTarget, TCollection> IsNotAssignableTo<TTarget>()
+    {
+        Context.ExpressionBuilder.Append($".IsNotAssignableTo<{typeof(TTarget).Name}>()");
+        return new IsNotAssignableToAssertion<TTarget, TCollection>(Context);
+    }
+
+    /// <summary>
+    /// Asserts that the collection is NOT of the specified type.
+    /// This allows chaining additional assertions on the value.
+    /// Example: await Assert.That((IEnumerable<int>)list).IsNotTypeOf<HashSet<int>>().And.HasCount(5);
+    /// </summary>
+    public IsNotTypeOfAssertion<TCollection, TExpected> IsNotTypeOf<TExpected>()
+    {
+        Context.ExpressionBuilder.Append($".IsNotTypeOf<{typeof(TExpected).Name}>()");
+        return new IsNotTypeOfAssertion<TCollection, TExpected>(Context);
+    }
+
     /// <summary>
     /// Asserts that the collection contains the expected item.
     /// This instance method enables calling Contains with proper type inference.
