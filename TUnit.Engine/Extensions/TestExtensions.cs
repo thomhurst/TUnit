@@ -16,8 +16,7 @@ internal static class TestExtensions
 
         var isFinalState = stateProperty is not DiscoveredTestNodeStateProperty and not InProgressTestNodeStateProperty;
 
-        var isTrxEnabled = isFinalState &&
-            (testContext.Services.GetService<ITestFrameworkCapabilities>()?.GetCapability<ITrxReportCapability>() as TrxReportCapability)?.IsTrxEnabled is true;
+        var isTrxEnabled = isFinalState && IsTrxEnabled(testContext);
 
         var estimatedCount =
                 3 + // State + FileLocation + MethodIdentifier
@@ -106,6 +105,21 @@ internal static class TestExtensions
         };
 
         return testNode;
+    }
+
+    private static bool IsTrxEnabled(TestContext testContext)
+    {
+        if(testContext.Services.GetService<ITestFrameworkCapabilities>() is not {} capabilities)
+        {
+            return false;
+        }
+
+        if(capabilities.GetCapability<ITrxReportCapability>() is not TrxReportCapability trxCapability)
+        {
+            return false;
+        }
+
+        return trxCapability.IsTrxEnabled;
     }
 
     private static IEnumerable<TestMetadataProperty> ExtractProperties(TestDetails testDetails)
