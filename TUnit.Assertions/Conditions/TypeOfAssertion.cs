@@ -49,10 +49,51 @@ public class TypeOfAssertion<TFrom, TTo> : Assertion<TTo>
 }
 
 /// <summary>
+/// Asserts that a value is NOT exactly of the specified type.
+/// </summary>
+public class IsNotTypeOfAssertion<TValue, TExpected> : Assertion<TValue>
+{
+    private readonly Type _expectedType;
+
+    public IsNotTypeOfAssertion(
+        AssertionContext<TValue> context)
+        : base(context)
+    {
+        _expectedType = typeof(TExpected);
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
+
+        if (value == null)
+        {
+            return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
+
+        var actualType = value.GetType();
+
+        if (actualType != _expectedType)
+        {
+            return Task.FromResult(AssertionResult.Passed);
+        }
+
+        return Task.FromResult(AssertionResult.Failed($"type was {actualType.Name}"));
+    }
+
+    protected override string GetExpectation() => $"to not be of type {_expectedType.Name}";
+}
+
+/// <summary>
 /// Asserts that a value's type is assignable to a specific type (is the type or a subtype).
 /// Works with both direct value assertions and exception assertions (via .And after Throws).
 /// </summary>
-[AssertionExtension("IsAssignableTo")]
 public class IsAssignableToAssertion<TTarget, TValue> : Assertion<TValue>
 {
     private readonly Type _targetType;
@@ -103,7 +144,6 @@ public class IsAssignableToAssertion<TTarget, TValue> : Assertion<TValue>
 /// Asserts that a value's type is NOT assignable to a specific type.
 /// Works with both direct value assertions and exception assertions (via .And after Throws).
 /// </summary>
-[AssertionExtension("IsNotAssignableTo")]
 public class IsNotAssignableToAssertion<TTarget, TValue> : Assertion<TValue>
 {
     private readonly Type _targetType;

@@ -740,17 +740,17 @@ public static class AssertionExtensions
     /// <summary>
     /// Asserts that a mapped Task value satisfies custom assertions on the unwrapped result.
     /// Maps the source value using a selector that returns a Task, then runs assertions on the awaited result.
-    /// Example: await Assert.That(model).Satisfies(m => m.AsyncValue, assert => assert.IsEqualTo("Hello"));
+    /// Supports both same-type and type-changing assertions.
+    /// Example: await Assert.That(model).SatisfiesAsync(m => m.AsyncValue, assert => assert.IsEqualTo("Hello"));
     /// </summary>
-    public static AsyncMappedSatisfiesAssertion<TValue, TMapped, TAssertion> Satisfies<TValue, TMapped, TAssertion>(
+    public static AsyncMappedSatisfiesAssertion<TValue, TMapped> SatisfiesAsync<TValue, TMapped>(
         this IAssertionSource<TValue> source,
         Func<TValue?, Task<TMapped?>> selector,
-        Func<ValueAssertion<TMapped>, TAssertion> assertions,
+        Func<ValueAssertion<TMapped>, IAssertion?> assertions,
         [CallerArgumentExpression(nameof(selector))] string? selectorExpression = null)
-        where TAssertion : Assertion<TMapped>
     {
-        source.Context.ExpressionBuilder.Append($".Satisfies({selectorExpression}, ...)");
-        return new AsyncMappedSatisfiesAssertion<TValue, TMapped, TAssertion>(
+        source.Context.ExpressionBuilder.Append($".SatisfiesAsync({selectorExpression}, ...)");
+        return new AsyncMappedSatisfiesAssertion<TValue, TMapped>(
             source.Context,
             selector!,
             assertions,
@@ -760,12 +760,13 @@ public static class AssertionExtensions
     /// <summary>
     /// Asserts that a mapped value satisfies custom assertions.
     /// Maps the source value using a selector, then runs assertions on the mapped value.
+    /// Supports both same-type and type-changing assertions.
     /// Example: await Assert.That(model).Satisfies(m => m.Name, assert => assert.IsEqualTo("John"));
     /// </summary>
     public static MappedSatisfiesAssertion<TValue, TMapped> Satisfies<TValue, TMapped>(
         this IAssertionSource<TValue> source,
         Func<TValue?, TMapped> selector,
-        Func<ValueAssertion<TMapped>, Assertion<TMapped>?> assertions,
+        Func<ValueAssertion<TMapped>, IAssertion?> assertions,
         [CallerArgumentExpression(nameof(selector))] string? selectorExpression = null)
     {
         source.Context.ExpressionBuilder.Append($".Satisfies({selectorExpression}, ...)");
@@ -1532,33 +1533,4 @@ public static class AssertionExtensions
         return new Assertions.Enums.DoesNotHaveSameValueAsAssertion<TEnum>(source.Context, otherEnumValue);
     }
 
-    /// <summary>
-    /// Asserts that a value's type is assignable to a specific type (specialized for object).
-    /// </summary>
-    public static IsAssignableToAssertion<TTarget, object> IsAssignableTo<TTarget>(
-        this IAssertionSource<object> source)
-    {
-        source.Context.ExpressionBuilder.Append($".IsAssignableTo<{typeof(TTarget).Name}>()");
-        return new IsAssignableToAssertion<TTarget, object>(source.Context);
-    }
-
-    /// <summary>
-    /// Asserts that a value's type is assignable to a specific type.
-    /// </summary>
-    public static IsAssignableToAssertion<TTarget, TValue> IsAssignableTo<TTarget, TValue>(
-        this IAssertionSource<TValue> source)
-    {
-        source.Context.ExpressionBuilder.Append($".IsAssignableTo<{typeof(TTarget).Name}>()");
-        return new IsAssignableToAssertion<TTarget, TValue>(source.Context);
-    }
-
-    /// <summary>
-    /// Asserts that a value's type is NOT assignable to a specific type.
-    /// </summary>
-    public static IsNotAssignableToAssertion<TTarget, TValue> IsNotAssignableTo<TTarget, TValue>(
-        this IAssertionSource<TValue> source)
-    {
-        source.Context.ExpressionBuilder.Append($".IsNotAssignableTo<{typeof(TTarget).Name}>()");
-        return new IsNotAssignableToAssertion<TTarget, TValue>(source.Context);
-    }
 }

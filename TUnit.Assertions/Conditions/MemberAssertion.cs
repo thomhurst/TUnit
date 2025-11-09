@@ -7,8 +7,9 @@ namespace TUnit.Assertions.Conditions;
 /// <summary>
 /// Result of a member assertion that allows returning to the parent object context.
 /// Enables chaining multiple member assertions on the same parent object.
+/// Implements IAssertion to allow use in Satisfies() lambdas that accept IAssertion.
 /// </summary>
-public class MemberAssertionResult<TObject>
+public class MemberAssertionResult<TObject> : IAssertion
 {
     private readonly AssertionContext<TObject> _parentContext;
     private readonly Assertion<object?> _memberAssertion;
@@ -17,6 +18,15 @@ public class MemberAssertionResult<TObject>
     {
         _parentContext = parentContext ?? throw new ArgumentNullException(nameof(parentContext));
         _memberAssertion = memberAssertion ?? throw new ArgumentNullException(nameof(memberAssertion));
+    }
+
+    /// <summary>
+    /// Implements IAssertion.AssertAsync to allow use in Satisfies() lambdas.
+    /// Executes the member assertion and returns a Task (not TObject).
+    /// </summary>
+    async Task IAssertion.AssertAsync()
+    {
+        await _memberAssertion.AssertAsync();
     }
 
     /// <summary>
@@ -145,6 +155,28 @@ public class AssertionSourceAdapter<T> : IAssertionSource<T>
     {
         Context.ExpressionBuilder.Append($".IsTypeOf<{typeof(TExpected).Name}>()");
         return new TypeOfAssertion<T, TExpected>(Context);
+    }
+
+    public IsAssignableToAssertion<TTarget, T> IsAssignableTo<TTarget>()
+    {
+        Context.ExpressionBuilder.Append($".IsAssignableTo<{typeof(TTarget).Name}>()");
+        return new IsAssignableToAssertion<TTarget, T>(Context);
+    }
+
+    public IsNotAssignableToAssertion<TTarget, T> IsNotAssignableTo<TTarget>()
+    {
+        Context.ExpressionBuilder.Append($".IsNotAssignableTo<{typeof(TTarget).Name}>()");
+        return new IsNotAssignableToAssertion<TTarget, T>(Context);
+    }
+
+    /// <summary>
+    /// Asserts that the value is NOT of the specified type.
+    /// Example: await Assert.That(obj).Member(x => x.Property).Satisfies(val => val.IsNotTypeOf<int>());
+    /// </summary>
+    public IsNotTypeOfAssertion<T, TExpected> IsNotTypeOf<TExpected>()
+    {
+        Context.ExpressionBuilder.Append($".IsNotTypeOf<{typeof(TExpected).Name}>()");
+        return new IsNotTypeOfAssertion<T, TExpected>(Context);
     }
 }
 

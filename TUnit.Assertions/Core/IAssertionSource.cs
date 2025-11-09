@@ -24,10 +24,22 @@ public interface IAssertionSource<TValue> : IAssertionSource
     AssertionContext<TValue> Context { get; }
 
     /// <summary>
-    /// Asserts that the value is of the specified type and returns an assertion on the casted value.
-    /// This allows chaining additional assertions on the typed value.
-    /// Only available at assertion source points (initial Assert.That, or after .And/.Or).
-    /// Example: await Assert.That(obj).IsTypeOf&lt;string&gt;().And.HasLength(5);
+    /// Asserts that the value is assignment-compatible with the specified type.
     /// </summary>
     TypeOfAssertion<TValue, TExpected> IsTypeOf<TExpected>();
+
+    /// <summary>
+    /// Asserts that the value is NOT exactly of the specified type.
+    /// </summary>
+    IsNotTypeOfAssertion<TValue, TExpected> IsNotTypeOf<TExpected>();
+
+    /// <summary>
+    /// Asserts that the value's type is assignable to the specified type.
+    /// </summary>
+    IsAssignableToAssertion<TExpected, TValue> IsAssignableTo<TExpected>();
+
+    /// <summary>
+    /// Asserts that the value's type is NOT assignable to the specified type.
+    /// </summary>
+    IsNotAssignableToAssertion<TExpected, TValue> IsNotAssignableTo<TExpected>();
 }

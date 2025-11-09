@@ -126,6 +126,9 @@ namespace .Assertions
     {
         public .<TObject> Context { get; }
         public .<TObject?> GetAwaiter() { }
+        public .<TTarget, TObject> IsAssignableTo<TTarget>() { }
+        public .<TTarget, TObject> IsNotAssignableTo<TTarget>() { }
+        public .<TObject, TExpected> IsNotTypeOf<TExpected>() { }
         public .<TObject, TExpected> IsTypeOf<TExpected>() { }
     }
     public class PropertyAssertion<TObject, TProperty>
@@ -195,6 +198,9 @@ namespace .
         public WhenParsedIntoAssertion(.<string> stringContext, ? formatProvider = null) { }
         protected override .<.> CheckAsync(.<T> metadata) { }
         protected override string GetExpectation() { }
+        public .<TTarget, T> IsAssignableTo<TTarget>() { }
+        public .<TTarget, T> IsNotAssignableTo<TTarget>() { }
+        public .<T, TExpected> IsNotTypeOf<TExpected>() { }
         public .<T, TExpected> IsTypeOf<TExpected>() { }
         public ..WhenParsedIntoAssertion<T> WithFormatProvider( formatProvider) { }
     }
@@ -268,12 +274,14 @@ namespace .Conditions
     {
         public AssertionSourceAdapter(.<T> context) { }
         public .<T> Context { get; }
+        public .<TTarget, T> IsAssignableTo<TTarget>() { }
+        public .<TTarget, T> IsNotAssignableTo<TTarget>() { }
+        public .<T, TExpected> IsNotTypeOf<TExpected>() { }
         public .<T, TExpected> IsTypeOf<TExpected>() { }
     }
-    public class AsyncMappedSatisfiesAssertion<TValue, TMapped, TAssertion> : .<TValue>
-        where TAssertion : .<TMapped>
+    public class AsyncMappedSatisfiesAssertion<TValue, TMapped> : .<TValue>
     {
-        public AsyncMappedSatisfiesAssertion(.<TValue> context, <TValue?, .<TMapped>> selector, <.<TMapped>, TAssertion> assertions, string selectorDescription) { }
+        public AsyncMappedSatisfiesAssertion(.<TValue> context, <TValue?, .<TMapped>> selector, <.<TMapped>, .?> assertions, string selectorDescription) { }
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
@@ -768,7 +776,6 @@ namespace .Conditions
         protected override string GetExpectation() { }
         public . Within(int tolerance) { }
     }
-    [.("IsAssignableTo")]
     public class IsAssignableToAssertion<TTarget, TValue> : .<TValue>
     {
         public IsAssignableToAssertion(.<TValue> context) { }
@@ -820,7 +827,6 @@ namespace .Conditions
         protected override string GetExpectation() { }
         public .<TCollection, TItem> Using(.<TItem> comparer) { }
     }
-    [.("IsNotAssignableTo")]
     public class IsNotAssignableToAssertion<TTarget, TValue> : .<TValue>
     {
         public IsNotAssignableToAssertion(.<TValue> context) { }
@@ -848,6 +854,12 @@ namespace .Conditions
         where TValue :  class
     {
         public IsNotDefaultReferenceAssertion(.<TValue> context) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class IsNotTypeOfAssertion<TValue, TExpected> : .<TValue>
+    {
+        public IsNotTypeOfAssertion(.<TValue> context) { }
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
@@ -884,11 +896,11 @@ namespace .Conditions
     }
     public class MappedSatisfiesAssertion<TValue, TMapped> : .<TValue>
     {
-        public MappedSatisfiesAssertion(.<TValue> context, <TValue?, TMapped> selector, <.<TMapped>, .<TMapped>?> assertions, string selectorDescription) { }
+        public MappedSatisfiesAssertion(.<TValue> context, <TValue?, TMapped> selector, <.<TMapped>, .?> assertions, string selectorDescription) { }
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class MemberAssertionResult<TObject>
+    public class MemberAssertionResult<TObject> : .
     {
         public .<TObject> And { get; }
         public .<TObject> Or { get; }
@@ -1386,7 +1398,7 @@ namespace .Core
         public static . FailIf(bool condition, string message) { }
         public static . Failed(string message) { }
     }
-    public abstract class Assertion<TValue>
+    public abstract class Assertion<TValue> : .
     {
         protected readonly .<TValue> Context;
         protected Assertion(.<TValue> context) { }
@@ -1447,10 +1459,17 @@ namespace .Core
         public  StartTime { get; }
         public TValue Value { get; }
     }
+    public interface IAssertion
+    {
+        . AssertAsync();
+    }
     public interface IAssertionSource { }
     public interface IAssertionSource<TValue> : .
     {
         .<TValue> Context { get; }
+        .<TExpected, TValue> IsAssignableTo<TExpected>();
+        .<TExpected, TValue> IsNotAssignableTo<TExpected>();
+        .<TValue, TExpected> IsNotTypeOf<TExpected>();
         .<TValue, TExpected> IsTypeOf<TExpected>();
     }
     public interface IDelegateAssertionSource<TValue> : ., .<TValue> { }
@@ -1579,8 +1598,6 @@ namespace .Extensions
         public static .<> IsAfterOrEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
         public static .<> IsAfterOrEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
         public static .<> IsAfterOrEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
-        public static .<TTarget, object> IsAssignableTo<TTarget>(this .<object> source) { }
-        public static .<TTarget, TValue> IsAssignableTo<TTarget, TValue>(this .<TValue> source) { }
         public static .<> IsBefore(this .<> source,  expected, [.("expected")] string? expression = null) { }
         public static .<> IsBefore(this .<> source,  expected, [.("expected")] string? expression = null) { }
         public static .<> IsBefore(this .<> source,  expected, [.("expected")] string? expression = null) { }
@@ -1597,7 +1614,6 @@ namespace .Extensions
             where TValue : <TValue> { }
         public static .<TValue> IsNegative<TValue>(this .<TValue?> source)
             where TValue :  struct, <TValue> { }
-        public static .<TTarget, TValue> IsNotAssignableTo<TTarget, TValue>(this .<TValue> source) { }
         public static ..IsNotDefinedAssertion<TEnum> IsNotDefined<TEnum>(this .<TEnum> source)
             where TEnum :  struct,  { }
         [.("Uses reflection to compare members")]
@@ -1631,9 +1647,8 @@ namespace .Extensions
         public static .<TObject> Member<TObject, TMember, TTransformed>(this .<TObject> source, .<<TObject, TMember>> memberSelector, <.<TMember>, .<TTransformed>> assertions) { }
         public static .<TObject> Member<TObject, TKey, TValue, TTransformed>(this .<TObject> source, .<<TObject, .<TKey, TValue>>> memberSelector, <.<.<TKey, TValue>, TKey, TValue>, .<TTransformed>> assertions) { }
         public static .<TValue> Satisfies<TValue>(this .<TValue> source, <TValue?, bool> predicate, [.("predicate")] string? expression = null) { }
-        public static .<TValue, TMapped> Satisfies<TValue, TMapped>(this .<TValue> source, <TValue?, TMapped> selector, <.<TMapped>, .<TMapped>?> assertions, [.("selector")] string? selectorExpression = null) { }
-        public static .<TValue, TMapped, TAssertion> Satisfies<TValue, TMapped, TAssertion>(this .<TValue> source, <TValue?, .<TMapped?>> selector, <.<TMapped>, TAssertion> assertions, [.("selector")] string? selectorExpression = null)
-            where TAssertion : .<TMapped> { }
+        public static .<TValue, TMapped> Satisfies<TValue, TMapped>(this .<TValue> source, <TValue?, TMapped> selector, <.<TMapped>, .?> assertions, [.("selector")] string? selectorExpression = null) { }
+        public static .<TValue, TMapped> SatisfiesAsync<TValue, TMapped>(this .<TValue> source, <TValue?, .<TMapped?>> selector, <.<TMapped>, .?> assertions, [.("selector")] string? selectorExpression = null) { }
         public static .<TException> Throws<TException>(this . source)
             where TException :  { }
         public static .<TException> Throws<TException>(this . source)
@@ -3028,10 +3043,6 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<int> metadata) { }
         protected override string GetExpectation() { }
     }
-    public static class IsAssignableToAssertionExtensions
-    {
-        public static .<TTarget, TValue> IsAssignableTo<TTarget, TValue>(this .<TValue> source) { }
-    }
     public static class IsDefaultAssertionExtensions
     {
         public static .<TValue> IsDefault<TValue>(this .<TValue> source)
@@ -3061,10 +3072,6 @@ namespace .Extensions
             "ires reflection and is not compatible with AOT")]
         public static .<TCollection, TItem> IsEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> expected, .<TItem> comparer, . ordering = 0, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null, [.("ordering")] string? orderingExpression = null)
             where TCollection : .<TItem> { }
-    }
-    public static class IsNotAssignableToAssertionExtensions
-    {
-        public static .<TTarget, TValue> IsNotAssignableTo<TTarget, TValue>(this .<TValue> source) { }
     }
     public static class IsNotDefaultAssertionExtensions
     {
@@ -4274,14 +4281,17 @@ namespace .Sources
     {
         public AsyncDelegateAssertion(<.> action, string? expression) { }
         public .<object?> Context { get; }
+        public .<TTarget, object?> IsAssignableTo<TTarget>() { }
         public .<.> IsCanceled() { }
         public .<.> IsCompleted() { }
         public .<.> IsCompletedSuccessfully() { }
         public .<.> IsFaulted() { }
+        public .<TTarget, object?> IsNotAssignableTo<TTarget>() { }
         public .<.> IsNotCanceled() { }
         public .<.> IsNotCompleted() { }
         public .<.> IsNotCompletedSuccessfully() { }
         public .<.> IsNotFaulted() { }
+        public .<object?, TExpected> IsNotTypeOf<TExpected>() { }
         public .<object?, TExpected> IsTypeOf<TExpected>() { }
         public .<?> Throws( exceptionType) { }
         public .<TException> Throws<TException>()
@@ -4295,6 +4305,9 @@ namespace .Sources
     {
         public AsyncFuncAssertion(<.<TValue?>> func, string? expression) { }
         public .<TValue> Context { get; }
+        public .<TTarget, TValue> IsAssignableTo<TTarget>() { }
+        public .<TTarget, TValue> IsNotAssignableTo<TTarget>() { }
+        public .<TValue, TExpected> IsNotTypeOf<TExpected>() { }
         public .<TValue, TExpected> IsTypeOf<TExpected>() { }
         public .<TException> Throws<TException>()
             where TException :  { }
@@ -4322,10 +4335,13 @@ namespace .Sources
         public .<TCollection, TItem> HasCount(int expectedCount, [.("expectedCount")] string? expression = null) { }
         public .<TCollection, TItem> HasDistinctItems() { }
         public .<TCollection, TItem> HasSingleItem() { }
+        public .<TTarget, TCollection> IsAssignableTo<TTarget>() { }
         public .<TCollection, TItem> IsEmpty() { }
         public .<TCollection, TItem> IsInDescendingOrder() { }
         public .<TCollection, TItem> IsInOrder() { }
+        public .<TTarget, TCollection> IsNotAssignableTo<TTarget>() { }
         public .<TCollection, TItem> IsNotEmpty() { }
+        public .<TCollection, TExpected> IsNotTypeOf<TExpected>() { }
         public .<TCollection, TItem, TKey> IsOrderedBy<TKey>(<TItem, TKey> keySelector, [.("keySelector")] string? expression = null) { }
         public .<TCollection, TItem, TKey> IsOrderedBy<TKey>(<TItem, TKey> keySelector, .<TKey>? comparer, [.("keySelector")] string? selectorExpression = null, [.("comparer")] string? comparerExpression = null) { }
         public .<TCollection, TItem, TKey> IsOrderedByDescending<TKey>(<TItem, TKey> keySelector, [.("keySelector")] string? expression = null) { }
@@ -4340,6 +4356,9 @@ namespace .Sources
     {
         public DelegateAssertion( action, string? expression) { }
         public .<object?> Context { get; }
+        public .<TTarget, object?> IsAssignableTo<TTarget>() { }
+        public .<TTarget, object?> IsNotAssignableTo<TTarget>() { }
+        public .<object?, TExpected> IsNotTypeOf<TExpected>() { }
         public .<object?, TExpected> IsTypeOf<TExpected>() { }
         public .<TException> Throws<TException>()
             where TException :  { }
@@ -4365,6 +4384,9 @@ namespace .Sources
     {
         public FuncAssertion(<TValue?> func, string? expression) { }
         public .<TValue> Context { get; }
+        public .<TTarget, TValue> IsAssignableTo<TTarget>() { }
+        public .<TTarget, TValue> IsNotAssignableTo<TTarget>() { }
+        public .<TValue, TExpected> IsNotTypeOf<TExpected>() { }
         public .<TValue, TExpected> IsTypeOf<TExpected>() { }
         public .<TException> Throws<TException>()
             where TException :  { }
@@ -4375,14 +4397,17 @@ namespace .Sources
     {
         public TaskAssertion(.<TValue?> task, string? expression) { }
         public .<TValue> Context { get; }
+        public .<TTarget, TValue> IsAssignableTo<TTarget>() { }
         public .<.<TValue>> IsCanceled() { }
         public .<.<TValue>> IsCompleted() { }
         public .<.<TValue>> IsCompletedSuccessfully() { }
         public .<.<TValue>> IsFaulted() { }
+        public .<TTarget, TValue> IsNotAssignableTo<TTarget>() { }
         public .<.<TValue>> IsNotCanceled() { }
         public .<.<TValue>> IsNotCompleted() { }
         public .<.<TValue>> IsNotCompletedSuccessfully() { }
         public .<.<TValue>> IsNotFaulted() { }
+        public .<TValue, TExpected> IsNotTypeOf<TExpected>() { }
         public .<TValue, TExpected> IsTypeOf<TExpected>() { }
         public .<TException> Throws<TException>()
             where TException :  { }
@@ -4396,6 +4421,7 @@ namespace .Sources
         public .<TValue> Context { get; }
         public .<TTarget, TValue> IsAssignableTo<TTarget>() { }
         public .<TTarget, TValue> IsNotAssignableTo<TTarget>() { }
+        public .<TValue, TExpected> IsNotTypeOf<TExpected>() { }
         public .<TValue, TExpected> IsTypeOf<TExpected>() { }
     }
 }

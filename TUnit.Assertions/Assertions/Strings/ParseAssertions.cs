@@ -253,6 +253,28 @@ public class WhenParsedIntoAssertion<[DynamicallyAccessedMembers(DynamicallyAcce
         return new TypeOfAssertion<T, TExpected>(Context);
     }
 
+    public IsAssignableToAssertion<TTarget, T> IsAssignableTo<TTarget>()
+    {
+        Context.ExpressionBuilder.Append($".IsAssignableTo<{typeof(TTarget).Name}>()");
+        return new IsAssignableToAssertion<TTarget, T>(Context);
+    }
+
+    public IsNotAssignableToAssertion<TTarget, T> IsNotAssignableTo<TTarget>()
+    {
+        Context.ExpressionBuilder.Append($".IsNotAssignableTo<{typeof(TTarget).Name}>()");
+        return new IsNotAssignableToAssertion<TTarget, T>(Context);
+    }
+
+    /// <summary>
+    /// Asserts that the parsed value is NOT of the specified type.
+    /// Example: await Assert.That("123").WhenParsedInto<object>().IsNotTypeOf<string>();
+    /// </summary>
+    public IsNotTypeOfAssertion<T, TExpected> IsNotTypeOf<TExpected>()
+    {
+        Context.ExpressionBuilder.Append($".IsNotTypeOf<{typeof(TExpected).Name}>()");
+        return new IsNotTypeOfAssertion<T, TExpected>(Context);
+    }
+
     /// <summary>
     /// Specifies the format provider to use when parsing.
     /// Returns a new assertion with the format provider set.

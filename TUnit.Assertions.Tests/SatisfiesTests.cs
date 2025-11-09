@@ -49,7 +49,7 @@ public class SatisfiesTests
         };
 
         await Assert.That(myModel)
-            .Satisfies(model => model.Value, assert => assert.IsEqualTo("Hello")!);
+            .SatisfiesAsync(async model => await model.Value!, assert => assert.IsEqualTo("Hello")!);
     }
 
     [Test]
@@ -69,9 +69,9 @@ public class SatisfiesTests
         };
 
         await Assert.That(myModel)
-            .Satisfies(model => model.Nested, assert =>
-                assert.Satisfies(model => model?.Nested, innerAssert =>
-                    innerAssert.Satisfies(model => model?.Value, innerAssert2 =>
+            .SatisfiesAsync(async model => await model.Nested!, assert =>
+                assert.SatisfiesAsync(async model => await model?.Nested!, innerAssert =>
+                    innerAssert.SatisfiesAsync(async model => await model?.Value!, innerAssert2 =>
                         innerAssert2.IsEqualTo("Baz")!
                     )
                 )
@@ -88,7 +88,7 @@ public class SatisfiesTests
 
         await Assert.That(async () =>
                 await Assert.That(myModel)
-                    .Satisfies(model => model.Value, assert => assert.IsEqualTo("Blah")!)
+                    .Satisfies(model => model.Value!, assert => assert.IsEqualTo("Blah")!)
             ).Throws<AssertionException>()
             .WithMessageMatching("""
                                  *to satisfy*
@@ -140,7 +140,7 @@ public class SatisfiesTests
 
         await Assert.That(async () =>
                 await Assert.That(myModel)
-                    .Satisfies(model => model.Value, assert => assert.IsEqualTo("Blah")!)
+                    .SatisfiesAsync(async model => await model.Value!, assert => assert.IsEqualTo("Blah")!)
             ).Throws<AssertionException>()
             .WithMessageMatching("""
                                  *to satisfy*
@@ -166,9 +166,9 @@ public class SatisfiesTests
 
         await Assert.That(async () =>
                 await Assert.That(myModel)
-                    .Satisfies(model => model.Nested, assert =>
-                        assert.Satisfies(model => model?.Nested, innerAssert =>
-                            innerAssert.Satisfies(model => model?.Value, innerAssert2 =>
+                    .SatisfiesAsync(async model => await model.Nested!, assert =>
+                        assert.SatisfiesAsync(async model => await model?.Nested!, innerAssert =>
+                            innerAssert.SatisfiesAsync(async model => await model?.Value!, innerAssert2 =>
                                 innerAssert2.IsEqualTo("Baz")!
                             )
                         )

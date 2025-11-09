@@ -76,4 +76,15 @@ public class ValueAssertion<TValue> : IAssertionSource<TValue>
         Context.ExpressionBuilder.Append($".IsNotAssignableTo<{typeof(TTarget).Name}>()");
         return new IsNotAssignableToAssertion<TTarget, TValue>(Context);
     }
+
+    /// <summary>
+    /// Asserts that the value is NOT of the specified type.
+    /// This instance method allows single type parameter usage without needing to specify the source type.
+    /// Example: await Assert.That(myObject).IsNotTypeOf<string>();
+    /// </summary>
+    public IsNotTypeOfAssertion<TValue, TExpected> IsNotTypeOf<TExpected>()
+    {
+        Context.ExpressionBuilder.Append($".IsNotTypeOf<{typeof(TExpected).Name}>()");
+        return new IsNotTypeOfAssertion<TValue, TExpected>(Context);
+    }
 }
