@@ -402,4 +402,63 @@ public class TypeAssertionAmbiguityTests
             .And
             .Member(c => c.ElementProperty, assert => assert.IsNotAssignableTo<DerivedElement>());
     }
+
+    // ============ COLLECTION ASSERTION CONTEXTS ============
+
+    [Test]
+    public async Task IsTypeOf_WithCollectionItems_NoAmbiguity()
+    {
+        List<object> items = ["test", "hello", "world"];
+
+        foreach (var item in items)
+        {
+            await Assert.That(item).IsTypeOf<string>();
+        }
+    }
+
+    [Test]
+    public async Task IsAssignableTo_WithCollectionItems_NoAmbiguity()
+    {
+        List<Element> items = [new Element(), new DerivedElement()];
+
+        foreach (var item in items)
+        {
+            await Assert.That(item).IsAssignableTo<IElement>();
+        }
+    }
+
+    [Test]
+    public async Task IsTypeOf_WithFirstItem_NoAmbiguity()
+    {
+        List<object> items = ["test", "hello"];
+
+        await Assert.That(items.First()).IsTypeOf<string>();
+    }
+
+    [Test]
+    public async Task IsAssignableTo_WithSingleItem_NoAmbiguity()
+    {
+        List<IElement> items = [new Element()];
+
+        await Assert.That(items.Single()).IsAssignableTo<Element>();
+    }
+
+    [Test]
+    public async Task IsTypeOf_WithCollectionChaining_NoAmbiguity()
+    {
+        List<object> items = ["test", "hello"];
+
+        await Assert.That(items).HasCount(2);
+        await Assert.That(items.First()).IsTypeOf<string>();
+    }
+
+    [Test]
+    public async Task IsAssignableTo_WithCollectionFiltering_NoAmbiguity()
+    {
+        List<IElement> items = [new Element(), new DerivedElement()];
+        var derived = items.OfType<DerivedElement>().ToList();
+
+        await Assert.That(derived).HasCount(1);
+        await Assert.That(derived.First()).IsAssignableTo<Element>();
+    }
 }

@@ -15,7 +15,7 @@ namespace TUnit.Assertions.Core;
 /// OrContinuation) implement IAssertionSource. This design prevents direct chaining of assertions
 /// without And/Or keywords and prevents awaiting bare sources without an assertion.
 /// <typeparam name="TValue">The type of value being asserted</typeparam>
-public abstract class Assertion<TValue>
+public abstract class Assertion<TValue> : IAssertion
 {
     /// <summary>
     /// The assertion context shared by all assertions in this chain.
@@ -242,4 +242,11 @@ public abstract class Assertion<TValue>
             Context.ExpressionBuilder.Append(expression);
         }
     }
+
+    /// <summary>
+    /// Explicitly implements the non-generic <see cref="IAssertion.AssertAsync"/> method.
+    /// This allows any assertion to be executed via the <see cref="IAssertion"/> interface
+    /// without losing the strongly-typed return value from the public <see cref="AssertAsync()"/> method.
+    /// </summary>
+    Task IAssertion.AssertAsync() => AssertAsync();
 }

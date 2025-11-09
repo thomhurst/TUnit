@@ -279,10 +279,9 @@ namespace .Conditions
         public .<T, TExpected> IsNotTypeOf<TExpected>() { }
         public .<T, TExpected> IsTypeOf<TExpected>() { }
     }
-    public class AsyncMappedSatisfiesAssertion<TValue, TMapped, TAssertion> : .<TValue>
-        where TAssertion : .<TMapped>
+    public class AsyncMappedSatisfiesAssertion<TValue, TMapped> : .<TValue>
     {
-        public AsyncMappedSatisfiesAssertion(.<TValue> context, <TValue?, .<TMapped>> selector, <.<TMapped>, TAssertion> assertions, string selectorDescription) { }
+        public AsyncMappedSatisfiesAssertion(.<TValue> context, <TValue?, .<TMapped>> selector, <.<TMapped>, .?> assertions, string selectorDescription) { }
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
@@ -897,11 +896,11 @@ namespace .Conditions
     }
     public class MappedSatisfiesAssertion<TValue, TMapped> : .<TValue>
     {
-        public MappedSatisfiesAssertion(.<TValue> context, <TValue?, TMapped> selector, <.<TMapped>, .<TMapped>?> assertions, string selectorDescription) { }
+        public MappedSatisfiesAssertion(.<TValue> context, <TValue?, TMapped> selector, <.<TMapped>, .?> assertions, string selectorDescription) { }
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class MemberAssertionResult<TObject>
+    public class MemberAssertionResult<TObject> : .
     {
         public .<TObject> And { get; }
         public .<TObject> Or { get; }
@@ -1399,7 +1398,7 @@ namespace .Core
         public static . FailIf(bool condition, string message) { }
         public static . Failed(string message) { }
     }
-    public abstract class Assertion<TValue>
+    public abstract class Assertion<TValue> : .
     {
         protected readonly .<TValue> Context;
         protected Assertion(.<TValue> context) { }
@@ -1459,6 +1458,10 @@ namespace .Core
         public ? Exception { get; }
         public  StartTime { get; }
         public TValue Value { get; }
+    }
+    public interface IAssertion
+    {
+        . AssertAsync();
     }
     public interface IAssertionSource { }
     public interface IAssertionSource<TValue> : .
@@ -1644,9 +1647,8 @@ namespace .Extensions
         public static .<TObject> Member<TObject, TMember, TTransformed>(this .<TObject> source, .<<TObject, TMember>> memberSelector, <.<TMember>, .<TTransformed>> assertions) { }
         public static .<TObject> Member<TObject, TKey, TValue, TTransformed>(this .<TObject> source, .<<TObject, .<TKey, TValue>>> memberSelector, <.<.<TKey, TValue>, TKey, TValue>, .<TTransformed>> assertions) { }
         public static .<TValue> Satisfies<TValue>(this .<TValue> source, <TValue?, bool> predicate, [.("predicate")] string? expression = null) { }
-        public static .<TValue, TMapped> Satisfies<TValue, TMapped>(this .<TValue> source, <TValue?, TMapped> selector, <.<TMapped>, .<TMapped>?> assertions, [.("selector")] string? selectorExpression = null) { }
-        public static .<TValue, TMapped, TAssertion> Satisfies<TValue, TMapped, TAssertion>(this .<TValue> source, <TValue?, .<TMapped?>> selector, <.<TMapped>, TAssertion> assertions, [.("selector")] string? selectorExpression = null)
-            where TAssertion : .<TMapped> { }
+        public static .<TValue, TMapped> Satisfies<TValue, TMapped>(this .<TValue> source, <TValue?, TMapped> selector, <.<TMapped>, .?> assertions, [.("selector")] string? selectorExpression = null) { }
+        public static .<TValue, TMapped> SatisfiesAsync<TValue, TMapped>(this .<TValue> source, <TValue?, .<TMapped?>> selector, <.<TMapped>, .?> assertions, [.("selector")] string? selectorExpression = null) { }
         public static .<TException> Throws<TException>(this . source)
             where TException :  { }
         public static .<TException> Throws<TException>(this . source)

@@ -7,18 +7,20 @@ namespace TUnit.Assertions.Conditions;
 /// <summary>
 /// Asserts that a mapped value satisfies custom assertions.
 /// Maps the source value using a selector, then runs assertions on the mapped value.
+/// This version supports both same-type and type-changing assertions (e.g., IsTypeOf).
 /// Example: await Assert.That(model).Satisfies(m => m.Name, assert => assert.IsEqualTo("John"));
+/// Example: await Assert.That(model).Satisfies(m => m.Value, assert => assert.IsTypeOf<string>());
 /// </summary>
 public class MappedSatisfiesAssertion<TValue, TMapped> : Assertion<TValue>
 {
     private readonly Func<TValue?, TMapped> _selector;
-    private readonly Func<ValueAssertion<TMapped>, Assertion<TMapped>?> _assertions;
+    private readonly Func<ValueAssertion<TMapped>, IAssertion?> _assertions;
     private readonly string _selectorDescription;
 
     public MappedSatisfiesAssertion(
         AssertionContext<TValue> context,
         Func<TValue?, TMapped> selector,
-        Func<ValueAssertion<TMapped>, Assertion<TMapped>?> assertions,
+        Func<ValueAssertion<TMapped>, IAssertion?> assertions,
         string selectorDescription)
         : base(context)
     {
@@ -73,19 +75,19 @@ public class MappedSatisfiesAssertion<TValue, TMapped> : Assertion<TValue>
 /// <summary>
 /// Asserts that an async-mapped value satisfies custom assertions.
 /// Maps the source value using an async selector, then runs assertions on the mapped value.
+/// This version supports both same-type and type-changing assertions (e.g., IsTypeOf).
 /// Example: await Assert.That(model).Satisfies(m => m.GetNameAsync(), assert => assert.IsEqualTo("John"));
 /// </summary>
-public class AsyncMappedSatisfiesAssertion<TValue, TMapped, TAssertion> : Assertion<TValue>
-    where TAssertion : Assertion<TMapped>
+public class AsyncMappedSatisfiesAssertion<TValue, TMapped> : Assertion<TValue>
 {
     private readonly Func<TValue?, Task<TMapped>> _selector;
-    private readonly Func<ValueAssertion<TMapped>, TAssertion> _assertions;
+    private readonly Func<ValueAssertion<TMapped>, IAssertion?> _assertions;
     private readonly string _selectorDescription;
 
     public AsyncMappedSatisfiesAssertion(
         AssertionContext<TValue> context,
         Func<TValue?, Task<TMapped>> selector,
-        Func<ValueAssertion<TMapped>, TAssertion> assertions,
+        Func<ValueAssertion<TMapped>, IAssertion?> assertions,
         string selectorDescription)
         : base(context)
     {

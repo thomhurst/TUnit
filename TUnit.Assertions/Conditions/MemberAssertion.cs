@@ -7,8 +7,9 @@ namespace TUnit.Assertions.Conditions;
 /// <summary>
 /// Result of a member assertion that allows returning to the parent object context.
 /// Enables chaining multiple member assertions on the same parent object.
+/// Implements IAssertion to allow use in Satisfies() lambdas that accept IAssertion.
 /// </summary>
-public class MemberAssertionResult<TObject>
+public class MemberAssertionResult<TObject> : IAssertion
 {
     private readonly AssertionContext<TObject> _parentContext;
     private readonly Assertion<object?> _memberAssertion;
@@ -17,6 +18,15 @@ public class MemberAssertionResult<TObject>
     {
         _parentContext = parentContext ?? throw new ArgumentNullException(nameof(parentContext));
         _memberAssertion = memberAssertion ?? throw new ArgumentNullException(nameof(memberAssertion));
+    }
+
+    /// <summary>
+    /// Implements IAssertion.AssertAsync to allow use in Satisfies() lambdas.
+    /// Executes the member assertion and returns a Task (not TObject).
+    /// </summary>
+    async Task IAssertion.AssertAsync()
+    {
+        await _memberAssertion.AssertAsync();
     }
 
     /// <summary>
