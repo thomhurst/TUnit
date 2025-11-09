@@ -31,6 +31,7 @@ internal static class TestExtensions
 
         var properties = new List<IProperty>(estimatedCount)
         {
+            stateProperty,
             new TestFileLocationProperty(testDetails.TestFilePath, new LinePositionSpan(
                 new LinePosition(testDetails.TestLineNumber, 0),
                 new LinePosition(testDetails.TestLineNumber, 0)

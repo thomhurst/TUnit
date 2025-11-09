@@ -88,11 +88,11 @@ public abstract class Context : IContext, IDisposable
 
     public string GetErrorOutput()
     {
-        if (_outputBuilder.Length == 0)
+        if (_errorOutputBuilder.Length == 0)
         {
             return string.Empty;
         }
-        
+
         _errorOutputLock.EnterReadLock();
 
         try
