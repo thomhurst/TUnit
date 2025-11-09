@@ -18,7 +18,7 @@ internal static class TestExtensions
 
         var capabilities = (ITestFrameworkCapabilities?)testContext.Services.GetService(typeof(ITestFrameworkCapabilities));
         var trxCapability = capabilities?.GetCapability<ITrxReportCapability>();
-        var isTrxEnabled = trxCapability != null;
+        var isTrxEnabled = trxCapability is TrxReportCapability trxCap && trxCap.IsTrxEnabled;
 
         var estimatedCount =
                 3 + // State + FileLocation + MethodIdentifier
