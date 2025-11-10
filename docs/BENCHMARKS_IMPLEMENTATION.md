@@ -149,7 +149,6 @@ import BenchmarkChart from '@site/src/components/BenchmarkChart';
 
 Added new "Benchmarks" section with:
 - Main benchmarks page (index)
-- Calculator page
 - Methodology page
 
 Positioned between "Examples & Use Cases" and "Reference" for optimal discoverability.
@@ -294,7 +293,6 @@ Visit:
    - Visit the deployed site after merge
    - Homepage shows real speedup numbers
    - Benchmarks page shows all test categories
-   - Calculator uses real data
    - Charts render correctly
 
 **Note:** You can review the PRs if desired, but they will merge automatically without intervention.

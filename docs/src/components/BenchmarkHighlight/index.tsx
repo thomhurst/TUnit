@@ -90,9 +90,6 @@ export default function BenchmarkHighlight(): JSX.Element {
           <Link to="/docs/benchmarks" className={styles.primaryLink}>
             View Detailed Benchmarks →
           </Link>
-          <Link to="/docs/benchmarks/calculator" className={styles.secondaryLink}>
-            Calculate Your Savings
-          </Link>
         </div>
 
         <div className={styles.benchmarkNote}>
