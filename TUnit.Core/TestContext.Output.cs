@@ -12,24 +12,8 @@ public partial class TestContext
     // Internal backing fields and properties
     internal ConcurrentBag<Timing> Timings { get; } = [];
     private readonly ConcurrentBag<Artifact> _artifactsBag = new();
-    private List<Artifact>? _cachedArtifactsList;
-    private int _artifactsVersion = 0;
 
-    internal IReadOnlyList<Artifact> Artifacts
-    {
-        get
-        {
-            // Simple version check - if bag hasn't changed, return cached list
-            if (_cachedArtifactsList != null && _artifactsVersion == _artifactsBag.Count)
-            {
-                return _cachedArtifactsList;
-            }
-
-            _cachedArtifactsList = _artifactsBag.ToList();
-            _artifactsVersion = _artifactsBag.Count;
-            return _cachedArtifactsList;
-        }
-    }
+    internal IReadOnlyList<Artifact> Artifacts => _artifactsBag.ToList();
 
     // Explicit interface implementations for ITestOutput
     TextWriter ITestOutput.StandardOutput => OutputWriter;
@@ -45,7 +29,6 @@ public partial class TestContext
     void ITestOutput.AttachArtifact(Artifact artifact)
     {
         _artifactsBag.Add(artifact);
-        _artifactsVersion++; // Invalidate cache
     }
 
     string ITestOutput.GetStandardOutput() => GetOutput();
