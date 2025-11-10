@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-11-09T00:29:34.403Z",
+  "timestamp": "2025-11-10T00:29:09.704Z",
   "environment": {
     "benchmarkDotNetVersion": "BenchmarkDotNet v0.15.6, Linux Ubuntu 24.04.3 LTS (Noble Numbat)",
     "sdk": ".NET SDK 10.0.100-rc.2.25502.107",
@@ -9,43 +9,43 @@
     "results": [
       {
         "Method": "TUnit",
-        "Version": "1.0.30",
-        "Mean": "572.4 ms",
-        "Error": "6.95 ms",
-        "StdDev": "5.80 ms",
-        "Median": "572.9 ms"
+        "Version": "1.0.39",
+        "Mean": "495.43 ms",
+        "Error": "2.303 ms",
+        "StdDev": "2.042 ms",
+        "Median": "495.43 ms"
       },
       {
         "Method": "NUnit",
         "Version": "4.4.0",
-        "Mean": "1,170.5 ms",
-        "Error": "8.04 ms",
-        "StdDev": "7.13 ms",
-        "Median": "1,170.7 ms"
+        "Mean": "578.77 ms",
+        "Error": "9.242 ms",
+        "StdDev": "7.718 ms",
+        "Median": "580.83 ms"
       },
       {
         "Method": "MSTest",
         "Version": "4.0.1",
-        "Mean": "2,953.6 ms",
-        "Error": "8.62 ms",
-        "StdDev": "7.64 ms",
-        "Median": "2,952.1 ms"
+        "Mean": "495.62 ms",
+        "Error": "7.338 ms",
+        "StdDev": "6.128 ms",
+        "Median": "496.03 ms"
       },
       {
         "Method": "xUnit3",
         "Version": "3.2.0",
-        "Mean": "3,043.7 ms",
-        "Error": "6.39 ms",
-        "StdDev": "5.98 ms",
-        "Median": "3,044.4 ms"
+        "Mean": "591.61 ms",
+        "Error": "10.673 ms",
+        "StdDev": "9.984 ms",
+        "Median": "591.28 ms"
       },
       {
         "Method": "TUnit_AOT",
-        "Version": "1.0.30",
-        "Mean": "130.7 ms",
-        "Error": "0.65 ms",
-        "StdDev": "0.58 ms",
-        "Median": "130.8 ms"
+        "Version": "1.0.39",
+        "Mean": "44.15 ms",
+        "Error": "1.112 ms",
+        "StdDev": "3.244 ms",
+        "Median": "44.00 ms"
       }
     ]
   },
@@ -53,58 +53,58 @@
     "BuildTime": [
       {
         "Method": "Build_TUnit",
-        "Version": "1.0.30",
-        "Mean": "1.828 s",
-        "Error": "0.0354 s",
-        "StdDev": "0.0460 s",
-        "Median": "1.831 s"
+        "Version": "1.0.39",
+        "Mean": "1.788 s",
+        "Error": "0.0343 s",
+        "StdDev": "0.0352 s",
+        "Median": "1.789 s"
       },
       {
         "Method": "Build_NUnit",
         "Version": "4.4.0",
-        "Mean": "1.633 s",
-        "Error": "0.0202 s",
-        "StdDev": "0.0179 s",
-        "Median": "1.633 s"
+        "Mean": "1.570 s",
+        "Error": "0.0201 s",
+        "StdDev": "0.0178 s",
+        "Median": "1.571 s"
       },
       {
         "Method": "Build_MSTest",
         "Version": "4.0.1",
-        "Mean": "1.717 s",
-        "Error": "0.0166 s",
-        "StdDev": "0.0147 s",
-        "Median": "1.716 s"
+        "Mean": "1.657 s",
+        "Error": "0.0256 s",
+        "StdDev": "0.0240 s",
+        "Median": "1.661 s"
       },
       {
         "Method": "Build_xUnit3",
         "Version": "3.2.0",
-        "Mean": "1.635 s",
-        "Error": "0.0214 s",
-        "StdDev": "0.0201 s",
-        "Median": "1.634 s"
+        "Mean": "1.577 s",
+        "Error": "0.0154 s",
+        "StdDev": "0.0136 s",
+        "Median": "1.575 s"
       }
     ]
   },
   "comparisons": {
     "results": {
-      "tunitMean": 572.4,
-      "tunitAOTMean": 130.7,
-      "vsXUnit": "0.01",
-      "vsNUnit": "0.00",
-      "vsMSTest": "0.00",
-      "aotSpeedup": "4.38"
+      "tunitMean": 495.43,
+      "tunitAOTMean": 44.15,
+      "vsXUnit": "1.19",
+      "vsNUnit": "1.17",
+      "vsMSTest": "1.00",
+      "aotSpeedup": "11.22"
     }
   },
   "averageSpeedups": {
-    "vsXUnit": "0.0",
-    "vsNUnit": "0.0",
-    "vsMSTest": "0.0",
+    "vsXUnit": "1.2",
+    "vsNUnit": "1.2",
+    "vsMSTest": "1.0",
     "count": 1
   },
   "stats": {
     "runtimeCategories": 1,
     "buildCategories": 1,
     "totalBenchmarks": 2,
-    "lastUpdated": "2025-11-09T00:29:34.402Z"
+    "lastUpdated": "2025-11-10T00:29:09.702Z"
   }
 }
