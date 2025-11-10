@@ -83,11 +83,13 @@ public class TestSessionContext : Context
 
     internal bool FirstTestStarted { get; set; }
 
-    internal readonly List<Artifact> Artifacts = [];
+    private readonly List<Artifact> _artifacts = [];
+
+    public IReadOnlyList<Artifact> Artifacts => _artifacts;
 
     public void AddArtifact(Artifact artifact)
     {
-        Artifacts.Add(artifact);
+        _artifacts.Add(artifact);
     }
 
     internal void RemoveAssembly(AssemblyHookContext assemblyContext)
