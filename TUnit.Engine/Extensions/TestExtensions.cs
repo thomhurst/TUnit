@@ -54,7 +54,7 @@ internal static class TestExtensions
         // Artifacts
         if(isFinalState && testContext.Output.Artifacts.Count > 0)
         {
-            properties.AddRange(testContext.Artifacts.Select(static x => new FileArtifactProperty(x.File, x.DisplayName, x.Description)));
+            properties.AddRange(testContext.Output.Artifacts.Select(static x => new FileArtifactProperty(x.File, x.DisplayName, x.Description)));
         }
 
         string? output = null;
