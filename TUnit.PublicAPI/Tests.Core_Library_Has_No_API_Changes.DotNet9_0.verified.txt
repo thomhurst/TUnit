@@ -1482,6 +1482,7 @@ namespace
     public class TestSessionContext : .Context
     {
         public .<.TestContext> AllTests { get; }
+        public .<.Artifact> Artifacts { get; }
         public .<.AssemblyHookContext> Assemblies { get; }
         public required string Id { get; init; }
         public .<.ClassHookContext> TestClasses { get; }
