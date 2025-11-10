@@ -342,7 +342,7 @@ All benchmark source code is available in the [\`tools/speed-comparison\`](https
 
 ### Interactive Comparison
 
-Want to estimate performance for your test suite? Try the [Benchmark Calculator](/docs/benchmarks/calculator) to see potential time savings.
+Benchmark calculator removed.
 
 ---
 

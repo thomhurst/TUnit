@@ -80,14 +80,7 @@ Auto-generated page featuring:
 - Links to interactive tools
 
 #### Calculator Page
-**File:** `docs/docs/benchmarks/calculator.md`
-
-Interactive page for users to:
-- Input their test count
-- Select current framework
-- Calculate potential time savings
-- See annual productivity gains
-- Understand ROI of migration
+**Benchmark calculator removed.**
 
 #### Methodology Page
 **File:** `docs/docs/benchmarks/methodology.md`
@@ -128,25 +121,7 @@ import BenchmarkChart from '@site/src/components/BenchmarkChart';
 ---
 
 #### 2. BenchmarkCalculator Component
-**Files:**
-- `docs/src/components/BenchmarkCalculator/index.tsx`
-- `docs/src/components/BenchmarkCalculator/styles.module.css`
-
-**Features:**
-- Input fields for test count, current framework, runs per day
-- Real-time calculations using actual benchmark data
-- Displays current vs TUnit vs TUnit AOT times
-- Shows daily and annual time savings
-- Calculates team-level impact
-- Responsive card-based layout
-- Gradient highlights for AOT results
-
-**Usage:**
-```tsx
-import BenchmarkCalculator from '@site/src/components/BenchmarkCalculator';
-
-<BenchmarkCalculator />
-```
+**Benchmark calculator removed.**
 
 ---
 
@@ -161,7 +136,7 @@ import BenchmarkCalculator from '@site/src/components/BenchmarkCalculator';
 - Auto-loads real benchmark data from JSON
 - Fallback data for initial rendering
 - Feature checkmarks (source-generated, parallel, AOT)
-- Call-to-action buttons to detailed benchmarks and calculator
+- Call-to-action button to detailed benchmarks
 - Methodology link
 - Gradient backgrounds and animations
 - Fully responsive
@@ -182,7 +157,6 @@ import BenchmarkCalculator from '@site/src/components/BenchmarkCalculator';
 
 Added new "Benchmarks" section with:
 - Main benchmarks page (index)
-- Calculator page
 - Methodology page
 
 Positioned between "Examples & Use Cases" and "Reference" for optimal discoverability.
@@ -266,15 +240,11 @@ TUnit/
 │   ├── docs/
 │   │   └── benchmarks/
 │   │       ├── index.md                  [AUTO-GENERATED]
-│   │       ├── calculator.md             [NEW]
 │   │       └── methodology.md            [NEW]
 │   │
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── BenchmarkChart/
-│   │   │   │   ├── index.tsx            [NEW]
-│   │   │   │   └── styles.module.css    [NEW]
-│   │   │   ├── BenchmarkCalculator/
 │   │   │   │   ├── index.tsx            [NEW]
 │   │   │   │   └── styles.module.css    [NEW]
 │   │   │   └── BenchmarkHighlight/
@@ -308,7 +278,6 @@ npm start
 Visit:
 - http://localhost:3000 (homepage with benchmark section)
 - http://localhost:3000/docs/benchmarks (detailed benchmarks)
-- http://localhost:3000/docs/benchmarks/calculator (calculator)
 - http://localhost:3000/docs/benchmarks/methodology (methodology)
 
 ### After First CI Run
@@ -332,7 +301,6 @@ Visit:
    - Visit the deployed site after merge
    - Homepage shows real speedup numbers
    - Benchmarks page shows all test categories
-   - Calculator uses real data
    - Charts render correctly
 
 **Note:** You can review the PRs if desired, but they will merge automatically without intervention.
@@ -353,7 +321,7 @@ matrix:
 The system automatically:
 - Processes new results
 - Adds new sections to documentation
-- Includes in charts and calculator
+- Includes in charts
 
 ### Styling Customization
 
