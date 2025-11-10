@@ -340,10 +340,6 @@ The benchmarks measure real-world testing patterns:
 
 All benchmark source code is available in the [\`tools/speed-comparison\`](https://github.com/thomhurst/TUnit/tree/main/tools/speed-comparison) directory.
 
-### Interactive Comparison
-
-Want to estimate performance for your test suite? Try the [Benchmark Calculator](/docs/benchmarks/calculator) to see potential time savings.
-
 ---
 
 :::note Continuous Benchmarking
