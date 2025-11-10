@@ -40,7 +40,7 @@ Hooks can optionally accept parameters for accessing context information and can
 public async Task Setup(TestContext context, CancellationToken cancellationToken)
 {
     // Access test information via context
-    Console.WriteLine($"Setting up test: {context.TestDetails.TestName}");
+    Console.WriteLine($"Setting up test: {context.Metadata.TestName}");
 
     // Use cancellation token for timeout-aware operations
     await SomeLongRunningOperation(cancellationToken);
@@ -64,7 +64,7 @@ public async Task SetupWithToken(CancellationToken cancellationToken)
 public async Task SetupWithContext(TestContext context)
 {
     // Can use context without CancellationToken
-    Console.WriteLine(context.TestDetails.TestName);
+    Console.WriteLine(context.Metadata.TestName);
 }
 ```
 

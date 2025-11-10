@@ -119,7 +119,7 @@ Example:
 public async Task AddItemToBag() 
 {
     var itemId = await AddToBag();
-    TestContext.Current!.ObjectBag.Add("ItemId", itemId);
+    TestContext.Current!.StateBag.Add("ItemId", itemId);
 }
 
 [Test]
@@ -127,7 +127,7 @@ public async Task AddItemToBag()
 public async Task DeleteItemFromBag() 
 {
     var addToBagTestContext = TestContext.Current!.GetTests(nameof(AddItemToBag)).First();
-    var itemId = addToBagTestContext.ObjectBag["ItemId"];
+    var itemId = addToBagTestContext.StateBag["ItemId"];
     await DeleteFromBag(itemId);
 }
 ```

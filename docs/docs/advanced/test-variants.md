@@ -94,7 +94,7 @@ public class ShrinkOnFailureAttribute : Attribute, ITestEndEventReceiver
             return; // Don't shrink shrink attempts
 
         // Get the test's numeric argument to shrink
-        var args = testContext.TestDetails.TestMethodArguments;
+        var args = testContext.Metadata.TestDetails.TestMethodArguments;
         if (args.Length == 0 || args[0] is not int size)
             return;
 
@@ -240,9 +240,9 @@ public async Task InputValidation_SpecialCharacters(string input)
     await Assert.That(result.IsValid).IsTrue();
 
     // If we haven't tested special characters yet, generate variants
-    if (!context.ObjectBag.ContainsKey("TestedSpecialChars"))
+    if (!context.StateBag.ContainsKey("TestedSpecialChars"))
     {
-        context.ObjectBag["TestedSpecialChars"] = true;
+        context.StateBag["TestedSpecialChars"] = true;
 
         var specialInputs = new[]
         {
@@ -365,7 +365,7 @@ public static async Task CreateTestVariant(
 |-----------|------|----------|---------|-------------|
 | `context` | `TestContext` | Yes | - | The current test context |
 | `arguments` | `object?[]?` | No | `null` | Method arguments for the variant. If `null`, reuses parent's arguments |
-| `properties` | `Dictionary<string, object?>?` | No | `null` | Custom metadata stored in the variant's `TestContext.ObjectBag` |
+| `properties` | `Dictionary<string, object?>?` | No | `null` | Custom metadata stored in the variant's `TestContext.StateBag` |
 | `relationship` | `TestRelationship` | No | `Derived` | Categorizes the variant's relationship to its parent |
 | `displayName` | `string?` | No | `null` | User-facing label shown in test explorers. If `null`, uses default format |
 
@@ -419,7 +419,7 @@ public async Task RecursiveVariant()
     var context = TestContext.Current!;
 
     // ✅ Good: Check depth
-    var depth = context.ObjectBag.TryGetValue("Depth", out var d) ? (int)d : 0;
+    var depth = context.StateBag.TryGetValue("Depth", out var d) ? (int)d : 0;
     if (depth < 5)
     {
         await context.CreateTestVariant(
@@ -476,7 +476,7 @@ for (int i = 0; i < 10000; i++)  // Creates 10,000 tests!
 
 ## See Also
 
-- [Test Context](../test-lifecycle/test-context.md) - Understanding TestContext and ObjectBag
+- [Test Context](../test-lifecycle/test-context.md) - Understanding TestContext and StateBag
 - [Dynamic Tests](../experimental/dynamic-tests.md) - Pre-execution test generation
 - [Retrying](../execution/retrying.md) - Built-in retry mechanism comparison
 - [Properties](../test-lifecycle/properties.md) - Test metadata and custom properties

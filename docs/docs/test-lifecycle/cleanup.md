@@ -61,7 +61,7 @@ public async Task CleanupWithToken(CancellationToken cancellationToken)
 public async Task CleanupWithContext(TestContext context)
 {
     // Can use context without CancellationToken
-    Console.WriteLine($"Test {context.TestDetails.TestName} completed");
+    Console.WriteLine($"Test {context.Metadata.TestName} completed");
 }
 ```
 
@@ -146,7 +146,7 @@ public class MyTestClass
     [After(Test)]
     public async Task AfterEachTest()
     {
-        await new HttpClient().GetAsync($"https://localhost/test-finished-notifier?testName={TestContext.Current.TestDetails.TestName}");
+        await new HttpClient().GetAsync($"https://localhost/test-finished-notifier?testName={TestContext.Current.Metadata.TestName}");
     }
 
     [Test]

@@ -10,7 +10,7 @@ This can be useful if you want something like a generic `AfterEachTest` for all 
 
 e.g.
 ```csharp
-if (TestContext.Current.TestInformation.CustomProperties.ContainsKey("SomeProperty"))
+if (TestContext.Current?.Metadata.TestDetails.CustomProperties.ContainsKey("SomeProperty") == true)
 {
     // Do something
 }
@@ -61,7 +61,7 @@ public void LogTestStart()
 {
     var logger = TestContext.Current?.GetService<ILogger>();
     logger?.LogInformation("Test {TestName} starting", 
-        TestContext.Current?.TestDetails.TestName);
+        TestContext.Current?.Metadata.TestName);
 }
 ```
 
@@ -223,7 +223,7 @@ public static IEnumerable<object[]> MyDataGenerator()
         Console.WriteLine($"Assembly: {context.ClassInformation?.Assembly.Name}");
         
         // Store data for later use during test execution
-        context.ObjectBag["GenerationTime"] = DateTime.Now;
+        context.StateBag["GenerationTime"] = DateTime.Now;
     }
     
     yield return new object[] { 1, 2, 3 };
@@ -232,7 +232,7 @@ public static IEnumerable<object[]> MyDataGenerator()
 
 ### Sharing Data Between Discovery and Execution
 
-The `ObjectBag` property on `TestBuilderContext` is carried forward to `TestContext`, allowing you to pass data from discovery time to execution time:
+The `StateBag` property on `TestBuilderContext` is carried forward to `TestContext`, allowing you to pass data from discovery time to execution time:
 
 ```csharp
 // In your data generator
@@ -241,8 +241,8 @@ public static IEnumerable<object[]> TestData()
     var builderContext = TestBuilderContext.Current;
     if (builderContext != null)
     {
-        builderContext.ObjectBag["DataGeneratedAt"] = DateTime.Now;
-        builderContext.ObjectBag["GeneratorVersion"] = "1.0";
+        builderContext.StateBag["DataGeneratedAt"] = DateTime.Now;
+        builderContext.StateBag["GeneratorVersion"] = "1.0";
     }
     
     yield return new object[] { "test" };
@@ -254,8 +254,8 @@ public static IEnumerable<object[]> TestData()
 public void MyTest(string value)
 {
     // Access the data stored during generation
-    var generatedAt = TestContext.Current.ObjectBag["DataGeneratedAt"];
-    var version = TestContext.Current.ObjectBag["GeneratorVersion"];
+    var generatedAt = TestContext.Current.StateBag["DataGeneratedAt"];
+    var version = TestContext.Current.StateBag["GeneratorVersion"];
     
     Console.WriteLine($"Data was generated at: {generatedAt}");
 }
@@ -271,7 +271,7 @@ public void MyTest(string value)
   - `Namespace` - The namespace
   - Properties, parameters, and more
 - `MethodInformation` - Full information about the test method
-- `ObjectBag` - A dictionary for storing custom data
+- `StateBag` - A dictionary for storing custom data
 - `Events` - Test events that can be subscribed to
 
 Note: `TestBuilderContext.Current` will be `null` if accessed outside of test discovery/building phase.
