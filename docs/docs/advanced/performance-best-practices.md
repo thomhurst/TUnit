@@ -518,7 +518,7 @@ public class PerformanceAwareExecutor : ITestExecutor
             {
                 _logger.LogWarning(
                     "Slow test detected: {TestName} took {ElapsedMs}ms",
-                    context.TestDetails.TestName,
+                    context.Metadata.TestName,
                     stopwatch.ElapsedMilliseconds);
             }
         }
@@ -540,8 +540,8 @@ public static void RecordTestMetrics()
             context.Result.Duration.TotalMilliseconds,
             new Dictionary<string, string>
             {
-                ["TestName"] = context.TestDetails.TestName,
-                ["TestClass"] = context.TestDetails.TestClass,
+                ["TestName"] = context.Metadata.TestName,
+                ["TestClass"] = context.Metadata.TestDetails.TestClass,
                 ["Result"] = context.Result.State.ToString()
             });
     }

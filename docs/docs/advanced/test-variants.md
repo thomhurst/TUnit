@@ -94,7 +94,7 @@ public class ShrinkOnFailureAttribute : Attribute, ITestEndEventReceiver
             return; // Don't shrink shrink attempts
 
         // Get the test's numeric argument to shrink
-        var args = testContext.TestDetails.TestMethodArguments;
+        var args = testContext.Metadata.TestDetails.TestMethodArguments;
         if (args.Length == 0 || args[0] is not int size)
             return;
 

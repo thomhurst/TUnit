@@ -889,15 +889,15 @@ public class ContextTests
     public async Task UsingTestContext_AllProperties(TestContext context)
     {
         // Writing output
-        context.OutputWriter.WriteLine($"Test: {context.TestDetails.TestName}");
-        context.OutputWriter.WriteLine($"Test ID: {context.TestDetails.TestId}");
+        context.OutputWriter.WriteLine($"Test: {context.Metadata.TestName}");
+        context.OutputWriter.WriteLine($"Test ID: {context.Metadata.TestDetails.TestId}");
 
         // Accessing test details
-        context.OutputWriter.WriteLine($"Class: {context.TestDetails.ClassType.Name}");
-        context.OutputWriter.WriteLine($"Method: {context.TestDetails.MethodInfo.Name}");
+        context.OutputWriter.WriteLine($"Class: {context.Metadata.TestDetails.ClassType.Name}");
+        context.OutputWriter.WriteLine($"Method: {context.Metadata.TestDetails.MethodInfo.Name}");
 
         // Accessing attributes and properties
-        var properties = context.TestDetails.Attributes.OfType<PropertyAttribute>();
+        var properties = context.Metadata.TestDetails.Attributes.OfType<PropertyAttribute>();
         foreach (var prop in properties)
         {
             context.OutputWriter.WriteLine($"{prop.Key}: {prop.Value}");
@@ -911,11 +911,11 @@ public class ContextTests
     [Property("Environment", "Staging")]
     public async Task TestWithProperties(TestContext context)
     {
-        var browserProp = context.TestDetails.Attributes
+        var browserProp = context.Metadata.TestDetails.Attributes
             .OfType<PropertyAttribute>()
             .FirstOrDefault(p => p.Key == "Browser");
 
-        var envProp = context.TestDetails.Attributes
+        var envProp = context.Metadata.TestDetails.Attributes
             .OfType<PropertyAttribute>()
             .FirstOrDefault(p => p.Key == "Environment");
 
@@ -927,7 +927,7 @@ public class ContextTests
 **Key Changes:**
 - TestContext is injected as parameter, not a property
 - Access output via `context.OutputWriter.WriteLine()`
-- Test metadata available via `context.TestDetails`
+- Test metadata available via `context.Metadata.TestDetails`
 - Properties accessed through attributes rather than dictionary
 - More type-safe property access
 
@@ -942,7 +942,7 @@ public class ContextTests
 4. **TestContext Changes**:
    - TestContext is injected as a parameter rather than a property
    - ClassInitialize and AssemblyInitialize don't receive TestContext parameters
-   - Access metadata via `context.TestDetails` instead of various TestContext properties
+   - Access metadata via `context.Metadata.TestDetails` instead of various TestContext properties
 
 5. **Dependency Injection**: TUnit has built-in support for dependency injection in test classes and methods.
 

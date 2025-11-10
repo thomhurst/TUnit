@@ -61,7 +61,7 @@ public void LogTestStart()
 {
     var logger = TestContext.Current?.GetService<ILogger>();
     logger?.LogInformation("Test {TestName} starting", 
-        TestContext.Current?.TestDetails.TestName);
+        TestContext.Current?.Metadata.TestName);
 }
 ```
 

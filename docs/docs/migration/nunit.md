@@ -543,9 +543,9 @@ public void Test_WithContextProperties()
 [Test]
 public async Task Test_WithContextProperties(TestContext context)
 {
-    context.OutputWriter.WriteLine($"Test Name: {context.TestDetails.TestName}");
-    context.OutputWriter.WriteLine($"Test ID: {context.TestDetails.TestId}");
-    context.OutputWriter.WriteLine($"Class Name: {context.TestDetails.ClassType.Name}");
+    context.OutputWriter.WriteLine($"Test Name: {context.Metadata.TestName}");
+    context.OutputWriter.WriteLine($"Test ID: {context.Metadata.TestDetails.TestId}");
+    context.OutputWriter.WriteLine($"Class Name: {context.Metadata.TestDetails.ClassType.Name}");
 
     // Test implementation
 }

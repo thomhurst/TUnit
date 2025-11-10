@@ -146,7 +146,7 @@ public class LoggingHookExecutor : IHookExecutor
 
     public async ValueTask ExecuteBeforeTestHook(MethodMetadata hookMethodInfo, TestContext context, Func<ValueTask> action)
     {
-        Console.WriteLine($"Before test hook: {hookMethodInfo.MethodName} for test {context.TestDetails.TestName}");
+        Console.WriteLine($"Before test hook: {hookMethodInfo.MethodName} for test {context.Metadata.TestName}");
         await action();
     }
 
@@ -177,7 +177,7 @@ public class LoggingHookExecutor : IHookExecutor
     public async ValueTask ExecuteAfterTestHook(MethodMetadata hookMethodInfo, TestContext context, Func<ValueTask> action)
     {
         await action();
-        Console.WriteLine($"After test hook: {hookMethodInfo.MethodName} for test {context.TestDetails.TestName}");
+        Console.WriteLine($"After test hook: {hookMethodInfo.MethodName} for test {context.Metadata.TestName}");
     }
 }
 ```
@@ -253,8 +253,8 @@ public class TestReporterAttribute : Attribute, ITestStartEventReceiver, ITestEn
     {
         await ReportingService.ReportTestStarted(
             context.GetDisplayName(),
-            context.TestDetails.TestClass?.FullName,
-            context.TestDetails.TestMethodArguments
+            context.Metadata.TestDetails.TestClass?.FullName,
+            context.Metadata.TestDetails.TestMethodArguments
         );
     }
 
