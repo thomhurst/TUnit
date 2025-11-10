@@ -22,8 +22,18 @@
 }
 
 .header p {
-  color: #cbd5e1;
+  color: #64748b;
   font-size: 1.1rem;
+}
+
+/* Light mode specific styles */
+[data-theme='light'] .header p {
+  color: #64748b;
+}
+
+/* Dark mode specific styles */
+[data-theme='dark'] .header p {
+  color: #cbd5e1;
 }
 
 .controls {
@@ -39,23 +49,36 @@
   max-width: 600px;
   padding: 0.875rem 1.25rem;
   font-size: 1rem;
-  background: rgba(20, 184, 166, 0.1);
+  background: rgba(20, 184, 166, 0.05);
   border: 2px solid rgba(20, 184, 166, 0.2);
   border-radius: 0.75rem;
-  color: #f1f5f9;
+  color: #1e293b;
   transition: all 0.2s ease;
   display: block;
   margin: 0 auto;
 }
 
+[data-theme='dark'] .searchInput {
+  background: rgba(20, 184, 166, 0.1);
+  color: #f1f5f9;
+}
+
 .searchInput:focus {
   outline: none;
   border-color: #14b8a6;
-  background: rgba(20, 184, 166, 0.15);
+  background: rgba(20, 184, 166, 0.08);
   box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
 }
 
+[data-theme='dark'] .searchInput:focus {
+  background: rgba(20, 184, 166, 0.15);
+}
+
 .searchInput::placeholder {
+  color: #64748b;
+}
+
+[data-theme='dark'] .searchInput::placeholder {
   color: #94a3b8;
 }
 
@@ -68,26 +91,40 @@
 
 .categoryButton {
   padding: 0.5rem 1rem;
-  background: rgba(20, 184, 166, 0.1);
+  background: rgba(20, 184, 166, 0.05);
   border: 1px solid rgba(20, 184, 166, 0.2);
   border-radius: 0.5rem;
-  color: #cbd5e1;
+  color: #334155;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
+[data-theme='dark'] .categoryButton {
+  background: rgba(20, 184, 166, 0.1);
+  color: #cbd5e1;
+}
+
 .categoryButton:hover {
-  background: rgba(20, 184, 166, 0.15);
+  background: rgba(20, 184, 166, 0.1);
   border-color: rgba(20, 184, 166, 0.3);
+  color: #1e293b;
+}
+
+[data-theme='dark'] .categoryButton:hover {
+  background: rgba(20, 184, 166, 0.15);
   color: #f1f5f9;
 }
 
 .categoryButton.active {
   background: #14b8a6;
   border-color: #14b8a6;
-  color: #0f172a;
+  color: #ffffff;
   font-weight: 600;
+}
+
+[data-theme='dark'] .categoryButton.active {
+  color: #0f172a;
 }
 
 .results {
@@ -95,10 +132,14 @@
 }
 
 .resultCount {
-  color: #94a3b8;
+  color: #64748b;
   font-size: 0.95rem;
   margin-bottom: 1.5rem;
   text-align: center;
+}
+
+[data-theme='dark'] .resultCount {
+  color: #94a3b8;
 }
 
 .assertionsList {
@@ -108,11 +149,16 @@
 }
 
 .assertionCard {
-  background: linear-gradient(135deg, rgba(20, 184, 166, 0.05) 0%, rgba(14, 165, 233, 0.05) 100%);
-  border: 1px solid rgba(20, 184, 166, 0.2);
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.03) 0%, rgba(14, 165, 233, 0.03) 100%);
+  border: 1px solid rgba(20, 184, 166, 0.15);
   border-radius: 0.75rem;
   padding: 1.5rem;
   transition: all 0.3s ease;
+}
+
+[data-theme='dark'] .assertionCard {
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.05) 0%, rgba(14, 165, 233, 0.05) 100%);
+  border: 1px solid rgba(20, 184, 166, 0.2);
 }
 
 .assertionCard:hover {
@@ -131,44 +177,65 @@
 .assertionName {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #f1f5f9;
+  color: #0f172a;
   margin: 0;
+}
+
+[data-theme='dark'] .assertionName {
+  color: #f1f5f9;
 }
 
 .assertionCategory {
   font-size: 0.75rem;
   padding: 0.25rem 0.75rem;
-  background: rgba(20, 184, 166, 0.2);
+  background: rgba(20, 184, 166, 0.1);
   border: 1px solid rgba(20, 184, 166, 0.3);
   border-radius: 1rem;
-  color: #5eead4;
+  color: #0d9488;
   font-weight: 500;
 }
 
+[data-theme='dark'] .assertionCategory {
+  background: rgba(20, 184, 166, 0.2);
+  color: #5eead4;
+}
+
 .assertionDescription {
-  color: #cbd5e1;
+  color: #475569;
   margin-bottom: 1rem;
   font-size: 0.95rem;
   line-height: 1.5;
 }
 
+[data-theme='dark'] .assertionDescription {
+  color: #cbd5e1;
+}
+
 .assertionSyntax {
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(241, 245, 249, 0.8);
   border: 1px solid rgba(20, 184, 166, 0.2);
   border-radius: 0.5rem;
   padding: 0.75rem;
   margin-bottom: 0.75rem;
 }
 
+[data-theme='dark'] .assertionSyntax {
+  background: rgba(15, 23, 42, 0.8);
+}
+
 .assertionSyntax code {
-  color: #a5f3fc;
+  color: #0c4a6e;
   font-family: 'Fira Code', 'Courier New', monospace;
   font-size: 0.875rem;
   word-break: break-all;
 }
 
+[data-theme='dark'] .assertionSyntax code {
+  color: #a5f3fc;
+}
+
 .assertionExample {
-  background: rgba(168, 85, 247, 0.1);
+  background: rgba(168, 85, 247, 0.05);
   border: 1px solid rgba(168, 85, 247, 0.2);
   border-radius: 0.5rem;
   padding: 0.75rem;
@@ -177,24 +244,40 @@
   gap: 0.5rem;
 }
 
+[data-theme='dark'] .assertionExample {
+  background: rgba(168, 85, 247, 0.1);
+}
+
 .exampleLabel {
-  color: #a855f7;
+  color: #7c3aed;
   font-size: 0.8rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
+[data-theme='dark'] .exampleLabel {
+  color: #a855f7;
+}
+
 .assertionExample code {
-  color: #e9d5ff;
+  color: #5b21b6;
   font-family: 'Fira Code', 'Courier New', monospace;
   font-size: 0.875rem;
   word-break: break-all;
 }
 
+[data-theme='dark'] .assertionExample code {
+  color: #e9d5ff;
+}
+
 .noResults {
   text-align: center;
   padding: 3rem 1rem;
+  color: #64748b;
+}
+
+[data-theme='dark'] .noResults {
   color: #94a3b8;
 }
 
@@ -205,6 +288,10 @@
 .noResults p:first-child {
   font-size: 1.1rem;
   font-weight: 600;
+  color: #475569;
+}
+
+[data-theme='dark'] .noResults p:first-child {
   color: #cbd5e1;
 }
 
