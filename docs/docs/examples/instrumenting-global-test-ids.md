@@ -15,17 +15,17 @@ class AssignTestIdentifiersAttribute : Attribute, ITestDiscoveryEventReceiver
 
     public ValueTask OnTestDiscovered(DiscoveredTestContext discoveredTestContext)
     {
-        discoveredTestContext.TestContext.ObjectBag[TestIdObjectBagKey] = TestId++;
+        discoveredTestContext.TestContext.StateBag[TestIdObjectBagKey] = TestId++;
         return ValueTask.CompletedTask;
     }
 }
 ```
 
-`TestIdObjectBagKey` is a unique key that we use to store the test identifier in the `ObjectBag` of TUnit's `TestContext`.
+`TestIdObjectBagKey` is a unique key that we use to store the test identifier in the `StateBag` of TUnit's `TestContext`.
 
 `TestId` is a static integer that we increment for each test. We use this to assign a unique identifier to each test.
 
-In `OnTestDiscovered`, we assign the test identifier to the `ObjectBag` using the `TestIdObjectBagKey`. The use of `ObjectBag` exposes the test identifier to hooks and tests.
+In `OnTestDiscovered`, we assign the test identifier to the `StateBag` using the `TestIdObjectBagKey`. The use of `StateBag` exposes the test identifier to hooks and tests.
 
 Before we demonstrate how to use this attribute, let's create a simple extension method for `TestContext` to retrieve the test identifier swiftly:
 
@@ -34,8 +34,8 @@ static class TestContextExtensions
 {
     public static int GetTestId(this TestContext? testContext)
     {
-        // Retrieve the test identifier from the ObjectBag
-        return (int)testContext!.ObjectBag[AssignTestIdentifiersAttribute.TestIdObjectBagKey]!;
+        // Retrieve the test identifier from the StateBag
+        return (int)testContext!.StateBag[AssignTestIdentifiersAttribute.TestIdObjectBagKey]!;
     }
 }
 ```
