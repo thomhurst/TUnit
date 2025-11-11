@@ -290,7 +290,7 @@ public async Task All_Items_Match()
 
 #### With Satisfy
 
-Chain additional assertions on all items by mapping to a property:
+The single parameter overload will match T from IEnumerable<T> - Giving you the relevant assertions for that type.
 
 ```csharp
 [Test]
@@ -305,11 +305,11 @@ public async Task All_Satisfy_With_Property()
     // Use the mapper overload to access item properties
     await Assert.That(users)
         .All()
-        .Satisfy(u => u.Age, age => age.IsGreaterThan(18));
+        .Satisfy(user => user.IsNotNull());
 }
 ```
 
-You can also map to any expression:
+You can also map to other types by accessing properties an such - And then assert on those specific values:
 
 ```csharp
 [Test]
@@ -324,8 +324,8 @@ public async Task All_Satisfy_With_Mapper()
     await Assert.That(users)
         .All()
         .Satisfy(
-            u => u.Name,
-            name => name.IsNotEmpty()
+            u => u.Age,
+            age => age.IsGreaterThan(18)
         );
 }
 ```
