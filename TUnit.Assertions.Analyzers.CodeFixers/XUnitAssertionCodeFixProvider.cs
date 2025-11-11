@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Formatting;
 using TUnit.Assertions.Analyzers.Extensions;
 
 namespace TUnit.Assertions.Analyzers.CodeFixers;
@@ -64,7 +65,57 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
 
         var genericArgs = GetGenericArguments(memberAccessExpressionSyntax.Name);
 
-        var newExpression = await GetNewExpression(context, memberAccessExpressionSyntax, methodName, actual, expected, genericArgs, expressionSyntax.ArgumentList.Arguments);
+        // Special handling for Assert.All - returns a statement instead of an expression
+        if (methodName == "All")
+        {
+            var newStatement = ConvertAllToStatement(expected, actual);
+            if (newStatement != null)
+            {
+                // Find the parent expression statement and containing method
+                var parentStatement = expressionSyntax.FirstAncestorOrSelf<ExpressionStatementSyntax>();
+                var methodDeclaration = expressionSyntax.FirstAncestorOrSelf<MethodDeclarationSyntax>();
+
+                if (parentStatement != null)
+                {
+                    // Format the statement using Roslyn's formatter with annotations
+                    newStatement = newStatement.WithAdditionalAnnotations(Formatter.Annotation);
+
+                    // Replace the statement
+                    var newRoot = compilationUnit.ReplaceNode(parentStatement, newStatement);
+
+                    // Find the method declaration in the new tree if it needs to be modified
+                    if (methodDeclaration != null && !methodDeclaration.Modifiers.Any(SyntaxKind.AsyncKeyword))
+                    {
+                        // Find the method in the new tree
+                        var newMethodDeclaration = newRoot.DescendantNodes()
+                            .OfType<MethodDeclarationSyntax>()
+                            .FirstOrDefault(m => m.Identifier.ValueText == methodDeclaration.Identifier.ValueText);
+
+                        if (newMethodDeclaration != null)
+                        {
+                            var asyncModifier = SyntaxFactory.Token(SyntaxKind.AsyncKeyword).WithTrailingTrivia(SyntaxFactory.Space);
+                            var newModifiers = newMethodDeclaration.Modifiers.Add(asyncModifier);
+                            var updatedMethodDeclaration = newMethodDeclaration.WithModifiers(newModifiers);
+
+                            // Update return type to Task if it's void
+                            if (newMethodDeclaration.ReturnType.ToString() == "void")
+                            {
+                                updatedMethodDeclaration = updatedMethodDeclaration.WithReturnType(
+                                    SyntaxFactory.IdentifierName("Task").WithLeadingTrivia(newMethodDeclaration.ReturnType.GetLeadingTrivia()).WithTrailingTrivia(SyntaxFactory.Space));
+                            }
+
+                            newRoot = newRoot.ReplaceNode(newMethodDeclaration, updatedMethodDeclaration);
+                        }
+                    }
+
+                    // Format the entire document
+                    var formattedRoot = Formatter.Format(newRoot, Formatter.Annotation, document.Project.Solution.Workspace);
+                    return document.WithSyntaxRoot(formattedRoot);
+                }
+            }
+        }
+
+        var newExpression = await GetNewExpression(context, expressionSyntax, memberAccessExpressionSyntax, methodName, actual, expected, genericArgs, expressionSyntax.ArgumentList.Arguments);
 
         if (newExpression != null)
         {
@@ -75,11 +126,15 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
     }
 
     private static async Task<ExpressionSyntax?> GetNewExpression(CodeFixContext context,
+        InvocationExpressionSyntax expressionSyntax,
         MemberAccessExpressionSyntax memberAccessExpressionSyntax, string method,
         ArgumentSyntax? actual, ArgumentSyntax? expected, string genericArgs,
         SeparatedSyntaxList<ArgumentSyntax> argumentListArguments)
     {
         var isGeneric = !string.IsNullOrEmpty(genericArgs);
+
+        // Check if we're inside a .Satisfy() or .Satisfies() lambda
+        var (isInSatisfy, parameterName) = IsInsideSatisfyLambda(expressionSyntax);
 
         return method switch
         {
@@ -95,13 +150,21 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
 
             "EndsWith" => SyntaxFactory.ParseExpression($"Assert.That({actual}).EndsWith({expected})"),
 
-            "NotNull" => SyntaxFactory.ParseExpression($"Assert.That({actual}).IsNotNull()"),
+            "NotNull" => isInSatisfy && parameterName != null
+                ? SyntaxFactory.ParseExpression($"{actual}.IsNotNull()")
+                : SyntaxFactory.ParseExpression($"Assert.That({actual}).IsNotNull()"),
 
-            "Null" => SyntaxFactory.ParseExpression($"Assert.That({actual}).IsNull()"),
+            "Null" => isInSatisfy && parameterName != null
+                ? SyntaxFactory.ParseExpression($"{actual}.IsNull()")
+                : SyntaxFactory.ParseExpression($"Assert.That({actual}).IsNull()"),
 
-            "True" => SyntaxFactory.ParseExpression($"Assert.That({actual}).IsTrue()"),
+            "True" => isInSatisfy && parameterName != null
+                ? SyntaxFactory.ParseExpression($"{actual}.IsTrue()")
+                : SyntaxFactory.ParseExpression($"Assert.That({actual}).IsTrue()"),
 
-            "False" => SyntaxFactory.ParseExpression($"Assert.That({actual}).IsFalse()"),
+            "False" => isInSatisfy && parameterName != null
+                ? SyntaxFactory.ParseExpression($"{actual}.IsFalse()")
+                : SyntaxFactory.ParseExpression($"Assert.That({actual}).IsFalse()"),
 
             "Same" => SyntaxFactory.ParseExpression($"Assert.That({actual}).IsSameReferenceAs({expected})"),
 
@@ -123,7 +186,7 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
                 ? SyntaxFactory.ParseExpression($"Assert.That({actual}).IsNotAssignableFrom<{genericArgs}>()")
                 : SyntaxFactory.ParseExpression($"Assert.That({actual}).IsNotAssignableFrom({expected})"),
 
-            "All" => SyntaxFactory.ParseExpression($"Assert.That({actual}).All().Satisfy({expected})"),
+            // "All" is handled separately in ConvertAssertionAsync
 
             "Single" => SyntaxFactory.ParseExpression($"Assert.That({actual}).HasSingleItem()"),
 
@@ -277,5 +340,194 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
         }
 
         return string.Empty;
+    }
+
+    private static (bool isInSatisfy, string? parameterName) IsInsideSatisfyLambda(SyntaxNode node)
+    {
+        var current = node.Parent;
+
+        while (current != null)
+        {
+            // Check if we're in a lambda expression
+            if (current is SimpleLambdaExpressionSyntax simpleLambda)
+            {
+                // Check if the lambda is an argument to a .Satisfy() or .Satisfies() call
+                if (current.Parent is ArgumentSyntax argument &&
+                    argument.Parent is ArgumentListSyntax argumentList &&
+                    argumentList.Parent is InvocationExpressionSyntax invocation &&
+                    invocation.Expression is MemberAccessExpressionSyntax memberAccess)
+                {
+                    var methodName = memberAccess.Name.Identifier.ValueText;
+                    if (methodName is "Satisfy" or "Satisfies")
+                    {
+                        return (true, simpleLambda.Parameter.Identifier.ValueText);
+                    }
+                }
+            }
+            else if (current is ParenthesizedLambdaExpressionSyntax parenLambda)
+            {
+                // Check if the lambda is an argument to a .Satisfy() or .Satisfies() call
+                if (current.Parent is ArgumentSyntax argument &&
+                    argument.Parent is ArgumentListSyntax argumentList &&
+                    argumentList.Parent is InvocationExpressionSyntax invocation &&
+                    invocation.Expression is MemberAccessExpressionSyntax memberAccess)
+                {
+                    var methodName = memberAccess.Name.Identifier.ValueText;
+                    if (methodName is "Satisfy" or "Satisfies")
+                    {
+                        // For parenthesized lambda, get the first parameter
+                        var firstParam = parenLambda.ParameterList.Parameters.FirstOrDefault();
+                        return (true, firstParam?.Identifier.ValueText);
+                    }
+                }
+            }
+
+            current = current.Parent;
+        }
+
+        return (false, null);
+    }
+
+    private static StatementSyntax? ConvertAllToStatement(ArgumentSyntax? collection, ArgumentSyntax? lambda)
+    {
+        if (lambda?.Expression is not LambdaExpressionSyntax lambdaExpression)
+        {
+            return null;
+        }
+
+        // Extract lambda parameter name
+        string? paramName = lambdaExpression switch
+        {
+            SimpleLambdaExpressionSyntax simple => simple.Parameter.Identifier.ValueText,
+            ParenthesizedLambdaExpressionSyntax paren => paren.ParameterList.Parameters.FirstOrDefault()?.Identifier.ValueText,
+            _ => null
+        };
+
+        if (paramName == null)
+        {
+            return null;
+        }
+
+        // Get the lambda body
+        var lambdaBody = lambdaExpression switch
+        {
+            SimpleLambdaExpressionSyntax simple => simple.Body,
+            ParenthesizedLambdaExpressionSyntax paren => paren.Body,
+            _ => null
+        };
+
+        if (lambdaBody == null)
+        {
+            return null;
+        }
+
+        // Convert xUnit assertions in the lambda body to TUnit assertions
+        var convertedStatements = ConvertLambdaBodyToTUnitAssertions(lambdaBody);
+
+        if (convertedStatements == null || convertedStatements.Count == 0)
+        {
+            return null;
+        }
+
+        // Build the foreach statement with converted assertions
+        var foreachBlock = SyntaxFactory.Block(convertedStatements);
+        var foreachStatement = SyntaxFactory.ForEachStatement(
+            SyntaxFactory.IdentifierName("var"),
+            SyntaxFactory.Identifier(paramName),
+            collection!.Expression,
+            foreachBlock
+        );
+
+        // Build the using statement with the foreach inside
+        var usingBlock = SyntaxFactory.Block(foreachStatement);
+        var usingStatement = SyntaxFactory.UsingStatement(
+            declaration: null,
+            expression: SyntaxFactory.InvocationExpression(
+                SyntaxFactory.MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    SyntaxFactory.IdentifierName("Assert"),
+                    SyntaxFactory.IdentifierName("Multiple")
+                ),
+                SyntaxFactory.ArgumentList()
+            ),
+            statement: usingBlock
+        ).NormalizeWhitespace();
+
+        return usingStatement;
+    }
+
+    private static List<StatementSyntax>? ConvertLambdaBodyToTUnitAssertions(SyntaxNode lambdaBody)
+    {
+        var statements = new List<StatementSyntax>();
+
+        // Extract statements from the lambda body
+        var bodyStatements = lambdaBody switch
+        {
+            BlockSyntax block => block.Statements,
+            ExpressionSyntax expr => SyntaxFactory.SingletonList<StatementSyntax>(
+                SyntaxFactory.ExpressionStatement(expr)
+            ),
+            _ => default
+        };
+
+        if (bodyStatements == default)
+        {
+            return null;
+        }
+
+        foreach (var statement in bodyStatements)
+        {
+            // Find xUnit assertion invocations in this statement
+            var invocations = statement.DescendantNodes().OfType<InvocationExpressionSyntax>()
+                .Where(inv => inv.Expression is MemberAccessExpressionSyntax memberAccess &&
+                             memberAccess.Expression.ToString().Contains("Xunit.Assert"))
+                .ToList();
+
+            if (invocations.Count == 0)
+            {
+                // Not an assertion statement - keep it as is
+                statements.Add(statement);
+                continue;
+            }
+
+            // Convert each xUnit assertion
+            foreach (var invocation in invocations)
+            {
+                if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess)
+                {
+                    continue;
+                }
+
+                var methodName = memberAccess.Name.Identifier.ValueText;
+                var args = invocation.ArgumentList.Arguments;
+
+                // Convert to TUnit assertion
+                ExpressionSyntax? tunitAssertion = methodName switch
+                {
+                    "NotNull" when args.Count >= 1 =>
+                        SyntaxFactory.ParseExpression($"Assert.That({args[0]}).IsNotNull()"),
+                    "Null" when args.Count >= 1 =>
+                        SyntaxFactory.ParseExpression($"Assert.That({args[0]}).IsNull()"),
+                    "True" when args.Count >= 1 =>
+                        SyntaxFactory.ParseExpression($"Assert.That({args[0]}).IsTrue()"),
+                    "False" when args.Count >= 1 =>
+                        SyntaxFactory.ParseExpression($"Assert.That({args[0]}).IsFalse()"),
+                    "Equal" when args.Count >= 2 =>
+                        SyntaxFactory.ParseExpression($"Assert.That({args[1]}).IsEqualTo({args[0]})"),
+                    "NotEqual" when args.Count >= 2 =>
+                        SyntaxFactory.ParseExpression($"Assert.That({args[1]}).IsNotEqualTo({args[0]})"),
+                    _ => null
+                };
+
+                if (tunitAssertion != null)
+                {
+                    // Make it an await expression statement
+                    var awaitExpr = SyntaxFactory.AwaitExpression(tunitAssertion);
+                    statements.Add(SyntaxFactory.ExpressionStatement(awaitExpr));
+                }
+            }
+        }
+
+        return statements.Count > 0 ? statements : null;
     }
 }

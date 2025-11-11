@@ -150,4 +150,73 @@ public class XUnitAssertionCodeFixProviderTests
             """
             );
     }
+
+    [Test]
+    public async Task Xunit_All_Converts_To_AssertMultiple_WithForeach()
+    {
+        await Verifier
+            .VerifyCodeFixAsync(
+                """
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    public void MyTest()
+                    {
+                        var users = new[]
+                        {
+                            new User { Name = "Alice", Age = 25 },
+                            new User { Name = "Bob", Age = 30 }
+                        };
+
+                        {|#0:Xunit.Assert.All(users, user =>
+                        {
+                            {|#1:Xunit.Assert.NotNull(user.Name)|};
+                            {|#2:Xunit.Assert.True(user.Age > 18)|};
+                        })|};
+                    }
+                }
+
+                public class User
+                {
+                    public string Name { get; init; }
+                    public int Age { get; init; }
+                }
+                """,
+                [
+                    Verifier.Diagnostic(Rules.XUnitAssertion).WithLocation(0),
+                    Verifier.Diagnostic(Rules.XUnitAssertion).WithLocation(1),
+                    Verifier.Diagnostic(Rules.XUnitAssertion).WithLocation(2)
+                ],
+                """
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    public async Task MyTest()
+                    {
+                        var users = new[]
+                        {
+                            new User { Name = "Alice", Age = 25 },
+                            new User { Name = "Bob", Age = 30 }
+                        };
+                        using (Assert.Multiple())
+                        {
+                            foreach (var user in users)
+                            {
+                                await Assert.That(user.Name).IsNotNull();
+                                await Assert.That(user.Age > 18).IsTrue();
+                            }
+                        }
+                    }
+                }
+
+                public class User
+                {
+                    public string Name { get; init; }
+                    public int Age { get; init; }
+                }
+                """
+            );
+    }
 }

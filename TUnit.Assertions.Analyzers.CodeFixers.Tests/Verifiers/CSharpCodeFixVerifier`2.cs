@@ -4,7 +4,9 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing;
+using TUnit.Assertions;
 using TUnit.Assertions.Analyzers.CodeFixers.Tests.Extensions;
+using TUnit.Core;
 
 namespace TUnit.Assertions.Analyzers.CodeFixers.Tests.Verifiers;
 
@@ -41,12 +43,19 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
         params DiagnosticResult[] expected
     )
     {
+        var referenceAssemblies = GetReferenceAssemblies();
+
+        // Only add xunit package for XUnitAssertionAnalyzer
+        if (typeof(TAnalyzer).Name == "XUnitAssertionAnalyzer")
+        {
+            referenceAssemblies = referenceAssemblies.AddPackages([new PackageIdentity("xunit.v3.assert", "3.2.0")]);
+        }
+
         var test = new Test
         {
             TestCode = source.NormalizeLineEndings(),
             CodeActionValidationMode = CodeActionValidationMode.SemanticStructure,
-            ReferenceAssemblies = GetReferenceAssemblies()
-                .AddPackages([new PackageIdentity("xunit.v3.assert", "2.0.0")]),
+            ReferenceAssemblies = referenceAssemblies,
             TestState =
             {
                 AdditionalReferences =
@@ -76,12 +85,19 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
         [StringSyntax("c#-test")] string fixedSource
     )
     {
+        var referenceAssemblies = GetReferenceAssemblies();
+
+        // Only add xunit package for XUnitAssertionAnalyzer
+        if (typeof(TAnalyzer).Name == "XUnitAssertionAnalyzer")
+        {
+            referenceAssemblies = referenceAssemblies.AddPackages([new PackageIdentity("xunit.v3.assert", "3.2.0")]);
+        }
+
         var test = new Test
         {
             TestCode = source.NormalizeLineEndings(),
             FixedCode = fixedSource.NormalizeLineEndings(),
-            ReferenceAssemblies = GetReferenceAssemblies()
-                .AddPackages([new PackageIdentity("xunit.v3.assert", "2.0.0")]),
+            ReferenceAssemblies = referenceAssemblies,
             TestState =
             {
                 AdditionalReferences =
