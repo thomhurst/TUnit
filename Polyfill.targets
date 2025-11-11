@@ -1,4 +1,8 @@
 <Project>
+    <PropertyGroup Condition="'$(EnableTUnitPolyfills)' != 'false'">
+        <PolyUseEmbeddedAttribute>true</PolyUseEmbeddedAttribute>
+    </PropertyGroup>
+
     <ItemGroup Condition="'$(EnableTUnitPolyfills)' != 'false'">
         <PackageReference Include="Polyfill">
             <PrivateAssets>all</PrivateAssets>

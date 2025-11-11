@@ -36,6 +36,8 @@
     <PropertyGroup>
         <!-- Default to enabling polyfills for older frameworks -->
         <EnableTUnitPolyfills Condition="'$(EnableTUnitPolyfills)' == '' and ('$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'netstandard2.1' or '$(TargetFrameworkIdentifier)' == '.NETFramework')">true</EnableTUnitPolyfills>
+        <!-- Use embedded Polyfill attributes to prevent type conflicts across projects -->
+        <PolyUseEmbeddedAttribute Condition="'$(PolyUseEmbeddedAttribute)' == ''">true</PolyUseEmbeddedAttribute>
     </PropertyGroup>
 
     <PropertyGroup>
