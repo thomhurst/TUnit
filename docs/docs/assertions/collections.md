@@ -290,11 +290,11 @@ public async Task All_Items_Match()
 
 #### With Satisfy
 
-Chain additional assertions on all items:
+Chain additional assertions on all items by mapping to a property:
 
 ```csharp
 [Test]
-public async Task All_Satisfy()
+public async Task All_Satisfy_With_Property()
 {
     var users = new[]
     {
@@ -302,15 +302,14 @@ public async Task All_Satisfy()
         new User { Name = "Bob", Age = 30 }
     };
 
+    // Use the mapper overload to access item properties
     await Assert.That(users)
         .All()
-        .Satisfy(u => Assert.That(u.Age).IsGreaterThan(18));
+        .Satisfy(u => u.Age, age => age.IsGreaterThan(18));
 }
 ```
 
-#### With Mapper
-
-Map items before asserting:
+You can also map to any expression:
 
 ```csharp
 [Test]
@@ -326,7 +325,7 @@ public async Task All_Satisfy_With_Mapper()
         .All()
         .Satisfy(
             u => u.Name,
-            name => Assert.That(name).IsNotEmpty()
+            name => name.IsNotEmpty()
         );
 }
 ```

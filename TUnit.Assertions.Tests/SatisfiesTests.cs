@@ -232,6 +232,41 @@ public class SatisfiesTests
                                                            """);
     }
 
+    // Tests for issue #3766: Demonstrates the correct usage of .All().Satisfy()
+    // The mapper overload allows checking properties of collection items
+    [Test]
+    public async Task All_Satisfy_WithMapper_Good()
+    {
+        var users = new[]
+        {
+            new User { Name = "Alice", Age = 25 },
+            new User { Name = "Bob", Age = 30 }
+        };
+
+        await Assert.That(users)
+            .All()
+            .Satisfy(u => u.Age, age => age.IsGreaterThan(18));
+    }
+
+    [Test]
+    public async Task All_Satisfy_WithMapper_Throws()
+    {
+        var users = new[]
+        {
+            new User { Name = "Alice", Age = 25 },
+            new User { Name = "Bob", Age = 15 }
+        };
+
+        await Assert.That(async () =>
+            await Assert.That(users)
+                .All()
+                .Satisfy(u => u.Age, age => age.IsGreaterThan(18))
+        ).Throws<AssertionException>().WithMessageMatching("""
+                                                           *to satisfy*
+                                                           *index 1*
+                                                           """);
+    }
+
     [Test]
     public async Task Satisfies_With_Member_As_Final_Statement()
     {
@@ -289,6 +324,12 @@ public class SatisfiesTests
         ).Throws<AssertionException>().WithMessageMatching("""
                                                            *to satisfy*
                                                            """);
+    }
+
+    public class User
+    {
+        public string Name { get; init; } = string.Empty;
+        public int Age { get; init; }
     }
 
     public class MyModelWithId
