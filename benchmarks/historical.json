@@ -1,52 +1,10 @@
 [
   {
-    "date": "2025-11-07",
-    "averageSpeedups": {
-      "vsXUnit": "1.3",
-      "vsNUnit": "1.2",
-      "vsMSTest": "1.3",
-      "count": 1
-    },
-    "environment": "Ubuntu"
-  },
-  {
-    "date": "2025-11-08",
-    "averageSpeedups": {
-      "vsXUnit": "1.2",
-      "vsNUnit": "1.1",
-      "vsMSTest": "1.0",
-      "count": 1
-    },
-    "environment": "Ubuntu"
-  },
-  {
-    "date": "2025-11-09",
-    "averageSpeedups": {
-      "vsXUnit": "0.0",
-      "vsNUnit": "0.0",
-      "vsMSTest": "0.0",
-      "count": 1
-    },
-    "environment": "Ubuntu"
-  },
-  {
-    "date": "2025-11-10",
-    "averageSpeedups": {
-      "vsXUnit": "1.2",
-      "vsNUnit": "1.2",
-      "vsMSTest": "1.0",
-      "count": 1
-    },
+    "date": "2025-11-11",
     "environment": "Ubuntu"
   },
   {
     "date": "2025-11-11",
-    "averageSpeedups": {
-      "vsXUnit": "0.0",
-      "vsNUnit": "0.0",
-      "vsMSTest": "0.0",
-      "count": 1
-    },
     "environment": "Ubuntu"
   }
 ]
