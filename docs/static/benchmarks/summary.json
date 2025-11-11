@@ -1,0 +1,10 @@
+{
+  "runtime": [
+    "results"
+  ],
+  "build": [
+    "BuildTime"
+  ],
+  "timestamp": "2025-11-11",
+  "environment": "Ubuntu Latest • .NET SDK 10.0.100"
+}
