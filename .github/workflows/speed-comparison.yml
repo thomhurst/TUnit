@@ -160,6 +160,27 @@ jobs:
         run: |
           node .github/scripts/process-benchmarks.js
 
+      - name: Generate Benchmark List
+        id: benchmark_list
+        run: |
+          # Read the summary.json file and format it for the PR body
+          SUMMARY=$(cat docs/static/benchmarks/summary.json)
+          RUNTIME_BENCHMARKS=$(echo "$SUMMARY" | grep -A 100 '"runtime"' | grep -o '"[^"]*Tests"' | sed 's/"//g' | sed 's/^/- /' | tr '\n' '|')
+          BUILD_BENCHMARKS=$(echo "$SUMMARY" | grep -A 100 '"build"' | grep -o '"[^"]*"' | sed 's/"//g' | grep -v 'runtime\|build\|timestamp\|environment' | sed 's/^/- /' | tr '\n' '|')
+
+          # Replace | with newlines for proper formatting
+          RUNTIME_LIST=$(echo "$RUNTIME_BENCHMARKS" | sed 's/|/\n/g')
+          BUILD_LIST=$(echo "$BUILD_BENCHMARKS" | sed 's/|/\n/g')
+
+          # Set output with proper escaping
+          echo "runtime_benchmarks<<EOF" >> $GITHUB_OUTPUT
+          echo "$RUNTIME_LIST" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+          echo "build_benchmarks<<EOF" >> $GITHUB_OUTPUT
+          echo "$BUILD_LIST" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Check for Changes
         id: check_changes
         run: |
@@ -187,10 +208,19 @@ jobs:
 
             This PR updates the benchmark documentation with the latest results from the Speed Comparison workflow.
 
+            ### Benchmarks Produced
+
+            #### Runtime Benchmarks
+            ${{ steps.benchmark_list.outputs.runtime_benchmarks }}
+
+            #### Build Benchmarks
+            ${{ steps.benchmark_list.outputs.build_benchmarks }}
+
             ### Changes
             - Updated benchmark data in `docs/static/benchmarks/latest.json`
             - Updated historical trends in `docs/static/benchmarks/historical.json`
             - Regenerated benchmark documentation in `docs/docs/benchmarks/index.md`
+            - Updated benchmark summary in `docs/static/benchmarks/summary.json`
 
             ### Workflow Run
             - **Run ID**: ${{ github.run_id }}

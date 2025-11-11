@@ -212,49 +212,13 @@ These benchmarks were automatically generated on **${timestamp}** from the lates
 **Environment:** ${environmentInfo.os || 'Ubuntu Latest'} • ${environmentInfo.sdk || '.NET 10'}
 :::
 
-## 🎯 Executive Summary
-
-TUnit demonstrates significant performance advantages across all testing scenarios:
-
-<div className="benchmark-summary">
-
-### Average Performance vs Other Frameworks
-
-- **${avgSpeedups.vsXUnit}x faster** than xUnit v3
-- **${avgSpeedups.vsNUnit}x faster** than NUnit
-- **${avgSpeedups.vsMSTest}x faster** than MSTest
-
-</div>
-
----
-
 ## 🚀 Runtime Performance
 
 `;
 
 // Add runtime results
 Object.entries(categories.runtime).forEach(([testClass, data]) => {
-  const comparison = comparisons[testClass];
-
   mainPage += `\n### ${testClass}\n\n`;
-
-  if (comparison && comparison.aotSpeedup) {
-    mainPage += `:::tip Native AOT Performance\n`;
-    mainPage += `TUnit with Native AOT compilation is **${comparison.aotSpeedup}x faster** than regular JIT!\n`;
-    mainPage += `:::\n\n`;
-  }
-
-  // Add speedup badges
-  if (comparison) {
-    const badges = [];
-    if (comparison.vsXUnit) badges.push(`**${comparison.vsXUnit}x faster** than xUnit`);
-    if (comparison.vsNUnit) badges.push(`**${comparison.vsNUnit}x faster** than NUnit`);
-    if (comparison.vsMSTest) badges.push(`**${comparison.vsMSTest}x faster** than MSTest`);
-
-    if (badges.length > 0) {
-      mainPage += `**Performance:** ${badges.join(' • ')}\n\n`;
-    }
-  }
 
   // Add table
   mainPage += `| Framework | Version | Mean | Median | StdDev |\n`;
@@ -267,6 +231,34 @@ Object.entries(categories.runtime).forEach(([testClass, data]) => {
   });
 
   mainPage += '\n';
+
+  // Add Mermaid bar chart
+  mainPage += `<details>\n<summary>📊 Visual Comparison</summary>\n\n`;
+  mainPage += '```mermaid\n%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#4CAF50", "primaryTextColor": "#fff", "primaryBorderColor": "#2E7D32", "lineColor": "#2E7D32", "secondaryColor": "#FFC107", "tertiaryColor": "#2196F3"}}}%%\nxychart-beta\n';
+  mainPage += `  title "${testClass} - Mean Execution Time (Lower is Better)"\n`;
+  mainPage += '  x-axis [';
+
+  // Add framework names for x-axis
+  const chartData = data.map(row => {
+    const name = row.Method.includes('TUnit_AOT') ? 'TUnit (AOT)' : row.Method;
+    const meanValue = parseMeanValue(row.Mean);
+    return { name, value: meanValue };
+  });
+
+  mainPage += chartData.map(d => `"${d.name}"`).join(', ');
+  mainPage += ']\n';
+  mainPage += '  y-axis "Time (ms)" 0 --> ';
+
+  // Set y-axis max to 120% of the highest value for better visualization
+  const maxValue = Math.max(...chartData.map(d => d.value));
+  mainPage += Math.ceil(maxValue * 1.2);
+  mainPage += '\n';
+
+  mainPage += '  bar [';
+  mainPage += chartData.map(d => d.value.toFixed(2)).join(', ');
+  mainPage += ']\n';
+  mainPage += '```\n\n';
+  mainPage += `</details>\n\n`;
 });
 
 // Add build time results
@@ -285,6 +277,34 @@ if (Object.keys(categories.build).length > 0) {
     });
 
     mainPage += '\n';
+
+    // Add Mermaid bar chart for build performance
+    mainPage += `<details>\n<summary>📊 Visual Comparison</summary>\n\n`;
+    mainPage += '```mermaid\n%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#4CAF50", "primaryTextColor": "#fff", "primaryBorderColor": "#2E7D32", "lineColor": "#2E7D32", "secondaryColor": "#FFC107", "tertiaryColor": "#2196F3"}}}%%\nxychart-beta\n';
+    mainPage += `  title "Build Time Comparison - Mean Compilation Time (Lower is Better)"\n`;
+    mainPage += '  x-axis [';
+
+    // Add framework names for x-axis
+    const chartData = data.map(row => {
+      const name = row.Method;
+      const meanValue = parseMeanValue(row.Mean);
+      return { name, value: meanValue };
+    });
+
+    mainPage += chartData.map(d => `"${d.name}"`).join(', ');
+    mainPage += ']\n';
+    mainPage += '  y-axis "Time (ms)" 0 --> ';
+
+    // Set y-axis max to 120% of the highest value for better visualization
+    const maxValue = Math.max(...chartData.map(d => d.value));
+    mainPage += Math.ceil(maxValue * 1.2);
+    mainPage += '\n';
+
+    mainPage += '  bar [';
+    mainPage += chartData.map(d => d.value.toFixed(2)).join(', ');
+    mainPage += ']\n';
+    mainPage += '```\n\n';
+    mainPage += `</details>\n\n`;
   });
 }
 
@@ -400,9 +420,30 @@ fs.writeFileSync(
 );
 console.log(`  ✓ Updated ${historicalFile} (${historical.length} data points)`);
 
+// Generate benchmark summary for PR body
+const benchmarkSummary = {
+  runtime: Object.keys(categories.runtime),
+  build: Object.keys(categories.build),
+  timestamp: timestamp,
+  environment: `${environmentInfo.os || 'Ubuntu Latest'} • ${environmentInfo.sdk || '.NET 10'}`
+};
+
+fs.writeFileSync(
+  path.join(STATIC_DIR, 'summary.json'),
+  JSON.stringify(benchmarkSummary, null, 2)
+);
+console.log(`  ✓ Created ${STATIC_DIR}/summary.json`);
+
 console.log('\n✅ Benchmark processing complete!\n');
 console.log(`Summary:`);
 console.log(`  - Runtime categories: ${stats.runtimeCategories}`);
 console.log(`  - Build categories: ${stats.buildCategories}`);
 console.log(`  - Total benchmarks: ${stats.totalBenchmarks}`);
-console.log(`  - Output files: 3 (markdown + 2 JSON files)`);
+console.log(`  - Output files: 4 (markdown + 3 JSON files)`);
+console.log(`\n📊 Benchmarks produced:`);
+console.log(`\nRuntime Benchmarks:`);
+Object.keys(categories.runtime).forEach(cat => console.log(`  - ${cat}`));
+if (Object.keys(categories.build).length > 0) {
+  console.log(`\nBuild Benchmarks:`);
+  Object.keys(categories.build).forEach(cat => console.log(`  - ${cat}`));
+}
