@@ -79,8 +79,10 @@ function extractEnvironmentInfo(content) {
 }
 
 function parseMeanValue(meanStr) {
-  // Parse "352.5 ms" -> 352.5
-  const match = meanStr.match(/[\d.]+/);
+  // Parse "352.5 ms" or "1,211.6 ms" -> 352.5 or 1211.6
+  // Remove commas, then extract number
+  const cleaned = meanStr.replace(/,/g, '');
+  const match = cleaned.match(/[\d.]+/);
   return match ? parseFloat(match[0]) : 0;
 }
 
@@ -136,62 +138,7 @@ const stats = {
   lastUpdated: new Date().toISOString()
 };
 
-console.log('\n📈 Calculating performance comparisons...');
-
-function calculateComparisons() {
-  const comparisons = {};
-
-  Object.entries(categories.runtime).forEach(([category, data]) => {
-    const tunit = data.find(d => d.Method === 'TUnit');
-    const tunitAOT = data.find(d => d.Method === 'TUnit_AOT');
-    const xunit = data.find(d => d.Method === 'xUnit3');
-    const nunit = data.find(d => d.Method === 'NUnit');
-    const mstest = data.find(d => d.Method === 'MSTest');
-
-    if (tunit) {
-      const tunitMean = parseMeanValue(tunit.Mean);
-      comparisons[category] = {
-        tunitMean,
-        tunitAOTMean: tunitAOT ? parseMeanValue(tunitAOT.Mean) : null,
-        vsXUnit: xunit ? (parseMeanValue(xunit.Mean) / tunitMean).toFixed(2) : null,
-        vsNUnit: nunit ? (parseMeanValue(nunit.Mean) / tunitMean).toFixed(2) : null,
-        vsMSTest: mstest ? (parseMeanValue(mstest.Mean) / tunitMean).toFixed(2) : null,
-        aotSpeedup: tunitAOT ? (tunitMean / parseMeanValue(tunitAOT.Mean)).toFixed(2) : null
-      };
-    }
-  });
-
-  return comparisons;
-}
-
-const comparisons = calculateComparisons();
-
-// Calculate average speedups
-const avgSpeedups = {
-  vsXUnit: 0,
-  vsNUnit: 0,
-  vsMSTest: 0,
-  count: 0
-};
-
-Object.values(comparisons).forEach(comp => {
-  if (comp.vsXUnit) {
-    avgSpeedups.vsXUnit += parseFloat(comp.vsXUnit);
-    avgSpeedups.count++;
-  }
-  if (comp.vsNUnit) avgSpeedups.vsNUnit += parseFloat(comp.vsNUnit);
-  if (comp.vsMSTest) avgSpeedups.vsMSTest += parseFloat(comp.vsMSTest);
-});
-
-if (avgSpeedups.count > 0) {
-  avgSpeedups.vsXUnit = (avgSpeedups.vsXUnit / avgSpeedups.count).toFixed(1);
-  avgSpeedups.vsNUnit = (avgSpeedups.vsNUnit / avgSpeedups.count).toFixed(1);
-  avgSpeedups.vsMSTest = (avgSpeedups.vsMSTest / avgSpeedups.count).toFixed(1);
-}
-
-console.log(`  Average speedup vs xUnit: ${avgSpeedups.vsXUnit}x`);
-console.log(`  Average speedup vs NUnit: ${avgSpeedups.vsNUnit}x`);
-console.log(`  Average speedup vs MSTest: ${avgSpeedups.vsMSTest}x`);
+console.log('\n📊 Preparing benchmark data...');
 
 // Generate main benchmarks page
 console.log('\n📝 Generating documentation...');
@@ -225,40 +172,30 @@ Object.entries(categories.runtime).forEach(([testClass, data]) => {
   mainPage += `|-----------|---------|------|--------|--------|\n`;
 
   data.forEach(row => {
-    const emoji = row.Method.includes('TUnit') ? '🏆 ' : '';
     const name = row.Method.includes('TUnit_AOT') ? '**TUnit (AOT)**' : row.Method.includes('TUnit') ? '**TUnit**' : row.Method;
-    mainPage += `| ${emoji}${name} | ${row.Version || 'N/A'} | ${row.Mean} | ${row.Median || 'N/A'} | ${row.StdDev || 'N/A'} |\n`;
+    mainPage += `| ${name} | ${row.Version || 'N/A'} | ${row.Mean} | ${row.Median || 'N/A'} | ${row.StdDev || 'N/A'} |\n`;
   });
 
   mainPage += '\n';
 
-  // Add Mermaid bar chart
-  mainPage += `<details>\n<summary>📊 Visual Comparison</summary>\n\n`;
-  mainPage += '```mermaid\n%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#4CAF50", "primaryTextColor": "#fff", "primaryBorderColor": "#2E7D32", "lineColor": "#2E7D32", "secondaryColor": "#FFC107", "tertiaryColor": "#2196F3"}}}%%\nxychart-beta\n';
-  mainPage += `  title "${testClass} - Mean Execution Time (Lower is Better)"\n`;
-  mainPage += '  x-axis [';
+  // Add Mermaid chart
+  mainPage += `\`\`\`mermaid\n`;
+  mainPage += `%%{init: {'theme':'base'}}%%\n`;
+  mainPage += `xychart-beta\n`;
+  mainPage += `  title "${testClass} Performance Comparison"\n`;
 
-  // Add framework names for x-axis
-  const chartData = data.map(row => {
-    const name = row.Method.includes('TUnit_AOT') ? 'TUnit (AOT)' : row.Method;
-    const meanValue = parseMeanValue(row.Mean);
-    return { name, value: meanValue };
-  });
+  // Detect time unit from the data
+  const sampleMean = data[0]?.Mean || '';
+  const timeUnit = sampleMean.includes(' s') ? 's' : 'ms';
 
-  mainPage += chartData.map(d => `"${d.name}"`).join(', ');
-  mainPage += ']\n';
-  mainPage += '  y-axis "Time (ms)" 0 --> ';
+  // Find max value for y-axis scaling
+  const maxValue = Math.max(...data.map(d => parseMeanValue(d.Mean)));
+  const yMax = Math.ceil(maxValue * 1.2); // 20% padding
 
-  // Set y-axis max to 120% of the highest value for better visualization
-  const maxValue = Math.max(...chartData.map(d => d.value));
-  mainPage += Math.ceil(maxValue * 1.2);
-  mainPage += '\n';
-
-  mainPage += '  bar [';
-  mainPage += chartData.map(d => d.value.toFixed(2)).join(', ');
-  mainPage += ']\n';
-  mainPage += '```\n\n';
-  mainPage += `</details>\n\n`;
+  mainPage += `  x-axis [${data.map(d => `"${d.Method}"`).join(', ')}]\n`;
+  mainPage += `  y-axis "Time (${timeUnit})" 0 --> ${yMax}\n`;
+  mainPage += `  bar [${data.map(d => parseMeanValue(d.Mean)).join(', ')}]\n`;
+  mainPage += `\`\`\`\n\n`;
 });
 
 // Add build time results
@@ -271,40 +208,30 @@ if (Object.keys(categories.build).length > 0) {
     mainPage += `|-----------|---------|------|--------|--------|\n`;
 
     data.forEach(row => {
-      const emoji = row.Method.includes('TUnit') ? '🏆 ' : '';
       const name = row.Method.includes('TUnit') ? '**TUnit**' : row.Method;
-      mainPage += `| ${emoji}${name} | ${row.Version || 'N/A'} | ${row.Mean} | ${row.Median || 'N/A'} | ${row.StdDev || 'N/A'} |\n`;
+      mainPage += `| ${name} | ${row.Version || 'N/A'} | ${row.Mean} | ${row.Median || 'N/A'} | ${row.StdDev || 'N/A'} |\n`;
     });
 
     mainPage += '\n';
 
-    // Add Mermaid bar chart for build performance
-    mainPage += `<details>\n<summary>📊 Visual Comparison</summary>\n\n`;
-    mainPage += '```mermaid\n%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#4CAF50", "primaryTextColor": "#fff", "primaryBorderColor": "#2E7D32", "lineColor": "#2E7D32", "secondaryColor": "#FFC107", "tertiaryColor": "#2196F3"}}}%%\nxychart-beta\n';
-    mainPage += `  title "Build Time Comparison - Mean Compilation Time (Lower is Better)"\n`;
-    mainPage += '  x-axis [';
+    // Add Mermaid chart for build performance
+    mainPage += `\`\`\`mermaid\n`;
+    mainPage += `%%{init: {'theme':'base'}}%%\n`;
+    mainPage += `xychart-beta\n`;
+    mainPage += `  title "Build Time Comparison"\n`;
 
-    // Add framework names for x-axis
-    const chartData = data.map(row => {
-      const name = row.Method;
-      const meanValue = parseMeanValue(row.Mean);
-      return { name, value: meanValue };
-    });
+    // Detect time unit from the data
+    const sampleMean = data[0]?.Mean || '';
+    const timeUnit = sampleMean.includes(' s') ? 's' : 'ms';
 
-    mainPage += chartData.map(d => `"${d.name}"`).join(', ');
-    mainPage += ']\n';
-    mainPage += '  y-axis "Time (ms)" 0 --> ';
+    // Find max value for y-axis scaling
+    const maxValue = Math.max(...data.map(d => parseMeanValue(d.Mean)));
+    const yMax = Math.ceil(maxValue * 1.2); // 20% padding
 
-    // Set y-axis max to 120% of the highest value for better visualization
-    const maxValue = Math.max(...chartData.map(d => d.value));
-    mainPage += Math.ceil(maxValue * 1.2);
-    mainPage += '\n';
-
-    mainPage += '  bar [';
-    mainPage += chartData.map(d => d.value.toFixed(2)).join(', ');
-    mainPage += ']\n';
-    mainPage += '```\n\n';
-    mainPage += `</details>\n\n`;
+    mainPage += `  x-axis [${data.map(d => `"${d.Method}"`).join(', ')}]\n`;
+    mainPage += `  y-axis "Time (${timeUnit})" 0 --> ${yMax}\n`;
+    mainPage += `  bar [${data.map(d => parseMeanValue(d.Mean)).join(', ')}]\n`;
+    mainPage += `\`\`\`\n\n`;
   });
 }
 
@@ -337,9 +264,10 @@ The benchmarks measure real-world testing patterns:
 
 - **DataDrivenTests**: Parameterized tests with multiple data sources
 - **AsyncTests**: Realistic async/await patterns with I/O simulation
-- **ScaleTests**: Large test suites (1000+ tests) measuring scalability
+- **ScaleTests**: Large test suites (150+ tests) measuring scalability
 - **MatrixTests**: Combinatorial test generation and execution
 - **MassiveParallelTests**: Parallel execution stress tests
+- **SetupTeardownTests**: Expensive test fixtures with setup/teardown overhead
 
 ### Environment
 
@@ -380,8 +308,6 @@ const benchmarkData = {
   environment: environmentInfo,
   categories: categories.runtime,
   build: categories.build,
-  comparisons,
-  averageSpeedups: avgSpeedups,
   stats
 };
 
@@ -407,7 +333,6 @@ if (fs.existsSync(historicalFile)) {
 // Add new data point
 historical.push({
   date: new Date().toISOString().split('T')[0],
-  averageSpeedups: avgSpeedups,
   environment: environmentInfo.os || 'Ubuntu'
 });
 
