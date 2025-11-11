@@ -135,7 +135,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.ADMIN_TOKEN }}
 
       - name: Download All Runtime Benchmark Artifacts
         uses: actions/download-artifact@v6
@@ -198,7 +198,7 @@ jobs:
         id: create_pr
         uses: peter-evans/create-pull-request@v7
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.ADMIN_TOKEN }}
           commit-message: 'chore: update benchmark results'
           branch: automated-benchmarks-update
           delete-branch: true
@@ -236,10 +236,12 @@ jobs:
             documentation
           draft: false
 
-      - name: Enable Auto-Merge
+      - name: Merge PR Immediately
         if: steps.check_changes.outputs.has_changes == 'true' && steps.create_pr.outputs.pull-request-number != ''
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.ADMIN_TOKEN }}
         run: |
-          gh pr merge ${{ steps.create_pr.outputs.pull-request-number }} --auto --squash --delete-branch
+          # Wait a moment for PR to be fully created
+          sleep 5
+          gh pr merge ${{ steps.create_pr.outputs.pull-request-number }} --squash --delete-branch --admin
 
