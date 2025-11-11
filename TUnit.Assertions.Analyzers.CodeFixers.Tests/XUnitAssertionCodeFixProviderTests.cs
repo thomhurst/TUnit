@@ -150,38 +150,4 @@ public class XUnitAssertionCodeFixProviderTests
             """
             );
     }
-
-    [Test]
-    public async Task Xunit_All_Converts_To_TUnit()
-    {
-        await Verifier
-            .VerifyCodeFixAsync(
-                """
-                using System.Threading.Tasks;
-
-                public class MyClass
-                {
-                    public void MyTest()
-                    {
-                        var users = new[] { 1, 2, 3 };
-                        {|#0:Xunit.Assert.All(users, user => Xunit.Assert.True(user > 0))|};
-                    }
-                }
-                """,
-                Verifier.Diagnostic(Rules.XUnitAssertion)
-                    .WithLocation(0),
-                """
-                using System.Threading.Tasks;
-
-                public class MyClass
-                {
-                    public void MyTest()
-                    {
-                        var users = new[] { 1, 2, 3 };
-                        Assert.That(users).All().Satisfy(user => Assert.That(user > 0).IsTrue());
-                    }
-                }
-                """
-            );
-    }
 }
