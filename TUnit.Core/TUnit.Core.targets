@@ -10,7 +10,6 @@
     <PropertyGroup>
         <_TUnitPolyfillVersion>8.9.1</_TUnitPolyfillVersion>
         <_TUnitNeedsPolyfill Condition="'$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'netstandard2.1' or '$(TargetFrameworkIdentifier)' == '.NETFramework'">true</_TUnitNeedsPolyfill>
-        <PolyUseEmbeddedAttribute Condition="'$(EnableTUnitPolyfills)' != 'false' and '$(_TUnitNeedsPolyfill)' == 'true'">true</PolyUseEmbeddedAttribute>
     </PropertyGroup>
 
     <!-- Add Polyfill for non-CPM projects -->
