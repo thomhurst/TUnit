@@ -290,7 +290,7 @@ public async Task All_Items_Match()
 
 #### With Satisfy
 
-The single parameter overload will match T from IEnumerable<T> - Giving you the relevant assertions for that type.
+The single parameter overload will match T from `IEnumerable<T>` - Giving you the relevant assertions for that type.
 
 ```csharp
 [Test]
