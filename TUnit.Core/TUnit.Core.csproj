@@ -64,6 +64,10 @@
         <PackageReference Include="Microsoft.CSharp" />
         <PackageReference Include="System.Text.Json" />
         <PackageReference Include="System.Collections.Immutable" />
+        <!-- Polyfill provides missing types for older frameworks (e.g., ModuleInitializerAttribute).
+             Flows transitively to consumer projects so generated code can access polyfilled types.
+             Version managed by Directory.Packages.props (CPM). -->
+        <PackageReference Include="Polyfill" />
     </ItemGroup>
     <ItemGroup>
       <Compile Remove="IClassDataSourceAttribute.cs" />
