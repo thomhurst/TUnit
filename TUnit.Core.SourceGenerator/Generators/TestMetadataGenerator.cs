@@ -2341,11 +2341,83 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     }
 
 
+    private static bool IsMethodHiding(IMethodSymbol derivedMethod, IMethodSymbol baseMethod)
+    {
+        // Must have same name
+        if (derivedMethod.Name != baseMethod.Name)
+        {
+            return false;
+        }
+
+        // Must NOT be an override (overrides are different from hiding)
+        if (derivedMethod.IsOverride)
+        {
+            return false;
+        }
+
+        // Must have matching parameters
+        if (!ParametersMatch(derivedMethod.Parameters, baseMethod.Parameters))
+        {
+            return false;
+        }
+
+        // Derived method's containing type must be derived from base method's containing type
+        var derivedType = derivedMethod.ContainingType;
+        var baseType = baseMethod.ContainingType;
+
+        // Can't hide yourself
+        if (SymbolEqualityComparer.Default.Equals(derivedType.OriginalDefinition, baseType.OriginalDefinition))
+        {
+            return false;
+        }
+
+        // Check if derived type inherits from base type
+        var current = derivedType.BaseType;
+        while (current is not null && current.SpecialType != SpecialType.System_Object)
+        {
+            if (SymbolEqualityComparer.Default.Equals(current.OriginalDefinition, baseType.OriginalDefinition))
+            {
+                return true;
+            }
+            current = current.BaseType;
+        }
+
+        return false;
+    }
+
     private static List<IMethodSymbol> CollectInheritedTestMethods(INamedTypeSymbol derivedClass)
     {
-        return derivedClass.GetMembersIncludingBase().OfType<IMethodSymbol>()
+        var allTestMethods = derivedClass.GetMembersIncludingBase()
+            .OfType<IMethodSymbol>()
             .Where(m => m.GetAttributes().Any(attr => attr.IsTestAttribute()))
             .ToList();
+
+        // Find methods declared directly on the derived class
+        var derivedClassMethods = allTestMethods
+            .Where(m => SymbolEqualityComparer.Default.Equals(m.ContainingType.OriginalDefinition, derivedClass.OriginalDefinition))
+            .ToList();
+
+        // Filter out base methods that are hidden by derived class methods or declared directly on derived class
+        var result = new List<IMethodSymbol>();
+        foreach (var method in allTestMethods)
+        {
+            // Skip methods declared directly on derived class
+            // (they're handled by regular test registration)
+            if (SymbolEqualityComparer.Default.Equals(method.ContainingType.OriginalDefinition, derivedClass.OriginalDefinition))
+            {
+                continue;
+            }
+
+            // Check if this base method is hidden by any derived class method
+            var isHidden = derivedClassMethods.Any(derived => IsMethodHiding(derived, method));
+
+            if (!isHidden)
+            {
+                result.Add(method);
+            }
+        }
+
+        return result;
     }
 
     private static IMethodSymbol? FindConcreteMethodImplementation(INamedTypeSymbol derivedClass, IMethodSymbol baseMethod)
