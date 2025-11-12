@@ -9,7 +9,7 @@ The required keyword keeps your code clean and correct. If a property isn't pass
 
 Supported attributes for properties in AOT mode:
 - **MethodDataSource** - Data sources via calling a method
-- **ClassDataSource<T>** - A data source that injects in T
+- **`ClassDataSource<T>`** - A data source that injects in T
 - **DataSourceGeneratorAttribute** - Source-generated data (first item only)
 
 For dependency injection with service providers, inherit from `DependencyInjectionDataSourceAttribute<TScope>` to create custom attributes. See [Dependency Injection](./dependency-injection.md) documentation for details.
