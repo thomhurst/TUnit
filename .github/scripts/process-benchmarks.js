@@ -97,6 +97,10 @@ let environmentInfo = {};
 console.log('📊 Processing runtime benchmarks...');
 const runtimeFiles = findMarkdownFiles(RUNTIME_DIR);
 console.log(`  Found ${runtimeFiles.length} runtime benchmark files`);
+if (runtimeFiles.length > 0) {
+  console.log('  Sample paths:');
+  runtimeFiles.slice(0, 2).forEach(f => console.log(`    ${f}`));
+}
 
 runtimeFiles.forEach(file => {
   const content = fs.readFileSync(file, 'utf8');
@@ -107,12 +111,17 @@ runtimeFiles.forEach(file => {
   }
 
   if (data) {
-    // Extract test category from path
-    const match = file.match(/run_time_([A-Za-z]+Tests)/);
-    const category = match ? match[1] : path.basename(path.dirname(file));
+    // Extract test category from artifact directory path
+    // Path structure: benchmark-results/runtime/ubuntu_markdown_run_time_<TestClass>/.../*.md
+    const match = file.match(/ubuntu_markdown_run_time_([A-Za-z]+Tests)/);
+    const category = match ? match[1] : null;
 
-    categories.runtime[category] = data;
-    console.log(`  ✓ Processed ${category}: ${data.length} frameworks`);
+    if (category) {
+      categories.runtime[category] = data;
+      console.log(`  ✓ Processed ${category}: ${data.length} frameworks`);
+    } else {
+      console.warn(`  ⚠️  Could not extract category from file path: ${file}`);
+    }
   }
 });
 
@@ -217,32 +226,7 @@ xychart-beta
 
 ## 🎯 Key Insights
 
-${(() => {
-  const tunitResult = data.find(d => d.Method === 'TUnit');
-  const tunitAotResult = data.find(d => d.Method === 'TUnit_AOT');
-  const otherResults = data.filter(d => !d.Method.includes('TUnit'));
-
-  if (!tunitResult) return '- TUnit data not available';
-
-  const tunitMean = parseMeanValue(tunitResult.Mean);
-  const insights = [];
-
-  otherResults.forEach(other => {
-    const otherMean = parseMeanValue(other.Mean);
-    const speedup = (otherMean / tunitMean).toFixed(2);
-    if (speedup > 1) {
-      insights.push(`- **${speedup}x faster** than ${other.Method} (${other.Version})`);
-    }
-  });
-
-  if (tunitAotResult) {
-    const aotMean = parseMeanValue(tunitAotResult.Mean);
-    const aotSpeedup = (tunitMean / aotMean).toFixed(2);
-    insights.push(`- **${aotSpeedup}x faster** with Native AOT compilation`);
-  }
-
-  return insights.join('\n');
-})()}
+This benchmark compares TUnit's performance against ${data.filter(d => !d.Method.includes('TUnit')).map(d => d.Method).join(', ')} using identical test scenarios.
 
 ---
 
@@ -515,11 +499,19 @@ console.log(`Summary:`);
 console.log(`  - Runtime categories: ${stats.runtimeCategories}`);
 console.log(`  - Build categories: ${stats.buildCategories}`);
 console.log(`  - Total benchmarks: ${stats.totalBenchmarks}`);
-console.log(`  - Output files: 4 (markdown + 3 JSON files)`);
+console.log(`  - Markdown pages generated: ${stats.runtimeCategories + stats.buildCategories + 1}`);
+console.log(`  - JSON files generated: ${stats.runtimeCategories + stats.buildCategories + 3}`);
 console.log(`\n📊 Benchmarks produced:`);
-console.log(`\nRuntime Benchmarks:`);
+console.log(`\nRuntime Benchmarks (${Object.keys(categories.runtime).length}):`);
 Object.keys(categories.runtime).forEach(cat => console.log(`  - ${cat}`));
 if (Object.keys(categories.build).length > 0) {
-  console.log(`\nBuild Benchmarks:`);
+  console.log(`\nBuild Benchmarks (${Object.keys(categories.build).length}):`);
   Object.keys(categories.build).forEach(cat => console.log(`  - ${cat}`));
+}
+
+// Validation warning
+if (Object.keys(categories.runtime).length === 0) {
+  console.warn('\n⚠️  WARNING: No runtime benchmark categories were found!');
+  console.warn('This likely means the artifact directory structure is not as expected.');
+  console.warn('Expected structure: benchmark-results/runtime/ubuntu_markdown_run_time_<TestClass>/');
 }

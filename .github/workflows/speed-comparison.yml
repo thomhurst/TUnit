@@ -142,14 +142,14 @@ jobs:
         with:
           path: benchmark-results/runtime/
           pattern: ubuntu_markdown_run_time_*
-          merge-multiple: true
+          merge-multiple: false
 
       - name: Download Build Time Benchmark Artifacts
         uses: actions/download-artifact@v6
         with:
           path: benchmark-results/build/
           pattern: ubuntu_markdown_build_time
-          merge-multiple: true
+          merge-multiple: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
