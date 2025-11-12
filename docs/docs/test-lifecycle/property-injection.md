@@ -8,11 +8,11 @@ The required keyword keeps your code clean and correct. If a property isn't pass
 ## AOT-Compatible Property Attributes
 
 Supported attributes for properties in AOT mode:
-- **Argument** - Compile-time constant values
-- **MethodDataSource** - Static method data sources
-- **ClassDataSource** - Static class-based data sources
+- **MethodDataSource** - Data sources via calling a method
+- **ClassDataSource<T>** - A data source that injects in T
 - **DataSourceGeneratorAttribute** - Source-generated data (first item only)
-- **ClassDataSource** - Dependency injection with service provider
+
+For dependency injection with service providers, inherit from `DependencyInjectionDataSourceAttribute<TScope>` to create custom attributes. See [Dependency Injection](./dependency-injection.md) documentation for details.
 
 The AOT system generates strongly-typed property setters at compile time, eliminating reflection overhead and ensuring Native AOT compatibility.
 
@@ -55,10 +55,6 @@ namespace MyTestProject;
 
 public class PropertySetterTests
 {
-    // Compile-time constant injection
-    [Arguments("1")]
-    public required string Property1 { get; init; }
-
     // Static method data source injection
     [MethodDataSource(nameof(GetMethodData))]
     public required string Property2 { get; init; }
@@ -83,7 +79,7 @@ public class PropertySetterTests
     [DataSourceGeneratorTests.AutoFixtureGenerator<string>]
     public required string Property7 { get; init; }
 
-    // Service provider dependency injection
+    // Async initialization example (IAsyncInitializer)
     [ClassDataSource<AsyncPropertyExample>]
     public required AsyncPropertyExample AsyncService { get; init; }
 
@@ -91,7 +87,6 @@ public class PropertySetterTests
     public async Task Test()
     {
         // All properties are automatically initialized before this test runs
-        await Assert.That(Property1).IsEqualTo("1");
         await Assert.That(Property2).IsNotNull();
         await Assert.That(Property3).IsNotNull();
         await Assert.That(AsyncService.IsInitialized).IsTrue();
