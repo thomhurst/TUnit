@@ -22,7 +22,7 @@ public class RunAspNetTestsModule : Module<CommandResult>
             Project = project.Name,
             NoBuild = true,
             Configuration = Configuration.Release,
-            Framework = "net9.0",
+            Framework = "net10.0",
             WorkingDirectory = project.Folder!,
             Arguments = ["--ignore-exit-code", "8", "--hangdump", "--hangdump-filename", "hangdump.aspnet-tests.dmp", "--hangdump-timeout", "5m"],
             EnvironmentVariables = new Dictionary<string, string?>

@@ -22,7 +22,7 @@ public abstract class InvokableTestBase(TestMode testMode)
         }
     }
 
-    private static readonly string GetEnvironmentVariable = Environment.GetEnvironmentVariable("NET_VERSION") ?? "net9.0";
+    private static readonly string GetEnvironmentVariable = Environment.GetEnvironmentVariable("NET_VERSION") ?? "net10.0";
 
     public static bool IsNetFramework => GetEnvironmentVariable.StartsWith("net4");
 

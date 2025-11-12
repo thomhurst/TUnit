@@ -37,7 +37,7 @@ public abstract class AbstractTestNugetPackageModule : TestBaseModule
     {
         get
         {
-            yield return "net9.0";
+            yield return "net10.0";
             yield return "net8.0";
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))

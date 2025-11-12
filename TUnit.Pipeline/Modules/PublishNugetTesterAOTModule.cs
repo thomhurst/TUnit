@@ -32,8 +32,8 @@ public class PublishNugetTesterAOTModule : Module<IReadOnlyList<CommandResult>>
             .FindFile(x => x.Name == "TUnit.NugetTester.csproj")
             .AssertExists();
 
-        // Test AOT publishing for net8.0 and net9.0
-        foreach (var framework in new[] { "net8.0", "net9.0" })
+        // Test AOT publishing
+        foreach (var framework in new[] { "net8.0", "net9.0", "net10.0" })
         {
             var result = await SubModule($"AOT-{framework}", async () =>
             {

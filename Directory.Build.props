@@ -69,4 +69,16 @@
     <None Include="$(MSBuildThisFileDirectory)assets/logo.jpg" Pack="true" PackagePath="\" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <PolyUseEmbeddedAttribute>true</PolyUseEmbeddedAttribute>
+  </PropertyGroup>
+
+  <!-- Include Polyfill for all target frameworks in internal projects -->
+  <ItemGroup>
+    <PackageReference Include="Polyfill">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
 </Project>

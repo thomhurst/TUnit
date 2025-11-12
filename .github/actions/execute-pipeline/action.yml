@@ -23,7 +23,7 @@ inputs:
   netversion:
     description: 'Net version'
     required: false
-    default: 'net9.0'
+    default: 'net10.0'
 
 runs:
   using: "composite"

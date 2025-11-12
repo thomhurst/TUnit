@@ -2,7 +2,7 @@
 
 public class SkipNetFrameworkAttribute(string reason) : SkipAttribute(reason)
 {
-    private static readonly string NetVersion = Environment.GetEnvironmentVariable("NET_VERSION") ?? "net9.0";
+    private static readonly string NetVersion = Environment.GetEnvironmentVariable("NET_VERSION") ?? "net10.0";
 
     public override Task<bool> ShouldSkip(TestRegisteredContext testRegisteredContext)
     {
