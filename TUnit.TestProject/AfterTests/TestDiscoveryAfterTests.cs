@@ -11,7 +11,7 @@ public class TestDiscoveryAfterHooks
     [AfterEvery(TestDiscovery)]
     public static async Task AfterEveryTestDiscovery(TestDiscoveryContext context)
     {
-        await FilePolyfill.WriteAllTextAsync($"TestDiscoveryAfterTests{Guid.NewGuid():N}.txt", $"{context.AllTests.Count()} tests found");
+        await File.WriteAllTextAsync($"TestDiscoveryAfterTests{Guid.NewGuid():N}.txt", $"{context.AllTests.Count()} tests found");
 
         var test = context.AllTests.FirstOrDefault(x =>
             x.Metadata.TestDetails.TestName == nameof(TestDiscoveryAfterTests.EnsureAfterEveryTestDiscoveryHit));

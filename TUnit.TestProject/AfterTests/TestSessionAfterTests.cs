@@ -11,7 +11,7 @@ public class TestSessionAfterHooksTests
     [AfterEvery(TestSession)]
     public static async Task AfterEveryTestSession(TestSessionContext context)
     {
-        await FilePolyfill.WriteAllTextAsync($"TestSessionAfterTests{Guid.NewGuid():N}.txt", $"{context.AllTests.Count()} tests in session");
+        await File.WriteAllTextAsync($"TestSessionAfterTests{Guid.NewGuid():N}.txt", $"{context.AllTests.Count()} tests in session");
 
         var test = context.AllTests.FirstOrDefault(x =>
             x.Metadata.TestDetails.TestName == nameof(TestSessionAfterTests.PepareForAfterSession));

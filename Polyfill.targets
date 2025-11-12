@@ -1,14 +1,6 @@
 <Project>
-    <PropertyGroup Condition="'$(EnableTUnitPolyfills)' != 'false'">
-        <PolyUseEmbeddedAttribute>true</PolyUseEmbeddedAttribute>
-    </PropertyGroup>
-
-    <ItemGroup Condition="'$(EnableTUnitPolyfills)' != 'false'">
-        <PackageReference Include="Polyfill">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-    </ItemGroup>
+    <!-- Polyfill is already added by Directory.Build.props for internal projects -->
+    <!-- For NuGet consumers, it's added by TUnit.Core.targets with embedded attributes -->
 
     <ItemGroup Condition="'$(TargetFrameworkIdentifier)'!='.NETCoreApp'">
         <PackageReference Include="System.Threading.Tasks.Extensions" />

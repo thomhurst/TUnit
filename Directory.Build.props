@@ -71,10 +71,10 @@
 
   <PropertyGroup>
     <PolyUseEmbeddedAttribute>true</PolyUseEmbeddedAttribute>
-    <_TUnitNeedsPolyfill Condition="'$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'netstandard2.1' or '$(TargetFrameworkIdentifier)' == '.NETFramework'">true</_TUnitNeedsPolyfill>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(_TUnitNeedsPolyfill)' == 'true'">
+  <!-- Include Polyfill for all target frameworks in internal projects -->
+  <ItemGroup>
     <PackageReference Include="Polyfill">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

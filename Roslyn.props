@@ -1,16 +1,9 @@
 <Project>
-
-    <PropertyGroup>
-        <PolyUseEmbeddedAttribute>true</PolyUseEmbeddedAttribute>
-    </PropertyGroup>
+    <!-- Polyfill is added by Directory.Build.props for internal projects -->
 
     <ItemGroup>
         <PackageReference Include="Microsoft.CodeAnalysis.Common" VersionOverride="$(RoslynVersion).*"/>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" VersionOverride="$(RoslynVersion).*"/>
-        <PackageReference Include="Polyfill">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
     </ItemGroup>
 
 </Project>
