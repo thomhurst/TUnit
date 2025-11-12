@@ -103,15 +103,16 @@ public partial class TestContext
                 exceptionForResult = null;
             }
 
+            var now = TimeProviderContext.Current.GetUtcNow();
             Result = new TestResult
             {
                 State = state,
                 OverrideReason = reason,
                 IsOverridden = true,
                 OriginalException = originalException,
-                Start = TestStart ?? DateTimeOffset.UtcNow,
-                End = DateTimeOffset.UtcNow,
-                Duration = DateTimeOffset.UtcNow - (TestStart ?? DateTimeOffset.UtcNow),
+                Start = TestStart ?? now,
+                End = now,
+                Duration = now - (TestStart ?? now),
                 Exception = exceptionForResult,
                 ComputerName = EnvironmentHelper.MachineName,
                 TestContext = this

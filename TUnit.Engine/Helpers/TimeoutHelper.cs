@@ -1,4 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
+using TUnit.Core;
 
 namespace TUnit.Engine.Helpers;
 
@@ -15,13 +17,15 @@ internal static class TimeoutHelper
     /// <param name="timeout">Optional timeout duration. If null, no timeout is applied</param>
     /// <param name="cancellationToken">Cancellation token for the operation</param>
     /// <param name="timeoutMessage">Optional custom timeout message. If null, uses default message</param>
+    /// <param name="timeProvider">Optional TimeProvider for controlling time. If null, uses TimeProvider.System</param>
     /// <returns>The completed task</returns>
     /// <exception cref="TimeoutException">Thrown when the timeout elapses before task completion</exception>
     public static async Task ExecuteWithTimeoutAsync(
         Func<CancellationToken, Task> taskFactory,
         TimeSpan? timeout,
         CancellationToken cancellationToken,
-        string? timeoutMessage = null)
+        string? timeoutMessage = null,
+        TimeProvider? timeProvider = null)
     {
         if (!timeout.HasValue)
         {
@@ -29,36 +33,34 @@ internal static class TimeoutHelper
             return;
         }
 
+        timeProvider ??= TimeProvider.System;
+
         using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         timeoutCts.CancelAfter(timeout.Value);
 
         var executionTask = taskFactory(timeoutCts.Token);
-        
+
         // Use a cancellable timeout task to avoid leaving Task.Delay running in the background
         using var timeoutTaskCts = new CancellationTokenSource();
-        var timeoutTask = Task.Delay(timeout.Value, timeoutTaskCts.Token);
+        var timeoutTask = timeProvider.Delay(timeout.Value, timeoutTaskCts.Token);
 
         var completedTask = await Task.WhenAny(executionTask, timeoutTask).ConfigureAwait(false);
 
         if (completedTask == timeoutTask)
         {
-            // Timeout occurred - cancel the execution task and wait briefly for cleanup
             timeoutCts.Cancel();
-            
-            // Give the execution task a chance to handle cancellation gracefully
+
             try
             {
                 await executionTask.ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
-                // Expected when cancellation is properly handled
             }
             catch
             {
-                // Ignore other exceptions from the cancelled task
             }
-            
+
             var message = timeoutMessage ?? $"Operation timed out after {timeout.Value}";
             throw new TimeoutException(message);
         }
@@ -79,49 +81,49 @@ internal static class TimeoutHelper
     /// <param name="timeout">Optional timeout duration. If null, no timeout is applied</param>
     /// <param name="cancellationToken">Cancellation token for the operation</param>
     /// <param name="timeoutMessage">Optional custom timeout message. If null, uses default message</param>
+    /// <param name="timeProvider">Optional TimeProvider for controlling time. If null, uses TimeProvider.System</param>
     /// <returns>The result of the completed task</returns>
     /// <exception cref="TimeoutException">Thrown when the timeout elapses before task completion</exception>
     public static async Task<T> ExecuteWithTimeoutAsync<T>(
         Func<CancellationToken, Task<T>> taskFactory,
         TimeSpan? timeout,
         CancellationToken cancellationToken,
-        string? timeoutMessage = null)
+        string? timeoutMessage = null,
+        TimeProvider? timeProvider = null)
     {
         if (!timeout.HasValue)
         {
             return await taskFactory(cancellationToken).ConfigureAwait(false);
         }
 
+        timeProvider ??= TimeProvider.System;
+
         using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         timeoutCts.CancelAfter(timeout.Value);
 
         var executionTask = taskFactory(timeoutCts.Token);
-        
+
         // Use a cancellable timeout task to avoid leaving Task.Delay running in the background
         using var timeoutTaskCts = new CancellationTokenSource();
-        var timeoutTask = Task.Delay(timeout.Value, timeoutTaskCts.Token);
+        var timeoutTask = timeProvider.Delay(timeout.Value, timeoutTaskCts.Token);
 
         var completedTask = await Task.WhenAny(executionTask, timeoutTask).ConfigureAwait(false);
 
         if (completedTask == timeoutTask)
         {
-            // Timeout occurred - cancel the execution task and wait briefly for cleanup
             timeoutCts.Cancel();
-            
-            // Give the execution task a chance to handle cancellation gracefully
+
             try
             {
                 await executionTask.ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
-                // Expected when cancellation is properly handled
             }
             catch
             {
-                // Ignore other exceptions from the cancelled task
             }
-            
+
             var message = timeoutMessage ?? $"Operation timed out after {timeout.Value}";
             throw new TimeoutException(message);
         }

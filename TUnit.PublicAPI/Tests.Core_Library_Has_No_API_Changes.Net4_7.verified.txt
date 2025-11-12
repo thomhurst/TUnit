@@ -1464,6 +1464,10 @@ namespace
         public static bool IsSuccess(this .TestState state) { }
         public static bool IsTransient(this .TestState state) { }
     }
+    public static class TimeProviderContext
+    {
+        public static  Current { get; set; }
+    }
     [(.Assembly | .Class | .Method)]
     public class TimeoutAttribute : .TUnitAttribute, .IScopedAttribute, ., ., .
     {

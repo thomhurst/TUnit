@@ -256,8 +256,10 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         Register<ITestRegistry>(new TestRegistry(TestBuilderPipeline, testCoordinator, dynamicTestQueue, TestSessionId, CancellationToken.Token));
 
+
         InitializeConsoleInterceptors();
     }
+
 
     public ContextProvider ContextProvider { get; }
 

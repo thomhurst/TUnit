@@ -217,7 +217,7 @@ internal sealed class TUnit_TestProject_Bugs__1924_None_Tests_Test__int_TestSour
             },
             InheritanceDepth = 1,
             FilePath = @"",
-            LineNumber = 23,
+            LineNumber = 24,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Bugs._1924.None.BaseClass),
@@ -360,7 +360,7 @@ internal sealed class TUnit_TestProject_Bugs__1924_None_Tests2_Test__int_TestSou
             },
             InheritanceDepth = 1,
             FilePath = @"",
-            LineNumber = 26,
+            LineNumber = 27,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Bugs._1924.None.BaseClass),
@@ -503,7 +503,7 @@ internal sealed class TUnit_TestProject_Bugs__1924_None_Tests3_Test__int_TestSou
             },
             InheritanceDepth = 1,
             FilePath = @"",
-            LineNumber = 29,
+            LineNumber = 30,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Bugs._1924.None.BaseClass),

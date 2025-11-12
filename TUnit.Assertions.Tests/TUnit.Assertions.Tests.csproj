@@ -13,6 +13,7 @@
   
   <ItemGroup>
     <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
   </ItemGroup>
   
   <ItemGroup>

@@ -14,7 +14,6 @@ internal class ReferencesHelper
                 // add your app/lib specifics, e.g.:
                 MetadataReference.CreateFromFile(typeof(Attribute).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(Assert).Assembly.Location),
-                MetadataReference.CreateFromFile(typeof(Polyfill).Assembly.Location),
             ])
             .ToList();
 }

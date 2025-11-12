@@ -90,6 +90,7 @@ public class ContextProvider(IServiceProvider serviceProvider, string testSessio
 
         var testContext = new TestContext(testName, serviceProvider, classContext, testBuilderContext, cancellationToken);
 
+
         classContext.AddTest(testContext);
 
         return testContext;

@@ -28,7 +28,8 @@ public class STAThreadTests
     {
         await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
 
-        await Task.Delay(10);
+        var timeProvider = TimeProviderContext.Current;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(10));
 
         await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
     }
@@ -47,7 +48,8 @@ public class STAThreadTests
     {
         await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
 
-        await Task.Delay(10).ConfigureAwait(true);
+        var timeProvider = TimeProviderContext.Current;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(10)).ConfigureAwait(true);
         await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
     }
 
@@ -100,13 +102,14 @@ public class STAThreadTests
     {
         await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
 
-        await Task.Delay(1);
+        var timeProvider = TimeProviderContext.Current;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(1));
         await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
 
         await Task.Yield();
         await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
 
-        await Task.Delay(1);
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(1));
         await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
 
         await Task.FromResult(true);
@@ -132,10 +135,11 @@ public class STAThreadTests
     {
         await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
 
+        var timeProvider = TimeProviderContext.Current;
         var tasks = new[]
         {
-            Task.Delay(5),
-            Task.Delay(10),
+            timeProvider.Delay(TimeSpan.FromMilliseconds(5)),
+            timeProvider.Delay(TimeSpan.FromMilliseconds(10)),
             Task.FromResult(42).ContinueWith(t => t.Result)
         };
 
@@ -164,7 +168,8 @@ public class STAThreadTests
     private async Task NestedAsyncMethod()
     {
         await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
-        await Task.Delay(5);
+        var timeProvider = TimeProviderContext.Current;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(5));
         await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
         await AnotherNestedMethod();
     }
@@ -180,14 +185,16 @@ public class STAThreadTests
     {
         for (var i = 1; i <= 3; i++)
         {
-            await Task.Delay(1);
+            var timeProvider = TimeProviderContext.Current;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(1));
             yield return i;
         }
     }
 
     private async Task ThrowingAsyncMethod()
     {
-        await Task.Delay(1);
+        var timeProvider = TimeProviderContext.Current;
+        await timeProvider.Delay(TimeSpan.FromMilliseconds(1));
         throw new InvalidOperationException("Test exception");
     }
 

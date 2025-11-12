@@ -7,7 +7,6 @@ namespace TUnit.TestProject.Bugs._1914;
 [SkipNetFramework("ExecutionContext.Restore is not supported on .NET Framework")]
 [UnconditionalSuppressMessage("Usage", "TUnit0042:Global hooks should not be mixed with test classes to avoid confusion. Place them in their own class.")]
 [UnconditionalSuppressMessage("Usage", "TUnit0047:Call `context.AddAsyncLocalValues`")]
-[UnconditionalSuppressMessage("Usage", "TUnitAssertions0002:Assert statements must be awaited")]
 public class SyncHookTests
 {
     private static readonly AsyncLocal<string> _0BeforeTestDiscoveryLocal = new();
@@ -49,10 +48,12 @@ public class SyncHookTests
 #if !NET
         return;
 #endif
+#pragma warning disable TUnitAssertions0002 // Sync hooks must use GetAwaiter().GetResult()
         Assert.That(_0BeforeTestDiscoveryLocal.Value).IsEqualTo("BeforeTestDiscovery")
             .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeTestSession").GetAwaiter().GetResult();
         Assert.That(_0BeforeTestDiscoveryLocal2.Value).IsEqualTo("BeforeTestDiscovery2")
             .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeTestSession").GetAwaiter().GetResult();
+#pragma warning restore TUnitAssertions0002
 
         _1BeforeTestSessionLocal.Value = "BeforeTestSession";
 #if NET
@@ -66,10 +67,12 @@ public class SyncHookTests
 #if !NET
         return;
 #endif
+#pragma warning disable TUnitAssertions0002 // Sync hooks must use GetAwaiter().GetResult()
         Assert.That(_0BeforeTestDiscoveryLocal.Value).IsEqualTo("BeforeTestDiscovery")
             .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeTestSession").GetAwaiter().GetResult();
         Assert.That(_0BeforeTestDiscoveryLocal2.Value).IsEqualTo("BeforeTestDiscovery2")
             .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeTestSession").GetAwaiter().GetResult();
+#pragma warning restore TUnitAssertions0002
 
         _1BeforeTestSessionLocal2.Value = "BeforeTestSession2";
 #if NET
@@ -83,6 +86,7 @@ public class SyncHookTests
 #if !NET
         return;
 #endif
+#pragma warning disable TUnitAssertions0002 // Sync hooks must use GetAwaiter().GetResult()
         Assert.That(_0BeforeTestDiscoveryLocal.Value).IsEqualTo("BeforeTestDiscovery")
             .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeAssembly")
             .GetAwaiter().GetResult();
@@ -96,6 +100,7 @@ public class SyncHookTests
         Assert.That(_1BeforeTestSessionLocal2.Value).IsEqualTo("BeforeTestSession2")
             .Because("AsyncLocal should flow from BeforeTestSession to BeforeAssembly")
             .GetAwaiter().GetResult();
+#pragma warning restore TUnitAssertions0002
 
         _2BeforeAssemblyLocal.Value = "BeforeAssembly";
 #if NET
@@ -109,6 +114,7 @@ public class SyncHookTests
 #if !NET
         return;
 #endif
+#pragma warning disable TUnitAssertions0002 // Sync hooks must use GetAwaiter().GetResult()
         Assert.That(_0BeforeTestDiscoveryLocal.Value).IsEqualTo("BeforeTestDiscovery")
             .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeAssembly")
             .GetAwaiter().GetResult();
@@ -122,6 +128,7 @@ public class SyncHookTests
         Assert.That(_1BeforeTestSessionLocal2.Value).IsEqualTo("BeforeTestSession2")
             .Because("AsyncLocal should flow from BeforeTestSession to BeforeAssembly")
             .GetAwaiter().GetResult();
+#pragma warning restore TUnitAssertions0002
 
         _2BeforeAssemblyLocal2.Value = "BeforeAssembly2";
 #if NET
@@ -135,6 +142,7 @@ public class SyncHookTests
 #if !NET
         return;
 #endif
+#pragma warning disable TUnitAssertions0002 // Sync hooks must use GetAwaiter().GetResult()
         Assert.That(_0BeforeTestDiscoveryLocal.Value).IsEqualTo("BeforeTestDiscovery")
             .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeClass")
             .GetAwaiter().GetResult();
@@ -155,6 +163,7 @@ public class SyncHookTests
         Assert.That(_2BeforeAssemblyLocal2.Value).IsEqualTo("BeforeAssembly2")
             .Because("AsyncLocal should flow from BeforeAssembly to BeforeClass")
             .GetAwaiter().GetResult();
+#pragma warning restore TUnitAssertions0002
 
         _3BeforeClassLocal.Value = "BeforeClass";
 #if NET
@@ -168,6 +177,7 @@ public class SyncHookTests
 #if !NET
         return;
 #endif
+#pragma warning disable TUnitAssertions0002 // Sync hooks must use GetAwaiter().GetResult()
         Assert.That(_0BeforeTestDiscoveryLocal.Value).IsEqualTo("BeforeTestDiscovery")
             .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeClass")
             .GetAwaiter().GetResult();
@@ -188,6 +198,7 @@ public class SyncHookTests
         Assert.That(_2BeforeAssemblyLocal2.Value).IsEqualTo("BeforeAssembly2")
             .Because("AsyncLocal should flow from BeforeAssembly to BeforeClass")
             .GetAwaiter().GetResult();
+#pragma warning restore TUnitAssertions0002
 
         _3BeforeClassLocal2.Value = "BeforeClass2";
 #if NET
@@ -201,6 +212,7 @@ public class SyncHookTests
 #if !NET
         return;
 #endif
+#pragma warning disable TUnitAssertions0002 // Sync hooks must use GetAwaiter().GetResult()
         Assert.That(_0BeforeTestDiscoveryLocal.Value).IsEqualTo("BeforeTestDiscovery")
             .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeTest")
             .GetAwaiter().GetResult();
@@ -228,6 +240,7 @@ public class SyncHookTests
         Assert.That(_3BeforeClassLocal2.Value).IsEqualTo("BeforeClass2")
             .Because("AsyncLocal should flow from BeforeClass to BeforeTest")
             .GetAwaiter().GetResult();
+#pragma warning restore TUnitAssertions0002
 
         _4BeforeTestLocal.Value = "BeforeTest";
 #if NET
@@ -241,6 +254,7 @@ public class SyncHookTests
 #if !NET
         return;
 #endif
+#pragma warning disable TUnitAssertions0002 // Sync hooks must use GetAwaiter().GetResult()
         Assert.That(_0BeforeTestDiscoveryLocal.Value).IsEqualTo("BeforeTestDiscovery")
             .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeTest")
             .GetAwaiter().GetResult();
@@ -268,6 +282,7 @@ public class SyncHookTests
         Assert.That(_3BeforeClassLocal2.Value).IsEqualTo("BeforeClass2")
             .Because("AsyncLocal should flow from BeforeClass to BeforeTest")
             .GetAwaiter().GetResult();
+#pragma warning restore TUnitAssertions0002
 
         _4BeforeTestLocal2.Value = "BeforeTest2";
 #if NET
