@@ -73,24 +73,21 @@ internal class ClassDataSources
 
     private static object Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)] Type type, DataGeneratorMetadata dataGeneratorMetadata)
     {
-        return CreateWithNestedDependencies(type, dataGeneratorMetadata, recursionDepth: 0);
+        return Create(type, dataGeneratorMetadata, recursionDepth: 0);
     }
 
     private const int MaxRecursionDepth = 10;
 
-    [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' requirements",
-        Justification = "PropertyType from PropertyInjectionMetadata has the required DynamicallyAccessedMembers annotations")]
-    private static object CreateWithNestedDependencies([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)] Type type, DataGeneratorMetadata dataGeneratorMetadata, int recursionDepth)
+    private static object Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)] Type type, DataGeneratorMetadata dataGeneratorMetadata, int recursionDepth)
     {
         if (recursionDepth >= MaxRecursionDepth)
         {
             throw new InvalidOperationException($"Maximum recursion depth ({MaxRecursionDepth}) exceeded when creating nested ClassDataSource dependencies. This may indicate a circular dependency.");
         }
 
-        object instance;
         try
         {
-            instance = Activator.CreateInstance(type)!;
+            return Activator.CreateInstance(type)!;
         }
         catch (TargetInvocationException targetInvocationException)
         {
@@ -101,21 +98,5 @@ internal class ClassDataSources
 
             throw;
         }
-
-        // Populate nested ClassDataSource properties recursively
-        var propertySource = PropertySourceRegistry.GetSource(type);
-        if (propertySource?.ShouldInitialize == true)
-        {
-            var propertyMetadata = propertySource.GetPropertyMetadata();
-            foreach (var metadata in propertyMetadata)
-            {
-                // Recursively create the property value using CreateWithNestedDependencies
-                // This will handle nested ClassDataSource properties
-                var propertyValue = CreateWithNestedDependencies(metadata.PropertyType, dataGeneratorMetadata, recursionDepth + 1);
-                metadata.SetProperty(instance, propertyValue);
-            }
-        }
-
-        return instance;
     }
 }

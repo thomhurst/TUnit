@@ -1,3 +1,5 @@
+using TUnit.TestProject.Attributes;
+
 namespace TUnit.TestProject.Bugs._3803;
 
 /// <summary>
@@ -14,6 +16,7 @@ namespace TUnit.TestProject.Bugs._3803;
 /// </summary>
 
 [NotInParallel]
+[EngineTest(ExpectedResult.Pass)]
 public class Bug3803_TestClass1
 {
     [ClassDataSource<WebApplicationFactory>(Shared = SharedType.PerTestSession)]
@@ -66,6 +69,7 @@ public class Bug3803_TestClass1
 }
 
 [NotInParallel]
+[EngineTest(ExpectedResult.Pass)]
 public class Bug3803_TestClass2
 {
     [ClassDataSource<WebApplicationFactory>(Shared = SharedType.PerTestSession)]
@@ -96,6 +100,7 @@ public class Bug3803_TestClass2
 }
 
 [NotInParallel]
+[EngineTest(ExpectedResult.Pass)]
 public class Bug3803_TestClass3
 {
     [ClassDataSource<WebApplicationFactory>(Shared = SharedType.PerTestSession)]
