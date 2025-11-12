@@ -1,10 +1,10 @@
 ---
-title: Build Performance
-description: Compilation time benchmark results
-sidebar_position: 8
+title: DataDrivenTests
+description: Performance benchmark results for DataDrivenTests
+sidebar_position: 3
 ---
 
-# Build Performance Benchmark
+# DataDrivenTests Benchmark
 
 :::info Last Updated
 This benchmark was automatically generated on **2025-11-12** from the latest CI run.
@@ -14,14 +14,13 @@ This benchmark was automatically generated on **2025-11-12** from the latest CI 
 
 ## 📊 Results
 
-Compilation time comparison across frameworks:
-
 | Framework | Version | Mean | Median | StdDev |
 |-----------|---------|------|--------|--------|
-| **TUnit** | 1.1.0 | 2.033 s | 2.032 s | 0.0296 s |
-| Build_NUnit | 4.4.0 | 1.622 s | 1.615 s | 0.0216 s |
-| Build_MSTest | 4.0.2 | 1.705 s | 1.701 s | 0.0231 s |
-| Build_xUnit3 | 3.2.0 | 1.611 s | 1.613 s | 0.0248 s |
+| **TUnit** | 1.1.0 | 510.37 ms | 511.05 ms | 7.125 ms |
+| NUnit | 4.4.0 | 583.06 ms | 583.47 ms | 17.581 ms |
+| MSTest | 4.0.2 | 594.23 ms | 591.72 ms | 18.226 ms |
+| xUnit3 | 3.2.0 | 604.34 ms | 605.85 ms | 7.447 ms |
+| **TUnit (AOT)** | 1.1.0 | 25.55 ms | 25.62 ms | 0.241 ms |
 
 ## 📈 Visual Comparison
 
@@ -57,11 +56,15 @@ Compilation time comparison across frameworks:
   }
 }}%%
 xychart-beta
-  title "Build Time Comparison"
-  x-axis ["Build_TUnit", "Build_NUnit", "Build_MSTest", "Build_xUnit3"]
-  y-axis "Time (s)" 0 --> 3
-  bar [2.033, 1.622, 1.705, 1.611]
+  title "DataDrivenTests Performance Comparison"
+  x-axis ["TUnit", "NUnit", "MSTest", "xUnit3", "TUnit_AOT"]
+  y-axis "Time (ms)" 0 --> 726
+  bar [510.37, 583.06, 594.23, 604.34, 25.55]
 ```
+
+## 🎯 Key Insights
+
+This benchmark compares TUnit's performance against NUnit, MSTest, xUnit3 using identical test scenarios.
 
 ---
 
@@ -69,4 +72,4 @@ xychart-beta
 View the [benchmarks overview](/docs/benchmarks) for methodology details and environment information.
 :::
 
-*Last generated: 2025-11-12T21:13:20.518Z*
+*Last generated: 2025-11-12T21:13:20.516Z*

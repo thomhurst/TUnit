@@ -1,0 +1,51 @@
+{
+  "timestamp": "2025-11-12T21:13:20.516Z",
+  "category": "AsyncTests",
+  "environment": {
+    "benchmarkDotNetVersion": "BenchmarkDotNet v0.15.6, Linux Ubuntu 24.04.3 LTS (Noble Numbat)",
+    "sdk": ".NET SDK 10.0.100",
+    "host": ".NET 10.0.0 (10.0.0, 10.0.25.52411), X64 RyuJIT x86-64-v3"
+  },
+  "results": [
+    {
+      "Method": "TUnit",
+      "Version": "1.1.0",
+      "Mean": "558.9 ms",
+      "Error": "4.39 ms",
+      "StdDev": "4.11 ms",
+      "Median": "557.2 ms"
+    },
+    {
+      "Method": "NUnit",
+      "Version": "4.4.0",
+      "Mean": "650.2 ms",
+      "Error": "10.15 ms",
+      "StdDev": "9.00 ms",
+      "Median": "649.0 ms"
+    },
+    {
+      "Method": "MSTest",
+      "Version": "4.0.2",
+      "Mean": "615.0 ms",
+      "Error": "6.64 ms",
+      "StdDev": "5.89 ms",
+      "Median": "614.8 ms"
+    },
+    {
+      "Method": "xUnit3",
+      "Version": "3.2.0",
+      "Mean": "702.4 ms",
+      "Error": "8.00 ms",
+      "StdDev": "7.09 ms",
+      "Median": "702.4 ms"
+    },
+    {
+      "Method": "TUnit_AOT",
+      "Version": "1.1.0",
+      "Mean": "123.8 ms",
+      "Error": "0.49 ms",
+      "StdDev": "0.46 ms",
+      "Median": "123.9 ms"
+    }
+  ]
+}

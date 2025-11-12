@@ -1,0 +1,51 @@
+{
+  "timestamp": "2025-11-12T21:13:20.517Z",
+  "category": "MassiveParallelTests",
+  "environment": {
+    "benchmarkDotNetVersion": "BenchmarkDotNet v0.15.6, Linux Ubuntu 24.04.3 LTS (Noble Numbat)",
+    "sdk": ".NET SDK 10.0.100",
+    "host": ".NET 10.0.0 (10.0.0, 10.0.25.52411), X64 RyuJIT x86-64-v3"
+  },
+  "results": [
+    {
+      "Method": "TUnit",
+      "Version": "1.1.0",
+      "Mean": "625.5 ms",
+      "Error": "8.58 ms",
+      "StdDev": "7.61 ms",
+      "Median": "626.8 ms"
+    },
+    {
+      "Method": "NUnit",
+      "Version": "4.4.0",
+      "Mean": "1,213.0 ms",
+      "Error": "13.24 ms",
+      "StdDev": "12.39 ms",
+      "Median": "1,211.9 ms"
+    },
+    {
+      "Method": "MSTest",
+      "Version": "4.0.2",
+      "Mean": "3,010.8 ms",
+      "Error": "13.51 ms",
+      "StdDev": "12.63 ms",
+      "Median": "3,010.4 ms"
+    },
+    {
+      "Method": "xUnit3",
+      "Version": "3.2.0",
+      "Mean": "3,099.6 ms",
+      "Error": "17.58 ms",
+      "StdDev": "15.59 ms",
+      "Median": "3,101.6 ms"
+    },
+    {
+      "Method": "TUnit_AOT",
+      "Version": "1.1.0",
+      "Mean": "132.3 ms",
+      "Error": "0.47 ms",
+      "StdDev": "0.36 ms",
+      "Median": "132.3 ms"
+    }
+  ]
+}

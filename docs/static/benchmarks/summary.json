@@ -1,6 +1,11 @@
 {
   "runtime": [
-    "results"
+    "AsyncTests",
+    "DataDrivenTests",
+    "MassiveParallelTests",
+    "MatrixTests",
+    "ScaleTests",
+    "SetupTeardownTests"
   ],
   "build": [
     "BuildTime"

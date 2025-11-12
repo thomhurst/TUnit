@@ -16,7 +16,12 @@ These benchmarks were automatically generated on **2025-11-12** from the latest 
 
 Click on any benchmark to view detailed results:
 
-- [results](results) - Detailed performance analysis
+- [AsyncTests](AsyncTests) - Detailed performance analysis
+- [DataDrivenTests](DataDrivenTests) - Detailed performance analysis
+- [MassiveParallelTests](MassiveParallelTests) - Detailed performance analysis
+- [MatrixTests](MatrixTests) - Detailed performance analysis
+- [ScaleTests](ScaleTests) - Detailed performance analysis
+- [SetupTeardownTests](SetupTeardownTests) - Detailed performance analysis
 
 
 ## 🔨 Build Benchmarks
@@ -75,4 +80,4 @@ These benchmarks run automatically daily via [GitHub Actions](https://github.com
 Each benchmark runs multiple iterations with statistical analysis to ensure accuracy. Results may vary based on hardware and test characteristics.
 :::
 
-*Last generated: 2025-11-12T20:55:56.396Z*
+*Last generated: 2025-11-12T21:13:20.518Z*
