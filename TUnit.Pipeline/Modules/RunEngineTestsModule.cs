@@ -33,7 +33,7 @@ public class RunEngineTestsModule : Module<CommandResult>
             Project = project.Name,
             NoBuild = true,
             Configuration = Configuration.Release,
-            Framework = "net9.0",
+            Framework = "net10.0",
             WorkingDirectory = project.Folder!,
             Arguments = [
                 "--hangdump", "--hangdump-filename", $"hangdump.{Environment.OSVersion.Platform}.engine-tests.dmp", "--hangdump-timeout", "30m",
