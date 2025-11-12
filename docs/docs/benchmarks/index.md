@@ -19,19 +19,19 @@ These benchmarks were automatically generated on **2025-11-12** from the latest 
 
 | Framework | Version | Mean | Median | StdDev |
 |-----------|---------|------|--------|--------|
-| **TUnit** | 1.0.78 | 495.66 ms | 496.75 ms | 3.288 ms |
-| NUnit | 4.4.0 | 533.59 ms | 534.97 ms | 10.858 ms |
-| MSTest | 4.0.2 | 505.82 ms | 502.05 ms | 13.674 ms |
-| xUnit3 | 3.2.0 | 583.29 ms | 580.92 ms | 10.011 ms |
-| **TUnit (AOT)** | 1.0.78 | 25.84 ms | 25.90 ms | 0.241 ms |
+| **TUnit** | 1.0.78 | 559.5 ms | 559.1 ms | 4.23 ms |
+| NUnit | 4.4.0 | 673.9 ms | 674.9 ms | 14.13 ms |
+| MSTest | 4.0.2 | 637.8 ms | 634.8 ms | 7.82 ms |
+| xUnit3 | 3.2.0 | 723.7 ms | 721.6 ms | 13.31 ms |
+| **TUnit (AOT)** | 1.0.78 | 123.2 ms | 122.9 ms | 0.66 ms |
 
 ```mermaid
 %%{init: {'theme':'base'}}%%
 xychart-beta
   title "results Performance Comparison"
   x-axis ["TUnit", "NUnit", "MSTest", "xUnit3", "TUnit_AOT"]
-  y-axis "Time (ms)" 0 --> 700
-  bar [495.66, 533.59, 505.82, 583.29, 25.84]
+  y-axis "Time (ms)" 0 --> 869
+  bar [559.5, 673.9, 637.8, 723.7, 123.2]
 ```
 
 
@@ -43,10 +43,10 @@ Compilation time comparison across frameworks:
 
 | Framework | Version | Mean | Median | StdDev |
 |-----------|---------|------|--------|--------|
-| **TUnit** | 1.0.78 | 2.025 s | 2.022 s | 0.0200 s |
-| Build_NUnit | 4.4.0 | 1.630 s | 1.634 s | 0.0153 s |
-| Build_MSTest | 4.0.2 | 1.712 s | 1.714 s | 0.0165 s |
-| Build_xUnit3 | 3.2.0 | 1.600 s | 1.600 s | 0.0100 s |
+| **TUnit** | 1.0.78 | 1.993 s | 1.991 s | 0.0148 s |
+| Build_NUnit | 4.4.0 | 1.602 s | 1.602 s | 0.0126 s |
+| Build_MSTest | 4.0.2 | 1.677 s | 1.678 s | 0.0063 s |
+| Build_xUnit3 | 3.2.0 | 1.586 s | 1.590 s | 0.0126 s |
 
 ```mermaid
 %%{init: {'theme':'base'}}%%
@@ -54,7 +54,7 @@ xychart-beta
   title "Build Time Comparison"
   x-axis ["Build_TUnit", "Build_NUnit", "Build_MSTest", "Build_xUnit3"]
   y-axis "Time (s)" 0 --> 3
-  bar [2.025, 1.63, 1.712, 1.6]
+  bar [1.993, 1.602, 1.677, 1.586]
 ```
 
 
@@ -109,4 +109,4 @@ These benchmarks run automatically daily via [GitHub Actions](https://github.com
 Each benchmark runs multiple iterations with statistical analysis to ensure accuracy. Results may vary based on hardware and test characteristics.
 :::
 
-*Last generated: 2025-11-12T00:04:00.609Z*
+*Last generated: 2025-11-12T00:30:03.764Z*
