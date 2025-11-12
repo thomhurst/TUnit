@@ -181,16 +181,31 @@ ${data.map(row => {
 %%{init: {
   'theme':'base',
   'themeVariables': {
-    'primaryColor': '#10b981',
-    'primaryTextColor': '#fff',
-    'primaryBorderColor': '#059669',
-    'lineColor': '#d1d5db',
-    'secondaryColor': '#3b82f6',
-    'tertiaryColor': '#f59e0b',
+    'primaryColor': '#2563eb',
+    'primaryTextColor': '#ffffff',
+    'primaryBorderColor': '#1e40af',
+    'lineColor': '#6b7280',
+    'secondaryColor': '#7c3aed',
+    'tertiaryColor': '#dc2626',
     'background': '#ffffff',
-    'mainBkg': '#10b981',
-    'secondBkg': '#ef4444',
-    'tertiaryBkg': '#f59e0b'
+    'mainBkg': '#2563eb',
+    'secondBkg': '#7c3aed',
+    'tertiaryBkg': '#dc2626',
+    'clusterBkg': '#f3f4f6',
+    'edgeLabelBackground': '#ffffff',
+    'tertiaryTextColor': '#1f2937',
+    'pie1': '#2563eb',
+    'pie2': '#7c3aed',
+    'pie3': '#dc2626',
+    'pie4': '#f59e0b',
+    'pie5': '#10b981',
+    'pie6': '#06b6d4',
+    'pie7': '#ec4899',
+    'pie8': '#6366f1',
+    'pie9': '#84cc16',
+    'pie10': '#f97316',
+    'pie11': '#14b8a6',
+    'pie12': '#a855f7'
   }
 }}%%
 xychart-beta
@@ -290,16 +305,31 @@ ${data.map(row => {
 %%{init: {
   'theme':'base',
   'themeVariables': {
-    'primaryColor': '#10b981',
-    'primaryTextColor': '#fff',
-    'primaryBorderColor': '#059669',
-    'lineColor': '#d1d5db',
-    'secondaryColor': '#3b82f6',
-    'tertiaryColor': '#f59e0b',
+    'primaryColor': '#2563eb',
+    'primaryTextColor': '#ffffff',
+    'primaryBorderColor': '#1e40af',
+    'lineColor': '#6b7280',
+    'secondaryColor': '#7c3aed',
+    'tertiaryColor': '#dc2626',
     'background': '#ffffff',
-    'mainBkg': '#10b981',
-    'secondBkg': '#ef4444',
-    'tertiaryBkg': '#f59e0b'
+    'mainBkg': '#2563eb',
+    'secondBkg': '#7c3aed',
+    'tertiaryBkg': '#dc2626',
+    'clusterBkg': '#f3f4f6',
+    'edgeLabelBackground': '#ffffff',
+    'tertiaryTextColor': '#1f2937',
+    'pie1': '#2563eb',
+    'pie2': '#7c3aed',
+    'pie3': '#dc2626',
+    'pie4': '#f59e0b',
+    'pie5': '#10b981',
+    'pie6': '#06b6d4',
+    'pie7': '#ec4899',
+    'pie8': '#6366f1',
+    'pie9': '#84cc16',
+    'pie10': '#f97316',
+    'pie11': '#14b8a6',
+    'pie12': '#a855f7'
   }
 }}%%
 xychart-beta

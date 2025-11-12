@@ -123,7 +123,7 @@ jobs:
           path: |
             **/BenchmarkDotNet.Artifacts/**
 
-  aggregate-and-commit-results:
+  process-and-upload-benchmarks:
     needs: [run-time-benchmarks, build-time-benchmarks]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
@@ -159,6 +159,88 @@ jobs:
       - name: Process Benchmark Results
         run: |
           node .github/scripts/process-benchmarks.js
+
+      - name: Upload Individual Runtime Benchmarks
+        uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: benchmark-DataDrivenTests
+          path: |
+            docs/docs/benchmarks/DataDrivenTests.md
+            docs/static/benchmarks/DataDrivenTests.json
+          retention-days: 90
+
+      - name: Upload Individual Runtime Benchmarks
+        uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: benchmark-AsyncTests
+          path: |
+            docs/docs/benchmarks/AsyncTests.md
+            docs/static/benchmarks/AsyncTests.json
+          retention-days: 90
+
+      - name: Upload Individual Runtime Benchmarks
+        uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: benchmark-ScaleTests
+          path: |
+            docs/docs/benchmarks/ScaleTests.md
+            docs/static/benchmarks/ScaleTests.json
+          retention-days: 90
+
+      - name: Upload Individual Runtime Benchmarks
+        uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: benchmark-MatrixTests
+          path: |
+            docs/docs/benchmarks/MatrixTests.md
+            docs/static/benchmarks/MatrixTests.json
+          retention-days: 90
+
+      - name: Upload Individual Runtime Benchmarks
+        uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: benchmark-MassiveParallelTests
+          path: |
+            docs/docs/benchmarks/MassiveParallelTests.md
+            docs/static/benchmarks/MassiveParallelTests.json
+          retention-days: 90
+
+      - name: Upload Individual Runtime Benchmarks
+        uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: benchmark-SetupTeardownTests
+          path: |
+            docs/docs/benchmarks/SetupTeardownTests.md
+            docs/static/benchmarks/SetupTeardownTests.json
+          retention-days: 90
+
+      - name: Upload Build Benchmark
+        uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: benchmark-BuildTime
+          path: |
+            docs/docs/benchmarks/BuildTime.md
+            docs/static/benchmarks/BuildTime.json
+          retention-days: 90
+
+      - name: Upload Summary Files
+        uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: benchmark-summary
+          path: |
+            docs/docs/benchmarks/index.md
+            docs/static/benchmarks/latest.json
+            docs/static/benchmarks/summary.json
+            docs/static/benchmarks/historical.json
+          retention-days: 90
 
       - name: Generate Benchmark List
         id: benchmark_list
@@ -209,6 +291,16 @@ jobs:
             This PR updates the benchmark documentation with the latest results from the Speed Comparison workflow.
 
             ### Benchmarks Produced
+
+            Individual benchmark artifacts are available for download:
+            - `benchmark-DataDrivenTests`
+            - `benchmark-AsyncTests`
+            - `benchmark-ScaleTests`
+            - `benchmark-MatrixTests`
+            - `benchmark-MassiveParallelTests`
+            - `benchmark-SetupTeardownTests`
+            - `benchmark-BuildTime`
+            - `benchmark-summary` (aggregated overview)
 
             #### Runtime Benchmarks
             ${{ steps.benchmark_list.outputs.runtime_benchmarks }}
