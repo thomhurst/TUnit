@@ -139,13 +139,206 @@ const stats = {
 };
 
 console.log('\n📊 Preparing benchmark data...');
-
-// Generate main benchmarks page
 console.log('\n📝 Generating documentation...');
 
 const timestamp = new Date().toISOString().split('T')[0];
+const sampleData = Object.values(categories.runtime)[0] || [];
+const frameworks = {
+  tunit: sampleData.find(d => d.Method === 'TUnit')?.Version || 'latest',
+  xunit: sampleData.find(d => d.Method === 'xUnit3')?.Version || 'latest',
+  nunit: sampleData.find(d => d.Method === 'NUnit')?.Version || 'latest',
+  mstest: sampleData.find(d => d.Method === 'MSTest')?.Version || 'latest'
+};
 
-let mainPage = `---
+// Generate individual benchmark pages for each runtime category
+Object.entries(categories.runtime).forEach(([testClass, data]) => {
+  const benchmarkPage = `---
+title: ${testClass}
+description: Performance benchmark results for ${testClass}
+sidebar_position: ${Object.keys(categories.runtime).indexOf(testClass) + 2}
+---
+
+# ${testClass} Benchmark
+
+:::info Last Updated
+This benchmark was automatically generated on **${timestamp}** from the latest CI run.
+
+**Environment:** ${environmentInfo.os || 'Ubuntu Latest'} • ${environmentInfo.sdk || '.NET 10'}
+:::
+
+## 📊 Results
+
+| Framework | Version | Mean | Median | StdDev |
+|-----------|---------|------|--------|--------|
+${data.map(row => {
+  const name = row.Method.includes('TUnit_AOT') ? '**TUnit (AOT)**' : row.Method.includes('TUnit') ? '**TUnit**' : row.Method;
+  return `| ${name} | ${row.Version || 'N/A'} | ${row.Mean} | ${row.Median || 'N/A'} | ${row.StdDev || 'N/A'} |`;
+}).join('\n')}
+
+## 📈 Visual Comparison
+
+\`\`\`mermaid
+%%{init: {
+  'theme':'base',
+  'themeVariables': {
+    'primaryColor': '#10b981',
+    'primaryTextColor': '#fff',
+    'primaryBorderColor': '#059669',
+    'lineColor': '#d1d5db',
+    'secondaryColor': '#3b82f6',
+    'tertiaryColor': '#f59e0b',
+    'background': '#ffffff',
+    'mainBkg': '#10b981',
+    'secondBkg': '#ef4444',
+    'tertiaryBkg': '#f59e0b'
+  }
+}}%%
+xychart-beta
+  title "${testClass} Performance Comparison"
+  x-axis [${data.map(d => `"${d.Method}"`).join(', ')}]
+  y-axis "Time (${data[0]?.Mean.includes(' s') ? 's' : 'ms'})" 0 --> ${Math.ceil(Math.max(...data.map(d => parseMeanValue(d.Mean))) * 1.2)}
+  bar [${data.map(d => parseMeanValue(d.Mean)).join(', ')}]
+\`\`\`
+
+## 🎯 Key Insights
+
+${(() => {
+  const tunitResult = data.find(d => d.Method === 'TUnit');
+  const tunitAotResult = data.find(d => d.Method === 'TUnit_AOT');
+  const otherResults = data.filter(d => !d.Method.includes('TUnit'));
+
+  if (!tunitResult) return '- TUnit data not available';
+
+  const tunitMean = parseMeanValue(tunitResult.Mean);
+  const insights = [];
+
+  otherResults.forEach(other => {
+    const otherMean = parseMeanValue(other.Mean);
+    const speedup = (otherMean / tunitMean).toFixed(2);
+    if (speedup > 1) {
+      insights.push(`- **${speedup}x faster** than ${other.Method} (${other.Version})`);
+    }
+  });
+
+  if (tunitAotResult) {
+    const aotMean = parseMeanValue(tunitAotResult.Mean);
+    const aotSpeedup = (tunitMean / aotMean).toFixed(2);
+    insights.push(`- **${aotSpeedup}x faster** with Native AOT compilation`);
+  }
+
+  return insights.join('\n');
+})()}
+
+---
+
+:::note Methodology
+View the [benchmarks overview](/docs/benchmarks) for methodology details and environment information.
+:::
+
+*Last generated: ${new Date().toISOString()}*
+`;
+
+  fs.writeFileSync(path.join(OUTPUT_DIR, `${testClass}.md`), benchmarkPage);
+  console.log(`  ✓ Created ${OUTPUT_DIR}/${testClass}.md`);
+
+  // Generate individual JSON file for each benchmark
+  const benchmarkJson = {
+    timestamp: new Date().toISOString(),
+    category: testClass,
+    environment: environmentInfo,
+    results: data
+  };
+
+  fs.writeFileSync(
+    path.join(STATIC_DIR, `${testClass}.json`),
+    JSON.stringify(benchmarkJson, null, 2)
+  );
+  console.log(`  ✓ Created ${STATIC_DIR}/${testClass}.json`);
+});
+
+// Generate build benchmark page if available
+if (Object.keys(categories.build).length > 0) {
+  Object.entries(categories.build).forEach(([testClass, data]) => {
+    const benchmarkPage = `---
+title: Build Performance
+description: Compilation time benchmark results
+sidebar_position: ${Object.keys(categories.runtime).length + 2}
+---
+
+# Build Performance Benchmark
+
+:::info Last Updated
+This benchmark was automatically generated on **${timestamp}** from the latest CI run.
+
+**Environment:** ${environmentInfo.os || 'Ubuntu Latest'} • ${environmentInfo.sdk || '.NET 10'}
+:::
+
+## 📊 Results
+
+Compilation time comparison across frameworks:
+
+| Framework | Version | Mean | Median | StdDev |
+|-----------|---------|------|--------|--------|
+${data.map(row => {
+  const name = row.Method.includes('TUnit') ? '**TUnit**' : row.Method;
+  return `| ${name} | ${row.Version || 'N/A'} | ${row.Mean} | ${row.Median || 'N/A'} | ${row.StdDev || 'N/A'} |`;
+}).join('\n')}
+
+## 📈 Visual Comparison
+
+\`\`\`mermaid
+%%{init: {
+  'theme':'base',
+  'themeVariables': {
+    'primaryColor': '#10b981',
+    'primaryTextColor': '#fff',
+    'primaryBorderColor': '#059669',
+    'lineColor': '#d1d5db',
+    'secondaryColor': '#3b82f6',
+    'tertiaryColor': '#f59e0b',
+    'background': '#ffffff',
+    'mainBkg': '#10b981',
+    'secondBkg': '#ef4444',
+    'tertiaryBkg': '#f59e0b'
+  }
+}}%%
+xychart-beta
+  title "Build Time Comparison"
+  x-axis [${data.map(d => `"${d.Method}"`).join(', ')}]
+  y-axis "Time (${data[0]?.Mean.includes(' s') ? 's' : 'ms'})" 0 --> ${Math.ceil(Math.max(...data.map(d => parseMeanValue(d.Mean))) * 1.2)}
+  bar [${data.map(d => parseMeanValue(d.Mean)).join(', ')}]
+\`\`\`
+
+---
+
+:::note Methodology
+View the [benchmarks overview](/docs/benchmarks) for methodology details and environment information.
+:::
+
+*Last generated: ${new Date().toISOString()}*
+`;
+
+    fs.writeFileSync(path.join(OUTPUT_DIR, 'BuildTime.md'), benchmarkPage);
+    console.log(`  ✓ Created ${OUTPUT_DIR}/BuildTime.md`);
+
+    // Generate build benchmark JSON
+    const buildJson = {
+      timestamp: new Date().toISOString(),
+      category: 'BuildTime',
+      environment: environmentInfo,
+      results: data
+    };
+
+    fs.writeFileSync(
+      path.join(STATIC_DIR, 'BuildTime.json'),
+      JSON.stringify(buildJson, null, 2)
+    );
+    console.log(`  ✓ Created ${STATIC_DIR}/BuildTime.json`);
+  });
+}
+
+// Generate index/overview page
+const indexPage = `---
 title: Performance Benchmarks
 description: Real-world performance comparisons between TUnit and other .NET testing frameworks
 sidebar_position: 1
@@ -159,92 +352,20 @@ These benchmarks were automatically generated on **${timestamp}** from the lates
 **Environment:** ${environmentInfo.os || 'Ubuntu Latest'} • ${environmentInfo.sdk || '.NET 10'}
 :::
 
-## 🚀 Runtime Performance
+## 🚀 Runtime Benchmarks
 
-`;
+Click on any benchmark to view detailed results:
 
-// Add runtime results
-Object.entries(categories.runtime).forEach(([testClass, data]) => {
-  mainPage += `\n### ${testClass}\n\n`;
+${Object.keys(categories.runtime).map(testClass =>
+  `- [${testClass}](${testClass}) - Detailed performance analysis`
+).join('\n')}
 
-  // Add table
-  mainPage += `| Framework | Version | Mean | Median | StdDev |\n`;
-  mainPage += `|-----------|---------|------|--------|--------|\n`;
+${Object.keys(categories.build).length > 0 ? `
+## 🔨 Build Benchmarks
 
-  data.forEach(row => {
-    const name = row.Method.includes('TUnit_AOT') ? '**TUnit (AOT)**' : row.Method.includes('TUnit') ? '**TUnit**' : row.Method;
-    mainPage += `| ${name} | ${row.Version || 'N/A'} | ${row.Mean} | ${row.Median || 'N/A'} | ${row.StdDev || 'N/A'} |\n`;
-  });
+- [Build Performance](BuildTime) - Compilation time comparison
+` : ''}
 
-  mainPage += '\n';
-
-  // Add Mermaid chart
-  mainPage += `\`\`\`mermaid\n`;
-  mainPage += `%%{init: {'theme':'base'}}%%\n`;
-  mainPage += `xychart-beta\n`;
-  mainPage += `  title "${testClass} Performance Comparison"\n`;
-
-  // Detect time unit from the data
-  const sampleMean = data[0]?.Mean || '';
-  const timeUnit = sampleMean.includes(' s') ? 's' : 'ms';
-
-  // Find max value for y-axis scaling
-  const maxValue = Math.max(...data.map(d => parseMeanValue(d.Mean)));
-  const yMax = Math.ceil(maxValue * 1.2); // 20% padding
-
-  mainPage += `  x-axis [${data.map(d => `"${d.Method}"`).join(', ')}]\n`;
-  mainPage += `  y-axis "Time (${timeUnit})" 0 --> ${yMax}\n`;
-  mainPage += `  bar [${data.map(d => parseMeanValue(d.Mean)).join(', ')}]\n`;
-  mainPage += `\`\`\`\n\n`;
-});
-
-// Add build time results
-if (Object.keys(categories.build).length > 0) {
-  mainPage += `\n---\n\n## 🔨 Build Performance\n\n`;
-  mainPage += `Compilation time comparison across frameworks:\n\n`;
-
-  Object.entries(categories.build).forEach(([testClass, data]) => {
-    mainPage += `| Framework | Version | Mean | Median | StdDev |\n`;
-    mainPage += `|-----------|---------|------|--------|--------|\n`;
-
-    data.forEach(row => {
-      const name = row.Method.includes('TUnit') ? '**TUnit**' : row.Method;
-      mainPage += `| ${name} | ${row.Version || 'N/A'} | ${row.Mean} | ${row.Median || 'N/A'} | ${row.StdDev || 'N/A'} |\n`;
-    });
-
-    mainPage += '\n';
-
-    // Add Mermaid chart for build performance
-    mainPage += `\`\`\`mermaid\n`;
-    mainPage += `%%{init: {'theme':'base'}}%%\n`;
-    mainPage += `xychart-beta\n`;
-    mainPage += `  title "Build Time Comparison"\n`;
-
-    // Detect time unit from the data
-    const sampleMean = data[0]?.Mean || '';
-    const timeUnit = sampleMean.includes(' s') ? 's' : 'ms';
-
-    // Find max value for y-axis scaling
-    const maxValue = Math.max(...data.map(d => parseMeanValue(d.Mean)));
-    const yMax = Math.ceil(maxValue * 1.2); // 20% padding
-
-    mainPage += `  x-axis [${data.map(d => `"${d.Method}"`).join(', ')}]\n`;
-    mainPage += `  y-axis "Time (${timeUnit})" 0 --> ${yMax}\n`;
-    mainPage += `  bar [${data.map(d => parseMeanValue(d.Mean)).join(', ')}]\n`;
-    mainPage += `\`\`\`\n\n`;
-  });
-}
-
-// Add methodology section
-const sampleData = Object.values(categories.runtime)[0] || [];
-const frameworks = {
-  tunit: sampleData.find(d => d.Method === 'TUnit')?.Version || 'latest',
-  xunit: sampleData.find(d => d.Method === 'xUnit3')?.Version || 'latest',
-  nunit: sampleData.find(d => d.Method === 'NUnit')?.Version || 'latest',
-  mstest: sampleData.find(d => d.Method === 'MSTest')?.Version || 'latest'
-};
-
-mainPage += `
 ---
 
 ## 📊 Methodology
@@ -299,7 +420,7 @@ Each benchmark runs multiple iterations with statistical analysis to ensure accu
 *Last generated: ${new Date().toISOString()}*
 `;
 
-fs.writeFileSync(path.join(OUTPUT_DIR, 'index.md'), mainPage);
+fs.writeFileSync(path.join(OUTPUT_DIR, 'index.md'), indexPage);
 console.log(`  ✓ Created ${OUTPUT_DIR}/index.md`);
 
 // Generate JSON for interactive components

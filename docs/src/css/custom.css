@@ -4,6 +4,9 @@
  * work well for content-centric websites.
  */
 
+/* Import benchmark chart styling */
+@import url('./benchmark-charts.css');
+
 /* You can override the default Infima variables here. */
 :root {
   --ifm-color-primary: #14b8a6;

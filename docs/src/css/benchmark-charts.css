@@ -1,0 +1,69 @@
+/* Enhanced styling for Mermaid benchmark charts */
+
+/* Override Mermaid xychart bar colors for better visibility */
+.markdown article .mermaid .xychart .plot > g > g > rect:nth-child(1) {
+  fill: #10b981 !important; /* TUnit - Emerald Green */
+  opacity: 0.9;
+}
+
+.markdown article .mermaid .xychart .plot > g > g > rect:nth-child(2) {
+  fill: #ef4444 !important; /* NUnit - Red */
+  opacity: 0.85;
+}
+
+.markdown article .mermaid .xychart .plot > g > g > rect:nth-child(3) {
+  fill: #f59e0b !important; /* MSTest - Amber */
+  opacity: 0.85;
+}
+
+.markdown article .mermaid .xychart .plot > g > g > rect:nth-child(4) {
+  fill: #8b5cf6 !important; /* xUnit - Purple */
+  opacity: 0.85;
+}
+
+.markdown article .mermaid .xychart .plot > g > g > rect:nth-child(5) {
+  fill: #06b6d4 !important; /* TUnit AOT - Cyan */
+  opacity: 0.9;
+}
+
+/* Enhance chart readability */
+.markdown article .mermaid .xychart text {
+  fill: var(--ifm-font-color-base) !important;
+  font-family: var(--ifm-font-family-base);
+}
+
+.markdown article .mermaid .xychart .title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* Grid lines for better readability */
+.markdown article .mermaid .xychart line {
+  stroke: var(--ifm-color-emphasis-300);
+  stroke-opacity: 0.5;
+}
+
+/* Axis styling */
+.markdown article .mermaid .xychart .xAxis line,
+.markdown article .mermaid .xychart .yAxis line {
+  stroke: var(--ifm-color-emphasis-500);
+}
+
+/* Dark mode adjustments */
+[data-theme='dark'] .markdown article .mermaid .xychart text {
+  fill: var(--ifm-font-color-base) !important;
+}
+
+[data-theme='dark'] .markdown article .mermaid .xychart line {
+  stroke: var(--ifm-color-emphasis-500);
+}
+
+/* Add subtle hover effects */
+.markdown article .mermaid .xychart .plot > g > g > rect {
+  transition: opacity 0.2s ease;
+}
+
+.markdown article .mermaid .xychart .plot > g > g > rect:hover {
+  opacity: 1 !important;
+  filter: brightness(1.1);
+}
