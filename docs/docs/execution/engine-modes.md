@@ -107,7 +107,7 @@ Add this MSBuild property to your test project file (`.csproj`):
 ```xml
 <Project Sdk="Microsoft.NET.Sdk.Razor">
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <!-- Disable source generation since we're using reflection mode -->
     <EnableTUnitSourceGeneration>false</EnableTUnitSourceGeneration>
   </PropertyGroup>
