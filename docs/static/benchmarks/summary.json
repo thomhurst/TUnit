@@ -1,14 +1,10 @@
 {
   "runtime": [
-    "AsyncTests",
-    "DataDrivenTests",
-    "MassiveParallelTests",
-    "MatrixTests",
-    "ScaleTests"
+    "results"
   ],
   "build": [
     "BuildTime"
   ],
-  "timestamp": "2025-11-11",
+  "timestamp": "2025-11-12",
   "environment": "Ubuntu Latest • .NET SDK 10.0.100"
 }
