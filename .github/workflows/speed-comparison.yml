@@ -326,6 +326,7 @@ jobs:
             automated
             benchmarks
             documentation
+            ignore-for-release
           draft: false
 
       - name: Merge PR Immediately
