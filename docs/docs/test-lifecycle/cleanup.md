@@ -37,7 +37,7 @@ Hooks can optionally accept parameters for accessing context information and can
 public async Task Cleanup(TestContext context, CancellationToken cancellationToken)
 {
     // Access test results via context
-    if (context.Result?.Status == TestStatus.Failed)
+    if (context.Execution.Result?.State == TestState.Failed)
     {
         await CaptureScreenshot(cancellationToken);
     }

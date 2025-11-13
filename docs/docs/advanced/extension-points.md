@@ -262,9 +262,9 @@ public class TestReporterAttribute : Attribute, ITestStartEventReceiver, ITestEn
     {
         await ReportingService.ReportTestCompleted(
             context.GetDisplayName(),
-            context.Result?.State,
-            context.Result?.Duration,
-            context.Result?.Exception?.Message
+            context.Execution.Result?.State,
+            context.Execution.Result?.Duration,
+            context.Execution.Result?.Exception?.Message
         );
     }
 }
@@ -289,7 +289,7 @@ public class CustomEventReceiverAttribute : Attribute, ITestStartEventReceiver, 
     
     public ValueTask OnTestEnd(TestContext context)
     {
-        Console.WriteLine($"Test ended: {context.GetDisplayName()} - {context.Result?.State}");
+        Console.WriteLine($"Test ended: {context.GetDisplayName()} - {context.Execution.Result?.State}");
         return default;
     }
 }
