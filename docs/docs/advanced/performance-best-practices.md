@@ -533,16 +533,16 @@ public class PerformanceAwareExecutor : ITestExecutor
 public static void RecordTestMetrics()
 {
     var context = TestContext.Current;
-    if (context?.Result != null)
+    if (context?.Execution.Result != null)
     {
         TelemetryClient.TrackMetric(
             "TestDuration",
-            context.Result.Duration.TotalMilliseconds,
+            context.Execution.Result.Duration.TotalMilliseconds,
             new Dictionary<string, string>
             {
                 ["TestName"] = context.Metadata.TestName,
                 ["TestClass"] = context.Metadata.TestDetails.TestClass,
-                ["Result"] = context.Result.State.ToString()
+                ["Result"] = context.Execution.Result.State.ToString()
             });
     }
 }

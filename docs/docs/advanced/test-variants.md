@@ -87,7 +87,7 @@ public class ShrinkOnFailureAttribute : Attribute, ITestEndEventReceiver
     public async ValueTask OnTestEnd(TestContext testContext)
     {
         // Only shrink if test failed and it's not already a shrink attempt
-        if (testContext.Result?.Status != TestStatus.Failed)
+        if (testContext.Execution.Result?.State != TestState.Failed)
             return;
 
         if (testContext.Relationship == TestRelationship.Derived)
