@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="TUnit.Playwright" Version="1.1.0" />
+        <PackageReference Include="TUnit.Playwright" Version="1.1.10" />
     </ItemGroup>
 
 </Project>
