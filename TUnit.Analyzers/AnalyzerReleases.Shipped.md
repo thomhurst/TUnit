@@ -28,7 +28,7 @@ TUnit0038 | Usage | Error | Property with data attribute must have a data source
 TUnit0043 | Usage | Error | Properties with data attributes must use 'required' keyword
 TUnit0044 | Usage | Error | Properties with data attributes must have a setter
 TUnit0045 | Usage | Error | Property has multiple data source attributes - use only one
-TUnit0046 | Usage | Warning | Data source should return Func<T> for lazy evaluation instead of T
+TUnit0046 | Usage | Warning | Data source should return Func<T> for reference types to ensure test isolation
 TUnit0049 | Usage | Error | [Matrix] parameters require [MatrixDataSource] attribute on the test method
 TUnit0050 | Usage | Error | Too many test arguments provided
 TUnit0056 | Usage | Error | Instance data source methods must use [InstanceMethodDataSource] attribute
