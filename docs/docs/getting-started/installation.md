@@ -113,18 +113,35 @@ This should NOT be used with TUnit. It'll stop test discovery from working prope
 :::
 
 ## .NET Framework
-If you are still targeting .NET Framework, TUnit will try to Polyfill some missing types that are used by the compiler, such as the `ModuleInitialiserAttribute`.
 
-If you have issues with other Polyfill libraries also defining them, in your project files, you can define the property `<EnableTUnitPolyfills>false</EnableTUnitPolyfills>` to stop TUnit generating them for you.
+### Automatic Polyfill Support
+When targeting .NET Framework or older .NET Standard versions (netstandard2.0/2.1), TUnit automatically provides the [Polyfill](https://github.com/SimonCropp/Polyfill) package as a transitive dependency. This package adds missing types that are required for modern C# features and TUnit's code generation, such as:
+
+- `ModuleInitializerAttribute` - Used for test discovery initialization
+- `CallerArgumentExpressionAttribute` - Used for assertion messages
+- Various other modern .NET types
+
+The Polyfill package flows automatically from `TUnit.Core` to your test projects, so you don't need to add it manually.
 
 ### Central Package Management (CPM)
-TUnit is fully compatible with NuGet Central Package Management. When CPM is enabled (via `Directory.Packages.props`), TUnit will automatically inject the Polyfill package using `VersionOverride`, so you don't need to manually add it to your `Directory.Packages.props` file.
+TUnit is fully compatible with NuGet Central Package Management. The Polyfill dependency is managed automatically as a transitive dependency.
 
-If you prefer to manage the Polyfill version yourself, you can:
-- Add `<PackageVersion Include="Polyfill" Version="x.x.x" />` to your `Directory.Packages.props`, OR
-- Disable automatic injection with `<EnableTUnitPolyfills>false</EnableTUnitPolyfills>` and add it manually
+If you prefer to manage the Polyfill version yourself:
+- Add `<PackageVersion Include="Polyfill" Version="x.x.x" />` to your `Directory.Packages.props`
+- TUnit will respect your version choice
 
 ### Embedded Polyfill Attributes
-TUnit automatically sets `<PolyUseEmbeddedAttribute>true</PolyUseEmbeddedAttribute>` to ensure that Polyfill types are embedded in each project. This prevents type conflicts when using `InternalsVisibleTo` or when multiple projects in your solution reference Polyfill. Each project gets its own isolated copy of the polyfill types, following the [recommended Polyfill consuming pattern](https://github.com/SimonCropp/Polyfill/blob/main/consuming.md#recommended-consuming-pattern).
+TUnit automatically sets `<PolyUseEmbeddedAttribute>true</PolyUseEmbeddedAttribute>` in your projects. This ensures that each project gets its own embedded copy of polyfilled types with `internal` visibility. This approach:
 
-You can override this behavior by setting `<PolyUseEmbeddedAttribute>false</PolyUseEmbeddedAttribute>` in your project file if needed.
+- **Prevents type conflicts** when using `InternalsVisibleTo`
+- **Isolates types** per-assembly (no public API pollution)
+- **Follows best practices** from the [Polyfill documentation](https://github.com/SimonCropp/Polyfill/blob/main/consuming.md#recommended-consuming-pattern)
+
+You can override this behavior if needed:
+```xml
+<PropertyGroup>
+    <PolyUseEmbeddedAttribute>false</PolyUseEmbeddedAttribute>
+</PropertyGroup>
+```
+
+Note: This property is set in TUnit's `.props` file which runs before your project file, so your settings always take precedence.

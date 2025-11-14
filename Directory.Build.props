@@ -73,8 +73,8 @@
     <PolyUseEmbeddedAttribute>true</PolyUseEmbeddedAttribute>
   </PropertyGroup>
 
-  <!-- Include Polyfill for all target frameworks in internal projects -->
-  <ItemGroup>
+  <!-- Include Polyfill for all target frameworks in internal projects (except TUnit.Core which has its own transitive reference) -->
+  <ItemGroup Condition="'$(MSBuildProjectName)' != 'TUnit.Core'">
     <PackageReference Include="Polyfill">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

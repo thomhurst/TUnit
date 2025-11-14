@@ -14,7 +14,6 @@
         <PackageReference Include="TUnit.Core">
             <VersionOverride Condition="'$(TUnitVersion)' != ''">$(TUnitVersion)</VersionOverride>
         </PackageReference>
-        <PackageReference Include="Polyfill" />
     </ItemGroup>
 
 </Project>

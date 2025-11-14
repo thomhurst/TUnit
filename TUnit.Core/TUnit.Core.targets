@@ -16,8 +16,8 @@
     <ItemGroup Condition="'$(EnableTUnitPolyfills)' != 'false' and '$(_TUnitNeedsPolyfill)' == 'true' and '$(ManagePackageVersionsCentrally)' != 'true' and '$(_PolyfillAlreadyDefined)' != 'true'">
         <PackageReference Include="Polyfill" Version="$(_TUnitPolyfillVersion)">
             <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>compile; analyzers</IncludeAssets>
-            <ExcludeAssets>runtime; native; contentfiles; build; buildtransitive</ExcludeAssets>
+            <IncludeAssets>compile; analyzers; build; buildtransitive</IncludeAssets>
+            <ExcludeAssets>runtime; native; contentfiles</ExcludeAssets>
         </PackageReference>
     </ItemGroup>
 
@@ -25,8 +25,8 @@
     <ItemGroup Condition="'$(EnableTUnitPolyfills)' != 'false' and '$(_TUnitNeedsPolyfill)' == 'true' and '$(ManagePackageVersionsCentrally)' == 'true' and '$(_PolyfillAlreadyDefined)' != 'true'">
         <PackageReference Include="Polyfill" VersionOverride="$(_TUnitPolyfillVersion)">
             <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>compile; analyzers</IncludeAssets>
-            <ExcludeAssets>runtime; native; contentfiles; build; buildtransitive</ExcludeAssets>
+            <IncludeAssets>compile; analyzers; build; buildtransitive</IncludeAssets>
+            <ExcludeAssets>runtime; native; contentfiles</ExcludeAssets>
         </PackageReference>
     </ItemGroup>
 
