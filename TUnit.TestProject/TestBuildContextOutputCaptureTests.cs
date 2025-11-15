@@ -1,5 +1,6 @@
 using TUnit.Core;
 using TUnit.Core.Interfaces;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
@@ -9,7 +10,7 @@ namespace TUnit.TestProject;
 /// Issue #3833: https://github.com/thomhurst/TUnit/issues/3833
 /// </summary>
 [NotInParallel]
-[Engine(ExpectedState.Pass)]
+[EngineTest(ExpectedResult.Pass)]
 public class TestBuildContextOutputCaptureTests
 {
     /// <summary>
