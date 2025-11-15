@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using TUnit.Core;
 using TUnit.Core.Data;
+using TUnit.Core.Enums;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Tracking;
@@ -87,7 +88,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
     // Fast-path checks with inlining
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public async ValueTask InvokeTestStartEventReceiversAsync(TestContext context, CancellationToken cancellationToken)
+    public async ValueTask InvokeTestStartEventReceiversAsync(TestContext context, CancellationToken cancellationToken, EventReceiverStage? stage = null)
     {
         // Fast path - no allocation if no receivers
         if (!_registry.HasTestStartReceivers())
@@ -95,10 +96,10 @@ internal sealed class EventReceiverOrchestrator : IDisposable
             return;
         }
 
-        await InvokeTestStartEventReceiversCore(context, cancellationToken);
+        await InvokeTestStartEventReceiversCore(context, cancellationToken, stage);
     }
 
-    private async ValueTask InvokeTestStartEventReceiversCore(TestContext context, CancellationToken cancellationToken)
+    private async ValueTask InvokeTestStartEventReceiversCore(TestContext context, CancellationToken cancellationToken, EventReceiverStage? stage)
     {
         // Manual filtering and sorting instead of LINQ to avoid allocations
         var eligibleObjects = context.GetEligibleEventObjects();
@@ -108,6 +109,13 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         {
             if (obj is ITestStartEventReceiver receiver)
             {
+#if NET
+                // Filter by stage if specified (only on .NET 8.0+ where Stage property exists)
+                if (stage.HasValue && receiver.Stage != stage.Value)
+                {
+                    continue;
+                }
+#endif
                 receivers ??= [];
                 receivers.Add(receiver);
             }
@@ -130,17 +138,17 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public async ValueTask<List<Exception>> InvokeTestEndEventReceiversAsync(TestContext context, CancellationToken cancellationToken)
+    public async ValueTask<List<Exception>> InvokeTestEndEventReceiversAsync(TestContext context, CancellationToken cancellationToken, EventReceiverStage? stage = null)
     {
         if (!_registry.HasTestEndReceivers())
         {
             return [];
         }
 
-        return await InvokeTestEndEventReceiversCore(context, cancellationToken);
+        return await InvokeTestEndEventReceiversCore(context, cancellationToken, stage);
     }
 
-    private async ValueTask<List<Exception>> InvokeTestEndEventReceiversCore(TestContext context, CancellationToken cancellationToken)
+    private async ValueTask<List<Exception>> InvokeTestEndEventReceiversCore(TestContext context, CancellationToken cancellationToken, EventReceiverStage? stage)
     {
         var exceptions = new List<Exception>();
 
@@ -152,6 +160,13 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         {
             if (obj is ITestEndEventReceiver receiver)
             {
+#if NET
+                // Filter by stage if specified (only on .NET 8.0+ where Stage property exists)
+                if (stage.HasValue && receiver.Stage != stage.Value)
+                {
+                    continue;
+                }
+#endif
                 receivers ??= [];
                 receivers.Add(receiver);
             }

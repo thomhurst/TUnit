@@ -20,6 +20,98 @@ The interfaces they can implement are:
 
 This can be useful especially when generating data that you need to track and maybe dispose later. By hooking into these events, we can do things like track and dispose our objects when we need.
 
+## Execution Stage Control
+
+> **Note**: This feature is available on .NET 8.0+ only due to default interface member requirements.
+
+For `ITestStartEventReceiver` and `ITestEndEventReceiver`, you can control when your event receivers execute relative to instance-level hooks (`[Before(Test)]` and `[After(Test)]`) by setting the `Stage` property.
+
+### EventReceiverStage Options
+
+- **`EventReceiverStage.Early`**: Executes before instance-level hooks
+  - Test start receivers run before `[Before(Test)]` hooks
+  - Test end receivers run before `[After(Test)]` hooks
+
+- **`EventReceiverStage.Late`** (default): Executes after instance-level hooks
+  - Test start receivers run after `[Before(Test)]` hooks
+  - Test end receivers run after `[After(Test)]` hooks
+
+### When to Use Early Stage
+
+Use `EventReceiverStage.Early` when your event receiver needs to:
+- Initialize resources that instance-level hooks depend on
+- Set up test context or environment before any test-specific setup runs
+- Capture test state before any modifications from hooks
+
+### When to Use Late Stage
+
+Use `EventReceiverStage.Late` (the default) when your event receiver needs to:
+- Access resources initialized by instance-level hooks
+- Clean up after all test-specific teardown completes
+- Log or report on final test state after all hooks have run
+
+### Example: Early Stage Event Receiver
+
+```csharp
+public class DatabaseConnectionAttribute : Attribute, ITestStartEventReceiver
+{
+    private IDbConnection? _connection;
+
+    // Execute before [Before(Test)] hooks so the connection is available to them
+    public EventReceiverStage Stage => EventReceiverStage.Early;
+
+    public async ValueTask OnTestStart(TestContext context)
+    {
+        _connection = new SqlConnection(connectionString);
+        await _connection.OpenAsync();
+
+        // Store connection in test context for use by hooks and test
+        context.GetOrAdd("DbConnection", () => _connection);
+    }
+}
+
+public class MyTests
+{
+    [Test]
+    [DatabaseConnection] // Runs BEFORE BeforeTest hook
+    public async Task TestWithDatabase()
+    {
+        // Database connection is already open and available
+        var connection = TestContext.Current!.Get<IDbConnection>("DbConnection");
+        // ... test logic
+    }
+
+    [Before(Test)]
+    public void BeforeTest()
+    {
+        // Database connection is already available here
+        var connection = TestContext.Current!.Get<IDbConnection>("DbConnection");
+        // ... setup that needs the database
+    }
+}
+```
+
+### Example: Late Stage Event Receiver (Default)
+
+```csharp
+public class TestMetricsAttribute : Attribute, ITestEndEventReceiver
+{
+    // Late stage is the default, so this property is optional
+    public EventReceiverStage Stage => EventReceiverStage.Late;
+
+    public async ValueTask OnTestEnd(TestContext context)
+    {
+        // This runs AFTER all [After(Test)] hooks have completed
+        // So we can capture the final test metrics including cleanup time
+        await LogMetrics(context);
+    }
+}
+```
+
+### .NET Framework / .NET Standard 2.0 Behavior
+
+On older frameworks that don't support default interface members (.NET Framework, .NET Standard 2.0), the `Stage` property is not available. All event receivers will execute at the `Late` stage (after instance-level hooks), which matches the historical behavior.
+
 Each attribute will be new'd up for each test, so you are able to store state within the fields of your attribute class.
 
 The `[ClassDataSource<T>]` uses these events to do the following:

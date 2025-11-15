@@ -1665,6 +1665,11 @@ namespace .Enums
         TestParameters = 1,
         Property = 2,
     }
+    public enum EventReceiverStage
+    {
+        Early = 0,
+        Late = 1,
+    }
     public enum LogLevel
     {
         None = -1,
@@ -2328,6 +2333,7 @@ namespace .Interfaces
     }
     public interface ITestEndEventReceiver : .
     {
+        . Stage { get; }
         . OnTestEnd(.TestContext context);
     }
     public interface ITestEvents
@@ -2443,6 +2449,7 @@ namespace .Interfaces
     }
     public interface ITestStartEventReceiver : .
     {
+        . Stage { get; }
         . OnTestStart(.TestContext context);
     }
     public interface ITestStateBag

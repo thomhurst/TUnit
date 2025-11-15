@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using TUnit.Core;
+using TUnit.Core.Enums;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Services;
@@ -91,9 +92,15 @@ internal class TestExecutor
 
             executableTest.Context.ClassContext.RestoreExecutionContext();
 
+            // Early stage test start receivers run before instance-level hooks
+            await _eventReceiverOrchestrator.InvokeTestStartEventReceiversAsync(executableTest.Context, cancellationToken, EventReceiverStage.Early).ConfigureAwait(false);
+
+            executableTest.Context.RestoreExecutionContext();
+
             await _hookExecutor.ExecuteBeforeTestHooksAsync(executableTest, cancellationToken).ConfigureAwait(false);
 
-            await _eventReceiverOrchestrator.InvokeTestStartEventReceiversAsync(executableTest.Context, cancellationToken).ConfigureAwait(false);
+            // Late stage test start receivers run after instance-level hooks (default behavior)
+            await _eventReceiverOrchestrator.InvokeTestStartEventReceiversAsync(executableTest.Context, cancellationToken, EventReceiverStage.Late).ConfigureAwait(false);
 
             executableTest.Context.RestoreExecutionContext();
 
@@ -114,8 +121,18 @@ internal class TestExecutor
         }
         finally
         {
+            // Early stage test end receivers run before instance-level hooks
+            var earlyStageExceptions = await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(executableTest.Context, cancellationToken, EventReceiverStage.Early).ConfigureAwait(false);
+
             var hookExceptions = await _hookExecutor.ExecuteAfterTestHooksAsync(executableTest, cancellationToken).ConfigureAwait(false);
-            var eventReceiverExceptions = await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(executableTest.Context, cancellationToken).ConfigureAwait(false);
+
+            // Late stage test end receivers run after instance-level hooks (default behavior)
+            var lateStageExceptions = await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(executableTest.Context, cancellationToken, EventReceiverStage.Late).ConfigureAwait(false);
+
+            // Combine all exceptions from event receivers
+            var eventReceiverExceptions = new List<Exception>(earlyStageExceptions.Count + lateStageExceptions.Count);
+            eventReceiverExceptions.AddRange(earlyStageExceptions);
+            eventReceiverExceptions.AddRange(lateStageExceptions);
 
             if (hookExceptions.Count > 0 || eventReceiverExceptions.Count > 0)
             {
