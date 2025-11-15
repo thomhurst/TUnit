@@ -90,8 +90,9 @@ internal class ClassDataSources
         var previousContext = TestBuilderContext.Current;
         try
         {
-            TestBuilderContext.Current = dataGeneratorMetadata.TestBuilderContext.Current;
-
+            var builderContext = dataGeneratorMetadata.TestBuilderContext.Current;
+            TestBuilderContext.Current = builderContext;
+            
             var instance = Activator.CreateInstance(type)!;
 
             // If the instance implements IAsyncInitializer, register it for initialization

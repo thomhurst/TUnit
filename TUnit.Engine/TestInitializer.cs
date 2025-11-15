@@ -31,6 +31,10 @@ internal class TestInitializer
             test.Context.Metadata.TestDetails.MethodMetadata,
             test.Context.InternalEvents);
 
+        // Transfer any console output that was captured during property data construction
+        // This ensures output from ClassDataSource constructors and IAsyncInitializer is preserved
+        test.Context.TransferOutputFrom(test.Context.TestBuilderContext);
+
         _eventReceiverOrchestrator.RegisterReceivers(test.Context, cancellationToken);
 
         // Shouldn't retrack already tracked objects, but will track any new ones created during retries / initialization

@@ -33,6 +33,14 @@ public abstract class Context : IContext, IDisposable
                 return assemblyHookContext;
             }
 
+            // Check TestBuilderContext BEFORE TestSessionContext
+            // TestBuilderContext is more specific (building data for a specific test)
+            // and should take precedence during data source construction
+            if (TestBuilderContext.Current is { } builderContext)
+            {
+                return new TestBuilderContextWrapper(builderContext);
+            }
+
             if (TestSessionContext.Current is Context testSessionContext)
             {
                 return testSessionContext;
@@ -41,13 +49,6 @@ public abstract class Context : IContext, IDisposable
             if (BeforeTestDiscoveryContext.Current is Context beforeTestDiscoveryContext)
             {
                 return beforeTestDiscoveryContext;
-            }
-
-            // If we're in a TestBuilderContext (during data source construction),
-            // wrap it to provide a Context interface
-            if (TestBuilderContext.Current is { } builderContext)
-            {
-                return new TestBuilderContextWrapper(builderContext);
             }
 
             // Fall back to GlobalContext
@@ -76,7 +77,7 @@ public abstract class Context : IContext, IDisposable
     /// Transfers captured output from a TestBuilderContext to this Context.
     /// This is used to preserve console output that was captured during test data construction.
     /// </summary>
-    protected void TransferOutputFrom(TestBuilderContext builderContext)
+    internal void TransferOutputFrom(TestBuilderContext builderContext)
     {
         var capturedOutput = builderContext.GetCapturedOutput();
         if (!string.IsNullOrEmpty(capturedOutput))
@@ -84,7 +85,8 @@ public abstract class Context : IContext, IDisposable
             _outputLock.EnterWriteLock();
             try
             {
-                _outputBuilder.Append(capturedOutput);
+                // Insert at the beginning so build-time output comes before test-time output
+                _outputBuilder.Insert(0, capturedOutput);
             }
             finally
             {
@@ -98,7 +100,7 @@ public abstract class Context : IContext, IDisposable
             _errorOutputLock.EnterWriteLock();
             try
             {
-                _errorOutputBuilder.Append(capturedErrorOutput);
+                _errorOutputBuilder.Insert(0, capturedErrorOutput);
             }
             finally
             {

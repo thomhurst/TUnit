@@ -175,8 +175,11 @@ internal static class DataGeneratorMetadataCreator
         TestContextEvents? events = null,
         ConcurrentDictionary<string, object?>? objectBag = null)
     {
+        // CRITICAL: Reuse existing TestBuilderContext from TestContext if available
+        // This ensures console output from ClassDataSource constructors is captured
+        // in the same context that will be transferred to TestContext later
         var testBuilderContext = testContext != null
-            ? TestBuilderContext.FromTestContext(testContext, dataSource)
+            ? testContext.TestBuilderContext  // Reuse existing instance to preserve output
             : methodMetadata != null
                 ? new TestBuilderContext
                 {

@@ -21,6 +21,8 @@ public partial class TestContext : Context,
     private readonly TestBuilderContext _testBuilderContext;
     private string? _cachedDisplayName;
 
+    internal TestBuilderContext TestBuilderContext => _testBuilderContext;
+
     public TestContext(string testName, IServiceProvider serviceProvider, ClassHookContext classContext, TestBuilderContext testBuilderContext, CancellationToken cancellationToken) : base(classContext)
     {
         _testBuilderContext = testBuilderContext;
@@ -32,9 +34,6 @@ public partial class TestContext : Context,
         Id = Guid.NewGuid().ToString();
 
         _testContextsById[Id] = this;
-
-        // Transfer any output captured during test data construction
-        TransferOutputFrom(testBuilderContext);
     }
 
     public string Id { get; }
