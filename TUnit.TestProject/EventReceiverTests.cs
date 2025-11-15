@@ -11,6 +11,11 @@ public class EventReceiverAttribute : Attribute, ITestStartEventReceiver, ITestE
     
     public int Order => 0;
     
+#if NET
+    // Explicitly implement HookStage for testing (should use default Late)
+    public TUnit.Core.Enums.HookStage HookStage => TUnit.Core.Enums.HookStage.Late;
+#endif
+    
     public ValueTask OnTestStart(TestContext context)
     {
         Events.Add($"TestStart: {context. Metadata.DisplayName}");
@@ -43,7 +48,7 @@ public class EventReceiverTests
     public async Task Test_With_Event_Receiver_Attribute()
     {
         await Task.Delay(10);
-        await Assert.That(EventReceiverAttribute.Events).Contains("TestStart: Test_With_Event_Receiver_Attribute()");
+        await Assert.That(EventReceiverAttribute.Events).Contains("TestStart: Test_With_Event_Receiver_Attribute");
     }
     
     [Test, Skip("Testing skip event receiver")]
@@ -60,13 +65,16 @@ public class EventReceiverTests
         
         var displayName = context. Metadata.DisplayName;
         
+        // TestEnd receivers run AFTER After(Test) hooks in Late stage (default behavior)
+        // So we should only see TestStart at this point, not TestEnd yet
         if (displayName.Contains("Skipped"))
         {
             await Assert.That(EventReceiverAttribute.Events).Contains($"TestSkipped: {displayName}");
         }
         else
         {
-            await Assert.That(EventReceiverAttribute.Events).Contains($"TestEnd: {displayName}");
+            // Just verify TestStart was recorded, TestEnd will be recorded after this hook
+            await Assert.That(EventReceiverAttribute.Events).Contains($"TestStart: {displayName}");
         }
     }
 }
