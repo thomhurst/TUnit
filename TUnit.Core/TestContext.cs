@@ -32,6 +32,9 @@ public partial class TestContext : Context,
         Id = Guid.NewGuid().ToString();
 
         _testContextsById[Id] = this;
+
+        // Transfer any output captured during test data construction
+        TransferOutputFrom(testBuilderContext);
     }
 
     public string Id { get; }

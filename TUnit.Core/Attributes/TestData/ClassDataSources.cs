@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using TUnit.Core.Data;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
@@ -85,9 +86,22 @@ internal class ClassDataSources
             throw new InvalidOperationException($"Maximum recursion depth ({MaxRecursionDepth}) exceeded when creating nested ClassDataSource dependencies. This may indicate a circular dependency.");
         }
 
+        // Set TestBuilderContext.Current so console output during construction is captured
+        var previousContext = TestBuilderContext.Current;
         try
         {
-            return Activator.CreateInstance(type)!;
+            TestBuilderContext.Current = dataGeneratorMetadata.TestBuilderContext.Current;
+
+            var instance = Activator.CreateInstance(type)!;
+
+            // If the instance implements IAsyncInitializer, register it for initialization
+            // The initialization will happen with the TestBuilderContext still set
+            if (instance is IAsyncInitializer)
+            {
+                dataGeneratorMetadata.TestBuilderContext.Current.RegisterForInitialization(instance);
+            }
+
+            return instance;
         }
         catch (TargetInvocationException targetInvocationException)
         {
@@ -97,6 +111,11 @@ internal class ClassDataSources
             }
 
             throw;
+        }
+        finally
+        {
+            // Restore previous context
+            TestBuilderContext.Current = previousContext;
         }
     }
 }

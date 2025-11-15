@@ -12,13 +12,48 @@ public abstract class Context : IContext, IDisposable
         get;
     }
 
-    public static Context Current =>
-        TestContext.Current as Context
-        ?? ClassHookContext.Current as Context
-        ?? AssemblyHookContext.Current as Context
-        ?? TestSessionContext.Current as Context
-        ?? BeforeTestDiscoveryContext.Current as Context
-        ?? GlobalContext.Current;
+    public static Context Current
+    {
+        get
+        {
+            // Try TestContext first (most specific)
+            if (TestContext.Current is Context testContext)
+            {
+                return testContext;
+            }
+
+            // Then try hook contexts
+            if (ClassHookContext.Current is Context classHookContext)
+            {
+                return classHookContext;
+            }
+
+            if (AssemblyHookContext.Current is Context assemblyHookContext)
+            {
+                return assemblyHookContext;
+            }
+
+            if (TestSessionContext.Current is Context testSessionContext)
+            {
+                return testSessionContext;
+            }
+
+            if (BeforeTestDiscoveryContext.Current is Context beforeTestDiscoveryContext)
+            {
+                return beforeTestDiscoveryContext;
+            }
+
+            // If we're in a TestBuilderContext (during data source construction),
+            // wrap it to provide a Context interface
+            if (TestBuilderContext.Current is { } builderContext)
+            {
+                return new TestBuilderContextWrapper(builderContext);
+            }
+
+            // Fall back to GlobalContext
+            return GlobalContext.Current;
+        }
+    }
 
     private readonly StringBuilder _outputBuilder = new();
     private readonly StringBuilder _errorOutputBuilder = new();
@@ -27,14 +62,49 @@ public abstract class Context : IContext, IDisposable
     private DefaultLogger? _defaultLogger;
 
     [field: AllowNull, MaybeNull]
-    public TextWriter OutputWriter => field ??= new ConcurrentStringWriter(_outputBuilder, _outputLock);
+    public virtual TextWriter OutputWriter => field ??= new ConcurrentStringWriter(_outputBuilder, _outputLock);
 
     [field: AllowNull, MaybeNull]
-    public TextWriter ErrorOutputWriter => field ??= new ConcurrentStringWriter(_errorOutputBuilder, _errorOutputLock);
+    public virtual TextWriter ErrorOutputWriter => field ??= new ConcurrentStringWriter(_errorOutputBuilder, _errorOutputLock);
 
     internal Context(Context? parent)
     {
         Parent = parent;
+    }
+
+    /// <summary>
+    /// Transfers captured output from a TestBuilderContext to this Context.
+    /// This is used to preserve console output that was captured during test data construction.
+    /// </summary>
+    protected void TransferOutputFrom(TestBuilderContext builderContext)
+    {
+        var capturedOutput = builderContext.GetCapturedOutput();
+        if (!string.IsNullOrEmpty(capturedOutput))
+        {
+            _outputLock.EnterWriteLock();
+            try
+            {
+                _outputBuilder.Append(capturedOutput);
+            }
+            finally
+            {
+                _outputLock.ExitWriteLock();
+            }
+        }
+
+        var capturedErrorOutput = builderContext.GetCapturedErrorOutput();
+        if (!string.IsNullOrEmpty(capturedErrorOutput))
+        {
+            _errorOutputLock.EnterWriteLock();
+            try
+            {
+                _errorOutputBuilder.Append(capturedErrorOutput);
+            }
+            finally
+            {
+                _errorOutputLock.ExitWriteLock();
+            }
+        }
     }
 
 #if NET
@@ -352,5 +422,28 @@ internal sealed class ConcurrentStringWriter : TextWriter
     {
         // Don't dispose the lock or builder - they're owned by Context
         base.Dispose(disposing);
+    }
+}
+
+/// <summary>
+/// Wraps a TestBuilderContext to provide a Context interface for console output capture
+/// during test data construction.
+/// </summary>
+internal sealed class TestBuilderContextWrapper : Context
+{
+    private readonly TestBuilderContext _builderContext;
+
+    public TestBuilderContextWrapper(TestBuilderContext builderContext) : base(null)
+    {
+        _builderContext = builderContext;
+    }
+
+    public override TextWriter OutputWriter => _builderContext.OutputWriter;
+
+    public override TextWriter ErrorOutputWriter => _builderContext.ErrorOutputWriter;
+
+    internal override void SetAsyncLocalContext()
+    {
+        // TestBuilderContext manages its own async local, so this is a no-op
     }
 }
