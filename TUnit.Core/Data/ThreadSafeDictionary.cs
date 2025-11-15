@@ -69,12 +69,30 @@ public class ThreadSafeDictionary<TKey,
     /// <remarks>
     /// This method is thread-safe. If multiple threads call this method simultaneously with the same key,
     /// the factory function will be executed only once, and all threads will receive the same instance.
+    /// This implementation uses a two-phase approach: TryGetValue for the fast path (when key exists),
+    /// and GetOrAdd with a pre-created Lazy for the slow path (new key). This prevents the factory
+    /// from being invoked multiple times during concurrent access.
     /// </remarks>
     public TValue GetOrAdd(TKey key, Func<TKey, TValue> func)
     {
-        var lazy = _innerDictionary.GetOrAdd(key,
-            k => new Lazy<TValue>(() => func(k), LazyThreadSafetyMode.ExecutionAndPublication));
-        return lazy.Value;
+        // Fast path: Check if key already exists (lock-free read)
+        if (_innerDictionary.TryGetValue(key, out var existingLazy))
+        {
+            return existingLazy.Value;
+        }
+
+        // Slow path: Key not found, need to create
+        // Create Lazy instance OUTSIDE of GetOrAdd to prevent factory from running during race
+        var newLazy = new Lazy<TValue>(() => func(key), LazyThreadSafetyMode.ExecutionAndPublication);
+
+        // Use GetOrAdd with VALUE (not factory) - atomic operation that either:
+        // 1. Adds our newLazy if key still doesn't exist
+        // 2. Returns existing Lazy if another thread just added one
+        var winningLazy = _innerDictionary.GetOrAdd(key, newLazy);
+
+        // CRITICAL: Always return value from the Lazy that's actually in the dictionary
+        // This ensures only ONE factory execution even if multiple Lazy instances were created
+        return winningLazy.Value;
     }
 
     /// <summary>
