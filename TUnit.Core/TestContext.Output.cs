@@ -32,7 +32,7 @@ public partial class TestContext
     }
 
     string ITestOutput.GetStandardOutput() => GetOutput();
-    string ITestOutput.GetErrorOutput() => GetErrorOutput();
+    string ITestOutput.GetErrorOutput() => GetOutputError();
 
     void ITestOutput.WriteLine(string message)
     {
@@ -46,7 +46,47 @@ public partial class TestContext
         _errorWriter.WriteLine(message);
     }
 
-    internal string GetOutput() => _outputWriter?.ToString() ?? string.Empty;
+    /// <summary>
+    /// Gets the combined build-time and execution-time standard output.
+    /// </summary>
+    public override string GetStandardOutput()
+    {
+        return GetOutput();
+    }
 
-    internal new string GetErrorOutput() => _errorWriter?.ToString() ?? string.Empty;
+    /// <summary>
+    /// Gets the combined build-time and execution-time error output.
+    /// </summary>
+    public override string GetErrorOutput()
+    {
+        return GetOutputError();
+    }
+
+    internal string GetOutput()
+    {
+        var buildOutput = _buildTimeOutput ?? string.Empty;
+        var baseOutput = base.GetStandardOutput();  // Get output from base class (Context)
+        var writerOutput = _outputWriter?.ToString() ?? string.Empty;
+
+        // Combine all three sources: build-time, base class output, and writer output
+        var parts = new[] { buildOutput, baseOutput, writerOutput }
+            .Where(s => !string.IsNullOrEmpty(s))
+            .ToArray();
+
+        return parts.Length == 0 ? string.Empty : string.Join(Environment.NewLine, parts);
+    }
+
+    internal string GetOutputError()
+    {
+        var buildErrorOutput = _buildTimeErrorOutput ?? string.Empty;
+        var baseErrorOutput = base.GetErrorOutput();  // Get error output from base class (Context)
+        var writerErrorOutput = _errorWriter?.ToString() ?? string.Empty;
+
+        // Combine all three sources: build-time error, base class error output, and writer error output
+        var parts = new[] { buildErrorOutput, baseErrorOutput, writerErrorOutput }
+            .Where(s => !string.IsNullOrEmpty(s))
+            .ToArray();
+
+        return parts.Length == 0 ? string.Empty : string.Join(Environment.NewLine, parts);
+    }
 }

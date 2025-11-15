@@ -136,6 +136,10 @@ internal sealed class TestBuilder : ITestBuilder
 
         try
         {
+            // Create a context for capturing output during test building
+            using var buildContext = new TestBuildContext();
+            TestBuildContext.Current = buildContext;
+
             // Handle GenericTestMetadata with ConcreteInstantiations
             if (metadata is GenericTestMetadata { ConcreteInstantiations.Count: > 0 } genericMetadata)
             {
@@ -506,6 +510,18 @@ internal sealed class TestBuilder : ITestBuilder
                     var test = await BuildTestAsync(metadata, testData, testSpecificContext);
                     test.Context.SkipReason = skipReason;
                     tests.Add(test);
+                }
+            }
+
+            // Transfer captured build-time output to all test contexts
+            var capturedOutput = buildContext.GetCapturedOutput();
+            var capturedErrorOutput = buildContext.GetCapturedErrorOutput();
+
+            if (!string.IsNullOrEmpty(capturedOutput) || !string.IsNullOrEmpty(capturedErrorOutput))
+            {
+                foreach (var test in tests)
+                {
+                    test.Context.SetBuildTimeOutput(capturedOutput, capturedErrorOutput);
                 }
             }
         }

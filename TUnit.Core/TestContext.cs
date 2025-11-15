@@ -55,6 +55,9 @@ public partial class TestContext : Context,
 
     private StringWriter? _errorWriter;
 
+    private string? _buildTimeOutput;
+    private string? _buildTimeErrorOutput;
+
     public static new TestContext? Current
     {
         get => TestContexts.Value;
@@ -152,5 +155,13 @@ public partial class TestContext : Context,
     internal ConcurrentDictionary<int, HashSet<object>> TrackedObjects =>
         _trackedObjects ??= new();
 
-
+    /// <summary>
+    /// Sets the output captured during test building phase.
+    /// This output is prepended to the test's execution output.
+    /// </summary>
+    internal void SetBuildTimeOutput(string? output, string? errorOutput)
+    {
+        _buildTimeOutput = output;
+        _buildTimeErrorOutput = errorOutput;
+    }
 }

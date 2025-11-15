@@ -399,8 +399,8 @@ namespace
         public void AddAsyncLocalValues() { }
         public void Dispose() { }
         public . GetDefaultLogger() { }
-        public string GetErrorOutput() { }
-        public string GetStandardOutput() { }
+        public virtual string GetErrorOutput() { }
+        public virtual string GetStandardOutput() { }
         public void RestoreExecutionContext() { }
     }
     public class ContextProvider : .
@@ -1241,6 +1241,14 @@ namespace
     {
         public TestAttribute([.] string file = "", [.] int line = 0) { }
     }
+    public sealed class TestBuildContext : .Context, 
+    {
+        public TestBuildContext() { }
+        public new static .TestBuildContext? Current { get; }
+        public new void Dispose() { }
+        public string GetCapturedErrorOutput() { }
+        public string GetCapturedOutput() { }
+    }
     public class TestBuilderContext : <.TestBuilderContext>
     {
         public TestBuilderContext() { }
@@ -1291,6 +1299,8 @@ namespace
         public static string? OutputDirectory { get; }
         public static .<string, .<string>> Parameters { get; }
         public static string WorkingDirectory { get; set; }
+        public override string GetErrorOutput() { }
+        public override string GetStandardOutput() { }
         public static .TestContext? GetById(string id) { }
     }
     public class TestContextEvents : .
