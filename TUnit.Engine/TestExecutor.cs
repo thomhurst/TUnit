@@ -91,9 +91,22 @@ internal class TestExecutor
 
             executableTest.Context.ClassContext.RestoreExecutionContext();
 
+#if NET
+            // Invoke Early stage test start event receivers before instance-level hooks
+            await _eventReceiverOrchestrator.InvokeTestStartEventReceiversAsync(executableTest.Context, Core.Enums.HookStage.Early, cancellationToken).ConfigureAwait(false);
+
+            executableTest.Context.RestoreExecutionContext();
+#endif
+
             await _hookExecutor.ExecuteBeforeTestHooksAsync(executableTest, cancellationToken).ConfigureAwait(false);
 
+#if NET
+            // Invoke Late stage test start event receivers after instance-level hooks
+            await _eventReceiverOrchestrator.InvokeTestStartEventReceiversAsync(executableTest.Context, Core.Enums.HookStage.Late, cancellationToken).ConfigureAwait(false);
+#else
+            // On older frameworks without default interface implementation, invoke all test start event receivers
             await _eventReceiverOrchestrator.InvokeTestStartEventReceiversAsync(executableTest.Context, cancellationToken).ConfigureAwait(false);
+#endif
 
             executableTest.Context.RestoreExecutionContext();
 
@@ -114,8 +127,24 @@ internal class TestExecutor
         }
         finally
         {
+#if NET
+            // Invoke Early stage test end event receivers before instance-level after hooks
+            var earlyEndExceptions = await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(executableTest.Context, Core.Enums.HookStage.Early, cancellationToken).ConfigureAwait(false);
+#endif
+
             var hookExceptions = await _hookExecutor.ExecuteAfterTestHooksAsync(executableTest, cancellationToken).ConfigureAwait(false);
+
+#if NET
+            // Invoke Late stage test end event receivers after instance-level after hooks
+            var lateEndExceptions = await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(executableTest.Context, Core.Enums.HookStage.Late, cancellationToken).ConfigureAwait(false);
+            
+            var eventReceiverExceptions = new List<Exception>();
+            eventReceiverExceptions.AddRange(earlyEndExceptions);
+            eventReceiverExceptions.AddRange(lateEndExceptions);
+#else
+            // On older frameworks without default interface implementation, invoke all test end event receivers
             var eventReceiverExceptions = await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(executableTest.Context, cancellationToken).ConfigureAwait(false);
+#endif
 
             if (hookExceptions.Count > 0 || eventReceiverExceptions.Count > 0)
             {
