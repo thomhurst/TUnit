@@ -25,4 +25,24 @@ public class IsEquivalentToAotTests
         // This WILL require unreferenced code (structural comparison)
         await Assert.That(list1).IsEquivalentTo(list2);
     }
+
+    [Test]
+    public async Task IsNotEquivalentTo_WithCustomComparer_WorksWithAot()
+    {
+        List<int> list1 = [1, 2, 3];
+        List<int> list2 = [4, 5, 6];
+
+        // This should NOT require unreferenced code when using a custom comparer
+        await Assert.That(list1).IsNotEquivalentTo(list2, comparer: EqualityComparer<int>.Default);
+    }
+
+    [Test]
+    public async Task IsNotEquivalentTo_WithoutComparer_RequiresUnreferencedCode()
+    {
+        List<int> list1 = [1, 2, 3];
+        List<int> list2 = [4, 5, 6];
+
+        // This WILL require unreferenced code (structural comparison)
+        await Assert.That(list1).IsNotEquivalentTo(list2);
+    }
 }
