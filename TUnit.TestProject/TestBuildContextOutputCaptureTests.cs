@@ -8,6 +8,8 @@ namespace TUnit.TestProject;
 /// is properly captured and included in test results.
 /// Issue #3833: https://github.com/thomhurst/TUnit/issues/3833
 /// </summary>
+[NotInParallel]
+[Engine(ExpectedState.Pass)]
 public class TestBuildContextOutputCaptureTests
 {
     /// <summary>
