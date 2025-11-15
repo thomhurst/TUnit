@@ -14,6 +14,7 @@ public abstract class Context : IContext, IDisposable
 
     public static Context Current =>
         TestContext.Current as Context
+        ?? TestBuildContext.Current as Context
         ?? ClassHookContext.Current as Context
         ?? AssemblyHookContext.Current as Context
         ?? TestSessionContext.Current as Context
@@ -67,13 +68,13 @@ public abstract class Context : IContext, IDisposable
 #endif
     }
 
-    public string GetStandardOutput()
+    public virtual string GetStandardOutput()
     {
         if (_outputBuilder.Length == 0)
         {
             return string.Empty;
         }
-        
+
         _outputLock.EnterReadLock();
 
         try
@@ -86,7 +87,7 @@ public abstract class Context : IContext, IDisposable
         }
     }
 
-    public string GetErrorOutput()
+    public virtual string GetErrorOutput()
     {
         if (_errorOutputBuilder.Length == 0)
         {
