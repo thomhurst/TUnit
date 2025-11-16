@@ -8,38 +8,37 @@ using TUnit.Assertions.Enums;
 namespace TUnit.Assertions.Conditions;
 
 /// <summary>
-/// Asserts that a collection is equivalent to another collection using structural comparison.
+/// AOT-compatible assertion that a collection is equivalent to another collection using a custom comparer.
 /// Two collections are equivalent if they contain the same elements, regardless of order (default).
 /// Can be configured to require matching order using CollectionOrdering.Matching.
-/// This version uses reflection-based structural comparison and is not AOT-compatible.
-/// For AOT-compatible assertions with custom comparers, use IsEquivalentToWithComparerAssertion.
+/// This version is fully AOT-compatible as it only uses the provided custom comparer (no reflection).
 /// Inherits from CollectionComparerBasedAssertion to preserve collection type awareness in And/Or chains.
 /// </summary>
 [AssertionExtension("IsEquivalentTo")]
-[RequiresUnreferencedCode("Collection equivalency uses structural comparison for complex objects, which requires reflection and is not compatible with AOT")]
-public class IsEquivalentToAssertion<TCollection, TItem> : CollectionComparerBasedAssertion<TCollection, TItem>
+public class IsEquivalentToWithComparerAssertion<TCollection, TItem> : CollectionComparerBasedAssertion<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     private readonly IEnumerable<TItem> _expected;
     private readonly CollectionOrdering _ordering;
 
-    public IsEquivalentToAssertion(
+    public IsEquivalentToWithComparerAssertion(
         AssertionContext<TCollection> context,
         IEnumerable<TItem> expected,
+        IEqualityComparer<TItem> comparer,
         CollectionOrdering ordering = CollectionOrdering.Any)
         : base(context)
     {
         _expected = expected ?? throw new ArgumentNullException(nameof(expected));
         _ordering = ordering;
+        SetComparer(comparer);
     }
 
-    public IsEquivalentToAssertion<TCollection, TItem> Using(IEqualityComparer<TItem> comparer)
+    public IsEquivalentToWithComparerAssertion<TCollection, TItem> Using(IEqualityComparer<TItem> comparer)
     {
         SetComparer(comparer);
         return this;
     }
 
-    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Collection equivalency uses structural comparison which requires reflection")]
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
         var value = metadata.Value;
@@ -50,7 +49,7 @@ public class IsEquivalentToAssertion<TCollection, TItem> : CollectionComparerBas
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
         }
 
-        var comparer = HasCustomComparer() ? GetComparer() : StructuralEqualityComparer<TItem>.Instance;
+        var comparer = GetComparer();
 
         var result = CollectionEquivalencyChecker.AreEquivalent(
             value,
