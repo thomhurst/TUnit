@@ -173,8 +173,9 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         detailsBuilder.AppendLine();
         detailsBuilder.AppendLine("### Details");
         detailsBuilder.AppendLine();
-        detailsBuilder.AppendLine("| Test | Status | Details | Duration |");
-        detailsBuilder.AppendLine("| --- | --- | --- | --- |");
+        detailsBuilder.AppendLine("""<table role="table" tabindex="0">""");
+        detailsBuilder.AppendLine("<thead><tr><th>Test</th><th>Status</th><th>Details</th><th>Duration</th></tr></thead>");
+        detailsBuilder.AppendLine("<tbody>");
 
         foreach (var testNodeUpdateMessage in last.Values)
         {
@@ -191,14 +192,20 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
             var status = GetStatus(stateProperty);
 
-            var details = GetDetails(stateProperty, testNodeUpdateMessage.TestNode.Properties).Replace("\n", " <br> ");
+            var details = GetDetails(stateProperty, testNodeUpdateMessage.TestNode.Properties);
 
             var timingProperty = testNodeUpdateMessage.TestNode.Properties.AsEnumerable().OfType<TimingProperty>().FirstOrDefault();
 
             var duration = timingProperty?.GlobalTiming.Duration;
 
-            detailsBuilder.AppendLine($"| {name} | {status} | {details} | {duration} |");
+            detailsBuilder.AppendLine("<tr>");
+            detailsBuilder.AppendLine($"<td>{name}</td>");
+            detailsBuilder.AppendLine($"<td>{status}</td>");
+            detailsBuilder.AppendLine($"<td>{details}</td>");
+            detailsBuilder.AppendLine($"<td>{duration}</td>");
+            detailsBuilder.AppendLine("</tr>");
         }
+        detailsBuilder.AppendLine("</tbody></table>");
 
         // Wrap in collapsible section if using collapsible style
         if (_reporterStyle == GitHubReporterStyle.Collapsible)
