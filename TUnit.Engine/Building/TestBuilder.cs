@@ -206,7 +206,8 @@ internal sealed class TestBuilder : ITestBuilder
                     hasAnyClassData = true;
                     classDataLoopIndex++;
 
-                    var classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
+                    var classDataResult = await classDataFactory() ?? [];
+                    var classData = DataUnwrapper.Unwrap(classDataResult);
 
                     var needsInstanceForMethodDataSources = metadata.DataSources.Any(ds => ds is IAccessesInstanceData);
 
@@ -292,7 +293,7 @@ internal sealed class TestBuilder : ITestBuilder
                                     InitializedAttributes = testBuilderContext.InitializedAttributes  // Preserve attributes from parent context
                                 };
 
-                                classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
+                                classData = DataUnwrapper.Unwrap(classDataResult);
                                 var methodData = DataUnwrapper.UnwrapWithTypes(await methodDataFactory() ?? [], metadata.MethodMetadata.Parameters);
 
                                 // For concrete generic instantiations, check if the data is compatible with the expected types
