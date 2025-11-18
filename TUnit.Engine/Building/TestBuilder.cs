@@ -206,7 +206,8 @@ internal sealed class TestBuilder : ITestBuilder
                     hasAnyClassData = true;
                     classDataLoopIndex++;
 
-                    var classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
+                    var classDataResult = await classDataFactory() ?? [];
+                    var classData = DataUnwrapper.Unwrap(classDataResult);
 
                     var needsInstanceForMethodDataSources = metadata.DataSources.Any(ds => ds is IAccessesInstanceData);
 
