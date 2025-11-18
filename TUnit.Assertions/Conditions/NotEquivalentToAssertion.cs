@@ -13,21 +13,31 @@ namespace TUnit.Assertions.Conditions;
 /// Inherits from CollectionComparerBasedAssertion to preserve collection type awareness in And/Or chains.
 /// </summary>
 [AssertionExtension("IsNotEquivalentTo")]
-[RequiresUnreferencedCode("Collection equivalency uses structural comparison for complex objects, which requires reflection and is not compatible with AOT")]
 public class NotEquivalentToAssertion<TCollection, TItem> : CollectionComparerBasedAssertion<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     private readonly IEnumerable<TItem> _notExpected;
     private readonly CollectionOrdering _ordering;
 
+    [RequiresUnreferencedCode("Collection equivalency uses structural comparison for complex objects, which requires reflection and is not compatible with AOT")]
     public NotEquivalentToAssertion(
         AssertionContext<TCollection> context,
         IEnumerable<TItem> notExpected,
+        CollectionOrdering ordering = CollectionOrdering.Any)
+        : this(context, notExpected, StructuralEqualityComparer<TItem>.Instance, ordering)
+    {
+    }
+
+    public NotEquivalentToAssertion(
+        AssertionContext<TCollection> context,
+        IEnumerable<TItem> notExpected,
+        IEqualityComparer<TItem> comparer,
         CollectionOrdering ordering = CollectionOrdering.Any)
         : base(context)
     {
         _notExpected = notExpected ?? throw new ArgumentNullException(nameof(notExpected));
         _ordering = ordering;
+        Comparer = comparer;
     }
 
     public NotEquivalentToAssertion<TCollection, TItem> Using(IEqualityComparer<TItem> comparer)
@@ -36,7 +46,6 @@ public class NotEquivalentToAssertion<TCollection, TItem> : CollectionComparerBa
         return this;
     }
 
-    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Collection equivalency uses structural comparison which requires reflection")]
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
         var value = metadata.Value;
@@ -47,7 +56,7 @@ public class NotEquivalentToAssertion<TCollection, TItem> : CollectionComparerBa
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
         }
 
-        var comparer = HasCustomComparer() ? GetComparer() : StructuralEqualityComparer<TItem>.Instance;
+        var comparer = GetComparer();
 
         var result = CollectionEquivalencyChecker.AreEquivalent(
             value,

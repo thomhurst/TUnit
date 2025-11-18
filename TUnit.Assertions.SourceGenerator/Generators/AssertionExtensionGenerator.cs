@@ -226,6 +226,22 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         // Skip the first parameter (AssertionContext<T>)
         var additionalParams = constructor.Parameters.Skip(1).ToArray();
 
+        // Check for RequiresUnreferencedCode attribute on the constructor first, then fall back to class-level
+        var constructorRequiresUnreferencedCodeAttr = constructor.GetAttributes()
+            .FirstOrDefault(attr => attr.AttributeClass?.Name == "RequiresUnreferencedCodeAttribute");
+
+        string? requiresUnreferencedCodeMessage = null;
+        if (constructorRequiresUnreferencedCodeAttr != null && constructorRequiresUnreferencedCodeAttr.ConstructorArguments.Length > 0)
+        {
+            // Constructor-level attribute takes precedence
+            requiresUnreferencedCodeMessage = constructorRequiresUnreferencedCodeAttr.ConstructorArguments[0].Value?.ToString();
+        }
+        else if (!string.IsNullOrEmpty(data.RequiresUnreferencedCodeMessage))
+        {
+            // Fall back to class-level attribute
+            requiresUnreferencedCodeMessage = data.RequiresUnreferencedCodeMessage;
+        }
+
         // Build generic type parameters string
         // Use the assertion class's own type parameters if it has them
         var genericParams = new List<string>();
@@ -315,10 +331,10 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         sourceBuilder.AppendLine($"    /// Extension method for {assertionType.Name}.");
         sourceBuilder.AppendLine("    /// </summary>");
 
-        // Add RequiresUnreferencedCode attribute if present
-        if (!string.IsNullOrEmpty(data.RequiresUnreferencedCodeMessage))
+        // Add RequiresUnreferencedCode attribute if present (from constructor or class level)
+        if (!string.IsNullOrEmpty(requiresUnreferencedCodeMessage))
         {
-            var escapedMessage = data.RequiresUnreferencedCodeMessage!.Replace("\"", "\\\"");
+            var escapedMessage = requiresUnreferencedCodeMessage!.Replace("\"", "\\\"");
             sourceBuilder.AppendLine($"    [global::System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode(\"{escapedMessage}\")]");
         }
 

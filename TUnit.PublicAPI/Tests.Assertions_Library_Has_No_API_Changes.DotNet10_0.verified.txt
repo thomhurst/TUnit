@@ -388,9 +388,9 @@ namespace .Conditions
     public abstract class CollectionComparerBasedAssertion<TCollection, TItem> : .<TCollection, TItem>
         where TCollection : .<TItem>
     {
+        protected .<TItem>? Comparer;
         protected CollectionComparerBasedAssertion(.<TCollection> context) { }
         protected .<TItem> GetComparer() { }
-        protected bool HasCustomComparer() { }
         protected void SetComparer(.<TItem> comparer) { }
     }
     [.("Contains")]
@@ -817,15 +817,14 @@ namespace .Conditions
         protected override string GetExpectation() { }
         public .<TValue> Using(.<TValue> comparer) { }
     }
-    [.("Collection equivalency uses structural comparison for complex objects, which requ" +
-        "ires reflection and is not compatible with AOT")]
     [.("IsEquivalentTo")]
     public class IsEquivalentToAssertion<TCollection, TItem> : .<TCollection, TItem>
         where TCollection : .<TItem>
     {
+        [.("Collection equivalency uses structural comparison for complex objects, which requ" +
+            "ires reflection and is not compatible with AOT")]
         public IsEquivalentToAssertion(.<TCollection> context, .<TItem> expected, . ordering = 0) { }
         public IsEquivalentToAssertion(.<TCollection> context, .<TItem> expected, .<TItem> comparer, . ordering = 0) { }
-        [.("AOT", "IL3050", Justification="Collection equivalency uses structural comparison which requires reflection")]
         protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
         public .<TCollection, TItem> Using(.<TItem> comparer) { }
@@ -919,14 +918,14 @@ namespace .Conditions
         public .<TValue> IgnoringType( type) { }
         public .<TValue> IgnoringType<TIgnore>() { }
     }
-    [.("Collection equivalency uses structural comparison for complex objects, which requ" +
-        "ires reflection and is not compatible with AOT")]
     [.("IsNotEquivalentTo")]
     public class NotEquivalentToAssertion<TCollection, TItem> : .<TCollection, TItem>
         where TCollection : .<TItem>
     {
+        [.("Collection equivalency uses structural comparison for complex objects, which requ" +
+            "ires reflection and is not compatible with AOT")]
         public NotEquivalentToAssertion(.<TCollection> context, .<TItem> notExpected, . ordering = 0) { }
-        [.("AOT", "IL3050", Justification="Collection equivalency uses structural comparison which requires reflection")]
+        public NotEquivalentToAssertion(.<TCollection> context, .<TItem> notExpected, .<TItem> comparer, . ordering = 0) { }
         protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
         public .<TCollection, TItem> Using(.<TItem> comparer) { }
@@ -3085,8 +3084,6 @@ namespace .Extensions
             "ires reflection and is not compatible with AOT")]
         public static .<TCollection, TItem> IsEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> expected, . ordering = 0, [.("expected")] string? expectedExpression = null, [.("ordering")] string? orderingExpression = null)
             where TCollection : .<TItem> { }
-        [.("Collection equivalency uses structural comparison for complex objects, which requ" +
-            "ires reflection and is not compatible with AOT")]
         public static .<TCollection, TItem> IsEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> expected, .<TItem> comparer, . ordering = 0, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null, [.("ordering")] string? orderingExpression = null)
             where TCollection : .<TItem> { }
     }
@@ -3183,6 +3180,8 @@ namespace .Extensions
         [.("Collection equivalency uses structural comparison for complex objects, which requ" +
             "ires reflection and is not compatible with AOT")]
         public static .<TCollection, TItem> IsNotEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> notExpected, . ordering = 0, [.("notExpected")] string? notExpectedExpression = null, [.("ordering")] string? orderingExpression = null)
+            where TCollection : .<TItem> { }
+        public static .<TCollection, TItem> IsNotEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> notExpected, .<TItem> comparer, . ordering = 0, [.("notExpected")] string? notExpectedExpression = null, [.("comparer")] string? comparerExpression = null, [.("ordering")] string? orderingExpression = null)
             where TCollection : .<TItem> { }
     }
     public static class NotSameReferenceAssertionExtensions

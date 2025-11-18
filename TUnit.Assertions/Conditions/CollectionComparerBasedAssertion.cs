@@ -1,4 +1,3 @@
-using System.Collections;
 using TUnit.Assertions.Core;
 using TUnit.Assertions.Sources;
 
@@ -13,7 +12,7 @@ namespace TUnit.Assertions.Conditions;
 public abstract class CollectionComparerBasedAssertion<TCollection, TItem> : CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
-    private IEqualityComparer<TItem>? _comparer;
+    protected IEqualityComparer<TItem>? Comparer;
 
     protected CollectionComparerBasedAssertion(AssertionContext<TCollection> context)
         : base(context)
@@ -26,7 +25,7 @@ public abstract class CollectionComparerBasedAssertion<TCollection, TItem> : Col
     /// </summary>
     protected void SetComparer(IEqualityComparer<TItem> comparer)
     {
-        _comparer = comparer;
+        Comparer = comparer;
         Context.ExpressionBuilder.Append($".Using({comparer.GetType().Name})");
     }
 
@@ -36,14 +35,6 @@ public abstract class CollectionComparerBasedAssertion<TCollection, TItem> : Col
     /// </summary>
     protected IEqualityComparer<TItem> GetComparer()
     {
-        return _comparer ?? EqualityComparer<TItem>.Default;
-    }
-
-    /// <summary>
-    /// Checks if a custom comparer has been specified.
-    /// </summary>
-    protected bool HasCustomComparer()
-    {
-        return _comparer != null;
+        return Comparer ?? EqualityComparer<TItem>.Default;
     }
 }
