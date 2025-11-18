@@ -1,3 +1,5 @@
+using TUnit.Assertions.Enums;
+
 namespace TUnit.NugetTester;
 
 /// <summary>
