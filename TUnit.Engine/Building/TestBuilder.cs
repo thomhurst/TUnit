@@ -293,7 +293,7 @@ internal sealed class TestBuilder : ITestBuilder
                                     InitializedAttributes = testBuilderContext.InitializedAttributes  // Preserve attributes from parent context
                                 };
 
-                                classData = DataUnwrapper.Unwrap(classDataResult);
+                                classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
                                 var methodData = DataUnwrapper.UnwrapWithTypes(await methodDataFactory() ?? [], metadata.MethodMetadata.Parameters);
 
                                 // For concrete generic instantiations, check if the data is compatible with the expected types
