@@ -381,9 +381,9 @@ namespace .Conditions
     public abstract class CollectionComparerBasedAssertion<TCollection, TItem> : .<TCollection, TItem>
         where TCollection : .<TItem>
     {
+        protected .<TItem>? Comparer;
         protected CollectionComparerBasedAssertion(.<TCollection> context) { }
         protected .<TItem> GetComparer() { }
-        protected bool HasCustomComparer() { }
         protected void SetComparer(.<TItem> comparer) { }
     }
     [.("Contains")]
@@ -893,6 +893,7 @@ namespace .Conditions
         where TCollection : .<TItem>
     {
         public NotEquivalentToAssertion(.<TCollection> context, .<TItem> notExpected, . ordering = 0) { }
+        public NotEquivalentToAssertion(.<TCollection> context, .<TItem> notExpected, .<TItem> comparer, . ordering = 0) { }
         protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
         public .<TCollection, TItem> Using(.<TItem> comparer) { }
@@ -2880,6 +2881,8 @@ namespace .Extensions
     public static class NotEquivalentToAssertionExtensions
     {
         public static .<TCollection, TItem> IsNotEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> notExpected, . ordering = 0, [.("notExpected")] string? notExpectedExpression = null, [.("ordering")] string? orderingExpression = null)
+            where TCollection : .<TItem> { }
+        public static .<TCollection, TItem> IsNotEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> notExpected, .<TItem> comparer, . ordering = 0, [.("notExpected")] string? notExpectedExpression = null, [.("comparer")] string? comparerExpression = null, [.("ordering")] string? orderingExpression = null)
             where TCollection : .<TItem> { }
     }
     public static class NotSameReferenceAssertionExtensions

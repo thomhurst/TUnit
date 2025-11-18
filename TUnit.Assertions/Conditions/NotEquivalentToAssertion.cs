@@ -24,10 +24,20 @@ public class NotEquivalentToAssertion<TCollection, TItem> : CollectionComparerBa
         AssertionContext<TCollection> context,
         IEnumerable<TItem> notExpected,
         CollectionOrdering ordering = CollectionOrdering.Any)
+        : this(context, notExpected, StructuralEqualityComparer<TItem>.Instance, ordering)
+    {
+    }
+
+    public NotEquivalentToAssertion(
+        AssertionContext<TCollection> context,
+        IEnumerable<TItem> notExpected,
+        IEqualityComparer<TItem> comparer,
+        CollectionOrdering ordering = CollectionOrdering.Any)
         : base(context)
     {
         _notExpected = notExpected ?? throw new ArgumentNullException(nameof(notExpected));
         _ordering = ordering;
+        Comparer = comparer;
     }
 
     public NotEquivalentToAssertion<TCollection, TItem> Using(IEqualityComparer<TItem> comparer)
@@ -36,8 +46,6 @@ public class NotEquivalentToAssertion<TCollection, TItem> : CollectionComparerBa
         return this;
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Structural comparison is only used when no custom comparer is provided. Custom comparer path is AOT-safe.")]
-    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Structural comparison is only used when no custom comparer is provided. Custom comparer path is AOT-safe.")]
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
         var value = metadata.Value;
@@ -48,7 +56,7 @@ public class NotEquivalentToAssertion<TCollection, TItem> : CollectionComparerBa
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
         }
 
-        var comparer = HasCustomComparer() ? GetComparer() : StructuralEqualityComparer<TItem>.Instance;
+        var comparer = GetComparer();
 
         var result = CollectionEquivalencyChecker.AreEquivalent(
             value,
