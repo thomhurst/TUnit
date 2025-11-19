@@ -10,7 +10,7 @@
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.7" />
     <PackageVersion Include="BenchmarkDotNet.Annotations" Version="0.15.7" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
-    <PackageVersion Include="CliWrap" Version="3.9.0" />
+    <PackageVersion Include="CliWrap" Version="3.10.0" />
     <PackageVersion Include="EnumerableAsyncProcessor" Version="3.8.4" />
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.0" />
     <PackageVersion Include="FSharp.Core" Version="10.0.100" />
