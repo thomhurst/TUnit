@@ -19,6 +19,7 @@ internal class TestExecutor
     private readonly HookExecutor _hookExecutor;
     private readonly TestLifecycleCoordinator _lifecycleCoordinator;
     private readonly BeforeHookTaskCache _beforeHookTaskCache;
+    private readonly AfterHookPairTracker _afterHookPairTracker;
     private readonly IContextProvider _contextProvider;
     private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
 
@@ -26,12 +27,14 @@ internal class TestExecutor
         HookExecutor hookExecutor,
         TestLifecycleCoordinator lifecycleCoordinator,
         BeforeHookTaskCache beforeHookTaskCache,
+        AfterHookPairTracker afterHookPairTracker,
         IContextProvider contextProvider,
         EventReceiverOrchestrator eventReceiverOrchestrator)
     {
         _hookExecutor = hookExecutor;
         _lifecycleCoordinator = lifecycleCoordinator;
         _beforeHookTaskCache = beforeHookTaskCache;
+        _afterHookPairTracker = afterHookPairTracker;
         _contextProvider = contextProvider;
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
     }
@@ -40,12 +43,19 @@ internal class TestExecutor
     /// <summary>
     /// Ensures that Before(TestSession) hooks have been executed.
     /// This is called before creating test instances to ensure resources are available.
+    /// Registers the corresponding After(TestSession) hook to run on cancellation.
     /// </summary>
-    public async Task EnsureTestSessionHooksExecutedAsync()
+    public async Task EnsureTestSessionHooksExecutedAsync(CancellationToken cancellationToken)
     {
         // Get or create and cache Before hooks - these run only once
-        await _beforeHookTaskCache.GetOrCreateBeforeTestSessionTask(() =>
-            _hookExecutor.ExecuteBeforeTestSessionHooksAsync(CancellationToken.None)).ConfigureAwait(false);
+        await _beforeHookTaskCache.GetOrCreateBeforeTestSessionTask(
+            ct => _hookExecutor.ExecuteBeforeTestSessionHooksAsync(ct),
+            cancellationToken).ConfigureAwait(false);
+
+        // Register After Session hook to run on cancellation (guarantees cleanup)
+        _afterHookPairTracker.RegisterAfterTestSessionHook(
+            cancellationToken,
+            () => new ValueTask<List<Exception>>(_hookExecutor.ExecuteAfterTestSessionHooksAsync(CancellationToken.None).AsTask()));
     }
 
     /// <summary>
@@ -63,7 +73,7 @@ internal class TestExecutor
 
         try
         {
-            await EnsureTestSessionHooksExecutedAsync().ConfigureAwait(false);
+            await EnsureTestSessionHooksExecutedAsync(cancellationToken).ConfigureAwait(false);
 
             await _eventReceiverOrchestrator.InvokeFirstTestInSessionEventReceiversAsync(
                 executableTest.Context,
@@ -72,8 +82,16 @@ internal class TestExecutor
 
             executableTest.Context.ClassContext.AssemblyContext.TestSessionContext.RestoreExecutionContext();
 
-            await _beforeHookTaskCache.GetOrCreateBeforeAssemblyTask(testAssembly, assembly => _hookExecutor.ExecuteBeforeAssemblyHooksAsync(assembly, CancellationToken.None))
-                .ConfigureAwait(false);
+            await _beforeHookTaskCache.GetOrCreateBeforeAssemblyTask(
+                testAssembly,
+                (assembly, ct) => _hookExecutor.ExecuteBeforeAssemblyHooksAsync(assembly, ct),
+                cancellationToken).ConfigureAwait(false);
+
+            // Register After Assembly hook to run on cancellation (guarantees cleanup)
+            _afterHookPairTracker.RegisterAfterAssemblyHook(
+                testAssembly,
+                cancellationToken,
+                (assembly) => new ValueTask<List<Exception>>(_hookExecutor.ExecuteAfterAssemblyHooksAsync(assembly, CancellationToken.None).AsTask()));
 
             await _eventReceiverOrchestrator.InvokeFirstTestInAssemblyEventReceiversAsync(
                 executableTest.Context,
@@ -82,8 +100,38 @@ internal class TestExecutor
 
             executableTest.Context.ClassContext.AssemblyContext.RestoreExecutionContext();
 
-            await _beforeHookTaskCache.GetOrCreateBeforeClassTask(testClass, _ => _hookExecutor.ExecuteBeforeClassHooksAsync(testClass, CancellationToken.None))
-                .ConfigureAwait(false);
+            [UnconditionalSuppressMessage("Trimming", "IL2067", Justification = "Type testClass is properly annotated; analyzer cannot verify through lambda")]
+            [UnconditionalSuppressMessage("Trimming", "IL2111", Justification = "Type testClass is properly annotated; analyzer cannot verify through local function delegate")]
+            static async ValueTask CallBeforeClass(BeforeHookTaskCache cache,
+                [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)]
+                Type testClass,
+                HookExecutor hookExecutor,
+                CancellationToken ct)
+            {
+                await cache.GetOrCreateBeforeClassTask(
+                    testClass,
+                    (type, cancellationToken) => hookExecutor.ExecuteBeforeClassHooksAsync(type, cancellationToken),
+                    ct).ConfigureAwait(false);
+            }
+
+            await CallBeforeClass(_beforeHookTaskCache, testClass, _hookExecutor, cancellationToken).ConfigureAwait(false);
+
+            // Register After Class hook to run on cancellation (guarantees cleanup)
+            [UnconditionalSuppressMessage("Trimming", "IL2067", Justification = "Type testClass is properly annotated; analyzer cannot verify through lambda")]
+            [UnconditionalSuppressMessage("Trimming", "IL2111", Justification = "Type testClass is properly annotated; analyzer cannot verify through local function delegate")]
+            static void RegisterAfterClass(AfterHookPairTracker tracker,
+                [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)]
+                Type testClass,
+                HookExecutor hookExecutor,
+                CancellationToken ct)
+            {
+                tracker.RegisterAfterClassHook(
+                    testClass,
+                    ct,
+                    (type) => new ValueTask<List<Exception>>(hookExecutor.ExecuteAfterClassHooksAsync(type, CancellationToken.None).AsTask()));
+            }
+
+            RegisterAfterClass(_afterHookPairTracker, testClass, _hookExecutor, cancellationToken);
 
             await _eventReceiverOrchestrator.InvokeFirstTestInClassEventReceiversAsync(
                 executableTest.Context,
@@ -121,13 +169,16 @@ internal class TestExecutor
         }
         finally
         {
-            // Early stage test end receivers run before instance-level hooks
-            var earlyStageExceptions = await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(executableTest.Context, cancellationToken, EventReceiverStage.Early).ConfigureAwait(false);
+            // After hooks must use CancellationToken.None to ensure cleanup runs even when cancelled
+            // This matches the pattern used for After Class/Assembly hooks in TestCoordinator
 
-            var hookExceptions = await _hookExecutor.ExecuteAfterTestHooksAsync(executableTest, cancellationToken).ConfigureAwait(false);
+            // Early stage test end receivers run before instance-level hooks
+            var earlyStageExceptions = await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(executableTest.Context, CancellationToken.None, EventReceiverStage.Early).ConfigureAwait(false);
+
+            var hookExceptions = await _hookExecutor.ExecuteAfterTestHooksAsync(executableTest, CancellationToken.None).ConfigureAwait(false);
 
             // Late stage test end receivers run after instance-level hooks (default behavior)
-            var lateStageExceptions = await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(executableTest.Context, cancellationToken, EventReceiverStage.Late).ConfigureAwait(false);
+            var lateStageExceptions = await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(executableTest.Context, CancellationToken.None, EventReceiverStage.Late).ConfigureAwait(false);
 
             // Combine all exceptions from event receivers
             var eventReceiverExceptions = new List<Exception>(earlyStageExceptions.Count + lateStageExceptions.Count);
@@ -199,15 +250,32 @@ internal class TestExecutor
         var exceptions = new List<Exception>();
         var flags = _lifecycleCoordinator.DecrementAndCheckAfterHooks(testClass, testAssembly);
 
+        [UnconditionalSuppressMessage("Trimming", "IL2067", Justification = "Type testClass is properly annotated; analyzer cannot verify through lambda")]
+        [UnconditionalSuppressMessage("Trimming", "IL2111", Justification = "Type testClass is properly annotated; analyzer cannot verify through local function delegate")]
+        static async ValueTask<List<Exception>> CallAfterClass(AfterHookPairTracker tracker,
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)]
+            Type testClass,
+            HookExecutor hookExecutor,
+            CancellationToken ct)
+        {
+            return await tracker.GetOrCreateAfterClassTask(
+                testClass,
+                (type) => new ValueTask<List<Exception>>(hookExecutor.ExecuteAfterClassHooksAsync(type, ct).AsTask())).ConfigureAwait(false);
+        }
+
         if (flags.ShouldExecuteAfterClass)
         {
-            var classExceptions = await _hookExecutor.ExecuteAfterClassHooksAsync(testClass, cancellationToken).ConfigureAwait(false);
+            // Use AfterHookPairTracker to prevent double execution if already triggered by cancellation
+            var classExceptions = await CallAfterClass(_afterHookPairTracker, testClass, _hookExecutor, cancellationToken).ConfigureAwait(false);
             exceptions.AddRange(classExceptions);
         }
 
         if (flags.ShouldExecuteAfterAssembly)
         {
-            var assemblyExceptions = await _hookExecutor.ExecuteAfterAssemblyHooksAsync(testAssembly, cancellationToken).ConfigureAwait(false);
+            // Use AfterHookPairTracker to prevent double execution if already triggered by cancellation
+            var assemblyExceptions = await _afterHookPairTracker.GetOrCreateAfterAssemblyTask(
+                testAssembly,
+                (assembly) => new ValueTask<List<Exception>>(_hookExecutor.ExecuteAfterAssemblyHooksAsync(assembly, cancellationToken).AsTask())).ConfigureAwait(false);
             exceptions.AddRange(assemblyExceptions);
         }
 
@@ -217,10 +285,15 @@ internal class TestExecutor
     /// <summary>
     /// Execute session-level after hooks once at the end of test execution.
     /// Returns any exceptions that occurred during hook execution.
+    /// Uses AfterHookPairTracker to prevent double execution if already triggered by cancellation.
     /// </summary>
     public async Task<List<Exception>> ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken)
     {
-        return await _hookExecutor.ExecuteAfterTestSessionHooksAsync(cancellationToken).ConfigureAwait(false);
+        // Use AfterHookPairTracker to prevent double execution if already triggered by cancellation
+        var exceptions = await _afterHookPairTracker.GetOrCreateAfterTestSessionTask(
+            () => new ValueTask<List<Exception>>(_hookExecutor.ExecuteAfterTestSessionHooksAsync(cancellationToken).AsTask())).ConfigureAwait(false);
+
+        return exceptions;
     }
 
     /// <summary>

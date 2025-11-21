@@ -90,7 +90,7 @@ internal sealed class TestCoordinator : ITestCoordinator
             }
 
             // Ensure TestSession hooks run before creating test instances
-            await _testExecutor.EnsureTestSessionHooksExecutedAsync().ConfigureAwait(false);
+            await _testExecutor.EnsureTestSessionHooksExecutedAsync(cancellationToken).ConfigureAwait(false);
 
             // Execute test with retry logic - each retry gets a fresh instance
             // Timeout is applied per retry attempt, not across all retries
