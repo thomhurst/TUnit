@@ -29,7 +29,7 @@ public class CancellationAfterHooksTests
         // Using ping instead of notepad for CI compatibility
         _process = Process.Start(new ProcessStartInfo
         {
-            FileName = OperatingSystem.IsWindows() ? "ping" : "ping",
+            FileName = "ping",
             Arguments = OperatingSystem.IsWindows() ? "-t 127.0.0.1" : "127.0.0.1",
             CreateNoWindow = true,
             UseShellExecute = false
@@ -47,25 +47,54 @@ public class CancellationAfterHooksTests
     [After(Test)]
     public async Task StopProcess(TestContext context)
     {
-        // Write marker to prove After hook ran EVEN ON CANCELLATION
-        var afterMarker = Path.Combine(MarkerFileDirectory, $"after_{context.Metadata.TestName}.txt");
-        await File.WriteAllTextAsync(afterMarker, $"After hook executed at {DateTime.Now:O} - Outcome: {context.Execution.Result?.State}");
+        try
+        {
+            // Write marker to prove After hook ran EVEN ON CANCELLATION
+            var afterMarker = Path.Combine(MarkerFileDirectory, $"after_{context.Metadata.TestName}.txt");
+            await File.WriteAllTextAsync(afterMarker, $"After hook executed at {DateTime.Now:O} - Outcome: {context.Execution.Result?.State}");
+        }
+        catch (Exception ex)
+        {
+            // Don't let marker file creation failure prevent process cleanup
+            Console.WriteLine($"[AfterTest] Failed to write marker file: {ex.Message}");
+        }
 
-        // Clean up the process
-        if (_process != null && !_process.HasExited)
+        // Clean up the process - critical for test isolation
+        if (_process != null)
         {
             try
             {
-                _process.Kill(true);
-                await _process.WaitForExitAsync();
+                if (!_process.HasExited)
+                {
+                    _process.Kill(entireProcessTree: true);
+
+                    // Wait for process exit with timeout to avoid hanging
+                    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                    await _process.WaitForExitAsync(cts.Token);
+                }
             }
-            catch
+            catch (OperationCanceledException)
             {
-                // Process might already be gone
+                // Process didn't exit in time, but we tried
+                Console.WriteLine("[AfterTest] Process kill timed out after 5 seconds");
+            }
+            catch (Exception ex)
+            {
+                // Log but don't fail - process might already be gone
+                Console.WriteLine($"[AfterTest] Process cleanup warning: {ex.Message}");
+            }
+            finally
+            {
+                try
+                {
+                    _process?.Dispose();
+                }
+                catch
+                {
+                    // Best effort disposal
+                }
             }
         }
-
-        _process?.Dispose();
     }
 }
 
@@ -88,9 +117,18 @@ public class SessionLevelCancellationTests
     public static async Task SessionCleanup(TestSessionContext context)
     {
         // This should run even if tests are cancelled
-        await File.WriteAllTextAsync(
-            SessionMarkerFile,
-            $"Session After hook executed at {DateTime.Now:O}");
+        try
+        {
+            await File.WriteAllTextAsync(
+                SessionMarkerFile,
+                $"Session After hook executed at {DateTime.Now:O}");
+            Console.WriteLine($"[AfterTestSession] Session After hook completed successfully");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[AfterTestSession] Failed to write marker file: {ex.Message}");
+            throw; // Re-throw to signal failure, but after logging
+        }
     }
 
     [Test]
@@ -120,9 +158,18 @@ public class AssemblyLevelCancellationTests
     public static async Task AssemblyCleanup(AssemblyHookContext context)
     {
         // This should run even if tests are cancelled
-        await File.WriteAllTextAsync(
-            AssemblyMarkerFile,
-            $"Assembly After hook executed at {DateTime.Now:O}");
+        try
+        {
+            await File.WriteAllTextAsync(
+                AssemblyMarkerFile,
+                $"Assembly After hook executed at {DateTime.Now:O}");
+            Console.WriteLine($"[AfterAssembly] Assembly After hook completed successfully");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[AfterAssembly] Failed to write marker file: {ex.Message}");
+            throw; // Re-throw to signal failure, but after logging
+        }
     }
 
     [Test]
@@ -152,9 +199,18 @@ public class ClassLevelCancellationTests
     public static async Task ClassCleanup(ClassHookContext context)
     {
         // This should run even if tests are cancelled
-        await File.WriteAllTextAsync(
-            ClassMarkerFile,
-            $"Class After hook executed at {DateTime.Now:O}");
+        try
+        {
+            await File.WriteAllTextAsync(
+                ClassMarkerFile,
+                $"Class After hook executed at {DateTime.Now:O}");
+            Console.WriteLine($"[AfterClass] Class After hook completed successfully");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[AfterClass] Failed to write marker file: {ex.Message}");
+            throw; // Re-throw to signal failure, but after logging
+        }
     }
 
     [Test]
