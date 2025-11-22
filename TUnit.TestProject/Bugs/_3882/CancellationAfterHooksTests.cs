@@ -13,7 +13,6 @@ namespace TUnit.TestProject.Bugs._3882;
 public class CancellationAfterHooksTests
 {
     private static readonly string MarkerFileDirectory = Path.Combine(Path.GetTempPath(), "TUnit_3882_Tests");
-    private Process? _process;
 
     [Before(Test)]
     public async Task StartProcess(TestContext context)
@@ -24,16 +23,6 @@ public class CancellationAfterHooksTests
         // Write marker to prove Before hook ran
         var beforeMarker = Path.Combine(MarkerFileDirectory, $"before_{context.Metadata.TestName}.txt");
         await File.WriteAllTextAsync(beforeMarker, $"Before hook executed at {DateTime.Now:O}");
-
-        // Start a long-running process (ping continuously)
-        // Using ping instead of notepad for CI compatibility
-        _process = Process.Start(new ProcessStartInfo
-        {
-            FileName = "ping",
-            Arguments = OperatingSystem.IsWindows() ? "-t 127.0.0.1" : "127.0.0.1",
-            CreateNoWindow = true,
-            UseShellExecute = false
-        });
     }
 
     [Test]
@@ -57,43 +46,6 @@ public class CancellationAfterHooksTests
         {
             // Don't let marker file creation failure prevent process cleanup
             Console.WriteLine($"[AfterTest] Failed to write marker file: {ex.Message}");
-        }
-
-        // Clean up the process - critical for test isolation
-        if (_process != null)
-        {
-            try
-            {
-                if (!_process.HasExited)
-                {
-                    _process.Kill(entireProcessTree: true);
-
-                    // Wait for process exit with timeout to avoid hanging
-                    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-                    await _process.WaitForExitAsync(cts.Token);
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                // Process didn't exit in time, but we tried
-                Console.WriteLine("[AfterTest] Process kill timed out after 5 seconds");
-            }
-            catch (Exception ex)
-            {
-                // Log but don't fail - process might already be gone
-                Console.WriteLine($"[AfterTest] Process cleanup warning: {ex.Message}");
-            }
-            finally
-            {
-                try
-                {
-                    _process?.Dispose();
-                }
-                catch
-                {
-                    // Best effort disposal
-                }
-            }
         }
     }
 }

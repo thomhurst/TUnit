@@ -2,22 +2,13 @@ using System.Diagnostics;
 
 namespace TUnit.TestProject.Bugs._3882;
 
-/// <summary>
-/// Tests for issue #3882: After Test hook is not run when test is cancelled EXTERNALLY
-/// https://github.com/thomhurst/TUnit/issues/3882
-///
-/// This test demonstrates that After hooks execute even when tests are cancelled externally
-/// (e.g., Ctrl+C, VS Test Explorer Stop button, process termination).
-/// The Before hook starts a process, the test delays indefinitely, and the After hook cleans up the process.
-/// NOTE: No [Timeout] attribute - these tests only stop via external cancellation.
-/// </summary>
+[Timeout(300_000)] // Overall timeout for the test class to prevent indefinite hangs
 public class ExternalCancellationTests
 {
     private static readonly string MarkerFileDirectory = Path.Combine(Path.GetTempPath(), "TUnit_3882_External");
-    private Process? _process;
 
     [Before(Test)]
-    public async Task StartProcess(TestContext context)
+    public async Task StartProcess(TestContext context, CancellationToken cancellationToken)
     {
         // Create marker directory
         Directory.CreateDirectory(MarkerFileDirectory);
@@ -25,16 +16,6 @@ public class ExternalCancellationTests
         // Write marker to prove Before hook ran
         var beforeMarker = Path.Combine(MarkerFileDirectory, $"before_{context.Metadata.TestName}.txt");
         await File.WriteAllTextAsync(beforeMarker, $"Before hook executed at {DateTime.Now:O}");
-
-        // Start a long-running process (ping continuously)
-        // Using ping instead of notepad for CI compatibility
-        _process = Process.Start(new ProcessStartInfo
-        {
-            FileName = "ping",
-            Arguments = OperatingSystem.IsWindows() ? "-t 127.0.0.1" : "127.0.0.1",
-            CreateNoWindow = true,
-            UseShellExecute = false
-        });
     }
 
     [Test]
@@ -46,7 +27,7 @@ public class ExternalCancellationTests
     }
 
     [After(Test)]
-    public async Task StopProcess(TestContext context)
+    public async Task StopProcess(TestContext context, CancellationToken cancellationToken)
     {
         try
         {
@@ -58,43 +39,6 @@ public class ExternalCancellationTests
         {
             // Don't let marker file creation failure prevent process cleanup
             Console.WriteLine($"[AfterTest] Failed to write marker file: {ex.Message}");
-        }
-
-        // Clean up the process - critical for test isolation
-        if (_process != null)
-        {
-            try
-            {
-                if (!_process.HasExited)
-                {
-                    _process.Kill(entireProcessTree: true);
-
-                    // Wait for process exit with timeout to avoid hanging
-                    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-                    await _process.WaitForExitAsync(cts.Token);
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                // Process didn't exit in time, but we tried
-                Console.WriteLine("[AfterTest] Process kill timed out after 5 seconds");
-            }
-            catch (Exception ex)
-            {
-                // Log but don't fail - process might already be gone
-                Console.WriteLine($"[AfterTest] Process cleanup warning: {ex.Message}");
-            }
-            finally
-            {
-                try
-                {
-                    _process?.Dispose();
-                }
-                catch
-                {
-                    // Best effort disposal
-                }
-            }
         }
     }
 }

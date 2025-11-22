@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using CliWrap;
 using Shouldly;
 using TUnit.Engine.Tests.Enums;
@@ -32,17 +33,16 @@ public class ExternalCancellationTests(TestMode testMode) : InvokableTestBase(te
         var guid = Guid.NewGuid().ToString("N");
         var trxFilename = guid + ".trx";
 
-        var cts = new CancellationTokenSource();
+        using var gracefulCancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        using var forcefulCancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(25));
+
+        var file = Path.Combine(testProject.DirectoryName!, "bin", "Release", GetEnvironmentVariable, "TUnit.TestProject.exe");
 
         var command = testMode switch
         {
-            TestMode.SourceGenerated => Cli.Wrap("dotnet")
+            TestMode.SourceGenerated => Cli.Wrap(file)
                 .WithArguments(
                 [
-                    "run",
-                    "--no-build",
-                    "-f", GetEnvironmentVariable,
-                    "--configuration", "Release",
                     "--treenode-filter", filter,
                     "--report-trx", "--report-trx-filename", trxFilename,
                     "--diagnostic-verbosity", "Debug",
@@ -54,10 +54,6 @@ public class ExternalCancellationTests(TestMode testMode) : InvokableTestBase(te
             TestMode.Reflection => Cli.Wrap("dotnet")
                 .WithArguments(
                 [
-                    "run",
-                    "--no-build",
-                    "-f", GetEnvironmentVariable,
-                    "--configuration", "Release",
                     "--treenode-filter", filter,
                     "--report-trx", "--report-trx-filename", trxFilename,
                     "--diagnostic-verbosity", "Debug",
@@ -68,8 +64,8 @@ public class ExternalCancellationTests(TestMode testMode) : InvokableTestBase(te
                 .WithValidation(CommandResultValidation.None),
 
             // Skip AOT and SingleFile modes for external cancellation (only test in CI)
-            TestMode.AOT => null!,
-            TestMode.SingleFileApplication => null!,
+            TestMode.AOT => null,
+            TestMode.SingleFileApplication => null,
             _ => throw new ArgumentOutOfRangeException(nameof(testMode), testMode, null)
         };
 
@@ -79,21 +75,9 @@ public class ExternalCancellationTests(TestMode testMode) : InvokableTestBase(te
             return;
         }
 
-        var executeTask = command.ExecuteAsync(cts.Token);
-
         try
         {
-            // Wait for process to start and hooks to register
-            // This ensures Before hooks have executed and After hooks are registered via CancellationToken.Register()
-            await Task.Delay(TimeSpan.FromSeconds(5), CancellationToken.None);
-
-            // Cancel externally (simulates Ctrl+C, VS Test Explorer Stop button)
-            // This should trigger the CancellationToken.Register() callbacks that execute After hooks
-            Console.WriteLine($"[ExternalCancellation] Cancelling test process for filter: {filter}");
-            cts.Cancel();
-
-            // Wait for the process to terminate (expected to throw OperationCanceledException)
-            await executeTask;
+            await command.ExecuteAsync(forcefulCancellationTokenSource.Token, gracefulCancellationTokenSource.Token);
         }
         catch (OperationCanceledException)
         {
@@ -105,11 +89,6 @@ public class ExternalCancellationTests(TestMode testMode) : InvokableTestBase(te
             // Log unexpected exceptions but don't fail - After hooks might still execute
             Console.WriteLine($"[ExternalCancellation] Unexpected exception: {ex.Message}");
         }
-
-        // Wait for After hooks to complete
-        // After hooks execute via CancellationToken.Register() callbacks, which may take a moment
-        // Need generous time for: signal delivery -> cancellation -> After hooks -> file write -> process termination
-        await Task.Delay(TimeSpan.FromSeconds(5), CancellationToken.None);
 
         // Verify marker file exists - this proves After hook executed even on external cancellation
         File.Exists(markerFile).ShouldBeTrue($"After hook marker file should exist at {markerFile}");
