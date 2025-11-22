@@ -36,7 +36,10 @@ public class ExternalCancellationTests(TestMode testMode) : InvokableTestBase(te
         using var gracefulCancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
         using var forcefulCancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(25));
 
-        var file = Path.Combine(testProject.DirectoryName!, "bin", "Release", GetEnvironmentVariable, "TUnit.TestProject.exe");
+        // Use cross-platform executable detection (Linux: no extension, Windows: .exe)
+        var binDir = new DirectoryInfo(Path.Combine(testProject.DirectoryName!, "bin", "Release", GetEnvironmentVariable));
+        var file = binDir.GetFiles("TUnit.TestProject").FirstOrDefault()?.FullName
+                   ?? binDir.GetFiles("TUnit.TestProject.exe").First().FullName;
 
         var command = testMode switch
         {
@@ -51,7 +54,7 @@ public class ExternalCancellationTests(TestMode testMode) : InvokableTestBase(te
                 .WithWorkingDirectory(testProject.DirectoryName!)
                 .WithValidation(CommandResultValidation.None),
 
-            TestMode.Reflection => Cli.Wrap("dotnet")
+            TestMode.Reflection => Cli.Wrap(file)
                 .WithArguments(
                 [
                     "--treenode-filter", filter,
