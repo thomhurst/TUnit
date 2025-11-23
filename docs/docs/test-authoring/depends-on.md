@@ -23,7 +23,7 @@ This takes a test name, which you can easily reference by using the `nameof(Test
 
 :::info
 
-If you have multiple tests with the same name, but different parameter types, then you you must include the types of parameters in the `[DependsOn]` attribute too so TUnit can locate the correct test.
+If you have multiple tests with the same name, but different parameter types, then you must include the types of parameters in the `[DependsOn]` attribute too so TUnit can locate the correct test.
 
 :::
 
