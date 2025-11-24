@@ -66,7 +66,7 @@ public class DatabaseConnectionAttribute : Attribute, ITestStartEventReceiver
         await _connection.OpenAsync();
 
         // Store connection in test context for use by hooks and test
-        context.GetOrAdd("DbConnection", () => _connection);
+        context.StateBag.GetOrAdd("DbConnection", _ => _connection);
     }
 }
 
@@ -77,7 +77,7 @@ public class MyTests
     public async Task TestWithDatabase()
     {
         // Database connection is already open and available
-        var connection = TestContext.Current!.Get<IDbConnection>("DbConnection");
+        TestContext.Current!.StateBag.TryGetValue<IDbConnection>("DbConnection", out var connection);
         // ... test logic
     }
 
@@ -85,7 +85,7 @@ public class MyTests
     public void BeforeTest()
     {
         // Database connection is already available here
-        var connection = TestContext.Current!.Get<IDbConnection>("DbConnection");
+        TestContext.Current!.StateBag.TryGetValue<IDbConnection>("DbConnection", out var connection);
         // ... setup that needs the database
     }
 }
@@ -128,7 +128,7 @@ public class DependencyInjectionClassConstructor : IClassConstructor, ITestEndEv
 {
     private readonly IServiceProvider _serviceProvider = CreateServiceProvider();
     private AsyncServiceScope _scope;
-    
+
     public Task<object> Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type type, ClassConstructorMetadata classConstructorMetadata)
     {
         _scope = _serviceProvider.CreateAsyncScope();
@@ -138,7 +138,7 @@ public class DependencyInjectionClassConstructor : IClassConstructor, ITestEndEv
     }
 
     public ValueTask OnTestEnd(TestContext testContext)
-    { 
+    {
         return _scope.DisposeAsync();
     }
 
