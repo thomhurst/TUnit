@@ -2209,6 +2209,13 @@
   dependencies:
     "@types/mdx" "^2.0.0"
 
+"@mdx-js/react@^3.1.1":
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@mdx-js/react/-/react-3.1.1.tgz#24bda7fffceb2fe256f954482123cda1be5f5fef"
+  integrity sha512-f++rKLQgUVYDAtECQ6fn/is15GkEH9+nZPM3MS0RcxVqoTfawHvDlSCH7JbMhAM6uJ32v3eXLvLmLvjGu7PTQw==
+  dependencies:
+    "@types/mdx" "^2.0.0"
+
 "@mermaid-js/parser@^0.6.3":
   version "0.6.3"
   resolved "https://registry.npmjs.org/@mermaid-js/parser/-/parser-0.6.3.tgz"
