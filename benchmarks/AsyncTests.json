@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-11-24T00:30:13.235Z",
+  "timestamp": "2025-11-25T00:27:11.745Z",
   "category": "AsyncTests",
   "environment": {
     "benchmarkDotNetVersion": "BenchmarkDotNet v0.15.7, Linux Ubuntu 24.04.3 LTS (Noble Numbat)",
@@ -10,42 +10,42 @@
     {
       "Method": "TUnit",
       "Version": "1.2.11",
-      "Mean": "564.9 ms",
-      "Error": "3.50 ms",
-      "StdDev": "3.11 ms",
-      "Median": "565.7 ms"
+      "Mean": "560.7 ms",
+      "Error": "3.82 ms",
+      "StdDev": "3.58 ms",
+      "Median": "560.6 ms"
     },
     {
       "Method": "NUnit",
       "Version": "4.4.0",
-      "Mean": "699.7 ms",
-      "Error": "9.80 ms",
-      "StdDev": "9.17 ms",
-      "Median": "700.8 ms"
+      "Mean": "678.8 ms",
+      "Error": "8.60 ms",
+      "StdDev": "7.62 ms",
+      "Median": "677.3 ms"
     },
     {
       "Method": "MSTest",
       "Version": "4.0.2",
-      "Mean": "660.6 ms",
-      "Error": "5.80 ms",
-      "StdDev": "5.14 ms",
-      "Median": "661.7 ms"
+      "Mean": "651.1 ms",
+      "Error": "6.23 ms",
+      "StdDev": "5.52 ms",
+      "Median": "650.0 ms"
     },
     {
       "Method": "xUnit3",
       "Version": "3.2.0",
-      "Mean": "743.1 ms",
-      "Error": "6.40 ms",
-      "StdDev": "5.98 ms",
-      "Median": "743.9 ms"
+      "Mean": "726.4 ms",
+      "Error": "7.08 ms",
+      "StdDev": "5.91 ms",
+      "Median": "726.1 ms"
     },
     {
       "Method": "TUnit_AOT",
       "Version": "1.2.11",
-      "Mean": "124.0 ms",
-      "Error": "0.47 ms",
-      "StdDev": "0.41 ms",
-      "Median": "124.1 ms"
+      "Mean": "122.9 ms",
+      "Error": "0.52 ms",
+      "StdDev": "0.46 ms",
+      "Median": "122.9 ms"
     }
   ]
 }
