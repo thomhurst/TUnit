@@ -108,7 +108,7 @@ Run your tests with the `--report-trx` flag:
 dotnet run --configuration Release --report-trx
 
 # Specify output location
-dotnet run --configuration Release --report-trx --report-trx-filename ./reports/testresults.trx
+dotnet run --configuration Release --results-directory ./reports --report-trx --report-trx-filename testresults.trx
 ```
 
 **📚 More Resources:**
