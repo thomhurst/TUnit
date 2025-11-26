@@ -99,11 +99,26 @@ public class LazyDataProvider
 #### Configure Appropriate Parallelism
 
 ```csharp
-// Set maximum parallel test execution
-[assembly: MaxParallelTests(Environment.ProcessorCount)]
+using TUnit.Core;
+using TUnit.Core.Interfaces;
 
-// Or use command line
-// dotnet test --maximum-parallel-tests 8
+// Set maximum parallel test execution using an assembly-level parallel limiter
+[assembly: ParallelLimiter<ProcessorCountLimit>]
+
+public class ProcessorCountLimit : IParallelLimit
+{
+    public int Limit => Environment.ProcessorCount;
+}
+```
+
+Alternatively, use the command line flag:
+```bash
+dotnet test -- --maximum-parallel-tests 8
+```
+
+Or set an environment variable:
+```bash
+export TUNIT_MAX_PARALLEL_TESTS=8
 ```
 
 #### Group Related Tests
