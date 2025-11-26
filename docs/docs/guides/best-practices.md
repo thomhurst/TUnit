@@ -665,7 +665,7 @@ TUnit is designed for performance at scale. Follow these guidelines to keep your
 
 - Let tests run in parallel (it's fast!)
 - Only use `[NotInParallel]` when absolutely necessary
-- Configure parallelism based on your CPU: `[assembly: MaxParallelTests(Environment.ProcessorCount)]`
+- Configure parallelism using the `--maximum-parallel-tests` CLI flag or `[assembly: ParallelLimiter<T>]` attribute
 - Avoid expensive setup in `[Before(Test)]` hooks - use class or assembly-level hooks for shared resources
 
 ### Avoid Slow Operations in Tests
