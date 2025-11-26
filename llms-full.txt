@@ -1143,11 +1143,26 @@ public class LazyDataProvider
 #### Configure Appropriate Parallelism
 
 ```csharp
-// Set maximum parallel test execution
-[assembly: MaxParallelTests(Environment.ProcessorCount)]
+using TUnit.Core;
+using TUnit.Core.Interfaces;
 
-// Or use command line
-// dotnet test --maximum-parallel-tests 8
+// Set maximum parallel test execution using an assembly-level parallel limiter
+[assembly: ParallelLimiter<ProcessorCountLimit>]
+
+public class ProcessorCountLimit : IParallelLimit
+{
+    public int Limit => Environment.ProcessorCount;
+}
+```
+
+Alternatively, use the command line flag:
+```bash
+dotnet test -- --maximum-parallel-tests 8
+```
+
+Or set an environment variable:
+```bash
+export TUNIT_MAX_PARALLEL_TESTS=8
 ```
 
 #### Group Related Tests
@@ -16849,7 +16864,7 @@ TUnit is designed for performance at scale. Follow these guidelines to keep your
 
 - Let tests run in parallel (it's fast!)
 - Only use `[NotInParallel]` when absolutely necessary
-- Configure parallelism based on your CPU: `[assembly: MaxParallelTests(Environment.ProcessorCount)]`
+- Configure parallelism using the `--maximum-parallel-tests` CLI flag or `[assembly: ParallelLimiter<T>]` attribute
 - Avoid expensive setup in `[Before(Test)]` hooks - use class or assembly-level hooks for shared resources
 
 ### Avoid Slow Operations in Tests
