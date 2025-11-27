@@ -790,7 +790,7 @@ public async Task Collection_Assertions()
     await Assert.That(list).DoesNotContain(5);
     await Assert.That(Array.Empty<int>()).IsEmpty();
     await Assert.That(list).IsNotEmpty();
-    await Assert.That(list).HasCount().EqualTo(3);
+    await Assert.That(list).Count().IsEqualTo(3);
 }
 ```
 

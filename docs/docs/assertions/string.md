@@ -291,7 +291,7 @@ public async Task String_Is_Not_Empty()
 }
 ```
 
-### HasLength
+### Length
 
 Tests that a string has a specific length:
 
@@ -301,7 +301,7 @@ public async Task String_Has_Length()
 {
     var code = "ABC123";
 
-    await Assert.That(code).HasLength(6);
+    await Assert.That(code).Length().IsEqualTo(6);
 }
 ```
 
@@ -314,12 +314,12 @@ public async Task Length_With_Comparison()
     var username = "alice";
 
     await Assert.That(username)
-        .HasLength().GreaterThan(3)
-        .And.HasLength().LessThan(20);
+        .Length().IsGreaterThan(3)
+        .And.Length().IsLessThan(20);
 }
 ```
 
-Or more concisely:
+Using `IsBetween`:
 
 ```csharp
 [Test]
@@ -327,7 +327,7 @@ public async Task Length_Range()
 {
     var username = "alice";
 
-    await Assert.That(username.Length).IsBetween(3, 20);
+    await Assert.That(username).Length().IsBetween(3, 20);
 }
 ```
 
@@ -459,8 +459,8 @@ public async Task Validate_Username()
     var username = "alice_123";
 
     await Assert.That(username)
-        .HasLength().GreaterThanOrEqualTo(3)
-        .And.HasLength().LessThanOrEqualTo(20)
+        .Length().IsGreaterThanOrEqualTo(3)
+        .And.Length().IsLessThanOrEqualTo(20)
         .And.Matches(@"^[a-zA-Z0-9_]+$")
         .And.DoesNotContain(" ");
 }
@@ -475,7 +475,7 @@ public async Task Validate_Password()
     var password = "SecureP@ss123";
 
     await Assert.That(password)
-        .HasLength().GreaterThanOrEqualTo(8)
+        .Length().IsGreaterThanOrEqualTo(8)
         .And.Matches(@"[A-Z]")  // Has uppercase
         .And.Matches(@"[a-z]")  // Has lowercase
         .And.Matches(@"\d")     // Has digit
@@ -600,7 +600,7 @@ public async Task Chained_String_Assertions()
         .And.Contains("World")
         .And.StartsWith("Hello")
         .And.EndsWith("!")
-        .And.HasLength(13);
+        .And.Length().IsEqualTo(13);
 }
 ```
 

@@ -72,7 +72,7 @@ public async Task ComplexMemberAssertions()
     await Assert.That(team)
         .Member(t => t.Name, name => name.StartsWith("Team"))
         .And.Member(t => t.Members, members => members
-            .HasCount().IsGreaterThan(0)
+            .Count().IsGreaterThan(0)
             .And.All(m => m.IsActive)
             .And.Any(m => m.Role == "Lead"))
         .And.Member(t => t.CreatedDate, date => date
@@ -134,7 +134,7 @@ public async Task NestedObjectAssertions()
         .And.Member(c => c.Address.City, city => city.IsEqualTo("Seattle"))
         .And.Member(c => c.Address.ZipCode, zip => zip.Matches(@"^\d{5}$"))
         .And.Member(c => c.Employees, employees => employees
-            .HasCount().IsBetween(100, 500)
+            .Count().IsBetween(100, 500)
             .And.All(e => e.Email.EndsWith("@techcorp.com")));
 }
 ```

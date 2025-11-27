@@ -1115,6 +1115,10 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<string> metadata) { }
         protected override string GetExpectation() { }
     }
+    public class StringLengthValueAssertion : .<int>
+    {
+        public StringLengthValueAssertion(.<string> stringContext) { }
+    }
     public class StringMatchesAssertion : .<..RegexMatchCollection>
     {
         public StringMatchesAssertion(.<string> context, . regex) { }
@@ -1578,7 +1582,10 @@ namespace .Extensions
         public static .<TValue> EqualTo<TValue>(this .<TValue> source, TValue? expected, [.("expected")] string? expression = null) { }
         public static ..HasFlagAssertion<TEnum> HasFlag<TEnum>(this .<TEnum> source, TEnum expectedFlag, [.("expectedFlag")] string? expression = null)
             where TEnum :  struct,  { }
+        [("Use Length() instead, which provides all numeric assertion methods. Example: Asse" +
+            "(str).Length().IsGreaterThan(5)")]
         public static ..LengthWrapper HasLength(this .<string> source) { }
+        [("Use Length().IsEqualTo(expectedLength) instead.")]
         public static . HasLength(this .<string> source, int expectedLength, [.("expectedLength")] string? expression = null) { }
         public static .<TException> HasMessageContaining<TException>(this .<TException> source, string expectedSubstring, [.("expectedSubstring")] string? expression = null)
             where TException :  { }
@@ -1633,6 +1640,7 @@ namespace .Extensions
             where TValue : <TValue> { }
         public static .<TValue> IsPositive<TValue>(this .<TValue?> source)
             where TValue :  struct, <TValue> { }
+        public static . Length(this .<string> source) { }
         [.(1)]
         public static .<TObject> Member<TObject, TItem>(this .<TObject> source, .<<TObject, .<TItem>>> memberSelector, <.<.<TItem>, TItem>, .<.<TItem>>> assertions) { }
         [.("Uses reflection for legacy compatibility. For AOT compatibility, use the Member<T" +
@@ -4350,7 +4358,10 @@ namespace .Sources
         public .<TCollection, TItem> DoesNotContain(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
         public .<TCollection, TItem> DoesNotContain(TItem expected, [.("expected")] string? expression = null) { }
         protected override string GetExpectation() { }
+        [("Use Count() instead, which provides all numeric assertion methods. Example: Asser" +
+            "(list).Count().IsGreaterThan(5)")]
         public ..CountWrapper<TCollection, TItem> HasCount() { }
+        [("Use Count().IsEqualTo(expectedCount) instead.")]
         public .<TCollection, TItem> HasCount(int expectedCount, [.("expectedCount")] string? expression = null) { }
         public .<TCollection, TItem> HasDistinctItems() { }
         public .<TCollection, TItem> HasSingleItem() { }

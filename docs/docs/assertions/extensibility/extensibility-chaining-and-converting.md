@@ -185,4 +185,4 @@ public class HasDetailAssertion : Assertion<ProblemDetails>
 TUnit includes several built-in examples of type conversion assertions:
 
 - `WhenParsedInto<T>()` - Converts a string to a parsed type (e.g., `await Assert.That("123").WhenParsedInto<int>().IsEqualTo(123)`)
-- `IsTypeOf<T>()` - Converts to a specific type (e.g., `await Assert.That(obj).IsTypeOf<StringBuilder>().HasLength(5)`)
+- `IsTypeOf<T>()` - Converts to a specific type (e.g., `await Assert.That(obj).IsTypeOf<StringBuilder>().Length().IsEqualTo(5)`)

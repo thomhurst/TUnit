@@ -137,7 +137,7 @@ await Assert.That(actual).IsEqualTo(expected);
 await Assert.That(value).IsTrue();
 await Assert.That(value).IsNull();
 await Assert.That(text).Contains("substring");
-await Assert.That(collection).HasCount().EqualTo(5);
+await Assert.That(collection).Count().IsEqualTo(5);
 ```
 
 ### Collection Assertions
@@ -610,7 +610,7 @@ public async Task ComplexAssertions()
     await Assert.That(text).Matches(@"^Hello");
 
     // Collection assertions
-    await Assert.That(list).HasCount().EqualTo(5);
+    await Assert.That(list).Count().IsEqualTo(5);
     await Assert.That(list).Contains(3);
     await Assert.That(list).AllSatisfy(x => x > 0);
     await Assert.That(list).IsInAscendingOrder();

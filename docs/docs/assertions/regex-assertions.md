@@ -108,13 +108,13 @@ public async Task PositionAndLengthAssertions()
     // Assert that match has specific length
     await Assert.That(text)
         .Matches(pattern)
-        .HasLength(3);
+        .Length().IsEqualTo(3);
 
     // Combine with group assertions
     await Assert.That(text)
         .Matches(pattern)
         .AtIndex(12)
-        .And.HasLength(3);
+        .And.Length().IsEqualTo(3);
 }
 ```
 
@@ -149,7 +149,7 @@ public async Task ProductCodeValidation()
         .Matches(pattern)
         .And.Group("code", code => code.StartsWith("ABC"))
         .And.Group("price", price => price.Contains(".99"))
-        .And.Group("stock", stock => stock.HasLength(2));
+        .And.Group("stock", stock => stock.Length().IsEqualTo(2));
 }
 ```
 
@@ -259,9 +259,9 @@ public async Task CompleteEmailValidation()
         .And.Group("local", local => local.StartsWith("john"))
         .And.Group("subdomain", sub => sub.IsEqualTo("mail"))
         .And.Group("domain", domain => domain.IsEqualTo("example"))
-        .And.Group("tld", tld => tld.HasLength(3))
+        .And.Group("tld", tld => tld.Length().IsEqualTo(3))
         .And.AtIndex(0)
-        .And.HasLength(email.Length);
+        .And.Length().IsEqualTo(email.Length);
 }
 ```
 

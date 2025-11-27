@@ -222,8 +222,8 @@ public class PerformantTests
 ```csharp
 // ❌ Bad: Expensive operation in assertion
 await Assert.That(await GetAllUsersFromDatabase())
-    .HasCount()
-    .EqualTo(1000);
+    .Count()
+    .IsEqualTo(1000);
 
 // ✅ Good: Use efficient queries
 var userCount = await GetUserCountFromDatabase();
@@ -246,7 +246,7 @@ public async Task EfficientValidation()
     }
     
     // More expensive validations only if needed
-    await Assert.That(result.Items).HasCount().GreaterThan(0);
+    await Assert.That(result.Items).Count().IsGreaterThan(0);
 }
 ```
 
