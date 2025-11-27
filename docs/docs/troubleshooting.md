@@ -463,7 +463,7 @@ await Assert.That(actual).IsEquivalentTo(expected, CollectionOrdering.Matching);
 Or assert on elements individually:
 
 ```csharp
-await Assert.That(actual).HasCount().EqualTo(expected.Length);
+await Assert.That(actual).Count().IsEqualTo(expected.Length);
 for (int i = 0; i < expected.Length; i++)
 {
     await Assert.That(actual[i]).IsEqualTo(expected[i]);
@@ -483,7 +483,7 @@ var expected = new[]
 await Assert.That(actual).IsEquivalentTo(expected);
 
 // More reliable - assert on properties
-await Assert.That(actual).HasCount().EqualTo(2);
+await Assert.That(actual).Count().IsEqualTo(2);
 await Assert.That(actual[0].Name).IsEqualTo("Alice");
 await Assert.That(actual[1].Name).IsEqualTo("Bob");
 
@@ -502,7 +502,7 @@ var actual = new[] { (1, "a"), (2, "b") };
 // await Assert.That(actual).IsEquivalentTo(expected);
 
 // Workaround - assert individual elements
-await Assert.That(actual).HasCount().EqualTo(2);
+await Assert.That(actual).Count().IsEqualTo(2);
 await Assert.That(actual[0]).IsEqualTo((1, "a"));
 await Assert.That(actual[1]).IsEqualTo((2, "b"));
 ```
@@ -516,7 +516,7 @@ var list = new List<int> { 1, 2, 3 };
 await Assert.That(list).IsEquivalentTo(new[] { 1, 2, 3 });
 
 // Check specific properties
-await Assert.That(list).HasCount().EqualTo(3);
+await Assert.That(list).Count().IsEqualTo(3);
 await Assert.That(list).Contains(2);
 await Assert.That(list).DoesNotContain(5);
 ```

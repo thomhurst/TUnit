@@ -104,7 +104,7 @@ public async Task Dictionary_Count()
         ["c"] = 3
     };
 
-    await Assert.That(dict).HasCount(3);
+    await Assert.That(dict).Count().IsEqualTo(3);
 }
 ```
 
@@ -223,7 +223,7 @@ public async Task Lookup_Table()
     };
 
     await Assert.That(statusCodes)
-        .HasCount(3)
+        .Count().IsEqualTo(3)
         .And.ContainsKey(200)
         .And.ContainsValue("OK");
 }
@@ -243,7 +243,7 @@ public async Task Cache_Contains_Entry()
 
     await Assert.That(cache)
         .ContainsKey("user:123")
-        .And.HasCount(2)
+        .And.Count().IsEqualTo(2)
         .And.IsNotEmpty();
 }
 ```
@@ -306,7 +306,7 @@ public async Task Dictionary_Keys()
     var keys = dict.Keys;
 
     await Assert.That(keys)
-        .HasCount(3)
+        .Count().IsEqualTo(3)
         .And.Contains("a")
         .And.Contains("b")
         .And.Contains("c");
@@ -329,7 +329,7 @@ public async Task Dictionary_Values()
     var values = dict.Values;
 
     await Assert.That(values)
-        .HasCount(3)
+        .Count().IsEqualTo(3)
         .And.Contains(1)
         .And.Contains(2)
         .And.All(v => v > 0);
@@ -376,7 +376,7 @@ public async Task Chained_Dictionary_Assertions()
 
     await Assert.That(dict)
         .IsNotEmpty()
-        .And.HasCount(3)
+        .And.Count().IsEqualTo(3)
         .And.ContainsKey("apple")
         .And.ContainsKey("banana")
         .And.ContainsValue(2)
@@ -397,7 +397,7 @@ public async Task Concurrent_Dictionary()
     concurrent.TryAdd("b", 2);
 
     await Assert.That(concurrent)
-        .HasCount(2)
+        .Count().IsEqualTo(2)
         .And.ContainsKey("a");
 }
 ```
@@ -412,7 +412,7 @@ public async Task ReadOnly_Dictionary()
     var readOnly = new ReadOnlyDictionary<string, int>(dict);
 
     await Assert.That(readOnly)
-        .HasCount(1)
+        .Count().IsEqualTo(1)
         .And.ContainsKey("a");
 }
 ```

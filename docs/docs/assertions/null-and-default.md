@@ -69,7 +69,7 @@ public async Task Chained_After_Null_Check()
     await Assert.That(input)
         .IsNotNull()
         .And.IsNotEmpty()  // Compiler knows input is not null
-        .And.HasLength().GreaterThan(5);
+        .And.Length().IsGreaterThan(5);
 }
 ```
 

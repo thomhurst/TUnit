@@ -98,7 +98,7 @@ public async Task Collection_Does_Not_Contain_Matching()
 
 ## Count Assertions
 
-### HasCount
+### Count
 
 Tests that a collection has an exact count:
 
@@ -108,7 +108,7 @@ public async Task Collection_Has_Count()
 {
     var numbers = new[] { 1, 2, 3, 4, 5 };
 
-    await Assert.That(numbers).HasCount(5);
+    await Assert.That(numbers).Count().IsEqualTo(5);
 }
 ```
 
@@ -123,11 +123,11 @@ public async Task Count_With_Comparison()
     var numbers = new[] { 1, 2, 3, 4, 5 };
 
     await Assert.That(numbers)
-        .HasCount().EqualTo(5);
+        .Count().IsEqualTo(5);
 
     await Assert.That(numbers)
-        .HasCount().GreaterThan(3)
-        .And.HasCount().LessThan(10);
+        .Count().IsGreaterThan(3)
+        .And.Count().IsLessThan(10);
 }
 ```
 
@@ -160,7 +160,7 @@ public async Task Collection_Is_Empty()
     var empty = new List<int>();
 
     await Assert.That(empty).IsEmpty();
-    await Assert.That(empty).HasCount(0);
+    await Assert.That(empty).Count().IsEqualTo(0);
 }
 ```
 
@@ -638,7 +638,7 @@ public async Task Filter_And_Assert()
     var evens = numbers.Where(n => n % 2 == 0).ToArray();
 
     await Assert.That(evens)
-        .HasCount(5)
+        .Count().IsEqualTo(5)
         .And.All(n => n % 2 == 0);
 }
 ```
@@ -659,7 +659,7 @@ public async Task LINQ_Query_Results()
     var adults = users.Where(u => u.Age >= 18).ToArray();
 
     await Assert.That(adults)
-        .HasCount(3)
+        .Count().IsEqualTo(3)
         .And.All(u => u.Age >= 18);
 }
 ```
@@ -708,7 +708,7 @@ public async Task Map_And_Verify()
     var names = users.Select(u => u.Name).ToArray();
 
     await Assert.That(names)
-        .HasCount(2)
+        .Count().IsEqualTo(2)
         .And.Contains("Alice")
         .And.Contains("Bob")
         .And.All(name => !string.IsNullOrEmpty(name));
@@ -745,12 +745,12 @@ public async Task Nested_Collections()
         new[] { 7, 8, 9 }
     };
 
-    await Assert.That(matrix).HasCount(3);
+    await Assert.That(matrix).Count().IsEqualTo(3);
     await Assert.That(matrix).All(row => row.Length == 3);
 
     // Flatten and assert
     var flattened = matrix.SelectMany(x => x).ToArray();
-    await Assert.That(flattened).HasCount(9);
+    await Assert.That(flattened).Count().IsEqualTo(9);
 }
 ```
 
@@ -768,7 +768,7 @@ public async Task Collection_Of_Collections()
     };
 
     await Assert.That(groups)
-        .HasCount(3)
+        .Count().IsEqualTo(3)
         .And.All(group => group.Count > 0);
 }
 ```
@@ -783,7 +783,7 @@ public async Task Chained_Collection_Assertions()
 
     await Assert.That(numbers)
         .IsNotEmpty()
-        .And.HasCount(5)
+        .And.Count().IsEqualTo(5)
         .And.Contains(3)
         .And.DoesNotContain(10)
         .And.IsInOrder()
@@ -807,7 +807,7 @@ public async Task Materialize_Before_Multiple_Assertions()
     // Materialize once to avoid re-execution
     var materialized = query.ToArray();
 
-    await Assert.That(materialized).HasCount().GreaterThan(1000);
+    await Assert.That(materialized).Count().IsGreaterThan(1000);
     await Assert.That(materialized).Contains(100);
     await Assert.That(materialized).All(n => n % 2 == 0);
 }
@@ -822,7 +822,7 @@ public async Task HashSet_Assertions()
     var set = new HashSet<int> { 1, 2, 3, 4, 5 };
 
     await Assert.That(set)
-        .HasCount(5)
+        .Count().IsEqualTo(5)
         .And.Contains(3)
         .And.HasDistinctItems();
 }

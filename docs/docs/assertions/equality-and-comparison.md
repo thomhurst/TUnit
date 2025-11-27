@@ -54,7 +54,7 @@ public async Task Using_EqualTo_Alias()
     var numbers = new[] { 1, 2, 3 };
 
     await Assert.That(numbers)
-        .HasCount().EqualTo(3)
+        .Count().IsEqualTo(3)
         .And.Contains(2);
 }
 ```

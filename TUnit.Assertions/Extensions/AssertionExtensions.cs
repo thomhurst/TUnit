@@ -684,9 +684,21 @@ public static class AssertionExtensions
     }
 
     /// <summary>
+    /// Gets the length of the string as an integer for numeric assertions.
+    /// Example: await Assert.That(str).Length().IsGreaterThan(5);
+    /// </summary>
+    public static StringLengthValueAssertion Length(
+        this IAssertionSource<string> source)
+    {
+        source.Context.ExpressionBuilder.Append(".Length()");
+        return new StringLengthValueAssertion(source.Context);
+    }
+
+    /// <summary>
     /// Returns a wrapper for string length assertions.
     /// Example: await Assert.That(str).HasLength().EqualTo(5);
     /// </summary>
+    [Obsolete("Use Length() instead, which provides all numeric assertion methods. Example: Assert.That(str).Length().IsGreaterThan(5)")]
     public static LengthWrapper HasLength(
         this IAssertionSource<string> source)
     {
@@ -698,6 +710,7 @@ public static class AssertionExtensions
     /// Asserts that the string has the expected length.
     /// Example: await Assert.That(str).HasLength(5);
     /// </summary>
+    [Obsolete("Use Length().IsEqualTo(expectedLength) instead.")]
     public static StringLengthAssertion HasLength(
         this IAssertionSource<string> source,
         int expectedLength,

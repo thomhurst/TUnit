@@ -188,7 +188,7 @@ public class StringTests
 
         // Assert
         await Assert.That(result).IsEqualTo("HELLO");
-        await Assert.That(result).HasLength(5);
+        await Assert.That(result).Length().IsEqualTo(5);
         await Assert.That(result.StartsWith("HE")).IsTrue();
     }
 }

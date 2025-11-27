@@ -90,7 +90,7 @@ public async Task ComplexCollectionAssertions()
 
     // Assert multiple conditions on a collection
     await Assert.That(orders)
-        .HasCount().IsGreaterThan(0)
+        .Count().IsGreaterThan(0)
         .And.Contains(o => o.Status == OrderStatus.Completed)
         .And.DoesNotContain(o => o.Total < 0)
         .And.HasDistinctItems();
@@ -146,7 +146,7 @@ public async Task DetailedExceptionAssertions()
     var exception = await Assert.That(() => ParallelOperationAsync())
         .Throws<AggregateException>();
 
-    await Assert.That(exception.InnerExceptions).HasCount(3);
+    await Assert.That(exception.InnerExceptions).Count().IsEqualTo(3);
     await Assert.That(exception.InnerExceptions).All(e => e is TaskCanceledException);
 }
 ```
@@ -169,7 +169,7 @@ public async Task CustomAssertionConditions()
     
     // Combine built-in and custom assertions
     await Assert.That(measurements)
-        .HasCount().GreaterThan(100)
+        .Count().IsGreaterThan(100)
         .And.All(m => m > 0)
         .And.Satisfies(IsNormallyDistributed, "Data should be normally distributed");
 }
@@ -242,7 +242,7 @@ public async Task StringPatternAssertions()
         .StartsWith("Report Generated:")
         .And.Contains("Total Items:")
         .And.DoesNotContain("null")
-        .And.HasLength().IsBetween(1000, 5000);
+        .And.Length().IsBetween(1000, 5000);
 }
 ```
 
@@ -299,7 +299,7 @@ public async Task PerformanceAssertions()
     await Assert.That(results.Max())
         .IsLessThan(500); // No operation over 500ms
     
-    await Assert.That(results.Where(r => r > 200).HasCount())
+    await Assert.That(results.Where(r => r > 200).Count())
         .IsLessThan(5); // Less than 5% over 200ms
 }
 ```

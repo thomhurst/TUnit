@@ -89,7 +89,7 @@ public class OrderServiceTests
         });
 
         await Assert.That(order.Id).IsGreaterThan(0);
-        await Assert.That(order.Items).HasCount().EqualTo(1);
+        await Assert.That(order.Items).Count().IsEqualTo(1);
     }
 }
 ```
@@ -616,7 +616,7 @@ public class OrderRepositoryIntegrationTests
         var loaded = await repository.GetWithItemsAsync(order.Id);
 
         await Assert.That(loaded).IsNotNull();
-        await Assert.That(loaded!.Items).HasCount().EqualTo(2);
+        await Assert.That(loaded!.Items).Count().IsEqualTo(2);
     }
 }
 ```

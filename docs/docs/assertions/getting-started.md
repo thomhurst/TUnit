@@ -63,7 +63,7 @@ await Assert.That(input).IsNotEmpty();
 
 ```csharp
 await Assert.That(numbers).Contains(42);
-await Assert.That(items).HasCount(5);
+await Assert.That(items).Count().IsEqualTo(5);
 await Assert.That(list).IsNotEmpty();
 await Assert.That(values).All(x => x > 0);
 ```
@@ -99,8 +99,8 @@ Combine multiple assertions on the same value using `.And`:
 await Assert.That(username)
     .IsNotNull()
     .And.IsNotEmpty()
-    .And.HasLength().GreaterThan(3)
-    .And.HasLength().LessThan(20);
+    .And.Length().IsGreaterThan(3)
+    .And.Length().IsLessThan(20);
 ```
 
 Use `.Or` when any condition can be true:
@@ -153,7 +153,7 @@ Collections have rich assertion support:
 var numbers = new[] { 1, 2, 3, 4, 5 };
 
 // Count and emptiness
-await Assert.That(numbers).HasCount(5);
+await Assert.That(numbers).Count().IsEqualTo(5);
 await Assert.That(numbers).IsNotEmpty();
 
 // Membership
@@ -397,7 +397,7 @@ Now that you understand the basics, explore specific assertion types:
 | Null/Default | `IsNull()`, `IsNotNull()`, `IsDefault()` |
 | Boolean | `IsTrue()`, `IsFalse()` |
 | Strings | `Contains()`, `StartsWith()`, `Matches()` |
-| Collections | `Contains()`, `HasCount()`, `All()`, `Any()` |
+| Collections | `Contains()`, `Count()`, `All()`, `Any()` |
 | Exceptions | `Throws<T>()`, `ThrowsNothing()` |
 | Types | `IsTypeOf<T>()`, `IsAssignableTo<T>()` |
 | Async | `CompletesWithin()`, async exception testing |
