@@ -13,4 +13,11 @@ public interface IHookExecutor
     ValueTask ExecuteAfterAssemblyHook(MethodMetadata hookMethodInfo, AssemblyHookContext context, Func<ValueTask> action);
     ValueTask ExecuteAfterClassHook(MethodMetadata hookMethodInfo, ClassHookContext context, Func<ValueTask> action);
     ValueTask ExecuteAfterTestHook(MethodMetadata hookMethodInfo, TestContext context, Func<ValueTask> action);
+
+#if NETSTANDARD2_0
+    ValueTask ExecuteDisposal(TestContext context, Func<ValueTask> action);
+#else
+    ValueTask ExecuteDisposal(TestContext context, Func<ValueTask> action)
+        => action();
+#endif
 }

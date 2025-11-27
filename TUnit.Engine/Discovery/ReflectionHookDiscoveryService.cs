@@ -1029,4 +1029,7 @@ internal class DefaultHookExecutor : IHookExecutor
 
     public ValueTask ExecuteAfterTestSessionHook(MethodMetadata testMethod, TestSessionContext context, Func<ValueTask> action)
         => action();
+
+    public ValueTask ExecuteDisposal(TestContext context, Func<ValueTask> action)
+        => action();
 }

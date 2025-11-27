@@ -1,6 +1,7 @@
 using System.Linq;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
+using TUnit.Core.Interfaces;
 using TUnit.Core.Logging;
 using TUnit.Core.Tracking;
 using TUnit.Engine.Helpers;
@@ -152,7 +153,8 @@ internal sealed class TestCoordinator : ITestCoordinator
 
                             try
                             {
-                                await TestExecutor.DisposeTestInstance(test).ConfigureAwait(false);
+                                var hookExecutor = test.Context.CustomHookExecutor;
+                                await TestExecutor.DisposeTestInstance(test, hookExecutor).ConfigureAwait(false);
                             }
                             catch (Exception disposeEx)
                             {

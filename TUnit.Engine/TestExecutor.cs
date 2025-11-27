@@ -247,12 +247,12 @@ internal class TestExecutor
         return _contextProvider;
     }
 
-    internal static async Task DisposeTestInstance(AbstractExecutableTest test)
+    internal static async Task DisposeTestInstance(AbstractExecutableTest test, IHookExecutor? hookExecutor = null)
     {
         // Dispose the test instance if it's disposable
         if (test.Context.Metadata.TestDetails.ClassInstance is not SkippedTestInstance)
         {
-            try
+            async ValueTask DisposeAsync()
             {
                 var instance = test.Context.Metadata.TestDetails.ClassInstance;
 
@@ -264,6 +264,18 @@ internal class TestExecutor
                     case IDisposable disposable:
                         disposable.Dispose();
                         break;
+                }
+            }
+
+            try
+            {
+                if (hookExecutor != null)
+                {
+                    await hookExecutor.ExecuteDisposal(test.Context, DisposeAsync).ConfigureAwait(false);
+                }
+                else
+                {
+                    await DisposeAsync().ConfigureAwait(false);
                 }
             }
             catch
