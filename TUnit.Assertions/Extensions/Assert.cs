@@ -87,6 +87,20 @@ public static class Assert
     }
 
     /// <summary>
+    /// Creates an assertion for a synchronous function that returns a collection.
+    /// This overload enables collection-specific assertions (IsEmpty, IsNotEmpty, HasCount, etc.) on lambda-wrapped collections.
+    /// Example: await Assert.That(() => GetItems()).IsEmpty();
+    /// Example: await Assert.That(() => GetItems()).HasCount(5);
+    /// </summary>
+    [OverloadResolutionPriority(1)]
+    public static FuncCollectionAssertion<TItem> That<TItem>(
+        Func<IEnumerable<TItem>?> func,
+        [CallerArgumentExpression(nameof(func))] string? expression = null)
+    {
+        return new FuncCollectionAssertion<TItem>(func!, expression);
+    }
+
+    /// <summary>
     /// Creates an assertion for a synchronous function.
     /// Example: await Assert.That(() => GetValue()).IsGreaterThan(10);
     /// </summary>
@@ -95,6 +109,20 @@ public static class Assert
         [CallerArgumentExpression(nameof(func))] string? expression = null)
     {
         return new FuncAssertion<TValue>(func, expression);
+    }
+
+    /// <summary>
+    /// Creates an assertion for an asynchronous function that returns a collection.
+    /// This overload enables collection-specific assertions (IsEmpty, IsNotEmpty, HasCount, etc.) on async lambda-wrapped collections.
+    /// Example: await Assert.That(async () => await GetItemsAsync()).IsEmpty();
+    /// Example: await Assert.That(async () => await GetItemsAsync()).HasCount(5);
+    /// </summary>
+    [OverloadResolutionPriority(1)]
+    public static AsyncFuncCollectionAssertion<TItem> That<TItem>(
+        Func<Task<IEnumerable<TItem>?>> func,
+        [CallerArgumentExpression(nameof(func))] string? expression = null)
+    {
+        return new AsyncFuncCollectionAssertion<TItem>(func!, expression);
     }
 
     /// <summary>
