@@ -1266,8 +1266,8 @@ public class PerformantTests
 ```csharp
 // ❌ Bad: Expensive operation in assertion
 await Assert.That(await GetAllUsersFromDatabase())
-    .HasCount()
-    .EqualTo(1000);
+    .Count()
+    .IsEqualTo(1000);
 
 // ✅ Good: Use efficient queries
 var userCount = await GetUserCountFromDatabase();
@@ -1290,7 +1290,7 @@ public async Task EfficientValidation()
     }
     
     // More expensive validations only if needed
-    await Assert.That(result.Items).HasCount().GreaterThan(0);
+    await Assert.That(result.Items).Count().IsGreaterThan(0);
 }
 ```
 
@@ -2264,7 +2264,7 @@ public async Task ComplexCollectionAssertions()
 
     // Assert multiple conditions on a collection
     await Assert.That(orders)
-        .HasCount().IsGreaterThan(0)
+        .Count().IsGreaterThan(0)
         .And.Contains(o => o.Status == OrderStatus.Completed)
         .And.DoesNotContain(o => o.Total < 0)
         .And.HasDistinctItems();
@@ -2320,7 +2320,7 @@ public async Task DetailedExceptionAssertions()
     var exception = await Assert.That(() => ParallelOperationAsync())
         .Throws<AggregateException>();
 
-    await Assert.That(exception.InnerExceptions).HasCount(3);
+    await Assert.That(exception.InnerExceptions).Count().IsEqualTo(3);
     await Assert.That(exception.InnerExceptions).All(e => e is TaskCanceledException);
 }
 ```
@@ -2343,7 +2343,7 @@ public async Task CustomAssertionConditions()
     
     // Combine built-in and custom assertions
     await Assert.That(measurements)
-        .HasCount().GreaterThan(100)
+        .Count().IsGreaterThan(100)
         .And.All(m => m > 0)
         .And.Satisfies(IsNormallyDistributed, "Data should be normally distributed");
 }
@@ -2416,7 +2416,7 @@ public async Task StringPatternAssertions()
         .StartsWith("Report Generated:")
         .And.Contains("Total Items:")
         .And.DoesNotContain("null")
-        .And.HasLength().IsBetween(1000, 5000);
+        .And.Length().IsBetween(1000, 5000);
 }
 ```
 
@@ -2473,7 +2473,7 @@ public async Task PerformanceAssertions()
     await Assert.That(results.Max())
         .IsLessThan(500); // No operation over 500ms
     
-    await Assert.That(results.Where(r => r > 200).HasCount())
+    await Assert.That(results.Where(r => r > 200).Count())
         .IsLessThan(5); // Less than 5% over 200ms
 }
 ```
@@ -3067,7 +3067,7 @@ public async Task Collection_Does_Not_Contain_Matching()
 
 ## Count Assertions
 
-### HasCount
+### Count
 
 Tests that a collection has an exact count:
 
@@ -3077,7 +3077,7 @@ public async Task Collection_Has_Count()
 {
     var numbers = new[] { 1, 2, 3, 4, 5 };
 
-    await Assert.That(numbers).HasCount(5);
+    await Assert.That(numbers).Count().IsEqualTo(5);
 }
 ```
 
@@ -3092,11 +3092,11 @@ public async Task Count_With_Comparison()
     var numbers = new[] { 1, 2, 3, 4, 5 };
 
     await Assert.That(numbers)
-        .HasCount().EqualTo(5);
+        .Count().IsEqualTo(5);
 
     await Assert.That(numbers)
-        .HasCount().GreaterThan(3)
-        .And.HasCount().LessThan(10);
+        .Count().IsGreaterThan(3)
+        .And.Count().IsLessThan(10);
 }
 ```
 
@@ -3129,7 +3129,7 @@ public async Task Collection_Is_Empty()
     var empty = new List<int>();
 
     await Assert.That(empty).IsEmpty();
-    await Assert.That(empty).HasCount(0);
+    await Assert.That(empty).Count().IsEqualTo(0);
 }
 ```
 
@@ -3607,7 +3607,7 @@ public async Task Filter_And_Assert()
     var evens = numbers.Where(n => n % 2 == 0).ToArray();
 
     await Assert.That(evens)
-        .HasCount(5)
+        .Count().IsEqualTo(5)
         .And.All(n => n % 2 == 0);
 }
 ```
@@ -3628,7 +3628,7 @@ public async Task LINQ_Query_Results()
     var adults = users.Where(u => u.Age >= 18).ToArray();
 
     await Assert.That(adults)
-        .HasCount(3)
+        .Count().IsEqualTo(3)
         .And.All(u => u.Age >= 18);
 }
 ```
@@ -3677,7 +3677,7 @@ public async Task Map_And_Verify()
     var names = users.Select(u => u.Name).ToArray();
 
     await Assert.That(names)
-        .HasCount(2)
+        .Count().IsEqualTo(2)
         .And.Contains("Alice")
         .And.Contains("Bob")
         .And.All(name => !string.IsNullOrEmpty(name));
@@ -3714,12 +3714,12 @@ public async Task Nested_Collections()
         new[] { 7, 8, 9 }
     };
 
-    await Assert.That(matrix).HasCount(3);
+    await Assert.That(matrix).Count().IsEqualTo(3);
     await Assert.That(matrix).All(row => row.Length == 3);
 
     // Flatten and assert
     var flattened = matrix.SelectMany(x => x).ToArray();
-    await Assert.That(flattened).HasCount(9);
+    await Assert.That(flattened).Count().IsEqualTo(9);
 }
 ```
 
@@ -3737,7 +3737,7 @@ public async Task Collection_Of_Collections()
     };
 
     await Assert.That(groups)
-        .HasCount(3)
+        .Count().IsEqualTo(3)
         .And.All(group => group.Count > 0);
 }
 ```
@@ -3752,7 +3752,7 @@ public async Task Chained_Collection_Assertions()
 
     await Assert.That(numbers)
         .IsNotEmpty()
-        .And.HasCount(5)
+        .And.Count().IsEqualTo(5)
         .And.Contains(3)
         .And.DoesNotContain(10)
         .And.IsInOrder()
@@ -3776,7 +3776,7 @@ public async Task Materialize_Before_Multiple_Assertions()
     // Materialize once to avoid re-execution
     var materialized = query.ToArray();
 
-    await Assert.That(materialized).HasCount().GreaterThan(1000);
+    await Assert.That(materialized).Count().IsGreaterThan(1000);
     await Assert.That(materialized).Contains(100);
     await Assert.That(materialized).All(n => n % 2 == 0);
 }
@@ -3791,7 +3791,7 @@ public async Task HashSet_Assertions()
     var set = new HashSet<int> { 1, 2, 3, 4, 5 };
 
     await Assert.That(set)
-        .HasCount(5)
+        .Count().IsEqualTo(5)
         .And.Contains(3)
         .And.HasDistinctItems();
 }
@@ -4600,7 +4600,7 @@ public async Task Dictionary_Count()
         ["c"] = 3
     };
 
-    await Assert.That(dict).HasCount(3);
+    await Assert.That(dict).Count().IsEqualTo(3);
 }
 ```
 
@@ -4719,7 +4719,7 @@ public async Task Lookup_Table()
     };
 
     await Assert.That(statusCodes)
-        .HasCount(3)
+        .Count().IsEqualTo(3)
         .And.ContainsKey(200)
         .And.ContainsValue("OK");
 }
@@ -4739,7 +4739,7 @@ public async Task Cache_Contains_Entry()
 
     await Assert.That(cache)
         .ContainsKey("user:123")
-        .And.HasCount(2)
+        .And.Count().IsEqualTo(2)
         .And.IsNotEmpty();
 }
 ```
@@ -4802,7 +4802,7 @@ public async Task Dictionary_Keys()
     var keys = dict.Keys;
 
     await Assert.That(keys)
-        .HasCount(3)
+        .Count().IsEqualTo(3)
         .And.Contains("a")
         .And.Contains("b")
         .And.Contains("c");
@@ -4825,7 +4825,7 @@ public async Task Dictionary_Values()
     var values = dict.Values;
 
     await Assert.That(values)
-        .HasCount(3)
+        .Count().IsEqualTo(3)
         .And.Contains(1)
         .And.Contains(2)
         .And.All(v => v > 0);
@@ -4872,7 +4872,7 @@ public async Task Chained_Dictionary_Assertions()
 
     await Assert.That(dict)
         .IsNotEmpty()
-        .And.HasCount(3)
+        .And.Count().IsEqualTo(3)
         .And.ContainsKey("apple")
         .And.ContainsKey("banana")
         .And.ContainsValue(2)
@@ -4893,7 +4893,7 @@ public async Task Concurrent_Dictionary()
     concurrent.TryAdd("b", 2);
 
     await Assert.That(concurrent)
-        .HasCount(2)
+        .Count().IsEqualTo(2)
         .And.ContainsKey("a");
 }
 ```
@@ -4908,7 +4908,7 @@ public async Task ReadOnly_Dictionary()
     var readOnly = new ReadOnlyDictionary<string, int>(dict);
 
     await Assert.That(readOnly)
-        .HasCount(1)
+        .Count().IsEqualTo(1)
         .And.ContainsKey("a");
 }
 ```
@@ -5097,7 +5097,7 @@ public async Task Using_EqualTo_Alias()
     var numbers = new[] { 1, 2, 3 };
 
     await Assert.That(numbers)
-        .HasCount().EqualTo(3)
+        .Count().IsEqualTo(3)
         .And.Contains(2);
 }
 ```
@@ -6467,7 +6467,7 @@ public class HasDetailAssertion : Assertion<ProblemDetails>
 TUnit includes several built-in examples of type conversion assertions:
 
 - `WhenParsedInto<T>()` - Converts a string to a parsed type (e.g., `await Assert.That("123").WhenParsedInto<int>().IsEqualTo(123)`)
-- `IsTypeOf<T>()` - Converts to a specific type (e.g., `await Assert.That(obj).IsTypeOf<StringBuilder>().HasLength(5)`)
+- `IsTypeOf<T>()` - Converts to a specific type (e.g., `await Assert.That(obj).IsTypeOf<StringBuilder>().Length().IsEqualTo(5)`)
 
 ---
 
@@ -7237,7 +7237,7 @@ await Assert.That(input).IsNotEmpty();
 
 ```csharp
 await Assert.That(numbers).Contains(42);
-await Assert.That(items).HasCount(5);
+await Assert.That(items).Count().IsEqualTo(5);
 await Assert.That(list).IsNotEmpty();
 await Assert.That(values).All(x => x > 0);
 ```
@@ -7273,8 +7273,8 @@ Combine multiple assertions on the same value using `.And`:
 await Assert.That(username)
     .IsNotNull()
     .And.IsNotEmpty()
-    .And.HasLength().GreaterThan(3)
-    .And.HasLength().LessThan(20);
+    .And.Length().IsGreaterThan(3)
+    .And.Length().IsLessThan(20);
 ```
 
 Use `.Or` when any condition can be true:
@@ -7327,7 +7327,7 @@ Collections have rich assertion support:
 var numbers = new[] { 1, 2, 3, 4, 5 };
 
 // Count and emptiness
-await Assert.That(numbers).HasCount(5);
+await Assert.That(numbers).Count().IsEqualTo(5);
 await Assert.That(numbers).IsNotEmpty();
 
 // Membership
@@ -7571,7 +7571,7 @@ Now that you understand the basics, explore specific assertion types:
 | Null/Default | `IsNull()`, `IsNotNull()`, `IsDefault()` |
 | Boolean | `IsTrue()`, `IsFalse()` |
 | Strings | `Contains()`, `StartsWith()`, `Matches()` |
-| Collections | `Contains()`, `HasCount()`, `All()`, `Any()` |
+| Collections | `Contains()`, `Count()`, `All()`, `Any()` |
 | Exceptions | `Throws<T>()`, `ThrowsNothing()` |
 | Types | `IsTypeOf<T>()`, `IsAssignableTo<T>()` |
 | Async | `CompletesWithin()`, async exception testing |
@@ -7663,7 +7663,7 @@ public async Task ComplexMemberAssertions()
     await Assert.That(team)
         .Member(t => t.Name, name => name.StartsWith("Team"))
         .And.Member(t => t.Members, members => members
-            .HasCount().IsGreaterThan(0)
+            .Count().IsGreaterThan(0)
             .And.All(m => m.IsActive)
             .And.Any(m => m.Role == "Lead"))
         .And.Member(t => t.CreatedDate, date => date
@@ -7725,7 +7725,7 @@ public async Task NestedObjectAssertions()
         .And.Member(c => c.Address.City, city => city.IsEqualTo("Seattle"))
         .And.Member(c => c.Address.ZipCode, zip => zip.Matches(@"^\d{5}$"))
         .And.Member(c => c.Employees, employees => employees
-            .HasCount().IsBetween(100, 500)
+            .Count().IsBetween(100, 500)
             .And.All(e => e.Email.EndsWith("@techcorp.com")));
 }
 ```
@@ -7800,7 +7800,7 @@ public async Task Chained_After_Null_Check()
     await Assert.That(input)
         .IsNotNull()
         .And.IsNotEmpty()  // Compiler knows input is not null
-        .And.HasLength().GreaterThan(5);
+        .And.Length().IsGreaterThan(5);
 }
 ```
 
@@ -8953,13 +8953,13 @@ public async Task PositionAndLengthAssertions()
     // Assert that match has specific length
     await Assert.That(text)
         .Matches(pattern)
-        .HasLength(3);
+        .Length().IsEqualTo(3);
 
     // Combine with group assertions
     await Assert.That(text)
         .Matches(pattern)
         .AtIndex(12)
-        .And.HasLength(3);
+        .And.Length().IsEqualTo(3);
 }
 ```
 
@@ -8994,7 +8994,7 @@ public async Task ProductCodeValidation()
         .Matches(pattern)
         .And.Group("code", code => code.StartsWith("ABC"))
         .And.Group("price", price => price.Contains(".99"))
-        .And.Group("stock", stock => stock.HasLength(2));
+        .And.Group("stock", stock => stock.Length().IsEqualTo(2));
 }
 ```
 
@@ -9104,9 +9104,9 @@ public async Task CompleteEmailValidation()
         .And.Group("local", local => local.StartsWith("john"))
         .And.Group("subdomain", sub => sub.IsEqualTo("mail"))
         .And.Group("domain", domain => domain.IsEqualTo("example"))
-        .And.Group("tld", tld => tld.HasLength(3))
+        .And.Group("tld", tld => tld.Length().IsEqualTo(3))
         .And.AtIndex(0)
-        .And.HasLength(email.Length);
+        .And.Length().IsEqualTo(email.Length);
 }
 ```
 
@@ -10262,7 +10262,7 @@ public async Task String_Is_Not_Empty()
 }
 ```
 
-### HasLength
+### Length
 
 Tests that a string has a specific length:
 
@@ -10272,7 +10272,7 @@ public async Task String_Has_Length()
 {
     var code = "ABC123";
 
-    await Assert.That(code).HasLength(6);
+    await Assert.That(code).Length().IsEqualTo(6);
 }
 ```
 
@@ -10285,12 +10285,12 @@ public async Task Length_With_Comparison()
     var username = "alice";
 
     await Assert.That(username)
-        .HasLength().GreaterThan(3)
-        .And.HasLength().LessThan(20);
+        .Length().IsGreaterThan(3)
+        .And.Length().IsLessThan(20);
 }
 ```
 
-Or more concisely:
+Using `IsBetween`:
 
 ```csharp
 [Test]
@@ -10298,7 +10298,7 @@ public async Task Length_Range()
 {
     var username = "alice";
 
-    await Assert.That(username.Length).IsBetween(3, 20);
+    await Assert.That(username).Length().IsBetween(3, 20);
 }
 ```
 
@@ -10430,8 +10430,8 @@ public async Task Validate_Username()
     var username = "alice_123";
 
     await Assert.That(username)
-        .HasLength().GreaterThanOrEqualTo(3)
-        .And.HasLength().LessThanOrEqualTo(20)
+        .Length().IsGreaterThanOrEqualTo(3)
+        .And.Length().IsLessThanOrEqualTo(20)
         .And.Matches(@"^[a-zA-Z0-9_]+$")
         .And.DoesNotContain(" ");
 }
@@ -10446,7 +10446,7 @@ public async Task Validate_Password()
     var password = "SecureP@ss123";
 
     await Assert.That(password)
-        .HasLength().GreaterThanOrEqualTo(8)
+        .Length().IsGreaterThanOrEqualTo(8)
         .And.Matches(@"[A-Z]")  // Has uppercase
         .And.Matches(@"[a-z]")  // Has lowercase
         .And.Matches(@"\d")     // Has digit
@@ -10571,7 +10571,7 @@ public async Task Chained_String_Assertions()
         .And.Contains("World")
         .And.StartsWith("Hello")
         .And.EndsWith("!")
-        .And.HasLength(13);
+        .And.Length().IsEqualTo(13);
 }
 ```
 
@@ -16162,7 +16162,7 @@ public class StringTests
 
         // Assert
         await Assert.That(result).IsEqualTo("HELLO");
-        await Assert.That(result).HasLength(5);
+        await Assert.That(result).Length().IsEqualTo(5);
         await Assert.That(result.StartsWith("HE")).IsTrue();
     }
 }
@@ -16998,7 +16998,7 @@ public class OrderServiceTests
         });
 
         await Assert.That(order.Id).IsGreaterThan(0);
-        await Assert.That(order.Items).HasCount().EqualTo(1);
+        await Assert.That(order.Items).Count().IsEqualTo(1);
     }
 }
 ```
@@ -17525,7 +17525,7 @@ public class OrderRepositoryIntegrationTests
         var loaded = await repository.GetWithItemsAsync(order.Id);
 
         await Assert.That(loaded).IsNotNull();
-        await Assert.That(loaded!.Items).HasCount().EqualTo(2);
+        await Assert.That(loaded!.Items).Count().IsEqualTo(2);
     }
 }
 ```
@@ -19185,7 +19185,7 @@ await Assert.That(actual).IsEqualTo(expected);
 await Assert.That(value).IsTrue();
 await Assert.That(value).IsNull();
 await Assert.That(text).Contains("substring");
-await Assert.That(collection).HasCount().EqualTo(5);
+await Assert.That(collection).Count().IsEqualTo(5);
 ```
 
 ### Collection Assertions
@@ -19658,7 +19658,7 @@ public async Task ComplexAssertions()
     await Assert.That(text).Matches(@"^Hello");
 
     // Collection assertions
-    await Assert.That(list).HasCount().EqualTo(5);
+    await Assert.That(list).Count().IsEqualTo(5);
     await Assert.That(list).Contains(3);
     await Assert.That(list).AllSatisfy(x => x > 0);
     await Assert.That(list).IsInAscendingOrder();
@@ -21143,7 +21143,7 @@ public async Task Collection_Assertions()
     await Assert.That(list).DoesNotContain(5);
     await Assert.That(Array.Empty<int>()).IsEmpty();
     await Assert.That(list).IsNotEmpty();
-    await Assert.That(list).HasCount().EqualTo(3);
+    await Assert.That(list).Count().IsEqualTo(3);
 }
 ```
 
@@ -26439,7 +26439,7 @@ await Assert.That(actual).IsEquivalentTo(expected, CollectionOrdering.Matching);
 Or assert on elements individually:
 
 ```csharp
-await Assert.That(actual).HasCount().EqualTo(expected.Length);
+await Assert.That(actual).Count().IsEqualTo(expected.Length);
 for (int i = 0; i < expected.Length; i++)
 {
     await Assert.That(actual[i]).IsEqualTo(expected[i]);
@@ -26459,7 +26459,7 @@ var expected = new[]
 await Assert.That(actual).IsEquivalentTo(expected);
 
 // More reliable - assert on properties
-await Assert.That(actual).HasCount().EqualTo(2);
+await Assert.That(actual).Count().IsEqualTo(2);
 await Assert.That(actual[0].Name).IsEqualTo("Alice");
 await Assert.That(actual[1].Name).IsEqualTo("Bob");
 
@@ -26478,7 +26478,7 @@ var actual = new[] { (1, "a"), (2, "b") };
 // await Assert.That(actual).IsEquivalentTo(expected);
 
 // Workaround - assert individual elements
-await Assert.That(actual).HasCount().EqualTo(2);
+await Assert.That(actual).Count().IsEqualTo(2);
 await Assert.That(actual[0]).IsEqualTo((1, "a"));
 await Assert.That(actual[1]).IsEqualTo((2, "b"));
 ```
@@ -26492,7 +26492,7 @@ var list = new List<int> { 1, 2, 3 };
 await Assert.That(list).IsEquivalentTo(new[] { 1, 2, 3 });
 
 // Check specific properties
-await Assert.That(list).HasCount().EqualTo(3);
+await Assert.That(list).Count().IsEqualTo(3);
 await Assert.That(list).Contains(2);
 await Assert.That(list).DoesNotContain(5);
 ```
