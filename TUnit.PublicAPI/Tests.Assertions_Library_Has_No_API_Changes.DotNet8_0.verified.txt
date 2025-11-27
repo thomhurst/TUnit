@@ -19,6 +19,8 @@ namespace
         public static . That(. task, [.("task")] string? expression = null) { }
         public static .<string> That(string? value, [.("value")] string? expression = null) { }
         public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
+        public static .<TItem> That<TItem>(<.<TItem>?> func, [.("func")] string? expression = null) { }
+        public static .<TItem> That<TItem>(<.<.<TItem>?>> func, [.("func")] string? expression = null) { }
         public static .<TValue> That<TValue>(<.<TValue?>> func, [.("func")] string? expression = null) { }
         public static .<TValue> That<TValue>(<TValue?> func, [.("func")] string? expression = null) { }
         public static .<TValue> That<TValue>(.<TValue> task, [.("task")] string? expression = null) { }
@@ -4313,6 +4315,14 @@ namespace .Sources
         public .<TException> ThrowsExactly<TException>()
             where TException :  { }
     }
+    public class AsyncFuncCollectionAssertion<TItem> : .<.<TItem>, TItem>, ., .<.<TItem>>, .<.<TItem>>
+    {
+        public AsyncFuncCollectionAssertion(<.<.<TItem>?>> func, string? expression) { }
+        public .<TException> Throws<TException>()
+            where TException :  { }
+        public .<TException> ThrowsExactly<TException>()
+            where TException :  { }
+    }
     public abstract class CollectionAssertionBase<TCollection, TItem> : .<TCollection>, ., .<TCollection>
         where TCollection : .<TItem>
     {
@@ -4387,6 +4397,14 @@ namespace .Sources
         public .<TTarget, TValue> IsNotAssignableTo<TTarget>() { }
         public .<TValue, TExpected> IsNotTypeOf<TExpected>() { }
         public .<TValue, TExpected> IsTypeOf<TExpected>() { }
+        public .<TException> Throws<TException>()
+            where TException :  { }
+        public .<TException> ThrowsExactly<TException>()
+            where TException :  { }
+    }
+    public class FuncCollectionAssertion<TItem> : .<.<TItem>, TItem>, ., .<.<TItem>>, .<.<TItem>>
+    {
+        public FuncCollectionAssertion(<.<TItem>?> func, string? expression) { }
         public .<TException> Throws<TException>()
             where TException :  { }
         public .<TException> ThrowsExactly<TException>()
