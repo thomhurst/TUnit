@@ -57,6 +57,11 @@ public abstract class GenericAbstractExecutor : IHookExecutor, ITestExecutor
         return ExecuteAsync(action);
     }
 
+    public ValueTask ExecuteDisposal(TestContext context, Func<ValueTask> action)
+    {
+        return ExecuteAsync(action);
+    }
+
     public ValueTask ExecuteTest(TestContext context, Func<ValueTask> action)
     {
         return ExecuteAsync(action);

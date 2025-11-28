@@ -117,3 +117,36 @@ public class SetHookExecutorWithStaticHooksTests
         await Assert.That(Thread.CurrentThread.Name).IsEqualTo("CrossPlatformTestExecutor");
     }
 }
+
+/// <summary>
+/// Tests demonstrating SetHookExecutor affects disposal execution - Issue #3918
+/// </summary>
+[EngineTest(ExpectedResult.Pass)]
+[SetBothExecutors] // This attribute sets both executors
+public class DisposalWithHookExecutorTests : IAsyncDisposable
+{
+    private static bool _disposalExecutedInCustomExecutor;
+
+    [Test]
+    public async Task Test_ExecutesInCustomExecutor()
+    {
+        // Test should execute in custom executor
+        await Assert.That(Thread.CurrentThread.Name).IsEqualTo("CrossPlatformTestExecutor");
+        await Assert.That(CrossPlatformTestExecutor.IsRunningInTestExecutor.Value).IsTrue();
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        // Verify disposal runs in the custom executor
+        _disposalExecutedInCustomExecutor =
+            Thread.CurrentThread.Name == "CrossPlatformTestExecutor" &&
+            CrossPlatformTestExecutor.IsRunningInTestExecutor.Value;
+        return default;
+    }
+
+    [After(Class)]
+    public static async Task VerifyDisposalRanInCustomExecutor(ClassHookContext context)
+    {
+        await Assert.That(_disposalExecutedInCustomExecutor).IsTrue();
+    }
+}
