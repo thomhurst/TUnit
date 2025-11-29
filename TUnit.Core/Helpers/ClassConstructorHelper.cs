@@ -50,9 +50,9 @@ public static class ClassConstructorHelper
             return null;
         }
 
-        // Use the ClassConstructor to create the instance
-        var classConstructorType = classConstructorAttribute.ClassConstructorType;
-        var classConstructor = (IClassConstructor)Activator.CreateInstance(classConstructorType)!;
+        // Reuse existing ClassConstructor if already set, otherwise create new instance
+        var classConstructor = testBuilderContext.ClassConstructor
+            ?? (IClassConstructor)Activator.CreateInstance(classConstructorAttribute.ClassConstructorType)!;
 
         testBuilderContext.ClassConstructor = classConstructor;
 
