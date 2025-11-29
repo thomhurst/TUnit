@@ -22,7 +22,7 @@ dotnet run --configuration Release --coverage
 # Specify output location
 dotnet run --configuration Release --coverage --coverage-output ./coverage/
 
-# Specify output format (default is binary .coverage file)
+# Specify output format (cobertura is default)
 dotnet run --configuration Release --coverage --coverage-output-format cobertura
 
 # Multiple formats

@@ -2240,7 +2240,7 @@ dotnet run --configuration Release --coverage --coverage-settings coverage.runse
 
 #### 1. Check Output Format
 ```bash
-# Cobertura (widely supported)
+# Default is Cobertura (widely supported)
 dotnet run --configuration Release --coverage --coverage-output-format cobertura
 
 # For Visual Studio

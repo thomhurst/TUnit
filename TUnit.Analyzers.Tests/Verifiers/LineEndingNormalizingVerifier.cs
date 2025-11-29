@@ -60,7 +60,17 @@ public class LineEndingNormalizingVerifier : IVerifier
 
     public void SequenceEqual<T>(IEnumerable<T> expected, IEnumerable<T> actual, IEqualityComparer<T>? equalityComparer = null, string? message = null)
     {
-        _defaultVerifier.SequenceEqual(expected, actual, equalityComparer, message);
+        // Normalize line endings for string sequence comparisons
+        if (typeof(T) == typeof(string))
+        {
+            var normalizedExpected = expected.Cast<string>().Select(NormalizeLineEndings).Cast<T>();
+            var normalizedActual = actual.Cast<string>().Select(NormalizeLineEndings).Cast<T>();
+            _defaultVerifier.SequenceEqual(normalizedExpected, normalizedActual, equalityComparer, message);
+        }
+        else
+        {
+            _defaultVerifier.SequenceEqual(expected, actual, equalityComparer, message);
+        }
     }
 
     public IVerifier PushContext(string context)

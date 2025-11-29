@@ -33,6 +33,7 @@ public class EngineCancellationToken : IDisposable
         {
 #endif
             Console.CancelKeyPress += OnCancelKeyPress;
+            AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
 #if NET5_0_OR_GREATER
         }
 #endif
@@ -71,6 +72,21 @@ public class EngineCancellationToken : IDisposable
         e.Cancel = true;
     }
 
+    private void OnProcessExit(object? sender, EventArgs e)
+    {
+        // Process is exiting (SIGTERM, kill, etc.) - trigger cancellation to execute After hooks
+        // Note: ProcessExit runs on a background thread with limited time (~3 seconds on Windows)
+        // The After hooks registered via CancellationToken.Register() will execute when we cancel
+        if (!CancellationTokenSource.IsCancellationRequested)
+        {
+            CancellationTokenSource.Cancel();
+
+            // Give After hooks a brief moment to execute via registered callbacks
+            // ProcessExit has limited time, so we can only wait briefly
+            Task.Delay(TimeSpan.FromMilliseconds(500)).GetAwaiter().GetResult();
+        }
+    }
+
     /// <summary>
     /// Disposes the cancellation token source.
     /// </summary>
@@ -82,6 +98,7 @@ public class EngineCancellationToken : IDisposable
         {
 #endif
             Console.CancelKeyPress -= OnCancelKeyPress;
+            AppDomain.CurrentDomain.ProcessExit -= OnProcessExit;
 #if NET5_0_OR_GREATER
         }
 #endif

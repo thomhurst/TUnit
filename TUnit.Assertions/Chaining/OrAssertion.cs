@@ -140,10 +140,10 @@ public class OrAssertion<TValue> : Assertion<TValue>
             var becausePrefix = firstBecause.StartsWith("because ", StringComparison.OrdinalIgnoreCase)
                 ? firstBecause
                 : $"because {firstBecause}";
-            return $"{firstExpectation}, {becausePrefix}{Environment.NewLine}or {secondExpectation}";
+            return $"{firstExpectation}, {becausePrefix}\nor {secondExpectation}";
         }
 
-        return $"{firstExpectation}{Environment.NewLine}or {secondExpectation}";
+        return $"{firstExpectation}\nor {secondExpectation}";
     }
 
     protected override string GetExpectation() => "either condition";

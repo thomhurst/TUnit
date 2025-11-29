@@ -139,10 +139,10 @@ public class AndAssertion<TValue> : Assertion<TValue>
             var becausePrefix = firstBecause.StartsWith("because ", StringComparison.OrdinalIgnoreCase)
                 ? firstBecause
                 : $"because {firstBecause}";
-            return $"{firstExpectation}, {becausePrefix}{Environment.NewLine}and {secondExpectation}";
+            return $"{firstExpectation}, {becausePrefix}\nand {secondExpectation}";
         }
 
-        return $"{firstExpectation}{Environment.NewLine}and {secondExpectation}";
+        return $"{firstExpectation}\nand {secondExpectation}";
     }
 
     protected override string GetExpectation() => "both conditions";
