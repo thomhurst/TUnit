@@ -94,12 +94,8 @@ public class PropertySetterTests
         Console.WriteLine($"Property7: {Property7}");
     }
 
-    // Static data source method for Property2
-    public static IEnumerable<string> GetMethodData()
-    {
-        yield return "method_data_1";
-        yield return "method_data_2";
-    }
+    // Static data source method for Property2 - returns a single value for property injection
+    public static string GetMethodData() => "method_data_value";
 }
 
 // Example model for ClassDataSource
