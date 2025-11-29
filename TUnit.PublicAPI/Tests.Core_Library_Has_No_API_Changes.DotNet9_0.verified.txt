@@ -749,7 +749,6 @@ namespace
         public . ExecuteBeforeTestDiscoveryHook(.MethodMetadata hookMethodInfo, .BeforeTestDiscoveryContext context, <.> action) { }
         public . ExecuteBeforeTestHook(.MethodMetadata hookMethodInfo, .TestContext context, <.> action) { }
         public . ExecuteBeforeTestSessionHook(.MethodMetadata hookMethodInfo, .TestSessionContext context, <.> action) { }
-        public . ExecuteDisposal(.TestContext context, <.> action) { }
         public . ExecuteTest(.TestContext context, <.> action) { }
     }
     public sealed class GenericMethodInfo
@@ -2270,7 +2269,6 @@ namespace .Interfaces
         . ExecuteBeforeTestDiscoveryHook(.MethodMetadata hookMethodInfo, .BeforeTestDiscoveryContext context, <.> action);
         . ExecuteBeforeTestHook(.MethodMetadata hookMethodInfo, .TestContext context, <.> action);
         . ExecuteBeforeTestSessionHook(.MethodMetadata hookMethodInfo, .TestSessionContext context, <.> action);
-        . ExecuteDisposal(.TestContext context, <.> action);
     }
     public interface IHookRegisteredEventReceiver : .
     {

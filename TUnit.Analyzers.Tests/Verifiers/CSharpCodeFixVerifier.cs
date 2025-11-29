@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing;
+using Microsoft.CodeAnalysis.Text;
 
 namespace TUnit.Analyzers.Tests.Verifiers;
 
@@ -16,6 +17,12 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
     {
         public Test()
         {
+            // Add EditorConfig to force LF line endings for cross-platform consistency
+            TestState.AnalyzerConfigFiles.Add(("/.editorconfig", SourceText.From("""
+                is_global = true
+                end_of_line = lf
+                """)));
+
             SolutionTransforms.Add((solution, projectId) =>
             {
                 var project = solution.GetProject(projectId);

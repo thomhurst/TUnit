@@ -262,7 +262,7 @@ public static class AssertionExtensions
     /// Example: await Assert.That(myObject).Member(x => x.Attributes, attrs => attrs.ContainsKey("status").And.IsNotEmpty());
     /// Note: This overload exists for backward compatibility. For AOT compatibility, use the TTransformed overload instead.
     /// </summary>
-    [OverloadResolutionPriority(1)]
+    [OverloadResolutionPriority(2)]
     [RequiresDynamicCode("Uses reflection for legacy compatibility. For AOT compatibility, use the Member<TObject, TKey, TValue, TTransformed> overload with strongly-typed assertions.")]
     public static MemberAssertionResult<TObject> Member<TObject, TKey, TValue>(
         this IAssertionSource<TObject> source,
@@ -421,7 +421,7 @@ public static class AssertionExtensions
     /// Example: await Assert.That(myObject).Member(x => x.Tags, tags => tags.HasCount(1).And.Contains("value"));
     /// Note: This overload exists for backward compatibility. For AOT compatibility, use the TTransformed overload instead.
     /// </summary>
-    [OverloadResolutionPriority(0)]
+    [OverloadResolutionPriority(1)]
     [RequiresDynamicCode("Uses reflection for legacy compatibility. For AOT compatibility, use the Member<TObject, TItem, TTransformed> overload with strongly-typed assertions.")]
     public static MemberAssertionResult<TObject> Member<TObject, TItem>(
         this IAssertionSource<TObject> source,
@@ -527,7 +527,6 @@ public static class AssertionExtensions
     /// After the member assertion completes, returns to the parent object context for further chaining.
     /// Example: await Assert.That(myObject).Member(x => x.PropertyName, value => value.IsEqualTo(expectedValue));
     /// </summary>
-    [OverloadResolutionPriority(0)]
     public static MemberAssertionResult<TObject> Member<TObject, TMember>(
         this IAssertionSource<TObject> source,
         Expression<Func<TObject, TMember>> memberSelector,
@@ -580,7 +579,6 @@ public static class AssertionExtensions
     /// Example: await Assert.That(myObject).Member(x => x.PropertyName, value => value.IsEqualTo(expectedValue));
     /// Note: This overload exists for backward compatibility. For AOT compatibility, use the TTransformed overload instead.
     /// </summary>
-    [OverloadResolutionPriority(-1)]
     [RequiresDynamicCode("Uses reflection for legacy compatibility. For AOT compatibility, use the Member<TObject, TMember, TTransformed> overload with strongly-typed assertions.")]
     public static MemberAssertionResult<TObject> Member<TObject, TMember>(
         this IAssertionSource<TObject> source,

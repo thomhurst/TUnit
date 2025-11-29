@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core.Data;
@@ -16,8 +15,9 @@ internal sealed class BeforeHookTaskCache
     private readonly ThreadSafeDictionary<Assembly, Task> _beforeAssemblyTasks = new();
     private Task? _beforeTestSessionTask;
     private readonly object _testSessionLock = new();
+    private readonly object _classLock = new();
 
-    public ValueTask GetOrCreateBeforeTestSessionTask(Func<ValueTask> taskFactory)
+    public ValueTask GetOrCreateBeforeTestSessionTask(Func<CancellationToken, ValueTask> taskFactory, CancellationToken cancellationToken)
     {
         if (_beforeTestSessionTask != null)
         {
@@ -28,23 +28,41 @@ internal sealed class BeforeHookTaskCache
         {
             if (_beforeTestSessionTask == null)
             {
-                _beforeTestSessionTask = taskFactory().AsTask();
+                _beforeTestSessionTask = taskFactory(cancellationToken).AsTask();
             }
             return new ValueTask(_beforeTestSessionTask);
         }
     }
 
-    public ValueTask GetOrCreateBeforeAssemblyTask(Assembly assembly, Func<Assembly, ValueTask> taskFactory)
+    public ValueTask GetOrCreateBeforeAssemblyTask(Assembly assembly, Func<Assembly, CancellationToken, ValueTask> taskFactory, CancellationToken cancellationToken)
     {
-        var task = _beforeAssemblyTasks.GetOrAdd(assembly, a => taskFactory(a).AsTask());
+        var task = _beforeAssemblyTasks.GetOrAdd(assembly, a => taskFactory(a, cancellationToken).AsTask());
         return new ValueTask(task);
     }
 
     public ValueTask GetOrCreateBeforeClassTask(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
-        Type testClass, Func<Type, ValueTask> taskFactory)
+        Type testClass,
+        HookExecutor hookExecutor,
+        CancellationToken cancellationToken)
     {
-        var task = _beforeClassTasks.GetOrAdd(testClass, t => taskFactory(t).AsTask());
-        return new ValueTask(task);
+        if (_beforeClassTasks.TryGetValue(testClass, out var existingTask))
+        {
+            return new ValueTask(existingTask);
+        }
+
+        lock (_classLock)
+        {
+            if (_beforeClassTasks.TryGetValue(testClass, out existingTask))
+            {
+                return new ValueTask(existingTask);
+            }
+
+            // Call ExecuteBeforeClassHooksAsync directly with the annotated testClass
+            // The factory ignores the key since we've already created the task with the annotated type
+            var newTask = hookExecutor.ExecuteBeforeClassHooksAsync(testClass, cancellationToken).AsTask();
+            _beforeClassTasks.GetOrAdd(testClass, _ => newTask);
+            return new ValueTask(newTask);
+        }
     }
 }

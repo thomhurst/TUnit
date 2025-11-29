@@ -1013,7 +1013,7 @@ dotnet run --configuration Release --coverage
 # Specify output location
 dotnet run --configuration Release --coverage --coverage-output ./coverage/
 
-# Specify coverage format (default is binary .coverage file)
+# Specify coverage format (default is cobertura)
 dotnet run --configuration Release --coverage --coverage-output-format cobertura
 
 # Multiple formats
@@ -1055,7 +1055,7 @@ If you have CI/CD pipelines that reference Coverlet, update them to use the new 
 The Microsoft coverage tool supports multiple output formats:
 
 ```bash
-# Cobertura (widely supported)
+# Cobertura (default, widely supported)
 dotnet run --configuration Release --coverage --coverage-output-format cobertura
 
 # XML (Visual Studio format)

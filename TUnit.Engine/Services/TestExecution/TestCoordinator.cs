@@ -1,7 +1,6 @@
 using System.Linq;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
-using TUnit.Core.Interfaces;
 using TUnit.Core.Logging;
 using TUnit.Core.Tracking;
 using TUnit.Engine.Helpers;
@@ -91,7 +90,7 @@ internal sealed class TestCoordinator : ITestCoordinator
             }
 
             // Ensure TestSession hooks run before creating test instances
-            await _testExecutor.EnsureTestSessionHooksExecutedAsync().ConfigureAwait(false);
+            await _testExecutor.EnsureTestSessionHooksExecutedAsync(cancellationToken).ConfigureAwait(false);
 
             // Execute test with retry logic - each retry gets a fresh instance
             // Timeout is applied per retry attempt, not across all retries
@@ -153,8 +152,7 @@ internal sealed class TestCoordinator : ITestCoordinator
 
                             try
                             {
-                                var hookExecutor = test.Context.CustomHookExecutor;
-                                await TestExecutor.DisposeTestInstance(test, hookExecutor).ConfigureAwait(false);
+                                await TestExecutor.DisposeTestInstance(test).ConfigureAwait(false);
                             }
                             catch (Exception disposeEx)
                             {
