@@ -290,7 +290,8 @@ internal sealed class TestBuilder : ITestBuilder
                                     Events = new TestContextEvents(),
                                     StateBag = new ConcurrentDictionary<string, object?>(),
                                     DataSourceAttribute = methodDataSource,
-                                    InitializedAttributes = testBuilderContext.InitializedAttributes  // Preserve attributes from parent context
+                                    InitializedAttributes = testBuilderContext.InitializedAttributes,  // Preserve attributes from parent context
+                                    ClassConstructor = testBuilderContext.ClassConstructor  // Preserve ClassConstructor for instance creation
                                 };
 
                                 classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
