@@ -1048,7 +1048,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine("else");
                 writer.AppendLine("{");
                 writer.Indent();
-                writer.AppendLine($"instance = new {fullyQualifiedType}();");
+                InstanceFactoryGenerator.GenerateInstanceCreation(writer, targetType, "instance");
                 writer.Unindent();
                 writer.AppendLine("}");
                 writer.AppendLine($"var result = (({fullyQualifiedType})instance).{methodCall};");
@@ -1080,7 +1080,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine("else");
                 writer.AppendLine("{");
                 writer.Indent();
-                writer.AppendLine($"instance = new {fullyQualifiedType}();");
+                InstanceFactoryGenerator.GenerateInstanceCreation(writer, targetType, "instance");
                 writer.Unindent();
                 writer.AppendLine("}");
                 writer.AppendLine($"var result = (({fullyQualifiedType})instance).{methodCall};");
@@ -1124,7 +1124,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine("else");
                 writer.AppendLine("{");
                 writer.Indent();
-                writer.AppendLine($"instance = new {fullyQualifiedType}();");
+                InstanceFactoryGenerator.GenerateInstanceCreation(writer, targetType, "instance");
                 writer.Unindent();
                 writer.AppendLine("}");
                 writer.AppendLine($"var result = (({fullyQualifiedType})instance).{methodCall};");
@@ -1167,7 +1167,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine("else");
                 writer.AppendLine("{");
                 writer.Indent();
-                writer.AppendLine($"instance = new {fullyQualifiedType}();");
+                InstanceFactoryGenerator.GenerateInstanceCreation(writer, targetType, "instance");
                 writer.Unindent();
                 writer.AppendLine("}");
                 writer.AppendLine($"var result = (({fullyQualifiedType})instance).{methodCall};");
@@ -1217,7 +1217,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine("else");
                 writer.AppendLine("{");
                 writer.Indent();
-                writer.AppendLine($"instance = new {fullyQualifiedType}();");
+                InstanceFactoryGenerator.GenerateInstanceCreation(writer, targetType, "instance");
                 writer.Unindent();
                 writer.AppendLine("}");
                 writer.AppendLine($"var result = (({fullyQualifiedType})instance).{propertyAccess};");
@@ -1249,7 +1249,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine("else");
                 writer.AppendLine("{");
                 writer.Indent();
-                writer.AppendLine($"instance = new {fullyQualifiedType}();");
+                InstanceFactoryGenerator.GenerateInstanceCreation(writer, targetType, "instance");
                 writer.Unindent();
                 writer.AppendLine("}");
                 writer.AppendLine($"var result = (({fullyQualifiedType})instance).{propertyAccess};");
@@ -1293,7 +1293,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine("else");
                 writer.AppendLine("{");
                 writer.Indent();
-                writer.AppendLine($"instance = new {fullyQualifiedType}();");
+                InstanceFactoryGenerator.GenerateInstanceCreation(writer, targetType, "instance");
                 writer.Unindent();
                 writer.AppendLine("}");
                 writer.AppendLine($"var result = (({fullyQualifiedType})instance).{propertyAccess};");
@@ -1336,7 +1336,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine("else");
                 writer.AppendLine("{");
                 writer.Indent();
-                writer.AppendLine($"instance = new {fullyQualifiedType}();");
+                InstanceFactoryGenerator.GenerateInstanceCreation(writer, targetType, "instance");
                 writer.Unindent();
                 writer.AppendLine("}");
                 writer.AppendLine($"var result = (({fullyQualifiedType})instance).{propertyAccess};");
