@@ -188,7 +188,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         // Create test finder service after discovery service so it can use its cache
         TestFinder = Register<ITestFinder>(new TestFinder(DiscoveryService));
 
-        var testInitializer = new TestInitializer(EventReceiverOrchestrator, PropertyInjectionService, objectTracker);
+        var testInitializer = new TestInitializer(EventReceiverOrchestrator, PropertyInjectionService, DataSourceInitializer, objectTracker);
 
         // Create the new TestCoordinator that orchestrates the granular services
         var testCoordinator = Register<ITestCoordinator>(

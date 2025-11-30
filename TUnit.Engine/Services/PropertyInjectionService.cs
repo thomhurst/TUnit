@@ -162,7 +162,9 @@ internal sealed class PropertyInjectionService
             return;
         }
 
-        if (SourceRegistrar.IsEnabled)
+        // Use whichever properties are available in the plan
+        // For closed generic types, source-gen may not have registered them, so use reflection fallback
+        if (plan.SourceGeneratedProperties.Length > 0)
         {
             foreach (var metadata in plan.SourceGeneratedProperties)
             {
@@ -184,7 +186,7 @@ internal sealed class PropertyInjectionService
                 }
             }
         }
-        else
+        else if (plan.ReflectionProperties.Length > 0)
         {
             foreach (var (property, _) in plan.ReflectionProperties)
             {
