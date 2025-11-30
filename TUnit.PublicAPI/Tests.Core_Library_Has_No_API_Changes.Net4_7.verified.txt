@@ -858,6 +858,7 @@ namespace
     public class InstanceMethodDataSourceAttribute : .MethodDataSourceAttribute, .IAccessesInstanceData
     {
         public InstanceMethodDataSourceAttribute(string methodNameProvidingDataSource) { }
+        public InstanceMethodDataSourceAttribute( classProvidingDataSource, string methodNameProvidingDataSource) { }
     }
     public class InvalidTestMetadataException : .TestBuilderException
     {

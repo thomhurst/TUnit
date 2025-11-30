@@ -250,6 +250,24 @@ internal sealed class TestBuilder : ITestBuilder
                                 // Non-generic class
                                 instanceForMethodDataSources = metadata.InstanceFactory([], classData);
                             }
+
+                            // Initialize property data sources on the early instance so that
+                            // method data sources can access fully-initialized properties.
+                            // This is critical for scenarios like:
+                            //   [ClassDataSource<ErrFixture<T>>] public required ErrFixture<T> Fixture { get; init; }
+                            //   public IEnumerable<Func<T>> TestExecutions => [() => Fixture.Value];
+                            //   [MethodDataSource("TestExecutions")] [Test] public void MyTest(T value) { }
+                            if (instanceForMethodDataSources != null)
+                            {
+                                var tempObjectBag = new ConcurrentDictionary<string, object?>();
+                                var tempEvents = new TestContextEvents();
+
+                                await _propertyInjectionService.InjectPropertiesIntoObjectAsync(
+                                    instanceForMethodDataSources,
+                                    tempObjectBag,
+                                    metadata.MethodMetadata,
+                                    tempEvents);
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -1371,6 +1389,17 @@ internal sealed class TestBuilder : ITestBuilder
                     {
                         continue; // Skip if instance creation failed
                     }
+
+                    // Initialize property data sources on the early instance so that
+                    // method data sources can access fully-initialized properties.
+                    var tempObjectBag = new ConcurrentDictionary<string, object?>();
+                    var tempEvents = new TestContextEvents();
+
+                    await _propertyInjectionService.InjectPropertiesIntoObjectAsync(
+                        instanceForMethodDataSources,
+                        tempObjectBag,
+                        metadata.MethodMetadata,
+                        tempEvents);
                 }
 
                 // Stream through method data sources

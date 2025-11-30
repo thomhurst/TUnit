@@ -102,13 +102,33 @@ internal static class PropertyInjectionPlanBuilder
 
     /// <summary>
     /// Builds an injection plan based on the current execution mode.
+    /// Falls back to reflection when source-gen mode has no registered source for a type.
+    /// This handles generic types like ErrFixture&lt;MyType&gt; where the source generator
+    /// couldn't register a property source for the closed generic type.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "Source gen mode has its own path>")]
     public static PropertyInjectionPlan Build(Type type)
     {
-        return SourceRegistrar.IsEnabled
-            ? BuildSourceGeneratedPlan(type)
-            : BuildReflectionPlan(type);
+        if (!SourceRegistrar.IsEnabled)
+        {
+            return BuildReflectionPlan(type);
+        }
+
+        // Try source-generated plan first
+        var plan = BuildSourceGeneratedPlan(type);
+
+        // If no properties found in source-gen mode, fall back to reflection
+        // This handles generic types that couldn't be registered at compile time
+        if (!plan.HasProperties)
+        {
+            var reflectionPlan = BuildReflectionPlan(type);
+            if (reflectionPlan.HasProperties)
+            {
+                return reflectionPlan;
+            }
+        }
+
+        return plan;
     }
 }
 
