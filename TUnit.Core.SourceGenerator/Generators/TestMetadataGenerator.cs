@@ -937,15 +937,23 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Generate the attribute with factory
         // We need to manually construct this to properly add the Factory property
-        var attrClass = attr.AttributeClass!;
-        var attrTypeName = attrClass.GloballyQualified();
+
+        // Determine if the data source is static or instance-based
+        var isStatic = dataSourceMethod?.IsStatic ?? dataSourceProperty?.GetMethod?.IsStatic ?? true;
+
+        // Use InstanceMethodDataSourceAttribute for instance-based data sources
+        // This implements IAccessesInstanceData which tells the engine to create an instance early
+        var attrTypeName = isStatic
+            ? "global::TUnit.Core.MethodDataSourceAttribute"
+            : "global::TUnit.Core.InstanceMethodDataSourceAttribute";
 
         if (attr.ConstructorArguments is
             [
                 { Value: ITypeSymbol typeArg } _, _, ..
             ])
         {
-            // MethodDataSource(Type, string) constructor
+            // MethodDataSource(Type, string) constructor - only available on MethodDataSourceAttribute
+            // For instance data sources, we still use the same constructor signature
             writer.AppendLine($"new {attrTypeName}(typeof({typeArg.GloballyQualified()}), \"{methodName}\")");
         }
         else
@@ -1048,7 +1056,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine("else");
                 writer.AppendLine("{");
                 writer.Indent();
-                InstanceFactoryGenerator.GenerateInstanceCreation(writer, targetType, "instance");
+                writer.AppendLine("throw new global::System.InvalidOperationException(\"Instance method data source requires TestClassInstance. This should have been provided by the engine.\");");
                 writer.Unindent();
                 writer.AppendLine("}");
                 writer.AppendLine($"var result = (({fullyQualifiedType})instance).{methodCall};");
@@ -1080,7 +1088,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine("else");
                 writer.AppendLine("{");
                 writer.Indent();
-                InstanceFactoryGenerator.GenerateInstanceCreation(writer, targetType, "instance");
+                writer.AppendLine("throw new global::System.InvalidOperationException(\"Instance method data source requires TestClassInstance. This should have been provided by the engine.\");");
                 writer.Unindent();
                 writer.AppendLine("}");
                 writer.AppendLine($"var result = (({fullyQualifiedType})instance).{methodCall};");
@@ -1124,7 +1132,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine("else");
                 writer.AppendLine("{");
                 writer.Indent();
-                InstanceFactoryGenerator.GenerateInstanceCreation(writer, targetType, "instance");
+                writer.AppendLine("throw new global::System.InvalidOperationException(\"Instance method data source requires TestClassInstance. This should have been provided by the engine.\");");
                 writer.Unindent();
                 writer.AppendLine("}");
                 writer.AppendLine($"var result = (({fullyQualifiedType})instance).{methodCall};");
@@ -1167,7 +1175,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine("else");
                 writer.AppendLine("{");
                 writer.Indent();
-                InstanceFactoryGenerator.GenerateInstanceCreation(writer, targetType, "instance");
+                writer.AppendLine("throw new global::System.InvalidOperationException(\"Instance method data source requires TestClassInstance. This should have been provided by the engine.\");");
                 writer.Unindent();
                 writer.AppendLine("}");
                 writer.AppendLine($"var result = (({fullyQualifiedType})instance).{methodCall};");
@@ -1217,7 +1225,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine("else");
                 writer.AppendLine("{");
                 writer.Indent();
-                InstanceFactoryGenerator.GenerateInstanceCreation(writer, targetType, "instance");
+                writer.AppendLine("throw new global::System.InvalidOperationException(\"Instance method data source requires TestClassInstance. This should have been provided by the engine.\");");
                 writer.Unindent();
                 writer.AppendLine("}");
                 writer.AppendLine($"var result = (({fullyQualifiedType})instance).{propertyAccess};");
@@ -1249,7 +1257,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine("else");
                 writer.AppendLine("{");
                 writer.Indent();
-                InstanceFactoryGenerator.GenerateInstanceCreation(writer, targetType, "instance");
+                writer.AppendLine("throw new global::System.InvalidOperationException(\"Instance method data source requires TestClassInstance. This should have been provided by the engine.\");");
                 writer.Unindent();
                 writer.AppendLine("}");
                 writer.AppendLine($"var result = (({fullyQualifiedType})instance).{propertyAccess};");
@@ -1293,7 +1301,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine("else");
                 writer.AppendLine("{");
                 writer.Indent();
-                InstanceFactoryGenerator.GenerateInstanceCreation(writer, targetType, "instance");
+                writer.AppendLine("throw new global::System.InvalidOperationException(\"Instance method data source requires TestClassInstance. This should have been provided by the engine.\");");
                 writer.Unindent();
                 writer.AppendLine("}");
                 writer.AppendLine($"var result = (({fullyQualifiedType})instance).{propertyAccess};");
@@ -1336,7 +1344,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine("else");
                 writer.AppendLine("{");
                 writer.Indent();
-                InstanceFactoryGenerator.GenerateInstanceCreation(writer, targetType, "instance");
+                writer.AppendLine("throw new global::System.InvalidOperationException(\"Instance method data source requires TestClassInstance. This should have been provided by the engine.\");");
                 writer.Unindent();
                 writer.AppendLine("}");
                 writer.AppendLine($"var result = (({fullyQualifiedType})instance).{propertyAccess};");

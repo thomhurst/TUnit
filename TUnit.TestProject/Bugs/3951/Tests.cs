@@ -19,6 +19,7 @@ public class ErrContext: IAsyncInitializer, IAsyncDisposable
 
 public class ErrFixture<T> : IAsyncDisposable, IAsyncInitializer
 {
+    [ClassDataSource<ErrContext>(Shared = SharedType.PerClass)]
     public required ErrContext Fixture { get; set; }
     public ValueTask DisposeAsync() => default;
     public Task InitializeAsync() => Task.CompletedTask;
@@ -43,6 +44,6 @@ public class ErrTest
     [Test]
     public async Task MyTest2(MyType t)
     {
-        await Assert.That(t.GetType()).IsAssignableTo<MyType>();
+        await Assert.That(t).IsAssignableTo<MyType>();
     }
 }

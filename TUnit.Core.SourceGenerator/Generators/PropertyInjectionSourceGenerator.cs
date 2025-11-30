@@ -38,11 +38,157 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             }
             GenerateIndividualPropertyInjectionSource(context, classData);
         });
+
+        // Also generate property sources for closed generic types used in data source attributes
+        // This ensures AOT compatibility for types like ErrFixture<MyType>
+        var closedGenericTypesFromDataSources = context.SyntaxProvider
+            .CreateSyntaxProvider(
+                predicate: (node, _) => IsClassWithDataSourceProperties(node),
+                transform: (ctx, _) => GetClosedGenericTypesFromDataSources(ctx))
+            .Where(x => x != null)
+            .SelectMany((types, _) => types ?? [])
+            .Collect()
+            .SelectMany((classes, _) => classes.DistinctBy(c => c.ClassSymbol, SymbolEqualityComparer.Default))
+            .Combine(enabledProvider);
+
+        context.RegisterSourceOutput(closedGenericTypesFromDataSources, (context, data) =>
+        {
+            var (classData, isEnabled) = data;
+            if (!isEnabled)
+            {
+                return;
+            }
+            GenerateIndividualPropertyInjectionSource(context, classData);
+        });
     }
 
     private static bool IsClassWithDataSourceProperties(SyntaxNode node)
     {
         return node is TypeDeclarationSyntax;
+    }
+
+    /// <summary>
+    /// Extracts closed generic types from data source attributes (like ClassDataSource&lt;ErrFixture&lt;MyType&gt;&gt;)
+    /// that have injectable properties. This enables AOT-compatible property injection for generic types.
+    /// </summary>
+    private static IEnumerable<ClassWithDataSourceProperties>? GetClosedGenericTypesFromDataSources(GeneratorSyntaxContext context)
+    {
+        var typeDecl = (TypeDeclarationSyntax)context.Node;
+        var semanticModel = context.SemanticModel;
+
+        if (semanticModel.GetDeclaredSymbol(typeDecl) is not INamedTypeSymbol typeSymbol)
+        {
+            return null;
+        }
+
+        var dataSourceInterface = semanticModel.Compilation.GetTypeByMetadataName("TUnit.Core.IDataSourceAttribute");
+        if (dataSourceInterface == null)
+        {
+            return null;
+        }
+
+        var closedGenericTypes = new List<ClassWithDataSourceProperties>();
+        var processedTypes = new HashSet<string>();
+
+        // Check all properties for data source attributes that reference closed generic types
+        var allProperties = typeSymbol.GetMembers()
+            .OfType<IPropertySymbol>()
+            .Concat(typeSymbol.GetMembersIncludingBase().OfType<IPropertySymbol>());
+
+        foreach (var property in allProperties)
+        {
+            foreach (var attr in property.GetAttributes())
+            {
+                if (attr.AttributeClass == null ||
+                    !attr.AttributeClass.AllInterfaces.Contains(dataSourceInterface, SymbolEqualityComparer.Default))
+                {
+                    continue;
+                }
+
+                // Check if the attribute is a generic type like ClassDataSource<T>
+                if (attr.AttributeClass.IsGenericType && attr.AttributeClass.TypeArguments.Length > 0)
+                {
+                    foreach (var typeArg in attr.AttributeClass.TypeArguments)
+                    {
+                        if (typeArg is INamedTypeSymbol namedTypeArg && namedTypeArg.IsGenericType &&
+                            !namedTypeArg.IsUnboundGenericType && namedTypeArg.TypeParameters.Length == 0)
+                        {
+                            // This is a closed generic type (e.g., ErrFixture<MyType>)
+                            var fullName = namedTypeArg.ToDisplayString();
+                            if (!processedTypes.Add(fullName))
+                            {
+                                continue;
+                            }
+
+                            // Check if this type has properties with data source attributes
+                            var classData = GetClassWithDataSourcePropertiesForType(namedTypeArg, semanticModel, dataSourceInterface);
+                            if (classData != null)
+                            {
+                                closedGenericTypes.Add(classData);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return closedGenericTypes.Count > 0 ? closedGenericTypes : null;
+    }
+
+    /// <summary>
+    /// Creates a ClassWithDataSourceProperties for a specific type (used for closed generic types).
+    /// </summary>
+    private static ClassWithDataSourceProperties? GetClassWithDataSourcePropertiesForType(
+        INamedTypeSymbol typeSymbol,
+        SemanticModel semanticModel,
+        INamedTypeSymbol dataSourceInterface)
+    {
+        // Skip types that are not publicly accessible
+        if (!IsPubliclyAccessible(typeSymbol))
+        {
+            return null;
+        }
+
+        var propertiesWithDataSources = new List<PropertyWithDataSourceAttribute>();
+        var processedProperties = new HashSet<string>();
+
+        var allProperties = typeSymbol.GetMembers()
+            .OfType<IPropertySymbol>()
+            .Where(CanSetProperty)
+            .ToList();
+
+        foreach (var property in allProperties)
+        {
+            if (!processedProperties.Add(property.Name))
+            {
+                continue;
+            }
+
+            foreach (var attr in property.GetAttributes())
+            {
+                if (attr.AttributeClass != null &&
+                    attr.AttributeClass.AllInterfaces.Contains(dataSourceInterface, SymbolEqualityComparer.Default))
+                {
+                    propertiesWithDataSources.Add(new PropertyWithDataSourceAttribute
+                    {
+                        Property = property,
+                        DataSourceAttribute = attr
+                    });
+                    break;
+                }
+            }
+        }
+
+        if (propertiesWithDataSources.Count == 0)
+        {
+            return null;
+        }
+
+        return new ClassWithDataSourceProperties
+        {
+            ClassSymbol = typeSymbol,
+            Properties = propertiesWithDataSources.ToImmutableArray()
+        };
     }
 
     private static ClassWithDataSourceProperties? GetClassWithDataSourceProperties(GeneratorSyntaxContext context)
