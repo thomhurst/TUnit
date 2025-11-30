@@ -6,6 +6,37 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
 public static class InstanceFactoryGenerator
 {
+    /// <summary>
+    /// Generates code to create an instance of a type with proper required property handling.
+    /// This handles required properties that don't have data sources by initializing them with defaults.
+    /// </summary>
+    public static void GenerateInstanceCreation(CodeWriter writer, ITypeSymbol typeSymbol, string variableName)
+    {
+        var className = typeSymbol.GloballyQualified();
+        // Use GetAllRequiredProperties because even properties with data sources need to be
+        // initialized in the object initializer to satisfy C#'s required modifier constraint.
+        // The actual values will be populated by the data sources at runtime.
+        var requiredProperties = RequiredPropertyHelper.GetAllRequiredProperties(typeSymbol).ToArray();
+
+        if (requiredProperties.Length == 0)
+        {
+            writer.AppendLine($"{variableName} = new {className}();");
+        }
+        else
+        {
+            writer.AppendLine($"{variableName} = new {className}()");
+            writer.AppendLine("{");
+            writer.Indent();
+            foreach (var property in requiredProperties)
+            {
+                var defaultValue = RequiredPropertyHelper.GetDefaultValueForType(property.Type);
+                writer.AppendLine($"{property.Name} = {defaultValue},");
+            }
+            writer.Unindent();
+            writer.AppendLine("};");
+        }
+    }
+
     public static void GenerateInstanceFactory(CodeWriter writer, ITypeSymbol typeSymbol)
     {
         GenerateInstanceFactory(writer, typeSymbol, null);
