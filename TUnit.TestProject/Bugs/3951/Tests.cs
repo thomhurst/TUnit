@@ -25,6 +25,7 @@ public class ErrFixture<T> : IAsyncDisposable, IAsyncInitializer
     public Task InitializeAsync() => Task.CompletedTask;
 }
 
+[EngineTest(ExpectedResult.Pass)]
 public class ErrTest
 {
     [ClassDataSource<ErrFixture<MyType>>(Shared = SharedType.PerClass)]
