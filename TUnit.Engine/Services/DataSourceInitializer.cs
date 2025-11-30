@@ -162,12 +162,21 @@ internal sealed class DataSourceInitializer
     {
         var plan = PropertyInjectionCache.GetOrCreatePlan(obj.GetType());
 
-        if (!SourceRegistrar.IsEnabled)
+        // Use whichever properties are available in the plan
+        // For closed generic types, source-gen may not have registered them, so use reflection fallback
+        if (plan.SourceGeneratedProperties.Length > 0)
         {
-            // Reflection mode
-            foreach (var prop in plan.ReflectionProperties)
+            // Source-generated mode
+            foreach (var metadata in plan.SourceGeneratedProperties)
             {
-                var value = prop.Property.GetValue(obj);
+                var property = metadata.ContainingType.GetProperty(metadata.PropertyName);
+
+                if (property == null || !property.CanRead)
+                {
+                    continue;
+                }
+
+                var value = property.GetValue(obj);
 
                 if (value == null || !visitedObjects.Add(value))
                 {
@@ -192,19 +201,12 @@ internal sealed class DataSourceInitializer
                 }
             }
         }
-        else
+        else if (plan.ReflectionProperties.Length > 0)
         {
-            // Source-generated mode
-            foreach (var metadata in plan.SourceGeneratedProperties)
+            // Reflection mode fallback
+            foreach (var prop in plan.ReflectionProperties)
             {
-                var property = metadata.ContainingType.GetProperty(metadata.PropertyName);
-
-                if (property == null || !property.CanRead)
-                {
-                    continue;
-                }
-
-                var value = property.GetValue(obj);
+                var value = prop.Property.GetValue(obj);
 
                 if (value == null || !visitedObjects.Add(value))
                 {
