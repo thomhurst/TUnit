@@ -1,71 +1,92 @@
-using System.Collections.Concurrent;
 using TUnit.Core;
+using TUnit.Core.Lifecycle;
 using TUnit.Core.Tracking;
-using TUnit.Engine.Extensions;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine;
 
+/// <summary>
+/// Initializes test instances before execution.
+/// Uses ObjectLifecycleManager as the single source of truth for all initialization.
+/// </summary>
 internal class TestInitializer
 {
     private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
-    private readonly PropertyInjectionService _propertyInjectionService;
-    private readonly DataSourceInitializer _dataSourceInitializer;
+    private readonly IObjectLifecycleManager _lifecycleManager;
     private readonly ObjectTracker _objectTracker;
 
-    public TestInitializer(EventReceiverOrchestrator eventReceiverOrchestrator,
-        PropertyInjectionService propertyInjectionService,
-        DataSourceInitializer dataSourceInitializer,
+    public TestInitializer(
+        EventReceiverOrchestrator eventReceiverOrchestrator,
+        IObjectLifecycleManager lifecycleManager,
         ObjectTracker objectTracker)
     {
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
-        _propertyInjectionService = propertyInjectionService;
-        _dataSourceInitializer = dataSourceInitializer;
+        _lifecycleManager = lifecycleManager;
         _objectTracker = objectTracker;
     }
 
     public async ValueTask InitializeTest(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
-        var testClassInstance = test.Context.Metadata.TestDetails.ClassInstance;
+        var testContext = test.Context;
+        var testClassInstance = testContext.Metadata.TestDetails.ClassInstance;
 
-        await _propertyInjectionService.InjectPropertiesIntoObjectAsync(
+        _eventReceiverOrchestrator.RegisterReceivers(testContext, cancellationToken);
+
+        // Track any new objects created during retries / initialization
+        _objectTracker.TrackObjects(testContext);
+
+        // Initialize tracked objects by level (deepest first)
+        await InitializeTrackedObjects(testContext, cancellationToken);
+
+        // Initialize property-injected objects (e.g., ClassDataSource values on properties)
+        // This is where IAsyncInitializer.InitializeAsync() gets called
+        await InitializePropertyInjectedObjects(testContext, cancellationToken);
+
+        // Finally, ensure the test class instance is fully initialized
+        // This handles property injection + IAsyncInitializer in one call
+        await _lifecycleManager.EnsureInitializedAsync(
             testClassInstance,
-            test.Context.StateBag.Items,
-            test.Context.Metadata.TestDetails.MethodMetadata,
-            test.Context.InternalEvents);
+            testContext.StateBag.Items,
+            testContext.Metadata.TestDetails.MethodMetadata,
+            testContext.InternalEvents,
+            testContext.Metadata.TestDetails.TestClassInjectedPropertyArguments,
+            cancellationToken);
+    }
 
-        _eventReceiverOrchestrator.RegisterReceivers(test.Context, cancellationToken);
+    private async Task InitializePropertyInjectedObjects(TestContext testContext, CancellationToken cancellationToken)
+    {
+        var propertyValues = testContext.Metadata.TestDetails.TestClassInjectedPropertyArguments;
 
-        // Shouldn't retrack already tracked objects, but will track any new ones created during retries / initialization
-        _objectTracker.TrackObjects(test.Context);
-
-        await InitializeTrackedObjects(test.Context, cancellationToken);
+        foreach (var kvp in propertyValues)
+        {
+            var value = kvp.Value;
+            if (value != null)
+            {
+                await _lifecycleManager.EnsureInitializedAsync(
+                    value,
+                    testContext.StateBag.Items,
+                    testContext.Metadata.TestDetails.MethodMetadata,
+                    testContext.InternalEvents,
+                    cancellationToken: cancellationToken);
+            }
+        }
     }
 
     private async Task InitializeTrackedObjects(TestContext testContext, CancellationToken cancellationToken)
     {
         // Initialize by level (deepest first), with objects at the same level in parallel
-        // Using DataSourceInitializer ensures property injection + nested objects + IAsyncInitializer
         var levels = testContext.TrackedObjects.Keys.OrderByDescending(level => level);
 
         foreach (var level in levels)
         {
             var objectsAtLevel = testContext.TrackedObjects[level];
             await Task.WhenAll(objectsAtLevel.Select(obj =>
-                _dataSourceInitializer.EnsureInitializedAsync(
+                _lifecycleManager.EnsureInitializedAsync(
                     obj,
                     testContext.StateBag.Items,
                     testContext.Metadata.TestDetails.MethodMetadata,
                     testContext.InternalEvents,
-                    cancellationToken).AsTask()));
+                    cancellationToken: cancellationToken).AsTask()));
         }
-
-        // Finally, ensure the test class itself is initialized (property injection + IAsyncInitializer)
-        await _dataSourceInitializer.EnsureInitializedAsync(
-            testContext.Metadata.TestDetails.ClassInstance,
-            testContext.StateBag.Items,
-            testContext.Metadata.TestDetails.MethodMetadata,
-            testContext.InternalEvents,
-            cancellationToken);
     }
 }

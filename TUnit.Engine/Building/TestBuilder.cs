@@ -7,6 +7,7 @@ using TUnit.Core.Enums;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
+using TUnit.Core.Lifecycle;
 using TUnit.Core.Services;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Extensions;
@@ -21,8 +22,7 @@ internal sealed class TestBuilder : ITestBuilder
     private readonly string _sessionId;
     private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
     private readonly IContextProvider _contextProvider;
-    private readonly PropertyInjectionService _propertyInjectionService;
-    private readonly DataSourceInitializer _dataSourceInitializer;
+    private readonly IObjectLifecycleManager _lifecycleManager;
     private readonly Discovery.IHookDiscoveryService _hookDiscoveryService;
     private readonly TestArgumentRegistrationService _testArgumentRegistrationService;
     private readonly IMetadataFilterMatcher _filterMatcher;
@@ -31,8 +31,7 @@ internal sealed class TestBuilder : ITestBuilder
         string sessionId,
         EventReceiverOrchestrator eventReceiverOrchestrator,
         IContextProvider contextProvider,
-        PropertyInjectionService propertyInjectionService,
-        DataSourceInitializer dataSourceInitializer,
+        IObjectLifecycleManager lifecycleManager,
         Discovery.IHookDiscoveryService hookDiscoveryService,
         TestArgumentRegistrationService testArgumentRegistrationService,
         IMetadataFilterMatcher filterMatcher)
@@ -41,8 +40,7 @@ internal sealed class TestBuilder : ITestBuilder
         _hookDiscoveryService = hookDiscoveryService;
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
         _contextProvider = contextProvider;
-        _propertyInjectionService = propertyInjectionService;
-        _dataSourceInitializer = dataSourceInitializer;
+        _lifecycleManager = lifecycleManager;
         _testArgumentRegistrationService = testArgumentRegistrationService;
         _filterMatcher = filterMatcher ?? throw new ArgumentNullException(nameof(filterMatcher));
     }
@@ -251,23 +249,8 @@ internal sealed class TestBuilder : ITestBuilder
                                 instanceForMethodDataSources = metadata.InstanceFactory([], classData);
                             }
 
-                            // Initialize property data sources on the early instance so that
-                            // method data sources can access fully-initialized properties.
-                            // This is critical for scenarios like:
-                            //   [ClassDataSource<ErrFixture<T>>] public required ErrFixture<T> Fixture { get; init; }
-                            //   public IEnumerable<Func<T>> TestExecutions => [() => Fixture.Value];
-                            //   [MethodDataSource("TestExecutions")] [Test] public void MyTest(T value) { }
-                            if (instanceForMethodDataSources != null)
-                            {
-                                var tempObjectBag = new ConcurrentDictionary<string, object?>();
-                                var tempEvents = new TestContextEvents();
-
-                                await _propertyInjectionService.InjectPropertiesIntoObjectAsync(
-                                    instanceForMethodDataSources,
-                                    tempObjectBag,
-                                    metadata.MethodMetadata,
-                                    tempEvents);
-                            }
+                            // Note: Property injection is deferred to TestInitializer (just before test execution)
+                            // Method data sources that need instance properties will access them at that time
                         }
                         catch (Exception ex)
                         {
@@ -769,10 +752,10 @@ internal sealed class TestBuilder : ITestBuilder
             return [NoDataSource.Instance];
         }
 
-        // Initialize all data sources to ensure properties are injected
+        // Initialize all data sources (they need to be ready to provide data)
         foreach (var dataSource in dataSources)
         {
-            await _dataSourceInitializer.EnsureInitializedAsync(dataSource);
+            await _lifecycleManager.EnsureInitializedAsync(dataSource, new ConcurrentDictionary<string, object?>());
         }
 
         return dataSources;
@@ -787,15 +770,14 @@ internal sealed class TestBuilder : ITestBuilder
         DataGeneratorMetadata dataGeneratorMetadata)
     {
         // Ensure the data source is fully initialized before getting data rows
-        // This includes property injection and IAsyncInitializer.InitializeAsync
-        var initializedDataSource = await _dataSourceInitializer.EnsureInitializedAsync(
+        await _lifecycleManager.EnsureInitializedAsync(
             dataSource,
             dataGeneratorMetadata.TestBuilderContext.Current.StateBag,
             dataGeneratorMetadata.TestInformation,
             dataGeneratorMetadata.TestBuilderContext.Current.Events);
 
         // Now get data rows from the initialized data source
-        await foreach (var dataRow in initializedDataSource.GetDataRowsAsync(dataGeneratorMetadata))
+        await foreach (var dataRow in dataSource.GetDataRowsAsync(dataGeneratorMetadata))
         {
             yield return dataRow;
         }
@@ -1026,8 +1008,8 @@ internal sealed class TestBuilder : ITestBuilder
         {
             if (attribute is IDataSourceAttribute dataSource)
             {
-                // Data source attributes need to be initialized with property injection
-                await _dataSourceInitializer.EnsureInitializedAsync(dataSource);
+                // Data source attributes need to be initialized
+                await _lifecycleManager.EnsureInitializedAsync(dataSource, new ConcurrentDictionary<string, object?>());
             }
         }
 
@@ -1390,16 +1372,7 @@ internal sealed class TestBuilder : ITestBuilder
                         continue; // Skip if instance creation failed
                     }
 
-                    // Initialize property data sources on the early instance so that
-                    // method data sources can access fully-initialized properties.
-                    var tempObjectBag = new ConcurrentDictionary<string, object?>();
-                    var tempEvents = new TestContextEvents();
-
-                    await _propertyInjectionService.InjectPropertiesIntoObjectAsync(
-                        instanceForMethodDataSources,
-                        tempObjectBag,
-                        metadata.MethodMetadata,
-                        tempEvents);
+                    // Note: Property injection is deferred to TestInitializer (just before test execution)
                 }
 
                 // Stream through method data sources
