@@ -17,13 +17,15 @@ namespace TUnit.Engine.Services;
 internal sealed class PropertyInjector
 {
     private readonly Lazy<ObjectLifecycleService> _objectLifecycleService;
+    private readonly string _testSessionId;
 
     // Object pool for visited dictionaries to reduce allocations
     private static readonly ConcurrentBag<ConcurrentDictionary<object, byte>> _visitedObjectsPool = new();
 
-    public PropertyInjector(Lazy<ObjectLifecycleService> objectLifecycleService)
+    public PropertyInjector(Lazy<ObjectLifecycleService> objectLifecycleService, string testSessionId)
     {
         _objectLifecycleService = objectLifecycleService;
+        _testSessionId = testSessionId;
     }
 
     /// <summary>
@@ -412,7 +414,7 @@ internal sealed class PropertyInjector
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Metadata creation handles both modes")]
     [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "ContainingType and PropertyType are preserved through source generation")]
-    private static DataGeneratorMetadata CreateDataGeneratorMetadata(
+    private DataGeneratorMetadata CreateDataGeneratorMetadata(
         PropertyInitializationContext context,
         IDataSourceAttribute dataSource)
     {
@@ -439,6 +441,7 @@ internal sealed class PropertyInjector
                 propertyMetadata,
                 context.MethodMetadata,
                 dataSource,
+                _testSessionId,
                 context.TestContext,
                 context.TestContext?.Metadata.TestDetails.ClassInstance,
                 context.Events,
@@ -451,6 +454,7 @@ internal sealed class PropertyInjector
                 context.PropertyInfo.DeclaringType!,
                 context.MethodMetadata,
                 dataSource,
+                _testSessionId,
                 context.TestContext,
                 context.Instance,
                 context.Events,

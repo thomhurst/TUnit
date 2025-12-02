@@ -116,7 +116,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         // Use Lazy<T> to break circular dependency between PropertyInjector and ObjectLifecycleService
         ObjectLifecycleService? objectLifecycleServiceInstance = null;
         var lazyObjectLifecycleService = new Lazy<ObjectLifecycleService>(() => objectLifecycleServiceInstance!);
-        var lazyPropertyInjector = new Lazy<PropertyInjector>(() => new PropertyInjector(lazyObjectLifecycleService));
+        var lazyPropertyInjector = new Lazy<PropertyInjector>(() => new PropertyInjector(lazyObjectLifecycleService, TestSessionId));
 
         objectLifecycleServiceInstance = new ObjectLifecycleService(lazyPropertyInjector, objectGraphDiscoveryService, objectTracker);
         ObjectLifecycleService = Register(objectLifecycleServiceInstance);
