@@ -74,7 +74,7 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
 
         try
         {
-            await testArgumentRegistrationService.OnTestRegistered(registeredContext);
+            await testArgumentRegistrationService.RegisterTestArgumentsAsync(test.Context);
         }
         catch (Exception ex)
         {

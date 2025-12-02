@@ -5,7 +5,6 @@ using TUnit.Core.Data;
 using TUnit.Core.Enums;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
-using TUnit.Core.Tracking;
 using TUnit.Engine.Events;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Logging;
@@ -17,7 +16,6 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 {
     private readonly EventReceiverRegistry _registry = new();
     private readonly TUnitFrameworkLogger _logger;
-    private readonly TrackableObjectGraphProvider _trackableObjectGraphProvider;
 
     // Track which assemblies/classes/sessions have had their "first" event invoked
     private ThreadSafeDictionary<string, Task> _firstTestInAssemblyTasks = new();
@@ -35,10 +33,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     // Track registered First event receiver types to avoid duplicate registrations
     private readonly ConcurrentHashSet<Type> _registeredFirstEventReceiverTypes = new();
 
-    public EventReceiverOrchestrator(TUnitFrameworkLogger logger, TrackableObjectGraphProvider trackableObjectGraphProvider)
+    public EventReceiverOrchestrator(TUnitFrameworkLogger logger)
     {
         _logger = logger;
-        _trackableObjectGraphProvider = trackableObjectGraphProvider;
     }
 
     public void RegisterReceivers(TestContext context, CancellationToken cancellationToken)
