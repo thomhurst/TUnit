@@ -59,7 +59,7 @@
     <PackageVersion Include="OneOf" Version="3.0.271" />
     <PackageVersion Include="OneOf.SourceGenerator" Version="3.0.271" />
     <PackageVersion Include="Polly" Version="8.6.5" />
-    <PackageVersion Include="Polyfill" Version="9.3.0" />
+    <PackageVersion Include="Polyfill" Version="9.3.1" />
     <PackageVersion Include="PublicApiGenerator" Version="11.5.3" />
     <PackageVersion Include="RandomDataGenerator.Net" Version="1.0.19.1" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
