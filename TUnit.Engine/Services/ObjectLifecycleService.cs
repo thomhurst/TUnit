@@ -1,6 +1,9 @@
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
+using TUnit.Core.PropertyInjection;
+using TUnit.Core.PropertyInjection.Initialization;
 using TUnit.Core.Tracking;
 
 namespace TUnit.Engine.Services;
@@ -107,13 +110,70 @@ internal sealed class ObjectLifecycleService : IObjectRegistry
 
     /// <summary>
     /// Prepares a test for execution.
-    /// Properties are already injected during registration, so this just initializes tracked objects.
+    /// Sets already-resolved cached property values on the current instance and initializes tracked objects.
+    /// This is needed because retries create new instances that don't have properties set yet.
     /// </summary>
     public async Task PrepareTestAsync(TestContext testContext, CancellationToken cancellationToken)
     {
-        // Properties were already injected during RegisterTestAsync
-        // Just initialize all tracked objects (IAsyncInitializer) depth-first
+        var testClassInstance = testContext.Metadata.TestDetails.ClassInstance;
+
+        // Set already-cached property values on the current instance
+        // This ensures new instances (from retries) get the same shared objects that were resolved during registration
+        // We don't re-resolve from data sources - we just set the cached values
+        SetCachedPropertiesOnInstance(testClassInstance, testContext);
+
+        // Update tracking to ensure the current instance's object graph is tracked
+        // TrackObjects has deduplication logic - shared objects already tracked won't be tracked again
+        // This ensures that objects reachable from the current instance are properly tracked for disposal
+        _objectTracker.TrackObjects(testContext);
+
+        // Initialize all tracked objects (IAsyncInitializer) depth-first
         await InitializeTrackedObjectsAsync(testContext, cancellationToken);
+    }
+
+    /// <summary>
+    /// Sets already-cached property values on a test class instance.
+    /// This is used to apply cached property values to new instances created during retries.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT")]
+    private void SetCachedPropertiesOnInstance(object instance, TestContext testContext)
+    {
+        var plan = PropertyInjectionCache.GetOrCreatePlan(instance.GetType());
+
+        if (!plan.HasProperties)
+        {
+            return;
+        }
+
+        var cachedProperties = testContext.Metadata.TestDetails.TestClassInjectedPropertyArguments;
+
+        if (plan.SourceGeneratedProperties.Length > 0)
+        {
+            foreach (var metadata in plan.SourceGeneratedProperties)
+            {
+                var cacheKey = $"{metadata.ContainingType.FullName}.{metadata.PropertyName}";
+
+                if (cachedProperties.TryGetValue(cacheKey, out var cachedValue) && cachedValue != null)
+                {
+                    // Set the cached value on the new instance
+                    metadata.SetProperty(instance, cachedValue);
+                }
+            }
+        }
+        else if (plan.ReflectionProperties.Length > 0)
+        {
+            foreach (var (property, _) in plan.ReflectionProperties)
+            {
+                var cacheKey = $"{property.DeclaringType!.FullName}.{property.Name}";
+
+                if (cachedProperties.TryGetValue(cacheKey, out var cachedValue) && cachedValue != null)
+                {
+                    // Set the cached value on the new instance
+                    var setter = PropertySetterFactory.CreateSetter(property);
+                    setter(instance, cachedValue);
+                }
+            }
+        }
     }
 
     /// <summary>
