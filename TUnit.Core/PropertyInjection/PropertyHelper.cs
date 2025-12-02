@@ -11,13 +11,18 @@ internal static class PropertyHelper
 {
     /// <summary>
     /// Gets PropertyInfo in an AOT-safe manner.
+    /// Searches for both public and non-public properties to support internal properties.
     /// </summary>
     public static PropertyInfo GetPropertyInfo(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)]
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
         Type containingType,
         string propertyName)
     {
-        var property = containingType.GetProperty(propertyName);
+        // Use binding flags to find both public and non-public properties
+        // This is necessary to support internal properties on internal classes
+        var property = containingType.GetProperty(
+            propertyName,
+            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
 
         if (property == null)
         {
