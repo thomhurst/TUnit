@@ -21,8 +21,7 @@ internal sealed class TestBuilder : ITestBuilder
     private readonly string _sessionId;
     private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
     private readonly IContextProvider _contextProvider;
-    private readonly PropertyInjectionService _propertyInjectionService;
-    private readonly DataSourceInitializer _dataSourceInitializer;
+    private readonly ObjectLifecycleService _objectLifecycleService;
     private readonly Discovery.IHookDiscoveryService _hookDiscoveryService;
     private readonly TestArgumentRegistrationService _testArgumentRegistrationService;
     private readonly IMetadataFilterMatcher _filterMatcher;
@@ -31,8 +30,7 @@ internal sealed class TestBuilder : ITestBuilder
         string sessionId,
         EventReceiverOrchestrator eventReceiverOrchestrator,
         IContextProvider contextProvider,
-        PropertyInjectionService propertyInjectionService,
-        DataSourceInitializer dataSourceInitializer,
+        ObjectLifecycleService objectLifecycleService,
         Discovery.IHookDiscoveryService hookDiscoveryService,
         TestArgumentRegistrationService testArgumentRegistrationService,
         IMetadataFilterMatcher filterMatcher)
@@ -41,8 +39,7 @@ internal sealed class TestBuilder : ITestBuilder
         _hookDiscoveryService = hookDiscoveryService;
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
         _contextProvider = contextProvider;
-        _propertyInjectionService = propertyInjectionService;
-        _dataSourceInitializer = dataSourceInitializer;
+        _objectLifecycleService = objectLifecycleService;
         _testArgumentRegistrationService = testArgumentRegistrationService;
         _filterMatcher = filterMatcher ?? throw new ArgumentNullException(nameof(filterMatcher));
     }
@@ -262,7 +259,7 @@ internal sealed class TestBuilder : ITestBuilder
                                 var tempObjectBag = new ConcurrentDictionary<string, object?>();
                                 var tempEvents = new TestContextEvents();
 
-                                await _propertyInjectionService.InjectPropertiesIntoObjectAsync(
+                                await _objectLifecycleService.RegisterObjectAsync(
                                     instanceForMethodDataSources,
                                     tempObjectBag,
                                     metadata.MethodMetadata,
@@ -772,7 +769,7 @@ internal sealed class TestBuilder : ITestBuilder
         // Initialize all data sources to ensure properties are injected
         foreach (var dataSource in dataSources)
         {
-            await _dataSourceInitializer.EnsureInitializedAsync(dataSource);
+            await _objectLifecycleService.EnsureInitializedAsync(dataSource);
         }
 
         return dataSources;
@@ -788,7 +785,7 @@ internal sealed class TestBuilder : ITestBuilder
     {
         // Ensure the data source is fully initialized before getting data rows
         // This includes property injection and IAsyncInitializer.InitializeAsync
-        var initializedDataSource = await _dataSourceInitializer.EnsureInitializedAsync(
+        var initializedDataSource = await _objectLifecycleService.EnsureInitializedAsync(
             dataSource,
             dataGeneratorMetadata.TestBuilderContext.Current.StateBag,
             dataGeneratorMetadata.TestInformation,
@@ -952,7 +949,7 @@ internal sealed class TestBuilder : ITestBuilder
         context.InternalDiscoveredTest = discoveredTest;
 
         // First, invoke the global test argument registration service to register shared instances
-        await _testArgumentRegistrationService.OnTestRegistered(registeredContext);
+        await _testArgumentRegistrationService.RegisterTestArgumentsAsync(context);
 
         var eventObjects = context.GetEligibleEventObjects();
 
@@ -1027,7 +1024,7 @@ internal sealed class TestBuilder : ITestBuilder
             if (attribute is IDataSourceAttribute dataSource)
             {
                 // Data source attributes need to be initialized with property injection
-                await _dataSourceInitializer.EnsureInitializedAsync(dataSource);
+                await _objectLifecycleService.EnsureInitializedAsync(dataSource);
             }
         }
 
@@ -1395,7 +1392,7 @@ internal sealed class TestBuilder : ITestBuilder
                     var tempObjectBag = new ConcurrentDictionary<string, object?>();
                     var tempEvents = new TestContextEvents();
 
-                    await _propertyInjectionService.InjectPropertiesIntoObjectAsync(
+                    await _objectLifecycleService.RegisterObjectAsync(
                         instanceForMethodDataSources,
                         tempObjectBag,
                         metadata.MethodMetadata,

@@ -51,9 +51,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public TUnitInitializer Initializer { get; }
     public CancellationTokenSource FailFastCancellationSource { get; }
     public ParallelLimitLockProvider ParallelLimitLockProvider { get; }
-    public PropertyInjectionService PropertyInjectionService { get; }
-    public DataSourceInitializer DataSourceInitializer { get; }
-    public ObjectRegistrationService ObjectRegistrationService { get; }
+    public ObjectLifecycleService ObjectLifecycleService { get; }
     public bool AfterSessionHooksFailed { get; set; }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
@@ -104,25 +102,27 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             loggerFactory.CreateLogger<TUnitFrameworkLogger>(),
             logLevelProvider));
 
-        // Create initialization services
-        // Note: Circular dependency managed through two-phase initialization
-        // Phase 1: Create services with partial dependencies
-        DataSourceInitializer = Register(new DataSourceInitializer());
-        PropertyInjectionService = Register(new PropertyInjectionService(DataSourceInitializer));
-        ObjectRegistrationService = Register(new ObjectRegistrationService(PropertyInjectionService));
+        // Create initialization services using Lazy<T> to break circular dependencies
+        // No more two-phase initialization with Initialize() calls
+        var objectGraphDiscoveryService = Register(new ObjectGraphDiscoveryService());
 
-        // Phase 2: Complete dependencies (Initialize methods accept IObjectRegistry to break circular dependency)
-        PropertyInjectionService.Initialize(ObjectRegistrationService);
-        DataSourceInitializer.Initialize(PropertyInjectionService);
-
+        // Keep TrackableObjectGraphProvider for ObjectTracker (TUnit.Core dependency)
         var trackableObjectGraphProvider = new TrackableObjectGraphProvider();
 
         var disposer = new Disposer(Logger);
 
         var objectTracker = new ObjectTracker(trackableObjectGraphProvider, disposer);
 
+        // Use Lazy<T> to break circular dependency between PropertyInjector and ObjectLifecycleService
+        ObjectLifecycleService? objectLifecycleServiceInstance = null;
+        var lazyObjectLifecycleService = new Lazy<ObjectLifecycleService>(() => objectLifecycleServiceInstance!);
+        var lazyPropertyInjector = new Lazy<PropertyInjector>(() => new PropertyInjector(lazyObjectLifecycleService));
+
+        objectLifecycleServiceInstance = new ObjectLifecycleService(lazyPropertyInjector, objectGraphDiscoveryService, objectTracker);
+        ObjectLifecycleService = Register(objectLifecycleServiceInstance);
+
         // Register the test argument registration service to handle object registration for shared instances
-        var testArgumentRegistrationService = Register(new TestArgumentRegistrationService(ObjectRegistrationService, objectTracker));
+        var testArgumentRegistrationService = Register(new TestArgumentRegistrationService(ObjectLifecycleService));
 
         TestFilterService = Register(new TestFilterService(Logger, testArgumentRegistrationService));
 
@@ -135,7 +135,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         CancellationToken = Register(new EngineCancellationToken());
 
-        EventReceiverOrchestrator = Register(new EventReceiverOrchestrator(Logger, trackableObjectGraphProvider));
+        EventReceiverOrchestrator = Register(new EventReceiverOrchestrator(Logger));
         HookCollectionService = Register<IHookCollectionService>(new HookCollectionService(EventReceiverOrchestrator));
 
         ParallelLimitLockProvider = Register(new ParallelLimitLockProvider());
@@ -174,7 +174,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var dependencyExpander = Register(new MetadataDependencyExpander(filterMatcher));
 
         var testBuilder = Register<ITestBuilder>(
-            new TestBuilder(TestSessionId, EventReceiverOrchestrator, ContextProvider, PropertyInjectionService, DataSourceInitializer, hookDiscoveryService, testArgumentRegistrationService, filterMatcher));
+            new TestBuilder(TestSessionId, EventReceiverOrchestrator, ContextProvider, ObjectLifecycleService, hookDiscoveryService, testArgumentRegistrationService, filterMatcher));
 
         TestBuilderPipeline = Register(
             new TestBuilderPipeline(
@@ -188,7 +188,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         // Create test finder service after discovery service so it can use its cache
         TestFinder = Register<ITestFinder>(new TestFinder(DiscoveryService));
 
-        var testInitializer = new TestInitializer(EventReceiverOrchestrator, PropertyInjectionService, DataSourceInitializer, objectTracker);
+        var testInitializer = new TestInitializer(EventReceiverOrchestrator, ObjectLifecycleService);
 
         // Create the new TestCoordinator that orchestrates the granular services
         var testCoordinator = Register<ITestCoordinator>(
