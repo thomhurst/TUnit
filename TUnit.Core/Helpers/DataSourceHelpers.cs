@@ -561,6 +561,7 @@ public static class DataSourceHelpers
             containingType,
             testInformation,
             dataSourceAttribute,
+            testSessionId,
             TestContext.Current,
             TestContext.Current?.Metadata.TestDetails.ClassInstance,
             TestContext.Current?.InternalEvents,

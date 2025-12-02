@@ -39,11 +39,20 @@ internal sealed class ObjectLifecycleService : IObjectRegistry
 
     /// <summary>
     /// Registers a test for lifecycle management during discovery.
-    /// Only tracks objects - does NOT inject properties or call IAsyncInitializer (lazy resolution).
+    /// Injects properties so shared objects can be properly tracked across all tests.
+    /// Does NOT call IAsyncInitializer (deferred to execution).
     /// </summary>
-    public void RegisterTest(TestContext testContext)
+    public async Task RegisterTestAsync(TestContext testContext)
     {
-        // Just track the objects that need tracking for disposal
+        var testClassInstance = testContext.Metadata.TestDetails.ClassInstance;
+        var objectBag = testContext.StateBag.Items;
+        var methodMetadata = testContext.Metadata.TestDetails.MethodMetadata;
+        var events = testContext.InternalEvents;
+
+        // Inject properties during registration so shared objects are created early
+        await PropertyInjector.InjectPropertiesAsync(testClassInstance, objectBag, methodMetadata, events);
+
+        // Track the objects that need tracking for disposal
         _objectTracker.TrackObjects(testContext);
     }
 
@@ -98,22 +107,12 @@ internal sealed class ObjectLifecycleService : IObjectRegistry
 
     /// <summary>
     /// Prepares a test for execution.
-    /// Injects properties into the test class and ensures all tracked objects are initialized.
+    /// Properties are already injected during registration, so this just initializes tracked objects.
     /// </summary>
     public async Task PrepareTestAsync(TestContext testContext, CancellationToken cancellationToken)
     {
-        var testClassInstance = testContext.Metadata.TestDetails.ClassInstance;
-        var objectBag = testContext.StateBag.Items;
-        var methodMetadata = testContext.Metadata.TestDetails.MethodMetadata;
-        var events = testContext.InternalEvents;
-
-        // Phase 2a: Inject properties into test class
-        await PropertyInjector.InjectPropertiesAsync(testClassInstance, objectBag, methodMetadata, events);
-
-        // Phase 2b: Update tracking for any new objects discovered during injection
-        _objectTracker.TrackObjects(testContext);
-
-        // Phase 2c: Initialize all tracked objects (IAsyncInitializer) depth-first
+        // Properties were already injected during RegisterTestAsync
+        // Just initialize all tracked objects (IAsyncInitializer) depth-first
         await InitializeTrackedObjectsAsync(testContext, cancellationToken);
     }
 

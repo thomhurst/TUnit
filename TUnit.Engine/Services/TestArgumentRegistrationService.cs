@@ -40,7 +40,7 @@ internal sealed class TestArgumentRegistrationService
             testContext.Metadata.TestDetails.MethodMetadata,
             testContext.InternalEvents);
 
-        // Register the test for tracking (objects will be tracked for disposal)
-        _objectLifecycleService.RegisterTest(testContext);
+        // Register the test for tracking (inject properties and track objects for disposal)
+        await _objectLifecycleService.RegisterTestAsync(testContext);
     }
 }
