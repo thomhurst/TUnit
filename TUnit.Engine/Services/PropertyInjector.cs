@@ -29,6 +29,37 @@ internal sealed class PropertyInjector
     }
 
     /// <summary>
+    /// Resolves and caches property values for a test class type WITHOUT setting them on an instance.
+    /// Used during registration to create shared objects early and enable proper reference counting.
+    /// </summary>
+    public async Task ResolveAndCachePropertiesAsync(
+        Type testClassType,
+        ConcurrentDictionary<string, object?> objectBag,
+        MethodMetadata? methodMetadata,
+        TestContextEvents events,
+        TestContext testContext)
+    {
+        var plan = PropertyInjectionCache.GetOrCreatePlan(testClassType);
+
+        if (!plan.HasProperties)
+        {
+            return;
+        }
+
+        // Resolve properties based on what's available in the plan
+        if (plan.SourceGeneratedProperties.Length > 0)
+        {
+            await ResolveAndCacheSourceGeneratedPropertiesAsync(
+                plan.SourceGeneratedProperties, objectBag, methodMetadata, events, testContext);
+        }
+        else if (plan.ReflectionProperties.Length > 0)
+        {
+            await ResolveAndCacheReflectionPropertiesAsync(
+                plan.ReflectionProperties, objectBag, methodMetadata, events, testContext);
+        }
+    }
+
+    /// <summary>
     /// Injects properties into an object and recursively into nested objects.
     /// </summary>
     public async Task InjectPropertiesAsync(
@@ -340,6 +371,125 @@ internal sealed class PropertyInjector
                     await InjectPropertiesRecursiveAsync(propertyValue, objectBag, methodMetadata, events, visitedObjects);
                 }
             }
+        }
+    }
+
+    private async Task ResolveAndCacheSourceGeneratedPropertiesAsync(
+        PropertyInjectionMetadata[] properties,
+        ConcurrentDictionary<string, object?> objectBag,
+        MethodMetadata? methodMetadata,
+        TestContextEvents events,
+        TestContext testContext)
+    {
+        if (properties.Length == 0)
+        {
+            return;
+        }
+
+        // Resolve properties in parallel
+        await Task.WhenAll(properties.Select(metadata =>
+            ResolveAndCacheSourceGeneratedPropertyAsync(metadata, objectBag, methodMetadata, events, testContext)));
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Source-gen properties are AOT-safe")]
+    private async Task ResolveAndCacheSourceGeneratedPropertyAsync(
+        PropertyInjectionMetadata metadata,
+        ConcurrentDictionary<string, object?> objectBag,
+        MethodMetadata? methodMetadata,
+        TestContextEvents events,
+        TestContext testContext)
+    {
+        var cacheKey = $"{metadata.ContainingType.FullName}.{metadata.PropertyName}";
+
+        // Check if already cached
+        if (testContext.Metadata.TestDetails.TestClassInjectedPropertyArguments.ContainsKey(cacheKey))
+        {
+            return;
+        }
+
+        // Resolve the property value from the data source
+        var resolvedValue = await ResolvePropertyDataAsync(
+            new PropertyInitializationContext
+            {
+                Instance = PlaceholderInstance.Instance,  // Use placeholder during registration
+                SourceGeneratedMetadata = metadata,
+                PropertyName = metadata.PropertyName,
+                PropertyType = metadata.PropertyType,
+                PropertySetter = metadata.SetProperty,
+                ObjectBag = objectBag,
+                MethodMetadata = methodMetadata,
+                Events = events,
+                VisitedObjects = new ConcurrentDictionary<object, byte>(),  // Empty dictionary for cycle detection
+                TestContext = testContext,
+                IsNestedProperty = false
+            });
+
+        if (resolvedValue != null)
+        {
+            // Cache the resolved value
+            ((ConcurrentDictionary<string, object?>)testContext.Metadata.TestDetails.TestClassInjectedPropertyArguments)
+                .TryAdd(cacheKey, resolvedValue);
+        }
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT")]
+    private async Task ResolveAndCacheReflectionPropertiesAsync(
+        (PropertyInfo Property, IDataSourceAttribute DataSource)[] properties,
+        ConcurrentDictionary<string, object?> objectBag,
+        MethodMetadata? methodMetadata,
+        TestContextEvents events,
+        TestContext testContext)
+    {
+        if (properties.Length == 0)
+        {
+            return;
+        }
+
+        await Task.WhenAll(properties.Select(pair =>
+            ResolveAndCacheReflectionPropertyAsync(pair.Property, pair.DataSource, objectBag, methodMetadata, events, testContext)));
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT")]
+    private async Task ResolveAndCacheReflectionPropertyAsync(
+        PropertyInfo property,
+        IDataSourceAttribute dataSource,
+        ConcurrentDictionary<string, object?> objectBag,
+        MethodMetadata? methodMetadata,
+        TestContextEvents events,
+        TestContext testContext)
+    {
+        var cacheKey = $"{property.DeclaringType!.FullName}.{property.Name}";
+
+        // Check if already cached
+        if (testContext.Metadata.TestDetails.TestClassInjectedPropertyArguments.ContainsKey(cacheKey))
+        {
+            return;
+        }
+
+        var propertySetter = PropertySetterFactory.CreateSetter(property);
+
+        var resolvedValue = await ResolvePropertyDataAsync(
+            new PropertyInitializationContext
+            {
+                Instance = PlaceholderInstance.Instance,  // Use placeholder during registration
+                PropertyInfo = property,
+                DataSource = dataSource,
+                PropertyName = property.Name,
+                PropertyType = property.PropertyType,
+                PropertySetter = propertySetter,
+                ObjectBag = objectBag,
+                MethodMetadata = methodMetadata,
+                Events = events,
+                VisitedObjects = new ConcurrentDictionary<object, byte>(),  // Empty dictionary for cycle detection
+                TestContext = testContext,
+                IsNestedProperty = false
+            });
+
+        if (resolvedValue != null)
+        {
+            // Cache the resolved value
+            ((ConcurrentDictionary<string, object?>)testContext.Metadata.TestDetails.TestClassInjectedPropertyArguments)
+                .TryAdd(cacheKey, resolvedValue);
         }
     }
 

@@ -42,20 +42,22 @@ internal sealed class ObjectLifecycleService : IObjectRegistry
 
     /// <summary>
     /// Registers a test for lifecycle management during discovery.
-    /// Injects properties so shared objects can be properly tracked across all tests.
+    /// Resolves and caches property values (to create shared objects early) without setting them on the placeholder instance.
+    /// Tracks the resolved objects so reference counting works correctly across all tests.
     /// Does NOT call IAsyncInitializer (deferred to execution).
     /// </summary>
     public async Task RegisterTestAsync(TestContext testContext)
     {
-        var testClassInstance = testContext.Metadata.TestDetails.ClassInstance;
         var objectBag = testContext.StateBag.Items;
         var methodMetadata = testContext.Metadata.TestDetails.MethodMetadata;
         var events = testContext.InternalEvents;
+        var testClassType = testContext.Metadata.TestDetails.ClassType;
 
-        // Inject properties during registration so shared objects are created early
-        await PropertyInjector.InjectPropertiesAsync(testClassInstance, objectBag, methodMetadata, events);
+        // Resolve property values (creating shared objects) and cache them WITHOUT setting on placeholder instance
+        // This ensures shared objects are created once and tracked with the correct reference count
+        await PropertyInjector.ResolveAndCachePropertiesAsync(testClassType, objectBag, methodMetadata, events, testContext);
 
-        // Track the objects that need tracking for disposal
+        // Track the cached objects so they get the correct reference count
         _objectTracker.TrackObjects(testContext);
     }
 
@@ -118,14 +120,9 @@ internal sealed class ObjectLifecycleService : IObjectRegistry
         var testClassInstance = testContext.Metadata.TestDetails.ClassInstance;
 
         // Set already-cached property values on the current instance
-        // This ensures new instances (from retries) get the same shared objects that were resolved during registration
-        // We don't re-resolve from data sources - we just set the cached values
+        // Properties were resolved and cached during RegisterTestAsync, so shared objects are already created
+        // We just need to set them on the actual test instance (retries create new instances)
         SetCachedPropertiesOnInstance(testClassInstance, testContext);
-
-        // Update tracking to ensure the current instance's object graph is tracked
-        // TrackObjects has deduplication logic - shared objects already tracked won't be tracked again
-        // This ensures that objects reachable from the current instance are properly tracked for disposal
-        _objectTracker.TrackObjects(testContext);
 
         // Initialize all tracked objects (IAsyncInitializer) depth-first
         await InitializeTrackedObjectsAsync(testContext, cancellationToken);
