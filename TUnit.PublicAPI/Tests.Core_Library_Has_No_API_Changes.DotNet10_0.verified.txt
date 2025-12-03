@@ -2494,7 +2494,7 @@ namespace .
     public sealed class PropertyInjectionMetadata
     {
         public PropertyInjectionMetadata() { }
-        [.(..PublicProperties)]
+        [.(..None | ..PublicProperties | ..NonPublicProperties)]
         public required  ContainingType { get; init; }
         public required <.IDataSourceAttribute> CreateDataSource { get; init; }
         public required string PropertyName { get; init; }

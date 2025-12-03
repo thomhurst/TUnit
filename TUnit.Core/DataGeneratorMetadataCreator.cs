@@ -170,6 +170,7 @@ internal static class DataGeneratorMetadataCreator
         PropertyMetadata propertyMetadata,
         MethodMetadata? methodMetadata,
         IDataSourceAttribute dataSource,
+        string testSessionId,
         TestContext? testContext = null,
         object? testClassInstance = null,
         TestContextEvents? events = null,
@@ -193,7 +194,7 @@ internal static class DataGeneratorMetadataCreator
             MembersToGenerate = [propertyMetadata],
             TestInformation = methodMetadata,
             Type = DataGeneratorType.Property,
-            TestSessionId = TestSessionContext.Current?.Id ?? "property-injection",
+            TestSessionId = testSessionId,
             TestClassInstance = testClassInstance ?? testContext?.Metadata.TestDetails.ClassInstance,
             ClassInstanceArguments = testContext?.Metadata.TestDetails.TestClassArguments ?? []
         };
@@ -215,6 +216,7 @@ internal static class DataGeneratorMetadataCreator
         Type containingType,
         MethodMetadata? methodMetadata,
         IDataSourceAttribute dataSource,
+        string testSessionId,
         TestContext? testContext = null,
         object? testClassInstance = null,
         TestContextEvents? events = null,
@@ -235,6 +237,7 @@ internal static class DataGeneratorMetadataCreator
             propertyMetadata,
             methodMetadata,
             dataSource,
+            testSessionId,
             testContext,
             testClassInstance,
             events,

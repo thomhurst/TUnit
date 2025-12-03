@@ -1,24 +1,22 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using TUnit.Core.Data;
+﻿using TUnit.Core.Data;
 
 namespace TUnit.Core.PropertyInjection;
 
 /// <summary>
-/// Provides caching functionality for property injection operations.
-/// Follows Single Responsibility Principle by focusing only on caching.
+/// Provides pure caching functionality for property injection metadata.
+/// Follows Single Responsibility Principle - only caches type metadata, no execution logic.
 ///
 /// This cache supports both execution modes:
 /// - Source Generation Mode: Uses pre-compiled property setters and metadata
 /// - Reflection Mode: Uses runtime discovery and dynamic property access
 ///
-/// The IL2067 suppressions are necessary because types come from runtime objects
-/// (via GetType() calls) which cannot have compile-time annotations.
+/// Instance-level injection tracking has been moved to ObjectLifecycleService
+/// to maintain SRP (caching vs execution are separate concerns).
 /// </summary>
 internal static class PropertyInjectionCache
 {
     private static readonly ThreadSafeDictionary<Type, PropertyInjectionPlan> _injectionPlans = new();
     private static readonly ThreadSafeDictionary<Type, bool> _shouldInjectCache = new();
-    private static readonly ThreadSafeDictionary<object, TaskCompletionSource<bool>> _injectionTasks = new();
 
     /// <summary>
     /// Gets or creates an injection plan for the specified type.
@@ -40,43 +38,5 @@ internal static class PropertyInjectionCache
             var plan = GetOrCreatePlan(t);
             return plan.HasProperties;
         });
-    }
-
-    /// <summary>
-    /// Ensures properties are injected into the specified instance.
-    /// Fast-path optimized for already-injected instances (zero allocation).
-    /// </summary>
-    public static async ValueTask EnsureInjectedAsync(object instance, Func<object, ValueTask> injectionFactory)
-    {
-        if (_injectionTasks.TryGetValue(instance, out var existingTcs) && existingTcs.Task.IsCompleted)
-        {
-            if (existingTcs.Task.IsFaulted)
-            {
-                await existingTcs.Task.ConfigureAwait(false);
-            }
-
-            return;
-        }
-
-        var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-        existingTcs = _injectionTasks.GetOrAdd(instance, _ => tcs);
-
-        if (existingTcs == tcs)
-        {
-            try
-            {
-                await injectionFactory(instance).ConfigureAwait(false);
-                tcs.SetResult(true);
-            }
-            catch (Exception ex)
-            {
-                tcs.SetException(ex);
-                throw;
-            }
-        }
-        else
-        {
-            await existingTcs.Task.ConfigureAwait(false);
-        }
     }
 }

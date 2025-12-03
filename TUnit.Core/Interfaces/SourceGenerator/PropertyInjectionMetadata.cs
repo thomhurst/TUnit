@@ -24,7 +24,7 @@ public sealed class PropertyInjectionMetadata
     /// <summary>
     /// Gets the type that contains the property (the parent class).
     /// </summary>
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)]
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
     public required Type ContainingType { get; init; }
 
     /// <summary>
