@@ -14,9 +14,9 @@ So a test could look like:
 
 ```fsharp
 member this.CheckPositive() = async {
-            let result = 1 + 1
-            do! check (Assert.That(result).IsPositive())
-        }
+    let result = 1 + 1
+    do! check (Assert.That(result).IsPositive())
+}
 ```
 
 F# is a lot more strict with type resolution when it comes to extension methods and method overloads. Because of that you may need to annotate the type for the assertions.
@@ -24,23 +24,42 @@ F# is a lot more strict with type resolution when it comes to extension methods 
 For example,
 
 ```fsharp
-    [<Test>]
-    [<Category("Pass")>]
-    member _.Test3() = async {
-        let value = "1"
-        do! check (Assert.That<string>(value).IsEqualTo("1"))
-    }
+[<Test>]
+[<Category("Pass")>]
+member _.Test3() = async {
+    let value = "1"
+    do! check (Assert.That<string>(value).IsEqualTo("1"))
+}
 
-    [<Test>]
-    [<Category("Fail")>]
-    member _.Throws1() = async {
-        do! check (Assert.That<string>(fun () -> task { return new string([||]) }).ThrowsException())
-    }
+[<Test>]
+[<Category("Fail")>]
+member _.Throws1() = async {
+    do! check (Assert.That<string>(fun () -> task { return new string([||]) }).ThrowsException())
+}
 
-    [<Test>]
-    [<Category("Pass")>]
-    member _.Throws4() = async {
-        do! check (Assert.That<bool>(fun () -> Task.FromResult(true)).ThrowsNothing())
-    }
+[<Test>]
+[<Category("Pass")>]
+member _.Throws4() = async {
+    do! check (Assert.That<bool>(fun () -> Task.FromResult(true)).ThrowsNothing())
+}
+```
 
-```    
+## taskAssert expression
+
+For Task-based tests you can also use the taskAssert computation expression to avoid wrapping every assertion in check.
+
+To use it, open the namespace:
+
+```fsharp
+open TUnit.Assertions.FSharp.TaskAssert
+```
+
+Inside a taskAssert block you can directly do! the assertion:
+```fsharp
+[<Test>]
+[<Category("Pass")>]
+member _.Test3() = taskAssert {
+    let value = "1"
+    do! Assert.That(value).IsEqualTo("1")
+}
+```
