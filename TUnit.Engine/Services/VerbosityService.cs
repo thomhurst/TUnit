@@ -1,7 +1,6 @@
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Services;
 using TUnit.Engine.CommandLineProviders;
-using TUnit.Engine.Helpers;
 using LogLevel = TUnit.Core.Logging.LogLevel;
 
 #pragma warning disable TPEXP
@@ -42,8 +41,6 @@ public sealed class VerbosityService
                $"(Stack traces: {ShowDetailedStackTrace}, ";
     }
 
-    // Use centralized environment variable cache
-
     private static bool GetOutputLevel(ICommandLineOptions commandLineOptions, IServiceProvider serviceProvider)
     {
         // Check for --output flag (Microsoft.Testing.Platform extension)
@@ -64,8 +61,8 @@ public sealed class VerbosityService
             return LogLevelCommandProvider.ParseLogLevel(args);
         }
 
-        // Check cached legacy environment variable for backwards compatibility
-        if (EnvironmentVariableCache.Get("TUNIT_DISCOVERY_DIAGNOSTICS") == "1")
+        // Check legacy environment variable for backwards compatibility
+        if (Environment.GetEnvironmentVariable("TUNIT_DISCOVERY_DIAGNOSTICS") == "1")
         {
             return LogLevel.Debug;
         }
