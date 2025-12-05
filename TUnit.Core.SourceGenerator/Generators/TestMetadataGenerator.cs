@@ -1886,14 +1886,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Generate InvokeTypedTest for non-generic tests
         var isAsync = IsAsyncMethod(testMethod.MethodSymbol);
         var returnsValueTask = ReturnsValueTask(testMethod.MethodSymbol);
+        var returnsVoid = testMethod.MethodSymbol.ReturnType.SpecialType == SpecialType.System_Void;
         if (testMethod is { IsGenericType: false, IsGenericMethod: false })
         {
-            GenerateConcreteTestInvoker(writer, testMethod, className, methodName, isAsync, returnsValueTask, hasCancellationToken, parametersFromArgs);
+            GenerateConcreteTestInvoker(writer, testMethod, className, methodName, isAsync, returnsValueTask, returnsVoid, hasCancellationToken, parametersFromArgs);
         }
     }
 
 
-    private static void GenerateConcreteTestInvoker(CodeWriter writer, TestMethodMetadata testMethod, string className, string methodName, bool isAsync, bool returnsValueTask, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs)
+    private static void GenerateConcreteTestInvoker(CodeWriter writer, TestMethodMetadata testMethod, string className, string methodName, bool isAsync, bool returnsValueTask, bool returnsVoid, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs)
     {
         // Generate InvokeTypedTest which is required by CreateExecutableTestFactory
         writer.AppendLine("InvokeTypedTest = static (instance, args, cancellationToken) =>");
@@ -1941,13 +1942,24 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 }
                 else
                 {
-                    writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask({methodCallReconstructed});");
+                    writer.AppendLine($"var methodResult = {methodCallReconstructed};");
+                    writer.AppendLine("if (methodResult is global::System.Threading.Tasks.Task t) return new global::System.Threading.Tasks.ValueTask(t);");
+                    writer.AppendLine("return global::TUnit.Core.AsyncConvert.ConvertObject(methodResult);");
                 }
             }
             else
             {
-                writer.AppendLine($"{methodCallReconstructed};");
-                writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
+                if (returnsVoid)
+                {
+                    writer.AppendLine($"{methodCallReconstructed};");
+                    writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
+                }
+                else
+                {
+                    writer.AppendLine($"var methodResult = {methodCallReconstructed};");
+                    writer.AppendLine("if (methodResult == null) return default(global::System.Threading.Tasks.ValueTask);");
+                    writer.AppendLine("return global::TUnit.Core.AsyncConvert.ConvertObject(methodResult);");
+                }
             }
             writer.Unindent();
             writer.AppendLine("}");
@@ -1966,13 +1978,24 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 }
                 else
                 {
-                    writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask({methodCallDirect});");
+                    writer.AppendLine($"var methodResult = {methodCallDirect};");
+                    writer.AppendLine("if (methodResult is global::System.Threading.Tasks.Task t) return new global::System.Threading.Tasks.ValueTask(t);");
+                    writer.AppendLine("return global::TUnit.Core.AsyncConvert.ConvertObject(methodResult);");
                 }
             }
             else
             {
-                writer.AppendLine($"{methodCallDirect};");
-                writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
+                if (returnsVoid)
+                {
+                    writer.AppendLine($"{methodCallDirect};");
+                    writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
+                }
+                else
+                {
+                    writer.AppendLine($"var methodResult = {methodCallDirect};");
+                    writer.AppendLine("if (methodResult == null) return default(global::System.Threading.Tasks.ValueTask);");
+                    writer.AppendLine("return global::TUnit.Core.AsyncConvert.ConvertObject(methodResult);");
+                }
             }
             writer.Unindent();
             writer.AppendLine("}");
@@ -1996,13 +2019,24 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 }
                 else
                 {
-                    writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask({typedMethodCall});");
+                    writer.AppendLine($"var methodResult = {typedMethodCall};");
+                    writer.AppendLine("if (methodResult is global::System.Threading.Tasks.Task t) return new global::System.Threading.Tasks.ValueTask(t);");
+                    writer.AppendLine("return global::TUnit.Core.AsyncConvert.ConvertObject(methodResult);");
                 }
             }
             else
             {
-                writer.AppendLine($"{typedMethodCall};");
-                writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
+                if (returnsVoid)
+                {
+                    writer.AppendLine($"{typedMethodCall};");
+                    writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
+                }
+                else
+                {
+                    writer.AppendLine($"var methodResult = {typedMethodCall};");
+                    writer.AppendLine("if (methodResult == null) return default(global::System.Threading.Tasks.ValueTask);");
+                    writer.AppendLine("return global::TUnit.Core.AsyncConvert.ConvertObject(methodResult);");
+                }
             }
         }
         else
@@ -2028,6 +2062,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 var argCount = requiredParamCount + i;
                 writer.AppendLine($"case {argCount}:");
                 writer.Indent();
+                writer.AppendLine("{");
+                writer.Indent();
 
                 // Build the arguments to pass, handling params arrays correctly
                 var argsToPass = TupleArgumentHelper.GenerateArgumentAccessWithParams(parametersFromArgs, "args", argCount);
@@ -2048,14 +2084,27 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     }
                     else
                     {
-                        writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask({typedMethodCall});");
+                        writer.AppendLine($"var methodResult = {typedMethodCall};");
+                        writer.AppendLine("if (methodResult is global::System.Threading.Tasks.Task t) return new global::System.Threading.Tasks.ValueTask(t);");
+                        writer.AppendLine("return global::TUnit.Core.AsyncConvert.ConvertObject(methodResult);");
                     }
                 }
                 else
                 {
-                    writer.AppendLine($"{typedMethodCall};");
-                    writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
+                    if (returnsVoid)
+                    {
+                        writer.AppendLine($"{typedMethodCall};");
+                        writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
+                    }
+                    else
+                    {
+                        writer.AppendLine($"var methodResult = {typedMethodCall};");
+                        writer.AppendLine("if (methodResult == null) return default(global::System.Threading.Tasks.ValueTask);");
+                        writer.AppendLine("return global::TUnit.Core.AsyncConvert.ConvertObject(methodResult);");
+                    }
                 }
+                writer.Unindent();
+                writer.AppendLine("}");
                 writer.Unindent();
             }
 

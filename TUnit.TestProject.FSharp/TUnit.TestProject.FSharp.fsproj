@@ -19,6 +19,7 @@
         <Compile Include="ClassConstructorWithEnumerableTest.fs" />
         <Compile Include="ClassDataSourceDrivenTests.fs" />
         <Compile Include="TaskAssertTests.fs" />
+        <Compile Include="AsyncTests.fs" />
         <Compile Include="Tests.fs" />
     </ItemGroup>
 
