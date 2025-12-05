@@ -163,8 +163,10 @@ internal sealed class TUnit_TestProject_DataSourceClassCombinedWithDataSourceMet
                     switch (args.Length)
                     {
                         case 1:
-                            instance.DataSourceClassCombinedWithDataSourceMethodTest(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-                            return default(global::System.Threading.Tasks.ValueTask);
+                            {
+                                instance.DataSourceClassCombinedWithDataSourceMethodTest(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+                                return default(global::System.Threading.Tasks.ValueTask);
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }

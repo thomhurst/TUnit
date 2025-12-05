@@ -84,7 +84,9 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Transfer__decimal_d
                     switch (args.Length)
                     {
                         case 2:
-                            return new global::System.Threading.Tasks.ValueTask(instance.Transfer(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[1])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Transfer(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[1])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
                     }
@@ -189,7 +191,9 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_SimpleDecimal__deci
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.SimpleDecimal(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.SimpleDecimal(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
@@ -294,7 +298,9 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_SmallDecimal__decim
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.SmallDecimal(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.SmallDecimal(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
@@ -399,7 +405,9 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_MaxDecimal__decimal
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.MaxDecimal(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.MaxDecimal(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
@@ -504,7 +512,9 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_MinDecimal__decimal
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.MinDecimal(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.MinDecimal(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
@@ -609,7 +619,9 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_ExplicitDecimalValu
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.ExplicitDecimalValue(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.ExplicitDecimalValue(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
@@ -728,7 +740,9 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_MultipleDecimals__d
                     switch (args.Length)
                     {
                         case 3:
-                            return new global::System.Threading.Tasks.ValueTask(instance.MultipleDecimals(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[2])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.MultipleDecimals(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[2])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
                     }
@@ -835,8 +849,10 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Test__decimal_TestS
                     switch (args.Length)
                     {
                         case 1:
-                            instance.Test(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]));
-                            return default(global::System.Threading.Tasks.ValueTask);
+                            {
+                                instance.Test(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]));
+                                return default(global::System.Threading.Tasks.ValueTask);
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
@@ -978,8 +994,10 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_TransactionDiscount
                     switch (args.Length)
                     {
                         case 6:
-                            instance.TransactionDiscountCalculations(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[4]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[5]));
-                            return default(global::System.Threading.Tasks.ValueTask);
+                            {
+                                instance.TransactionDiscountCalculations(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[4]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[5]));
+                                return default(global::System.Threading.Tasks.ValueTask);
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 6 arguments, but got {args.Length}");
                     }
@@ -1084,7 +1102,9 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Equality3__decimal_
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.Equality3(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Equality3(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
@@ -1189,7 +1209,9 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Equality4__decimal_
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.Equality4(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Equality4(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
@@ -1294,7 +1316,9 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_TestMethod__decimal
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.TestMethod(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.TestMethod(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }

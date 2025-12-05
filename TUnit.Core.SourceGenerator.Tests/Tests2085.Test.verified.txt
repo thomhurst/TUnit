@@ -75,7 +75,9 @@ internal sealed class TUnit_TestProject_Bugs__2085_Tests_Double_SpecialConsts__d
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.Double_SpecialConsts(TUnit.Core.Helpers.CastHelper.Cast<double>(args[0])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Double_SpecialConsts(TUnit.Core.Helpers.CastHelper.Cast<double>(args[0])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
@@ -180,7 +182,9 @@ internal sealed class TUnit_TestProject_Bugs__2085_Tests_Float_SpecialConsts__fl
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.Float_SpecialConsts(TUnit.Core.Helpers.CastHelper.Cast<float>(args[0])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Float_SpecialConsts(TUnit.Core.Helpers.CastHelper.Cast<float>(args[0])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }

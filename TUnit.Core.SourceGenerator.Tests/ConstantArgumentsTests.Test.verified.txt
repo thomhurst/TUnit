@@ -75,7 +75,9 @@ internal sealed class TUnit_TestProject_ConstantArgumentsTests_String1__string_T
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.String1(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.String1(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
@@ -180,7 +182,9 @@ internal sealed class TUnit_TestProject_ConstantArgumentsTests_Int__int_TestSour
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.Int(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Int(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
@@ -285,7 +289,9 @@ internal sealed class TUnit_TestProject_ConstantArgumentsTests_Double__double_Te
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.Double(TUnit.Core.Helpers.CastHelper.Cast<double>(args[0])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Double(TUnit.Core.Helpers.CastHelper.Cast<double>(args[0])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
@@ -390,7 +396,9 @@ internal sealed class TUnit_TestProject_ConstantArgumentsTests_Float__float_Test
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.Float(TUnit.Core.Helpers.CastHelper.Cast<float>(args[0])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Float(TUnit.Core.Helpers.CastHelper.Cast<float>(args[0])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
@@ -495,7 +503,9 @@ internal sealed class TUnit_TestProject_ConstantArgumentsTests_Long__long_TestSo
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.Long(TUnit.Core.Helpers.CastHelper.Cast<long>(args[0])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Long(TUnit.Core.Helpers.CastHelper.Cast<long>(args[0])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
@@ -600,7 +610,9 @@ internal sealed class TUnit_TestProject_ConstantArgumentsTests_UInt__uint_TestSo
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.UInt(TUnit.Core.Helpers.CastHelper.Cast<uint>(args[0])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.UInt(TUnit.Core.Helpers.CastHelper.Cast<uint>(args[0])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
@@ -705,7 +717,9 @@ internal sealed class TUnit_TestProject_ConstantArgumentsTests_ULong__ulong_Test
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.ULong(TUnit.Core.Helpers.CastHelper.Cast<ulong>(args[0])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.ULong(TUnit.Core.Helpers.CastHelper.Cast<ulong>(args[0])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }

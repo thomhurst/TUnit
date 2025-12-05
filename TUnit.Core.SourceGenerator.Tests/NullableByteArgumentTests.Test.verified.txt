@@ -76,8 +76,10 @@ internal sealed class TUnit_TestProject_NullableByteArgumentTests_Test__byte__Te
                     switch (args.Length)
                     {
                         case 1:
-                            instance.Test(TUnit.Core.Helpers.CastHelper.Cast<byte?>(args[0]));
-                            return default(global::System.Threading.Tasks.ValueTask);
+                            {
+                                instance.Test(TUnit.Core.Helpers.CastHelper.Cast<byte?>(args[0]));
+                                return default(global::System.Threading.Tasks.ValueTask);
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
@@ -190,8 +192,10 @@ internal sealed class TUnit_TestProject_NullableByteArgumentTests_Test2__byte_by
                     switch (args.Length)
                     {
                         case 2:
-                            instance.Test2(TUnit.Core.Helpers.CastHelper.Cast<byte>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<byte?>(args[1]));
-                            return default(global::System.Threading.Tasks.ValueTask);
+                            {
+                                instance.Test2(TUnit.Core.Helpers.CastHelper.Cast<byte>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<byte?>(args[1]));
+                                return default(global::System.Threading.Tasks.ValueTask);
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
                     }

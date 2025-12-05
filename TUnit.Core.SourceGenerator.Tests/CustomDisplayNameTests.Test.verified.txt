@@ -306,7 +306,9 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test3__string_int
                     switch (args.Length)
                     {
                         case 3:
-                            return new global::System.Threading.Tasks.ValueTask(instance.Test3(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[2])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Test3(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[2])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
                     }
@@ -436,7 +438,9 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_MethodDataSourceT
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.MethodDataSourceTest(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.MethodDataSourceTest(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
@@ -564,7 +568,9 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_TestParameterName
                     switch (args.Length)
                     {
                         case 2:
-                            return new global::System.Threading.Tasks.ValueTask(instance.TestParameterNamePrefixBug(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.TestParameterNamePrefixBug(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
                     }
@@ -682,7 +688,9 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_PasswordTest__str
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.PasswordTest(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.PasswordTest(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }

@@ -75,7 +75,9 @@ internal sealed class TUnit_TestProject_NameOfArgumentTests_TestName__string_Tes
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.TestName(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.TestName(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }

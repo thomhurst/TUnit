@@ -167,8 +167,10 @@ internal sealed class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
                     switch (args.Length)
                     {
                         case 1:
-                            instance.GenericMethodDataSource(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
-                            return default(global::System.Threading.Tasks.ValueTask);
+                            {
+                                instance.GenericMethodDataSource(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+                                return default(global::System.Threading.Tasks.ValueTask);
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
@@ -286,8 +288,10 @@ internal sealed class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
                     switch (args.Length)
                     {
                         case 1:
-                            instance.NonGenericMethodDataSource(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
-                            return default(global::System.Threading.Tasks.ValueTask);
+                            {
+                                instance.NonGenericMethodDataSource(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+                                return default(global::System.Threading.Tasks.ValueTask);
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }

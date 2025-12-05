@@ -96,7 +96,9 @@ internal sealed class TUnit_TestProject_EnumerableDataSourceDrivenTests_DataSour
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.DataSource_Method(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.DataSource_Method(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
@@ -222,7 +224,9 @@ internal sealed class TUnit_TestProject_EnumerableDataSourceDrivenTests_DataSour
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.DataSource_Method2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.DataSource_Method2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
@@ -348,8 +352,10 @@ internal sealed class TUnit_TestProject_EnumerableDataSourceDrivenTests_DataSour
                     switch (args.Length)
                     {
                         case 1:
-                            instance.DataSource_WithBaseReturn(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.EnumerableDataSourceDrivenTests.BaseValue>(args[0]));
-                            return default(global::System.Threading.Tasks.ValueTask);
+                            {
+                                instance.DataSource_WithBaseReturn(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.EnumerableDataSourceDrivenTests.BaseValue>(args[0]));
+                                return default(global::System.Threading.Tasks.ValueTask);
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }

@@ -89,7 +89,9 @@ internal sealed class TUnit_TestProject_MatrixTests_MatrixTest_One__string_int_b
                     switch (args.Length)
                     {
                         case 3:
-                            return new global::System.Threading.Tasks.ValueTask(instance.MatrixTest_One(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[2])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.MatrixTest_One(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[2])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
                     }
@@ -215,7 +217,9 @@ internal sealed class TUnit_TestProject_MatrixTests_MatrixTest_Two__int_int_int_
                     switch (args.Length)
                     {
                         case 4:
-                            return new global::System.Threading.Tasks.ValueTask(instance.MatrixTest_Two(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[3])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.MatrixTest_Two(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[3])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 4 arguments, but got {args.Length}");
                     }
@@ -334,7 +338,9 @@ internal sealed class TUnit_TestProject_MatrixTests_MatrixTest_Enum__int_TestEnu
                     switch (args.Length)
                     {
                         case 3:
-                            return new global::System.Threading.Tasks.ValueTask(instance.MatrixTest_Enum(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.TestEnum>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.TestEnum?>(args[2])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.MatrixTest_Enum(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.TestEnum>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.TestEnum?>(args[2])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
                     }
@@ -446,7 +452,9 @@ internal sealed class TUnit_TestProject_MatrixTests_AutoGenerateBools__string_bo
                     switch (args.Length)
                     {
                         case 2:
-                            return new global::System.Threading.Tasks.ValueTask(instance.AutoGenerateBools(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[1])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.AutoGenerateBools(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[1])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
                     }
@@ -558,7 +566,9 @@ internal sealed class TUnit_TestProject_MatrixTests_AutoGenerateBools2__string_b
                     switch (args.Length)
                     {
                         case 2:
-                            return new global::System.Threading.Tasks.ValueTask(instance.AutoGenerateBools2(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<bool?>(args[1])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.AutoGenerateBools2(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<bool?>(args[1])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
                     }
@@ -670,7 +680,9 @@ internal sealed class TUnit_TestProject_MatrixTests_ImplicitConversion__OneOf_Te
                     switch (args.Length)
                     {
                         case 2:
-                            return new global::System.Threading.Tasks.ValueTask(instance.ImplicitConversion(TUnit.Core.Helpers.CastHelper.Cast<OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[1])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.ImplicitConversion(TUnit.Core.Helpers.CastHelper.Cast<OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[1])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
                     }
@@ -782,7 +794,9 @@ internal sealed class TUnit_TestProject_MatrixTests_ExcludingAutoGeneratedMatrix
                     switch (args.Length)
                     {
                         case 2:
-                            return new global::System.Threading.Tasks.ValueTask(instance.ExcludingAutoGeneratedMatrixValues(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MatrixTests.CountToTenEnum>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[1])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.ExcludingAutoGeneratedMatrixValues(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MatrixTests.CountToTenEnum>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[1])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
                     }
@@ -887,7 +901,9 @@ internal sealed class TUnit_TestProject_MatrixTests_Method1__int_TestSource : gl
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.Method1(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Method1(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
@@ -992,7 +1008,9 @@ internal sealed class TUnit_TestProject_MatrixTests_Method2__int_TestSource : gl
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.Method2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Method2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
@@ -1097,7 +1115,9 @@ internal sealed class TUnit_TestProject_MatrixTests_Method3__int_TestSource : gl
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.Method3(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Method3(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
@@ -1202,7 +1222,9 @@ internal sealed class TUnit_TestProject_MatrixTests_Method4__int_TestSource : gl
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.Method4(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Method4(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
@@ -1317,7 +1339,9 @@ internal sealed class TUnit_TestProject_MatrixTests_Exclusion__int_int_TestSourc
                     switch (args.Length)
                     {
                         case 2:
-                            return new global::System.Threading.Tasks.ValueTask(instance.Exclusion(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<int>(args[1])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Exclusion(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<int>(args[1])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
                     }

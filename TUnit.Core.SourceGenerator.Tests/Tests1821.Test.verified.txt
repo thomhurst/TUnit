@@ -91,7 +91,9 @@ internal sealed class TUnit_TestProject_Bugs__1821_Tests_MethodDataSource__strin
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.MethodDataSource(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.MethodDataSource(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
@@ -212,7 +214,9 @@ internal sealed class TUnit_TestProject_Bugs__1821_Tests_MatrixDataSource__strin
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.MatrixDataSource(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.MatrixDataSource(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }

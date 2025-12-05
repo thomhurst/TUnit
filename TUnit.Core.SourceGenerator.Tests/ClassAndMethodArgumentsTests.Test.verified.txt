@@ -197,7 +197,9 @@ internal sealed class TUnit_TestProject_ClassAndMethodArgumentsTests_WithMethodL
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.WithMethodLevel(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.WithMethodLevel(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
@@ -320,7 +322,9 @@ internal sealed class TUnit_TestProject_ClassAndMethodArgumentsTests_IgnoreParam
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.IgnoreParameters(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0])));
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.IgnoreParameters(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0])));
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
