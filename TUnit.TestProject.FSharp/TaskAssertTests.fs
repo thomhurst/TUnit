@@ -55,8 +55,16 @@ type TaskAssertTests() =
         }
 
     [<Test>]
-    [<Category("Fail")>]
     member _.FailingAssertion_ThrowsCorrectly() : Task =
-        taskAssert {
-            do! Assert.That(1 + 1).IsEqualTo(3)  // Should fail
+        task {
+            let mutable exceptionThrown = false
+            try
+                do! taskAssert {
+                    do! Assert.That(1 + 1).IsEqualTo(3)
+                }
+            with
+            | _ -> exceptionThrown <- true
+
+            if not exceptionThrown then
+                failwith "Expected an exception to be thrown but none was thrown"
         }
