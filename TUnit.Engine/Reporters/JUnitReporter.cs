@@ -18,8 +18,7 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
     public async Task<bool> IsEnabledAsync()
     {
         // Check if explicitly disabled
-        if (EnvironmentVariableCache.Get("TUNIT_DISABLE_JUNIT_REPORTER") is not null ||
-            EnvironmentVariableCache.Get("DISABLE_JUNIT_REPORTER") is not null)
+        if (EnvironmentVariableCache.Get("TUNIT_DISABLE_JUNIT_REPORTER") is not null)
         {
             return false;
         }
