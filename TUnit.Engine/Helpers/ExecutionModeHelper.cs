@@ -67,7 +67,7 @@ internal static class ExecutionModeHelper
         }
 
         // Check environment variable
-        var envMode = EnvironmentVariableCache.Get("TUNIT_EXECUTION_MODE");
+        var envMode = Environment.GetEnvironmentVariable("TUNIT_EXECUTION_MODE");
         if (!string.IsNullOrEmpty(envMode))
         {
             var mode = envMode!.ToLowerInvariant();

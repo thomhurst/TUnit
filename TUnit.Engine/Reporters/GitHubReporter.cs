@@ -7,7 +7,6 @@ using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestHost;
 using TUnit.Engine.Framework;
-using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Reporters;
 
@@ -25,18 +24,18 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
     public async Task<bool> IsEnabledAsync()
     {
-        if (EnvironmentVariableCache.Get("TUNIT_DISABLE_GITHUB_REPORTER") is not null ||
-            EnvironmentVariableCache.Get("DISABLE_GITHUB_REPORTER") is not null)
+        if (Environment.GetEnvironmentVariable("TUNIT_DISABLE_GITHUB_REPORTER") is not null ||
+            Environment.GetEnvironmentVariable("DISABLE_GITHUB_REPORTER") is not null)
         {
             return false;
         }
 
-        if (EnvironmentVariableCache.Get("GITHUB_ACTIONS") is null)
+        if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") is null)
         {
             return false;
         }
 
-        if (EnvironmentVariableCache.Get("GITHUB_STEP_SUMMARY") is not { } fileName
+        if (Environment.GetEnvironmentVariable("GITHUB_STEP_SUMMARY") is not { } fileName
             || !File.Exists(fileName))
         {
             return false;
@@ -45,7 +44,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         _outputSummaryFilePath = fileName;
 
         // Determine reporter style from environment variable or default to collapsible
-        var styleEnv = EnvironmentVariableCache.Get("TUNIT_GITHUB_REPORTER_STYLE");
+        var styleEnv = Environment.GetEnvironmentVariable("TUNIT_GITHUB_REPORTER_STYLE");
         if (!string.IsNullOrEmpty(styleEnv))
         {
             _reporterStyle = styleEnv!.ToLowerInvariant() switch

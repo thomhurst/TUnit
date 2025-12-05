@@ -132,7 +132,8 @@ internal static class JUnitXmlWriter
 
         // Get test state
         var stateProperty = testNode.Properties.AsEnumerable()
-            .FirstOrDefault(p => p is TestNodeStateProperty);
+            .OfType<TestNodeStateProperty>()
+            .FirstOrDefault();
 
         // Get timing
         var timingProperty = testNode.Properties.AsEnumerable()
@@ -286,17 +287,17 @@ internal static class JUnitXmlWriter
 
     private static TestSummary CalculateSummary(IEnumerable<TestNodeUpdateMessage> tests)
     {
-        var summary = new TestSummary
-        {
-            Timestamp = DateTimeOffset.Now
-        };
+        DateTimeOffset? earliestStartTime = null;
+
+        var summary = new TestSummary();
 
         foreach (var test in tests)
         {
             summary.Total++;
 
             var stateProperty = test.TestNode.Properties.AsEnumerable()
-                .FirstOrDefault(p => p is TestNodeStateProperty);
+                .OfType<TestNodeStateProperty>()
+                .FirstOrDefault();
 
             var timing = test.TestNode.Properties.AsEnumerable()
                 .OfType<TimingProperty>()
@@ -305,6 +306,15 @@ internal static class JUnitXmlWriter
             if (timing?.GlobalTiming.Duration is { } durationValue)
             {
                 summary.TotalTime += durationValue;
+
+                // Track the earliest start time from actual test execution
+                if (timing.GlobalTiming.StartTime is { } startTime)
+                {
+                    if (earliestStartTime is null || startTime < earliestStartTime)
+                    {
+                        earliestStartTime = startTime;
+                    }
+                }
             }
 
             switch (stateProperty)
@@ -323,6 +333,9 @@ internal static class JUnitXmlWriter
                     break;
             }
         }
+
+        // Use earliest test start time, fallback to current time if no timing data available
+        summary.Timestamp = earliestStartTime ?? DateTimeOffset.Now;
 
         return summary;
     }

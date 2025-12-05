@@ -34,11 +34,6 @@ internal class JUnitReporterCommandProvider(IExtension extension) : ICommandLine
         CommandLineOption commandOption,
         string[] arguments)
     {
-        if (commandOption.Name == JUnitOutputPathOption && arguments.Length != 1)
-        {
-            return ValidationResult.InvalidTask("A single output path must be provided for --junit-output-path");
-        }
-
         return ValidationResult.ValidTask;
     }
 

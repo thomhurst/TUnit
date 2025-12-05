@@ -5,7 +5,6 @@ using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestHost;
 using TUnit.Engine.Framework;
-using TUnit.Engine.Helpers;
 using TUnit.Engine.Xml;
 
 namespace TUnit.Engine.Reporters;
@@ -18,15 +17,15 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
     public async Task<bool> IsEnabledAsync()
     {
         // Check if explicitly disabled
-        if (EnvironmentVariableCache.Get("TUNIT_DISABLE_JUNIT_REPORTER") is not null)
+        if (Environment.GetEnvironmentVariable("TUNIT_DISABLE_JUNIT_REPORTER") is not null)
         {
             return false;
         }
 
         // Check if explicitly enabled OR running in GitLab CI
-        var explicitlyEnabled = EnvironmentVariableCache.Get("TUNIT_ENABLE_JUNIT_REPORTER") is not null;
-        var runningInGitLab = EnvironmentVariableCache.Get("GITLAB_CI") is not null ||
-                              EnvironmentVariableCache.Get("CI_SERVER") is not null;
+        var explicitlyEnabled = Environment.GetEnvironmentVariable("TUNIT_ENABLE_JUNIT_REPORTER") is not null;
+        var runningInGitLab = Environment.GetEnvironmentVariable("GITLAB_CI") is not null ||
+                              Environment.GetEnvironmentVariable("CI_SERVER") is not null;
 
         if (!explicitlyEnabled && !runningInGitLab)
         {
@@ -34,7 +33,7 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
         }
 
         // Determine output path
-        _outputPath = EnvironmentVariableCache.Get("JUNIT_XML_OUTPUT_PATH")
+        _outputPath = Environment.GetEnvironmentVariable("JUNIT_XML_OUTPUT_PATH")
             ?? GetDefaultOutputPath();
 
         _isEnabled = true;
@@ -76,12 +75,9 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
 
         // Get the last update for each test
         var lastUpdates = new List<TestNodeUpdateMessage>(_updates.Count);
-        foreach (var kvp in _updates)
+        foreach (var kvp in _updates.Where(kvp => kvp.Value.Count > 0))
         {
-            if (kvp.Value.Count > 0)
-            {
-                lastUpdates.Add(kvp.Value[kvp.Value.Count - 1]);
-            }
+            lastUpdates.Add(kvp.Value[kvp.Value.Count - 1]);
         }
 
         // Generate JUnit XML
@@ -100,6 +96,11 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
 
     internal void SetOutputPath(string path)
     {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            throw new ArgumentException("Output path cannot be null or empty", nameof(path));
+        }
+
         _outputPath = path;
     }
 
@@ -119,7 +120,6 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
         }
 
         const int maxAttempts = 5;
-        var random = new Random();
 
         for (int attempt = 1; attempt <= maxAttempts; attempt++)
         {
@@ -136,7 +136,7 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
             catch (IOException ex) when (attempt < maxAttempts && IsFileLocked(ex))
             {
                 var baseDelay = 50 * Math.Pow(2, attempt - 1);
-                var jitter = random.Next(0, 50);
+                var jitter = Random.Shared.Next(0, 50);
                 var delay = (int)(baseDelay + jitter);
 
                 Console.WriteLine($"JUnit XML file is locked, retrying in {delay}ms (attempt {attempt}/{maxAttempts})");
