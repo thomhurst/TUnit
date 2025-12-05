@@ -53,3 +53,10 @@ type TaskAssertTests() =
             do! Assert.That(class4.IsInitialized).IsTrue()
             do! Assert.That(class5.IsInitialized).IsTrue()
         }
+
+    [<Test>]
+    [<Category("Fail")>]
+    member _.FailingAssertion_ThrowsCorrectly() : Task =
+        taskAssert {
+            do! Assert.That(1 + 1).IsEqualTo(3)  // Should fail
+        }
