@@ -21,6 +21,9 @@ public static class TestApplicationBuilderExtensions
         var githubReporter = new GitHubReporter(extension);
         var githubReporterCommandProvider = new GitHubReporterCommandProvider(extension);
 
+        var junitReporter = new JUnitReporter(extension);
+        var junitReporterCommandProvider = new JUnitReporterCommandProvider(extension);
+
         testApplicationBuilder.RegisterTestFramework(
             serviceProvider => new TestFrameworkCapabilities(CreateCapabilities(serviceProvider)),
             (capabilities, serviceProvider) => new TUnitTestFramework(extension, serviceProvider, capabilities));
@@ -46,6 +49,9 @@ public static class TestApplicationBuilderExtensions
         // GitHub reporter configuration
         testApplicationBuilder.CommandLine.AddProvider(() => githubReporterCommandProvider);
 
+        // JUnit reporter configuration
+        testApplicationBuilder.CommandLine.AddProvider(() => junitReporterCommandProvider);
+
         testApplicationBuilder.TestHost.AddDataConsumer(serviceProvider =>
         {
             // Apply command-line configuration if provided
@@ -58,6 +64,18 @@ public static class TestApplicationBuilderExtensions
             return githubReporter;
         });
         testApplicationBuilder.TestHost.AddTestHostApplicationLifetime(_ => githubReporter);
+
+        testApplicationBuilder.TestHost.AddDataConsumer(serviceProvider =>
+        {
+            // Apply command-line configuration if provided
+            var commandLineOptions = serviceProvider.GetRequiredService<ICommandLineOptions>();
+            if (commandLineOptions.TryGetOptionArgumentList(JUnitReporterCommandProvider.JUnitOutputPathOption, out var pathArgs))
+            {
+                junitReporter.SetOutputPath(pathArgs[0]);
+            }
+            return junitReporter;
+        });
+        testApplicationBuilder.TestHost.AddTestHostApplicationLifetime(_ => junitReporter);
     }
 
     private static IReadOnlyCollection<ITestFrameworkCapability> CreateCapabilities(IServiceProvider serviceProvider)
