@@ -1603,7 +1603,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 {
                     return valueTask.AsTask();
                 }
-                return Task.CompletedTask;
+                // F# Async support (reuses existing AsyncConvert logic)
+                return AsyncConvert.ConvertObject(result).AsTask();
             }
             catch (TargetInvocationException tie)
             {

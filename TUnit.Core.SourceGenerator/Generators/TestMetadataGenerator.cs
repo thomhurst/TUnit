@@ -1884,16 +1884,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         InstanceFactoryGenerator.GenerateInstanceFactory(writer, testMethod.TypeSymbol, testMethod);
 
         // Generate InvokeTypedTest for non-generic tests
-        var isAsync = IsAsyncMethod(testMethod.MethodSymbol);
-        var returnsValueTask = ReturnsValueTask(testMethod.MethodSymbol);
+        var returnPattern = GetReturnPattern(testMethod.MethodSymbol);
         if (testMethod is { IsGenericType: false, IsGenericMethod: false })
         {
-            GenerateConcreteTestInvoker(writer, testMethod, className, methodName, isAsync, returnsValueTask, hasCancellationToken, parametersFromArgs);
+            GenerateConcreteTestInvoker(writer, testMethod, className, methodName, returnPattern, hasCancellationToken, parametersFromArgs);
         }
     }
 
 
-    private static void GenerateConcreteTestInvoker(CodeWriter writer, TestMethodMetadata testMethod, string className, string methodName, bool isAsync, bool returnsValueTask, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs)
+    private static void GenerateConcreteTestInvoker(CodeWriter writer, TestMethodMetadata testMethod, string className, string methodName, TestReturnPattern returnPattern, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs)
     {
         // Generate InvokeTypedTest which is required by CreateExecutableTestFactory
         writer.AppendLine("InvokeTypedTest = static (instance, args, cancellationToken) =>");
@@ -1933,22 +1932,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var methodCallReconstructed = hasCancellationToken
                 ? $"instance.{methodName}({tupleConstruction}, cancellationToken)"
                 : $"instance.{methodName}({tupleConstruction})";
-            if (isAsync)
-            {
-                if (returnsValueTask)
-                {
-                    writer.AppendLine($"return {methodCallReconstructed};");
-                }
-                else
-                {
-                    writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask({methodCallReconstructed});");
-                }
-            }
-            else
-            {
-                writer.AppendLine($"{methodCallReconstructed};");
-                writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
-            }
+            GenerateReturnHandling(writer, methodCallReconstructed, returnPattern);
             writer.Unindent();
             writer.AppendLine("}");
             writer.AppendLine("else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))");
@@ -1958,22 +1942,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var methodCallDirect = hasCancellationToken
                 ? $"instance.{methodName}(TUnit.Core.Helpers.CastHelper.Cast<{singleTupleParam.GloballyQualified()}>(args[0]), cancellationToken)"
                 : $"instance.{methodName}(TUnit.Core.Helpers.CastHelper.Cast<{singleTupleParam.GloballyQualified()}>(args[0]))";
-            if (isAsync)
-            {
-                if (returnsValueTask)
-                {
-                    writer.AppendLine($"return {methodCallDirect};");
-                }
-                else
-                {
-                    writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask({methodCallDirect});");
-                }
-            }
-            else
-            {
-                writer.AppendLine($"{methodCallDirect};");
-                writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
-            }
+            GenerateReturnHandling(writer, methodCallDirect, returnPattern);
             writer.Unindent();
             writer.AppendLine("}");
             writer.AppendLine("else");
@@ -1988,22 +1957,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var typedMethodCall = hasCancellationToken
                 ? $"instance.{methodName}(cancellationToken)"
                 : $"instance.{methodName}()";
-            if (isAsync)
-            {
-                if (returnsValueTask)
-                {
-                    writer.AppendLine($"return {typedMethodCall};");
-                }
-                else
-                {
-                    writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask({typedMethodCall});");
-                }
-            }
-            else
-            {
-                writer.AppendLine($"{typedMethodCall};");
-                writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
-            }
+            GenerateReturnHandling(writer, typedMethodCall, returnPattern);
         }
         else
         {
@@ -2028,6 +1982,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 var argCount = requiredParamCount + i;
                 writer.AppendLine($"case {argCount}:");
                 writer.Indent();
+                writer.AppendLine("{");
+                writer.Indent();
 
                 // Build the arguments to pass, handling params arrays correctly
                 var argsToPass = TupleArgumentHelper.GenerateArgumentAccessWithParams(parametersFromArgs, "args", argCount);
@@ -2039,23 +1995,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 }
 
                 var typedMethodCall = $"instance.{methodName}({string.Join(", ", argsToPass)})";
-
-                if (isAsync)
-                {
-                    if (returnsValueTask)
-                    {
-                        writer.AppendLine($"return {typedMethodCall};");
-                    }
-                    else
-                    {
-                        writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask({typedMethodCall});");
-                    }
-                }
-                else
-                {
-                    writer.AppendLine($"{typedMethodCall};");
-                    writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
-                }
+                GenerateReturnHandling(writer, typedMethodCall, returnPattern);
+                writer.Unindent();
+                writer.AppendLine("}");
                 writer.Unindent();
             }
 
@@ -2121,6 +2063,66 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         var returnTypeName = method.ReturnType.ToDisplayString();
         return returnTypeName.StartsWith("System.Threading.Tasks.ValueTask");
+    }
+
+    private enum TestReturnPattern
+    {
+        Void,        // void methods
+        ValueTask,   // ValueTask or ValueTask<T>
+        Task,        // Task or Task<T>
+        Unknown      // F# Async, custom awaitables, etc.
+    }
+
+    private static TestReturnPattern GetReturnPattern(IMethodSymbol method)
+    {
+        if (method.ReturnType.SpecialType == SpecialType.System_Void)
+        {
+            return TestReturnPattern.Void;
+        }
+
+        var returnTypeName = method.ReturnType.ToDisplayString();
+
+        if (returnTypeName.StartsWith("System.Threading.Tasks.ValueTask"))
+        {
+            return TestReturnPattern.ValueTask;
+        }
+
+        if (returnTypeName.StartsWith("System.Threading.Tasks.Task") ||
+            returnTypeName.StartsWith("Task<"))
+        {
+            return TestReturnPattern.Task;
+        }
+
+        return TestReturnPattern.Unknown;
+    }
+
+    private static void GenerateReturnHandling(
+        CodeWriter writer,
+        string methodCall,
+        TestReturnPattern returnPattern)
+    {
+        switch (returnPattern)
+        {
+            case TestReturnPattern.Void:
+                writer.AppendLine($"{methodCall};");
+                writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
+                break;
+
+            case TestReturnPattern.ValueTask:
+                writer.AppendLine($"return {methodCall};");
+                break;
+
+            case TestReturnPattern.Task:
+                writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask({methodCall});");
+                break;
+
+            case TestReturnPattern.Unknown:
+                // F# Async, custom awaitables
+                writer.AppendLine($"var methodResult = {methodCall};");
+                writer.AppendLine("if (methodResult == null) return default(global::System.Threading.Tasks.ValueTask);");
+                writer.AppendLine("return global::TUnit.Core.AsyncConvert.ConvertObject(methodResult);");
+                break;
+        }
     }
 
     private static void GenerateDependencies(CodeWriter writer, Compilation compilation, IMethodSymbol methodSymbol)

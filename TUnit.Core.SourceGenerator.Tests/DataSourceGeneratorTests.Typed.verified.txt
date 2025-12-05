@@ -107,8 +107,10 @@ internal sealed class TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_M
                     switch (args.Length)
                     {
                         case 1:
-                            instance.GeneratedData_Method(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-                            return default(global::System.Threading.Tasks.ValueTask);
+                            {
+                                instance.GeneratedData_Method(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+                                return default(global::System.Threading.Tasks.ValueTask);
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
@@ -259,8 +261,10 @@ internal sealed class TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_M
                     switch (args.Length)
                     {
                         case 3:
-                            instance.GeneratedData_Method2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[2]));
-                            return default(global::System.Threading.Tasks.ValueTask);
+                            {
+                                instance.GeneratedData_Method2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[2]));
+                                return default(global::System.Threading.Tasks.ValueTask);
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
                     }
@@ -411,8 +415,10 @@ internal sealed class TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_M
                     switch (args.Length)
                     {
                         case 3:
-                            instance.GeneratedData_Method3(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[2]));
-                            return default(global::System.Threading.Tasks.ValueTask);
+                            {
+                                instance.GeneratedData_Method3(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[2]));
+                                return default(global::System.Threading.Tasks.ValueTask);
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
                     }

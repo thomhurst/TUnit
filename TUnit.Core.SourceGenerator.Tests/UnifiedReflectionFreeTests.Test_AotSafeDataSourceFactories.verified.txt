@@ -89,8 +89,10 @@ internal sealed class TUnit_TestProject_AotDataSourceTest_TestWithDataSource__in
                     switch (args.Length)
                     {
                         case 3:
-                            instance.TestWithDataSource(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]));
-                            return default(global::System.Threading.Tasks.ValueTask);
+                            {
+                                instance.TestWithDataSource(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]));
+                                return default(global::System.Threading.Tasks.ValueTask);
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
                     }

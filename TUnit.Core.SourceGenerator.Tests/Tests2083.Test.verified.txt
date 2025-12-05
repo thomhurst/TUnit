@@ -80,8 +80,10 @@ internal sealed class TUnit_TestProject_Bugs__2083_Tests_MyTest__long_TestSource
                     switch (args.Length)
                     {
                         case 1:
-                            instance.MyTest(TUnit.Core.Helpers.CastHelper.Cast<long>(args[0]));
-                            return default(global::System.Threading.Tasks.ValueTask);
+                            {
+                                instance.MyTest(TUnit.Core.Helpers.CastHelper.Cast<long>(args[0]));
+                                return default(global::System.Threading.Tasks.ValueTask);
+                            }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
