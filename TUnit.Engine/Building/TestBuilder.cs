@@ -66,6 +66,30 @@ internal sealed class TestBuilder : ITestBuilder
         }
     }
 
+    /// <summary>
+    /// Initializes any IAsyncDiscoveryInitializer objects in class data during test discovery.
+    /// This is called BEFORE method data sources are evaluated, enabling data sources
+    /// to access initialized shared objects (like Docker containers).
+    /// </summary>
+    private static async Task InitializeDiscoveryObjectsAsync(object?[] classData)
+    {
+        if (classData == null || classData.Length == 0)
+        {
+            return;
+        }
+
+        foreach (var data in classData)
+        {
+            if (data is IAsyncDiscoveryInitializer && data is not IDataSourceAttribute)
+            {
+                // Uses ObjectInitializer which handles deduplication.
+                // This also prevents double-init during execution since ObjectInitializer
+                // tracks initialized objects.
+                await ObjectInitializer.InitializeAsync(data);
+            }
+        }
+    }
+
     private async Task<object> CreateInstance(TestMetadata metadata, Type[] resolvedClassGenericArgs, object?[] classData, TestBuilderContext builderContext)
     {
         // Initialize any deferred IAsyncInitializer objects in class data
@@ -205,6 +229,10 @@ internal sealed class TestBuilder : ITestBuilder
 
                     var classDataResult = await classDataFactory() ?? [];
                     var classData = DataUnwrapper.Unwrap(classDataResult);
+
+                    // Initialize IAsyncDiscoveryInitializer objects before method data sources are evaluated.
+                    // This enables InstanceMethodDataSource to access initialized shared objects.
+                    await InitializeDiscoveryObjectsAsync(classData);
 
                     var needsInstanceForMethodDataSources = metadata.DataSources.Any(ds => ds is IAccessesInstanceData);
 
@@ -1385,6 +1413,10 @@ internal sealed class TestBuilder : ITestBuilder
                 classDataLoopIndex++;
 
                 var classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
+
+                // Initialize IAsyncDiscoveryInitializer objects before method data sources are evaluated.
+                // This enables InstanceMethodDataSource to access initialized shared objects.
+                await InitializeDiscoveryObjectsAsync(classData);
 
                 // Handle instance creation for method data sources
                 var needsInstanceForMethodDataSources = metadata.DataSources.Any(ds => ds is IAccessesInstanceData);
