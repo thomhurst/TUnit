@@ -80,7 +80,7 @@ internal sealed class TestBuilder : ITestBuilder
 
         foreach (var data in classData)
         {
-            if (data is IAsyncDiscoveryInitializer && data is not IDataSourceAttribute)
+            if (data is IAsyncDiscoveryInitializer)
             {
                 // Uses ObjectInitializer which handles deduplication.
                 // This also prevents double-init during execution since ObjectInitializer
@@ -293,6 +293,12 @@ internal sealed class TestBuilder : ITestBuilder
                                     tempObjectBag,
                                     metadata.MethodMetadata,
                                     tempEvents);
+
+                                // Initialize the test class instance if it implements IAsyncDiscoveryInitializer
+                                if (instanceForMethodDataSources is IAsyncDiscoveryInitializer)
+                                {
+                                    await ObjectInitializer.InitializeAsync(instanceForMethodDataSources);
+                                }
                             }
                         }
                         catch (Exception ex)
@@ -340,6 +346,9 @@ internal sealed class TestBuilder : ITestBuilder
 
                                 classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
                                 var methodData = DataUnwrapper.UnwrapWithTypes(await methodDataFactory() ?? [], metadata.MethodMetadata.Parameters);
+
+                                // Initialize any IAsyncDiscoveryInitializer objects in method data
+                                await InitializeDiscoveryObjectsAsync(methodData);
 
                                 // For concrete generic instantiations, check if the data is compatible with the expected types
                                 if (metadata.GenericMethodTypeArguments is { Length: > 0 })
@@ -1442,6 +1451,12 @@ internal sealed class TestBuilder : ITestBuilder
                         tempObjectBag,
                         metadata.MethodMetadata,
                         tempEvents);
+
+                    // Initialize the test class instance if it implements IAsyncDiscoveryInitializer
+                    if (instanceForMethodDataSources is IAsyncDiscoveryInitializer)
+                    {
+                        await ObjectInitializer.InitializeAsync(instanceForMethodDataSources);
+                    }
                 }
 
                 // Stream through method data sources
@@ -1551,6 +1566,9 @@ internal sealed class TestBuilder : ITestBuilder
             var classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
 
             var methodData = DataUnwrapper.UnwrapWithTypes(await methodDataFactory() ?? [], metadata.MethodMetadata.Parameters);
+
+            // Initialize any IAsyncDiscoveryInitializer objects in method data
+            await InitializeDiscoveryObjectsAsync(methodData);
 
             // Check data compatibility for generic methods
             if (metadata.GenericMethodTypeArguments is { Length: > 0 })
