@@ -29,29 +29,20 @@ public class InstanceMethodDataSourceWithAsyncInitializerTests
 
     /// <summary>
     /// Simulates a fixture like ClientServiceFixture that starts Docker containers.
-    /// Implements IAsyncInitializer (NOT IAsyncDiscoveryInitializer) because the user
-    /// does not want initialization during discovery.
+    /// Implements IAsyncInitializer (NOT IAsyncDiscoveryInitializer) because initialization
+    /// should only happen during test execution, not during discovery.
+    /// 
+    /// With the engine fix in DataSourceHelpers.cs, fixtures implementing IAsyncInitializer
+    /// are NOT initialized during discovery - only during test execution.
     /// </summary>
     public class SimulatedContainerFixture : IAsyncInitializer
     {
-        /// <summary>
-        /// Test case identifiers are PREDEFINED - they don't depend on initialization.
-        /// This allows discovery to enumerate test cases without initializing the fixture.
-        /// </summary>
-        private static readonly string[] PredefinedTestCases = ["TestCase1", "TestCase2", "TestCase3"];
-
         /// <summary>
         /// Unique identifier for this instance to verify sharing behavior.
         /// </summary>
         public Guid InstanceId { get; } = Guid.NewGuid();
 
         public bool IsInitialized { get; private set; }
-
-        /// <summary>
-        /// Returns predefined test case identifiers. These are available during discovery
-        /// WITHOUT requiring initialization.
-        /// </summary>
-        public IEnumerable<string> GetTestCases() => PredefinedTestCases;
 
         public Task InitializeAsync()
         {
@@ -69,12 +60,17 @@ public class InstanceMethodDataSourceWithAsyncInitializerTests
     public required SimulatedContainerFixture Fixture { get; init; }
 
     /// <summary>
-    /// This property is accessed by InstanceMethodDataSource during discovery.
-    /// It returns predefined test case identifiers that don't require initialization.
-    /// The bug was that accessing this would trigger InitializeAsync() during discovery.
-    /// After the fix, InitializeAsync() should only be called during test execution.
+    /// This property is accessed by InstanceMethodDataSource during discovery (compile-time).
+    /// It MUST return test case identifiers WITHOUT accessing the fixture, because:
+    /// 1. Source generation happens at compile-time, not runtime
+    /// 2. The fixture is created at runtime via ClassDataSource
+    /// 3. Accessing runtime properties during compilation is impossible
+    /// 
+    /// Test case identifiers are predefined here, and the test verifies that the fixture
+    /// (which implements IAsyncInitializer) is only initialized during test execution,
+    /// not during discovery.
     /// </summary>
-    public IEnumerable<string> TestExecutions => Fixture.GetTestCases();
+    public IEnumerable<string> TestExecutions => ["TestCase1", "TestCase2", "TestCase3"];
 
     [Test]
     [InstanceMethodDataSource(nameof(TestExecutions))]
