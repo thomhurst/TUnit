@@ -39,8 +39,8 @@ internal sealed class PropertyInjector
         TestContextEvents events,
         TestContext testContext)
     {
-        // Skip property resolution if this test is reusing the discovery instance with pre-initialized properties
-        if (testContext.StateBag.Items.TryGetValue("__ReusingDiscoveryInstance", out var reusingFlag) && reusingFlag is true)
+        // Skip property resolution if this test is reusing the discovery instance (already initialized)
+        if (testContext.IsDiscoveryInstanceReused)
         {
             return;
         }

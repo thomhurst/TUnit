@@ -14,8 +14,9 @@ internal interface ITestBuilder
     /// <param name="metadata">The test metadata</param>
     /// <param name="testData">The test data</param>
     /// <param name="testBuilderContext"></param>
+    /// <param name="isReusingDiscoveryInstance">Whether this test is reusing the discovery instance</param>
     /// <returns>An executable test ready for execution</returns>
-    Task<AbstractExecutableTest> BuildTestAsync(TestMetadata metadata, TestBuilder.TestData testData, TestBuilderContext testBuilderContext);
+    Task<AbstractExecutableTest> BuildTestAsync(TestMetadata metadata, TestBuilder.TestData testData, TestBuilderContext testBuilderContext, bool isReusingDiscoveryInstance = false);
 
     /// <summary>
     /// Builds all executable tests from a single TestMetadata using its DataCombinationGenerator delegate.
