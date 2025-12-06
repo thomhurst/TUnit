@@ -227,3 +227,49 @@ public class DeeplyNestedService : IAsyncInitializer
     }
 }
 
+// Regression test for Issue #3991: TestContext.Current is null during property injection
+public class TestContextAvailabilityDuringPropertyInjectionTests
+{
+    [TestContextDataSource]
+    public required TestContextCapture? ContextCapture { get; set; }
+
+    [Test]
+    public async Task PropertyInjection_CanAccessTestContext_DuringDiscoveryPhase()
+    {
+        // This test verifies that TestContext.Current is available during property injection
+        // in the discovery/registration phase (Issue #3991)
+        await Assert.That(ContextCapture).IsNotNull();
+        await Assert.That(ContextCapture!.TestContextWasAvailable).IsTrue();
+        await Assert.That(ContextCapture.CapturedTestContextId).IsNotNull();
+    }
+}
+
+// Data source that accesses TestContext.Current during initialization
+// This reproduces the bug from Issue #3991
+public class TestContextDataSourceAttribute : AsyncDataSourceGeneratorAttribute<TestContextCapture>
+{
+    protected override async IAsyncEnumerable<Func<Task<TestContextCapture>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        yield return async () =>
+        {
+            // This is where the bug occurs: TestContext.Current is null during discovery
+            var testContext = TestContext.Current;
+
+            return new TestContextCapture
+            {
+                TestContextWasAvailable = testContext != null,
+                CapturedTestContextId = testContext?.Id,
+                CapturedCancellationToken = testContext?.CancellationToken ?? default
+            };
+        };
+        await Task.CompletedTask;
+    }
+}
+
+public class TestContextCapture
+{
+    public bool TestContextWasAvailable { get; set; }
+    public string? CapturedTestContextId { get; set; }
+    public CancellationToken CapturedCancellationToken { get; set; }
+}
+
