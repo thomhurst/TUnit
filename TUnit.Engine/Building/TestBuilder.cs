@@ -209,6 +209,7 @@ internal sealed class TestBuilder : ITestBuilder
                     var needsInstanceForMethodDataSources = metadata.DataSources.Any(ds => ds is IAccessesInstanceData);
 
                     object? instanceForMethodDataSources = null;
+                    var discoveryInstanceUsed = false;
 
                     if (needsInstanceForMethodDataSources)
                     {
@@ -385,6 +386,18 @@ internal sealed class TestBuilder : ITestBuilder
                                 if (basicSkipReason is { Length: > 0 })
                                 {
                                     instanceFactory = () => Task.FromResult<object>(SkippedTestInstance.Instance);
+                                }
+                                else if (methodDataLoopIndex == 1 && i == 0 && instanceForMethodDataSources != null && !discoveryInstanceUsed)
+                                {
+                                    // Reuse the discovery instance for the first test to avoid duplicate initialization
+                                    var capturedInstance = instanceForMethodDataSources;
+                                    discoveryInstanceUsed = true;
+
+                                    // Mark in the context that this test is reusing the discovery instance
+                                    // so that property resolution is skipped during RegisterTestAsync
+                                    contextAccessor.Current.StateBag["__ReusingDiscoveryInstance"] = true;
+
+                                    instanceFactory = () => Task.FromResult(capturedInstance);
                                 }
                                 else
                                 {
