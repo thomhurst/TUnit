@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Core.Helpers;
 
@@ -177,8 +178,12 @@ public static class DataSourceHelpers
         // If it's a Func<TResult>, invoke it first
         var actualData = InvokeIfFunc(data);
 
-        // Initialize the object if it implements IAsyncInitializer
-        await ObjectInitializer.InitializeAsync(actualData);
+        // Only initialize during discovery if explicitly opted-in via IAsyncDiscoveryInitializer
+        // Regular IAsyncInitializer objects are initialized during test execution by ObjectLifecycleService
+        if (actualData is IAsyncDiscoveryInitializer)
+        {
+            await ObjectInitializer.InitializeAsync(actualData);
+        }
 
         return actualData;
     }
@@ -197,7 +202,11 @@ public static class DataSourceHelpers
         if (enumerator.MoveNext())
         {
             var value = enumerator.Current;
-            await ObjectInitializer.InitializeAsync(value);
+            // Only initialize during discovery if explicitly opted-in via IAsyncDiscoveryInitializer
+            if (value is IAsyncDiscoveryInitializer)
+            {
+                await ObjectInitializer.InitializeAsync(value);
+            }
             return value;
         }
 
@@ -224,14 +233,22 @@ public static class DataSourceHelpers
             if (enumerator.MoveNext())
             {
                 var value = enumerator.Current;
-                await ObjectInitializer.InitializeAsync(value);
+                // Only initialize during discovery if explicitly opted-in via IAsyncDiscoveryInitializer
+                if (value is IAsyncDiscoveryInitializer)
+                {
+                    await ObjectInitializer.InitializeAsync(value);
+                }
                 return value;
             }
             return null;
         }
 
-        // For non-enumerable types, just initialize and return
-        await ObjectInitializer.InitializeAsync(actualData);
+        // Only initialize during discovery if explicitly opted-in via IAsyncDiscoveryInitializer
+        // Regular IAsyncInitializer objects are initialized during test execution by ObjectLifecycleService
+        if (actualData is IAsyncDiscoveryInitializer)
+        {
+            await ObjectInitializer.InitializeAsync(actualData);
+        }
         return actualData;
     }
 
@@ -579,8 +596,12 @@ public static class DataSourceHelpers
             {
                 var value = args[0];
 
-                // Initialize the value if it implements IAsyncInitializer
-                await ObjectInitializer.InitializeAsync(value);
+                // Only initialize during discovery if explicitly opted-in via IAsyncDiscoveryInitializer
+                // Regular IAsyncInitializer objects are initialized during test execution by ObjectLifecycleService
+                if (value is IAsyncDiscoveryInitializer)
+                {
+                    await ObjectInitializer.InitializeAsync(value);
+                }
 
                 return value;
             }
