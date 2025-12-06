@@ -10,8 +10,12 @@ namespace TUnit.TestProject.Bugs._3992;
 ///
 /// This test replicates the user's scenario where:
 /// 1. A ClassDataSource fixture implements IAsyncInitializer (e.g., starts Docker containers)
-/// 2. An InstanceMethodDataSource accesses data from that fixture
+/// 2. An InstanceMethodDataSource returns predefined test case identifiers
 /// 3. The fixture should NOT be initialized during discovery - only during execution
+///
+/// The key insight is that test case IDENTIFIERS are known ahead of time (predefined),
+/// but the actual fixture initialization (Docker containers, DB connections, etc.)
+/// should only happen when tests actually execute.
 ///
 /// The bug caused Docker containers to start during test discovery (e.g., in IDE or --list-tests),
 /// which was unexpected and resource-intensive.
@@ -30,7 +34,11 @@ public class InstanceMethodDataSourceWithAsyncInitializerTests
     /// </summary>
     public class SimulatedContainerFixture : IAsyncInitializer
     {
-        private readonly List<string> _testCases = [];
+        /// <summary>
+        /// Test case identifiers are PREDEFINED - they don't depend on initialization.
+        /// This allows discovery to enumerate test cases without initializing the fixture.
+        /// </summary>
+        private static readonly string[] PredefinedTestCases = ["TestCase1", "TestCase2", "TestCase3"];
 
         /// <summary>
         /// Unique identifier for this instance to verify sharing behavior.
@@ -38,15 +46,19 @@ public class InstanceMethodDataSourceWithAsyncInitializerTests
         public Guid InstanceId { get; } = Guid.NewGuid();
 
         public bool IsInitialized { get; private set; }
-        public IReadOnlyList<string> TestCases => _testCases;
+
+        /// <summary>
+        /// Returns predefined test case identifiers. These are available during discovery
+        /// WITHOUT requiring initialization.
+        /// </summary>
+        public IEnumerable<string> GetTestCases() => PredefinedTestCases;
 
         public Task InitializeAsync()
         {
             Interlocked.Increment(ref _initializationCount);
             Console.WriteLine($"[SimulatedContainerFixture] InitializeAsync called on instance {InstanceId} (count: {_initializationCount})");
 
-            // Simulate container startup that populates test data
-            _testCases.AddRange(["TestCase1", "TestCase2", "TestCase3"]);
+            // Simulate expensive container startup - this should NOT happen during discovery
             IsInitialized = true;
 
             return Task.CompletedTask;
@@ -58,10 +70,11 @@ public class InstanceMethodDataSourceWithAsyncInitializerTests
 
     /// <summary>
     /// This property is accessed by InstanceMethodDataSource during discovery.
-    /// With the bug, accessing this would trigger InitializeAsync() during discovery.
+    /// It returns predefined test case identifiers that don't require initialization.
+    /// The bug was that accessing this would trigger InitializeAsync() during discovery.
     /// After the fix, InitializeAsync() should only be called during test execution.
     /// </summary>
-    public IEnumerable<string> TestExecutions => Fixture.TestCases;
+    public IEnumerable<string> TestExecutions => Fixture.GetTestCases();
 
     [Test]
     [InstanceMethodDataSource(nameof(TestExecutions))]
