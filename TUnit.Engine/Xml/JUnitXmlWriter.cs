@@ -33,7 +33,7 @@ internal static class JUnitXmlWriter
                 ?.FrameworkDisplayName
             ?? RuntimeInformation.FrameworkDescription;
 
-        using var stringWriter = new StringWriter();
+        using var stringWriter = new Utf8StringWriter();
         var settings = new XmlWriterSettings
         {
             Indent = true,
@@ -339,6 +339,11 @@ internal static class JUnitXmlWriter
 
         return summary;
     }
+}
+
+file sealed class Utf8StringWriter : StringWriter
+{
+    public override Encoding Encoding => Encoding.UTF8;
 }
 
 internal sealed class TestSummary
