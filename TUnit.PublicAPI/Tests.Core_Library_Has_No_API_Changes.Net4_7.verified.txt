@@ -2131,6 +2131,7 @@ namespace .Interfaces
     {
         .<<object?[]>> GenerateDataFactoriesAsync(.DataSourceContext context, .CancellationToken cancellationToken = default);
     }
+    public interface IAsyncDiscoveryInitializer : . { }
     public interface IAsyncInitializer
     {
         . InitializeAsync();
