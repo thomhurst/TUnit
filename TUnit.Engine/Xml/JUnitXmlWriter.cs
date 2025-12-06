@@ -62,7 +62,7 @@ internal static class JUnitXmlWriter
 
         xmlWriter.WriteEndElement(); // testsuites
         xmlWriter.WriteEndDocument();
-
+        xmlWriter.Flush();
         return stringWriter.ToString();
     }
 
