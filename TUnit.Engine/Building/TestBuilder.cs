@@ -766,10 +766,10 @@ internal sealed class TestBuilder : ITestBuilder
             return [NoDataSource.Instance];
         }
 
-        // Initialize all data sources to ensure properties are injected
+        // Inject properties into data sources during discovery (IAsyncInitializer deferred to execution)
         foreach (var dataSource in dataSources)
         {
-            await _objectLifecycleService.EnsureInitializedAsync(dataSource);
+            await _objectLifecycleService.InjectPropertiesAsync(dataSource);
         }
 
         return dataSources;
@@ -783,16 +783,15 @@ internal sealed class TestBuilder : ITestBuilder
         IDataSourceAttribute dataSource,
         DataGeneratorMetadata dataGeneratorMetadata)
     {
-        // Ensure the data source is fully initialized before getting data rows
-        // This includes property injection and IAsyncInitializer.InitializeAsync
-        var initializedDataSource = await _objectLifecycleService.EnsureInitializedAsync(
+        // Inject properties into data source during discovery (IAsyncInitializer deferred to execution)
+        var propertyInjectedDataSource = await _objectLifecycleService.InjectPropertiesAsync(
             dataSource,
             dataGeneratorMetadata.TestBuilderContext.Current.StateBag,
             dataGeneratorMetadata.TestInformation,
             dataGeneratorMetadata.TestBuilderContext.Current.Events);
 
-        // Now get data rows from the initialized data source
-        await foreach (var dataRow in initializedDataSource.GetDataRowsAsync(dataGeneratorMetadata))
+        // Now get data rows from the property-injected data source
+        await foreach (var dataRow in propertyInjectedDataSource.GetDataRowsAsync(dataGeneratorMetadata))
         {
             yield return dataRow;
         }
@@ -1017,14 +1016,13 @@ internal sealed class TestBuilder : ITestBuilder
 
     private async Task<Attribute[]> InitializeAttributesAsync(Attribute[] attributes)
     {
-        // Initialize any attributes that need property injection or implement IAsyncInitializer
-        // This ensures they're fully initialized before being used
+        // Inject properties into data source attributes during discovery
+        // IAsyncInitializer.InitializeAsync is deferred to execution time
         foreach (var attribute in attributes)
         {
             if (attribute is IDataSourceAttribute dataSource)
             {
-                // Data source attributes need to be initialized with property injection
-                await _objectLifecycleService.EnsureInitializedAsync(dataSource);
+                await _objectLifecycleService.InjectPropertiesAsync(dataSource);
             }
         }
 

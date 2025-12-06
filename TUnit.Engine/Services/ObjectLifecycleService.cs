@@ -208,6 +208,30 @@ internal sealed class ObjectLifecycleService : IObjectRegistry
     #region Phase 3: Object Initialization
 
     /// <summary>
+    /// Injects properties into an object without calling IAsyncInitializer.
+    /// Used during test discovery to prepare data sources without triggering async initialization.
+    /// </summary>
+    public async ValueTask<T> InjectPropertiesAsync<T>(
+        T obj,
+        ConcurrentDictionary<string, object?>? objectBag = null,
+        MethodMetadata? methodMetadata = null,
+        TestContextEvents? events = null) where T : notnull
+    {
+        if (obj == null)
+        {
+            throw new ArgumentNullException(nameof(obj));
+        }
+
+        objectBag ??= new ConcurrentDictionary<string, object?>();
+        events ??= new TestContextEvents();
+
+        // Only inject properties, do not call IAsyncInitializer
+        await PropertyInjector.InjectPropertiesAsync(obj, objectBag, methodMetadata, events);
+
+        return obj;
+    }
+
+    /// <summary>
     /// Ensures an object is fully initialized (property injection + IAsyncInitializer).
     /// Thread-safe with fast-path for already-initialized objects.
     /// </summary>
