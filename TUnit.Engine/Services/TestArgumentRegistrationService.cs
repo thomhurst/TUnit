@@ -23,6 +23,8 @@ internal sealed class TestArgumentRegistrationService
     /// </summary>
     public async ValueTask RegisterTestArgumentsAsync(TestContext testContext)
     {
+        TestContext.Current = testContext;
+
         var classArguments = testContext.Metadata.TestDetails.TestClassArguments;
         var methodArguments = testContext.Metadata.TestDetails.TestMethodArguments;
 
