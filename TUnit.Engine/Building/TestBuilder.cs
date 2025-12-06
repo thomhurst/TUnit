@@ -209,6 +209,7 @@ internal sealed class TestBuilder : ITestBuilder
                     var needsInstanceForMethodDataSources = metadata.DataSources.Any(ds => ds is IAccessesInstanceData);
 
                     object? instanceForMethodDataSources = null;
+                    var discoveryInstanceUsed = false;
 
                     if (needsInstanceForMethodDataSources)
                     {
@@ -382,9 +383,20 @@ internal sealed class TestBuilder : ITestBuilder
                                 var basicSkipReason = GetBasicSkipReason(metadata, attributes);
 
                                 Func<Task<object>> instanceFactory;
+                                bool isReusingDiscoveryInstance = false;
+
                                 if (basicSkipReason is { Length: > 0 })
                                 {
                                     instanceFactory = () => Task.FromResult<object>(SkippedTestInstance.Instance);
+                                }
+                                else if (methodDataLoopIndex == 1 && i == 0 && instanceForMethodDataSources != null && !discoveryInstanceUsed)
+                                {
+                                    // Reuse the discovery instance for the first test to avoid duplicate initialization
+                                    var capturedInstance = instanceForMethodDataSources;
+                                    discoveryInstanceUsed = true;
+                                    isReusingDiscoveryInstance = true;
+
+                                    instanceFactory = () => Task.FromResult(capturedInstance);
                                 }
                                 else
                                 {
@@ -420,7 +432,7 @@ internal sealed class TestBuilder : ITestBuilder
                                     InitializedAttributes = attributes
                                 };
 
-                                var test = await BuildTestAsync(metadata, testData, testSpecificContext);
+                                var test = await BuildTestAsync(metadata, testData, testSpecificContext, isReusingDiscoveryInstance);
 
                                 // If we have a basic skip reason, set it immediately
                                 if (!string.IsNullOrEmpty(basicSkipReason))
@@ -799,7 +811,7 @@ internal sealed class TestBuilder : ITestBuilder
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Hook discovery service handles mode-specific logic; reflection calls suppressed in AOT mode")]
     [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Hook discovery service handles mode-specific logic; dynamic code suppressed in AOT mode")]
-    public async Task<AbstractExecutableTest> BuildTestAsync(TestMetadata metadata, TestData testData, TestBuilderContext testBuilderContext)
+    public async Task<AbstractExecutableTest> BuildTestAsync(TestMetadata metadata, TestData testData, TestBuilderContext testBuilderContext, bool isReusingDiscoveryInstance = false)
     {
         // Discover instance hooks for closed generic types (no-op in source gen mode)
         if (metadata.TestClassType is { IsGenericType: true, IsGenericTypeDefinition: false })
@@ -810,6 +822,9 @@ internal sealed class TestBuilder : ITestBuilder
         var testId = TestIdentifierService.GenerateTestId(metadata, testData);
 
         var context = await CreateTestContextAsync(testId, metadata, testData, testBuilderContext);
+
+        // Mark if this test is reusing the discovery instance (already initialized)
+        context.IsDiscoveryInstanceReused = isReusingDiscoveryInstance;
 
         context.Metadata.TestDetails.ClassInstance = PlaceholderInstance.Instance;
 
