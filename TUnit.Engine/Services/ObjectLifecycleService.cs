@@ -322,8 +322,18 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
                 await InitializeObjectCoreAsync(obj, objectBag, methodMetadata, events, cancellationToken);
                 tcs.SetResult(true);
             }
+            catch (OperationCanceledException)
+            {
+                // Propagate cancellation without caching failure - allows retry after cancel
+                _initializationTasks.TryRemove(obj, out _);
+                tcs.SetCanceled();
+                throw;
+            }
             catch (Exception ex)
             {
+                // Remove failed initialization from cache to allow retry
+                // This is important for transient failures that may succeed on retry
+                _initializationTasks.TryRemove(obj, out _);
                 tcs.SetException(ex);
                 throw;
             }
