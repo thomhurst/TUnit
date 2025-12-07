@@ -12,7 +12,7 @@ namespace TUnit.Core.Services;
 /// behavior and avoid duplicate caches. This consolidates initialization tracking in one place.
 /// </para>
 /// </remarks>
-public sealed class ObjectInitializationService : IObjectInitializationService
+internal sealed class ObjectInitializationService : IObjectInitializationService
 {
     /// <summary>
     /// Creates a new instance of the initialization service.

@@ -1664,36 +1664,6 @@ namespace .DataSources
         public static string FormatArguments(object?[] arguments, .<<object?, string?>> formatters) { }
     }
 }
-namespace .Discovery
-{
-    public readonly struct DiscoveryError : <.>
-    {
-        public DiscoveryError(string TypeName, string PropertyName, string ErrorMessage,  Exception) { }
-        public string ErrorMessage { get; init; }
-        public  Exception { get; init; }
-        public string PropertyName { get; init; }
-        public string TypeName { get; init; }
-    }
-    public sealed class ObjectGraph : .
-    {
-        public ObjectGraph(.<int, .<object>> objectsByDepth, .<object> allObjects) { }
-        public .<object> AllObjects { get; }
-        public int MaxDepth { get; }
-        public .<int, .<object>> ObjectsByDepth { get; }
-        public .<int> GetDepthsDescending() { }
-        public .<object> GetObjectsAtDepth(int depth) { }
-    }
-    public sealed class ObjectGraphDiscoverer : ., .
-    {
-        public ObjectGraphDiscoverer() { }
-        public .<int, .<object>> DiscoverAndTrackObjects(.TestContext testContext, .CancellationToken cancellationToken = default) { }
-        public . DiscoverNestedObjectGraph(object rootObject, .CancellationToken cancellationToken = default) { }
-        public . DiscoverObjectGraph(.TestContext testContext, .CancellationToken cancellationToken = default) { }
-        public static void ClearCache() { }
-        public static void ClearDiscoveryErrors() { }
-        public static .<.> GetDiscoveryErrors() { }
-    }
-}
 namespace .Enums
 {
     public enum DataGeneratorType
@@ -2328,28 +2298,6 @@ namespace .Interfaces
     {
         . OnLastTestInTestSession(.TestSessionContext current, .TestContext testContext);
     }
-    public interface IObjectGraph
-    {
-        .<object> AllObjects { get; }
-        int MaxDepth { get; }
-        .<int, .<object>> ObjectsByDepth { get; }
-        .<int> GetDepthsDescending();
-        .<object> GetObjectsAtDepth(int depth);
-    }
-    public interface IObjectGraphDiscoverer
-    {
-        .<int, .<object>> DiscoverAndTrackObjects(.TestContext testContext, .CancellationToken cancellationToken = default);
-        . DiscoverNestedObjectGraph(object rootObject, .CancellationToken cancellationToken = default);
-        . DiscoverObjectGraph(.TestContext testContext, .CancellationToken cancellationToken = default);
-    }
-    public interface IObjectGraphTracker : . { }
-    public interface IObjectInitializationService
-    {
-        void ClearCache();
-        . InitializeAsync(object? obj, .CancellationToken cancellationToken = default);
-        . InitializeForDiscoveryAsync(object? obj, .CancellationToken cancellationToken = default);
-        bool IsInitialized(object? obj);
-    }
     public interface IParallelConstraint { }
     public interface IParallelLimit
     {
@@ -2684,14 +2632,6 @@ namespace .Services
         public NoOpGenericTypeResolver() { }
         public [] ResolveGenericClassArguments([.(..PublicConstructors)]  genericTypeDefinition, object?[] constructorArguments) { }
         public [] ResolveGenericMethodArguments(.MethodInfo genericMethodDefinition, object?[] runtimeArguments) { }
-    }
-    public sealed class ObjectInitializationService : .
-    {
-        public ObjectInitializationService() { }
-        public void ClearCache() { }
-        public . InitializeAsync(object? obj, .CancellationToken cancellationToken = default) { }
-        public . InitializeForDiscoveryAsync(object? obj, .CancellationToken cancellationToken = default) { }
-        public bool IsInitialized(object? obj) { }
     }
     public static class ServiceProviderExtensions
     {

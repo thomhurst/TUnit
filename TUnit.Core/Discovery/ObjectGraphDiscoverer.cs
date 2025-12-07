@@ -16,7 +16,7 @@ namespace TUnit.Core.Discovery;
 /// <param name="PropertyName">The name of the property that failed to access.</param>
 /// <param name="ErrorMessage">The error message.</param>
 /// <param name="Exception">The exception that occurred.</param>
-public readonly record struct DiscoveryError(string TypeName, string PropertyName, string ErrorMessage, Exception Exception);
+internal readonly record struct DiscoveryError(string TypeName, string PropertyName, string ErrorMessage, Exception Exception);
 
 /// <summary>
 /// Centralized service for discovering and organizing object graphs.
@@ -37,7 +37,7 @@ public readonly record struct DiscoveryError(string TypeName, string PropertyNam
 /// rather than thrown, allowing discovery to continue despite individual property failures.
 /// </para>
 /// </remarks>
-public sealed class ObjectGraphDiscoverer : IObjectGraphTracker
+internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
 {
     /// <summary>
     /// Maximum recursion depth for object graph discovery.

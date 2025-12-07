@@ -12,7 +12,7 @@ namespace TUnit.Core.Discovery;
 /// to prevent callers from corrupting internal state.
 /// Uses Lazy&lt;T&gt; for thread-safe lazy initialization of read-only views.
 /// </remarks>
-public sealed class ObjectGraph : IObjectGraph
+internal sealed class ObjectGraph : IObjectGraph
 {
     private readonly ConcurrentDictionary<int, HashSet<object>> _objectsByDepth;
     private readonly HashSet<object> _allObjects;

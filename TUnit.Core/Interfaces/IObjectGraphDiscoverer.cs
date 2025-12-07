@@ -24,7 +24,7 @@ namespace TUnit.Core.Interfaces;
 /// For tracking operations that modify TestContext.TrackedObjects, see <see cref="IObjectGraphTracker"/>.
 /// </para>
 /// </remarks>
-public interface IObjectGraphDiscoverer
+internal interface IObjectGraphDiscoverer
 {
     /// <summary>
     /// Discovers all objects from a test context, organized by depth level.
@@ -81,7 +81,7 @@ public interface IObjectGraphDiscoverer
 /// The distinction exists for semantic clarity and future extensibility.
 /// </para>
 /// </remarks>
-public interface IObjectGraphTracker : IObjectGraphDiscoverer
+internal interface IObjectGraphTracker : IObjectGraphDiscoverer
 {
     // All methods inherited from IObjectGraphDiscoverer
     // This interface provides semantic clarity for tracking operations
@@ -94,7 +94,7 @@ public interface IObjectGraphTracker : IObjectGraphDiscoverer
 /// Collections are exposed as read-only to prevent callers from corrupting internal state.
 /// Use <see cref="GetObjectsAtDepth"/> and <see cref="GetDepthsDescending"/> for safe iteration.
 /// </remarks>
-public interface IObjectGraph
+internal interface IObjectGraph
 {
     /// <summary>
     /// Gets objects organized by depth (0 = root arguments, 1+ = nested).

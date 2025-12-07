@@ -16,7 +16,7 @@ namespace TUnit.Core.Interfaces;
 /// </list>
 /// </para>
 /// </remarks>
-public interface IObjectInitializationService
+internal interface IObjectInitializationService
 {
     /// <summary>
     /// Initializes an object during the execution phase.
