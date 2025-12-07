@@ -49,7 +49,8 @@ public partial class TestContext : Context,
 
     private static readonly AsyncLocal<TestContext?> TestContexts = new();
 
-    internal static readonly Dictionary<string, List<string>> InternalParametersDictionary = new();
+    // Use ConcurrentDictionary for thread-safe access during parallel test discovery
+    internal static readonly ConcurrentDictionary<string, List<string>> InternalParametersDictionary = new();
 
     private StringWriter? _outputWriter;
 

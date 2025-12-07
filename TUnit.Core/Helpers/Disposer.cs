@@ -1,8 +1,13 @@
-﻿using TUnit.Core.Logging;
+﻿using TUnit.Core.Interfaces;
+using TUnit.Core.Logging;
 
 namespace TUnit.Core.Helpers;
 
-internal class Disposer(ILogger logger)
+/// <summary>
+/// Disposes objects asynchronously with logging.
+/// Implements IDisposer for Dependency Inversion Principle compliance.
+/// </summary>
+internal class Disposer(ILogger logger) : IDisposer
 {
     /// <summary>
     /// Disposes an object and propagates any exceptions.

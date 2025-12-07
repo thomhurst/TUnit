@@ -51,24 +51,17 @@ internal static class PropertyCacheManager
                 // Double-check after acquiring cleanup flag
                 if (PropertyCache.Count > MaxCacheSize)
                 {
-                    var keysToRemove = new List<Type>(MaxCacheSize / 2);
-                    var count = 0;
-                    foreach (var key in PropertyCache.Keys)
-                    {
-                        if (count++ >= MaxCacheSize / 2)
-                        {
-                            break;
-                        }
+                    // Use ToArray() to get a true snapshot for thread-safe enumeration
+                    // This prevents issues with concurrent modifications during iteration
+                    var allKeys = PropertyCache.Keys.ToArray();
+                    var removeCount = Math.Min(allKeys.Length / 2, MaxCacheSize / 2);
 
-                        keysToRemove.Add(key);
-                    }
-
-                    foreach (var key in keysToRemove)
+                    for (var i = 0; i < removeCount; i++)
                     {
-                        PropertyCache.TryRemove(key, out _);
+                        PropertyCache.TryRemove(allKeys[i], out _);
                     }
 #if DEBUG
-                    Debug.WriteLine($"[PropertyCacheManager] PropertyCache exceeded {MaxCacheSize} entries, cleared {keysToRemove.Count} entries");
+                    Debug.WriteLine($"[PropertyCacheManager] PropertyCache exceeded {MaxCacheSize} entries, cleared {removeCount} entries");
 #endif
                 }
             }

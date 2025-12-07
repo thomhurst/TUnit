@@ -2,6 +2,11 @@ using System.Diagnostics;
 
 namespace TUnit.Core.Helpers;
 
+/// <summary>
+/// Thread-safe counter with event notification.
+/// Captures event handler BEFORE state change to prevent race conditions
+/// where subscribers miss notifications that occur during subscription.
+/// </summary>
 [DebuggerDisplay("Count = {CurrentCount}")]
 public class Counter
 {
@@ -11,9 +16,11 @@ public class Counter
 
     public int Increment()
     {
+        // Capture handler BEFORE state change to ensure all subscribers
+        // at the time of the change are notified (prevents TOCTOU race)
+        var handler = _onCountChanged;
         var newCount = Interlocked.Increment(ref _count);
 
-        var handler = _onCountChanged;
         handler?.Invoke(this, newCount);
 
         return newCount;
@@ -21,9 +28,11 @@ public class Counter
 
     public int Decrement()
     {
+        // Capture handler BEFORE state change to ensure all subscribers
+        // at the time of the change are notified (prevents TOCTOU race)
+        var handler = _onCountChanged;
         var newCount = Interlocked.Decrement(ref _count);
 
-        var handler = _onCountChanged;
         handler?.Invoke(this, newCount);
 
         return newCount;
@@ -31,9 +40,11 @@ public class Counter
 
     public int Add(int value)
     {
+        // Capture handler BEFORE state change to ensure all subscribers
+        // at the time of the change are notified (prevents TOCTOU race)
+        var handler = _onCountChanged;
         var newCount = Interlocked.Add(ref _count, value);
 
-        var handler = _onCountChanged;
         handler?.Invoke(this, newCount);
 
         return newCount;

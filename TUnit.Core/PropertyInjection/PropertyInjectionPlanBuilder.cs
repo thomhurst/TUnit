@@ -134,6 +134,7 @@ internal static class PropertyInjectionPlanBuilder
 
 /// <summary>
 /// Represents a plan for injecting properties into an object.
+/// Provides iterator methods to abstract source-gen vs reflection branching (DRY).
 /// </summary>
 internal sealed class PropertyInjectionPlan
 {
@@ -141,4 +142,100 @@ internal sealed class PropertyInjectionPlan
     public required PropertyInjectionMetadata[] SourceGeneratedProperties { get; init; }
     public required (PropertyInfo Property, IDataSourceAttribute DataSource)[] ReflectionProperties { get; init; }
     public required bool HasProperties { get; init; }
+
+    /// <summary>
+    /// Iterates over all properties in the plan, abstracting source-gen vs reflection.
+    /// Call the appropriate callback based on which mode has properties.
+    /// </summary>
+    /// <param name="onSourceGenerated">Action to invoke for each source-generated property.</param>
+    /// <param name="onReflection">Action to invoke for each reflection property.</param>
+    public void ForEachProperty(
+        Action<PropertyInjectionMetadata> onSourceGenerated,
+        Action<(PropertyInfo Property, IDataSourceAttribute DataSource)> onReflection)
+    {
+        if (SourceGeneratedProperties.Length > 0)
+        {
+            foreach (var metadata in SourceGeneratedProperties)
+            {
+                onSourceGenerated(metadata);
+            }
+        }
+        else if (ReflectionProperties.Length > 0)
+        {
+            foreach (var prop in ReflectionProperties)
+            {
+                onReflection(prop);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Iterates over all properties in the plan asynchronously.
+    /// </summary>
+    public async Task ForEachPropertyAsync(
+        Func<PropertyInjectionMetadata, Task> onSourceGenerated,
+        Func<(PropertyInfo Property, IDataSourceAttribute DataSource), Task> onReflection)
+    {
+        if (SourceGeneratedProperties.Length > 0)
+        {
+            foreach (var metadata in SourceGeneratedProperties)
+            {
+                await onSourceGenerated(metadata);
+            }
+        }
+        else if (ReflectionProperties.Length > 0)
+        {
+            foreach (var prop in ReflectionProperties)
+            {
+                await onReflection(prop);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Executes actions for all properties in parallel.
+    /// </summary>
+    public Task ForEachPropertyParallelAsync(
+        Func<PropertyInjectionMetadata, Task> onSourceGenerated,
+        Func<(PropertyInfo Property, IDataSourceAttribute DataSource), Task> onReflection)
+    {
+        if (SourceGeneratedProperties.Length > 0)
+        {
+            return Helpers.ParallelTaskHelper.ForEachAsync(SourceGeneratedProperties, onSourceGenerated);
+        }
+        else if (ReflectionProperties.Length > 0)
+        {
+            return Helpers.ParallelTaskHelper.ForEachAsync(ReflectionProperties, onReflection);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Gets property values from an instance, abstracting source-gen vs reflection.
+    /// </summary>
+    public IEnumerable<object?> GetPropertyValues(object instance)
+    {
+        if (SourceGeneratedProperties.Length > 0)
+        {
+            foreach (var metadata in SourceGeneratedProperties)
+            {
+                var property = metadata.ContainingType.GetProperty(metadata.PropertyName);
+                if (property?.CanRead == true)
+                {
+                    yield return property.GetValue(instance);
+                }
+            }
+        }
+        else if (ReflectionProperties.Length > 0)
+        {
+            foreach (var (property, _) in ReflectionProperties)
+            {
+                if (property.CanRead)
+                {
+                    yield return property.GetValue(instance);
+                }
+            }
+        }
+    }
 }

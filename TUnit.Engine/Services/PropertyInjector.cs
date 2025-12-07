@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core;
+using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Interfaces.SourceGenerator;
 using TUnit.Core.PropertyInjection;
@@ -99,7 +100,7 @@ internal sealed class PropertyInjector
 #if NETSTANDARD2_0
             visitedObjects = new ConcurrentDictionary<object, byte>();
 #else
-            visitedObjects = new ConcurrentDictionary<object, byte>(ReferenceEqualityComparer.Instance);
+            visitedObjects = new ConcurrentDictionary<object, byte>(Core.Helpers.ReferenceEqualityComparer.Instance);
 #endif
         }
 
@@ -200,7 +201,7 @@ internal sealed class PropertyInjector
         }
     }
 
-    private async Task InjectSourceGeneratedPropertiesAsync(
+    private Task InjectSourceGeneratedPropertiesAsync(
         object instance,
         PropertyInjectionMetadata[] properties,
         ConcurrentDictionary<string, object?> objectBag,
@@ -208,18 +209,8 @@ internal sealed class PropertyInjector
         TestContextEvents events,
         ConcurrentDictionary<object, byte> visitedObjects)
     {
-        if (properties.Length == 0)
-        {
-            return;
-        }
-
-        // Initialize properties in parallel without LINQ Select
-        var tasks = new Task[properties.Length];
-        for (var i = 0; i < properties.Length; i++)
-        {
-            tasks[i] = InjectSourceGeneratedPropertyAsync(instance, properties[i], objectBag, methodMetadata, events, visitedObjects);
-        }
-        await Task.WhenAll(tasks);
+        return ParallelTaskHelper.ForEachAsync(properties,
+            prop => InjectSourceGeneratedPropertyAsync(instance, prop, objectBag, methodMetadata, events, visitedObjects));
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Source-gen properties are AOT-safe")]
@@ -248,7 +239,7 @@ internal sealed class PropertyInjector
         object? resolvedValue = null;
 
         // Use a composite key to avoid conflicts when nested classes have properties with the same name
-        var cacheKey = $"{metadata.ContainingType.FullName}.{metadata.PropertyName}";
+        var cacheKey = PropertyCacheKeyGenerator.GetCacheKey(metadata);
 
         // Check if property was pre-resolved during registration
         if (testContext?.Metadata.TestDetails.TestClassInjectedPropertyArguments.TryGetValue(cacheKey, out resolvedValue) == true)
@@ -292,7 +283,7 @@ internal sealed class PropertyInjector
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT")]
-    private async Task InjectReflectionPropertiesAsync(
+    private Task InjectReflectionPropertiesAsync(
         object instance,
         (PropertyInfo Property, IDataSourceAttribute DataSource)[] properties,
         ConcurrentDictionary<string, object?> objectBag,
@@ -300,19 +291,8 @@ internal sealed class PropertyInjector
         TestContextEvents events,
         ConcurrentDictionary<object, byte> visitedObjects)
     {
-        if (properties.Length == 0)
-        {
-            return;
-        }
-
-        // Initialize properties in parallel without LINQ Select
-        var tasks = new Task[properties.Length];
-        for (var i = 0; i < properties.Length; i++)
-        {
-            var pair = properties[i];
-            tasks[i] = InjectReflectionPropertyAsync(instance, pair.Property, pair.DataSource, objectBag, methodMetadata, events, visitedObjects);
-        }
-        await Task.WhenAll(tasks);
+        return ParallelTaskHelper.ForEachAsync(properties,
+            pair => InjectReflectionPropertyAsync(instance, pair.Property, pair.DataSource, objectBag, methodMetadata, events, visitedObjects));
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT")]
@@ -406,25 +386,15 @@ internal sealed class PropertyInjector
         }
     }
 
-    private async Task ResolveAndCacheSourceGeneratedPropertiesAsync(
+    private Task ResolveAndCacheSourceGeneratedPropertiesAsync(
         PropertyInjectionMetadata[] properties,
         ConcurrentDictionary<string, object?> objectBag,
         MethodMetadata? methodMetadata,
         TestContextEvents events,
         TestContext testContext)
     {
-        if (properties.Length == 0)
-        {
-            return;
-        }
-
-        // Resolve properties in parallel without LINQ Select
-        var tasks = new Task[properties.Length];
-        for (var i = 0; i < properties.Length; i++)
-        {
-            tasks[i] = ResolveAndCacheSourceGeneratedPropertyAsync(properties[i], objectBag, methodMetadata, events, testContext);
-        }
-        await Task.WhenAll(tasks);
+        return ParallelTaskHelper.ForEachAsync(properties,
+            prop => ResolveAndCacheSourceGeneratedPropertyAsync(prop, objectBag, methodMetadata, events, testContext));
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Source-gen properties are AOT-safe")]
@@ -435,7 +405,7 @@ internal sealed class PropertyInjector
         TestContextEvents events,
         TestContext testContext)
     {
-        var cacheKey = $"{metadata.ContainingType.FullName}.{metadata.PropertyName}";
+        var cacheKey = PropertyCacheKeyGenerator.GetCacheKey(metadata);
 
         // Check if already cached
         if (testContext.Metadata.TestDetails.TestClassInjectedPropertyArguments.ContainsKey(cacheKey))
@@ -469,26 +439,15 @@ internal sealed class PropertyInjector
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT")]
-    private async Task ResolveAndCacheReflectionPropertiesAsync(
+    private Task ResolveAndCacheReflectionPropertiesAsync(
         (PropertyInfo Property, IDataSourceAttribute DataSource)[] properties,
         ConcurrentDictionary<string, object?> objectBag,
         MethodMetadata? methodMetadata,
         TestContextEvents events,
         TestContext testContext)
     {
-        if (properties.Length == 0)
-        {
-            return;
-        }
-
-        // Resolve properties in parallel without LINQ Select
-        var tasks = new Task[properties.Length];
-        for (var i = 0; i < properties.Length; i++)
-        {
-            var pair = properties[i];
-            tasks[i] = ResolveAndCacheReflectionPropertyAsync(pair.Property, pair.DataSource, objectBag, methodMetadata, events, testContext);
-        }
-        await Task.WhenAll(tasks);
+        return ParallelTaskHelper.ForEachAsync(properties,
+            pair => ResolveAndCacheReflectionPropertyAsync(pair.Property, pair.DataSource, objectBag, methodMetadata, events, testContext));
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT")]
@@ -500,7 +459,7 @@ internal sealed class PropertyInjector
         TestContextEvents events,
         TestContext testContext)
     {
-        var cacheKey = $"{property.DeclaringType!.FullName}.{property.Name}";
+        var cacheKey = PropertyCacheKeyGenerator.GetCacheKey(property);
 
         // Check if already cached
         if (testContext.Metadata.TestDetails.TestClassInjectedPropertyArguments.ContainsKey(cacheKey))

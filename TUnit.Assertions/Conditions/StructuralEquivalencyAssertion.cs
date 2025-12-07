@@ -2,6 +2,7 @@ using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text;
+using TUnit.Assertions.Conditions.Helpers;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
@@ -77,7 +78,7 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}"));
         }
 
-        var result = CompareObjects(value, _expected, "", new HashSet<object>(new ReferenceEqualityComparer()));
+        var result = CompareObjects(value, _expected, "", new HashSet<object>(ReferenceEqualityComparer<object>.Instance));
         return Task.FromResult(result);
     }
 
@@ -365,11 +366,5 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
         }
 
         return "value";
-    }
-
-    private sealed class ReferenceEqualityComparer : IEqualityComparer<object>
-    {
-        public new bool Equals(object? x, object? y) => ReferenceEquals(x, y);
-        public int GetHashCode(object obj) => System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(obj);
     }
 }

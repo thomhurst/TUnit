@@ -19,21 +19,48 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     private static readonly ConcurrentDictionary<object, Counter> s_trackedObjects =
         new(Helpers.ReferenceEqualityComparer.Instance);
 
+    // Collects errors from async disposal callbacks for post-session review
+    private static readonly ConcurrentBag<Exception> s_asyncCallbackErrors = new();
+
+    /// <summary>
+    /// Gets any errors that occurred during async disposal callbacks.
+    /// Check this at the end of a test session to surface hidden failures.
+    /// </summary>
+    public static IReadOnlyCollection<Exception> GetAsyncCallbackErrors() => s_asyncCallbackErrors.ToArray();
+
     /// <summary>
     /// Clears all static tracking state. Call at the end of a test session to release memory.
     /// </summary>
     public static void ClearStaticTracking()
     {
         s_trackedObjects.Clear();
+        s_asyncCallbackErrors.Clear();
     }
 
     /// <summary>
     /// Flattens a ConcurrentDictionary of depth-keyed HashSets into a single HashSet.
     /// Thread-safe: locks each HashSet while copying.
+    /// Pre-calculates capacity to avoid HashSet resizing during population.
     /// </summary>
     private static HashSet<object> FlattenTrackedObjects(ConcurrentDictionary<int, HashSet<object>> trackedObjects)
     {
+#if NETSTANDARD2_0
+        // .NET Standard 2.0 doesn't support HashSet capacity constructor
         var result = new HashSet<object>(Helpers.ReferenceEqualityComparer.Instance);
+#else
+        // First pass: calculate total capacity to avoid resizing
+        var totalCapacity = 0;
+        foreach (var kvp in trackedObjects)
+        {
+            lock (kvp.Value)
+            {
+                totalCapacity += kvp.Value.Count;
+            }
+        }
+
+        // Second pass: populate with pre-sized HashSet
+        var result = new HashSet<object>(totalCapacity, Helpers.ReferenceEqualityComparer.Instance);
+#endif
         foreach (var kvp in trackedObjects)
         {
             lock (kvp.Value)
@@ -142,6 +169,10 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
             if (count == 0)
             {
+                // Remove from tracking dictionary to prevent memory leak
+                // Use TryRemove to ensure atomicity - only remove if still in dictionary
+                s_trackedObjects.TryRemove(obj, out _);
+
                 await disposer.DisposeAsync(obj).ConfigureAwait(false);
             }
         }
@@ -155,6 +186,10 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         return obj is not IDisposable and not IAsyncDisposable;
     }
 
+    /// <summary>
+    /// Registers a callback to be invoked when the object is disposed (ref count reaches 0).
+    /// If the object is already disposed, the callback is invoked immediately.
+    /// </summary>
     public static void OnDisposed(object? o, Action action)
     {
         if (o is not IDisposable and not IAsyncDisposable)
@@ -162,16 +197,28 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
             return;
         }
 
-        s_trackedObjects.GetOrAdd(o, static _ => new Counter())
-            .OnCountChanged += (_, count) =>
+        var counter = s_trackedObjects.GetOrAdd(o, static _ => new Counter());
+
+        counter.OnCountChanged += (_, count) =>
         {
             if (count == 0)
             {
                 action();
             }
         };
+
+        // Check if already disposed (count is 0) - invoke immediately if so
+        // This prevents lost callbacks when registering after disposal
+        if (counter.CurrentCount == 0)
+        {
+            action();
+        }
     }
 
+    /// <summary>
+    /// Registers an async callback to be invoked when the object is disposed (ref count reaches 0).
+    /// If the object is already disposed, the callback is invoked immediately.
+    /// </summary>
     public static void OnDisposedAsync(object? o, Func<Task> asyncAction)
     {
         if (o is not IDisposable and not IAsyncDisposable)
@@ -179,21 +226,29 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
             return;
         }
 
+        var counter = s_trackedObjects.GetOrAdd(o, static _ => new Counter());
+
         // Avoid async void pattern by wrapping in fire-and-forget with exception handling
-        s_trackedObjects.GetOrAdd(o, static _ => new Counter())
-            .OnCountChanged += (_, count) =>
+        counter.OnCountChanged += (_, count) =>
         {
             if (count == 0)
             {
-                // Fire-and-forget with exception handling to avoid unobserved exceptions
+                // Fire-and-forget with exception collection to surface errors
                 _ = SafeExecuteAsync(asyncAction);
             }
         };
+
+        // Check if already disposed (count is 0) - invoke immediately if so
+        // This prevents lost callbacks when registering after disposal
+        if (counter.CurrentCount == 0)
+        {
+            _ = SafeExecuteAsync(asyncAction);
+        }
     }
 
     /// <summary>
-    /// Executes an async action safely, catching and logging any exceptions
-    /// to avoid unobserved task exceptions from fire-and-forget patterns.
+    /// Executes an async action safely, catching and collecting exceptions
+    /// for post-session review instead of silently swallowing them.
     /// </summary>
     private static async Task SafeExecuteAsync(Func<Task> asyncAction)
     {
@@ -203,13 +258,12 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         }
         catch (Exception ex)
         {
-            // Log to debug in DEBUG builds, otherwise swallow to prevent crashes
-            // The disposal itself already logged any errors
+            // Collect error for post-session review instead of silently swallowing
+            s_asyncCallbackErrors.Add(ex);
+
 #if DEBUG
             System.Diagnostics.Debug.WriteLine($"[ObjectTracker] Exception in OnDisposedAsync callback: {ex.Message}");
 #endif
-            // Prevent unobserved task exception from crashing the application
-            _ = ex;
         }
     }
 }

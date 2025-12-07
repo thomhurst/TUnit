@@ -41,7 +41,7 @@ public sealed class StructuralEqualityComparer<T> : IEqualityComparer<T>
             return EqualityComparer<T>.Default.Equals(x, y);
         }
 
-        return CompareStructurally(x, y, new HashSet<object>(new ReferenceEqualityComparer()));
+        return CompareStructurally(x, y, new HashSet<object>(ReferenceEqualityComparer<object>.Instance));
     }
 
     public int GetHashCode(T obj)
@@ -153,11 +153,5 @@ public sealed class StructuralEqualityComparer<T> : IEqualityComparer<T>
             FieldInfo field => field.GetValue(obj),
             _ => throw new InvalidOperationException($"Unknown member type: {member.GetType()}")
         };
-    }
-
-    private sealed class ReferenceEqualityComparer : IEqualityComparer<object>
-    {
-        public new bool Equals(object? x, object? y) => ReferenceEquals(x, y);
-        public int GetHashCode(object obj) => System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(obj);
     }
 }

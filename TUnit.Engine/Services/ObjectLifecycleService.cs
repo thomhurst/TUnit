@@ -167,7 +167,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
         {
             foreach (var metadata in plan.SourceGeneratedProperties)
             {
-                var cacheKey = $"{metadata.ContainingType.FullName}.{metadata.PropertyName}";
+                var cacheKey = PropertyCacheKeyGenerator.GetCacheKey(metadata);
 
                 if (cachedProperties.TryGetValue(cacheKey, out var cachedValue) && cachedValue != null)
                 {
@@ -180,7 +180,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
         {
             foreach (var (property, _) in plan.ReflectionProperties)
             {
-                var cacheKey = $"{property.DeclaringType!.FullName}.{property.Name}";
+                var cacheKey = PropertyCacheKeyGenerator.GetCacheKey(property);
 
                 if (cachedProperties.TryGetValue(cacheKey, out var cachedValue) && cachedValue != null)
                 {

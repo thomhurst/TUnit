@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
+using TUnit.Core.Interfaces.SourceGenerator;
 using TUnit.Core.PropertyInjection;
 
 namespace TUnit.Core.Discovery;
@@ -350,37 +351,67 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphTracker
 
         if (useSourceGen)
         {
-            foreach (var metadata in plan.SourceGeneratedProperties)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                var property = metadata.ContainingType.GetProperty(metadata.PropertyName);
-                if (property == null || !property.CanRead)
-                {
-                    continue;
-                }
-
-                var value = property.GetValue(obj);
-                if (value != null && tryAdd(value, currentDepth))
-                {
-                    recurse(value, currentDepth + 1);
-                }
-            }
+            TraverseSourceGeneratedProperties(obj, plan.SourceGeneratedProperties, tryAdd, recurse, currentDepth, cancellationToken);
         }
         else
         {
-            // Reflection path - use the appropriate property collection
             var reflectionProps = useSourceRegistrarCheck
                 ? plan.ReflectionProperties
                 : (plan.ReflectionProperties.Length > 0 ? plan.ReflectionProperties : []);
 
-            foreach (var prop in reflectionProps)
+            TraverseReflectionProperties(obj, reflectionProps, tryAdd, recurse, currentDepth, cancellationToken);
+        }
+    }
+
+    /// <summary>
+    /// Traverses source-generated properties and discovers nested objects.
+    /// Extracted for reduced complexity in TraverseInjectableProperties.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Property discovery handles both AOT and reflection modes")]
+    private static void TraverseSourceGeneratedProperties(
+        object obj,
+        PropertyInjectionMetadata[] sourceGeneratedProperties,
+        TryAddObjectFunc tryAdd,
+        RecurseFunc recurse,
+        int currentDepth,
+        CancellationToken cancellationToken)
+    {
+        foreach (var metadata in sourceGeneratedProperties)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var property = metadata.ContainingType.GetProperty(metadata.PropertyName);
+            if (property == null || !property.CanRead)
             {
-                cancellationToken.ThrowIfCancellationRequested();
-                var value = prop.Property.GetValue(obj);
-                if (value != null && tryAdd(value, currentDepth))
-                {
-                    recurse(value, currentDepth + 1);
-                }
+                continue;
+            }
+
+            var value = property.GetValue(obj);
+            if (value != null && tryAdd(value, currentDepth))
+            {
+                recurse(value, currentDepth + 1);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Traverses reflection-based properties and discovers nested objects.
+    /// Extracted for reduced complexity in TraverseInjectableProperties.
+    /// </summary>
+    private static void TraverseReflectionProperties(
+        object obj,
+        (PropertyInfo Property, IDataSourceAttribute DataSource)[] reflectionProperties,
+        TryAddObjectFunc tryAdd,
+        RecurseFunc recurse,
+        int currentDepth,
+        CancellationToken cancellationToken)
+    {
+        foreach (var prop in reflectionProperties)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var value = prop.Property.GetValue(obj);
+            if (value != null && tryAdd(value, currentDepth))
+            {
+                recurse(value, currentDepth + 1);
             }
         }
     }
@@ -451,30 +482,32 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         RootObjectCallback onRootObjectAdded,
         CancellationToken cancellationToken)
     {
-        foreach (var classArgument in testDetails.TestClassArguments)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            if (classArgument != null && tryAdd(classArgument, 0))
-            {
-                onRootObjectAdded(classArgument);
-            }
-        }
+        // Process class arguments
+        ProcessRootCollection(testDetails.TestClassArguments, tryAdd, onRootObjectAdded, cancellationToken);
 
-        foreach (var methodArgument in testDetails.TestMethodArguments)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            if (methodArgument != null && tryAdd(methodArgument, 0))
-            {
-                onRootObjectAdded(methodArgument);
-            }
-        }
+        // Process method arguments
+        ProcessRootCollection(testDetails.TestMethodArguments, tryAdd, onRootObjectAdded, cancellationToken);
 
-        foreach (var property in testDetails.TestClassInjectedPropertyArguments.Values)
+        // Process injected property values
+        ProcessRootCollection(testDetails.TestClassInjectedPropertyArguments.Values, tryAdd, onRootObjectAdded, cancellationToken);
+    }
+
+    /// <summary>
+    /// Processes a collection of root objects, adding them to the graph and invoking callback.
+    /// Extracted to eliminate duplicate iteration patterns in CollectRootObjects.
+    /// </summary>
+    private static void ProcessRootCollection<T>(
+        IEnumerable<T> collection,
+        TryAddObjectFunc tryAdd,
+        RootObjectCallback onRootObjectAdded,
+        CancellationToken cancellationToken)
+    {
+        foreach (var item in collection)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (property != null && tryAdd(property, 0))
+            if (item != null && tryAdd(item, 0))
             {
-                onRootObjectAdded(property);
+                onRootObjectAdded(item);
             }
         }
     }
