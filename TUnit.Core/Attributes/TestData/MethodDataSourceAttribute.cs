@@ -82,7 +82,10 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
 
         // If we have a test class instance and no explicit class was provided,
         // use the instance's actual type (which will be the constructed generic type)
-        if (ClassProvidingDataSource == null && dataGeneratorMetadata.TestClassInstance != null)
+        // Skip PlaceholderInstance as it's used during discovery when the actual instance isn't created yet
+        if (ClassProvidingDataSource == null
+            && dataGeneratorMetadata.TestClassInstance != null
+            && dataGeneratorMetadata.TestClassInstance is not PlaceholderInstance)
         {
             targetType = dataGeneratorMetadata.TestClassInstance.GetType();
         }
