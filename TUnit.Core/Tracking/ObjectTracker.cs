@@ -19,6 +19,9 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     private static readonly ConcurrentDictionary<object, Counter> s_trackedObjects =
         new(Helpers.ReferenceEqualityComparer.Instance);
 
+    // Lock for atomic decrement-check-dispose operations to prevent race conditions
+    private static readonly object s_disposalLock = new();
+
     // Collects errors from async disposal callbacks for post-session review
     private static readonly ConcurrentBag<Exception> s_asyncCallbackErrors = new();
 
@@ -36,6 +39,13 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         s_trackedObjects.Clear();
         s_asyncCallbackErrors.Clear();
     }
+
+    /// <summary>
+    /// Gets an existing counter for the object or creates a new one.
+    /// Centralizes the GetOrAdd pattern to ensure consistent counter creation.
+    /// </summary>
+    private static Counter GetOrCreateCounter(object obj) =>
+        s_trackedObjects.GetOrAdd(obj, static _ => new Counter());
 
     /// <summary>
     /// Flattens a ConcurrentDictionary of depth-keyed HashSets into a single HashSet.
@@ -147,7 +157,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
             return;
         }
 
-        var counter = s_trackedObjects.GetOrAdd(obj, static _ => new Counter());
+        var counter = GetOrCreateCounter(obj);
         counter.Increment();
     }
 
@@ -158,23 +168,35 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
             return;
         }
 
-        if (s_trackedObjects.TryGetValue(obj, out var counter))
+        var shouldDispose = false;
+
+        // Use lock to make decrement-check-remove atomic and prevent race conditions
+        // where multiple tests could try to dispose the same object simultaneously
+        lock (s_disposalLock)
         {
-            var count = counter.Decrement();
-
-            if (count < 0)
+            if (s_trackedObjects.TryGetValue(obj, out var counter))
             {
-                throw new InvalidOperationException("Reference count for object went below zero. This indicates a bug in the reference counting logic.");
-            }
+                var count = counter.Decrement();
 
-            if (count == 0)
-            {
-                // Remove from tracking dictionary to prevent memory leak
-                // Use TryRemove to ensure atomicity - only remove if still in dictionary
-                s_trackedObjects.TryRemove(obj, out _);
+                if (count < 0)
+                {
+                    throw new InvalidOperationException("Reference count for object went below zero. This indicates a bug in the reference counting logic.");
+                }
 
-                await disposer.DisposeAsync(obj).ConfigureAwait(false);
+                if (count == 0)
+                {
+                    // Remove from tracking dictionary to prevent memory leak
+                    // Use TryRemove to ensure atomicity - only remove if still in dictionary
+                    s_trackedObjects.TryRemove(obj, out _);
+                    shouldDispose = true;
+                }
             }
+        }
+
+        // Dispose outside the lock to avoid blocking other untrack operations
+        if (shouldDispose)
+        {
+            await disposer.DisposeAsync(obj).ConfigureAwait(false);
         }
     }
 
@@ -191,14 +213,26 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     /// If the object is already disposed, the callback is invoked immediately.
     /// The callback is guaranteed to be invoked exactly once (idempotent).
     /// </summary>
+    /// <param name="o">The object to monitor for disposal. If null or not disposable, the method returns without action.</param>
+    /// <param name="action">The callback to invoke on disposal. Must not be null.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="action"/> is null.</exception>
     public static void OnDisposed(object? o, Action action)
     {
+#if NET6_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(action);
+#else
+        if (action == null)
+        {
+            throw new ArgumentNullException(nameof(action));
+        }
+#endif
+
         if (o is not IDisposable and not IAsyncDisposable)
         {
             return;
         }
 
-        var counter = s_trackedObjects.GetOrAdd(o, static _ => new Counter());
+        var counter = GetOrCreateCounter(o);
 
         // Use flag to ensure callback only fires once (idempotent)
         var invoked = 0;
@@ -235,14 +269,26 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     /// If the object is already disposed, the callback is invoked immediately.
     /// The callback is guaranteed to be invoked exactly once (idempotent).
     /// </summary>
+    /// <param name="o">The object to monitor for disposal. If null or not disposable, the method returns without action.</param>
+    /// <param name="asyncAction">The async callback to invoke on disposal. Must not be null.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="asyncAction"/> is null.</exception>
     public static void OnDisposedAsync(object? o, Func<Task> asyncAction)
     {
+#if NET6_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(asyncAction);
+#else
+        if (asyncAction == null)
+        {
+            throw new ArgumentNullException(nameof(asyncAction));
+        }
+#endif
+
         if (o is not IDisposable and not IAsyncDisposable)
         {
             return;
         }
 
-        var counter = s_trackedObjects.GetOrAdd(o, static _ => new Counter());
+        var counter = GetOrCreateCounter(o);
 
         // Use flag to ensure callback only fires once (idempotent)
         var invoked = 0;

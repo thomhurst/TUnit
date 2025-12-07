@@ -963,10 +963,6 @@ namespace
         public .<string> NotInParallelConstraintKeys { get; init; }
         public int Order { get; set; }
     }
-    public static class ObjectInitializer
-    {
-        public static . InitializeAsync(object? obj, .CancellationToken cancellationToken = default) { }
-    }
     public class ParallelGroupAttribute : .TUnitAttribute, ., .
     {
         public ParallelGroupAttribute(string group) { }
@@ -1621,6 +1617,36 @@ namespace .DataSources
         public static string FormatArguments(object?[] arguments, .<<object?, string?>> formatters) { }
     }
 }
+namespace .Discovery
+{
+    public readonly struct DiscoveryError : <.>
+    {
+        public DiscoveryError(string TypeName, string PropertyName, string ErrorMessage,  Exception) { }
+        public string ErrorMessage { get; init; }
+        public  Exception { get; init; }
+        public string PropertyName { get; init; }
+        public string TypeName { get; init; }
+    }
+    public sealed class ObjectGraph : .
+    {
+        public ObjectGraph(.<int, .<object>> objectsByDepth, .<object> allObjects) { }
+        public .<object> AllObjects { get; }
+        public int MaxDepth { get; }
+        public .<int, .<object>> ObjectsByDepth { get; }
+        public .<int> GetDepthsDescending() { }
+        public .<object> GetObjectsAtDepth(int depth) { }
+    }
+    public sealed class ObjectGraphDiscoverer : ., .
+    {
+        public ObjectGraphDiscoverer() { }
+        public .<int, .<object>> DiscoverAndTrackObjects(.TestContext testContext, .CancellationToken cancellationToken = default) { }
+        public . DiscoverNestedObjectGraph(object rootObject, .CancellationToken cancellationToken = default) { }
+        public . DiscoverObjectGraph(.TestContext testContext, .CancellationToken cancellationToken = default) { }
+        public static void ClearCache() { }
+        public static void ClearDiscoveryErrors() { }
+        public static .<.> GetDiscoveryErrors() { }
+    }
+}
 namespace .Enums
 {
     public enum DataGeneratorType
@@ -1960,14 +1986,23 @@ namespace .Helpers
         public static bool IsConstructedGenericType( type) { }
         public static  MakeGenericTypeSafe( genericTypeDefinition, params [] typeArguments) { }
     }
+    public static class ParallelTaskHelper
+    {
+        public static . ForEachAsync<T>(.<T> items, <T, .> action) { }
+        public static . ForEachAsync<T>(T[] items, <T, .> action) { }
+        public static . ForEachAsync<T>(.<T> items, <T, .CancellationToken, .> action, .CancellationToken cancellationToken) { }
+        public static . ForEachAsync<T>(T[] items, <T, .CancellationToken, .> action, .CancellationToken cancellationToken) { }
+        public static . ForEachWithIndexAsync<T>(T[] items, <T, int, .> action) { }
+        public static . ForEachWithIndexAsync<T>(T[] items, <T, int, .CancellationToken, .> action, .CancellationToken cancellationToken) { }
+    }
     public class ProcessorCountParallelLimit : .
     {
         public ProcessorCountParallelLimit() { }
         public int Limit { get; }
     }
-    public class ReferenceEqualityComparer : .<object>
+    public sealed class ReferenceEqualityComparer : .<object>
     {
-        public ReferenceEqualityComparer() { }
+        public static readonly . Instance;
         public bool Equals(object? x, object? y) { }
         public int GetHashCode(object obj) { }
     }
@@ -2161,6 +2196,10 @@ namespace .Interfaces
     {
         .<<object?[]>> GenerateDataFactories(.DataSourceContext context);
     }
+    public interface IDisposer
+    {
+        . DisposeAsync(object? obj);
+    }
     public interface IEventReceiver
     {
         int Order { get; }
@@ -2220,6 +2259,28 @@ namespace .Interfaces
     public interface ILastTestInTestSessionEventReceiver : .
     {
         . OnLastTestInTestSession(.TestSessionContext current, .TestContext testContext);
+    }
+    public interface IObjectGraph
+    {
+        .<object> AllObjects { get; }
+        int MaxDepth { get; }
+        .<int, .<object>> ObjectsByDepth { get; }
+        .<int> GetDepthsDescending();
+        .<object> GetObjectsAtDepth(int depth);
+    }
+    public interface IObjectGraphDiscoverer
+    {
+        .<int, .<object>> DiscoverAndTrackObjects(.TestContext testContext, .CancellationToken cancellationToken = default);
+        . DiscoverNestedObjectGraph(object rootObject, .CancellationToken cancellationToken = default);
+        . DiscoverObjectGraph(.TestContext testContext, .CancellationToken cancellationToken = default);
+    }
+    public interface IObjectGraphTracker : . { }
+    public interface IObjectInitializationService
+    {
+        void ClearCache();
+        . InitializeAsync(object? obj, .CancellationToken cancellationToken = default);
+        . InitializeForDiscoveryAsync(object? obj, .CancellationToken cancellationToken = default);
+        bool IsInitialized(object? obj);
     }
     public interface IParallelConstraint { }
     public interface IParallelLimit
@@ -2510,6 +2571,14 @@ namespace .Models
         public ? MethodInvoker { get; set; }
     }
 }
+namespace .PropertyInjection
+{
+    public static class PropertyCacheKeyGenerator
+    {
+        public static string GetCacheKey(.PropertyInfo property) { }
+        public static string GetCacheKey(..PropertyInjectionMetadata metadata) { }
+    }
+}
 namespace .Services
 {
     public class GenericTypeResolver : .
@@ -2536,6 +2605,14 @@ namespace .Services
         public NoOpGenericTypeResolver() { }
         public [] ResolveGenericClassArguments( genericTypeDefinition, object?[] constructorArguments) { }
         public [] ResolveGenericMethodArguments(.MethodInfo genericMethodDefinition, object?[] runtimeArguments) { }
+    }
+    public sealed class ObjectInitializationService : .
+    {
+        public ObjectInitializationService() { }
+        public void ClearCache() { }
+        public . InitializeAsync(object? obj, .CancellationToken cancellationToken = default) { }
+        public . InitializeForDiscoveryAsync(object? obj, .CancellationToken cancellationToken = default) { }
+        public bool IsInitialized(object? obj) { }
     }
     public static class ServiceProviderExtensions
     {

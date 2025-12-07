@@ -38,12 +38,25 @@ public class Counter
         return newCount;
     }
 
+    /// <summary>
+    /// Adds a value to the counter. Use Increment/Decrement for single-step changes.
+    /// </summary>
+    /// <param name="value">The value to add (can be positive or negative).</param>
+    /// <returns>The new count after the addition.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if the resulting count is negative, indicating a logic error.</exception>
     public int Add(int value)
     {
         // Capture handler BEFORE state change to ensure all subscribers
         // at the time of the change are notified (prevents TOCTOU race)
         var handler = _onCountChanged;
         var newCount = Interlocked.Add(ref _count, value);
+
+        // Guard against reference count going negative - indicates a bug in calling code
+        if (newCount < 0)
+        {
+            throw new InvalidOperationException(
+                $"Counter went below zero (result: {newCount}). This indicates a bug in the reference counting logic.");
+        }
 
         RaiseEventSafely(handler, newCount);
 

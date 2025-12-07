@@ -18,7 +18,7 @@ namespace TUnit.Core;
 /// For dependency injection scenarios, use <see cref="ObjectInitializationService"/> directly.
 /// </para>
 /// </remarks>
-public static class ObjectInitializer
+internal static class ObjectInitializer
 {
     // Use Lazy<Task> pattern to ensure InitializeAsync is called exactly once per object,
     // even under contention. GetOrAdd's factory can be called multiple times, but with
@@ -34,7 +34,7 @@ public static class ObjectInitializer
     /// </summary>
     /// <param name="obj">The object to potentially initialize.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    public static ValueTask InitializeForDiscoveryAsync(object? obj, CancellationToken cancellationToken = default)
+    internal static ValueTask InitializeForDiscoveryAsync(object? obj, CancellationToken cancellationToken = default)
     {
         // During discovery, only initialize IAsyncDiscoveryInitializer
         if (obj is not IAsyncDiscoveryInitializer asyncDiscoveryInitializer)
@@ -52,7 +52,7 @@ public static class ObjectInitializer
     /// </summary>
     /// <param name="obj">The object to potentially initialize.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    public static ValueTask InitializeAsync(object? obj, CancellationToken cancellationToken = default)
+    internal static ValueTask InitializeAsync(object? obj, CancellationToken cancellationToken = default)
     {
         if (obj is not IAsyncInitializer asyncInitializer)
         {

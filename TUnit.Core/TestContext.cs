@@ -173,8 +173,13 @@ public partial class TestContext : Context,
     internal AbstractExecutableTest InternalExecutableTest { get; set; } = null!;
 
     private ConcurrentDictionary<int, HashSet<object>>? _trackedObjects;
+
+    /// <summary>
+    /// Thread-safe lazy initialization of TrackedObjects using LazyInitializer
+    /// to prevent race conditions when multiple threads access this property simultaneously.
+    /// </summary>
     internal ConcurrentDictionary<int, HashSet<object>> TrackedObjects =>
-        _trackedObjects ??= new();
+        LazyInitializer.EnsureInitialized(ref _trackedObjects)!;
 
     /// <summary>
     /// Sets the output captured during test building phase.

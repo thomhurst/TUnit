@@ -78,11 +78,21 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}"));
         }
 
-        var result = CompareObjects(value, _expected, "", new HashSet<object>(ReferenceEqualityComparer<object>.Instance));
+        var result = CompareObjects(
+            value,
+            _expected,
+            "",
+            new HashSet<object>(ReferenceEqualityComparer<object>.Instance),
+            new HashSet<object>(ReferenceEqualityComparer<object>.Instance));
         return Task.FromResult(result);
     }
 
-    internal AssertionResult CompareObjects(object? actual, object? expected, string path, HashSet<object> visited)
+    internal AssertionResult CompareObjects(
+        object? actual,
+        object? expected,
+        string path,
+        HashSet<object> visitedActual,
+        HashSet<object>? visitedExpected = null)
     {
         // Check for ignored paths
         if (_ignoredMembers.Contains(path))
@@ -119,13 +129,25 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
             return AssertionResult.Passed;
         }
 
-        // Handle cycles
-        if (visited.Contains(actual))
+        // Handle cycles - check both actual and expected to prevent infinite recursion
+        // from cycles in either object graph
+        if (visitedActual.Contains(actual))
         {
             return AssertionResult.Passed;
         }
 
-        visited.Add(actual);
+        visitedActual.Add(actual);
+
+        // Also track expected objects to handle cycles in the expected graph
+        if (visitedExpected != null)
+        {
+            if (visitedExpected.Contains(expected))
+            {
+                return AssertionResult.Passed;
+            }
+
+            visitedExpected.Add(expected);
+        }
 
         // Handle enumerables
         if (actual is IEnumerable actualEnumerable && expected is IEnumerable expectedEnumerable
@@ -157,7 +179,7 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
                     return AssertionResult.Failed($"{itemPath} did not match{Environment.NewLine}Expected: null{Environment.NewLine}Received: {FormatValue(actualList[i])}");
                 }
 
-                var result = CompareObjects(actualList[i], expectedList[i], itemPath, visited);
+                var result = CompareObjects(actualList[i], expectedList[i], itemPath, visitedActual, visitedExpected);
                 if (!result.IsPassed)
                 {
                     return result;
@@ -217,7 +239,7 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
                 actualValue = ReflectionHelper.GetMemberValue(actual, actualMember);
             }
 
-            var result = CompareObjects(actualValue, expectedValue, memberPath, visited);
+            var result = CompareObjects(actualValue, expectedValue, memberPath, visitedActual, visitedExpected);
             if (!result.IsPassed)
             {
                 return result;
