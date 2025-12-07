@@ -10,15 +10,19 @@ namespace TUnit.Core.Discovery;
 /// <remarks>
 /// Internal collections are stored privately and exposed as read-only views
 /// to prevent callers from corrupting internal state.
+/// Uses Lazy&lt;T&gt; for thread-safe lazy initialization of read-only views.
 /// </remarks>
 public sealed class ObjectGraph : IObjectGraph
 {
     private readonly ConcurrentDictionary<int, HashSet<object>> _objectsByDepth;
     private readonly HashSet<object> _allObjects;
 
-    // Cached read-only views (created lazily on first access)
-    private IReadOnlyDictionary<int, IReadOnlyCollection<object>>? _readOnlyObjectsByDepth;
-    private IReadOnlyCollection<object>? _readOnlyAllObjects;
+    // Thread-safe lazy initialization of read-only views
+    private readonly Lazy<IReadOnlyDictionary<int, IReadOnlyCollection<object>>> _lazyReadOnlyObjectsByDepth;
+    private readonly Lazy<IReadOnlyCollection<object>> _lazyReadOnlyAllObjects;
+
+    // Cached sorted depths (computed once in constructor)
+    private readonly int[] _sortedDepthsDescending;
 
     /// <summary>
     /// Creates a new object graph from the discovered objects.
@@ -29,33 +33,28 @@ public sealed class ObjectGraph : IObjectGraph
     {
         _objectsByDepth = objectsByDepth;
         _allObjects = allObjects;
+
         // Use IsEmpty for thread-safe check before accessing Keys
         MaxDepth = objectsByDepth.IsEmpty ? -1 : objectsByDepth.Keys.Max();
+
+        // Cache sorted depths (computed once, reused on each call to GetDepthsDescending)
+        _sortedDepthsDescending = objectsByDepth.Keys.OrderByDescending(d => d).ToArray();
+
+        // Use Lazy<T> with ExecutionAndPublication for thread-safe single initialization
+        _lazyReadOnlyObjectsByDepth = new Lazy<IReadOnlyDictionary<int, IReadOnlyCollection<object>>>(
+            CreateReadOnlyObjectsByDepth,
+            LazyThreadSafetyMode.ExecutionAndPublication);
+
+        _lazyReadOnlyAllObjects = new Lazy<IReadOnlyCollection<object>>(
+            () => _allObjects.ToArray(),
+            LazyThreadSafetyMode.ExecutionAndPublication);
     }
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<int, IReadOnlyCollection<object>> ObjectsByDepth
-    {
-        get
-        {
-            // Create read-only view lazily and cache it
-            // Note: This creates a snapshot - subsequent modifications to internal collections won't be reflected
-            return _readOnlyObjectsByDepth ??= new ReadOnlyDictionary<int, IReadOnlyCollection<object>>(
-                _objectsByDepth.ToDictionary(
-                    kvp => kvp.Key,
-                    kvp => (IReadOnlyCollection<object>)kvp.Value.ToArray()));
-        }
-    }
+    public IReadOnlyDictionary<int, IReadOnlyCollection<object>> ObjectsByDepth => _lazyReadOnlyObjectsByDepth.Value;
 
     /// <inheritdoc />
-    public IReadOnlyCollection<object> AllObjects
-    {
-        get
-        {
-            // Create read-only view lazily and cache it
-            return _readOnlyAllObjects ??= _allObjects.ToArray();
-        }
-    }
+    public IReadOnlyCollection<object> AllObjects => _lazyReadOnlyAllObjects.Value;
 
     /// <inheritdoc />
     public int MaxDepth { get; }
@@ -63,12 +62,41 @@ public sealed class ObjectGraph : IObjectGraph
     /// <inheritdoc />
     public IEnumerable<object> GetObjectsAtDepth(int depth)
     {
-        return _objectsByDepth.TryGetValue(depth, out var objects) ? objects : [];
+        if (!_objectsByDepth.TryGetValue(depth, out var objects))
+        {
+            return [];
+        }
+
+        // Lock and copy to prevent concurrent modification issues
+        lock (objects)
+        {
+            return objects.ToArray();
+        }
     }
 
     /// <inheritdoc />
     public IEnumerable<int> GetDepthsDescending()
     {
-        return _objectsByDepth.Keys.OrderByDescending(d => d);
+        // Return cached sorted depths (computed once in constructor)
+        return _sortedDepthsDescending;
+    }
+
+    /// <summary>
+    /// Creates a thread-safe read-only snapshot of objects by depth.
+    /// </summary>
+    private IReadOnlyDictionary<int, IReadOnlyCollection<object>> CreateReadOnlyObjectsByDepth()
+    {
+        var dict = new Dictionary<int, IReadOnlyCollection<object>>(_objectsByDepth.Count);
+
+        foreach (var kvp in _objectsByDepth)
+        {
+            // Lock each HashSet while copying to ensure consistency
+            lock (kvp.Value)
+            {
+                dict[kvp.Key] = kvp.Value.ToArray();
+            }
+        }
+
+        return new ReadOnlyDictionary<int, IReadOnlyCollection<object>>(dict);
     }
 }

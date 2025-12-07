@@ -40,6 +40,9 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
     // Cache for GetProperties() results per type - eliminates repeated reflection calls
     private static readonly ConcurrentDictionary<Type, PropertyInfo[]> PropertyCache = new();
 
+    // Flag to coordinate cache cleanup (prevents multiple threads cleaning simultaneously)
+    private static int _cleanupInProgress;
+
     // Reference equality comparer for object tracking (ignores Equals overrides)
     private static readonly Helpers.ReferenceEqualityComparer ReferenceComparer = new();
 
@@ -131,7 +134,7 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
 
         foreach (var classArgument in testDetails.TestClassArguments)
         {
-            if (classArgument != null && GetOrAddHashSet(visitedObjects, 0).Add(classArgument))
+            if (classArgument != null && TryAddToHashSet(visitedObjects, 0, classArgument))
             {
                 DiscoverNestedObjectsForTracking(classArgument, visitedObjects, 1);
             }
@@ -139,7 +142,7 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
 
         foreach (var methodArgument in testDetails.TestMethodArguments)
         {
-            if (methodArgument != null && GetOrAddHashSet(visitedObjects, 0).Add(methodArgument))
+            if (methodArgument != null && TryAddToHashSet(visitedObjects, 0, methodArgument))
             {
                 DiscoverNestedObjectsForTracking(methodArgument, visitedObjects, 1);
             }
@@ -147,7 +150,7 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
 
         foreach (var property in testDetails.TestClassInjectedPropertyArguments.Values)
         {
-            if (property != null && GetOrAddHashSet(visitedObjects, 0).Add(property))
+            if (property != null && TryAddToHashSet(visitedObjects, 0, property))
             {
                 DiscoverNestedObjectsForTracking(property, visitedObjects, 1);
             }
@@ -171,7 +174,9 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
         // Guard against excessive recursion to prevent stack overflow
         if (currentDepth > MaxRecursionDepth)
         {
+#if DEBUG
             Debug.WriteLine($"[ObjectGraphDiscoverer] Max recursion depth ({MaxRecursionDepth}) reached for type '{obj.GetType().Name}'");
+#endif
             return;
         }
 
@@ -239,7 +244,9 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
         // Guard against excessive recursion to prevent stack overflow
         if (currentDepth > MaxRecursionDepth)
         {
+#if DEBUG
             Debug.WriteLine($"[ObjectGraphDiscoverer] Max recursion depth ({MaxRecursionDepth}) reached for type '{obj.GetType().Name}'");
+#endif
             return;
         }
 
@@ -256,7 +263,7 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
                     continue;
                 }
 
-                if (!GetOrAddHashSet(visitedObjects, currentDepth).Add(value))
+                if (!TryAddToHashSet(visitedObjects, currentDepth, value))
                 {
                     continue;
                 }
@@ -280,7 +287,7 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
                     continue;
                 }
 
-                if (!GetOrAddHashSet(visitedObjects, currentDepth).Add(value))
+                if (!TryAddToHashSet(visitedObjects, currentDepth, value))
                 {
                     continue;
                 }
@@ -311,7 +318,9 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
         // Guard against excessive recursion to prevent stack overflow
         if (currentDepth > MaxRecursionDepth)
         {
+#if DEBUG
             Debug.WriteLine($"[ObjectGraphDiscoverer] Max recursion depth ({MaxRecursionDepth}) reached for type '{obj.GetType().Name}'");
+#endif
             return;
         }
 
@@ -353,8 +362,12 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
             }
             catch (Exception ex)
             {
+#if DEBUG
                 // Log instead of silently swallowing - helps with debugging
                 Debug.WriteLine($"[ObjectGraphDiscoverer] Failed to access property '{property.Name}' on type '{type.Name}': {ex.Message}");
+#endif
+                // Continue discovery despite property access failures
+                _ = ex;
             }
         }
     }
@@ -373,7 +386,9 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
         // Guard against excessive recursion to prevent stack overflow
         if (currentDepth > MaxRecursionDepth)
         {
+#if DEBUG
             Debug.WriteLine($"[ObjectGraphDiscoverer] Max recursion depth ({MaxRecursionDepth}) reached for type '{obj.GetType().Name}'");
+#endif
             return;
         }
 
@@ -396,14 +411,22 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
                     continue;
                 }
 
-                if (value is IAsyncInitializer && GetOrAddHashSet(visitedObjects, currentDepth).Add(value))
+                if (value is IAsyncInitializer && TryAddToHashSet(visitedObjects, currentDepth, value))
                 {
                     DiscoverNestedObjectsForTracking(value, visitedObjects, currentDepth + 1);
                 }
             }
+            catch (OperationCanceledException)
+            {
+                throw; // Propagate cancellation
+            }
             catch (Exception ex)
             {
+#if DEBUG
                 Debug.WriteLine($"[ObjectGraphDiscoverer] Failed to access property '{property.Name}' on type '{type.Name}': {ex.Message}");
+#endif
+                // Continue discovery despite property access failures
+                _ = ex;
             }
         }
     }
@@ -416,22 +439,70 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
     private static PropertyInfo[] GetCachedProperties(Type type)
     {
         // Periodic cleanup if cache grows too large to prevent memory leaks
-        if (PropertyCache.Count > MaxCacheSize)
+        // Use Interlocked to ensure only one thread performs cleanup at a time
+        if (PropertyCache.Count > MaxCacheSize &&
+            Interlocked.CompareExchange(ref _cleanupInProgress, 1, 0) == 0)
         {
-            // Clear half the cache (simple approach - non-LRU for performance)
-            var keysToRemove = PropertyCache.Keys.Take(MaxCacheSize / 2).ToList();
-            foreach (var key in keysToRemove)
+            try
             {
-                PropertyCache.TryRemove(key, out _);
-            }
+                // Double-check after acquiring cleanup flag
+                if (PropertyCache.Count > MaxCacheSize)
+                {
+                    var keysToRemove = new List<Type>(MaxCacheSize / 2);
+                    var count = 0;
+                    foreach (var key in PropertyCache.Keys)
+                    {
+                        if (count++ >= MaxCacheSize / 2)
+                        {
+                            break;
+                        }
 
-            Debug.WriteLine($"[ObjectGraphDiscoverer] PropertyCache exceeded {MaxCacheSize} entries, cleared {keysToRemove.Count} entries");
+                        keysToRemove.Add(key);
+                    }
+
+                    foreach (var key in keysToRemove)
+                    {
+                        PropertyCache.TryRemove(key, out _);
+                    }
+#if DEBUG
+                    Debug.WriteLine($"[ObjectGraphDiscoverer] PropertyCache exceeded {MaxCacheSize} entries, cleared {keysToRemove.Count} entries");
+#endif
+                }
+            }
+            finally
+            {
+                Interlocked.Exchange(ref _cleanupInProgress, 0);
+            }
         }
 
-        return PropertyCache.GetOrAdd(type, t =>
-            t.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-             .Where(p => p.CanRead && p.GetIndexParameters().Length == 0)
-             .ToArray());
+        return PropertyCache.GetOrAdd(type, static t =>
+        {
+            // Use explicit loops instead of LINQ to avoid allocations in hot path
+            var allProps = t.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+            // First pass: count eligible properties
+            var count = 0;
+            foreach (var p in allProps)
+            {
+                if (p.CanRead && p.GetIndexParameters().Length == 0)
+                {
+                    count++;
+                }
+            }
+
+            // Second pass: fill result array
+            var result = new PropertyInfo[count];
+            var i = 0;
+            foreach (var p in allProps)
+            {
+                if (p.CanRead && p.GetIndexParameters().Length == 0)
+                {
+                    result[i++] = p;
+                }
+            }
+
+            return result;
+        });
     }
 
     /// <summary>
@@ -454,17 +525,26 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
 
     /// <summary>
     /// Adds an object to the specified depth level.
+    /// Thread-safe: uses lock to protect HashSet modifications.
     /// </summary>
     private static void AddToDepth(ConcurrentDictionary<int, HashSet<object>> objectsByDepth, int depth, object obj)
     {
-        objectsByDepth.GetOrAdd(depth, _ => []).Add(obj);
+        var hashSet = objectsByDepth.GetOrAdd(depth, _ => new HashSet<object>(ReferenceComparer));
+        lock (hashSet)
+        {
+            hashSet.Add(obj);
+        }
     }
 
     /// <summary>
-    /// Gets or creates a HashSet at the specified depth (thread-safe).
+    /// Thread-safe add to HashSet at specified depth. Returns true if added (not duplicate).
     /// </summary>
-    private static HashSet<object> GetOrAddHashSet(ConcurrentDictionary<int, HashSet<object>> dict, int depth)
+    private static bool TryAddToHashSet(ConcurrentDictionary<int, HashSet<object>> dict, int depth, object obj)
     {
-        return dict.GetOrAdd(depth, _ => []);
+        var hashSet = dict.GetOrAdd(depth, _ => new HashSet<object>(ReferenceComparer));
+        lock (hashSet)
+        {
+            return hashSet.Add(obj);
+        }
     }
 }
