@@ -525,30 +525,14 @@ internal sealed class PropertyInjector
 
             if (value != null)
             {
-                // Handle property injection and initialization appropriately during discovery
-                var hasInjectableProperties = PropertyInjectionCache.HasInjectableProperties(value.GetType());
-                var isDiscoveryInitializer = value is IAsyncDiscoveryInitializer;
-
-                if (isDiscoveryInitializer)
-                {
-                    // Full initialization during discovery (property injection + IAsyncInitializer.InitializeAsync)
-                    // for objects that explicitly opt-in via IAsyncDiscoveryInitializer
-                    await _objectLifecycleService.Value.EnsureInitializedAsync(
-                        value,
-                        context.ObjectBag,
-                        context.MethodMetadata,
-                        context.Events);
-                }
-                else if (hasInjectableProperties)
-                {
-                    // Property injection only, IAsyncInitializer.InitializeAsync deferred to execution
-                    // Regular IAsyncInitializer objects are initialized during test execution by ObjectLifecycleService
-                    await _objectLifecycleService.Value.InjectPropertiesAsync(
-                        value,
-                        context.ObjectBag,
-                        context.MethodMetadata,
-                        context.Events);
-                }
+                // EnsureInitializedAsync handles property injection and initialization.
+                // ObjectInitializer is phase-aware: during Discovery phase, only IAsyncDiscoveryInitializer
+                // objects are initialized; regular IAsyncInitializer objects are deferred to Execution phase.
+                await _objectLifecycleService.Value.EnsureInitializedAsync(
+                    value,
+                    context.ObjectBag,
+                    context.MethodMetadata,
+                    context.Events);
 
                 return value;
             }

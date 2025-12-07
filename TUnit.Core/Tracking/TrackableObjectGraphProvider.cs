@@ -1,5 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using TUnit.Core.Interfaces;
 using TUnit.Core.PropertyInjection;
 using TUnit.Core.StaticProperties;
 
@@ -64,6 +66,7 @@ internal class TrackableObjectGraphProvider
         }
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Property discovery handles both AOT and reflection modes")]
     private void AddNestedTrackableObjects(object obj, ConcurrentDictionary<int, HashSet<object>> visitedObjects, int currentDepth)
     {
         var plan = PropertyInjectionCache.GetOrCreatePlan(obj.GetType());
@@ -81,11 +84,6 @@ internal class TrackableObjectGraphProvider
 
                 // Check if already visited before yielding to prevent duplicates
                 if (!visitedObjects.GetOrAdd(currentDepth, []).Add(value))
-                {
-                    continue;
-                }
-
-                if (!PropertyInjectionCache.HasInjectableProperties(value.GetType()))
                 {
                     continue;
                 }
@@ -117,12 +115,62 @@ internal class TrackableObjectGraphProvider
                     continue;
                 }
 
-                if (!PropertyInjectionCache.HasInjectableProperties(value.GetType()))
+                AddNestedTrackableObjects(value, visitedObjects, currentDepth + 1);
+            }
+        }
+
+        // Also discover nested IAsyncInitializer objects from ALL properties
+        // This handles cases where nested objects don't have data source attributes
+        // but still implement IAsyncInitializer and need to be tracked for disposal
+        AddNestedInitializerObjects(obj, visitedObjects, currentDepth);
+    }
+
+    /// <summary>
+    /// Discovers nested objects that implement IAsyncInitializer from all readable properties.
+    /// This is separate from injectable property discovery to handle objects without data source attributes.
+    /// This is a best-effort fallback - in AOT scenarios, properties with data source attributes are discovered via source generation.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection fallback for nested initializers. In AOT, source-gen handles primary discovery.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection fallback for nested initializers. In AOT, source-gen handles primary discovery.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Reflection fallback for nested initializers. In AOT, source-gen handles primary discovery.")]
+    private void AddNestedInitializerObjects(object obj, ConcurrentDictionary<int, HashSet<object>> visitedObjects, int currentDepth)
+    {
+        var type = obj.GetType();
+
+        // Skip primitive types, strings, and system types
+        if (type.IsPrimitive || type == typeof(string) || type.Namespace?.StartsWith("System") == true)
+        {
+            return;
+        }
+
+        // Get all readable instance properties
+        var properties = type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+        foreach (var property in properties)
+        {
+            if (!property.CanRead || property.GetIndexParameters().Length > 0)
+            {
+                continue;
+            }
+
+            try
+            {
+                var value = property.GetValue(obj);
+                if (value == null)
                 {
                     continue;
                 }
 
-                AddNestedTrackableObjects(value, visitedObjects, currentDepth + 1);
+                // Only discover if it implements IAsyncInitializer and hasn't been visited
+                if (value is IAsyncInitializer && visitedObjects.GetOrAdd(currentDepth, []).Add(value))
+                {
+                    // Recursively discover nested objects
+                    AddNestedTrackableObjects(value, visitedObjects, currentDepth + 1);
+                }
+            }
+            catch
+            {
+                // Ignore properties that throw exceptions when accessed
             }
         }
     }

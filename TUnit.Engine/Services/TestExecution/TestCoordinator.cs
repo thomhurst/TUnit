@@ -126,9 +126,9 @@ internal sealed class TestCoordinator : ITestCoordinator
 
                         try
                         {
-                            await _testInitializer.InitializeTest(test, ct).ConfigureAwait(false);
+                            _testInitializer.PrepareTest(test, ct);
                             test.Context.RestoreExecutionContext();
-                            await _testExecutor.ExecuteAsync(test, ct).ConfigureAwait(false);
+                            await _testExecutor.ExecuteAsync(test, _testInitializer, ct).ConfigureAwait(false);
                         }
                         finally
                         {

@@ -1,6 +1,8 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using TUnit.Core;
+using TUnit.Core.Interfaces;
 using TUnit.Core.PropertyInjection;
 
 namespace TUnit.Engine.Services;
@@ -81,7 +83,9 @@ internal sealed class ObjectGraphDiscoveryService
     }
 
     /// <summary>
-    /// Recursively discovers nested objects that have injectable properties.
+    /// Recursively discovers nested objects that have injectable properties OR implement IAsyncInitializer.
+    /// This ensures that all nested objects that need initialization are discovered,
+    /// even if they don't have explicit data source attributes.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Property discovery handles both AOT and reflection modes")]
     private void DiscoverNestedObjects(
@@ -93,56 +97,112 @@ internal sealed class ObjectGraphDiscoveryService
     {
         var plan = PropertyInjectionCache.GetOrCreatePlan(obj.GetType());
 
-        if (!plan.HasProperties)
+        // First, discover objects from injectable properties (data source attributes)
+        if (plan.HasProperties)
         {
-            return;
-        }
-
-        // Use source-generated properties if available, otherwise fall back to reflection
-        if (plan.SourceGeneratedProperties.Length > 0)
-        {
-            foreach (var metadata in plan.SourceGeneratedProperties)
+            // Use source-generated properties if available, otherwise fall back to reflection
+            if (plan.SourceGeneratedProperties.Length > 0)
             {
-                var property = metadata.ContainingType.GetProperty(metadata.PropertyName);
-                if (property == null || !property.CanRead)
+                foreach (var metadata in plan.SourceGeneratedProperties)
                 {
-                    continue;
+                    var property = metadata.ContainingType.GetProperty(metadata.PropertyName);
+                    if (property == null || !property.CanRead)
+                    {
+                        continue;
+                    }
+
+                    var value = property.GetValue(obj);
+                    if (value == null || !visitedObjects.Add(value))
+                    {
+                        continue;
+                    }
+
+                    AddToDepth(objectsByDepth, currentDepth, value);
+                    allObjects.Add(value);
+
+                    // Recursively discover nested objects
+                    DiscoverNestedObjects(value, objectsByDepth, visitedObjects, allObjects, currentDepth + 1);
                 }
-
-                var value = property.GetValue(obj);
-                if (value == null || !visitedObjects.Add(value))
+            }
+            else if (plan.ReflectionProperties.Length > 0)
+            {
+                foreach (var (property, _) in plan.ReflectionProperties)
                 {
-                    continue;
-                }
+                    var value = property.GetValue(obj);
+                    if (value == null || !visitedObjects.Add(value))
+                    {
+                        continue;
+                    }
 
-                AddToDepth(objectsByDepth, currentDepth, value);
-                allObjects.Add(value);
+                    AddToDepth(objectsByDepth, currentDepth, value);
+                    allObjects.Add(value);
 
-                // Recursively discover if this value has injectable properties
-                if (PropertyInjectionCache.HasInjectableProperties(value.GetType()))
-                {
+                    // Recursively discover nested objects
                     DiscoverNestedObjects(value, objectsByDepth, visitedObjects, allObjects, currentDepth + 1);
                 }
             }
         }
-        else if (plan.ReflectionProperties.Length > 0)
+
+        // Also discover nested IAsyncInitializer objects from ALL properties
+        // This handles cases where nested objects don't have data source attributes
+        // but still implement IAsyncInitializer and need to be initialized
+        DiscoverNestedInitializerObjects(obj, objectsByDepth, visitedObjects, allObjects, currentDepth);
+    }
+
+    /// <summary>
+    /// Discovers nested objects that implement IAsyncInitializer from all readable properties.
+    /// This is separate from injectable property discovery to handle objects without data source attributes.
+    /// This is a best-effort fallback - in AOT scenarios, properties with data source attributes are discovered via source generation.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection fallback for nested initializers. In AOT, source-gen handles primary discovery.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection fallback for nested initializers. In AOT, source-gen handles primary discovery.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Reflection fallback for nested initializers. In AOT, source-gen handles primary discovery.")]
+    private void DiscoverNestedInitializerObjects(
+        object obj,
+        ConcurrentDictionary<int, HashSet<object>> objectsByDepth,
+        HashSet<object> visitedObjects,
+        HashSet<object> allObjects,
+        int currentDepth)
+    {
+        var type = obj.GetType();
+
+        // Skip primitive types, strings, and system types
+        if (type.IsPrimitive || type == typeof(string) || type.Namespace?.StartsWith("System") == true)
         {
-            foreach (var (property, _) in plan.ReflectionProperties)
+            return;
+        }
+
+        // Get all readable instance properties
+        var properties = type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+        foreach (var property in properties)
+        {
+            if (!property.CanRead || property.GetIndexParameters().Length > 0)
+            {
+                continue;
+            }
+
+            try
             {
                 var value = property.GetValue(obj);
-                if (value == null || !visitedObjects.Add(value))
+                if (value == null)
                 {
                     continue;
                 }
 
-                AddToDepth(objectsByDepth, currentDepth, value);
-                allObjects.Add(value);
-
-                // Recursively discover if this value has injectable properties
-                if (PropertyInjectionCache.HasInjectableProperties(value.GetType()))
+                // Only discover if it implements IAsyncInitializer and hasn't been visited
+                if (value is IAsyncInitializer && visitedObjects.Add(value))
                 {
+                    AddToDepth(objectsByDepth, currentDepth, value);
+                    allObjects.Add(value);
+
+                    // Recursively discover nested objects
                     DiscoverNestedObjects(value, objectsByDepth, visitedObjects, allObjects, currentDepth + 1);
                 }
+            }
+            catch
+            {
+                // Ignore properties that throw exceptions when accessed
             }
         }
     }

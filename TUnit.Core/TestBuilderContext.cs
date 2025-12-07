@@ -49,7 +49,8 @@ public record TestBuilderContext
     {
         Events.OnInitialize += async (sender, args) =>
         {
-            await ObjectInitializer.InitializeAsync(obj);
+            // Discovery: only IAsyncDiscoveryInitializer
+            await ObjectInitializer.InitializeForDiscoveryAsync(obj);
         };
     }
 

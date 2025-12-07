@@ -112,10 +112,11 @@ internal sealed class ObjectLifecycleService : IObjectRegistry
 
     /// <summary>
     /// Prepares a test for execution.
-    /// Sets already-resolved cached property values on the current instance and initializes tracked objects.
+    /// Sets already-resolved cached property values on the current instance.
     /// This is needed because retries create new instances that don't have properties set yet.
+    /// Does NOT call IAsyncInitializer - that is deferred until after BeforeClass hooks via InitializeTestObjectsAsync.
     /// </summary>
-    public async Task PrepareTestAsync(TestContext testContext, CancellationToken cancellationToken)
+    public void PrepareTest(TestContext testContext)
     {
         var testClassInstance = testContext.Metadata.TestDetails.ClassInstance;
 
@@ -123,7 +124,14 @@ internal sealed class ObjectLifecycleService : IObjectRegistry
         // Properties were resolved and cached during RegisterTestAsync, so shared objects are already created
         // We just need to set them on the actual test instance (retries create new instances)
         SetCachedPropertiesOnInstance(testClassInstance, testContext);
+    }
 
+    /// <summary>
+    /// Initializes test objects (IAsyncInitializer) after BeforeClass hooks have run.
+    /// This ensures resources like Docker containers are not started until needed.
+    /// </summary>
+    public async Task InitializeTestObjectsAsync(TestContext testContext, CancellationToken cancellationToken)
+    {
         // Initialize all tracked objects (IAsyncInitializer) depth-first
         await InitializeTrackedObjectsAsync(testContext, cancellationToken);
     }
@@ -175,6 +183,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry
 
     /// <summary>
     /// Initializes all tracked objects depth-first (deepest objects first).
+    /// This is called during test execution (after BeforeClass hooks) to initialize IAsyncInitializer objects.
     /// </summary>
     private async Task InitializeTrackedObjectsAsync(TestContext testContext, CancellationToken cancellationToken)
     {
@@ -184,23 +193,41 @@ internal sealed class ObjectLifecycleService : IObjectRegistry
         {
             var objectsAtLevel = testContext.TrackedObjects[level];
 
-            // Initialize all objects at this depth in parallel
-            await Task.WhenAll(objectsAtLevel.Select(obj =>
-                EnsureInitializedAsync(
-                    obj,
-                    testContext.StateBag.Items,
-                    testContext.Metadata.TestDetails.MethodMetadata,
-                    testContext.InternalEvents,
-                    cancellationToken).AsTask()));
+            // Initialize each tracked object and its nested objects
+            foreach (var obj in objectsAtLevel)
+            {
+                // First initialize nested objects depth-first
+                await InitializeNestedObjectsForExecutionAsync(obj, cancellationToken);
+
+                // Then initialize the object itself
+                await ObjectInitializer.InitializeAsync(obj, cancellationToken);
+            }
         }
 
-        // Finally initialize the test class itself
-        await EnsureInitializedAsync(
-            testContext.Metadata.TestDetails.ClassInstance,
-            testContext.StateBag.Items,
-            testContext.Metadata.TestDetails.MethodMetadata,
-            testContext.InternalEvents,
-            cancellationToken);
+        // Finally initialize the test class and its nested objects
+        var classInstance = testContext.Metadata.TestDetails.ClassInstance;
+        await InitializeNestedObjectsForExecutionAsync(classInstance, cancellationToken);
+        await ObjectInitializer.InitializeAsync(classInstance, cancellationToken);
+    }
+
+    /// <summary>
+    /// Initializes nested objects during execution phase - all IAsyncInitializer objects.
+    /// </summary>
+    private async Task InitializeNestedObjectsForExecutionAsync(object rootObject, CancellationToken cancellationToken)
+    {
+        var graph = _objectGraphDiscoveryService.DiscoverNestedObjectGraph(rootObject);
+
+        // Initialize from deepest to shallowest (skip depth 0 which is the root itself)
+        foreach (var depth in graph.GetDepthsDescending())
+        {
+            if (depth == 0) continue; // Root handled separately
+
+            var objectsAtDepth = graph.GetObjectsAtDepth(depth);
+
+            // Initialize all IAsyncInitializer objects at this depth
+            await Task.WhenAll(objectsAtDepth
+                .Select(obj => ObjectInitializer.InitializeAsync(obj, cancellationToken).AsTask()));
+        }
     }
 
     #endregion
@@ -234,6 +261,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry
     /// <summary>
     /// Ensures an object is fully initialized (property injection + IAsyncInitializer).
     /// Thread-safe with fast-path for already-initialized objects.
+    /// Called during test execution to initialize all IAsyncInitializer objects.
     /// </summary>
     public async ValueTask<T> EnsureInitializedAsync<T>(
         T obj,
@@ -247,13 +275,17 @@ internal sealed class ObjectLifecycleService : IObjectRegistry
             throw new ArgumentNullException(nameof(obj));
         }
 
-        // Fast path: already initialized
+        // Fast path: already processed by this service
         if (_initializationTasks.TryGetValue(obj, out var existingTcs) && existingTcs.Task.IsCompleted)
         {
             if (existingTcs.Task.IsFaulted)
             {
                 await existingTcs.Task.ConfigureAwait(false);
             }
+
+            // EnsureInitializedAsync is only called during discovery (from PropertyInjector).
+            // If the object is shared and has already been processed, just return it.
+            // Regular IAsyncInitializer objects will be initialized during execution via InitializeTrackedObjectsAsync.
             return obj;
         }
 
@@ -284,7 +316,8 @@ internal sealed class ObjectLifecycleService : IObjectRegistry
     }
 
     /// <summary>
-    /// Core initialization: property injection + nested objects + IAsyncInitializer.
+    /// Core initialization: property injection + IAsyncDiscoveryInitializer only.
+    /// Regular IAsyncInitializer objects are NOT initialized here - they are deferred to execution phase.
     /// </summary>
     private async Task InitializeObjectCoreAsync(
         object obj,
@@ -301,14 +334,12 @@ internal sealed class ObjectLifecycleService : IObjectRegistry
             // Step 1: Inject properties
             await PropertyInjector.InjectPropertiesAsync(obj, objectBag, methodMetadata, events);
 
-            // Step 2: Initialize nested objects depth-first
-            await InitializeNestedObjectsAsync(obj, cancellationToken);
+            // Step 2: Initialize nested objects depth-first (discovery-only)
+            await InitializeNestedObjectsForDiscoveryAsync(obj, cancellationToken);
 
-            // Step 3: Call IAsyncInitializer on the object itself
-            if (obj is IAsyncInitializer asyncInitializer)
-            {
-                await ObjectInitializer.InitializeAsync(asyncInitializer, cancellationToken);
-            }
+            // Step 3: Call IAsyncDiscoveryInitializer only (not regular IAsyncInitializer)
+            // Regular IAsyncInitializer objects are deferred to execution phase via InitializeTestObjectsAsync
+            await ObjectInitializer.InitializeForDiscoveryAsync(obj, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -318,9 +349,9 @@ internal sealed class ObjectLifecycleService : IObjectRegistry
     }
 
     /// <summary>
-    /// Initializes nested objects depth-first using the centralized ObjectGraphDiscoveryService.
+    /// Initializes nested objects during discovery phase - only IAsyncDiscoveryInitializer objects.
     /// </summary>
-    private async Task InitializeNestedObjectsAsync(object rootObject, CancellationToken cancellationToken)
+    private async Task InitializeNestedObjectsForDiscoveryAsync(object rootObject, CancellationToken cancellationToken)
     {
         var graph = _objectGraphDiscoveryService.DiscoverNestedObjectGraph(rootObject);
 
@@ -331,9 +362,9 @@ internal sealed class ObjectLifecycleService : IObjectRegistry
 
             var objectsAtDepth = graph.GetObjectsAtDepth(depth);
 
+            // Only initialize IAsyncDiscoveryInitializer objects during discovery
             await Task.WhenAll(objectsAtDepth
-                .Where(obj => obj is IAsyncInitializer)
-                .Select(obj => ObjectInitializer.InitializeAsync(obj, cancellationToken).AsTask()));
+                .Select(obj => ObjectInitializer.InitializeForDiscoveryAsync(obj, cancellationToken).AsTask()));
         }
     }
 

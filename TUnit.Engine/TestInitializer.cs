@@ -20,12 +20,19 @@ internal class TestInitializer
         _objectLifecycleService = objectLifecycleService;
     }
 
-    public async ValueTask InitializeTest(AbstractExecutableTest test, CancellationToken cancellationToken)
+    public void PrepareTest(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         // Register event receivers
         _eventReceiverOrchestrator.RegisterReceivers(test.Context, cancellationToken);
 
-        // Prepare test: inject properties, track objects, initialize (IAsyncInitializer)
-        await _objectLifecycleService.PrepareTestAsync(test.Context, cancellationToken);
+        // Prepare test: set cached property values on the instance
+        // Does NOT call IAsyncInitializer - that is deferred until after BeforeClass hooks
+        _objectLifecycleService.PrepareTest(test.Context);
+    }
+
+    public async ValueTask InitializeTestObjectsAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    {
+        // Initialize test objects (IAsyncInitializer) - called after BeforeClass hooks
+        await _objectLifecycleService.InitializeTestObjectsAsync(test.Context, cancellationToken);
     }
 }
