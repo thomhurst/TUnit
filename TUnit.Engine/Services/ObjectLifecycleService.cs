@@ -195,6 +195,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     /// <summary>
     /// Initializes all tracked objects depth-first (deepest objects first).
     /// This is called during test execution (after BeforeClass hooks) to initialize IAsyncInitializer objects.
+    /// Objects at the same level are initialized in parallel.
     /// </summary>
     private async Task InitializeTrackedObjectsAsync(TestContext testContext, CancellationToken cancellationToken)
     {
@@ -223,14 +224,16 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
                     objectsAtLevel.CopyTo(objectsCopy);
                 }
 
-                // Initialize each tracked object and its nested objects
+                // Initialize all objects at this level in parallel
+                var tasks = new List<Task>(objectsCopy.Length);
                 foreach (var obj in objectsCopy)
                 {
-                    // First initialize nested objects depth-first
-                    await InitializeNestedObjectsForExecutionAsync(obj, cancellationToken);
+                    tasks.Add(InitializeObjectWithNestedAsync(obj, cancellationToken));
+                }
 
-                    // Then initialize the object itself
-                    await ObjectInitializer.InitializeAsync(obj, cancellationToken);
+                if (tasks.Count > 0)
+                {
+                    await Task.WhenAll(tasks);
                 }
             }
         }
@@ -239,6 +242,18 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
         var classInstance = testContext.Metadata.TestDetails.ClassInstance;
         await InitializeNestedObjectsForExecutionAsync(classInstance, cancellationToken);
         await ObjectInitializer.InitializeAsync(classInstance, cancellationToken);
+    }
+
+    /// <summary>
+    /// Initializes an object and its nested objects.
+    /// </summary>
+    private async Task InitializeObjectWithNestedAsync(object obj, CancellationToken cancellationToken)
+    {
+        // First initialize nested objects depth-first
+        await InitializeNestedObjectsForExecutionAsync(obj, cancellationToken);
+
+        // Then initialize the object itself
+        await ObjectInitializer.InitializeAsync(obj, cancellationToken);
     }
 
     /// <summary>
