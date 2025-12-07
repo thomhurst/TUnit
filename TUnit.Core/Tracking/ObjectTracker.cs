@@ -9,29 +9,51 @@ namespace TUnit.Core.Tracking;
 /// Objects are disposed when their reference count reaches zero, regardless of sharing type.
 /// Uses ReferenceEqualityComparer to track objects by identity, not value equality.
 /// </summary>
+/// <remarks>
+/// The static <c>s_trackedObjects</c> dictionary is shared across all tests.
+/// Call <see cref="ClearStaticTracking"/> at the end of a test session to release memory.
+/// </remarks>
 internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphProvider, Disposer disposer)
 {
     // Use ReferenceEqualityComparer to prevent objects with custom Equals from sharing state
-    private static readonly ConcurrentDictionary<object, Counter> _trackedObjects =
+    private static readonly ConcurrentDictionary<object, Counter> s_trackedObjects =
         new(Helpers.ReferenceEqualityComparer.Instance);
 
-    public void TrackObjects(TestContext testContext)
+    /// <summary>
+    /// Clears all static tracking state. Call at the end of a test session to release memory.
+    /// </summary>
+    public static void ClearStaticTracking()
     {
-        // Build alreadyTracked set without LINQ to reduce allocations
-        var alreadyTracked = new HashSet<object>(Helpers.ReferenceEqualityComparer.Instance);
-        foreach (var kvp in testContext.TrackedObjects)
+        s_trackedObjects.Clear();
+    }
+
+    /// <summary>
+    /// Flattens a ConcurrentDictionary of depth-keyed HashSets into a single HashSet.
+    /// Thread-safe: locks each HashSet while copying.
+    /// </summary>
+    private static HashSet<object> FlattenTrackedObjects(ConcurrentDictionary<int, HashSet<object>> trackedObjects)
+    {
+        var result = new HashSet<object>(Helpers.ReferenceEqualityComparer.Instance);
+        foreach (var kvp in trackedObjects)
         {
-            // Lock while iterating to prevent concurrent modification
             lock (kvp.Value)
             {
                 foreach (var obj in kvp.Value)
                 {
-                    alreadyTracked.Add(obj);
+                    result.Add(obj);
                 }
             }
         }
 
-        // Get new trackable objects without LINQ
+        return result;
+    }
+
+    public void TrackObjects(TestContext testContext)
+    {
+        // Get already tracked objects (DRY: use helper method)
+        var alreadyTracked = FlattenTrackedObjects(testContext.TrackedObjects);
+
+        // Get new trackable objects
         var newTrackableObjects = new HashSet<object>(Helpers.ReferenceEqualityComparer.Instance);
         var trackableDict = trackableObjectGraphProvider.GetTrackableObjects(testContext);
         foreach (var kvp in trackableDict)
@@ -56,18 +78,8 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
     public async ValueTask UntrackObjects(TestContext testContext, List<Exception> cleanupExceptions)
     {
-        // Build objects set without LINQ to reduce allocations and with proper locking
-        var objectsToUntrack = new HashSet<object>(Helpers.ReferenceEqualityComparer.Instance);
-        foreach (var kvp in testContext.TrackedObjects)
-        {
-            lock (kvp.Value)
-            {
-                foreach (var obj in kvp.Value)
-                {
-                    objectsToUntrack.Add(obj);
-                }
-            }
-        }
+        // Get all objects to untrack (DRY: use helper method)
+        var objectsToUntrack = FlattenTrackedObjects(testContext.TrackedObjects);
 
         foreach (var obj in objectsToUntrack)
         {
@@ -108,7 +120,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
             return;
         }
 
-        var counter = _trackedObjects.GetOrAdd(obj, static _ => new Counter());
+        var counter = s_trackedObjects.GetOrAdd(obj, static _ => new Counter());
         counter.Increment();
     }
 
@@ -119,7 +131,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
             return;
         }
 
-        if (_trackedObjects.TryGetValue(obj, out var counter))
+        if (s_trackedObjects.TryGetValue(obj, out var counter))
         {
             var count = counter.Decrement();
 
@@ -145,12 +157,12 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
     public static void OnDisposed(object? o, Action action)
     {
-        if(o is not IDisposable and not IAsyncDisposable)
+        if (o is not IDisposable and not IAsyncDisposable)
         {
             return;
         }
 
-        _trackedObjects.GetOrAdd(o, static _ => new Counter())
+        s_trackedObjects.GetOrAdd(o, static _ => new Counter())
             .OnCountChanged += (_, count) =>
         {
             if (count == 0)
@@ -162,13 +174,13 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
     public static void OnDisposedAsync(object? o, Func<Task> asyncAction)
     {
-        if(o is not IDisposable and not IAsyncDisposable)
+        if (o is not IDisposable and not IAsyncDisposable)
         {
             return;
         }
 
         // Avoid async void pattern by wrapping in fire-and-forget with exception handling
-        _trackedObjects.GetOrAdd(o, static _ => new Counter())
+        s_trackedObjects.GetOrAdd(o, static _ => new Counter())
             .OnCountChanged += (_, count) =>
         {
             if (count == 0)

@@ -9,6 +9,15 @@ using TUnit.Core.PropertyInjection;
 namespace TUnit.Core.Discovery;
 
 /// <summary>
+/// Represents an error that occurred during object graph discovery.
+/// </summary>
+/// <param name="TypeName">The name of the type being inspected.</param>
+/// <param name="PropertyName">The name of the property that failed to access.</param>
+/// <param name="ErrorMessage">The error message.</param>
+/// <param name="Exception">The exception that occurred.</param>
+public readonly record struct DiscoveryError(string TypeName, string PropertyName, string ErrorMessage, Exception Exception);
+
+/// <summary>
 /// Centralized service for discovering and organizing object graphs.
 /// Consolidates duplicate graph traversal logic from ObjectGraphDiscoveryService and TrackableObjectGraphProvider.
 /// Follows Single Responsibility Principle - only discovers objects, doesn't modify them.
@@ -22,26 +31,18 @@ namespace TUnit.Core.Discovery;
 /// <item><description>Depth 0: Root objects (class args, method args, property values)</description></item>
 /// <item><description>Depth 1+: Nested objects found in properties of objects at previous depth</description></item>
 /// </list>
+/// <para>
+/// Discovery errors (e.g., property access failures) are collected in <see cref="GetDiscoveryErrors"/>
+/// rather than thrown, allowing discovery to continue despite individual property failures.
+/// </para>
 /// </remarks>
-public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
+public sealed class ObjectGraphDiscoverer : IObjectGraphTracker
 {
     /// <summary>
     /// Maximum recursion depth for object graph discovery.
     /// Prevents stack overflow on deep or circular object graphs.
     /// </summary>
     private const int MaxRecursionDepth = 50;
-
-    /// <summary>
-    /// Maximum size for the property cache before cleanup is triggered.
-    /// Prevents unbounded memory growth in long-running test sessions.
-    /// </summary>
-    private const int MaxCacheSize = 10000;
-
-    // Cache for GetProperties() results per type - eliminates repeated reflection calls
-    private static readonly ConcurrentDictionary<Type, PropertyInfo[]> PropertyCache = new();
-
-    // Flag to coordinate cache cleanup (prevents multiple threads cleaning simultaneously)
-    private static int _cleanupInProgress;
 
     // Reference equality comparer for object tracking (ignores Equals overrides)
     private static readonly Helpers.ReferenceEqualityComparer ReferenceComparer = Helpers.ReferenceEqualityComparer.Instance;
@@ -56,6 +57,27 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
         typeof(TimeSpan),
         typeof(Guid)
     ];
+
+    // Thread-safe collection of discovery errors for diagnostics
+    private static readonly ConcurrentBag<DiscoveryError> DiscoveryErrors = [];
+
+    /// <summary>
+    /// Gets all discovery errors that occurred during object graph traversal.
+    /// Useful for debugging and diagnostics when property access fails.
+    /// </summary>
+    /// <returns>A read-only list of discovery errors.</returns>
+    public static IReadOnlyList<DiscoveryError> GetDiscoveryErrors()
+    {
+        return DiscoveryErrors.ToArray();
+    }
+
+    /// <summary>
+    /// Clears all recorded discovery errors. Call at end of test session.
+    /// </summary>
+    public static void ClearDiscoveryErrors()
+    {
+        DiscoveryErrors.Clear();
+    }
 
     /// <summary>
     /// Delegate for adding discovered objects to collections.
@@ -77,10 +99,11 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
     public IObjectGraph DiscoverObjectGraph(TestContext testContext, CancellationToken cancellationToken = default)
     {
         var objectsByDepth = new ConcurrentDictionary<int, HashSet<object>>();
-        var allObjects = new HashSet<object>();
+        var allObjects = new HashSet<object>(ReferenceComparer);
+        var allObjectsLock = new object(); // Thread-safety for allObjects HashSet
         var visitedObjects = new ConcurrentDictionary<object, byte>(ReferenceComparer);
 
-        // Standard mode add callback
+        // Standard mode add callback (thread-safe)
         bool TryAddStandard(object obj, int depth)
         {
             if (!visitedObjects.TryAdd(obj, 0))
@@ -89,7 +112,11 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
             }
 
             AddToDepth(objectsByDepth, depth, obj);
-            allObjects.Add(obj);
+            lock (allObjectsLock)
+            {
+                allObjects.Add(obj);
+            }
+
             return true;
         }
 
@@ -97,7 +124,7 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
         CollectRootObjects(
             testContext.Metadata.TestDetails,
             TryAddStandard,
-            obj => DiscoverNestedObjects(obj, objectsByDepth, visitedObjects, allObjects, currentDepth: 1, cancellationToken),
+            obj => DiscoverNestedObjects(obj, objectsByDepth, visitedObjects, allObjects, allObjectsLock, currentDepth: 1, cancellationToken),
             cancellationToken);
 
         return new ObjectGraph(objectsByDepth, allObjects);
@@ -107,14 +134,19 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
     public IObjectGraph DiscoverNestedObjectGraph(object rootObject, CancellationToken cancellationToken = default)
     {
         var objectsByDepth = new ConcurrentDictionary<int, HashSet<object>>();
-        var allObjects = new HashSet<object>();
+        var allObjects = new HashSet<object>(ReferenceComparer);
+        var allObjectsLock = new object(); // Thread-safety for allObjects HashSet
         var visitedObjects = new ConcurrentDictionary<object, byte>(ReferenceComparer);
 
         if (visitedObjects.TryAdd(rootObject, 0))
         {
             AddToDepth(objectsByDepth, 0, rootObject);
-            allObjects.Add(rootObject);
-            DiscoverNestedObjects(rootObject, objectsByDepth, visitedObjects, allObjects, currentDepth: 1, cancellationToken);
+            lock (allObjectsLock)
+            {
+                allObjects.Add(rootObject);
+            }
+
+            DiscoverNestedObjects(rootObject, objectsByDepth, visitedObjects, allObjects, allObjectsLock, currentDepth: 1, cancellationToken);
         }
 
         return new ObjectGraph(objectsByDepth, allObjects);
@@ -150,6 +182,7 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
         ConcurrentDictionary<int, HashSet<object>> objectsByDepth,
         ConcurrentDictionary<object, byte> visitedObjects,
         HashSet<object> allObjects,
+        object allObjectsLock,
         int currentDepth,
         CancellationToken cancellationToken)
     {
@@ -160,7 +193,7 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        // Standard mode add callback: visitedObjects + objectsByDepth + allObjects
+        // Standard mode add callback: visitedObjects + objectsByDepth + allObjects (thread-safe)
         bool TryAddStandard(object value, int depth)
         {
             if (!visitedObjects.TryAdd(value, 0))
@@ -169,14 +202,18 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
             }
 
             AddToDepth(objectsByDepth, depth, value);
-            allObjects.Add(value);
+            lock (allObjectsLock)
+            {
+                allObjects.Add(value);
+            }
+
             return true;
         }
 
         // Recursive callback
         void Recurse(object value, int depth)
         {
-            DiscoverNestedObjects(value, objectsByDepth, visitedObjects, allObjects, depth, cancellationToken);
+            DiscoverNestedObjects(value, objectsByDepth, visitedObjects, allObjects, allObjectsLock, depth, cancellationToken);
         }
 
         // Traverse injectable properties (useSourceRegistrarCheck = false)
@@ -223,85 +260,12 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
     }
 
     /// <summary>
-    /// Gets cached properties for a type, filtering to only readable non-indexed properties.
-    /// Includes periodic cache cleanup to prevent unbounded memory growth.
-    /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection fallback for nested initializers. In AOT, source-gen handles primary discovery.")]
-    private static PropertyInfo[] GetCachedProperties(Type type)
-    {
-        // Periodic cleanup if cache grows too large to prevent memory leaks
-        // Use Interlocked to ensure only one thread performs cleanup at a time
-        if (PropertyCache.Count > MaxCacheSize &&
-            Interlocked.CompareExchange(ref _cleanupInProgress, 1, 0) == 0)
-        {
-            try
-            {
-                // Double-check after acquiring cleanup flag
-                if (PropertyCache.Count > MaxCacheSize)
-                {
-                    var keysToRemove = new List<Type>(MaxCacheSize / 2);
-                    var count = 0;
-                    foreach (var key in PropertyCache.Keys)
-                    {
-                        if (count++ >= MaxCacheSize / 2)
-                        {
-                            break;
-                        }
-
-                        keysToRemove.Add(key);
-                    }
-
-                    foreach (var key in keysToRemove)
-                    {
-                        PropertyCache.TryRemove(key, out _);
-                    }
-#if DEBUG
-                    Debug.WriteLine($"[ObjectGraphDiscoverer] PropertyCache exceeded {MaxCacheSize} entries, cleared {keysToRemove.Count} entries");
-#endif
-                }
-            }
-            finally
-            {
-                Interlocked.Exchange(ref _cleanupInProgress, 0);
-            }
-        }
-
-        return PropertyCache.GetOrAdd(type, static t =>
-        {
-            // Use explicit loops instead of LINQ to avoid allocations in hot path
-            var allProps = t.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-
-            // First pass: count eligible properties
-            var count = 0;
-            foreach (var p in allProps)
-            {
-                if (p.CanRead && p.GetIndexParameters().Length == 0)
-                {
-                    count++;
-                }
-            }
-
-            // Second pass: fill result array
-            var result = new PropertyInfo[count];
-            var i = 0;
-            foreach (var p in allProps)
-            {
-                if (p.CanRead && p.GetIndexParameters().Length == 0)
-                {
-                    result[i++] = p;
-                }
-            }
-
-            return result;
-        });
-    }
-
-    /// <summary>
-    /// Clears the property cache. Called at end of test session to release memory.
+    /// Clears all caches. Called at end of test session to release memory.
     /// </summary>
     public static void ClearCache()
     {
-        PropertyCache.Clear();
+        PropertyCacheManager.ClearCache();
+        ClearDiscoveryErrors();
     }
 
     /// <summary>
@@ -442,7 +406,7 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
             return;
         }
 
-        var properties = GetCachedProperties(type);
+        var properties = PropertyCacheManager.GetCachedProperties(type);
 
         foreach (var property in properties)
         {
@@ -467,11 +431,12 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
             }
             catch (Exception ex)
             {
+                // Record error for diagnostics (available via GetDiscoveryErrors())
+                DiscoveryErrors.Add(new DiscoveryError(type.Name, property.Name, ex.Message, ex));
 #if DEBUG
                 Debug.WriteLine($"[ObjectGraphDiscoverer] Failed to access property '{property.Name}' on type '{type.Name}': {ex.Message}");
 #endif
                 // Continue discovery despite property access failures
-                _ = ex;
             }
         }
     }

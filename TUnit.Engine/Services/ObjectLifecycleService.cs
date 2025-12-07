@@ -244,29 +244,12 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     /// <summary>
     /// Initializes nested objects during execution phase - all IAsyncInitializer objects.
     /// </summary>
-    private async Task InitializeNestedObjectsForExecutionAsync(object rootObject, CancellationToken cancellationToken)
+    private Task InitializeNestedObjectsForExecutionAsync(object rootObject, CancellationToken cancellationToken)
     {
-        var graph = _objectGraphDiscoveryService.DiscoverNestedObjectGraph(rootObject, cancellationToken);
-
-        // Initialize from deepest to shallowest (skip depth 0 which is the root itself)
-        foreach (var depth in graph.GetDepthsDescending())
-        {
-            if (depth == 0) continue; // Root handled separately
-
-            var objectsAtDepth = graph.GetObjectsAtDepth(depth);
-
-            // Pre-allocate task list without LINQ Select
-            var tasks = new List<Task>();
-            foreach (var obj in objectsAtDepth)
-            {
-                tasks.Add(ObjectInitializer.InitializeAsync(obj, cancellationToken).AsTask());
-            }
-
-            if (tasks.Count > 0)
-            {
-                await Task.WhenAll(tasks);
-            }
-        }
+        return InitializeNestedObjectsAsync(
+            rootObject,
+            ObjectInitializer.InitializeAsync,
+            cancellationToken);
     }
 
     #endregion
@@ -385,14 +368,35 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     /// <summary>
     /// Initializes nested objects during discovery phase - only IAsyncDiscoveryInitializer objects.
     /// </summary>
-    private async Task InitializeNestedObjectsForDiscoveryAsync(object rootObject, CancellationToken cancellationToken)
+    private Task InitializeNestedObjectsForDiscoveryAsync(object rootObject, CancellationToken cancellationToken)
+    {
+        return InitializeNestedObjectsAsync(
+            rootObject,
+            ObjectInitializer.InitializeForDiscoveryAsync,
+            cancellationToken);
+    }
+
+    /// <summary>
+    /// Shared implementation for nested object initialization (DRY).
+    /// Discovers nested objects and initializes them depth-first using the provided initializer.
+    /// </summary>
+    /// <param name="rootObject">The root object to discover nested objects from.</param>
+    /// <param name="initializer">The initializer function to call for each object.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    private async Task InitializeNestedObjectsAsync(
+        object rootObject,
+        Func<object?, CancellationToken, ValueTask> initializer,
+        CancellationToken cancellationToken)
     {
         var graph = _objectGraphDiscoveryService.DiscoverNestedObjectGraph(rootObject, cancellationToken);
 
         // Initialize from deepest to shallowest (skip depth 0 which is the root itself)
         foreach (var depth in graph.GetDepthsDescending())
         {
-            if (depth == 0) continue; // Root handled separately
+            if (depth == 0)
+            {
+                continue; // Root handled separately
+            }
 
             var objectsAtDepth = graph.GetObjectsAtDepth(depth);
 
@@ -400,7 +404,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
             var tasks = new List<Task>();
             foreach (var obj in objectsAtDepth)
             {
-                tasks.Add(ObjectInitializer.InitializeForDiscoveryAsync(obj, cancellationToken).AsTask());
+                tasks.Add(initializer(obj, cancellationToken).AsTask());
             }
 
             if (tasks.Count > 0)

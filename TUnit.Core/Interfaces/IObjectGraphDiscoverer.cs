@@ -4,6 +4,7 @@ namespace TUnit.Core.Interfaces;
 
 /// <summary>
 /// Defines a contract for discovering object graphs from test contexts.
+/// Pure query interface - only reads and returns data, does not modify state.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -18,6 +19,9 @@ namespace TUnit.Core.Interfaces;
 /// <item><description>Injected property values</description></item>
 /// <item><description>Nested objects that implement <see cref="IAsyncInitializer"/></description></item>
 /// </list>
+/// </para>
+/// <para>
+/// For tracking operations that modify TestContext.TrackedObjects, see <see cref="IObjectGraphTracker"/>.
 /// </para>
 /// </remarks>
 public interface IObjectGraphDiscoverer
@@ -55,7 +59,32 @@ public interface IObjectGraphDiscoverer
     /// <returns>
     /// The tracked objects dictionary (same as testContext.TrackedObjects) populated with discovered objects.
     /// </returns>
+    /// <remarks>
+    /// This method modifies testContext.TrackedObjects directly. For pure query operations,
+    /// use <see cref="DiscoverObjectGraph"/> instead.
+    /// </remarks>
     ConcurrentDictionary<int, HashSet<object>> DiscoverAndTrackObjects(TestContext testContext, CancellationToken cancellationToken = default);
+}
+
+/// <summary>
+/// Marker interface for object graph tracking operations.
+/// Extends <see cref="IObjectGraphDiscoverer"/> with operations that modify state.
+/// </summary>
+/// <remarks>
+/// <para>
+/// This interface exists to support Interface Segregation Principle:
+/// clients that only need query operations can depend on <see cref="IObjectGraphDiscoverer"/>,
+/// while clients that need tracking can depend on <see cref="IObjectGraphTracker"/>.
+/// </para>
+/// <para>
+/// Currently inherits all methods from <see cref="IObjectGraphDiscoverer"/>.
+/// The distinction exists for semantic clarity and future extensibility.
+/// </para>
+/// </remarks>
+public interface IObjectGraphTracker : IObjectGraphDiscoverer
+{
+    // All methods inherited from IObjectGraphDiscoverer
+    // This interface provides semantic clarity for tracking operations
 }
 
 /// <summary>
