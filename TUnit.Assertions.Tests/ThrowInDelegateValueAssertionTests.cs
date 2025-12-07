@@ -5,18 +5,19 @@ public class ThrowInDelegateValueAssertionTests
     [Test]
     public async Task ThrowInDelegateValueAssertion_ReturnsExpectedErrorMessage()
     {
+        var expectedContains = """
+                         Expected to be equal to True
+                         but threw System.Exception
+                         """.NormalizeLineEndings();
         var assertion = async () => await Assert.That(() =>
         {
             throw new Exception("No");
             return true;
         }).IsEqualTo(true);
 
-        await Assert.That(assertion)
-            .Throws<AssertionException>()
-            .WithMessageContaining("""
-                         Expected to be equal to True
-                         but threw System.Exception
-                         """);
+        var exception = await Assert.That(assertion)
+            .Throws<AssertionException>();
+        await Assert.That(exception.Message.NormalizeLineEndings()).Contains(expectedContains);
     }
 
     [Test]

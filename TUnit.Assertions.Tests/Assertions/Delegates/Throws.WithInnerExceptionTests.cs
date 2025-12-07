@@ -15,7 +15,7 @@ public partial class Throws
                                   but exception message was "some different inner message"
 
                                   at Assert.That(action).ThrowsException().WithInnerException().WithMessage("bar")
-                                  """;
+                                  """.NormalizeLineEndings();
             Exception exception = CreateCustomException(outerMessage,
                 CreateCustomException("some different inner message"));
             Action action = () => throw exception;
@@ -24,8 +24,8 @@ public partial class Throws
                 => await Assert.That(action).ThrowsException()
                 .WithInnerException().WithMessage(expectedInnerMessage);
 
-            await Assert.That(sut).ThrowsException()
-                .WithMessage(expectedMessage);
+            var thrownException = await Assert.That(sut).ThrowsException();
+            await Assert.That(thrownException.Message.NormalizeLineEndings()).IsEqualTo(expectedMessage);
         }
 
         [Test]

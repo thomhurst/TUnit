@@ -13,15 +13,15 @@ public partial class Throws
                                   but threw TUnit.Assertions.Tests.Assertions.Delegates.Throws+OtherException
 
                                   at Assert.That(action).ThrowsExactly<CustomException>()
-                                  """;
+                                  """.NormalizeLineEndings();
             Exception exception = CreateOtherException();
             Action action = () => throw exception;
 
             var sut = async ()
                 => await Assert.That(action).ThrowsExactly<CustomException>();
 
-            await Assert.That(sut).ThrowsException()
-                .WithMessage(expectedMessage);
+            var thrownException = await Assert.That(sut).ThrowsException();
+            await Assert.That(thrownException.Message.NormalizeLineEndings()).IsEqualTo(expectedMessage);
         }
 
         [Test]
@@ -32,15 +32,15 @@ public partial class Throws
                                   but wrong exception type: SubCustomException instead of exactly CustomException
 
                                   at Assert.That(action).ThrowsExactly<CustomException>()
-                                  """;
+                                  """.NormalizeLineEndings();
             Exception exception = CreateSubCustomException();
             Action action = () => throw exception;
 
             var sut = async ()
                 => await Assert.That(action).ThrowsExactly<CustomException>();
 
-            await Assert.That(sut).ThrowsException()
-                .WithMessage(expectedMessage);
+            var thrownException = await Assert.That(sut).ThrowsException();
+            await Assert.That(thrownException.Message.NormalizeLineEndings()).IsEqualTo(expectedMessage);
         }
 
         [Test]
@@ -51,14 +51,14 @@ public partial class Throws
                                   but no exception was thrown
 
                                   at Assert.That(action).ThrowsExactly<CustomException>()
-                                  """;
+                                  """.NormalizeLineEndings();
             var action = () => { };
 
             var sut = async ()
                 => await Assert.That(action).ThrowsExactly<CustomException>();
 
-            await Assert.That(sut).ThrowsException()
-                .WithMessage(expectedMessage);
+            var thrownException = await Assert.That(sut).ThrowsException();
+            await Assert.That(thrownException.Message.NormalizeLineEndings()).IsEqualTo(expectedMessage);
         }
 
         [Test]
@@ -117,10 +117,11 @@ public partial class Throws
                 await Assert.That((object)ex).IsAssignableTo<CustomException>();
             });
 
-            await Assert.That(assertionException).HasMessageStartingWith("""
-                                                                         Expected to throw exactly Exception
-                                                                         but wrong exception type: CustomException instead of exactly Exception
-                                                                         """);
+            var expectedPrefix = """
+                Expected to throw exactly Exception
+                but wrong exception type: CustomException instead of exactly Exception
+                """.NormalizeLineEndings();
+            await Assert.That(assertionException.Message.NormalizeLineEndings()).StartsWith(expectedPrefix);
         }
 
         [Test]

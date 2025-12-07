@@ -15,15 +15,15 @@ public partial class Throws
                                   but exception message was "foo"
 
                                   at Assert.That(action).ThrowsExactly<CustomException>().WithMessage("bar")
-                                  """;
+                                  """.NormalizeLineEndings();
             Exception exception = CreateCustomException(message1);
             Action action = () => throw exception;
 
             var sut = async ()
                 => await Assert.That(action).ThrowsExactly<CustomException>().WithMessage(message2);
 
-            await Assert.That(sut).ThrowsException()
-                .WithMessage(expectedMessage);
+            var thrownException = await Assert.That(sut).ThrowsException();
+            await Assert.That(thrownException.Message.NormalizeLineEndings()).IsEqualTo(expectedMessage);
         }
 
         [Test]
