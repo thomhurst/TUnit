@@ -351,7 +351,7 @@ namespace
         public static .ClassMetadata GetOrAdd(string name, <.ClassMetadata> factory) { }
     }
     [(.Class | .Method)]
-    public sealed class CombinedDataSourcesAttribute : .AsyncUntypedDataSourceGeneratorAttribute, .IAccessesInstanceData
+    public sealed class CombinedDataSourcesAttribute : .AsyncUntypedDataSourceGeneratorAttribute
     {
         public CombinedDataSourcesAttribute() { }
         [.(typeof(.CombinedDataSourcesAttribute.<GenerateDataSourcesAsync>d__0))]

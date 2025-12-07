@@ -81,7 +81,7 @@ namespace TUnit.Core;
 /// </code>
 /// </example>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-public sealed class CombinedDataSourcesAttribute : AsyncUntypedDataSourceGeneratorAttribute, IAccessesInstanceData
+public sealed class CombinedDataSourcesAttribute : AsyncUntypedDataSourceGeneratorAttribute
 {
     protected override async IAsyncEnumerable<Func<Task<object?[]?>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
