@@ -20,6 +20,15 @@ public sealed class ReferenceEqualityComparer : IEqualityComparer<object>
     {
     }
 
+    /// <summary>
+    /// Compares two objects by reference identity.
+    /// </summary>
+    /// <remarks>
+    /// The 'new' keyword is used because this method explicitly implements
+    /// IEqualityComparer&lt;object&gt;.Equals with nullable parameters, which
+    /// hides the inherited static Object.Equals(object?, object?) method.
+    /// This is intentional and provides the correct behavior for reference equality.
+    /// </remarks>
     public new bool Equals(object? x, object? y)
     {
         return ReferenceEquals(x, y);

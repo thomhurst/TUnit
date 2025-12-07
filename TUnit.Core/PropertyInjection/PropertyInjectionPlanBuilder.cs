@@ -11,6 +11,22 @@ namespace TUnit.Core.PropertyInjection;
 internal static class PropertyInjectionPlanBuilder
 {
     /// <summary>
+    /// Walks up the inheritance chain from the given type to typeof(object),
+    /// invoking the action for each type in the hierarchy.
+    /// </summary>
+    /// <param name="type">The starting type.</param>
+    /// <param name="action">The action to invoke for each type in the inheritance chain.</param>
+    private static void WalkInheritanceChain(Type type, Action<Type> action)
+    {
+        var currentType = type;
+        while (currentType != null && currentType != typeof(object))
+        {
+            action(currentType);
+            currentType = currentType.BaseType;
+        }
+    }
+
+    /// <summary>
     /// Creates an injection plan for source-generated mode.
     /// Walks the inheritance chain to include all injectable properties from base classes.
     /// </summary>
@@ -20,8 +36,7 @@ internal static class PropertyInjectionPlanBuilder
         var processedProperties = new HashSet<string>();
 
         // Walk up the inheritance chain to find all properties with data sources
-        var currentType = type;
-        while (currentType != null && currentType != typeof(object))
+        WalkInheritanceChain(type, currentType =>
         {
             var propertySource = PropertySourceRegistry.GetSource(currentType);
             if (propertySource?.ShouldInitialize == true)
@@ -35,9 +50,7 @@ internal static class PropertyInjectionPlanBuilder
                     }
                 }
             }
-
-            currentType = currentType.BaseType;
-        }
+        });
 
         var sourceGenProps = allProperties.ToArray();
 
@@ -62,8 +75,7 @@ internal static class PropertyInjectionPlanBuilder
         var processedProperties = new HashSet<string>();
 
         // Walk up the inheritance chain to find all properties with data source attributes
-        var currentType = type;
-        while (currentType != null && currentType != typeof(object))
+        WalkInheritanceChain(type, currentType =>
         {
             var properties = currentType.GetProperties(
                 BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
@@ -87,9 +99,7 @@ internal static class PropertyInjectionPlanBuilder
                     }
                 }
             }
-
-            currentType = currentType.BaseType;
-        }
+        });
 
         return new PropertyInjectionPlan
         {
@@ -106,7 +116,7 @@ internal static class PropertyInjectionPlanBuilder
     /// This handles generic types like ErrFixture&lt;MyType&gt; where the source generator
     /// couldn't register a property source for the closed generic type.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "Source gen mode has its own path>")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "Source gen mode has its own path")]
     public static PropertyInjectionPlan Build(Type type)
     {
         if (!SourceRegistrar.IsEnabled)

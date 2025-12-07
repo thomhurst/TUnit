@@ -21,7 +21,7 @@ public class Counter
         var handler = _onCountChanged;
         var newCount = Interlocked.Increment(ref _count);
 
-        handler?.Invoke(this, newCount);
+        RaiseEventSafely(handler, newCount);
 
         return newCount;
     }
@@ -33,7 +33,7 @@ public class Counter
         var handler = _onCountChanged;
         var newCount = Interlocked.Decrement(ref _count);
 
-        handler?.Invoke(this, newCount);
+        RaiseEventSafely(handler, newCount);
 
         return newCount;
     }
@@ -45,9 +45,47 @@ public class Counter
         var handler = _onCountChanged;
         var newCount = Interlocked.Add(ref _count, value);
 
-        handler?.Invoke(this, newCount);
+        RaiseEventSafely(handler, newCount);
 
         return newCount;
+    }
+
+    /// <summary>
+    /// Raises the event safely, ensuring all subscribers are notified even if some throw exceptions.
+    /// Collects all exceptions and throws AggregateException if any occurred.
+    /// </summary>
+    private void RaiseEventSafely(EventHandler<int>? handler, int newCount)
+    {
+        if (handler == null)
+        {
+            return;
+        }
+
+        var invocationList = handler.GetInvocationList();
+        List<Exception>? exceptions = null;
+
+        foreach (var subscriber in invocationList)
+        {
+            try
+            {
+                ((EventHandler<int>)subscriber).Invoke(this, newCount);
+            }
+            catch (Exception ex)
+            {
+                exceptions ??= [];
+                exceptions.Add(ex);
+
+#if DEBUG
+                Debug.WriteLine($"[Counter] Exception in OnCountChanged subscriber: {ex.Message}");
+#endif
+            }
+        }
+
+        // If any subscribers threw, aggregate and rethrow after all are notified
+        if (exceptions?.Count > 0)
+        {
+            throw new AggregateException("One or more OnCountChanged subscribers threw an exception.", exceptions);
+        }
     }
 
     public int CurrentCount => Interlocked.CompareExchange(ref _count, 0, 0);

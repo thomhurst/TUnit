@@ -110,7 +110,7 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
         var expectedType = expected.GetType();
 
         // Handle primitive types and strings
-        if (IsPrimitiveType(actualType))
+        if (TypeHelper.IsPrimitiveOrWellKnownType(actualType))
         {
             if (!Equals(actual, expected))
             {
@@ -168,7 +168,7 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
         }
 
         // Compare properties and fields
-        var expectedMembers = GetMembersToCompare(expectedType);
+        var expectedMembers = ReflectionHelper.GetMembersToCompare(expectedType);
 
         foreach (var member in expectedMembers)
         {
@@ -179,7 +179,7 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
                 continue;
             }
 
-            var expectedValue = GetMemberValue(expected, member);
+            var expectedValue = ReflectionHelper.GetMemberValue(expected, member);
 
             // Check if this member's type should be ignored
             var memberType = member switch
@@ -199,22 +199,22 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
             // In partial equivalency mode, skip members that don't exist on actual
             if (_usePartialEquivalency)
             {
-                var actualMember = GetMemberInfo(actualType, member.Name);
+                var actualMember = ReflectionHelper.GetMemberInfo(actualType, member.Name);
                 if (actualMember == null)
                 {
                     continue;
                 }
 
-                actualValue = GetMemberValue(actual, actualMember);
+                actualValue = ReflectionHelper.GetMemberValue(actual, actualMember);
             }
             else
             {
-                var actualMember = GetMemberInfo(actualType, member.Name);
+                var actualMember = ReflectionHelper.GetMemberInfo(actualType, member.Name);
                 if (actualMember == null)
                 {
                     return AssertionResult.Failed($"Property {memberPath} did not match{Environment.NewLine}Expected: {FormatValue(expectedValue)}{Environment.NewLine}Received: null");
                 }
-                actualValue = GetMemberValue(actual, actualMember);
+                actualValue = ReflectionHelper.GetMemberValue(actual, actualMember);
             }
 
             var result = CompareObjects(actualValue, expectedValue, memberPath, visited);
@@ -227,7 +227,7 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
         // In non-partial mode, check for extra properties on actual
         if (!_usePartialEquivalency)
         {
-            var actualMembers = GetMembersToCompare(actualType);
+            var actualMembers = ReflectionHelper.GetMembersToCompare(actualType);
             var expectedMemberNames = new HashSet<string>(expectedMembers.Select(m => m.Name));
 
             foreach (var member in actualMembers)
@@ -248,7 +248,7 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
                     }
 
                     var memberPath = string.IsNullOrEmpty(path) ? member.Name : $"{path}.{member.Name}";
-                    var actualValue = GetMemberValue(actual, member);
+                    var actualValue = ReflectionHelper.GetMemberValue(actual, member);
 
                     // Skip properties with null values - they're equivalent to not having the property
                     if (actualValue == null)
@@ -262,13 +262,6 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
         }
 
         return AssertionResult.Passed;
-    }
-
-    private static bool IsPrimitiveType(Type type)
-    {
-        return type.IsPrimitive || type.IsEnum || type == typeof(string) || type == typeof(decimal)
-               || type == typeof(DateTime) || type == typeof(DateTimeOffset) || type == typeof(TimeSpan)
-               || type == typeof(Guid);
     }
 
     private bool ShouldIgnoreType(Type type)
@@ -287,36 +280,6 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
         }
 
         return false;
-    }
-
-    private static List<MemberInfo> GetMembersToCompare([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields)] Type type)
-    {
-        var members = new List<MemberInfo>();
-        members.AddRange(type.GetProperties(BindingFlags.Public | BindingFlags.Instance));
-        members.AddRange(type.GetFields(BindingFlags.Public | BindingFlags.Instance));
-        return members;
-    }
-
-    private static MemberInfo? GetMemberInfo([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields)] Type type, string name)
-    {
-        var property = type.GetProperty(name, BindingFlags.Public | BindingFlags.Instance);
-        if (property != null)
-        {
-            return property;
-        }
-
-        var field = type.GetField(name, BindingFlags.Public | BindingFlags.Instance);
-        return field;
-    }
-
-    private static object? GetMemberValue(object obj, MemberInfo member)
-    {
-        return member switch
-        {
-            PropertyInfo prop => prop.GetValue(obj),
-            FieldInfo field => field.GetValue(obj),
-            _ => throw new InvalidOperationException($"Unknown member type: {member.GetType()}")
-        };
     }
 
     private static string FormatValue(object? value)
@@ -339,32 +302,9 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
         // Extract the source variable name from the expression builder
         // Format: "Assert.That(variableName).IsEquivalentTo(...)"
         var expressionString = Context.ExpressionBuilder.ToString();
-        var sourceVariable = ExtractSourceVariable(expressionString);
+        var sourceVariable = ExpressionHelper.ExtractSourceVariable(expressionString);
         var expectedDesc = _expectedExpression ?? "expected value";
 
         return $"{sourceVariable} to be equivalent to {expectedDesc}";
-    }
-
-    private static string ExtractSourceVariable(string expression)
-    {
-        // Extract variable name from "Assert.That(variableName)" or similar
-        var thatIndex = expression.IndexOf(".That(");
-        if (thatIndex >= 0)
-        {
-            var startIndex = thatIndex + 6; // Length of ".That("
-            var endIndex = expression.IndexOf(')', startIndex);
-            if (endIndex > startIndex)
-            {
-                var variable = expression.Substring(startIndex, endIndex - startIndex);
-                // Handle lambda expressions like "async () => ..." by returning "value"
-                if (variable.Contains("=>") || variable.StartsWith("()"))
-                {
-                    return "value";
-                }
-                return variable;
-            }
-        }
-
-        return "value";
     }
 }

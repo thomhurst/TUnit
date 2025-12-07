@@ -73,7 +73,21 @@ public partial class TestContext : Context,
 
     public static IReadOnlyDictionary<string, List<string>> Parameters => InternalParametersDictionary;
 
-    public static IConfiguration Configuration { get; internal set; } = null!;
+    private static IConfiguration? _configuration;
+
+    /// <summary>
+    /// Gets the test configuration. Throws a descriptive exception if accessed before initialization.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if Configuration is accessed before the test engine initializes it.</exception>
+    public static IConfiguration Configuration
+    {
+        get => _configuration ?? throw new InvalidOperationException(
+            "TestContext.Configuration has not been initialized. " +
+            "This property is only available after the TUnit test engine has started. " +
+            "If you are accessing this from a static constructor or field initializer, " +
+            "consider moving the code to a test setup method or test body instead.");
+        internal set => _configuration = value;
+    }
 
     public static string? OutputDirectory
     {

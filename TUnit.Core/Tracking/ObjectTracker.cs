@@ -189,6 +189,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     /// <summary>
     /// Registers a callback to be invoked when the object is disposed (ref count reaches 0).
     /// If the object is already disposed, the callback is invoked immediately.
+    /// The callback is guaranteed to be invoked exactly once (idempotent).
     /// </summary>
     public static void OnDisposed(object? o, Action action)
     {
@@ -199,18 +200,32 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
         var counter = s_trackedObjects.GetOrAdd(o, static _ => new Counter());
 
-        counter.OnCountChanged += (_, count) =>
+        // Use flag to ensure callback only fires once (idempotent)
+        var invoked = 0;
+        EventHandler<int>? handler = null;
+
+        handler = (sender, count) =>
         {
-            if (count == 0)
+            if (count == 0 && Interlocked.Exchange(ref invoked, 1) == 0)
             {
+                // Remove handler to prevent memory leaks
+                if (sender is Counter c && handler != null)
+                {
+                    c.OnCountChanged -= handler;
+                }
+
                 action();
             }
         };
 
+        counter.OnCountChanged += handler;
+
         // Check if already disposed (count is 0) - invoke immediately if so
         // This prevents lost callbacks when registering after disposal
-        if (counter.CurrentCount == 0)
+        // Idempotent check ensures this doesn't double-fire if event already triggered
+        if (counter.CurrentCount == 0 && Interlocked.Exchange(ref invoked, 1) == 0)
         {
+            counter.OnCountChanged -= handler;
             action();
         }
     }
@@ -218,6 +233,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     /// <summary>
     /// Registers an async callback to be invoked when the object is disposed (ref count reaches 0).
     /// If the object is already disposed, the callback is invoked immediately.
+    /// The callback is guaranteed to be invoked exactly once (idempotent).
     /// </summary>
     public static void OnDisposedAsync(object? o, Func<Task> asyncAction)
     {
@@ -228,20 +244,34 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
         var counter = s_trackedObjects.GetOrAdd(o, static _ => new Counter());
 
+        // Use flag to ensure callback only fires once (idempotent)
+        var invoked = 0;
+        EventHandler<int>? handler = null;
+
         // Avoid async void pattern by wrapping in fire-and-forget with exception handling
-        counter.OnCountChanged += (_, count) =>
+        handler = (sender, count) =>
         {
-            if (count == 0)
+            if (count == 0 && Interlocked.Exchange(ref invoked, 1) == 0)
             {
+                // Remove handler to prevent memory leaks
+                if (sender is Counter c && handler != null)
+                {
+                    c.OnCountChanged -= handler;
+                }
+
                 // Fire-and-forget with exception collection to surface errors
                 _ = SafeExecuteAsync(asyncAction);
             }
         };
 
+        counter.OnCountChanged += handler;
+
         // Check if already disposed (count is 0) - invoke immediately if so
         // This prevents lost callbacks when registering after disposal
-        if (counter.CurrentCount == 0)
+        // Idempotent check ensures this doesn't double-fire if event already triggered
+        if (counter.CurrentCount == 0 && Interlocked.Exchange(ref invoked, 1) == 0)
         {
+            counter.OnCountChanged -= handler;
             _ = SafeExecuteAsync(asyncAction);
         }
     }
