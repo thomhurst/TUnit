@@ -45,6 +45,17 @@ public interface IObjectGraphDiscoverer
     /// Higher depths contain nested objects.
     /// </returns>
     IObjectGraph DiscoverNestedObjectGraph(object rootObject, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Discovers objects and populates the test context's tracked objects dictionary directly.
+    /// Used for efficient object tracking without intermediate allocations.
+    /// </summary>
+    /// <param name="testContext">The test context to discover objects from and populate.</param>
+    /// <param name="cancellationToken">Optional cancellation token for long-running discovery.</param>
+    /// <returns>
+    /// The tracked objects dictionary (same as testContext.TrackedObjects) populated with discovered objects.
+    /// </returns>
+    ConcurrentDictionary<int, HashSet<object>> DiscoverAndTrackObjects(TestContext testContext, CancellationToken cancellationToken = default);
 }
 
 /// <summary>

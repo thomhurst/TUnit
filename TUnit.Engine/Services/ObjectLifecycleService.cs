@@ -31,7 +31,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     // Track initialization state per object
     // Use ReferenceEqualityComparer to prevent objects with custom Equals from sharing initialization state
     private readonly ConcurrentDictionary<object, TaskCompletionSource<bool>> _initializationTasks =
-        new(new Core.Helpers.ReferenceEqualityComparer());
+        new(Core.Helpers.ReferenceEqualityComparer.Instance);
 
     public ObjectLifecycleService(
         Lazy<PropertyInjector> propertyInjector,

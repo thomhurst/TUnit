@@ -6,8 +6,20 @@ namespace TUnit.Core.Helpers;
 /// Compares objects by reference identity, not value equality.
 /// Uses RuntimeHelpers.GetHashCode to get identity-based hash codes.
 /// </summary>
-public class ReferenceEqualityComparer : IEqualityComparer<object>
+public sealed class ReferenceEqualityComparer : IEqualityComparer<object>
 {
+    /// <summary>
+    /// Singleton instance to avoid repeated allocations.
+    /// </summary>
+    public static readonly ReferenceEqualityComparer Instance = new();
+
+    /// <summary>
+    /// Private constructor to enforce singleton pattern.
+    /// </summary>
+    private ReferenceEqualityComparer()
+    {
+    }
+
     public new bool Equals(object? x, object? y)
     {
         return ReferenceEquals(x, y);

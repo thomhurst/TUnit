@@ -24,7 +24,7 @@ public static class ObjectInitializer
     // even under contention. GetOrAdd's factory can be called multiple times, but with
     // Lazy<Task> + ExecutionAndPublication mode, only one initialization actually runs.
     private static readonly ConcurrentDictionary<object, Lazy<Task>> InitializationTasks =
-        new(new Helpers.ReferenceEqualityComparer());
+        new(Helpers.ReferenceEqualityComparer.Instance);
 
     /// <summary>
     /// Initializes an object during the discovery phase.

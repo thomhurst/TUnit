@@ -13,12 +13,12 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 {
     // Use ReferenceEqualityComparer to prevent objects with custom Equals from sharing state
     private static readonly ConcurrentDictionary<object, Counter> _trackedObjects =
-        new(new Helpers.ReferenceEqualityComparer());
+        new(Helpers.ReferenceEqualityComparer.Instance);
 
     public void TrackObjects(TestContext testContext)
     {
         // Build alreadyTracked set without LINQ to reduce allocations
-        var alreadyTracked = new HashSet<object>(new Helpers.ReferenceEqualityComparer());
+        var alreadyTracked = new HashSet<object>(Helpers.ReferenceEqualityComparer.Instance);
         foreach (var kvp in testContext.TrackedObjects)
         {
             // Lock while iterating to prevent concurrent modification
@@ -32,7 +32,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         }
 
         // Get new trackable objects without LINQ
-        var newTrackableObjects = new HashSet<object>(new Helpers.ReferenceEqualityComparer());
+        var newTrackableObjects = new HashSet<object>(Helpers.ReferenceEqualityComparer.Instance);
         var trackableDict = trackableObjectGraphProvider.GetTrackableObjects(testContext);
         foreach (var kvp in trackableDict)
         {
@@ -57,7 +57,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     public async ValueTask UntrackObjects(TestContext testContext, List<Exception> cleanupExceptions)
     {
         // Build objects set without LINQ to reduce allocations and with proper locking
-        var objectsToUntrack = new HashSet<object>(new Helpers.ReferenceEqualityComparer());
+        var objectsToUntrack = new HashSet<object>(Helpers.ReferenceEqualityComparer.Instance);
         foreach (var kvp in testContext.TrackedObjects)
         {
             lock (kvp.Value)
