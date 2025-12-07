@@ -156,9 +156,12 @@ public sealed class CombinedDataSourcesAttribute : AsyncUntypedDataSourceGenerat
             if (dataSourceAttr is IAccessesInstanceData && dataGeneratorMetadata.TestClassInstance == null)
             {
                 var className = dataGeneratorMetadata.TestInformation?.Class.Type.Name ?? "Unknown";
+                var attrName = dataSourceAttr.GetType().Name;
                 throw new InvalidOperationException(
-                    $"Cannot use instance-based data source attribute on parameter '{parameterMetadata.Name}' when no instance is available. " +
-                    $"Consider using static data sources or ensure the test class is properly instantiated.");
+                    $"Cannot use instance-based data source '{attrName}' on parameter '{parameterMetadata.Name}' in class '{className}'. " +
+                    $"When [CombinedDataSources] is applied at the class level (constructor parameters), all data sources must be static " +
+                    $"because no instance exists yet. Use static [MethodDataSource] or [Arguments] instead, " +
+                    $"or move [CombinedDataSources] to the method level if you need instance-based data sources.");
             }
 
             // Create metadata for this single parameter

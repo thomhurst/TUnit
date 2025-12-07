@@ -131,3 +131,23 @@ public class ClassLevelCombinedDataSources_ThreeParameters(
 }
 
 #endregion
+
+#region Edge Case: Instance data source at class level
+
+/// <summary>
+/// Edge case documentation: When using CombinedDataSources at the class level with
+/// an instance-requiring data source (like MethodDataSource pointing to an instance method),
+/// the runtime check in CombinedDataSourcesAttribute.GetParameterValues() (lines 156-165)
+/// will throw an InvalidOperationException with a clear, diagnostic error message:
+///
+/// "Cannot use instance-based data source '{AttributeName}' on parameter '{name}' in class '{ClassName}'.
+/// When [CombinedDataSources] is applied at the class level (constructor parameters), all data sources
+/// must be static because no instance exists yet. Use static [MethodDataSource] or [Arguments] instead,
+/// or move [CombinedDataSources] to the method level if you need instance-based data sources."
+///
+/// This provides proper error handling with actionable guidance, replacing the confusing
+/// "circular dependency" message that was previously shown due to the blanket IAccessesInstanceData check.
+/// </summary>
+public class EdgeCaseDocumentation;
+
+#endregion
