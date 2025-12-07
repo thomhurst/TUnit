@@ -30,9 +30,12 @@ public class TestBuildContextOutputCaptureTests
     }
 
     /// <summary>
-    /// Data source that writes to console in async initializer
+    /// Data source that writes to console in async initializer.
+    /// Uses IAsyncDiscoveryInitializer so it initializes during test discovery/building,
+    /// allowing the output to be captured in the test's build context.
+    /// Note: Regular IAsyncInitializer only runs during test execution (per issue #3992 fix).
     /// </summary>
-    public class DataSourceWithAsyncInitOutput : IAsyncInitializer
+    public class DataSourceWithAsyncInitOutput : IAsyncDiscoveryInitializer
     {
         public string Value { get; private set; } = "Uninitialized";
 
@@ -88,8 +91,9 @@ public class TestBuildContextOutputCaptureTests
     [ClassDataSource<DataSourceWithAsyncInitOutput>]
     public async Task Test_CapturesAsyncInitializerOutput_InTestResults(DataSourceWithAsyncInitOutput data)
     {
-        // The InitializeAsync output should be captured during test building
-        // and included in the test's output
+        // The InitializeAsync output should be captured during test building.
+        // Note: This uses IAsyncDiscoveryInitializer which runs during discovery.
+        // Regular IAsyncInitializer runs during execution only (per issue #3992 fix).
 
         // Get the test output
         var output = TestContext.Current!.GetStandardOutput();
