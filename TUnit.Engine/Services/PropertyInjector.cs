@@ -14,17 +14,21 @@ namespace TUnit.Engine.Services;
 /// Follows Single Responsibility Principle - only injects property values, doesn't initialize objects.
 /// Uses Lazy initialization to break circular dependencies without manual Initialize() calls.
 /// </summary>
+/// <remarks>
+/// Depends on <see cref="IInitializationCallback"/> rather than a concrete service,
+/// enabling testability and following Dependency Inversion Principle.
+/// </remarks>
 internal sealed class PropertyInjector
 {
-    private readonly Lazy<ObjectLifecycleService> _objectLifecycleService;
+    private readonly Lazy<IInitializationCallback> _initializationCallback;
     private readonly string _testSessionId;
 
     // Object pool for visited dictionaries to reduce allocations
     private static readonly ConcurrentBag<ConcurrentDictionary<object, byte>> _visitedObjectsPool = new();
 
-    public PropertyInjector(Lazy<ObjectLifecycleService> objectLifecycleService, string testSessionId)
+    public PropertyInjector(Lazy<IInitializationCallback> initializationCallback, string testSessionId)
     {
-        _objectLifecycleService = objectLifecycleService;
+        _initializationCallback = initializationCallback;
         _testSessionId = testSessionId;
     }
 
@@ -528,7 +532,7 @@ internal sealed class PropertyInjector
                 // EnsureInitializedAsync handles property injection and initialization.
                 // ObjectInitializer is phase-aware: during Discovery phase, only IAsyncDiscoveryInitializer
                 // objects are initialized; regular IAsyncInitializer objects are deferred to Execution phase.
-                await _objectLifecycleService.Value.EnsureInitializedAsync(
+                await _initializationCallback.Value.EnsureInitializedAsync(
                     value,
                     context.ObjectBag,
                     context.MethodMetadata,
@@ -560,7 +564,7 @@ internal sealed class PropertyInjector
         }
 
         // Ensure the data source is initialized
-        return await _objectLifecycleService.Value.EnsureInitializedAsync(
+        return await _initializationCallback.Value.EnsureInitializedAsync(
             dataSource,
             context.ObjectBag,
             context.MethodMetadata,

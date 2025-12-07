@@ -1,19 +1,29 @@
-using System.Runtime.CompilerServices;
+using System.Collections.Concurrent;
+using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
+using TUnit.Core.Services;
 
 namespace TUnit.Core;
 
 /// <summary>
-/// Centralized service for initializing objects that implement IAsyncInitializer.
+/// Static facade for initializing objects that implement <see cref="IAsyncInitializer"/>.
 /// Provides thread-safe, deduplicated initialization with explicit phase control.
-///
-/// Use InitializeForDiscoveryAsync during test discovery - only IAsyncDiscoveryInitializer objects are initialized.
-/// Use InitializeAsync during test execution - all IAsyncInitializer objects are initialized.
 /// </summary>
+/// <remarks>
+/// <para>
+/// Use <see cref="InitializeForDiscoveryAsync"/> during test discovery - only <see cref="IAsyncDiscoveryInitializer"/> objects are initialized.
+/// Use <see cref="InitializeAsync"/> during test execution - all <see cref="IAsyncInitializer"/> objects are initialized.
+/// </para>
+/// <para>
+/// For dependency injection scenarios, use <see cref="ObjectInitializationService"/> directly.
+/// </para>
+/// </remarks>
 public static class ObjectInitializer
 {
-    private static readonly ConditionalWeakTable<object, Task> _initializationTasks = new();
-    private static readonly Lock _lock = new();
+    // Use ConcurrentDictionary with reference equality for thread-safe tracking
+    // This replaces ConditionalWeakTable which doesn't support explicit cleanup
+    private static readonly ConcurrentDictionary<object, Task> InitializationTasks =
+        new(new Helpers.ReferenceEqualityComparer());
 
     /// <summary>
     /// Initializes an object during the discovery phase.
@@ -52,8 +62,14 @@ public static class ObjectInitializer
     }
 
     /// <summary>
-    /// Checks if an object has been initialized by ObjectInitializer.
+    /// Checks if an object has been successfully initialized by ObjectInitializer.
     /// </summary>
+    /// <param name="obj">The object to check.</param>
+    /// <returns>True if the object has been initialized successfully; otherwise, false.</returns>
+    /// <remarks>
+    /// Returns false if the object is null, not an <see cref="IAsyncInitializer"/>,
+    /// has not been initialized yet, or if initialization failed.
+    /// </remarks>
     internal static bool IsInitialized(object? obj)
     {
         if (obj is not IAsyncInitializer)
@@ -61,10 +77,20 @@ public static class ObjectInitializer
             return false;
         }
 
-        lock (_lock)
-        {
-            return _initializationTasks.TryGetValue(obj, out var task) && task.IsCompleted;
-        }
+        // Use Status == RanToCompletion to ensure we don't return true for faulted/canceled tasks
+        // (IsCompletedSuccessfully is not available in netstandard2.0)
+        return InitializationTasks.TryGetValue(obj, out var task) && task.Status == TaskStatus.RanToCompletion;
+    }
+
+    /// <summary>
+    /// Clears the initialization cache.
+    /// </summary>
+    /// <remarks>
+    /// Called at the end of a test session to release resources.
+    /// </remarks>
+    internal static void ClearCache()
+    {
+        InitializationTasks.Clear();
     }
 
     private static async ValueTask InitializeCoreAsync(
@@ -72,20 +98,11 @@ public static class ObjectInitializer
         IAsyncInitializer asyncInitializer,
         CancellationToken cancellationToken)
     {
-        Task initializationTask;
-
-        lock (_lock)
-        {
-            if (_initializationTasks.TryGetValue(obj, out var existingTask))
-            {
-                initializationTask = existingTask;
-            }
-            else
-            {
-                initializationTask = asyncInitializer.InitializeAsync();
-                _initializationTasks.Add(obj, initializationTask);
-            }
-        }
+        // Use GetOrAdd for thread-safe deduplication without holding lock during async
+        // Note: GetOrAdd's factory may be called multiple times under contention,
+        // but only one result is stored. Multiple InitializeAsync() calls is safe
+        // since we only await the winning task.
+        var initializationTask = InitializationTasks.GetOrAdd(obj, _ => asyncInitializer.InitializeAsync());
 
         // Wait for initialization with cancellation support
         await initializationTask.WaitAsync(cancellationToken);

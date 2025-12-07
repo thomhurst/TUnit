@@ -17,7 +17,11 @@ namespace TUnit.Engine.Services;
 /// Uses Lazy&lt;T&gt; for dependencies to break circular references without manual Initialize() calls.
 /// Follows clear phase separation: Register → Inject → Initialize → Cleanup.
 /// </summary>
-internal sealed class ObjectLifecycleService : IObjectRegistry
+/// <remarks>
+/// Implements <see cref="IInitializationCallback"/> to allow PropertyInjector to call back for initialization
+/// without creating a direct dependency (breaking the circular reference pattern).
+/// </remarks>
+internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationCallback
 {
     private readonly Lazy<PropertyInjector> _propertyInjector;
     private readonly ObjectGraphDiscoveryService _objectGraphDiscoveryService;
