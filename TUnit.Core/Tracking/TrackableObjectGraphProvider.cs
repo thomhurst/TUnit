@@ -32,24 +32,31 @@ internal class TrackableObjectGraphProvider
     /// Gets trackable objects from a test context, organized by depth level.
     /// Delegates to the shared ObjectGraphDiscoverer to eliminate code duplication.
     /// </summary>
-    public ConcurrentDictionary<int, HashSet<object>> GetTrackableObjects(TestContext testContext)
+    /// <param name="testContext">The test context to get trackable objects from.</param>
+    /// <param name="cancellationToken">Optional cancellation token for long-running discovery.</param>
+    public ConcurrentDictionary<int, HashSet<object>> GetTrackableObjects(TestContext testContext, CancellationToken cancellationToken = default)
     {
         // Use the ObjectGraphDiscoverer's specialized method that populates TrackedObjects directly
         if (_discoverer is ObjectGraphDiscoverer concreteDiscoverer)
         {
-            return concreteDiscoverer.DiscoverAndTrackObjects(testContext);
+            return concreteDiscoverer.DiscoverAndTrackObjects(testContext, cancellationToken);
         }
 
         // Fallback for custom implementations (testing)
-        var graph = _discoverer.DiscoverObjectGraph(testContext);
+        var graph = _discoverer.DiscoverObjectGraph(testContext, cancellationToken);
         var trackedObjects = testContext.TrackedObjects;
 
         foreach (var (depth, objects) in graph.ObjectsByDepth)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var depthSet = trackedObjects.GetOrAdd(depth, _ => []);
-            foreach (var obj in objects)
+            // Lock to ensure thread-safe HashSet modification
+            lock (depthSet)
             {
-                depthSet.Add(obj);
+                foreach (var obj in objects)
+                {
+                    depthSet.Add(obj);
+                }
             }
         }
 

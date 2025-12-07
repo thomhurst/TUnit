@@ -126,33 +126,37 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
     /// Used by TrackableObjectGraphProvider to populate TestContext.TrackedObjects.
     /// </summary>
     /// <param name="testContext">The test context to discover objects from.</param>
+    /// <param name="cancellationToken">Cancellation token for the operation.</param>
     /// <returns>The tracked objects dictionary (same as testContext.TrackedObjects).</returns>
-    public ConcurrentDictionary<int, HashSet<object>> DiscoverAndTrackObjects(TestContext testContext)
+    public ConcurrentDictionary<int, HashSet<object>> DiscoverAndTrackObjects(TestContext testContext, CancellationToken cancellationToken = default)
     {
         var visitedObjects = testContext.TrackedObjects;
         var testDetails = testContext.Metadata.TestDetails;
 
         foreach (var classArgument in testDetails.TestClassArguments)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             if (classArgument != null && TryAddToHashSet(visitedObjects, 0, classArgument))
             {
-                DiscoverNestedObjectsForTracking(classArgument, visitedObjects, 1);
+                DiscoverNestedObjectsForTracking(classArgument, visitedObjects, 1, cancellationToken);
             }
         }
 
         foreach (var methodArgument in testDetails.TestMethodArguments)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             if (methodArgument != null && TryAddToHashSet(visitedObjects, 0, methodArgument))
             {
-                DiscoverNestedObjectsForTracking(methodArgument, visitedObjects, 1);
+                DiscoverNestedObjectsForTracking(methodArgument, visitedObjects, 1, cancellationToken);
             }
         }
 
         foreach (var property in testDetails.TestClassInjectedPropertyArguments.Values)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             if (property != null && TryAddToHashSet(visitedObjects, 0, property))
             {
-                DiscoverNestedObjectsForTracking(property, visitedObjects, 1);
+                DiscoverNestedObjectsForTracking(property, visitedObjects, 1, cancellationToken);
             }
         }
 
@@ -239,7 +243,8 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
     private void DiscoverNestedObjectsForTracking(
         object obj,
         ConcurrentDictionary<int, HashSet<object>> visitedObjects,
-        int currentDepth)
+        int currentDepth,
+        CancellationToken cancellationToken)
     {
         // Guard against excessive recursion to prevent stack overflow
         if (currentDepth > MaxRecursionDepth)
@@ -250,6 +255,8 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
             return;
         }
 
+        cancellationToken.ThrowIfCancellationRequested();
+
         var plan = PropertyInjectionCache.GetOrCreatePlan(obj.GetType());
 
         // Check SourceRegistrar.IsEnabled for compatibility with existing TrackableObjectGraphProvider behavior
@@ -257,6 +264,7 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
         {
             foreach (var prop in plan.ReflectionProperties)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 var value = prop.Property.GetValue(obj);
                 if (value == null)
                 {
@@ -268,13 +276,14 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
                     continue;
                 }
 
-                DiscoverNestedObjectsForTracking(value, visitedObjects, currentDepth + 1);
+                DiscoverNestedObjectsForTracking(value, visitedObjects, currentDepth + 1, cancellationToken);
             }
         }
         else
         {
             foreach (var metadata in plan.SourceGeneratedProperties)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 var property = metadata.ContainingType.GetProperty(metadata.PropertyName);
                 if (property == null || !property.CanRead)
                 {
@@ -292,12 +301,12 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
                     continue;
                 }
 
-                DiscoverNestedObjectsForTracking(value, visitedObjects, currentDepth + 1);
+                DiscoverNestedObjectsForTracking(value, visitedObjects, currentDepth + 1, cancellationToken);
             }
         }
 
         // Also discover nested IAsyncInitializer objects from ALL properties
-        DiscoverNestedInitializerObjectsForTracking(obj, visitedObjects, currentDepth);
+        DiscoverNestedInitializerObjectsForTracking(obj, visitedObjects, currentDepth, cancellationToken);
     }
 
     /// <summary>
@@ -381,7 +390,8 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
     private void DiscoverNestedInitializerObjectsForTracking(
         object obj,
         ConcurrentDictionary<int, HashSet<object>> visitedObjects,
-        int currentDepth)
+        int currentDepth,
+        CancellationToken cancellationToken)
     {
         // Guard against excessive recursion to prevent stack overflow
         if (currentDepth > MaxRecursionDepth)
@@ -391,6 +401,8 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
 #endif
             return;
         }
+
+        cancellationToken.ThrowIfCancellationRequested();
 
         var type = obj.GetType();
 
@@ -403,6 +415,7 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
 
         foreach (var property in properties)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             try
             {
                 var value = property.GetValue(obj);
@@ -413,7 +426,7 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
 
                 if (value is IAsyncInitializer && TryAddToHashSet(visitedObjects, currentDepth, value))
                 {
-                    DiscoverNestedObjectsForTracking(value, visitedObjects, currentDepth + 1);
+                    DiscoverNestedObjectsForTracking(value, visitedObjects, currentDepth + 1, cancellationToken);
                 }
             }
             catch (OperationCanceledException)

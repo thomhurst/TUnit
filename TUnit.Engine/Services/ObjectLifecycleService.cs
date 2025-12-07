@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Core;
+using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Core.PropertyInjection;
 using TUnit.Core.PropertyInjection.Initialization;
@@ -28,7 +29,9 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     private readonly ObjectTracker _objectTracker;
 
     // Track initialization state per object
-    private readonly ConcurrentDictionary<object, TaskCompletionSource<bool>> _initializationTasks = new();
+    // Use ReferenceEqualityComparer to prevent objects with custom Equals from sharing initialization state
+    private readonly ConcurrentDictionary<object, TaskCompletionSource<bool>> _initializationTasks =
+        new(new Core.Helpers.ReferenceEqualityComparer());
 
     public ObjectLifecycleService(
         Lazy<PropertyInjector> propertyInjector,
@@ -98,7 +101,8 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
             return;
         }
 
-        var tasks = new List<Task>();
+        // Pre-allocate with expected capacity to avoid resizing
+        var tasks = new List<Task>(arguments.Length);
         foreach (var argument in arguments)
         {
             if (argument != null)
@@ -107,7 +111,10 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
             }
         }
 
-        await Task.WhenAll(tasks);
+        if (tasks.Count > 0)
+        {
+            await Task.WhenAll(tasks);
+        }
     }
 
     #endregion
@@ -191,20 +198,40 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     /// </summary>
     private async Task InitializeTrackedObjectsAsync(TestContext testContext, CancellationToken cancellationToken)
     {
-        var levels = testContext.TrackedObjects.Keys.OrderByDescending(level => level);
+        // Get levels without LINQ - use Array.Sort with reverse comparison for descending order
+        var trackedObjects = testContext.TrackedObjects;
+        var levelCount = trackedObjects.Count;
 
-        foreach (var level in levels)
+        if (levelCount > 0)
         {
-            var objectsAtLevel = testContext.TrackedObjects[level];
+            var levels = new int[levelCount];
+            trackedObjects.Keys.CopyTo(levels, 0);
+            Array.Sort(levels, (a, b) => b.CompareTo(a)); // Descending order
 
-            // Initialize each tracked object and its nested objects
-            foreach (var obj in objectsAtLevel)
+            foreach (var level in levels)
             {
-                // First initialize nested objects depth-first
-                await InitializeNestedObjectsForExecutionAsync(obj, cancellationToken);
+                if (!trackedObjects.TryGetValue(level, out var objectsAtLevel))
+                {
+                    continue;
+                }
 
-                // Then initialize the object itself
-                await ObjectInitializer.InitializeAsync(obj, cancellationToken);
+                // Copy to array under lock to prevent concurrent modification
+                object[] objectsCopy;
+                lock (objectsAtLevel)
+                {
+                    objectsCopy = new object[objectsAtLevel.Count];
+                    objectsAtLevel.CopyTo(objectsCopy);
+                }
+
+                // Initialize each tracked object and its nested objects
+                foreach (var obj in objectsCopy)
+                {
+                    // First initialize nested objects depth-first
+                    await InitializeNestedObjectsForExecutionAsync(obj, cancellationToken);
+
+                    // Then initialize the object itself
+                    await ObjectInitializer.InitializeAsync(obj, cancellationToken);
+                }
             }
         }
 
@@ -228,9 +255,17 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
 
             var objectsAtDepth = graph.GetObjectsAtDepth(depth);
 
-            // Initialize all IAsyncInitializer objects at this depth
-            await Task.WhenAll(objectsAtDepth
-                .Select(obj => ObjectInitializer.InitializeAsync(obj, cancellationToken).AsTask()));
+            // Pre-allocate task list without LINQ Select
+            var tasks = new List<Task>();
+            foreach (var obj in objectsAtDepth)
+            {
+                tasks.Add(ObjectInitializer.InitializeAsync(obj, cancellationToken).AsTask());
+            }
+
+            if (tasks.Count > 0)
+            {
+                await Task.WhenAll(tasks);
+            }
         }
     }
 
@@ -361,9 +396,17 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
 
             var objectsAtDepth = graph.GetObjectsAtDepth(depth);
 
-            // Only initialize IAsyncDiscoveryInitializer objects during discovery
-            await Task.WhenAll(objectsAtDepth
-                .Select(obj => ObjectInitializer.InitializeForDiscoveryAsync(obj, cancellationToken).AsTask()));
+            // Pre-allocate task list without LINQ Select
+            var tasks = new List<Task>();
+            foreach (var obj in objectsAtDepth)
+            {
+                tasks.Add(ObjectInitializer.InitializeForDiscoveryAsync(obj, cancellationToken).AsTask());
+            }
+
+            if (tasks.Count > 0)
+            {
+                await Task.WhenAll(tasks);
+            }
         }
     }
 

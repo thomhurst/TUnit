@@ -34,11 +34,33 @@ public sealed class ObjectGraph : IObjectGraph
         _objectsByDepth = objectsByDepth;
         _allObjects = allObjects;
 
-        // Use IsEmpty for thread-safe check before accessing Keys
-        MaxDepth = objectsByDepth.IsEmpty ? -1 : objectsByDepth.Keys.Max();
+        // Compute MaxDepth and sorted depths without LINQ to reduce allocations
+        var keyCount = objectsByDepth.Count;
+        if (keyCount == 0)
+        {
+            MaxDepth = -1;
+            _sortedDepthsDescending = [];
+        }
+        else
+        {
+            var keys = new int[keyCount];
+            objectsByDepth.Keys.CopyTo(keys, 0);
 
-        // Cache sorted depths (computed once, reused on each call to GetDepthsDescending)
-        _sortedDepthsDescending = objectsByDepth.Keys.OrderByDescending(d => d).ToArray();
+            // Find max manually
+            var maxDepth = int.MinValue;
+            foreach (var key in keys)
+            {
+                if (key > maxDepth)
+                {
+                    maxDepth = key;
+                }
+            }
+            MaxDepth = maxDepth;
+
+            // Sort in descending order using Array.Sort with reverse comparison
+            Array.Sort(keys, (a, b) => b.CompareTo(a));
+            _sortedDepthsDescending = keys;
+        }
 
         // Use Lazy<T> with ExecutionAndPublication for thread-safe single initialization
         _lazyReadOnlyObjectsByDepth = new Lazy<IReadOnlyDictionary<int, IReadOnlyCollection<object>>>(

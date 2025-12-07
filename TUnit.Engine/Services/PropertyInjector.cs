@@ -128,17 +128,29 @@ internal sealed class PropertyInjector
             return;
         }
 
-        var injectableArgs = arguments
-            .Where(arg => arg != null && PropertyInjectionCache.HasInjectableProperties(arg.GetType()))
-            .ToArray();
+        // Build list of injectable args without LINQ
+        var injectableArgs = new List<object>(arguments.Length);
+        foreach (var arg in arguments)
+        {
+            if (arg != null && PropertyInjectionCache.HasInjectableProperties(arg.GetType()))
+            {
+                injectableArgs.Add(arg);
+            }
+        }
 
-        if (injectableArgs.Length == 0)
+        if (injectableArgs.Count == 0)
         {
             return;
         }
 
-        await Task.WhenAll(injectableArgs.Select(arg =>
-            InjectPropertiesAsync(arg!, objectBag, methodMetadata, events)));
+        // Build task list without LINQ Select
+        var tasks = new List<Task>(injectableArgs.Count);
+        foreach (var arg in injectableArgs)
+        {
+            tasks.Add(InjectPropertiesAsync(arg, objectBag, methodMetadata, events));
+        }
+
+        await Task.WhenAll(tasks);
     }
 
     private async Task InjectPropertiesRecursiveAsync(
@@ -201,9 +213,13 @@ internal sealed class PropertyInjector
             return;
         }
 
-        // Initialize properties in parallel
-        await Task.WhenAll(properties.Select(metadata =>
-            InjectSourceGeneratedPropertyAsync(instance, metadata, objectBag, methodMetadata, events, visitedObjects)));
+        // Initialize properties in parallel without LINQ Select
+        var tasks = new Task[properties.Length];
+        for (var i = 0; i < properties.Length; i++)
+        {
+            tasks[i] = InjectSourceGeneratedPropertyAsync(instance, properties[i], objectBag, methodMetadata, events, visitedObjects);
+        }
+        await Task.WhenAll(tasks);
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Source-gen properties are AOT-safe")]
@@ -289,8 +305,14 @@ internal sealed class PropertyInjector
             return;
         }
 
-        await Task.WhenAll(properties.Select(pair =>
-            InjectReflectionPropertyAsync(instance, pair.Property, pair.DataSource, objectBag, methodMetadata, events, visitedObjects)));
+        // Initialize properties in parallel without LINQ Select
+        var tasks = new Task[properties.Length];
+        for (var i = 0; i < properties.Length; i++)
+        {
+            var pair = properties[i];
+            tasks[i] = InjectReflectionPropertyAsync(instance, pair.Property, pair.DataSource, objectBag, methodMetadata, events, visitedObjects);
+        }
+        await Task.WhenAll(tasks);
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT")]
@@ -396,9 +418,13 @@ internal sealed class PropertyInjector
             return;
         }
 
-        // Resolve properties in parallel
-        await Task.WhenAll(properties.Select(metadata =>
-            ResolveAndCacheSourceGeneratedPropertyAsync(metadata, objectBag, methodMetadata, events, testContext)));
+        // Resolve properties in parallel without LINQ Select
+        var tasks = new Task[properties.Length];
+        for (var i = 0; i < properties.Length; i++)
+        {
+            tasks[i] = ResolveAndCacheSourceGeneratedPropertyAsync(properties[i], objectBag, methodMetadata, events, testContext);
+        }
+        await Task.WhenAll(tasks);
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Source-gen properties are AOT-safe")]
@@ -455,8 +481,14 @@ internal sealed class PropertyInjector
             return;
         }
 
-        await Task.WhenAll(properties.Select(pair =>
-            ResolveAndCacheReflectionPropertyAsync(pair.Property, pair.DataSource, objectBag, methodMetadata, events, testContext)));
+        // Resolve properties in parallel without LINQ Select
+        var tasks = new Task[properties.Length];
+        for (var i = 0; i < properties.Length; i++)
+        {
+            var pair = properties[i];
+            tasks[i] = ResolveAndCacheReflectionPropertyAsync(pair.Property, pair.DataSource, objectBag, methodMetadata, events, testContext);
+        }
+        await Task.WhenAll(tasks);
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT")]
