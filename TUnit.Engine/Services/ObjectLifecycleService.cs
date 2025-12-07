@@ -219,7 +219,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     /// </summary>
     private async Task InitializeNestedObjectsForExecutionAsync(object rootObject, CancellationToken cancellationToken)
     {
-        var graph = _objectGraphDiscoveryService.DiscoverNestedObjectGraph(rootObject);
+        var graph = _objectGraphDiscoveryService.DiscoverNestedObjectGraph(rootObject, cancellationToken);
 
         // Initialize from deepest to shallowest (skip depth 0 which is the root itself)
         foreach (var depth in graph.GetDepthsDescending())
@@ -333,23 +333,18 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
         objectBag ??= new ConcurrentDictionary<string, object?>();
         events ??= new TestContextEvents();
 
-        try
-        {
-            // Step 1: Inject properties
-            await PropertyInjector.InjectPropertiesAsync(obj, objectBag, methodMetadata, events);
+        // Let exceptions propagate naturally - don't wrap in InvalidOperationException
+        // This aligns with ObjectInitializer behavior and provides cleaner stack traces
 
-            // Step 2: Initialize nested objects depth-first (discovery-only)
-            await InitializeNestedObjectsForDiscoveryAsync(obj, cancellationToken);
+        // Step 1: Inject properties
+        await PropertyInjector.InjectPropertiesAsync(obj, objectBag, methodMetadata, events);
 
-            // Step 3: Call IAsyncDiscoveryInitializer only (not regular IAsyncInitializer)
-            // Regular IAsyncInitializer objects are deferred to execution phase via InitializeTestObjectsAsync
-            await ObjectInitializer.InitializeForDiscoveryAsync(obj, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException(
-                $"Failed to initialize object of type '{obj.GetType().Name}': {ex.Message}", ex);
-        }
+        // Step 2: Initialize nested objects depth-first (discovery-only)
+        await InitializeNestedObjectsForDiscoveryAsync(obj, cancellationToken);
+
+        // Step 3: Call IAsyncDiscoveryInitializer only (not regular IAsyncInitializer)
+        // Regular IAsyncInitializer objects are deferred to execution phase via InitializeTestObjectsAsync
+        await ObjectInitializer.InitializeForDiscoveryAsync(obj, cancellationToken);
     }
 
     /// <summary>
@@ -357,7 +352,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     /// </summary>
     private async Task InitializeNestedObjectsForDiscoveryAsync(object rootObject, CancellationToken cancellationToken)
     {
-        var graph = _objectGraphDiscoveryService.DiscoverNestedObjectGraph(rootObject);
+        var graph = _objectGraphDiscoveryService.DiscoverNestedObjectGraph(rootObject, cancellationToken);
 
         // Initialize from deepest to shallowest (skip depth 0 which is the root itself)
         foreach (var depth in graph.GetDepthsDescending())

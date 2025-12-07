@@ -20,9 +20,10 @@ namespace TUnit.Core;
 /// </remarks>
 public static class ObjectInitializer
 {
-    // Use ConcurrentDictionary with reference equality for thread-safe tracking
-    // This replaces ConditionalWeakTable which doesn't support explicit cleanup
-    private static readonly ConcurrentDictionary<object, Task> InitializationTasks =
+    // Use Lazy<Task> pattern to ensure InitializeAsync is called exactly once per object,
+    // even under contention. GetOrAdd's factory can be called multiple times, but with
+    // Lazy<Task> + ExecutionAndPublication mode, only one initialization actually runs.
+    private static readonly ConcurrentDictionary<object, Lazy<Task>> InitializationTasks =
         new(new Helpers.ReferenceEqualityComparer());
 
     /// <summary>
@@ -79,7 +80,10 @@ public static class ObjectInitializer
 
         // Use Status == RanToCompletion to ensure we don't return true for faulted/canceled tasks
         // (IsCompletedSuccessfully is not available in netstandard2.0)
-        return InitializationTasks.TryGetValue(obj, out var task) && task.Status == TaskStatus.RanToCompletion;
+        // With Lazy<Task>, we need to check if the Lazy has a value AND that value completed successfully
+        return InitializationTasks.TryGetValue(obj, out var lazyTask) &&
+               lazyTask.IsValueCreated &&
+               lazyTask.Value.Status == TaskStatus.RanToCompletion;
     }
 
     /// <summary>
@@ -98,13 +102,30 @@ public static class ObjectInitializer
         IAsyncInitializer asyncInitializer,
         CancellationToken cancellationToken)
     {
-        // Use GetOrAdd for thread-safe deduplication without holding lock during async
-        // Note: GetOrAdd's factory may be called multiple times under contention,
-        // but only one result is stored. Multiple InitializeAsync() calls is safe
-        // since we only await the winning task.
-        var initializationTask = InitializationTasks.GetOrAdd(obj, _ => asyncInitializer.InitializeAsync());
+        // Use Lazy<Task> with ExecutionAndPublication mode to ensure InitializeAsync
+        // is called exactly once, even under contention. GetOrAdd's factory may be
+        // called multiple times, but Lazy ensures only one initialization runs.
+        var lazyTask = InitializationTasks.GetOrAdd(obj,
+            _ => new Lazy<Task>(
+                () => asyncInitializer.InitializeAsync(),
+                LazyThreadSafetyMode.ExecutionAndPublication));
 
-        // Wait for initialization with cancellation support
-        await initializationTask.WaitAsync(cancellationToken);
+        try
+        {
+            // Wait for initialization with cancellation support
+            await lazyTask.Value.WaitAsync(cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            // Propagate cancellation without modification
+            throw;
+        }
+        catch
+        {
+            // Remove failed initialization from cache to allow retry
+            // This is important for transient failures that may succeed on retry
+            InitializationTasks.TryRemove(obj, out _);
+            throw;
+        }
     }
 }

@@ -26,39 +26,51 @@ public interface IObjectGraphDiscoverer
     /// Discovers all objects from a test context, organized by depth level.
     /// </summary>
     /// <param name="testContext">The test context to discover objects from.</param>
+    /// <param name="cancellationToken">Optional cancellation token for long-running discovery.</param>
     /// <returns>
     /// An <see cref="IObjectGraph"/> containing all discovered objects organized by depth.
     /// Depth 0 contains root objects (arguments and property values).
     /// Higher depths contain nested objects.
     /// </returns>
-    IObjectGraph DiscoverObjectGraph(TestContext testContext);
+    IObjectGraph DiscoverObjectGraph(TestContext testContext, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Discovers nested objects from a single root object, organized by depth.
     /// </summary>
     /// <param name="rootObject">The root object to discover nested objects from.</param>
+    /// <param name="cancellationToken">Optional cancellation token for long-running discovery.</param>
     /// <returns>
     /// An <see cref="IObjectGraph"/> containing all discovered objects organized by depth.
     /// Depth 0 contains the root object itself.
     /// Higher depths contain nested objects.
     /// </returns>
-    IObjectGraph DiscoverNestedObjectGraph(object rootObject);
+    IObjectGraph DiscoverNestedObjectGraph(object rootObject, CancellationToken cancellationToken = default);
 }
 
 /// <summary>
 /// Represents a discovered object graph organized by depth level.
 /// </summary>
+/// <remarks>
+/// Collections are exposed as read-only to prevent callers from corrupting internal state.
+/// Use <see cref="GetObjectsAtDepth"/> and <see cref="GetDepthsDescending"/> for safe iteration.
+/// </remarks>
 public interface IObjectGraph
 {
     /// <summary>
     /// Gets objects organized by depth (0 = root arguments, 1+ = nested).
     /// </summary>
-    ConcurrentDictionary<int, HashSet<object>> ObjectsByDepth { get; }
+    /// <remarks>
+    /// Returns a read-only view. Use <see cref="GetObjectsAtDepth"/> for iteration.
+    /// </remarks>
+    IReadOnlyDictionary<int, IReadOnlyCollection<object>> ObjectsByDepth { get; }
 
     /// <summary>
     /// Gets all unique objects in the graph.
     /// </summary>
-    HashSet<object> AllObjects { get; }
+    /// <remarks>
+    /// Returns a read-only view to prevent modification.
+    /// </remarks>
+    IReadOnlyCollection<object> AllObjects { get; }
 
     /// <summary>
     /// Gets the maximum nesting depth (-1 if empty).

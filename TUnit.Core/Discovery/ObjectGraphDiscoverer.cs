@@ -25,6 +25,18 @@ namespace TUnit.Core.Discovery;
 /// </remarks>
 public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
 {
+    /// <summary>
+    /// Maximum recursion depth for object graph discovery.
+    /// Prevents stack overflow on deep or circular object graphs.
+    /// </summary>
+    private const int MaxRecursionDepth = 50;
+
+    /// <summary>
+    /// Maximum size for the property cache before cleanup is triggered.
+    /// Prevents unbounded memory growth in long-running test sessions.
+    /// </summary>
+    private const int MaxCacheSize = 10000;
+
     // Cache for GetProperties() results per type - eliminates repeated reflection calls
     private static readonly ConcurrentDictionary<Type, PropertyInfo[]> PropertyCache = new();
 
@@ -43,7 +55,7 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
     ];
 
     /// <inheritdoc />
-    public IObjectGraph DiscoverObjectGraph(TestContext testContext)
+    public IObjectGraph DiscoverObjectGraph(TestContext testContext, CancellationToken cancellationToken = default)
     {
         var objectsByDepth = new ConcurrentDictionary<int, HashSet<object>>();
         var allObjects = new HashSet<object>();
@@ -55,31 +67,34 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
         // Collect root-level objects (depth 0)
         foreach (var classArgument in testDetails.TestClassArguments)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             if (classArgument != null && visitedObjects.TryAdd(classArgument, 0))
             {
                 AddToDepth(objectsByDepth, 0, classArgument);
                 allObjects.Add(classArgument);
-                DiscoverNestedObjects(classArgument, objectsByDepth, visitedObjects, allObjects, currentDepth: 1);
+                DiscoverNestedObjects(classArgument, objectsByDepth, visitedObjects, allObjects, currentDepth: 1, cancellationToken);
             }
         }
 
         foreach (var methodArgument in testDetails.TestMethodArguments)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             if (methodArgument != null && visitedObjects.TryAdd(methodArgument, 0))
             {
                 AddToDepth(objectsByDepth, 0, methodArgument);
                 allObjects.Add(methodArgument);
-                DiscoverNestedObjects(methodArgument, objectsByDepth, visitedObjects, allObjects, currentDepth: 1);
+                DiscoverNestedObjects(methodArgument, objectsByDepth, visitedObjects, allObjects, currentDepth: 1, cancellationToken);
             }
         }
 
         foreach (var property in testDetails.TestClassInjectedPropertyArguments.Values)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             if (property != null && visitedObjects.TryAdd(property, 0))
             {
                 AddToDepth(objectsByDepth, 0, property);
                 allObjects.Add(property);
-                DiscoverNestedObjects(property, objectsByDepth, visitedObjects, allObjects, currentDepth: 1);
+                DiscoverNestedObjects(property, objectsByDepth, visitedObjects, allObjects, currentDepth: 1, cancellationToken);
             }
         }
 
@@ -87,7 +102,7 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
     }
 
     /// <inheritdoc />
-    public IObjectGraph DiscoverNestedObjectGraph(object rootObject)
+    public IObjectGraph DiscoverNestedObjectGraph(object rootObject, CancellationToken cancellationToken = default)
     {
         var objectsByDepth = new ConcurrentDictionary<int, HashSet<object>>();
         var allObjects = new HashSet<object>();
@@ -97,7 +112,7 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
         {
             AddToDepth(objectsByDepth, 0, rootObject);
             allObjects.Add(rootObject);
-            DiscoverNestedObjects(rootObject, objectsByDepth, visitedObjects, allObjects, currentDepth: 1);
+            DiscoverNestedObjects(rootObject, objectsByDepth, visitedObjects, allObjects, currentDepth: 1, cancellationToken);
         }
 
         return new ObjectGraph(objectsByDepth, allObjects);
@@ -150,8 +165,18 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
         ConcurrentDictionary<int, HashSet<object>> objectsByDepth,
         ConcurrentDictionary<object, byte> visitedObjects,
         HashSet<object> allObjects,
-        int currentDepth)
+        int currentDepth,
+        CancellationToken cancellationToken)
     {
+        // Guard against excessive recursion to prevent stack overflow
+        if (currentDepth > MaxRecursionDepth)
+        {
+            Debug.WriteLine($"[ObjectGraphDiscoverer] Max recursion depth ({MaxRecursionDepth}) reached for type '{obj.GetType().Name}'");
+            return;
+        }
+
+        cancellationToken.ThrowIfCancellationRequested();
+
         var plan = PropertyInjectionCache.GetOrCreatePlan(obj.GetType());
 
         // First, discover objects from injectable properties (data source attributes)
@@ -162,6 +187,7 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
             {
                 foreach (var metadata in plan.SourceGeneratedProperties)
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
                     var property = metadata.ContainingType.GetProperty(metadata.PropertyName);
                     if (property == null || !property.CanRead)
                     {
@@ -176,13 +202,14 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
 
                     AddToDepth(objectsByDepth, currentDepth, value);
                     allObjects.Add(value);
-                    DiscoverNestedObjects(value, objectsByDepth, visitedObjects, allObjects, currentDepth + 1);
+                    DiscoverNestedObjects(value, objectsByDepth, visitedObjects, allObjects, currentDepth + 1, cancellationToken);
                 }
             }
             else if (plan.ReflectionProperties.Length > 0)
             {
                 foreach (var (property, _) in plan.ReflectionProperties)
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
                     var value = property.GetValue(obj);
                     if (value == null || !visitedObjects.TryAdd(value, 0))
                     {
@@ -191,13 +218,13 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
 
                     AddToDepth(objectsByDepth, currentDepth, value);
                     allObjects.Add(value);
-                    DiscoverNestedObjects(value, objectsByDepth, visitedObjects, allObjects, currentDepth + 1);
+                    DiscoverNestedObjects(value, objectsByDepth, visitedObjects, allObjects, currentDepth + 1, cancellationToken);
                 }
             }
         }
 
         // Also discover nested IAsyncInitializer objects from ALL properties
-        DiscoverNestedInitializerObjects(obj, objectsByDepth, visitedObjects, allObjects, currentDepth);
+        DiscoverNestedInitializerObjects(obj, objectsByDepth, visitedObjects, allObjects, currentDepth, cancellationToken);
     }
 
     /// <summary>
@@ -209,6 +236,13 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
         ConcurrentDictionary<int, HashSet<object>> visitedObjects,
         int currentDepth)
     {
+        // Guard against excessive recursion to prevent stack overflow
+        if (currentDepth > MaxRecursionDepth)
+        {
+            Debug.WriteLine($"[ObjectGraphDiscoverer] Max recursion depth ({MaxRecursionDepth}) reached for type '{obj.GetType().Name}'");
+            return;
+        }
+
         var plan = PropertyInjectionCache.GetOrCreatePlan(obj.GetType());
 
         // Check SourceRegistrar.IsEnabled for compatibility with existing TrackableObjectGraphProvider behavior
@@ -271,8 +305,18 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
         ConcurrentDictionary<int, HashSet<object>> objectsByDepth,
         ConcurrentDictionary<object, byte> visitedObjects,
         HashSet<object> allObjects,
-        int currentDepth)
+        int currentDepth,
+        CancellationToken cancellationToken)
     {
+        // Guard against excessive recursion to prevent stack overflow
+        if (currentDepth > MaxRecursionDepth)
+        {
+            Debug.WriteLine($"[ObjectGraphDiscoverer] Max recursion depth ({MaxRecursionDepth}) reached for type '{obj.GetType().Name}'");
+            return;
+        }
+
+        cancellationToken.ThrowIfCancellationRequested();
+
         var type = obj.GetType();
 
         // Skip types that don't need discovery
@@ -286,6 +330,7 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
 
         foreach (var property in properties)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             try
             {
                 var value = property.GetValue(obj);
@@ -299,8 +344,12 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
                 {
                     AddToDepth(objectsByDepth, currentDepth, value);
                     allObjects.Add(value);
-                    DiscoverNestedObjects(value, objectsByDepth, visitedObjects, allObjects, currentDepth + 1);
+                    DiscoverNestedObjects(value, objectsByDepth, visitedObjects, allObjects, currentDepth + 1, cancellationToken);
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                throw; // Propagate cancellation
             }
             catch (Exception ex)
             {
@@ -321,6 +370,13 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
         ConcurrentDictionary<int, HashSet<object>> visitedObjects,
         int currentDepth)
     {
+        // Guard against excessive recursion to prevent stack overflow
+        if (currentDepth > MaxRecursionDepth)
+        {
+            Debug.WriteLine($"[ObjectGraphDiscoverer] Max recursion depth ({MaxRecursionDepth}) reached for type '{obj.GetType().Name}'");
+            return;
+        }
+
         var type = obj.GetType();
 
         if (ShouldSkipType(type))
@@ -354,14 +410,36 @@ public sealed class ObjectGraphDiscoverer : IObjectGraphDiscoverer
 
     /// <summary>
     /// Gets cached properties for a type, filtering to only readable non-indexed properties.
+    /// Includes periodic cache cleanup to prevent unbounded memory growth.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection fallback for nested initializers. In AOT, source-gen handles primary discovery.")]
     private static PropertyInfo[] GetCachedProperties(Type type)
     {
+        // Periodic cleanup if cache grows too large to prevent memory leaks
+        if (PropertyCache.Count > MaxCacheSize)
+        {
+            // Clear half the cache (simple approach - non-LRU for performance)
+            var keysToRemove = PropertyCache.Keys.Take(MaxCacheSize / 2).ToList();
+            foreach (var key in keysToRemove)
+            {
+                PropertyCache.TryRemove(key, out _);
+            }
+
+            Debug.WriteLine($"[ObjectGraphDiscoverer] PropertyCache exceeded {MaxCacheSize} entries, cleared {keysToRemove.Count} entries");
+        }
+
         return PropertyCache.GetOrAdd(type, t =>
             t.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
              .Where(p => p.CanRead && p.GetIndexParameters().Length == 0)
              .ToArray());
+    }
+
+    /// <summary>
+    /// Clears the property cache. Called at end of test session to release memory.
+    /// </summary>
+    public static void ClearCache()
+    {
+        PropertyCache.Clear();
     }
 
     /// <summary>

@@ -30,16 +30,16 @@ internal sealed class ObjectGraphDiscoveryService
     /// <summary>
     /// Discovers all objects from test context arguments and properties, organized by depth level.
     /// </summary>
-    public IObjectGraph DiscoverObjectGraph(TestContext testContext)
+    public IObjectGraph DiscoverObjectGraph(TestContext testContext, CancellationToken cancellationToken = default)
     {
-        return _discoverer.DiscoverObjectGraph(testContext);
+        return _discoverer.DiscoverObjectGraph(testContext, cancellationToken);
     }
 
     /// <summary>
     /// Discovers nested objects from a single root object, organized by depth.
     /// </summary>
-    public IObjectGraph DiscoverNestedObjectGraph(object rootObject)
+    public IObjectGraph DiscoverNestedObjectGraph(object rootObject, CancellationToken cancellationToken = default)
     {
-        return _discoverer.DiscoverNestedObjectGraph(rootObject);
+        return _discoverer.DiscoverNestedObjectGraph(rootObject, cancellationToken);
     }
 }
