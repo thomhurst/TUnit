@@ -1,21 +1,56 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace TUnit.Core.PropertyInjection;
 
 /// <summary>
-/// Factory for creating property setters.
+/// Factory for creating property setters with caching for performance.
 /// Consolidates all property setter creation logic in one place following DRY principle.
 /// </summary>
+/// <remarks>
+/// Setters are cached using the PropertyInfo as the key to avoid repeated reflection calls.
+/// This significantly improves performance when the same property is accessed multiple times
+/// (e.g., in test retries or shared test data scenarios).
+/// </remarks>
 internal static class PropertySetterFactory
 {
+    // Cache setters per PropertyInfo to avoid repeated reflection
+    private static readonly ConcurrentDictionary<PropertyInfo, Action<object, object?>> SetterCache = new();
+
+    /// <summary>
+    /// Gets or creates a setter delegate for the given property.
+    /// Uses caching to avoid repeated reflection calls.
+    /// </summary>
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Backing field access for init-only properties requires reflection")]
+    #endif
+    public static Action<object, object?> GetOrCreateSetter(PropertyInfo property)
+    {
+        return SetterCache.GetOrAdd(property, CreateSetterCore);
+    }
+
     /// <summary>
     /// Creates a setter delegate for the given property.
+    /// Consider using <see cref="GetOrCreateSetter"/> for better performance through caching.
     /// </summary>
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Backing field access for init-only properties requires reflection")]
     #endif
     public static Action<object, object?> CreateSetter(PropertyInfo property)
+    {
+        // Delegate to cached version for consistency
+        return GetOrCreateSetter(property);
+    }
+
+    /// <summary>
+    /// Core implementation for creating a setter delegate.
+    /// Called by GetOrCreateSetter for caching.
+    /// </summary>
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Backing field access for init-only properties requires reflection")]
+    #endif
+    private static Action<object, object?> CreateSetterCore(PropertyInfo property)
     {
         if (property.CanWrite && property.SetMethod != null)
         {

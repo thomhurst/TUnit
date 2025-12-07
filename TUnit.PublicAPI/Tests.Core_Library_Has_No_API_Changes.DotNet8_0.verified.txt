@@ -1000,10 +1000,6 @@ namespace
         public .<string> NotInParallelConstraintKeys { get; init; }
         public int Order { get; set; }
     }
-    public static class ObjectInitializer
-    {
-        public static . InitializeAsync(object? obj, .CancellationToken cancellationToken = default) { }
-    }
     public class ParallelGroupAttribute : .TUnitAttribute, ., .
     {
         public ParallelGroupAttribute(string group) { }
@@ -2021,14 +2017,23 @@ namespace .Helpers
         [.("MakeGenericType requires runtime code generation")]
         public static  MakeGenericTypeSafe( genericTypeDefinition, params [] typeArguments) { }
     }
+    public static class ParallelTaskHelper
+    {
+        public static . ForEachAsync<T>(.<T> items, <T, .> action) { }
+        public static . ForEachAsync<T>(T[] items, <T, .> action) { }
+        public static . ForEachAsync<T>(.<T> items, <T, .CancellationToken, .> action, .CancellationToken cancellationToken) { }
+        public static . ForEachAsync<T>(T[] items, <T, .CancellationToken, .> action, .CancellationToken cancellationToken) { }
+        public static . ForEachWithIndexAsync<T>(T[] items, <T, int, .> action) { }
+        public static . ForEachWithIndexAsync<T>(T[] items, <T, int, .CancellationToken, .> action, .CancellationToken cancellationToken) { }
+    }
     public class ProcessorCountParallelLimit : .
     {
         public ProcessorCountParallelLimit() { }
         public int Limit { get; }
     }
-    public class ReferenceEqualityComparer : .<object>
+    public sealed class ReferenceEqualityComparer : .<object>
     {
-        public ReferenceEqualityComparer() { }
+        public static readonly . Instance;
         public bool Equals(object? x, object? y) { }
         public int GetHashCode(object obj) { }
     }
@@ -2228,6 +2233,10 @@ namespace .Interfaces
     public interface IDataSource
     {
         .<<object?[]>> GenerateDataFactories(.DataSourceContext context);
+    }
+    public interface IDisposer
+    {
+        . DisposeAsync(object? obj);
     }
     public interface IEventReceiver
     {
@@ -2586,6 +2595,14 @@ namespace .Models
         public bool HasStronglyTypedDelegates { get; }
         public <.<object?[]>>? MethodDataResolver { get; set; }
         public ? MethodInvoker { get; set; }
+    }
+}
+namespace .PropertyInjection
+{
+    public static class PropertyCacheKeyGenerator
+    {
+        public static string GetCacheKey(.PropertyInfo property) { }
+        public static string GetCacheKey(..PropertyInjectionMetadata metadata) { }
     }
 }
 namespace .Services

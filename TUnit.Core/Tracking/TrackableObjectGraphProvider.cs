@@ -1,57 +1,47 @@
-﻿using System.Collections.Concurrent;
-using System.Diagnostics.CodeAnalysis;
-using TUnit.Core.PropertyInjection;
+using System.Collections.Concurrent;
+using TUnit.Core.Discovery;
+using TUnit.Core.Interfaces;
 using TUnit.Core.StaticProperties;
 
 namespace TUnit.Core.Tracking;
 
+/// <summary>
+/// Provides trackable objects from test contexts for lifecycle management.
+/// Delegates to <see cref="ObjectGraphDiscoverer"/> for the actual discovery logic.
+/// </summary>
 internal class TrackableObjectGraphProvider
 {
-    public ConcurrentDictionary<int, HashSet<object>> GetTrackableObjects(TestContext testContext)
+    private readonly IObjectGraphDiscoverer _discoverer;
+
+    /// <summary>
+    /// Creates a new instance with the default discoverer.
+    /// </summary>
+    public TrackableObjectGraphProvider() : this(new ObjectGraphDiscoverer())
     {
-        var visitedObjects = testContext.TrackedObjects;
-
-        var testDetails = testContext.Metadata.TestDetails;
-
-        foreach (var classArgument in testDetails.TestClassArguments)
-        {
-            if (classArgument != null && visitedObjects.GetOrAdd(0, []).Add(classArgument))
-            {
-                AddNestedTrackableObjects(classArgument, visitedObjects, 1);
-            }
-        }
-
-        foreach (var methodArgument in testDetails.TestMethodArguments)
-        {
-            if (methodArgument != null && visitedObjects.GetOrAdd(0, []).Add(methodArgument))
-            {
-                AddNestedTrackableObjects(methodArgument, visitedObjects, 1);
-            }
-        }
-
-        foreach (var property in testDetails.TestClassInjectedPropertyArguments.Values)
-        {
-            if (property != null && visitedObjects.GetOrAdd(0, []).Add(property))
-            {
-                AddNestedTrackableObjects(property, visitedObjects, 1);
-            }
-        }
-
-        return visitedObjects;
-    }
-
-    private static void AddToLevel(Dictionary<int, List<object>> objectsByLevel, int level, object obj)
-    {
-        if (!objectsByLevel.TryGetValue(level, out var list))
-        {
-            list = [];
-            objectsByLevel[level] = list;
-        }
-        list.Add(obj);
     }
 
     /// <summary>
-    /// Get trackable objects for static properties (session-level)
+    /// Creates a new instance with a custom discoverer (for testing).
+    /// </summary>
+    public TrackableObjectGraphProvider(IObjectGraphDiscoverer discoverer)
+    {
+        _discoverer = discoverer;
+    }
+
+    /// <summary>
+    /// Gets trackable objects from a test context, organized by depth level.
+    /// Delegates to the shared IObjectGraphDiscoverer to eliminate code duplication.
+    /// </summary>
+    /// <param name="testContext">The test context to get trackable objects from.</param>
+    /// <param name="cancellationToken">Optional cancellation token for long-running discovery.</param>
+    public ConcurrentDictionary<int, HashSet<object>> GetTrackableObjects(TestContext testContext, CancellationToken cancellationToken = default)
+    {
+        // OCP-compliant: Use the interface method directly instead of type-checking
+        return _discoverer.DiscoverAndTrackObjects(testContext, cancellationToken);
+    }
+
+    /// <summary>
+    /// Gets trackable objects for static properties (session-level).
     /// </summary>
     public IEnumerable<object> GetStaticPropertyTrackableObjects()
     {
@@ -60,69 +50,6 @@ internal class TrackableObjectGraphProvider
             if (value != null)
             {
                 yield return value;
-            }
-        }
-    }
-
-    private void AddNestedTrackableObjects(object obj, ConcurrentDictionary<int, HashSet<object>> visitedObjects, int currentDepth)
-    {
-        var plan = PropertyInjectionCache.GetOrCreatePlan(obj.GetType());
-
-        if(!SourceRegistrar.IsEnabled)
-        {
-            foreach (var prop in plan.ReflectionProperties)
-            {
-                var value = prop.Property.GetValue(obj);
-
-                if (value == null)
-                {
-                    continue;
-                }
-
-                // Check if already visited before yielding to prevent duplicates
-                if (!visitedObjects.GetOrAdd(currentDepth, []).Add(value))
-                {
-                    continue;
-                }
-
-                if (!PropertyInjectionCache.HasInjectableProperties(value.GetType()))
-                {
-                    continue;
-                }
-
-                AddNestedTrackableObjects(value, visitedObjects, currentDepth + 1);
-            }
-        }
-        else
-        {
-            foreach (var metadata in plan.SourceGeneratedProperties)
-            {
-                var property = metadata.ContainingType.GetProperty(metadata.PropertyName);
-
-                if (property == null || !property.CanRead)
-                {
-                    continue;
-                }
-
-                var value = property.GetValue(obj);
-
-                if (value == null)
-                {
-                    continue;
-                }
-
-                // Check if already visited before yielding to prevent duplicates
-                if (!visitedObjects.GetOrAdd(currentDepth, []).Add(value))
-                {
-                    continue;
-                }
-
-                if (!PropertyInjectionCache.HasInjectableProperties(value.GetType()))
-                {
-                    continue;
-                }
-
-                AddNestedTrackableObjects(value, visitedObjects, currentDepth + 1);
             }
         }
     }

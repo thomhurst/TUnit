@@ -28,12 +28,13 @@ public class Tests2117
         """)]
     public async Task IsEquivalent_Fail(int[] a, int[] b, CollectionOrdering? collectionOrdering, string expectedError)
     {
-        await Assert.That(async () =>
+        var exception = await Assert.That(async () =>
                 await (collectionOrdering is null
                     ? Assert.That(a).IsEquivalentTo(b)
                     : Assert.That(a).IsEquivalentTo(b, collectionOrdering.Value))
-            ).Throws<AssertionException>()
-            .WithMessage(expectedError);
+            ).Throws<AssertionException>();
+
+        await Assert.That(exception.Message.NormalizeLineEndings()).IsEqualTo(expectedError.NormalizeLineEndings());
     }
 
     [Test]
@@ -60,11 +61,12 @@ public class Tests2117
         """)]
     public async Task IsNotEquivalent_Fail(int[] a, int[] b, CollectionOrdering? collectionOrdering, string expectedError)
     {
-        await Assert.That(async () =>
+        var exception = await Assert.That(async () =>
                 await (collectionOrdering is null
                     ? Assert.That(a).IsNotEquivalentTo(b)
                     : Assert.That(a).IsNotEquivalentTo(b, collectionOrdering.Value))
-            ).Throws<AssertionException>()
-            .WithMessage(expectedError);
+            ).Throws<AssertionException>();
+
+        await Assert.That(exception.Message.NormalizeLineEndings()).IsEqualTo(expectedError.NormalizeLineEndings());
     }
 }

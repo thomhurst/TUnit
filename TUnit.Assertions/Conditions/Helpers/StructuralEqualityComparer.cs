@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
 
 namespace TUnit.Assertions.Conditions.Helpers;
 
@@ -36,12 +35,12 @@ public sealed class StructuralEqualityComparer<T> : IEqualityComparer<T>
 
         var type = typeof(T);
 
-        if (IsPrimitiveType(type))
+        if (TypeHelper.IsPrimitiveOrWellKnownType(type))
         {
             return EqualityComparer<T>.Default.Equals(x, y);
         }
 
-        return CompareStructurally(x, y, new HashSet<object>(new ReferenceEqualityComparer()));
+        return CompareStructurally(x, y, new HashSet<object>(ReferenceEqualityComparer<object>.Instance));
     }
 
     public int GetHashCode(T obj)
@@ -52,23 +51,6 @@ public sealed class StructuralEqualityComparer<T> : IEqualityComparer<T>
         }
 
         return EqualityComparer<T>.Default.GetHashCode(obj);
-    }
-
-    private static bool IsPrimitiveType(Type type)
-    {
-        return type.IsPrimitive
-               || type.IsEnum
-               || type == typeof(string)
-               || type == typeof(decimal)
-               || type == typeof(DateTime)
-               || type == typeof(DateTimeOffset)
-               || type == typeof(TimeSpan)
-               || type == typeof(Guid)
-#if NET6_0_OR_GREATER
-               || type == typeof(DateOnly)
-               || type == typeof(TimeOnly)
-#endif
-            ;
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "GetType() is acceptable for runtime structural comparison")]
@@ -87,7 +69,7 @@ public sealed class StructuralEqualityComparer<T> : IEqualityComparer<T>
         var xType = x.GetType();
         var yType = y.GetType();
 
-        if (IsPrimitiveType(xType))
+        if (TypeHelper.IsPrimitiveOrWellKnownType(xType))
         {
             return Equals(x, y);
         }
@@ -121,12 +103,12 @@ public sealed class StructuralEqualityComparer<T> : IEqualityComparer<T>
             return true;
         }
 
-        var members = GetMembersToCompare(xType);
+        var members = ReflectionHelper.GetMembersToCompare(xType);
 
         foreach (var member in members)
         {
-            var xValue = GetMemberValue(x, member);
-            var yValue = GetMemberValue(y, member);
+            var xValue = ReflectionHelper.GetMemberValue(x, member);
+            var yValue = ReflectionHelper.GetMemberValue(y, member);
 
             if (!CompareStructurally(xValue, yValue, visited))
             {
@@ -135,29 +117,5 @@ public sealed class StructuralEqualityComparer<T> : IEqualityComparer<T>
         }
 
         return true;
-    }
-
-    private static List<MemberInfo> GetMembersToCompare([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields)] Type type)
-    {
-        var members = new List<MemberInfo>();
-        members.AddRange(type.GetProperties(BindingFlags.Public | BindingFlags.Instance));
-        members.AddRange(type.GetFields(BindingFlags.Public | BindingFlags.Instance));
-        return members;
-    }
-
-    private static object? GetMemberValue(object obj, MemberInfo member)
-    {
-        return member switch
-        {
-            PropertyInfo prop => prop.GetValue(obj),
-            FieldInfo field => field.GetValue(obj),
-            _ => throw new InvalidOperationException($"Unknown member type: {member.GetType()}")
-        };
-    }
-
-    private sealed class ReferenceEqualityComparer : IEqualityComparer<object>
-    {
-        public new bool Equals(object? x, object? y) => ReferenceEquals(x, y);
-        public int GetHashCode(object obj) => System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(obj);
     }
 }

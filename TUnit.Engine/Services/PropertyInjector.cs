@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core;
+using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Interfaces.SourceGenerator;
 using TUnit.Core.PropertyInjection;
@@ -14,17 +15,21 @@ namespace TUnit.Engine.Services;
 /// Follows Single Responsibility Principle - only injects property values, doesn't initialize objects.
 /// Uses Lazy initialization to break circular dependencies without manual Initialize() calls.
 /// </summary>
+/// <remarks>
+/// Depends on <see cref="IInitializationCallback"/> rather than a concrete service,
+/// enabling testability and following Dependency Inversion Principle.
+/// </remarks>
 internal sealed class PropertyInjector
 {
-    private readonly Lazy<ObjectLifecycleService> _objectLifecycleService;
+    private readonly Lazy<IInitializationCallback> _initializationCallback;
     private readonly string _testSessionId;
 
     // Object pool for visited dictionaries to reduce allocations
     private static readonly ConcurrentBag<ConcurrentDictionary<object, byte>> _visitedObjectsPool = new();
 
-    public PropertyInjector(Lazy<ObjectLifecycleService> objectLifecycleService, string testSessionId)
+    public PropertyInjector(Lazy<IInitializationCallback> initializationCallback, string testSessionId)
     {
-        _objectLifecycleService = objectLifecycleService;
+        _initializationCallback = initializationCallback;
         _testSessionId = testSessionId;
     }
 
@@ -95,7 +100,7 @@ internal sealed class PropertyInjector
 #if NETSTANDARD2_0
             visitedObjects = new ConcurrentDictionary<object, byte>();
 #else
-            visitedObjects = new ConcurrentDictionary<object, byte>(ReferenceEqualityComparer.Instance);
+            visitedObjects = new ConcurrentDictionary<object, byte>(Core.Helpers.ReferenceEqualityComparer.Instance);
 #endif
         }
 
@@ -124,17 +129,29 @@ internal sealed class PropertyInjector
             return;
         }
 
-        var injectableArgs = arguments
-            .Where(arg => arg != null && PropertyInjectionCache.HasInjectableProperties(arg.GetType()))
-            .ToArray();
+        // Build list of injectable args without LINQ
+        var injectableArgs = new List<object>(arguments.Length);
+        foreach (var arg in arguments)
+        {
+            if (arg != null && PropertyInjectionCache.HasInjectableProperties(arg.GetType()))
+            {
+                injectableArgs.Add(arg);
+            }
+        }
 
-        if (injectableArgs.Length == 0)
+        if (injectableArgs.Count == 0)
         {
             return;
         }
 
-        await Task.WhenAll(injectableArgs.Select(arg =>
-            InjectPropertiesAsync(arg!, objectBag, methodMetadata, events)));
+        // Build task list without LINQ Select
+        var tasks = new List<Task>(injectableArgs.Count);
+        foreach (var arg in injectableArgs)
+        {
+            tasks.Add(InjectPropertiesAsync(arg, objectBag, methodMetadata, events));
+        }
+
+        await Task.WhenAll(tasks);
     }
 
     private async Task InjectPropertiesRecursiveAsync(
@@ -184,7 +201,7 @@ internal sealed class PropertyInjector
         }
     }
 
-    private async Task InjectSourceGeneratedPropertiesAsync(
+    private Task InjectSourceGeneratedPropertiesAsync(
         object instance,
         PropertyInjectionMetadata[] properties,
         ConcurrentDictionary<string, object?> objectBag,
@@ -192,14 +209,8 @@ internal sealed class PropertyInjector
         TestContextEvents events,
         ConcurrentDictionary<object, byte> visitedObjects)
     {
-        if (properties.Length == 0)
-        {
-            return;
-        }
-
-        // Initialize properties in parallel
-        await Task.WhenAll(properties.Select(metadata =>
-            InjectSourceGeneratedPropertyAsync(instance, metadata, objectBag, methodMetadata, events, visitedObjects)));
+        return ParallelTaskHelper.ForEachAsync(properties,
+            prop => InjectSourceGeneratedPropertyAsync(instance, prop, objectBag, methodMetadata, events, visitedObjects));
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Source-gen properties are AOT-safe")]
@@ -228,7 +239,7 @@ internal sealed class PropertyInjector
         object? resolvedValue = null;
 
         // Use a composite key to avoid conflicts when nested classes have properties with the same name
-        var cacheKey = $"{metadata.ContainingType.FullName}.{metadata.PropertyName}";
+        var cacheKey = PropertyCacheKeyGenerator.GetCacheKey(metadata);
 
         // Check if property was pre-resolved during registration
         if (testContext?.Metadata.TestDetails.TestClassInjectedPropertyArguments.TryGetValue(cacheKey, out resolvedValue) == true)
@@ -272,7 +283,7 @@ internal sealed class PropertyInjector
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT")]
-    private async Task InjectReflectionPropertiesAsync(
+    private Task InjectReflectionPropertiesAsync(
         object instance,
         (PropertyInfo Property, IDataSourceAttribute DataSource)[] properties,
         ConcurrentDictionary<string, object?> objectBag,
@@ -280,13 +291,8 @@ internal sealed class PropertyInjector
         TestContextEvents events,
         ConcurrentDictionary<object, byte> visitedObjects)
     {
-        if (properties.Length == 0)
-        {
-            return;
-        }
-
-        await Task.WhenAll(properties.Select(pair =>
-            InjectReflectionPropertyAsync(instance, pair.Property, pair.DataSource, objectBag, methodMetadata, events, visitedObjects)));
+        return ParallelTaskHelper.ForEachAsync(properties,
+            pair => InjectReflectionPropertyAsync(instance, pair.Property, pair.DataSource, objectBag, methodMetadata, events, visitedObjects));
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT")]
@@ -380,21 +386,15 @@ internal sealed class PropertyInjector
         }
     }
 
-    private async Task ResolveAndCacheSourceGeneratedPropertiesAsync(
+    private Task ResolveAndCacheSourceGeneratedPropertiesAsync(
         PropertyInjectionMetadata[] properties,
         ConcurrentDictionary<string, object?> objectBag,
         MethodMetadata? methodMetadata,
         TestContextEvents events,
         TestContext testContext)
     {
-        if (properties.Length == 0)
-        {
-            return;
-        }
-
-        // Resolve properties in parallel
-        await Task.WhenAll(properties.Select(metadata =>
-            ResolveAndCacheSourceGeneratedPropertyAsync(metadata, objectBag, methodMetadata, events, testContext)));
+        return ParallelTaskHelper.ForEachAsync(properties,
+            prop => ResolveAndCacheSourceGeneratedPropertyAsync(prop, objectBag, methodMetadata, events, testContext));
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Source-gen properties are AOT-safe")]
@@ -405,7 +405,7 @@ internal sealed class PropertyInjector
         TestContextEvents events,
         TestContext testContext)
     {
-        var cacheKey = $"{metadata.ContainingType.FullName}.{metadata.PropertyName}";
+        var cacheKey = PropertyCacheKeyGenerator.GetCacheKey(metadata);
 
         // Check if already cached
         if (testContext.Metadata.TestDetails.TestClassInjectedPropertyArguments.ContainsKey(cacheKey))
@@ -439,20 +439,15 @@ internal sealed class PropertyInjector
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT")]
-    private async Task ResolveAndCacheReflectionPropertiesAsync(
+    private Task ResolveAndCacheReflectionPropertiesAsync(
         (PropertyInfo Property, IDataSourceAttribute DataSource)[] properties,
         ConcurrentDictionary<string, object?> objectBag,
         MethodMetadata? methodMetadata,
         TestContextEvents events,
         TestContext testContext)
     {
-        if (properties.Length == 0)
-        {
-            return;
-        }
-
-        await Task.WhenAll(properties.Select(pair =>
-            ResolveAndCacheReflectionPropertyAsync(pair.Property, pair.DataSource, objectBag, methodMetadata, events, testContext)));
+        return ParallelTaskHelper.ForEachAsync(properties,
+            pair => ResolveAndCacheReflectionPropertyAsync(pair.Property, pair.DataSource, objectBag, methodMetadata, events, testContext));
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT")]
@@ -464,7 +459,7 @@ internal sealed class PropertyInjector
         TestContextEvents events,
         TestContext testContext)
     {
-        var cacheKey = $"{property.DeclaringType!.FullName}.{property.Name}";
+        var cacheKey = PropertyCacheKeyGenerator.GetCacheKey(property);
 
         // Check if already cached
         if (testContext.Metadata.TestDetails.TestClassInjectedPropertyArguments.ContainsKey(cacheKey))
@@ -525,15 +520,14 @@ internal sealed class PropertyInjector
 
             if (value != null)
             {
-                // Ensure nested objects are initialized
-                if (PropertyInjectionCache.HasInjectableProperties(value.GetType()) || value is IAsyncInitializer)
-                {
-                    await _objectLifecycleService.Value.EnsureInitializedAsync(
-                        value,
-                        context.ObjectBag,
-                        context.MethodMetadata,
-                        context.Events);
-                }
+                // EnsureInitializedAsync handles property injection and initialization.
+                // ObjectInitializer is phase-aware: during Discovery phase, only IAsyncDiscoveryInitializer
+                // objects are initialized; regular IAsyncInitializer objects are deferred to Execution phase.
+                await _initializationCallback.Value.EnsureInitializedAsync(
+                    value,
+                    context.ObjectBag,
+                    context.MethodMetadata,
+                    context.Events);
 
                 return value;
             }
@@ -561,7 +555,7 @@ internal sealed class PropertyInjector
         }
 
         // Ensure the data source is initialized
-        return await _objectLifecycleService.Value.EnsureInitializedAsync(
+        return await _initializationCallback.Value.EnsureInitializedAsync(
             dataSource,
             context.ObjectBag,
             context.MethodMetadata,

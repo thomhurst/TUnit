@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text;
 using TUnit.Assertions.Attributes;
+using TUnit.Assertions.Conditions.Helpers;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
@@ -84,7 +85,7 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
         if (_ignoredTypes.Count > 0)
         {
             // Use reference-based tracking to detect cycles
-            var visited = new HashSet<object>(new ReferenceEqualityComparer());
+            var visited = new HashSet<object>(ReferenceEqualityComparer<object>.Instance);
             var result = DeepEquals(value, _expected, _ignoredTypes, visited);
             if (result.IsSuccess)
             {
@@ -213,15 +214,4 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
     }
 
     protected override string GetExpectation() => $"to be equal to {(_expected is string s ? $"\"{s}\"" : _expected)}";
-
-    /// <summary>
-    /// Comparer that uses reference equality instead of value equality.
-    /// Used for cycle detection in deep comparison.
-    /// </summary>
-    private sealed class ReferenceEqualityComparer : IEqualityComparer<object>
-    {
-        public new bool Equals(object? x, object? y) => ReferenceEquals(x, y);
-
-        public int GetHashCode(object obj) => System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(obj);
-    }
 }

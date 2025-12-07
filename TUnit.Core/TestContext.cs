@@ -49,7 +49,8 @@ public partial class TestContext : Context,
 
     private static readonly AsyncLocal<TestContext?> TestContexts = new();
 
-    internal static readonly Dictionary<string, List<string>> InternalParametersDictionary = new();
+    // Use ConcurrentDictionary for thread-safe access during parallel test discovery
+    internal static readonly ConcurrentDictionary<string, List<string>> InternalParametersDictionary = new();
 
     private StringWriter? _outputWriter;
 
@@ -72,7 +73,21 @@ public partial class TestContext : Context,
 
     public static IReadOnlyDictionary<string, List<string>> Parameters => InternalParametersDictionary;
 
-    public static IConfiguration Configuration { get; internal set; } = null!;
+    private static IConfiguration? _configuration;
+
+    /// <summary>
+    /// Gets the test configuration. Throws a descriptive exception if accessed before initialization.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if Configuration is accessed before the test engine initializes it.</exception>
+    public static IConfiguration Configuration
+    {
+        get => _configuration ?? throw new InvalidOperationException(
+            "TestContext.Configuration has not been initialized. " +
+            "This property is only available after the TUnit test engine has started. " +
+            "If you are accessing this from a static constructor or field initializer, " +
+            "consider moving the code to a test setup method or test body instead.");
+        internal set => _configuration = value;
+    }
 
     public static string? OutputDirectory
     {
@@ -158,8 +173,13 @@ public partial class TestContext : Context,
     internal AbstractExecutableTest InternalExecutableTest { get; set; } = null!;
 
     private ConcurrentDictionary<int, HashSet<object>>? _trackedObjects;
+
+    /// <summary>
+    /// Thread-safe lazy initialization of TrackedObjects using LazyInitializer
+    /// to prevent race conditions when multiple threads access this property simultaneously.
+    /// </summary>
     internal ConcurrentDictionary<int, HashSet<object>> TrackedObjects =>
-        _trackedObjects ??= new();
+        LazyInitializer.EnsureInitialized(ref _trackedObjects)!;
 
     /// <summary>
     /// Sets the output captured during test building phase.

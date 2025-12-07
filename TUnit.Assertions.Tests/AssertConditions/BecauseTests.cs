@@ -1,4 +1,4 @@
-﻿namespace TUnit.Assertions.Tests.AssertConditions;
+namespace TUnit.Assertions.Tests.AssertConditions;
 
 public class BecauseTests
 {
@@ -68,7 +68,7 @@ public class BecauseTests
         };
 
         var exception = await Assert.ThrowsAsync<AssertionException>(action);
-        await Assert.That(exception.Message).IsEqualTo(expectedMessage);
+        await Assert.That(exception.Message.NormalizeLineEndings()).IsEqualTo(expectedMessage.NormalizeLineEndings());
     }
 
     [Test]
@@ -91,7 +91,7 @@ public class BecauseTests
         };
 
         var exception = await Assert.ThrowsAsync<AssertionException>(action);
-        await Assert.That(exception.Message.NormalizeLineEndings()).IsEqualTo(expectedMessage);
+        await Assert.That(exception.Message.NormalizeLineEndings()).IsEqualTo(expectedMessage.NormalizeLineEndings());
     }
 
     [Test]

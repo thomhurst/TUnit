@@ -11,6 +11,22 @@ namespace TUnit.Core.PropertyInjection;
 internal static class PropertyInjectionPlanBuilder
 {
     /// <summary>
+    /// Walks up the inheritance chain from the given type to typeof(object),
+    /// invoking the action for each type in the hierarchy.
+    /// </summary>
+    /// <param name="type">The starting type.</param>
+    /// <param name="action">The action to invoke for each type in the inheritance chain.</param>
+    private static void WalkInheritanceChain(Type type, Action<Type> action)
+    {
+        var currentType = type;
+        while (currentType != null && currentType != typeof(object))
+        {
+            action(currentType);
+            currentType = currentType.BaseType;
+        }
+    }
+
+    /// <summary>
     /// Creates an injection plan for source-generated mode.
     /// Walks the inheritance chain to include all injectable properties from base classes.
     /// </summary>
@@ -20,8 +36,7 @@ internal static class PropertyInjectionPlanBuilder
         var processedProperties = new HashSet<string>();
 
         // Walk up the inheritance chain to find all properties with data sources
-        var currentType = type;
-        while (currentType != null && currentType != typeof(object))
+        WalkInheritanceChain(type, currentType =>
         {
             var propertySource = PropertySourceRegistry.GetSource(currentType);
             if (propertySource?.ShouldInitialize == true)
@@ -35,9 +50,7 @@ internal static class PropertyInjectionPlanBuilder
                     }
                 }
             }
-
-            currentType = currentType.BaseType;
-        }
+        });
 
         var sourceGenProps = allProperties.ToArray();
 
@@ -62,8 +75,7 @@ internal static class PropertyInjectionPlanBuilder
         var processedProperties = new HashSet<string>();
 
         // Walk up the inheritance chain to find all properties with data source attributes
-        var currentType = type;
-        while (currentType != null && currentType != typeof(object))
+        WalkInheritanceChain(type, currentType =>
         {
             var properties = currentType.GetProperties(
                 BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
@@ -87,9 +99,7 @@ internal static class PropertyInjectionPlanBuilder
                     }
                 }
             }
-
-            currentType = currentType.BaseType;
-        }
+        });
 
         return new PropertyInjectionPlan
         {
@@ -106,7 +116,7 @@ internal static class PropertyInjectionPlanBuilder
     /// This handles generic types like ErrFixture&lt;MyType&gt; where the source generator
     /// couldn't register a property source for the closed generic type.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "Source gen mode has its own path>")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "Source gen mode has its own path")]
     public static PropertyInjectionPlan Build(Type type)
     {
         if (!SourceRegistrar.IsEnabled)
@@ -134,6 +144,7 @@ internal static class PropertyInjectionPlanBuilder
 
 /// <summary>
 /// Represents a plan for injecting properties into an object.
+/// Provides iterator methods to abstract source-gen vs reflection branching (DRY).
 /// </summary>
 internal sealed class PropertyInjectionPlan
 {
@@ -141,4 +152,100 @@ internal sealed class PropertyInjectionPlan
     public required PropertyInjectionMetadata[] SourceGeneratedProperties { get; init; }
     public required (PropertyInfo Property, IDataSourceAttribute DataSource)[] ReflectionProperties { get; init; }
     public required bool HasProperties { get; init; }
+
+    /// <summary>
+    /// Iterates over all properties in the plan, abstracting source-gen vs reflection.
+    /// Call the appropriate callback based on which mode has properties.
+    /// </summary>
+    /// <param name="onSourceGenerated">Action to invoke for each source-generated property.</param>
+    /// <param name="onReflection">Action to invoke for each reflection property.</param>
+    public void ForEachProperty(
+        Action<PropertyInjectionMetadata> onSourceGenerated,
+        Action<(PropertyInfo Property, IDataSourceAttribute DataSource)> onReflection)
+    {
+        if (SourceGeneratedProperties.Length > 0)
+        {
+            foreach (var metadata in SourceGeneratedProperties)
+            {
+                onSourceGenerated(metadata);
+            }
+        }
+        else if (ReflectionProperties.Length > 0)
+        {
+            foreach (var prop in ReflectionProperties)
+            {
+                onReflection(prop);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Iterates over all properties in the plan asynchronously.
+    /// </summary>
+    public async Task ForEachPropertyAsync(
+        Func<PropertyInjectionMetadata, Task> onSourceGenerated,
+        Func<(PropertyInfo Property, IDataSourceAttribute DataSource), Task> onReflection)
+    {
+        if (SourceGeneratedProperties.Length > 0)
+        {
+            foreach (var metadata in SourceGeneratedProperties)
+            {
+                await onSourceGenerated(metadata);
+            }
+        }
+        else if (ReflectionProperties.Length > 0)
+        {
+            foreach (var prop in ReflectionProperties)
+            {
+                await onReflection(prop);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Executes actions for all properties in parallel.
+    /// </summary>
+    public Task ForEachPropertyParallelAsync(
+        Func<PropertyInjectionMetadata, Task> onSourceGenerated,
+        Func<(PropertyInfo Property, IDataSourceAttribute DataSource), Task> onReflection)
+    {
+        if (SourceGeneratedProperties.Length > 0)
+        {
+            return Helpers.ParallelTaskHelper.ForEachAsync(SourceGeneratedProperties, onSourceGenerated);
+        }
+        else if (ReflectionProperties.Length > 0)
+        {
+            return Helpers.ParallelTaskHelper.ForEachAsync(ReflectionProperties, onReflection);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Gets property values from an instance, abstracting source-gen vs reflection.
+    /// </summary>
+    public IEnumerable<object?> GetPropertyValues(object instance)
+    {
+        if (SourceGeneratedProperties.Length > 0)
+        {
+            foreach (var metadata in SourceGeneratedProperties)
+            {
+                var property = metadata.ContainingType.GetProperty(metadata.PropertyName);
+                if (property?.CanRead == true)
+                {
+                    yield return property.GetValue(instance);
+                }
+            }
+        }
+        else if (ReflectionProperties.Length > 0)
+        {
+            foreach (var (property, _) in ReflectionProperties)
+            {
+                if (property.CanRead)
+                {
+                    yield return property.GetValue(instance);
+                }
+            }
+        }
+    }
 }

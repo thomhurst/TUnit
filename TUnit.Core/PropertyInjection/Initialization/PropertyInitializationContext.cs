@@ -7,6 +7,7 @@ namespace TUnit.Core.PropertyInjection.Initialization;
 /// <summary>
 /// Encapsulates all context needed for property initialization.
 /// Follows Single Responsibility Principle by being a pure data container.
+/// Provides factory methods to reduce duplication when creating contexts (DRY).
 /// </summary>
 internal sealed class PropertyInitializationContext
 {
@@ -84,4 +85,124 @@ internal sealed class PropertyInitializationContext
     /// Parent object for nested properties.
     /// </summary>
     public object? ParentInstance { get; init; }
+
+    #region Factory Methods (DRY)
+
+    /// <summary>
+    /// Creates a context for source-generated property injection.
+    /// </summary>
+    public static PropertyInitializationContext ForSourceGenerated(
+        object instance,
+        PropertyInjectionMetadata metadata,
+        ConcurrentDictionary<string, object?> objectBag,
+        MethodMetadata? methodMetadata,
+        TestContextEvents events,
+        ConcurrentDictionary<object, byte> visitedObjects,
+        TestContext? testContext,
+        bool isNestedProperty = false)
+    {
+        return new PropertyInitializationContext
+        {
+            Instance = instance,
+            SourceGeneratedMetadata = metadata,
+            PropertyName = metadata.PropertyName,
+            PropertyType = metadata.PropertyType,
+            PropertySetter = metadata.SetProperty,
+            ObjectBag = objectBag,
+            MethodMetadata = methodMetadata,
+            Events = events,
+            VisitedObjects = visitedObjects,
+            TestContext = testContext,
+            IsNestedProperty = isNestedProperty
+        };
+    }
+
+    /// <summary>
+    /// Creates a context for reflection-based property injection.
+    /// </summary>
+    public static PropertyInitializationContext ForReflection(
+        object instance,
+        PropertyInfo property,
+        IDataSourceAttribute dataSource,
+        Action<object, object?> propertySetter,
+        ConcurrentDictionary<string, object?> objectBag,
+        MethodMetadata? methodMetadata,
+        TestContextEvents events,
+        ConcurrentDictionary<object, byte> visitedObjects,
+        TestContext? testContext,
+        bool isNestedProperty = false)
+    {
+        return new PropertyInitializationContext
+        {
+            Instance = instance,
+            PropertyInfo = property,
+            DataSource = dataSource,
+            PropertyName = property.Name,
+            PropertyType = property.PropertyType,
+            PropertySetter = propertySetter,
+            ObjectBag = objectBag,
+            MethodMetadata = methodMetadata,
+            Events = events,
+            VisitedObjects = visitedObjects,
+            TestContext = testContext,
+            IsNestedProperty = isNestedProperty
+        };
+    }
+
+    /// <summary>
+    /// Creates a context for caching during registration (uses placeholder instance).
+    /// </summary>
+    public static PropertyInitializationContext ForCaching(
+        PropertyInjectionMetadata metadata,
+        ConcurrentDictionary<string, object?> objectBag,
+        MethodMetadata? methodMetadata,
+        TestContextEvents events,
+        TestContext testContext)
+    {
+        return new PropertyInitializationContext
+        {
+            Instance = PlaceholderInstance.Instance,
+            SourceGeneratedMetadata = metadata,
+            PropertyName = metadata.PropertyName,
+            PropertyType = metadata.PropertyType,
+            PropertySetter = metadata.SetProperty,
+            ObjectBag = objectBag,
+            MethodMetadata = methodMetadata,
+            Events = events,
+            VisitedObjects = new ConcurrentDictionary<object, byte>(),
+            TestContext = testContext,
+            IsNestedProperty = false
+        };
+    }
+
+    /// <summary>
+    /// Creates a context for reflection caching during registration (uses placeholder instance).
+    /// </summary>
+    public static PropertyInitializationContext ForReflectionCaching(
+        PropertyInfo property,
+        IDataSourceAttribute dataSource,
+        Action<object, object?> propertySetter,
+        ConcurrentDictionary<string, object?> objectBag,
+        MethodMetadata? methodMetadata,
+        TestContextEvents events,
+        TestContext testContext)
+    {
+        return new PropertyInitializationContext
+        {
+            Instance = PlaceholderInstance.Instance,
+            PropertyInfo = property,
+            DataSource = dataSource,
+            PropertyName = property.Name,
+            PropertyType = property.PropertyType,
+            PropertySetter = propertySetter,
+            ObjectBag = objectBag,
+            MethodMetadata = methodMetadata,
+            Events = events,
+            VisitedObjects = new ConcurrentDictionary<object, byte>(),
+            TestContext = testContext,
+            IsNestedProperty = false
+        };
+    }
+
+    #endregion
 }

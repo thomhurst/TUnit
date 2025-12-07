@@ -14,14 +14,14 @@ public partial class Throws
                                   but no exception was thrown
 
                                   at Assert.That(action).ThrowsException()
-                                  """;
+                                  """.NormalizeLineEndings();
             var action = () => { };
 
             var sut = async ()
                 => await Assert.That(action).ThrowsException();
 
-            await Assert.That(sut).ThrowsException()
-                .WithMessage(expectedMessage);
+            var thrownException = await Assert.That(sut).ThrowsException();
+            await Assert.That(thrownException.Message.NormalizeLineEndings()).IsEqualTo(expectedMessage);
         }
 
         [Test]

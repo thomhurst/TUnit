@@ -56,13 +56,13 @@ public partial class StringRegexAssertionTests
             return;
         }
 
-        await TUnitAssert.That(exception!.Message).IsEqualTo(
+        await TUnitAssert.That(exception!.Message.NormalizeLineEndings()).IsEqualTo(
             $"""
              Expected text match pattern
              but The regex "^\d+$" does not match with "{text}"
 
              at Assert.That(text).Matches(pattern)
-             """
+             """.NormalizeLineEndings()
         );
     }
 
@@ -81,13 +81,13 @@ public partial class StringRegexAssertionTests
             return;
         }
 
-        await TUnitAssert.That(exception!.Message).IsEqualTo(
+        await TUnitAssert.That(exception!.Message.NormalizeLineEndings()).IsEqualTo(
             $"""
              Expected text match pattern
              but The regex "^\d+$" does not match with "{text}"
 
              at Assert.That(text).Matches(pattern)
-             """
+             """.NormalizeLineEndings()
         );
     }
 
@@ -110,13 +110,13 @@ public partial class StringRegexAssertionTests
             return;
         }
         
-        await TUnitAssert.That(exception!.Message).IsEqualTo(
+        await TUnitAssert.That(exception!.Message.NormalizeLineEndings()).IsEqualTo(
             $"""
              Expected text match regex
              but The regex "^\d+$" does not match with "Hello123World"
 
              at Assert.That(text).Matches(regex)
-             """
+             """.NormalizeLineEndings()
         );
     }
 #endif
@@ -192,13 +192,13 @@ public partial class StringRegexAssertionTests
             return;
         }
 
-        await TUnitAssert.That(exception!.Message).IsEqualTo(
+        await TUnitAssert.That(exception!.Message.NormalizeLineEndings()).IsEqualTo(
             $"""
              Expected text to not match with pattern
              but The regex "^\d+$" matches with "{text}"
 
              at Assert.That(text).DoesNotMatch(pattern)
-             """
+             """.NormalizeLineEndings()
         );
     }
 
@@ -217,13 +217,13 @@ public partial class StringRegexAssertionTests
             return;
         }
 
-        await TUnitAssert.That(exception!.Message).IsEqualTo(
+        await TUnitAssert.That(exception!.Message.NormalizeLineEndings()).IsEqualTo(
             $"""
              Expected text to not match with pattern
              but The regex "^\d+$" matches with "{text}"
 
              at Assert.That(text).DoesNotMatch(pattern)
-             """
+             """.NormalizeLineEndings()
         );
     }
 
@@ -246,13 +246,13 @@ public partial class StringRegexAssertionTests
             return;
         }
         
-        await TUnitAssert.That(exception!.Message).IsEqualTo(
+        await TUnitAssert.That(exception!.Message.NormalizeLineEndings()).IsEqualTo(
             $"""
              Expected text to not match with regex
              but The regex "^\d+$" matches with "{text}"
 
              at Assert.That(text).DoesNotMatch(regex)
-             """
+             """.NormalizeLineEndings()
         );
     }
 #endif

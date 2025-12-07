@@ -136,7 +136,7 @@ public class EquivalentAssertionTests
             but collection item at index 1 does not match: expected 2, but was 5
 
             at Assert.That(array).IsEquivalentTo(list, CollectionOrdering.Matching)
-            """
+            """.NormalizeLineEndings()
         );
     }
 
@@ -155,7 +155,7 @@ public class EquivalentAssertionTests
             but collection item at index 1 does not match: expected 2, but was 5
 
             at Assert.That(array).IsEquivalentTo(list, CollectionOrdering.Matching)
-            """
+            """.NormalizeLineEndings()
         );
     }
 

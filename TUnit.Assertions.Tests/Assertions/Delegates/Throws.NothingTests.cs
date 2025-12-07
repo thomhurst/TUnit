@@ -12,15 +12,15 @@ public partial class Throws
                                     but threw TUnit.Assertions.Tests.Assertions.Delegates.Throws+CustomException: {nameof(Fails_For_Code_With_Exceptions)}
 
                                     at Assert.That(action).ThrowsNothing()
-                                    """;
+                                    """.NormalizeLineEndings();
             Exception exception = CreateCustomException();
             Action action = () => throw exception;
 
             var sut = async ()
                 => await Assert.That(action).ThrowsNothing();
 
-            await Assert.That(sut).ThrowsException()
-                .WithMessage(expectedMessage);
+            var thrownException = await Assert.That(sut).ThrowsException();
+            await Assert.That(thrownException.Message.NormalizeLineEndings()).IsEqualTo(expectedMessage);
         }
 
         [Test]

@@ -1,9 +1,18 @@
-﻿using TUnit.Core.Logging;
+﻿using TUnit.Core.Interfaces;
+using TUnit.Core.Logging;
 
 namespace TUnit.Core.Helpers;
 
-internal class Disposer(ILogger logger)
+/// <summary>
+/// Disposes objects asynchronously with logging.
+/// Implements IDisposer for Dependency Inversion Principle compliance.
+/// </summary>
+internal class Disposer(ILogger logger) : IDisposer
 {
+    /// <summary>
+    /// Disposes an object and propagates any exceptions.
+    /// Exceptions are logged but NOT swallowed - callers must handle them.
+    /// </summary>
     public async ValueTask DisposeAsync(object? obj)
     {
         try
@@ -19,10 +28,15 @@ internal class Disposer(ILogger logger)
         }
         catch (Exception e)
         {
+            // Log the error for diagnostics
             if (logger != null)
             {
                 await logger.LogErrorAsync(e);
             }
+
+            // Propagate the exception - don't silently swallow disposal failures
+            // Callers can catch and aggregate if disposing multiple objects
+            throw;
         }
     }
 }

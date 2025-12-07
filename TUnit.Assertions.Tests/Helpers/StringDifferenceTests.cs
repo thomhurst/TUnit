@@ -10,15 +10,15 @@ public class StringDifferenceTests
                               but found ""
 
                               at Assert.That(actual).IsEqualTo(expected)
-                              """;
+                              """.NormalizeLineEndings();
         var actual = "";
         var expected = "some text";
 
         var sut = async ()
             => await Assert.That(actual).IsEqualTo(expected);
 
-        await Assert.That(sut).ThrowsException()
-            .WithMessage(expectedMessage);
+        var exception = await Assert.That(sut).ThrowsException();
+        await Assert.That(exception.Message.NormalizeLineEndings()).IsEqualTo(expectedMessage);
     }
 
     [Test]
@@ -29,15 +29,15 @@ public class StringDifferenceTests
                               but found "actual text"
 
                               at Assert.That(actual).IsEqualTo(expected)
-                              """;
+                              """.NormalizeLineEndings();
         var actual = "actual text";
         var expected = "";
 
         var sut = async ()
             => await Assert.That(actual).IsEqualTo(expected);
 
-        await Assert.That(sut).ThrowsException()
-            .WithMessage(expectedMessage);
+        var exception = await Assert.That(sut).ThrowsException();
+        await Assert.That(exception.Message.NormalizeLineEndings()).IsEqualTo(expectedMessage);
     }
 
     [Test]
@@ -48,15 +48,15 @@ public class StringDifferenceTests
                               but found "some"
 
                               at Assert.That(actual).IsEqualTo(expected)
-                              """;
+                              """.NormalizeLineEndings();
         var actual = "some";
         var expected = "some text";
 
         var sut = async ()
             => await Assert.That(actual).IsEqualTo(expected);
 
-        await Assert.That(sut).ThrowsException()
-            .WithMessage(expectedMessage);
+        var exception = await Assert.That(sut).ThrowsException();
+        await Assert.That(exception.Message.NormalizeLineEndings()).IsEqualTo(expectedMessage);
     }
 
     [Test]
@@ -67,14 +67,14 @@ public class StringDifferenceTests
                               but found "some text"
 
                               at Assert.That(actual).IsEqualTo(expected)
-                              """;
+                              """.NormalizeLineEndings();
         var actual = "some text";
         var expected = "some";
 
         var sut = async ()
             => await Assert.That(actual).IsEqualTo(expected);
 
-        await Assert.That(sut).ThrowsException()
-            .WithMessage(expectedMessage);
+        var exception = await Assert.That(sut).ThrowsException();
+        await Assert.That(exception.Message.NormalizeLineEndings()).IsEqualTo(expectedMessage);
     }
 }

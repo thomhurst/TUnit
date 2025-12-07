@@ -1,6 +1,4 @@
-﻿using TUnit.Core.Tracking;
-
-namespace TUnit.Core.Data;
+﻿namespace TUnit.Core.Data;
 
 public class ScopedDictionary<TScope>
     where TScope : notnull
@@ -11,14 +9,6 @@ public class ScopedDictionary<TScope>
     {
         var innerDictionary = _scopedContainers.GetOrAdd(scope, static _ => new ThreadSafeDictionary<Type, object?>());
 
-        var obj = innerDictionary.GetOrAdd(type, factory);
-
-        ObjectTracker.OnDisposed(obj, () =>
-        {
-            innerDictionary.Remove(type);
-        });
-
-        return obj;
+        return innerDictionary.GetOrAdd(type, factory);
     }
-
 }

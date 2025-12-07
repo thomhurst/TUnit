@@ -114,9 +114,11 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var objectTracker = new ObjectTracker(trackableObjectGraphProvider, disposer);
 
         // Use Lazy<T> to break circular dependency between PropertyInjector and ObjectLifecycleService
+        // PropertyInjector now depends on IInitializationCallback interface (implemented by ObjectLifecycleService)
+        // This follows Dependency Inversion Principle and improves testability
         ObjectLifecycleService? objectLifecycleServiceInstance = null;
-        var lazyObjectLifecycleService = new Lazy<ObjectLifecycleService>(() => objectLifecycleServiceInstance!);
-        var lazyPropertyInjector = new Lazy<PropertyInjector>(() => new PropertyInjector(lazyObjectLifecycleService, TestSessionId));
+        var lazyInitializationCallback = new Lazy<IInitializationCallback>(() => objectLifecycleServiceInstance!);
+        var lazyPropertyInjector = new Lazy<PropertyInjector>(() => new PropertyInjector(lazyInitializationCallback, TestSessionId));
 
         objectLifecycleServiceInstance = new ObjectLifecycleService(lazyPropertyInjector, objectGraphDiscoveryService, objectTracker);
         ObjectLifecycleService = Register(objectLifecycleServiceInstance);
