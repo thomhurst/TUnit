@@ -525,10 +525,25 @@ internal sealed class PropertyInjector
 
             if (value != null)
             {
-                // Ensure nested objects are initialized
-                if (PropertyInjectionCache.HasInjectableProperties(value.GetType()) || value is IAsyncInitializer)
+                // Handle property injection and initialization appropriately during discovery
+                var hasInjectableProperties = PropertyInjectionCache.HasInjectableProperties(value.GetType());
+                var isDiscoveryInitializer = value is IAsyncDiscoveryInitializer;
+
+                if (isDiscoveryInitializer)
                 {
+                    // Full initialization during discovery (property injection + IAsyncInitializer.InitializeAsync)
+                    // for objects that explicitly opt-in via IAsyncDiscoveryInitializer
                     await _objectLifecycleService.Value.EnsureInitializedAsync(
+                        value,
+                        context.ObjectBag,
+                        context.MethodMetadata,
+                        context.Events);
+                }
+                else if (hasInjectableProperties)
+                {
+                    // Property injection only, IAsyncInitializer.InitializeAsync deferred to execution
+                    // Regular IAsyncInitializer objects are initialized during test execution by ObjectLifecycleService
+                    await _objectLifecycleService.Value.InjectPropertiesAsync(
                         value,
                         context.ObjectBag,
                         context.MethodMetadata,

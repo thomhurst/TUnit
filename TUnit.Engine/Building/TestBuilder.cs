@@ -45,7 +45,9 @@ internal sealed class TestBuilder : ITestBuilder
     }
 
     /// <summary>
-    /// Initializes any IAsyncInitializer objects in class data that were deferred during registration.
+    /// Initializes any IAsyncDiscoveryInitializer objects in class data during test building.
+    /// Regular IAsyncInitializer objects are NOT initialized here - they are deferred to test execution
+    /// via ObjectLifecycleService to avoid premature initialization during discovery.
     /// </summary>
     private async Task InitializeDeferredClassDataAsync(object?[] classData)
     {
@@ -56,7 +58,9 @@ internal sealed class TestBuilder : ITestBuilder
 
         foreach (var data in classData)
         {
-            if (data is IAsyncInitializer asyncInitializer && data is not IDataSourceAttribute)
+            // Only initialize IAsyncDiscoveryInitializer during discovery/building.
+            // Regular IAsyncInitializer objects are initialized during test execution.
+            if (data is IAsyncDiscoveryInitializer && data is not IDataSourceAttribute)
             {
                 if (!ObjectInitializer.IsInitialized(data))
                 {
