@@ -57,7 +57,7 @@ internal sealed class HookExecutor
                     ExceptionDispatchInfo.Capture(skipEx).Throw();
                 }
 
-                throw new BeforeTestSessionException("BeforeTestSession hook failed", ex);
+                throw new BeforeTestSessionException($"BeforeTestSession hook failed: {ex.Message}", ex);
             }
         }
     }
@@ -83,7 +83,7 @@ internal sealed class HookExecutor
             {
                 // Collect hook exceptions instead of throwing immediately
                 // This allows all hooks to run even if some fail
-                exceptions.Add(new AfterTestSessionException("AfterTestSession hook failed", ex));
+                exceptions.Add(new AfterTestSessionException($"AfterTestSession hook failed: {ex.Message}", ex));
             }
         }
 
@@ -119,7 +119,7 @@ internal sealed class HookExecutor
                     ExceptionDispatchInfo.Capture(skipEx).Throw();
                 }
 
-                throw new BeforeAssemblyException("BeforeAssembly hook failed", ex);
+                throw new BeforeAssemblyException($"BeforeAssembly hook failed: {ex.Message}", ex);
             }
         }
     }
@@ -146,7 +146,7 @@ internal sealed class HookExecutor
             {
                 // Collect hook exceptions instead of throwing immediately
                 // This allows all hooks to run even if some fail
-                exceptions.Add(new AfterAssemblyException("AfterAssembly hook failed", ex));
+                exceptions.Add(new AfterAssemblyException($"AfterAssembly hook failed: {ex.Message}", ex));
             }
         }
 
@@ -184,7 +184,7 @@ internal sealed class HookExecutor
                     ExceptionDispatchInfo.Capture(skipEx).Throw();
                 }
 
-                throw new BeforeClassException("BeforeClass hook failed", ex);
+                throw new BeforeClassException($"BeforeClass hook failed: {ex.Message}", ex);
             }
         }
     }
@@ -213,7 +213,7 @@ internal sealed class HookExecutor
             {
                 // Collect hook exceptions instead of throwing immediately
                 // This allows all hooks to run even if some fail
-                exceptions.Add(new AfterClassException("AfterClass hook failed", ex));
+                exceptions.Add(new AfterClassException($"AfterClass hook failed: {ex.Message}", ex));
             }
         }
 
@@ -248,7 +248,7 @@ internal sealed class HookExecutor
                         ExceptionDispatchInfo.Capture(skipEx).Throw();
                     }
 
-                    throw new BeforeTestException("BeforeEveryTest hook failed", ex);
+                    throw new BeforeTestException($"BeforeEveryTest hook failed: {ex.Message}", ex);
                 }
             }
         }
@@ -277,7 +277,7 @@ internal sealed class HookExecutor
                         ExceptionDispatchInfo.Capture(skipEx).Throw();
                     }
 
-                    throw new BeforeTestException("BeforeTest hook failed", ex);
+                    throw new BeforeTestException($"BeforeTest hook failed: {ex.Message}", ex);
                 }
             }
         }
@@ -347,7 +347,7 @@ internal sealed class HookExecutor
             }
             catch (Exception ex)
             {
-                throw new BeforeTestDiscoveryException("BeforeTestDiscovery hook failed", ex);
+                throw new BeforeTestDiscoveryException($"BeforeTestDiscovery hook failed: {ex.Message}", ex);
             }
         }
     }
@@ -370,7 +370,7 @@ internal sealed class HookExecutor
             }
             catch (Exception ex)
             {
-                throw new AfterTestDiscoveryException("AfterTestDiscovery hook failed", ex);
+                throw new AfterTestDiscoveryException($"AfterTestDiscovery hook failed: {ex.Message}", ex);
             }
         }
     }
