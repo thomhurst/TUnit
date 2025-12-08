@@ -158,33 +158,17 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
                 ? SyntaxFactory.ParseExpression($"{actual}.IsNull()")
                 : SyntaxFactory.ParseExpression($"Assert.That({actual}).IsNull()"),
 
-            "True" => isInSatisfy && parameterName != null
-                ? SyntaxFactory.ParseExpression($"{actual}.IsTrue()")
-                : SyntaxFactory.ParseExpression($"Assert.That({actual}).IsTrue()"),
+            "True" => ConvertTrueAssertion(argumentListArguments, expected, isInSatisfy, parameterName),
 
-            "False" => isInSatisfy && parameterName != null
-                ? SyntaxFactory.ParseExpression($"{actual}.IsFalse()")
-                : SyntaxFactory.ParseExpression($"Assert.That({actual}).IsFalse()"),
+            "False" => ConvertFalseAssertion(argumentListArguments, expected, isInSatisfy, parameterName),
 
             "Same" => SyntaxFactory.ParseExpression($"Assert.That({actual}).IsSameReferenceAs({expected})"),
 
             "NotSame" => SyntaxFactory.ParseExpression($"Assert.That({actual}).IsNotSameReferenceAs({expected})"),
 
-            "IsAssignableTo" => isGeneric
-                ? SyntaxFactory.ParseExpression($"Assert.That({actual}).IsAssignableTo<{genericArgs}>()")
-                : SyntaxFactory.ParseExpression($"Assert.That({actual}).IsAssignableTo({expected})"),
-
-            "IsNotAssignableTo" => isGeneric
-                ? SyntaxFactory.ParseExpression($"Assert.That({actual}).IsNotAssignableTo<{genericArgs}>()")
-                : SyntaxFactory.ParseExpression($"Assert.That({actual}).IsNotAssignableTo({expected})"),
-
             "IsAssignableFrom" => isGeneric
                 ? SyntaxFactory.ParseExpression($"Assert.That({actual}).IsAssignableFrom<{genericArgs}>()")
                 : SyntaxFactory.ParseExpression($"Assert.That({actual}).IsAssignableFrom({expected})"),
-
-            "IsNotAssignableFrom" => isGeneric
-                ? SyntaxFactory.ParseExpression($"Assert.That({actual}).IsNotAssignableFrom<{genericArgs}>()")
-                : SyntaxFactory.ParseExpression($"Assert.That({actual}).IsNotAssignableFrom({expected})"),
 
             // "All" is handled separately in ConvertAssertionAsync
 
@@ -313,6 +297,46 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
         }
 
         return typeSymbol.AllInterfaces.Any(i => i.GloballyQualified() == "global::System.Collections.IEnumerable");
+    }
+
+    private static ExpressionSyntax ConvertTrueAssertion(
+        SeparatedSyntaxList<ArgumentSyntax> args,
+        ArgumentSyntax? condition,
+        bool isInSatisfy,
+        string? parameterName)
+    {
+        var baseExpr = isInSatisfy && parameterName != null
+            ? $"{condition}.IsTrue()"
+            : $"Assert.That({condition}).IsTrue()";
+
+        // Check for message parameter (second argument)
+        if (args.Count >= 2)
+        {
+            var message = args[1];
+            return SyntaxFactory.ParseExpression($"{baseExpr}.Because({message})");
+        }
+
+        return SyntaxFactory.ParseExpression(baseExpr);
+    }
+
+    private static ExpressionSyntax ConvertFalseAssertion(
+        SeparatedSyntaxList<ArgumentSyntax> args,
+        ArgumentSyntax? condition,
+        bool isInSatisfy,
+        string? parameterName)
+    {
+        var baseExpr = isInSatisfy && parameterName != null
+            ? $"{condition}.IsFalse()"
+            : $"Assert.That({condition}).IsFalse()";
+
+        // Check for message parameter (second argument)
+        if (args.Count >= 2)
+        {
+            var message = args[1];
+            return SyntaxFactory.ParseExpression($"{baseExpr}.Because({message})");
+        }
+
+        return SyntaxFactory.ParseExpression(baseExpr);
     }
 
     private static async Task<ExpressionSyntax> Contains(CodeFixContext context,
@@ -508,8 +532,12 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
                         SyntaxFactory.ParseExpression($"Assert.That({args[0]}).IsNotNull()"),
                     "Null" when args.Count >= 1 =>
                         SyntaxFactory.ParseExpression($"Assert.That({args[0]}).IsNull()"),
+                    "True" when args.Count >= 2 =>
+                        SyntaxFactory.ParseExpression($"Assert.That({args[0]}).IsTrue().Because({args[1]})"),
                     "True" when args.Count >= 1 =>
                         SyntaxFactory.ParseExpression($"Assert.That({args[0]}).IsTrue()"),
+                    "False" when args.Count >= 2 =>
+                        SyntaxFactory.ParseExpression($"Assert.That({args[0]}).IsFalse().Because({args[1]})"),
                     "False" when args.Count >= 1 =>
                         SyntaxFactory.ParseExpression($"Assert.That({args[0]}).IsFalse()"),
                     "Equal" when args.Count >= 2 =>
