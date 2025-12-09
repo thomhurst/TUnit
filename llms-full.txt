@@ -1526,14 +1526,19 @@ public class InMemoryDatabaseTests
 
 ```bash
 # Run fast unit tests first
-dotnet test --filter "Category=Unit" --no-build
+dotnet test --no-build -- --treenode-filter "/*/*/*/*[Category=Unit]"
 
 # Run slower integration tests separately
-dotnet test --filter "Category=Integration" --no-build
+dotnet test --no-build -- --treenode-filter "/*/*/*/*[Category=Integration]"
 
 # Run expensive E2E tests last
-dotnet test --filter "Category=E2E" --no-build
+dotnet test --no-build -- --treenode-filter "/*/*/*/*[Category=E2E]"
 ```
+
+> **Note**: With .NET 10 SDK or newer, you can use the simpler syntax:
+> ```bash
+> dotnet test --no-build --treenode-filter "/**[Category=Unit]"
+> ```
 
 ### Use Test Result Caching
 
@@ -14446,7 +14451,7 @@ test:integration:
     - build
   script:
     - dotnet test --configuration $BUILD_CONFIGURATION --no-build
-      --filter "Category=Integration"
+      -- --treenode-filter "/*/*/*/*[Category=Integration]"
       --report-trx --results-directory ./TestResults
   artifacts:
     when: always
@@ -14705,12 +14710,17 @@ Run different test categories in separate jobs:
 ```yaml
 # Unit tests (fast)
 - name: Unit Tests
-  run: dotnet test --filter "Category=Unit"
+  run: dotnet test -- --treenode-filter "/*/*/*/*[Category=Unit]"
 
 # Integration tests (slower)
 - name: Integration Tests
-  run: dotnet test --filter "Category=Integration"
+  run: dotnet test -- --treenode-filter "/*/*/*/*[Category=Integration]"
 ```
+
+> **Note**: With .NET 10 SDK or newer, you can use the simpler syntax without the `--` separator:
+> ```yaml
+> run: dotnet test --treenode-filter "/**[Category=Unit]"
+> ```
 
 ### Fail Fast in PRs
 
