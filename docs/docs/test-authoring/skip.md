@@ -96,53 +96,6 @@ public class MyTestClass
 }
 ```
 
-### Skip.When()
-
-For cleaner conditional skipping, you can use `Skip.When(condition, reason)` which skips the test when the condition is `true`:
-
-```csharp
-using TUnit.Core;
-
-namespace MyTestProject;
-
-public class MyTestClass
-{
-    [Test]
-    public void MyTest()
-    {
-        var isCI = Environment.GetEnvironmentVariable("CI") != null;
-        
-        Skip.When(isCI, "This test doesn't run in CI environments");
-        
-        // Test continues only when not in CI
-        RunLocalOnlyTest();
-    }
-}
-```
-
-### Skip.Unless()
-
-Similarly, `Skip.Unless(condition, reason)` skips the test unless the condition is `true`:
-
-```csharp
-using TUnit.Core;
-
-namespace MyTestProject;
-
-public class MyTestClass
-{
-    [Test]
-    public void MyTest()
-    {
-        var hasRequiredPermissions = CheckPermissions();
-        
-        Skip.Unless(hasRequiredPermissions, "User doesn't have required permissions");
-        
-        // Test continues only if user has permissions
-        PerformPrivilegedOperation();
-    }
-}
-```
 
 ### Skipping from Hooks
 
