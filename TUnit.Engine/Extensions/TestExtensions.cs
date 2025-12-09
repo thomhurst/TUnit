@@ -220,9 +220,13 @@ internal static class TestExtensions
             yield return new StandardErrorTrxMessage(standardError);
         }
 
-        if (!string.IsNullOrEmpty(testContext.SkipReason))
+        var skipReason = testContext.Execution.Result?.IsOverridden == true
+            ? testContext.Execution.Result.OverrideReason
+            : testContext.SkipReason;
+
+        if (!string.IsNullOrEmpty(skipReason))
         {
-            yield return new DebugOrTraceTrxMessage($"Skipped: {testContext.SkipReason}");
+            yield return new DebugOrTraceTrxMessage($"Skipped: {skipReason}");
         }
     }
 
