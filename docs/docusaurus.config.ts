@@ -109,6 +109,11 @@ const config: Config = {
           label: 'GitHub',
           position: 'right',
         },
+        {
+          href: 'https://github.com/sponsors/thomhurst',
+          label: '❤️ Sponsor',
+          position: 'right',
+        },
       ],
     },
     footer: {

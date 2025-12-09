@@ -75,6 +75,12 @@ public async Task MyTest()
                 View Tutorial
                 <span className={styles.buttonIcon} aria-hidden="true">📚</span>
               </Link>
+              <Link
+                className={styles.secondaryButton}
+                href="https://github.com/sponsors/thomhurst"
+                aria-label="Sponsor TUnit development">
+                ❤️ Sponsor
+              </Link>
             </div>
           </div>
           <div className={styles.heroCode}>
