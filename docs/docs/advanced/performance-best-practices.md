@@ -482,14 +482,19 @@ public class InMemoryDatabaseTests
 
 ```bash
 # Run fast unit tests first
-dotnet test --filter "Category=Unit" --no-build
+dotnet test --no-build -- --treenode-filter "/*/*/*/*[Category=Unit]"
 
 # Run slower integration tests separately
-dotnet test --filter "Category=Integration" --no-build
+dotnet test --no-build -- --treenode-filter "/*/*/*/*[Category=Integration]"
 
 # Run expensive E2E tests last
-dotnet test --filter "Category=E2E" --no-build
+dotnet test --no-build -- --treenode-filter "/*/*/*/*[Category=E2E]"
 ```
+
+> **Note**: With .NET 10 SDK or newer, you can use the simpler syntax:
+> ```bash
+> dotnet test --no-build --treenode-filter "/**[Category=Unit]"
+> ```
 
 ### Use Test Result Caching
 

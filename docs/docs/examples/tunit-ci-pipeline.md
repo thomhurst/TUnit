@@ -331,7 +331,7 @@ test:integration:
     - build
   script:
     - dotnet test --configuration $BUILD_CONFIGURATION --no-build
-      --filter "Category=Integration"
+      -- --treenode-filter "/*/*/*/*[Category=Integration]"
       --report-trx --results-directory ./TestResults
   artifacts:
     when: always
@@ -590,12 +590,17 @@ Run different test categories in separate jobs:
 ```yaml
 # Unit tests (fast)
 - name: Unit Tests
-  run: dotnet test --filter "Category=Unit"
+  run: dotnet test -- --treenode-filter "/*/*/*/*[Category=Unit]"
 
 # Integration tests (slower)
 - name: Integration Tests
-  run: dotnet test --filter "Category=Integration"
+  run: dotnet test -- --treenode-filter "/*/*/*/*[Category=Integration]"
 ```
+
+> **Note**: With .NET 10 SDK or newer, you can use the simpler syntax without the `--` separator:
+> ```yaml
+> run: dotnet test --treenode-filter "/**[Category=Unit]"
+> ```
 
 ### Fail Fast in PRs
 
