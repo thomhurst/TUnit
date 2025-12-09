@@ -16,9 +16,9 @@
     <PackageVersion Include="FSharp.Core" Version="10.0.101" />
     <PackageVersion Include="Humanizer" Version="3.0.1" />
     <PackageVersion Include="MessagePack" Version="3.1.4" />
-    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.AspNetCore.TestHost" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.AspNetCore.TestHost" Version="10.0.1" />
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.10" />
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="18.0.2" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" />
