@@ -35,7 +35,7 @@ jobs:
       - name: Get PR info (manual trigger)
         if: github.event_name == 'workflow_dispatch'
         id: pr-info
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const { data: pr } = await github.rest.pulls.get({
