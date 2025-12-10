@@ -412,15 +412,30 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class CollectionCountValueAssertion<TCollection, TItem> : .<int>
+    public class CollectionCountEqualsAssertion<TCollection, TItem> : .<TCollection, TItem>
         where TCollection : .<TItem>
     {
-        public CollectionCountValueAssertion(.<TCollection> collectionContext, <TItem, bool>? predicate) { }
+        protected override .<.> CheckAsync(.<TCollection> metadata) { }
+        protected override string GetExpectation() { }
     }
-    public class CollectionCountWithAssertionValueAssertion<TCollection, TItem> : .<int>
+    public class CollectionCountSource<TCollection, TItem>
         where TCollection : .<TItem>
     {
-        public CollectionCountWithAssertionValueAssertion(.<TCollection> collectionContext, <.<TItem>, .<TItem>?> assertion) { }
+        public CollectionCountSource(.<TCollection> collectionContext, <.<TItem>, .<TItem>?>? assertion) { }
+        public .<TCollection, TItem> IsEqualTo(int expected, [.("expected")] string? expression = null) { }
+        public .<TCollection, TItem> IsGreaterThan(int expected, [.("expected")] string? expression = null) { }
+        public .<TCollection, TItem> IsGreaterThanOrEqualTo(int expected, [.("expected")] string? expression = null) { }
+        public .<TCollection, TItem> IsLessThan(int expected, [.("expected")] string? expression = null) { }
+        public .<TCollection, TItem> IsLessThanOrEqualTo(int expected, [.("expected")] string? expression = null) { }
+        public .<TCollection, TItem> IsNotEqualTo(int expected, [.("expected")] string? expression = null) { }
+        public .<TCollection, TItem> IsPositive() { }
+        public .<TCollection, TItem> IsZero() { }
+    }
+    public class CollectionCountWithInlineAssertionAssertion<TCollection, TItem> : .<TCollection, TItem>
+        where TCollection : .<TItem>
+    {
+        protected override .<.> CheckAsync(.<TCollection> metadata) { }
+        protected override string GetExpectation() { }
     }
     [.("DoesNotContain")]
     public class CollectionDoesNotContainAssertion<TCollection, TItem> : .<TCollection, TItem>
@@ -3838,10 +3853,8 @@ namespace .Sources
         public .<TCollection, TItem> Contains(TItem expected, [.("expected")] string? expression = null) { }
         public .<TCollection, TItem> ContainsOnly(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
         public .<TCollection, TItem> Count() { }
-        [("Use Count(item => ()) instead to leverage the full assertion bu" +
-            "ilder. Example: Count(item => (10))")]
-        public .<TCollection, TItem> Count(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
-        public .<TCollection, TItem> Count(<.<TItem>, .<TItem>?> assertion, [.("assertion")] string? expression = null) { }
+        public .<TCollection, TItem> Count(<.<TItem>, .<TItem>?> itemAssertion, [.("itemAssertion")] string? expression = null) { }
+        public .<TCollection, TItem> Count(<.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null) { }
         public .<TCollection, TItem> DoesNotContain(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
         public .<TCollection, TItem> DoesNotContain(TItem expected, [.("expected")] string? expression = null) { }
         protected override string GetExpectation() { }

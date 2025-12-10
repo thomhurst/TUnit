@@ -132,41 +132,43 @@ public abstract class CollectionAssertionBase<TCollection, TItem> : Assertion<TC
 
     /// <summary>
     /// Gets the count of items in the collection for further numeric assertions.
-    /// This enables fluent assertions on the count itself.
-    /// Example: await Assert.That(list).Count().IsGreaterThan(5);
+    /// This enables fluent assertions on the count itself while preserving collection type for chaining.
+    /// Example: await Assert.That(list).Count().IsGreaterThan(5).And.Contains(1);
     /// </summary>
-    public CollectionCountValueAssertion<TCollection, TItem> Count()
+    public CollectionCountSource<TCollection, TItem> Count()
     {
         Context.ExpressionBuilder.Append(".Count()");
-        return new CollectionCountValueAssertion<TCollection, TItem>(Context, null);
+        return new CollectionCountSource<TCollection, TItem>(Context, null);
     }
 
     /// <summary>
-    /// Gets the count of items matching the predicate for further numeric assertions.
-    /// This enables fluent assertions on filtered counts.
-    /// Example: await Assert.That(list).Count(x => x > 10).IsEqualTo(3);
+    /// Asserts on the count of items using an inline assertion lambda.
+    /// This enables compact count assertions while preserving collection type for chaining.
+    /// Note: For collections of int, use Count().IsEqualTo(5) instead of Count(c => c.IsEqualTo(5))
+    /// to avoid ambiguity with item-filtering.
+    /// Example: await Assert.That(list).Count(c => c.IsEqualTo(5)).And.Contains(1);
     /// </summary>
-    [Obsolete("Use Count(item => item.YourAssertion()) instead to leverage the full assertion builder. Example: Count(item => item.IsGreaterThan(10))")]
-    public CollectionCountValueAssertion<TCollection, TItem> Count(
-        Func<TItem, bool> predicate,
-        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
+    [OverloadResolutionPriority(-1)]
+    public CollectionCountWithInlineAssertionAssertion<TCollection, TItem> Count(
+        Func<IAssertionSource<int>, Assertion<int>?> countAssertion,
+        [CallerArgumentExpression(nameof(countAssertion))] string? expression = null)
     {
         Context.ExpressionBuilder.Append($".Count({expression})");
-        return new CollectionCountValueAssertion<TCollection, TItem>(Context, predicate);
+        return new CollectionCountWithInlineAssertionAssertion<TCollection, TItem>(Context, countAssertion);
     }
 
     /// <summary>
     /// Gets the count of items satisfying the given assertion for further numeric assertions.
     /// This enables fluent assertions on filtered counts using the full assertion builder.
-    /// Example: await Assert.That(list).Count(item => item.IsGreaterThan(10)).IsEqualTo(3);
+    /// The result preserves collection type for further chaining.
+    /// Example: await Assert.That(list).Count(item => item.IsGreaterThan(10)).IsEqualTo(3).And.Contains(1);
     /// </summary>
-    [OverloadResolutionPriority(1)]
-    public CollectionCountWithAssertionValueAssertion<TCollection, TItem> Count(
-        Func<IAssertionSource<TItem>, Assertion<TItem>?> assertion,
-        [CallerArgumentExpression(nameof(assertion))] string? expression = null)
+    public CollectionCountSource<TCollection, TItem> Count(
+        Func<IAssertionSource<TItem>, Assertion<TItem>?> itemAssertion,
+        [CallerArgumentExpression(nameof(itemAssertion))] string? expression = null)
     {
         Context.ExpressionBuilder.Append($".Count({expression})");
-        return new CollectionCountWithAssertionValueAssertion<TCollection, TItem>(Context, assertion);
+        return new CollectionCountSource<TCollection, TItem>(Context, itemAssertion);
     }
 
     /// <summary>
