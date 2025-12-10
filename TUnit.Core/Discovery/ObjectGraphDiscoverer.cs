@@ -477,7 +477,7 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
     /// Eliminates duplicate loops in DiscoverObjectGraph and DiscoverAndTrackObjects.
     /// </summary>
     /// <remarks>
-    /// For injected properties, only DIRECT test class properties are added at depth 0.
+    /// For injected properties, only DIRECT test class properties (including inherited) are added at depth 0.
     /// Nested properties (properties of injected objects) are discovered through normal
     /// graph traversal at appropriate depths (1+), ensuring correct initialization order
     /// for nested IAsyncInitializer dependencies. See GitHub issue #4032.
@@ -494,17 +494,24 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         // Process method arguments
         ProcessRootCollection(testDetails.TestMethodArguments, tryAdd, onRootObjectAdded, cancellationToken);
 
+        // Build set of types in the test class hierarchy (for identifying direct properties)
+        var hierarchyTypes = GetTypeHierarchy(testDetails.ClassType);
+
         // Process ONLY direct test class injected properties at depth 0.
         // Nested properties will be discovered through normal graph traversal at depth 1+.
         // This ensures proper initialization order for nested IAsyncInitializer dependencies.
-        // Cache keys are formatted as "{ContainingType.FullName}.{PropertyName}" (see PropertyCacheKeyGenerator).
-        var testClassPrefix = testDetails.ClassType.FullName + ".";
         foreach (var kvp in testDetails.TestClassInjectedPropertyArguments)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            // Only add properties that belong directly to the test class (not nested properties)
-            if (kvp.Key.StartsWith(testClassPrefix, StringComparison.Ordinal) && kvp.Value != null)
+            if (kvp.Value == null)
+            {
+                continue;
+            }
+
+            // Check if this property belongs to the test class hierarchy (not nested object properties)
+            // Cache key format: "{DeclaringType.FullName}.{PropertyName}"
+            if (IsDirectProperty(kvp.Key, hierarchyTypes))
             {
                 if (tryAdd(kvp.Value, 0))
                 {
@@ -512,6 +519,45 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Gets all types in the inheritance hierarchy from the given type up to (but not including) object.
+    /// </summary>
+    private static HashSet<string> GetTypeHierarchy(Type type)
+    {
+        var result = new HashSet<string>();
+        var currentType = type;
+
+        while (currentType != null && currentType != typeof(object))
+        {
+            if (currentType.FullName != null)
+            {
+                result.Add(currentType.FullName);
+            }
+
+            currentType = currentType.BaseType;
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Determines if a cache key represents a direct property (belonging to test class hierarchy)
+    /// vs a nested property (belonging to an injected object).
+    /// Cache key format: "{DeclaringType.FullName}.{PropertyName}"
+    /// </summary>
+    private static bool IsDirectProperty(string cacheKey, HashSet<string> hierarchyTypes)
+    {
+        // Find the last dot to separate type from property name
+        var lastDotIndex = cacheKey.LastIndexOf('.');
+        if (lastDotIndex <= 0)
+        {
+            return true; // Malformed key, treat as direct
+        }
+
+        var declaringTypeName = cacheKey.Substring(0, lastDotIndex);
+        return hierarchyTypes.Contains(declaringTypeName);
     }
 
     /// <summary>
