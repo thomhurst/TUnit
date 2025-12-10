@@ -56,6 +56,37 @@ public class ConstructorAccessNestedInitializerTests
 }
 
 /// <summary>
+/// Test that matches the exact pattern from issue #4032:
+/// - TestClass has WebApplicationFactory as a property
+/// - WebApplicationFactory has InMemoryPostgreSqlDatabase as a property
+/// - WebApplicationFactory.InitializeAsync() accesses Server which triggers ConfigureWebHost
+/// - ConfigureWebHost accesses InMemoryPostgreSqlDatabase.Container.GetConnectionString()
+/// </summary>
+[EngineTest(ExpectedResult.Pass)]
+public class WebApplicationFactoryPatternTests
+{
+    [ClassDataSource<MockWebApplicationFactory>(Shared = SharedType.PerTestSession)]
+    public required MockWebApplicationFactory WebAppFactory { get; init; }
+
+    [Test]
+    public async Task WebApplicationFactory_ShouldAccessInitializedContainer()
+    {
+        // The mock factory should have successfully accessed the container
+        await Assert.That(WebAppFactory.ConnectionStringFromContainer)
+            .IsNotNull()
+            .Because("the container should be initialized before ConfigureWebHost is called");
+    }
+
+    [Test]
+    public async Task Container_ShouldBeInitialized_BeforeFactoryInit()
+    {
+        await Assert.That(WebAppFactory.ContainerWasInitializedBeforeFactory)
+            .IsTrue()
+            .Because("InMemoryPostgreSqlDatabase.InitializeAsync should be called before WebApplicationFactory.InitializeAsync");
+    }
+}
+
+/// <summary>
 /// Simulates a container or resource that needs async initialization (like Testcontainers).
 /// </summary>
 public class NestedDependency : IAsyncInitializer
@@ -78,6 +109,77 @@ public class NestedDependency : IAsyncInitializer
             throw new InvalidOperationException("NestedDependency has not been initialized. Call InitializeAsync first.");
         }
         return "mock-connection-string";
+    }
+}
+
+/// <summary>
+/// Simulates InMemoryPostgreSqlDatabase from the issue.
+/// </summary>
+public class MockDatabase : IAsyncInitializer
+{
+    public bool IsInitialized { get; private set; }
+
+    public Task InitializeAsync()
+    {
+        IsInitialized = true;
+        Console.WriteLine("[MockDatabase] Container started (InitializeAsync called)");
+        return Task.CompletedTask;
+    }
+
+    public string GetConnectionString()
+    {
+        if (!IsInitialized)
+        {
+            throw new InvalidOperationException("MockDatabase has not been initialized. Container not started.");
+        }
+        return "Host=localhost;Port=5432;Database=test;Username=test;Password=test";
+    }
+}
+
+/// <summary>
+/// Simulates WebApplicationFactory from the issue.
+/// Accessing Server triggers ConfigureWebHost which needs the database.
+/// </summary>
+public class MockWebApplicationFactory : IAsyncInitializer
+{
+    [ClassDataSource<MockDatabase>(Shared = SharedType.PerTestSession)]
+    public required MockDatabase Database { get; init; }
+
+    public bool ContainerWasInitializedBeforeFactory { get; private set; }
+    public string? ConnectionStringFromContainer { get; private set; }
+    private bool _serverCreated;
+
+    // Simulates WebApplicationFactory.Server property
+    private void EnsureServer()
+    {
+        if (_serverCreated)
+        {
+            return;
+        }
+
+        // This simulates ConfigureWebHost being called
+        ConfigureWebHost();
+        _serverCreated = true;
+    }
+
+    // Simulates the ConfigureWebHost method from the issue
+    private void ConfigureWebHost()
+    {
+        Console.WriteLine("[MockWebApplicationFactory] ConfigureWebHost called");
+        ContainerWasInitializedBeforeFactory = Database.IsInitialized;
+
+        // This is what fails in the issue - accessing the connection string
+        // before the container is started
+        ConnectionStringFromContainer = Database.GetConnectionString();
+        Console.WriteLine($"[MockWebApplicationFactory] Got connection string: {ConnectionStringFromContainer}");
+    }
+
+    public Task InitializeAsync()
+    {
+        Console.WriteLine("[MockWebApplicationFactory] InitializeAsync called");
+        // This triggers Server property which triggers ConfigureWebHost
+        EnsureServer();
+        return Task.CompletedTask;
     }
 }
 
