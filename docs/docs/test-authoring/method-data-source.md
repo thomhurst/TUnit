@@ -243,4 +243,33 @@ public class AsyncDataSourceTests
 :::tip Performance Note
 Async data sources are generated with strongly-typed delegates in AOT mode, providing excellent performance while maintaining full async/await support and cancellation token handling.
 :::
+
+## Instance Method Data Sources
+
+In addition to static `MethodDataSource`, TUnit supports `InstanceMethodDataSource` for accessing instance members:
+
+```csharp
+public class MyTests
+{
+    private IEnumerable<int> TestData => new[] { 1, 2, 3 };
+
+    [Test]
+    [InstanceMethodDataSource(nameof(TestData))]
+    public async Task MyTest(int value)
+    {
+        await Assert.That(value).IsGreaterThan(0);
+    }
+}
+```
+
+### Discovery Phase Considerations
+
+`InstanceMethodDataSource` is evaluated during **test discovery** (before test execution). If the instance property depends on async initialization via `IAsyncInitializer`, that initialization has **not yet run** during discovery, potentially resulting in empty data and no tests being generated.
+
+**Solutions:**
+
+1. **Preferred:** Return predefined values that don't require initialization
+2. **Alternative:** Use `IAsyncDiscoveryInitializer` if you need discovery-time initialization
+
+See [Property Injection - Discovery Phase Initialization](../test-lifecycle/property-injection.md#discovery-phase-initialization) for detailed guidance and examples.
 EOF < /dev/null

@@ -430,6 +430,68 @@ public class DatabaseTests : IAsyncInitializer
 }
 ```
 
+## IAsyncDiscoveryInitializer
+
+For scenarios requiring initialization during test discovery rather than execution, implement `IAsyncDiscoveryInitializer`:
+
+```csharp
+namespace TUnit.Core.Interfaces;
+
+/// <summary>
+/// Initializes during test discovery phase, before test enumeration.
+/// Use when data sources need access to initialized data during discovery.
+/// </summary>
+public interface IAsyncDiscoveryInitializer : IAsyncInitializer;
+```
+
+**When to use:**
+- `InstanceMethodDataSource` accessing dynamically loaded data
+- Test case enumeration depends on async-loaded fixtures
+- Discovery-time data generation
+
+**Performance consideration:** Discovery runs frequently (IDE reloads, `--list-tests`, CI enumeration), so avoid expensive operations when possible. Prefer predefined data over discovery-time initialization when feasible.
+
+Example:
+
+```csharp
+// Fixture that loads test cases during discovery
+public class TestCaseFixture : IAsyncDiscoveryInitializer, IAsyncDisposable
+{
+    private List<string> _testCases = [];
+
+    public async Task InitializeAsync()
+    {
+        // This runs during DISCOVERY, not just execution
+        _testCases = await LoadTestCasesFromDatabaseAsync();
+    }
+
+    public IEnumerable<string> GetTestCases() => _testCases;
+
+    public async ValueTask DisposeAsync()
+    {
+        _testCases.Clear();
+    }
+}
+
+public class MyTests
+{
+    [ClassDataSource<TestCaseFixture>(Shared = SharedType.PerClass)]
+    public required TestCaseFixture Fixture { get; init; }
+
+    public IEnumerable<string> TestCases => Fixture.GetTestCases();
+
+    [Test]
+    [InstanceMethodDataSource(nameof(TestCases))]
+    public async Task MyTest(string testCase)
+    {
+        // Tests are generated during discovery with initialized data
+        await Assert.That(testCase).IsNotNullOrEmpty();
+    }
+}
+```
+
+See [Property Injection - Discovery Phase Initialization](../test-lifecycle/property-injection.md#discovery-phase-initialization) for detailed guidance and best practices.
+
 ## Best Practices
 
 1. **Keep Extensions Focused**: Each extension should have a single, clear responsibility.

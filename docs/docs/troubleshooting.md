@@ -230,6 +230,52 @@ public void MyTest() { }
 [MethodDataSource<DataClass>(nameof(DataClass.GetData))]
 ```
 
+### Tests Not Generated When Using InstanceMethodDataSource
+
+**Symptom:** When using `InstanceMethodDataSource` with a property from a `ClassDataSource` fixture, no tests appear in the test explorer or `--list-tests` output.
+
+**Cause:** The fixture implements `IAsyncInitializer`, which runs during test **execution**, not during test **discovery**. When TUnit enumerates test cases during discovery, the fixture hasn't been initialized yet, so the data source returns empty data.
+
+**Solution 1 (Recommended):** Return predefined test case identifiers that don't require initialization:
+
+```csharp
+public class Fixture : IAsyncInitializer  // ✅ Stays as IAsyncInitializer
+{
+    // Predefined IDs - available without initialization
+    private static readonly string[] TestCaseIds = ["Case1", "Case2", "Case3"];
+
+    public async Task InitializeAsync()
+    {
+        // Expensive setup runs during execution only
+        await StartDockerContainerAsync();
+    }
+
+    // Returns predefined IDs - works during discovery
+    public IEnumerable<string> GetTestCaseIds() => TestCaseIds;
+}
+```
+
+**Solution 2:** Use `IAsyncDiscoveryInitializer` if you truly need data loaded during discovery:
+
+```csharp
+public class Fixture : IAsyncDiscoveryInitializer  // Changed from IAsyncInitializer
+{
+    private List<string> _testCases = [];
+
+    public async Task InitializeAsync()
+    {
+        // Now runs during discovery
+        _testCases = await LoadTestCasesAsync();
+    }
+
+    public IEnumerable<string> GetTestCases() => _testCases;
+}
+```
+
+**Performance note:** Solution 1 is preferred because discovery happens frequently (IDE reloads, project switches, `--list-tests`), and you want to avoid expensive operations during discovery when possible.
+
+For detailed examples, see [Property Injection - Discovery Phase Initialization](test-lifecycle/property-injection.md#discovery-phase-initialization).
+
 ## Test Execution Issues
 
 ### Tests Hanging or Deadlocking
