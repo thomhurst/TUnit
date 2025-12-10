@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.Tests;
@@ -35,17 +34,6 @@ public class CollectionAssertionTests
         var items = new List<int>();
 
         await Assert.That(() => items).Count().IsEqualTo(0);
-    }
-
-    [Test]
-    [SuppressMessage("Obsolete", "CS0618:Type or member is obsolete")]
-    public async Task Count_WithPredicate()
-    {
-        var items = new List<int> { 1, 2, 3, 4, 5 };
-
-#pragma warning disable CS0618 // Type or member is obsolete
-        await Assert.That(items).Count(x => x > 2).IsEqualTo(3);
-#pragma warning restore CS0618
     }
 
     [Test]
@@ -127,5 +115,159 @@ public class CollectionAssertionTests
 
         // Test with lambda-wrapped collection
         await Assert.That(() => items).Count(item => item.IsGreaterThan(2)).IsEqualTo(3);
+    }
+
+    // Tests for collection chaining after Count assertions
+
+    [Test]
+    public async Task Count_ThenAnd_Contains()
+    {
+        var items = new List<int> { 1, 2, 3, 4, 5 };
+
+        // Count and then chain with Contains
+        await Assert.That(items)
+            .Count().IsEqualTo(5)
+            .And.Contains(3);
+    }
+
+    [Test]
+    public async Task Count_ThenAnd_IsNotEmpty()
+    {
+        var items = new List<int> { 1, 2, 3, 4, 5 };
+
+        // Count and then chain with IsNotEmpty
+        await Assert.That(items)
+            .Count().IsGreaterThan(0)
+            .And.IsNotEmpty();
+    }
+
+    [Test]
+    public async Task Count_WithInnerAssertion_ThenAnd_Contains()
+    {
+        var items = new List<int> { 1, 2, 3, 4, 5 };
+
+        // Count with inner assertion and then chain with Contains
+        await Assert.That(items)
+            .Count(item => item.IsGreaterThan(2)).IsEqualTo(3)
+            .And.Contains(5);
+    }
+
+    [Test]
+    public async Task Count_ThenAnd_All()
+    {
+        var items = new List<int> { 1, 2, 3, 4, 5 };
+
+        // Count and then chain with All
+        await Assert.That(items)
+            .Count().IsEqualTo(5)
+            .And.All(x => x > 0);
+    }
+
+    [Test]
+    public async Task Count_ThenAnd_Count()
+    {
+        var items = new List<int> { 1, 2, 3, 4, 5 };
+
+        // Chain multiple Count assertions
+        await Assert.That(items)
+            .Count().IsGreaterThan(3)
+            .And.Count().IsLessThan(10);
+    }
+
+    [Test]
+    public async Task Count_WithInnerAssertion_ThenAnd_IsInOrder()
+    {
+        var items = new List<int> { 1, 2, 3, 4, 5 };
+
+        // Count with inner assertion and then check ordering
+        await Assert.That(items)
+            .Count(item => item.IsGreaterThan(0)).IsEqualTo(5)
+            .And.IsInOrder();
+    }
+
+    [Test]
+    public async Task Count_IsGreaterThan()
+    {
+        var items = new List<int> { 1, 2, 3, 4, 5 };
+
+        await Assert.That(items).Count().IsGreaterThan(3);
+    }
+
+    [Test]
+    public async Task Count_IsLessThan()
+    {
+        var items = new List<int> { 1, 2, 3 };
+
+        await Assert.That(items).Count().IsLessThan(5);
+    }
+
+    [Test]
+    public async Task Count_IsGreaterThanOrEqualTo()
+    {
+        var items = new List<int> { 1, 2, 3, 4, 5 };
+
+        await Assert.That(items).Count().IsGreaterThanOrEqualTo(5);
+    }
+
+    [Test]
+    public async Task Count_IsLessThanOrEqualTo()
+    {
+        var items = new List<int> { 1, 2, 3, 4, 5 };
+
+        await Assert.That(items).Count().IsLessThanOrEqualTo(5);
+    }
+
+    [Test]
+    public async Task Count_IsZero()
+    {
+        var items = new List<int>();
+
+        await Assert.That(items).Count().IsZero();
+    }
+
+    [Test]
+    public async Task Count_IsPositive()
+    {
+        var items = new List<int> { 1 };
+
+        await Assert.That(items).Count().IsPositive();
+    }
+
+    [Test]
+    public async Task Count_IsNotEqualTo()
+    {
+        var items = new List<int> { 1, 2, 3 };
+
+        await Assert.That(items).Count().IsNotEqualTo(5);
+    }
+
+    [Test]
+    public async Task Chained_Collection_Assertions()
+    {
+        var numbers = new[] { 1, 2, 3, 4, 5 };
+
+        // For collections of int, use Count().IsEqualTo(5) instead of Count(c => c.IsEqualTo(5))
+        // to avoid ambiguity with item-filtering
+        await Assert.That(numbers)
+            .IsNotEmpty()
+            .And.Count().IsEqualTo(5)
+            .And.Contains(3)
+            .And.DoesNotContain(10)
+            .And.IsInOrder()
+            .And.All(n => n > 0)
+            .And.Any(n => n == 5);
+    }
+
+    [Test]
+    public async Task Chained_Collection_Assertions_WithStrings()
+    {
+        var names = new[] { "Alice", "Bob", "Charlie" };
+
+        // For non-int collections, Count(c => c.IsEqualTo(3)) works unambiguously
+        await Assert.That(names)
+            .IsNotEmpty()
+            .And.Count(c => c.IsEqualTo(3))
+            .And.Contains("Bob")
+            .And.DoesNotContain("Dave");
     }
 }

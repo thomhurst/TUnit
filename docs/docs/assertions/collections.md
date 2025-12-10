@@ -164,6 +164,36 @@ public async Task Count_Strings_With_Inner_Assertion()
 }
 ```
 
+### Count with Collection Chaining
+
+Count assertions preserve the collection type, allowing you to chain additional collection assertions:
+
+```csharp
+[Test]
+public async Task Count_With_Chaining()
+{
+    var numbers = new[] { 1, 2, 3, 4, 5 };
+
+    // Assert count and then chain with other collection assertions
+    await Assert.That(numbers)
+        .Count().IsEqualTo(5)
+        .And.Contains(3)
+        .And.IsInOrder();
+
+    // Count with item filter assertion, then chain
+    await Assert.That(numbers)
+        .Count(item => item.IsGreaterThan(2)).IsEqualTo(3)
+        .And.Contains(5)
+        .And.All(x => x > 0);
+
+    // For non-int collections, you can also use inline count assertions
+    var names = new[] { "Alice", "Bob", "Charlie" };
+    await Assert.That(names)
+        .Count(c => c.IsEqualTo(3))
+        .And.Contains("Bob");
+}
+```
+
 ### IsEmpty
 
 Tests that a collection has no items:
