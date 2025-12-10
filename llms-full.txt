@@ -3105,21 +3105,36 @@ public async Task Count_With_Comparison()
 }
 ```
 
-### Count with Predicate
+### Count with Inner Assertion
 
-Count items matching a predicate:
+Count items that satisfy an assertion, allowing you to reuse existing assertion methods:
 
 ```csharp
 [Test]
-public async Task Count_With_Predicate()
+public async Task Count_With_Inner_Assertion()
 {
     var numbers = new[] { 1, 2, 3, 4, 5, 6 };
 
-    // Count even numbers
-    var evenCount = await Assert.That(numbers)
-        .Count(n => n % 2 == 0);
+    // Count numbers greater than 3 using assertion builder
+    await Assert.That(numbers)
+        .Count(item => item.IsGreaterThan(3))
+        .IsEqualTo(3);
 
-    await Assert.That(evenCount).IsEqualTo(3);
+    // Count numbers between 2 and 5
+    await Assert.That(numbers)
+        .Count(item => item.IsBetween(2, 5))
+        .IsEqualTo(4);
+}
+
+[Test]
+public async Task Count_Strings_With_Inner_Assertion()
+{
+    var names = new[] { "Alice", "Bob", "Andrew", "Charlie" };
+
+    // Count names starting with "A"
+    await Assert.That(names)
+        .Count(item => item.StartsWith("A"))
+        .IsEqualTo(2);
 }
 ```
 
@@ -3464,7 +3479,7 @@ The default behavior (ignoring order) is ideal for:
 public async Task Database_Query_Results()
 {
     var results = await database.GetActiveUsersAsync();
-    
+
     // Order doesn't matter for this assertion
     await Assert.That(results)
         .IsEquivalentTo(new[] { user1, user2, user3 });
@@ -3484,7 +3499,7 @@ Use order-sensitive comparison when:
 public async Task Sorted_Query_Results()
 {
     var results = await database.GetUsersSortedByNameAsync();
-    
+
     // Order matters here
     await Assert.That(results)
         .IsEquivalentTo(
@@ -3504,7 +3519,7 @@ public async Task Multiple_Order_Sensitive_Checks()
 {
     var list1 = GetSortedList1();
     var list2 = GetSortedList2();
-    
+
     // Be explicit about ordering requirements
     await Assert.That(list1).IsEquivalentTo(expected1, CollectionOrdering.Matching);
     await Assert.That(list2).IsEquivalentTo(expected2, CollectionOrdering.Matching);
@@ -3518,7 +3533,7 @@ For ordered comparisons, you can also use `IsInOrder()`:
 public async Task Verify_Ordering_Separately()
 {
     var actual = new[] { 1, 2, 3 };
-    
+
     // Check both equivalency and ordering
     await Assert.That(actual).IsEquivalentTo(new[] { 1, 2, 3 });
     await Assert.That(actual).IsInOrder();
