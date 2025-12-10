@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using CliWrap;
 using Shouldly;
+using TUnit.Core.Enums;
 using TUnit.Engine.Tests.Enums;
 
 namespace TUnit.Engine.Tests;
@@ -102,7 +103,7 @@ public class ExternalCancellationTests(TestMode testMode) : InvokableTestBase(te
     }
 
     [Test]
-    [SkipOnWindows("CliWrap graceful cancellation (CTRL+C) does not reliably reach child processes on Windows")]
+    [ExcludeOn(OS.Windows)]
     public async Task TestLevel_AfterHook_Runs_OnExternalCancellation()
     {
         var afterMarkerFile = Path.Combine(TempPath, "TUnit_3882_External", "after_Test_ThatGets_Cancelled_Externally.txt");
@@ -114,7 +115,7 @@ public class ExternalCancellationTests(TestMode testMode) : InvokableTestBase(te
     }
 
     [Test]
-    [SkipOnWindows("CliWrap graceful cancellation (CTRL+C) does not reliably reach child processes on Windows")]
+    [ExcludeOn(OS.Windows)]
     public async Task SessionLevel_AfterHook_Runs_OnExternalCancellation()
     {
         var afterMarkerFile = Path.Combine(TempPath, "TUnit_3882_External_Session_After.txt");
@@ -126,7 +127,7 @@ public class ExternalCancellationTests(TestMode testMode) : InvokableTestBase(te
     }
 
     [Test]
-    [SkipOnWindows("CliWrap graceful cancellation (CTRL+C) does not reliably reach child processes on Windows")]
+    [ExcludeOn(OS.Windows)]
     public async Task AssemblyLevel_AfterHook_Runs_OnExternalCancellation()
     {
         var afterMarkerFile = Path.Combine(TempPath, "TUnit_3882_External_Assembly_After.txt");
@@ -138,7 +139,7 @@ public class ExternalCancellationTests(TestMode testMode) : InvokableTestBase(te
     }
 
     [Test]
-    [SkipOnWindows("CliWrap graceful cancellation (CTRL+C) does not reliably reach child processes on Windows")]
+    [ExcludeOn(OS.Windows)]
     public async Task ClassLevel_AfterHook_Runs_OnExternalCancellation()
     {
         var afterMarkerFile = Path.Combine(TempPath, "TUnit_3882_External_Class_After.txt");
