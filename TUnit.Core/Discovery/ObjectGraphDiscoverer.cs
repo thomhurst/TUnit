@@ -488,8 +488,21 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         // Process method arguments
         ProcessRootCollection(testDetails.TestMethodArguments, tryAdd, onRootObjectAdded, cancellationToken);
 
-        // Process injected property values
-        ProcessRootCollection(testDetails.TestClassInjectedPropertyArguments.Values, tryAdd, onRootObjectAdded, cancellationToken);
+        // Process injected property values - ONLY those belonging directly to the test class
+        // Nested injected properties (e.g., properties of injected objects) should be discovered
+        // through normal object graph traversal at the appropriate depth level
+        var testClassTypePrefix = testDetails.ClassType.FullName + ".";
+        foreach (var kvp in testDetails.TestClassInjectedPropertyArguments)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            
+            // Only add properties that belong to the test class itself
+            // Cache keys are formatted as "{ContainingType.FullName}.{PropertyName}"
+            if (kvp.Key.StartsWith(testClassTypePrefix) && kvp.Value != null && tryAdd(kvp.Value, 0))
+            {
+                onRootObjectAdded(kvp.Value);
+            }
+        }
     }
 
     /// <summary>

@@ -249,10 +249,13 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     /// </summary>
     private async Task InitializeObjectWithNestedAsync(object obj, CancellationToken cancellationToken)
     {
-        // First initialize nested objects depth-first
-        await InitializeNestedObjectsForExecutionAsync(obj, cancellationToken);
-
-        // Then initialize the object itself
+        // NOTE: We do NOT initialize nested objects here because they are already
+        // tracked separately in TrackedObjects at their own depth levels.
+        // Initializing them here would cause initialization order issues where
+        // a parent object's InitializeAsync could execute before its nested dependencies
+        // are fully initialized (because Lazy<Task> executes synchronous methods immediately).
+        
+        // Just initialize the object itself
         await ObjectInitializer.InitializeAsync(obj, cancellationToken);
     }
 
