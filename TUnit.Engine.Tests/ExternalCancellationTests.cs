@@ -10,6 +10,9 @@ namespace TUnit.Engine.Tests;
 /// Validates that After hooks execute even when tests are cancelled EXTERNALLY (Issue #3882).
 /// These tests start the test process asynchronously, cancel it mid-execution (simulating Ctrl+C or Stop button),
 /// and verify that After hooks still execute by checking for marker files.
+/// 
+/// NOTE: These tests are excluded on Windows because CliWrap graceful cancellation (CTRL+C) 
+/// does not reliably reach child processes on Windows.
 /// </summary>
 public class ExternalCancellationTests(TestMode testMode) : InvokableTestBase(testMode)
 {
