@@ -155,6 +155,20 @@ public abstract class CollectionAssertionBase<TCollection, TItem> : Assertion<TC
     }
 
     /// <summary>
+    /// Gets the count of items satisfying the given assertion for further numeric assertions.
+    /// This enables fluent assertions on filtered counts using the full assertion builder.
+    /// Example: await Assert.That(list).Count(item => item.IsGreaterThan(10)).IsEqualTo(3);
+    /// </summary>
+    [OverloadResolutionPriority(1)]
+    public CollectionCountWithAssertionValueAssertion<TCollection, TItem> Count(
+        Func<IAssertionSource<TItem>, Assertion<TItem>?> assertion,
+        [CallerArgumentExpression(nameof(assertion))] string? expression = null)
+    {
+        Context.ExpressionBuilder.Append($".Count({expression})");
+        return new CollectionCountWithAssertionValueAssertion<TCollection, TItem>(Context, assertion);
+    }
+
+    /// <summary>
     /// Asserts that the collection is ordered by the specified key selector in ascending order.
     /// This instance method enables calling IsOrderedBy with proper type inference.
     /// Example: await Assert.That(list).IsOrderedBy(x => x.Name);

@@ -417,6 +417,11 @@ namespace .Conditions
     {
         public CollectionCountValueAssertion(.<TCollection> collectionContext, <TItem, bool>? predicate) { }
     }
+    public class CollectionCountWithAssertionValueAssertion<TCollection, TItem> : .<int>
+        where TCollection : .<TItem>
+    {
+        public CollectionCountWithAssertionValueAssertion(.<TCollection> collectionContext, <.<TItem>, .<TItem>?> assertion) { }
+    }
     [.("DoesNotContain")]
     public class CollectionDoesNotContainAssertion<TCollection, TItem> : .<TCollection, TItem>
         where TCollection : .<TItem>
@@ -3834,6 +3839,7 @@ namespace .Sources
         public .<TCollection, TItem> ContainsOnly(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
         public .<TCollection, TItem> Count() { }
         public .<TCollection, TItem> Count(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public .<TCollection, TItem> Count(<.<TItem>, .<TItem>?> assertion, [.("assertion")] string? expression = null) { }
         public .<TCollection, TItem> DoesNotContain(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
         public .<TCollection, TItem> DoesNotContain(TItem expected, [.("expected")] string? expression = null) { }
         protected override string GetExpectation() { }
