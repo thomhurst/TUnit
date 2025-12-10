@@ -4349,6 +4349,8 @@ namespace .Sources
         public .<TCollection, TItem> Contains(TItem expected, [.("expected")] string? expression = null) { }
         public .<TCollection, TItem> ContainsOnly(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
         public .<TCollection, TItem> Count() { }
+        [("Use Count(item => ()) instead to leverage the full assertion bu" +
+            "ilder. Example: Count(item => (10))")]
         public .<TCollection, TItem> Count(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
         public .<TCollection, TItem> Count(<.<TItem>, .<TItem>?> assertion, [.("assertion")] string? expression = null) { }
         public .<TCollection, TItem> DoesNotContain(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }

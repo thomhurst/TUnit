@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.Tests;
@@ -37,11 +38,14 @@ public class CollectionAssertionTests
     }
 
     [Test]
+    [SuppressMessage("Obsolete", "CS0618:Type or member is obsolete")]
     public async Task Count_WithPredicate()
     {
         var items = new List<int> { 1, 2, 3, 4, 5 };
 
+#pragma warning disable CS0618 // Type or member is obsolete
         await Assert.That(items).Count(x => x > 2).IsEqualTo(3);
+#pragma warning restore CS0618
     }
 
     [Test]
