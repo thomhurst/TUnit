@@ -476,6 +476,12 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
     /// Collects root-level objects (class args, method args, properties) from test details.
     /// Eliminates duplicate loops in DiscoverObjectGraph and DiscoverAndTrackObjects.
     /// </summary>
+    /// <remarks>
+    /// For injected properties, only DIRECT test class properties are added at depth 0.
+    /// Nested properties (properties of injected objects) are discovered through normal
+    /// graph traversal at appropriate depths (1+), ensuring correct initialization order
+    /// for nested IAsyncInitializer dependencies. See GitHub issue #4032.
+    /// </remarks>
     private static void CollectRootObjects(
         TestDetails testDetails,
         TryAddObjectFunc tryAdd,
@@ -488,8 +494,24 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         // Process method arguments
         ProcessRootCollection(testDetails.TestMethodArguments, tryAdd, onRootObjectAdded, cancellationToken);
 
-        // Process injected property values
-        ProcessRootCollection(testDetails.TestClassInjectedPropertyArguments.Values, tryAdd, onRootObjectAdded, cancellationToken);
+        // Process ONLY direct test class injected properties at depth 0.
+        // Nested properties will be discovered through normal graph traversal at depth 1+.
+        // This ensures proper initialization order for nested IAsyncInitializer dependencies.
+        // Cache keys are formatted as "{ContainingType.FullName}.{PropertyName}" (see PropertyCacheKeyGenerator).
+        var testClassPrefix = testDetails.ClassType.FullName + ".";
+        foreach (var kvp in testDetails.TestClassInjectedPropertyArguments)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // Only add properties that belong directly to the test class (not nested properties)
+            if (kvp.Key.StartsWith(testClassPrefix, StringComparison.Ordinal) && kvp.Value != null)
+            {
+                if (tryAdd(kvp.Value, 0))
+                {
+                    onRootObjectAdded(kvp.Value);
+                }
+            }
+        }
     }
 
     /// <summary>

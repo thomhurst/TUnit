@@ -147,6 +147,17 @@ dotnet test TUnit.Core.SourceGenerator.Tests
 
 **Rule**: Only run TUnit.TestProject with explicit `--treenode-filter` to target specific tests or classes.
 
+**IMPORTANT: Run filters ONE AT A TIME!** Using OR patterns (`Pattern1|Pattern2`) can match thousands of unintended tests. Always run one specific filter per command:
+
+```bash
+# ❌ WRONG - OR patterns can match too broadly
+--treenode-filter "/*/*/ClassA/*|/*/*/ClassB/*"
+
+# ✅ CORRECT - Run separate commands for each class
+dotnet run -- --treenode-filter "/*/*/ClassA/*"
+dotnet run -- --treenode-filter "/*/*/ClassB/*"
+```
+
 ---
 
 ### Most Common Commands
