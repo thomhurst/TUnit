@@ -1,0 +1,136 @@
+name: Bug Report
+description: Report a bug or unexpected behavior in TUnit
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill out the information below to help us investigate.
+
+        **Before submitting**, please check:
+        - [ ] I've searched [existing issues](https://github.com/thomhurst/TUnit/issues) to ensure this isn't a duplicate
+        - [ ] I've read the [documentation](https://tunit.dev/) and this isn't expected behavior
+        - [ ] I'm using the latest version of TUnit
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear and concise description of what the bug is.
+      placeholder: Describe the bug...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+      placeholder: I expected...
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+      placeholder: Instead, what happened was...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: |
+        Please provide a minimal code example that reproduces the issue.
+        Include test code and any relevant configuration.
+      placeholder: |
+        1. Create a test class with...
+        2. Run the test using...
+        3. Observe that...
+
+        ```csharp
+        [Test]
+        public async Task MyTest()
+        {
+            // Minimal reproduction code
+        }
+        ```
+    validations:
+      required: true
+
+  - type: input
+    id: tunit-version
+    attributes:
+      label: TUnit Version
+      description: What version of TUnit are you using?
+      placeholder: "e.g., 0.15.0"
+    validations:
+      required: true
+
+  - type: input
+    id: dotnet-version
+    attributes:
+      label: .NET Version
+      description: What .NET version are you targeting?
+      placeholder: "e.g., .NET 8.0, .NET 9.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      description: What operating system are you using?
+      options:
+        - Windows
+        - macOS
+        - Linux
+        - Other (please specify in additional context)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: ide
+    attributes:
+      label: IDE / Test Runner
+      description: How are you running the tests?
+      options:
+        - dotnet CLI (dotnet test / dotnet run)
+        - Visual Studio
+        - JetBrains Rider
+        - VS Code
+        - Other (please specify in additional context)
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error Output / Stack Trace
+      description: |
+        If applicable, include the error message or stack trace.
+        This will be automatically formatted as code.
+      render: shell
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: |
+        Add any other context about the problem here.
+        - Are you using AOT/trimming?
+        - Any custom configuration?
+        - Does this happen with specific test data?
+
+  - type: checkboxes
+    id: ide-issue
+    attributes:
+      label: IDE-Specific Issue?
+      description: |
+        If this issue only occurs in a specific IDE (not via `dotnet test`), it may need to be reported to that IDE's team instead.
+      options:
+        - label: I've confirmed this issue occurs when running via `dotnet test` or `dotnet run`, not just in my IDE

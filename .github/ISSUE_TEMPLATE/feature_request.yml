@@ -1,0 +1,102 @@
+name: Feature Request
+description: Suggest a new feature or enhancement for TUnit
+title: "[Feature]: "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a feature! We appreciate your input in making TUnit better.
+
+        **Before submitting**, please:
+        - [ ] Search [existing issues](https://github.com/thomhurst/TUnit/issues) and [discussions](https://github.com/thomhurst/TUnit/discussions) to ensure this hasn't been suggested before
+        - [ ] Check the [documentation](https://tunit.dev/) to confirm this feature doesn't already exist
+        - [ ] Consider starting a [discussion](https://github.com/thomhurst/TUnit/discussions/new?category=ideas) first for larger features to get community feedback
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: |
+        Is your feature request related to a problem? Please describe.
+        A clear description of what problem this feature would solve.
+      placeholder: "I'm frustrated when... / It would be helpful if... / Currently I have to..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: |
+        Describe the solution you'd like.
+        Include example code/syntax if applicable.
+      placeholder: |
+        I would like TUnit to...
+
+        Example usage:
+        ```csharp
+        [Test]
+        [ProposedAttribute("value")]
+        public async Task MyTest()
+        {
+            // How I envision using this feature
+        }
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: |
+        Have you considered any alternative solutions or workarounds?
+        What do you currently do instead?
+      placeholder: "I've tried... / Currently I work around this by..."
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Feature Category
+      description: What area of TUnit does this feature relate to?
+      options:
+        - Test Discovery / Attributes
+        - Test Execution / Lifecycle
+        - Assertions
+        - Data-Driven Testing (Arguments, DataSources)
+        - Parallel Execution
+        - Test Output / Reporting
+        - IDE Integration
+        - Performance
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: How important is this feature to you?
+      description: Help us prioritize by indicating the impact on your workflow.
+      options:
+        - Nice to have - would improve my experience
+        - Important - significantly impacts my workflow
+        - Critical - blocking my adoption/usage of TUnit
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: |
+        Add any other context, screenshots, or examples about the feature request.
+        - Links to similar features in other test frameworks
+        - Use cases that would benefit from this feature
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      description: Would you be interested in contributing this feature?
+      options:
+        - label: I'm willing to submit a pull request for this feature

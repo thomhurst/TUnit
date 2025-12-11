@@ -34,7 +34,7 @@ If you then still feel the need to ask a question and need clarification, we rec
 
 - Open an [Issue](https://github.com/thomhurst/TUnit/issues/new).
 - Provide as much context as you can about what you're running into.
-- Provide project and platform versions (nodejs, npm, etc), depending on what seems relevant.
+- Provide project and platform versions (.NET SDK, TUnit version, OS), depending on what seems relevant.
 
 We will then take care of the issue as soon as possible.
 
@@ -50,7 +50,7 @@ A good bug report shouldn't leave others needing to chase you up for more inform
 
 - Make sure that you are using the latest version.
 - Determine if your bug is really a bug and not an error on your side e.g. using incompatible environment components/versions (Make sure that you have read the [documentation](https://tunit.dev/). If you are looking for support, you might want to check [this section](#i-have-a-question)).
-- To see if other users have experienced (and potentially already solved) the same issue you are having, check if there is not already a bug report existing for your bug or error in the [bug tracker](https://github.com/thomhurst/TUnitissues?q=label%3Abug).
+- To see if other users have experienced (and potentially already solved) the same issue you are having, check if there is not already a bug report existing for your bug or error in the [bug tracker](https://github.com/thomhurst/TUnit/issues?q=label%3Abug).
 - Also make sure to search the internet (including Stack Overflow) to see if users outside of the GitHub community have discussed the issue.
 - Collect information about the bug:
 - Stack trace (Traceback)
@@ -72,7 +72,7 @@ Once it's filed:
 
 - The project team will label the issue accordingly.
 - A team member will try to reproduce the issue with your provided steps. If there are no reproduction steps or no obvious way to reproduce the issue, the team will ask you for those steps and mark the issue as `needs-repro`. Bugs with the `needs-repro` tag will not be addressed until they are reproduced.
-- If the team is able to reproduce the issue, it will be marked `needs-fix`, as well as possibly other tags (such as `critical`), and the issue will be left to be [implemented by someone](#your-first-code-contribution).
+- If the team is able to reproduce the issue, it will be marked `needs-fix`, as well as possibly other tags (such as `critical`), and the issue will be left to be implemented.
 
 ### Suggesting Enhancements
 
@@ -103,3 +103,31 @@ The documentation is generated from files within this repository, so you can for
 The relevant files are at `docs > docs > tutorials-[basics|extras|assertions]`
 
 If want to provide sample code for complicated or useful different test suite set-ups, that's also very welcome, as this can help other users get started a lot quicker!
+
+### Code Contributions
+
+When contributing code to TUnit, please keep these important requirements in mind:
+
+#### Dual-Mode Implementation
+TUnit supports both source-generated and reflection-based test discovery. **All changes that affect test discovery or execution must work identically in both modes:**
+- Source Generator path: `TUnit.Core.SourceGenerator`
+- Reflection path: `TUnit.Engine`
+
+#### Snapshot Testing
+If your changes affect the source generator output or public APIs:
+1. Run the relevant tests: `dotnet test TUnit.Core.SourceGenerator.Tests` or `dotnet test TUnit.PublicAPI`
+2. Review any `.received.txt` files generated
+3. If the changes are intentional, rename them to `.verified.txt`
+4. Commit the `.verified.txt` files with your changes
+
+#### Performance Considerations
+TUnit is designed to handle millions of tests. When contributing:
+- Minimize allocations in hot paths (test discovery, execution)
+- Avoid LINQ in performance-critical code
+- Cache reflection results
+- Use `ValueTask` for potentially-sync operations
+
+#### AOT Compatibility
+All code must work with Native AOT and IL trimming. Add appropriate `[DynamicallyAccessedMembers]` annotations when using reflection.
+
+For detailed development guidelines, see the [CLAUDE.md](https://github.com/thomhurst/TUnit/blob/main/CLAUDE.md) file in the repository root.

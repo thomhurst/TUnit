@@ -2,18 +2,46 @@ changelog:
   exclude:
     labels:
       - ignore-for-release
+      - duplicate
+      - invalid
+      - wontfix
   categories:
-    - title: Breaking Changes 🛠
+    - title: Breaking Changes
       labels:
         - Semver-Major
         - breaking-change
         - breaking
-    - title: 🏕 Changes
+    - title: New Features
+      labels:
+        - enhancement
+        - feature
+    - title: Bug Fixes
+      labels:
+        - bug
+        - fix
+    - title: Performance Improvements
+      labels:
+        - performance
+    - title: Documentation
+      labels:
+        - documentation
+        - docs
+    - title: Other Changes
       labels:
         - '*'
       exclude:
         labels:
           - dependencies
-    - title: 👒 Dependencies
+          - enhancement
+          - feature
+          - bug
+          - fix
+          - performance
+          - documentation
+          - docs
+          - Semver-Major
+          - breaking-change
+          - breaking
+    - title: Dependencies
       labels:
         - dependencies
