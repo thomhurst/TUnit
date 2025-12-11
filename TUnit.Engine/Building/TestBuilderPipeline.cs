@@ -152,6 +152,8 @@ internal sealed class TestBuilderPipeline
             .SelectAsync(async repeatIndex =>
         {
             // Create a simple TestData for ID generation
+            // Use DynamicTestIndex from the metadata to ensure unique test IDs for multiple dynamic tests
+            var dynamicTestIndex = metadata is IDynamicTestMetadata dynMeta ? dynMeta.DynamicTestIndex : 0;
             var testData = new TestBuilder.TestData
             {
                 TestClassInstanceFactory = () => Task.FromResult(metadata.InstanceFactory(Type.EmptyTypes, [])),
@@ -159,7 +161,7 @@ internal sealed class TestBuilderPipeline
                 ClassDataLoopIndex = 0,
                 ClassData = [],
                 MethodDataSourceAttributeIndex = 0,
-                MethodDataLoopIndex = 0,
+                MethodDataLoopIndex = dynamicTestIndex,
                 MethodData = [],
                 RepeatIndex = repeatIndex,
                 InheritanceDepth = metadata.InheritanceDepth,
@@ -271,6 +273,8 @@ internal sealed class TestBuilderPipeline
 
                 // Dynamic tests need to honor attributes like RepeatCount, RetryCount, etc.
                 // We'll create multiple test instances based on RepeatCount
+                // Use DynamicTestIndex from the metadata to ensure unique test IDs for multiple dynamic tests
+                var dynamicTestIndex = ((IDynamicTestMetadata)resolvedMetadata).DynamicTestIndex;
                 for (var repeatIndex = 0; repeatIndex < repeatCount + 1; repeatIndex++)
                 {
                     // Create a simple TestData for ID generation
@@ -281,7 +285,7 @@ internal sealed class TestBuilderPipeline
                         ClassDataLoopIndex = 0,
                         ClassData = [],
                         MethodDataSourceAttributeIndex = 0,
-                        MethodDataLoopIndex = 0,
+                        MethodDataLoopIndex = dynamicTestIndex,
                         MethodData = [],
                         RepeatIndex = repeatIndex,
                         InheritanceDepth = resolvedMetadata.InheritanceDepth,

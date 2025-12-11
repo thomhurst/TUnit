@@ -11,6 +11,8 @@ public class DynamicTestBuilderContext
     [
     ];
 
+    private int _nextIndex = 1; // Start at 1 to match loop index convention used by regular data sources
+
     public DynamicTestBuilderContext(string filePath, int lineNumber)
     {
         FilePath = filePath;
@@ -33,6 +35,9 @@ public class DynamicTestBuilderContext
             testWithLocation.CreatorFilePath = FilePath;
             testWithLocation.CreatorLineNumber = LineNumber;
         }
+
+        // Assign unique index for test ID generation
+        test.DynamicTestIndex = _nextIndex++;
 
         _tests.Add(test);
     }

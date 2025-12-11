@@ -353,6 +353,8 @@ internal sealed class TestRegistry : ITestRegistry
             _dynamicResult = dynamicResult;
         }
 
+        public int DynamicTestIndex => _dynamicResult.DynamicTestIndex;
+
         public override Func<ExecutableTestCreationContext, TestMetadata, AbstractExecutableTest> CreateExecutableTestFactory
         {
             get => (context, metadata) =>

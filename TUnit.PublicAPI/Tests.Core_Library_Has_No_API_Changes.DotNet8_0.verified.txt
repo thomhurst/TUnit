@@ -6,6 +6,7 @@ namespace
     public abstract class AbstractDynamicTest
     {
         protected AbstractDynamicTest() { }
+        public int DynamicTestIndex { get; set; }
         public abstract .<.DiscoveryResult> GetTests();
     }
     public abstract class AbstractDynamicTest<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicFields | ..NonPublicFields | ..PublicProperties)]  T> : .AbstractDynamicTest
@@ -617,6 +618,7 @@ namespace
         public string? CreatorFilePath { get; set; }
         public int? CreatorLineNumber { get; set; }
         public string? DisplayName { get; set; }
+        public int DynamicTestIndex { get; set; }
         public string? ParentTestId { get; set; }
         public .<string, object?>? Properties { get; set; }
         public .? Relationship { get; set; }
@@ -853,7 +855,10 @@ namespace
         string? CreatorFilePath { get; set; }
         int? CreatorLineNumber { get; set; }
     }
-    public interface IDynamicTestMetadata { }
+    public interface IDynamicTestMetadata
+    {
+        int DynamicTestIndex { get; }
+    }
     public interface IDynamicTestSource
     {
         .<.AbstractDynamicTest> CollectDynamicTests(string sessionId);
