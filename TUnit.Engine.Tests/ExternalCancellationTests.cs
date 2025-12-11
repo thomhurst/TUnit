@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using CliWrap;
 using Shouldly;
+using TUnit.Core.Enums;
 using TUnit.Engine.Tests.Enums;
 
 namespace TUnit.Engine.Tests;
@@ -10,6 +11,12 @@ namespace TUnit.Engine.Tests;
 /// These tests start the test process asynchronously, cancel it mid-execution (simulating Ctrl+C or Stop button),
 /// and verify that After hooks still execute by checking for marker files.
 /// </summary>
+/// <remarks>
+/// These tests are skipped on Windows because CliWrap's graceful cancellation uses GenerateConsoleCtrlEvent,
+/// which doesn't work reliably for child processes with their own console.
+/// See: https://github.com/Tyrrrz/CliWrap/issues/47
+/// </remarks>
+[ExcludeOn(OS.Windows)]
 public class ExternalCancellationTests(TestMode testMode) : InvokableTestBase(testMode)
 {
     private static readonly string TempPath = Path.GetTempPath();
