@@ -623,6 +623,16 @@ namespace
     {
         public static T Argument<T>() { }
     }
+    public sealed class DynamicTestMetadata : .TestMetadata, .IDynamicTestMetadata
+    {
+        public DynamicTestMetadata(.DynamicDiscoveryResult dynamicResult) { }
+        public override <.ExecutableTestCreationContext, .TestMetadata, .AbstractExecutableTest> CreateExecutableTestFactory { get; }
+        public string? DisplayName { get; }
+        public int DynamicTestIndex { get; }
+        public string? ParentTestId { get; }
+        public .<string, object?>? Properties { get; }
+        public .? Relationship { get; }
+    }
     public class DynamicTest<T> : .AbstractDynamicTest<T>, .IDynamicTestCreatorLocation
         where T :  class
     {
@@ -630,6 +640,7 @@ namespace
         public .<> Attributes { get; set; }
         public string? CreatorFilePath { get; set; }
         public int? CreatorLineNumber { get; set; }
+        public string? DisplayName { get; set; }
         public object?[]? TestClassArguments { get; set; }
         public .<<T>>? TestMethod { get; set; }
         public object?[]? TestMethodArguments { get; set; }
@@ -834,6 +845,7 @@ namespace
     }
     public interface IDynamicTestMetadata
     {
+        string? DisplayName { get; }
         int DynamicTestIndex { get; }
     }
     public interface IDynamicTestSource

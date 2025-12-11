@@ -131,7 +131,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
 
         var testName = methodInfo.Name;
 
-        return Task.FromResult<TestMetadata>(new AotDynamicTestMetadata(result)
+        return Task.FromResult<TestMetadata>(new DynamicTestMetadata(result)
         {
             TestName = testName,
             TestClassType = result.TestClassType,
@@ -294,74 +294,6 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             ReturnType = typeof(void),
             TypeInfo = new ConcreteType(type)
         };
-    }
-
-    private sealed class AotDynamicTestMetadata(DynamicDiscoveryResult dynamicResult) : TestMetadata, IDynamicTestMetadata
-    {
-        public int DynamicTestIndex => dynamicResult.DynamicTestIndex;
-
-        public override Func<ExecutableTestCreationContext, TestMetadata, AbstractExecutableTest> CreateExecutableTestFactory
-        {
-            get => (context, metadata) =>
-            {
-                // For dynamic tests, we need to use the specific arguments from the dynamic result
-                var modifiedContext = new ExecutableTestCreationContext
-                {
-                    TestId = context.TestId,
-                    DisplayName = context.DisplayName,
-                    Arguments = dynamicResult.TestMethodArguments ?? context.Arguments,
-                    ClassArguments = dynamicResult.TestClassArguments ?? context.ClassArguments,
-                    Context = context.Context
-                };
-
-                // Create instance and test invoker for the dynamic test
-                var createInstance = async (TestContext testContext) =>
-                {
-                    object instance;
-
-                    // Check if there's a ClassConstructor to use
-                    if (testContext.ClassConstructor != null)
-                    {
-                        var testBuilderContext = TestBuilderContext.FromTestContext(testContext, null);
-                        var classConstructorMetadata = new ClassConstructorMetadata
-                        {
-                            TestSessionId = "", // Dynamic tests don't have session IDs
-                            TestBuilderContext = testBuilderContext
-                        };
-
-                        instance = await testContext.ClassConstructor.Create(metadata.TestClassType, classConstructorMetadata);
-                    }
-                    else
-                    {
-                        instance = metadata.InstanceFactory(Type.EmptyTypes, modifiedContext.ClassArguments);
-                    }
-
-                    // Handle property injections
-                    foreach (var propertyInjection in metadata.PropertyInjections)
-                    {
-                        var value = propertyInjection.ValueFactory();
-                        propertyInjection.Setter(instance, value);
-                    }
-
-                    return instance;
-                };
-
-                var invokeTest = metadata.TestInvoker ?? throw new InvalidOperationException("Test invoker is null");
-
-                return new ExecutableTest(createInstance,
-                    async (instance, args, context, ct) =>
-                    {
-                        await invokeTest(instance, args);
-                    })
-                {
-                    TestId = modifiedContext.TestId,
-                    Metadata = metadata,
-                    Arguments = modifiedContext.Arguments,
-                    ClassArguments = modifiedContext.ClassArguments,
-                    Context = modifiedContext.Context
-                };
-            };
-        }
     }
 
     private sealed class FailedDynamicTestMetadata(Exception exception) : TestMetadata

@@ -10,4 +10,9 @@ public interface IDynamicTestMetadata
     /// Used to generate unique test IDs when multiple dynamic tests target the same method.
     /// </summary>
     int DynamicTestIndex { get; }
+
+    /// <summary>
+    /// Custom display name for this dynamic test. If null, a default name will be generated.
+    /// </summary>
+    string? DisplayName { get; }
 }
