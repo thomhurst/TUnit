@@ -56,7 +56,7 @@ public class DynamicDiscoveryResult : DiscoveryResult
     /// </summary>
     public string UniqueId
     {
-        get => _uniqueId ??= Guid.NewGuid().ToString("N")[..8];
+        get => _uniqueId ??= Guid.NewGuid().ToString("N").Substring(0, 8);
         set => _uniqueId = value;
     }
 }
