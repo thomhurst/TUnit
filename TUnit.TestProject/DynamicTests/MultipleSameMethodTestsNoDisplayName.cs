@@ -5,32 +5,29 @@ using TUnit.TestProject.Attributes;
 namespace TUnit.TestProject.DynamicTests;
 
 [EngineTest(ExpectedResult.Pass)]
-public class MultipleSameMethodTests
+public class MultipleSameMethodTestsNoDisplayName
 {
     [DynamicTestBuilder]
     public void BuildDynamicTests(DynamicTestBuilderContext context)
     {
         // Add multiple tests calling the same method with different arguments
-        // Each test should have a custom display name for better readability
-        context.AddTest(new DynamicTest<MultipleSameMethodTests>
+        // WITHOUT custom display names - should still work due to UniqueId
+        context.AddTest(new DynamicTest<MultipleSameMethodTestsNoDisplayName>
         {
             TestMethod = @class => @class.ParametrizedTest(DynamicTestHelper.Argument<string>()),
             TestMethodArguments = ["First"],
-            DisplayName = "ParametrizedTest with First"
         });
 
-        context.AddTest(new DynamicTest<MultipleSameMethodTests>
+        context.AddTest(new DynamicTest<MultipleSameMethodTestsNoDisplayName>
         {
             TestMethod = @class => @class.ParametrizedTest(DynamicTestHelper.Argument<string>()),
             TestMethodArguments = ["Second"],
-            DisplayName = "ParametrizedTest with Second"
         });
 
-        context.AddTest(new DynamicTest<MultipleSameMethodTests>
+        context.AddTest(new DynamicTest<MultipleSameMethodTestsNoDisplayName>
         {
             TestMethod = @class => @class.ParametrizedTest(DynamicTestHelper.Argument<string>()),
             TestMethodArguments = ["Third"],
-            DisplayName = "ParametrizedTest with Third"
         });
     }
 

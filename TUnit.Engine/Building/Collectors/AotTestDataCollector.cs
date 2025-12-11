@@ -129,7 +129,8 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             throw new InvalidOperationException("Could not extract method info from dynamic test expression");
         }
 
-        var testName = methodInfo.Name;
+        // Use custom display name if provided, otherwise generate unique name using UniqueId
+        var testName = result.DisplayName ?? $"{methodInfo.Name}_{result.UniqueId}";
 
         return Task.FromResult<TestMetadata>(new AotDynamicTestMetadata(result)
         {
@@ -306,7 +307,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
                 var modifiedContext = new ExecutableTestCreationContext
                 {
                     TestId = context.TestId,
-                    DisplayName = context.DisplayName,
+                    DisplayName = dynamicResult.DisplayName ?? context.DisplayName,
                     Arguments = dynamicResult.TestMethodArguments ?? context.Arguments,
                     ClassArguments = dynamicResult.TestClassArguments ?? context.ClassArguments,
                     Context = context.Context

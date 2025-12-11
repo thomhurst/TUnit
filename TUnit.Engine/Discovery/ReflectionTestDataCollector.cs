@@ -1920,7 +1920,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             throw new InvalidOperationException("Could not extract method info from dynamic test expression");
         }
 
-        var testName = GenerateTestName(result.TestClassType, methodInfo);
+        // Use custom display name if provided, otherwise generate unique name using UniqueId
+        var testName = result.DisplayName ?? $"{GenerateTestName(result.TestClassType, methodInfo)}_{result.UniqueId}";
 
         var metadata = new DynamicReflectionTestMetadata(result.TestClassType, methodInfo, result)
         {
@@ -2116,7 +2117,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 var modifiedContext = new ExecutableTestCreationContext
                 {
                     TestId = context.TestId,
-                    DisplayName = context.DisplayName,
+                    DisplayName = _dynamicResult.DisplayName ?? context.DisplayName,
                     Arguments = _dynamicResult.TestMethodArguments ?? context.Arguments,
                     ClassArguments = _dynamicResult.TestClassArguments ?? context.ClassArguments,
                     Context = context.Context

@@ -47,6 +47,18 @@ public class DynamicDiscoveryResult : DiscoveryResult
     public Dictionary<string, object?>? Properties { get; set; }
 
     public string? DisplayName { get; set; }
+
+    private string? _uniqueId;
+
+    /// <summary>
+    /// Unique identifier for this dynamic test instance. 
+    /// Auto-generated if not explicitly set. Used to ensure uniqueness when multiple tests call the same method.
+    /// </summary>
+    public string UniqueId
+    {
+        get => _uniqueId ??= Guid.NewGuid().ToString("N")[..8];
+        set => _uniqueId = value;
+    }
 }
 
 public abstract class AbstractDynamicTest
@@ -89,6 +101,11 @@ public class DynamicTest<[DynamicallyAccessedMembers(
     /// </summary>
     public int? CreatorLineNumber { get; set; }
 
+    /// <summary>
+    /// Optional display name for this test. If not provided, a default name will be generated.
+    /// </summary>
+    public string? DisplayName { get; set; }
+
     public override IEnumerable<DiscoveryResult> GetTests()
     {
         var result = new DynamicDiscoveryResult
@@ -99,7 +116,8 @@ public class DynamicTest<[DynamicallyAccessedMembers(
             Attributes = Attributes,
             TestClassType = typeof(T),
             CreatorFilePath = CreatorFilePath,
-            CreatorLineNumber = CreatorLineNumber
+            CreatorLineNumber = CreatorLineNumber,
+            DisplayName = DisplayName
         };
 
         yield return result;
