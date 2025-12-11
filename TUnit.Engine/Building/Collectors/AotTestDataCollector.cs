@@ -298,6 +298,8 @@ internal sealed class AotTestDataCollector : ITestDataCollector
 
     private sealed class AotDynamicTestMetadata(DynamicDiscoveryResult dynamicResult) : TestMetadata, IDynamicTestMetadata
     {
+        public int DynamicTestIndex => dynamicResult.DynamicTestIndex;
+
         public override Func<ExecutableTestCreationContext, TestMetadata, AbstractExecutableTest> CreateExecutableTestFactory
         {
             get => (context, metadata) =>

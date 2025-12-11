@@ -2108,6 +2108,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             _dynamicResult = dynamicResult;
         }
 
+        public int DynamicTestIndex => _dynamicResult.DynamicTestIndex;
+
         public override Func<ExecutableTestCreationContext, TestMetadata, AbstractExecutableTest> CreateExecutableTestFactory
         {
             get => (context, metadata) =>

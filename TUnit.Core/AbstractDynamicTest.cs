@@ -47,11 +47,23 @@ public class DynamicDiscoveryResult : DiscoveryResult
     public Dictionary<string, object?>? Properties { get; set; }
 
     public string? DisplayName { get; set; }
+
+    /// <summary>
+    /// Unique index for this dynamic test within its builder context.
+    /// Used to generate unique test IDs when multiple dynamic tests target the same method.
+    /// </summary>
+    public int DynamicTestIndex { get; set; }
 }
 
 public abstract class AbstractDynamicTest
 {
     public abstract IEnumerable<DiscoveryResult> GetTests();
+
+    /// <summary>
+    /// Unique index for this dynamic test within its builder context.
+    /// Used to generate unique test IDs when multiple dynamic tests target the same method.
+    /// </summary>
+    public int DynamicTestIndex { get; set; }
 }
 
 public abstract class AbstractDynamicTest<[DynamicallyAccessedMembers(
@@ -99,7 +111,8 @@ public class DynamicTest<[DynamicallyAccessedMembers(
             Attributes = Attributes,
             TestClassType = typeof(T),
             CreatorFilePath = CreatorFilePath,
-            CreatorLineNumber = CreatorLineNumber
+            CreatorLineNumber = CreatorLineNumber,
+            DynamicTestIndex = DynamicTestIndex
         };
 
         yield return result;
