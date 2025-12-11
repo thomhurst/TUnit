@@ -218,10 +218,8 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         }
 
         // Traverse injectable properties (useSourceRegistrarCheck = false)
+        // This discovers properties with data source attributes and their values (including IAsyncInitializer objects)
         TraverseInjectableProperties(obj, TryAddStandard, Recurse, currentDepth, cancellationToken, useSourceRegistrarCheck: false);
-
-        // Also discover nested IAsyncInitializer objects from ALL properties
-        TraverseInitializerProperties(obj, TryAddStandard, Recurse, currentDepth, cancellationToken);
     }
 
     /// <summary>
@@ -254,10 +252,8 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         }
 
         // Traverse injectable properties (useSourceRegistrarCheck = true for tracking mode)
+        // This discovers properties with data source attributes and their values (including IAsyncInitializer objects)
         TraverseInjectableProperties(obj, TryAddTracking, Recurse, currentDepth, cancellationToken, useSourceRegistrarCheck: true);
-
-        // Also discover nested IAsyncInitializer objects from ALL properties
-        TraverseInitializerProperties(obj, TryAddTracking, Recurse, currentDepth, cancellationToken);
     }
 
     /// <summary>
@@ -417,8 +413,8 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
     }
 
     /// <summary>
-    /// Unified traversal for IAsyncInitializer objects (from all properties).
-    /// Eliminates duplicate code between DiscoverNestedInitializerObjects and DiscoverNestedInitializerObjectsForTracking.
+    /// Unified traversal for IAsyncInitializer objects (from properties with data source attributes).
+    /// Only accesses properties that have data source attributes to avoid unwanted side effects from property getters.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection fallback for nested initializers. In AOT, source-gen handles primary discovery.")]
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection fallback for nested initializers. In AOT, source-gen handles primary discovery.")]
@@ -442,6 +438,16 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         foreach (var property in properties)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            
+            // Only access properties that have data source attributes to avoid unwanted side effects
+            bool hasDataSourceAttribute = property.GetCustomAttributes(inherit: true)
+                .Any(attr => attr is IDataSourceAttribute);
+            
+            if (!hasDataSourceAttribute)
+            {
+                continue;
+            }
+            
             try
             {
                 var value = property.GetValue(obj);
