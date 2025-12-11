@@ -1922,7 +1922,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         var testName = GenerateTestName(result.TestClassType, methodInfo);
 
-        var metadata = new DynamicReflectionTestMetadata(result.TestClassType, methodInfo, result)
+        var metadata = new DynamicTestMetadata(result)
         {
             TestName = testName,
             TestClassType = result.TestClassType,
@@ -2089,87 +2089,6 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             ClassDataSources = [],
             PropertyDataSources = []
         };
-    }
-
-    private sealed class DynamicReflectionTestMetadata : TestMetadata, IDynamicTestMetadata
-    {
-        private readonly DynamicDiscoveryResult _dynamicResult;
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
-        private readonly Type _testClass;
-        private readonly MethodInfo _testMethod;
-
-        public DynamicReflectionTestMetadata(
-            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type testClass,
-            MethodInfo testMethod,
-            DynamicDiscoveryResult dynamicResult)
-        {
-            _testClass = testClass;
-            _testMethod = testMethod;
-            _dynamicResult = dynamicResult;
-        }
-
-        public int DynamicTestIndex => _dynamicResult.DynamicTestIndex;
-
-        public override Func<ExecutableTestCreationContext, TestMetadata, AbstractExecutableTest> CreateExecutableTestFactory
-        {
-            get => (context, metadata) =>
-            {
-                // For dynamic tests, we need to use the specific arguments from the dynamic result
-                var modifiedContext = new ExecutableTestCreationContext
-                {
-                    TestId = context.TestId,
-                    DisplayName = context.DisplayName,
-                    Arguments = _dynamicResult.TestMethodArguments ?? context.Arguments,
-                    ClassArguments = _dynamicResult.TestClassArguments ?? context.ClassArguments,
-                    Context = context.Context
-                };
-
-                // Create a regular ExecutableTest with the modified context
-                // Create instance and test invoker for the dynamic test
-                Func<TestContext, Task<object>> createInstance = async (TestContext testContext) =>
-                {
-                    // Try to create instance with ClassConstructor attribute
-                    var attributes = metadata.AttributeFactory();
-                    var classConstructorInstance = await ClassConstructorHelper.TryCreateInstanceWithClassConstructor(
-                        attributes,
-                        _testClass,
-                        metadata.TestSessionId,
-                        testContext).ConfigureAwait(false);
-
-                    if (classConstructorInstance != null)
-                    {
-                        return classConstructorInstance;
-                    }
-
-                    // Fall back to default instance factory
-                    var instance = metadata.InstanceFactory(Type.EmptyTypes, modifiedContext.ClassArguments);
-
-                    // Handle property injections
-                    foreach (var propertyInjection in metadata.PropertyInjections)
-                    {
-                        var value = propertyInjection.ValueFactory();
-                        propertyInjection.Setter(instance, value);
-                    }
-
-                    return instance;
-                };
-
-                var invokeTest = metadata.TestInvoker ?? throw new InvalidOperationException("Test invoker is null");
-
-                return new ExecutableTest(createInstance,
-                    async (instance, args, context, ct) =>
-                    {
-                        await invokeTest(instance, args).ConfigureAwait(false);
-                    })
-                {
-                    TestId = modifiedContext.TestId,
-                    Metadata = metadata,
-                    Arguments = modifiedContext.Arguments,
-                    ClassArguments = modifiedContext.ClassArguments,
-                    Context = modifiedContext.Context
-                };
-            };
-        }
     }
 
 }

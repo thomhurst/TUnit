@@ -256,7 +256,7 @@ internal sealed class TestRegistry : ITestRegistry
 
         var testName = methodInfo.Name;
 
-        return await Task.FromResult<TestMetadata>(new RuntimeDynamicTestMetadata(result.TestClassType, methodInfo, result)
+        return await Task.FromResult<TestMetadata>(new DynamicTestMetadata(result)
         {
             TestName = testName,
             TestClassType = result.TestClassType,
@@ -339,83 +339,6 @@ internal sealed class TestRegistry : ITestRegistry
         public required Type TestClassType { get; init; }
     }
 
-
-    private sealed class RuntimeDynamicTestMetadata : TestMetadata, IDynamicTestMetadata
-    {
-        private readonly DynamicDiscoveryResult _dynamicResult;
-        private readonly Type _testClass;
-        private readonly MethodInfo _testMethod;
-
-        public RuntimeDynamicTestMetadata(Type testClass, MethodInfo testMethod, DynamicDiscoveryResult dynamicResult)
-        {
-            _testClass = testClass;
-            _testMethod = testMethod;
-            _dynamicResult = dynamicResult;
-        }
-
-        public int DynamicTestIndex => _dynamicResult.DynamicTestIndex;
-
-        public override Func<ExecutableTestCreationContext, TestMetadata, AbstractExecutableTest> CreateExecutableTestFactory
-        {
-            get => (context, metadata) =>
-            {
-                var modifiedContext = new ExecutableTestCreationContext
-                {
-                    TestId = context.TestId,
-                    DisplayName = _dynamicResult.DisplayName ?? context.DisplayName,
-                    Arguments = _dynamicResult.TestMethodArguments ?? context.Arguments,
-                    ClassArguments = _dynamicResult.TestClassArguments ?? context.ClassArguments,
-                    Context = context.Context
-                };
-
-                if (_dynamicResult.ParentTestId != null)
-                {
-                    modifiedContext.Context.ParentTestId = _dynamicResult.ParentTestId;
-                }
-
-                if (_dynamicResult.Relationship.HasValue)
-                {
-                    modifiedContext.Context.Relationship = _dynamicResult.Relationship.Value;
-                }
-
-                if (_dynamicResult.Properties != null)
-                {
-                    foreach (var kvp in _dynamicResult.Properties)
-                    {
-                        modifiedContext.Context.StateBag.Items[kvp.Key] = kvp.Value;
-                    }
-                }
-
-                var createInstance = (TestContext testContext) =>
-                {
-                    var instance = metadata.InstanceFactory(Type.EmptyTypes, modifiedContext.ClassArguments);
-
-                    foreach (var propertyInjection in metadata.PropertyInjections)
-                    {
-                        var value = propertyInjection.ValueFactory();
-                        propertyInjection.Setter(instance, value);
-                    }
-
-                    return Task.FromResult(instance);
-                };
-
-                var invokeTest = metadata.TestInvoker ?? throw new InvalidOperationException("Test invoker is null");
-
-                return new ExecutableTest(createInstance,
-                    async (instance, args, context, ct) =>
-                    {
-                        await invokeTest(instance, args);
-                    })
-                {
-                    TestId = modifiedContext.TestId,
-                    Metadata = metadata,
-                    Arguments = modifiedContext.Arguments,
-                    ClassArguments = modifiedContext.ClassArguments,
-                    Context = modifiedContext.Context
-                };
-            };
-        }
-    }
 
     /// <summary>
     /// Optimized method to get dependencies without LINQ allocations

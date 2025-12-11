@@ -294,9 +294,11 @@ internal sealed class TestBuilderPipeline
                     };
 
                     var testId = TestIdentifierService.GenerateTestId(resolvedMetadata, testData);
+                    var dynamicMetadata = (IDynamicTestMetadata)resolvedMetadata;
+                    var baseDisplayName = dynamicMetadata.DisplayName ?? resolvedMetadata.TestName;
                     var displayName = repeatCount > 0
-                        ? $"{resolvedMetadata.TestName} (Repeat {repeatIndex + 1}/{repeatCount + 1})"
-                        : resolvedMetadata.TestName;
+                        ? $"{baseDisplayName} (Repeat {repeatIndex + 1}/{repeatCount + 1})"
+                        : baseDisplayName;
 
                     // Create TestDetails for dynamic tests
                     var testDetails = new TestDetails
@@ -325,6 +327,12 @@ internal sealed class TestBuilderPipeline
 
                     // Set the TestDetails on the context
                     context.Metadata.TestDetails = testDetails;
+
+                    // Set custom display name for dynamic tests if specified
+                    if (dynamicMetadata.DisplayName != null)
+                    {
+                        context.Metadata.DisplayName = dynamicMetadata.DisplayName;
+                    }
 
                     // Invoke discovery event receivers to properly handle all attribute behaviors
                     await InvokeDiscoveryEventReceiversAsync(context).ConfigureAwait(false);

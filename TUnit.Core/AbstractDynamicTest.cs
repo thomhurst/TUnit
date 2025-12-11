@@ -101,6 +101,11 @@ public class DynamicTest<[DynamicallyAccessedMembers(
     /// </summary>
     public int? CreatorLineNumber { get; set; }
 
+    /// <summary>
+    /// Custom display name for this dynamic test. If not set, a default name will be generated.
+    /// </summary>
+    public string? DisplayName { get; set; }
+
     public override IEnumerable<DiscoveryResult> GetTests()
     {
         var result = new DynamicDiscoveryResult
@@ -112,7 +117,8 @@ public class DynamicTest<[DynamicallyAccessedMembers(
             TestClassType = typeof(T),
             CreatorFilePath = CreatorFilePath,
             CreatorLineNumber = CreatorLineNumber,
-            DynamicTestIndex = DynamicTestIndex
+            DynamicTestIndex = DynamicTestIndex,
+            DisplayName = DisplayName
         };
 
         yield return result;
