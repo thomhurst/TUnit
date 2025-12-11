@@ -442,6 +442,17 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         foreach (var property in properties)
         {
             cancellationToken.ThrowIfCancellationRequested();
+
+            // Only access properties whose declared type could be IAsyncInitializer.
+            // This prevents triggering side effects from unrelated property getters
+            // (e.g., WebApplicationFactory.Server which starts the test host when accessed).
+            // Properties typed as object/interfaces not extending IAsyncInitializer won't be
+            // checked - users should properly type their properties or use data source attributes.
+            if (!typeof(IAsyncInitializer).IsAssignableFrom(property.PropertyType))
+            {
+                continue;
+            }
+
             try
             {
                 var value = property.GetValue(obj);
