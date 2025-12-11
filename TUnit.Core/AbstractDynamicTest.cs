@@ -48,17 +48,11 @@ public class DynamicDiscoveryResult : DiscoveryResult
 
     public string? DisplayName { get; set; }
 
-    private string? _uniqueId;
-
     /// <summary>
     /// Unique identifier for this dynamic test instance. 
-    /// Auto-generated if not explicitly set. Used to ensure uniqueness when multiple tests call the same method.
+    /// Auto-generated to ensure uniqueness when multiple tests call the same method.
     /// </summary>
-    public string UniqueId
-    {
-        get => _uniqueId ??= Guid.NewGuid().ToString("N").Substring(0, 8);
-        set => _uniqueId = value;
-    }
+    public string UniqueId { get; set; } = Guid.NewGuid().ToString("N").Substring(0, 8);
 }
 
 public abstract class AbstractDynamicTest
