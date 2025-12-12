@@ -9,12 +9,6 @@ on:
     #   - "src/**/*.tsx"
     #   - "src/**/*.js"
     #   - "src/**/*.jsx"
-  workflow_dispatch:
-    inputs:
-      pr_number:
-        description: 'PR number to review'
-        required: true
-        type: number
 
 jobs:
   claude-review:
@@ -32,27 +26,10 @@ jobs:
       id-token: write
 
     steps:
-      - name: Get PR info (manual trigger)
-        if: github.event_name == 'workflow_dispatch'
-        id: pr-info
-        uses: actions/github-script@v8
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          script: |
-            const { data: pr } = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: ${{ inputs.pr_number }}
-            });
-            core.setOutput('ref', pr.head.ref);
-            core.setOutput('repo', pr.head.repo.full_name);
-            return pr;
-
-      - name: Checkout PR branch
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event_name == 'workflow_dispatch' && steps.pr-info.outputs.ref || github.event.pull_request.head.ref }}
-          repository: ${{ github.event_name == 'workflow_dispatch' && steps.pr-info.outputs.repo || github.event.pull_request.head.repo.full_name }}
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Run Claude Code Review
         id: claude-review
@@ -61,7 +38,7 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
             REPO: ${{ github.repository }}
-            PR NUMBER: ${{ inputs.pr_number || github.event.pull_request.number }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
 
             Please review this pull request and provide feedback on:
             - Code quality and best practices
