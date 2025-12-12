@@ -224,6 +224,26 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
         {
             elementType = arrayTypeSymbol2.ElementType.GloballyQualified();
         }
+        // Check parent cast expression for array type context
+        // Handles cases like: (MyEnum[])[MyEnum.One, MyEnum.Two]
+        else if (node.Parent is CastExpressionSyntax castExpr)
+        {
+            var castTypeInfo = semanticModel.GetTypeInfo(castExpr.Type);
+            if (castTypeInfo.Type is IArrayTypeSymbol castArrayType)
+            {
+                elementType = castArrayType.ElementType.GloballyQualified();
+            }
+        }
+        // Infer element type from first element if still unknown
+        // Handles cases where semantic model doesn't provide array type info
+        else if (node.Elements.Count > 0 && node.Elements[0] is ExpressionElementSyntax firstElement)
+        {
+            var elementTypeInfo = semanticModel.GetTypeInfo(firstElement.Expression);
+            if (elementTypeInfo.Type is ITypeSymbol inferredType)
+            {
+                elementType = inferredType.GloballyQualified();
+            }
+        }
 
         // Visit and rewrite each element
         var rewrittenElements = new List<ExpressionSyntax>();
