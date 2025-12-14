@@ -25116,22 +25116,42 @@ Attach files to individual tests using `TestContext.Current.Output.AttachArtifac
 
 ### Basic Usage
 
+The simplest way to attach an artifact is by providing just the file path:
+
 ```csharp
 [Test]
 public async Task MyIntegrationTest()
 {
     // Perform your test logic
     var result = await PerformOperation();
-    
-    // Attach an artifact to this specific test
+
+    // Attach an artifact using the simple overload
+    TestContext.Current!.Output.AttachArtifact("path/to/logfile.log");
+
+    // Or with a custom display name and description
+    TestContext.Current!.Output.AttachArtifact(
+        "path/to/logfile.log",
+        displayName: "Application Logs",
+        description: "Logs captured during test execution"
+    );
+
+    await Assert.That(result).IsEqualTo(expected);
+}
+```
+
+For more control, you can create an `Artifact` object directly:
+
+```csharp
+[Test]
+public async Task MyIntegrationTest()
+{
+    // Attach an artifact using the full Artifact object
     TestContext.Current!.Output.AttachArtifact(new Artifact
     {
         File = new FileInfo("path/to/logfile.log"),
         DisplayName = "Application Logs",
         Description = "Logs captured during test execution"
     });
-    
-    await Assert.That(result).IsEqualTo(expected);
 }
 ```
 
