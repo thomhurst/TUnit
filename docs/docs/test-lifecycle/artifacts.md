@@ -308,7 +308,7 @@ if (File.Exists(logPath))
 }
 else
 {
-    TestContext.Current!.OutputWriter.WriteLine($"Warning: Log file not found at {logPath}");
+    TestContext.Current!.Output.WriteLine($"Warning: Log file not found at {logPath}");
 }
 ```
 
