@@ -34,7 +34,7 @@ jobs:
         working-directory: "tools/speed-comparison/UnifiedTests"
 
       - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: test-builds-ubuntu
           path: tools/speed-comparison/UnifiedTests/bin/
@@ -81,7 +81,7 @@ jobs:
           CLASS_NAME: ${{ matrix.class }}
 
       - name: Upload Markdown
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: ubuntu_markdown_run_time_${{ matrix.class }}
@@ -116,7 +116,7 @@ jobs:
         working-directory: "tools/speed-comparison/Tests.Benchmark"
 
       - name: Upload Markdown
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: ubuntu_markdown_build_time
@@ -161,7 +161,7 @@ jobs:
           node .github/scripts/process-benchmarks.js
 
       - name: Upload Individual Runtime Benchmarks
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: benchmark-DataDrivenTests
@@ -171,7 +171,7 @@ jobs:
           retention-days: 90
 
       - name: Upload Individual Runtime Benchmarks
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: benchmark-AsyncTests
@@ -181,7 +181,7 @@ jobs:
           retention-days: 90
 
       - name: Upload Individual Runtime Benchmarks
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: benchmark-ScaleTests
@@ -191,7 +191,7 @@ jobs:
           retention-days: 90
 
       - name: Upload Individual Runtime Benchmarks
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: benchmark-MatrixTests
@@ -201,7 +201,7 @@ jobs:
           retention-days: 90
 
       - name: Upload Individual Runtime Benchmarks
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: benchmark-MassiveParallelTests
@@ -211,7 +211,7 @@ jobs:
           retention-days: 90
 
       - name: Upload Individual Runtime Benchmarks
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: benchmark-SetupTeardownTests
@@ -221,7 +221,7 @@ jobs:
           retention-days: 90
 
       - name: Upload Build Benchmark
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: benchmark-BuildTime
@@ -231,7 +231,7 @@ jobs:
           retention-days: 90
 
       - name: Upload Summary Files
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: benchmark-summary
