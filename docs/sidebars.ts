@@ -46,6 +46,7 @@ const sidebars: SidebarsConfig = {
           label: 'Core Concepts',
           collapsed: false,
           items: [
+            'test-lifecycle/lifecycle-overview',
             'test-lifecycle/setup',
             'test-lifecycle/cleanup',
             'test-lifecycle/test-context',
