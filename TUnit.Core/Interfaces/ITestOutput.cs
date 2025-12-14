@@ -48,6 +48,16 @@ public interface ITestOutput
     void AttachArtifact(Artifact artifact);
 
     /// <summary>
+    /// Attaches a file as an artifact to this test.
+    /// Artifacts are preserved after test execution.
+    /// Thread-safe for concurrent calls.
+    /// </summary>
+    /// <param name="filePath">The path to the file to attach</param>
+    /// <param name="displayName">Optional display name for the artifact. Defaults to the file name.</param>
+    /// <param name="description">Optional description of the artifact</param>
+    void AttachArtifact(string filePath, string? displayName = null, string? description = null);
+
+    /// <summary>
     /// Gets all standard output written during test execution as a single string.
     /// </summary>
     /// <returns>The accumulated standard output</returns>
