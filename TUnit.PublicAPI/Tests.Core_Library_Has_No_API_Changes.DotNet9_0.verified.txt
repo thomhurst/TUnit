@@ -2450,6 +2450,7 @@ namespace .Interfaces
         .TextWriter StandardOutput { get; }
         .<.Timing> Timings { get; }
         void AttachArtifact(.Artifact artifact);
+        void AttachArtifact(string filePath, string? displayName = null, string? description = null);
         string GetErrorOutput();
         string GetStandardOutput();
         void RecordTiming(.Timing timing);

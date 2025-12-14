@@ -31,6 +31,17 @@ public partial class TestContext
         _artifactsBag.Add(artifact);
     }
 
+    void ITestOutput.AttachArtifact(string filePath, string? displayName, string? description)
+    {
+        var fileInfo = new FileInfo(filePath);
+        _artifactsBag.Add(new Artifact
+        {
+            File = fileInfo,
+            DisplayName = displayName ?? fileInfo.Name,
+            Description = description
+        });
+    }
+
     string ITestOutput.GetStandardOutput() => GetOutput();
     string ITestOutput.GetErrorOutput() => GetOutputError();
 
