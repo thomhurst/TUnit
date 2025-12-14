@@ -103,6 +103,7 @@ This file contains links to documentation sections following the llmstxt.org sta
 - [Ordering Tests](https://tunit.dev/docs/test-authoring/order): :::warning
 - [Skipping Tests](https://tunit.dev/docs/test-authoring/skip): If you want to simply skip a test, just place a `[Skip(reason)]` attribute on your test with an explanation of why you're skipping it.
 - [Things to know](https://tunit.dev/docs/test-authoring/things-to-know): TUnit has made some decisions by design. You may need to know about them:
+- [Test Artifacts](https://tunit.dev/docs/test-lifecycle/artifacts): Test artifacts are files (screenshots, logs, videos, JSON dumps, etc.) that you can attach to your tests. They are invaluable for debugging test fa...
 - [Class Constructor Helpers](https://tunit.dev/docs/test-lifecycle/class-constructors): Some test suites might be more complex than others, and a user may want control over 'newing' up their test classes.
 - [Test Clean Ups](https://tunit.dev/docs/test-lifecycle/cleanup): TUnit supports having your test class implement `IDisposable` or `IAsyncDisposable`. These will be called after your test has finished executing. H...
 - [Dependency Injection](https://tunit.dev/docs/test-lifecycle/dependency-injection): Dependency Injection can be set up by leveraging the power of the Data Source Generators.
