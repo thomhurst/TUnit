@@ -300,6 +300,39 @@ public class MyTests
 }
 ```
 
+### Test Attachments
+
+```csharp
+// MSTest
+[TestMethod]
+public void TestWithAttachment()
+{
+    // Test logic
+    var logPath = "test-log.txt";
+    File.WriteAllText(logPath, "test logs");
+    
+    TestContext.AddResultFile(logPath);
+}
+
+// TUnit
+[Test]
+public async Task TestWithAttachment()
+{
+    // Test logic
+    var logPath = "test-log.txt";
+    await File.WriteAllTextAsync(logPath, "test logs");
+    
+    TestContext.Current!.Output.AttachArtifact(new Artifact
+    {
+        File = new FileInfo(logPath),
+        DisplayName = "Test Log",
+        Description = "Logs captured during test execution"  // Optional
+    });
+}
+```
+
+For more information about working with test artifacts, including session-level artifacts and best practices, see the [Test Artifacts guide](../test-lifecycle/artifacts.md).
+
 ### Assert.Fail
 
 ```csharp

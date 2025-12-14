@@ -28,6 +28,30 @@ if (TestContext.Current?.Result?.State == TestState.Failed)
 }
 ```
 
+## Test Output and Artifacts
+
+The `TestContext.Output` property provides access to test output capture and artifact management:
+
+```csharp
+// Write to standard output
+TestContext.Current!.Output.WriteLine("Debug information");
+
+// Write to error output
+TestContext.Current.Output.WriteError("Warning: something unexpected happened");
+
+// Attach an artifact (file, screenshot, log, etc.)
+TestContext.Current.Output.AttachArtifact(new Artifact
+{
+    File = new FileInfo("path/to/logfile.log"),
+    DisplayName = "Application Logs",
+    Description = "Logs captured during test execution"
+});
+```
+
+Artifacts are particularly useful for debugging test failures, especially in integration tests. You can attach screenshots, logs, videos, configuration files, or any other files that help diagnose issues.
+
+For complete information about working with test artifacts, including session-level artifacts, best practices, and common use cases, see the [Test Artifacts](./artifacts.md) guide.
+
 ## Dependency Injection
 
 **Note**: `TestContext` does NOT provide direct access to dependency injection services. The internal service provider in `TestContext` is exclusively for TUnit framework services and is not meant for user-provided dependencies.

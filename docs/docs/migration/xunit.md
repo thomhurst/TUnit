@@ -690,6 +690,57 @@ public class LoggingTests
 - Access output via `context.OutputWriter.WriteLine()`
 - TestContext provides additional test metadata
 
+#### Test Attachments
+
+xUnit v3 introduced test attachments. TUnit also supports this capability:
+
+**xUnit v3 Code:**
+```csharp
+public class TestWithAttachments
+{
+    private readonly ITestContextAccessor _testContextAccessor;
+    
+    public TestWithAttachments(ITestContextAccessor testContextAccessor)
+    {
+        _testContextAccessor = testContextAccessor;
+    }
+    
+    [Fact]
+    public async Task Test_WithAttachment()
+    {
+        // Test logic
+        var logPath = "test-log.txt";
+        await File.WriteAllTextAsync(logPath, "test logs");
+        
+        _testContextAccessor.Current!.Attachments.Add(
+            new FileAttachment(logPath, "Test Log"));
+    }
+}
+```
+
+**TUnit Equivalent:**
+```csharp
+public class TestWithAttachments
+{
+    [Test]
+    public async Task Test_WithAttachment()
+    {
+        // Test logic
+        var logPath = "test-log.txt";
+        await File.WriteAllTextAsync(logPath, "test logs");
+        
+        TestContext.Current!.Output.AttachArtifact(new Artifact
+        {
+            File = new FileInfo(logPath),
+            DisplayName = "Test Log",
+            Description = "Logs captured during test execution"  // Optional
+        });
+    }
+}
+```
+
+For more information about working with test artifacts, including session-level artifacts and best practices, see the [Test Artifacts guide](../test-lifecycle/artifacts.md).
+
 ### Traits and Categories
 
 #### Trait → Property
