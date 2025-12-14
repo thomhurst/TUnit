@@ -30,11 +30,14 @@ if (TestContext.Current?.Result?.State == TestState.Failed)
 
 ## Test Output and Artifacts
 
-The `TestContext.Output` property provides access to test output capture and artifact management:
+The `TestContext` provides multiple ways to write output and attach artifacts:
 
 ```csharp
-// Write to standard output
+// Write to standard output (modern interface-based approach)
 TestContext.Current!.Output.WriteLine("Debug information");
+
+// Alternative: Direct TextWriter access (also valid)
+TestContext.Current!.OutputWriter.WriteLine("Debug information");
 
 // Write to error output
 TestContext.Current.Output.WriteError("Warning: something unexpected happened");
@@ -47,6 +50,8 @@ TestContext.Current.Output.AttachArtifact(new Artifact
     Description = "Logs captured during test execution"
 });
 ```
+
+Both `Output.WriteLine()` and `OutputWriter.WriteLine()` are valid - the `Output` property provides a convenient interface-based API, while `OutputWriter` gives direct access to the underlying TextWriter.
 
 Artifacts are particularly useful for debugging test failures, especially in integration tests. You can attach screenshots, logs, videos, configuration files, or any other files that help diagnose issues.
 
