@@ -25,6 +25,7 @@ Migrating from NUnit to TUnit can significantly improve test execution speed. Be
 | `Assert.That(actual, Is.EqualTo(expected))` | `await Assert.That(actual).IsEqualTo(expected)` |
 | `Assert.Throws<T>(() => ...)` | `await Assert.ThrowsAsync<T>(() => ...)` |
 | `TestContext.WriteLine(...)` | `TestContext` parameter with `context.OutputWriter.WriteLine(...)` |
+| `TestContext.AddTestAttachment(path, name)` | `TestContext.Current!.Output.AttachArtifact(new Artifact { File = new FileInfo(path), DisplayName = name })` |
 | `CollectionAssert.AreEqual(expected, actual)` | `await Assert.That(actual).IsEquivalentTo(expected)` |
 | `StringAssert.Contains(substring, text)` | `await Assert.That(text).Contains(substring)` |
 
@@ -246,6 +247,39 @@ public async Task MyTest(TestContext context)
     context.OutputWriter.WriteLine("More output");
 }
 ```
+
+### Test Attachments
+
+```csharp
+// NUnit
+[Test]
+public void TestWithAttachment()
+{
+    // Test logic
+    var logPath = "test-log.txt";
+    File.WriteAllText(logPath, "test logs");
+    
+    TestContext.AddTestAttachment(logPath, "Test Log");
+}
+
+// TUnit
+[Test]
+public async Task TestWithAttachment()
+{
+    // Test logic
+    var logPath = "test-log.txt";
+    await File.WriteAllTextAsync(logPath, "test logs");
+    
+    TestContext.Current!.Output.AttachArtifact(new Artifact
+    {
+        File = new FileInfo(logPath),
+        DisplayName = "Test Log",
+        Description = "Logs captured during test execution"  // Optional
+    });
+}
+```
+
+For more information about working with test artifacts, including session-level artifacts and best practices, see the [Test Artifacts guide](../test-lifecycle/artifacts.md).
 
 ### Combinatorial Testing
 

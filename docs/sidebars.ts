@@ -49,6 +49,7 @@ const sidebars: SidebarsConfig = {
             'test-lifecycle/setup',
             'test-lifecycle/cleanup',
             'test-lifecycle/test-context',
+            'test-lifecycle/artifacts',
             'test-lifecycle/properties',
             'test-lifecycle/property-injection',
             'test-lifecycle/event-subscribing',
