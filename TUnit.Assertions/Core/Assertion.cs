@@ -212,21 +212,23 @@ public abstract class Assertion<TValue> : IAssertion
     /// </summary>
     protected Exception CreateException(AssertionResult result)
     {
-        var message = $"""
-            Expected {GetExpectation()}
-            but {result.Message}
-
-            at {Context.ExpressionBuilder}
-            """;
-
+        var expectation = GetExpectation();
+        
         if (_becauseMessage != null)
         {
             // Check if message already starts with "because" to avoid duplication
             var becausePrefix = _becauseMessage.StartsWith("because ", StringComparison.OrdinalIgnoreCase)
                 ? _becauseMessage
                 : $"because {_becauseMessage}";
-            message += $"\n\n{becausePrefix}";
+            expectation = $"{expectation}, {becausePrefix}";
         }
+        
+        var message = $"""
+            Expected {expectation}
+            but {result.Message}
+
+            at {Context.ExpressionBuilder}
+            """;
 
         return new AssertionException(message);
     }

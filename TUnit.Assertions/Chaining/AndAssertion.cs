@@ -133,13 +133,22 @@ public class AndAssertion<TValue> : Assertion<TValue>
         var firstExpectation = _first.InternalGetExpectation();
         var firstBecause = _first.InternalBecauseMessage;
         var secondExpectation = _second.InternalGetExpectation();
+        var secondBecause = _second.InternalBecauseMessage;
 
         if (firstBecause != null)
         {
             var becausePrefix = firstBecause.StartsWith("because ", StringComparison.OrdinalIgnoreCase)
                 ? firstBecause
                 : $"because {firstBecause}";
-            return $"{firstExpectation}, {becausePrefix}\nand {secondExpectation}";
+            firstExpectation = $"{firstExpectation}, {becausePrefix}";
+        }
+
+        if (secondBecause != null)
+        {
+            var becausePrefix = secondBecause.StartsWith("because ", StringComparison.OrdinalIgnoreCase)
+                ? secondBecause
+                : $"because {secondBecause}";
+            secondExpectation = $"{secondExpectation}, {becausePrefix}";
         }
 
         return $"{firstExpectation}\nand {secondExpectation}";
