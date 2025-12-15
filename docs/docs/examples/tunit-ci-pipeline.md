@@ -48,7 +48,7 @@ jobs:
       run: dotnet build --configuration Release --no-restore
 
     - name: Run tests with coverage
-      run: dotnet test --configuration Release --no-build --coverage --report-trx --results-directory ./TestResults
+      run: dotnet test --configuration Release --no-build -- --coverage --report-trx --results-directory ./TestResults
 
     - name: Upload test results
       if: always()  # Run even if tests fail
@@ -140,7 +140,7 @@ jobs:
         dotnet-version: '9.0.x'
 
     - name: Run tests
-      run: dotnet test --configuration Release --report-trx --results-directory ./TestResults
+      run: dotnet test --configuration Release -- --report-trx --results-directory ./TestResults
 
     - name: Comment PR with results
       if: always()
@@ -272,7 +272,7 @@ steps:
   inputs:
     version: '$(dotnetVersion)'
 
-- script: dotnet test --configuration Release --report-trx
+- script: dotnet test --configuration Release -- --report-trx
   displayName: 'Run tests on $(vmImage) with .NET $(dotnetVersion)'
 ```
 
@@ -363,7 +363,7 @@ coverage-report:
 .test-template:
   stage: test
   script:
-    - dotnet test --configuration Release --report-trx
+    - dotnet test --configuration Release -- --report-trx
 
 test:net8:
   extends: .test-template
@@ -607,7 +607,7 @@ Run different test categories in separate jobs:
 Use fail-fast mode for quick feedback in pull requests:
 
 ```bash
-dotnet test --fail-fast
+dotnet test -- --fail-fast
 ```
 
 ## Troubleshooting
