@@ -54,6 +54,19 @@ internal static class TypeHelper
     }
 
     /// <summary>
+    /// Checks if a type is compiler-generated (e.g., records, anonymous types).
+    /// </summary>
+    private static bool IsCompilerGeneratedType(
+        [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(
+            System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods)]
+        Type type)
+    {
+        // Records have a compiler-generated <Clone>$ method
+        // This is a heuristic but works reliably for C# records
+        return type.GetMethod("<Clone>$", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance) != null;
+    }
+
+    /// <summary>
     /// Determines if a type is a primitive or well-known immutable type that should use
     /// value equality rather than structural comparison.
     /// Types implementing IEquatable&lt;T&gt; are also considered primitive-like for comparison purposes.
@@ -62,7 +75,8 @@ internal static class TypeHelper
     /// <returns>True if the type should use value equality; false for structural comparison.</returns>
     public static bool IsPrimitiveOrWellKnownType(
         [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(
-            System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.Interfaces)]
+            System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.Interfaces |
+            System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods)]
         Type type)
     {
         // Check user-defined primitives first (fast path for common case)
@@ -90,15 +104,29 @@ internal static class TypeHelper
         }
 
         // Check if type implements IEquatable<T> for its own type
-        // Types implementing IEquatable<T> should use their Equals method
-        // rather than structural comparison (e.g., Vector2, Uri, CultureInfo)
+        // Only treat as primitive-like if:
+        // 1. It's a value type (struct), OR
+        // 2. It's a well-known immutable reference type
+        // This ensures records and other reference types still use structural comparison
         var equatableInterface = type.GetInterface("IEquatable`1");
         if (equatableInterface != null)
         {
             var genericArgs = equatableInterface.GetGenericArguments();
             if (genericArgs.Length == 1 && genericArgs[0] == type)
             {
-                return true;
+                // For value types, always use IEquatable<T>
+                if (type.IsValueType)
+                {
+                    return true;
+                }
+
+                // For reference types, only use IEquatable<T> for known immutable types
+                // that are safe to compare by value (e.g., Uri, CultureInfo)
+                // Exclude records and other types that might have mutable reference fields
+                if (type.IsSealed && !IsCompilerGeneratedType(type))
+                {
+                    return true;
+                }
             }
         }
 
