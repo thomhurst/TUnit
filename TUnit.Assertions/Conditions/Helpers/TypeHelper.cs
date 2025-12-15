@@ -54,15 +54,27 @@ internal static class TypeHelper
     }
 
     /// <summary>
-    /// Checks if a type is compiler-generated (e.g., records, anonymous types).
+    /// Checks if a type is a compiler-generated record type.
     /// </summary>
     private static bool IsCompilerGeneratedType(
         [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(
-            System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods)]
+            System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods |
+            System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties |
+            System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicProperties)]
         Type type)
     {
-        // Records have a compiler-generated <Clone>$ method
-        // This is a heuristic but works reliably for C# records
+        // Records have a compiler-generated EqualityContract property
+        // This is more reliable than checking for <Clone>$ method
+        var equalityContract = type.GetProperty("EqualityContract", 
+            System.Reflection.BindingFlags.NonPublic | 
+            System.Reflection.BindingFlags.Instance);
+        
+        if (equalityContract != null && equalityContract.PropertyType == typeof(Type))
+        {
+            return true;
+        }
+
+        // Also check for <Clone>$ method as a fallback
         return type.GetMethod("<Clone>$", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance) != null;
     }
 
@@ -76,7 +88,9 @@ internal static class TypeHelper
     public static bool IsPrimitiveOrWellKnownType(
         [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(
             System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.Interfaces |
-            System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods)]
+            System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods |
+            System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties |
+            System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicProperties)]
         Type type)
     {
         // Check user-defined primitives first (fast path for common case)
@@ -106,13 +120,14 @@ internal static class TypeHelper
         // Check if type implements IEquatable<T> for its own type
         // Only treat as primitive-like if:
         // 1. It's a value type (struct), OR
-        // 2. It's a well-known immutable reference type
+        // 2. It's a sealed reference type that's not compiler-generated (e.g., Uri, CultureInfo)
         // This ensures records and other reference types still use structural comparison
-        var equatableInterface = type.GetInterface("IEquatable`1");
-        if (equatableInterface != null)
+        var interfaces = type.GetInterfaces();
+        foreach (var iface in interfaces)
         {
-            var genericArgs = equatableInterface.GetGenericArguments();
-            if (genericArgs.Length == 1 && genericArgs[0] == type)
+            if (iface.IsGenericType && 
+                iface.GetGenericTypeDefinition() == typeof(IEquatable<>) &&
+                iface.GetGenericArguments()[0] == type)
             {
                 // For value types, always use IEquatable<T>
                 if (type.IsValueType)
@@ -127,6 +142,8 @@ internal static class TypeHelper
                 {
                     return true;
                 }
+                
+                break;
             }
         }
 
