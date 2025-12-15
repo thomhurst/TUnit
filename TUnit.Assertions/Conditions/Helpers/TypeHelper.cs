@@ -56,10 +56,14 @@ internal static class TypeHelper
     /// <summary>
     /// Determines if a type is a primitive or well-known immutable type that should use
     /// value equality rather than structural comparison.
+    /// Types implementing IEquatable&lt;T&gt; are also considered primitive-like for comparison purposes.
     /// </summary>
     /// <param name="type">The type to check.</param>
     /// <returns>True if the type should use value equality; false for structural comparison.</returns>
-    public static bool IsPrimitiveOrWellKnownType(Type type)
+    public static bool IsPrimitiveOrWellKnownType(
+        [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(
+            System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.Interfaces)]
+        Type type)
     {
         // Check user-defined primitives first (fast path for common case)
         if (CustomPrimitiveTypes.ContainsKey(type))
@@ -67,18 +71,37 @@ internal static class TypeHelper
             return true;
         }
 
-        return type.IsPrimitive
-               || type.IsEnum
-               || type == typeof(string)
-               || type == typeof(decimal)
-               || type == typeof(DateTime)
-               || type == typeof(DateTimeOffset)
-               || type == typeof(TimeSpan)
-               || type == typeof(Guid)
+        // Check if type is a well-known primitive type
+        if (type.IsPrimitive
+            || type.IsEnum
+            || type == typeof(string)
+            || type == typeof(decimal)
+            || type == typeof(DateTime)
+            || type == typeof(DateTimeOffset)
+            || type == typeof(TimeSpan)
+            || type == typeof(Guid)
 #if NET6_0_OR_GREATER
-               || type == typeof(DateOnly)
-               || type == typeof(TimeOnly)
+            || type == typeof(DateOnly)
+            || type == typeof(TimeOnly)
 #endif
-            ;
+            )
+        {
+            return true;
+        }
+
+        // Check if type implements IEquatable<T> for its own type
+        // Types implementing IEquatable<T> should use their Equals method
+        // rather than structural comparison (e.g., Vector2, Uri, CultureInfo)
+        var equatableInterface = type.GetInterface("IEquatable`1");
+        if (equatableInterface != null)
+        {
+            var genericArgs = equatableInterface.GetGenericArguments();
+            if (genericArgs.Length == 1 && genericArgs[0] == type)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
