@@ -63,7 +63,7 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Download Build Artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: test-builds-ubuntu
           path: tools/speed-comparison/UnifiedTests/bin/
@@ -138,14 +138,14 @@ jobs:
           token: ${{ secrets.ADMIN_TOKEN }}
 
       - name: Download All Runtime Benchmark Artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           path: benchmark-results/runtime/
           pattern: ubuntu_markdown_run_time_*
           merge-multiple: false
 
       - name: Download Build Time Benchmark Artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           path: benchmark-results/build/
           pattern: ubuntu_markdown_build_time
