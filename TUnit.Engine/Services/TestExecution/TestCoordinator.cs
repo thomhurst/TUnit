@@ -239,13 +239,25 @@ internal sealed class TestCoordinator : ITestCoordinator
             }
 
             // If any cleanup exceptions occurred, mark the test as failed
+            // UNLESS the test has already completed successfully (Passed or Skipped).
+            // Cleanup exceptions should not override a passing test result.
             if (cleanupExceptions.Count > 0)
             {
-                var aggregatedException = cleanupExceptions.Count == 1
-                    ? cleanupExceptions[0]
-                    : new AggregateException("One or more errors occurred during test cleanup", cleanupExceptions);
+                // Log all cleanup exceptions for diagnostics
+                foreach (var cleanupEx in cleanupExceptions)
+                {
+                    await _logger.LogErrorAsync($"Cleanup exception for {test.TestId}: {cleanupEx}").ConfigureAwait(false);
+                }
 
-                await _stateManager.MarkFailedAsync(test, aggregatedException).ConfigureAwait(false);
+                // Only fail the test if it hasn't already completed successfully
+                if (test.State != TestState.Passed && test.State != TestState.Skipped)
+                {
+                    var aggregatedException = cleanupExceptions.Count == 1
+                        ? cleanupExceptions[0]
+                        : new AggregateException("One or more errors occurred during test cleanup", cleanupExceptions);
+
+                    await _stateManager.MarkFailedAsync(test, aggregatedException).ConfigureAwait(false);
+                }
             }
 
             switch (test.State)
