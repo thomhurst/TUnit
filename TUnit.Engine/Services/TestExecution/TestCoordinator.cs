@@ -250,13 +250,30 @@ internal sealed class TestCoordinator : ITestCoordinator
                 }
 
                 // Only fail the test if it hasn't already completed successfully
+                // For Passed and Skipped tests, we log the cleanup exception but don't change the result
                 if (test.State != TestState.Passed && test.State != TestState.Skipped)
                 {
-                    var aggregatedException = cleanupExceptions.Count == 1
-                        ? cleanupExceptions[0]
-                        : new AggregateException("One or more errors occurred during test cleanup", cleanupExceptions);
+                    // If the test already failed, aggregate the exceptions
+                    // If the test hasn't completed yet, use the cleanup exception(s)
+                    var existingException = test.Result?.Exception;
+                    Exception exceptionToReport;
 
-                    await _stateManager.MarkFailedAsync(test, aggregatedException).ConfigureAwait(false);
+                    if (existingException != null)
+                    {
+                        // Test already failed - aggregate with cleanup exceptions
+                        var allExceptions = new List<Exception> { existingException };
+                        allExceptions.AddRange(cleanupExceptions);
+                        exceptionToReport = new AggregateException("Test failure and cleanup errors occurred", allExceptions);
+                    }
+                    else
+                    {
+                        // Test hasn't completed - use cleanup exception(s)
+                        exceptionToReport = cleanupExceptions.Count == 1
+                            ? cleanupExceptions[0]
+                            : new AggregateException("One or more errors occurred during test cleanup", cleanupExceptions);
+                    }
+
+                    await _stateManager.MarkFailedAsync(test, exceptionToReport).ConfigureAwait(false);
                 }
             }
 

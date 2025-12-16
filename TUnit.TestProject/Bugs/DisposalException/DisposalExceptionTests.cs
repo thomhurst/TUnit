@@ -96,3 +96,32 @@ public class SkippedTestDisposalTests
         await Assert.That(fixture).IsNotNull();
     }
 }
+
+/// <summary>
+/// Verify that failing tests with disposal exceptions remain failed
+/// (and the cleanup exception is aggregated with the test exception).
+/// </summary>
+[EngineTest(ExpectedResult.Failure)]
+public class FailingTestDisposalTests
+{
+    public class FixtureWithFailingDisposal : IAsyncDisposable
+    {
+        public async ValueTask DisposeAsync()
+        {
+            await Task.Yield();
+            throw new InvalidOperationException("Disposal failed during cleanup");
+        }
+    }
+
+    [Test]
+    [ClassDataSource<FixtureWithFailingDisposal>]
+    public async Task FailingTest_WithDisposalException_ShouldRemainFailed(FixtureWithFailingDisposal fixture)
+    {
+        // This test intentionally fails
+        await Assert.That(false).IsTrue().Because("Test intentionally fails to verify cleanup exception handling");
+        
+        // The test will fail with the assertion error above.
+        // Then disposal will also fail, but both exceptions should be logged.
+        // The test should remain failed (not passed).
+    }
+}
