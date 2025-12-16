@@ -70,3 +70,29 @@ public class DisposalExceptionTests
         await Assert.That(fixture).IsNotNull();
     }
 }
+
+/// <summary>
+/// Verify that skipped tests with disposal exceptions remain skipped
+/// (disposal exceptions should not override skipped state either).
+/// </summary>
+[EngineTest(ExpectedResult.Pass)]
+public class SkippedTestDisposalTests
+{
+    public class FixtureWithFailingDisposal : IAsyncDisposable
+    {
+        public async ValueTask DisposeAsync()
+        {
+            await Task.Yield();
+            throw new InvalidOperationException("Disposal failed");
+        }
+    }
+
+    [Test]
+    [Skip("This test is intentionally skipped")]
+    [ClassDataSource<FixtureWithFailingDisposal>]
+    public async Task SkippedTest_WithDisposalException_ShouldRemainSkipped(FixtureWithFailingDisposal fixture)
+    {
+        // This test should be skipped, so it won't execute
+        await Assert.That(fixture).IsNotNull();
+    }
+}
