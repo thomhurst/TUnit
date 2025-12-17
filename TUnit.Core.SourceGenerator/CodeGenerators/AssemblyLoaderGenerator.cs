@@ -70,6 +70,8 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
         }
 
         var sourceBuilder = new CodeWriter();
+
+        sourceBuilder.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]");
         sourceBuilder.AppendLine($"[global::System.CodeDom.Compiler.GeneratedCode(\"TUnit\", \"{typeof(AssemblyLoaderGenerator).Assembly.GetName().Version}\")]");
         using (sourceBuilder.BeginBlock("file static class AssemblyLoader" + Guid.NewGuid().ToString("N")))
         {
