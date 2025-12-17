@@ -32,9 +32,12 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
             return false;
         }
 
-        // Determine output path
-        _outputPath = Environment.GetEnvironmentVariable("JUNIT_XML_OUTPUT_PATH")
-            ?? GetDefaultOutputPath();
+        // Determine output path (only if not already set via command-line argument)
+        if (string.IsNullOrEmpty(_outputPath))
+        {
+            _outputPath = Environment.GetEnvironmentVariable("JUNIT_XML_OUTPUT_PATH")
+                ?? GetDefaultOutputPath();
+        }
 
         _isEnabled = true;
         return await extension.IsEnabledAsync();
