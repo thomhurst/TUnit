@@ -50,14 +50,14 @@ internal sealed class HookCollectionService : IHookCollectionService
         // Pre-compute all global hooks that don't depend on specific types/assemblies
         _beforeEveryTestHooks = await BuildGlobalBeforeEveryTestHooksAsync();
         _afterEveryTestHooks = await BuildGlobalAfterEveryTestHooksAsync();
-        _beforeTestSessionHooks = BuildGlobalBeforeTestSessionHooks();
-        _afterTestSessionHooks = BuildGlobalAfterTestSessionHooks();
-        _beforeTestDiscoveryHooks = BuildGlobalBeforeTestDiscoveryHooks();
-        _afterTestDiscoveryHooks = BuildGlobalAfterTestDiscoveryHooks();
-        _beforeEveryClassHooks = BuildGlobalBeforeEveryClassHooks();
-        _afterEveryClassHooks = BuildGlobalAfterEveryClassHooks();
-        _beforeEveryAssemblyHooks = BuildGlobalBeforeEveryAssemblyHooks();
-        _afterEveryAssemblyHooks = BuildGlobalAfterEveryAssemblyHooks();
+        _beforeTestSessionHooks = await BuildGlobalBeforeTestSessionHooksAsync();
+        _afterTestSessionHooks = await BuildGlobalAfterTestSessionHooksAsync();
+        _beforeTestDiscoveryHooks = await BuildGlobalBeforeTestDiscoveryHooksAsync();
+        _afterTestDiscoveryHooks = await BuildGlobalAfterTestDiscoveryHooksAsync();
+        _beforeEveryClassHooks = await BuildGlobalBeforeEveryClassHooksAsync();
+        _afterEveryClassHooks = await BuildGlobalAfterEveryClassHooksAsync();
+        _beforeEveryAssemblyHooks = await BuildGlobalBeforeEveryAssemblyHooksAsync();
+        _afterEveryAssemblyHooks = await BuildGlobalAfterEveryAssemblyHooksAsync();
     }
 
     private async Task<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> BuildGlobalBeforeEveryTestHooksAsync()
@@ -94,13 +94,13 @@ internal sealed class HookCollectionService : IHookCollectionService
             .ToList();
     }
 
-    private IReadOnlyList<Func<TestSessionContext, CancellationToken, Task>> BuildGlobalBeforeTestSessionHooks()
+    private async Task<IReadOnlyList<Func<TestSessionContext, CancellationToken, Task>>> BuildGlobalBeforeTestSessionHooksAsync()
     {
         var allHooks = new List<(int order, int registrationIndex, Func<TestSessionContext, CancellationToken, Task> hook)>(Sources.BeforeTestSessionHooks.Count);
 
         foreach (var hook in Sources.BeforeTestSessionHooks)
         {
-            var hookFunc = CreateTestSessionHookDelegate(hook);
+            var hookFunc = await CreateTestSessionHookDelegateAsync(hook);
             allHooks.Add((hook.Order, hook.RegistrationIndex, hookFunc));
         }
 
@@ -111,13 +111,13 @@ internal sealed class HookCollectionService : IHookCollectionService
             .ToList();
     }
 
-    private IReadOnlyList<Func<TestSessionContext, CancellationToken, Task>> BuildGlobalAfterTestSessionHooks()
+    private async Task<IReadOnlyList<Func<TestSessionContext, CancellationToken, Task>>> BuildGlobalAfterTestSessionHooksAsync()
     {
         var allHooks = new List<(int order, int registrationIndex, Func<TestSessionContext, CancellationToken, Task> hook)>(Sources.AfterTestSessionHooks.Count);
 
         foreach (var hook in Sources.AfterTestSessionHooks)
         {
-            var hookFunc = CreateTestSessionHookDelegate(hook);
+            var hookFunc = await CreateTestSessionHookDelegateAsync(hook);
             allHooks.Add((hook.Order, hook.RegistrationIndex, hookFunc));
         }
 
@@ -128,13 +128,13 @@ internal sealed class HookCollectionService : IHookCollectionService
             .ToList();
     }
 
-    private IReadOnlyList<Func<BeforeTestDiscoveryContext, CancellationToken, Task>> BuildGlobalBeforeTestDiscoveryHooks()
+    private async Task<IReadOnlyList<Func<BeforeTestDiscoveryContext, CancellationToken, Task>>> BuildGlobalBeforeTestDiscoveryHooksAsync()
     {
         var allHooks = new List<(int order, int registrationIndex, Func<BeforeTestDiscoveryContext, CancellationToken, Task> hook)>(Sources.BeforeTestDiscoveryHooks.Count);
 
         foreach (var hook in Sources.BeforeTestDiscoveryHooks)
         {
-            var hookFunc = CreateBeforeTestDiscoveryHookDelegate(hook);
+            var hookFunc = await CreateBeforeTestDiscoveryHookDelegateAsync(hook);
             allHooks.Add((hook.Order, hook.RegistrationIndex, hookFunc));
         }
 
@@ -145,13 +145,13 @@ internal sealed class HookCollectionService : IHookCollectionService
             .ToList();
     }
 
-    private IReadOnlyList<Func<TestDiscoveryContext, CancellationToken, Task>> BuildGlobalAfterTestDiscoveryHooks()
+    private async Task<IReadOnlyList<Func<TestDiscoveryContext, CancellationToken, Task>>> BuildGlobalAfterTestDiscoveryHooksAsync()
     {
         var allHooks = new List<(int order, int registrationIndex, Func<TestDiscoveryContext, CancellationToken, Task> hook)>(Sources.AfterTestDiscoveryHooks.Count);
 
         foreach (var hook in Sources.AfterTestDiscoveryHooks)
         {
-            var hookFunc = CreateTestDiscoveryHookDelegate(hook);
+            var hookFunc = await CreateTestDiscoveryHookDelegateAsync(hook);
             allHooks.Add((hook.Order, hook.RegistrationIndex, hookFunc));
         }
 
@@ -162,13 +162,13 @@ internal sealed class HookCollectionService : IHookCollectionService
             .ToList();
     }
 
-    private IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>> BuildGlobalBeforeEveryClassHooks()
+    private async Task<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>> BuildGlobalBeforeEveryClassHooksAsync()
     {
         var allHooks = new List<(int order, int registrationIndex, Func<ClassHookContext, CancellationToken, Task> hook)>(Sources.BeforeEveryClassHooks.Count);
 
         foreach (var hook in Sources.BeforeEveryClassHooks)
         {
-            var hookFunc = CreateClassHookDelegate(hook);
+            var hookFunc = await CreateClassHookDelegateAsync(hook);
             allHooks.Add((hook.Order, hook.RegistrationIndex, hookFunc));
         }
 
@@ -179,13 +179,13 @@ internal sealed class HookCollectionService : IHookCollectionService
             .ToList();
     }
 
-    private IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>> BuildGlobalAfterEveryClassHooks()
+    private async Task<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>> BuildGlobalAfterEveryClassHooksAsync()
     {
         var allHooks = new List<(int order, int registrationIndex, Func<ClassHookContext, CancellationToken, Task> hook)>(Sources.AfterEveryClassHooks.Count);
 
         foreach (var hook in Sources.AfterEveryClassHooks)
         {
-            var hookFunc = CreateClassHookDelegate(hook);
+            var hookFunc = await CreateClassHookDelegateAsync(hook);
             allHooks.Add((hook.Order, hook.RegistrationIndex, hookFunc));
         }
 
@@ -196,13 +196,13 @@ internal sealed class HookCollectionService : IHookCollectionService
             .ToList();
     }
 
-    private IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>> BuildGlobalBeforeEveryAssemblyHooks()
+    private async Task<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>> BuildGlobalBeforeEveryAssemblyHooksAsync()
     {
         var allHooks = new List<(int order, int registrationIndex, Func<AssemblyHookContext, CancellationToken, Task> hook)>(Sources.BeforeEveryAssemblyHooks.Count);
 
         foreach (var hook in Sources.BeforeEveryAssemblyHooks)
         {
-            var hookFunc = CreateAssemblyHookDelegate(hook);
+            var hookFunc = await CreateAssemblyHookDelegateAsync(hook);
             allHooks.Add((hook.Order, hook.RegistrationIndex, hookFunc));
         }
 
@@ -213,13 +213,13 @@ internal sealed class HookCollectionService : IHookCollectionService
             .ToList();
     }
 
-    private IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>> BuildGlobalAfterEveryAssemblyHooks()
+    private async Task<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>> BuildGlobalAfterEveryAssemblyHooksAsync()
     {
         var allHooks = new List<(int order, int registrationIndex, Func<AssemblyHookContext, CancellationToken, Task> hook)>(Sources.AfterEveryAssemblyHooks.Count);
 
         foreach (var hook in Sources.AfterEveryAssemblyHooks)
         {
-            var hookFunc = CreateAssemblyHookDelegate(hook);
+            var hookFunc = await CreateAssemblyHookDelegateAsync(hook);
             allHooks.Add((hook.Order, hook.RegistrationIndex, hookFunc));
         }
 
@@ -422,168 +422,196 @@ internal sealed class HookCollectionService : IHookCollectionService
         return new ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>>(_afterEveryTestHooks ?? []);
     }
 
-    public ValueTask<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>> CollectBeforeClassHooksAsync(Type testClassType)
+    public async ValueTask<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>> CollectBeforeClassHooksAsync(Type testClassType)
     {
-        var hooks = _beforeClassHooksCache.GetOrAdd(testClassType, type =>
+        if (_beforeClassHooksCache.TryGetValue(testClassType, out var cachedHooks))
         {
-            var hooksByType = new List<(Type type, List<(int order, int registrationIndex, Func<ClassHookContext, CancellationToken, Task> hook)> hooks)>();
+            return cachedHooks;
+        }
 
-            // Collect hooks for each type in the hierarchy
-            var currentType = type;
-            while (currentType != null)
+        var hooks = await BuildBeforeClassHooksAsync(testClassType);
+        _beforeClassHooksCache.TryAdd(testClassType, hooks);
+        return hooks;
+    }
+
+    private async Task<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>> BuildBeforeClassHooksAsync(Type type)
+    {
+        var hooksByType = new List<(Type type, List<(int order, int registrationIndex, Func<ClassHookContext, CancellationToken, Task> hook)> hooks)>();
+
+        // Collect hooks for each type in the hierarchy
+        var currentType = type;
+        while (currentType != null)
+        {
+            var typeHooks = new List<(int order, int registrationIndex, Func<ClassHookContext, CancellationToken, Task> hook)>();
+
+            if (Sources.BeforeClassHooks.TryGetValue(currentType, out var sourceHooks))
             {
-                var typeHooks = new List<(int order, int registrationIndex, Func<ClassHookContext, CancellationToken, Task> hook)>();
-
-                if (Sources.BeforeClassHooks.TryGetValue(currentType, out var sourceHooks))
+                foreach (var hook in sourceHooks)
                 {
-                    foreach (var hook in sourceHooks)
+                    var hookFunc = await CreateClassHookDelegateAsync(hook);
+                    typeHooks.Add((hook.Order, hook.RegistrationIndex, hookFunc));
+                }
+            }
+
+            // Also check the open generic type definition for generic types
+            if (currentType is { IsGenericType: true, IsGenericTypeDefinition: false })
+            {
+                var openGenericType = GetCachedGenericTypeDefinition(currentType);
+                if (Sources.BeforeClassHooks.TryGetValue(openGenericType, out var openTypeHooks))
+                {
+                    foreach (var hook in openTypeHooks)
                     {
-                        var hookFunc = CreateClassHookDelegate(hook);
+                        var hookFunc = await CreateClassHookDelegateAsync(hook);
                         typeHooks.Add((hook.Order, hook.RegistrationIndex, hookFunc));
                     }
                 }
-
-                // Also check the open generic type definition for generic types
-                if (currentType is { IsGenericType: true, IsGenericTypeDefinition: false })
-                {
-                    var openGenericType = GetCachedGenericTypeDefinition(currentType);
-                    if (Sources.BeforeClassHooks.TryGetValue(openGenericType, out var openTypeHooks))
-                    {
-                        foreach (var hook in openTypeHooks)
-                        {
-                            var hookFunc = CreateClassHookDelegate(hook);
-                            typeHooks.Add((hook.Order, hook.RegistrationIndex, hookFunc));
-                        }
-                    }
-                }
-
-                if (typeHooks.Count > 0)
-                {
-                    hooksByType.Add((currentType, typeHooks));
-                }
-
-                currentType = currentType.BaseType;
             }
 
-            hooksByType.Reverse();
-
-            var finalHooks = new List<Func<ClassHookContext, CancellationToken, Task>>();
-            foreach (var (_, typeHooks) in hooksByType)
+            if (typeHooks.Count > 0)
             {
-                SortAndAddClassHooks(finalHooks, typeHooks);
+                hooksByType.Add((currentType, typeHooks));
             }
 
-            return finalHooks;
-        });
+            currentType = currentType.BaseType;
+        }
 
-        return new ValueTask<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>>(hooks);
+        hooksByType.Reverse();
+
+        var finalHooks = new List<Func<ClassHookContext, CancellationToken, Task>>();
+        foreach (var (_, typeHooks) in hooksByType)
+        {
+            SortAndAddClassHooks(finalHooks, typeHooks);
+        }
+
+        return finalHooks;
     }
 
-    public ValueTask<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>> CollectAfterClassHooksAsync(Type testClassType)
+    public async ValueTask<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>> CollectAfterClassHooksAsync(Type testClassType)
     {
-        var hooks = _afterClassHooksCache.GetOrAdd(testClassType, type =>
+        if (_afterClassHooksCache.TryGetValue(testClassType, out var cachedHooks))
         {
-            var hooksByType = new List<(Type type, List<(int order, int registrationIndex, Func<ClassHookContext, CancellationToken, Task> hook)> hooks)>();
+            return cachedHooks;
+        }
 
-            // Collect hooks for each type in the hierarchy
-            var currentType = type;
-            while (currentType != null)
+        var hooks = await BuildAfterClassHooksAsync(testClassType);
+        _afterClassHooksCache.TryAdd(testClassType, hooks);
+        return hooks;
+    }
+
+    private async Task<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>> BuildAfterClassHooksAsync(Type type)
+    {
+        var hooksByType = new List<(Type type, List<(int order, int registrationIndex, Func<ClassHookContext, CancellationToken, Task> hook)> hooks)>();
+
+        // Collect hooks for each type in the hierarchy
+        var currentType = type;
+        while (currentType != null)
+        {
+            var typeHooks = new List<(int order, int registrationIndex, Func<ClassHookContext, CancellationToken, Task> hook)>();
+
+            if (Sources.AfterClassHooks.TryGetValue(currentType, out var sourceHooks))
             {
-                var typeHooks = new List<(int order, int registrationIndex, Func<ClassHookContext, CancellationToken, Task> hook)>();
-
-                if (Sources.AfterClassHooks.TryGetValue(currentType, out var sourceHooks))
+                foreach (var hook in sourceHooks)
                 {
-                    foreach (var hook in sourceHooks)
+                    var hookFunc = await CreateClassHookDelegateAsync(hook);
+                    typeHooks.Add((hook.Order, hook.RegistrationIndex, hookFunc));
+                }
+            }
+
+            // Also check the open generic type definition for generic types
+            if (currentType is { IsGenericType: true, IsGenericTypeDefinition: false })
+            {
+                var openGenericType = GetCachedGenericTypeDefinition(currentType);
+                if (Sources.AfterClassHooks.TryGetValue(openGenericType, out var openTypeHooks))
+                {
+                    foreach (var hook in openTypeHooks)
                     {
-                        var hookFunc = CreateClassHookDelegate(hook);
+                        var hookFunc = await CreateClassHookDelegateAsync(hook);
                         typeHooks.Add((hook.Order, hook.RegistrationIndex, hookFunc));
                     }
                 }
-
-                // Also check the open generic type definition for generic types
-                if (currentType is { IsGenericType: true, IsGenericTypeDefinition: false })
-                {
-                    var openGenericType = GetCachedGenericTypeDefinition(currentType);
-                    if (Sources.AfterClassHooks.TryGetValue(openGenericType, out var openTypeHooks))
-                    {
-                        foreach (var hook in openTypeHooks)
-                        {
-                            var hookFunc = CreateClassHookDelegate(hook);
-                            typeHooks.Add((hook.Order, hook.RegistrationIndex, hookFunc));
-                        }
-                    }
-                }
-
-                if (typeHooks.Count > 0)
-                {
-                    hooksByType.Add((currentType, typeHooks));
-                }
-
-                currentType = currentType.BaseType;
             }
 
-            var finalHooks = new List<Func<ClassHookContext, CancellationToken, Task>>();
-            foreach (var (_, typeHooks) in hooksByType)
+            if (typeHooks.Count > 0)
             {
-                SortAndAddClassHooks(finalHooks, typeHooks);
+                hooksByType.Add((currentType, typeHooks));
             }
 
-            return finalHooks;
-        });
+            currentType = currentType.BaseType;
+        }
 
-        return new ValueTask<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>>(hooks);
+        var finalHooks = new List<Func<ClassHookContext, CancellationToken, Task>>();
+        foreach (var (_, typeHooks) in hooksByType)
+        {
+            SortAndAddClassHooks(finalHooks, typeHooks);
+        }
+
+        return finalHooks;
     }
 
-    public ValueTask<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>> CollectBeforeAssemblyHooksAsync(Assembly assembly)
+    public async ValueTask<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>> CollectBeforeAssemblyHooksAsync(Assembly assembly)
     {
-        var hooks = _beforeAssemblyHooksCache.GetOrAdd(assembly, asm =>
+        if (_beforeAssemblyHooksCache.TryGetValue(assembly, out var cachedHooks))
         {
-            if (!Sources.BeforeAssemblyHooks.TryGetValue(asm, out var assemblyHooks))
-            {
-                return [];
-            }
+            return cachedHooks;
+        }
 
-            var allHooks = new List<(int order, Func<AssemblyHookContext, CancellationToken, Task> hook)>(assemblyHooks.Count);
-
-            foreach (var hook in assemblyHooks)
-            {
-                var hookFunc = CreateAssemblyHookDelegate(hook);
-                allHooks.Add((hook.Order, hookFunc));
-            }
-
-            return allHooks
-                .OrderBy(h => h.order)
-                .Select(h => h.hook)
-                .ToList();
-        });
-
-        return new ValueTask<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>>(hooks);
+        var hooks = await BuildBeforeAssemblyHooksAsync(assembly);
+        _beforeAssemblyHooksCache.TryAdd(assembly, hooks);
+        return hooks;
     }
 
-    public ValueTask<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>> CollectAfterAssemblyHooksAsync(Assembly assembly)
+    private async Task<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>> BuildBeforeAssemblyHooksAsync(Assembly assembly)
     {
-        var hooks = _afterAssemblyHooksCache.GetOrAdd(assembly, asm =>
+        if (!Sources.BeforeAssemblyHooks.TryGetValue(assembly, out var assemblyHooks))
         {
-            if (!Sources.AfterAssemblyHooks.TryGetValue(asm, out var assemblyHooks))
-            {
-                return [];
-            }
+            return [];
+        }
 
-            var allHooks = new List<(int order, Func<AssemblyHookContext, CancellationToken, Task> hook)>(assemblyHooks.Count);
+        var allHooks = new List<(int order, Func<AssemblyHookContext, CancellationToken, Task> hook)>(assemblyHooks.Count);
 
-            foreach (var hook in assemblyHooks)
-            {
-                var hookFunc = CreateAssemblyHookDelegate(hook);
-                allHooks.Add((hook.Order, hookFunc));
-            }
+        foreach (var hook in assemblyHooks)
+        {
+            var hookFunc = await CreateAssemblyHookDelegateAsync(hook);
+            allHooks.Add((hook.Order, hookFunc));
+        }
 
-            return allHooks
-                .OrderBy(h => h.order)
-                .Select(h => h.hook)
-                .ToList();
-        });
+        return allHooks
+            .OrderBy(h => h.order)
+            .Select(h => h.hook)
+            .ToList();
+    }
 
-        return new ValueTask<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>>(hooks);
+    public async ValueTask<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>> CollectAfterAssemblyHooksAsync(Assembly assembly)
+    {
+        if (_afterAssemblyHooksCache.TryGetValue(assembly, out var cachedHooks))
+        {
+            return cachedHooks;
+        }
+
+        var hooks = await BuildAfterAssemblyHooksAsync(assembly);
+        _afterAssemblyHooksCache.TryAdd(assembly, hooks);
+        return hooks;
+    }
+
+    private async Task<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>> BuildAfterAssemblyHooksAsync(Assembly assembly)
+    {
+        if (!Sources.AfterAssemblyHooks.TryGetValue(assembly, out var assemblyHooks))
+        {
+            return [];
+        }
+
+        var allHooks = new List<(int order, Func<AssemblyHookContext, CancellationToken, Task> hook)>(assemblyHooks.Count);
+
+        foreach (var hook in assemblyHooks)
+        {
+            var hookFunc = await CreateAssemblyHookDelegateAsync(hook);
+            allHooks.Add((hook.Order, hookFunc));
+        }
+
+        return allHooks
+            .OrderBy(h => h.order)
+            .Select(h => h.hook)
+            .ToList();
     }
 
     public ValueTask<IReadOnlyList<Func<TestSessionContext, CancellationToken, Task>>> CollectBeforeTestSessionHooksAsync()
@@ -700,8 +728,40 @@ internal sealed class HookCollectionService : IHookCollectionService
         };
     }
 
+    private async Task<Func<ClassHookContext, CancellationToken, Task>> CreateClassHookDelegateAsync(StaticHookMethod<ClassHookContext> hook)
+    {
+        // Process hook registration event receivers
+        await ProcessHookRegistrationAsync(hook);
+
+        return async (context, cancellationToken) =>
+        {
+            var timeoutAction = HookTimeoutHelper.CreateTimeoutHookAction(
+                hook,
+                context,
+                cancellationToken);
+
+            await timeoutAction();
+        };
+    }
+
     private static Func<AssemblyHookContext, CancellationToken, Task> CreateAssemblyHookDelegate(StaticHookMethod<AssemblyHookContext> hook)
     {
+        return async (context, cancellationToken) =>
+        {
+            var timeoutAction = HookTimeoutHelper.CreateTimeoutHookAction(
+                hook,
+                context,
+                cancellationToken);
+
+            await timeoutAction();
+        };
+    }
+
+    private async Task<Func<AssemblyHookContext, CancellationToken, Task>> CreateAssemblyHookDelegateAsync(StaticHookMethod<AssemblyHookContext> hook)
+    {
+        // Process hook registration event receivers
+        await ProcessHookRegistrationAsync(hook);
+
         return async (context, cancellationToken) =>
         {
             var timeoutAction = HookTimeoutHelper.CreateTimeoutHookAction(
@@ -726,6 +786,22 @@ internal sealed class HookCollectionService : IHookCollectionService
         };
     }
 
+    private async Task<Func<TestSessionContext, CancellationToken, Task>> CreateTestSessionHookDelegateAsync(StaticHookMethod<TestSessionContext> hook)
+    {
+        // Process hook registration event receivers
+        await ProcessHookRegistrationAsync(hook);
+
+        return async (context, cancellationToken) =>
+        {
+            var timeoutAction = HookTimeoutHelper.CreateTimeoutHookAction(
+                hook,
+                context,
+                cancellationToken);
+
+            await timeoutAction();
+        };
+    }
+
     private static Func<BeforeTestDiscoveryContext, CancellationToken, Task> CreateBeforeTestDiscoveryHookDelegate(StaticHookMethod<BeforeTestDiscoveryContext> hook)
     {
         return async (context, cancellationToken) =>
@@ -739,8 +815,40 @@ internal sealed class HookCollectionService : IHookCollectionService
         };
     }
 
+    private async Task<Func<BeforeTestDiscoveryContext, CancellationToken, Task>> CreateBeforeTestDiscoveryHookDelegateAsync(StaticHookMethod<BeforeTestDiscoveryContext> hook)
+    {
+        // Process hook registration event receivers
+        await ProcessHookRegistrationAsync(hook);
+
+        return async (context, cancellationToken) =>
+        {
+            var timeoutAction = HookTimeoutHelper.CreateTimeoutHookAction(
+                hook,
+                context,
+                cancellationToken);
+
+            await timeoutAction();
+        };
+    }
+
     private static Func<TestDiscoveryContext, CancellationToken, Task> CreateTestDiscoveryHookDelegate(StaticHookMethod<TestDiscoveryContext> hook)
     {
+        return async (context, cancellationToken) =>
+        {
+            var timeoutAction = HookTimeoutHelper.CreateTimeoutHookAction(
+                hook,
+                context,
+                cancellationToken);
+
+            await timeoutAction();
+        };
+    }
+
+    private async Task<Func<TestDiscoveryContext, CancellationToken, Task>> CreateTestDiscoveryHookDelegateAsync(StaticHookMethod<TestDiscoveryContext> hook)
+    {
+        // Process hook registration event receivers
+        await ProcessHookRegistrationAsync(hook);
+
         return async (context, cancellationToken) =>
         {
             var timeoutAction = HookTimeoutHelper.CreateTimeoutHookAction(
