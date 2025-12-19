@@ -5,6 +5,7 @@ namespace TUnit.Engine.Tests;
 
 public class HookTimeoutTests(TestMode testMode) : InvokableTestBase(testMode)
 {
+    [Test]
     public async Task ClassHook_WithTimeout_ShouldFail()
     {
         await RunTestsWithFilter(
@@ -17,6 +18,7 @@ public class HookTimeoutTests(TestMode testMode) : InvokableTestBase(testMode)
             ]);
     }
 
+    [Test]
     public async Task AssemblyHook_WithTimeout_ShouldPass()
     {
         await RunTestsWithFilter(
