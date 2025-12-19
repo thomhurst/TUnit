@@ -439,6 +439,7 @@ namespace
         public DataSourceException(string dataSourceName,  innerException) { }
         public DataSourceException(string dataSourceName, string message) { }
         public string DataSourceName { get; }
+        public static .DataSourceException FromNestedFailure(string message,  innerException) { }
     }
     [(.Class | .Method | .Property | .Parameter, AllowMultiple=true)]
     public abstract class DataSourceGeneratorAttribute<T> : .AsyncDataSourceGeneratorAttribute<T>
