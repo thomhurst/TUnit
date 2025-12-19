@@ -459,45 +459,56 @@ internal sealed class TestBuilder : ITestBuilder
                             const string skipReason = "Data source returned no data";
 
                             Type[] resolvedClassGenericArgs;
+                            Exception? genericResolutionException = null;
                             try
                             {
                                 resolvedClassGenericArgs = metadata.TestClassType.IsGenericTypeDefinition
                                     ? TryInferClassGenericsFromDataSources(metadata)
                                     : Type.EmptyTypes;
                             }
-                            catch
+                            catch (Exception ex)
                             {
                                 resolvedClassGenericArgs = Type.EmptyTypes;
+                                genericResolutionException = ex;
                             }
 
-                            var testData = new TestData
+                            // If generic type inference failed, create a failed test instead of skipped
+                            if (genericResolutionException != null)
                             {
-                                TestClassInstanceFactory = () => Task.FromResult<object>(SkippedTestInstance.Instance),
-                                ClassDataSourceAttributeIndex = classDataAttributeIndex,
-                                ClassDataLoopIndex = classDataLoopIndex,
-                                ClassData = classData,
-                                MethodDataSourceAttributeIndex = methodDataAttributeIndex,
-                                MethodDataLoopIndex = 1, // Use 1 since we're creating a single skipped test
-                                MethodData = [],
-                                RepeatIndex = 0,
-                                InheritanceDepth = metadata.InheritanceDepth,
-                                ResolvedClassGenericArguments = resolvedClassGenericArgs,
-                                ResolvedMethodGenericArguments = Type.EmptyTypes
-                            };
-
-                            var testSpecificContext = new TestBuilderContext
+                                var failedTest = await CreateFailedTestForDataGenerationError(metadata, genericResolutionException);
+                                tests.Add(failedTest);
+                            }
+                            else
                             {
-                                TestMetadata = metadata.MethodMetadata,
-                                Events = new TestContextEvents(),
-                                StateBag = new ConcurrentDictionary<string, object?>(),
-                                ClassConstructor = testBuilderContext.ClassConstructor,
-                                DataSourceAttribute = methodDataSource,
-                                InitializedAttributes = attributes
-                            };
+                                var testData = new TestData
+                                {
+                                    TestClassInstanceFactory = () => Task.FromResult<object>(SkippedTestInstance.Instance),
+                                    ClassDataSourceAttributeIndex = classDataAttributeIndex,
+                                    ClassDataLoopIndex = classDataLoopIndex,
+                                    ClassData = classData,
+                                    MethodDataSourceAttributeIndex = methodDataAttributeIndex,
+                                    MethodDataLoopIndex = 1, // Use 1 since we're creating a single skipped test
+                                    MethodData = [],
+                                    RepeatIndex = 0,
+                                    InheritanceDepth = metadata.InheritanceDepth,
+                                    ResolvedClassGenericArguments = resolvedClassGenericArgs,
+                                    ResolvedMethodGenericArguments = Type.EmptyTypes
+                                };
 
-                            var test = await BuildTestAsync(metadata, testData, testSpecificContext);
-                            test.Context.SkipReason = skipReason;
-                            tests.Add(test);
+                                var testSpecificContext = new TestBuilderContext
+                                {
+                                    TestMetadata = metadata.MethodMetadata,
+                                    Events = new TestContextEvents(),
+                                    StateBag = new ConcurrentDictionary<string, object?>(),
+                                    ClassConstructor = testBuilderContext.ClassConstructor,
+                                    DataSourceAttribute = methodDataSource,
+                                    InitializedAttributes = attributes
+                                };
+
+                                var test = await BuildTestAsync(metadata, testData, testSpecificContext);
+                                test.Context.SkipReason = skipReason;
+                                tests.Add(test);
+                            }
                         }
                     }
                 }
@@ -508,45 +519,56 @@ internal sealed class TestBuilder : ITestBuilder
                     const string skipReason = "Data source returned no data";
 
                     Type[] resolvedClassGenericArgs;
+                    Exception? genericResolutionException = null;
                     try
                     {
                         resolvedClassGenericArgs = metadata.TestClassType.IsGenericTypeDefinition
                             ? TryInferClassGenericsFromDataSources(metadata)
                             : Type.EmptyTypes;
                     }
-                    catch
+                    catch (Exception ex)
                     {
                         resolvedClassGenericArgs = Type.EmptyTypes;
+                        genericResolutionException = ex;
                     }
 
-                    var testData = new TestData
+                    // If generic type inference failed, create a failed test instead of skipped
+                    if (genericResolutionException != null)
                     {
-                        TestClassInstanceFactory = () => Task.FromResult<object>(SkippedTestInstance.Instance),
-                        ClassDataSourceAttributeIndex = classDataAttributeIndex,
-                        ClassDataLoopIndex = 1, // Use 1 since we're creating a single skipped test
-                        ClassData = [],
-                        MethodDataSourceAttributeIndex = 0,
-                        MethodDataLoopIndex = 0,
-                        MethodData = [],
-                        RepeatIndex = 0,
-                        InheritanceDepth = metadata.InheritanceDepth,
-                        ResolvedClassGenericArguments = resolvedClassGenericArgs,
-                        ResolvedMethodGenericArguments = Type.EmptyTypes
-                    };
-
-                    var testSpecificContext = new TestBuilderContext
+                        var failedTest = await CreateFailedTestForDataGenerationError(metadata, genericResolutionException);
+                        tests.Add(failedTest);
+                    }
+                    else
                     {
-                        TestMetadata = metadata.MethodMetadata,
-                        Events = new TestContextEvents(),
-                        StateBag = new ConcurrentDictionary<string, object?>(),
-                        ClassConstructor = testBuilderContext.ClassConstructor,
-                        DataSourceAttribute = classDataSource,
-                        InitializedAttributes = attributes
-                    };
+                        var testData = new TestData
+                        {
+                            TestClassInstanceFactory = () => Task.FromResult<object>(SkippedTestInstance.Instance),
+                            ClassDataSourceAttributeIndex = classDataAttributeIndex,
+                            ClassDataLoopIndex = 1, // Use 1 since we're creating a single skipped test
+                            ClassData = [],
+                            MethodDataSourceAttributeIndex = 0,
+                            MethodDataLoopIndex = 0,
+                            MethodData = [],
+                            RepeatIndex = 0,
+                            InheritanceDepth = metadata.InheritanceDepth,
+                            ResolvedClassGenericArguments = resolvedClassGenericArgs,
+                            ResolvedMethodGenericArguments = Type.EmptyTypes
+                        };
 
-                    var test = await BuildTestAsync(metadata, testData, testSpecificContext);
-                    test.Context.SkipReason = skipReason;
-                    tests.Add(test);
+                        var testSpecificContext = new TestBuilderContext
+                        {
+                            TestMetadata = metadata.MethodMetadata,
+                            Events = new TestContextEvents(),
+                            StateBag = new ConcurrentDictionary<string, object?>(),
+                            ClassConstructor = testBuilderContext.ClassConstructor,
+                            DataSourceAttribute = classDataSource,
+                            InitializedAttributes = attributes
+                        };
+
+                        var test = await BuildTestAsync(metadata, testData, testSpecificContext);
+                        test.Context.SkipReason = skipReason;
+                        tests.Add(test);
+                    }
                 }
             }
 
@@ -1314,6 +1336,26 @@ internal sealed class TestBuilder : ITestBuilder
         public Type[] ResolvedMethodGenericArguments { get; set; } = Type.EmptyTypes;
     }
 
+    /// <summary>
+    /// Result of attempting to create an instance for method data sources.
+    /// Captures either success with an instance or failure with the exception.
+    /// </summary>
+    private readonly struct InstanceCreationResult
+    {
+        public object? Instance { get; }
+        public Exception? Exception { get; }
+        public bool Success => Exception == null;
+
+        private InstanceCreationResult(object? instance, Exception? exception)
+        {
+            Instance = instance;
+            Exception = exception;
+        }
+
+        public static InstanceCreationResult CreateSuccess(object? instance) => new(instance, null);
+        public static InstanceCreationResult CreateFailure(Exception exception) => new(null, exception);
+    }
+
 #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Test building in reflection mode uses generic type resolution which requires unreferenced code")]
 #endif
@@ -1403,13 +1445,17 @@ internal sealed class TestBuilder : ITestBuilder
 
                 if (needsInstanceForMethodDataSources)
                 {
-                    instanceForMethodDataSources = await CreateInstanceForMethodDataSources(
+                    var instanceResult = await CreateInstanceForMethodDataSources(
                         metadata, classDataAttributeIndex, classDataLoopIndex, classData);
 
-                    if (instanceForMethodDataSources == null)
+                    if (!instanceResult.Success)
                     {
-                        continue; // Skip if instance creation failed
+                        // Yield a failed test instead of silently skipping
+                        yield return await CreateFailedTestForInstanceDataSourceError(metadata, instanceResult.Exception!);
+                        continue;
                     }
+
+                    instanceForMethodDataSources = instanceResult.Instance!;
 
                     // Initialize property data sources on the early instance so that
                     // method data sources can access fully-initialized properties.
@@ -1472,7 +1518,7 @@ internal sealed class TestBuilder : ITestBuilder
 #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Generic type resolution for instance creation uses reflection")]
 #endif
-    private Task<object?> CreateInstanceForMethodDataSources(
+    private Task<InstanceCreationResult> CreateInstanceForMethodDataSources(
         TestMetadata metadata, int classDataAttributeIndex, int classDataLoopIndex, object?[] classData)
     {
         try
@@ -1495,22 +1541,22 @@ internal sealed class TestBuilder : ITestBuilder
                 try
                 {
                     var resolution = TestGenericTypeResolver.Resolve(metadata, tempTestData);
-                    return Task.FromResult<object?>(metadata.InstanceFactory(resolution.ResolvedClassGenericArguments, classData));
+                    return Task.FromResult(InstanceCreationResult.CreateSuccess(metadata.InstanceFactory(resolution.ResolvedClassGenericArguments, classData)));
                 }
                 catch (GenericTypeResolutionException) when (classData.Length == 0)
                 {
                     var resolvedTypes = TryInferClassGenericsFromDataSources(metadata);
-                    return Task.FromResult<object?>(metadata.InstanceFactory(resolvedTypes, classData));
+                    return Task.FromResult(InstanceCreationResult.CreateSuccess(metadata.InstanceFactory(resolvedTypes, classData)));
                 }
             }
             else
             {
-                return Task.FromResult<object?>(metadata.InstanceFactory([], classData));
+                return Task.FromResult(InstanceCreationResult.CreateSuccess(metadata.InstanceFactory([], classData)));
             }
         }
-        catch
+        catch (Exception ex)
         {
-            return Task.FromResult<object?>(null);
+            return Task.FromResult(InstanceCreationResult.CreateFailure(ex));
         }
     }
 
