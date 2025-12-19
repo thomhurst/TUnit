@@ -421,6 +421,7 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
     /// Eliminates duplicate code between DiscoverNestedInitializerObjects and DiscoverNestedInitializerObjectsForTracking.
     /// </summary>
     /// <remarks>
+    /// Uses source-generated metadata when available (AOT-compatible), falling back to reflection otherwise.
     /// Exceptions during property access are propagated to the caller with context about
     /// which type/property failed. This ensures data source initialization failures are
     /// properly reported as test failures rather than silently swallowed.
@@ -442,6 +443,80 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
             return;
         }
 
+        // Try source-generated metadata first (AOT-compatible)
+        var registeredProperties = InitializerPropertyRegistry.GetProperties(type);
+        if (registeredProperties != null)
+        {
+            TraverseRegisteredInitializerProperties(obj, type, registeredProperties, tryAdd, recurse, currentDepth, cancellationToken);
+            return;
+        }
+
+        // Fall back to reflection (non-AOT path)
+        TraverseInitializerPropertiesViaReflection(obj, type, tryAdd, recurse, currentDepth, cancellationToken);
+    }
+
+    /// <summary>
+    /// Traverses IAsyncInitializer properties using source-generated metadata (AOT-compatible).
+    /// </summary>
+    private static void TraverseRegisteredInitializerProperties(
+        object obj,
+        Type type,
+        InitializerPropertyInfo[] properties,
+        TryAddObjectFunc tryAdd,
+        RecurseFunc recurse,
+        int currentDepth,
+        CancellationToken cancellationToken)
+    {
+        foreach (var propInfo in properties)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            try
+            {
+                var value = propInfo.GetValue(obj);
+                if (value == null)
+                {
+                    continue;
+                }
+
+                // Only discover IAsyncInitializer objects
+                if (value is IAsyncInitializer && tryAdd(value, currentDepth))
+                {
+                    recurse(value, currentDepth + 1);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                throw; // Propagate cancellation
+            }
+            catch (Exception ex)
+            {
+                // Record error for diagnostics (still available via GetDiscoveryErrors())
+                DiscoveryErrors.Add(new DiscoveryError(type.Name, propInfo.PropertyName, ex.Message, ex));
+
+                // Propagate the exception with context about which property failed
+                // This ensures data source failures are reported as test failures
+                throw DataSourceException.FromNestedFailure(
+                    $"Failed to access property '{propInfo.PropertyName}' on type '{type.Name}' during object graph discovery. " +
+                    $"This may indicate that a data source or its nested dependencies failed to initialize. " +
+                    $"See inner exception for details.",
+                    ex);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Traverses IAsyncInitializer properties using reflection (fallback for non-source-generated types).
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2067", Justification = "Reflection fallback path. Types without source-generated metadata may not work in trimmed apps.")]
+    private static void TraverseInitializerPropertiesViaReflection(
+        object obj,
+        Type type,
+        TryAddObjectFunc tryAdd,
+        RecurseFunc recurse,
+        int currentDepth,
+        CancellationToken cancellationToken)
+    {
         var properties = PropertyCacheManager.GetCachedProperties(type);
 
         foreach (var property in properties)
