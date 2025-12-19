@@ -38,8 +38,11 @@ internal static class PropertyCacheManager
     /// </summary>
     /// <param name="type">The type to get properties for.</param>
     /// <returns>An array of readable, non-indexed properties for the type.</returns>
-    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection fallback for nested initializers. In AOT, source-gen handles primary discovery.")]
-    public static PropertyInfo[] GetCachedProperties(Type type)
+    [UnconditionalSuppressMessage("Trimming", "IL2111",
+        Justification = "CreatePropertyArray is called with a type that has the required DynamicallyAccessedMembers annotation from the caller.")]
+    public static PropertyInfo[] GetCachedProperties(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
+        Type type)
     {
         // Periodic cleanup if cache grows too large to prevent memory leaks
         // Use Interlocked to ensure only one thread performs cleanup at a time
@@ -71,34 +74,38 @@ internal static class PropertyCacheManager
             }
         }
 
-        return PropertyCache.GetOrAdd(type, static t =>
+        return PropertyCache.GetOrAdd(type, CreatePropertyArray);
+    }
+
+    private static PropertyInfo[] CreatePropertyArray(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
+        Type t)
+    {
+        // Use explicit loops instead of LINQ to avoid allocations in hot path
+        var allProps = t.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+        // First pass: count eligible properties
+        var eligibleCount = 0;
+        foreach (var p in allProps)
         {
-            // Use explicit loops instead of LINQ to avoid allocations in hot path
-            var allProps = t.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-
-            // First pass: count eligible properties
-            var eligibleCount = 0;
-            foreach (var p in allProps)
+            if (p.CanRead && p.GetIndexParameters().Length == 0)
             {
-                if (p.CanRead && p.GetIndexParameters().Length == 0)
-                {
-                    eligibleCount++;
-                }
+                eligibleCount++;
             }
+        }
 
-            // Second pass: fill result array
-            var result = new PropertyInfo[eligibleCount];
-            var i = 0;
-            foreach (var p in allProps)
+        // Second pass: fill result array
+        var result = new PropertyInfo[eligibleCount];
+        var i = 0;
+        foreach (var p in allProps)
+        {
+            if (p.CanRead && p.GetIndexParameters().Length == 0)
             {
-                if (p.CanRead && p.GetIndexParameters().Length == 0)
-                {
-                    result[i++] = p;
-                }
+                result[i++] = p;
             }
+        }
 
-            return result;
-        });
+        return result;
     }
 
     /// <summary>

@@ -459,6 +459,7 @@ namespace
         public DataSourceException(string dataSourceName,  innerException) { }
         public DataSourceException(string dataSourceName, string message) { }
         public string DataSourceName { get; }
+        public static .DataSourceException FromNestedFailure(string message,  innerException) { }
     }
     [(.Class | .Method | .Property | .Parameter, AllowMultiple=true)]
     public abstract class DataSourceGeneratorAttribute<[.(..PublicConstructors)]  T> : .AsyncDataSourceGeneratorAttribute<T>
@@ -1679,6 +1680,22 @@ namespace .DataSources
         public static string FormatArguments(.TestContext context) { }
         public static string FormatArguments(object?[] arguments) { }
         public static string FormatArguments(object?[] arguments, .<<object?, string?>> formatters) { }
+    }
+}
+namespace .Discovery
+{
+    public sealed class InitializerPropertyInfo
+    {
+        public InitializerPropertyInfo() { }
+        public required <object, object?> GetValue { get; init; }
+        public required string PropertyName { get; init; }
+        public required  PropertyType { get; init; }
+    }
+    public static class InitializerPropertyRegistry
+    {
+        public static .[]? GetProperties( type) { }
+        public static bool HasRegistration( type) { }
+        public static void Register( type, .[] properties) { }
     }
 }
 namespace .Enums

@@ -60,6 +60,29 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             }
             GenerateIndividualPropertyInjectionSource(context, classData);
         });
+
+        // Third pipeline: Generate InitializerPropertyRegistry metadata for IAsyncInitializer types
+        // that have properties returning other IAsyncInitializer types.
+        // This enables AOT-compatible nested initializer discovery.
+        var asyncInitializerTypes = context.SyntaxProvider
+            .CreateSyntaxProvider(
+                predicate: (node, _) => node is TypeDeclarationSyntax,
+                transform: (ctx, _) => GetAsyncInitializerWithInitializerProperties(ctx))
+            .Where(x => x != null)
+            .Select((x, _) => x!)
+            .Collect()
+            .SelectMany((types, _) => types.DistinctBy(t => t.TypeSymbol, SymbolEqualityComparer.Default))
+            .Combine(enabledProvider);
+
+        context.RegisterSourceOutput(asyncInitializerTypes, (ctx, data) =>
+        {
+            var (typeInfo, isEnabled) = data;
+            if (!isEnabled)
+            {
+                return;
+            }
+            GenerateInitializerPropertySource(ctx, typeInfo);
+        });
     }
 
     private static bool IsClassWithDataSourceProperties(SyntaxNode node)
@@ -635,6 +658,130 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
     // Alias for consistency
     private static string GetNonNullableTypeName(ITypeSymbol typeSymbol) => GetNonNullableTypeString(typeSymbol);
+
+    #region IAsyncInitializer Property Discovery (for nested initializer discovery)
+
+    /// <summary>
+    /// Finds types that implement IAsyncInitializer and have properties that return other IAsyncInitializer types.
+    /// Used for AOT-compatible nested initializer discovery during object graph traversal.
+    /// </summary>
+    private static AsyncInitializerTypeInfo? GetAsyncInitializerWithInitializerProperties(GeneratorSyntaxContext context)
+    {
+        var typeDecl = (TypeDeclarationSyntax)context.Node;
+        var semanticModel = context.SemanticModel;
+
+        if (semanticModel.GetDeclaredSymbol(typeDecl) is not INamedTypeSymbol typeSymbol)
+        {
+            return null;
+        }
+
+        // Skip non-public/internal types
+        if (!IsPubliclyAccessible(typeSymbol))
+        {
+            return null;
+        }
+
+        // Skip open generic types
+        if (typeSymbol.IsUnboundGenericType || typeSymbol.TypeParameters.Length > 0)
+        {
+            return null;
+        }
+
+        var asyncInitializerInterface = semanticModel.Compilation.GetTypeByMetadataName("TUnit.Core.Interfaces.IAsyncInitializer");
+        if (asyncInitializerInterface == null)
+        {
+            return null;
+        }
+
+        // Check if this type implements IAsyncInitializer
+        if (!typeSymbol.AllInterfaces.Contains(asyncInitializerInterface, SymbolEqualityComparer.Default))
+        {
+            return null;
+        }
+
+        // Find properties that return IAsyncInitializer types
+        var initializerProperties = new List<InitializerPropertyMetadata>();
+
+        var allProperties = typeSymbol.GetMembers()
+            .OfType<IPropertySymbol>()
+            .Where(p => p.GetMethod != null && !p.IsStatic && !p.IsIndexer)
+            .ToList();
+
+        foreach (var property in allProperties)
+        {
+            // Check if the property type implements IAsyncInitializer
+            if (property.Type is INamedTypeSymbol propertyType)
+            {
+                if (propertyType.AllInterfaces.Contains(asyncInitializerInterface, SymbolEqualityComparer.Default) ||
+                    SymbolEqualityComparer.Default.Equals(propertyType, asyncInitializerInterface))
+                {
+                    initializerProperties.Add(new InitializerPropertyMetadata
+                    {
+                        Property = property
+                    });
+                }
+            }
+        }
+
+        if (initializerProperties.Count == 0)
+        {
+            return null;
+        }
+
+        return new AsyncInitializerTypeInfo
+        {
+            TypeSymbol = typeSymbol,
+            Properties = initializerProperties.ToImmutableArray()
+        };
+    }
+
+    /// <summary>
+    /// Generates source code that registers IAsyncInitializer property metadata with InitializerPropertyRegistry.
+    /// </summary>
+    private static void GenerateInitializerPropertySource(SourceProductionContext context, AsyncInitializerTypeInfo typeInfo)
+    {
+        var typeSymbol = typeInfo.TypeSymbol;
+        var safeName = GetSafeClassName(typeSymbol);
+        var fileName = $"{safeName}_InitializerProperties.g.cs";
+
+        var sourceBuilder = new StringBuilder();
+
+        sourceBuilder.AppendLine("using System;");
+        sourceBuilder.AppendLine("using TUnit.Core.Discovery;");
+        sourceBuilder.AppendLine();
+        sourceBuilder.AppendLine("namespace TUnit.Generated;");
+        sourceBuilder.AppendLine();
+
+        // Generate module initializer
+        sourceBuilder.AppendLine($"internal static class {safeName}_InitializerPropertiesInitializer");
+        sourceBuilder.AppendLine("{");
+        sourceBuilder.AppendLine("    [global::System.Runtime.CompilerServices.ModuleInitializer]");
+        sourceBuilder.AppendLine("    public static void Initialize()");
+        sourceBuilder.AppendLine("    {");
+        sourceBuilder.AppendLine($"        InitializerPropertyRegistry.Register(typeof({typeSymbol.GloballyQualified()}), new InitializerPropertyInfo[]");
+        sourceBuilder.AppendLine("        {");
+
+        foreach (var propInfo in typeInfo.Properties)
+        {
+            var property = propInfo.Property;
+            var propertyTypeName = property.Type.GloballyQualified();
+
+            sourceBuilder.AppendLine("            new InitializerPropertyInfo");
+            sourceBuilder.AppendLine("            {");
+            sourceBuilder.AppendLine($"                PropertyName = \"{property.Name}\",");
+            sourceBuilder.AppendLine($"                PropertyType = typeof({propertyTypeName}),");
+            sourceBuilder.AppendLine($"                GetValue = static obj => (({typeSymbol.GloballyQualified()})obj).{property.Name}");
+            sourceBuilder.AppendLine("            },");
+        }
+
+        sourceBuilder.AppendLine("        });");
+        sourceBuilder.AppendLine("    }");
+        sourceBuilder.AppendLine("}");
+
+        context.AddSource(fileName, sourceBuilder.ToString());
+    }
+
+    #endregion
 }
 
 internal sealed class ClassWithDataSourceProperties
@@ -664,4 +811,22 @@ internal sealed class ClassWithDataSourcePropertiesComparer : IEqualityComparer<
     {
         return SymbolEqualityComparer.Default.GetHashCode(obj.ClassSymbol);
     }
+}
+
+/// <summary>
+/// Model for types that implement IAsyncInitializer and have properties returning IAsyncInitializer.
+/// Used for generating AOT-compatible nested initializer discovery metadata.
+/// </summary>
+internal sealed class AsyncInitializerTypeInfo
+{
+    public required INamedTypeSymbol TypeSymbol { get; init; }
+    public required ImmutableArray<InitializerPropertyMetadata> Properties { get; init; }
+}
+
+/// <summary>
+/// Metadata about a property that returns an IAsyncInitializer type.
+/// </summary>
+internal sealed class InitializerPropertyMetadata
+{
+    public required IPropertySymbol Property { get; init; }
 }

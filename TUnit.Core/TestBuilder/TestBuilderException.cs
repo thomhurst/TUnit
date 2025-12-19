@@ -66,6 +66,24 @@ public class DataSourceException : TestBuilderException
     /// Gets the name of the data source that failed.
     /// </summary>
     public string DataSourceName { get; }
+
+    /// <summary>
+    /// Creates a DataSourceException with a custom message and inner exception.
+    /// Used when a data source or its nested dependencies fail during initialization.
+    /// </summary>
+    /// <param name="message">The full error message.</param>
+    /// <param name="innerException">The exception that caused this error.</param>
+    /// <returns>A new DataSourceException instance.</returns>
+    public static DataSourceException FromNestedFailure(string message, Exception innerException)
+    {
+        return new DataSourceException(message, innerException, isCustomMessage: true);
+    }
+
+    private DataSourceException(string message, Exception innerException, bool isCustomMessage)
+        : base(message, innerException)
+    {
+        DataSourceName = string.Empty;
+    }
 }
 
 /// <summary>
