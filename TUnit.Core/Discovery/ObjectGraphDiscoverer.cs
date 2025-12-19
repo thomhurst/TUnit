@@ -420,6 +420,11 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
     /// Unified traversal for IAsyncInitializer objects (from all properties).
     /// Eliminates duplicate code between DiscoverNestedInitializerObjects and DiscoverNestedInitializerObjectsForTracking.
     /// </summary>
+    /// <remarks>
+    /// Exceptions during property access are propagated to the caller with context about
+    /// which type/property failed. This ensures data source initialization failures are
+    /// properly reported as test failures rather than silently swallowed.
+    /// </remarks>
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection fallback for nested initializers. In AOT, source-gen handles primary discovery.")]
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection fallback for nested initializers. In AOT, source-gen handles primary discovery.")]
     [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Reflection fallback for nested initializers. In AOT, source-gen handles primary discovery.")]
@@ -473,12 +478,16 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
             }
             catch (Exception ex)
             {
-                // Record error for diagnostics (available via GetDiscoveryErrors())
+                // Record error for diagnostics (still available via GetDiscoveryErrors())
                 DiscoveryErrors.Add(new DiscoveryError(type.Name, property.Name, ex.Message, ex));
-#if DEBUG
-                Debug.WriteLine($"[ObjectGraphDiscoverer] Failed to access property '{property.Name}' on type '{type.Name}': {ex.Message}");
-#endif
-                // Continue discovery despite property access failures
+
+                // Propagate the exception with context about which property failed
+                // This ensures data source failures are reported as test failures
+                throw DataSourceException.FromNestedFailure(
+                    $"Failed to access property '{property.Name}' on type '{type.Name}' during object graph discovery. " +
+                    $"This may indicate that a data source or its nested dependencies failed to initialize. " +
+                    $"See inner exception for details.",
+                    ex);
             }
         }
     }
