@@ -30,13 +30,13 @@ internal static class TaskExtensions
         await task.WaitAsync(cancellationToken).ConfigureAwait(false);
 #else
         var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-        using (cancellationToken.Register(s => ((TaskCompletionSource<bool>)s!).TrySetCanceled(), tcs))
+        using (cancellationToken.Register(s => ((TaskCompletionSource<bool>)s!).TrySetCanceled(cancellationToken), tcs))
         {
             var completedTask = await Task.WhenAny(task, tcs.Task).ConfigureAwait(false);
             if (completedTask == tcs.Task)
             {
-                // Cancellation was requested
-                cancellationToken.ThrowIfCancellationRequested();
+                // Cancellation was requested - await to throw OperationCanceledException with correct token
+                await tcs.Task.ConfigureAwait(false);
             }
             
             // Original task completed - propagate any exceptions
