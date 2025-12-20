@@ -70,7 +70,23 @@ public record TestBuilderContext
 /// <summary>
 /// Provides access to the current <see cref="TestBuilderContext"/>.
 /// </summary>
-public class TestBuilderContextAccessor(TestBuilderContext context)
+public class TestBuilderContextAccessor
 {
-    public TestBuilderContext Current { get; set; } = context;
+    private TestBuilderContext _current;
+
+    public TestBuilderContextAccessor(TestBuilderContext context)
+    {
+        _current = context;
+        TestBuilderContext.Current = context;
+    }
+
+    public TestBuilderContext Current
+    {
+        get => _current;
+        set
+        {
+            _current = value;
+            TestBuilderContext.Current = value;
+        }
+    }
 }

@@ -1,11 +1,15 @@
-﻿namespace TUnit.Example.Asp.Net.TestProject;
+namespace TUnit.Example.Asp.Net.TestProject;
 
+/// <summary>
+/// Simple integration tests using the WebApplicationTest pattern via TestsBase.
+/// These tests don't need per-test isolation (no database writes).
+/// </summary>
 public class Tests : TestsBase
 {
     [Test]
-    public async Task Test()
+    public async Task Ping_ReturnsHelloWorld()
     {
-        var client = WebApplicationFactory.CreateClient();
+        var client = Factory.CreateClient();
 
         var response = await client.GetAsync("/ping");
 

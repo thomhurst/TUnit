@@ -7,8 +7,8 @@
   <Import Project="..\Library.props" />
 
   <ItemGroup>
-    <InternalsVisibleTo Include="TUnit.Engine" />
     <InternalsVisibleTo Include="TUnit.UnitTests" />
+    <InternalsVisibleTo Include="TUnit.AspNetCore" />
   </ItemGroup>
 
   <ItemGroup>
