@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using TUnit.Core;
 using TUnit.Core.Logging;
+using TUnit.Engine.Helpers;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Services.TestExecution;
 
@@ -106,8 +107,8 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
         ConcurrentQueue<(AbstractExecutableTest Test, IReadOnlyList<string> ConstraintKeys, TaskCompletionSource<bool> StartSignal)> waitingTests,
         CancellationToken cancellationToken)
     {
-        // Wait for signal to start
-        await startSignal.Task.ConfigureAwait(false);
+        // Wait for signal to start while observing cancellation token
+        await startSignal.Task.WaitWithCancellationAsync(cancellationToken).ConfigureAwait(false);
         
         await _logger.LogDebugAsync($"Starting previously queued test {test.TestId} with constraint keys: {string.Join(", ", constraintKeys)}").ConfigureAwait(false);
         

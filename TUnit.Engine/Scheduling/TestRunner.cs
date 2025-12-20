@@ -73,6 +73,8 @@ public sealed class TestRunner
             // First, execute all dependencies recursively
             foreach (var dependency in test.Dependencies)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+                
                 await ExecuteTestAsync(dependency.Test, cancellationToken).ConfigureAwait(false);
 
                 if (dependency.Test.State == TestState.Failed && !dependency.ProceedOnFailure)
@@ -83,6 +85,8 @@ public sealed class TestRunner
                 }
             }
 
+            cancellationToken.ThrowIfCancellationRequested();
+            
             test.State = TestState.Running;
             test.StartTime = DateTimeOffset.UtcNow;
 

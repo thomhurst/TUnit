@@ -6,6 +6,7 @@ using TUnit.Core.Interfaces;
 using TUnit.Core.PropertyInjection;
 using TUnit.Core.PropertyInjection.Initialization;
 using TUnit.Core.Tracking;
+using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Services;
 
@@ -355,8 +356,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
         }
         else
         {
-            await existingTcs.Task.ConfigureAwait(false);
-            cancellationToken.ThrowIfCancellationRequested();
+            await existingTcs.Task.WaitWithCancellationAsync(cancellationToken).ConfigureAwait(false);
         }
 
         return obj;
