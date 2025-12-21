@@ -65,6 +65,42 @@ public class TodoApiTests : TestsBase
 
 ## Core Concepts
 
+### Why Test Isolation Matters
+
+:::warning Critical for Parallel Execution
+TUnit runs tests in parallel by default. Without proper isolation, tests will interfere with each other, causing flaky failures that are difficult to debug.
+:::
+
+When tests share resources like database tables, message queues, or cache keys, you'll encounter problems:
+
+| Shared Resource | What Goes Wrong |
+|-----------------|-----------------|
+| Database table | Test A inserts a record, Test B's `COUNT(*)` assertion fails |
+| Message queue | Test A consumes Test B's messages |
+| Cache key | Test A overwrites Test B's cached data |
+| Redis key | Test A deletes keys that Test B is using |
+| S3 bucket path | Test A's cleanup deletes Test B's files |
+
+**The solution**: Give each test its own isolated resources using `GetIsolatedName()` and `GetIsolatedPrefix()`:
+
+```csharp
+protected override async Task SetupAsync()
+{
+    // Each test gets unique resources that no other test will touch
+    var tableName = GetIsolatedName("todos");      // "Test_42_todos"
+    var queueName = GetIsolatedName("events");     // "Test_42_events"
+    var cachePrefix = GetIsolatedPrefix();         // "test_42_"
+
+    await CreateTableAsync(tableName);
+    await CreateQueueAsync(queueName);
+}
+```
+
+This ensures:
+- Tests can run in parallel without interference
+- Test failures are deterministic and reproducible
+- You can run the same test multiple times (with `[Repeat]`) safely
+
 ### WebApplicationTest Pattern
 
 The `WebApplicationTest<TFactory, TEntryPoint>` base class provides:
@@ -317,7 +353,46 @@ Logs from your ASP.NET Core app will appear in the test output, making debugging
 
 ## Best Practices
 
-### 1. Use Base Classes for Common Setup
+### 1. Always Isolate Shared Resources
+
+:::tip Golden Rule
+If a resource is shared (database, queue, cache), each test must use its own isolated instance of that resource.
+:::
+
+```csharp
+// ❌ BAD: All tests share the same table - will cause flaky failures
+protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
+{
+    config.AddInMemoryCollection(new Dictionary<string, string?>
+    {
+        { "Database:TableName", "todos" }  // Shared = flaky!
+    });
+}
+
+// ✅ GOOD: Each test gets its own table
+protected override async Task SetupAsync()
+{
+    TableName = GetIsolatedName("todos");  // "Test_42_todos"
+    await CreateTableAsync(TableName);
+}
+
+protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
+{
+    config.AddInMemoryCollection(new Dictionary<string, string?>
+    {
+        { "Database:TableName", TableName }  // Isolated = reliable!
+    });
+}
+```
+
+Common resources that need isolation:
+- **Database tables**: Use `GetIsolatedName("tablename")`
+- **Message queues/topics**: Use `GetIsolatedName("queue")`
+- **Cache keys**: Use `GetIsolatedPrefix()` as a key prefix
+- **Blob storage paths**: Use `GetIsolatedPrefix()` as a path prefix
+- **Redis keys**: Use `GetIsolatedPrefix()` as a key prefix
+
+### 2. Use Base Classes for Common Setup
 
 ```csharp
 // Shared base for all tests
@@ -342,25 +417,13 @@ public class UserTests : DatabaseTestBase
 }
 ```
 
-### 2. Clean Up Resources
+### 3. Clean Up Resources
 
 ```csharp
 [After(HookType.Test)]
 public async Task Cleanup()
 {
     await CleanupTestDataAsync();
-}
-```
-
-### 3. Use Isolated Names for Shared Resources
-
-```csharp
-protected override async Task SetupAsync()
-{
-    // Each test gets unique resources
-    var tableName = GetIsolatedName("users");
-    var cachePrefix = GetIsolatedPrefix();
-    var topicName = GetIsolatedName("events");
 }
 ```
 
