@@ -615,7 +615,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         // Get the element type from the array type (e.g., SharedType[] -> SharedType)
         if (constant.Type is IArrayTypeSymbol arrayType)
         {
-            var elementTypeName = arrayType.ElementType.ToDisplayString();
+            var elementTypeName = GetNonNullableTypeString(arrayType.ElementType);
             var elements = string.Join(", ", constant.Values.Select(FormatTypedConstant));
             return $"new {elementTypeName}[] {{ {elements} }}";
         }
