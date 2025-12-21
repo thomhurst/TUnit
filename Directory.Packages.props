@@ -86,6 +86,7 @@
     <PackageVersion Include="Verify" Version="31.9.0" />
     <PackageVersion Include="Verify.NUnit" Version="31.9.0" />
     <PackageVersion Include="TUnit" Version="1.6.5" />
+    <PackageVersion Include="TUnit.AspNetCore" Version="1.6.5" />
     <PackageVersion Include="TUnit.Core" Version="1.6.5" />
     <PackageVersion Include="TUnit.Assertions" Version="1.6.5" />
     <PackageVersion Include="Verify.TUnit" Version="31.9.0" />

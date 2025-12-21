@@ -27,6 +27,8 @@
   <ItemGroup>
     <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers.csproj" OutputItemType="Analyzer"
       ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\TUnit.AspNetCore.Analyzers\TUnit.AspNetCore.Analyzers.csproj" OutputItemType="Analyzer"
+      ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.csproj"
       OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>

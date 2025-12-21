@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<root>
+    <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <xsd:element name="root" msdata:IsDataSet="true">
+
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="TUnit0062Description" xml:space="preserve">
+        <value>The Factory, Services, and HttpCapture properties are not available in constructors or SetupAsync. These properties are initialized in the [Before(HookType.Test)] hook which runs after SetupAsync. Access these properties only in test methods or [Before(HookType.Test)]/[After(HookType.Test)] hooks.</value>
+    </data>
+    <data name="TUnit0062MessageFormat" xml:space="preserve">
+        <value>'{0}' cannot be accessed in {1}. It is not initialized until after SetupAsync completes.</value>
+    </data>
+    <data name="TUnit0062Title" xml:space="preserve">
+        <value>Factory property accessed before initialization</value>
+    </data>
+</root>
