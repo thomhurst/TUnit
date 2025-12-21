@@ -49,9 +49,16 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
             return null;
         }
 
+        // Skip open generic types - we can't generate code for types with unbound type parameters
+        // The initialization will happen in the consuming assembly that provides concrete type arguments
+        if (typeSymbol.IsGenericType && typeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter))
+        {
+            return null;
+        }
+
         // Check if this type has any static properties with data source attributes
         var hasStaticPropertiesWithDataSources = GetStaticPropertyDataSources(typeSymbol).Any();
-        
+
         return hasStaticPropertiesWithDataSources ? typeSymbol : null;
     }
 

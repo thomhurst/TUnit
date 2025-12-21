@@ -605,9 +605,24 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             TypedConstantKind.Primitive => constant.Value?.ToString() ?? "null",
             TypedConstantKind.Enum => FormatEnumConstant(constant),
             TypedConstantKind.Type => FormatTypeConstant(constant),
-            TypedConstantKind.Array => $"new object[] {{ {string.Join(", ", constant.Values.Select(FormatTypedConstant))} }}",
+            TypedConstantKind.Array => FormatArrayConstant(constant),
             _ => constant.Value?.ToString() ?? "null"
         };
+    }
+
+    private static string FormatArrayConstant(TypedConstant constant)
+    {
+        // Get the element type from the array type (e.g., SharedType[] -> SharedType)
+        if (constant.Type is IArrayTypeSymbol arrayType)
+        {
+            var elementTypeName = arrayType.ElementType.ToDisplayString();
+            var elements = string.Join(", ", constant.Values.Select(FormatTypedConstant));
+            return $"new {elementTypeName}[] {{ {elements} }}";
+        }
+
+        // Fallback to object[] if type information is not available
+        var fallbackElements = string.Join(", ", constant.Values.Select(FormatTypedConstant));
+        return $"new object[] {{ {fallbackElements} }}";
     }
 
     private static string FormatEnumConstant(TypedConstant constant)

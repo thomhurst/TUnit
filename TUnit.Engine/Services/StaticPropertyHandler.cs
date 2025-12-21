@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using TUnit.Core;
 using TUnit.Core.Helpers;
 using TUnit.Core.StaticProperties;
@@ -15,17 +16,24 @@ internal sealed class StaticPropertyHandler
     private readonly ObjectTracker _objectTracker;
     private readonly TrackableObjectGraphProvider _trackableObjectGraphProvider;
     private readonly Disposer _disposer;
+    private readonly Lazy<PropertyInjector> _propertyInjector;
+    private readonly ObjectGraphDiscoveryService _objectGraphDiscoveryService;
+    private readonly ConcurrentDictionary<string, object?> _sessionObjectBag = new();
     private bool _initialized;
 
     public StaticPropertyHandler(TUnitFrameworkLogger logger,
         ObjectTracker objectTracker,
         TrackableObjectGraphProvider trackableObjectGraphProvider,
-        Disposer disposer)
+        Disposer disposer,
+        Lazy<PropertyInjector> propertyInjector,
+        ObjectGraphDiscoveryService objectGraphDiscoveryService)
     {
         _logger = logger;
         _objectTracker = objectTracker;
         _trackableObjectGraphProvider = trackableObjectGraphProvider;
         _disposer = disposer;
+        _propertyInjector = propertyInjector;
+        _objectGraphDiscoveryService = objectGraphDiscoveryService;
     }
 
     /// <summary>
@@ -50,6 +58,20 @@ internal sealed class StaticPropertyHandler
 
                 if (value != null)
                 {
+                    // Inject instance properties on the value before initialization
+                    // This handles cases where the static property's type has instance properties
+                    // with data source attributes (e.g., [ClassDataSource] with Shared = PerTestSession)
+                    await _propertyInjector.Value.InjectPropertiesAsync(
+                        value,
+                        _sessionObjectBag,
+                        methodMetadata: null,
+                        new TestContextEvents());
+
+                    // Initialize nested objects depth-first BEFORE initializing the main value
+                    // This ensures containers (IAsyncInitializer) are started before the factory
+                    // that depends on them calls methods like GetConnectionString()
+                    await InitializeNestedObjectsAsync(value, cancellationToken);
+
                     // Initialize the value (IAsyncInitializer, etc.)
                     await ObjectInitializer.InitializeAsync(value, cancellationToken);
 
@@ -95,6 +117,39 @@ internal sealed class StaticPropertyHandler
         if (cleanupExceptions.Count > 0)
         {
             throw new AggregateException("Errors occurred while disposing static properties", cleanupExceptions);
+        }
+    }
+
+    /// <summary>
+    /// Initializes nested objects depth-first (deepest first) before the parent object.
+    /// This ensures that containers/resources are fully initialized before the parent
+    /// object (like a WebApplicationFactory) tries to use them.
+    /// </summary>
+    private async Task InitializeNestedObjectsAsync(object rootObject, CancellationToken cancellationToken)
+    {
+        var graph = _objectGraphDiscoveryService.DiscoverNestedObjectGraph(rootObject, cancellationToken);
+
+        // Initialize from deepest to shallowest (skip depth 0 which is the root itself)
+        foreach (var depth in graph.GetDepthsDescending())
+        {
+            if (depth == 0)
+            {
+                continue; // Root handled separately by caller
+            }
+
+            var objectsAtDepth = graph.GetObjectsAtDepth(depth);
+
+            // Pre-allocate task list without LINQ Select
+            var tasks = new List<Task>();
+            foreach (var obj in objectsAtDepth)
+            {
+                tasks.Add(ObjectInitializer.InitializeAsync(obj, cancellationToken).AsTask());
+            }
+
+            if (tasks.Count > 0)
+            {
+                await Task.WhenAll(tasks);
+            }
         }
     }
 }

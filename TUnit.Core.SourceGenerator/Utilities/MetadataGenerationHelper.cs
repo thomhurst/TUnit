@@ -426,12 +426,23 @@ internal static class MetadataGenerationHelper
         // For generic types with unresolved type parameters, we can't cast to the open generic type
         // We need to use dynamic or reflection
         var hasUnresolvedTypeParameters = namedTypeSymbol.IsGenericType &&
-                                         namedTypeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter);
+                                         (namedTypeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter) ||
+                                          namedTypeSymbol.TypeArguments.OfType<ITypeParameterSymbol>().Any() ||
+                                          SymbolEqualityComparer.Default.Equals(namedTypeSymbol, namedTypeSymbol.OriginalDefinition));
 
-        if (hasUnresolvedTypeParameters && !property.IsStatic)
+        if (hasUnresolvedTypeParameters)
         {
-            // Use dynamic to avoid invalid cast to open generic type
-            return $"o => ((dynamic)o).{property.Name}";
+            if (property.IsStatic)
+            {
+                // Can't access static members on an unbound generic type like WebApplicationTest<,>
+                // Use reflection to get the value at runtime
+                return $"_ => typeof({namedTypeSymbol.GloballyQualified()}).GetProperty(\"{property.Name}\")?.GetValue(null)";
+            }
+            else
+            {
+                // Use dynamic to avoid invalid cast to open generic type
+                return $"o => ((dynamic)o).{property.Name}";
+            }
         }
 
         var safeTypeName = namedTypeSymbol.GloballyQualified();

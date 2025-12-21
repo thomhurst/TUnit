@@ -15,7 +15,6 @@ namespace TUnit.Example.Asp.Net.TestProject;
 /// - <see cref="ConfigureTestConfiguration"/> is auto-additive (no need to call base)
 /// - <see cref="GetIsolatedPrefix"/> provides consistent isolation naming
 /// </remarks>
-[SuppressMessage("Usage", "TUnit0043:Property must use `required` keyword")]
 public abstract class RedisTestBase : TestsBase
 {
     [ClassDataSource<InMemoryRedis>(Shared = SharedType.PerTestSession)]

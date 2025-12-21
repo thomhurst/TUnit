@@ -77,15 +77,16 @@ public abstract class WebApplicationTest<TFactory, TEntryPoint> : WebApplication
     where TFactory : TestWebApplicationFactory<TEntryPoint>, new()
     where TEntryPoint : class
 {
-    private static readonly TFactory _globalFactory = new();
+    [ClassDataSource(Shared = [SharedType.PerTestSession])]
+    public TFactory GlobalFactory { get; set; } = null!;
+
     private WebApplicationFactory<TEntryPoint>? _factory;
 
     /// <summary>
     /// Gets the per-test delegating factory. This factory is isolated to the current test.
     /// </summary>
     /// <exception cref="InvalidOperationException">Thrown if accessed before test setup.</exception>
-    public WebApplicationFactory<TEntryPoint> Factory => _factory
-        ?? throw new InvalidOperationException(
+    public WebApplicationFactory<TEntryPoint> Factory => _factory ?? throw new InvalidOperationException(
             "Factory is not initialized. Ensure the test has started and the BeforeTest hook has run. " +
             "Do not access Factory during test discovery or in data source methods.");
 
@@ -110,7 +111,7 @@ public abstract class WebApplicationTest<TFactory, TEntryPoint> : WebApplication
         await SetupAsync();
 
         // Then create factory with sync configuration (required by ASP.NET Core hosting)
-        _factory = _globalFactory.GetIsolatedFactory(
+        _factory = GlobalFactory.GetIsolatedFactory(
             testContext,
             Options,
             ConfigureTestServices,
@@ -241,5 +242,5 @@ public abstract class WebApplicationTest<TFactory, TEntryPoint> : WebApplication
     /// }
     /// </code>
     /// </example>
-    public HttpExchangeCapture? HttpCapture => Services.GetService<HttpExchangeCapture>();
+    public HttpExchangeCapture? HttpCapture => field ??= new();
 }
