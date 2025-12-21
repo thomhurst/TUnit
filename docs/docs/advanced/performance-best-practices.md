@@ -20,7 +20,7 @@ TUnit's AOT (Ahead-of-Time) compilation mode provides the best performance for t
 ```
 
 :::performance Native AOT Performance
-TUnit with Native AOT compilation delivers exceptional speed improvements - benchmarks show **11.65x faster** execution compared to regular JIT. See the [AOT benchmarks](/docs/benchmarks) for detailed measurements.
+TUnit with Native AOT compilation delivers significant speed improvements compared to regular JIT. See the [benchmarks](/docs/benchmarks) for detailed measurements.
 :::
 
 Benefits:

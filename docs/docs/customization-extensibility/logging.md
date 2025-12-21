@@ -29,3 +29,78 @@ dotnet run --log-level Warning
 ```
 
 The above will show only logs that are `Warning` or higher (e.g. `Error`, `Critical`) while executing the test.
+
+## Custom Loggers
+
+The `DefaultLogger` class is designed to be extensible. You can inherit from it to customize message formatting and output behavior.
+
+### Available Extension Points
+
+- `Context` - Protected property to access the associated context
+- `GenerateMessage(string message, Exception? exception, LogLevel logLevel)` - Override to customize message formatting
+- `WriteToOutput(string message, bool isError)` - Override to customize how messages are written
+- `WriteToOutputAsync(string message, bool isError)` - Async version of WriteToOutput
+
+### Example: Adding Test Headers
+
+Here's an example of a custom logger that prepends a test identifier header before the first log message:
+
+```csharp
+public class TestHeaderLogger : DefaultLogger
+{
+    private bool _hasOutputHeader;
+
+    public TestHeaderLogger(Context context) : base(context) { }
+
+    protected override string GenerateMessage(string message, Exception? exception, LogLevel logLevel)
+    {
+        var baseMessage = base.GenerateMessage(message, exception, logLevel);
+
+        if (!_hasOutputHeader && Context is TestContext testContext)
+        {
+            _hasOutputHeader = true;
+            var testId = $"{testContext.TestDetails.ClassType.Name}.{testContext.TestDetails.TestName}";
+            return $"--- {testId} ---\n{baseMessage}";
+        }
+
+        return baseMessage;
+    }
+}
+```
+
+### Using Custom Loggers
+
+Create an instance of your custom logger and use it directly:
+
+```csharp
+[Test]
+public async Task MyTest()
+{
+    var logger = new TestHeaderLogger(TestContext.Current!);
+    logger.LogInformation("This message will have a test header");
+    logger.LogInformation("Subsequent messages won't repeat the header");
+}
+```
+
+### Example: Custom Output Destinations
+
+You can override the write methods to send output to additional destinations:
+
+```csharp
+public class MultiDestinationLogger : DefaultLogger
+{
+    private readonly TextWriter _additionalOutput;
+
+    public MultiDestinationLogger(Context context, TextWriter additionalOutput)
+        : base(context)
+    {
+        _additionalOutput = additionalOutput;
+    }
+
+    protected override void WriteToOutput(string message, bool isError)
+    {
+        base.WriteToOutput(message, isError);
+        _additionalOutput.WriteLine(message);
+    }
+}
+```
