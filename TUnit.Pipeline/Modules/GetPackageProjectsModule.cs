@@ -18,7 +18,8 @@ public class GetPackageProjectsModule : Module<List<File>>
             Sourcy.DotNet.Projects.TUnit_Engine,
             Sourcy.DotNet.Projects.TUnit,
             Sourcy.DotNet.Projects.TUnit_Playwright,
-            Sourcy.DotNet.Projects.TUnit_Templates
+            Sourcy.DotNet.Projects.TUnit_Templates,
+            Sourcy.DotNet.Projects.TUnit_AspNetCore
         ];
     }
 }
