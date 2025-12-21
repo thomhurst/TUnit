@@ -1126,7 +1126,7 @@ TUnit's AOT (Ahead-of-Time) compilation mode provides the best performance for t
 ```
 
 :::performance Native AOT Performance
-TUnit with Native AOT compilation delivers exceptional speed improvements - benchmarks show **11.65x faster** execution compared to regular JIT. See the [AOT benchmarks](/docs/benchmarks) for detailed measurements.
+TUnit with Native AOT compilation delivers significant speed improvements compared to regular JIT. See the [benchmarks](/docs/benchmarks) for detailed measurements.
 :::
 
 Benefits:
@@ -13553,6 +13553,81 @@ dotnet run --log-level Warning
 
 The above will show only logs that are `Warning` or higher (e.g. `Error`, `Critical`) while executing the test.
 
+## Custom Loggers
+
+The `DefaultLogger` class is designed to be extensible. You can inherit from it to customize message formatting and output behavior.
+
+### Available Extension Points
+
+- `Context` - Protected property to access the associated context
+- `GenerateMessage(string message, Exception? exception, LogLevel logLevel)` - Override to customize message formatting
+- `WriteToOutput(string message, bool isError)` - Override to customize how messages are written
+- `WriteToOutputAsync(string message, bool isError)` - Async version of WriteToOutput
+
+### Example: Adding Test Headers
+
+Here's an example of a custom logger that prepends a test identifier header before the first log message:
+
+```csharp
+public class TestHeaderLogger : DefaultLogger
+{
+    private bool _hasOutputHeader;
+
+    public TestHeaderLogger(Context context) : base(context) { }
+
+    protected override string GenerateMessage(string message, Exception? exception, LogLevel logLevel)
+    {
+        var baseMessage = base.GenerateMessage(message, exception, logLevel);
+
+        if (!_hasOutputHeader && Context is TestContext testContext)
+        {
+            _hasOutputHeader = true;
+            var testId = $"{testContext.TestDetails.ClassType.Name}.{testContext.TestDetails.TestName}";
+            return $"--- {testId} ---\n{baseMessage}";
+        }
+
+        return baseMessage;
+    }
+}
+```
+
+### Using Custom Loggers
+
+Create an instance of your custom logger and use it directly:
+
+```csharp
+[Test]
+public async Task MyTest()
+{
+    var logger = new TestHeaderLogger(TestContext.Current!);
+    logger.LogInformation("This message will have a test header");
+    logger.LogInformation("Subsequent messages won't repeat the header");
+}
+```
+
+### Example: Custom Output Destinations
+
+You can override the write methods to send output to additional destinations:
+
+```csharp
+public class MultiDestinationLogger : DefaultLogger
+{
+    private readonly TextWriter _additionalOutput;
+
+    public MultiDestinationLogger(Context context, TextWriter additionalOutput)
+        : base(context)
+    {
+        _additionalOutput = additionalOutput;
+    }
+
+    protected override void WriteToOutput(string message, bool isError)
+    {
+        base.WriteToOutput(message, isError);
+        _additionalOutput.WriteLine(message);
+    }
+}
+```
+
 ---
 
 ## ASP.NET Core Integration Testing
@@ -18573,7 +18648,7 @@ TUnit is designed for speed. Through source generation and compile-time optimiza
 
 
 :::from-mstest Performance Boost
-Migrating from MSTest to TUnit can significantly improve test execution speed. Benchmarks show TUnit is **1.3x faster** than MSTest on average. Check the [detailed benchmarks](/docs/benchmarks) to see performance comparisons.
+Migrating from MSTest to TUnit can improve test execution speed. Check the [benchmarks](/docs/benchmarks) to see how TUnit compares.
 :::
 
 ## Quick Reference
@@ -19743,7 +19818,7 @@ dotnet run --configuration Release --coverage --coverage-settings coverage.runse
 
 
 :::from-nunit Performance Boost
-Migrating from NUnit to TUnit can significantly improve test execution speed. Benchmarks show TUnit is **1.2x faster** than NUnit on average. Check the [detailed benchmarks](/docs/benchmarks) to see performance comparisons.
+Migrating from NUnit to TUnit can improve test execution speed. Check the [benchmarks](/docs/benchmarks) to see how TUnit compares.
 :::
 
 ## Quick Reference
@@ -21082,7 +21157,7 @@ Update your code incrementally, starting with new code and high-value refactorin
 
 
 :::from-xunit Performance Boost
-Migrating from xUnit to TUnit can significantly improve test execution speed. Benchmarks show TUnit is **1.3x faster** than xUnit v3 on average. Check the [detailed benchmarks](/docs/benchmarks) to see performance comparisons.
+Migrating from xUnit to TUnit can improve test execution speed. Check the [benchmarks](/docs/benchmarks) to see how TUnit compares.
 :::
 
 ## Quick Reference
