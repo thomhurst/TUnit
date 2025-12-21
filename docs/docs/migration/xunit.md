@@ -1,7 +1,7 @@
 # Migrating from xUnit.net
 
 :::from-xunit Performance Boost
-Migrating from xUnit to TUnit can significantly improve test execution speed. Benchmarks show TUnit is **1.3x faster** than xUnit v3 on average. Check the [detailed benchmarks](/docs/benchmarks) to see performance comparisons.
+Migrating from xUnit to TUnit can improve test execution speed. Check the [benchmarks](/docs/benchmarks) to see how TUnit compares.
 :::
 
 ## Quick Reference

@@ -2555,10 +2555,14 @@ namespace .Logging
     public class DefaultLogger : .
     {
         public DefaultLogger(.Context context) { }
+        protected .Context Context { get; }
+        protected virtual string GenerateMessage(string message, ? exception, . logLevel) { }
         public override void Log<TState>(. logLevel, TState state, ? exception, <TState, ?, string> formatter) { }
         public override . LogAsync<TState>(. logLevel, TState state, ? exception, <TState, ?, string> formatter) { }
         public void PushProperties(.<string, .<object>> dictionary) { }
         public void PushProperty(string name, object? value) { }
+        protected virtual void WriteToOutput(string message, bool isError) { }
+        protected virtual . WriteToOutputAsync(string message, bool isError) { }
     }
     public interface ILogger
     {

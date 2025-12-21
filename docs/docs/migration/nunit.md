@@ -1,7 +1,7 @@
 # Migrating from NUnit
 
 :::from-nunit Performance Boost
-Migrating from NUnit to TUnit can significantly improve test execution speed. Benchmarks show TUnit is **1.2x faster** than NUnit on average. Check the [detailed benchmarks](/docs/benchmarks) to see performance comparisons.
+Migrating from NUnit to TUnit can improve test execution speed. Check the [benchmarks](/docs/benchmarks) to see how TUnit compares.
 :::
 
 ## Quick Reference

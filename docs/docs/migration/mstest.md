@@ -1,7 +1,7 @@
 # Migrating from MSTest
 
 :::from-mstest Performance Boost
-Migrating from MSTest to TUnit can significantly improve test execution speed. Benchmarks show TUnit is **1.3x faster** than MSTest on average. Check the [detailed benchmarks](/docs/benchmarks) to see performance comparisons.
+Migrating from MSTest to TUnit can improve test execution speed. Check the [benchmarks](/docs/benchmarks) to see how TUnit compares.
 :::
 
 ## Quick Reference
