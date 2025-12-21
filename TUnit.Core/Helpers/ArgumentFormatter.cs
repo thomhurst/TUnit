@@ -90,27 +90,7 @@ public static class ArgumentFormatter
         if (o is string str)
         {
             // Replace dots with middle dot (·) to prevent VS Test Explorer from interpreting them as namespace separators
-            // Only do this if the string contains dots, to avoid unnecessary allocations
-            if (!str.Contains('.'))
-            {
-                return str;
-            }
-
-#if NET8_0_OR_GREATER
-            // Use Span<char> for better performance - avoid string.Replace allocation
-            Span<char> buffer = str.Length <= 256
-                ? stackalloc char[str.Length]
-                : new char[str.Length];
-
-            for (int i = 0; i < str.Length; i++)
-            {
-                buffer[i] = str[i] == '.' ? '·' : str[i];
-            }
-
-            return new string(buffer);
-#else
             return str.Replace(".", "·");
-#endif
         }
 
         if (toString == type.FullName || toString == type.AssemblyQualifiedName)
