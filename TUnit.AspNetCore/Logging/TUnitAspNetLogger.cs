@@ -7,13 +7,13 @@ namespace TUnit.AspNetCore.Logging;
 /// A logger that writes log messages to TUnit's test output.
 /// Messages are associated with the current test context for proper output capture.
 /// </summary>
-public sealed class TUnitLogger : ILogger
+public sealed class TUnitAspNetLogger : ILogger
 {
     private readonly string _categoryName;
     private readonly TestContext _context;
     private readonly LogLevel _minLogLevel;
 
-    internal TUnitLogger(string categoryName, TestContext context, LogLevel minLogLevel)
+    internal TUnitAspNetLogger(string categoryName, TestContext context, LogLevel minLogLevel)
     {
         _categoryName = categoryName;
         _context = context;
@@ -44,6 +44,11 @@ public sealed class TUnitLogger : ILogger
 
         var message = formatter(state, exception);
 
-        Console.WriteLine(@$"[{logLevel}] {message}");
+        if (exception is not null)
+        {
+            message = $"{message}{Environment.NewLine}{exception}";
+        }
+
+        Console.WriteLine($"[{logLevel}] {_categoryName}: {message}");
     }
 }

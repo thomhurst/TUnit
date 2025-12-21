@@ -129,21 +129,20 @@ public class ClassDataSourceConstructorAnalyzer : ConcurrentDiagnosticAnalyzer
             return true;
         }
 
-        // Check for an explicit parameterless constructor
-        foreach (var constructor in type.InstanceConstructors)
+        // If there are no explicit constructors, the compiler generates a public parameterless constructor
+        var hasAnyExplicitConstructor = type.InstanceConstructors
+            .Any(c => !c.IsImplicitlyDeclared);
+
+        if (!hasAnyExplicitConstructor)
         {
-            if (constructor.Parameters.Length == 0)
-            {
-                // Check if the constructor is accessible
-                if (constructor.DeclaredAccessibility == Accessibility.Public ||
-                    constructor.DeclaredAccessibility == Accessibility.Internal ||
-                    constructor.DeclaredAccessibility == Accessibility.ProtectedOrInternal)
-                {
-                    return true;
-                }
-            }
+            return true;
         }
 
-        return false;
+        // Check for an explicit accessible parameterless constructor
+        return type.InstanceConstructors
+            .Where(c => c.Parameters.Length == 0)
+            .Any(c => c.DeclaredAccessibility is Accessibility.Public
+                or Accessibility.Internal
+                or Accessibility.ProtectedOrInternal);
     }
 }

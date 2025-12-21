@@ -432,17 +432,12 @@ internal static class MetadataGenerationHelper
 
         if (hasUnresolvedTypeParameters)
         {
-            if (property.IsStatic)
-            {
+            return property.IsStatic
                 // Can't access static members on an unbound generic type like WebApplicationTest<,>
                 // Use reflection to get the value at runtime
-                return $"_ => typeof({namedTypeSymbol.GloballyQualified()}).GetProperty(\"{property.Name}\")?.GetValue(null)";
-            }
-            else
-            {
+                ? $"_ => typeof({namedTypeSymbol.GloballyQualified()}).GetProperty(\"{property.Name}\")?.GetValue(null)"
                 // Use dynamic to avoid invalid cast to open generic type
-                return $"o => ((dynamic)o).{property.Name}";
-            }
+                : $"o => ((dynamic)o).{property.Name}";
         }
 
         var safeTypeName = namedTypeSymbol.GloballyQualified();

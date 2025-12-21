@@ -5,12 +5,12 @@ using TUnit.Core;
 namespace TUnit.AspNetCore.Logging;
 
 /// <summary>
-/// A logger provider that creates <see cref="TUnitLogger"/> instances.
+/// A logger provider that creates <see cref="TUnitAspNetLogger"/> instances.
 /// Logs are written to the current test's output.
 /// </summary>
 public sealed class TUnitLoggerProvider : ILoggerProvider
 {
-    private readonly ConcurrentDictionary<string, TUnitLogger> _loggers = new();
+    private readonly ConcurrentDictionary<string, TUnitAspNetLogger> _loggers = new();
     private readonly TestContext _testContext;
     private readonly LogLevel _minLogLevel;
     private bool _disposed;
@@ -32,7 +32,7 @@ public sealed class TUnitLoggerProvider : ILoggerProvider
         ObjectDisposedException.ThrowIf(_disposed, this);
 
         return _loggers.GetOrAdd(categoryName,
-            name => new TUnitLogger(name, _testContext, _minLogLevel));
+            name => new TUnitAspNetLogger(name, _testContext, _minLogLevel));
     }
 
     public void Dispose()

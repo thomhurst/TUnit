@@ -18,8 +18,6 @@ public abstract class WebApplicationTest
     /// </summary>
     public int UniqueId { get; }
 
-
-
     internal WebApplicationTest()
     {
         UniqueId = Interlocked.Increment(ref _idCounter);
@@ -242,5 +240,6 @@ public abstract class WebApplicationTest<TFactory, TEntryPoint> : WebApplication
     /// }
     /// </code>
     /// </example>
-    public HttpExchangeCapture? HttpCapture => field ??= new();
+    public HttpExchangeCapture? HttpCapture =>
+        Options.EnableHttpExchangeCapture ? (field ??= new()) : null;
 }

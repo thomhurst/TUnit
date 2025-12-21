@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Diagnostics;
 using System.Net;
 using System.Text;
@@ -42,33 +43,38 @@ public sealed class HttpExchangeCaptureMiddleware
         }
         finally
         {
-            stopwatch.Stop();
-
-            // Capture response
-            string? responseBody = null;
+            // Ensure response body stream is restored even on exception
             if (_capture.CaptureResponseBody)
             {
-                responseBodyStream.Position = 0;
-                responseBody = await ReadBodyAsync(responseBodyStream, _capture.MaxBodySize);
-
-                // Copy back to original stream
-                responseBodyStream.Position = 0;
-                await responseBodyStream.CopyToAsync(originalBodyStream);
                 context.Response.Body = originalBodyStream;
             }
-
-            var capturedResponse = CaptureResponse(context.Response, responseBody);
-
-            var exchange = new CapturedHttpExchange
-            {
-                Timestamp = timestamp,
-                Duration = stopwatch.Elapsed,
-                Request = capturedRequest,
-                Response = capturedResponse
-            };
-
-            _capture.Add(exchange);
         }
+
+        stopwatch.Stop();
+
+        // Capture response
+        string? responseBody = null;
+        if (_capture.CaptureResponseBody)
+        {
+            responseBodyStream.Position = 0;
+            responseBody = await ReadBodyAsync(responseBodyStream, _capture.MaxBodySize);
+
+            // Copy back to original stream
+            responseBodyStream.Position = 0;
+            await responseBodyStream.CopyToAsync(originalBodyStream);
+        }
+
+        var capturedResponse = CaptureResponse(context.Response, responseBody);
+
+        var exchange = new CapturedHttpExchange
+        {
+            Timestamp = timestamp,
+            Duration = stopwatch.Elapsed,
+            Request = capturedRequest,
+            Response = capturedResponse
+        };
+
+        _capture.Add(exchange);
     }
 
     private async Task<CapturedRequest> CaptureRequestAsync(HttpRequest request)
@@ -120,24 +126,31 @@ public sealed class HttpExchangeCaptureMiddleware
 
     private static async Task<string> ReadBodyAsync(Stream stream, int maxSize)
     {
-        // Use ArrayPool for better performance with large bodies
-        var buffer = new byte[Math.Min(maxSize, 81920)]; // 80KB chunks
-        var builder = new StringBuilder();
-        int totalRead = 0;
-
-        int bytesRead;
-        while ((bytesRead = await stream.ReadAsync(buffer.AsMemory(0, Math.Min(buffer.Length, maxSize - totalRead)))) > 0)
+        var bufferSize = Math.Min(maxSize, 81920); // 80KB chunks
+        var buffer = ArrayPool<byte>.Shared.Rent(bufferSize);
+        try
         {
-            builder.Append(Encoding.UTF8.GetString(buffer, 0, bytesRead));
-            totalRead += bytesRead;
+            var builder = new StringBuilder();
+            int totalRead = 0;
 
-            if (totalRead >= maxSize)
+            int bytesRead;
+            while ((bytesRead = await stream.ReadAsync(buffer.AsMemory(0, Math.Min(bufferSize, maxSize - totalRead)))) > 0)
             {
-                builder.Append("... [truncated]");
-                break;
-            }
-        }
+                builder.Append(Encoding.UTF8.GetString(buffer, 0, bytesRead));
+                totalRead += bytesRead;
 
-        return builder.ToString();
+                if (totalRead >= maxSize)
+                {
+                    builder.Append("... [truncated]");
+                    break;
+                }
+            }
+
+            return builder.ToString();
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(buffer);
+        }
     }
 }
