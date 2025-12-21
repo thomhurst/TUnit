@@ -7,7 +7,7 @@ namespace TUnit.Core;
 /// This implements IAccessesInstanceData which tells the engine to create a properly-initialized
 /// instance before evaluating the data source.
 /// </summary>
-[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true)]
 public class InstanceMethodDataSourceAttribute : MethodDataSourceAttribute, IAccessesInstanceData
 {
     public InstanceMethodDataSourceAttribute(string methodNameProvidingDataSource)

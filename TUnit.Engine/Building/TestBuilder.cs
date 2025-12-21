@@ -170,6 +170,10 @@ internal sealed class TestBuilder : ITestBuilder
                 InitializedAttributes = attributes  // Store the initialized attributes
             };
 
+            // Set the static AsyncLocal immediately so it's available for property data sources
+            // This must be set BEFORE any operations that might invoke data source methods
+            TestBuilderContext.Current = testBuilderContext;
+
             // Check for ClassConstructor attribute and set it early if present (reuse already created attributes)
             var classConstructorAttribute = attributes.OfType<ClassConstructorAttribute>().FirstOrDefault();
             if (classConstructorAttribute != null)
@@ -391,7 +395,7 @@ internal sealed class TestBuilder : ITestBuilder
                                 var basicSkipReason = GetBasicSkipReason(metadata, attributes);
 
                                 Func<Task<object>> instanceFactory;
-                                bool isReusingDiscoveryInstance = false;
+                                var isReusingDiscoveryInstance = false;
 
                                 if (basicSkipReason is { Length: > 0 })
                                 {
@@ -1391,6 +1395,10 @@ internal sealed class TestBuilder : ITestBuilder
             StateBag = new ConcurrentDictionary<string, object?>(),
             InitializedAttributes = attributes  // Store the initialized attributes
         };
+
+        // Set the static AsyncLocal immediately so it's available for property data sources
+        // This must be set BEFORE any operations that might invoke data source methods
+        TestBuilderContext.Current = baseContext;
 
         // Check for ClassConstructor attribute and set it early if present
         // Look for any attribute that inherits from ClassConstructorAttribute

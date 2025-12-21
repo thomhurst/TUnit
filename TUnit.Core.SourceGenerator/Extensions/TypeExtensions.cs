@@ -237,10 +237,14 @@ public static class TypeExtensions
         if (typeSymbol is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol)
         {
             // Check if this is an unbound generic type or has type parameter arguments
+            // Use multiple detection methods for robustness across Roslyn versions
             var hasTypeParameters = namedTypeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter);
+            var hasTypeParameterSymbols = namedTypeSymbol.TypeArguments.OfType<ITypeParameterSymbol>().Any();
             var isUnboundGeneric = namedTypeSymbol.IsUnboundGenericType;
-            
-            if (hasTypeParameters || isUnboundGeneric)
+            // Also detect generic type definitions by checking if type equals its OriginalDefinition
+            var isGenericTypeDefinition = SymbolEqualityComparer.Default.Equals(namedTypeSymbol, namedTypeSymbol.OriginalDefinition);
+
+            if (hasTypeParameters || hasTypeParameterSymbols || isUnboundGeneric || isGenericTypeDefinition)
             {
                 // Special case for System.Nullable<> - Roslyn displays it as "T?" even for open generic
                 if (namedTypeSymbol.SpecialType == SpecialType.System_Nullable_T ||

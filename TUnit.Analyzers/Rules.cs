@@ -97,7 +97,7 @@ public static class Rules
         CreateDescriptor("TUnit0042", UsageCategory, DiagnosticSeverity.Warning);
 
     public static readonly DiagnosticDescriptor PropertyRequiredNotSet =
-        CreateDescriptor("TUnit0043", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor("TUnit0043", UsageCategory, DiagnosticSeverity.Info);
 
     public static readonly DiagnosticDescriptor MustHavePropertySetter =
         CreateDescriptor("TUnit0044", UsageCategory, DiagnosticSeverity.Error);
@@ -161,6 +161,9 @@ public static class Rules
 
     public static readonly DiagnosticDescriptor PotentialEmptyDataSource =
         CreateDescriptor("TUnit0060", UsageCategory, DiagnosticSeverity.Info);
+
+    public static readonly DiagnosticDescriptor NoAccessibleConstructor =
+        CreateDescriptor("TUnit0061", UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor GenericTypeNotAotCompatible =
         CreateDescriptor("TUnit0300", UsageCategory, DiagnosticSeverity.Warning);

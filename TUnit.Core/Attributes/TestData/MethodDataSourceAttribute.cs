@@ -89,6 +89,17 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         {
             targetType = dataGeneratorMetadata.TestClassInstance.GetType();
         }
+
+        // If the target type is abstract or interface, we can't create an instance of it.
+        // Fall back to the test class type which should be concrete.
+        if (targetType != null && (targetType.IsAbstract || targetType.IsInterface))
+        {
+            var testClassType = TestClassTypeHelper.GetTestClassType(dataGeneratorMetadata);
+            if (testClassType != null && !testClassType.IsAbstract && !testClassType.IsInterface)
+            {
+                targetType = testClassType;
+            }
+        }
         
         if (targetType == null)
         {
@@ -108,7 +119,13 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             object? instance = null;
             if (!methodInfo.IsStatic)
             {
-                instance = dataGeneratorMetadata.TestClassInstance ?? Activator.CreateInstance(targetType);
+                // Skip PlaceholderInstance as it's a sentinel value, not a real instance
+                var testClassInstance = dataGeneratorMetadata.TestClassInstance;
+                if (testClassInstance is PlaceholderInstance)
+                {
+                    testClassInstance = null;
+                }
+                instance = testClassInstance ?? Activator.CreateInstance(targetType);
             }
 
             methodResult = methodInfo.Invoke(instance, Arguments);
@@ -125,7 +142,13 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
                 object? instance = null;
                 if (propertyInfo.GetMethod?.IsStatic != true)
                 {
-                    instance = dataGeneratorMetadata.TestClassInstance ?? Activator.CreateInstance(targetType);
+                    // Skip PlaceholderInstance as it's a sentinel value, not a real instance
+                    var testClassInstance = dataGeneratorMetadata.TestClassInstance;
+                    if (testClassInstance is PlaceholderInstance)
+                    {
+                        testClassInstance = null;
+                    }
+                    instance = testClassInstance ?? Activator.CreateInstance(targetType);
                 }
 
                 methodResult = propertyInfo.GetValue(instance);
@@ -136,7 +159,13 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
                 object? instance = null;
                 if (!fieldInfo.IsStatic)
                 {
-                    instance = dataGeneratorMetadata.TestClassInstance ?? Activator.CreateInstance(targetType);
+                    // Skip PlaceholderInstance as it's a sentinel value, not a real instance
+                    var testClassInstance = dataGeneratorMetadata.TestClassInstance;
+                    if (testClassInstance is PlaceholderInstance)
+                    {
+                        testClassInstance = null;
+                    }
+                    instance = testClassInstance ?? Activator.CreateInstance(targetType);
                 }
 
                 methodResult = fieldInfo.GetValue(instance);

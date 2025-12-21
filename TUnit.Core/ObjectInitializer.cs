@@ -107,7 +107,7 @@ internal static class ObjectInitializer
         // called multiple times, but Lazy ensures only one initialization runs.
         var lazyTask = InitializationTasks.GetOrAdd(obj,
             _ => new Lazy<Task>(
-                () => asyncInitializer.InitializeAsync(),
+                asyncInitializer.InitializeAsync,
                 LazyThreadSafetyMode.ExecutionAndPublication));
 
         try

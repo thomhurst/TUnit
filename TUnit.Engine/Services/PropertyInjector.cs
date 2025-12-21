@@ -508,6 +508,7 @@ internal sealed class PropertyInjector
         }
 
         var dataGeneratorMetadata = CreateDataGeneratorMetadata(context, dataSource);
+
         var dataRows = dataSource.GetDataRowsAsync(dataGeneratorMetadata);
 
         await foreach (var factory in dataRows)

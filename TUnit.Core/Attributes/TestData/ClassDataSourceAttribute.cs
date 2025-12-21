@@ -4,30 +4,14 @@ using TUnit.Core.Helpers;
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Parameter, AllowMultiple = true)]
-public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)] T>
-    : DataSourceGeneratorAttribute<T>
-{
-    public SharedType Shared { get; set; } = SharedType.None;
-    public string Key { get; set; } = string.Empty;
-    public Type ClassType => typeof(T);
-
-    protected override IEnumerable<Func<T>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
-    {
-        var testClassType = TestClassTypeHelper.GetTestClassType(dataGeneratorMetadata);
-        yield return () => ClassDataSources.Get(dataGeneratorMetadata.TestSessionId)
-            .Get<T>(Shared, testClassType, Key, dataGeneratorMetadata);
-    }
-
-
-    public IEnumerable<SharedType> GetSharedTypes() => [Shared];
-
-    public IEnumerable<string> GetKeys() => string.IsNullOrEmpty(Key) ? [] : [Key];
-}
-
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Parameter, AllowMultiple = true)]
 public sealed class ClassDataSourceAttribute : UntypedDataSourceGeneratorAttribute
 {
-    private readonly Type[] _types;
+    private Type[] _types;
+
+    public ClassDataSourceAttribute()
+    {
+        _types = [];
+    }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "Non-params constructor calls params one with proper annotations.")]
     public ClassDataSourceAttribute(
@@ -99,6 +83,25 @@ public sealed class ClassDataSourceAttribute : UntypedDataSourceGeneratorAttribu
     {
         yield return () =>
         {
+            if (_types.Length == 0)
+            {
+                _types = dataGeneratorMetadata.MembersToGenerate.Select(x =>
+                {
+                    if (x is ParameterMetadata parameterMetadata)
+                    {
+                        return parameterMetadata.Type;
+                    }
+
+                    if (x is PropertyMetadata propertyMetadata)
+                    {
+                        return propertyMetadata.Type;
+                    }
+
+                    throw new ArgumentOutOfRangeException(nameof(dataGeneratorMetadata),
+                        "Member to generate must be either a parameter or a property.");
+                }).ToArray();
+            }
+
             var items = new object?[_types.Length];
 
             for (var i = 0; i < _types.Length; i++)
@@ -116,4 +119,25 @@ public sealed class ClassDataSourceAttribute : UntypedDataSourceGeneratorAttribu
 
     public IEnumerable<string> GetKeys() => Keys;
 
+}
+
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Parameter, AllowMultiple = true)]
+public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)] T>
+    : DataSourceGeneratorAttribute<T>
+{
+    public SharedType Shared { get; set; } = SharedType.None;
+    public string Key { get; set; } = string.Empty;
+    public Type ClassType => typeof(T);
+
+    protected override IEnumerable<Func<T>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        var testClassType = TestClassTypeHelper.GetTestClassType(dataGeneratorMetadata);
+        yield return () => ClassDataSources.Get(dataGeneratorMetadata.TestSessionId)
+            .Get<T>(Shared, testClassType, Key, dataGeneratorMetadata);
+    }
+
+
+    public IEnumerable<SharedType> GetSharedTypes() => [Shared];
+
+    public IEnumerable<string> GetKeys() => string.IsNullOrEmpty(Key) ? [] : [Key];
 }
