@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 using TUnit.Example.Asp.Net.Configuration;
@@ -7,12 +8,14 @@ namespace TUnit.Example.Asp.Net.Services;
 public class RedisCacheService : ICacheService, IAsyncDisposable
 {
     private readonly RedisOptions _options;
+    private readonly ILogger<RedisCacheService> _logger;
     private ConnectionMultiplexer? _connection;
     private IDatabase? _database;
 
-    public RedisCacheService(IOptions<RedisOptions> options)
+    public RedisCacheService(IOptions<RedisOptions> options, ILogger<RedisCacheService> logger)
     {
         _options = options.Value;
+        _logger = logger;
     }
 
     private async Task<IDatabase> GetDatabaseAsync()
@@ -32,27 +35,60 @@ public class RedisCacheService : ICacheService, IAsyncDisposable
 
     public async Task<string?> GetAsync(string key)
     {
+        var prefixedKey = GetPrefixedKey(key);
+        _logger.LogDebug("Getting cache key {Key}", prefixedKey);
+
         var db = await GetDatabaseAsync();
-        var value = await db.StringGetAsync(GetPrefixedKey(key));
-        return value.HasValue ? value.ToString() : null;
+        var value = await db.StringGetAsync(prefixedKey);
+
+        if (value.HasValue)
+        {
+            _logger.LogInformation("Cache hit for key {Key}", prefixedKey);
+            return value.ToString();
+        }
+
+        _logger.LogDebug("Cache miss for key {Key}", prefixedKey);
+        return null;
     }
 
     public async Task SetAsync(string key, string value, TimeSpan? expiry = null)
     {
+        var prefixedKey = GetPrefixedKey(key);
+        _logger.LogDebug("Setting cache key {Key}", prefixedKey);
+
         var db = await GetDatabaseAsync();
-        await db.StringSetAsync(GetPrefixedKey(key), value, expiry);
+        await db.StringSetAsync(prefixedKey, value, expiry);
+
+        _logger.LogInformation("Cached value for key {Key}, expiry={Expiry}", prefixedKey, expiry?.ToString() ?? "none");
     }
 
     public async Task<bool> DeleteAsync(string key)
     {
+        var prefixedKey = GetPrefixedKey(key);
+        _logger.LogDebug("Deleting cache key {Key}", prefixedKey);
+
         var db = await GetDatabaseAsync();
-        return await db.KeyDeleteAsync(GetPrefixedKey(key));
+        var deleted = await db.KeyDeleteAsync(prefixedKey);
+
+        if (deleted)
+        {
+            _logger.LogInformation("Deleted cache key {Key}", prefixedKey);
+        }
+        else
+        {
+            _logger.LogDebug("Cache key {Key} not found for deletion", prefixedKey);
+        }
+
+        return deleted;
     }
 
     public async Task<bool> ExistsAsync(string key)
     {
+        var prefixedKey = GetPrefixedKey(key);
         var db = await GetDatabaseAsync();
-        return await db.KeyExistsAsync(GetPrefixedKey(key));
+        var exists = await db.KeyExistsAsync(prefixedKey);
+        _logger.LogDebug("Cache key {Key} exists: {Exists}", prefixedKey, exists);
+        return exists;
     }
 
     public async ValueTask DisposeAsync()

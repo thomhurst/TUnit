@@ -14,6 +14,8 @@ builder.Services.AddScoped<ICacheService, RedisCacheService>();
 
 var app = builder.Build();
 
+var logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Endpoints");
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -21,7 +23,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapGet("/ping", () => "Hello, World!");
+app.MapGet("/ping", () =>
+{
+    logger.LogInformation("Ping endpoint called");
+    return "Hello, World!";
+});
 
 // Todo CRUD endpoints
 app.MapGet("/todos", async (ITodoRepository repo) =>

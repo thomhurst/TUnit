@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Npgsql;
 using TUnit.Example.Asp.Net.Configuration;
@@ -9,15 +10,19 @@ public class TodoRepository : ITodoRepository
 {
     private readonly string _connectionString;
     private readonly string _tableName;
+    private readonly ILogger<TodoRepository> _logger;
 
-    public TodoRepository(IOptions<DatabaseOptions> options)
+    public TodoRepository(IOptions<DatabaseOptions> options, ILogger<TodoRepository> logger)
     {
         _connectionString = options.Value.ConnectionString;
         _tableName = options.Value.TableName;
+        _logger = logger;
     }
 
     public async Task<IEnumerable<Todo>> GetAllAsync()
     {
+        _logger.LogDebug("Fetching all todos from table {TableName}", _tableName);
+
         var todos = new List<Todo>();
 
         await using var connection = new NpgsqlConnection(_connectionString);
@@ -38,11 +43,14 @@ public class TodoRepository : ITodoRepository
             });
         }
 
+        _logger.LogInformation("Retrieved {Count} todos from table {TableName}", todos.Count, _tableName);
         return todos;
     }
 
     public async Task<Todo?> GetByIdAsync(int id)
     {
+        _logger.LogDebug("Fetching todo {TodoId} from table {TableName}", id, _tableName);
+
         await using var connection = new NpgsqlConnection(_connectionString);
         await connection.OpenAsync();
 
@@ -53,20 +61,25 @@ public class TodoRepository : ITodoRepository
         await using var reader = await cmd.ExecuteReaderAsync();
         if (await reader.ReadAsync())
         {
-            return new Todo
+            var todo = new Todo
             {
                 Id = reader.GetInt32(0),
                 Title = reader.GetString(1),
                 IsComplete = reader.GetBoolean(2),
                 CreatedAt = reader.GetDateTime(3)
             };
+            _logger.LogInformation("Found todo {TodoId}: {Title}", todo.Id, todo.Title);
+            return todo;
         }
 
+        _logger.LogWarning("Todo {TodoId} not found in table {TableName}", id, _tableName);
         return null;
     }
 
     public async Task<Todo> CreateAsync(Todo todo)
     {
+        _logger.LogDebug("Creating todo with title {Title} in table {TableName}", todo.Title, _tableName);
+
         await using var connection = new NpgsqlConnection(_connectionString);
         await connection.OpenAsync();
 
@@ -83,17 +96,22 @@ public class TodoRepository : ITodoRepository
         await using var reader = await cmd.ExecuteReaderAsync();
         await reader.ReadAsync();
 
-        return new Todo
+        var created = new Todo
         {
             Id = reader.GetInt32(0),
             Title = reader.GetString(1),
             IsComplete = reader.GetBoolean(2),
             CreatedAt = reader.GetDateTime(3)
         };
+
+        _logger.LogInformation("Created todo {TodoId}: {Title}", created.Id, created.Title);
+        return created;
     }
 
     public async Task<Todo?> UpdateAsync(int id, Todo todo)
     {
+        _logger.LogDebug("Updating todo {TodoId} in table {TableName}", id, _tableName);
+
         await using var connection = new NpgsqlConnection(_connectionString);
         await connection.OpenAsync();
 
@@ -111,20 +129,25 @@ public class TodoRepository : ITodoRepository
         await using var reader = await cmd.ExecuteReaderAsync();
         if (await reader.ReadAsync())
         {
-            return new Todo
+            var updated = new Todo
             {
                 Id = reader.GetInt32(0),
                 Title = reader.GetString(1),
                 IsComplete = reader.GetBoolean(2),
                 CreatedAt = reader.GetDateTime(3)
             };
+            _logger.LogInformation("Updated todo {TodoId}: {Title}, IsComplete={IsComplete}", updated.Id, updated.Title, updated.IsComplete);
+            return updated;
         }
 
+        _logger.LogWarning("Failed to update todo {TodoId} - not found in table {TableName}", id, _tableName);
         return null;
     }
 
     public async Task<bool> DeleteAsync(int id)
     {
+        _logger.LogDebug("Deleting todo {TodoId} from table {TableName}", id, _tableName);
+
         await using var connection = new NpgsqlConnection(_connectionString);
         await connection.OpenAsync();
 
@@ -133,6 +156,14 @@ public class TodoRepository : ITodoRepository
         cmd.Parameters.AddWithValue("id", id);
 
         var rowsAffected = await cmd.ExecuteNonQueryAsync();
-        return rowsAffected > 0;
+
+        if (rowsAffected > 0)
+        {
+            _logger.LogInformation("Deleted todo {TodoId} from table {TableName}", id, _tableName);
+            return true;
+        }
+
+        _logger.LogWarning("Failed to delete todo {TodoId} - not found in table {TableName}", id, _tableName);
+        return false;
     }
 }

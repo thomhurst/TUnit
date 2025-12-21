@@ -30,11 +30,6 @@ public abstract class TestWebApplicationFactory<TEntryPoint> : WebApplicationFac
             builder.ConfigureTestServices(configureServices)
                 .ConfigureAppConfiguration(configureConfiguration);
 
-            if (options.AddTUnitLogging)
-            {
-                builder.ConfigureTestServices(services => services.AddTUnitLogging(testContext));
-            }
-
             if (options.EnableHttpExchangeCapture)
             {
                 builder.ConfigureTestServices(services => services.AddHttpExchangeCapture());

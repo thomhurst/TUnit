@@ -80,6 +80,8 @@ public abstract class WebApplicationTest<TFactory, TEntryPoint> : WebApplication
 
     private WebApplicationFactory<TEntryPoint>? _factory;
 
+    private readonly WebApplicationTestOptions _options = new();
+
     /// <summary>
     /// Gets the per-test delegating factory. This factory is isolated to the current test.
     /// </summary>
@@ -94,8 +96,6 @@ public abstract class WebApplicationTest<TFactory, TEntryPoint> : WebApplication
     /// </summary>
     public IServiceProvider Services => Factory.Services;
 
-    protected virtual WebApplicationTestOptions Options { get; } = new();
-
     /// <summary>
     /// Initializes the isolated web application factory before each test.
     /// This hook runs after all property injection is complete, ensuring
@@ -105,13 +105,15 @@ public abstract class WebApplicationTest<TFactory, TEntryPoint> : WebApplication
     [EditorBrowsable(EditorBrowsableState.Never)]
     public async Task InitializeFactoryAsync(TestContext testContext)
     {
+        ConfigureTestOptions(_options);
+
         // Run async setup first - use this for database/container initialization
         await SetupAsync();
 
         // Then create factory with sync configuration (required by ASP.NET Core hosting)
         _factory = GlobalFactory.GetIsolatedFactory(
             testContext,
-            Options,
+            _options,
             ConfigureTestServices,
             (_, config) => ConfigureTestConfiguration(config),
             ConfigureWebHostBuilder);
@@ -160,6 +162,10 @@ public abstract class WebApplicationTest<TFactory, TEntryPoint> : WebApplication
     protected virtual Task SetupAsync()
     {
         return Task.CompletedTask;
+    }
+
+    protected virtual void ConfigureTestOptions(WebApplicationTestOptions options)
+    {
     }
 
     /// <summary>
@@ -241,5 +247,5 @@ public abstract class WebApplicationTest<TFactory, TEntryPoint> : WebApplication
     /// </code>
     /// </example>
     public HttpExchangeCapture? HttpCapture =>
-        Options.EnableHttpExchangeCapture ? (field ??= new()) : null;
+        _options.EnableHttpExchangeCapture ? (field ??= new()) : null;
 }

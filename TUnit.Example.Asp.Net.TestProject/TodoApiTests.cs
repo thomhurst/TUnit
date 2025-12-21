@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using TUnit.AspNetCore;
 using TUnit.Example.Asp.Net.Models;
 
 namespace TUnit.Example.Asp.Net.TestProject;
