@@ -1,17 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <Import Project="..\TestProject.props" />
-    
+
     <PropertyGroup>
         <TargetFrameworks>net10.0</TargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\TUnit.AspNetCore\TUnit.AspNetCore.csproj" />
+        <ProjectReference Include="..\TUnit.AspNetCore.Analyzers\TUnit.AspNetCore.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+
         <ProjectReference Include="..\TUnit.Example.Asp.Net\TUnit.Example.Asp.Net.csproj" />
         <ProjectReference Include="..\TUnit\TUnit.csproj" />
     </ItemGroup>
-    
+
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing"/>
         <PackageReference Include="Npgsql" />
@@ -19,7 +21,7 @@
         <PackageReference Include="Testcontainers.PostgreSql" />
         <PackageReference Include="Testcontainers.Redis" />
     </ItemGroup>
-    
+
     <ItemGroup>
       <Compile Remove="Tests2.cs" />
     </ItemGroup>

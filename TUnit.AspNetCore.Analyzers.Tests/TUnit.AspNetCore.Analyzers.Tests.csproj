@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\TestProject.props" />
+
+  <PropertyGroup>
+    <!-- ASP.NET Core only supports .NET 8.0+ -->
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" VersionOverride="4.8.0" />
+    <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TUnit.AspNetCore.Analyzers\TUnit.AspNetCore.Analyzers.csproj" />
+    <ProjectReference Include="..\TUnit.Engine\TUnit.Engine.csproj" />
+    <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />
+  </ItemGroup>
+
+  <Import Project="..\TestProject.targets" />
+</Project>

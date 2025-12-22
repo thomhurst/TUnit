@@ -27,8 +27,25 @@
   <ItemGroup>
     <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers.csproj" OutputItemType="Analyzer"
       ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\TUnit.AspNetCore.Analyzers\TUnit.AspNetCore.Analyzers.csproj" OutputItemType="Analyzer"
+      ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.csproj"
       OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <!-- Pack AspNetCore Analyzers for different Roslyn versions -->
+  <ItemGroup>
+    <None
+      Include="$(MSBuildProjectDirectory)\..\TUnit.AspNetCore.Analyzers.Roslyn44\bin\$(Configuration)\netstandard2.0\TUnit.AspNetCore.Analyzers.dll"
+      Pack="true" PackagePath="analyzers/dotnet/roslyn4.4/cs" Visible="false" />
+
+    <None
+      Include="$(MSBuildProjectDirectory)\..\TUnit.AspNetCore.Analyzers.Roslyn47\bin\$(Configuration)\netstandard2.0\TUnit.AspNetCore.Analyzers.dll"
+      Pack="true" PackagePath="analyzers/dotnet/roslyn4.7/cs" Visible="false" />
+
+    <None
+      Include="$(MSBuildProjectDirectory)\..\TUnit.AspNetCore.Analyzers.Roslyn414\bin\$(Configuration)\netstandard2.0\TUnit.AspNetCore.Analyzers.dll"
+      Pack="true" PackagePath="analyzers/dotnet/roslyn4.14/cs" Visible="false" />
   </ItemGroup>
 
   <Import Project="..\Library.targets" />

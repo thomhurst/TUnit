@@ -1,0 +1,12 @@
+<Project>
+
+    <Import Project="$(MSBuildThisFileDirectory)Roslyn.props" />
+
+    <ItemGroup>
+        <Compile Include="..\TUnit.AspNetCore.Analyzers\**\*.cs" Exclude="..\TUnit.AspNetCore.Analyzers\obj\**\*.cs" />
+        <EmbeddedResource Include="..\TUnit.AspNetCore.Analyzers\**\*.resx" />
+        <AdditionalFiles Include="..\TUnit.AspNetCore.Analyzers\AnalyzerReleases.Shipped.md" />
+        <AdditionalFiles Include="..\TUnit.AspNetCore.Analyzers\AnalyzerReleases.Unshipped.md" />
+    </ItemGroup>
+
+</Project>

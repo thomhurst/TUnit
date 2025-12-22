@@ -27,8 +27,13 @@ public abstract class TestWebApplicationFactory<TEntryPoint> : WebApplicationFac
             configureWebHostBuilder?.Invoke(builder);
 
             // Then apply standard configuration
-            builder.ConfigureTestServices(configureServices)
-                .ConfigureAppConfiguration(configureConfiguration);
+            builder
+                .ConfigureAppConfiguration(configureConfiguration)
+                .ConfigureTestServices(services =>
+                {
+                    configureServices(services);
+                    services.AddSingleton(testContext);
+                });
 
             if (options.EnableHttpExchangeCapture)
             {
