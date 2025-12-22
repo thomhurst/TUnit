@@ -106,7 +106,9 @@ public class TodoApiTests : TodoTestBase
     [Test]
     public async Task CreateMultipleTodos_GetAllReturnsThem()
     {
-        var client = Factory.CreateClient();
+        var client = GlobalFactory.CreateDefaultClient();
+
+        var services = Factory.Services;
 
         // Create multiple todos
         await client.PostAsJsonAsync("/todos", new { Title = "Todo 1" });

@@ -34,6 +34,7 @@ public class WebApplicationFactoryAccessAnalyzerTests
                 public System.IServiceProvider Services { get; } = null!;
                 public object Server { get; } = null!;
                 public object CreateClient() => new object();
+                public object CreateDefaultClient() => new object();
             }
         }
 
@@ -413,6 +414,35 @@ public class WebApplicationFactoryAccessAnalyzerTests
     }
 
     [Test]
+    public async Task Error_When_Calling_GlobalFactory_CreateDefaultClient()
+    {
+        // GlobalFactory.CreateDefaultClient() should never be called - use Factory.CreateDefaultClient() instead
+        await Verifier
+            .VerifyAnalyzerAsync(
+                $$"""
+                using TUnit.Core;
+                {{WebApplicationFactoryStub}}
+                {{WebApplicationTestStub}}
+
+                public class MyFactory : TUnit.AspNetCore.TestWebApplicationFactory<Program> { }
+                public class Program { }
+
+                public class MyTests : TUnit.AspNetCore.WebApplicationTest<MyFactory, Program>
+                {
+                    [Test]
+                    public void MyTest()
+                    {
+                        var client = {|#0:GlobalFactory.CreateDefaultClient()|};
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.GlobalFactoryMemberAccess)
+                    .WithLocation(0)
+                    .WithArguments("CreateDefaultClient")
+            );
+    }
+
+    [Test]
     public async Task No_Error_When_Accessing_Factory_Services_In_Test()
     {
         // Factory.Services is the correct way to access services
@@ -435,6 +465,83 @@ public class WebApplicationFactoryAccessAnalyzerTests
                     }
                 }
                 """
+            );
+    }
+
+    [Test]
+    public async Task Error_When_Accessing_Factory_In_Constructor_With_Deep_Inheritance()
+    {
+        // Analyzer should detect WebApplicationTest even through multiple levels of inheritance
+        await Verifier
+            .VerifyAnalyzerAsync(
+                $$"""
+                using TUnit.Core;
+                {{WebApplicationTestStub}}
+
+                public class MyFactory { }
+                public class Program { }
+
+                public abstract class BaseTestClass : TUnit.AspNetCore.WebApplicationTest<MyFactory, Program>
+                {
+                }
+
+                public abstract class MiddleTestClass : BaseTestClass
+                {
+                }
+
+                public class MyTests : MiddleTestClass
+                {
+                    public MyTests()
+                    {
+                        var factory = {|#0:Factory|};
+                    }
+
+                    [Test]
+                    public void MyTest()
+                    {
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.FactoryAccessedTooEarly)
+                    .WithLocation(0)
+                    .WithArguments("Factory", "constructor")
+            );
+    }
+
+    [Test]
+    public async Task Error_When_Accessing_GlobalFactory_Services_With_Deep_Inheritance()
+    {
+        // Analyzer should detect GlobalFactory.Services access even through multiple levels of inheritance
+        await Verifier
+            .VerifyAnalyzerAsync(
+                $$"""
+                using TUnit.Core;
+                {{WebApplicationFactoryStub}}
+                {{WebApplicationTestStub}}
+
+                public class MyFactory : TUnit.AspNetCore.TestWebApplicationFactory<Program> { }
+                public class Program { }
+
+                public abstract class BaseTestClass : TUnit.AspNetCore.WebApplicationTest<MyFactory, Program>
+                {
+                }
+
+                public abstract class MiddleTestClass : BaseTestClass
+                {
+                }
+
+                public class MyTests : MiddleTestClass
+                {
+                    [Test]
+                    public void MyTest()
+                    {
+                        var services = {|#0:GlobalFactory.Services|};
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.GlobalFactoryMemberAccess)
+                    .WithLocation(0)
+                    .WithArguments("Services")
             );
     }
 }

@@ -27,12 +27,13 @@ public abstract class TestWebApplicationFactory<TEntryPoint> : WebApplicationFac
             configureWebHostBuilder?.Invoke(builder);
 
             // Then apply standard configuration
-            builder.ConfigureTestServices(services =>
+            builder
+                .ConfigureAppConfiguration(configureConfiguration)
+                .ConfigureTestServices(services =>
                 {
                     configureServices(services);
                     services.AddSingleton(testContext);
-                })
-                .ConfigureAppConfiguration(configureConfiguration);
+                });
 
             if (options.EnableHttpExchangeCapture)
             {
@@ -40,7 +41,4 @@ public abstract class TestWebApplicationFactory<TEntryPoint> : WebApplicationFac
             }
         });
     }
-
-    public override IServiceProvider Services => throw new NotSupportedException("Create a new isolated server to access services");
-    public new TestServer Server => throw new NotSupportedException("Create a new isolated server to access services");
 }

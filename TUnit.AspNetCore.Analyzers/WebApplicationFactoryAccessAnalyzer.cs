@@ -25,7 +25,8 @@ public class WebApplicationFactoryAccessAnalyzer : ConcurrentDiagnosticAnalyzer
     private static readonly ImmutableHashSet<string> RestrictedGlobalFactoryMembers = ImmutableHashSet.Create(
         "Services",
         "Server",
-        "CreateClient"
+        "CreateClient",
+        "CreateDefaultClient"
     );
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
