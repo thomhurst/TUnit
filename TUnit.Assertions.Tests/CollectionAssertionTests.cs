@@ -270,4 +270,40 @@ public class CollectionAssertionTests
             .And.Contains("Bob")
             .And.DoesNotContain("Dave");
     }
+
+    [Test]
+    public async Task All_Predicate_Failure_Message_Contains_Index_And_Value()
+    {
+        var items = new[] { 2, 4, -5, 8 };
+
+        await Assert.That(async () =>
+            await Assert.That(items).All(x => x > 0)
+        ).Throws<AssertionException>()
+        .WithMessageContaining("index 2")
+        .And.WithMessageContaining("[-5]");
+    }
+
+    [Test]
+    public async Task All_Predicate_Failure_Message_Contains_String_Value()
+    {
+        var names = new[] { "Alice", "Bob", "" };
+
+        await Assert.That(async () =>
+            await Assert.That(names).All(x => !string.IsNullOrEmpty(x))
+        ).Throws<AssertionException>()
+        .WithMessageContaining("index 2")
+        .And.WithMessageContaining("[]");
+    }
+
+    [Test]
+    public async Task All_Predicate_Failure_Message_Contains_First_Failing_Item()
+    {
+        var items = new[] { 1, 2, 3, -1, -2, -3 };
+
+        await Assert.That(async () =>
+            await Assert.That(items).All(x => x > 0)
+        ).Throws<AssertionException>()
+        .WithMessageContaining("index 3")
+        .And.WithMessageContaining("[-1]");
+    }
 }

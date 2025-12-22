@@ -423,7 +423,7 @@ public class CollectionAllAssertion<TCollection, TItem> : Sources.CollectionAsse
         {
             if (!_predicate(item))
             {
-                return Task.FromResult(AssertionResult.Failed($"item at index {index} does not satisfy predicate"));
+                return Task.FromResult(AssertionResult.Failed($"item at index {index} with value [{item}] does not satisfy predicate"));
             }
 
             index++;
