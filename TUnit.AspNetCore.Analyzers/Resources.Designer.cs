@@ -81,5 +81,32 @@ namespace TUnit.AspNetCore.Analyzers {
                 return ResourceManager.GetString("TUnit0062Title", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Do not access Services, Server, or CreateClient on GlobalFactory directly...
+        /// </summary>
+        internal static string TUnit0063Description {
+            get {
+                return ResourceManager.GetString("TUnit0063Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Do not access '{0}' on GlobalFactory. Use 'Factory.{0}' instead to ensure test isolation.
+        /// </summary>
+        internal static string TUnit0063MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0063MessageFormat", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to GlobalFactory member access breaks test isolation.
+        /// </summary>
+        internal static string TUnit0063Title {
+            get {
+                return ResourceManager.GetString("TUnit0063Title", resourceCulture);
+            }
+        }
     }
 }

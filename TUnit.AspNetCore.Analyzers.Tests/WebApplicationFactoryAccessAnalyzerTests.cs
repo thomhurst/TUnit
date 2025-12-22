@@ -1,7 +1,6 @@
-using AspNetCoreRules = TUnit.AspNetCore.Analyzers.Rules;
-using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.AspNetCore.Analyzers.WebApplicationFactoryAccessAnalyzer>;
+using Verifier = TUnit.AspNetCore.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.AspNetCore.Analyzers.WebApplicationFactoryAccessAnalyzer>;
 
-namespace TUnit.Analyzers.Tests;
+namespace TUnit.AspNetCore.Analyzers.Tests;
 
 public class WebApplicationFactoryAccessAnalyzerTests
 {
@@ -23,6 +22,26 @@ public class WebApplicationFactoryAccessAnalyzerTests
                 public object? HttpCapture { get; }
 
                 protected virtual System.Threading.Tasks.Task SetupAsync() => System.Threading.Tasks.Task.CompletedTask;
+            }
+        }
+        """;
+
+    private const string WebApplicationFactoryStub = """
+        namespace Microsoft.AspNetCore.Mvc.Testing
+        {
+            public class WebApplicationFactory<TEntryPoint> where TEntryPoint : class
+            {
+                public System.IServiceProvider Services { get; } = null!;
+                public object Server { get; } = null!;
+                public object CreateClient() => new object();
+            }
+        }
+
+        namespace TUnit.AspNetCore
+        {
+            public class TestWebApplicationFactory<TEntryPoint> : Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory<TEntryPoint>
+                where TEntryPoint : class
+            {
             }
         }
         """;
@@ -77,7 +96,7 @@ public class WebApplicationFactoryAccessAnalyzerTests
                     }
                 }
                 """,
-                Verifier.Diagnostic(AspNetCoreRules.FactoryAccessedTooEarly)
+                Verifier.Diagnostic(Rules.FactoryAccessedTooEarly)
                     .WithLocation(0)
                     .WithArguments("Factory", "constructor")
             );
@@ -108,7 +127,7 @@ public class WebApplicationFactoryAccessAnalyzerTests
                     }
                 }
                 """,
-                Verifier.Diagnostic(AspNetCoreRules.FactoryAccessedTooEarly)
+                Verifier.Diagnostic(Rules.FactoryAccessedTooEarly)
                     .WithLocation(0)
                     .WithArguments("Services", "constructor")
             );
@@ -141,7 +160,7 @@ public class WebApplicationFactoryAccessAnalyzerTests
                     }
                 }
                 """,
-                Verifier.Diagnostic(AspNetCoreRules.FactoryAccessedTooEarly)
+                Verifier.Diagnostic(Rules.FactoryAccessedTooEarly)
                     .WithLocation(0)
                     .WithArguments("Factory", "SetupAsync")
             );
@@ -174,7 +193,7 @@ public class WebApplicationFactoryAccessAnalyzerTests
                     }
                 }
                 """,
-                Verifier.Diagnostic(AspNetCoreRules.FactoryAccessedTooEarly)
+                Verifier.Diagnostic(Rules.FactoryAccessedTooEarly)
                     .WithLocation(0)
                     .WithArguments("HttpCapture", "SetupAsync")
             );
@@ -206,7 +225,7 @@ public class WebApplicationFactoryAccessAnalyzerTests
                     }
                 }
                 """,
-                Verifier.Diagnostic(AspNetCoreRules.FactoryAccessedTooEarly)
+                Verifier.Diagnostic(Rules.FactoryAccessedTooEarly)
                     .WithLocation(0)
                     .WithArguments("GlobalFactory", "constructor")
             );
@@ -300,6 +319,119 @@ public class WebApplicationFactoryAccessAnalyzerTests
                     [Test]
                     public void MyTest()
                     {
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Error_When_Accessing_GlobalFactory_Services()
+    {
+        // GlobalFactory.Services should never be accessed - use Factory.Services instead
+        await Verifier
+            .VerifyAnalyzerAsync(
+                $$"""
+                using TUnit.Core;
+                {{WebApplicationFactoryStub}}
+                {{WebApplicationTestStub}}
+
+                public class MyFactory : TUnit.AspNetCore.TestWebApplicationFactory<Program> { }
+                public class Program { }
+
+                public class MyTests : TUnit.AspNetCore.WebApplicationTest<MyFactory, Program>
+                {
+                    [Test]
+                    public void MyTest()
+                    {
+                        var services = {|#0:GlobalFactory.Services|};
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.GlobalFactoryMemberAccess)
+                    .WithLocation(0)
+                    .WithArguments("Services")
+            );
+    }
+
+    [Test]
+    public async Task Error_When_Accessing_GlobalFactory_Server()
+    {
+        // GlobalFactory.Server should never be accessed - use Factory.Server instead
+        await Verifier
+            .VerifyAnalyzerAsync(
+                $$"""
+                using TUnit.Core;
+                {{WebApplicationFactoryStub}}
+                {{WebApplicationTestStub}}
+
+                public class MyFactory : TUnit.AspNetCore.TestWebApplicationFactory<Program> { }
+                public class Program { }
+
+                public class MyTests : TUnit.AspNetCore.WebApplicationTest<MyFactory, Program>
+                {
+                    [Test]
+                    public void MyTest()
+                    {
+                        var server = {|#0:GlobalFactory.Server|};
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.GlobalFactoryMemberAccess)
+                    .WithLocation(0)
+                    .WithArguments("Server")
+            );
+    }
+
+    [Test]
+    public async Task Error_When_Calling_GlobalFactory_CreateClient()
+    {
+        // GlobalFactory.CreateClient() should never be called - use Factory.CreateClient() instead
+        await Verifier
+            .VerifyAnalyzerAsync(
+                $$"""
+                using TUnit.Core;
+                {{WebApplicationFactoryStub}}
+                {{WebApplicationTestStub}}
+
+                public class MyFactory : TUnit.AspNetCore.TestWebApplicationFactory<Program> { }
+                public class Program { }
+
+                public class MyTests : TUnit.AspNetCore.WebApplicationTest<MyFactory, Program>
+                {
+                    [Test]
+                    public void MyTest()
+                    {
+                        var client = {|#0:GlobalFactory.CreateClient()|};
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.GlobalFactoryMemberAccess)
+                    .WithLocation(0)
+                    .WithArguments("CreateClient")
+            );
+    }
+
+    [Test]
+    public async Task No_Error_When_Accessing_Factory_Services_In_Test()
+    {
+        // Factory.Services is the correct way to access services
+        await Verifier
+            .VerifyAnalyzerAsync(
+                $$"""
+                using TUnit.Core;
+                {{WebApplicationFactoryStub}}
+                {{WebApplicationTestStub}}
+
+                public class MyFactory : TUnit.AspNetCore.TestWebApplicationFactory<Program> { }
+                public class Program { }
+
+                public class MyTests : TUnit.AspNetCore.WebApplicationTest<MyFactory, Program>
+                {
+                    [Test]
+                    public void MyTest()
+                    {
+                        var services = Services;
                     }
                 }
                 """

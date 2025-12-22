@@ -21,12 +21,20 @@ public class WebApplicationFactoryAccessAnalyzer : ConcurrentDiagnosticAnalyzer
         "GlobalFactory"
     );
 
+    // Members that should never be accessed on GlobalFactory (breaks test isolation)
+    private static readonly ImmutableHashSet<string> RestrictedGlobalFactoryMembers = ImmutableHashSet.Create(
+        "Services",
+        "Server",
+        "CreateClient"
+    );
+
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Rules.FactoryAccessedTooEarly);
+        ImmutableArray.Create(Rules.FactoryAccessedTooEarly, Rules.GlobalFactoryMemberAccess);
 
     protected override void InitializeInternal(AnalysisContext context)
     {
         context.RegisterOperationAction(AnalyzePropertyReference, OperationKind.PropertyReference);
+        context.RegisterOperationAction(AnalyzeInvocation, OperationKind.Invocation);
     }
 
     private void AnalyzePropertyReference(OperationAnalysisContext context)
@@ -37,6 +45,17 @@ public class WebApplicationFactoryAccessAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         var propertyName = propertyReference.Property.Name;
+
+        // Check for GlobalFactory.Services or GlobalFactory.Server access
+        if (RestrictedGlobalFactoryMembers.Contains(propertyName) &&
+            IsGlobalFactoryAccess(propertyReference.Instance))
+        {
+            context.ReportDiagnostic(Diagnostic.Create(
+                Rules.GlobalFactoryMemberAccess,
+                context.Operation.Syntax.GetLocation(),
+                propertyName));
+            return;
+        }
 
         var isRestrictedInBoth = RestrictedInConstructorAndSetup.Contains(propertyName);
         var isRestrictedInConstructorOnly = RestrictedInConstructorOnly.Contains(propertyName);
@@ -85,6 +104,42 @@ public class WebApplicationFactoryAccessAnalyzer : ConcurrentDiagnosticAnalyzer
                 propertyName,
                 contextName));
         }
+    }
+
+    private void AnalyzeInvocation(OperationAnalysisContext context)
+    {
+        if (context.Operation is not IInvocationOperation invocation)
+        {
+            return;
+        }
+
+        var methodName = invocation.TargetMethod.Name;
+
+        // Check for GlobalFactory.CreateClient() access
+        if (RestrictedGlobalFactoryMembers.Contains(methodName) &&
+            IsGlobalFactoryAccess(invocation.Instance))
+        {
+            context.ReportDiagnostic(Diagnostic.Create(
+                Rules.GlobalFactoryMemberAccess,
+                context.Operation.Syntax.GetLocation(),
+                methodName));
+        }
+    }
+
+    private static bool IsGlobalFactoryAccess(IOperation? instance)
+    {
+        if (instance is not IPropertyReferenceOperation propertyRef)
+        {
+            return false;
+        }
+
+        // Check if accessing GlobalFactory property on a WebApplicationTest type
+        if (propertyRef.Property.Name != "GlobalFactory")
+        {
+            return false;
+        }
+
+        return IsWebApplicationTestType(propertyRef.Property.ContainingType);
     }
 
     private static bool IsWebApplicationTestType(INamedTypeSymbol? type)
