@@ -49,14 +49,16 @@ internal static class CodeGenerationHelpers
                     }
 
                     // Generate cached data source attributes for AOT compatibility
+                    // Include both IDataSourceAttribute and IDataSourceMemberAttribute implementations
                     var dataSourceAttributes = param.GetAttributes()
                         .Where(attr => attr.AttributeClass != null &&
-                               attr.AttributeClass.AllInterfaces.Any(i => i.Name == "IDataSourceAttribute"))
+                               attr.AttributeClass.AllInterfaces.Any(i =>
+                                   i.Name == "IDataSourceAttribute" || i.Name == "IDataSourceMemberAttribute"))
                         .ToArray();
 
                     if (dataSourceAttributes.Length > 0)
                     {
-                        writer.AppendLine($"CachedDataSourceAttributes = new global::TUnit.Core.IDataSourceAttribute[]");
+                        writer.AppendLine($"CachedDataSourceAttributes = new global::System.Attribute[]");
                         writer.AppendLine("{");
                         writer.SetIndentLevel(3);
                         foreach (var attr in dataSourceAttributes)
