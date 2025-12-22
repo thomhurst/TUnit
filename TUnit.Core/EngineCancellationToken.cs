@@ -14,8 +14,7 @@ public class EngineCancellationToken : IDisposable
     /// Gets the cancellation token.
     /// </summary>
     public CancellationToken Token { get; private set; }
-    
-    private CancellationTokenSource? _forcefulExitCts;
+
     private volatile bool _forcefulExitStarted;
 
     /// <summary>
@@ -26,6 +25,8 @@ public class EngineCancellationToken : IDisposable
     {
         CancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         Token = CancellationTokenSource.Token;
+
+        Token.Register(_ => Cancel(), this);
 
         // Console.CancelKeyPress is not supported on browser platforms
 #if NET5_0_OR_GREATER
@@ -38,8 +39,16 @@ public class EngineCancellationToken : IDisposable
         }
 #endif
     }
-    
+
     private void OnCancelKeyPress(object? sender, ConsoleCancelEventArgs e)
+    {
+        Cancel();
+
+        // Prevent the default behavior (immediate termination)
+        e.Cancel = true;
+    }
+
+    private void Cancel()
     {
         // Cancel the test execution
         if (!CancellationTokenSource.IsCancellationRequested)
@@ -51,14 +60,9 @@ public class EngineCancellationToken : IDisposable
         if (!_forcefulExitStarted)
         {
             _forcefulExitStarted = true;
-            
-            // Cancel any previous forceful exit timer
-            _forcefulExitCts?.Cancel();
-            _forcefulExitCts?.Dispose();
-            _forcefulExitCts = new CancellationTokenSource();
-            
+
             // Start a new forceful exit timer
-            _ = Task.Delay(TimeSpan.FromSeconds(10), _forcefulExitCts.Token).ContinueWith(t =>
+            _ = Task.Delay(TimeSpan.FromSeconds(30), CancellationToken.None).ContinueWith(t =>
             {
                 if (!t.IsCanceled)
                 {
@@ -67,9 +71,6 @@ public class EngineCancellationToken : IDisposable
                 }
             }, TaskScheduler.Default);
         }
-        
-        // Prevent the default behavior (immediate termination)
-        e.Cancel = true;
     }
 
     private void OnProcessExit(object? sender, EventArgs e)
@@ -102,8 +103,6 @@ public class EngineCancellationToken : IDisposable
 #if NET5_0_OR_GREATER
         }
 #endif
-        _forcefulExitCts?.Cancel();
-        _forcefulExitCts?.Dispose();
         CancellationTokenSource.Dispose();
     }
 }
