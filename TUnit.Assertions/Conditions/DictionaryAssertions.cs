@@ -1,4 +1,5 @@
 using System.Text;
+using TUnit.Assertions.Conditions.Helpers;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
@@ -27,6 +28,12 @@ public class DictionaryContainsKeyAssertion<TDictionary, TKey, TValue> : Sources
     public DictionaryContainsKeyAssertion<TDictionary, TKey, TValue> Using(IEqualityComparer<TKey> comparer)
     {
         return new DictionaryContainsKeyAssertion<TDictionary, TKey, TValue>(Context, _expectedKey, comparer);
+    }
+
+    public DictionaryContainsKeyAssertion<TDictionary, TKey, TValue> Using(Func<TKey?, TKey?, bool> equalityPredicate)
+    {
+        return new DictionaryContainsKeyAssertion<TDictionary, TKey, TValue>(
+            Context, _expectedKey, new FuncEqualityComparer<TKey>(equalityPredicate));
     }
 
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TDictionary> metadata)
