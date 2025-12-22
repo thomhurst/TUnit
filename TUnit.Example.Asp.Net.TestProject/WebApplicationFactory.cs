@@ -1,8 +1,6 @@
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using TUnit.AspNetCore;
-using TUnit.Core.Interfaces;
 
 namespace TUnit.Example.Asp.Net.TestProject;
 
@@ -14,7 +12,7 @@ namespace TUnit.Example.Asp.Net.TestProject;
 /// Instead, test classes inject containers and provide configuration overrides
 /// via OverrideConfigurationAsync. This allows the factory to be created with new().
 /// </summary>
-public class WebApplicationFactory : TestWebApplicationFactory<Program>, IAsyncInitializer
+public class WebApplicationFactory : TestWebApplicationFactory<Program>
 {
     private int _configuredWebHostCalled;
 
@@ -37,13 +35,6 @@ public class WebApplicationFactory : TestWebApplicationFactory<Program>, IAsyncI
     /// </summary>
     [ClassDataSource<InMemoryKafka>(Shared = SharedType.PerTestSession)]
     public InMemoryKafka Kafka { get; init; } = null!;
-
-
-    public Task InitializeAsync()
-    {
-        _ = Server;
-        return Task.CompletedTask;
-    }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
