@@ -42,7 +42,7 @@ namespace TUnit.Core;
 /// </remarks>
 /// <param name="objects">The values to be used for this parameter in the test matrix.</param>
 [AttributeUsage(AttributeTargets.Parameter)]
-public class MatrixAttribute(params object?[]? objects) : TUnitAttribute
+public class MatrixAttribute(params object?[]? objects) : TUnitAttribute, IDataSourceMemberAttribute
 {
     protected MatrixAttribute() : this(null)
     {

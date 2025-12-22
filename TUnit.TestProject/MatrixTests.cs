@@ -192,4 +192,22 @@ public class MatrixTests
     {
         return 1;
     }
+
+    // Test for GitHub Discussion #4145: MatrixMethod with enum parameter
+    [Test]
+    [MatrixDataSource]
+    public async Task MatrixMethod_WithEnumParameter_UsesOnlyMethodValues(
+        [Matrix(true, false)] bool flag,
+        [MatrixMethod<MatrixTests>(nameof(GetSpecificEnumValues))] CountToTenEnum @enum)
+    {
+        // This test verifies that MatrixMethod returns only the specific enum values
+        // and doesn't auto-generate all enum values (should only be One or Five)
+        await Assert.That(@enum == CountToTenEnum.One || @enum == CountToTenEnum.Five).IsTrue();
+    }
+
+    public static IEnumerable<CountToTenEnum> GetSpecificEnumValues()
+    {
+        yield return CountToTenEnum.One;
+        yield return CountToTenEnum.Five;
+    }
 }

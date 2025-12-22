@@ -126,7 +126,9 @@ public sealed class CombinedDataSourcesAttribute : AsyncUntypedDataSourceGenerat
         if (parameterMetadata.CachedDataSourceAttributes != null)
         {
             // Source-generated mode: use cached attributes (no reflection!)
-            dataSourceAttributes = parameterMetadata.CachedDataSourceAttributes;
+            dataSourceAttributes = parameterMetadata.CachedDataSourceAttributes
+                .OfType<IDataSourceAttribute>()
+                .ToArray();
         }
         else
         {

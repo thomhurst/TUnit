@@ -56,9 +56,10 @@ public record ParameterMetadata([DynamicallyAccessedMembers(DynamicallyAccessedM
     /// Cached data source attributes to avoid reflection call.
     /// Set by source generator for AOT compatibility.
     /// When null, falls back to using ReflectionInfo.GetCustomAttributes().
+    /// Includes attributes implementing IDataSourceAttribute or IDataSourceMemberAttribute.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public IDataSourceAttribute[]? CachedDataSourceAttributes { get; internal init; }
+    public Attribute[]? CachedDataSourceAttributes { get; internal init; }
 
     /// <summary>
     /// Position of this parameter in the method/constructor signature.

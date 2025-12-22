@@ -864,6 +864,7 @@ namespace
         bool SkipIfEmpty { get; set; }
         .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata);
     }
+    public interface IDataSourceMemberAttribute { }
     public interface IDynamicTestCreatorLocation
     {
         string? CreatorFilePath { get; set; }
@@ -909,7 +910,7 @@ namespace
         public InvalidTestMetadataException(string message, .TestMetadata metadata,  innerException) { }
     }
     [(.Parameter)]
-    public class MatrixAttribute : .TUnitAttribute
+    public class MatrixAttribute : .TUnitAttribute, .IDataSourceMemberAttribute
     {
         protected MatrixAttribute() { }
         public MatrixAttribute(params object?[]? objects) { }
@@ -1053,7 +1054,7 @@ namespace
     public class ParameterMetadata : <.ParameterMetadata>, .IMemberMetadata
     {
         public ParameterMetadata([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties)]  Type) { }
-        public .IDataSourceAttribute[]? CachedDataSourceAttributes { get; }
+        public []? CachedDataSourceAttributes { get; }
         public object? CachedDefaultValue { get; }
         public bool? CachedIsOptional { get; }
         public bool? CachedIsParams { get; }
