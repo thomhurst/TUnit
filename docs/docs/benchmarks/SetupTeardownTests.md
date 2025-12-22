@@ -7,7 +7,7 @@ sidebar_position: 7
 # SetupTeardownTests Benchmark
 
 :::info Last Updated
-This benchmark was automatically generated on **2025-12-21** from the latest CI run.
+This benchmark was automatically generated on **2025-12-22** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.101
 :::
@@ -16,11 +16,11 @@ This benchmark was automatically generated on **2025-12-21** from the latest CI 
 
 | Framework | Version | Mean | Median | StdDev |
 |-----------|---------|------|--------|--------|
-| **TUnit** | 1.5.80 | 570.7 ms | 571.2 ms | 5.47 ms |
-| NUnit | 4.4.0 | 1,176.1 ms | 1,173.3 ms | 8.15 ms |
-| MSTest | 4.0.2 | 1,121.5 ms | 1,121.1 ms | 4.71 ms |
-| xUnit3 | 3.2.1 | 1,206.1 ms | 1,203.3 ms | 10.96 ms |
-| **TUnit (AOT)** | 1.5.80 | NA | NA | NA |
+| **TUnit** | 1.6.5 | 571.7 ms | 573.1 ms | 3.83 ms |
+| NUnit | 4.4.0 | 1,160.4 ms | 1,161.5 ms | 8.88 ms |
+| MSTest | 4.0.2 | 1,106.4 ms | 1,107.7 ms | 6.84 ms |
+| xUnit3 | 3.2.1 | 1,200.1 ms | 1,202.4 ms | 7.07 ms |
+| **TUnit (AOT)** | 1.6.5 | NA | NA | NA |
 
 ## 📈 Visual Comparison
 
@@ -58,8 +58,8 @@ This benchmark was automatically generated on **2025-12-21** from the latest CI 
 xychart-beta
   title "SetupTeardownTests Performance Comparison"
   x-axis ["TUnit", "NUnit", "MSTest", "xUnit3", "TUnit_AOT"]
-  y-axis "Time (ms)" 0 --> 1448
-  bar [570.7, 1176.1, 1121.5, 1206.1, 0]
+  y-axis "Time (ms)" 0 --> 1441
+  bar [571.7, 1160.4, 1106.4, 1200.1, 0]
 ```
 
 ## 🎯 Key Insights
@@ -72,4 +72,4 @@ This benchmark compares TUnit's performance against NUnit, MSTest, xUnit3 using 
 View the [benchmarks overview](/docs/benchmarks) for methodology details and environment information.
 :::
 
-*Last generated: 2025-12-21T00:31:36.141Z*
+*Last generated: 2025-12-22T00:31:09.538Z*
