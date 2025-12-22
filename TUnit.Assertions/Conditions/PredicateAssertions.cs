@@ -1,5 +1,6 @@
 using System.Text;
 using TUnit.Assertions.Attributes;
+using TUnit.Assertions.Conditions.Helpers;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
@@ -63,6 +64,12 @@ public class IsEquatableOrEqualToAssertion<TValue> : ComparerBasedAssertion<TVal
     public IsEquatableOrEqualToAssertion<TValue> Using(IEqualityComparer<TValue> comparer)
     {
         SetComparer(comparer);
+        return this;
+    }
+
+    public IsEquatableOrEqualToAssertion<TValue> Using(Func<TValue?, TValue?, bool> equalityPredicate)
+    {
+        SetComparer(new FuncEqualityComparer<TValue>(equalityPredicate));
         return this;
     }
 

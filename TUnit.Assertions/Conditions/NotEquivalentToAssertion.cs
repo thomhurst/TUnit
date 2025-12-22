@@ -46,6 +46,12 @@ public class NotEquivalentToAssertion<TCollection, TItem> : CollectionComparerBa
         return this;
     }
 
+    public NotEquivalentToAssertion<TCollection, TItem> Using(Func<TItem?, TItem?, bool> equalityPredicate)
+    {
+        SetComparer(new FuncEqualityComparer<TItem>(equalityPredicate));
+        return this;
+    }
+
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
         var value = metadata.Value;
