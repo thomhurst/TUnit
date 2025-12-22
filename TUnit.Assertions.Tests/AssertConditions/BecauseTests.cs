@@ -144,4 +144,26 @@ public class BecauseTests
         var exception = await Assert.ThrowsAsync<AssertionException>(action);
         await Assert.That(exception.Message).Contains(because1).And.Contains(because2);
     }
+
+    [Test]
+    public async Task Because_Message_Appears_Inline_With_Expectation()
+    {
+        var expectedMessage = """
+                              Expected to be false, because this is the reason
+                              but found True
+
+                              at Assert.That(variable).IsFalse().Because("this is the reason")
+                              """;
+
+        var variable = true;
+
+        var action = async () =>
+        {
+            await Assert.That(variable).IsFalse().Because("this is the reason");
+        };
+
+        var exception = await Assert.ThrowsAsync<AssertionException>(action);
+        await Assert.That(exception.Message.NormalizeLineEndings())
+            .IsEqualTo(expectedMessage.NormalizeLineEndings());
+    }
 }
