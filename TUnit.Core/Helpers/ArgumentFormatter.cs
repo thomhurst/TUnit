@@ -135,19 +135,19 @@ public static class ArgumentFormatter
     private static string FormatEnumerable(IEnumerable enumerable)
     {
         const int maxElements = 10;
-        var elements = new List<string>(maxElements + 1);
-        var count = 0;
+        Span<string?> elements = [null, null, null, null, null, null, null, null, null, null, null];
 
+        var count = 0;
         try
         {
             foreach (var element in enumerable)
             {
                 if (count >= maxElements)
                 {
-                    elements.Add("...");
+                    elements[count] ="...";
                     break;
                 }
-                elements.Add(FormatDefault(element));
+                elements[count] = FormatDefault(element);
                 count++;
             }
         }
@@ -157,6 +157,6 @@ public static class ArgumentFormatter
             return enumerable.GetType().Name;
         }
 
-        return string.Join(", ", elements);
+        return string.Join(", ", elements[..count]);
     }
 }
