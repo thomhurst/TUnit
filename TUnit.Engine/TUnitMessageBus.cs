@@ -23,6 +23,11 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
 
     public async ValueTask Discovered(TestContext testContext)
     {
+        if (testContext.IsNotDiscoverable)
+        {
+            return;
+        }
+
         await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
             sessionUid: _sessionSessionUid,
             testNode: testContext.ToTestNode(DiscoveredTestNodeStateProperty.CachedInstance)
