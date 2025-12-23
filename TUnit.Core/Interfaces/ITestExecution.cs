@@ -108,6 +108,13 @@ public interface ITestExecution
     bool ReportResult { get; set; }
 
     /// <summary>
+    /// Gets or sets whether the test should be hidden from test discovery/explorer.
+    /// Defaults to false. Set to true to hide the test from discovery notifications
+    /// while still allowing it to execute when run directly.
+    /// </summary>
+    bool IsNotDiscoverable { get; set; }
+
+    /// <summary>
     /// Links an external cancellation token to this test's execution token.
     /// Useful for coordinating cancellation across multiple operations or tests.
     /// </summary>
