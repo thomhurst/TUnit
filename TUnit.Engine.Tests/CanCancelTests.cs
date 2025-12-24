@@ -23,6 +23,8 @@ public class CanCancelTests(TestMode testMode) : InvokableTestBase(testMode)
         await RunTestsWithFilter(
             "/*/*/CanCancelTests/*",
             [
+                // A cancelled test is reported as "Failed" in TRX because it was terminated before completion.
+                // This is the expected behavior - the test did not pass, so it's marked as failed.
                 result => result.ResultSummary.Outcome.ShouldBe("Failed"),
                 result => TimeSpan.Parse(result.Duration).ShouldBeLessThan(TimeSpan.FromSeconds(MaxExpectedDurationSeconds))
             ],

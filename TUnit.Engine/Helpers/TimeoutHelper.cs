@@ -6,6 +6,11 @@ namespace TUnit.Engine.Helpers;
 internal static class TimeoutHelper
 {
     /// <summary>
+    /// Grace period to allow tasks to handle cancellation before throwing timeout exception.
+    /// </summary>
+    private static readonly TimeSpan GracePeriod = TimeSpan.FromSeconds(1);
+
+    /// <summary>
     /// Executes a task with an optional timeout. If the timeout elapses before the task completes,
     /// control is returned to the caller immediately with a TimeoutException.
     /// </summary>
@@ -62,76 +67,62 @@ internal static class TimeoutHelper
                 return await task.ConfigureAwait(false);
             }
 
-            // Race against cancellation to respond immediately when cancelled
-            var tcs = new TaskCompletionSource<bool>();
-            using var registration = cancellationToken.Register(() => tcs.TrySetResult(true));
+            // Race against cancellation - TrySetCanceled makes the TCS throw OperationCanceledException when awaited
+            var tcs = new TaskCompletionSource<T>();
+            using var registration = cancellationToken.Register(() => tcs.TrySetCanceled(cancellationToken));
 
-            var completedTask = await Task.WhenAny(task, tcs.Task).ConfigureAwait(false);
-
-            if (completedTask == tcs.Task)
-            {
-                throw new OperationCanceledException(cancellationToken);
-            }
-
-            return await task.ConfigureAwait(false);
+            // await await: first gets winning task, then awaits it (propagates result or exception)
+            return await await Task.WhenAny(task, tcs.Task).ConfigureAwait(false);
         }
 
-        // Timeout path: create linked token so task can observe both timeout and external cancellation
+        // Timeout path: create linked token so task can observe both timeout and external cancellation.
         using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         timeoutCts.CancelAfter(timeout.Value);
 
         var executionTask = taskFactory(timeoutCts.Token);
 
-        // Create a task that completes when cancellation is requested (for reactive cancellation)
-        var cancellationTcs = new TaskCompletionSource<bool>();
-        using var cancellationRegistration = cancellationToken.Register(() => cancellationTcs.TrySetResult(true));
+        // TCS for reactive external cancellation - TrySetCanceled makes it throw when awaited
+        var cancellationTcs = new TaskCompletionSource<T>();
+        using var cancellationRegistration = cancellationToken.Register(() => cancellationTcs.TrySetCanceled(cancellationToken));
 
-        // Create timeout task
+        // Timeout detection task
         using var timeoutTaskCts = new CancellationTokenSource();
         var timeoutTask = Task.Delay(timeout.Value, timeoutTaskCts.Token);
 
         var winner = await Task.WhenAny(executionTask, cancellationTcs.Task, timeoutTask).ConfigureAwait(false);
 
-        // External cancellation requested
-        if (winner == cancellationTcs.Task)
-        {
-            timeoutTaskCts.Cancel();
-            throw new OperationCanceledException(cancellationToken);
-        }
+        // Clean up timeout task if not needed
+        timeoutTaskCts.Cancel();
 
-        // Timeout occurred
+        // Timeout occurred - need special handling for grace period
         if (winner == timeoutTask)
         {
+            timeoutCts.Cancel();
+
             // Give the execution task a brief grace period to handle cancellation
             try
             {
 #if NET8_0_OR_GREATER
-                await executionTask.WaitAsync(TimeSpan.FromSeconds(1), CancellationToken.None).ConfigureAwait(false);
+                await executionTask.WaitAsync(GracePeriod, CancellationToken.None).ConfigureAwait(false);
 #else
-                var graceTask = Task.Delay(TimeSpan.FromSeconds(1), CancellationToken.None);
-                await Task.WhenAny(executionTask, graceTask).ConfigureAwait(false);
+                await Task.WhenAny(executionTask, Task.Delay(GracePeriod, CancellationToken.None)).ConfigureAwait(false);
 #endif
-            }
-            catch (OperationCanceledException)
-            {
-                // Expected when cancellation is properly handled
-            }
-            catch (TimeoutException)
-            {
-                // Grace period expired, which is fine
             }
             catch
             {
-                // Ignore other exceptions from the cancelled task
+                // Ignore all exceptions from the cancelled task
             }
 
-            var message = timeoutMessage ?? $"Operation timed out after {timeout.Value}";
-            throw new TimeoutException(message);
+            throw new TimeoutException(timeoutMessage ?? $"Operation timed out after {timeout.Value}");
         }
 
-        // Task completed normally - cancel the timeout task to free resources
-        timeoutTaskCts.Cancel();
+        // We already know the winner - await it directly (avoid redundant WhenAny allocation)
+        if (winner == executionTask)
+        {
+            return await executionTask.ConfigureAwait(false);
+        }
 
-        return await executionTask.ConfigureAwait(false);
+        // Must be cancellationTcs.Task - awaiting throws OperationCanceledException
+        return await cancellationTcs.Task.ConfigureAwait(false);
     }
 }
