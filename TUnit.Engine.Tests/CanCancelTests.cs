@@ -14,7 +14,8 @@ public class CanCancelTests(TestMode testMode) : InvokableTestBase(testMode)
 {
     private const int CancellationDelaySeconds = 5;
     private const int MaxExpectedDurationSeconds = 30;
-    private const int TestTimeoutMs = MaxExpectedDurationSeconds * 1000;
+    // Test timeout must be higher than MaxExpectedDurationSeconds to allow for subprocess startup and assertions
+    private const int TestTimeoutMs = 60_000;
 
     [Test, Timeout(TestTimeoutMs)]
     public async Task GracefulCancellation_ShouldTerminateTestBeforeTimeout(CancellationToken ct)
