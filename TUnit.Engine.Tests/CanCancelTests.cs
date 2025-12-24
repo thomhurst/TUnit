@@ -14,8 +14,9 @@ public class CanCancelTests(TestMode testMode) : InvokableTestBase(testMode)
 {
     private const int CancellationDelaySeconds = 5;
     private const int MaxExpectedDurationSeconds = 30;
+    private const int TestTimeoutMs = MaxExpectedDurationSeconds * 1000;
 
-    [Test, Timeout(30_000)]
+    [Test, Timeout(TestTimeoutMs)]
     public async Task GracefulCancellation_ShouldTerminateTestBeforeTimeout(CancellationToken ct)
     {
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);

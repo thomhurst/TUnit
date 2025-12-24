@@ -108,7 +108,14 @@ internal static class TimeoutHelper
 #if NET8_0_OR_GREATER
                 await executionTask.WaitAsync(GracePeriod, CancellationToken.None).ConfigureAwait(false);
 #else
-                await Task.WhenAny(executionTask, Task.Delay(GracePeriod, CancellationToken.None)).ConfigureAwait(false);
+                // Use cancellable delay to avoid leaked tasks when executionTask completes first
+                using var graceCts = new CancellationTokenSource();
+                var delayTask = Task.Delay(GracePeriod, graceCts.Token);
+                var graceWinner = await Task.WhenAny(executionTask, delayTask).ConfigureAwait(false);
+                if (graceWinner == executionTask)
+                {
+                    graceCts.Cancel();
+                }
 #endif
             }
             catch
