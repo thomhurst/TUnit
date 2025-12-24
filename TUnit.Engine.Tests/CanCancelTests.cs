@@ -12,15 +12,18 @@ namespace TUnit.Engine.Tests;
 [ExcludeOn(OS.Windows)]
 public class CanCancelTests(TestMode testMode) : InvokableTestBase(testMode)
 {
+    private const int CancellationDelaySeconds = 5;
+    private const int MaxExpectedDurationSeconds = 30;
+
     [Test, Timeout(30_000)]
-    public async Task Test(CancellationToken ct)
+    public async Task GracefulCancellation_ShouldTerminateTestBeforeTimeout(CancellationToken ct)
     {
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(CancellationDelaySeconds));
         await RunTestsWithFilter(
             "/*/*/CanCancelTests/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Failed"),
-                result => TimeSpan.Parse(result.Duration).ShouldBeLessThan(TimeSpan.FromSeconds(30))
+                result => TimeSpan.Parse(result.Duration).ShouldBeLessThan(TimeSpan.FromSeconds(MaxExpectedDurationSeconds))
             ],
             new RunOptions().WithGracefulCancellationToken(cts.Token));
     }
