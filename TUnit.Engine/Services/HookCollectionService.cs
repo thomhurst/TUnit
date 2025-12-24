@@ -551,10 +551,16 @@ internal sealed class HookCollectionService : IHookCollectionService
                 allHooks.Add((hook.Order, hookFunc));
             }
 
-            return allHooks
-                .OrderBy(h => h.order)
-                .Select(h => h.hook)
-                .ToList();
+            // Sort in-place to avoid LINQ allocation
+            allHooks.Sort((a, b) => a.order.CompareTo(b.order));
+
+            // Extract hooks into result list
+            var result = new List<Func<AssemblyHookContext, CancellationToken, Task>>(allHooks.Count);
+            foreach (var (_, hook) in allHooks)
+            {
+                result.Add(hook);
+            }
+            return result;
         });
 
         return new ValueTask<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>>(hooks);
@@ -577,10 +583,16 @@ internal sealed class HookCollectionService : IHookCollectionService
                 allHooks.Add((hook.Order, hookFunc));
             }
 
-            return allHooks
-                .OrderBy(h => h.order)
-                .Select(h => h.hook)
-                .ToList();
+            // Sort in-place to avoid LINQ allocation
+            allHooks.Sort((a, b) => a.order.CompareTo(b.order));
+
+            // Extract hooks into result list
+            var result = new List<Func<AssemblyHookContext, CancellationToken, Task>>(allHooks.Count);
+            foreach (var (_, hook) in allHooks)
+            {
+                result.Add(hook);
+            }
+            return result;
         });
 
         return new ValueTask<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>>(hooks);

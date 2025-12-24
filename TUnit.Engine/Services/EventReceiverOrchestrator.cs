@@ -245,7 +245,10 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         // Filter scoped attributes to ensure only the highest priority one of each type is invoked
         var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(eventReceivers);
 
-        foreach (var receiver in filteredReceivers.OrderBy(static r => r.Order))
+        // Sort in place to avoid LINQ allocation
+        filteredReceivers.Sort(static (a, b) => a.Order.CompareTo(b.Order));
+
+        foreach (var receiver in filteredReceivers)
         {
             await receiver.OnTestDiscovered(discoveredContext);
         }
@@ -256,10 +259,12 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         // Filter scoped attributes to ensure only the highest priority one of each type is invoked
         var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(
             hookContext.HookMethod.Attributes
-                .OfType<IHookRegisteredEventReceiver>()
-                .OrderBy(static r => r.Order));
+                .OfType<IHookRegisteredEventReceiver>());
 
-        foreach (var receiver in filteredReceivers.OrderBy(static r => r.Order))
+        // Sort in place to avoid LINQ allocation
+        filteredReceivers.Sort(static (a, b) => a.Order.CompareTo(b.Order));
+
+        foreach (var receiver in filteredReceivers)
         {
             await receiver.OnHookRegistered(hookContext);
         }

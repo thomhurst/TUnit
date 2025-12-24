@@ -34,8 +34,10 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
             return;
         }
 
-        // Sort tests by priority
-        var sortedTests = tests.OrderBy(static t => t.Priority).ToArray();
+        // Sort tests by priority (in-place sort to avoid LINQ allocation)
+        var sortedTests = new (AbstractExecutableTest Test, IReadOnlyList<string> ConstraintKeys, int Priority)[tests.Length];
+        Array.Copy(tests, sortedTests, tests.Length);
+        Array.Sort(sortedTests, static (a, b) => a.Priority.CompareTo(b.Priority));
 
         // Track which constraint keys are currently in use
         var lockedKeys = new HashSet<string>();
@@ -55,8 +57,8 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
             bool canStart;
             lock (lockObject)
             {
-                // Check if all constraint keys are available
-                canStart = !constraintKeys.Any(key => lockedKeys.Contains(key));
+                // Check if all constraint keys are available (manual loop to avoid LINQ allocation)
+                canStart = !AnyKeyLocked(constraintKeys, lockedKeys);
                 
                 if (canStart)
                 {
@@ -161,8 +163,8 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
                 
                 while (waitingTests.TryDequeue(out var waitingTest))
                 {
-                    // Check if all constraint keys are available for this waiting test
-                    var canStart = !waitingTest.ConstraintKeys.Any(key => lockedKeys.Contains(key));
+                    // Check if all constraint keys are available for this waiting test (manual loop to avoid LINQ allocation)
+                    var canStart = !AnyKeyLocked(waitingTest.ConstraintKeys, lockedKeys);
                     
                     if (canStart)
                     {
@@ -198,5 +200,21 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
                 testToStart.StartSignal.SetResult(true);
             }
         }
+    }
+
+    /// <summary>
+    /// Checks if any of the constraint keys are currently locked.
+    /// Manual loop implementation to avoid LINQ allocation in hot path.
+    /// </summary>
+    private static bool AnyKeyLocked(IReadOnlyList<string> constraintKeys, HashSet<string> lockedKeys)
+    {
+        for (var i = 0; i < constraintKeys.Count; i++)
+        {
+            if (lockedKeys.Contains(constraintKeys[i]))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }

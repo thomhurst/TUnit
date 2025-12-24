@@ -154,7 +154,8 @@ internal sealed class TestBuilder : ITestBuilder
             // Create and initialize attributes ONCE
             var attributes = await InitializeAttributesAsync(metadata.AttributeFactory.Invoke());
 
-            if (metadata.ClassDataSources.Any(ds => ds is IAccessesInstanceData))
+            // Manual check to avoid LINQ Any() allocation
+            if (HasInstanceDataAccessor(metadata.ClassDataSources))
             {
                 var failedTest = await CreateFailedTestForClassDataSourceCircularDependency(metadata);
                 tests.Add(failedTest);
@@ -212,7 +213,8 @@ internal sealed class TestBuilder : ITestBuilder
                     // ObjectInitializer is phase-aware and will only initialize IAsyncDiscoveryInitializer during Discovery.
                     await InitializeClassDataAsync(classData);
 
-                    var needsInstanceForMethodDataSources = metadata.DataSources.Any(ds => ds is IAccessesInstanceData);
+                    // Manual check to avoid LINQ Any() allocation
+                    var needsInstanceForMethodDataSources = HasInstanceDataAccessor(metadata.DataSources);
 
                     object? instanceForMethodDataSources = null;
                     var discoveryInstanceUsed = false;
@@ -694,7 +696,7 @@ internal sealed class TestBuilder : ITestBuilder
             }
         }
 
-        if (metadata.DataSources.Any(ds => ds is IAccessesInstanceData))
+        if (HasInstanceDataAccessor(metadata.DataSources))
         {
             // Look at the test method parameters to find attributes that can help with generic type inference
             foreach (var param in metadata.MethodMetadata.Parameters)
@@ -1104,12 +1106,20 @@ internal sealed class TestBuilder : ITestBuilder
 
     private async Task<AbstractExecutableTest> CreateFailedTestForClassDataSourceCircularDependency(TestMetadata metadata)
     {
-        var instanceClassDataSources = metadata.ClassDataSources
-            .Where(ds => ds is IAccessesInstanceData)
-            .Select(ds => ds.GetType().Name)
-            .ToList();
+        // Manual loop to collect instance data source names (avoids LINQ allocation)
+        List<string>? instanceClassDataSourceNames = null;
+        foreach (var ds in metadata.ClassDataSources)
+        {
+            if (ds is IAccessesInstanceData)
+            {
+                instanceClassDataSourceNames ??= [];
+                instanceClassDataSourceNames.Add(ds.GetType().Name);
+            }
+        }
 
-        var dataSourceNames = string.Join(", ", instanceClassDataSources);
+        var dataSourceNames = instanceClassDataSourceNames != null
+            ? string.Join(", ", instanceClassDataSourceNames)
+            : string.Empty;
         var genericParams = string.Join(", ", metadata.TestClassType.GetGenericArguments().Select(t => t.Name));
 
         var message = $"Cannot use instance method data sources ({dataSourceNames}) for class constructor arguments with generic test class '{metadata.TestClassType.Name}<{genericParams}>'. " +
@@ -1306,6 +1316,22 @@ internal sealed class TestBuilder : ITestBuilder
         return expectedType.IsAssignableFrom(actualType);
     }
 
+    /// <summary>
+    /// Checks if any data source in the collection accesses instance data.
+    /// Manual loop implementation to avoid LINQ Any() allocation in hot path.
+    /// </summary>
+    private static bool HasInstanceDataAccessor(IDataSourceAttribute[] dataSources)
+    {
+        for (var i = 0; i < dataSources.Length; i++)
+        {
+            if (dataSources[i] is IAccessesInstanceData)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     internal class TestData
     {
         public required Func<Task<object>> TestClassInstanceFactory { get; init; }
@@ -1416,7 +1442,7 @@ internal sealed class TestBuilder : ITestBuilder
         var contextAccessor = new TestBuilderContextAccessor(baseContext);
 
         // Check for circular dependency
-        if (metadata.ClassDataSources.Any(ds => ds is IAccessesInstanceData))
+        if (HasInstanceDataAccessor(metadata.ClassDataSources))
         {
             yield return await CreateFailedTestForClassDataSourceCircularDependency(metadata);
             yield break;
@@ -1448,7 +1474,7 @@ internal sealed class TestBuilder : ITestBuilder
                 await InitializeClassDataAsync(classData);
 
                 // Handle instance creation for method data sources
-                var needsInstanceForMethodDataSources = metadata.DataSources.Any(ds => ds is IAccessesInstanceData);
+                var needsInstanceForMethodDataSources = HasInstanceDataAccessor(metadata.DataSources);
                 object? instanceForMethodDataSources = null;
 
                 if (needsInstanceForMethodDataSources)

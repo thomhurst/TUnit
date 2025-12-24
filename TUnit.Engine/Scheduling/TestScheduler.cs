@@ -170,8 +170,9 @@ internal sealed class TestScheduler : ITestScheduler
 
         foreach (var group in groupedTests.ParallelGroups)
         {
+            // SortedDictionary is already sorted by key, no need for OrderBy
             var orderedTests = new List<AbstractExecutableTest>();
-            foreach (var kvp in group.Value.OrderBy(t => t.Key))
+            foreach (var kvp in group.Value)
             {
                 orderedTests.AddRange(kvp.Value);
             }

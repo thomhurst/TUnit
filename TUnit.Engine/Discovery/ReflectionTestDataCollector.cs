@@ -358,10 +358,15 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return discoveredTests;
         }
 
-        var filteredTypes = types.Where(static t => t.IsClass && !IsCompilerGenerated(t));
-
-        foreach (var type in filteredTypes)
+        // Manual iteration to avoid LINQ Where() allocation
+        foreach (var type in types)
         {
+            // Filter inline instead of using LINQ
+            if (!type.IsClass || IsCompilerGenerated(type))
+            {
+                continue;
+            }
+
             if (type.IsAbstract)
             {
                 continue;
@@ -487,10 +492,15 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             yield break;
         }
 
-        var filteredTypes = types.Where(static t => t.IsClass && !IsCompilerGenerated(t));
-
-        foreach (var type in filteredTypes)
+        // Manual iteration to avoid LINQ Where() allocation
+        foreach (var type in types)
         {
+            // Filter inline instead of using LINQ
+            if (!type.IsClass || IsCompilerGenerated(type))
+            {
+                continue;
+            }
+
             cancellationToken.ThrowIfCancellationRequested();
 
             // Skip abstract types - they can't be instantiated
@@ -518,16 +528,32 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 if (inheritsTests)
                 {
                     // Get all test methods including inherited ones
-                    testMethods = GetAllTestMethods(type)
-                        .Where(static m => m.IsDefined(typeof(TestAttribute), inherit: false) && !m.IsAbstract)
-                        .ToArray();
+                    // Manual filtering to avoid LINQ allocation
+                    var allMethods = GetAllTestMethods(type);
+                    var testMethodsList = new List<MethodInfo>();
+                    foreach (var method in allMethods)
+                    {
+                        if (method.IsDefined(typeof(TestAttribute), inherit: false) && !method.IsAbstract)
+                        {
+                            testMethodsList.Add(method);
+                        }
+                    }
+                    testMethods = testMethodsList.ToArray();
                 }
                 else
                 {
                     // Only get declared test methods
-                    testMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
-                        .Where(static m => m.IsDefined(typeof(TestAttribute), inherit: false) && !m.IsAbstract)
-                        .ToArray();
+                    // Manual filtering to avoid LINQ allocation
+                    var declaredMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+                    var testMethodsList = new List<MethodInfo>();
+                    foreach (var method in declaredMethods)
+                    {
+                        if (method.IsDefined(typeof(TestAttribute), inherit: false) && !method.IsAbstract)
+                        {
+                            testMethodsList.Add(method);
+                        }
+                    }
+                    testMethods = testMethodsList.ToArray();
                 }
             }
             catch (Exception)
