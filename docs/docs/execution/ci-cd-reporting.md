@@ -172,7 +172,7 @@ While TUnit currently provides specialized support for GitHub Actions, it works 
 Use TRX reporting for Azure DevOps integration:
 
 ```bash
-dotnet test --report-trx --report-trx-filename TestResults.trx
+dotnet test -- --report-trx --report-trx-filename TestResults.trx
 ```
 
 ### Jenkins
@@ -181,7 +181,7 @@ Jenkins can consume various test output formats:
 
 ```bash
 # Generate TRX report for Jenkins
-dotnet test --report-trx
+dotnet test -- --report-trx
 
 # Or use console output with appropriate verbosity
 dotnet test --logger "console;verbosity=detailed"
@@ -194,7 +194,7 @@ GitLab can parse test results in various formats:
 ```yaml
 test:
   script:
-    - dotnet test --report-trx
+    - dotnet test -- --report-trx
   artifacts:
     reports:
       junit:

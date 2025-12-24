@@ -510,7 +510,7 @@ dotnet test --no-build -- --treenode-filter "/*/*/*/*[Category=E2E]"
 
 ```bash
 # Stop on first failure to save CI time
-dotnet test --fail-fast
+dotnet test -- --fail-fast
 ```
 
 ## Monitoring and Profiling
