@@ -12,7 +12,8 @@ namespace TUnit.Engine.Tests;
 [ExcludeOn(OS.Windows)]
 public class CanCancelTests(TestMode testMode) : InvokableTestBase(testMode)
 {
-    private const int CancellationDelaySeconds = 5;
+    private const int GracefulCancellationDelaySeconds = 5;
+    private const int ForcefulCancellationDelaySeconds = 15;
     private const int MaxExpectedDurationSeconds = 30;
     // Test timeout must be higher than MaxExpectedDurationSeconds to allow for subprocess startup and assertions
     private const int TestTimeoutMs = 60_000;
@@ -20,8 +21,12 @@ public class CanCancelTests(TestMode testMode) : InvokableTestBase(testMode)
     [Test, Timeout(TestTimeoutMs)]
     public async Task GracefulCancellation_ShouldTerminateTestBeforeTimeout(CancellationToken ct)
     {
-        using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-        cts.CancelAfter(TimeSpan.FromSeconds(CancellationDelaySeconds));
+        // Graceful cancellation first (SIGINT), then forceful (SIGKILL) as backup
+        using var gracefulCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        using var forcefulCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        gracefulCts.CancelAfter(TimeSpan.FromSeconds(GracefulCancellationDelaySeconds));
+        forcefulCts.CancelAfter(TimeSpan.FromSeconds(ForcefulCancellationDelaySeconds));
+
         await RunTestsWithFilter(
             "/*/*/CanCancelTests/*",
             [
@@ -30,6 +35,8 @@ public class CanCancelTests(TestMode testMode) : InvokableTestBase(testMode)
                 result => result.ResultSummary.Outcome.ShouldBe("Failed"),
                 result => TimeSpan.Parse(result.Duration).ShouldBeLessThan(TimeSpan.FromSeconds(MaxExpectedDurationSeconds))
             ],
-            new RunOptions().WithGracefulCancellationToken(cts.Token));
+            new RunOptions()
+                .WithGracefulCancellationToken(gracefulCts.Token)
+                .WithForcefulCancellationToken(forcefulCts.Token));
     }
 }
