@@ -1,0 +1,7 @@
+# Profile results (large binary files)
+Results/*.nettrace
+Results/*.speedscope.json
+Results/*.etl
+
+# Keep the results directory but ignore generated baselines
+# (Users can commit specific baselines they want to track)
