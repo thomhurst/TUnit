@@ -18,7 +18,8 @@ public class CanCancelTests(TestMode testMode) : InvokableTestBase(testMode)
     [Test, Timeout(30_000)]
     public async Task GracefulCancellation_ShouldTerminateTestBeforeTimeout(CancellationToken ct)
     {
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(CancellationDelaySeconds));
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        cts.CancelAfter(TimeSpan.FromSeconds(CancellationDelaySeconds));
         await RunTestsWithFilter(
             "/*/*/CanCancelTests/*",
             [

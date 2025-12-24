@@ -51,18 +51,24 @@ internal static class TimeoutHelper
         CancellationToken cancellationToken,
         string? timeoutMessage = null)
     {
-        // Fast path: no timeout specified - just race against cancellation
+        // Fast path: no timeout specified
         if (!timeout.HasValue)
         {
             var task = taskFactory(cancellationToken);
+
+            // If the token can't be cancelled, just await directly (avoid allocations)
+            if (!cancellationToken.CanBeCanceled)
+            {
+                return await task.ConfigureAwait(false);
+            }
 
             // Race against cancellation to respond immediately when cancelled
             var tcs = new TaskCompletionSource<bool>();
             using var registration = cancellationToken.Register(() => tcs.TrySetResult(true));
 
-            var winningTask = await Task.WhenAny(task, tcs.Task).ConfigureAwait(false);
+            var completedTask = await Task.WhenAny(task, tcs.Task).ConfigureAwait(false);
 
-            if (winningTask == tcs.Task)
+            if (completedTask == tcs.Task)
             {
                 throw new OperationCanceledException(cancellationToken);
             }
@@ -84,17 +90,17 @@ internal static class TimeoutHelper
         using var timeoutTaskCts = new CancellationTokenSource();
         var timeoutTask = Task.Delay(timeout.Value, timeoutTaskCts.Token);
 
-        var winningTask2 = await Task.WhenAny(executionTask, cancellationTcs.Task, timeoutTask).ConfigureAwait(false);
+        var winner = await Task.WhenAny(executionTask, cancellationTcs.Task, timeoutTask).ConfigureAwait(false);
 
         // External cancellation requested
-        if (winningTask2 == cancellationTcs.Task)
+        if (winner == cancellationTcs.Task)
         {
             timeoutTaskCts.Cancel();
             throw new OperationCanceledException(cancellationToken);
         }
 
         // Timeout occurred
-        if (winningTask2 == timeoutTask)
+        if (winner == timeoutTask)
         {
             // Give the execution task a brief grace period to handle cancellation
             try
