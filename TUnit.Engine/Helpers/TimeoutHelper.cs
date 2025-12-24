@@ -78,17 +78,19 @@ internal static class TimeoutHelper
         }
 
         // Timeout path: create linked token so task can observe both timeout and external cancellation.
-        // CancelAfter schedules automatic cancellation - no need for separate Task.Delay timer.
         using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        timeoutCts.CancelAfter(timeout.Value);
 
-        var executionTask = taskFactory(timeoutCts.Token);
-
-        // TCS fires when linked token is cancelled (either external cancellation OR timeout)
+        // Set up cancellation detection BEFORE scheduling timeout to avoid race condition
+        // where timeout fires before registration completes (with very small timeouts)
         var cancelledTcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
         using var registration = timeoutCts.Token.Register(
             static state => ((TaskCompletionSource<T>)state!).TrySetCanceled(),
             cancelledTcs);
+
+        // Now schedule the timeout - registration is guaranteed to catch it
+        timeoutCts.CancelAfter(timeout.Value);
+
+        var executionTask = taskFactory(timeoutCts.Token);
 
         var winner = await Task.WhenAny(executionTask, cancelledTcs.Task).ConfigureAwait(false);
 
