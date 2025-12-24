@@ -69,7 +69,9 @@ internal static class TimeoutHelper
 
             // Race against cancellation - TrySetCanceled makes the TCS throw OperationCanceledException when awaited
             var tcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
-            using var reg = cancellationToken.Register(() => tcs.TrySetCanceled(cancellationToken));
+            using var reg = cancellationToken.Register(
+                static state => ((TaskCompletionSource<T>)state!).TrySetCanceled(),
+                tcs);
 
             // await await: first gets winning task, then awaits it (propagates result or exception)
             return await await Task.WhenAny(task, tcs.Task).ConfigureAwait(false);
@@ -84,7 +86,9 @@ internal static class TimeoutHelper
 
         // TCS fires when linked token is cancelled (either external cancellation OR timeout)
         var cancelledTcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
-        using var registration = timeoutCts.Token.Register(() => cancelledTcs.TrySetCanceled(timeoutCts.Token));
+        using var registration = timeoutCts.Token.Register(
+            static state => ((TaskCompletionSource<T>)state!).TrySetCanceled(),
+            cancelledTcs);
 
         var winner = await Task.WhenAny(executionTask, cancelledTcs.Task).ConfigureAwait(false);
 
