@@ -1,8 +1,15 @@
 ﻿using Shouldly;
+using TUnit.Core.Enums;
 using TUnit.Engine.Tests.Enums;
 
 namespace TUnit.Engine.Tests;
 
+/// <summary>
+/// Tests that verify test cancellation works correctly when graceful cancellation is requested.
+/// Skipped on Windows because CliWrap's graceful cancellation uses GenerateConsoleCtrlEvent,
+/// which doesn't work properly for subprocess control.
+/// </summary>
+[ExcludeOn(OS.Windows)]
 public class CanCancelTests(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test, Timeout(30_000)]
