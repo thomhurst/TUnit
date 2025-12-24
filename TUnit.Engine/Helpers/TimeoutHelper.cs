@@ -100,7 +100,7 @@ internal static class TimeoutHelper
                 throw new OperationCanceledException(cancellationToken);
             }
 
-            // Timeout occurred - give the execution task a brief grace period
+            // Timeout occurred - give the execution task a brief grace period to clean up
             try
             {
 #if NET8_0_OR_GREATER
@@ -111,9 +111,10 @@ internal static class TimeoutHelper
             }
             catch
             {
-                // Ignore all exceptions from the cancelled task
+                // Ignore all exceptions - task was cancelled, we're just giving it time to clean up
             }
 
+            // Even if task completed during grace period, timeout already elapsed so we throw
             throw new TimeoutException(timeoutMessage ?? $"Operation timed out after {timeout.Value}");
         }
 
