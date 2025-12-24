@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Text;
 using CliWrap;
 using CliWrap.Buffered;
 using TrxTools.TrxParser;
@@ -72,7 +73,7 @@ public abstract class InvokableTestBase(TestMode testMode)
             .WithWorkingDirectory(testProject.DirectoryName!)
             .WithValidation(CommandResultValidation.None);
 
-        await RunWithFailureLogging(command, trxFilename, assertions, assertionExpression);
+        await RunWithFailureLogging(command, runOptions, trxFilename, assertions, assertionExpression);
     }
 
     private async Task RunWithAot(string filter, List<Action<TestRun>> assertions,
@@ -106,7 +107,7 @@ public abstract class InvokableTestBase(TestMode testMode)
             )
             .WithValidation(CommandResultValidation.None);
 
-        await RunWithFailureLogging(command, trxFilename, assertions, assertionExpression);
+        await RunWithFailureLogging(command, runOptions, trxFilename, assertions, assertionExpression);
     }
 
     private async Task RunWithSingleFile(string filter,
@@ -140,7 +141,7 @@ public abstract class InvokableTestBase(TestMode testMode)
             )
             .WithValidation(CommandResultValidation.None);
 
-        await RunWithFailureLogging(command, trxFilename, assertions, assertionExpression);
+        await RunWithFailureLogging(command, runOptions, trxFilename, assertions, assertionExpression);
     }
 
     protected static FileInfo? FindFile(Func<FileInfo, bool> predicate)
@@ -153,13 +154,27 @@ public abstract class InvokableTestBase(TestMode testMode)
         return FileSystemHelpers.FindFolder(predicate);
     }
 
-    private async Task RunWithFailureLogging(Command command, string trxFilename, List<Action<TestRun>> assertions, string assertionExpression)
+    private async Task<CommandTask<BufferedCommandResult>> RunWithFailureLogging(Command command, RunOptions runOptions,
+        string trxFilename, List<Action<TestRun>> assertions, string assertionExpression)
     {
+        var commandTask = command.ExecuteBufferedAsync
+        (
+            gracefulCancellationToken: runOptions.GracefulCancellationToken,
+            forcefulCancellationToken: runOptions.ForcefulCancellationToken,
+            standardOutputEncoding: runOptions.StandardOutputEncoding,
+            standardErrorEncoding: runOptions.StandardErrorEncoding
+        );
+
         BufferedCommandResult? commandResult = null;
 
         try
         {
-            commandResult = await command.ExecuteBufferedAsync();
+            foreach (var onExecutingDelegate in runOptions.OnExecutingDelegates)
+            {
+                await onExecutingDelegate(commandTask);
+            }
+
+            commandResult = await commandTask;
 
             await TrxAsserter.AssertTrx(testMode, command, commandResult, assertions, trxFilename, assertionExpression: assertionExpression);
         }
@@ -176,16 +191,38 @@ public abstract class InvokableTestBase(TestMode testMode)
                                  Expression: {assertionExpression}
                                  """);
         }
+
+        return commandTask;
     }
 }
 
 public record RunOptions
 {
+    public CancellationToken GracefulCancellationToken { get; set; } = CancellationToken.None;
+    public CancellationToken ForcefulCancellationToken { get; set; } = CancellationToken.None;
+
+    public Encoding StandardOutputEncoding { get; set; } = Encoding.UTF8;
+    public Encoding StandardErrorEncoding { get; set; } = Encoding.UTF8;
+
     public List<string> AdditionalArguments { get; init; } = [];
+
+    public List<Func<CommandTask<BufferedCommandResult>, Task>> OnExecutingDelegates { get; init; } = [];
 
     public RunOptions WithArgument(string argument)
     {
         AdditionalArguments.Add(argument);
+        return this;
+    }
+
+    public RunOptions WithGracefulCancellationToken(CancellationToken token)
+    {
+        GracefulCancellationToken = token;
+        return this;
+    }
+
+    public RunOptions WithForcefulCancellationToken(CancellationToken token)
+    {
+        ForcefulCancellationToken = token;
         return this;
     }
 }

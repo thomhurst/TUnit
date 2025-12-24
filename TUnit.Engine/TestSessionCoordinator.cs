@@ -90,7 +90,8 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
         // Combine cancellation tokens
         using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
             cancellationToken,
-            _serviceProvider.FailFastCancellationSource.Token);
+            _serviceProvider.FailFastCancellationSource.Token,
+            _serviceProvider.CancellationToken.Token);
 
         // Schedule and execute tests (batch approach to preserve ExecutionContext)
         var success = await _testScheduler.ScheduleAndExecuteAsync(testList, linkedCts.Token);
