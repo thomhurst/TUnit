@@ -5,6 +5,11 @@ using TUnit.Example.Asp.Net.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+if (builder.Configuration["SomeKey"] != "SomeValue")
+{
+    throw new InvalidOperationException("SomeKey is not SomeValue - But we set it in WebApplicationFactory");
+}
+
 builder.Services.AddOpenApi();
 builder.Services.Configure<DatabaseOptions>(builder.Configuration.GetSection(DatabaseOptions.SectionName));
 builder.Services.Configure<RedisOptions>(builder.Configuration.GetSection(RedisOptions.SectionName));
