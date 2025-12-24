@@ -1004,6 +1004,16 @@ namespace
         public override int GetHashCode() { }
         protected virtual bool PrintMembers(.StringBuilder stringBuilder) { }
     }
+    [(.Assembly | .Class | .Method, AllowMultiple=false, Inherited=true)]
+    public class NotDiscoverableAttribute : .TUnitAttribute, ., .
+    {
+        public NotDiscoverableAttribute() { }
+        public NotDiscoverableAttribute(string reason) { }
+        public int Order { get; }
+        public string? Reason { get; }
+        public . OnTestRegistered(.TestRegisteredContext context) { }
+        public virtual .<bool> ShouldHide(.TestRegisteredContext context) { }
+    }
     [(.Assembly | .Class | .Method)]
     public class NotInParallelAttribute : .SingleTUnitAttribute, .IScopedAttribute, ., .
     {
@@ -2412,6 +2422,7 @@ namespace .Interfaces
         .CancellationToken CancellationToken { get; }
         int CurrentRetryAttempt { get; }
         .? CustomHookExecutor { get; set; }
+        bool IsNotDiscoverable { get; set; }
         .TestPhase Phase { get; }
         bool ReportResult { get; set; }
         .TestResult? Result { get; }

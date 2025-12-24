@@ -22,6 +22,7 @@ public partial class TestContext
     internal Func<TestContext, Exception, int, Task<bool>>? RetryFunc { get; set; }
     internal IHookExecutor? CustomHookExecutor { get; set; }
     internal bool ReportResult { get; set; } = true;
+    internal bool IsNotDiscoverable { get; set; }
 
     // Explicit interface implementations for ITestExecution
     TestPhase ITestExecution.Phase => Phase;
@@ -61,6 +62,11 @@ public partial class TestContext
     {
         get => ReportResult;
         set => ReportResult = value;
+    }
+    bool ITestExecution.IsNotDiscoverable
+    {
+        get => IsNotDiscoverable;
+        set => IsNotDiscoverable = value;
     }
 
     void ITestExecution.OverrideResult(TestState state, string reason) => OverrideResult(state, reason);
