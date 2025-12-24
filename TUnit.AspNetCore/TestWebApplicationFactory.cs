@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using TUnit.AspNetCore.Extensions;
 using TUnit.AspNetCore.Interception;
 using TUnit.Core;
@@ -14,24 +15,31 @@ namespace TUnit.AspNetCore;
 /// </summary>
 public abstract class TestWebApplicationFactory<TEntryPoint> : WebApplicationFactory<TEntryPoint> where TEntryPoint : class
 {
+
     public WebApplicationFactory<TEntryPoint> GetIsolatedFactory(
         TestContext testContext,
         WebApplicationTestOptions options,
-        Action<IServiceCollection> configureServices,
-        Action<WebHostBuilderContext, IConfigurationBuilder> configureConfiguration,
+        Action<IServiceCollection> configureIsolatedServices,
+        Action<IConfigurationBuilder> configureIsolatedStartupConfiguration,
+        Action<WebHostBuilderContext, IConfigurationBuilder> configureIsolatedAppConfiguration,
         Action<IWebHostBuilder>? configureWebHostBuilder = null)
     {
         return WithWebHostBuilder(builder =>
         {
-            // Apply user's escape hatch configuration first
-            configureWebHostBuilder?.Invoke(builder);
+            var configurationBuilder = new ConfigurationManager();
+            ConfigureStartupConfiguration(configurationBuilder);
+            configureIsolatedStartupConfiguration(configurationBuilder);
 
-            // Then apply standard configuration
+            foreach (var keyValuePair in configurationBuilder.AsEnumerable())
+            {
+                builder.UseSetting(keyValuePair.Key, keyValuePair.Value);
+            }
+
             builder
-                .ConfigureAppConfiguration(configureConfiguration)
+                .ConfigureAppConfiguration(configureIsolatedAppConfiguration)
                 .ConfigureTestServices(services =>
                 {
-                    configureServices(services);
+                    configureIsolatedServices(services);
                     services.AddSingleton(testContext);
                 });
 
@@ -39,6 +47,21 @@ public abstract class TestWebApplicationFactory<TEntryPoint> : WebApplicationFac
             {
                 builder.ConfigureTestServices(services => services.AddHttpExchangeCapture());
             }
+
+            configureWebHostBuilder?.Invoke(builder);
         });
+    }
+
+    protected virtual void ConfigureStartupConfiguration(IConfigurationBuilder configurationBuilder)
+    {
+    }
+
+    protected override IHostBuilder? CreateHostBuilder()
+    {
+        var hostBuilder = base.CreateHostBuilder();
+
+        hostBuilder?.ConfigureHostConfiguration(ConfigureStartupConfiguration);
+
+        return hostBuilder;
     }
 }

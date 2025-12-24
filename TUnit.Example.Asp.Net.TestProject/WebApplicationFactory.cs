@@ -49,8 +49,16 @@ public class WebApplicationFactory : TestWebApplicationFactory<Program>
             {
                 { "Database:ConnectionString", PostgreSql.Container.GetConnectionString() },
                 { "Redis:ConnectionString", Redis.Container.GetConnectionString() },
-                { "Kafka:ConnectionString", Kafka.Container.GetBootstrapAddress() }
+                { "Kafka:ConnectionString", Kafka.Container.GetBootstrapAddress() },
             });
+        });
+    }
+
+    protected override void ConfigureStartupConfiguration(IConfigurationBuilder configurationBuilder)
+    {
+        configurationBuilder.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            { "SomeKey", "SomeValue" }
         });
     }
 }
