@@ -653,6 +653,45 @@ public class NUnitMigrationAnalyzerTests
         );
     }
 
+    [Test]
+    public async Task NUnit_ExpectedResult_BlockBody_SingleReturn_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+            using NUnit.Framework;
+
+            public class MyClass
+            {
+                {|#0:[TestCase(2, 3, ExpectedResult = 5)]|}
+                public int Add(int a, int b)
+                {
+                    var sum = a + b;
+                    return sum;
+                }
+            }
+            """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+            using TUnit.Core;
+            using TUnit.Assertions;
+            using static TUnit.Assertions.Assert;
+            using TUnit.Assertions.Extensions;
+
+            public class MyClass
+            {
+                [Test]
+                [Arguments(2, 3, 5)]
+                public async Task Add(int a, int b, int expected)
+                {
+                    var sum = a + b;
+                    await Assert.That(sum).IsEqualTo(expected);
+                }
+            }
+            """,
+            ConfigureNUnitTest
+        );
+    }
+
     private static void ConfigureNUnitTest(Verifier.Test test)
     {
         test.TestState.AdditionalReferences.Add(typeof(NUnit.Framework.TestAttribute).Assembly);
