@@ -87,10 +87,14 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
     #endif
     private async Task ExecuteTestsCore(List<AbstractExecutableTest> testList, CancellationToken cancellationToken)
     {
-        // Combine cancellation tokens
+        // Combine cancellation tokens from multiple sources:
+        // - cancellationToken: Per-request cancellation from test platform
+        // - FailFastCancellationSource: Triggered when fail-fast is enabled and a test fails
+        // - CancellationToken: Engine-level graceful shutdown (e.g., Ctrl+C)
         using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
             cancellationToken,
-            _serviceProvider.FailFastCancellationSource.Token);
+            _serviceProvider.FailFastCancellationSource.Token,
+            _serviceProvider.CancellationToken.Token);
 
         // Schedule and execute tests (batch approach to preserve ExecutionContext)
         var success = await _testScheduler.ScheduleAndExecuteAsync(testList, linkedCts.Token);
