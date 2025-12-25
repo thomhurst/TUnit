@@ -692,6 +692,56 @@ public class NUnitMigrationAnalyzerTests
         );
     }
 
+    [Test]
+    public async Task NUnit_ExpectedResult_MultipleReturns_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+            using NUnit.Framework;
+
+            public class MyClass
+            {
+                {|#0:[TestCase(-1, ExpectedResult = 0)]|}
+                [TestCase(0, ExpectedResult = 1)]
+                [TestCase(5, ExpectedResult = 120)]
+                public int Factorial(int n)
+                {
+                    if (n < 0) return 0;
+                    if (n <= 1) return 1;
+                    return n * Factorial(n - 1);
+                }
+            }
+            """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+            using TUnit.Core;
+            using TUnit.Assertions;
+            using static TUnit.Assertions.Assert;
+            using TUnit.Assertions.Extensions;
+
+            public class MyClass
+            {
+                [Test]
+                [Arguments(-1, 0)]
+                [Arguments(0, 1)]
+                [Arguments(5, 120)]
+                public async Task Factorial(int n, int expected)
+                {
+                    int result;
+                    if (n < 0)
+                        result = 0;
+                    else if (n <= 1)
+                        result = 1;
+                    else
+                        result = n * Factorial(n - 1);
+                    await Assert.That(result).IsEqualTo(expected);
+                }
+            }
+            """,
+            ConfigureNUnitTest
+        );
+    }
+
     private static void ConfigureNUnitTest(Verifier.Test test)
     {
         test.TestState.AdditionalReferences.Add(typeof(NUnit.Framework.TestAttribute).Assembly);

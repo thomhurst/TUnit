@@ -1,0 +1,1 @@
+{"exporter": "Microsoft.Diagnostics.Tracing.TraceEvent@3.1.23.0", "name": "before-gc.speedscope.speedscope", "activeProfileIndex": 0, "$schema": "https://www.speedscope.app/file-format-schema.json", "shared": { "frames": [ ] }, "profiles": [ ] }

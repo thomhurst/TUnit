@@ -1,3 +1,4 @@
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -103,7 +104,17 @@ public class NUnitExpectedResultRewriter : CSharpSyntaxRewriter
             .WithSemicolonToken(default);
 
         // 4. Add async modifier if not present
-        if (!method.Modifiers.Any(SyntaxKind.AsyncKeyword))
+        bool hasAsyncModifier = false;
+        foreach (var modifier in method.Modifiers)
+        {
+            if (modifier.IsKind(SyntaxKind.AsyncKeyword))
+            {
+                hasAsyncModifier = true;
+                break;
+            }
+        }
+
+        if (!hasAsyncModifier)
         {
             var modifiers = method.Modifiers;
             var insertIndex = 0;
@@ -143,35 +154,39 @@ public class NUnitExpectedResultRewriter : CSharpSyntaxRewriter
         }
         else if (method.Body != null)
         {
-            // Block body - find return statements
-            var returnStatements = new List<ReturnStatementSyntax>();
-            foreach (var statement in method.Body.Statements)
-            {
-                if (statement is ReturnStatementSyntax returnStmt)
-                {
-                    returnStatements.Add(returnStmt);
-                }
-            }
+            // Block body - find ALL return statements recursively
+            var returnStatements = FindAllReturnStatements(method.Body);
 
             if (returnStatements.Count == 1 && returnStatements[0].Expression != null)
             {
-                // Single return - use the expression directly
-                returnExpression = returnStatements[0].Expression;
+                // Single return - check if it's a simple direct return or nested
+                bool isDirectReturn = method.Body.Statements.Contains(returnStatements[0]);
 
-                // Build new body with all statements except the return, plus assertion
-                var statementsWithoutReturn = new List<StatementSyntax>();
-                foreach (var s in method.Body.Statements)
+                if (isDirectReturn)
                 {
-                    if (s != returnStatements[0])
+                    // Direct return - use the expression directly
+                    returnExpression = returnStatements[0].Expression;
+
+                    // Build new body with all statements except the return, plus assertion
+                    var statementsWithoutReturn = new List<StatementSyntax>();
+                    foreach (var s in method.Body.Statements)
                     {
-                        statementsWithoutReturn.Add(s);
+                        if (s != returnStatements[0])
+                        {
+                            statementsWithoutReturn.Add(s);
+                        }
                     }
+
+                    var assertStatement = CreateAssertStatement(returnExpression);
+                    statementsWithoutReturn.Add(assertStatement);
+
+                    return SyntaxFactory.Block(statementsWithoutReturn);
                 }
-
-                var assertStatement = CreateAssertStatement(returnExpression);
-                statementsWithoutReturn.Add(assertStatement);
-
-                return SyntaxFactory.Block(statementsWithoutReturn);
+                else
+                {
+                    // Nested return - treat as multiple returns
+                    return TransformMultipleReturns(method.Body, returnType);
+                }
             }
             else if (returnStatements.Count > 1)
             {
@@ -195,6 +210,21 @@ public class NUnitExpectedResultRewriter : CSharpSyntaxRewriter
         return SyntaxFactory.Block(assertion);
     }
 
+    private List<ReturnStatementSyntax> FindAllReturnStatements(SyntaxNode node)
+    {
+        var returnStatements = new List<ReturnStatementSyntax>();
+
+        foreach (var descendant in node.DescendantNodes())
+        {
+            if (descendant is ReturnStatementSyntax returnStmt)
+            {
+                returnStatements.Add(returnStmt);
+            }
+        }
+
+        return returnStatements;
+    }
+
     private BlockSyntax TransformMultipleReturns(BlockSyntax body, TypeSyntax returnType)
     {
         // Declare: {returnType} result;
@@ -203,13 +233,12 @@ public class NUnitExpectedResultRewriter : CSharpSyntaxRewriter
                 .WithVariables(SyntaxFactory.SingletonSeparatedList(
                     SyntaxFactory.VariableDeclarator("result"))));
 
-        // Replace each 'return X;' with 'result = X;'
-        var rewriter = new ReturnToAssignmentRewriter();
-        var transformedBody = (BlockSyntax)rewriter.Visit(body);
+        // Transform the statements to use if-else chains
+        var transformedStatements = TransformStatementsWithElseChain(body.Statements);
 
         // Add result declaration at start
         var statements = new List<StatementSyntax> { resultDeclaration };
-        statements.AddRange(transformedBody.Statements);
+        statements.AddRange(transformedStatements);
 
         // Add assertion at end
         var assertStatement = CreateAssertStatement(
@@ -217,6 +246,115 @@ public class NUnitExpectedResultRewriter : CSharpSyntaxRewriter
         statements.Add(assertStatement);
 
         return SyntaxFactory.Block(statements);
+    }
+
+    private List<StatementSyntax> TransformStatementsWithElseChain(SyntaxList<StatementSyntax> originalStatements)
+    {
+        var result = new List<StatementSyntax>();
+        var ifChainParts = new List<(ExpressionSyntax condition, StatementSyntax statement)>();
+        StatementSyntax? elseStatement = null;
+
+        // First pass: collect all if statements with returns and the final return
+        for (int i = 0; i < originalStatements.Count; i++)
+        {
+            var stmt = originalStatements[i];
+
+            if (stmt is IfStatementSyntax ifStmt && ContainsReturn(ifStmt))
+            {
+                // Extract the condition and the assignment
+                var transformedIf = TransformIfStatement(ifStmt);
+
+                // If the statement is a block with a single statement, unwrap it
+                var statement = transformedIf.Statement;
+                if (statement is BlockSyntax block && block.Statements.Count == 1)
+                {
+                    statement = block.Statements[0];
+                }
+
+                ifChainParts.Add((transformedIf.Condition, statement));
+            }
+            else if (stmt is ReturnStatementSyntax returnStmt && returnStmt.Expression != null)
+            {
+                // Final return statement - will become the else clause
+                elseStatement = SyntaxFactory.ExpressionStatement(
+                    SyntaxFactory.AssignmentExpression(
+                        SyntaxKind.SimpleAssignmentExpression,
+                        SyntaxFactory.IdentifierName("result"),
+                        returnStmt.Expression));
+            }
+            else
+            {
+                // Non-return statement - add any accumulated if chain first
+                if (ifChainParts.Count > 0 || elseStatement != null)
+                {
+                    result.Add(BuildIfElseChain(ifChainParts, elseStatement));
+                    ifChainParts.Clear();
+                    elseStatement = null;
+                }
+                result.Add(stmt);
+            }
+        }
+
+        // Add any remaining if chain
+        if (ifChainParts.Count > 0 || elseStatement != null)
+        {
+            result.Add(BuildIfElseChain(ifChainParts, elseStatement));
+        }
+
+        return result;
+    }
+
+    private IfStatementSyntax BuildIfElseChain(
+        List<(ExpressionSyntax condition, StatementSyntax statement)> ifChainParts,
+        StatementSyntax? elseStatement)
+    {
+        // Build the chain from the end backwards
+        ElseClauseSyntax? elseClause = elseStatement != null
+            ? SyntaxFactory.ElseClause(elseStatement.WithoutTrivia())
+            : null;
+
+        // Build the if-else chain backwards
+        for (int i = ifChainParts.Count - 1; i >= 0; i--)
+        {
+            var (condition, statement) = ifChainParts[i];
+
+            var ifStmt = SyntaxFactory.IfStatement(
+                condition.WithoutTrivia(),
+                statement.WithoutTrivia());
+
+            if (elseClause != null)
+            {
+                ifStmt = ifStmt.WithElse(elseClause);
+            }
+
+            // This becomes the else clause for the next level up
+            if (i > 0)
+            {
+                elseClause = SyntaxFactory.ElseClause(ifStmt);
+            }
+            else
+            {
+                // This is the root
+                return ifStmt;
+            }
+        }
+
+        // Shouldn't get here if ifChainParts is not empty
+        return SyntaxFactory.IfStatement(
+            SyntaxFactory.LiteralExpression(SyntaxKind.TrueLiteralExpression),
+            SyntaxFactory.Block());
+    }
+
+    private bool ContainsReturn(SyntaxNode node)
+    {
+        return node.DescendantNodes().OfType<ReturnStatementSyntax>().Any();
+    }
+
+    private IfStatementSyntax TransformIfStatement(IfStatementSyntax ifStmt)
+    {
+        // Transform the statement inside the if from 'return X;' to 'result = X;'
+        var rewriter = new ReturnToAssignmentRewriter();
+        return (IfStatementSyntax)rewriter.Visit(ifStmt);
     }
 
     private ExpressionStatementSyntax CreateAssertStatement(ExpressionSyntax actualExpression)
