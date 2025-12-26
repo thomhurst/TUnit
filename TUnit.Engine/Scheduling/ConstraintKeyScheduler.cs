@@ -55,15 +55,24 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
             bool canStart;
             lock (lockObject)
             {
-                // Check if all constraint keys are available
-                canStart = !constraintKeys.Any(key => lockedKeys.Contains(key));
-                
+                // Check if all constraint keys are available - manual loop avoids LINQ allocation
+                canStart = true;
+                var keyCount = constraintKeys.Count;
+                for (var i = 0; i < keyCount; i++)
+                {
+                    if (lockedKeys.Contains(constraintKeys[i]))
+                    {
+                        canStart = false;
+                        break;
+                    }
+                }
+
                 if (canStart)
                 {
                     // Lock all the constraint keys for this test
-                    foreach (var key in constraintKeys)
+                    for (var i = 0; i < keyCount; i++)
                     {
-                        lockedKeys.Add(key);
+                        lockedKeys.Add(constraintKeys[i]);
                     }
                 }
             }
@@ -146,8 +155,10 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
             parallelLimiterSemaphore?.Release();
 
             // Release the constraint keys and check if any waiting tests can now run
+            // Pre-allocate lists outside the lock to minimize lock duration
             var testsToStart = new List<(AbstractExecutableTest Test, IReadOnlyList<string> ConstraintKeys, TaskCompletionSource<bool> StartSignal)>();
-            
+            var testsToRequeue = new List<(AbstractExecutableTest Test, IReadOnlyList<string> ConstraintKeys, TaskCompletionSource<bool> StartSignal)>();
+
             lock (lockObject)
             {
                 // Release all constraint keys for this test
@@ -155,35 +166,43 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
                 {
                     lockedKeys.Remove(key);
                 }
-                
+
                 // Check waiting tests to see if any can now run
-                var tempQueue = new List<(AbstractExecutableTest Test, IReadOnlyList<string> ConstraintKeys, TaskCompletionSource<bool> StartSignal)>();
                 
                 while (waitingTests.TryDequeue(out var waitingTest))
                 {
-                    // Check if all constraint keys are available for this waiting test
-                    var canStart = !waitingTest.ConstraintKeys.Any(key => lockedKeys.Contains(key));
-                    
+                    // Check if all constraint keys are available for this waiting test - manual loop avoids LINQ allocation
+                    var canStart = true;
+                    var waitingKeyCount = waitingTest.ConstraintKeys.Count;
+                    for (var i = 0; i < waitingKeyCount; i++)
+                    {
+                        if (lockedKeys.Contains(waitingTest.ConstraintKeys[i]))
+                        {
+                            canStart = false;
+                            break;
+                        }
+                    }
+
                     if (canStart)
                     {
                         // Lock the keys for this test
-                        foreach (var key in waitingTest.ConstraintKeys)
+                        for (var i = 0; i < waitingKeyCount; i++)
                         {
-                            lockedKeys.Add(key);
+                            lockedKeys.Add(waitingTest.ConstraintKeys[i]);
                         }
-                        
+
                         // Mark test to start after we exit the lock
                         testsToStart.Add(waitingTest);
                     }
                     else
                     {
                         // Still can't run, keep it in the queue
-                        tempQueue.Add(waitingTest);
+                        testsToRequeue.Add(waitingTest);
                     }
                 }
-                
+
                 // Re-add tests that still can't run
-                foreach (var waitingTestItem in tempQueue)
+                foreach (var waitingTestItem in testsToRequeue)
                 {
                     waitingTests.Enqueue(waitingTestItem);
                 }

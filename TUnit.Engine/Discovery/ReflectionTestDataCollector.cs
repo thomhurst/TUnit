@@ -1,5 +1,6 @@
 ﻿using System.Buffers;
 using System.Collections.Concurrent;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -28,8 +29,7 @@ namespace TUnit.Engine.Discovery;
 internal sealed class ReflectionTestDataCollector : ITestDataCollector
 {
     private static readonly ConcurrentDictionary<Assembly, bool> _scannedAssemblies = new();
-    private static readonly List<TestMetadata> _discoveredTests = new(capacity: 1000); // Pre-sized for typical test suites
-    private static readonly Lock _discoveredTestsLock = new(); // Lock for thread-safe access to _discoveredTests
+    private static ImmutableList<TestMetadata> _discoveredTests = ImmutableList<TestMetadata>.Empty;
     private static readonly ConcurrentDictionary<Assembly, Type[]> _assemblyTypesCache = new();
     private static readonly ConcurrentDictionary<Type, MethodInfo[]> _typeMethodsCache = new();
 
@@ -47,10 +47,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     public static void ClearCaches()
     {
         _scannedAssemblies.Clear();
-        lock (_discoveredTestsLock)
-        {
-            _discoveredTests.Clear();
-        }
+        Interlocked.Exchange(ref _discoveredTests, ImmutableList<TestMetadata>.Empty);
         _assemblyTypesCache.Clear();
         _typeMethodsCache.Clear();
         lock (_assemblyCacheLock)
@@ -133,12 +130,15 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         var dynamicTests = await DiscoverDynamicTests(testSessionId).ConfigureAwait(false);
         newTests.AddRange(dynamicTests);
 
-        // Add to discovered tests with lock (better enumeration performance than ConcurrentBag)
-        lock (_discoveredTestsLock)
+        // Atomic swap - no lock needed for readers
+        ImmutableList<TestMetadata> original, updated;
+        do
         {
-            _discoveredTests.AddRange(newTests);
-            return new List<TestMetadata>(_discoveredTests);
-        }
+            original = _discoveredTests;
+            updated = original.AddRange(newTests);
+        } while (Interlocked.CompareExchange(ref _discoveredTests, updated, original) != original);
+
+        return _discoveredTests;
     }
 
     public async IAsyncEnumerable<TestMetadata> CollectTestsStreamingAsync(
@@ -171,10 +171,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             // Stream tests from this assembly
             await foreach (var test in DiscoverTestsInAssemblyStreamingAsync(assembly, cancellationToken))
             {
-                lock (_discoveredTestsLock)
-                {
-                    _discoveredTests.Add(test);
-                }
+                ImmutableInterlocked.Update(ref _discoveredTests, list => list.Add(test));
                 yield return test;
             }
         }
@@ -182,10 +179,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // Stream dynamic tests
         await foreach (var dynamicTest in DiscoverDynamicTestsStreamingAsync(testSessionId, cancellationToken))
         {
-            lock (_discoveredTestsLock)
-            {
-                _discoveredTests.Add(dynamicTest);
-            }
+            ImmutableInterlocked.Update(ref _discoveredTests, list => list.Add(dynamicTest));
             yield return dynamicTest;
         }
     }
