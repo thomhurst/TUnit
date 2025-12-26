@@ -742,6 +742,42 @@ public class NUnitMigrationAnalyzerTests
         );
     }
 
+    [Test]
+    public async Task NUnit_ExpectedResult_String_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+            using NUnit.Framework;
+
+            public class MyClass
+            {
+                {|#0:[TestCase("hello", ExpectedResult = "HELLO")]|}
+                [TestCase("World", ExpectedResult = "WORLD")]
+                public string ToUpper(string input) => input.ToUpper();
+            }
+            """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+            using TUnit.Core;
+            using TUnit.Assertions;
+            using static TUnit.Assertions.Assert;
+            using TUnit.Assertions.Extensions;
+
+            public class MyClass
+            {
+                [Test]
+                [Arguments("hello", "HELLO")]
+                [Arguments("World", "WORLD")]
+                public async Task ToUpper(string input, string expected)
+                {
+                    await Assert.That(input.ToUpper()).IsEqualTo(expected);
+                }
+            }
+            """,
+            ConfigureNUnitTest
+        );
+    }
+
     private static void ConfigureNUnitTest(Verifier.Test test)
     {
         test.TestState.AdditionalReferences.Add(typeof(NUnit.Framework.TestAttribute).Assembly);
