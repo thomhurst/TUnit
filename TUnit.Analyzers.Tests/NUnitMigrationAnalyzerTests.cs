@@ -581,6 +581,153 @@ public class NUnitMigrationAnalyzerTests
         );
     }
 
+    [Test]
+    public async Task NUnit_ExpectedResult_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+            using NUnit.Framework;
+
+            public class MyClass
+            {
+                {|#0:[TestCase(2, 3, ExpectedResult = 5)]|}
+                public int Add(int a, int b) => a + b;
+            }
+            """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+            using TUnit.Core;
+            using TUnit.Assertions;
+            using static TUnit.Assertions.Assert;
+            using TUnit.Assertions.Extensions;
+
+            public class MyClass
+            {
+                [Test]
+                [Arguments(2, 3, 5)]
+                public async Task Add(int a, int b, int expected)
+                {
+                    await Assert.That(a + b).IsEqualTo(expected);
+                }
+            }
+            """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_Multiple_ExpectedResult_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+            using NUnit.Framework;
+
+            public class MyClass
+            {
+                {|#0:[TestCase(2, 3, ExpectedResult = 5)]|}
+                [TestCase(10, 5, ExpectedResult = 15)]
+                [TestCase(0, 0, ExpectedResult = 0)]
+                public int Add(int a, int b) => a + b;
+            }
+            """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+            using TUnit.Core;
+            using TUnit.Assertions;
+            using static TUnit.Assertions.Assert;
+            using TUnit.Assertions.Extensions;
+
+            public class MyClass
+            {
+                [Test]
+                [Arguments(2, 3, 5)]
+                [Arguments(10, 5, 15)]
+                [Arguments(0, 0, 0)]
+                public async Task Add(int a, int b, int expected)
+                {
+                    await Assert.That(a + b).IsEqualTo(expected);
+                }
+            }
+            """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_ExpectedResult_BlockBody_SingleReturn_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+            using NUnit.Framework;
+
+            public class MyClass
+            {
+                {|#0:[TestCase(2, 3, ExpectedResult = 5)]|}
+                public int Add(int a, int b)
+                {
+                    var sum = a + b;
+                    return sum;
+                }
+            }
+            """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+            using TUnit.Core;
+            using TUnit.Assertions;
+            using static TUnit.Assertions.Assert;
+            using TUnit.Assertions.Extensions;
+
+            public class MyClass
+            {
+                [Test]
+                [Arguments(2, 3, 5)]
+                public async Task Add(int a, int b, int expected)
+                {
+                    var sum = a + b;
+                    await Assert.That(sum).IsEqualTo(expected);
+                }
+            }
+            """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_ExpectedResult_String_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+            using NUnit.Framework;
+
+            public class MyClass
+            {
+                {|#0:[TestCase("hello", ExpectedResult = "HELLO")]|}
+                [TestCase("World", ExpectedResult = "WORLD")]
+                public string ToUpper(string input) => input.ToUpper();
+            }
+            """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+            using TUnit.Core;
+            using TUnit.Assertions;
+            using static TUnit.Assertions.Assert;
+            using TUnit.Assertions.Extensions;
+
+            public class MyClass
+            {
+                [Test]
+                [Arguments("hello", "HELLO")]
+                [Arguments("World", "WORLD")]
+                public async Task ToUpper(string input, string expected)
+                {
+                    await Assert.That(input.ToUpper()).IsEqualTo(expected);
+                }
+            }
+            """,
+            ConfigureNUnitTest
+        );
+    }
+
     private static void ConfigureNUnitTest(Verifier.Test test)
     {
         test.TestState.AdditionalReferences.Add(typeof(NUnit.Framework.TestAttribute).Assembly);
