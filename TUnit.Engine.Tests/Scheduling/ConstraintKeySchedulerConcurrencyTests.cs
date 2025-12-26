@@ -20,12 +20,15 @@ public class ConstraintKeySchedulerConcurrencyTests(TestMode testMode) : Invokab
         // It runs tests with overlapping constraint keys to verify the scheduler
         // can handle high contention without deadlocking
 
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+
         await RunTestsWithFilter("/*/*/ConstraintKeyStressTests/*",
         [
             result => result.ResultSummary.Outcome.ShouldBe("Completed"),
             result => result.ResultSummary.Counters.Total.ShouldBe(30), // 10 tests × 3 runs (Repeat(2))
             result => result.ResultSummary.Counters.Passed.ShouldBe(30),
             result => result.ResultSummary.Counters.Failed.ShouldBe(0)
-        ]);
+        ],
+        new RunOptions().WithForcefulCancellationToken(cts.Token));
     }
 }

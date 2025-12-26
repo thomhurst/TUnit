@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
@@ -11,31 +10,6 @@ namespace TUnit.TestProject;
 [EngineTest(ExpectedResult.Pass)]
 public class ConstraintKeyStressTests
 {
-    private static readonly ConcurrentBag<(string TestName, DateTimeOffset Start, DateTimeOffset End)> _executionTimes = [];
-    private static int _completedTests = 0;
-
-    [After(Test)]
-    public async Task RecordExecution()
-    {
-        var context = TestContext.Current!;
-        _executionTimes.Add((context.Metadata.TestDetails.TestName,
-                            context.Execution.TestStart!.Value,
-                            context.Execution.Result!.End!.Value));
-        Interlocked.Increment(ref _completedTests);
-        await Task.CompletedTask;
-    }
-
-    [After(Class)]
-    public static async Task VerifyAllTestsCompleted()
-    {
-        await Task.Delay(100); // Ensure all tests recorded
-
-        var times = _executionTimes.ToArray();
-
-        // Check we have all 30 tests (10 methods × 3 runs each with Repeat(2))
-        await Assert.That(times.Length).IsEqualTo(30);
-        await Assert.That(_completedTests).IsEqualTo(30);
-    }
 
     // Tests with constraint key "A" - will contend with each other
     [Test, Repeat(2)]
