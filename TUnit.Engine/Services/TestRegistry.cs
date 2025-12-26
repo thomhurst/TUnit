@@ -261,7 +261,9 @@ internal sealed class TestRegistry : ITestRegistry
             TestName = testName,
             TestClassType = result.TestClassType,
             TestMethodName = methodInfo.Name,
-            Dependencies = GetDependenciesOptimized(result.Attributes),
+            Dependencies = result.Attributes.OfType<DependsOnAttribute>()
+                .Select(x => x.ToTestDependency())
+                .ToArray(),
             DataSources = [],
             ClassDataSources = [],
             PropertyDataSources = [],
@@ -338,25 +340,6 @@ internal sealed class TestRegistry : ITestRegistry
         public required TestContext SourceContext { get; init; }
         public required Type TestClassType { get; init; }
     }
-
-
-    /// <summary>
-    /// Optimized method to get dependencies without LINQ allocations
-    /// </summary>
-    private static TestDependency[] GetDependenciesOptimized(ICollection<Attribute> attributes)
-    {
-        var dependencies = new List<TestDependency>(attributes.Count);
-        foreach (var attr in attributes)
-        {
-            if (attr is DependsOnAttribute dependsOn)
-            {
-                dependencies.Add(dependsOn.ToTestDependency());
-            }
-        }
-        return dependencies.ToArray();
-    }
-
-
 
     /// <summary>
     /// Optimized method to convert attributes to array without LINQ allocations
