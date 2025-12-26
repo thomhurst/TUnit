@@ -427,3 +427,12 @@ nul
 # Claude Code settings
 .claude/settings.local.json
 .claude/agents
+
+# Documentation plans
+doc/plans/
+
+# Speedscope profiling files
+*speedscope*.json
+
+# Dotnet trace files
+*.nettrace

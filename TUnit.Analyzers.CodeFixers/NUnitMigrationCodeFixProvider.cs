@@ -37,7 +37,10 @@ public class NUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
 
     protected override CompilationUnitSyntax ApplyFrameworkSpecificConversions(CompilationUnitSyntax compilationUnit, SemanticModel semanticModel, Compilation compilation)
     {
-        // NUnit-specific conversions if needed
+        // Transform ExpectedResult patterns before attribute conversion
+        var expectedResultRewriter = new NUnitExpectedResultRewriter(semanticModel);
+        compilationUnit = (CompilationUnitSyntax)expectedResultRewriter.Visit(compilationUnit);
+
         return compilationUnit;
     }
 }
