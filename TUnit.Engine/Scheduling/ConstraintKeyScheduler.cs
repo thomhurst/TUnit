@@ -155,8 +155,10 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
             parallelLimiterSemaphore?.Release();
 
             // Release the constraint keys and check if any waiting tests can now run
+            // Pre-allocate lists outside the lock to minimize lock duration
             var testsToStart = new List<(AbstractExecutableTest Test, IReadOnlyList<string> ConstraintKeys, TaskCompletionSource<bool> StartSignal)>();
-            
+            var testsToRequeue = new List<(AbstractExecutableTest Test, IReadOnlyList<string> ConstraintKeys, TaskCompletionSource<bool> StartSignal)>();
+
             lock (lockObject)
             {
                 // Release all constraint keys for this test
@@ -164,9 +166,8 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
                 {
                     lockedKeys.Remove(key);
                 }
-                
+
                 // Check waiting tests to see if any can now run
-                var tempQueue = new List<(AbstractExecutableTest Test, IReadOnlyList<string> ConstraintKeys, TaskCompletionSource<bool> StartSignal)>();
                 
                 while (waitingTests.TryDequeue(out var waitingTest))
                 {
@@ -196,12 +197,12 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
                     else
                     {
                         // Still can't run, keep it in the queue
-                        tempQueue.Add(waitingTest);
+                        testsToRequeue.Add(waitingTest);
                     }
                 }
-                
+
                 // Re-add tests that still can't run
-                foreach (var waitingTestItem in tempQueue)
+                foreach (var waitingTestItem in testsToRequeue)
                 {
                     waitingTests.Enqueue(waitingTestItem);
                 }
