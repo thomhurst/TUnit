@@ -83,13 +83,13 @@
     <PackageVersion Include="Testcontainers.Redis" Version="4.9.0" />
     <PackageVersion Include="trxparser" Version="0.5.0" />
     <PackageVersion Include="TUnit.Assertions.FSharp" Version="0.75.38-PullRequest3485.0" />
-    <PackageVersion Include="Verify" Version="31.9.1" />
-    <PackageVersion Include="Verify.NUnit" Version="31.9.1" />
+    <PackageVersion Include="Verify" Version="31.9.2" />
+    <PackageVersion Include="Verify.NUnit" Version="31.9.2" />
     <PackageVersion Include="TUnit" Version="1.6.28" />
     <PackageVersion Include="TUnit.AspNetCore" Version="1.6.28" />
     <PackageVersion Include="TUnit.Core" Version="1.6.28" />
     <PackageVersion Include="TUnit.Assertions" Version="1.6.28" />
-    <PackageVersion Include="Verify.TUnit" Version="31.9.1" />
+    <PackageVersion Include="Verify.TUnit" Version="31.9.2" />
     <PackageVersion Include="Vogen" Version="8.0.4" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.assert" Version="2.9.3" />
