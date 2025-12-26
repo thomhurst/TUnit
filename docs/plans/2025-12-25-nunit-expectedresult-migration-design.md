@@ -2,7 +2,7 @@
 
 **Issue**: #4167
 **Date**: 2025-12-25
-**Status**: Design Complete
+**Status**: Implemented
 
 ## Overview
 
