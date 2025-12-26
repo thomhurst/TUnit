@@ -503,7 +503,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 continue;
             }
 
-            MethodInfo[] testMethods;
+            IEnumerable<MethodInfo> testMethods;
             try
             {
                 // Check if this class inherits tests from base classes
@@ -513,15 +513,14 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 {
                     // Get all test methods including inherited ones
                     testMethods = GetAllTestMethods(type)
-                        .Where(static m => m.IsDefined(typeof(TestAttribute), inherit: false) && !m.IsAbstract)
-                        .ToArray();
+                        .Where(static m => m.IsDefined(typeof(TestAttribute), inherit: false) && !m.IsAbstract);
                 }
                 else
                 {
                     // Only get declared test methods
-                    testMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
-                        .Where(static m => m.IsDefined(typeof(TestAttribute), inherit: false) && !m.IsAbstract)
-                        .ToArray();
+                    testMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static |
+                                                  BindingFlags.DeclaredOnly)
+                        .Where(static m => m.IsDefined(typeof(TestAttribute), inherit: false) && !m.IsAbstract);
                 }
             }
             catch (Exception)
