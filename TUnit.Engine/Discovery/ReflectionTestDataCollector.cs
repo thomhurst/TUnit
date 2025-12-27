@@ -92,16 +92,14 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 assembliesList.Add(assembly);
             }
         }
-        var assemblies = assembliesList;
 
-
-        var maxConcurrency = Math.Min(assemblies.Count, Environment.ProcessorCount * 2);
+        var maxConcurrency = Math.Min(assembliesList.Count, Environment.ProcessorCount * 2);
         var semaphore = new SemaphoreSlim(maxConcurrency, maxConcurrency);
-        var tasks = new Task<List<TestMetadata>>[assemblies.Count];
+        var tasks = new Task<List<TestMetadata>>[assembliesList.Count];
 
-        for (var i = 0; i < assemblies.Count; i++)
+        for (var i = 0; i < assembliesList.Count; i++)
         {
-            var assembly = assemblies[i];
+            var assembly = assembliesList[i];
             var index = i;
 
             tasks[index] = ProcessAssemblyAsync(assembly, semaphore);
@@ -138,19 +136,15 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     {
         // Get assemblies to scan
         var allAssemblies = Assemblies;
-        var assemblies = new List<Assembly>(allAssemblies.Length);
-        foreach (var assembly in allAssemblies)
-        {
-            if (ShouldScanAssembly(assembly))
-            {
-                assemblies.Add(assembly);
-            }
-        }
-
 
         // Stream tests from each assembly
-        foreach (var assembly in assemblies)
+        foreach (var assembly in allAssemblies)
         {
+            if(!ShouldScanAssembly(assembly))
+            {
+                continue;
+            }
+
             cancellationToken.ThrowIfCancellationRequested();
 
             // Use lock-free ConcurrentDictionary for assembly tracking
@@ -359,7 +353,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 continue;
             }
 
-            MethodInfo[] testMethods;
+            IEnumerable<MethodInfo> testMethods;
             try
             {
                 // Check if this class inherits tests from base classes
@@ -368,30 +362,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 if (inheritsTests)
                 {
                     // Get all methods including inherited ones
-                    // Optimize: Manual filtering instead of LINQ Where().ToArray()
                     var allMethods = GetAllTestMethods(type);
-                    var testMethodsList = new List<MethodInfo>();
-                    foreach (var method in allMethods)
-                    {
-                        if (method.IsDefined(typeof(TestAttribute), inherit: false) && !method.IsAbstract)
-                        {
-                            testMethodsList.Add(method);
-                        }
-                    }
-                    testMethods = testMethodsList.ToArray();
+                    testMethods = allMethods.Where(method => method.IsDefined(typeof(TestAttribute), inherit: false) && !method.IsAbstract);
                 }
                 else
                 {
                     var declaredMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
-                    var testMethodsList = new List<MethodInfo>(declaredMethods.Length);
-                    foreach (var method in declaredMethods)
-                    {
-                        if (method.IsDefined(typeof(TestAttribute), inherit: false) && !method.IsAbstract)
-                        {
-                            testMethodsList.Add(method);
-                        }
-                    }
-                    testMethods = testMethodsList.ToArray();
+                    testMethods = declaredMethods.Where(method => method.IsDefined(typeof(TestAttribute), inherit: false) && !method.IsAbstract);
                 }
             }
             catch (Exception)
@@ -579,9 +556,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 testMethodsList.Add(method);
             }
         }
-        var testMethods = testMethodsList.ToArray();
 
-        if (testMethods.Length == 0)
+        if (testMethodsList.Count == 0)
         {
             return discoveredTests;
         }
@@ -611,7 +587,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     var concreteType = ReflectionGenericTypeResolver.CreateConcreteType(genericTypeDefinition, typeArguments);
 
                     // Build tests for each method in the concrete type
-                    foreach (var genericMethod in testMethods)
+                    foreach (var genericMethod in testMethodsList)
                     {
                         var concreteMethod = concreteType.GetMethod(genericMethod.Name,
                             BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
@@ -668,9 +644,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 testMethodsList.Add(method);
             }
         }
-        var testMethods = testMethodsList.ToArray();
 
-        if (testMethods.Length == 0)
+        if (testMethodsList.Count == 0)
         {
             yield break;
         }
@@ -707,7 +682,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     var concreteType = ReflectionGenericTypeResolver.CreateConcreteType(genericTypeDefinition, typeArguments);
 
                     // Build tests for each method in the concrete type
-                    foreach (var genericMethod in testMethods)
+                    foreach (var genericMethod in testMethodsList)
                     {
                         var concreteMethod = concreteType.GetMethod(genericMethod.Name,
                             BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
@@ -1328,10 +1303,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return false;
         }
 
-        var argInterfaces = AssemblyReferenceCache.GetInterfaces(argType);
+        IEnumerable<Type> argInterfaces = AssemblyReferenceCache.GetInterfaces(argType);
         if (argType.IsInterface)
         {
-            argInterfaces = argInterfaces.Concat([argType]).ToArray();
+            argInterfaces = argInterfaces.Concat([argType]);
         }
 
         foreach (var iface in argInterfaces)
@@ -1629,19 +1604,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             }
         }
 
-        var allAssemblies = Assemblies;
-        var assembliesList = new List<Assembly>(allAssemblies.Length);
-        foreach (var assembly in allAssemblies)
+        foreach (var assembly in Assemblies)
         {
-            if (ShouldScanAssembly(assembly))
+            if (!ShouldScanAssembly(assembly))
             {
-                assembliesList.Add(assembly);
+                continue;
             }
-        }
-        var assemblies = assembliesList;
 
-        foreach (var assembly in assemblies)
-        {
             var types = _assemblyTypesCache.GetOrAdd(assembly, asm =>
             {
                 try
@@ -1659,20 +1628,14 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 if (!type.IsClass || IsCompilerGenerated(type))
                     continue;
                 var declaredMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
-                var methodsList = new List<MethodInfo>(4);
+
                 foreach (var method in declaredMethods)
                 {
-#pragma warning disable TUnitWIP0001
-                    if (method.IsDefined(typeof(DynamicTestBuilderAttribute), inherit: false) && !method.IsAbstract)
-#pragma warning restore TUnitWIP0001
+                    if (!method.IsDefined(typeof(DynamicTestBuilderAttribute), inherit: false) || method.IsAbstract)
                     {
-                        methodsList.Add(method);
+                        continue;
                     }
-                }
-                var methods = methodsList.ToArray();
 
-                foreach (var method in methods)
-                {
                     try
                     {
                         var tests = await ExecuteDynamicTestBuilder(type, method, testSessionId).ConfigureAwait(false);
@@ -1695,18 +1658,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         string testSessionId,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var allAssemblies = Assemblies;
-        var assemblies = new List<Assembly>(allAssemblies.Length);
-        foreach (var assembly in allAssemblies)
+        foreach (var assembly in Assemblies)
         {
-            if (ShouldScanAssembly(assembly))
+            if (!ShouldScanAssembly(assembly))
             {
-                assemblies.Add(assembly);
+                continue;
             }
-        }
 
-        foreach (var assembly in assemblies)
-        {
             cancellationToken.ThrowIfCancellationRequested();
 
             var types = _assemblyTypesCache.GetOrAdd(assembly, asm =>
@@ -1726,20 +1684,14 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 if (!type.IsClass || IsCompilerGenerated(type))
                     continue;
                 var declaredMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
-                var methodsList = new List<MethodInfo>(4);
+
                 foreach (var method in declaredMethods)
                 {
-#pragma warning disable TUnitWIP0001
-                    if (method.IsDefined(typeof(DynamicTestBuilderAttribute), inherit: false) && !method.IsAbstract)
-#pragma warning restore TUnitWIP0001
+                    if (!method.IsDefined(typeof(DynamicTestBuilderAttribute), inherit: false) || method.IsAbstract)
                     {
-                        methodsList.Add(method);
+                        continue;
                     }
-                }
-                var methods = methodsList.ToArray();
 
-                foreach (var method in methods)
-                {
                     cancellationToken.ThrowIfCancellationRequested();
 
                     // Stream tests from this dynamic builder
