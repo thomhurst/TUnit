@@ -1,0 +1,35 @@
+name: Issue Triage
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      id-token: write
+    steps:
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            REPO: ${{ github.repository }}
+            ISSUE NUMBER: ${{ github.event.issue.number }}
+            TITLE: ${{ github.event.issue.title }}
+            BODY: ${{ github.event.issue.body }}
+            AUTHOR: ${{ github.event.issue.user.login }}
+
+            Analyze this new issue and:
+            1. Determine if it's a bug report, feature request, or question
+            2. Assess priority (critical, high, medium, low)
+            3. Suggest appropriate labels
+            4. Check if it duplicates existing issues
+
+            Based on your analysis, add the appropriate labels using:
+            `gh issue edit [number] --add-label "label1,label2"`
+
+            If it appears to be a duplicate, post a comment mentioning the original issue.
+
+          claude_args: |
+            --allowedTools "Bash(gh issue:*),Bash(gh search:*)"
