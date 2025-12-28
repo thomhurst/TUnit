@@ -4,7 +4,7 @@ When using TUnit in a CI/CD pipeline, you'll want to run tests, collect results,
 
 The best practice is to use the .NET SDK CLI (`dotnet test` or `dotnet run`) directly to maintain full control over execution, ensure reproducibility across environments, and allow for local debugging.
 
-> **Note**: The `--` separator is required to pass arguments to the test runner when using `dotnet test` when using SDKs older than .NET 10.
+> **Note**: The `--` separator is required to pass arguments to the test runner when using `dotnet test`. CLI flags/args from extension packages (such as `--coverage`, `--report-trx`, `--results-directory`) must come after the `--` separator so they are parsed as program arguments to the TUnit test runner, not as `dotnet test` arguments. For example: `dotnet test -- --coverage --report-trx` instead of `dotnet test --coverage --report-trx`.
 
 ## GitHub Actions
 
@@ -48,7 +48,7 @@ jobs:
       run: dotnet build --configuration Release --no-restore
 
     - name: Run tests with coverage
-      run: dotnet test --configuration Release --no-build --coverage --report-trx --results-directory ./TestResults
+      run: dotnet test --configuration Release --no-build -- --coverage --report-trx --results-directory ./TestResults
 
     - name: Upload test results
       if: always()  # Run even if tests fail
@@ -140,7 +140,7 @@ jobs:
         dotnet-version: '9.0.x'
 
     - name: Run tests
-      run: dotnet test --configuration Release --report-trx --results-directory ./TestResults
+      run: dotnet test --configuration Release -- --report-trx --results-directory ./TestResults
 
     - name: Comment PR with results
       if: always()
@@ -219,7 +219,7 @@ stages:
       displayName: 'Build solution'
 
     - script: |
-        dotnet test --configuration $(buildConfiguration) --no-build \
+        dotnet test --configuration $(buildConfiguration) --no-build -- \
           --coverage --coverage-output-format cobertura \
           --report-trx --results-directory $(Agent.TempDirectory)
       displayName: 'Run tests with coverage'
@@ -272,7 +272,7 @@ steps:
   inputs:
     version: '$(dotnetVersion)'
 
-- script: dotnet test --configuration Release --report-trx
+- script: dotnet test --configuration Release -- --report-trx
   displayName: 'Run tests on $(vmImage) with .NET $(dotnetVersion)'
 ```
 
@@ -311,7 +311,7 @@ test:unit:
   dependencies:
     - build
   script:
-    - dotnet test --configuration $BUILD_CONFIGURATION --no-build
+    - dotnet test --configuration $BUILD_CONFIGURATION --no-build --
       --coverage --coverage-output-format cobertura
       --report-trx --results-directory ./TestResults
   coverage: '/Total\s+\|\s+(\d+\.?\d*)%/'
@@ -330,8 +330,8 @@ test:integration:
   dependencies:
     - build
   script:
-    - dotnet test --configuration $BUILD_CONFIGURATION --no-build
-      -- --treenode-filter "/*/*/*/*[Category=Integration]"
+    - dotnet test --configuration $BUILD_CONFIGURATION --no-build --
+      --treenode-filter "/*/*/*/*[Category=Integration]"
       --report-trx --results-directory ./TestResults
   artifacts:
     when: always
@@ -363,7 +363,7 @@ coverage-report:
 .test-template:
   stage: test
   script:
-    - dotnet test --configuration Release --report-trx
+    - dotnet test --configuration Release -- --report-trx
 
 test:net8:
   extends: .test-template
@@ -420,7 +420,7 @@ jobs:
       - run:
           name: Run tests
           command: |
-            dotnet test --configuration Release --no-build \
+            dotnet test --configuration Release --no-build -- \
               --coverage --coverage-output-format cobertura \
               --report-trx --results-directory ./TestResults
 
@@ -489,7 +489,7 @@ RUN dotnet build --configuration Release --no-restore
 # Run tests
 FROM build AS test
 WORKDIR /src
-RUN dotnet test --configuration Release --no-build \
+RUN dotnet test --configuration Release --no-build -- \
     --coverage --report-trx --results-directory /testresults
 
 # Export test results
@@ -597,17 +597,14 @@ Run different test categories in separate jobs:
   run: dotnet test -- --treenode-filter "/*/*/*/*[Category=Integration]"
 ```
 
-> **Note**: With .NET 10 SDK or newer, you can use the simpler syntax without the `--` separator:
-> ```yaml
-> run: dotnet test --treenode-filter "/**[Category=Unit]"
-> ```
+> **Note**: The `--` separator is always required when passing TUnit-specific arguments like `--treenode-filter` to ensure they are parsed correctly as program arguments rather than `dotnet test` arguments.
 
 ### Fail Fast in PRs
 
 Use fail-fast mode for quick feedback in pull requests:
 
 ```bash
-dotnet test --fail-fast
+dotnet test -- --fail-fast
 ```
 
 ## Troubleshooting
