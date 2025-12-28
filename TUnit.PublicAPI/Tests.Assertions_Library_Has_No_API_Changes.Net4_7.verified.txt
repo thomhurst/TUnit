@@ -1291,6 +1291,60 @@ namespace .
 }
 namespace .
 {
+    public static class JsonElementAssertionExtensions
+    {
+        [.(ExpectationMessage="to not have property \'{propertyName}\'", InlineMethodBody=true)]
+        public static bool DoesNotHaveProperty(this . value, string propertyName) { }
+        [.(ExpectationMessage="to have property \'{propertyName}\'", InlineMethodBody=true)]
+        public static bool HasProperty(this . value, string propertyName) { }
+        [.(ExpectationMessage="to be a JSON array", InlineMethodBody=true)]
+        public static bool IsArray(this . value) { }
+        [.(ExpectationMessage="to be a JSON boolean", InlineMethodBody=true)]
+        public static bool IsBoolean(this . value) { }
+        [.(ExpectationMessage="to not be JSON null", InlineMethodBody=true)]
+        public static bool IsNotNull(this . value) { }
+        [.(ExpectationMessage="to be JSON null", InlineMethodBody=true)]
+        public static bool IsNull(this . value) { }
+        [.(ExpectationMessage="to be a JSON number", InlineMethodBody=true)]
+        public static bool IsNumber(this . value) { }
+        [.(ExpectationMessage="to be a JSON object", InlineMethodBody=true)]
+        public static bool IsObject(this . value) { }
+        [.(ExpectationMessage="to be a JSON string", InlineMethodBody=true)]
+        public static bool IsString(this . value) { }
+    }
+    public static class JsonNodeAssertionExtensions
+    {
+        [.(ExpectationMessage="to not have property \'{propertyName}\'")]
+        public static . DoesNotHaveJsonProperty(this ..JsonNode? value, string propertyName) { }
+        [.(ExpectationMessage="to have {expected} elements")]
+        public static . HasJsonArrayCount(this ..JsonNode? value, int expected) { }
+        [.(ExpectationMessage="to have property \'{propertyName}\'")]
+        public static . HasJsonProperty(this ..JsonNode? value, string propertyName) { }
+        [.(ExpectationMessage="to be a JsonArray")]
+        public static . IsJsonArray(this ..JsonNode? value) { }
+        [.(ExpectationMessage="to be an empty JSON array")]
+        public static . IsJsonArrayEmpty(this ..JsonNode? value) { }
+        [.(ExpectationMessage="to not be an empty JSON array")]
+        public static . IsJsonArrayNotEmpty(this ..JsonNode? value) { }
+        [.(ExpectationMessage="to be a JsonObject")]
+        public static . IsJsonObject(this ..JsonNode? value) { }
+        [.(ExpectationMessage="to be a JsonValue")]
+        public static . IsJsonValue(this ..JsonNode? value) { }
+    }
+    public static class JsonStringAssertionExtensions
+    {
+        [.(ExpectationMessage="to not be valid JSON")]
+        public static . IsNotValidJson(this string value) { }
+        [.(ExpectationMessage="to be valid JSON")]
+        public static . IsValidJson(this string value) { }
+        [.(ExpectationMessage="to be a valid JSON array")]
+        public static . IsValidJsonArray(this string value) { }
+        [.(ExpectationMessage="to be a valid JSON object")]
+        public static . IsValidJsonObject(this string value) { }
+    }
+}
+namespace .
+{
     public class CountWrapper<TCollection, TItem> : ., .<TCollection>
         where TCollection : .<TItem>
     {
@@ -2846,6 +2900,138 @@ namespace .Extensions
         public static .<TValue> IsNotDefault<TValue>(this .<TValue> source)
             where TValue :  class { }
     }
+    public static class JsonElementAssertionExtensions
+    {
+        public static ._DoesNotHaveProperty_String_Assertion DoesNotHaveProperty(this .<.> source, string propertyName, [.("propertyName")] string? propertyNameExpression = null) { }
+        public static ._HasProperty_String_Assertion HasProperty(this .<.> source, string propertyName, [.("propertyName")] string? propertyNameExpression = null) { }
+        public static ._IsArray_Assertion IsArray(this .<.> source) { }
+        public static ._IsBoolean_Assertion IsBoolean(this .<.> source) { }
+        public static ._IsNotNull_Assertion IsNotNull(this .<.> source) { }
+        public static ._IsNull_Assertion IsNull(this .<.> source) { }
+        public static ._IsNumber_Assertion IsNumber(this .<.> source) { }
+        public static ._IsObject_Assertion IsObject(this .<.> source) { }
+        public static ._IsString_Assertion IsString(this .<.> source) { }
+    }
+    public sealed class JsonElement_DoesNotHaveProperty_String_Assertion : .<.>
+    {
+        public JsonElement_DoesNotHaveProperty_String_Assertion(.<.> context, string propertyName) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class JsonElement_HasProperty_String_Assertion : .<.>
+    {
+        public JsonElement_HasProperty_String_Assertion(.<.> context, string propertyName) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class JsonElement_IsArray_Assertion : .<.>
+    {
+        public JsonElement_IsArray_Assertion(.<.> context) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class JsonElement_IsBoolean_Assertion : .<.>
+    {
+        public JsonElement_IsBoolean_Assertion(.<.> context) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class JsonElement_IsNotNull_Assertion : .<.>
+    {
+        public JsonElement_IsNotNull_Assertion(.<.> context) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class JsonElement_IsNull_Assertion : .<.>
+    {
+        public JsonElement_IsNull_Assertion(.<.> context) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class JsonElement_IsNumber_Assertion : .<.>
+    {
+        public JsonElement_IsNumber_Assertion(.<.> context) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class JsonElement_IsObject_Assertion : .<.>
+    {
+        public JsonElement_IsObject_Assertion(.<.> context) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class JsonElement_IsString_Assertion : .<.>
+    {
+        public JsonElement_IsString_Assertion(.<.> context) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public static class JsonNodeAssertionExtensions
+    {
+        public static ._DoesNotHaveJsonProperty_String_Assertion DoesNotHaveJsonProperty(this .<..JsonNode?> source, string propertyName, [.("propertyName")] string? propertyNameExpression = null) { }
+        public static ._HasJsonArrayCount_Int_Assertion HasJsonArrayCount(this .<..JsonNode?> source, int expected, [.("expected")] string? expectedExpression = null) { }
+        public static ._HasJsonProperty_String_Assertion HasJsonProperty(this .<..JsonNode?> source, string propertyName, [.("propertyName")] string? propertyNameExpression = null) { }
+        public static ._IsJsonArray_Assertion IsJsonArray(this .<..JsonNode?> source) { }
+        public static ._IsJsonArrayEmpty_Assertion IsJsonArrayEmpty(this .<..JsonNode?> source) { }
+        public static ._IsJsonArrayNotEmpty_Assertion IsJsonArrayNotEmpty(this .<..JsonNode?> source) { }
+        public static ._IsJsonObject_Assertion IsJsonObject(this .<..JsonNode?> source) { }
+        public static ._IsJsonValue_Assertion IsJsonValue(this .<..JsonNode?> source) { }
+    }
+    public sealed class JsonNode_DoesNotHaveJsonProperty_String_Assertion : .<..JsonNode?>
+    {
+        public JsonNode_DoesNotHaveJsonProperty_String_Assertion(.<..JsonNode?> context, string propertyName) { }
+        protected override .<.> CheckAsync(.<..JsonNode?> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class JsonNode_HasJsonArrayCount_Int_Assertion : .<..JsonNode?>
+    {
+        public JsonNode_HasJsonArrayCount_Int_Assertion(.<..JsonNode?> context, int expected) { }
+        protected override .<.> CheckAsync(.<..JsonNode?> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class JsonNode_HasJsonProperty_String_Assertion : .<..JsonNode?>
+    {
+        public JsonNode_HasJsonProperty_String_Assertion(.<..JsonNode?> context, string propertyName) { }
+        protected override .<.> CheckAsync(.<..JsonNode?> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class JsonNode_IsJsonArrayEmpty_Assertion : .<..JsonNode?>
+    {
+        public JsonNode_IsJsonArrayEmpty_Assertion(.<..JsonNode?> context) { }
+        protected override .<.> CheckAsync(.<..JsonNode?> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class JsonNode_IsJsonArrayNotEmpty_Assertion : .<..JsonNode?>
+    {
+        public JsonNode_IsJsonArrayNotEmpty_Assertion(.<..JsonNode?> context) { }
+        protected override .<.> CheckAsync(.<..JsonNode?> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class JsonNode_IsJsonArray_Assertion : .<..JsonNode?>
+    {
+        public JsonNode_IsJsonArray_Assertion(.<..JsonNode?> context) { }
+        protected override .<.> CheckAsync(.<..JsonNode?> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class JsonNode_IsJsonObject_Assertion : .<..JsonNode?>
+    {
+        public JsonNode_IsJsonObject_Assertion(.<..JsonNode?> context) { }
+        protected override .<.> CheckAsync(.<..JsonNode?> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class JsonNode_IsJsonValue_Assertion : .<..JsonNode?>
+    {
+        public JsonNode_IsJsonValue_Assertion(.<..JsonNode?> context) { }
+        protected override .<.> CheckAsync(.<..JsonNode?> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public static class JsonStringAssertionExtensions
+    {
+        public static ._IsNotValidJson_Assertion IsNotValidJson(this .<string> source) { }
+        public static ._IsValidJson_Assertion IsValidJson(this .<string> source) { }
+        public static ._IsValidJsonArray_Assertion IsValidJsonArray(this .<string> source) { }
+        public static ._IsValidJsonObject_Assertion IsValidJsonObject(this .<string> source) { }
+    }
     public static class LazyAssertionExtensions
     {
         public static ._IsValueCreated_Assertion<T> IsValueCreated<T>(this .<<T>> source) { }
@@ -3196,6 +3382,30 @@ namespace .Extensions
         public static . IsNotNullOrWhiteSpace(this .<string> source) { }
         public static . IsNullOrEmpty(this .<string> source) { }
         public static . IsNullOrWhiteSpace(this .<string> source) { }
+    }
+    public sealed class String_IsNotValidJson_Assertion : .<string>
+    {
+        public String_IsNotValidJson_Assertion(.<string> context) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class String_IsValidJsonArray_Assertion : .<string>
+    {
+        public String_IsValidJsonArray_Assertion(.<string> context) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class String_IsValidJsonObject_Assertion : .<string>
+    {
+        public String_IsValidJsonObject_Assertion(.<string> context) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class String_IsValidJson_Assertion : .<string>
+    {
+        public String_IsValidJson_Assertion(.<string> context) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
+        protected override string GetExpectation() { }
     }
     public sealed class T_IsIn_IEnumerableT_Assertion<T> : .<T>
     {
