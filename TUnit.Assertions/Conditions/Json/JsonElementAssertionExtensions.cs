@@ -35,4 +35,12 @@ file static partial class JsonElementAssertionExtensions
     [GenerateAssertion(ExpectationMessage = "to not be JSON null", InlineMethodBody = true)]
     public static bool IsNotNull(this JsonElement value)
         => value.ValueKind != JsonValueKind.Null;
+
+    [GenerateAssertion(ExpectationMessage = "to have property '{propertyName}'", InlineMethodBody = true)]
+    public static bool HasProperty(this JsonElement value, string propertyName)
+        => value.ValueKind == JsonValueKind.Object && value.TryGetProperty(propertyName, out _);
+
+    [GenerateAssertion(ExpectationMessage = "to not have property '{propertyName}'", InlineMethodBody = true)]
+    public static bool DoesNotHaveProperty(this JsonElement value, string propertyName)
+        => value.ValueKind != JsonValueKind.Object || !value.TryGetProperty(propertyName, out _);
 }

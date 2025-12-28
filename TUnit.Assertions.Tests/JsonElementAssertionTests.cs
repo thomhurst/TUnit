@@ -109,4 +109,34 @@ public class JsonElementAssertionTests
         await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(
             async () => await Assert.That(doc.RootElement).IsNotNull());
     }
+
+    [Test]
+    public async Task HasProperty_WhenPropertyExists_Passes()
+    {
+        using var doc = JsonDocument.Parse("{\"name\":\"Alice\",\"age\":30}");
+        await Assert.That(doc.RootElement).HasProperty("name");
+    }
+
+    [Test]
+    public async Task HasProperty_WhenPropertyMissing_Fails()
+    {
+        using var doc = JsonDocument.Parse("{\"name\":\"Alice\"}");
+        await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(
+            async () => await Assert.That(doc.RootElement).HasProperty("missing"));
+    }
+
+    [Test]
+    public async Task DoesNotHaveProperty_WhenPropertyMissing_Passes()
+    {
+        using var doc = JsonDocument.Parse("{\"name\":\"Alice\"}");
+        await Assert.That(doc.RootElement).DoesNotHaveProperty("missing");
+    }
+
+    [Test]
+    public async Task DoesNotHaveProperty_WhenPropertyExists_Fails()
+    {
+        using var doc = JsonDocument.Parse("{\"name\":\"Alice\"}");
+        await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(
+            async () => await Assert.That(doc.RootElement).DoesNotHaveProperty("name"));
+    }
 }
