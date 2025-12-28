@@ -31,7 +31,7 @@ jobs:
       # This ensures we never execute untrusted code from forks
       # The action will use `gh pr diff` to review the changes safely
       - name: Checkout base repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.base.ref }}
           fetch-depth: 1
