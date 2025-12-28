@@ -62,6 +62,49 @@ public static partial class JsonNodeAssertionExtensions
         return TUnit.Assertions.Core.AssertionResult.Failed($"property '{propertyName}' was found");
     }
 
+    // JsonArray assertions - work on JsonNode? to avoid collection assertion wrapping issues
+    [GenerateAssertion(ExpectationMessage = "to be an empty JSON array")]
+    public static TUnit.Assertions.Core.AssertionResult IsJsonArrayEmpty(this JsonNode? value)
+    {
+        if (value is not JsonArray array)
+        {
+            return TUnit.Assertions.Core.AssertionResult.Failed($"found {value?.GetType().Name ?? "null"} instead of JsonArray");
+        }
+        if (array.Count == 0)
+        {
+            return TUnit.Assertions.Core.AssertionResult.Passed;
+        }
+        return TUnit.Assertions.Core.AssertionResult.Failed($"has {array.Count} elements");
+    }
+
+    [GenerateAssertion(ExpectationMessage = "to not be an empty JSON array")]
+    public static TUnit.Assertions.Core.AssertionResult IsJsonArrayNotEmpty(this JsonNode? value)
+    {
+        if (value is not JsonArray array)
+        {
+            return TUnit.Assertions.Core.AssertionResult.Failed($"found {value?.GetType().Name ?? "null"} instead of JsonArray");
+        }
+        if (array.Count > 0)
+        {
+            return TUnit.Assertions.Core.AssertionResult.Passed;
+        }
+        return TUnit.Assertions.Core.AssertionResult.Failed("array is empty");
+    }
+
+    [GenerateAssertion(ExpectationMessage = "to have {expected} elements")]
+    public static TUnit.Assertions.Core.AssertionResult HasJsonArrayCount(this JsonNode? value, int expected)
+    {
+        if (value is not JsonArray array)
+        {
+            return TUnit.Assertions.Core.AssertionResult.Failed($"found {value?.GetType().Name ?? "null"} instead of JsonArray");
+        }
+        if (array.Count == expected)
+        {
+            return TUnit.Assertions.Core.AssertionResult.Passed;
+        }
+        return TUnit.Assertions.Core.AssertionResult.Failed($"has {array.Count} elements");
+    }
+
 #if NET8_0_OR_GREATER
     [GenerateAssertion(ExpectationMessage = "to be equal to {expected}")]
     public static TUnit.Assertions.Core.AssertionResult IsDeepEqualTo(this JsonNode? value, JsonNode? expected)

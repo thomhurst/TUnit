@@ -80,6 +80,52 @@ public class JsonNodeAssertionTests
             async () => await Assert.That(node).DoesNotHaveJsonProperty("name"));
     }
 
+    // JsonArray assertions - use JsonNode? to work with TUnit's assertion model
+    [Test]
+    public async Task IsJsonArrayEmpty_WithEmptyArray_Passes()
+    {
+        JsonNode? node = JsonNode.Parse("[]");
+        await Assert.That(node).IsJsonArrayEmpty();
+    }
+
+    [Test]
+    public async Task IsJsonArrayEmpty_WithNonEmptyArray_Fails()
+    {
+        JsonNode? node = JsonNode.Parse("[1, 2, 3]");
+        await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(
+            async () => await Assert.That(node).IsJsonArrayEmpty());
+    }
+
+    [Test]
+    public async Task IsJsonArrayNotEmpty_WithNonEmptyArray_Passes()
+    {
+        JsonNode? node = JsonNode.Parse("[1, 2, 3]");
+        await Assert.That(node).IsJsonArrayNotEmpty();
+    }
+
+    [Test]
+    public async Task IsJsonArrayNotEmpty_WithEmptyArray_Fails()
+    {
+        JsonNode? node = JsonNode.Parse("[]");
+        await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(
+            async () => await Assert.That(node).IsJsonArrayNotEmpty());
+    }
+
+    [Test]
+    public async Task HasJsonArrayCount_WithMatchingCount_Passes()
+    {
+        JsonNode? node = JsonNode.Parse("[1, 2, 3]");
+        await Assert.That(node).HasJsonArrayCount(3);
+    }
+
+    [Test]
+    public async Task HasJsonArrayCount_WithMismatchedCount_Fails()
+    {
+        JsonNode? node = JsonNode.Parse("[1, 2, 3]");
+        await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(
+            async () => await Assert.That(node).HasJsonArrayCount(5));
+    }
+
 #if NET8_0_OR_GREATER
     [Test]
     public async Task IsDeepEqualTo_WithIdenticalJson_Passes()
