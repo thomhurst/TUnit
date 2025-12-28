@@ -139,4 +139,51 @@ public class JsonElementAssertionTests
         await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(
             async () => await Assert.That(doc.RootElement).DoesNotHaveProperty("name"));
     }
+
+#if NET9_0_OR_GREATER
+    [Test]
+    public async Task IsDeepEqualTo_WithIdenticalJson_Passes()
+    {
+        using var doc1 = JsonDocument.Parse("{\"name\":\"Alice\",\"age\":30}");
+        using var doc2 = JsonDocument.Parse("{\"name\":\"Alice\",\"age\":30}");
+        await Assert.That(doc1.RootElement).IsDeepEqualTo(doc2.RootElement);
+    }
+
+    [Test]
+    public async Task IsDeepEqualTo_WithDifferentWhitespace_Passes()
+    {
+        using var doc1 = JsonDocument.Parse("{ \"name\" : \"Alice\" }");
+        using var doc2 = JsonDocument.Parse("{\"name\":\"Alice\"}");
+        await Assert.That(doc1.RootElement).IsDeepEqualTo(doc2.RootElement);
+    }
+
+    [Test]
+    public async Task IsDeepEqualTo_WithDifferentValues_FailsWithPath()
+    {
+        using var doc1 = JsonDocument.Parse("{\"name\":\"Alice\",\"age\":30}");
+        using var doc2 = JsonDocument.Parse("{\"name\":\"Alice\",\"age\":31}");
+
+        var exception = await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(
+            async () => await Assert.That(doc1.RootElement).IsDeepEqualTo(doc2.RootElement));
+
+        await Assert.That(exception.Message).Contains("$.age");
+    }
+
+    [Test]
+    public async Task IsNotDeepEqualTo_WithDifferentJson_Passes()
+    {
+        using var doc1 = JsonDocument.Parse("{\"name\":\"Alice\"}");
+        using var doc2 = JsonDocument.Parse("{\"name\":\"Bob\"}");
+        await Assert.That(doc1.RootElement).IsNotDeepEqualTo(doc2.RootElement);
+    }
+
+    [Test]
+    public async Task IsNotDeepEqualTo_WithIdenticalJson_Fails()
+    {
+        using var doc1 = JsonDocument.Parse("{\"name\":\"Alice\"}");
+        using var doc2 = JsonDocument.Parse("{\"name\":\"Alice\"}");
+        await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(
+            async () => await Assert.That(doc1.RootElement).IsNotDeepEqualTo(doc2.RootElement));
+    }
+#endif
 }

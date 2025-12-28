@@ -6,7 +6,7 @@ namespace TUnit.Assertions.Conditions.Json;
 /// <summary>
 /// Source-generated assertions for JsonElement type checking.
 /// </summary>
-file static partial class JsonElementAssertionExtensions
+public static partial class JsonElementAssertionExtensions
 {
     [GenerateAssertion(ExpectationMessage = "to be a JSON object", InlineMethodBody = true)]
     public static bool IsObject(this JsonElement value)
@@ -43,4 +43,23 @@ file static partial class JsonElementAssertionExtensions
     [GenerateAssertion(ExpectationMessage = "to not have property '{propertyName}'", InlineMethodBody = true)]
     public static bool DoesNotHaveProperty(this JsonElement value, string propertyName)
         => value.ValueKind != JsonValueKind.Object || !value.TryGetProperty(propertyName, out _);
+
+#if NET9_0_OR_GREATER
+    [GenerateAssertion(ExpectationMessage = "to be deeply equal to {expected}")]
+    public static TUnit.Assertions.Core.AssertionResult IsDeepEqualTo(this JsonElement value, JsonElement expected)
+    {
+        if (JsonElement.DeepEquals(value, expected))
+        {
+            return TUnit.Assertions.Core.AssertionResult.Passed;
+        }
+
+        var diff = JsonDiffHelper.FindFirstDifference(value, expected);
+        return TUnit.Assertions.Core.AssertionResult.Failed(
+            $"differs at {diff.Path}: expected {diff.Expected} but found {diff.Actual}");
+    }
+
+    [GenerateAssertion(ExpectationMessage = "to not be deeply equal to {expected}", InlineMethodBody = true)]
+    public static bool IsNotDeepEqualTo(this JsonElement value, JsonElement expected)
+        => !JsonElement.DeepEquals(value, expected);
+#endif
 }
