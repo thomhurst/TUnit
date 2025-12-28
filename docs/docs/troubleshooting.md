@@ -357,7 +357,7 @@ public async Task LongRunningTest()
 
 #### 2. Global Timeout Configuration
 ```bash
-dotnet test --timeout 60s
+dotnet test -- --timeout 60s
 ```
 
 #### 3. Check for Infinite Loops
