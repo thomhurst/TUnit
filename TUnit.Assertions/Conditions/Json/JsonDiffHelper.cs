@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace TUnit.Assertions.Conditions.Json;
 
@@ -128,6 +129,140 @@ internal static class JsonDiffHelper
             JsonValueKind.Object => "{...}",
             JsonValueKind.Array => "[...]",
             _ => element.GetRawText()
+        };
+    }
+
+    /// <summary>
+    /// Finds the first difference between two JSON nodes.
+    /// </summary>
+    /// <param name="actual">The actual JSON node to compare.</param>
+    /// <param name="expected">The expected JSON node to compare against.</param>
+    /// <returns>A <see cref="DiffResult"/> containing information about the first difference found,
+    /// or a result with <see cref="DiffResult.HasDifference"/> set to false if the nodes are identical.</returns>
+    public static DiffResult FindFirstDifference(JsonNode? actual, JsonNode? expected)
+    {
+        return FindNodeDiff(actual, expected, "$");
+    }
+
+    private static DiffResult FindNodeDiff(JsonNode? actual, JsonNode? expected, string path)
+    {
+        // Handle null cases
+        if (actual is null && expected is null)
+        {
+            return new DiffResult(path, "", "", HasDifference: false);
+        }
+        if (actual is null)
+        {
+            return new DiffResult(path, FormatNode(expected), "null");
+        }
+        if (expected is null)
+        {
+            return new DiffResult(path, "null", FormatNode(actual));
+        }
+
+        // Check type mismatch
+        if (actual.GetType() != expected.GetType())
+        {
+            return new DiffResult(path, GetNodeTypeName(expected), GetNodeTypeName(actual));
+        }
+
+        return actual switch
+        {
+            JsonObject actualObj => CompareJsonObjects(actualObj, (JsonObject)expected, path),
+            JsonArray actualArr => CompareJsonArrays(actualArr, (JsonArray)expected, path),
+            JsonValue actualVal => CompareJsonValues(actualVal, (JsonValue)expected, path),
+            _ => new DiffResult(path, "", "", HasDifference: false)
+        };
+    }
+
+    private static DiffResult CompareJsonObjects(JsonObject actual, JsonObject expected, string path)
+    {
+        // Check for missing properties in actual that exist in expected
+        foreach (var prop in expected)
+        {
+            var propPath = $"{path}.{prop.Key}";
+            if (!actual.TryGetPropertyValue(prop.Key, out var actualProp))
+            {
+                return new DiffResult(propPath, FormatNode(prop.Value), "(missing)");
+            }
+
+            var diff = FindNodeDiff(actualProp, prop.Value, propPath);
+            if (diff.HasDifference)
+            {
+                return diff;
+            }
+        }
+
+        // Check for extra properties in actual that don't exist in expected
+        foreach (var prop in actual)
+        {
+            var propPath = $"{path}.{prop.Key}";
+            if (!expected.ContainsKey(prop.Key))
+            {
+                return new DiffResult(propPath, "(missing)", FormatNode(prop.Value));
+            }
+        }
+
+        return new DiffResult(path, "", "", HasDifference: false);
+    }
+
+    private static DiffResult CompareJsonArrays(JsonArray actual, JsonArray expected, string path)
+    {
+        if (actual.Count != expected.Count)
+        {
+            return new DiffResult($"{path}.Length", expected.Count.ToString(), actual.Count.ToString());
+        }
+
+        for (var i = 0; i < actual.Count; i++)
+        {
+            var itemPath = $"{path}[{i}]";
+            var diff = FindNodeDiff(actual[i], expected[i], itemPath);
+            if (diff.HasDifference)
+            {
+                return diff;
+            }
+        }
+
+        return new DiffResult(path, "", "", HasDifference: false);
+    }
+
+    private static DiffResult CompareJsonValues(JsonValue actual, JsonValue expected, string path)
+    {
+        var actualText = actual.ToJsonString();
+        var expectedText = expected.ToJsonString();
+
+        if (actualText != expectedText)
+        {
+            return new DiffResult(path, expectedText, actualText);
+        }
+
+        return new DiffResult(path, "", "", HasDifference: false);
+    }
+
+    private static string GetNodeTypeName(JsonNode? node)
+    {
+        return node switch
+        {
+            JsonObject => "Object",
+            JsonArray => "Array",
+            JsonValue => "Value",
+            _ => "null"
+        };
+    }
+
+    private static string FormatNode(JsonNode? node)
+    {
+        if (node is null)
+        {
+            return "null";
+        }
+
+        return node switch
+        {
+            JsonObject => "{...}",
+            JsonArray => "[...]",
+            JsonValue val => val.ToJsonString(),
+            _ => node.ToJsonString()
         };
     }
 }

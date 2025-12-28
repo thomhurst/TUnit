@@ -90,12 +90,32 @@ public class JsonNodeAssertionTests
     }
 
     [Test]
+    public async Task IsDeepEqualTo_WithDifferentWhitespace_Passes()
+    {
+        JsonNode? node1 = JsonNode.Parse("{ \"name\" : \"Alice\" }");
+        JsonNode? node2 = JsonNode.Parse("{\"name\":\"Alice\"}");
+        await Assert.That(node1).IsDeepEqualTo(node2);
+    }
+
+    [Test]
     public async Task IsDeepEqualTo_WithDifferentJson_Fails()
     {
         JsonNode? node1 = JsonNode.Parse("{\"name\":\"Alice\"}");
         JsonNode? node2 = JsonNode.Parse("{\"name\":\"Bob\"}");
         await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(
             async () => await Assert.That(node1).IsDeepEqualTo(node2));
+    }
+
+    [Test]
+    public async Task IsDeepEqualTo_ErrorMessageContainsPath()
+    {
+        JsonNode? node1 = JsonNode.Parse("{\"person\":{\"name\":\"Alice\",\"age\":30}}");
+        JsonNode? node2 = JsonNode.Parse("{\"person\":{\"name\":\"Alice\",\"age\":31}}");
+
+        var exception = await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(
+            async () => await Assert.That(node1).IsDeepEqualTo(node2));
+
+        await Assert.That(exception.Message).Contains("$.person.age");
     }
 
     [Test]

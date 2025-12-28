@@ -70,7 +70,10 @@ public static partial class JsonNodeAssertionExtensions
         {
             return TUnit.Assertions.Core.AssertionResult.Passed;
         }
-        return TUnit.Assertions.Core.AssertionResult.Failed($"found {value}");
+
+        var diff = JsonDiffHelper.FindFirstDifference(value, expected);
+        return TUnit.Assertions.Core.AssertionResult.Failed(
+            $"differs at {diff.Path}: expected {diff.Expected} but found {diff.Actual}");
     }
 
     [GenerateAssertion(ExpectationMessage = "to not be equal to {expected}")]
@@ -80,7 +83,7 @@ public static partial class JsonNodeAssertionExtensions
         {
             return TUnit.Assertions.Core.AssertionResult.Passed;
         }
-        return TUnit.Assertions.Core.AssertionResult.Failed($"values are equal");
+        return TUnit.Assertions.Core.AssertionResult.Failed("values are equal");
     }
 #endif
 }
