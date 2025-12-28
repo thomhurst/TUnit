@@ -36,6 +36,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             .Where(static m => m is not null)
             .Combine(enabledProvider);
 
+        // Custom test attributes that inherit from BaseTestAttribute
+        var customTestMethodsProvider = context.SyntaxProvider
+            .CreateSyntaxProvider(
+                predicate: static (node, _) => node is MethodDeclarationSyntax { AttributeLists.Count: > 0 },
+                transform: static (ctx, _) => GetCustomTestMethodMetadata(ctx))
+            .Where(static m => m is not null)
+            .Combine(enabledProvider);
+
         var inheritsTestsClassesProvider = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "TUnit.Core.InheritsTestsAttribute",
@@ -45,6 +53,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             .Combine(enabledProvider);
 
         context.RegisterSourceOutput(testMethodsProvider,
+            static (context, data) =>
+            {
+                var (testMethod, isEnabled) = data;
+                if (!isEnabled)
+                {
+                    return;
+                }
+                GenerateTestMethodSource(context, testMethod);
+            });
+
+        context.RegisterSourceOutput(customTestMethodsProvider,
             static (context, data) =>
             {
                 var (testMethod, isEnabled) = data;
@@ -67,6 +86,86 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             });
     }
 
+    private static TestMethodMetadata? GetCustomTestMethodMetadata(GeneratorSyntaxContext context)
+    {
+        var methodSyntax = (MethodDeclarationSyntax)context.Node;
+        var methodSymbol = context.SemanticModel.GetDeclaredSymbol(methodSyntax) as IMethodSymbol;
+
+        if (methodSymbol == null)
+        {
+            return null;
+        }
+
+        // Find the custom test attribute that inherits from BaseTestAttribute
+        // Skip any attributes defined in TUnit.Core namespace (handled by built-in providers)
+        AttributeData? testAttribute = null;
+        foreach (var attr in methodSymbol.GetAttributes())
+        {
+            var attrType = attr.AttributeClass;
+            if (attrType == null)
+            {
+                continue;
+            }
+
+            // Skip built-in TUnit.Core attributes - they're handled by other providers
+            if (attrType.ContainingNamespace?.ToDisplayString() == "TUnit.Core")
+            {
+                continue;
+            }
+
+            var baseType = attrType.BaseType;
+            while (baseType != null)
+            {
+                if (baseType.ToDisplayString() == "TUnit.Core.BaseTestAttribute")
+                {
+                    testAttribute = attr;
+                    break;
+                }
+                baseType = baseType.BaseType;
+            }
+            if (testAttribute != null)
+            {
+                break;
+            }
+        }
+
+        if (testAttribute == null)
+        {
+            return null;
+        }
+
+        var containingType = methodSymbol.ContainingType;
+
+        if (containingType == null)
+        {
+            return null;
+        }
+
+        if (containingType.IsAbstract)
+        {
+            return null;
+        }
+
+        var isGenericType = containingType is { IsGenericType: true, TypeParameters.Length: > 0 };
+        var isGenericMethod = methodSymbol is { IsGenericMethod: true };
+
+        var (filePath, lineNumber) = GetTestMethodSourceLocation(methodSyntax, testAttribute);
+
+        return new TestMethodMetadata
+        {
+            MethodSymbol = methodSymbol,
+            TypeSymbol = containingType,
+            FilePath = filePath,
+            LineNumber = lineNumber,
+            TestAttribute = testAttribute,
+            SemanticModel = context.SemanticModel,
+            MethodSyntax = methodSyntax,
+            IsGenericType = isGenericType,
+            IsGenericMethod = isGenericMethod,
+            MethodAttributes = methodSymbol.GetAttributes()
+        };
+    }
+
     private static InheritsTestsClassMetadata? GetInheritsTestsClassMetadata(GeneratorAttributeSyntaxContext context)
     {
         var classSyntax = (ClassDeclarationSyntax)context.TargetNode;
@@ -85,7 +184,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             TypeSymbol = classSymbol,
             ClassSyntax = classSyntax,
-            Context = context
+            SemanticModel = context.SemanticModel
         };
     }
 
@@ -120,7 +219,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             FilePath = filePath,
             LineNumber = lineNumber,
             TestAttribute = context.Attributes.First(),
-            Context = context,
+            SemanticModel = context.SemanticModel,
             MethodSyntax = methodSyntax,
             IsGenericType = isGenericType,
             IsGenericMethod = isGenericMethod,
@@ -185,7 +284,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 FilePath = filePath,
                 LineNumber = lineNumber,
                 TestAttribute = testAttribute,
-                Context = classInfo.Context, // Use class context to access Compilation
+                SemanticModel = classInfo.SemanticModel, // Use class context to access Compilation
                 MethodSyntax = null, // No syntax for inherited methods
                 IsGenericType = typeForMetadata.IsGenericType,
                 IsGenericMethod = (concreteMethod ?? method).IsGenericMethod,
@@ -228,13 +327,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         try
         {
-            if (testMethod?.MethodSymbol == null || testMethod.Context == null)
+            if (testMethod?.MethodSymbol == null || testMethod.SemanticModel?.Compilation == null)
             {
                 return;
             }
-
-            // Get compilation from semantic model instead of parameter
-            var compilation = testMethod.Context.Value.SemanticModel.Compilation;
 
             var writer = new CodeWriter();
             GenerateFileHeader(writer);
@@ -274,7 +370,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static void GenerateTestMetadata(CodeWriter writer, TestMethodMetadata testMethod)
     {
-        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
+        var compilation = testMethod.SemanticModel?.Compilation!;
 
         var className = testMethod.TypeSymbol.GloballyQualified();
         var methodName = testMethod.MethodSymbol.Name;
@@ -357,7 +453,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         string combinationGuid,
         ImmutableArray<ITypeSymbol> typeArguments)
     {
-        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
+        var compilation = testMethod.SemanticModel?.Compilation!;
         var methodName = testMethod.MethodSymbol.Name;
         var typeArgsString = string.Join(", ", typeArguments.Select(t => t.GloballyQualified()));
         var instantiatedMethodName = $"{methodName}<{typeArgsString}>";
@@ -369,7 +465,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             FilePath = testMethod.FilePath,
             LineNumber = testMethod.LineNumber,
             TestAttribute = testMethod.TestAttribute,
-            Context = testMethod.Context,
+            SemanticModel = testMethod.SemanticModel,
             MethodSyntax = testMethod.MethodSyntax,
             IsGenericType = testMethod.IsGenericType,
             IsGenericMethod = false, // We're creating a concrete instantiation
@@ -576,7 +672,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static void GenerateMetadata(CodeWriter writer, TestMethodMetadata testMethod)
     {
-        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
+        var compilation = testMethod.SemanticModel?.Compilation!;
         var methodSymbol = testMethod.MethodSymbol;
 
 
@@ -622,7 +718,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static void GenerateMetadataForConcreteInstantiation(CodeWriter writer, TestMethodMetadata testMethod)
     {
-        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
+        var compilation = testMethod.SemanticModel?.Compilation!;
         var methodSymbol = testMethod.MethodSymbol;
 
 
@@ -674,7 +770,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static void GenerateDataSources(CodeWriter writer, TestMethodMetadata testMethod)
     {
-        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
+        var compilation = testMethod.SemanticModel?.Compilation!;
         var methodSymbol = testMethod.MethodSymbol;
         var typeSymbol = testMethod.TypeSymbol;
 
@@ -1578,7 +1674,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static void GeneratePropertyDataSources(CodeWriter writer, TestMethodMetadata testMethod)
     {
-        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
+        var compilation = testMethod.SemanticModel?.Compilation!;
         var typeSymbol = testMethod.TypeSymbol;
         var currentType = typeSymbol;
         var processedProperties = new HashSet<string>();
@@ -3145,7 +3241,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         string className,
         string combinationGuid)
     {
-        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
+        var compilation = testMethod.SemanticModel?.Compilation!;
         var methodName = testMethod.MethodSymbol.Name;
 
         writer.AppendLine("// Create generic metadata with concrete type registrations");
@@ -4624,7 +4720,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         ITypeSymbol[] typeArguments,
         AttributeData? specificArgumentsAttribute = null)
     {
-        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
+        var compilation = testMethod.SemanticModel?.Compilation!;
         var methodName = testMethod.MethodSymbol.Name;
 
         // Separate class type arguments from method type arguments
@@ -4844,7 +4940,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         AttributeData? specificArgumentsAttribute,
         ITypeSymbol[] typeArguments)
     {
-        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
+        var compilation = testMethod.SemanticModel?.Compilation!;
         var methodSymbol = testMethod.MethodSymbol;
         var typeSymbol = testMethod.TypeSymbol;
 
@@ -5163,7 +5259,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         AttributeData? classDataSourceAttribute,
         AttributeData? methodDataSourceAttribute)
     {
-        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
+        var compilation = testMethod.SemanticModel?.Compilation!;
         var methodName = testMethod.MethodSymbol.Name;
 
         writer.AppendLine($"var metadata = new global::TUnit.Core.TestMetadata<{className}>");
@@ -5356,6 +5452,6 @@ public class InheritsTestsClassMetadata
 {
     public required INamedTypeSymbol TypeSymbol { get; init; }
     public required ClassDeclarationSyntax ClassSyntax { get; init; }
-    public GeneratorAttributeSyntaxContext Context { get; init; }
+    public SemanticModel SemanticModel { get; init; }
 }
 

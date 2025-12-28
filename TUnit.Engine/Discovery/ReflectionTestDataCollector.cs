@@ -381,7 +381,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     var testMethodsList = new List<MethodInfo>();
                     foreach (var method in allMethods)
                     {
-                        if (method.IsDefined(typeof(TestAttribute), inherit: false) && !method.IsAbstract)
+                        if (IsTestMethod(method) && !method.IsAbstract)
                         {
                             testMethodsList.Add(method);
                         }
@@ -394,7 +394,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     var testMethodsList = new List<MethodInfo>(declaredMethods.Length);
                     foreach (var method in declaredMethods)
                     {
-                        if (method.IsDefined(typeof(TestAttribute), inherit: false) && !method.IsAbstract)
+                        if (IsTestMethod(method) && !method.IsAbstract)
                         {
                             testMethodsList.Add(method);
                         }
@@ -512,14 +512,14 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 {
                     // Get all test methods including inherited ones
                     testMethods = GetAllTestMethods(type)
-                        .Where(static m => m.IsDefined(typeof(TestAttribute), inherit: false) && !m.IsAbstract);
+                        .Where(static m => IsTestMethod(m) && !m.IsAbstract);
                 }
                 else
                 {
                     // Only get declared test methods
                     testMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static |
                                                   BindingFlags.DeclaredOnly)
-                        .Where(static m => m.IsDefined(typeof(TestAttribute), inherit: false) && !m.IsAbstract);
+                        .Where(static m => IsTestMethod(m) && !m.IsAbstract);
                 }
             }
             catch (Exception)
@@ -582,7 +582,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         var testMethodsList = new List<MethodInfo>(declaredMethods.Length);
         foreach (var method in declaredMethods)
         {
-            if (method.IsDefined(typeof(TestAttribute), inherit: false) && !method.IsAbstract)
+            if (IsTestMethod(method) && !method.IsAbstract)
             {
                 testMethodsList.Add(method);
             }
@@ -671,7 +671,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         var testMethodsList = new List<MethodInfo>(declaredMethods.Length);
         foreach (var method in declaredMethods)
         {
-            if (method.IsDefined(typeof(TestAttribute), inherit: false) && !method.IsAbstract)
+            if (IsTestMethod(method) && !method.IsAbstract)
             {
                 testMethodsList.Add(method);
             }
@@ -1010,7 +1010,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
             foreach (var method in methods)
             {
-                if (method.IsDefined(typeof(TestAttribute), inherit: false))
+                if (IsTestMethod(method))
                 {
                     return true;
                 }
@@ -1024,14 +1024,20 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
     }
 
+    private static bool IsTestMethod(MethodInfo method)
+    {
+        // Check if method has any attribute that inherits from BaseTestAttribute
+        return method.GetCustomAttributes(typeof(BaseTestAttribute), inherit: false).Length > 0;
+    }
+
     private static string? ExtractFilePath(MethodInfo method)
     {
-        return method.GetCustomAttribute<TestAttribute>()?.File;
+        return method.GetCustomAttribute<BaseTestAttribute>()?.File;
     }
 
     private static int? ExtractLineNumber(MethodInfo method)
     {
-        return method.GetCustomAttribute<TestAttribute>()?.Line;
+        return method.GetCustomAttribute<BaseTestAttribute>()?.Line;
     }
 
     private static TestMetadata CreateFailedTestMetadataForAssembly(Assembly assembly, Exception ex)
