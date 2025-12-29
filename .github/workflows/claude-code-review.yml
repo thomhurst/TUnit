@@ -26,55 +26,68 @@ jobs:
             </task>
 
             <instructions>
-            FIRST: Read CLAUDE.md to understand TUnit's critical rules and coding standards.
+            1. Read CLAUDE.md to understand TUnit's critical rules
+            2. Run `gh pr diff ${{ github.event.pull_request.number }}` to see changes
+            3. Run `gh pr view ${{ github.event.pull_request.number }} --comments` to check previous review comments
+            4. Determine which TUnit rules apply based on files changed
+            5. Read any files needed to understand context before commenting
 
-            THEN: Use `gh pr diff ${{ github.event.pull_request.number }}` to see the changes. Think carefully about each change before commenting.
-
-            INVESTIGATE before commenting. Read any files you need to understand context. Never speculate about code you haven't inspected.
+            Think carefully. Never speculate about code you haven't inspected.
             </instructions>
 
-            <tunit_critical_rules>
-            These are blocking issues if violated:
-            1. DUAL-MODE: Changes to TUnit.Core.SourceGenerator or TUnit.Engine test discovery must work in both modes
-            2. SNAPSHOTS: Source generator or public API changes require .verified.txt updates (never .received.txt)
-            3. NO VSTEST: Microsoft.VisualStudio.TestPlatform is forbidden - only Microsoft.Testing.Platform
-            4. AOT: Reflection usage must have [DynamicallyAccessedMembers] annotations
-            5. PERFORMANCE: No unnecessary allocations in hot paths (discovery, execution, data generation)
-            </tunit_critical_rules>
+            <tunit_rules>
+            Check which rules apply based on files modified:
+
+            - IF changes touch TUnit.Core.SourceGenerator OR TUnit.Engine test discovery:
+              → Verify dual-mode implementation (both paths must behave identically)
+
+            - IF source generator output changed:
+              → Verify .verified.txt snapshots updated (never .received.txt)
+
+            - IF public API changed (TUnit.Core, TUnit.Engine, TUnit.Assertions):
+              → Verify TUnit.PublicAPI snapshots updated
+
+            - IF reflection is used:
+              → Verify [DynamicallyAccessedMembers] annotations for AOT compatibility
+
+            - IF changes touch hot paths (discovery, execution, data generation):
+              → Flag unnecessary allocations or performance concerns
+
+            ALWAYS block: Any use of Microsoft.VisualStudio.TestPlatform (VSTest)
+            </tunit_rules>
 
             <review_focus>
-            Only flag issues that matter:
-            - Critical: Bugs, security vulnerabilities, TUnit rule violations
-            - Important: Performance problems, missing tests for new functionality
-            - Suggestions: Better approaches (only if significantly better)
+            Flag only issues that matter:
+            - Critical: Bugs, TUnit rule violations, security issues (injection, XSS, command injection, secrets in code)
+            - Suggestions: Significantly better approaches (not minor preferences)
 
             DO NOT comment on:
-            - Style preferences handled by linters/formatters
-            - Minor naming suggestions
-            - Obvious or self-explanatory code
-            - Things that are clearly intentional design choices
+            - Style handled by linters/formatters
+            - Minor naming preferences
+            - Self-explanatory code
+            - Intentional design choices
             </review_focus>
 
             <output_format>
-            Structure your review as:
-
             ## Summary
             One sentence: what does this PR do?
 
             ## Critical Issues
-            List any blocking problems. If none, state "None found."
+            Blocking problems that must be fixed. If none: "None found ✅"
 
             ## Suggestions
-            Optional improvements worth considering. Keep brief.
+            Optional improvements. If none, omit this section.
+
+            ## Previous Review Status
+            If previous comments exist: note which issues were addressed or remain open.
+            If no previous comments: omit this section.
 
             ## Verdict
-            ✅ APPROVE - Ready to merge (no critical issues)
-            ⚠️ REQUEST CHANGES - Critical issues must be addressed
-            💬 COMMENT - Questions or non-blocking feedback only
-
-            If previous review comments exist, note which issues were addressed.
+            ✅ **APPROVE** - No critical issues
+            ⚠️ **REQUEST CHANGES** - Critical issues found
+            💬 **COMMENT** - Questions only, no blocking issues
             </output_format>
 
-            Post your review using `gh pr comment ${{ github.event.pull_request.number }}`.
+            Post your review using `gh pr comment ${{ github.event.pull_request.number }} --body "YOUR_REVIEW"`.
 
           claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
