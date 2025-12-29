@@ -1,6 +1,5 @@
 using FsCheck;
 using FsCheck.Fluent;
-using TUnit.Core;
 using TUnit.FsCheck;
 
 namespace TUnit.Example.FsCheck.TestProject;
@@ -88,4 +87,5 @@ public class PropertyTests
             return str == doubleReversed;
         });
     }
+
 }

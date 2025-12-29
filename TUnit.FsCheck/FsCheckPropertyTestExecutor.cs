@@ -42,7 +42,11 @@ public class FsCheckPropertyTestExecutor : ITestExecutor
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "FsCheck requires reflection")]
-    private static MethodInfo GetMethodInfo(Type classType, string methodName, ParameterMetadata[] parameters)
+    private static MethodInfo GetMethodInfo(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)]
+        Type classType,
+        string methodName,
+        ParameterMetadata[] parameters)
     {
         // Try to find the method by name and parameter count
         var methods = classType
