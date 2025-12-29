@@ -22,6 +22,11 @@ internal static class ReflectionAttributeExtractor
     private static readonly ConcurrentDictionary<AttributeCacheKey, Attribute[]> _attributesCache = new();
 
     /// <summary>
+    /// Cache for all attributes lookups (method + class + assembly combined)
+    /// </summary>
+    private static readonly ConcurrentDictionary<(Type, MethodInfo), Attribute[]> _allAttributesCache = new();
+
+    /// <summary>
     /// Composite cache key combining type, method, and attribute type information
     /// </summary>
     private readonly struct AttributeCacheKey : IEquatable<AttributeCacheKey>
@@ -181,15 +186,18 @@ internal static class ReflectionAttributeExtractor
 
     public static Attribute[] GetAllAttributes(Type testClass, MethodInfo testMethod)
     {
-        var attributes = new List<Attribute>();
+        return _allAttributesCache.GetOrAdd((testClass, testMethod), key =>
+        {
+            var attributes = new List<Attribute>();
 
-        // Add in reverse order of precedence so method attributes come first
-        // This ensures ScopedAttributeFilter will keep method-level attributes over class/assembly
-        attributes.AddRange(testMethod.GetCustomAttributes());
-        attributes.AddRange(testClass.GetCustomAttributes());
-        attributes.AddRange(testClass.Assembly.GetCustomAttributes());
+            // Add in reverse order of precedence so method attributes come first
+            // This ensures ScopedAttributeFilter will keep method-level attributes over class/assembly
+            attributes.AddRange(key.Item2.GetCustomAttributes());
+            attributes.AddRange(key.Item1.GetCustomAttributes());
+            attributes.AddRange(key.Item1.Assembly.GetCustomAttributes());
 
-        return attributes.ToArray();
+            return attributes.ToArray();
+        });
     }
 
     [UnconditionalSuppressMessage("Trimming",
