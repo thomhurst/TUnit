@@ -1,7 +1,5 @@
 # Project Structure
 
-Overview of TUnit's codebase organization.
-
 ---
 
 ## Core Projects

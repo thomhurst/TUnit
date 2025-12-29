@@ -1,12 +1,10 @@
 # Troubleshooting
 
-Common issues and solutions.
-
 ---
 
 ## Snapshot Tests Failing
 
-See CLAUDE.md for the quick fix workflow.
+See `CLAUDE.md` for the quick fix workflow.
 
 If changes are unintentional, investigate what modified the source generator output or public API.
 
@@ -45,7 +43,7 @@ obj/Debug/net9.0/generated/TUnit.Core.SourceGenerator/
 
 ## AOT Compilation Fails
 
-See `mandatory-rules.md` Rule 5 for annotation patterns.
+See `mandatory-rules.md` for annotation patterns.
 
 **Common Causes**:
 - Reflection without `[DynamicallyAccessedMembers]`
@@ -72,4 +70,4 @@ dotnet run -c Release --framework net9.0
 
 This is expected. Many tests verify failure scenarios.
 
-See `workflows.md` for filter syntax.
+See `workflows.md`.

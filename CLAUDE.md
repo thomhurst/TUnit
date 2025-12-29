@@ -45,8 +45,6 @@ git add *.verified.txt
 
 > "Does this make TUnit faster, more modern, more reliable, or more enjoyable to use?"
 
-If NO, reconsider the change.
-
 ## Further Documentation
 
 - `.claude/docs/mandatory-rules.md` - Full rule details

@@ -1,7 +1,5 @@
 # Development Workflows
 
-Commands, processes, and checklists for TUnit development.
-
 ---
 
 ## Common Commands
@@ -67,7 +65,7 @@ dotnet run -- --treenode-filter "/*/*/ClassB/*"
 3. Implement in `TUnit.Core` if new abstractions needed
 4. Add analyzer rule if misuse is possible
 5. Run all tests: `dotnet test`
-6. Accept snapshots if needed (see CLAUDE.md)
+6. Accept snapshots if needed (see `CLAUDE.md`)
 7. Benchmark if touching hot paths
 8. Test AOT if using reflection
 

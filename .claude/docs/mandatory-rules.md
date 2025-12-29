@@ -1,7 +1,5 @@
 # Mandatory Rules
 
-Detailed explanations of the critical rules from CLAUDE.md.
-
 ---
 
 ## Rule 1: Dual-Mode Implementation
@@ -40,7 +38,7 @@ Run snapshot tests when changing:
 - Source generator output → `dotnet test TUnit.Core.SourceGenerator.Tests`
 - Public APIs → `dotnet test TUnit.PublicAPI`
 
-See CLAUDE.md for the quick fix workflow to accept snapshots.
+See `CLAUDE.md` for the quick fix workflow.
 
 ---
 
