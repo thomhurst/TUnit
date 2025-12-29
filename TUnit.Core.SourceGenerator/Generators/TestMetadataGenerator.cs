@@ -233,6 +233,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 return;
             }
 
+            // Get compilation from semantic model instead of parameter
+            var compilation = testMethod.Context.Value.SemanticModel.Compilation;
+
             var writer = new CodeWriter();
             GenerateFileHeader(writer);
             GenerateTestMetadata(writer, testMethod);
