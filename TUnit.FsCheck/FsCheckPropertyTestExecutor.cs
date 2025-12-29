@@ -308,7 +308,6 @@ public class FsCheckPropertyTestExecutor : ITestExecutor
     {
         var sb = new StringBuilder();
         sb.AppendLine($"Property '{methodName}' failed with counterexample:");
-        sb.AppendLine();
 
         // Unwrap TargetInvocationException to get to the actual FsCheck exception
         var innerEx = ex;
@@ -335,7 +334,6 @@ public class FsCheckPropertyTestExecutor : ITestExecutor
         {
             sb.AppendLine();
             sb.AppendLine("FsCheck output:");
-            sb.AppendLine();
             // Indent each line of the FsCheck message
             foreach (var line in innerEx.Message.Split('\n'))
             {
