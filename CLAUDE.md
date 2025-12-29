@@ -348,14 +348,6 @@ finally { ArrayPool<byte>.Shared.Return(buffer); }
 // ❌ Catching all exceptions without re-throw
 try { } catch (Exception) { }  // Swallows errors
 
-// ❌ LINQ in hot paths
-var count = tests.Where(t => t.IsPassed).Count();
-
-// ✅ Use loops instead
-int count = 0;
-foreach (var test in tests)
-    if (test.IsPassed) count++;
-
 // ❌ String concatenation in loops
 string result = "";
 foreach (var item in items) result += item;
@@ -363,6 +355,23 @@ foreach (var item in items) result += item;
 // ✅ StringBuilder
 var builder = new StringBuilder();
 foreach (var item in items) builder.Append(item);
+```
+
+### LINQ Best Practices
+
+Modern .NET (6+) has heavily optimized LINQ. **Prefer LINQ for readable, maintainable code**:
+
+```csharp
+// ✅ LINQ is optimized and readable
+var count = tests.Count(t => t.IsPassed);
+var passedTests = tests.Where(t => t.IsPassed).ToList();
+
+// ✅ Use appropriate LINQ methods
+var first = items.FirstOrDefault();
+var any = items.Any(x => x.IsValid);
+
+// ✅ For truly performance-critical inner loops measured by profiling,
+// consider manual optimization only if benchmarks show a real problem
 ```
 
 ---
@@ -598,10 +607,10 @@ dotnet trace collect -- dotnet test
 ```
 
 **Common Causes**:
-- LINQ in hot path → use loops
 - Missing reflection cache
 - Unnecessary allocations → use object pooling
 - Blocking on async
+- Excessive allocations in tight loops (profile to identify)
 
 ---
 
