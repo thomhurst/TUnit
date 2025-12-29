@@ -11,10 +11,10 @@ public class TestMethodMetadata : IEquatable<TestMethodMetadata>
 {
     public required IMethodSymbol MethodSymbol { get; init; }
     public required INamedTypeSymbol TypeSymbol { get; init; }
-    public required SemanticModel SemanticModel { get; init; }
     public required string FilePath { get; init; }
     public required int LineNumber { get; init; }
     public required AttributeData TestAttribute { get; init; }
+    public GeneratorAttributeSyntaxContext? Context { get; init; }
     public required MethodDeclarationSyntax? MethodSyntax { get; init; }
     public bool IsGenericType { get; init; }
     public bool IsGenericMethod { get; init; }

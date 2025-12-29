@@ -137,7 +137,7 @@ public class FsCheckPropertyTestExecutor : ITestExecutor
                 break;
             default:
                 throw new NotSupportedException(
-                    $"FsCheck property tests with {parameterTypes.Length} parameters are not supported. Maximum is 4.");
+                    $"FsCheck property tests with {parameterTypes.Length} parameters are not supported. Maximum is 3.");
         }
     }
 
@@ -235,8 +235,7 @@ public class FsCheckPropertyTestExecutor : ITestExecutor
         catch (Exception ex)
         {
             throw new PropertyFailedException(
-                FormatCounterexample(methodInfo.Name, [(paramName, failingValue)], ex),
-                ex);
+                FormatCounterexample(methodInfo.Name, [(paramName, failingValue)], ex));
         }
     }
 
@@ -267,8 +266,7 @@ public class FsCheckPropertyTestExecutor : ITestExecutor
         {
             throw new PropertyFailedException(
                 FormatCounterexample(methodInfo.Name, [(paramNames[0], failingValue1), (paramNames[1], failingValue2)],
-                    ex),
-                ex);
+                    ex));
         }
     }
 
@@ -302,8 +300,7 @@ public class FsCheckPropertyTestExecutor : ITestExecutor
             throw new PropertyFailedException(
                 FormatCounterexample(methodInfo.Name,
                     [(paramNames[0], failingValue1), (paramNames[1], failingValue2), (paramNames[2], failingValue3)],
-                    ex),
-                ex);
+                    ex));
         }
     }
 
@@ -313,7 +310,7 @@ public class FsCheckPropertyTestExecutor : ITestExecutor
         sb.AppendLine($"Property '{methodName}' failed with counterexample:");
         sb.AppendLine();
 
-        // Include the original exception message if it has useful info
+        // Unwrap TargetInvocationException to get to the actual FsCheck exception
         var innerEx = ex;
         while (innerEx is TargetInvocationException { InnerException: not null } tie)
         {
@@ -331,6 +328,20 @@ public class FsCheckPropertyTestExecutor : ITestExecutor
                 ? shrunkValues[i]
                 : FormatValue(value);
             sb.AppendLine($"  {name} = {displayValue}");
+        }
+
+        // Append the FsCheck message for full details
+        if (innerEx != null && !string.IsNullOrEmpty(innerEx.Message))
+        {
+            sb.AppendLine();
+            sb.AppendLine("FsCheck output:");
+            sb.AppendLine();
+            // Indent each line of the FsCheck message
+            foreach (var line in innerEx.Message.Split('\n'))
+            {
+                sb.Append("  ");
+                sb.AppendLine(line.TrimEnd('\r'));
+            }
         }
 
         return sb.ToString();
