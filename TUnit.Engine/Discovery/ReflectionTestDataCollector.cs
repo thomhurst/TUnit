@@ -1923,11 +1923,26 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             GenericTypeInfo = ReflectionGenericTypeResolver.ExtractGenericTypeInfo(result.TestClassType),
             GenericMethodInfo = ReflectionGenericTypeResolver.ExtractGenericMethodInfo(methodInfo),
             GenericMethodTypeArguments = methodInfo.IsGenericMethodDefinition ? null : methodInfo.GetGenericArguments(),
-            AttributeFactory = () => result.Attributes.ToArray(),
+            AttributeFactory = () => GetDynamicTestAttributes(result),
             PropertyInjections = PropertySourceRegistry.DiscoverInjectableProperties(result.TestClassType)
         };
 
         return Task.FromResult<TestMetadata>(metadata);
+    }
+
+    private static Attribute[] GetDynamicTestAttributes(DynamicDiscoveryResult result)
+    {
+        // Merge explicitly provided attributes with inherited class/assembly attributes
+        // Order matches GetAllAttributes: method-level first (explicit), then class, then assembly
+        var attributes = new List<Attribute>(result.Attributes);
+
+        if (result.TestClassType != null)
+        {
+            attributes.AddRange(result.TestClassType.GetCustomAttributes().OfType<Attribute>());
+            attributes.AddRange(result.TestClassType.Assembly.GetCustomAttributes().OfType<Attribute>());
+        }
+
+        return attributes.ToArray();
     }
 
     private static Func<Type[], object?[], object> CreateDynamicInstanceFactory(Type testClass, object?[]? predefinedClassArgs)
