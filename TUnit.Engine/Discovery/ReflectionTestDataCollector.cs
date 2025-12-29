@@ -373,7 +373,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     var testMethodsList = new List<MethodInfo>();
                     foreach (var method in allMethods)
                     {
-                        if (IsTestMethod(method) && !method.IsAbstract)
+                        if (method.IsDefined(typeof(TestAttribute), inherit: false) && !method.IsAbstract)
                         {
                             testMethodsList.Add(method);
                         }
@@ -386,7 +386,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     var testMethodsList = new List<MethodInfo>(declaredMethods.Length);
                     foreach (var method in declaredMethods)
                     {
-                        if (IsTestMethod(method) && !method.IsAbstract)
+                        if (method.IsDefined(typeof(TestAttribute), inherit: false) && !method.IsAbstract)
                         {
                             testMethodsList.Add(method);
                         }
@@ -504,14 +504,14 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 {
                     // Get all test methods including inherited ones
                     testMethods = GetAllTestMethods(type)
-                        .Where(static m => IsTestMethod(m) && !m.IsAbstract);
+                        .Where(static m => m.IsDefined(typeof(TestAttribute), inherit: false) && !m.IsAbstract);
                 }
                 else
                 {
                     // Only get declared test methods
                     testMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static |
                                                   BindingFlags.DeclaredOnly)
-                        .Where(static m => IsTestMethod(m) && !m.IsAbstract);
+                        .Where(static m => m.IsDefined(typeof(TestAttribute), inherit: false) && !m.IsAbstract);
                 }
             }
             catch (Exception)
@@ -574,7 +574,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         var testMethodsList = new List<MethodInfo>(declaredMethods.Length);
         foreach (var method in declaredMethods)
         {
-            if (IsTestMethod(method) && !method.IsAbstract)
+            if (method.IsDefined(typeof(TestAttribute), inherit: false) && !method.IsAbstract)
             {
                 testMethodsList.Add(method);
             }
@@ -663,7 +663,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         var testMethodsList = new List<MethodInfo>(declaredMethods.Length);
         foreach (var method in declaredMethods)
         {
-            if (IsTestMethod(method) && !method.IsAbstract)
+            if (method.IsDefined(typeof(TestAttribute), inherit: false) && !method.IsAbstract)
             {
                 testMethodsList.Add(method);
             }
@@ -1002,7 +1002,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
             foreach (var method in methods)
             {
-                if (IsTestMethod(method))
+                if (method.IsDefined(typeof(TestAttribute), inherit: false))
                 {
                     return true;
                 }
@@ -1014,11 +1014,6 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             // If we can't access the methods, treat it as not having test methods
             return false;
         }
-    }
-
-    private static bool IsTestMethod(MethodInfo method)
-    {
-        return method.IsDefined(typeof(TestAttribute), inherit: false);
     }
 
     private static string? ExtractFilePath(MethodInfo method)
