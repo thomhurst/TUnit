@@ -53,4 +53,27 @@ public class DataSourceExceptionPropagationTests(TestMode testMode) : InvokableT
                 }
             ]);
     }
+
+    [Test]
+    public async Task NestedClassDataSource_ConstructorThrows_FailsTestWithException()
+    {
+        await RunTestsWithFilter(
+            "/*/*/NestedDataSourcesThrow/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Failed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(1),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(0),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(1),
+                result =>
+                {
+                    var errorMessage = result.Results.First().Output?.ErrorInfo?.Message;
+                    errorMessage.ShouldNotBeNull("Expected an error message");
+                    // Should contain the original exception message from the DataSource3 constructor
+                    errorMessage.ShouldContain("Oops something went wrong");
+                    // Should indicate the nested property injection failure path
+                    errorMessage.ShouldContain("Failed to inject properties for type 'DataSource'");
+                    errorMessage.ShouldContain("Failed to inject properties for type 'DataSource2'");
+                }
+            ]);
+    }
 }
