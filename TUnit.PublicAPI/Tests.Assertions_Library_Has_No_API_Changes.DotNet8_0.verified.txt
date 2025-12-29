@@ -19,6 +19,7 @@ namespace
         public static . That(. task, [.("task")] string? expression = null) { }
         public static .<string> That(string? value, [.("value")] string? expression = null) { }
         public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
+        public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
         public static .<TItem> That<TItem>(<.<TItem>?> func, [.("func")] string? expression = null) { }
         public static .<TItem> That<TItem>(<.<.<TItem>?>> func, [.("func")] string? expression = null) { }
         public static .<TValue> That<TValue>(<.<TValue?>> func, [.("func")] string? expression = null) { }
@@ -47,6 +48,29 @@ namespace
             where TException :  { }
         public static .<TException> ThrowsExactlyAsync<TException>(string parameterName, <.> action)
             where TException :  { }
+    }
+    public static class DecimalAssertions
+    {
+        [.(ExpectationMessage="to have precision {expectedPrecision}")]
+        public static . HasPrecision(this decimal value, int expectedPrecision) { }
+        [.(ExpectationMessage="to have scale {expectedScale}")]
+        public static . HasScale(this decimal value, int expectedScale) { }
+        [.(ExpectationMessage="to be negative", InlineMethodBody=true)]
+        public static bool IsNegative(this decimal value) { }
+        [.(ExpectationMessage="to not be negative", InlineMethodBody=true)]
+        public static bool IsNotNegative(this decimal value) { }
+        [.(ExpectationMessage="to not be positive", InlineMethodBody=true)]
+        public static bool IsNotPositive(this decimal value) { }
+        [.(ExpectationMessage="to not be a whole number", InlineMethodBody=true)]
+        public static bool IsNotWhole(this decimal value) { }
+        [.(ExpectationMessage="to not be zero", InlineMethodBody=true)]
+        public static bool IsNotZero(this decimal value) { }
+        [.(ExpectationMessage="to be positive", InlineMethodBody=true)]
+        public static bool IsPositive(this decimal value) { }
+        [.(ExpectationMessage="to be a whole number", InlineMethodBody=true)]
+        public static bool IsWhole(this decimal value) { }
+        [.(ExpectationMessage="to be zero", InlineMethodBody=true)]
+        public static bool IsZero(this decimal value) { }
     }
     public static class Fail
     {
@@ -280,6 +304,75 @@ namespace .Conditions
         public .<TTarget, T> IsNotAssignableTo<TTarget>() { }
         public .<T, TExpected> IsNotTypeOf<TExpected>() { }
         public .<T, TExpected> IsTypeOf<TExpected>() { }
+    }
+    public class AsyncEnumerableAllAssertion<TItem> : .<.<TItem>>
+    {
+        public AsyncEnumerableAllAssertion(.<.<TItem>> context, <TItem, bool> predicate, string predicateDescription) { }
+        protected override .<.> CheckAsync(.<.<TItem>> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class AsyncEnumerableAnyAssertion<TItem> : .<.<TItem>>
+    {
+        public AsyncEnumerableAnyAssertion(.<.<TItem>> context, <TItem, bool> predicate, string predicateDescription) { }
+        protected override .<.> CheckAsync(.<.<TItem>> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public static class AsyncEnumerableAssertionExtensions
+    {
+        public static .<TItem> All<TItem>(this .<TItem> source, <TItem, bool> predicate, [.("predicate")] string? predicateExpression = null) { }
+        public static .<TItem> Any<TItem>(this .<TItem> source, <TItem, bool> predicate, [.("predicate")] string? predicateExpression = null) { }
+        public static .<TItem> CompletesWithin<TItem>(this .<TItem> source,  timeout, [.("timeout")] string? timeoutExpression = null) { }
+        public static .<TItem> Contains<TItem>(this .<TItem> source, TItem expectedItem, [.("expectedItem")] string? expectedItemExpression = null) { }
+        public static .<TItem> Contains<TItem>(this .<TItem> source, TItem expectedItem, .<TItem> comparer, [.("expectedItem")] string? expectedItemExpression = null) { }
+        public static .<TItem> DoesNotContain<TItem>(this .<TItem> source, TItem item, [.("item")] string? itemExpression = null) { }
+        public static .<TItem> DoesNotContain<TItem>(this .<TItem> source, TItem item, .<TItem> comparer, [.("item")] string? itemExpression = null) { }
+        public static .<TItem> IsEmpty<TItem>(this .<TItem> source) { }
+        public static .<TItem> IsNotEmpty<TItem>(this .<TItem> source) { }
+        public static .<TItem> YieldsCount<TItem>(this .<TItem> source, int expectedCount, [.("expectedCount")] string? expectedCountExpression = null) { }
+        public static .<TItem> YieldsExactly<TItem>(this .<TItem> source, params TItem[] expectedItems) { }
+        public static .<TItem> YieldsExactly<TItem>(this .<TItem> source, .<TItem> comparer, params TItem[] expectedItems) { }
+    }
+    public class AsyncEnumerableCompletesWithinAssertion<TItem> : .<.<TItem>>
+    {
+        public AsyncEnumerableCompletesWithinAssertion(.<.<TItem>> context,  timeout) { }
+        protected override .<.> CheckAsync(.<.<TItem>> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class AsyncEnumerableContainsAssertion<TItem> : .<.<TItem>>
+    {
+        public AsyncEnumerableContainsAssertion(.<.<TItem>> context, TItem expectedItem, .<TItem>? comparer = null) { }
+        protected override .<.> CheckAsync(.<.<TItem>> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class AsyncEnumerableDoesNotContainAssertion<TItem> : .<.<TItem>>
+    {
+        public AsyncEnumerableDoesNotContainAssertion(.<.<TItem>> context, TItem item, .<TItem>? comparer = null) { }
+        protected override .<.> CheckAsync(.<.<TItem>> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class AsyncEnumerableIsEmptyAssertion<TItem> : .<.<TItem>>
+    {
+        public AsyncEnumerableIsEmptyAssertion(.<.<TItem>> context) { }
+        protected override .<.> CheckAsync(.<.<TItem>> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class AsyncEnumerableIsNotEmptyAssertion<TItem> : .<.<TItem>>
+    {
+        public AsyncEnumerableIsNotEmptyAssertion(.<.<TItem>> context) { }
+        protected override .<.> CheckAsync(.<.<TItem>> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class AsyncEnumerableYieldsCountAssertion<TItem> : .<.<TItem>>
+    {
+        public AsyncEnumerableYieldsCountAssertion(.<.<TItem>> context, int expectedCount) { }
+        protected override .<.> CheckAsync(.<.<TItem>> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class AsyncEnumerableYieldsExactlyAssertion<TItem> : .<.<TItem>>
+    {
+        public AsyncEnumerableYieldsExactlyAssertion(.<.<TItem>> context, TItem[] expectedItems, .<TItem>? comparer = null) { }
+        protected override .<.> CheckAsync(.<.<TItem>> metadata) { }
+        protected override string GetExpectation() { }
     }
     public class AsyncMappedSatisfiesAssertion<TValue, TMapped> : .<TValue>
     {
@@ -701,6 +794,45 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TException> metadata) { }
         protected override string GetExpectation() { }
     }
+    public static class FieldInfoAssertionExtensions
+    {
+        [.(ExpectationMessage="to not have attribute of type {attributeType}")]
+        public static . DoesNotHaveAttribute(this .FieldInfo value,  attributeType) { }
+        [.(ExpectationMessage="to have attribute of type {attributeType}")]
+        public static . HasAttribute(this .FieldInfo value,  attributeType) { }
+        [.(ExpectationMessage="to have name \'{expectedName}\'")]
+        public static . HasName(this .FieldInfo value, string expectedName) { }
+        [.(ExpectationMessage="to be a constant", InlineMethodBody=true)]
+        public static bool IsConstant(this .FieldInfo value) { }
+        [.(ExpectationMessage="to be internal", InlineMethodBody=true)]
+        public static bool IsInternal(this .FieldInfo value) { }
+        [.(ExpectationMessage="to not be a constant", InlineMethodBody=true)]
+        public static bool IsNotConstant(this .FieldInfo value) { }
+        [.(ExpectationMessage="to not be internal", InlineMethodBody=true)]
+        public static bool IsNotInternal(this .FieldInfo value) { }
+        [.(ExpectationMessage="to not be private", InlineMethodBody=true)]
+        public static bool IsNotPrivate(this .FieldInfo value) { }
+        [.(ExpectationMessage="to not be protected", InlineMethodBody=true)]
+        public static bool IsNotProtected(this .FieldInfo value) { }
+        [.(ExpectationMessage="to not be public", InlineMethodBody=true)]
+        public static bool IsNotPublic(this .FieldInfo value) { }
+        [.(ExpectationMessage="to not be readonly", InlineMethodBody=true)]
+        public static bool IsNotReadOnly(this .FieldInfo value) { }
+        [.(ExpectationMessage="to not be static", InlineMethodBody=true)]
+        public static bool IsNotStatic(this .FieldInfo value) { }
+        [.(ExpectationMessage="to be of type {expectedType}")]
+        public static . IsOfType(this .FieldInfo value,  expectedType) { }
+        [.(ExpectationMessage="to be private", InlineMethodBody=true)]
+        public static bool IsPrivate(this .FieldInfo value) { }
+        [.(ExpectationMessage="to be protected", InlineMethodBody=true)]
+        public static bool IsProtected(this .FieldInfo value) { }
+        [.(ExpectationMessage="to be public", InlineMethodBody=true)]
+        public static bool IsPublic(this .FieldInfo value) { }
+        [.(ExpectationMessage="to be readonly", InlineMethodBody=true)]
+        public static bool IsReadOnly(this .FieldInfo value) { }
+        [.(ExpectationMessage="to be static", InlineMethodBody=true)]
+        public static bool IsStatic(this .FieldInfo value) { }
+    }
     [.("IsNotExecutable")]
     public class FileIsNotExecutableAssertion : .<.FileInfo>
     {
@@ -931,6 +1063,55 @@ namespace .Conditions
         public .<TObject?> GetAwaiter() { }
         public static .<TObject> op_Implicit(.<TObject> result) { }
     }
+    public static class MethodInfoAssertionExtensions
+    {
+        [.(ExpectationMessage="to not have attribute of type {attributeType}")]
+        public static . DoesNotHaveAttribute(this .MethodInfo value,  attributeType) { }
+        [.(ExpectationMessage="to have attribute of type {attributeType}")]
+        public static . HasAttribute(this .MethodInfo value,  attributeType) { }
+        [.(ExpectationMessage="to have name \'{expectedName}\'")]
+        public static . HasName(this .MethodInfo value, string expectedName) { }
+        [.(ExpectationMessage="to have {expectedCount} parameters")]
+        public static . HasParameterCount(this .MethodInfo value, int expectedCount) { }
+        [.(ExpectationMessage="to be abstract", InlineMethodBody=true)]
+        public static bool IsAbstract(this .MethodInfo value) { }
+        [.(ExpectationMessage="to be final (sealed)", InlineMethodBody=true)]
+        public static bool IsFinal(this .MethodInfo value) { }
+        [.(ExpectationMessage="to be a generic method", InlineMethodBody=true)]
+        public static bool IsGenericMethod(this .MethodInfo value) { }
+        [.(ExpectationMessage="to be internal", InlineMethodBody=true)]
+        public static bool IsInternal(this .MethodInfo value) { }
+        [.(ExpectationMessage="to not be abstract", InlineMethodBody=true)]
+        public static bool IsNotAbstract(this .MethodInfo value) { }
+        [.(ExpectationMessage="to not be final (sealed)", InlineMethodBody=true)]
+        public static bool IsNotFinal(this .MethodInfo value) { }
+        [.(ExpectationMessage="to not be a generic method", InlineMethodBody=true)]
+        public static bool IsNotGenericMethod(this .MethodInfo value) { }
+        [.(ExpectationMessage="to not be internal", InlineMethodBody=true)]
+        public static bool IsNotInternal(this .MethodInfo value) { }
+        [.(ExpectationMessage="to not be private", InlineMethodBody=true)]
+        public static bool IsNotPrivate(this .MethodInfo value) { }
+        [.(ExpectationMessage="to not be protected", InlineMethodBody=true)]
+        public static bool IsNotProtected(this .MethodInfo value) { }
+        [.(ExpectationMessage="to not be public", InlineMethodBody=true)]
+        public static bool IsNotPublic(this .MethodInfo value) { }
+        [.(ExpectationMessage="to not be static", InlineMethodBody=true)]
+        public static bool IsNotStatic(this .MethodInfo value) { }
+        [.(ExpectationMessage="to not be virtual", InlineMethodBody=true)]
+        public static bool IsNotVirtual(this .MethodInfo value) { }
+        [.(ExpectationMessage="to be private", InlineMethodBody=true)]
+        public static bool IsPrivate(this .MethodInfo value) { }
+        [.(ExpectationMessage="to be protected", InlineMethodBody=true)]
+        public static bool IsProtected(this .MethodInfo value) { }
+        [.(ExpectationMessage="to be public", InlineMethodBody=true)]
+        public static bool IsPublic(this .MethodInfo value) { }
+        [.(ExpectationMessage="to be static", InlineMethodBody=true)]
+        public static bool IsStatic(this .MethodInfo value) { }
+        [.(ExpectationMessage="to be virtual", InlineMethodBody=true)]
+        public static bool IsVirtual(this .MethodInfo value) { }
+        [.(ExpectationMessage="to return type {expectedType}")]
+        public static . ReturnsType(this .MethodInfo value,  expectedType) { }
+    }
     [.("IsNotEqualTo")]
     public class NotEqualsAssertion<TValue> : .<TValue>
     {
@@ -1003,6 +1184,41 @@ namespace .Conditions
     [.<.Process>("Responding", CustomName="IsNotResponding", ExpectationMessage="be responding", NegateLogic=true)]
     [.<.Process>("Responding", ExpectationMessage="be responding")]
     public static class ProcessAssertionExtensions { }
+    public static class PropertyInfoAssertionExtensions
+    {
+        [.(ExpectationMessage="to be readable", InlineMethodBody=true)]
+        public static bool CanRead(this .PropertyInfo value) { }
+        [.(ExpectationMessage="to be writable", InlineMethodBody=true)]
+        public static bool CanWrite(this .PropertyInfo value) { }
+        [.(ExpectationMessage="to not be readable", InlineMethodBody=true)]
+        public static bool CannotRead(this .PropertyInfo value) { }
+        [.(ExpectationMessage="to not be writable", InlineMethodBody=true)]
+        public static bool CannotWrite(this .PropertyInfo value) { }
+        [.(ExpectationMessage="to not have attribute of type {attributeType}")]
+        public static . DoesNotHaveAttribute(this .PropertyInfo value,  attributeType) { }
+        [.(ExpectationMessage="to not have a getter")]
+        public static . DoesNotHaveGetter(this .PropertyInfo value) { }
+        [.(ExpectationMessage="to not have a setter")]
+        public static . DoesNotHaveSetter(this .PropertyInfo value) { }
+        [.(ExpectationMessage="to have attribute of type {attributeType}")]
+        public static . HasAttribute(this .PropertyInfo value,  attributeType) { }
+        [.(ExpectationMessage="to have a getter")]
+        public static . HasGetter(this .PropertyInfo value) { }
+        [.(ExpectationMessage="to have name \'{expectedName}\'")]
+        public static . HasName(this .PropertyInfo value, string expectedName) { }
+        [.(ExpectationMessage="to have a setter")]
+        public static . HasSetter(this .PropertyInfo value) { }
+        [.(ExpectationMessage="to not be public")]
+        public static . IsNotPublic(this .PropertyInfo value) { }
+        [.(ExpectationMessage="to not be static")]
+        public static . IsNotStatic(this .PropertyInfo value) { }
+        [.(ExpectationMessage="to be of type {expectedType}")]
+        public static . IsOfType(this .PropertyInfo value,  expectedType) { }
+        [.(ExpectationMessage="to be public")]
+        public static . IsPublic(this .PropertyInfo value) { }
+        [.(ExpectationMessage="to be static")]
+        public static . IsStatic(this .PropertyInfo value) { }
+    }
     [.<.Rune>("IsAscii", CustomName="IsNotAscii", ExpectationMessage="be ASCII", NegateLogic=true)]
     [.<.Rune>("IsAscii", ExpectationMessage="be ASCII")]
     [.<.Rune>("IsBmp", CustomName="IsNotBmp", ExpectationMessage="be in the Basic Multilingual Plane", NegateLogic=true)]
@@ -1452,6 +1668,66 @@ namespace .
     {
         public LengthWrapper(.<string> context) { }
         public . EqualTo(int expectedLength, [.("expectedLength")] string? expression = null) { }
+    }
+}
+namespace .
+{
+    public static class XAttributeAssertionExtensions
+    {
+        [.(ExpectationMessage="to have name \'{expectedName}\'")]
+        public static . HasName(this . value, string expectedName) { }
+        [.(ExpectationMessage="to have value \'{expectedValue}\'")]
+        public static . HasValue(this . value, string expectedValue) { }
+        [.(ExpectationMessage="to be a namespace declaration")]
+        public static . IsNamespaceDeclaration(this . value) { }
+        [.(ExpectationMessage="to not be a namespace declaration")]
+        public static . IsNotNamespaceDeclaration(this . value) { }
+    }
+    public static class XDocumentAssertionExtensions
+    {
+        [.(ExpectationMessage="to not have an XML declaration")]
+        public static . DoesNotHaveDeclaration(this . value) { }
+        [.(ExpectationMessage="to not have a root element")]
+        public static . DoesNotHaveRoot(this . value) { }
+        [.(ExpectationMessage="to have an XML declaration")]
+        public static . HasDeclaration(this . value) { }
+        [.(ExpectationMessage="to have a root element")]
+        public static . HasRoot(this . value) { }
+        [.(ExpectationMessage="to have root element named \'{expectedName}\'")]
+        public static . HasRootNamed(this . value, string expectedName) { }
+        [.(ExpectationMessage="to be deeply equal to {expected}")]
+        public static . IsDeepEqualTo(this . value, . expected) { }
+        [.(ExpectationMessage="to not be deeply equal to {expected}")]
+        public static . IsNotDeepEqualTo(this . value, . expected) { }
+    }
+    public static class XElementAssertionExtensions
+    {
+        [.(ExpectationMessage="to not have attribute \'{attributeName}\'")]
+        public static . DoesNotHaveAttribute(this . value, string attributeName) { }
+        [.(ExpectationMessage="to not have child element \'{childName}\'")]
+        public static . DoesNotHaveChildElement(this . value, string childName) { }
+        [.(ExpectationMessage="to have attribute \'{attributeName}\'")]
+        public static . HasAttribute(this . value, string attributeName) { }
+        [.(ExpectationMessage="to have attribute \'{attributeName}\' with value \'{expectedValue}\'")]
+        public static . HasAttributeValue(this . value, string attributeName, string expectedValue) { }
+        [.(ExpectationMessage="to have {expectedCount} child elements")]
+        public static . HasChildCount(this . value, int expectedCount) { }
+        [.(ExpectationMessage="to have child element \'{childName}\'")]
+        public static . HasChildElement(this . value, string childName) { }
+        [.(ExpectationMessage="to have name \'{expectedName}\'")]
+        public static . HasName(this . value, string expectedName) { }
+        [.(ExpectationMessage="to have namespace \'{expectedNamespace}\'")]
+        public static . HasNamespace(this . value, string expectedNamespace) { }
+        [.(ExpectationMessage="to have value \'{expectedValue}\'")]
+        public static . HasValue(this . value, string expectedValue) { }
+        [.(ExpectationMessage="to be deeply equal to {expected}")]
+        public static . IsDeepEqualTo(this . value, . expected) { }
+        [.(ExpectationMessage="to be empty")]
+        public static . IsEmpty(this . value) { }
+        [.(ExpectationMessage="to not be deeply equal to {expected}")]
+        public static . IsNotDeepEqualTo(this . value, . expected) { }
+        [.(ExpectationMessage="to not be empty")]
+        public static . IsNotEmpty(this . value) { }
     }
 }
 namespace .Core
@@ -2448,16 +2724,72 @@ namespace .Extensions
     }
     public static class DecimalAssertions
     {
+        public static ._HasPrecision_Int_Assertion HasPrecision(this .<decimal> source, int expectedPrecision, [.("expectedPrecision")] string? expectedPrecisionExpression = null) { }
+        public static ._HasScale_Int_Assertion HasScale(this .<decimal> source, int expectedScale, [.("expectedScale")] string? expectedScaleExpression = null) { }
+        public static ._IsNegative_Assertion IsNegative(this .<decimal> source) { }
+        public static ._IsNotNegative_Assertion IsNotNegative(this .<decimal> source) { }
+        public static ._IsNotPositive_Assertion IsNotPositive(this .<decimal> source) { }
+        public static ._IsNotWhole_Assertion IsNotWhole(this .<decimal> source) { }
         public static ._IsNotZero_Assertion IsNotZero(this .<decimal> source) { }
+        public static ._IsPositive_Assertion IsPositive(this .<decimal> source) { }
+        public static ._IsWhole_Assertion IsWhole(this .<decimal> source) { }
         public static ._IsZero_Assertion IsZero(this .<decimal> source) { }
     }
     public static class DecimalEqualsAssertionExtensions
     {
         public static . IsEqualTo(this .<decimal> source, decimal expected, [.("expected")] string? expectedExpression = null) { }
     }
+    public sealed class Decimal_HasPrecision_Int_Assertion : .<decimal>
+    {
+        public Decimal_HasPrecision_Int_Assertion(.<decimal> context, int expectedPrecision) { }
+        protected override .<.> CheckAsync(.<decimal> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class Decimal_HasScale_Int_Assertion : .<decimal>
+    {
+        public Decimal_HasScale_Int_Assertion(.<decimal> context, int expectedScale) { }
+        protected override .<.> CheckAsync(.<decimal> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class Decimal_IsNegative_Assertion : .<decimal>
+    {
+        public Decimal_IsNegative_Assertion(.<decimal> context) { }
+        protected override .<.> CheckAsync(.<decimal> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class Decimal_IsNotNegative_Assertion : .<decimal>
+    {
+        public Decimal_IsNotNegative_Assertion(.<decimal> context) { }
+        protected override .<.> CheckAsync(.<decimal> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class Decimal_IsNotPositive_Assertion : .<decimal>
+    {
+        public Decimal_IsNotPositive_Assertion(.<decimal> context) { }
+        protected override .<.> CheckAsync(.<decimal> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class Decimal_IsNotWhole_Assertion : .<decimal>
+    {
+        public Decimal_IsNotWhole_Assertion(.<decimal> context) { }
+        protected override .<.> CheckAsync(.<decimal> metadata) { }
+        protected override string GetExpectation() { }
+    }
     public sealed class Decimal_IsNotZero_Assertion : .<decimal>
     {
         public Decimal_IsNotZero_Assertion(.<decimal> context) { }
+        protected override .<.> CheckAsync(.<decimal> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class Decimal_IsPositive_Assertion : .<decimal>
+    {
+        public Decimal_IsPositive_Assertion(.<decimal> context) { }
+        protected override .<.> CheckAsync(.<decimal> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class Decimal_IsWhole_Assertion : .<decimal>
+    {
+        public Decimal_IsWhole_Assertion(.<decimal> context) { }
         protected override .<.> CheckAsync(.<decimal> metadata) { }
         protected override string GetExpectation() { }
     }
@@ -2753,6 +3085,135 @@ namespace .Extensions
         public Exception_HasTargetSite_Assertion(.<> context) { }
         [.("Trimming", "IL2026", Justification="Caller is already warned via RequiresUnreferencedCode on extension method")]
         protected override .<.> CheckAsync(.<> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public static class FieldInfoAssertionExtensions
+    {
+        public static ._DoesNotHaveAttribute_Type_Assertion DoesNotHaveAttribute(this .<.FieldInfo> source,  attributeType, [.("attributeType")] string? attributeTypeExpression = null) { }
+        public static ._HasAttribute_Type_Assertion HasAttribute(this .<.FieldInfo> source,  attributeType, [.("attributeType")] string? attributeTypeExpression = null) { }
+        public static ._HasName_String_Assertion HasName(this .<.FieldInfo> source, string expectedName, [.("expectedName")] string? expectedNameExpression = null) { }
+        public static ._IsConstant_Assertion IsConstant(this .<.FieldInfo> source) { }
+        public static ._IsInternal_Assertion IsInternal(this .<.FieldInfo> source) { }
+        public static ._IsNotConstant_Assertion IsNotConstant(this .<.FieldInfo> source) { }
+        public static ._IsNotInternal_Assertion IsNotInternal(this .<.FieldInfo> source) { }
+        public static ._IsNotPrivate_Assertion IsNotPrivate(this .<.FieldInfo> source) { }
+        public static ._IsNotProtected_Assertion IsNotProtected(this .<.FieldInfo> source) { }
+        public static ._IsNotPublic_Assertion IsNotPublic(this .<.FieldInfo> source) { }
+        public static ._IsNotReadOnly_Assertion IsNotReadOnly(this .<.FieldInfo> source) { }
+        public static ._IsNotStatic_Assertion IsNotStatic(this .<.FieldInfo> source) { }
+        public static ._IsOfType_Type_Assertion IsOfType(this .<.FieldInfo> source,  expectedType, [.("expectedType")] string? expectedTypeExpression = null) { }
+        public static ._IsPrivate_Assertion IsPrivate(this .<.FieldInfo> source) { }
+        public static ._IsProtected_Assertion IsProtected(this .<.FieldInfo> source) { }
+        public static ._IsPublic_Assertion IsPublic(this .<.FieldInfo> source) { }
+        public static ._IsReadOnly_Assertion IsReadOnly(this .<.FieldInfo> source) { }
+        public static ._IsStatic_Assertion IsStatic(this .<.FieldInfo> source) { }
+    }
+    public sealed class FieldInfo_DoesNotHaveAttribute_Type_Assertion : .<.FieldInfo>
+    {
+        public FieldInfo_DoesNotHaveAttribute_Type_Assertion(.<.FieldInfo> context,  attributeType) { }
+        protected override .<.> CheckAsync(.<.FieldInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class FieldInfo_HasAttribute_Type_Assertion : .<.FieldInfo>
+    {
+        public FieldInfo_HasAttribute_Type_Assertion(.<.FieldInfo> context,  attributeType) { }
+        protected override .<.> CheckAsync(.<.FieldInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class FieldInfo_HasName_String_Assertion : .<.FieldInfo>
+    {
+        public FieldInfo_HasName_String_Assertion(.<.FieldInfo> context, string expectedName) { }
+        protected override .<.> CheckAsync(.<.FieldInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class FieldInfo_IsConstant_Assertion : .<.FieldInfo>
+    {
+        public FieldInfo_IsConstant_Assertion(.<.FieldInfo> context) { }
+        protected override .<.> CheckAsync(.<.FieldInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class FieldInfo_IsInternal_Assertion : .<.FieldInfo>
+    {
+        public FieldInfo_IsInternal_Assertion(.<.FieldInfo> context) { }
+        protected override .<.> CheckAsync(.<.FieldInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class FieldInfo_IsNotConstant_Assertion : .<.FieldInfo>
+    {
+        public FieldInfo_IsNotConstant_Assertion(.<.FieldInfo> context) { }
+        protected override .<.> CheckAsync(.<.FieldInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class FieldInfo_IsNotInternal_Assertion : .<.FieldInfo>
+    {
+        public FieldInfo_IsNotInternal_Assertion(.<.FieldInfo> context) { }
+        protected override .<.> CheckAsync(.<.FieldInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class FieldInfo_IsNotPrivate_Assertion : .<.FieldInfo>
+    {
+        public FieldInfo_IsNotPrivate_Assertion(.<.FieldInfo> context) { }
+        protected override .<.> CheckAsync(.<.FieldInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class FieldInfo_IsNotProtected_Assertion : .<.FieldInfo>
+    {
+        public FieldInfo_IsNotProtected_Assertion(.<.FieldInfo> context) { }
+        protected override .<.> CheckAsync(.<.FieldInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class FieldInfo_IsNotPublic_Assertion : .<.FieldInfo>
+    {
+        public FieldInfo_IsNotPublic_Assertion(.<.FieldInfo> context) { }
+        protected override .<.> CheckAsync(.<.FieldInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class FieldInfo_IsNotReadOnly_Assertion : .<.FieldInfo>
+    {
+        public FieldInfo_IsNotReadOnly_Assertion(.<.FieldInfo> context) { }
+        protected override .<.> CheckAsync(.<.FieldInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class FieldInfo_IsNotStatic_Assertion : .<.FieldInfo>
+    {
+        public FieldInfo_IsNotStatic_Assertion(.<.FieldInfo> context) { }
+        protected override .<.> CheckAsync(.<.FieldInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class FieldInfo_IsOfType_Type_Assertion : .<.FieldInfo>
+    {
+        public FieldInfo_IsOfType_Type_Assertion(.<.FieldInfo> context,  expectedType) { }
+        protected override .<.> CheckAsync(.<.FieldInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class FieldInfo_IsPrivate_Assertion : .<.FieldInfo>
+    {
+        public FieldInfo_IsPrivate_Assertion(.<.FieldInfo> context) { }
+        protected override .<.> CheckAsync(.<.FieldInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class FieldInfo_IsProtected_Assertion : .<.FieldInfo>
+    {
+        public FieldInfo_IsProtected_Assertion(.<.FieldInfo> context) { }
+        protected override .<.> CheckAsync(.<.FieldInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class FieldInfo_IsPublic_Assertion : .<.FieldInfo>
+    {
+        public FieldInfo_IsPublic_Assertion(.<.FieldInfo> context) { }
+        protected override .<.> CheckAsync(.<.FieldInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class FieldInfo_IsReadOnly_Assertion : .<.FieldInfo>
+    {
+        public FieldInfo_IsReadOnly_Assertion(.<.FieldInfo> context) { }
+        protected override .<.> CheckAsync(.<.FieldInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class FieldInfo_IsStatic_Assertion : .<.FieldInfo>
+    {
+        public FieldInfo_IsStatic_Assertion(.<.FieldInfo> context) { }
+        protected override .<.> CheckAsync(.<.FieldInfo> metadata) { }
         protected override string GetExpectation() { }
     }
     public static class FileInfoAssertionExtensions
@@ -3391,6 +3852,170 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<long> metadata) { }
         protected override string GetExpectation() { }
     }
+    public static class MethodInfoAssertionExtensions
+    {
+        public static ._DoesNotHaveAttribute_Type_Assertion DoesNotHaveAttribute(this .<.MethodInfo> source,  attributeType, [.("attributeType")] string? attributeTypeExpression = null) { }
+        public static ._HasAttribute_Type_Assertion HasAttribute(this .<.MethodInfo> source,  attributeType, [.("attributeType")] string? attributeTypeExpression = null) { }
+        public static ._HasName_String_Assertion HasName(this .<.MethodInfo> source, string expectedName, [.("expectedName")] string? expectedNameExpression = null) { }
+        public static ._HasParameterCount_Int_Assertion HasParameterCount(this .<.MethodInfo> source, int expectedCount, [.("expectedCount")] string? expectedCountExpression = null) { }
+        public static ._IsAbstract_Assertion IsAbstract(this .<.MethodInfo> source) { }
+        public static ._IsFinal_Assertion IsFinal(this .<.MethodInfo> source) { }
+        public static ._IsGenericMethod_Assertion IsGenericMethod(this .<.MethodInfo> source) { }
+        public static ._IsInternal_Assertion IsInternal(this .<.MethodInfo> source) { }
+        public static ._IsNotAbstract_Assertion IsNotAbstract(this .<.MethodInfo> source) { }
+        public static ._IsNotFinal_Assertion IsNotFinal(this .<.MethodInfo> source) { }
+        public static ._IsNotGenericMethod_Assertion IsNotGenericMethod(this .<.MethodInfo> source) { }
+        public static ._IsNotInternal_Assertion IsNotInternal(this .<.MethodInfo> source) { }
+        public static ._IsNotPrivate_Assertion IsNotPrivate(this .<.MethodInfo> source) { }
+        public static ._IsNotProtected_Assertion IsNotProtected(this .<.MethodInfo> source) { }
+        public static ._IsNotPublic_Assertion IsNotPublic(this .<.MethodInfo> source) { }
+        public static ._IsNotStatic_Assertion IsNotStatic(this .<.MethodInfo> source) { }
+        public static ._IsNotVirtual_Assertion IsNotVirtual(this .<.MethodInfo> source) { }
+        public static ._IsPrivate_Assertion IsPrivate(this .<.MethodInfo> source) { }
+        public static ._IsProtected_Assertion IsProtected(this .<.MethodInfo> source) { }
+        public static ._IsPublic_Assertion IsPublic(this .<.MethodInfo> source) { }
+        public static ._IsStatic_Assertion IsStatic(this .<.MethodInfo> source) { }
+        public static ._IsVirtual_Assertion IsVirtual(this .<.MethodInfo> source) { }
+        public static ._ReturnsType_Type_Assertion ReturnsType(this .<.MethodInfo> source,  expectedType, [.("expectedType")] string? expectedTypeExpression = null) { }
+    }
+    public sealed class MethodInfo_DoesNotHaveAttribute_Type_Assertion : .<.MethodInfo>
+    {
+        public MethodInfo_DoesNotHaveAttribute_Type_Assertion(.<.MethodInfo> context,  attributeType) { }
+        protected override .<.> CheckAsync(.<.MethodInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class MethodInfo_HasAttribute_Type_Assertion : .<.MethodInfo>
+    {
+        public MethodInfo_HasAttribute_Type_Assertion(.<.MethodInfo> context,  attributeType) { }
+        protected override .<.> CheckAsync(.<.MethodInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class MethodInfo_HasName_String_Assertion : .<.MethodInfo>
+    {
+        public MethodInfo_HasName_String_Assertion(.<.MethodInfo> context, string expectedName) { }
+        protected override .<.> CheckAsync(.<.MethodInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class MethodInfo_HasParameterCount_Int_Assertion : .<.MethodInfo>
+    {
+        public MethodInfo_HasParameterCount_Int_Assertion(.<.MethodInfo> context, int expectedCount) { }
+        protected override .<.> CheckAsync(.<.MethodInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class MethodInfo_IsAbstract_Assertion : .<.MethodInfo>
+    {
+        public MethodInfo_IsAbstract_Assertion(.<.MethodInfo> context) { }
+        protected override .<.> CheckAsync(.<.MethodInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class MethodInfo_IsFinal_Assertion : .<.MethodInfo>
+    {
+        public MethodInfo_IsFinal_Assertion(.<.MethodInfo> context) { }
+        protected override .<.> CheckAsync(.<.MethodInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class MethodInfo_IsGenericMethod_Assertion : .<.MethodInfo>
+    {
+        public MethodInfo_IsGenericMethod_Assertion(.<.MethodInfo> context) { }
+        protected override .<.> CheckAsync(.<.MethodInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class MethodInfo_IsInternal_Assertion : .<.MethodInfo>
+    {
+        public MethodInfo_IsInternal_Assertion(.<.MethodInfo> context) { }
+        protected override .<.> CheckAsync(.<.MethodInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class MethodInfo_IsNotAbstract_Assertion : .<.MethodInfo>
+    {
+        public MethodInfo_IsNotAbstract_Assertion(.<.MethodInfo> context) { }
+        protected override .<.> CheckAsync(.<.MethodInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class MethodInfo_IsNotFinal_Assertion : .<.MethodInfo>
+    {
+        public MethodInfo_IsNotFinal_Assertion(.<.MethodInfo> context) { }
+        protected override .<.> CheckAsync(.<.MethodInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class MethodInfo_IsNotGenericMethod_Assertion : .<.MethodInfo>
+    {
+        public MethodInfo_IsNotGenericMethod_Assertion(.<.MethodInfo> context) { }
+        protected override .<.> CheckAsync(.<.MethodInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class MethodInfo_IsNotInternal_Assertion : .<.MethodInfo>
+    {
+        public MethodInfo_IsNotInternal_Assertion(.<.MethodInfo> context) { }
+        protected override .<.> CheckAsync(.<.MethodInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class MethodInfo_IsNotPrivate_Assertion : .<.MethodInfo>
+    {
+        public MethodInfo_IsNotPrivate_Assertion(.<.MethodInfo> context) { }
+        protected override .<.> CheckAsync(.<.MethodInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class MethodInfo_IsNotProtected_Assertion : .<.MethodInfo>
+    {
+        public MethodInfo_IsNotProtected_Assertion(.<.MethodInfo> context) { }
+        protected override .<.> CheckAsync(.<.MethodInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class MethodInfo_IsNotPublic_Assertion : .<.MethodInfo>
+    {
+        public MethodInfo_IsNotPublic_Assertion(.<.MethodInfo> context) { }
+        protected override .<.> CheckAsync(.<.MethodInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class MethodInfo_IsNotStatic_Assertion : .<.MethodInfo>
+    {
+        public MethodInfo_IsNotStatic_Assertion(.<.MethodInfo> context) { }
+        protected override .<.> CheckAsync(.<.MethodInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class MethodInfo_IsNotVirtual_Assertion : .<.MethodInfo>
+    {
+        public MethodInfo_IsNotVirtual_Assertion(.<.MethodInfo> context) { }
+        protected override .<.> CheckAsync(.<.MethodInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class MethodInfo_IsPrivate_Assertion : .<.MethodInfo>
+    {
+        public MethodInfo_IsPrivate_Assertion(.<.MethodInfo> context) { }
+        protected override .<.> CheckAsync(.<.MethodInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class MethodInfo_IsProtected_Assertion : .<.MethodInfo>
+    {
+        public MethodInfo_IsProtected_Assertion(.<.MethodInfo> context) { }
+        protected override .<.> CheckAsync(.<.MethodInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class MethodInfo_IsPublic_Assertion : .<.MethodInfo>
+    {
+        public MethodInfo_IsPublic_Assertion(.<.MethodInfo> context) { }
+        protected override .<.> CheckAsync(.<.MethodInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class MethodInfo_IsStatic_Assertion : .<.MethodInfo>
+    {
+        public MethodInfo_IsStatic_Assertion(.<.MethodInfo> context) { }
+        protected override .<.> CheckAsync(.<.MethodInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class MethodInfo_IsVirtual_Assertion : .<.MethodInfo>
+    {
+        public MethodInfo_IsVirtual_Assertion(.<.MethodInfo> context) { }
+        protected override .<.> CheckAsync(.<.MethodInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class MethodInfo_ReturnsType_Type_Assertion : .<.MethodInfo>
+    {
+        public MethodInfo_ReturnsType_Type_Assertion(.<.MethodInfo> context,  expectedType) { }
+        protected override .<.> CheckAsync(.<.MethodInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
     public static class NotEqualsAssertionExtensions
     {
         public static .<TValue> IsNotEqualTo<TValue>(this .<TValue> source, TValue notExpected, .<TValue>? comparer = null, [.("notExpected")] string? notExpectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
@@ -3471,6 +4096,121 @@ namespace .Extensions
     {
         public static .<TObject, TProperty> HasProperty<TObject, TProperty>(this .<TObject> source, .<<TObject, TProperty>> propertySelector) { }
         public static .<TObject> HasProperty<TObject, TProperty>(this .<TObject> source, .<<TObject, TProperty>> propertySelector, TProperty expectedValue, [.("expectedValue")] string? expression = null) { }
+    }
+    public static class PropertyInfoAssertionExtensions
+    {
+        public static ._CanRead_Assertion CanRead(this .<.PropertyInfo> source) { }
+        public static ._CanWrite_Assertion CanWrite(this .<.PropertyInfo> source) { }
+        public static ._CannotRead_Assertion CannotRead(this .<.PropertyInfo> source) { }
+        public static ._CannotWrite_Assertion CannotWrite(this .<.PropertyInfo> source) { }
+        public static ._DoesNotHaveAttribute_Type_Assertion DoesNotHaveAttribute(this .<.PropertyInfo> source,  attributeType, [.("attributeType")] string? attributeTypeExpression = null) { }
+        public static ._DoesNotHaveGetter_Assertion DoesNotHaveGetter(this .<.PropertyInfo> source) { }
+        public static ._DoesNotHaveSetter_Assertion DoesNotHaveSetter(this .<.PropertyInfo> source) { }
+        public static ._HasAttribute_Type_Assertion HasAttribute(this .<.PropertyInfo> source,  attributeType, [.("attributeType")] string? attributeTypeExpression = null) { }
+        public static ._HasGetter_Assertion HasGetter(this .<.PropertyInfo> source) { }
+        public static ._HasName_String_Assertion HasName(this .<.PropertyInfo> source, string expectedName, [.("expectedName")] string? expectedNameExpression = null) { }
+        public static ._HasSetter_Assertion HasSetter(this .<.PropertyInfo> source) { }
+        public static ._IsNotPublic_Assertion IsNotPublic(this .<.PropertyInfo> source) { }
+        public static ._IsNotStatic_Assertion IsNotStatic(this .<.PropertyInfo> source) { }
+        public static ._IsOfType_Type_Assertion IsOfType(this .<.PropertyInfo> source,  expectedType, [.("expectedType")] string? expectedTypeExpression = null) { }
+        public static ._IsPublic_Assertion IsPublic(this .<.PropertyInfo> source) { }
+        public static ._IsStatic_Assertion IsStatic(this .<.PropertyInfo> source) { }
+    }
+    public sealed class PropertyInfo_CanRead_Assertion : .<.PropertyInfo>
+    {
+        public PropertyInfo_CanRead_Assertion(.<.PropertyInfo> context) { }
+        protected override .<.> CheckAsync(.<.PropertyInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class PropertyInfo_CanWrite_Assertion : .<.PropertyInfo>
+    {
+        public PropertyInfo_CanWrite_Assertion(.<.PropertyInfo> context) { }
+        protected override .<.> CheckAsync(.<.PropertyInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class PropertyInfo_CannotRead_Assertion : .<.PropertyInfo>
+    {
+        public PropertyInfo_CannotRead_Assertion(.<.PropertyInfo> context) { }
+        protected override .<.> CheckAsync(.<.PropertyInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class PropertyInfo_CannotWrite_Assertion : .<.PropertyInfo>
+    {
+        public PropertyInfo_CannotWrite_Assertion(.<.PropertyInfo> context) { }
+        protected override .<.> CheckAsync(.<.PropertyInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class PropertyInfo_DoesNotHaveAttribute_Type_Assertion : .<.PropertyInfo>
+    {
+        public PropertyInfo_DoesNotHaveAttribute_Type_Assertion(.<.PropertyInfo> context,  attributeType) { }
+        protected override .<.> CheckAsync(.<.PropertyInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class PropertyInfo_DoesNotHaveGetter_Assertion : .<.PropertyInfo>
+    {
+        public PropertyInfo_DoesNotHaveGetter_Assertion(.<.PropertyInfo> context) { }
+        protected override .<.> CheckAsync(.<.PropertyInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class PropertyInfo_DoesNotHaveSetter_Assertion : .<.PropertyInfo>
+    {
+        public PropertyInfo_DoesNotHaveSetter_Assertion(.<.PropertyInfo> context) { }
+        protected override .<.> CheckAsync(.<.PropertyInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class PropertyInfo_HasAttribute_Type_Assertion : .<.PropertyInfo>
+    {
+        public PropertyInfo_HasAttribute_Type_Assertion(.<.PropertyInfo> context,  attributeType) { }
+        protected override .<.> CheckAsync(.<.PropertyInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class PropertyInfo_HasGetter_Assertion : .<.PropertyInfo>
+    {
+        public PropertyInfo_HasGetter_Assertion(.<.PropertyInfo> context) { }
+        protected override .<.> CheckAsync(.<.PropertyInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class PropertyInfo_HasName_String_Assertion : .<.PropertyInfo>
+    {
+        public PropertyInfo_HasName_String_Assertion(.<.PropertyInfo> context, string expectedName) { }
+        protected override .<.> CheckAsync(.<.PropertyInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class PropertyInfo_HasSetter_Assertion : .<.PropertyInfo>
+    {
+        public PropertyInfo_HasSetter_Assertion(.<.PropertyInfo> context) { }
+        protected override .<.> CheckAsync(.<.PropertyInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class PropertyInfo_IsNotPublic_Assertion : .<.PropertyInfo>
+    {
+        public PropertyInfo_IsNotPublic_Assertion(.<.PropertyInfo> context) { }
+        protected override .<.> CheckAsync(.<.PropertyInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class PropertyInfo_IsNotStatic_Assertion : .<.PropertyInfo>
+    {
+        public PropertyInfo_IsNotStatic_Assertion(.<.PropertyInfo> context) { }
+        protected override .<.> CheckAsync(.<.PropertyInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class PropertyInfo_IsOfType_Type_Assertion : .<.PropertyInfo>
+    {
+        public PropertyInfo_IsOfType_Type_Assertion(.<.PropertyInfo> context,  expectedType) { }
+        protected override .<.> CheckAsync(.<.PropertyInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class PropertyInfo_IsPublic_Assertion : .<.PropertyInfo>
+    {
+        public PropertyInfo_IsPublic_Assertion(.<.PropertyInfo> context) { }
+        protected override .<.> CheckAsync(.<.PropertyInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class PropertyInfo_IsStatic_Assertion : .<.PropertyInfo>
+    {
+        public PropertyInfo_IsStatic_Assertion(.<.PropertyInfo> context) { }
+        protected override .<.> CheckAsync(.<.PropertyInfo> metadata) { }
+        protected override string GetExpectation() { }
     }
     public static class RangeAssertionExtensions
     {
@@ -4507,6 +5247,183 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
+    public static class XAttributeAssertionExtensions
+    {
+        public static ._HasName_String_Assertion HasName(this .<.> source, string expectedName, [.("expectedName")] string? expectedNameExpression = null) { }
+        public static ._HasValue_String_Assertion HasValue(this .<.> source, string expectedValue, [.("expectedValue")] string? expectedValueExpression = null) { }
+        public static ._IsNamespaceDeclaration_Assertion IsNamespaceDeclaration(this .<.> source) { }
+        public static ._IsNotNamespaceDeclaration_Assertion IsNotNamespaceDeclaration(this .<.> source) { }
+    }
+    public sealed class XAttribute_HasName_String_Assertion : .<.>
+    {
+        public XAttribute_HasName_String_Assertion(.<.> context, string expectedName) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class XAttribute_HasValue_String_Assertion : .<.>
+    {
+        public XAttribute_HasValue_String_Assertion(.<.> context, string expectedValue) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class XAttribute_IsNamespaceDeclaration_Assertion : .<.>
+    {
+        public XAttribute_IsNamespaceDeclaration_Assertion(.<.> context) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class XAttribute_IsNotNamespaceDeclaration_Assertion : .<.>
+    {
+        public XAttribute_IsNotNamespaceDeclaration_Assertion(.<.> context) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public static class XDocumentAssertionExtensions
+    {
+        public static ._DoesNotHaveDeclaration_Assertion DoesNotHaveDeclaration(this .<.> source) { }
+        public static ._DoesNotHaveRoot_Assertion DoesNotHaveRoot(this .<.> source) { }
+        public static ._HasDeclaration_Assertion HasDeclaration(this .<.> source) { }
+        public static ._HasRoot_Assertion HasRoot(this .<.> source) { }
+        public static ._HasRootNamed_String_Assertion HasRootNamed(this .<.> source, string expectedName, [.("expectedName")] string? expectedNameExpression = null) { }
+        public static ._IsDeepEqualTo_XDocument_Assertion IsDeepEqualTo(this .<.> source, . expected, [.("expected")] string? expectedExpression = null) { }
+        public static ._IsNotDeepEqualTo_XDocument_Assertion IsNotDeepEqualTo(this .<.> source, . expected, [.("expected")] string? expectedExpression = null) { }
+    }
+    public sealed class XDocument_DoesNotHaveDeclaration_Assertion : .<.>
+    {
+        public XDocument_DoesNotHaveDeclaration_Assertion(.<.> context) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class XDocument_DoesNotHaveRoot_Assertion : .<.>
+    {
+        public XDocument_DoesNotHaveRoot_Assertion(.<.> context) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class XDocument_HasDeclaration_Assertion : .<.>
+    {
+        public XDocument_HasDeclaration_Assertion(.<.> context) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class XDocument_HasRootNamed_String_Assertion : .<.>
+    {
+        public XDocument_HasRootNamed_String_Assertion(.<.> context, string expectedName) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class XDocument_HasRoot_Assertion : .<.>
+    {
+        public XDocument_HasRoot_Assertion(.<.> context) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class XDocument_IsDeepEqualTo_XDocument_Assertion : .<.>
+    {
+        public XDocument_IsDeepEqualTo_XDocument_Assertion(.<.> context, . expected) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class XDocument_IsNotDeepEqualTo_XDocument_Assertion : .<.>
+    {
+        public XDocument_IsNotDeepEqualTo_XDocument_Assertion(.<.> context, . expected) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public static class XElementAssertionExtensions
+    {
+        public static ._DoesNotHaveAttribute_String_Assertion DoesNotHaveAttribute(this .<.> source, string attributeName, [.("attributeName")] string? attributeNameExpression = null) { }
+        public static ._DoesNotHaveChildElement_String_Assertion DoesNotHaveChildElement(this .<.> source, string childName, [.("childName")] string? childNameExpression = null) { }
+        public static ._HasAttribute_String_Assertion HasAttribute(this .<.> source, string attributeName, [.("attributeName")] string? attributeNameExpression = null) { }
+        public static ._HasAttributeValue_String_String_Assertion HasAttributeValue(this .<.> source, string attributeName, string expectedValue, [.("attributeName")] string? attributeNameExpression = null, [.("expectedValue")] string? expectedValueExpression = null) { }
+        public static ._HasChildCount_Int_Assertion HasChildCount(this .<.> source, int expectedCount, [.("expectedCount")] string? expectedCountExpression = null) { }
+        public static ._HasChildElement_String_Assertion HasChildElement(this .<.> source, string childName, [.("childName")] string? childNameExpression = null) { }
+        public static ._HasName_String_Assertion HasName(this .<.> source, string expectedName, [.("expectedName")] string? expectedNameExpression = null) { }
+        public static ._HasNamespace_String_Assertion HasNamespace(this .<.> source, string expectedNamespace, [.("expectedNamespace")] string? expectedNamespaceExpression = null) { }
+        public static ._HasValue_String_Assertion HasValue(this .<.> source, string expectedValue, [.("expectedValue")] string? expectedValueExpression = null) { }
+        public static ._IsDeepEqualTo_XElement_Assertion IsDeepEqualTo(this .<.> source, . expected, [.("expected")] string? expectedExpression = null) { }
+        public static ._IsEmpty_Assertion IsEmpty(this .<.> source) { }
+        public static ._IsNotDeepEqualTo_XElement_Assertion IsNotDeepEqualTo(this .<.> source, . expected, [.("expected")] string? expectedExpression = null) { }
+        public static ._IsNotEmpty_Assertion IsNotEmpty(this .<.> source) { }
+    }
+    public sealed class XElement_DoesNotHaveAttribute_String_Assertion : .<.>
+    {
+        public XElement_DoesNotHaveAttribute_String_Assertion(.<.> context, string attributeName) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class XElement_DoesNotHaveChildElement_String_Assertion : .<.>
+    {
+        public XElement_DoesNotHaveChildElement_String_Assertion(.<.> context, string childName) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class XElement_HasAttributeValue_String_String_Assertion : .<.>
+    {
+        public XElement_HasAttributeValue_String_String_Assertion(.<.> context, string attributeName, string expectedValue) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class XElement_HasAttribute_String_Assertion : .<.>
+    {
+        public XElement_HasAttribute_String_Assertion(.<.> context, string attributeName) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class XElement_HasChildCount_Int_Assertion : .<.>
+    {
+        public XElement_HasChildCount_Int_Assertion(.<.> context, int expectedCount) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class XElement_HasChildElement_String_Assertion : .<.>
+    {
+        public XElement_HasChildElement_String_Assertion(.<.> context, string childName) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class XElement_HasName_String_Assertion : .<.>
+    {
+        public XElement_HasName_String_Assertion(.<.> context, string expectedName) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class XElement_HasNamespace_String_Assertion : .<.>
+    {
+        public XElement_HasNamespace_String_Assertion(.<.> context, string expectedNamespace) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class XElement_HasValue_String_Assertion : .<.>
+    {
+        public XElement_HasValue_String_Assertion(.<.> context, string expectedValue) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class XElement_IsDeepEqualTo_XElement_Assertion : .<.>
+    {
+        public XElement_IsDeepEqualTo_XElement_Assertion(.<.> context, . expected) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class XElement_IsEmpty_Assertion : .<.>
+    {
+        public XElement_IsEmpty_Assertion(.<.> context) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class XElement_IsNotDeepEqualTo_XElement_Assertion : .<.>
+    {
+        public XElement_IsNotDeepEqualTo_XElement_Assertion(.<.> context, . expected) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class XElement_IsNotEmpty_Assertion : .<.>
+    {
+        public XElement_IsNotEmpty_Assertion(.<.> context) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
     [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
     public sealed class _IsEmpty_Assertion<T> : .<T[]>
     {
@@ -4561,6 +5478,16 @@ namespace .Sources
             where TException :  { }
         public .<TException> ThrowsExactly<TException>(string parameterName)
             where TException :  { }
+    }
+    public class AsyncEnumerableAssertion<TItem> : ., .<.<TItem>>
+    {
+        protected AsyncEnumerableAssertion(.<.<TItem>> context) { }
+        public AsyncEnumerableAssertion(.<TItem>? value, string? expression) { }
+        public .<.<TItem>> Context { get; }
+        public .<TTarget, .<TItem>> IsAssignableTo<TTarget>() { }
+        public .<TTarget, .<TItem>> IsNotAssignableTo<TTarget>() { }
+        public .<.<TItem>, TExpected> IsNotTypeOf<TExpected>() { }
+        public .<.<TItem>, TExpected> IsTypeOf<TExpected>() { }
     }
     public class AsyncFuncAssertion<TValue> : ., .<TValue>, .<TValue>
     {

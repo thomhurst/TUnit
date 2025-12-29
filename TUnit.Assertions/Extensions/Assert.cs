@@ -43,6 +43,20 @@ public static class Assert
     }
 
     /// <summary>
+    /// Creates an assertion for an IAsyncEnumerable.
+    /// Enables async sequence validation without blocking.
+    /// Example: await Assert.That(asyncEnumerable).IsEmpty();
+    /// Example: await Assert.That(asyncEnumerable).YieldsExactly(item1, item2);
+    /// </summary>
+    [OverloadResolutionPriority(2)]
+    public static AsyncEnumerableAssertion<TItem> That<TItem>(
+        IAsyncEnumerable<TItem>? value,
+        [CallerArgumentExpression(nameof(value))] string? expression = null)
+    {
+        return new AsyncEnumerableAssertion<TItem>(value, expression);
+    }
+
+    /// <summary>
     /// Creates an assertion for an IEnumerable (nullable or non-nullable).
     /// This overload enables better type inference for collection operations like IsInOrder, All, ContainsOnly.
     /// Works with any type implementing IEnumerable&lt;T&gt; including List, Array, DbSet, IQueryable, and custom collections.
