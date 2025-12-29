@@ -150,8 +150,11 @@ public class FsCheckPropertyTestExecutor : ITestExecutor
         for (int i = 0; i < args.Length; i++)
         {
             var name = args[i];
-            var value = shrunkValues?[i] ?? "<could not generate value>";
-            sb.AppendLine($"  {name} = {value}");
+            var value = shrunkValues?[i];
+            if (value != null)
+            {
+                sb.AppendLine($"  {name} = {value}");
+            }
         }
 
         // Append the FsCheck message for full details
