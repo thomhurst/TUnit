@@ -1026,18 +1026,17 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     private static bool IsTestMethod(MethodInfo method)
     {
-        // Check if method has any attribute that inherits from BaseTestAttribute
-        return method.GetCustomAttributes(typeof(BaseTestAttribute), inherit: false).Length > 0;
+        return method.IsDefined(typeof(TestAttribute), inherit: false);
     }
 
     private static string? ExtractFilePath(MethodInfo method)
     {
-        return method.GetCustomAttribute<BaseTestAttribute>()?.File;
+        return method.GetCustomAttribute<TestAttribute>()?.File;
     }
 
     private static int? ExtractLineNumber(MethodInfo method)
     {
-        return method.GetCustomAttribute<BaseTestAttribute>()?.Line;
+        return method.GetCustomAttribute<TestAttribute>()?.Line;
     }
 
     private static TestMetadata CreateFailedTestMetadataForAssembly(Assembly assembly, Exception ex)

@@ -1,23 +1,24 @@
+using TUnit.Core;
 using TUnit.FsCheck;
 
 namespace TUnit.Example.FsCheck.TestProject;
 
 public class PropertyTests
 {
-    [FsCheckProperty]
+    [Test, FsCheckProperty]
     public bool ReverseReverseIsOriginal(int[] array)
     {
         var reversed = array.AsEnumerable().Reverse().Reverse().ToArray();
         return array.SequenceEqual(reversed);
     }
 
-    [FsCheckProperty]
+    [Test, FsCheckProperty]
     public bool AbsoluteValueIsNonNegative(int value)
     {
         return Math.Abs((long)value) >= 0;
     }
 
-    [FsCheckProperty]
+    [Test, FsCheckProperty]
     public bool StringConcatenationLength(string a, string b)
     {
         if (a == null || b == null)
@@ -28,14 +29,14 @@ public class PropertyTests
         return (a + b).Length == a.Length + b.Length;
     }
 
-    [FsCheckProperty(MaxTest = 50)]
+    [Test, FsCheckProperty(MaxTest = 50)]
     public bool ListConcatenationPreservesElements(int[] first, int[] second)
     {
         var combined = first.Concat(second).ToArray();
         return combined.Length == first.Length + second.Length;
     }
 
-    [FsCheckProperty]
+    [Test, FsCheckProperty]
     public void AdditionIsCommutative(int a, int b)
     {
         var result1 = a + b;
@@ -47,7 +48,7 @@ public class PropertyTests
         }
     }
 
-    [FsCheckProperty]
+    [Test, FsCheckProperty]
     public async Task AsyncPropertyTest(int value)
     {
         await Task.Delay(1); // Simulate async work
@@ -58,7 +59,7 @@ public class PropertyTests
         }
     }
 
-    [FsCheckProperty]
+    [Test, FsCheckProperty]
     public bool MultiplicationIsAssociative(int a, int b, int c)
     {
         // Using long to avoid overflow
