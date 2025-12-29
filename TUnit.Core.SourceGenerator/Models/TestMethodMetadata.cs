@@ -23,7 +23,7 @@ public class TestMethodMetadata : IEquatable<TestMethodMetadata>
     /// All attributes on the method, stored for later use during data combination generation
     /// </summary>
     public ImmutableArray<AttributeData> MethodAttributes { get; init; } = ImmutableArray<AttributeData>.Empty;
-
+    
     /// <summary>
     /// The inheritance depth of this test method.
     /// 0 = method is declared directly in the test class
