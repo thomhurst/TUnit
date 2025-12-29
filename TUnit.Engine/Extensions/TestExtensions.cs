@@ -214,8 +214,15 @@ internal static class TestExtensions
         }
 
         var end = testContext.Execution.TestEnd ?? DateTimeOffset.Now;
+        var timings = testContext.Timings;
+        var stepTimings = new StepTimingInfo[timings.Count];
+        var i = 0;
+        foreach (var timing in timings)
+        {
+            stepTimings[i++] = new StepTimingInfo(timing.StepName, timing.StepName, new TimingInfo(timing.Start, timing.End, timing.Duration));
+        }
 
-        return new TimingProperty(new TimingInfo(overallStart, end, end - overallStart), testContext.Timings.Select(x => new StepTimingInfo(x.StepName, x.StepName, new TimingInfo(x.Start, x.End, x.Duration))).ToArray());
+        return new TimingProperty(new TimingInfo(overallStart, end, end - overallStart), stepTimings);
     }
 
     private static IEnumerable<TrxMessage> GetTrxMessages(TestContext testContext, string? standardOutput, string? standardError)
