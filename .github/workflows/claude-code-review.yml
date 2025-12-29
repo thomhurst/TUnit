@@ -2,6 +2,12 @@ name: Claude Code Review
 on:
   pull_request_target:
     types: [opened, synchronize]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'Pull Request number to review'
+        required: true
+        type: number
 
 jobs:
   external-review:
@@ -23,13 +29,13 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           prompt: |
             <task>
-            Review PR #${{ github.event.pull_request.number }} in ${{ github.repository }}.
+            Review PR #${{ inputs.pr_number || github.event.pull_request.number }} in ${{ github.repository }}.
             </task>
 
             <instructions>
             1. Read CLAUDE.md to understand TUnit's critical rules
-            2. Run `gh pr diff ${{ github.event.pull_request.number }}` to see changes
-            3. Run `gh pr view ${{ github.event.pull_request.number }} --comments` to check previous review comments
+            2. Run `gh pr diff ${{ inputs.pr_number || github.event.pull_request.number }}` to see changes
+            3. Run `gh pr view ${{ inputs.pr_number || github.event.pull_request.number }} --comments` to check previous review comments
             4. Determine which TUnit rules apply based on files changed
             5. Read any files needed to understand context before commenting
 
@@ -89,6 +95,6 @@ jobs:
             💬 **COMMENT** - Questions only, no blocking issues
             </output_format>
 
-            Post your review using `gh pr comment ${{ github.event.pull_request.number }} --body "YOUR_REVIEW"`.
+            Post your review using `gh pr comment ${{ inputs.pr_number || github.event.pull_request.number }} --body "YOUR_REVIEW"`.
 
           claude_args: '--allowed-tools "Read,Glob,Grep,Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
