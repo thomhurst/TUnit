@@ -114,198 +114,25 @@ public class FsCheckPropertyTestExecutor : ITestExecutor
     [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "FsCheck requires dynamic code")]
     private static void RunPropertyCheck(MethodInfo methodInfo, object classInstance, Config config)
     {
+        try
+        {
+            Check.Method(config, methodInfo, classInstance);
+        }
+        catch (Exception ex)
+        {
+            throw new PropertyFailedException(FormatCounterexample(methodInfo, ex));
+        }
+    }
+
+    private static string FormatCounterexample(MethodInfo methodInfo, Exception ex)
+    {
         var parameters = methodInfo.GetParameters();
-        var parameterTypes = parameters.Select(p => p.ParameterType).ToArray();
-        var parameterNames = parameters.Select(p => p.Name ?? "arg").ToArray();
+        var args = parameters
+            .Select((p, i) => p.Name ?? $"arg{i}")
+            .ToArray();
 
-        // Create the property based on parameter count
-        switch (parameterTypes.Length)
-        {
-            case 0:
-                RunPropertyWithNoParams(methodInfo, classInstance, config);
-                break;
-            case 1:
-                RunPropertyWithParams1(methodInfo, classInstance, config, parameterTypes[0], parameterNames[0]);
-                break;
-            case 2:
-                RunPropertyWithParams2(methodInfo, classInstance, config, parameterTypes[0], parameterTypes[1],
-                    parameterNames);
-                break;
-            case 3:
-                RunPropertyWithParams3(methodInfo, classInstance, config, parameterTypes[0], parameterTypes[1],
-                    parameterTypes[2], parameterNames);
-                break;
-            default:
-                throw new NotSupportedException(
-                    $"FsCheck property tests with {parameterTypes.Length} parameters are not supported. Maximum is 3.");
-        }
-    }
+        var methodName = methodInfo.Name;
 
-    private static void RunPropertyWithNoParams(MethodInfo methodInfo, object classInstance, Config config)
-    {
-        object? result;
-        try
-        {
-            result = methodInfo.Invoke(classInstance, null);
-        }
-        catch (TargetInvocationException ex) when (ex.InnerException != null)
-        {
-            ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
-            throw; // Unreachable
-        }
-
-        HandleVoidResult(result);
-    }
-
-    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "FsCheck requires dynamic code")]
-    private static void RunPropertyWithParams1(MethodInfo methodInfo, object classInstance, Config config, Type type1,
-        string paramName)
-    {
-        var genericMethod = typeof(FsCheckPropertyTestExecutor)
-            .GetMethod(nameof(RunPropertyGeneric1), BindingFlags.NonPublic | BindingFlags.Static)!
-            .MakeGenericMethod(type1);
-
-        try
-        {
-            genericMethod.Invoke(null, [methodInfo, classInstance, config, paramName]);
-        }
-        catch (TargetInvocationException ex) when (ex.InnerException != null)
-        {
-            ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
-        }
-    }
-
-    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "FsCheck requires dynamic code")]
-    private static void RunPropertyWithParams2(MethodInfo methodInfo, object classInstance, Config config, Type type1,
-        Type type2, string[] paramNames)
-    {
-        var genericMethod = typeof(FsCheckPropertyTestExecutor)
-            .GetMethod(nameof(RunPropertyGeneric2), BindingFlags.NonPublic | BindingFlags.Static)!
-            .MakeGenericMethod(type1, type2);
-
-        try
-        {
-            genericMethod.Invoke(null, [methodInfo, classInstance, config, paramNames]);
-        }
-        catch (TargetInvocationException ex) when (ex.InnerException != null)
-        {
-            ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
-        }
-    }
-
-    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "FsCheck requires dynamic code")]
-    private static void RunPropertyWithParams3(MethodInfo methodInfo, object classInstance, Config config, Type type1,
-        Type type2, Type type3, string[] paramNames)
-    {
-        var genericMethod = typeof(FsCheckPropertyTestExecutor)
-            .GetMethod(nameof(RunPropertyGeneric3), BindingFlags.NonPublic | BindingFlags.Static)!
-            .MakeGenericMethod(type1, type2, type3);
-
-        try
-        {
-            genericMethod.Invoke(null, [methodInfo, classInstance, config, paramNames]);
-        }
-        catch (TargetInvocationException ex) when (ex.InnerException != null)
-        {
-            ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
-        }
-    }
-
-    private static void RunPropertyGeneric1<T>(MethodInfo methodInfo, object classInstance, Config config,
-        string paramName)
-    {
-        T? failingValue = default;
-        var hasFailed = false;
-
-        try
-        {
-            Prop.ForAll<T>(arg =>
-            {
-                var result = methodInfo.Invoke(classInstance, [arg]);
-                var passed = HandleResult(result);
-                if (!passed && !hasFailed)
-                {
-                    failingValue = arg;
-                    hasFailed = true;
-                }
-
-                return passed;
-            }).Check(config);
-        }
-        catch (Exception ex)
-        {
-            throw new PropertyFailedException(
-                FormatCounterexample(methodInfo.Name, [(paramName, failingValue)], ex));
-        }
-    }
-
-    private static void RunPropertyGeneric2<T1, T2>(MethodInfo methodInfo, object classInstance, Config config,
-        string[] paramNames)
-    {
-        T1? failingValue1 = default;
-        T2? failingValue2 = default;
-        var hasFailed = false;
-
-        try
-        {
-            Prop.ForAll<T1, T2>((arg1, arg2) =>
-            {
-                var result = methodInfo.Invoke(classInstance, [arg1, arg2]);
-                var passed = HandleResult(result);
-                if (!passed && !hasFailed)
-                {
-                    failingValue1 = arg1;
-                    failingValue2 = arg2;
-                    hasFailed = true;
-                }
-
-                return passed;
-            }).Check(config);
-        }
-        catch (Exception ex)
-        {
-            throw new PropertyFailedException(
-                FormatCounterexample(methodInfo.Name, [(paramNames[0], failingValue1), (paramNames[1], failingValue2)],
-                    ex));
-        }
-    }
-
-    private static void RunPropertyGeneric3<T1, T2, T3>(MethodInfo methodInfo, object classInstance, Config config,
-        string[] paramNames)
-    {
-        T1? failingValue1 = default;
-        T2? failingValue2 = default;
-        T3? failingValue3 = default;
-        var hasFailed = false;
-
-        try
-        {
-            Prop.ForAll<T1, T2, T3>((arg1, arg2, arg3) =>
-            {
-                var result = methodInfo.Invoke(classInstance, [arg1, arg2, arg3]);
-                var passed = HandleResult(result);
-                if (!passed && !hasFailed)
-                {
-                    failingValue1 = arg1;
-                    failingValue2 = arg2;
-                    failingValue3 = arg3;
-                    hasFailed = true;
-                }
-
-                return passed;
-            }).Check(config);
-        }
-        catch (Exception ex)
-        {
-            throw new PropertyFailedException(
-                FormatCounterexample(methodInfo.Name,
-                    [(paramNames[0], failingValue1), (paramNames[1], failingValue2), (paramNames[2], failingValue3)],
-                    ex));
-        }
-    }
-
-    private static string FormatCounterexample(string methodName, (string name, object? value)[] args, Exception ex)
-    {
         var sb = new StringBuilder();
         sb.AppendLine($"Property '{methodName}' failed with counterexample:");
 
@@ -322,11 +149,9 @@ public class FsCheckPropertyTestExecutor : ITestExecutor
         // Display args, using shrunk values if available
         for (int i = 0; i < args.Length; i++)
         {
-            var (name, value) = args[i];
-            var displayValue = (shrunkValues != null && i < shrunkValues.Length)
-                ? shrunkValues[i]
-                : FormatValue(value);
-            sb.AppendLine($"  {name} = {displayValue}");
+            var name = args[i];
+            var value = shrunkValues?[i] ?? "<could not generate value>";
+            sb.AppendLine($"  {name} = {value}");
         }
 
         // Append the FsCheck message for full details
@@ -442,76 +267,6 @@ public class FsCheckPropertyTestExecutor : ITestExecutor
         }
 
         return values.ToArray();
-    }
-
-    private static string FormatValue(object? value)
-    {
-        if (value == null)
-        {
-            return "null";
-        }
-
-        if (value is string s)
-        {
-            return $"\"{s}\"";
-        }
-
-        if (value is char c)
-        {
-            return $"'{c}'";
-        }
-
-        if (value is Array arr)
-        {
-            var elements = new List<string>();
-            foreach (var item in arr)
-            {
-                elements.Add(FormatValue(item));
-                if (elements.Count > 10)
-                {
-                    elements.Add($"... ({arr.Length} total)");
-                    break;
-                }
-            }
-            return $"[{string.Join(", ", elements)}]";
-        }
-
-        return value.ToString() ?? "null";
-    }
-
-    private static void HandleVoidResult(object? result)
-    {
-        switch (result)
-        {
-            case Task task:
-                task.GetAwaiter().GetResult();
-                break;
-            case ValueTask valueTask:
-                valueTask.GetAwaiter().GetResult();
-                break;
-        }
-    }
-
-    private static bool HandleResult(object? result)
-    {
-        switch (result)
-        {
-            case Task<bool> taskBool:
-                return taskBool.GetAwaiter().GetResult();
-            case ValueTask<bool> valueTaskBool:
-                return valueTaskBool.GetAwaiter().GetResult();
-            case Task task:
-                task.GetAwaiter().GetResult();
-                return true;
-            case ValueTask valueTask:
-                valueTask.GetAwaiter().GetResult();
-                return true;
-            case bool boolResult:
-                return boolResult;
-            default:
-                // Method returned void or non-boolean - assume success if no exception
-                return true;
-        }
     }
 }
 #pragma warning restore IL2046
