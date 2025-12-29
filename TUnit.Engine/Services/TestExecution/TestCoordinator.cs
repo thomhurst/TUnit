@@ -65,6 +65,17 @@ internal sealed class TestCoordinator : ITestCoordinator
 
             _contextRestorer.RestoreContext(test);
 
+            // Check if test was already marked as failed during registration (e.g., property injection failure)
+            // If so, skip execution and report the failure immediately
+            var existingResult = test.Context.Execution.Result;
+            if (existingResult?.State == TestState.Failed)
+            {
+                var exception = existingResult.Exception ?? new InvalidOperationException("Test failed during registration");
+                await _stateManager.MarkFailedAsync(test, exception).ConfigureAwait(false);
+                await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
+                return;
+            }
+
             // Clear Result and timing from any previous execution (important for repeated tests)
             test.Context.Execution.Result = null;
             test.Context.TestStart = null;
