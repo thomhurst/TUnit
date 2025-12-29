@@ -148,9 +148,24 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             GenericTypeInfo = null,
             GenericMethodInfo = null,
             GenericMethodTypeArguments = null,
-            AttributeFactory = () => result.Attributes.ToArray(),
+            AttributeFactory = () => GetDynamicTestAttributes(result),
             PropertyInjections = PropertySourceRegistry.DiscoverInjectableProperties(result.TestClassType)
         });
+    }
+
+    private static Attribute[] GetDynamicTestAttributes(DynamicDiscoveryResult result)
+    {
+        // Merge explicitly provided attributes with inherited class/assembly attributes
+        // Order matches GetAllAttributes: method-level first (explicit), then class, then assembly
+        var attributes = new List<Attribute>(result.Attributes);
+
+        if (result.TestClassType != null)
+        {
+            attributes.AddRange(result.TestClassType.GetCustomAttributes().OfType<Attribute>());
+            attributes.AddRange(result.TestClassType.Assembly.GetCustomAttributes().OfType<Attribute>());
+        }
+
+        return attributes.ToArray();
     }
 
     [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break functionality when AOT compiling.")]

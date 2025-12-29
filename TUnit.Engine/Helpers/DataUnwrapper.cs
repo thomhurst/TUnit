@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using TUnit.Core;
 using TUnit.Core.Helpers;
 
@@ -38,7 +37,11 @@ internal class DataUnwrapper
         // Otherwise use the default unwrapping
         if(values.Length == 1 && DataSourceHelpers.IsTuple(values[0]))
         {
-            var paramTypes = expectedParameters.Select(p => p.Type).ToArray();
+            var paramTypes = new Type[expectedParameters.Length];
+            for (var i = 0; i < expectedParameters.Length; i++)
+            {
+                paramTypes[i] = expectedParameters[i].Type;
+            }
             return values[0].ToObjectArrayWithTypes(paramTypes);
         }
 

@@ -33,27 +33,18 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     private static readonly ConcurrentDictionary<Assembly, Type[]> _assemblyTypesCache = new();
     private static readonly ConcurrentDictionary<Type, MethodInfo[]> _typeMethodsCache = new();
 
-    private static Assembly[]? _cachedAssemblies;
-    private static readonly Lock _assemblyCacheLock = new();
+    private static Assembly[] Assemblies => field ??= FindAssemblies();
 
-    private static Assembly[] GetCachedAssemblies()
+    private static Assembly[] FindAssemblies()
     {
-        lock (_assemblyCacheLock)
-        {
-            return _cachedAssemblies ??= AppDomain.CurrentDomain.GetAssemblies();
-        }
-    }
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-    public static void ClearCaches()
-    {
-        _scannedAssemblies.Clear();
-        Interlocked.Exchange(ref _discoveredTests, ImmutableList<TestMetadata>.Empty);
-        _assemblyTypesCache.Clear();
-        _typeMethodsCache.Clear();
-        lock (_assemblyCacheLock)
+        if (assemblies.Length == 0)
         {
-            _cachedAssemblies = null;
+            return [ Assembly.GetEntryAssembly() ?? Assembly.GetCallingAssembly() ];
         }
+
+        return  assemblies;
     }
 
     private async Task<List<TestMetadata>> ProcessAssemblyAsync(Assembly assembly, SemaphoreSlim semaphore)
@@ -92,7 +83,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 #endif
 
-        var allAssemblies = GetCachedAssemblies();
+        var allAssemblies = Assemblies;
         var assembliesList = new List<Assembly>(allAssemblies.Length);
         foreach (var assembly in allAssemblies)
         {
@@ -146,7 +137,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         // Get assemblies to scan
-        var allAssemblies = GetCachedAssemblies();
+        var allAssemblies = Assemblies;
         var assemblies = new List<Assembly>(allAssemblies.Length);
         foreach (var assembly in allAssemblies)
         {
@@ -1644,7 +1635,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             }
         }
 
-        var allAssemblies = GetCachedAssemblies();
+        var allAssemblies = Assemblies;
         var assembliesList = new List<Assembly>(allAssemblies.Length);
         foreach (var assembly in allAssemblies)
         {
@@ -1710,7 +1701,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         string testSessionId,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var allAssemblies = GetCachedAssemblies();
+        var allAssemblies = Assemblies;
         var assemblies = new List<Assembly>(allAssemblies.Length);
         foreach (var assembly in allAssemblies)
         {
@@ -1938,11 +1929,26 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             GenericTypeInfo = ReflectionGenericTypeResolver.ExtractGenericTypeInfo(result.TestClassType),
             GenericMethodInfo = ReflectionGenericTypeResolver.ExtractGenericMethodInfo(methodInfo),
             GenericMethodTypeArguments = methodInfo.IsGenericMethodDefinition ? null : methodInfo.GetGenericArguments(),
-            AttributeFactory = () => result.Attributes.ToArray(),
+            AttributeFactory = () => GetDynamicTestAttributes(result),
             PropertyInjections = PropertySourceRegistry.DiscoverInjectableProperties(result.TestClassType)
         };
 
         return Task.FromResult<TestMetadata>(metadata);
+    }
+
+    private static Attribute[] GetDynamicTestAttributes(DynamicDiscoveryResult result)
+    {
+        // Merge explicitly provided attributes with inherited class/assembly attributes
+        // Order matches GetAllAttributes: method-level first (explicit), then class, then assembly
+        var attributes = new List<Attribute>(result.Attributes);
+
+        if (result.TestClassType != null)
+        {
+            attributes.AddRange(result.TestClassType.GetCustomAttributes().OfType<Attribute>());
+            attributes.AddRange(result.TestClassType.Assembly.GetCustomAttributes().OfType<Attribute>());
+        }
+
+        return attributes.ToArray();
     }
 
     private static Func<Type[], object?[], object> CreateDynamicInstanceFactory(Type testClass, object?[]? predefinedClassArgs)

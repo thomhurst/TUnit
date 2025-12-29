@@ -183,6 +183,9 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             yield break;
         }
 
+        // Compute paramTypes once to avoid repeated LINQ allocations
+        var paramTypes = GetParameterTypes(dataGeneratorMetadata.TestInformation?.Parameters);
+
         // If it's IAsyncEnumerable, handle it specially
         if (IsAsyncEnumerable(methodResult.GetType()))
         {
@@ -192,7 +195,6 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
                 hasAnyItems = true;
                 yield return async () =>
                 {
-                    var paramTypes = dataGeneratorMetadata.TestInformation?.Parameters.Select(static p => p.Type).ToArray();
                     return await Task.FromResult<object?[]?>(item.ToObjectArrayWithTypes(paramTypes));
                 };
             }
@@ -218,7 +220,6 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
                     hasAnyItems = true;
                     yield return async () =>
                     {
-                        var paramTypes = dataGeneratorMetadata.TestInformation?.Parameters.Select(static p => p.Type).ToArray();
                         return await Task.FromResult<object?[]?>(item.ToObjectArrayWithTypes(paramTypes));
                     };
                 }
@@ -234,7 +235,6 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             {
                 yield return async () =>
                 {
-                    var paramTypes = dataGeneratorMetadata.TestInformation?.Parameters.Select(static p => p.Type).ToArray();
                     return await Task.FromResult<object?[]?>(taskResult.ToObjectArrayWithTypes(paramTypes));
                 };
             }
@@ -247,7 +247,6 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             foreach (var item in enumerable)
             {
                 hasAnyItems = true;
-                var paramTypes = dataGeneratorMetadata.TestInformation?.Parameters.Select(static p => p.Type).ToArray();
                 yield return () => Task.FromResult<object?[]?>(item.ToObjectArrayWithTypes(paramTypes));
             }
 
@@ -260,12 +259,26 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         }
         else
         {
-            var paramTypes = dataGeneratorMetadata.TestInformation?.Parameters.Select(static p => p.Type).ToArray();
             yield return async () =>
             {
                 return await Task.FromResult<object?[]?>(methodResult.ToObjectArrayWithTypes(paramTypes));
             };
         }
+    }
+
+    private static Type[]? GetParameterTypes(ParameterMetadata[]? parameters)
+    {
+        if (parameters == null || parameters.Length == 0)
+        {
+            return null;
+        }
+
+        var types = new Type[parameters.Length];
+        for (var i = 0; i < parameters.Length; i++)
+        {
+            types[i] = parameters[i].Type;
+        }
+        return types;
     }
 
     private static bool IsAsyncEnumerable([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type type)
