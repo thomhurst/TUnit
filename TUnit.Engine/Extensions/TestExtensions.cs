@@ -10,6 +10,8 @@ namespace TUnit.Engine.Extensions;
 
 internal static class TestExtensions
 {
+    private static bool? _cachedIsTrxEnabled;
+
     internal static TestNode ToTestNode(this TestContext testContext, TestNodeStateProperty stateProperty)
     {
         var testDetails = testContext.Metadata.TestDetails ?? throw new ArgumentNullException(nameof(testContext.Metadata.TestDetails));
@@ -34,7 +36,7 @@ internal static class TestExtensions
                 assemblyFullName: testDetails.MethodMetadata.Class.Type.Assembly.GetName().FullName,
                 typeName: testContext.GetClassTypeName(),
                 methodName: testDetails.MethodName,
-                parameterTypeFullNames: CreateParameterTypeArray(testDetails.MethodMetadata.Parameters.Select(static p => p.Type).ToArray()),
+                parameterTypeFullNames: CreateParameterTypeArray(testDetails.MethodMetadata.Parameters),
                 returnTypeFullName: testDetails.ReturnType.FullName ?? typeof(void).FullName!,
                 methodArity: testDetails.MethodMetadata.GenericTypeCount
             )
@@ -172,17 +174,25 @@ internal static class TestExtensions
 
     private static bool IsTrxEnabled(TestContext testContext)
     {
+        if (_cachedIsTrxEnabled.HasValue)
+        {
+            return _cachedIsTrxEnabled.Value;
+        }
+
         if(testContext.Services.GetService<ITestFrameworkCapabilities>() is not {} capabilities)
         {
+            _cachedIsTrxEnabled = false;
             return false;
         }
 
         if(capabilities.GetCapability<ITrxReportCapability>() is not TrxReportCapability trxCapability)
         {
+            _cachedIsTrxEnabled = false;
             return false;
         }
 
-        return trxCapability.IsTrxEnabled;
+        _cachedIsTrxEnabled = trxCapability.IsTrxEnabled;
+        return _cachedIsTrxEnabled.Value;
     }
 
     private static IEnumerable<TestMetadataProperty> ExtractProperties(TestDetails testDetails)
@@ -229,17 +239,17 @@ internal static class TestExtensions
     /// <summary>
     /// Efficiently create parameter type array without LINQ materialization
     /// </summary>
-    private static string[] CreateParameterTypeArray(IReadOnlyList<Type>? parameterTypes)
+    private static string[] CreateParameterTypeArray(ParameterMetadata[] parameters)
     {
-        if (parameterTypes == null || parameterTypes.Count == 0)
+        if (parameters.Length == 0)
         {
             return [];
         }
 
-        var array = new string[parameterTypes.Count];
-        for (var i = 0; i < parameterTypes.Count; i++)
+        var array = new string[parameters.Length];
+        for (var i = 0; i < parameters.Length; i++)
         {
-            array[i] = parameterTypes[i].FullName!;
+            array[i] = parameters[i].Type.FullName!;
         }
         return array;
     }
