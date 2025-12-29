@@ -1,3 +1,5 @@
+using FsCheck;
+using FsCheck.Fluent;
 using TUnit.Core;
 using TUnit.FsCheck;
 
@@ -66,5 +68,24 @@ public class PropertyTests
         var left = (long)a * ((long)b * c);
         var right = ((long)a * b) * c;
         return left == right;
+    }
+
+    [Test, FsCheckProperty]
+    public bool SumOfFourNumbersIsCommutative(int a, int b, int c, int d)
+    {
+        var sum1 = a + b + c + d;
+        var sum2 = d + c + b + a;
+        return sum1 == sum2;
+    }
+
+    [Test, FsCheckProperty]
+    public Property StringReversalProperty()
+    {
+        return Prop.ForAll<string>(str =>
+        {
+            var reversed = new string(str.Reverse().ToArray());
+            var doubleReversed = new string(reversed.Reverse().ToArray());
+            return str == doubleReversed;
+        });
     }
 }
