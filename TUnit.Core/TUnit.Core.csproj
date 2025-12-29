@@ -6,7 +6,6 @@
         <InternalsVisibleTo Include="TUnit.Engine" />
         <InternalsVisibleTo Include="TUnit.UnitTests" />
         <InternalsVisibleTo Include="TUnit.AspNetCore" />
-        <InternalsVisibleTo Include="TUnit.FsCheck" />
     </ItemGroup>
 
     <ItemGroup>
