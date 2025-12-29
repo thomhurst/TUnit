@@ -1,29 +1,30 @@
 # Code Patterns
 
+Common implementation patterns for TUnit development.
+
+---
+
 ## Adding Assertions
 
-IMPORTANT: **Prefer `[GenerateAssertion]` for simplicity.** Use manual patterns only for complex cases.
+Prefer `[GenerateAssertion]` for simplicity. Use manual patterns only for complex cases.
 
-### Preferred: GenerateAssertion Attribute
+### Preferred: GenerateAssertion
 
 ```csharp
-// Simple and recommended approach
 public static class StringAssertions
 {
     [GenerateAssertion]
     public static bool IsUpperCase(this string value)
-    {
-        return value.All(char.IsUpper);
-    }
+        => value.All(char.IsUpper);
 }
 
 // Usage:
 await Assert.That(myString).IsUpperCase();
 ```
 
-### Advanced: Manual Assertion Pattern
+### Manual Pattern (Complex Cases Only)
 
-Only use when `[GenerateAssertion]` is insufficient (custom error messages, complex logic):
+Use when you need custom error messages or complex validation logic:
 
 ```csharp
 public static class NumericAssertions
@@ -43,58 +44,24 @@ public static class NumericAssertions
                 (actual, expected) => $"{actual} is positive"));
     }
 }
-
-// Usage:
-await Assert.That(value).IsPositive();
 ```
 
 ---
 
-## Implementing Dual-Mode Features
+## Dual-Mode Features
 
 Only needed for core engine metadata collection. See `mandatory-rules.md` for when this applies.
 
-### Step 1: Define Abstraction in TUnit.Core
-
-```csharp
-[AttributeUsage(AttributeTargets.Method)]
-public class BeforeAllTestsAttribute : Attribute { }
-```
-
-### Step 2: Implement in Source Generator
-
-In `TUnit.Core.SourceGenerator`:
-
-```csharp
-// Generated code example:
-// await MyTestClass.GlobalSetup();
-```
-
-### Step 3: Implement in Reflection Engine
-
-In `TUnit.Engine`:
-
-```csharp
-public class ReflectionTestDiscoverer
-{
-    private async Task DiscoverHooksAsync(Type testClass)
-    {
-        var hookMethods = testClass.GetMethods()
-            .Where(m => m.GetCustomAttribute<BeforeAllTestsAttribute>() != null);
-
-        foreach (var method in hookMethods)
-            RegisterHook(method);
-    }
-}
-```
-
-### Step 4: Test Both Modes
+1. Define abstraction in `TUnit.Core`
+2. Implement in `TUnit.Core.SourceGenerator`
+3. Implement in `TUnit.Engine`
+4. Test both modes:
 
 ```csharp
 [Test]
 [Arguments(ExecutionMode.SourceGenerated)]
 [Arguments(ExecutionMode.Reflection)]
-public async Task BeforeAllTestsHook_ExecutesOnce(ExecutionMode mode) { }
+public async Task MyFeature_WorksInBothModes(ExecutionMode mode) { }
 ```
 
 ---
@@ -115,8 +82,7 @@ public class TestMethodMustBePublicAnalyzer : DiagnosticAnalyzer
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);
 
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
-        => [Rule];
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
 
     public override void Initialize(AnalysisContext context)
     {
@@ -128,37 +94,11 @@ public class TestMethodMustBePublicAnalyzer : DiagnosticAnalyzer
     private void AnalyzeMethod(SymbolAnalysisContext context)
     {
         var method = (IMethodSymbol)context.Symbol;
-
-        if (method.GetAttributes().Any(a => a.AttributeClass?.Name == "TestAttribute"))
+        if (method.GetAttributes().Any(a => a.AttributeClass?.Name == "TestAttribute")
+            && method.DeclaredAccessibility != Accessibility.Public)
         {
-            if (method.DeclaredAccessibility != Accessibility.Public)
-            {
-                context.ReportDiagnostic(Diagnostic.Create(
-                    Rule, method.Locations[0], method.Name));
-            }
+            context.ReportDiagnostic(Diagnostic.Create(Rule, method.Locations[0], method.Name));
         }
     }
 }
-```
-
----
-
-## Async Patterns
-
-```csharp
-// ValueTask for potentially-sync operations
-public ValueTask<TestResult> ExecuteAsync(CancellationToken ct)
-{
-    if (IsCached)
-        return new ValueTask<TestResult>(cachedResult);
-
-    return ExecuteAsyncCore(ct);
-}
-
-// Always accept CancellationToken
-public async Task<T> RunAsync(CancellationToken cancellationToken) { }
-
-// NEVER block on async
-// var result = ExecuteAsync().Result;                    // DEADLOCK RISK
-// var result = ExecuteAsync().GetAwaiter().GetResult();  // DEADLOCK RISK
 ```

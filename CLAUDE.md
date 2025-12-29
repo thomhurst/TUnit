@@ -2,25 +2,25 @@
 
 ## CRITICAL RULES
 
-These rules are non-negotiable. See `.claude/docs/mandatory-rules.md` for full details.
+1. **Dual-Mode** - Changes to core engine metadata collection MUST work in both source-gen (`TUnit.Core.SourceGenerator`) AND reflection (`TUnit.Engine`) modes.
 
-1. **Dual-Mode Implementation** - Changes to core engine metadata collection MUST work in both source-gen (`TUnit.Core.SourceGenerator`) AND reflection (`TUnit.Engine`) modes identically.
-
-2. **Snapshot Testing** - Any change to source generator output or public APIs requires running snapshot tests and committing `.verified.txt` files. NEVER commit `.received.txt` files.
+2. **Snapshot Testing** - Changes to source generator output or public APIs require running snapshot tests. Commit `.verified.txt` files. NEVER commit `.received.txt`.
 
 3. **No VSTest** - Use `Microsoft.Testing.Platform` only. NEVER use `Microsoft.VisualStudio.TestPlatform`.
 
-4. **Performance First** - Minimize allocations in hot paths. Cache reflection results. Use `ValueTask` for potentially-sync operations. Profile before/after for critical path changes.
+4. **Performance First** - Minimize allocations in hot paths. Cache reflection. Use `ValueTask` for potentially-sync operations.
 
-5. **AOT/Trimming Compatible** - All code must work with Native AOT. Annotate reflection usage with `[DynamicallyAccessedMembers]`.
+5. **AOT Compatible** - All code must work with Native AOT. Annotate reflection with `[DynamicallyAccessedMembers]`.
+
+See `.claude/docs/mandatory-rules.md` for full details.
 
 ## IMPORTANT WARNINGS
 
-**NEVER run `TUnit.TestProject` without filters.** Many tests are designed to fail. Always use:
+**NEVER run `TUnit.TestProject` without filters.** Many tests are designed to fail.
 ```bash
 dotnet run -- --treenode-filter "/*/*/SpecificClass/*"
 ```
-See `.claude/docs/workflows.md` for details.
+See `.claude/docs/workflows.md` for filter syntax and details.
 
 ## Quick Fix: Snapshot Tests Failing
 
@@ -37,30 +37,20 @@ git add *.verified.txt
 
 ## Code Principles
 
-- **Use modern C# and .NET features.** Prefer latest syntax and APIs over legacy patterns.
-- **Prefer `[GenerateAssertion]`** for new assertions. Use manual patterns only for complex cases. See `.claude/docs/patterns.md`.
+- **Use modern C# and .NET features.** Prefer latest syntax and APIs.
+- **Prefer `[GenerateAssertion]`** for new assertions. See `.claude/docs/patterns.md`.
 - **NEVER block on async** - No `.Result` or `.GetAwaiter().GetResult()`.
 
 ## Decision Framework
-
-Before any change, ask:
 
 > "Does this make TUnit faster, more modern, more reliable, or more enjoyable to use?"
 
 If NO, reconsider the change.
 
-## Documentation Map
+## Further Documentation
 
-| Topic | File |
-|-------|------|
-| Full rule details | `.claude/docs/mandatory-rules.md` |
-| Commands & workflows | `.claude/docs/workflows.md` |
-| Code patterns | `.claude/docs/patterns.md` |
-| Project structure | `.claude/docs/project-structure.md` |
-| Troubleshooting | `.claude/docs/troubleshooting.md` |
-
-## Resources
-
-- Documentation: https://tunit.dev
-- Issues: https://github.com/thomhurst/TUnit/issues
-- Contributing: `.github/CONTRIBUTING.md`
+- `.claude/docs/mandatory-rules.md` - Full rule details
+- `.claude/docs/workflows.md` - Commands, checklists, filters
+- `.claude/docs/patterns.md` - Code examples
+- `.claude/docs/project-structure.md` - Project map
+- `.claude/docs/troubleshooting.md` - Common issues

@@ -1,11 +1,14 @@
-# Mandatory Rules - Full Details
+# Mandatory Rules
+
+Detailed explanations of the critical rules from CLAUDE.md.
+
+---
 
 ## Rule 1: Dual-Mode Implementation
 
-IMPORTANT: This rule applies only to changes in **core engine metadata collection code**.
+This rule applies only to **core engine metadata collection code**.
 
 TUnit supports two execution modes that MUST produce identical behavior:
-
 - **Source-Generated Mode** (`TUnit.Core.SourceGenerator`) - Compile-time code generation
 - **Reflection Mode** (`TUnit.Engine`) - Runtime test discovery
 
@@ -23,46 +26,21 @@ TUnit supports two execution modes that MUST produce identical behavior:
 - Analyzer changes
 - Documentation changes
 
-### Implementation Checklist
+### Checklist
 
-- Feature implemented in `TUnit.Core.SourceGenerator` (source-gen path)
-- Feature implemented in `TUnit.Engine` (reflection path)
+- Feature implemented in `TUnit.Core.SourceGenerator`
+- Feature implemented in `TUnit.Engine`
 - Tests verify both modes behave identically
 
 ---
 
 ## Rule 2: Snapshot Testing
 
-### Trigger Conditions
-
 Run snapshot tests when changing:
-- Source generator output (`TUnit.Core.SourceGenerator`)
-- Public APIs (`TUnit.Core`, `TUnit.Engine`, `TUnit.Assertions`)
+- Source generator output → `dotnet test TUnit.Core.SourceGenerator.Tests`
+- Public APIs → `dotnet test TUnit.PublicAPI`
 
-### Workflow
-
-```bash
-# Source Generator Changes:
-dotnet test TUnit.Core.SourceGenerator.Tests
-
-# Public API Changes:
-dotnet test TUnit.PublicAPI
-
-# Review .received.txt files for intentional changes
-
-# Accept snapshots:
-# Linux/macOS:
-for f in *.received.txt; do mv "$f" "${f%.received.txt}.verified.txt"; done
-
-# Windows:
-for %f in (*.received.txt) do move /Y "%f" "%~nf.verified.txt"
-
-# Commit .verified.txt files
-git add *.verified.txt
-git commit -m "Update snapshots: [reason]"
-```
-
-IMPORTANT: NEVER commit `.received.txt` files. Only `.verified.txt` files should be tracked.
+See CLAUDE.md for the quick fix workflow to accept snapshots.
 
 ---
 
@@ -71,7 +49,7 @@ IMPORTANT: NEVER commit `.received.txt` files. Only `.verified.txt` files should
 - USE: `Microsoft.Testing.Platform`
 - NEVER: `Microsoft.VisualStudio.TestPlatform` (VSTest)
 
-VSTest is legacy and incompatible with TUnit's architecture. If you encounter VSTest references in new code, stop and refactor to use Microsoft.Testing.Platform.
+VSTest is legacy and incompatible with TUnit's architecture.
 
 ---
 
@@ -87,30 +65,11 @@ TUnit processes millions of tests. Performance is not optional.
 - Use object pooling for frequent allocations
 - Profile before/after for changes in critical paths
 
-### Hot Paths (Always Profile)
+### Hot Paths
 
 1. Test discovery (source generation + reflection scanning)
 2. Test execution (invocation, assertions, result collection)
 3. Data generation (argument expansion, data sources)
-
-### Performance Patterns
-
-```csharp
-// Cache reflection results
-private static readonly ConcurrentDictionary<Type, MethodInfo[]> TestMethodCache = new();
-
-// Object pooling
-private static readonly ObjectPool<StringBuilder> StringBuilderPool =
-    ObjectPool.Create<StringBuilder>();
-
-// Span<T> to avoid allocations
-public void ProcessTestName(ReadOnlySpan<char> name) { }
-
-// ArrayPool for temporary buffers
-var buffer = ArrayPool<byte>.Shared.Rent(size);
-try { /* use buffer */ }
-finally { ArrayPool<byte>.Shared.Return(buffer); }
-```
 
 ---
 
@@ -118,7 +77,7 @@ finally { ArrayPool<byte>.Shared.Return(buffer); }
 
 All code must work with Native AOT and IL trimming.
 
-### Guidelines
+### Annotations
 
 ```csharp
 // Annotate reflection usage
@@ -141,8 +100,3 @@ public void InvokeTest(MethodInfo method) { }
 cd TUnit.TestProject
 dotnet publish -c Release -p:PublishAot=true --use-current-runtime
 ```
-
-If AOT compilation fails, common causes are:
-- Dynamic code generation (not AOT-compatible)
-- Reflection without proper annotations
-- Missing `[DynamicallyAccessedMembers]` attributes
