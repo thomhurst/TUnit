@@ -1,9 +1,11 @@
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Conditions;
 using TUnit.Assertions.Exceptions;
 using TUnit.Assertions.Sources;
+using TUnit.Assertions.Wrappers;
 
 namespace TUnit.Assertions;
 
@@ -12,13 +14,45 @@ namespace TUnit.Assertions;
 /// Provides Assert.That() overloads for different source types.
 /// </summary>
 [SuppressMessage("Usage", "TUnitAssertions0002:Assert statement not awaited")]
-public static class Assert
+public static partial class Assert
 {
+    /// <summary>
+    /// Creates an assertion for an IDictionary value.
+    /// Wraps IDictionary as IReadOnlyDictionary since IDictionary doesn't inherit from it in .NET &lt; 9.
+    /// Example: await Assert.That(dict).ContainsKey("key");
+    /// </summary>
+    /// <remarks>
+    /// Note: Func/Task/ValueTask overloads are not generated for IDictionary because it cannot be
+    /// implicitly converted to IReadOnlyDictionary. Use IReadOnlyDictionary or Dictionary directly
+    /// for async/lazy assertions, or explicitly wrap with ReadOnlyDictionaryWrapper.
+    /// </remarks>
+    [OverloadResolutionPriority(4)]
+    public static DictionaryAssertion<TKey, TValue> That<TKey, TValue>(
+        IDictionary<TKey, TValue>? value,
+        [CallerArgumentExpression(nameof(value))] string? expression = null)
+    {
+        if (value is null)
+        {
+            return new DictionaryAssertion<TKey, TValue>(null!, expression);
+        }
+
+        // If it already implements IReadOnlyDictionary, use it directly
+        if (value is IReadOnlyDictionary<TKey, TValue> readOnly)
+        {
+            return new DictionaryAssertion<TKey, TValue>(readOnly, expression);
+        }
+
+        // Wrap IDictionary as IReadOnlyDictionary
+        var wrapper = new ReadOnlyDictionaryWrapper<TKey, TValue>(value);
+        return new DictionaryAssertion<TKey, TValue>(wrapper, expression);
+    }
+
     /// <summary>
     /// Creates an assertion for an IReadOnlyDictionary value.
     /// This overload enables better type inference for dictionary operations like ContainsKey.
     /// Example: await Assert.That(dict).ContainsKey("key");
     /// </summary>
+    [GenerateAssertOverloads(Priority = 3)]
     [OverloadResolutionPriority(3)]
     public static DictionaryAssertion<TKey, TValue> That<TKey, TValue>(
         IReadOnlyDictionary<TKey, TValue> value,
