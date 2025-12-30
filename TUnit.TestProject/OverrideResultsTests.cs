@@ -29,10 +29,16 @@ public class OverrideResultsTests
         throw new InvalidOperationException("Original exception that should be preserved");
     }
 
+    [Test, OverrideToSkippedWithSpecificReason]
+    public void TestSkippedWithSpecificReason()
+    {
+        // This test will be overridden to skipped with a specific reason
+    }
+
     [After(Class)]
     public static async Task AfterClass(ClassHookContext classHookContext)
     {
-        await Assert.That(classHookContext.Tests.Count).IsEqualTo(4);
+        await Assert.That(classHookContext.Tests.Count).IsEqualTo(5);
 
         // Test 1: Failed -> Passed
         var test1 = classHookContext.Tests.First(t => t.Metadata.TestDetails.TestName == "OverrideFailedTestToPassed");
@@ -59,6 +65,12 @@ public class OverrideResultsTests
         // Test 4: Verify original exception preservation
         var test4 = classHookContext.Tests.First(t => t.Metadata.TestDetails.TestName == "VerifyOriginalExceptionIsPreserved");
         await Assert.That(test4.Execution.Result?.OriginalException?.Message).IsEqualTo("Original exception that should be preserved");
+
+        // Test 5: Verify skip reason is displayed when overridden
+        var test5 = classHookContext.Tests.First(t => t.Metadata.TestDetails.TestName == "TestSkippedWithSpecificReason");
+        await Assert.That(test5.Execution.Result?.State).IsEqualTo(TestState.Skipped);
+        await Assert.That(test5.Execution.Result?.IsOverridden).IsTrue();
+        await Assert.That(test5.Execution.Result?.OverrideReason).IsEqualTo("test-skip foo bar baz.");
     }
 
     public class OverridePassAttribute : Attribute, ITestEndEventReceiver
@@ -99,6 +111,17 @@ public class OverrideResultsTests
         public ValueTask OnTestEnd(TestContext afterTestContext)
         {
             afterTestContext.Execution.OverrideResult(TestState.Passed, "Test passed after retry");
+            return default(ValueTask);
+        }
+
+        public int Order => 0;
+    }
+
+    public class OverrideToSkippedWithSpecificReasonAttribute : Attribute, ITestEndEventReceiver
+    {
+        public ValueTask OnTestEnd(TestContext afterTestContext)
+        {
+            afterTestContext.Execution.OverrideResult(TestState.Skipped, "test-skip foo bar baz.");
             return default(ValueTask);
         }
 
