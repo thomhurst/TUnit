@@ -29,12 +29,10 @@ public class NUnitMigrationAnalyzerTests
     
     [Test]
     [Arguments("NUnit.Framework.Test", "Test")]
-    [Arguments("NUnit.Framework.TestCase(1, 2, 3)", "Arguments(1, 2, 3)")]
     [Arguments("NUnit.Framework.SetUp", "Before(HookType.Test)")]
     [Arguments("NUnit.Framework.TearDown", "After(HookType.Test)")]
     [Arguments("NUnit.Framework.OneTimeSetUp", "Before(HookType.Class)")]
     [Arguments("NUnit.Framework.OneTimeTearDown", "After(HookType.Class)")]
-    [Arguments("NUnit.Framework.TestCaseSource(\"SomeMethod\")", "MethodDataSource(\"SomeMethod\")")]
     public async Task NUnit_Attribute_Can_Be_Converted(string attribute, string expected)
     {
         await CodeFixer.VerifyCodeFixAsync(
@@ -123,7 +121,7 @@ public class NUnitMigrationAnalyzerTests
                 public class MyClass
                 {
                     [Test]
-                    public void MyMethod()
+                    public async Task MyMethod()
                     {
                         await Assert.That(5).IsEqualTo(5);
                         await Assert.That(true).IsTrue();
@@ -134,7 +132,7 @@ public class NUnitMigrationAnalyzerTests
             ConfigureNUnitTest
         );
     }
-    
+
     [Test]
     public async Task NUnit_Classic_Assertions_Converted()
     {
@@ -302,14 +300,14 @@ public class NUnitMigrationAnalyzerTests
                     public class InnerTests
                     {
                         [Test]
-                        public void InnerTest()
+                        public async Task InnerTest()
                         {
                             await Assert.That(true).IsTrue();
                         }
                     }
 
                     [Test]
-                    public void OuterTest()
+                    public async Task OuterTest()
                     {
                         await Assert.That(false).IsFalse();
                     }
@@ -346,7 +344,7 @@ public class NUnitMigrationAnalyzerTests
                 public class GenericTestClass<T>
                 {
                     [Test]
-                    public void GenericTest()
+                    public async Task GenericTest()
                     {
                         var instance = default(T);
                         await Assert.That(instance).IsEqualTo(default(T));
@@ -388,7 +386,7 @@ public class NUnitMigrationAnalyzerTests
                 public class MyClass
                 {
                     [Test]
-                    public void ComplexConstraints()
+                    public async Task ComplexConstraints()
                     {
                         await Assert.That(10).IsGreaterThan(5);
                         await Assert.That(3).IsLessThan(10);
@@ -492,22 +490,24 @@ public class NUnitMigrationAnalyzerTests
                     }
 
                     [Test]
-                    public void Test1()
+                    public async Task Test1()
                     {
                         await Assert.That(_counter).IsGreaterThan(0);
                         ClassicAssert.IsTrue(true);
                     }
 
+                    [Test]
                     [Arguments(1, 2, 3)]
                     [Arguments(5, 5, 10)]
-                    public void AdditionTest(int a, int b, int expected)
+                    public async Task AdditionTest(int a, int b, int expected)
                     {
                         var result = a + b;
                         await Assert.That(result).IsEqualTo(expected);
                     }
 
+                    [Test]
                     [MethodDataSource(nameof(GetTestData))]
-                    public void DataDrivenTest(string input)
+                    public async Task DataDrivenTest(string input)
                     {
                         await Assert.That(input).IsNotNull();
                     }
@@ -566,7 +566,7 @@ public class NUnitMigrationAnalyzerTests
                 public class MyClass
                 {
                     [Test]
-                    public void TestMultipleAssertions()
+                    public async Task TestMultipleAssertions()
                     {
                         var value = 42;
                         await Assert.That(value).IsNotNull();
@@ -724,6 +724,335 @@ public class NUnitMigrationAnalyzerTests
                 }
             }
             """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_IsNotEqualTo_Converted_Correctly()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void TestMethod()
+                    {
+                        Assert.That(5, Is.Not.EqualTo(10));
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        await Assert.That(5).IsNotEqualTo(10);
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_IsNotGreaterThan_Converted_To_IsLessThanOrEqualTo()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void TestMethod()
+                    {
+                        Assert.That(5, Is.Not.GreaterThan(10));
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        await Assert.That(5).IsLessThanOrEqualTo(10);
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_DoesNotContain_Converted_Correctly()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void TestMethod()
+                    {
+                        Assert.That("hello world", Does.Not.Contain("foo"));
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        await Assert.That("hello world").DoesNotContain("foo");
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_DoesNotStartWith_Converted_Correctly()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void TestMethod()
+                    {
+                        Assert.That("hello world", Does.Not.StartWith("foo"));
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        await Assert.That("hello world").DoesNotStartWith("foo");
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_AssertionMessage_Converted_To_Because()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void TestMethod()
+                    {
+                        Assert.That(5, Is.EqualTo(5), "Values should match");
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        await Assert.That(5).IsEqualTo(5).Because("Values should match");
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_AssertionMessage_WithNegation_Converted_To_Because()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void TestMethod()
+                    {
+                        Assert.That(5, Is.Not.EqualTo(10), "Hash should differ");
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        await Assert.That(5).IsNotEqualTo(10).Because("Hash should differ");
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_VoidMethod_ConvertedToAsyncTask_WhenContainsAwait()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void TestMethod()
+                    {
+                        Assert.That(true, Is.True);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        await Assert.That(true).IsTrue();
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_TestCaseOnly_AddsTestAttribute()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [TestCase(1, 2, 3)]
+                    [TestCase(4, 5, 9)]
+                    public void AdditionTest(int a, int b, int expected)
+                    {
+                        Assert.That(a + b, Is.EqualTo(expected));
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    [Arguments(1, 2, 3)]
+                    [Arguments(4, 5, 9)]
+                    public async Task AdditionTest(int a, int b, int expected)
+                    {
+                        await Assert.That(a + b).IsEqualTo(expected);
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_TestCaseWithExistingTest_DoesNotDuplicateTestAttribute()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    [TestCase(1, 2, 3)]
+                    public void AdditionTest(int a, int b, int expected)
+                    {
+                        Assert.That(a + b, Is.EqualTo(expected));
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    [Arguments(1, 2, 3)]
+                    public async Task AdditionTest(int a, int b, int expected)
+                    {
+                        await Assert.That(a + b).IsEqualTo(expected);
+                    }
+                }
+                """,
             ConfigureNUnitTest
         );
     }

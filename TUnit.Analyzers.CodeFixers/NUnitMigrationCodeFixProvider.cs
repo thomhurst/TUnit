@@ -43,6 +43,11 @@ public class NUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
 
         return compilationUnit;
     }
+
+    /// <summary>
+    /// NUnit allows [TestCase] alone, but TUnit requires [Test] + [Arguments].
+    /// </summary>
+    protected override bool ShouldEnsureTestAttribute() => true;
 }
 
 public class NUnitAttributeRewriter : AttributeRewriter
@@ -158,26 +163,169 @@ public class NUnitAssertionRewriter : AssertionRewriter
         var arguments = invocation.ArgumentList.Arguments;
         var actualValue = arguments[0].Expression;
         var constraint = arguments[1].Expression;
-        
+
+        // Capture the optional message argument (3rd argument)
+        ExpressionSyntax? message = null;
+        if (arguments.Count >= 3)
+        {
+            message = arguments[2].Expression;
+        }
+
         // Parse the constraint to determine the TUnit assertion method
         if (constraint is InvocationExpressionSyntax constraintInvocation)
         {
-            return ConvertConstraintToTUnit(actualValue, constraintInvocation);
+            return ConvertConstraintToTUnitWithMessage(actualValue, constraintInvocation, message);
         }
-        
+
         if (constraint is MemberAccessExpressionSyntax constraintMember)
         {
-            return ConvertConstraintMemberToTUnit(actualValue, constraintMember);
+            return ConvertConstraintMemberToTUnitWithMessage(actualValue, constraintMember, message);
         }
-        
-        return CreateTUnitAssertion("IsEqualTo", actualValue, SyntaxFactory.Argument(constraint));
+
+        return CreateTUnitAssertionWithMessage("IsEqualTo", actualValue, message, SyntaxFactory.Argument(constraint));
     }
-    
+
+    private ExpressionSyntax ConvertConstraintToTUnitWithMessage(ExpressionSyntax actualValue, InvocationExpressionSyntax constraint, ExpressionSyntax? message)
+    {
+        if (constraint.Expression is MemberAccessExpressionSyntax memberAccess)
+        {
+            var methodName = memberAccess.Name.Identifier.Text;
+
+            // Handle Is.Not.EqualTo, Is.Not.GreaterThan, etc. (invocation patterns)
+            if (memberAccess.Expression is MemberAccessExpressionSyntax chainedAccess &&
+                chainedAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Is" } &&
+                chainedAccess.Name.Identifier.Text == "Not")
+            {
+                return methodName switch
+                {
+                    "EqualTo" => CreateTUnitAssertionWithMessage("IsNotEqualTo", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
+                    "GreaterThan" => CreateTUnitAssertionWithMessage("IsLessThanOrEqualTo", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
+                    "LessThan" => CreateTUnitAssertionWithMessage("IsGreaterThanOrEqualTo", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
+                    "GreaterThanOrEqualTo" => CreateTUnitAssertionWithMessage("IsLessThan", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
+                    "LessThanOrEqualTo" => CreateTUnitAssertionWithMessage("IsGreaterThan", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
+                    "SameAs" => CreateTUnitAssertionWithMessage("IsNotSameReferenceAs", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
+                    "InstanceOf" => CreateTUnitAssertionWithMessage("IsNotTypeOf", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
+                    _ => CreateTUnitAssertionWithMessage("IsNotEqualTo", actualValue, message, constraint.ArgumentList.Arguments.ToArray())
+                };
+            }
+
+            // Handle Does.Not.StartWith, Does.Not.EndWith, Does.Not.Contain
+            if (memberAccess.Expression is MemberAccessExpressionSyntax doesNotAccess &&
+                doesNotAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Does" } &&
+                doesNotAccess.Name.Identifier.Text == "Not")
+            {
+                return methodName switch
+                {
+                    "StartWith" => CreateTUnitAssertionWithMessage("DoesNotStartWith", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
+                    "EndWith" => CreateTUnitAssertionWithMessage("DoesNotEndWith", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
+                    "Contain" => CreateTUnitAssertionWithMessage("DoesNotContain", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
+                    _ => CreateTUnitAssertionWithMessage("DoesNotContain", actualValue, message, constraint.ArgumentList.Arguments.ToArray())
+                };
+            }
+
+            // Handle Does.StartWith, Does.EndWith, Contains.Substring
+            if (memberAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Does" or "Contains" })
+            {
+                return methodName switch
+                {
+                    "StartWith" => CreateTUnitAssertionWithMessage("StartsWith", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
+                    "EndWith" => CreateTUnitAssertionWithMessage("EndsWith", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
+                    "Substring" => CreateTUnitAssertionWithMessage("Contains", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
+                    _ => CreateTUnitAssertionWithMessage("IsEqualTo", actualValue, message, SyntaxFactory.Argument(constraint))
+                };
+            }
+
+            return methodName switch
+            {
+                "EqualTo" => CreateTUnitAssertionWithMessage("IsEqualTo", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
+                "GreaterThan" => CreateTUnitAssertionWithMessage("IsGreaterThan", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
+                "LessThan" => CreateTUnitAssertionWithMessage("IsLessThan", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
+                "GreaterThanOrEqualTo" => CreateTUnitAssertionWithMessage("IsGreaterThanOrEqualTo", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
+                "LessThanOrEqualTo" => CreateTUnitAssertionWithMessage("IsLessThanOrEqualTo", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
+                "Contains" => CreateTUnitAssertionWithMessage("Contains", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
+                "StartsWith" => CreateTUnitAssertionWithMessage("StartsWith", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
+                "EndsWith" => CreateTUnitAssertionWithMessage("EndsWith", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
+                "SameAs" => CreateTUnitAssertionWithMessage("IsSameReferenceAs", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
+                "InstanceOf" => CreateTUnitAssertionWithMessage("IsTypeOf", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
+                _ => CreateTUnitAssertionWithMessage("IsEqualTo", actualValue, message, SyntaxFactory.Argument(constraint))
+            };
+        }
+
+        return CreateTUnitAssertionWithMessage("IsEqualTo", actualValue, message, SyntaxFactory.Argument(constraint));
+    }
+
+    private ExpressionSyntax ConvertConstraintMemberToTUnitWithMessage(ExpressionSyntax actualValue, MemberAccessExpressionSyntax constraint, ExpressionSyntax? message)
+    {
+        var memberName = constraint.Name.Identifier.Text;
+
+        // Handle Is.Not.X patterns (member access, not invocation)
+        if (constraint.Expression is MemberAccessExpressionSyntax innerMemberAccess &&
+            innerMemberAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Is" } &&
+            innerMemberAccess.Name.Identifier.Text == "Not")
+        {
+            return memberName switch
+            {
+                "Null" => CreateTUnitAssertionWithMessage("IsNotNull", actualValue, message),
+                "Empty" => CreateTUnitAssertionWithMessage("IsNotEmpty", actualValue, message),
+                "True" => CreateTUnitAssertionWithMessage("IsFalse", actualValue, message),
+                "False" => CreateTUnitAssertionWithMessage("IsTrue", actualValue, message),
+                "Positive" => CreateTUnitAssertionWithMessage("IsLessThanOrEqualTo", actualValue, message, SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(0)))),
+                "Negative" => CreateTUnitAssertionWithMessage("IsGreaterThanOrEqualTo", actualValue, message, SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(0)))),
+                "Zero" => CreateTUnitAssertionWithMessage("IsNotEqualTo", actualValue, message, SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(0)))),
+                _ => CreateTUnitAssertionWithMessage("IsNotEqualTo", actualValue, message, SyntaxFactory.Argument(constraint))
+            };
+        }
+
+        return memberName switch
+        {
+            "True" => CreateTUnitAssertionWithMessage("IsTrue", actualValue, message),
+            "False" => CreateTUnitAssertionWithMessage("IsFalse", actualValue, message),
+            "Null" => CreateTUnitAssertionWithMessage("IsNull", actualValue, message),
+            "Empty" => CreateTUnitAssertionWithMessage("IsEmpty", actualValue, message),
+            "Positive" => CreateTUnitAssertionWithMessage("IsPositive", actualValue, message),
+            "Negative" => CreateTUnitAssertionWithMessage("IsNegative", actualValue, message),
+            "Zero" => CreateTUnitAssertionWithMessage("IsZero", actualValue, message),
+            _ => CreateTUnitAssertionWithMessage("IsEqualTo", actualValue, message, SyntaxFactory.Argument(constraint))
+        };
+    }
+
     private ExpressionSyntax ConvertConstraintToTUnit(ExpressionSyntax actualValue, InvocationExpressionSyntax constraint)
     {
         if (constraint.Expression is MemberAccessExpressionSyntax memberAccess)
         {
             var methodName = memberAccess.Name.Identifier.Text;
+
+            // Handle Is.Not.EqualTo, Is.Not.GreaterThan, etc. (invocation patterns)
+            if (memberAccess.Expression is MemberAccessExpressionSyntax chainedAccess &&
+                chainedAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Is" } &&
+                chainedAccess.Name.Identifier.Text == "Not")
+            {
+                return methodName switch
+                {
+                    "EqualTo" => CreateTUnitAssertion("IsNotEqualTo", actualValue, constraint.ArgumentList.Arguments.ToArray()),
+                    "GreaterThan" => CreateTUnitAssertion("IsLessThanOrEqualTo", actualValue, constraint.ArgumentList.Arguments.ToArray()),
+                    "LessThan" => CreateTUnitAssertion("IsGreaterThanOrEqualTo", actualValue, constraint.ArgumentList.Arguments.ToArray()),
+                    "GreaterThanOrEqualTo" => CreateTUnitAssertion("IsLessThan", actualValue, constraint.ArgumentList.Arguments.ToArray()),
+                    "LessThanOrEqualTo" => CreateTUnitAssertion("IsGreaterThan", actualValue, constraint.ArgumentList.Arguments.ToArray()),
+                    "SameAs" => CreateTUnitAssertion("IsNotSameReferenceAs", actualValue, constraint.ArgumentList.Arguments.ToArray()),
+                    "InstanceOf" => CreateTUnitAssertion("IsNotTypeOf", actualValue, constraint.ArgumentList.Arguments.ToArray()),
+                    _ => CreateTUnitAssertion("IsNotEqualTo", actualValue, constraint.ArgumentList.Arguments.ToArray())
+                };
+            }
+
+            // Handle Does.Not.StartWith, Does.Not.EndWith, Does.Not.Contain
+            if (memberAccess.Expression is MemberAccessExpressionSyntax doesNotAccess &&
+                doesNotAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Does" } &&
+                doesNotAccess.Name.Identifier.Text == "Not")
+            {
+                return methodName switch
+                {
+                    "StartWith" => CreateTUnitAssertion("DoesNotStartWith", actualValue, constraint.ArgumentList.Arguments.ToArray()),
+                    "EndWith" => CreateTUnitAssertion("DoesNotEndWith", actualValue, constraint.ArgumentList.Arguments.ToArray()),
+                    "Contain" => CreateTUnitAssertion("DoesNotContain", actualValue, constraint.ArgumentList.Arguments.ToArray()),
+                    _ => CreateTUnitAssertion("DoesNotContain", actualValue, constraint.ArgumentList.Arguments.ToArray())
+                };
+            }
 
             // Handle Does.StartWith, Does.EndWith, Contains.Substring
             if (memberAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Does" or "Contains" })
@@ -196,9 +344,18 @@ public class NUnitAssertionRewriter : AssertionRewriter
                 "EqualTo" => CreateTUnitAssertion("IsEqualTo", actualValue, constraint.ArgumentList.Arguments.ToArray()),
                 "GreaterThan" => CreateTUnitAssertion("IsGreaterThan", actualValue, constraint.ArgumentList.Arguments.ToArray()),
                 "LessThan" => CreateTUnitAssertion("IsLessThan", actualValue, constraint.ArgumentList.Arguments.ToArray()),
+                "GreaterThanOrEqualTo" => CreateTUnitAssertion("IsGreaterThanOrEqualTo", actualValue, constraint.ArgumentList.Arguments.ToArray()),
+                "LessThanOrEqualTo" => CreateTUnitAssertion("IsLessThanOrEqualTo", actualValue, constraint.ArgumentList.Arguments.ToArray()),
                 "Contains" => CreateTUnitAssertion("Contains", actualValue, constraint.ArgumentList.Arguments.ToArray()),
                 "StartsWith" => CreateTUnitAssertion("StartsWith", actualValue, constraint.ArgumentList.Arguments.ToArray()),
                 "EndsWith" => CreateTUnitAssertion("EndsWith", actualValue, constraint.ArgumentList.Arguments.ToArray()),
+                "SameAs" => CreateTUnitAssertion("IsSameReferenceAs", actualValue, constraint.ArgumentList.Arguments.ToArray()),
+                "InstanceOf" => CreateTUnitAssertion("IsTypeOf", actualValue, constraint.ArgumentList.Arguments.ToArray()),
+                "SubsetOf" => CreateTUnitAssertion("IsSubsetOf", actualValue, constraint.ArgumentList.Arguments.ToArray()),
+                "SupersetOf" => CreateTUnitAssertion("IsSupersetOf", actualValue, constraint.ArgumentList.Arguments.ToArray()),
+                "EquivalentTo" => CreateTUnitAssertion("IsEquivalentTo", actualValue, constraint.ArgumentList.Arguments.ToArray()),
+                "Matches" => CreateTUnitAssertion("Matches", actualValue, constraint.ArgumentList.Arguments.ToArray()),
+                "InRange" => CreateInRangeAssertion(actualValue, constraint.ArgumentList.Arguments),
                 _ => CreateTUnitAssertion("IsEqualTo", actualValue, SyntaxFactory.Argument(constraint))
             };
         }
@@ -210,7 +367,7 @@ public class NUnitAssertionRewriter : AssertionRewriter
     {
         var memberName = constraint.Name.Identifier.Text;
 
-        // Handle Is.Not.X patterns
+        // Handle Is.Not.X patterns (member access, not invocation)
         if (constraint.Expression is MemberAccessExpressionSyntax innerMemberAccess &&
             innerMemberAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Is" } &&
             innerMemberAccess.Name.Identifier.Text == "Not")
@@ -219,7 +376,12 @@ public class NUnitAssertionRewriter : AssertionRewriter
             {
                 "Null" => CreateTUnitAssertion("IsNotNull", actualValue),
                 "Empty" => CreateTUnitAssertion("IsNotEmpty", actualValue),
-                _ => CreateTUnitAssertion("IsEqualTo", actualValue, SyntaxFactory.Argument(constraint))
+                "True" => CreateTUnitAssertion("IsFalse", actualValue),
+                "False" => CreateTUnitAssertion("IsTrue", actualValue),
+                "Positive" => CreateTUnitAssertion("IsLessThanOrEqualTo", actualValue, SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(0)))),
+                "Negative" => CreateTUnitAssertion("IsGreaterThanOrEqualTo", actualValue, SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(0)))),
+                "Zero" => CreateTUnitAssertion("IsNotEqualTo", actualValue, SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(0)))),
+                _ => CreateTUnitAssertion("IsNotEqualTo", actualValue, SyntaxFactory.Argument(constraint))
             };
         }
 
@@ -229,38 +391,227 @@ public class NUnitAssertionRewriter : AssertionRewriter
             "False" => CreateTUnitAssertion("IsFalse", actualValue),
             "Null" => CreateTUnitAssertion("IsNull", actualValue),
             "Empty" => CreateTUnitAssertion("IsEmpty", actualValue),
+            "Positive" => CreateTUnitAssertion("IsPositive", actualValue),
+            "Negative" => CreateTUnitAssertion("IsNegative", actualValue),
+            "Zero" => CreateTUnitAssertion("IsZero", actualValue),
+            "Unique" => CreateTUnitAssertion("HasDistinctItems", actualValue),
+            "Ordered" => CreateTUnitAssertion("IsInAscendingOrder", actualValue),
             _ => CreateTUnitAssertion("IsEqualTo", actualValue, SyntaxFactory.Argument(constraint))
         };
+    }
+
+    private ExpressionSyntax CreateInRangeAssertion(ExpressionSyntax actualValue, SeparatedSyntaxList<ArgumentSyntax> arguments)
+    {
+        // Is.InRange(low, high) -> IsInRange(low, high)
+        if (arguments.Count >= 2)
+        {
+            return CreateTUnitAssertion("IsInRange", actualValue, arguments[0], arguments[1]);
+        }
+        return CreateTUnitAssertion("IsInRange", actualValue);
     }
     
     private ExpressionSyntax? ConvertClassicAssertion(InvocationExpressionSyntax invocation, string methodName)
     {
         var arguments = invocation.ArgumentList.Arguments;
-        
+
+        // Handle Assert.Throws<T> and Assert.ThrowsAsync<T> first (generic methods)
+        if (methodName is "Throws" or "ThrowsAsync")
+        {
+            return ConvertNUnitThrows(invocation);
+        }
+
+        // Handle special assertions (Pass, Inconclusive, Fail, Warn)
         return methodName switch
         {
-            "AreEqual" when arguments.Count >= 2 => 
-                CreateTUnitAssertion("IsEqualTo", arguments[1].Expression, arguments[0]),
-            "AreNotEqual" when arguments.Count >= 2 => 
-                CreateTUnitAssertion("IsNotEqualTo", arguments[1].Expression, arguments[0]),
-            "IsTrue" when arguments.Count >= 1 => 
-                CreateTUnitAssertion("IsTrue", arguments[0].Expression),
-            "IsFalse" when arguments.Count >= 1 => 
-                CreateTUnitAssertion("IsFalse", arguments[0].Expression),
-            "IsNull" when arguments.Count >= 1 => 
-                CreateTUnitAssertion("IsNull", arguments[0].Expression),
-            "IsNotNull" when arguments.Count >= 1 => 
-                CreateTUnitAssertion("IsNotNull", arguments[0].Expression),
-            "IsEmpty" when arguments.Count >= 1 => 
-                CreateTUnitAssertion("IsEmpty", arguments[0].Expression),
-            "IsNotEmpty" when arguments.Count >= 1 => 
-                CreateTUnitAssertion("IsNotEmpty", arguments[0].Expression),
-            "Greater" when arguments.Count >= 2 => 
-                CreateTUnitAssertion("IsGreaterThan", arguments[0].Expression, arguments[1]),
-            "Less" when arguments.Count >= 2 => 
-                CreateTUnitAssertion("IsLessThan", arguments[0].Expression, arguments[1]),
+            // Pass and Fail
+            "Pass" => CreatePassAssertion(arguments),
+            "Fail" => CreateFailAssertion(arguments),
+            "Inconclusive" => CreateSkipAssertion(arguments),
+            "Ignore" => CreateSkipAssertion(arguments),
+
+            // 2-arg assertions (expected, actual) with optional message at index 2
+            "AreEqual" when arguments.Count >= 2 => ConvertAreEqualWithComparer(arguments),
+            "AreNotEqual" when arguments.Count >= 2 => ConvertAreNotEqualWithMessage(arguments),
+            "AreSame" when arguments.Count >= 2 => ConvertTwoArgWithMessage("IsSameReferenceAs", arguments),
+            "AreNotSame" when arguments.Count >= 2 => ConvertTwoArgWithMessage("IsNotSameReferenceAs", arguments),
+            "Greater" when arguments.Count >= 2 => ConvertTwoArgWithMessage("IsGreaterThan", arguments, swapArgs: false),
+            "GreaterOrEqual" when arguments.Count >= 2 => ConvertTwoArgWithMessage("IsGreaterThanOrEqualTo", arguments, swapArgs: false),
+            "Less" when arguments.Count >= 2 => ConvertTwoArgWithMessage("IsLessThan", arguments, swapArgs: false),
+            "LessOrEqual" when arguments.Count >= 2 => ConvertTwoArgWithMessage("IsLessThanOrEqualTo", arguments, swapArgs: false),
+
+            // 1-arg assertions with optional message at index 1
+            "IsTrue" when arguments.Count >= 1 => ConvertOneArgWithMessage("IsTrue", arguments),
+            "IsFalse" when arguments.Count >= 1 => ConvertOneArgWithMessage("IsFalse", arguments),
+            "IsNull" when arguments.Count >= 1 => ConvertOneArgWithMessage("IsNull", arguments),
+            "IsNotNull" when arguments.Count >= 1 => ConvertOneArgWithMessage("IsNotNull", arguments),
+            "IsEmpty" when arguments.Count >= 1 => ConvertOneArgWithMessage("IsEmpty", arguments),
+            "IsNotEmpty" when arguments.Count >= 1 => ConvertOneArgWithMessage("IsNotEmpty", arguments),
+            "IsNaN" when arguments.Count >= 1 => ConvertOneArgWithMessage("IsNaN", arguments),
+            "IsInstanceOf" when arguments.Count >= 2 => ConvertInstanceOf(arguments, isNegated: false),
+            "IsNotInstanceOf" when arguments.Count >= 2 => ConvertInstanceOf(arguments, isNegated: true),
+
+            // Collection assertions
+            "Contains" when arguments.Count >= 2 => ConvertTwoArgWithMessage("Contains", arguments, swapArgs: false),
+
+            // Comparison assertions
+            "Positive" when arguments.Count >= 1 => ConvertOneArgWithMessage("IsPositive", arguments),
+            "Negative" when arguments.Count >= 1 => ConvertOneArgWithMessage("IsNegative", arguments),
+            "Zero" when arguments.Count >= 1 => ConvertOneArgWithMessage("IsZero", arguments),
+            "NotZero" when arguments.Count >= 1 => ConvertOneArgWithMessage("IsNotZero", arguments),
+
             _ => null
         };
+    }
+
+    private ExpressionSyntax ConvertOneArgWithMessage(string methodName, SeparatedSyntaxList<ArgumentSyntax> arguments)
+    {
+        var actualValue = arguments[0].Expression;
+        var (message, formatArgs) = ExtractMessageWithFormatArgs(arguments, 1);
+        var messageExpr = message != null ? CreateMessageExpression(message, formatArgs) : null;
+        return CreateTUnitAssertionWithMessage(methodName, actualValue, messageExpr);
+    }
+
+    private ExpressionSyntax ConvertTwoArgWithMessage(string methodName, SeparatedSyntaxList<ArgumentSyntax> arguments, bool swapArgs = true)
+    {
+        // For most NUnit assertions: expected is first, actual is second
+        // For TUnit: actual is first, expected goes in the method call
+        var actualValue = swapArgs ? arguments[1].Expression : arguments[0].Expression;
+        var expectedArg = swapArgs ? arguments[0] : arguments[1];
+        var (message, formatArgs) = ExtractMessageWithFormatArgs(arguments, 2);
+        var messageExpr = message != null ? CreateMessageExpression(message, formatArgs) : null;
+        return CreateTUnitAssertionWithMessage(methodName, actualValue, messageExpr, expectedArg);
+    }
+
+    private ExpressionSyntax ConvertAreEqualWithComparer(SeparatedSyntaxList<ArgumentSyntax> arguments)
+    {
+        var expected = arguments[0];
+        var actual = arguments[1].Expression;
+
+        // Check if 3rd argument is a comparer (not a string message)
+        if (arguments.Count >= 3 && IsLikelyComparerArgument(arguments[2]))
+        {
+            // Add TODO comment and skip the comparer
+            var result = CreateTUnitAssertion("IsEqualTo", actual, expected);
+            return result.WithLeadingTrivia(
+                CreateTodoComment("custom comparer was used - consider using Assert.That(...).IsEquivalentTo() or a custom condition."),
+                SyntaxFactory.EndOfLine("\n"),
+                SyntaxFactory.Whitespace("                "));
+        }
+
+        var (message, formatArgs) = ExtractMessageWithFormatArgs(arguments, 2);
+        var messageExpr = message != null ? CreateMessageExpression(message, formatArgs) : null;
+        return CreateTUnitAssertionWithMessage("IsEqualTo", actual, messageExpr, expected);
+    }
+
+    private ExpressionSyntax ConvertAreNotEqualWithMessage(SeparatedSyntaxList<ArgumentSyntax> arguments)
+    {
+        var expected = arguments[0];
+        var actual = arguments[1].Expression;
+
+        // Check if 3rd argument is a comparer
+        if (arguments.Count >= 3 && IsLikelyComparerArgument(arguments[2]))
+        {
+            var result = CreateTUnitAssertion("IsNotEqualTo", actual, expected);
+            return result.WithLeadingTrivia(
+                CreateTodoComment("custom comparer was used - consider using a custom condition."),
+                SyntaxFactory.EndOfLine("\n"),
+                SyntaxFactory.Whitespace("                "));
+        }
+
+        var (message, formatArgs) = ExtractMessageWithFormatArgs(arguments, 2);
+        var messageExpr = message != null ? CreateMessageExpression(message, formatArgs) : null;
+        return CreateTUnitAssertionWithMessage("IsNotEqualTo", actual, messageExpr, expected);
+    }
+
+    private ExpressionSyntax ConvertInstanceOf(SeparatedSyntaxList<ArgumentSyntax> arguments, bool isNegated)
+    {
+        var actualValue = arguments[0].Expression;
+        var expectedType = arguments[1];
+        var methodName = isNegated ? "IsNotAssignableTo" : "IsAssignableTo";
+        var (message, formatArgs) = ExtractMessageWithFormatArgs(arguments, 2);
+        var messageExpr = message != null ? CreateMessageExpression(message, formatArgs) : null;
+        return CreateTUnitAssertionWithMessage(methodName, actualValue, messageExpr, expectedType);
+    }
+
+    private ExpressionSyntax ConvertNUnitThrows(InvocationExpressionSyntax invocation)
+    {
+        if (invocation.Expression is MemberAccessExpressionSyntax memberAccess &&
+            memberAccess.Name is GenericNameSyntax genericName)
+        {
+            var exceptionType = genericName.TypeArgumentList.Arguments[0];
+            var action = invocation.ArgumentList.Arguments[0].Expression;
+
+            var throwsAsyncInvocation = SyntaxFactory.InvocationExpression(
+                SyntaxFactory.MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    SyntaxFactory.IdentifierName("Assert"),
+                    SyntaxFactory.GenericName("ThrowsAsync")
+                        .WithTypeArgumentList(
+                            SyntaxFactory.TypeArgumentList(
+                                SyntaxFactory.SingletonSeparatedList(exceptionType)
+                            )
+                        )
+                ),
+                SyntaxFactory.ArgumentList(
+                    SyntaxFactory.SingletonSeparatedList(
+                        SyntaxFactory.Argument(action)
+                    )
+                )
+            );
+
+            return SyntaxFactory.AwaitExpression(throwsAsyncInvocation);
+        }
+
+        // Fallback for non-generic Throws
+        return CreateTUnitAssertion("Throws", invocation.ArgumentList.Arguments[0].Expression);
+    }
+
+    private ExpressionSyntax CreatePassAssertion(SeparatedSyntaxList<ArgumentSyntax> arguments)
+    {
+        var passInvocation = SyntaxFactory.InvocationExpression(
+            SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                SyntaxFactory.IdentifierName("Assert"),
+                SyntaxFactory.IdentifierName("Pass")
+            ),
+            arguments.Count > 0
+                ? SyntaxFactory.ArgumentList(SyntaxFactory.SingletonSeparatedList(arguments[0]))
+                : SyntaxFactory.ArgumentList()
+        );
+
+        return SyntaxFactory.AwaitExpression(passInvocation);
+    }
+
+    private ExpressionSyntax CreateFailAssertion(SeparatedSyntaxList<ArgumentSyntax> arguments)
+    {
+        var failInvocation = SyntaxFactory.InvocationExpression(
+            SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                SyntaxFactory.IdentifierName("Assert"),
+                SyntaxFactory.IdentifierName("Fail")
+            ),
+            arguments.Count > 0
+                ? SyntaxFactory.ArgumentList(SyntaxFactory.SingletonSeparatedList(arguments[0]))
+                : SyntaxFactory.ArgumentList()
+        );
+
+        return SyntaxFactory.AwaitExpression(failInvocation);
+    }
+
+    private ExpressionSyntax CreateSkipAssertion(SeparatedSyntaxList<ArgumentSyntax> arguments)
+    {
+        var skipInvocation = SyntaxFactory.InvocationExpression(
+            SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                SyntaxFactory.IdentifierName("Assert"),
+                SyntaxFactory.IdentifierName("Skip")
+            ),
+            arguments.Count > 0
+                ? SyntaxFactory.ArgumentList(SyntaxFactory.SingletonSeparatedList(arguments[0]))
+                : SyntaxFactory.ArgumentList()
+        );
+
+        return SyntaxFactory.AwaitExpression(skipInvocation);
     }
 }
 

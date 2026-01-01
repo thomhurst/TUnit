@@ -35,6 +35,15 @@ public abstract class AssertionRewriter : CSharpSyntaxRewriter
         ExpressionSyntax actualValue,
         params ArgumentSyntax[] additionalArguments)
     {
+        return CreateTUnitAssertionWithMessage(methodName, actualValue, null, additionalArguments);
+    }
+
+    protected ExpressionSyntax CreateTUnitAssertionWithMessage(
+        string methodName,
+        ExpressionSyntax actualValue,
+        ExpressionSyntax? message,
+        params ArgumentSyntax[] additionalArguments)
+    {
         // Create Assert.That(actualValue)
         var assertThatInvocation = SyntaxFactory.InvocationExpression(
             SyntaxFactory.MemberAccessExpression(
@@ -60,10 +69,139 @@ public abstract class AssertionRewriter : CSharpSyntaxRewriter
             ? SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(additionalArguments))
             : SyntaxFactory.ArgumentList();
 
-        var fullInvocation = SyntaxFactory.InvocationExpression(methodAccess, arguments);
+        ExpressionSyntax fullInvocation = SyntaxFactory.InvocationExpression(methodAccess, arguments);
 
-        // Now wrap the entire thing in await: await Assert.That(actualValue).MethodName(args)
+        // Add .Because(message) if message is provided and non-empty
+        if (message != null && !IsEmptyOrNullMessage(message))
+        {
+            var becauseAccess = SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                fullInvocation,
+                SyntaxFactory.IdentifierName("Because")
+            );
+
+            fullInvocation = SyntaxFactory.InvocationExpression(
+                becauseAccess,
+                SyntaxFactory.ArgumentList(
+                    SyntaxFactory.SingletonSeparatedList(
+                        SyntaxFactory.Argument(message)
+                    )
+                )
+            );
+        }
+
+        // Now wrap the entire thing in await: await Assert.That(actualValue).MethodName(args).Because(message)
         return SyntaxFactory.AwaitExpression(fullInvocation);
+    }
+
+    private static bool IsEmptyOrNullMessage(ExpressionSyntax message)
+    {
+        // Check for null literal
+        if (message is LiteralExpressionSyntax literal)
+        {
+            if (literal.IsKind(SyntaxKind.NullLiteralExpression))
+            {
+                return true;
+            }
+
+            // Check for empty string literal
+            if (literal.IsKind(SyntaxKind.StringLiteralExpression) &&
+                literal.Token.ValueText == "")
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Extracts the message and any format arguments from an argument list.
+    /// Format string messages like Assert.AreEqual(5, x, "Expected {0}", x) have args after the message.
+    /// </summary>
+    protected static (ExpressionSyntax? message, ArgumentSyntax[]? formatArgs) ExtractMessageWithFormatArgs(
+        SeparatedSyntaxList<ArgumentSyntax> arguments,
+        int messageIndex)
+    {
+        if (arguments.Count <= messageIndex)
+        {
+            return (null, null);
+        }
+
+        var message = arguments[messageIndex].Expression;
+
+        // Check if there are additional format arguments after the message
+        if (arguments.Count > messageIndex + 1)
+        {
+            var formatArgs = arguments.Skip(messageIndex + 1).ToArray();
+            return (message, formatArgs);
+        }
+
+        return (message, null);
+    }
+
+    /// <summary>
+    /// Creates a message expression, wrapping in string.Format if format args are present.
+    /// </summary>
+    protected static ExpressionSyntax CreateMessageExpression(
+        ExpressionSyntax message,
+        ArgumentSyntax[]? formatArgs)
+    {
+        if (formatArgs == null || formatArgs.Length == 0)
+        {
+            return message;
+        }
+
+        // Create string.Format(message, arg1, arg2, ...)
+        var allArgs = new List<ArgumentSyntax>
+        {
+            SyntaxFactory.Argument(message)
+        };
+        allArgs.AddRange(formatArgs);
+
+        return SyntaxFactory.InvocationExpression(
+            SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.StringKeyword)),
+                SyntaxFactory.IdentifierName("Format")
+            ),
+            SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(allArgs))
+        );
+    }
+
+    /// <summary>
+    /// Checks if the argument at the given index appears to be a comparer (IComparer, IEqualityComparer).
+    /// </summary>
+    protected bool IsLikelyComparerArgument(ArgumentSyntax argument)
+    {
+        var typeInfo = SemanticModel.GetTypeInfo(argument.Expression);
+        if (typeInfo.Type == null) return false;
+
+        var typeName = typeInfo.Type.ToDisplayString();
+
+        // Check for IComparer, IComparer<T>, IEqualityComparer, IEqualityComparer<T>
+        if (typeName.Contains("IComparer") || typeName.Contains("IEqualityComparer"))
+        {
+            return true;
+        }
+
+        // Check interfaces
+        if (typeInfo.Type is INamedTypeSymbol namedType)
+        {
+            return namedType.AllInterfaces.Any(i =>
+                i.Name == "IComparer" ||
+                i.Name == "IEqualityComparer");
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Creates a TODO comment for unsupported features during migration.
+    /// </summary>
+    protected static SyntaxTrivia CreateTodoComment(string message)
+    {
+        return SyntaxFactory.Comment($"// TODO: TUnit migration - {message}");
     }
     
     protected bool IsFrameworkAssertion(InvocationExpressionSyntax invocation)
