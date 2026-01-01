@@ -122,7 +122,7 @@ public class MSTestMigrationAnalyzerTests
                 public class MyClass
                 {
                     [Test]
-                    public void MyMethod()
+                    public async Task MyMethod()
                     {
                         await Assert.That(5).IsEqualTo(5);
                         await Assert.That(true).IsTrue();
@@ -293,7 +293,7 @@ public class MSTestMigrationAnalyzerTests
                 public class MyClass
                 {
                     [Test]
-                    public void MyMethod()
+                    public async Task MyMethod()
                     {
                         var list1 = new[] { 1, 2, 3 };
                         var list2 = new[] { 1, 2, 3 };
@@ -334,7 +334,7 @@ public class MSTestMigrationAnalyzerTests
                 public class MyClass
                 {
                     [Test]
-                    public void StringTests()
+                    public async Task StringTests()
                     {
                         await Assert.That("hello world").Contains("world");
                         await Assert.That("hello world").StartsWith("hello");
@@ -383,14 +383,14 @@ public class MSTestMigrationAnalyzerTests
                     public class InnerTests
                     {
                         [Test]
-                        public void InnerTest()
+                        public async Task InnerTest()
                         {
                             await Assert.That(true).IsTrue();
                         }
                     }
 
                     [Test]
-                    public void OuterTest()
+                    public async Task OuterTest()
                     {
                         await Assert.That(false).IsFalse();
                     }
@@ -427,7 +427,7 @@ public class MSTestMigrationAnalyzerTests
                 public class GenericTestClass<T>
                 {
                     [Test]
-                    public void GenericTest()
+                    public async Task GenericTest()
                     {
                         var instance = default(T);
                         await Assert.That(instance).IsEqualTo(default(T));
@@ -530,7 +530,7 @@ public class MSTestMigrationAnalyzerTests
                     }
 
                     [Test]
-                    public void Test1()
+                    public async Task Test1()
                     {
                         await Assert.That(_counter > 0).IsTrue();
                         await Assert.That(_counter).IsNotNull();
@@ -539,7 +539,7 @@ public class MSTestMigrationAnalyzerTests
                     [Arguments(1, 2, 3)]
                     [Arguments(5, 5, 10)]
                     [Test]
-                    public void AdditionTest(int a, int b, int expected)
+                    public async Task AdditionTest(int a, int b, int expected)
                     {
                         var result = a + b;
                         await Assert.That(result).IsEqualTo(expected);
@@ -547,7 +547,7 @@ public class MSTestMigrationAnalyzerTests
 
                     [MethodDataSource(nameof(GetTestData))]
                     [Test]
-                    public void DataDrivenTest(string input)
+                    public async Task DataDrivenTest(string input)
                     {
                         await Assert.That(input).IsNotNull();
                     }
@@ -616,7 +616,7 @@ public class MSTestMigrationAnalyzerTests
                 public class MyClass
                 {
                     [Test]
-                    public void TestMultipleAssertionTypes()
+                    public async Task TestMultipleAssertionTypes()
                     {
                         var value = 42;
                         var list = new[] { 1, 2, 3 };
@@ -672,7 +672,7 @@ public class MSTestMigrationAnalyzerTests
                 public class MyClass
                 {
                     [Test]
-                    public void TestReferences()
+                    public async Task TestReferences()
                     {
                         var obj1 = new object();
                         var obj2 = obj1;
@@ -680,6 +680,48 @@ public class MSTestMigrationAnalyzerTests
 
                         await Assert.That(obj2).IsSameReference(obj1);
                         await Assert.That(obj3).IsNotSameReference(obj1);
+                    }
+                }
+                """,
+            ConfigureMSTestTest
+        );
+    }
+
+    [Test]
+    public async Task MSTest_Assertion_Messages_Preserved()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+                {|#0:public class MyClass|}
+                {
+                    [TestMethod]
+                    public void TestWithMessages()
+                    {
+                        Assert.AreEqual(5, 5, "Values should be equal");
+                        Assert.IsTrue(true, "Should be true");
+                        Assert.IsNull(null, "Should be null");
+                        Assert.AreNotEqual(3, 5, "Values should not be equal");
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
+            """
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestWithMessages()
+                    {
+                        await Assert.That(5).IsEqualTo(5).Because("Values should be equal");
+                        await Assert.That(true).IsTrue().Because("Should be true");
+                        await Assert.That(null).IsNull().Because("Should be null");
+                        await Assert.That(5).IsNotEqualTo(3).Because("Values should not be equal");
                     }
                 }
                 """,

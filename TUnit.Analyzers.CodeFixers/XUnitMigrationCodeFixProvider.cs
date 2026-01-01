@@ -539,22 +539,39 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
 
             return methodName switch
             {
+                // Equality assertions - check for comparer overloads
+                "Equal" when arguments.Count >= 3 && IsLikelyComparerArgument(arguments[2]) =>
+                    CreateEqualWithComparerComment(arguments),
                 "Equal" when arguments.Count >= 2 =>
                     CreateTUnitAssertion("IsEqualTo", arguments[1].Expression, arguments[0]),
+                "NotEqual" when arguments.Count >= 3 && IsLikelyComparerArgument(arguments[2]) =>
+                    CreateNotEqualWithComparerComment(arguments),
                 "NotEqual" when arguments.Count >= 2 =>
                     CreateTUnitAssertion("IsNotEqualTo", arguments[1].Expression, arguments[0]),
+
+                // Boolean assertions
+                "True" when arguments.Count >= 2 =>
+                    CreateTUnitAssertionWithMessage("IsTrue", arguments[0].Expression, arguments[1].Expression),
                 "True" when arguments.Count >= 1 =>
                     CreateTUnitAssertion("IsTrue", arguments[0].Expression),
+                "False" when arguments.Count >= 2 =>
+                    CreateTUnitAssertionWithMessage("IsFalse", arguments[0].Expression, arguments[1].Expression),
                 "False" when arguments.Count >= 1 =>
                     CreateTUnitAssertion("IsFalse", arguments[0].Expression),
+
+                // Null assertions
                 "Null" when arguments.Count >= 1 =>
                     CreateTUnitAssertion("IsNull", arguments[0].Expression),
                 "NotNull" when arguments.Count >= 1 =>
                     CreateTUnitAssertion("IsNotNull", arguments[0].Expression),
+
+                // Reference assertions
                 "Same" when arguments.Count >= 2 =>
                     CreateTUnitAssertion("IsSameReference", arguments[1].Expression, arguments[0]),
                 "NotSame" when arguments.Count >= 2 =>
                     CreateTUnitAssertion("IsNotSameReference", arguments[1].Expression, arguments[0]),
+
+                // String/Collection contains
                 "Contains" when arguments.Count >= 2 =>
                     CreateTUnitAssertion("Contains", arguments[1].Expression, arguments[0]),
                 "DoesNotContain" when arguments.Count >= 2 =>
@@ -563,24 +580,152 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
                     CreateTUnitAssertion("StartsWith", arguments[1].Expression, arguments[0]),
                 "EndsWith" when arguments.Count >= 2 =>
                     CreateTUnitAssertion("EndsWith", arguments[1].Expression, arguments[0]),
+
+                // Empty/Not empty
                 "Empty" when arguments.Count >= 1 =>
                     CreateTUnitAssertion("IsEmpty", arguments[0].Expression),
                 "NotEmpty" when arguments.Count >= 1 =>
                     CreateTUnitAssertion("IsNotEmpty", arguments[0].Expression),
-                "Throws" =>
-                    ConvertThrows(invocation, nameNode),
-                "ThrowsAsync" =>
-                    ConvertThrowsAsync(invocation, nameNode),
-                "IsType" =>
-                    ConvertIsType(invocation, nameNode),
-                "IsAssignableFrom" =>
-                    ConvertIsAssignableFrom(invocation, nameNode),
+
+                // Exception assertions
+                "Throws" => ConvertThrows(invocation, nameNode),
+                "ThrowsAsync" => ConvertThrowsAsync(invocation, nameNode),
+                "ThrowsAny" => ConvertThrowsAny(invocation, nameNode),
+                "ThrowsAnyAsync" => ConvertThrowsAnyAsync(invocation, nameNode),
+
+                // Type assertions
+                "IsType" => ConvertIsType(invocation, nameNode),
+                "IsNotType" => ConvertIsNotType(invocation, nameNode),
+                "IsAssignableFrom" => ConvertIsAssignableFrom(invocation, nameNode),
+
+                // Range assertions
                 "InRange" when arguments.Count >= 3 =>
                     CreateTUnitAssertion("IsInRange", arguments[0].Expression, arguments[1], arguments[2]),
                 "NotInRange" when arguments.Count >= 3 =>
                     CreateTUnitAssertion("IsNotInRange", arguments[0].Expression, arguments[1], arguments[2]),
+
+                // Collection assertions
+                "Single" when arguments.Count >= 1 =>
+                    CreateTUnitAssertion("HasSingleItem", arguments[0].Expression),
+                "All" when arguments.Count >= 2 =>
+                    CreateTUnitAssertion("AllSatisfy", arguments[0].Expression, arguments[1]),
+
+                // Subset/superset
+                "Subset" when arguments.Count >= 2 =>
+                    CreateTUnitAssertion("IsSubsetOf", arguments[0].Expression, arguments[1]),
+                "Superset" when arguments.Count >= 2 =>
+                    CreateTUnitAssertion("IsSupersetOf", arguments[0].Expression, arguments[1]),
+                "ProperSubset" when arguments.Count >= 2 =>
+                    CreateTUnitAssertion("IsSubsetOf", arguments[0].Expression, arguments[1]),
+                "ProperSuperset" when arguments.Count >= 2 =>
+                    CreateTUnitAssertion("IsSupersetOf", arguments[0].Expression, arguments[1]),
+
+                // Unique items
+                "Distinct" when arguments.Count >= 1 =>
+                    CreateTUnitAssertion("HasDistinctItems", arguments[0].Expression),
+
+                // Equivalent (order independent)
+                "Equivalent" when arguments.Count >= 2 =>
+                    CreateTUnitAssertion("IsEquivalentTo", arguments[1].Expression, arguments[0]),
+
                 _ => null
             };
+        }
+
+        private ExpressionSyntax CreateEqualWithComparerComment(SeparatedSyntaxList<ArgumentSyntax> arguments)
+        {
+            var result = CreateTUnitAssertion("IsEqualTo", arguments[1].Expression, arguments[0]);
+            return result.WithLeadingTrivia(
+                SyntaxFactory.Comment("// TODO: TUnit migration - custom comparer was used. Consider using Assert.That(...).IsEquivalentTo() or a custom condition."),
+                SyntaxFactory.EndOfLine("\n"),
+                SyntaxFactory.Whitespace("                "));
+        }
+
+        private ExpressionSyntax CreateNotEqualWithComparerComment(SeparatedSyntaxList<ArgumentSyntax> arguments)
+        {
+            var result = CreateTUnitAssertion("IsNotEqualTo", arguments[1].Expression, arguments[0]);
+            return result.WithLeadingTrivia(
+                SyntaxFactory.Comment("// TODO: TUnit migration - custom comparer was used. Consider using a custom condition."),
+                SyntaxFactory.EndOfLine("\n"),
+                SyntaxFactory.Whitespace("                "));
+        }
+
+        private ExpressionSyntax ConvertThrowsAny(InvocationExpressionSyntax invocation, SimpleNameSyntax nameNode)
+        {
+            // Assert.ThrowsAny<T>(action) -> await Assert.ThrowsAsync<T>(action)
+            // Note: ThrowsAny accepts derived types, ThrowsAsync should work similarly
+            if (nameNode is GenericNameSyntax genericName)
+            {
+                var exceptionType = genericName.TypeArgumentList.Arguments[0];
+                var action = invocation.ArgumentList.Arguments[0].Expression;
+
+                var invocationExpression = SyntaxFactory.InvocationExpression(
+                    SyntaxFactory.MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        SyntaxFactory.IdentifierName("Assert"),
+                        SyntaxFactory.GenericName("ThrowsAsync")
+                            .WithTypeArgumentList(
+                                SyntaxFactory.TypeArgumentList(
+                                    SyntaxFactory.SingletonSeparatedList(exceptionType)
+                                )
+                            )
+                    ),
+                    SyntaxFactory.ArgumentList(
+                        SyntaxFactory.SingletonSeparatedList(
+                            SyntaxFactory.Argument(action)
+                        )
+                    )
+                );
+
+                return SyntaxFactory.AwaitExpression(invocationExpression);
+            }
+
+            return CreateTUnitAssertion("Throws", invocation.ArgumentList.Arguments[0].Expression);
+        }
+
+        private ExpressionSyntax ConvertThrowsAnyAsync(InvocationExpressionSyntax invocation, SimpleNameSyntax nameNode)
+        {
+            // Same as ThrowsAny but for async
+            return ConvertThrowsAny(invocation, nameNode);
+        }
+
+        private ExpressionSyntax ConvertIsNotType(InvocationExpressionSyntax invocation, SimpleNameSyntax nameNode)
+        {
+            // Assert.IsNotType<T>(value) -> await Assert.That(value).IsNotTypeOf<T>()
+            if (nameNode is GenericNameSyntax genericName)
+            {
+                var expectedType = genericName.TypeArgumentList.Arguments[0];
+                var value = invocation.ArgumentList.Arguments[0].Expression;
+
+                var assertThatInvocation = SyntaxFactory.InvocationExpression(
+                    SyntaxFactory.MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        SyntaxFactory.IdentifierName("Assert"),
+                        SyntaxFactory.IdentifierName("That")
+                    ),
+                    SyntaxFactory.ArgumentList(
+                        SyntaxFactory.SingletonSeparatedList(
+                            SyntaxFactory.Argument(value)
+                        )
+                    )
+                );
+
+                var methodAccess = SyntaxFactory.MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    assertThatInvocation,
+                    SyntaxFactory.GenericName("IsNotTypeOf")
+                        .WithTypeArgumentList(
+                            SyntaxFactory.TypeArgumentList(
+                                SyntaxFactory.SingletonSeparatedList(expectedType)
+                            )
+                        )
+                );
+
+                var fullInvocation = SyntaxFactory.InvocationExpression(methodAccess, SyntaxFactory.ArgumentList());
+                return SyntaxFactory.AwaitExpression(fullInvocation);
+            }
+
+            return CreateTUnitAssertion("IsNotTypeOf", invocation.ArgumentList.Arguments[0].Expression);
         }
 
         private ExpressionSyntax ConvertThrows(InvocationExpressionSyntax invocation, SimpleNameSyntax nameNode)

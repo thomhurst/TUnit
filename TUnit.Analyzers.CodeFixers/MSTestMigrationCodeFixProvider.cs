@@ -217,83 +217,260 @@ public class MSTestAssertionRewriter : AssertionRewriter
     private ExpressionSyntax? ConvertMSTestAssertion(InvocationExpressionSyntax invocation, string methodName)
     {
         var arguments = invocation.ArgumentList.Arguments;
-        
+
+        // MSTest assertion message parameter positions:
+        // - 2-arg assertions (IsTrue, IsFalse, IsNull, IsNotNull): message is 2nd param (index 1)
+        // - 3-arg assertions (AreEqual, AreSame, etc.): message is 3rd param (index 2)
+
         return methodName switch
         {
-            "AreEqual" when arguments.Count >= 2 => 
+            // 2-arg assertions with message as 3rd param
+            "AreEqual" when arguments.Count >= 3 =>
+                CreateTUnitAssertionWithMessage("IsEqualTo", arguments[1].Expression, arguments[2].Expression, arguments[0]),
+            "AreEqual" when arguments.Count >= 2 =>
                 CreateTUnitAssertion("IsEqualTo", arguments[1].Expression, arguments[0]),
-            "AreNotEqual" when arguments.Count >= 2 => 
+            "AreNotEqual" when arguments.Count >= 3 =>
+                CreateTUnitAssertionWithMessage("IsNotEqualTo", arguments[1].Expression, arguments[2].Expression, arguments[0]),
+            "AreNotEqual" when arguments.Count >= 2 =>
                 CreateTUnitAssertion("IsNotEqualTo", arguments[1].Expression, arguments[0]),
-            "IsTrue" when arguments.Count >= 1 => 
-                CreateTUnitAssertion("IsTrue", arguments[0].Expression),
-            "IsFalse" when arguments.Count >= 1 => 
-                CreateTUnitAssertion("IsFalse", arguments[0].Expression),
-            "IsNull" when arguments.Count >= 1 => 
-                CreateTUnitAssertion("IsNull", arguments[0].Expression),
-            "IsNotNull" when arguments.Count >= 1 => 
-                CreateTUnitAssertion("IsNotNull", arguments[0].Expression),
-            "AreSame" when arguments.Count >= 2 => 
+            "AreSame" when arguments.Count >= 3 =>
+                CreateTUnitAssertionWithMessage("IsSameReference", arguments[1].Expression, arguments[2].Expression, arguments[0]),
+            "AreSame" when arguments.Count >= 2 =>
                 CreateTUnitAssertion("IsSameReference", arguments[1].Expression, arguments[0]),
-            "AreNotSame" when arguments.Count >= 2 => 
+            "AreNotSame" when arguments.Count >= 3 =>
+                CreateTUnitAssertionWithMessage("IsNotSameReference", arguments[1].Expression, arguments[2].Expression, arguments[0]),
+            "AreNotSame" when arguments.Count >= 2 =>
                 CreateTUnitAssertion("IsNotSameReference", arguments[1].Expression, arguments[0]),
-            "IsInstanceOfType" when arguments.Count >= 2 => 
+
+            // 1-arg assertions with message as 2nd param
+            "IsTrue" when arguments.Count >= 2 =>
+                CreateTUnitAssertionWithMessage("IsTrue", arguments[0].Expression, arguments[1].Expression),
+            "IsTrue" when arguments.Count >= 1 =>
+                CreateTUnitAssertion("IsTrue", arguments[0].Expression),
+            "IsFalse" when arguments.Count >= 2 =>
+                CreateTUnitAssertionWithMessage("IsFalse", arguments[0].Expression, arguments[1].Expression),
+            "IsFalse" when arguments.Count >= 1 =>
+                CreateTUnitAssertion("IsFalse", arguments[0].Expression),
+            "IsNull" when arguments.Count >= 2 =>
+                CreateTUnitAssertionWithMessage("IsNull", arguments[0].Expression, arguments[1].Expression),
+            "IsNull" when arguments.Count >= 1 =>
+                CreateTUnitAssertion("IsNull", arguments[0].Expression),
+            "IsNotNull" when arguments.Count >= 2 =>
+                CreateTUnitAssertionWithMessage("IsNotNull", arguments[0].Expression, arguments[1].Expression),
+            "IsNotNull" when arguments.Count >= 1 =>
+                CreateTUnitAssertion("IsNotNull", arguments[0].Expression),
+
+            // Type assertions with message as 3rd param
+            "IsInstanceOfType" when arguments.Count >= 3 =>
+                CreateTUnitAssertionWithMessage("IsAssignableTo", arguments[0].Expression, arguments[2].Expression, arguments[1]),
+            "IsInstanceOfType" when arguments.Count >= 2 =>
                 CreateTUnitAssertion("IsAssignableTo", arguments[0].Expression, arguments[1]),
-            "IsNotInstanceOfType" when arguments.Count >= 2 => 
+            "IsNotInstanceOfType" when arguments.Count >= 3 =>
+                CreateTUnitAssertionWithMessage("IsNotAssignableTo", arguments[0].Expression, arguments[2].Expression, arguments[1]),
+            "IsNotInstanceOfType" when arguments.Count >= 2 =>
                 CreateTUnitAssertion("IsNotAssignableTo", arguments[0].Expression, arguments[1]),
+
+            // Special assertions
             "ThrowsException" when arguments.Count >= 1 =>
                 CreateThrowsAssertion(invocation),
             "ThrowsExceptionAsync" when arguments.Count >= 1 =>
                 CreateThrowsAsyncAssertion(invocation),
             "Fail" => CreateFailAssertion(arguments),
+            "Inconclusive" => CreateInconclusiveAssertion(arguments),
             _ => null
         };
+    }
+
+    private ExpressionSyntax CreateInconclusiveAssertion(SeparatedSyntaxList<ArgumentSyntax> arguments)
+    {
+        // Convert Assert.Inconclusive(message) to await Assert.Skip(message)
+        var skipInvocation = SyntaxFactory.InvocationExpression(
+            SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                SyntaxFactory.IdentifierName("Assert"),
+                SyntaxFactory.IdentifierName("Skip")
+            ),
+            arguments.Count > 0
+                ? SyntaxFactory.ArgumentList(SyntaxFactory.SingletonSeparatedList(arguments[0]))
+                : SyntaxFactory.ArgumentList()
+        );
+
+        return SyntaxFactory.AwaitExpression(skipInvocation);
     }
     
     private ExpressionSyntax? ConvertCollectionAssertion(InvocationExpressionSyntax invocation, string methodName)
     {
         var arguments = invocation.ArgumentList.Arguments;
-        
+
+        // CollectionAssert message is typically the last parameter after the required args
+
         return methodName switch
         {
-            "AreEqual" when arguments.Count >= 2 => 
+            // Equality assertions
+            "AreEqual" when arguments.Count >= 3 =>
+                CreateTUnitAssertionWithMessage("IsEquivalentTo", arguments[1].Expression, arguments[2].Expression, arguments[0]),
+            "AreEqual" when arguments.Count >= 2 =>
                 CreateTUnitAssertion("IsEquivalentTo", arguments[1].Expression, arguments[0]),
-            "AreNotEqual" when arguments.Count >= 2 => 
+            "AreNotEqual" when arguments.Count >= 3 =>
+                CreateTUnitAssertionWithMessage("IsNotEquivalentTo", arguments[1].Expression, arguments[2].Expression, arguments[0]),
+            "AreNotEqual" when arguments.Count >= 2 =>
                 CreateTUnitAssertion("IsNotEquivalentTo", arguments[1].Expression, arguments[0]),
-            "Contains" when arguments.Count >= 2 => 
+
+            // AreEquivalent (order independent)
+            "AreEquivalent" when arguments.Count >= 3 =>
+                CreateTUnitAssertionWithMessage("IsEquivalentTo", arguments[1].Expression, arguments[2].Expression, arguments[0]),
+            "AreEquivalent" when arguments.Count >= 2 =>
+                CreateTUnitAssertion("IsEquivalentTo", arguments[1].Expression, arguments[0]),
+            "AreNotEquivalent" when arguments.Count >= 3 =>
+                CreateTUnitAssertionWithMessage("IsNotEquivalentTo", arguments[1].Expression, arguments[2].Expression, arguments[0]),
+            "AreNotEquivalent" when arguments.Count >= 2 =>
+                CreateTUnitAssertion("IsNotEquivalentTo", arguments[1].Expression, arguments[0]),
+
+            // Contains assertions
+            "Contains" when arguments.Count >= 3 =>
+                CreateTUnitAssertionWithMessage("Contains", arguments[0].Expression, arguments[2].Expression, arguments[1]),
+            "Contains" when arguments.Count >= 2 =>
                 CreateTUnitAssertion("Contains", arguments[0].Expression, arguments[1]),
-            "DoesNotContain" when arguments.Count >= 2 => 
+            "DoesNotContain" when arguments.Count >= 3 =>
+                CreateTUnitAssertionWithMessage("DoesNotContain", arguments[0].Expression, arguments[2].Expression, arguments[1]),
+            "DoesNotContain" when arguments.Count >= 2 =>
                 CreateTUnitAssertion("DoesNotContain", arguments[0].Expression, arguments[1]),
-            "AllItemsAreNotNull" when arguments.Count >= 1 => 
-                CreateTUnitAssertion("AllSatisfy", arguments[0].Expression, 
-                    SyntaxFactory.Argument(
-                        SyntaxFactory.SimpleLambdaExpression(
-                            SyntaxFactory.Parameter(SyntaxFactory.Identifier("x")),
-                            SyntaxFactory.BinaryExpression(
-                                SyntaxKind.NotEqualsExpression,
-                                SyntaxFactory.IdentifierName("x"),
-                                SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression)
-                            )
-                        )
-                    )),
+
+            // Subset/Superset
+            "IsSubsetOf" when arguments.Count >= 3 =>
+                CreateTUnitAssertionWithMessage("IsSubsetOf", arguments[0].Expression, arguments[2].Expression, arguments[1]),
+            "IsSubsetOf" when arguments.Count >= 2 =>
+                CreateTUnitAssertion("IsSubsetOf", arguments[0].Expression, arguments[1]),
+            "IsNotSubsetOf" when arguments.Count >= 3 =>
+                CreateTUnitAssertionWithMessage("IsNotSubsetOf", arguments[0].Expression, arguments[2].Expression, arguments[1]),
+            "IsNotSubsetOf" when arguments.Count >= 2 =>
+                CreateTUnitAssertion("IsNotSubsetOf", arguments[0].Expression, arguments[1]),
+
+            // Unique items
+            "AllItemsAreUnique" when arguments.Count >= 2 =>
+                CreateTUnitAssertionWithMessage("HasDistinctItems", arguments[0].Expression, arguments[1].Expression),
+            "AllItemsAreUnique" when arguments.Count >= 1 =>
+                CreateTUnitAssertion("HasDistinctItems", arguments[0].Expression),
+
+            // AllItemsAreNotNull
+            "AllItemsAreNotNull" when arguments.Count >= 2 =>
+                CreateAllItemsAreNotNullWithMessage(arguments[0].Expression, arguments[1].Expression),
+            "AllItemsAreNotNull" when arguments.Count >= 1 =>
+                CreateTUnitAssertion("AllSatisfy", arguments[0].Expression,
+                    SyntaxFactory.Argument(CreateNotNullLambda())),
+
+            // AllItemsAreInstancesOfType
+            "AllItemsAreInstancesOfType" when arguments.Count >= 3 =>
+                CreateAllItemsAreInstancesOfTypeWithMessage(arguments[0].Expression, arguments[1].Expression, arguments[2].Expression),
+            "AllItemsAreInstancesOfType" when arguments.Count >= 2 =>
+                CreateAllItemsAreInstancesOfType(arguments[0].Expression, arguments[1].Expression),
+
             _ => null
         };
+    }
+
+    private ExpressionSyntax CreateAllItemsAreNotNullWithMessage(ExpressionSyntax collection, ExpressionSyntax message)
+    {
+        return CreateTUnitAssertionWithMessage("AllSatisfy", collection, message,
+            SyntaxFactory.Argument(CreateNotNullLambda()));
+    }
+
+    private static ExpressionSyntax CreateNotNullLambda()
+    {
+        return SyntaxFactory.SimpleLambdaExpression(
+            SyntaxFactory.Parameter(SyntaxFactory.Identifier("x")),
+            SyntaxFactory.BinaryExpression(
+                SyntaxKind.NotEqualsExpression,
+                SyntaxFactory.IdentifierName("x"),
+                SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression)
+            )
+        );
+    }
+
+    private ExpressionSyntax CreateAllItemsAreInstancesOfType(ExpressionSyntax collection, ExpressionSyntax expectedType)
+    {
+        // Create a lambda: x => x.GetType() == expectedType or x is Type
+        var isExpression = SyntaxFactory.IsPatternExpression(
+            SyntaxFactory.IdentifierName("x"),
+            SyntaxFactory.DeclarationPattern(
+                SyntaxFactory.IdentifierName("_"),
+                SyntaxFactory.SingleVariableDesignation(SyntaxFactory.Identifier("_"))
+            )
+        );
+
+        // Simpler approach: use AllSatisfy with type check
+        // Since we have a Type argument, we'll create a comment explaining manual conversion needed
+        var result = CreateTUnitAssertion("AllSatisfy", collection,
+            SyntaxFactory.Argument(
+                SyntaxFactory.SimpleLambdaExpression(
+                    SyntaxFactory.Parameter(SyntaxFactory.Identifier("x")),
+                    SyntaxFactory.InvocationExpression(
+                        SyntaxFactory.MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            expectedType,
+                            SyntaxFactory.IdentifierName("IsInstanceOfType")
+                        ),
+                        SyntaxFactory.ArgumentList(
+                            SyntaxFactory.SingletonSeparatedList(
+                                SyntaxFactory.Argument(SyntaxFactory.IdentifierName("x"))
+                            )
+                        )
+                    )
+                )
+            ));
+        return result;
+    }
+
+    private ExpressionSyntax CreateAllItemsAreInstancesOfTypeWithMessage(ExpressionSyntax collection, ExpressionSyntax expectedType, ExpressionSyntax message)
+    {
+        var result = CreateTUnitAssertionWithMessage("AllSatisfy", collection, message,
+            SyntaxFactory.Argument(
+                SyntaxFactory.SimpleLambdaExpression(
+                    SyntaxFactory.Parameter(SyntaxFactory.Identifier("x")),
+                    SyntaxFactory.InvocationExpression(
+                        SyntaxFactory.MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            expectedType,
+                            SyntaxFactory.IdentifierName("IsInstanceOfType")
+                        ),
+                        SyntaxFactory.ArgumentList(
+                            SyntaxFactory.SingletonSeparatedList(
+                                SyntaxFactory.Argument(SyntaxFactory.IdentifierName("x"))
+                            )
+                        )
+                    )
+                )
+            ));
+        return result;
     }
     
     private ExpressionSyntax? ConvertStringAssertion(InvocationExpressionSyntax invocation, string methodName)
     {
         var arguments = invocation.ArgumentList.Arguments;
-        
+
+        // StringAssert message is typically the last parameter after the required args
+
         return methodName switch
         {
-            "Contains" when arguments.Count >= 2 => 
+            "Contains" when arguments.Count >= 3 =>
+                CreateTUnitAssertionWithMessage("Contains", arguments[0].Expression, arguments[2].Expression, arguments[1]),
+            "Contains" when arguments.Count >= 2 =>
                 CreateTUnitAssertion("Contains", arguments[0].Expression, arguments[1]),
-            "DoesNotMatch" when arguments.Count >= 2 => 
+            "DoesNotMatch" when arguments.Count >= 3 =>
+                CreateTUnitAssertionWithMessage("DoesNotMatch", arguments[0].Expression, arguments[2].Expression, arguments[1]),
+            "DoesNotMatch" when arguments.Count >= 2 =>
                 CreateTUnitAssertion("DoesNotMatch", arguments[0].Expression, arguments[1]),
-            "EndsWith" when arguments.Count >= 2 => 
+            "EndsWith" when arguments.Count >= 3 =>
+                CreateTUnitAssertionWithMessage("EndsWith", arguments[0].Expression, arguments[2].Expression, arguments[1]),
+            "EndsWith" when arguments.Count >= 2 =>
                 CreateTUnitAssertion("EndsWith", arguments[0].Expression, arguments[1]),
-            "Matches" when arguments.Count >= 2 => 
+            "Matches" when arguments.Count >= 3 =>
+                CreateTUnitAssertionWithMessage("Matches", arguments[0].Expression, arguments[2].Expression, arguments[1]),
+            "Matches" when arguments.Count >= 2 =>
                 CreateTUnitAssertion("Matches", arguments[0].Expression, arguments[1]),
-            "StartsWith" when arguments.Count >= 2 => 
+            "StartsWith" when arguments.Count >= 3 =>
+                CreateTUnitAssertionWithMessage("StartsWith", arguments[0].Expression, arguments[2].Expression, arguments[1]),
+            "StartsWith" when arguments.Count >= 2 =>
                 CreateTUnitAssertion("StartsWith", arguments[0].Expression, arguments[1]),
             _ => null
         };

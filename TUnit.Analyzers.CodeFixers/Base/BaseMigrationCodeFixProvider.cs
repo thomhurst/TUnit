@@ -57,6 +57,10 @@ public abstract class BaseMigrationCodeFixProvider : CodeFixProvider
             // Framework-specific conversions (also use semantic model while it still matches)
             compilationUnit = ApplyFrameworkSpecificConversions(compilationUnit, semanticModel, compilation);
 
+            // Fix method signatures that now contain await but aren't marked async
+            var asyncSignatureRewriter = new AsyncMethodSignatureRewriter();
+            compilationUnit = (CompilationUnitSyntax)asyncSignatureRewriter.Visit(compilationUnit);
+
             // Remove unnecessary base classes and interfaces
             var baseTypeRewriter = CreateBaseTypeRewriter(semanticModel, compilation);
             compilationUnit = (CompilationUnitSyntax)baseTypeRewriter.Visit(compilationUnit);
@@ -68,6 +72,13 @@ public abstract class BaseMigrationCodeFixProvider : CodeFixProvider
             // Convert attributes
             var attributeRewriter = CreateAttributeRewriter(compilation);
             compilationUnit = (CompilationUnitSyntax)attributeRewriter.Visit(compilationUnit);
+
+            // Ensure [Test] attribute is present when data attributes exist (NUnit-specific)
+            if (ShouldEnsureTestAttribute())
+            {
+                var testAttributeEnsurer = new TestAttributeEnsurer();
+                compilationUnit = (CompilationUnitSyntax)testAttributeEnsurer.Visit(compilationUnit);
+            }
 
             // Remove framework usings and add TUnit usings (do this LAST)
             compilationUnit = MigrationHelpers.RemoveFrameworkUsings(compilationUnit, FrameworkName);
@@ -105,6 +116,13 @@ public abstract class BaseMigrationCodeFixProvider : CodeFixProvider
     /// Override to return false for frameworks that don't need assertion usings (e.g., XUnit).
     /// </summary>
     protected virtual bool ShouldAddTUnitUsings() => true;
+
+    /// <summary>
+    /// Determines whether to run TestAttributeEnsurer to add [Test] when data attributes exist.
+    /// Override to return true for NUnit (where [TestCase] alone is valid but TUnit requires [Test] + [Arguments]).
+    /// Default is false since most frameworks don't need this.
+    /// </summary>
+    protected virtual bool ShouldEnsureTestAttribute() => false;
 
     /// <summary>
     /// Removes excessive blank lines at the start of class members (after opening brace).
