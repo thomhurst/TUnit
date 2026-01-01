@@ -10,6 +10,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
     <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
+    <PackageReference Include="Microsoft.Testing.Extensions.Telemetry" />
   </ItemGroup>
 
   <Import Project="..\Library.targets" />
