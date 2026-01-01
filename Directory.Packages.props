@@ -40,6 +40,7 @@
     <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.1.0" />
     <PackageVersion Include="Microsoft.Testing.Extensions.CrashDump" Version="2.0.2" />
     <PackageVersion Include="Microsoft.Testing.Extensions.HangDump" Version="2.0.2" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.Telemetry" Version="2.0.2" />
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="2.0.2" />
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" Version="2.0.2" />
     <PackageVersion Include="Microsoft.Testing.Platform" Version="2.0.2" />
