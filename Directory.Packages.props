@@ -80,7 +80,7 @@
     <PackageVersion Include="System.Text.Json" Version="9.0.0" />
     <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
     <PackageVersion Include="Testcontainers.Kafka" Version="4.9.0" />
-    <PackageVersion Include="Testcontainers.PostgreSql" Version="4.9.0" />
+    <PackageVersion Include="Testcontainers.PostgreSql" Version="4.10.0" />
     <PackageVersion Include="Testcontainers.Redis" Version="4.9.0" />
     <PackageVersion Include="trxparser" Version="0.5.0" />
     <PackageVersion Include="TUnit.Assertions.FSharp" Version="0.75.38-PullRequest3485.0" />
