@@ -1076,6 +1076,255 @@ public class NUnitMigrationAnalyzerTests
         );
     }
 
+    [Test]
+    public async Task NUnit_TestCase_WithTestName_AddsComment()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                public class MyClass
+                {
+                    {|#0:[TestCase("", TestName = "Empty string test")]|}
+                    public void TestMethod(string arg)
+                    {
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    [Arguments("")] // TODO: TUnit migration - unsupported: TestName = "Empty string test"
+                    public void TestMethod(string arg)
+                    {
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_TestCase_WithMultipleProperties_AddsComment()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                public class MyClass
+                {
+                    {|#0:[TestCase(42, TestName = "The answer", Description = "Tests the ultimate answer", Category = "Math")]|}
+                    public void TestMethod(int arg)
+                    {
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    [Arguments(42)] // TODO: TUnit migration - unsupported: TestName = "The answer", Description = "Tests the ultimate answer", Category = "Math"
+                    public void TestMethod(int arg)
+                    {
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_TestCase_WithIgnore_ConvertsToSkip()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                public class MyClass
+                {
+                    {|#0:[TestCase(1, Ignore = "Not implemented yet")]|}
+                    public void TestMethod(int arg)
+                    {
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    [Arguments(1, Skip = "Not implemented yet")]
+                    public void TestMethod(int arg)
+                    {
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_TestCase_WithIgnoreReason_ConvertsToSkip()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                public class MyClass
+                {
+                    {|#0:[TestCase(1, IgnoreReason = "Bug #123")]|}
+                    public void TestMethod(int arg)
+                    {
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    [Arguments(1, Skip = "Bug #123")]
+                    public void TestMethod(int arg)
+                    {
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_TestCase_WithExpectedResult_AndOtherProperties_AddsComment()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                public class MyClass
+                {
+                    {|#0:[TestCase(5, ExpectedResult = true, TestName = "Name #1", Description = "Description #1")]|}
+                    [TestCase(1, ExpectedResult = false, TestName = "Name #2", Description = "Description #2")]
+                    public bool TestFoo(int intArg) => intArg == 5;
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    [Arguments(5, true)] // TODO: TUnit migration - unsupported: TestName = "Name #1", Description = "Description #1"
+                    [Arguments(1, false)] // TODO: TUnit migration - unsupported: TestName = "Name #2", Description = "Description #2"
+                    public async Task TestFoo(int intArg, bool expected)
+                    {
+                        await Assert.That(intArg == 5).IsEqualTo(expected);
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_TestCase_WithMixedProperties_ConvertsCorrectly()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                public class MyClass
+                {
+                    {|#0:[TestCase(1, Ignore = "Skipped", TestName = "Named test")]|}
+                    public void TestMethod(int arg)
+                    {
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    [Arguments(1, Skip = "Skipped")] // TODO: TUnit migration - unsupported: TestName = "Named test"
+                    public void TestMethod(int arg)
+                    {
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_TestCase_NoProperties_NoComment()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                public class MyClass
+                {
+                    {|#0:[TestCase(1, 2)]|}
+                    [TestCase(3, 4)]
+                    public void TestMethod(int a, int b)
+                    {
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    [Arguments(1, 2)]
+                    [Arguments(3, 4)]
+                    public void TestMethod(int a, int b)
+                    {
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
     private static void ConfigureNUnitTest(Verifier.Test test)
     {
         test.TestState.AdditionalReferences.Add(typeof(NUnit.Framework.TestAttribute).Assembly);

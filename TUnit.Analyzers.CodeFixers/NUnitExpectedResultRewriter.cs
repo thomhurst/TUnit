@@ -391,6 +391,7 @@ public class NUnitExpectedResultRewriter : CSharpSyntaxRewriter
         foreach (var attrList in attributeLists)
         {
             var newAttributes = new List<AttributeSyntax>();
+            var unsupportedPropertiesList = new List<string>();
 
             foreach (var attr in attrList.Attributes)
             {
@@ -404,8 +405,9 @@ public class NUnitExpectedResultRewriter : CSharpSyntaxRewriter
                 else if (testCaseAttributes.Contains(attr))
                 {
                     // Transform TestCase with ExpectedResult
-                    var transformed = TransformTestCaseAttribute(attr);
+                    var (transformed, unsupportedProperties) = TransformTestCaseAttribute(attr);
                     newAttributes.Add(transformed);
+                    unsupportedPropertiesList.AddRange(unsupportedProperties);
                 }
                 else
                 {
@@ -415,7 +417,16 @@ public class NUnitExpectedResultRewriter : CSharpSyntaxRewriter
 
             if (newAttributes.Count > 0)
             {
-                result.Add(attrList.WithAttributes(SyntaxFactory.SeparatedList(newAttributes)));
+                var newAttrList = attrList.WithAttributes(SyntaxFactory.SeparatedList(newAttributes));
+
+                // Add TODO comment as trailing trivia on the attribute list
+                if (unsupportedPropertiesList.Count > 0)
+                {
+                    var todoComment = SyntaxFactory.Comment($" // TODO: TUnit migration - unsupported: {string.Join(", ", unsupportedPropertiesList)}");
+                    newAttrList = newAttrList.WithTrailingTrivia(newAttrList.GetTrailingTrivia().Insert(0, todoComment));
+                }
+
+                result.Add(newAttrList);
             }
         }
 
@@ -432,11 +443,11 @@ public class NUnitExpectedResultRewriter : CSharpSyntaxRewriter
         return SyntaxFactory.List(result);
     }
 
-    private AttributeSyntax TransformTestCaseAttribute(AttributeSyntax attribute)
+    private (AttributeSyntax attribute, List<string> unsupportedProperties) TransformTestCaseAttribute(AttributeSyntax attribute)
     {
         if (attribute.ArgumentList == null)
         {
-            return attribute;
+            return (attribute, new List<string>());
         }
 
         var newArgs = new List<AttributeArgumentSyntax>();
@@ -486,16 +497,8 @@ public class NUnitExpectedResultRewriter : CSharpSyntaxRewriter
         var newAttribute = attribute.WithArgumentList(
             SyntaxFactory.AttributeArgumentList(SyntaxFactory.SeparatedList(newArgs)));
 
-        // Add TODO comment for unsupported properties
-        if (unsupportedProperties.Count > 0)
-        {
-            var todoComment = SyntaxFactory.Comment($"/* TODO: TUnit migration - unsupported TestCase properties: {string.Join(", ", unsupportedProperties)} */");
-            newAttribute = newAttribute.WithLeadingTrivia(
-                newAttribute.GetLeadingTrivia().Add(todoComment).Add(SyntaxFactory.Space));
-        }
-
         // The attribute will be renamed to "Arguments" by the existing attribute rewriter
-        return newAttribute;
+        return (newAttribute, unsupportedProperties);
     }
 
     private class ReturnToAssignmentRewriter : CSharpSyntaxRewriter

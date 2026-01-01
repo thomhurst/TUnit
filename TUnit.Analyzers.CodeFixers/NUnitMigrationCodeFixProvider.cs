@@ -53,32 +53,98 @@ public class NUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
 public class NUnitAttributeRewriter : AttributeRewriter
 {
     protected override string FrameworkName => "NUnit";
-    
+
     protected override bool IsFrameworkAttribute(string attributeName)
     {
         return attributeName switch
         {
-            "Test" or "TestCase" or "TestCaseSource" or 
+            "Test" or "TestCase" or "TestCaseSource" or
             "SetUp" or "TearDown" or "OneTimeSetUp" or "OneTimeTearDown" or
             "TestFixture" or "Category" or "Ignore" or "Explicit" => true,
             _ => false
         };
     }
-    
+
     protected override AttributeArgumentListSyntax? ConvertAttributeArguments(AttributeArgumentListSyntax argumentList, string attributeName)
     {
         return attributeName switch
         {
-            "TestCase" => ConvertTestCaseArguments(argumentList),
+            "TestCase" => ConvertTestCaseArguments(argumentList).arguments,
             "TestCaseSource" => ConvertTestCaseSourceArguments(argumentList),
             "Category" => ConvertCategoryArguments(argumentList),
             _ => argumentList
         };
     }
 
-    private AttributeArgumentListSyntax ConvertTestCaseArguments(AttributeArgumentListSyntax argumentList)
+    /// <summary>
+    /// Override VisitAttributeList to properly add TODO comments after the attribute list bracket.
+    /// </summary>
+    public override SyntaxNode? VisitAttributeList(AttributeListSyntax node)
+    {
+        var attributes = new List<AttributeSyntax>();
+        var droppedPropertiesList = new List<string>();
+
+        foreach (var attribute in node.Attributes)
+        {
+            var attributeName = MigrationHelpers.GetAttributeName(attribute);
+
+            if (MigrationHelpers.ShouldRemoveAttribute(attributeName, FrameworkName))
+            {
+                continue;
+            }
+
+            if (MigrationHelpers.IsHookAttribute(attributeName, FrameworkName))
+            {
+                var hookAttributeList = MigrationHelpers.ConvertHookAttribute(attribute, FrameworkName);
+                if (hookAttributeList != null)
+                {
+                    return hookAttributeList
+                        .WithLeadingTrivia(node.GetLeadingTrivia())
+                        .WithTrailingTrivia(node.GetTrailingTrivia());
+                }
+            }
+
+            // Handle TestCase specially to track unsupported properties
+            if (attributeName == "TestCase" && attribute.ArgumentList != null)
+            {
+                var (newArgs, droppedProperties) = ConvertTestCaseArguments(attribute.ArgumentList);
+                var newAttribute = SyntaxFactory.Attribute(
+                    SyntaxFactory.IdentifierName("Arguments"),
+                    newArgs);
+                attributes.Add(newAttribute);
+                droppedPropertiesList.AddRange(droppedProperties);
+            }
+            else
+            {
+                var convertedAttribute = ConvertAttribute(attribute);
+                if (convertedAttribute != null)
+                {
+                    attributes.Add(convertedAttribute);
+                }
+            }
+        }
+
+        if (attributes.Count == 0)
+        {
+            return null;
+        }
+
+        var result = node.WithAttributes(SyntaxFactory.SeparatedList(attributes));
+
+        // Add TODO comment as trailing trivia on the attribute list
+        if (droppedPropertiesList.Count > 0)
+        {
+            var todoComment = SyntaxFactory.Comment($" // TODO: TUnit migration - unsupported: {string.Join(", ", droppedPropertiesList)}");
+            result = result.WithTrailingTrivia(result.GetTrailingTrivia().Insert(0, todoComment));
+        }
+
+        return result;
+    }
+
+    private (AttributeArgumentListSyntax arguments, List<string> droppedProperties) ConvertTestCaseArguments(AttributeArgumentListSyntax argumentList)
     {
         var newArgs = new List<AttributeArgumentSyntax>();
+        var droppedProperties = new List<string>();
 
         foreach (var arg in argumentList.Arguments)
         {
@@ -100,11 +166,9 @@ public class NUnitAttributeRewriter : AttributeRewriter
             }
             else if (namedProperty is "TestName" or "Category" or "Description" or "Author" or "Explicit" or "ExplicitReason" or "ExpectedResult")
             {
-                // These properties don't have direct TUnit equivalents - preserve as comment
+                // These properties don't have direct TUnit equivalents
                 // ExpectedResult is handled by NUnitExpectedResultRewriter, so if we get here it's a case without special handling
-                var commentArg = SyntaxFactory.AttributeArgument(arg.Expression)
-                    .WithLeadingTrivia(SyntaxFactory.Comment($"/* TODO: {namedProperty} not supported */ "));
-                newArgs.Add(commentArg);
+                droppedProperties.Add($"{namedProperty} = {arg.Expression}");
             }
             else
             {
@@ -113,7 +177,7 @@ public class NUnitAttributeRewriter : AttributeRewriter
             }
         }
 
-        return SyntaxFactory.AttributeArgumentList(SyntaxFactory.SeparatedList(newArgs));
+        return (SyntaxFactory.AttributeArgumentList(SyntaxFactory.SeparatedList(newArgs)), droppedProperties);
     }
     
     private AttributeArgumentListSyntax ConvertTestCaseSourceArguments(AttributeArgumentListSyntax argumentList)
