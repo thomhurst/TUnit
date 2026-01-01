@@ -184,8 +184,20 @@ public static class MigrationHelpers
         var assertionsStaticUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("TUnit.Assertions.Assert"))
             .WithStaticKeyword(SyntaxFactory.Token(SyntaxKind.StaticKeyword));
         var extensionsUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("TUnit.Assertions.Extensions"));
+        // Add System.Threading.Tasks for async Task methods
+        var tasksUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Threading.Tasks"));
 
         var existingUsings = compilationUnit.Usings.ToList();
+
+        // Add System.Threading.Tasks only if the code has async methods or await expressions
+        bool hasAsyncCode = compilationUnit.DescendantNodes()
+            .Any(n => n is AwaitExpressionSyntax ||
+                     (n is MethodDeclarationSyntax m && m.Modifiers.Any(mod => mod.IsKind(SyntaxKind.AsyncKeyword))));
+
+        if (hasAsyncCode && !existingUsings.Any(u => u.Name?.ToString() == "System.Threading.Tasks"))
+        {
+            existingUsings.Add(tasksUsing);
+        }
 
         if (!existingUsings.Any(u => u.Name?.ToString() == "TUnit.Core"))
         {

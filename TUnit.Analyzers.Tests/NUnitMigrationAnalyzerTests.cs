@@ -113,6 +113,7 @@ public class NUnitMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
+                using System.Threading.Tasks;
                 using TUnit.Core;
                 using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
@@ -290,6 +291,7 @@ public class NUnitMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
+                using System.Threading.Tasks;
                 using TUnit.Core;
                 using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
@@ -336,6 +338,7 @@ public class NUnitMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
+                using System.Threading.Tasks;
                 using TUnit.Core;
                 using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
@@ -378,6 +381,7 @@ public class NUnitMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
+                using System.Threading.Tasks;
                 using TUnit.Core;
                 using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
@@ -468,6 +472,7 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System;
+                using System.Threading.Tasks;
                 using TUnit.Core;
                 using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
@@ -558,6 +563,7 @@ public class NUnitMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
+                using System.Threading.Tasks;
                 using TUnit.Core;
                 using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
@@ -596,6 +602,7 @@ public class NUnitMigrationAnalyzerTests
             """,
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
+            using System.Threading.Tasks;
             using TUnit.Core;
             using TUnit.Assertions;
             using static TUnit.Assertions.Assert;
@@ -632,6 +639,7 @@ public class NUnitMigrationAnalyzerTests
             """,
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
+            using System.Threading.Tasks;
             using TUnit.Core;
             using TUnit.Assertions;
             using static TUnit.Assertions.Assert;
@@ -672,6 +680,7 @@ public class NUnitMigrationAnalyzerTests
             """,
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
+            using System.Threading.Tasks;
             using TUnit.Core;
             using TUnit.Assertions;
             using static TUnit.Assertions.Assert;
@@ -708,6 +717,7 @@ public class NUnitMigrationAnalyzerTests
             """,
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
+            using System.Threading.Tasks;
             using TUnit.Core;
             using TUnit.Assertions;
             using static TUnit.Assertions.Assert;
@@ -746,6 +756,7 @@ public class NUnitMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
+                using System.Threading.Tasks;
                 using TUnit.Core;
                 using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
@@ -782,6 +793,7 @@ public class NUnitMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
+                using System.Threading.Tasks;
                 using TUnit.Core;
                 using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
@@ -818,6 +830,7 @@ public class NUnitMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
+                using System.Threading.Tasks;
                 using TUnit.Core;
                 using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
@@ -854,6 +867,7 @@ public class NUnitMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
+                using System.Threading.Tasks;
                 using TUnit.Core;
                 using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
@@ -890,6 +904,7 @@ public class NUnitMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
+                using System.Threading.Tasks;
                 using TUnit.Core;
                 using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
@@ -926,6 +941,7 @@ public class NUnitMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
+                using System.Threading.Tasks;
                 using TUnit.Core;
                 using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
@@ -962,6 +978,7 @@ public class NUnitMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
+                using System.Threading.Tasks;
                 using TUnit.Core;
                 using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
@@ -999,6 +1016,7 @@ public class NUnitMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
+                using System.Threading.Tasks;
                 using TUnit.Core;
                 using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
@@ -1038,6 +1056,7 @@ public class NUnitMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
+                using System.Threading.Tasks;
                 using TUnit.Core;
                 using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;

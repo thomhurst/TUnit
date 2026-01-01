@@ -441,19 +441,40 @@ public class NUnitExpectedResultRewriter : CSharpSyntaxRewriter
 
         var newArgs = new List<AttributeArgumentSyntax>();
         ExpressionSyntax? expectedValue = null;
+        var unsupportedProperties = new List<string>();
 
         foreach (var arg in attribute.ArgumentList.Arguments)
         {
-            if (arg.NameEquals?.Name.Identifier.Text == "ExpectedResult")
+            var namedProperty = arg.NameEquals?.Name.Identifier.Text;
+
+            if (namedProperty == "ExpectedResult")
             {
                 expectedValue = arg.Expression;
             }
-            else if (arg.NameColon == null && arg.NameEquals == null)
+            else if (namedProperty == null)
             {
                 // Positional argument - keep it
                 newArgs.Add(arg);
             }
-            // Skip other named arguments for now
+            else if (namedProperty == "Ignore" || namedProperty == "IgnoreReason")
+            {
+                // Map NUnit's Ignore/IgnoreReason to TUnit's Skip
+                var skipArg = SyntaxFactory.AttributeArgument(
+                    SyntaxFactory.NameEquals(SyntaxFactory.IdentifierName("Skip")),
+                    null,
+                    arg.Expression);
+                newArgs.Add(skipArg);
+            }
+            else if (namedProperty is "TestName" or "Category" or "Description" or "Author" or "Explicit" or "ExplicitReason")
+            {
+                // These properties don't have direct TUnit equivalents
+                unsupportedProperties.Add($"{namedProperty} = {arg.Expression}");
+            }
+            // Other named arguments are preserved as-is (they might be TUnit-compatible)
+            else
+            {
+                newArgs.Add(arg);
+            }
         }
 
         // Add expected value as last positional argument
@@ -462,9 +483,19 @@ public class NUnitExpectedResultRewriter : CSharpSyntaxRewriter
             newArgs.Add(SyntaxFactory.AttributeArgument(expectedValue));
         }
 
-        // The attribute will be renamed to "Arguments" by the existing attribute rewriter
-        return attribute.WithArgumentList(
+        var newAttribute = attribute.WithArgumentList(
             SyntaxFactory.AttributeArgumentList(SyntaxFactory.SeparatedList(newArgs)));
+
+        // Add TODO comment for unsupported properties
+        if (unsupportedProperties.Count > 0)
+        {
+            var todoComment = SyntaxFactory.Comment($"/* TODO: TUnit migration - unsupported TestCase properties: {string.Join(", ", unsupportedProperties)} */");
+            newAttribute = newAttribute.WithLeadingTrivia(
+                newAttribute.GetLeadingTrivia().Add(todoComment).Add(SyntaxFactory.Space));
+        }
+
+        // The attribute will be renamed to "Arguments" by the existing attribute rewriter
+        return newAttribute;
     }
 
     private class ReturnToAssignmentRewriter : CSharpSyntaxRewriter

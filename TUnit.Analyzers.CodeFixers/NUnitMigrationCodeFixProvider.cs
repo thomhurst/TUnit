@@ -69,11 +69,51 @@ public class NUnitAttributeRewriter : AttributeRewriter
     {
         return attributeName switch
         {
-            "TestCase" => argumentList, // Arguments attribute uses the same format
+            "TestCase" => ConvertTestCaseArguments(argumentList),
             "TestCaseSource" => ConvertTestCaseSourceArguments(argumentList),
             "Category" => ConvertCategoryArguments(argumentList),
             _ => argumentList
         };
+    }
+
+    private AttributeArgumentListSyntax ConvertTestCaseArguments(AttributeArgumentListSyntax argumentList)
+    {
+        var newArgs = new List<AttributeArgumentSyntax>();
+
+        foreach (var arg in argumentList.Arguments)
+        {
+            var namedProperty = arg.NameEquals?.Name.Identifier.Text;
+
+            if (namedProperty == null)
+            {
+                // Positional argument - keep it
+                newArgs.Add(arg);
+            }
+            else if (namedProperty == "Ignore" || namedProperty == "IgnoreReason")
+            {
+                // Map NUnit's Ignore/IgnoreReason to TUnit's Skip
+                var skipArg = SyntaxFactory.AttributeArgument(
+                    SyntaxFactory.NameEquals(SyntaxFactory.IdentifierName("Skip")),
+                    null,
+                    arg.Expression);
+                newArgs.Add(skipArg);
+            }
+            else if (namedProperty is "TestName" or "Category" or "Description" or "Author" or "Explicit" or "ExplicitReason" or "ExpectedResult")
+            {
+                // These properties don't have direct TUnit equivalents - preserve as comment
+                // ExpectedResult is handled by NUnitExpectedResultRewriter, so if we get here it's a case without special handling
+                var commentArg = SyntaxFactory.AttributeArgument(arg.Expression)
+                    .WithLeadingTrivia(SyntaxFactory.Comment($"/* TODO: {namedProperty} not supported */ "));
+                newArgs.Add(commentArg);
+            }
+            else
+            {
+                // Other named arguments are preserved as-is
+                newArgs.Add(arg);
+            }
+        }
+
+        return SyntaxFactory.AttributeArgumentList(SyntaxFactory.SeparatedList(newArgs));
     }
     
     private AttributeArgumentListSyntax ConvertTestCaseSourceArguments(AttributeArgumentListSyntax argumentList)
