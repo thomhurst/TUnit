@@ -57,6 +57,22 @@ public class NUnitTestCasePropertyRewriter : CSharpSyntaxRewriter
 
     private TestCaseProperties ExtractProperties(List<AttributeSyntax> testCaseAttributes)
     {
+        // Early return if no TestCase has named arguments (performance optimization)
+        bool hasNamedArguments = false;
+        foreach (var attribute in testCaseAttributes)
+        {
+            if (attribute.ArgumentList?.Arguments.Any(a => a.NameEquals != null) == true)
+            {
+                hasNamedArguments = true;
+                break;
+            }
+        }
+
+        if (!hasNamedArguments)
+        {
+            return new TestCaseProperties();
+        }
+
         var properties = new TestCaseProperties();
 
         foreach (var attribute in testCaseAttributes)
@@ -129,14 +145,15 @@ public class NUnitTestCasePropertyRewriter : CSharpSyntaxRewriter
 
     private string? GetStringValue(ExpressionSyntax expression)
     {
+        // Only handle string literals - interpolated strings, concatenation, and const references
+        // cannot be reliably migrated and should be handled manually by the user
         if (expression is LiteralExpressionSyntax literal &&
             literal.IsKind(SyntaxKind.StringLiteralExpression))
         {
             return literal.Token.ValueText;
         }
 
-        // Handle interpolated strings or other expressions by getting the text
-        return expression.ToString().Trim('"');
+        return null;
     }
 
     private SyntaxList<AttributeListSyntax> GeneratePropertyAttributes(
@@ -211,13 +228,13 @@ public class NUnitTestCasePropertyRewriter : CSharpSyntaxRewriter
 
     private AttributeSyntax? CreateDisplayNameAttribute(HashSet<string> testNames)
     {
-        if (testNames.Count == 0)
+        // Only generate DisplayName if there's exactly one unique TestName
+        // Multiple different TestNames cannot be represented by a single DisplayName attribute
+        if (testNames.Count != 1)
         {
             return null;
         }
 
-        // If only one test name, use it directly
-        // If multiple different names, use the first one (user can manually adjust)
         var displayName = testNames.First();
 
         return SyntaxFactory.Attribute(

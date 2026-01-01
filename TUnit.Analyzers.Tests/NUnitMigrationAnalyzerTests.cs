@@ -1079,6 +1079,50 @@ public class NUnitMigrationAnalyzerTests
     [Test]
     public async Task NUnit_TestCase_TestName_Converted_To_DisplayName()
     {
+        // When multiple TestCases have the SAME TestName, it generates DisplayName
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [TestCase(1, TestName = "Test values")]
+                    [TestCase(2, TestName = "Test values")]
+                    public void MyTest(int value)
+                    {
+                        Assert.That(value > 0, Is.True);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    [Arguments(1)]
+                    [Arguments(2)]
+                    [DisplayName("Test values")]
+                    public async Task MyTest(int value)
+                    {
+                        await Assert.That(value > 0).IsTrue();
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_TestCase_Different_TestNames_Not_Converted()
+    {
+        // When multiple TestCases have DIFFERENT TestNames, no DisplayName is generated
+        // (user must manually adjust since a single DisplayName can't represent multiple values)
         await CodeFixer.VerifyCodeFixAsync(
             """
                 using NUnit.Framework;
@@ -1106,7 +1150,6 @@ public class NUnitMigrationAnalyzerTests
                     [Test]
                     [Arguments(1)]
                     [Arguments(2)]
-                    [DisplayName("Addition of one")]
                     public async Task MyTest(int value)
                     {
                         await Assert.That(value > 0).IsTrue();
