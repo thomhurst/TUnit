@@ -37,7 +37,12 @@ public class NUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
 
     protected override CompilationUnitSyntax ApplyFrameworkSpecificConversions(CompilationUnitSyntax compilationUnit, SemanticModel semanticModel, Compilation compilation)
     {
-        // Transform ExpectedResult patterns before attribute conversion
+        // Extract TestCase properties FIRST (before ExpectedResult conversion changes the attributes)
+        // Maps: TestName → DisplayName, Category → Category, Description/Author → Property, Explicit → Explicit
+        var testCasePropertyRewriter = new NUnitTestCasePropertyRewriter();
+        compilationUnit = (CompilationUnitSyntax)testCasePropertyRewriter.Visit(compilationUnit);
+
+        // Transform ExpectedResult patterns (TestCase with ExpectedResult → Arguments with assertion)
         var expectedResultRewriter = new NUnitExpectedResultRewriter(semanticModel);
         compilationUnit = (CompilationUnitSyntax)expectedResultRewriter.Visit(compilationUnit);
 
@@ -98,13 +103,16 @@ public class NUnitAttributeRewriter : AttributeRewriter
                     arg.Expression);
                 newArgs.Add(skipArg);
             }
-            else if (namedProperty is "TestName" or "Category" or "Description" or "Author" or "Explicit" or "ExplicitReason" or "ExpectedResult")
+            else if (namedProperty is "TestName" or "Category" or "Description" or "Author" or "Explicit" or "ExplicitReason")
             {
-                // These properties don't have direct TUnit equivalents - preserve as comment
-                // ExpectedResult is handled by NUnitExpectedResultRewriter, so if we get here it's a case without special handling
-                var commentArg = SyntaxFactory.AttributeArgument(arg.Expression)
-                    .WithLeadingTrivia(SyntaxFactory.Comment($"/* TODO: {namedProperty} not supported */ "));
-                newArgs.Add(commentArg);
+                // These properties are converted to separate TUnit attributes by NUnitTestCasePropertyRewriter:
+                // TestName → [DisplayName], Category → [Category], Description/Author → [Property], Explicit → [Explicit]
+                // Skip them here - they don't belong in the [Arguments] attribute
+            }
+            else if (namedProperty == "ExpectedResult")
+            {
+                // ExpectedResult is handled by NUnitExpectedResultRewriter
+                // If we get here, it's a case without the ExpectedResult transformation, skip it
             }
             else
             {
@@ -141,20 +149,9 @@ public class NUnitAttributeRewriter : AttributeRewriter
     
     private AttributeArgumentListSyntax ConvertCategoryArguments(AttributeArgumentListSyntax argumentList)
     {
-        // Convert Category to Property
-        var arguments = new List<AttributeArgumentSyntax>();
-        
-        arguments.Add(SyntaxFactory.AttributeArgument(
-            SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, 
-                SyntaxFactory.Literal("Category"))
-        ));
-        
-        if (argumentList.Arguments.Count > 0)
-        {
-            arguments.Add(argumentList.Arguments[0]);
-        }
-        
-        return SyntaxFactory.AttributeArgumentList(SyntaxFactory.SeparatedList(arguments));
+        // TUnit has a native Category attribute with the same signature as NUnit
+        // [Category("Unit")] in NUnit -> [Category("Unit")] in TUnit
+        return argumentList;
     }
 }
 

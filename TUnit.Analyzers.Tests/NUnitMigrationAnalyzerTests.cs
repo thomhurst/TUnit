@@ -1076,6 +1076,325 @@ public class NUnitMigrationAnalyzerTests
         );
     }
 
+    [Test]
+    public async Task NUnit_TestCase_TestName_Converted_To_DisplayName()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [TestCase(1, TestName = "Addition of one")]
+                    [TestCase(2, TestName = "Addition of two")]
+                    public void MyTest(int value)
+                    {
+                        Assert.That(value > 0, Is.True);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    [Arguments(1)]
+                    [Arguments(2)]
+                    [DisplayName("Addition of one")]
+                    public async Task MyTest(int value)
+                    {
+                        await Assert.That(value > 0).IsTrue();
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_TestCase_Category_Converted_To_Category()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [TestCase(1, Category = "Unit")]
+                    [TestCase(2, Category = "Integration")]
+                    public void MyTest(int value)
+                    {
+                        Assert.That(value > 0, Is.True);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    [Arguments(1)]
+                    [Arguments(2)]
+                    [Category("Unit")]
+                    [Category("Integration")]
+                    public async Task MyTest(int value)
+                    {
+                        await Assert.That(value > 0).IsTrue();
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_TestCase_Description_Converted_To_Property()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [TestCase(1, Description = "Tests positive numbers")]
+                    public void MyTest(int value)
+                    {
+                        Assert.That(value > 0, Is.True);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    [Arguments(1)]
+                    [Property("Description", "Tests positive numbers")]
+                    public async Task MyTest(int value)
+                    {
+                        await Assert.That(value > 0).IsTrue();
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_TestCase_Author_Converted_To_Property()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [TestCase(1, Author = "John Doe")]
+                    public void MyTest(int value)
+                    {
+                        Assert.That(value > 0, Is.True);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    [Arguments(1)]
+                    [Property("Author", "John Doe")]
+                    public async Task MyTest(int value)
+                    {
+                        await Assert.That(value > 0).IsTrue();
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_TestCase_Explicit_Converted_To_Explicit()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [TestCase(1, Explicit = true)]
+                    public void MyTest(int value)
+                    {
+                        Assert.That(value > 0, Is.True);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    [Arguments(1)]
+                    [Explicit]
+                    public async Task MyTest(int value)
+                    {
+                        await Assert.That(value > 0).IsTrue();
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_TestCase_ExplicitReason_Converted_To_Explicit_And_Property()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [TestCase(1, ExplicitReason = "Manual test only")]
+                    public void MyTest(int value)
+                    {
+                        Assert.That(value > 0, Is.True);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    [Arguments(1)]
+                    [Explicit]
+                    [Property("ExplicitReason", "Manual test only")]
+                    public async Task MyTest(int value)
+                    {
+                        await Assert.That(value > 0).IsTrue();
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_TestCase_MultipleProperties_All_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [TestCase(1, TestName = "Test One", Category = "Unit", Description = "First test", Author = "Jane")]
+                    public void MyTest(int value)
+                    {
+                        Assert.That(value > 0, Is.True);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    [Arguments(1)]
+                    [DisplayName("Test One")]
+                    [Category("Unit")]
+                    [Property("Description", "First test")]
+                    [Property("Author", "Jane")]
+                    public async Task MyTest(int value)
+                    {
+                        await Assert.That(value > 0).IsTrue();
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_TestCase_WithExpectedResult_And_Properties_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                public class MyClass
+                {
+                    {|#0:[TestCase(2, 3, ExpectedResult = 5, TestName = "Add small numbers", Category = "Math")]|}
+                    public int Add(int a, int b) => a + b;
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    [Arguments(2, 3, 5)]
+                    [DisplayName("Add small numbers")]
+                    [Category("Math")]
+                    public async Task Add(int a, int b, int expected)
+                    {
+                        await Assert.That(a + b).IsEqualTo(expected);
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
     private static void ConfigureNUnitTest(Verifier.Test test)
     {
         test.TestState.AdditionalReferences.Add(typeof(NUnit.Framework.TestAttribute).Assembly);

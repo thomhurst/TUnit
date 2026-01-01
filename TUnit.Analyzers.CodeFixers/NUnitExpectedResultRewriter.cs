@@ -441,7 +441,6 @@ public class NUnitExpectedResultRewriter : CSharpSyntaxRewriter
 
         var newArgs = new List<AttributeArgumentSyntax>();
         ExpressionSyntax? expectedValue = null;
-        var unsupportedProperties = new List<string>();
 
         foreach (var arg in attribute.ArgumentList.Arguments)
         {
@@ -467,8 +466,9 @@ public class NUnitExpectedResultRewriter : CSharpSyntaxRewriter
             }
             else if (namedProperty is "TestName" or "Category" or "Description" or "Author" or "Explicit" or "ExplicitReason")
             {
-                // These properties don't have direct TUnit equivalents
-                unsupportedProperties.Add($"{namedProperty} = {arg.Expression}");
+                // These properties are converted to separate TUnit attributes by NUnitTestCasePropertyRewriter:
+                // TestName → [DisplayName], Category → [Category], Description/Author → [Property], Explicit → [Explicit]
+                // Skip them here - they don't belong in the [Arguments] attribute
             }
             // Other named arguments are preserved as-is (they might be TUnit-compatible)
             else
@@ -485,14 +485,6 @@ public class NUnitExpectedResultRewriter : CSharpSyntaxRewriter
 
         var newAttribute = attribute.WithArgumentList(
             SyntaxFactory.AttributeArgumentList(SyntaxFactory.SeparatedList(newArgs)));
-
-        // Add TODO comment for unsupported properties
-        if (unsupportedProperties.Count > 0)
-        {
-            var todoComment = SyntaxFactory.Comment($"/* TODO: TUnit migration - unsupported TestCase properties: {string.Join(", ", unsupportedProperties)} */");
-            newAttribute = newAttribute.WithLeadingTrivia(
-                newAttribute.GetLeadingTrivia().Add(todoComment).Add(SyntaxFactory.Space));
-        }
 
         // The attribute will be renamed to "Arguments" by the existing attribute rewriter
         return newAttribute;
