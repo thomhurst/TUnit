@@ -1433,6 +1433,171 @@ public class NUnitMigrationAnalyzerTests
         );
     }
 
+    [Test]
+    public async Task NUnit_TestCase_Ignore_Converted_To_Skip_Inline()
+    {
+        // Ignore is converted to inline Skip on each [Arguments]
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [TestCase(1, Ignore = "Needs fixing")]
+                    [TestCase(2, Ignore = "Also broken")]
+                    public void MyTest(int value)
+                    {
+                        Assert.That(value > 0, Is.True);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    [Arguments(1, Skip = "Needs fixing")]
+                    [Arguments(2, Skip = "Also broken")]
+                    public async Task MyTest(int value)
+                    {
+                        await Assert.That(value > 0).IsTrue();
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_TestCase_IgnoreReason_Converted_To_Skip_Inline()
+    {
+        // IgnoreReason is converted to inline Skip on each [Arguments]
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [TestCase(1, IgnoreReason = "Under development")]
+                    public void MyTest(int value)
+                    {
+                        Assert.That(value > 0, Is.True);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    [Arguments(1, Skip = "Under development")]
+                    public async Task MyTest(int value)
+                    {
+                        await Assert.That(value > 0).IsTrue();
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_TestCase_AllInlineProperties_Converted()
+    {
+        // Test with all inline properties: DisplayName, Skip, and Categories
+        // Note: The order of named properties in output follows the order in the source
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [TestCase(1, TestName = "Test One", Category = "Unit", Ignore = "Temporarily disabled")]
+                    [TestCase(2, TestName = "Test Two", Category = "Integration", Ignore = "WIP")]
+                    public void MyTest(int value)
+                    {
+                        Assert.That(value > 0, Is.True);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    [Arguments(1, DisplayName = "Test One", Skip = "Temporarily disabled", Categories = ["Unit"])]
+                    [Arguments(2, DisplayName = "Test Two", Skip = "WIP", Categories = ["Integration"])]
+                    public async Task MyTest(int value)
+                    {
+                        await Assert.That(value > 0).IsTrue();
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_TestCase_AllProperties_Comprehensive_Converted()
+    {
+        // Comprehensive test with ALL properties - inline (TestName→DisplayName, Category→Categories, Ignore→Skip)
+        // and separate attributes (Description→Property, Author→Property, Explicit→Explicit, ExplicitReason→Explicit+Property)
+        // Note: The order of named properties in output follows the order in the source
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [TestCase(1, TestName = "Full featured test", Category = "Comprehensive", Ignore = "Testing migration", Description = "A complete test case", Author = "Developer")]
+                    public void MyTest(int value)
+                    {
+                        Assert.That(value > 0, Is.True);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    [Arguments(1, DisplayName = "Full featured test", Skip = "Testing migration", Categories = ["Comprehensive"])]
+                    [Property("Description", "A complete test case")]
+                    [Property("Author", "Developer")]
+                    public async Task MyTest(int value)
+                    {
+                        await Assert.That(value > 0).IsTrue();
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
     private static void ConfigureNUnitTest(Verifier.Test test)
     {
         test.TestState.AdditionalReferences.Add(typeof(NUnit.Framework.TestAttribute).Assembly);
