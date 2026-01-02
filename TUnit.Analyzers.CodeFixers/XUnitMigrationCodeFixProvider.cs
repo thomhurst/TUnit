@@ -44,7 +44,9 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
 
     protected override CompilationUnitSyntax ApplyFrameworkSpecificConversions(CompilationUnitSyntax compilationUnit, SemanticModel semanticModel, Compilation compilation)
     {
-        var syntaxTree = compilationUnit.SyntaxTree;
+        // Use the original syntax tree from the semantic model, not from the (potentially modified) compilation unit
+        // After assertion rewriting, compilationUnit.SyntaxTree is a new tree not in the compilation
+        var syntaxTree = semanticModel.SyntaxTree;
         SyntaxNode updatedRoot = compilationUnit;
 
         updatedRoot = UpdateInitializeDispose(compilation, updatedRoot);
@@ -616,9 +618,9 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
                 "Superset" when arguments.Count >= 2 =>
                     CreateTUnitAssertion("IsSupersetOf", arguments[0].Expression, arguments[1]),
                 "ProperSubset" when arguments.Count >= 2 =>
-                    CreateTUnitAssertion("IsSubsetOf", arguments[0].Expression, arguments[1]),
+                    CreateProperSubsetWithTodo(arguments),
                 "ProperSuperset" when arguments.Count >= 2 =>
-                    CreateTUnitAssertion("IsSupersetOf", arguments[0].Expression, arguments[1]),
+                    CreateProperSupersetWithTodo(arguments),
 
                 // Unique items
                 "Distinct" when arguments.Count >= 1 =>
@@ -627,6 +629,28 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
                 // Equivalent (order independent)
                 "Equivalent" when arguments.Count >= 2 =>
                     CreateTUnitAssertion("IsEquivalentTo", arguments[1].Expression, arguments[0]),
+
+                // Regex assertions
+                "Matches" when arguments.Count >= 2 =>
+                    CreateTUnitAssertion("Matches", arguments[1].Expression, arguments[0]),
+                "DoesNotMatch" when arguments.Count >= 2 =>
+                    CreateTUnitAssertion("DoesNotMatch", arguments[1].Expression, arguments[0]),
+
+                // Collection with inspectors - complex, needs TODO
+                "Collection" when arguments.Count >= 2 =>
+                    CreateCollectionWithTodo(arguments),
+
+                // PropertyChanged - not supported in TUnit
+                "PropertyChanged" when arguments.Count >= 3 =>
+                    CreatePropertyChangedTodo(arguments),
+                "PropertyChangedAsync" when arguments.Count >= 3 =>
+                    CreatePropertyChangedTodo(arguments),
+
+                // Raises events - not supported in TUnit
+                "Raises" => CreateRaisesTodo(arguments),
+                "RaisesAsync" => CreateRaisesTodo(arguments),
+                "RaisesAny" => CreateRaisesTodo(arguments),
+                "RaisesAnyAsync" => CreateRaisesTodo(arguments),
 
                 _ => null
             };
@@ -637,8 +661,7 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
             var result = CreateTUnitAssertion("IsEqualTo", arguments[1].Expression, arguments[0]);
             return result.WithLeadingTrivia(
                 SyntaxFactory.Comment("// TODO: TUnit migration - custom comparer was used. Consider using Assert.That(...).IsEquivalentTo() or a custom condition."),
-                SyntaxFactory.EndOfLine("\n"),
-                SyntaxFactory.Whitespace("                "));
+                SyntaxFactory.EndOfLine("\n"));
         }
 
         private ExpressionSyntax CreateNotEqualWithComparerComment(SeparatedSyntaxList<ArgumentSyntax> arguments)
@@ -646,8 +669,79 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
             var result = CreateTUnitAssertion("IsNotEqualTo", arguments[1].Expression, arguments[0]);
             return result.WithLeadingTrivia(
                 SyntaxFactory.Comment("// TODO: TUnit migration - custom comparer was used. Consider using a custom condition."),
-                SyntaxFactory.EndOfLine("\n"),
-                SyntaxFactory.Whitespace("                "));
+                SyntaxFactory.EndOfLine("\n"));
+        }
+
+        private ExpressionSyntax CreateCollectionWithTodo(SeparatedSyntaxList<ArgumentSyntax> arguments)
+        {
+            // Assert.Collection(collection, inspector1, inspector2, ...) has no direct TUnit equivalent
+            // Convert to HasCount check and add TODO for manual inspector conversion
+            var collection = arguments[0].Expression;
+            var inspectorCount = arguments.Count - 1;
+
+            var result = CreateTUnitAssertion("HasCount", collection,
+                SyntaxFactory.Argument(
+                    SyntaxFactory.LiteralExpression(
+                        SyntaxKind.NumericLiteralExpression,
+                        SyntaxFactory.Literal(inspectorCount))));
+
+            // Just add TODO comment and newline - indentation will be handled by VisitInvocationExpression
+            return result.WithLeadingTrivia(
+                SyntaxFactory.Comment("// TODO: TUnit migration - Assert.Collection had element inspectors. Manually add assertions for each element."),
+                SyntaxFactory.EndOfLine("\n"));
+        }
+
+        private ExpressionSyntax CreatePropertyChangedTodo(SeparatedSyntaxList<ArgumentSyntax> arguments)
+        {
+            // Assert.PropertyChanged(object, propertyName, action) - TUnit doesn't have this
+            // Create a placeholder that executes the action and add TODO
+            var action = arguments.Count > 2 ? arguments[2].Expression : arguments[0].Expression;
+
+            // Create: action() with TODO comment
+            var invocation = action is LambdaExpressionSyntax
+                ? (ExpressionSyntax)SyntaxFactory.InvocationExpression(
+                    SyntaxFactory.ParenthesizedExpression(action))
+                : SyntaxFactory.InvocationExpression(action);
+
+            return invocation.WithLeadingTrivia(
+                SyntaxFactory.Comment("// TODO: TUnit migration - PropertyChanged assertion not supported. Implement INotifyPropertyChanged testing manually."),
+                SyntaxFactory.EndOfLine("\n"));
+        }
+
+        private ExpressionSyntax CreateRaisesTodo(SeparatedSyntaxList<ArgumentSyntax> arguments)
+        {
+            // Assert.Raises(attach, detach, action) - TUnit doesn't have this
+            // Create placeholder with TODO
+            var action = arguments.Count > 2 ? arguments[2].Expression : arguments[0].Expression;
+
+            var invocation = action is LambdaExpressionSyntax
+                ? (ExpressionSyntax)SyntaxFactory.InvocationExpression(
+                    SyntaxFactory.ParenthesizedExpression(action))
+                : SyntaxFactory.InvocationExpression(action);
+
+            return invocation.WithLeadingTrivia(
+                SyntaxFactory.Comment("// TODO: TUnit migration - Raises assertion not supported. Implement event testing manually."),
+                SyntaxFactory.EndOfLine("\n"));
+        }
+
+        private ExpressionSyntax CreateProperSubsetWithTodo(SeparatedSyntaxList<ArgumentSyntax> arguments)
+        {
+            // ProperSubset means strict subset (not equal to superset)
+            // TUnit's IsSubsetOf doesn't distinguish between proper/improper
+            var result = CreateTUnitAssertion("IsSubsetOf", arguments[0].Expression, arguments[1]);
+            return result.WithLeadingTrivia(
+                SyntaxFactory.Comment("// TODO: TUnit migration - ProperSubset requires strict subset (not equal). Add additional assertion if needed."),
+                SyntaxFactory.EndOfLine("\n"));
+        }
+
+        private ExpressionSyntax CreateProperSupersetWithTodo(SeparatedSyntaxList<ArgumentSyntax> arguments)
+        {
+            // ProperSuperset means strict superset (not equal to subset)
+            // TUnit's IsSupersetOf doesn't distinguish between proper/improper
+            var result = CreateTUnitAssertion("IsSupersetOf", arguments[0].Expression, arguments[1]);
+            return result.WithLeadingTrivia(
+                SyntaxFactory.Comment("// TODO: TUnit migration - ProperSuperset requires strict superset (not equal). Add additional assertion if needed."),
+                SyntaxFactory.EndOfLine("\n"));
         }
 
         private ExpressionSyntax ConvertThrowsAny(InvocationExpressionSyntax invocation, SimpleNameSyntax nameNode)

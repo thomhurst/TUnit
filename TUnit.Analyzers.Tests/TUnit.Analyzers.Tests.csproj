@@ -10,6 +10,8 @@
     <PackageReference Include="Polly" />
     <PackageReference Include="MSTest.TestFramework" />
     <PackageReference Include="NUnit" />
+    <PackageReference Include="xunit.v3.extensibility.core" />
+    <PackageReference Include="xunit.v3.assert" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TUnit.Analyzers.CodeFixers\TUnit.Analyzers.CodeFixers.csproj" />
