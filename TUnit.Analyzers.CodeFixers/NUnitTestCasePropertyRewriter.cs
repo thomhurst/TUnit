@@ -7,7 +7,9 @@ namespace TUnit.Analyzers.CodeFixers;
 
 /// <summary>
 /// Extracts NUnit TestCase properties and converts them to TUnit attributes.
-/// Maps: TestName → DisplayName, Category → Category, Description/Author → Property, Explicit → Explicit
+/// Maps: Description/Author → Property, Explicit → Explicit
+/// Note: TestName → DisplayName and Category → Categories are now handled inline on [Arguments]
+/// by NUnitAttributeRewriter, so we don't generate separate attributes for those.
 /// </summary>
 public class NUnitTestCasePropertyRewriter : CSharpSyntaxRewriter
 {
@@ -88,21 +90,8 @@ public class NUnitTestCasePropertyRewriter : CSharpSyntaxRewriter
 
                 switch (propertyName)
                 {
-                    case "TestName":
-                        var testNameValue = GetStringValue(arg.Expression);
-                        if (testNameValue != null)
-                        {
-                            properties.TestNames.Add(testNameValue);
-                        }
-                        break;
-
-                    case "Category":
-                        var categoryValue = GetStringValue(arg.Expression);
-                        if (categoryValue != null)
-                        {
-                            properties.Categories.Add(categoryValue);
-                        }
-                        break;
+                    // Note: TestName and Category are now handled inline on [Arguments] by NUnitAttributeRewriter
+                    // so we don't need to extract them here anymore.
 
                     case "Description":
                         var descValue = GetStringValue(arg.Expression);
@@ -168,29 +157,8 @@ public class NUnitTestCasePropertyRewriter : CSharpSyntaxRewriter
         // Get indentation from existing attributes
         var indentation = GetIndentation(leadingTrivia);
 
-        // DisplayName from TestName (use first if multiple, or try to create pattern)
-        if (properties.TestNames.Count > 0)
-        {
-            var displayNameAttr = CreateDisplayNameAttribute(properties.TestNames);
-            if (displayNameAttr != null)
-            {
-                newLists.Add(CreateAttributeList(displayNameAttr, indentation));
-            }
-        }
-
-        // Category - add all unique categories
-        foreach (var category in properties.Categories.Distinct())
-        {
-            var categoryAttr = SyntaxFactory.Attribute(
-                SyntaxFactory.IdentifierName("Category"),
-                SyntaxFactory.AttributeArgumentList(
-                    SyntaxFactory.SingletonSeparatedList(
-                        SyntaxFactory.AttributeArgument(
-                            SyntaxFactory.LiteralExpression(
-                                SyntaxKind.StringLiteralExpression,
-                                SyntaxFactory.Literal(category))))));
-            newLists.Add(CreateAttributeList(categoryAttr, indentation));
-        }
+        // Note: TestName → DisplayName and Category → Categories are now handled inline on [Arguments]
+        // by NUnitAttributeRewriter.ConvertTestCaseArguments, so we don't generate separate attributes here.
 
         // Description - use Property attribute
         if (properties.Descriptions.Count > 0)
@@ -224,27 +192,6 @@ public class NUnitTestCasePropertyRewriter : CSharpSyntaxRewriter
         }
 
         return SyntaxFactory.List(newLists);
-    }
-
-    private AttributeSyntax? CreateDisplayNameAttribute(HashSet<string> testNames)
-    {
-        // Only generate DisplayName if there's exactly one unique TestName
-        // Multiple different TestNames cannot be represented by a single DisplayName attribute
-        if (testNames.Count != 1)
-        {
-            return null;
-        }
-
-        var displayName = testNames.First();
-
-        return SyntaxFactory.Attribute(
-            SyntaxFactory.IdentifierName("DisplayName"),
-            SyntaxFactory.AttributeArgumentList(
-                SyntaxFactory.SingletonSeparatedList(
-                    SyntaxFactory.AttributeArgument(
-                        SyntaxFactory.LiteralExpression(
-                            SyntaxKind.StringLiteralExpression,
-                            SyntaxFactory.Literal(displayName))))));
     }
 
     private AttributeSyntax CreatePropertyAttribute(string name, string value)
@@ -288,8 +235,7 @@ public class NUnitTestCasePropertyRewriter : CSharpSyntaxRewriter
 
     private class TestCaseProperties
     {
-        public HashSet<string> TestNames { get; } = new();
-        public HashSet<string> Categories { get; } = new();
+        // Note: TestNames and Categories are now handled inline on [Arguments] by NUnitAttributeRewriter
         public HashSet<string> Descriptions { get; } = new();
         public HashSet<string> Authors { get; } = new();
         public bool IsExplicit { get; set; }
