@@ -11,8 +11,18 @@ internal static class DataSourceMetadataExtractor
     /// <summary>
     /// Extracts metadata from a data source attribute if it has the relevant properties.
     /// </summary>
+    /// <remarks>
+    /// Uses DynamicDependency to ensure the trimmer preserves public properties on known TUnit data source types.
+    /// Custom data source attributes need to ensure their DisplayName/Skip/Categories properties are preserved
+    /// if they want these features to work in trimmed/AOT scenarios.
+    /// </remarks>
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(ArgumentsAttribute))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, "TUnit.Core.ArgumentsAttribute`1", "TUnit.Core")]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(MethodDataSourceAttribute))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(ClassDataSourceAttribute<>))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(MatrixAttribute))]
     [UnconditionalSuppressMessage("Trimming", "IL2075:Reflection on unknown types",
-        Justification = "Data source attributes are preserved by the test framework and their properties are accessed at runtime.")]
+        Justification = "Known TUnit data source types are preserved via DynamicDependency. Custom data sources must preserve their own properties.")]
     public static TestDataRowMetadata? ExtractFromAttribute(IDataSourceAttribute? dataSource)
     {
         if (dataSource is null)

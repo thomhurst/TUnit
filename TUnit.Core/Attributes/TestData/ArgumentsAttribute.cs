@@ -86,6 +86,22 @@ public ValueTask OnTestRegistered(TestRegisteredContext context)
             context.TestContext.Metadata.TestDetails.ClassInstance = SkippedTestInstance.Instance;
         }
 
+        if (!string.IsNullOrEmpty(DisplayName))
+        {
+            context.TestContext.SetDataSourceDisplayName(DisplayName!);
+        }
+
+        if (Categories is { Length: > 0 })
+        {
+            foreach (var category in Categories)
+            {
+                if (!string.IsNullOrWhiteSpace(category) && !context.TestDetails.Categories.Contains(category))
+                {
+                    context.TestDetails.Categories.Add(category);
+                }
+            }
+        }
+
         return default;
     }
 
@@ -123,6 +139,22 @@ public ValueTask OnTestRegistered(TestRegisteredContext context)
         {
             context.TestContext.SkipReason = Skip;
             context.TestContext.Metadata.TestDetails.ClassInstance = SkippedTestInstance.Instance;
+        }
+
+        if (!string.IsNullOrEmpty(DisplayName))
+        {
+            context.TestContext.SetDataSourceDisplayName(DisplayName!);
+        }
+
+        if (Categories is { Length: > 0 })
+        {
+            foreach (var category in Categories)
+            {
+                if (!string.IsNullOrWhiteSpace(category) && !context.TestDetails.Categories.Contains(category))
+                {
+                    context.TestDetails.Categories.Add(category);
+                }
+            }
         }
 
         return default;
