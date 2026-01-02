@@ -89,7 +89,7 @@ public class UserRoleTests
 }
 ```
 
-## With Func<T> for Reference Types
+## With Func\<T\> for Reference Types
 
 When returning reference types, combine with `Func<T>` to ensure fresh instances:
 
