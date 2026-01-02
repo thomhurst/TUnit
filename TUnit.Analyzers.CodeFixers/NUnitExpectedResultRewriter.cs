@@ -439,7 +439,11 @@ public class NUnitExpectedResultRewriter : CSharpSyntaxRewriter
             return attribute;
         }
 
-        var newArgs = new List<AttributeArgumentSyntax>();
+        // Separate positional and named arguments to ensure correct ordering:
+        // Positional args → ExpectedResult → Named properties (DisplayName, Skip, Categories)
+        var positionalArgs = new List<AttributeArgumentSyntax>();
+        var namedArgs = new List<AttributeArgumentSyntax>();
+        var categories = new List<ExpressionSyntax>();
         ExpressionSyntax? expectedValue = null;
 
         foreach (var arg in attribute.ArgumentList.Arguments)
@@ -453,7 +457,7 @@ public class NUnitExpectedResultRewriter : CSharpSyntaxRewriter
             else if (namedProperty == null)
             {
                 // Positional argument - keep it
-                newArgs.Add(arg);
+                positionalArgs.Add(arg);
             }
             else if (namedProperty == "Ignore" || namedProperty == "IgnoreReason")
             {
@@ -462,25 +466,62 @@ public class NUnitExpectedResultRewriter : CSharpSyntaxRewriter
                     SyntaxFactory.NameEquals(SyntaxFactory.IdentifierName("Skip")),
                     null,
                     arg.Expression);
-                newArgs.Add(skipArg);
+                namedArgs.Add(skipArg);
             }
-            else if (namedProperty is "TestName" or "Category" or "Description" or "Author" or "Explicit" or "ExplicitReason")
+            else if (namedProperty == "TestName")
+            {
+                // Map NUnit's TestName to TUnit's DisplayName inline on [Arguments]
+                var displayNameArg = SyntaxFactory.AttributeArgument(
+                    SyntaxFactory.NameEquals(SyntaxFactory.IdentifierName("DisplayName")),
+                    null,
+                    arg.Expression);
+                namedArgs.Add(displayNameArg);
+            }
+            else if (namedProperty == "Category")
+            {
+                // Collect categories to create a Categories array
+                categories.Add(arg.Expression);
+            }
+            else if (namedProperty is "Description" or "Author" or "Explicit" or "ExplicitReason")
             {
                 // These properties are converted to separate TUnit attributes by NUnitTestCasePropertyRewriter:
-                // TestName → [DisplayName], Category → [Category], Description/Author → [Property], Explicit → [Explicit]
+                // Description/Author → [Property], Explicit → [Explicit]
                 // Skip them here - they don't belong in the [Arguments] attribute
             }
             // Other named arguments are preserved as-is (they might be TUnit-compatible)
             else
             {
-                newArgs.Add(arg);
+                namedArgs.Add(arg);
             }
         }
 
-        // Add expected value as last positional argument
+        // Build final argument list in correct order:
+        // 1. Positional arguments
+        // 2. ExpectedResult (as positional argument)
+        // 3. Named properties (DisplayName, Skip, Categories)
+        var newArgs = new List<AttributeArgumentSyntax>(positionalArgs);
+
+        // Add expected value as last positional argument (before named properties)
         if (expectedValue != null)
         {
             newArgs.Add(SyntaxFactory.AttributeArgument(expectedValue));
+        }
+
+        // Add named arguments
+        newArgs.AddRange(namedArgs);
+
+        // Add Categories array if any categories were found
+        if (categories.Count > 0)
+        {
+            var categoriesArray = SyntaxFactory.CollectionExpression(
+                SyntaxFactory.SeparatedList(
+                    categories.Select(c => (CollectionElementSyntax)SyntaxFactory.ExpressionElement(c))));
+
+            var categoriesArg = SyntaxFactory.AttributeArgument(
+                SyntaxFactory.NameEquals(SyntaxFactory.IdentifierName("Categories")),
+                null,
+                categoriesArray);
+            newArgs.Add(categoriesArg);
         }
 
         var newAttribute = attribute.WithArgumentList(

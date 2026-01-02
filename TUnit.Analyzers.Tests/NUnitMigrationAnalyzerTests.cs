@@ -1079,7 +1079,7 @@ public class NUnitMigrationAnalyzerTests
     [Test]
     public async Task NUnit_TestCase_TestName_Converted_To_DisplayName()
     {
-        // When multiple TestCases have the SAME TestName, it generates DisplayName
+        // TestName is now converted to inline DisplayName on each [Arguments]
         await CodeFixer.VerifyCodeFixAsync(
             """
                 using NUnit.Framework;
@@ -1105,9 +1105,8 @@ public class NUnitMigrationAnalyzerTests
                 public class MyClass
                 {
                     [Test]
-                    [Arguments(1)]
-                    [Arguments(2)]
-                    [DisplayName("Test values")]
+                    [Arguments(1, DisplayName = "Test values")]
+                    [Arguments(2, DisplayName = "Test values")]
                     public async Task MyTest(int value)
                     {
                         await Assert.That(value > 0).IsTrue();
@@ -1119,10 +1118,9 @@ public class NUnitMigrationAnalyzerTests
     }
 
     [Test]
-    public async Task NUnit_TestCase_Different_TestNames_Not_Converted()
+    public async Task NUnit_TestCase_Different_TestNames_Converted_Inline()
     {
-        // When multiple TestCases have DIFFERENT TestNames, no DisplayName is generated
-        // (user must manually adjust since a single DisplayName can't represent multiple values)
+        // Each TestCase's TestName is now converted to inline DisplayName on each [Arguments]
         await CodeFixer.VerifyCodeFixAsync(
             """
                 using NUnit.Framework;
@@ -1148,8 +1146,8 @@ public class NUnitMigrationAnalyzerTests
                 public class MyClass
                 {
                     [Test]
-                    [Arguments(1)]
-                    [Arguments(2)]
+                    [Arguments(1, DisplayName = "Addition of one")]
+                    [Arguments(2, DisplayName = "Addition of two")]
                     public async Task MyTest(int value)
                     {
                         await Assert.That(value > 0).IsTrue();
@@ -1161,8 +1159,9 @@ public class NUnitMigrationAnalyzerTests
     }
 
     [Test]
-    public async Task NUnit_TestCase_Category_Converted_To_Category()
+    public async Task NUnit_TestCase_Category_Converted_To_Categories_Inline()
     {
+        // Category is now converted to inline Categories array on each [Arguments]
         await CodeFixer.VerifyCodeFixAsync(
             """
                 using NUnit.Framework;
@@ -1188,10 +1187,8 @@ public class NUnitMigrationAnalyzerTests
                 public class MyClass
                 {
                     [Test]
-                    [Arguments(1)]
-                    [Arguments(2)]
-                    [Category("Unit")]
-                    [Category("Integration")]
+                    [Arguments(1, Categories = ["Unit"])]
+                    [Arguments(2, Categories = ["Integration"])]
                     public async Task MyTest(int value)
                     {
                         await Assert.That(value > 0).IsTrue();
@@ -1362,6 +1359,7 @@ public class NUnitMigrationAnalyzerTests
     [Test]
     public async Task NUnit_TestCase_MultipleProperties_All_Converted()
     {
+        // TestName and Category are inline on [Arguments], Description/Author become separate [Property] attributes
         await CodeFixer.VerifyCodeFixAsync(
             """
                 using NUnit.Framework;
@@ -1386,9 +1384,7 @@ public class NUnitMigrationAnalyzerTests
                 public class MyClass
                 {
                     [Test]
-                    [Arguments(1)]
-                    [DisplayName("Test One")]
-                    [Category("Unit")]
+                    [Arguments(1, DisplayName = "Test One", Categories = ["Unit"])]
                     [Property("Description", "First test")]
                     [Property("Author", "Jane")]
                     public async Task MyTest(int value)
@@ -1404,6 +1400,7 @@ public class NUnitMigrationAnalyzerTests
     [Test]
     public async Task NUnit_TestCase_WithExpectedResult_And_Properties_Converted()
     {
+        // TestName and Category are inline on [Arguments], ExpectedResult becomes extra parameter
         await CodeFixer.VerifyCodeFixAsync(
             """
                 using NUnit.Framework;
@@ -1425,9 +1422,7 @@ public class NUnitMigrationAnalyzerTests
                 public class MyClass
                 {
                     [Test]
-                    [Arguments(2, 3, 5)]
-                    [DisplayName("Add small numbers")]
-                    [Category("Math")]
+                    [Arguments(2, 3, 5, DisplayName = "Add small numbers", Categories = ["Math"])]
                     public async Task Add(int a, int b, int expected)
                     {
                         await Assert.That(a + b).IsEqualTo(expected);

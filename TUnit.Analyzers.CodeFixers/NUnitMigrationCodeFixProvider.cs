@@ -84,6 +84,7 @@ public class NUnitAttributeRewriter : AttributeRewriter
     private AttributeArgumentListSyntax ConvertTestCaseArguments(AttributeArgumentListSyntax argumentList)
     {
         var newArgs = new List<AttributeArgumentSyntax>();
+        var categories = new List<ExpressionSyntax>();
 
         foreach (var arg in argumentList.Arguments)
         {
@@ -103,10 +104,24 @@ public class NUnitAttributeRewriter : AttributeRewriter
                     arg.Expression);
                 newArgs.Add(skipArg);
             }
-            else if (namedProperty is "TestName" or "Category" or "Description" or "Author" or "Explicit" or "ExplicitReason")
+            else if (namedProperty == "TestName")
+            {
+                // Map NUnit's TestName to TUnit's DisplayName inline on [Arguments]
+                var displayNameArg = SyntaxFactory.AttributeArgument(
+                    SyntaxFactory.NameEquals(SyntaxFactory.IdentifierName("DisplayName")),
+                    null,
+                    arg.Expression);
+                newArgs.Add(displayNameArg);
+            }
+            else if (namedProperty == "Category")
+            {
+                // Collect categories to create a Categories array
+                categories.Add(arg.Expression);
+            }
+            else if (namedProperty is "Description" or "Author" or "Explicit" or "ExplicitReason")
             {
                 // These properties are converted to separate TUnit attributes by NUnitTestCasePropertyRewriter:
-                // TestName → [DisplayName], Category → [Category], Description/Author → [Property], Explicit → [Explicit]
+                // Description/Author → [Property], Explicit → [Explicit]
                 // Skip them here - they don't belong in the [Arguments] attribute
             }
             else if (namedProperty == "ExpectedResult")
@@ -119,6 +134,20 @@ public class NUnitAttributeRewriter : AttributeRewriter
                 // Other named arguments are preserved as-is
                 newArgs.Add(arg);
             }
+        }
+
+        // Add Categories array if any categories were found
+        if (categories.Count > 0)
+        {
+            var categoriesArray = SyntaxFactory.CollectionExpression(
+                SyntaxFactory.SeparatedList(
+                    categories.Select(c => (CollectionElementSyntax)SyntaxFactory.ExpressionElement(c))));
+
+            var categoriesArg = SyntaxFactory.AttributeArgument(
+                SyntaxFactory.NameEquals(SyntaxFactory.IdentifierName("Categories")),
+                null,
+                categoriesArray);
+            newArgs.Add(categoriesArg);
         }
 
         return SyntaxFactory.AttributeArgumentList(SyntaxFactory.SeparatedList(newArgs));
