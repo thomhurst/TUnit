@@ -118,6 +118,21 @@ public partial class TestContext : Context,
 
     internal string? CustomDisplayName { get; set; }
 
+    /// <summary>
+    /// Display name provided by the data source (from TestDataRow or ArgumentsAttribute.DisplayName).
+    /// This takes precedence over the default generated display name but can be overridden by CustomDisplayName.
+    /// Supports $paramName substitution.
+    /// </summary>
+    internal string? DataSourceDisplayName { get; private set; }
+
+    /// <summary>
+    /// Sets the display name from the data source (TestDataRow or ArgumentsAttribute.DisplayName).
+    /// </summary>
+    internal void SetDataSourceDisplayName(string displayName)
+    {
+        DataSourceDisplayName = displayName;
+    }
+
 
     internal TestDetails TestDetails { get; set; } = null!;
 

@@ -35,6 +35,16 @@ public class TestDataCombination
 
     public string? DisplayName { get; init; }
 
+    /// <summary>
+    /// Skip reason from the data source. When set, this test combination will be skipped.
+    /// </summary>
+    public string? Skip { get; init; }
+
+    /// <summary>
+    /// Categories from the data source to apply to this specific test combination.
+    /// </summary>
+    public string[]? Categories { get; init; }
+
     public int RepeatIndex { get; init; } = 0;
 
     public Dictionary<string, Type>? ResolvedGenericTypes { get; init; }
