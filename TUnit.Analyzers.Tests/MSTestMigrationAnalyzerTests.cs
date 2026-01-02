@@ -780,11 +780,10 @@ public class MSTestMigrationAnalyzerTests
     }
 
     [Test]
-    public async Task MSTest_Assertions_With_Comparer_PassedAsBecause()
+    public async Task MSTest_Assertions_With_Comparer_AddsTodoComment()
     {
-        // Note: When the comparer is a variable (not detectable as IComparer via syntax alone),
-        // it gets passed to .Because() since semantic analysis may not resolve the type in all contexts.
-        // In real usage with full compilation context, the semantic check should work properly.
+        // When the comparer type cannot be determined via semantic analysis (e.g., in test context),
+        // a TODO comment is added for manual review instead of passing invalid arguments to .Because().
         await CodeFixer.VerifyCodeFixAsync(
             """
                 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -815,7 +814,8 @@ public class MSTestMigrationAnalyzerTests
                     public async Task TestWithComparer()
                     {
                         var comparer = StringComparer.OrdinalIgnoreCase;
-                        await Assert.That("HELLO").IsEqualTo("hello").Because(comparer);
+                        // TODO: TUnit migration - third argument could not be identified as comparer or message. Manual verification required.
+                        await Assert.That("HELLO").IsEqualTo("hello");
                     }
                 }
                 """,

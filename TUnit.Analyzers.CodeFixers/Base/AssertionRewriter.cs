@@ -200,13 +200,25 @@ public abstract class AssertionRewriter : CSharpSyntaxRewriter
 
     /// <summary>
     /// Checks if the argument at the given index appears to be a comparer (IComparer, IEqualityComparer).
+    /// Returns null if the type cannot be determined.
     /// </summary>
-    protected bool IsLikelyComparerArgument(ArgumentSyntax argument)
+    protected bool? IsLikelyComparerArgument(ArgumentSyntax argument)
     {
         var typeInfo = SemanticModel.GetTypeInfo(argument.Expression);
-        if (typeInfo.Type == null) return false;
+        if (typeInfo.Type == null || typeInfo.Type.TypeKind == TypeKind.Error)
+        {
+            // Type couldn't be resolved - return null to indicate unknown
+            return null;
+        }
 
         var typeName = typeInfo.Type.ToDisplayString();
+
+        // If it's a string type, it's definitely a message, not a comparer
+        if (typeInfo.Type.SpecialType == SpecialType.System_String ||
+            typeName == "string" || typeName == "System.String")
+        {
+            return false;
+        }
 
         // Check for IComparer, IComparer<T>, IEqualityComparer, IEqualityComparer<T>
         if (typeName.Contains("IComparer") || typeName.Contains("IEqualityComparer"))
@@ -214,12 +226,21 @@ public abstract class AssertionRewriter : CSharpSyntaxRewriter
             return true;
         }
 
-        // Check interfaces
+        // Check interfaces - also check for generic interface names like IComparer`1
         if (typeInfo.Type is INamedTypeSymbol namedType)
         {
-            return namedType.AllInterfaces.Any(i =>
-                i.Name == "IComparer" ||
-                i.Name == "IEqualityComparer");
+            if (namedType.AllInterfaces.Any(i =>
+                i.Name.StartsWith("IComparer") ||
+                i.Name.StartsWith("IEqualityComparer")))
+            {
+                return true;
+            }
+        }
+
+        // Also check if the type name itself contains Comparer (for StringComparer, etc.)
+        if (typeName.Contains("Comparer"))
+        {
+            return true;
         }
 
         return false;

@@ -542,11 +542,11 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
             return methodName switch
             {
                 // Equality assertions - check for comparer overloads
-                "Equal" when arguments.Count >= 3 && IsLikelyComparerArgument(arguments[2]) =>
+                "Equal" when arguments.Count >= 3 && IsLikelyComparerArgument(arguments[2]) == true =>
                     CreateEqualWithComparerComment(arguments),
                 "Equal" when arguments.Count >= 2 =>
                     CreateTUnitAssertion("IsEqualTo", arguments[1].Expression, arguments[0]),
-                "NotEqual" when arguments.Count >= 3 && IsLikelyComparerArgument(arguments[2]) =>
+                "NotEqual" when arguments.Count >= 3 && IsLikelyComparerArgument(arguments[2]) == true =>
                     CreateNotEqualWithComparerComment(arguments),
                 "NotEqual" when arguments.Count >= 2 =>
                     CreateTUnitAssertion("IsNotEqualTo", arguments[1].Expression, arguments[0]),
