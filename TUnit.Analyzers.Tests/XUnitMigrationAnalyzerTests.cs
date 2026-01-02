@@ -631,15 +631,243 @@ public class XUnitMigrationAnalyzerTests
             );
     }
 
+    [Test]
+    public async Task Assert_Equal_Can_Be_Converted()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Fact]
+                    public void MyTest()
+                    {
+                        Assert.Equal(5, 2 + 3);
+                    }
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task MyTest()
+                    {
+                        await Assert.That(2 + 3).IsEqualTo(5);
+                    }
+                }
+                """,
+                ConfigureXUnitTest
+            );
+    }
+
+    [Test]
+    public async Task Assert_Matches_Can_Be_Converted()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Fact]
+                    public void MyTest()
+                    {
+                        Assert.Matches(@"\d+", "abc123");
+                    }
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task MyTest()
+                    {
+                        await Assert.That("abc123").Matches(@"\d+");
+                    }
+                }
+                """,
+                ConfigureXUnitTest
+            );
+    }
+
+    [Test]
+    public async Task Assert_DoesNotMatch_Can_Be_Converted()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Fact]
+                    public void MyTest()
+                    {
+                        Assert.DoesNotMatch(@"^\d+$", "abc123");
+                    }
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task MyTest()
+                    {
+                        await Assert.That("abc123").DoesNotMatch(@"^\d+$");
+                    }
+                }
+                """,
+                ConfigureXUnitTest
+            );
+    }
+
+    [Test]
+    public async Task Assert_Collection_Adds_Todo_Comment()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using System;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Fact]
+                    public void MyTest()
+                    {
+                        var items = new[] { 1, 2, 3 };
+                        Assert.Collection(items,
+                            x => Assert.Equal(1, x),
+                            x => Assert.Equal(2, x),
+                            x => Assert.Equal(3, x));
+                    }
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+                using System;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task MyTest()
+                    {
+                        var items = new[] { 1, 2, 3 };
+                        // TODO: TUnit migration - Assert.Collection had element inspectors. Manually add assertions for each element.
+                        await Assert.That(items).HasCount(3);
+                    }
+                }
+                """,
+                ConfigureXUnitTest
+            );
+    }
+
+    [Test]
+    public async Task Assert_ProperSubset_Adds_Todo_Comment()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using System;
+                using System.Collections.Generic;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Fact]
+                    public void MyTest()
+                    {
+                        var subset = new HashSet<int> { 1, 2 };
+                        var superset = new HashSet<int> { 1, 2, 3 };
+                        Assert.ProperSubset(superset, subset);
+                    }
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+                using System;
+                using System.Collections.Generic;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task MyTest()
+                    {
+                        var subset = new HashSet<int> { 1, 2 };
+                        var superset = new HashSet<int> { 1, 2, 3 };
+                        // TODO: TUnit migration - ProperSubset requires strict subset (not equal). Add additional assertion if needed.
+                        await Assert.That(superset).IsSubsetOf(subset);
+                    }
+                }
+                """,
+                ConfigureXUnitTest
+            );
+    }
+
+    [Test]
+    public async Task Assert_ProperSuperset_Adds_Todo_Comment()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using System;
+                using System.Collections.Generic;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Fact]
+                    public void MyTest()
+                    {
+                        var subset = new HashSet<int> { 1, 2 };
+                        var superset = new HashSet<int> { 1, 2, 3 };
+                        Assert.ProperSuperset(subset, superset);
+                    }
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+                using System;
+                using System.Collections.Generic;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task MyTest()
+                    {
+                        var subset = new HashSet<int> { 1, 2 };
+                        var superset = new HashSet<int> { 1, 2, 3 };
+                        // TODO: TUnit migration - ProperSuperset requires strict superset (not equal). Add additional assertion if needed.
+                        await Assert.That(subset).IsSupersetOf(superset);
+                    }
+                }
+                """,
+                ConfigureXUnitTest
+            );
+    }
+
     private static void ConfigureXUnitTest(Verifier.Test test)
     {
         var globalUsings = ("GlobalUsings.cs", SourceText.From("global using Xunit;"));
 
         test.TestState.Sources.Add(globalUsings);
-
-        test.ReferenceAssemblies = test.ReferenceAssemblies.AddPackages([
-            new PackageIdentity("xunit.v3.extensibility.core", "3.0.1")
-        ]);
+        test.TestState.AdditionalReferences.Add(typeof(Xunit.FactAttribute).Assembly);
+        test.TestState.AdditionalReferences.Add(typeof(Xunit.Assert).Assembly);
     }
 
     private static void ConfigureXUnitTest(CodeFixer.Test test)
@@ -649,9 +877,13 @@ public class XUnitMigrationAnalyzerTests
         test.TestState.Sources.Add(globalUsings);
         test.FixedState.Sources.Add(globalUsings);
 
-        test.ReferenceAssemblies = test.ReferenceAssemblies.AddPackages([
-            new PackageIdentity("xunit.v3.extensibility.core", "3.0.1")
-        ]);
+        // Add xUnit assemblies to TestState
+        test.TestState.AdditionalReferences.Add(typeof(Xunit.FactAttribute).Assembly);
+        test.TestState.AdditionalReferences.Add(typeof(Xunit.Assert).Assembly);
+
+        // Add TUnit assemblies to FixedState for the converted assertions
+        test.FixedState.AdditionalReferences.Add(typeof(TUnit.Core.TestAttribute).Assembly);
+        test.FixedState.AdditionalReferences.Add(typeof(TUnit.Assertions.Assert).Assembly);
     }
 }
 

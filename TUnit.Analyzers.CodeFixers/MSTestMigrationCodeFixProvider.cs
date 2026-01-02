@@ -186,31 +186,50 @@ public class MSTestAssertionRewriter : AssertionRewriter
     
     protected override ExpressionSyntax? ConvertAssertionIfNeeded(InvocationExpressionSyntax invocation)
     {
-        if (!IsFrameworkAssertion(invocation))
+        // First try semantic analysis
+        var isFrameworkAssertionViaSemantic = false;
+        try
+        {
+            isFrameworkAssertionViaSemantic = IsFrameworkAssertion(invocation);
+        }
+        catch (InvalidOperationException)
+        {
+            // Semantic analysis failed due to invalid compilation state, fall back to syntax-based detection
+        }
+        catch (ArgumentException)
+        {
+            // Semantic analysis failed due to invalid arguments, fall back to syntax-based detection
+        }
+
+        // Check if it looks like an MSTest assertion syntactically
+        var isMsTestAssertionSyntax = invocation.Expression is MemberAccessExpressionSyntax ma &&
+                                       ma.Expression is IdentifierNameSyntax { Identifier.Text: "Assert" or "CollectionAssert" or "StringAssert" };
+
+        if (!isFrameworkAssertionViaSemantic && !isMsTestAssertionSyntax)
         {
             return null;
         }
-        
+
         if (invocation.Expression is MemberAccessExpressionSyntax memberAccess &&
             memberAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Assert" })
         {
             return ConvertMSTestAssertion(invocation, memberAccess.Name.Identifier.Text);
         }
-        
+
         // Handle CollectionAssert
         if (invocation.Expression is MemberAccessExpressionSyntax collectionAccess &&
             collectionAccess.Expression is IdentifierNameSyntax { Identifier.Text: "CollectionAssert" })
         {
             return ConvertCollectionAssertion(invocation, collectionAccess.Name.Identifier.Text);
         }
-        
+
         // Handle StringAssert
         if (invocation.Expression is MemberAccessExpressionSyntax stringAccess &&
             stringAccess.Expression is IdentifierNameSyntax { Identifier.Text: "StringAssert" })
         {
             return ConvertStringAssertion(invocation, stringAccess.Name.Identifier.Text);
         }
-        
+
         return null;
     }
     
@@ -224,15 +243,9 @@ public class MSTestAssertionRewriter : AssertionRewriter
 
         return methodName switch
         {
-            // 2-arg assertions with message as 3rd param
-            "AreEqual" when arguments.Count >= 3 =>
-                CreateTUnitAssertionWithMessage("IsEqualTo", arguments[1].Expression, arguments[2].Expression, arguments[0]),
-            "AreEqual" when arguments.Count >= 2 =>
-                CreateTUnitAssertion("IsEqualTo", arguments[1].Expression, arguments[0]),
-            "AreNotEqual" when arguments.Count >= 3 =>
-                CreateTUnitAssertionWithMessage("IsNotEqualTo", arguments[1].Expression, arguments[2].Expression, arguments[0]),
-            "AreNotEqual" when arguments.Count >= 2 =>
-                CreateTUnitAssertion("IsNotEqualTo", arguments[1].Expression, arguments[0]),
+            // Equality assertions - check for comparer overloads and format strings
+            "AreEqual" => ConvertAreEqual(arguments),
+            "AreNotEqual" => ConvertAreNotEqual(arguments),
             "AreSame" when arguments.Count >= 3 =>
                 CreateTUnitAssertionWithMessage("IsSameReference", arguments[1].Expression, arguments[2].Expression, arguments[0]),
             "AreSame" when arguments.Count >= 2 =>
@@ -279,6 +292,254 @@ public class MSTestAssertionRewriter : AssertionRewriter
             "Inconclusive" => CreateInconclusiveAssertion(arguments),
             _ => null
         };
+    }
+
+    /// <summary>
+    /// Converts Assert.AreEqual with support for comparer overloads and format string messages.
+    /// MSTest overloads:
+    /// - Assert.AreEqual(expected, actual)
+    /// - Assert.AreEqual(expected, actual, message)
+    /// - Assert.AreEqual(expected, actual, message, params object[] parameters)
+    /// - Assert.AreEqual(expected, actual, comparer)
+    /// - Assert.AreEqual(expected, actual, comparer, message)
+    /// </summary>
+    private ExpressionSyntax? ConvertAreEqual(SeparatedSyntaxList<ArgumentSyntax> arguments)
+    {
+        if (arguments.Count < 2)
+        {
+            return null;
+        }
+
+        var expected = arguments[0];
+        var actual = arguments[1];
+
+        // 2 args: AreEqual(expected, actual)
+        if (arguments.Count == 2)
+        {
+            return CreateTUnitAssertion("IsEqualTo", actual.Expression, expected);
+        }
+
+        // 3+ args: Determine if 3rd arg is a message (string) or comparer
+        // Check for named arguments first (most reliable)
+        var thirdArg = arguments[2];
+        var namedArg = thirdArg.NameColon?.Name.Identifier.Text;
+        if (namedArg == "message")
+        {
+            var (msg, fmtArgs) = ExtractMessageWithFormatArgs(arguments, 2);
+            if (msg != null)
+            {
+                var msgExpr = CreateMessageExpression(msg, fmtArgs);
+                return CreateTUnitAssertionWithMessage("IsEqualTo", actual.Expression, msgExpr, expected);
+            }
+            return CreateTUnitAssertion("IsEqualTo", actual.Expression, expected);
+        }
+        if (namedArg == "comparer")
+        {
+            var result = CreateTUnitAssertion("IsEqualTo", actual.Expression, expected);
+            if (arguments.Count >= 4)
+            {
+                var (message, formatArgs) = ExtractMessageWithFormatArgs(arguments, 3);
+                if (message != null)
+                {
+                    var messageExpr = CreateMessageExpression(message, formatArgs);
+                    result = CreateTUnitAssertionWithMessage("IsEqualTo", actual.Expression, messageExpr, expected);
+                }
+            }
+            return result.WithLeadingTrivia(
+                SyntaxFactory.Comment("// TODO: TUnit migration - IEqualityComparer was used. TUnit uses .IsEqualTo() which may have different comparison semantics."),
+                SyntaxFactory.EndOfLine("\n"));
+        }
+
+        // Check syntactically if it looks like a string (message)
+        var isLikelyMessage = thirdArg.Expression is LiteralExpressionSyntax literal &&
+                               literal.IsKind(SyntaxKind.StringLiteralExpression);
+        // Also check for interpolated strings
+        isLikelyMessage = isLikelyMessage || thirdArg.Expression is InterpolatedStringExpressionSyntax;
+
+        // If it's a string expression, treat as message
+        if (isLikelyMessage)
+        {
+            var (msg, fmtArgs) = ExtractMessageWithFormatArgs(arguments, 2);
+            if (msg != null)
+            {
+                var msgExpr = CreateMessageExpression(msg, fmtArgs);
+                return CreateTUnitAssertionWithMessage("IsEqualTo", actual.Expression, msgExpr, expected);
+            }
+            return CreateTUnitAssertion("IsEqualTo", actual.Expression, expected);
+        }
+
+        // If not a string literal, try semantic analysis to check for comparer
+        var isComparer = IsLikelyComparerArgumentSafe(arguments[2]);
+
+        if (isComparer == true)
+        {
+            // AreEqual(expected, actual, comparer) or AreEqual(expected, actual, comparer, message)
+            var result = CreateTUnitAssertion("IsEqualTo", actual.Expression, expected);
+            if (arguments.Count >= 4)
+            {
+                // Has message after comparer
+                var (message, formatArgs) = ExtractMessageWithFormatArgs(arguments, 3);
+                if (message != null)
+                {
+                    var messageExpr = CreateMessageExpression(message, formatArgs);
+                    result = CreateTUnitAssertionWithMessage("IsEqualTo", actual.Expression, messageExpr, expected);
+                }
+            }
+            // Add TODO for comparer
+            return result.WithLeadingTrivia(
+                SyntaxFactory.Comment("// TODO: TUnit migration - IEqualityComparer was used. TUnit uses .IsEqualTo() which may have different comparison semantics."),
+                SyntaxFactory.EndOfLine("\n"));
+        }
+
+        if (isComparer == null)
+        {
+            // Type couldn't be determined - add TODO for manual review
+            return CreateTUnitAssertion("IsEqualTo", actual.Expression, expected).WithLeadingTrivia(
+                SyntaxFactory.Comment("// TODO: TUnit migration - third argument could not be identified as comparer or message. Manual verification required."),
+                SyntaxFactory.EndOfLine("\n"));
+        }
+
+        // isComparer == false: Not a comparer, treat remaining args as message with format args
+        var (msg2, fmtArgs2) = ExtractMessageWithFormatArgs(arguments, 2);
+        if (msg2 != null)
+        {
+            var msgExpr = CreateMessageExpression(msg2, fmtArgs2);
+            return CreateTUnitAssertionWithMessage("IsEqualTo", actual.Expression, msgExpr, expected);
+        }
+
+        return CreateTUnitAssertion("IsEqualTo", actual.Expression, expected);
+    }
+
+    /// <summary>
+    /// Safely checks if an argument is a comparer, catching any exceptions from semantic analysis.
+    /// Returns null if the type cannot be determined.
+    /// </summary>
+    private bool? IsLikelyComparerArgumentSafe(ArgumentSyntax argument)
+    {
+        try
+        {
+            return IsLikelyComparerArgument(argument);
+        }
+        catch (InvalidOperationException)
+        {
+            // Semantic analysis failed due to invalid compilation state
+            return null;
+        }
+        catch (ArgumentException)
+        {
+            // Semantic analysis failed due to invalid arguments
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Converts Assert.AreNotEqual with support for comparer overloads and format string messages.
+    /// </summary>
+    private ExpressionSyntax? ConvertAreNotEqual(SeparatedSyntaxList<ArgumentSyntax> arguments)
+    {
+        if (arguments.Count < 2)
+        {
+            return null;
+        }
+
+        var expected = arguments[0];
+        var actual = arguments[1];
+
+        // 2 args: AreNotEqual(expected, actual)
+        if (arguments.Count == 2)
+        {
+            return CreateTUnitAssertion("IsNotEqualTo", actual.Expression, expected);
+        }
+
+        // 3+ args: Determine if 3rd arg is a message (string) or comparer
+        // Check for named arguments first (most reliable)
+        var thirdArg = arguments[2];
+        var namedArg = thirdArg.NameColon?.Name.Identifier.Text;
+        if (namedArg == "message")
+        {
+            var (msg, fmtArgs) = ExtractMessageWithFormatArgs(arguments, 2);
+            if (msg != null)
+            {
+                var msgExpr = CreateMessageExpression(msg, fmtArgs);
+                return CreateTUnitAssertionWithMessage("IsNotEqualTo", actual.Expression, msgExpr, expected);
+            }
+            return CreateTUnitAssertion("IsNotEqualTo", actual.Expression, expected);
+        }
+        if (namedArg == "comparer")
+        {
+            var result = CreateTUnitAssertion("IsNotEqualTo", actual.Expression, expected);
+            if (arguments.Count >= 4)
+            {
+                var (message, formatArgs) = ExtractMessageWithFormatArgs(arguments, 3);
+                if (message != null)
+                {
+                    var messageExpr = CreateMessageExpression(message, formatArgs);
+                    result = CreateTUnitAssertionWithMessage("IsNotEqualTo", actual.Expression, messageExpr, expected);
+                }
+            }
+            return result.WithLeadingTrivia(
+                SyntaxFactory.Comment("// TODO: TUnit migration - IEqualityComparer was used. TUnit uses .IsNotEqualTo() which may have different comparison semantics."),
+                SyntaxFactory.EndOfLine("\n"));
+        }
+
+        // Check syntactically if it looks like a string (message)
+        var isLikelyMessage = thirdArg.Expression is LiteralExpressionSyntax literal &&
+                               literal.IsKind(SyntaxKind.StringLiteralExpression);
+        // Also check for interpolated strings
+        isLikelyMessage = isLikelyMessage || thirdArg.Expression is InterpolatedStringExpressionSyntax;
+
+        // If it's a string expression, treat as message
+        if (isLikelyMessage)
+        {
+            var (msg, fmtArgs) = ExtractMessageWithFormatArgs(arguments, 2);
+            if (msg != null)
+            {
+                var msgExpr = CreateMessageExpression(msg, fmtArgs);
+                return CreateTUnitAssertionWithMessage("IsNotEqualTo", actual.Expression, msgExpr, expected);
+            }
+            return CreateTUnitAssertion("IsNotEqualTo", actual.Expression, expected);
+        }
+
+        // If not a string literal, try semantic analysis to check for comparer
+        var isComparer = IsLikelyComparerArgumentSafe(arguments[2]);
+
+        if (isComparer == true)
+        {
+            // AreNotEqual(expected, actual, comparer) or AreNotEqual(expected, actual, comparer, message)
+            var result = CreateTUnitAssertion("IsNotEqualTo", actual.Expression, expected);
+            if (arguments.Count >= 4)
+            {
+                // Has message after comparer
+                var (message, formatArgs) = ExtractMessageWithFormatArgs(arguments, 3);
+                if (message != null)
+                {
+                    var messageExpr = CreateMessageExpression(message, formatArgs);
+                    result = CreateTUnitAssertionWithMessage("IsNotEqualTo", actual.Expression, messageExpr, expected);
+                }
+            }
+            // Add TODO for comparer
+            return result.WithLeadingTrivia(
+                SyntaxFactory.Comment("// TODO: TUnit migration - IEqualityComparer was used. TUnit uses .IsNotEqualTo() which may have different comparison semantics."),
+                SyntaxFactory.EndOfLine("\n"));
+        }
+
+        if (isComparer == null)
+        {
+            // Type couldn't be determined - add TODO for manual review
+            return CreateTUnitAssertion("IsNotEqualTo", actual.Expression, expected).WithLeadingTrivia(
+                SyntaxFactory.Comment("// TODO: TUnit migration - third argument could not be identified as comparer or message. Manual verification required."),
+                SyntaxFactory.EndOfLine("\n"));
+        }
+
+        // isComparer == false: Not a comparer, treat remaining args as message with format args
+        var (msg2, fmtArgs2) = ExtractMessageWithFormatArgs(arguments, 2);
+        if (msg2 != null)
+        {
+            var msgExpr = CreateMessageExpression(msg2, fmtArgs2);
+            return CreateTUnitAssertionWithMessage("IsNotEqualTo", actual.Expression, msgExpr, expected);
+        }
+
+        return CreateTUnitAssertion("IsNotEqualTo", actual.Expression, expected);
     }
 
     private ExpressionSyntax CreateInconclusiveAssertion(SeparatedSyntaxList<ArgumentSyntax> arguments)

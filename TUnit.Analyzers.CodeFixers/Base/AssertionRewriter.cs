@@ -19,9 +19,35 @@ public abstract class AssertionRewriter : CSharpSyntaxRewriter
         var convertedAssertion = ConvertAssertionIfNeeded(node);
         if (convertedAssertion != null)
         {
-            // Preserve the original trivia (whitespace, comments, etc.)
+            var conversionTrivia = convertedAssertion.GetLeadingTrivia();
+            var originalTrivia = node.GetLeadingTrivia();
+
+            SyntaxTriviaList finalTrivia;
+            // Only do special handling when there's actually a TODO comment
+            var hasComment = conversionTrivia.Any(t => t.IsKind(SyntaxKind.SingleLineCommentTrivia));
+            if (hasComment)
+            {
+                // Conversion added trivia (TODO comments). Structure should be:
+                // [original whitespace] [TODO comment] [newline] [original whitespace] [await expression]
+                var whitespaceTrivia = originalTrivia.Where(t => t.IsKind(SyntaxKind.WhitespaceTrivia)).ToList();
+                var nonWhitespaceTrivia = originalTrivia.Where(t => !t.IsKind(SyntaxKind.WhitespaceTrivia)).ToList();
+
+                var builder = new List<SyntaxTrivia>();
+                builder.AddRange(nonWhitespaceTrivia); // Add any non-whitespace (e.g., leading newlines)
+                builder.AddRange(whitespaceTrivia);    // Add indentation
+                builder.AddRange(conversionTrivia);    // Add TODO comment + newline
+                builder.AddRange(whitespaceTrivia);    // Add indentation again for the await
+
+                finalTrivia = new SyntaxTriviaList(builder);
+            }
+            else
+            {
+                // No TODO comment, just use original trivia
+                finalTrivia = originalTrivia;
+            }
+
             return convertedAssertion
-                .WithLeadingTrivia(node.GetLeadingTrivia())
+                .WithLeadingTrivia(finalTrivia)
                 .WithTrailingTrivia(node.GetTrailingTrivia());
         }
 
@@ -91,7 +117,10 @@ public abstract class AssertionRewriter : CSharpSyntaxRewriter
         }
 
         // Now wrap the entire thing in await: await Assert.That(actualValue).MethodName(args).Because(message)
-        return SyntaxFactory.AwaitExpression(fullInvocation);
+        // Need to add a trailing space after 'await' keyword
+        var awaitKeyword = SyntaxFactory.Token(SyntaxKind.AwaitKeyword)
+            .WithTrailingTrivia(SyntaxFactory.Space);
+        return SyntaxFactory.AwaitExpression(awaitKeyword, fullInvocation);
     }
 
     private static bool IsEmptyOrNullMessage(ExpressionSyntax message)
@@ -171,13 +200,25 @@ public abstract class AssertionRewriter : CSharpSyntaxRewriter
 
     /// <summary>
     /// Checks if the argument at the given index appears to be a comparer (IComparer, IEqualityComparer).
+    /// Returns null if the type cannot be determined.
     /// </summary>
-    protected bool IsLikelyComparerArgument(ArgumentSyntax argument)
+    protected bool? IsLikelyComparerArgument(ArgumentSyntax argument)
     {
         var typeInfo = SemanticModel.GetTypeInfo(argument.Expression);
-        if (typeInfo.Type == null) return false;
+        if (typeInfo.Type == null || typeInfo.Type.TypeKind == TypeKind.Error)
+        {
+            // Type couldn't be resolved - return null to indicate unknown
+            return null;
+        }
 
         var typeName = typeInfo.Type.ToDisplayString();
+
+        // If it's a string type, it's definitely a message, not a comparer
+        if (typeInfo.Type.SpecialType == SpecialType.System_String ||
+            typeName == "string" || typeName == "System.String")
+        {
+            return false;
+        }
 
         // Check for IComparer, IComparer<T>, IEqualityComparer, IEqualityComparer<T>
         if (typeName.Contains("IComparer") || typeName.Contains("IEqualityComparer"))
@@ -185,12 +226,21 @@ public abstract class AssertionRewriter : CSharpSyntaxRewriter
             return true;
         }
 
-        // Check interfaces
+        // Check interfaces - also check for generic interface names like IComparer`1
         if (typeInfo.Type is INamedTypeSymbol namedType)
         {
-            return namedType.AllInterfaces.Any(i =>
-                i.Name == "IComparer" ||
-                i.Name == "IEqualityComparer");
+            if (namedType.AllInterfaces.Any(i =>
+                i.Name.StartsWith("IComparer") ||
+                i.Name.StartsWith("IEqualityComparer")))
+            {
+                return true;
+            }
+        }
+
+        // Also check if the type name itself contains Comparer (for StringComparer, etc.)
+        if (typeName.Contains("Comparer"))
+        {
+            return true;
         }
 
         return false;
@@ -206,12 +256,14 @@ public abstract class AssertionRewriter : CSharpSyntaxRewriter
     
     protected bool IsFrameworkAssertion(InvocationExpressionSyntax invocation)
     {
-        var symbol = SemanticModel.GetSymbolInfo(invocation).Symbol;
+        var symbolInfo = SemanticModel.GetSymbolInfo(invocation);
+        var symbol = symbolInfo.Symbol;
+
         if (symbol is not IMethodSymbol methodSymbol)
         {
             return false;
         }
-        
+
         var namespaceName = methodSymbol.ContainingNamespace?.ToDisplayString() ?? "";
         return IsFrameworkAssertionNamespace(namespaceName);
     }

@@ -525,7 +525,7 @@ public class NUnitAssertionRewriter : AssertionRewriter
         var actual = arguments[1].Expression;
 
         // Check if 3rd argument is a comparer (not a string message)
-        if (arguments.Count >= 3 && IsLikelyComparerArgument(arguments[2]))
+        if (arguments.Count >= 3 && IsLikelyComparerArgument(arguments[2]) == true)
         {
             // Add TODO comment and skip the comparer
             var result = CreateTUnitAssertion("IsEqualTo", actual, expected);
@@ -546,7 +546,7 @@ public class NUnitAssertionRewriter : AssertionRewriter
         var actual = arguments[1].Expression;
 
         // Check if 3rd argument is a comparer
-        if (arguments.Count >= 3 && IsLikelyComparerArgument(arguments[2]))
+        if (arguments.Count >= 3 && IsLikelyComparerArgument(arguments[2]) == true)
         {
             var result = CreateTUnitAssertion("IsNotEqualTo", actual, expected);
             return result.WithLeadingTrivia(
