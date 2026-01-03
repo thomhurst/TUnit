@@ -29,6 +29,20 @@ public static class Assert
     }
 
     /// <summary>
+    /// Creates an assertion for an IDictionary value (mutable dictionary).
+    /// This overload enables better type inference for dictionary operations like ContainsKey.
+    /// Example: await Assert.That(dict).ContainsKey("key");
+    /// </summary>
+    [OverloadResolutionPriority(2)]
+    public static MutableDictionaryAssertion<TKey, TValue> That<TKey, TValue>(
+        IDictionary<TKey, TValue> value,
+        [CallerArgumentExpression(nameof(value))] string? expression = null)
+        where TKey : notnull
+    {
+        return new MutableDictionaryAssertion<TKey, TValue>(value, expression);
+    }
+
+    /// <summary>
     /// Creates an assertion for a string value.
     /// Strings are treated as values, not as character collections, by default.
     /// For character-level assertions, explicitly cast to IEnumerable&lt;char&gt; or char[].

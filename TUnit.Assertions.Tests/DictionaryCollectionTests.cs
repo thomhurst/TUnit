@@ -461,4 +461,169 @@ public class DictionaryCollectionTests
         await Assert.That(dictionary)
             .ContainsKey("HELLO", StringComparer.OrdinalIgnoreCase);
     }
+
+    // ===================================
+    // IDictionary<TKey, TValue> Tests
+    // ===================================
+
+    [Test]
+    public async Task IDictionary_ContainsKey_Works()
+    {
+        IDictionary<string, int> dictionary = new Dictionary<string, int>
+        {
+            ["key1"] = 1,
+            ["key2"] = 2
+        };
+
+        await Assert.That(dictionary).ContainsKey("key1");
+    }
+
+    [Test]
+    public async Task IDictionary_DoesNotContainKey_Works()
+    {
+        IDictionary<string, int> dictionary = new Dictionary<string, int>
+        {
+            ["key1"] = 1
+        };
+
+        await Assert.That(dictionary).DoesNotContainKey("nonexistent");
+    }
+
+    [Test]
+    public async Task IDictionary_ContainsValue_Works()
+    {
+        IDictionary<string, int> dictionary = new Dictionary<string, int>
+        {
+            ["key1"] = 100,
+            ["key2"] = 200
+        };
+
+        await Assert.That(dictionary).ContainsValue(200);
+    }
+
+    [Test]
+    public async Task IDictionary_DoesNotContainValue_Works()
+    {
+        IDictionary<string, int> dictionary = new Dictionary<string, int>
+        {
+            ["key1"] = 100
+        };
+
+        await Assert.That(dictionary).DoesNotContainValue(999);
+    }
+
+    [Test]
+    public async Task IDictionary_ContainsKeyWithValue_Works()
+    {
+        IDictionary<string, int> dictionary = new Dictionary<string, int>
+        {
+            ["key1"] = 100,
+            ["key2"] = 200
+        };
+
+        await Assert.That(dictionary).ContainsKeyWithValue("key2", 200);
+    }
+
+    [Test]
+    public async Task IDictionary_AllKeys_Works()
+    {
+        IDictionary<string, int> dictionary = new Dictionary<string, int>
+        {
+            ["prefix_a"] = 1,
+            ["prefix_b"] = 2
+        };
+
+        await Assert.That(dictionary).AllKeys(k => k.StartsWith("prefix_"));
+    }
+
+    [Test]
+    public async Task IDictionary_AllValues_Works()
+    {
+        IDictionary<string, int> dictionary = new Dictionary<string, int>
+        {
+            ["a"] = 10,
+            ["b"] = 20
+        };
+
+        await Assert.That(dictionary).AllValues(v => v > 0);
+    }
+
+    [Test]
+    public async Task IDictionary_AnyKey_Works()
+    {
+        IDictionary<string, int> dictionary = new Dictionary<string, int>
+        {
+            ["first"] = 1,
+            ["special"] = 2
+        };
+
+        await Assert.That(dictionary).AnyKey(k => k == "special");
+    }
+
+    [Test]
+    public async Task IDictionary_AnyValue_Works()
+    {
+        IDictionary<string, int> dictionary = new Dictionary<string, int>
+        {
+            ["a"] = 1,
+            ["b"] = 100
+        };
+
+        await Assert.That(dictionary).AnyValue(v => v >= 100);
+    }
+
+    [Test]
+    public async Task IDictionary_And_Chain_Works()
+    {
+        IDictionary<string, int> dictionary = new Dictionary<string, int>
+        {
+            ["key1"] = 100,
+            ["key2"] = 200
+        };
+
+        await Assert.That(dictionary)
+            .ContainsKey("key1")
+            .And.ContainsValue(200)
+            .And.AllValues(v => v > 0);
+    }
+
+    [Test]
+    public async Task IDictionary_Or_Chain_Works()
+    {
+        IDictionary<string, int> dictionary = new Dictionary<string, int>
+        {
+            ["key1"] = 100
+        };
+
+        await Assert.That(dictionary)
+            .ContainsKey("nonexistent")
+            .Or.ContainsKey("key1");
+    }
+
+    [Test]
+    public async Task IDictionary_Collection_Methods_Work()
+    {
+        IDictionary<string, int> dictionary = new Dictionary<string, int>
+        {
+            ["key1"] = 1,
+            ["key2"] = 2
+        };
+
+        // IDictionary should also have access to collection methods
+        await Assert.That(dictionary)
+            .IsNotEmpty()
+            .And.HasCount(2);
+    }
+
+    [Test]
+    public async Task IDictionary_ContainsKey_With_Custom_Comparer()
+    {
+        IDictionary<string, int> dictionary = new Dictionary<string, int>
+        {
+            ["Hello"] = 1
+        };
+
+        await Assert.That(dictionary)
+            .ContainsKey("HELLO", StringComparer.OrdinalIgnoreCase);
+    }
 }

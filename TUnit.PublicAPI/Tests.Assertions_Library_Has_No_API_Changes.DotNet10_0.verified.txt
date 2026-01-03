@@ -178,6 +178,9 @@ namespace
         public static .<TItem> That<TItem>(<TItem> value, [.("value")] string? expression = null) { }
         public static .<TValue> That<TValue>(.<TValue> task, [.("task")] string? expression = null) { }
         public static .<TValue> That<TValue>(TValue? value, [.("value")] string? expression = null) { }
+        [.(2)]
+        public static .<TKey, TValue> That<TKey, TValue>(.<TKey, TValue> value, [.("value")] string? expression = null)
+            where TKey :  notnull { }
         [.(3)]
         public static .<TKey, TValue> That<TKey, TValue>(.<TKey, TValue> value, [.("value")] string? expression = null)
             where TKey :  notnull { }
@@ -1268,6 +1271,80 @@ namespace .Conditions
         public .<TObject?> GetAwaiter() { }
         public static .<TObject> op_Implicit(.<TObject> result) { }
     }
+    public class MutableDictionaryAllKeysAssertion<TDictionary, TKey, TValue> : .<TDictionary, TKey, TValue>
+        where TDictionary : .<TKey, TValue>
+        where TKey :  notnull
+    {
+        public MutableDictionaryAllKeysAssertion(.<TDictionary> context, <TKey, bool> predicate) { }
+        protected override .<.> CheckAsync(.<TDictionary> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class MutableDictionaryAllValuesAssertion<TDictionary, TKey, TValue> : .<TDictionary, TKey, TValue>
+        where TDictionary : .<TKey, TValue>
+        where TKey :  notnull
+    {
+        public MutableDictionaryAllValuesAssertion(.<TDictionary> context, <TValue, bool> predicate) { }
+        protected override .<.> CheckAsync(.<TDictionary> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class MutableDictionaryAnyKeyAssertion<TDictionary, TKey, TValue> : .<TDictionary, TKey, TValue>
+        where TDictionary : .<TKey, TValue>
+        where TKey :  notnull
+    {
+        public MutableDictionaryAnyKeyAssertion(.<TDictionary> context, <TKey, bool> predicate) { }
+        protected override .<.> CheckAsync(.<TDictionary> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class MutableDictionaryAnyValueAssertion<TDictionary, TKey, TValue> : .<TDictionary, TKey, TValue>
+        where TDictionary : .<TKey, TValue>
+        where TKey :  notnull
+    {
+        public MutableDictionaryAnyValueAssertion(.<TDictionary> context, <TValue, bool> predicate) { }
+        protected override .<.> CheckAsync(.<TDictionary> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class MutableDictionaryContainsKeyAssertion<TDictionary, TKey, TValue> : .<TDictionary, TKey, TValue>
+        where TDictionary : .<TKey, TValue>
+        where TKey :  notnull
+    {
+        public MutableDictionaryContainsKeyAssertion(.<TDictionary> context, TKey expectedKey, .<TKey>? comparer = null) { }
+        protected override .<.> CheckAsync(.<TDictionary> metadata) { }
+        protected override string GetExpectation() { }
+        public .<TDictionary, TKey, TValue> Using(.<TKey> comparer) { }
+        public .<TDictionary, TKey, TValue> Using(<TKey?, TKey?, bool> equalityPredicate) { }
+    }
+    public class MutableDictionaryContainsKeyWithValueAssertion<TDictionary, TKey, TValue> : .<TDictionary, TKey, TValue>
+        where TDictionary : .<TKey, TValue>
+        where TKey :  notnull
+    {
+        public MutableDictionaryContainsKeyWithValueAssertion(.<TDictionary> context, TKey expectedKey, TValue expectedValue) { }
+        protected override .<.> CheckAsync(.<TDictionary> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class MutableDictionaryContainsValueAssertion<TDictionary, TKey, TValue> : .<TDictionary, TKey, TValue>
+        where TDictionary : .<TKey, TValue>
+        where TKey :  notnull
+    {
+        public MutableDictionaryContainsValueAssertion(.<TDictionary> context, TValue expectedValue) { }
+        protected override .<.> CheckAsync(.<TDictionary> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class MutableDictionaryDoesNotContainKeyAssertion<TDictionary, TKey, TValue> : .<TDictionary, TKey, TValue>
+        where TDictionary : .<TKey, TValue>
+        where TKey :  notnull
+    {
+        public MutableDictionaryDoesNotContainKeyAssertion(.<TDictionary> context, TKey expectedKey) { }
+        protected override .<.> CheckAsync(.<TDictionary> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class MutableDictionaryDoesNotContainValueAssertion<TDictionary, TKey, TValue> : .<TDictionary, TKey, TValue>
+        where TDictionary : .<TKey, TValue>
+        where TKey :  notnull
+    {
+        public MutableDictionaryDoesNotContainValueAssertion(.<TDictionary> context, TValue expectedValue) { }
+        protected override .<.> CheckAsync(.<TDictionary> metadata) { }
+        protected override string GetExpectation() { }
+    }
     [.("IsNotEqualTo")]
     public class NotEqualsAssertion<TValue> : .<TValue>
     {
@@ -1959,6 +2036,12 @@ namespace .Core
         .<TValue, TExpected> IsTypeOf<TExpected>();
     }
     public interface IDelegateAssertionSource<TValue> : ., .<TValue> { }
+    public class MutableDictionaryAndContinuation<TDictionary, TKey, TValue> : .<TDictionary, TKey, TValue>
+        where TDictionary : .<TKey, TValue>
+        where TKey :  notnull { }
+    public class MutableDictionaryOrContinuation<TDictionary, TKey, TValue> : .<TDictionary, TKey, TValue>
+        where TDictionary : .<TKey, TValue>
+        where TKey :  notnull { }
     public class OrContinuation<TValue> : .<TValue> { }
 }
 namespace .Enums
@@ -5157,6 +5240,30 @@ namespace .Sources
     public class MemoryOrContinuation<TMemory, TItem> : .<TMemory, TItem>
     {
         protected override .<TItem> CreateAdapter(TMemory value) { }
+    }
+    public abstract class MutableDictionaryAssertionBase<TDictionary, TKey, TValue> : .<TDictionary, .<TKey, TValue>>
+        where TDictionary : .<TKey, TValue>
+        where TKey :  notnull
+    {
+        protected MutableDictionaryAssertionBase(.<TDictionary> context) { }
+        public new .<TDictionary, TKey, TValue> And { get; }
+        public new .<TDictionary, TKey, TValue> Or { get; }
+        public .<TDictionary, TKey, TValue> AllKeys(<TKey, bool> predicate, [.("predicate")] string? expression = null) { }
+        public .<TDictionary, TKey, TValue> AllValues(<TValue, bool> predicate, [.("predicate")] string? expression = null) { }
+        public .<TDictionary, TKey, TValue> AnyKey(<TKey, bool> predicate, [.("predicate")] string? expression = null) { }
+        public .<TDictionary, TKey, TValue> AnyValue(<TValue, bool> predicate, [.("predicate")] string? expression = null) { }
+        public .<TDictionary, TKey, TValue> ContainsKey(TKey expectedKey, [.("expectedKey")] string? expression = null) { }
+        public .<TDictionary, TKey, TValue> ContainsKey(TKey expectedKey, .<TKey>? comparer, [.("expectedKey")] string? keyExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public .<TDictionary, TKey, TValue> ContainsKeyWithValue(TKey expectedKey, TValue expectedValue, [.("expectedKey")] string? keyExpression = null, [.("expectedValue")] string? valueExpression = null) { }
+        public .<TDictionary, TKey, TValue> ContainsValue(TValue expectedValue, [.("expectedValue")] string? expression = null) { }
+        public .<TDictionary, TKey, TValue> DoesNotContainKey(TKey expectedKey, [.("expectedKey")] string? expression = null) { }
+        public .<TDictionary, TKey, TValue> DoesNotContainValue(TValue expectedValue, [.("expectedValue")] string? expression = null) { }
+        protected override string GetExpectation() { }
+    }
+    public class MutableDictionaryAssertion<TKey, TValue> : .<.<TKey, TValue>, TKey, TValue>
+        where TKey :  notnull
+    {
+        public MutableDictionaryAssertion(.<TKey, TValue> value, string? expression) { }
     }
     public class ReadOnlyMemoryAssertion<TItem> : .<<TItem>, TItem>, ., .<<TItem>>
     {

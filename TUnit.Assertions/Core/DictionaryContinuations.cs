@@ -33,3 +33,35 @@ public class DictionaryOrContinuation<TDictionary, TKey, TValue> : DictionaryAss
     {
     }
 }
+
+/// <summary>
+/// And continuation for mutable dictionary (IDictionary) assertions that preserves dictionary type, key type, and value type.
+/// Inherits from MutableDictionaryAssertionBase to automatically expose all dictionary and collection methods.
+/// </summary>
+public class MutableDictionaryAndContinuation<TDictionary, TKey, TValue> : MutableDictionaryAssertionBase<TDictionary, TKey, TValue>
+    where TDictionary : IDictionary<TKey, TValue>
+    where TKey : notnull
+{
+    internal MutableDictionaryAndContinuation(
+        AssertionContext<TDictionary> context,
+        Assertion<TDictionary> previousAssertion)
+        : base(context, previousAssertion, ".And", CombinerType.And)
+    {
+    }
+}
+
+/// <summary>
+/// Or continuation for mutable dictionary (IDictionary) assertions that preserves dictionary type, key type, and value type.
+/// Inherits from MutableDictionaryAssertionBase to automatically expose all dictionary and collection methods.
+/// </summary>
+public class MutableDictionaryOrContinuation<TDictionary, TKey, TValue> : MutableDictionaryAssertionBase<TDictionary, TKey, TValue>
+    where TDictionary : IDictionary<TKey, TValue>
+    where TKey : notnull
+{
+    internal MutableDictionaryOrContinuation(
+        AssertionContext<TDictionary> context,
+        Assertion<TDictionary> previousAssertion)
+        : base(context, previousAssertion, ".Or", CombinerType.Or)
+    {
+    }
+}
