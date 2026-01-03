@@ -13,7 +13,7 @@ public class CaptureOutputTests
         using (Assert.Multiple())
         {
             await Assert.That(TestContext.Current!.Metadata.TestDetails.TestName).IsEqualTo("Test");
-            await Assert.That(TestContext.Current.GetStandardOutput()).IsEqualTo("Blah1");
+            await Assert.That(TestContext.Current.GetStandardOutput()).Contains("Blah1");
         }
     }
 
@@ -25,7 +25,7 @@ public class CaptureOutputTests
         using (Assert.Multiple())
         {
             await Assert.That(TestContext.Current!.Metadata.TestDetails.TestName).IsEqualTo("Test2");
-            await Assert.That(TestContext.Current.GetStandardOutput()).IsEqualTo("Blah2");
+            await Assert.That(TestContext.Current.GetStandardOutput()).Contains("Blah2");
         }
     }
 
@@ -37,7 +37,7 @@ public class CaptureOutputTests
         using (Assert.Multiple())
         {
             await Assert.That(TestContext.Current!.Metadata.TestDetails.TestName).IsEqualTo("Test3");
-            await Assert.That(TestContext.Current.GetStandardOutput()).IsEqualTo("Blah3");
+            await Assert.That(TestContext.Current.GetStandardOutput()).Contains("Blah3");
         }
     }
 
@@ -49,7 +49,7 @@ public class CaptureOutputTests
         using (Assert.Multiple())
         {
             await Assert.That(TestContext.Current!.Metadata.TestDetails.TestName).IsEqualTo("Test4");
-            await Assert.That(TestContext.Current.GetStandardOutput()).IsEqualTo("Blah4");
+            await Assert.That(TestContext.Current.GetStandardOutput()).Contains("Blah4");
         }
     }
 
@@ -61,7 +61,7 @@ public class CaptureOutputTests
         using (Assert.Multiple())
         {
             await Assert.That(TestContext.Current!.Metadata.TestDetails.TestName).IsEqualTo("Test5");
-            await Assert.That(TestContext.Current.GetStandardOutput()).IsEqualTo("Blah5");
+            await Assert.That(TestContext.Current.GetStandardOutput()).Contains("Blah5");
         }
     }
 

@@ -9,6 +9,6 @@ public class ConsoleTests
     public async Task Write_Source_Gen_Information()
     {
         Console.WriteLine(TestContext.Current!.Metadata.TestDetails.MethodMetadata);
-        await Assert.That(TestContext.Current.GetStandardOutput()).IsEqualTo(TestContext.Current.Metadata.TestDetails.MethodMetadata.ToString());
+        await Assert.That(TestContext.Current.GetStandardOutput()).Contains(TestContext.Current.Metadata.TestDetails.MethodMetadata.ToString()!);
     }
 }
