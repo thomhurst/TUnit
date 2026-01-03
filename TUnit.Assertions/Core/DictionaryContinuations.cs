@@ -8,6 +8,7 @@ namespace TUnit.Assertions.Core;
 /// </summary>
 public class DictionaryAndContinuation<TDictionary, TKey, TValue> : DictionaryAssertionBase<TDictionary, TKey, TValue>
     where TDictionary : IReadOnlyDictionary<TKey, TValue>
+    where TKey : notnull
 {
     internal DictionaryAndContinuation(
         AssertionContext<TDictionary> context,
@@ -23,6 +24,7 @@ public class DictionaryAndContinuation<TDictionary, TKey, TValue> : DictionaryAs
 /// </summary>
 public class DictionaryOrContinuation<TDictionary, TKey, TValue> : DictionaryAssertionBase<TDictionary, TKey, TValue>
     where TDictionary : IReadOnlyDictionary<TKey, TValue>
+    where TKey : notnull
 {
     internal DictionaryOrContinuation(
         AssertionContext<TDictionary> context,

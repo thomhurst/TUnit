@@ -23,6 +23,7 @@ public static class Assert
     public static DictionaryAssertion<TKey, TValue> That<TKey, TValue>(
         IReadOnlyDictionary<TKey, TValue> value,
         [CallerArgumentExpression(nameof(value))] string? expression = null)
+        where TKey : notnull
     {
         return new DictionaryAssertion<TKey, TValue>(value, expression);
     }
@@ -54,6 +55,78 @@ public static class Assert
         [CallerArgumentExpression(nameof(value))] string? expression = null)
     {
         return new CollectionAssertion<TItem>(value!, expression);
+    }
+
+#if NET5_0_OR_GREATER
+    /// <summary>
+    /// Creates an assertion for a Memory&lt;T&gt; value.
+    /// Enables collection-like assertion methods (IsEmpty, Contains, Count, etc.) for Memory types.
+    /// Example: await Assert.That(memory).IsNotEmpty();
+    /// Example: await Assert.That(memory).Count().IsEqualTo(5);
+    /// </summary>
+    [OverloadResolutionPriority(1)]
+    public static MemoryAssertion<TItem> That<TItem>(
+        Memory<TItem> value,
+        [CallerArgumentExpression(nameof(value))] string? expression = null)
+    {
+        return new MemoryAssertion<TItem>(value, expression ?? "memory");
+    }
+
+    /// <summary>
+    /// Creates an assertion for a ReadOnlyMemory&lt;T&gt; value.
+    /// Enables collection-like assertion methods (IsEmpty, Contains, Count, etc.) for ReadOnlyMemory types.
+    /// Example: await Assert.That(readOnlyMemory).IsNotEmpty();
+    /// Example: await Assert.That(readOnlyMemory).Count().IsEqualTo(5);
+    /// </summary>
+    [OverloadResolutionPriority(1)]
+    public static ReadOnlyMemoryAssertion<TItem> That<TItem>(
+        ReadOnlyMemory<TItem> value,
+        [CallerArgumentExpression(nameof(value))] string? expression = null)
+    {
+        return new ReadOnlyMemoryAssertion<TItem>(value, expression ?? "memory");
+    }
+
+    /// <summary>
+    /// Creates an assertion for an IReadOnlySet&lt;T&gt; value.
+    /// Enables set-specific assertion methods (IsSubsetOf, IsSupersetOf, Overlaps, etc.).
+    /// Example: await Assert.That(set).IsSubsetOf(otherSet);
+    /// Example: await Assert.That(set).Overlaps(otherSet);
+    /// </summary>
+    [OverloadResolutionPriority(2)]
+    public static ReadOnlySetAssertion<TItem> That<TItem>(
+        IReadOnlySet<TItem> value,
+        [CallerArgumentExpression(nameof(value))] string? expression = null)
+    {
+        return new ReadOnlySetAssertion<TItem>(value, expression ?? "set");
+    }
+#endif
+
+    /// <summary>
+    /// Creates an assertion for an ISet&lt;T&gt; value.
+    /// Enables set-specific assertion methods (IsSubsetOf, IsSupersetOf, Overlaps, etc.).
+    /// Example: await Assert.That(set).IsSubsetOf(otherSet);
+    /// Example: await Assert.That(set).Overlaps(otherSet);
+    /// </summary>
+    [OverloadResolutionPriority(2)]
+    public static SetAssertion<TItem> That<TItem>(
+        ISet<TItem> value,
+        [CallerArgumentExpression(nameof(value))] string? expression = null)
+    {
+        return new SetAssertion<TItem>(value, expression ?? "set");
+    }
+
+    /// <summary>
+    /// Creates an assertion for a HashSet&lt;T&gt; value.
+    /// Enables set-specific assertion methods (IsSubsetOf, IsSupersetOf, Overlaps, etc.).
+    /// Example: await Assert.That(hashSet).IsSubsetOf(otherSet);
+    /// Example: await Assert.That(hashSet).Overlaps(otherSet);
+    /// </summary>
+    [OverloadResolutionPriority(3)]
+    public static HashSetAssertion<TItem> That<TItem>(
+        HashSet<TItem> value,
+        [CallerArgumentExpression(nameof(value))] string? expression = null)
+    {
+        return new HashSetAssertion<TItem>(value, expression ?? "hashSet");
     }
 
     /// <summary>

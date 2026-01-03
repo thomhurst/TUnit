@@ -162,6 +162,7 @@ public static class AssertionExtensions
         this IAssertionSource<TObject> source,
         Expression<Func<TObject, IReadOnlyDictionary<TKey, TValue>>> memberSelector,
         Func<DictionaryMemberAssertionAdapter<IReadOnlyDictionary<TKey, TValue>, TKey, TValue>, Assertion<TTransformed>> assertions)
+        where TKey : notnull
     {
         var parentContext = source.Context;
         var memberPath = GetMemberPath(memberSelector);
@@ -214,6 +215,7 @@ public static class AssertionExtensions
         this IAssertionSource<TObject> source,
         Expression<Func<TObject, IReadOnlyDictionary<TKey, TValue>>> memberSelector,
         Func<DictionaryMemberAssertionAdapter<IReadOnlyDictionary<TKey, TValue>, TKey, TValue>, Assertion<IReadOnlyDictionary<TKey, TValue>>> assertions)
+        where TKey : notnull
     {
         var parentContext = source.Context;
         var memberPath = GetMemberPath(memberSelector);
@@ -268,6 +270,7 @@ public static class AssertionExtensions
         this IAssertionSource<TObject> source,
         Expression<Func<TObject, IReadOnlyDictionary<TKey, TValue>>> memberSelector,
         Func<DictionaryMemberAssertionAdapter<IReadOnlyDictionary<TKey, TValue>, TKey, TValue>, object> assertions)
+        where TKey : notnull
     {
         var parentContext = source.Context;
         var memberPath = GetMemberPath(memberSelector);
