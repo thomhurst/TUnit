@@ -113,6 +113,21 @@ public static class Assert
     {
         return new ReadOnlySetAssertion<TItem>(value, expression ?? "set");
     }
+
+    /// <summary>
+    /// Creates an assertion for an IAsyncEnumerable&lt;T&gt; value.
+    /// Enables collection-like assertion methods (IsEmpty, Contains, HasCount, All, Any).
+    /// Note: The async enumerable will be materialized (consumed) during assertion evaluation.
+    /// Example: await Assert.That(asyncEnumerable).IsNotEmpty();
+    /// Example: await Assert.That(asyncEnumerable).HasCount(5);
+    /// </summary>
+    [OverloadResolutionPriority(1)]
+    public static AsyncEnumerableAssertion<TItem> That<TItem>(
+        IAsyncEnumerable<TItem> value,
+        [CallerArgumentExpression(nameof(value))] string? expression = null)
+    {
+        return new AsyncEnumerableAssertion<TItem>(value, expression ?? "asyncEnumerable");
+    }
 #endif
 
     /// <summary>
@@ -127,6 +142,49 @@ public static class Assert
         [CallerArgumentExpression(nameof(value))] string? expression = null)
     {
         return new SetAssertion<TItem>(value, expression ?? "set");
+    }
+
+    /// <summary>
+    /// Creates an assertion for an IList&lt;T&gt; value.
+    /// Enables index-based assertion methods (HasItemAt, ItemAt, FirstItem, LastItem)
+    /// in addition to standard collection methods (IsEmpty, Contains, Count, etc.).
+    /// Example: await Assert.That(list).ItemAt(0).IsEqualTo(expected);
+    /// Example: await Assert.That(list).LastItem().IsNotNull();
+    /// </summary>
+    [OverloadResolutionPriority(4)]
+    public static ListAssertion<TItem> That<TItem>(
+        IList<TItem> value,
+        [CallerArgumentExpression(nameof(value))] string? expression = null)
+    {
+        return new ListAssertion<TItem>(value, expression ?? "list");
+    }
+
+    /// <summary>
+    /// Creates an assertion for an array value.
+    /// Arrays are routed to CollectionAssertion to preserve array-specific generated assertions.
+    /// Example: await Assert.That(array).IsSingleElement();
+    /// </summary>
+    [OverloadResolutionPriority(5)]
+    public static CollectionAssertion<TItem> That<TItem>(
+        TItem[] value,
+        [CallerArgumentExpression(nameof(value))] string? expression = null)
+    {
+        return new CollectionAssertion<TItem>(value!, expression);
+    }
+
+    /// <summary>
+    /// Creates an assertion for an IReadOnlyList&lt;T&gt; value.
+    /// Enables index-based assertion methods (HasItemAt, ItemAt, FirstItem, LastItem)
+    /// in addition to standard collection methods (IsEmpty, Contains, Count, etc.).
+    /// Example: await Assert.That(readOnlyList).ItemAt(0).IsEqualTo(expected);
+    /// Example: await Assert.That(readOnlyList).LastItem().IsNotNull();
+    /// </summary>
+    [OverloadResolutionPriority(3)]
+    public static ReadOnlyListAssertion<TItem> That<TItem>(
+        IReadOnlyList<TItem> value,
+        [CallerArgumentExpression(nameof(value))] string? expression = null)
+    {
+        return new ReadOnlyListAssertion<TItem>(value, expression ?? "readOnlyList");
     }
 
     /// <summary>
