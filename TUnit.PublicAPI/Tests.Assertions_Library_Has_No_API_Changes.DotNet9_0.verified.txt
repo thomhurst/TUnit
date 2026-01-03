@@ -1,4 +1,143 @@
 [assembly: .(".NETCoreApp,Version=v9.0", FrameworkDisplayName=".NET 9.0")]
+namespace .Abstractions
+{
+    public interface ICollectionAdapter<out TItem> : ., .<TItem>
+    {
+        string? Description { get; }
+    }
+    public interface IContainsCheck<TItem>
+    {
+        bool Contains(TItem item, .<TItem>? comparer = null);
+    }
+    public interface ICountable
+    {
+        int Count { get; }
+        bool IsEmpty { get; }
+    }
+    public interface IDictionaryAdapter<TKey, TValue> : .<.<TKey, TValue>>, ., .<.<TKey, TValue>>, .<TKey>, .<TKey, TValue> { }
+    public interface IIndexable<out TItem>
+    {
+        TItem this[int index] { get; }
+        int Length { get; }
+    }
+    public interface IItemSequence<out TItem>
+    {
+        .<TItem> AsEnumerable();
+    }
+    public interface IKeyLookup<in TKey>
+    {
+        bool ContainsKey(TKey key);
+    }
+    public interface IKeyValueAccess<TKey, TValue> : .<TKey>
+    {
+        .<TKey> Keys { get; }
+        .<TValue> Values { get; }
+        bool ContainsValue(TValue value, .<TValue>? comparer = null);
+        bool TryGetValue(TKey key, out TValue? value);
+    }
+    public interface ISetAdapter<TItem> : .<TItem>, .<TItem>, ., .<TItem>, .<TItem> { }
+    public interface ISetOperations<TItem>
+    {
+        bool IsProperSubsetOf(.<TItem> other);
+        bool IsProperSupersetOf(.<TItem> other);
+        bool IsSubsetOf(.<TItem> other);
+        bool IsSupersetOf(.<TItem> other);
+        bool Overlaps(.<TItem> other);
+        bool SetEquals(.<TItem> other);
+    }
+}
+namespace .Adapters
+{
+    public readonly struct DictionaryAdapter<TKey, TValue> : .<.<TKey, TValue>>, ., .<TKey, TValue>, .<.<TKey, TValue>>, .<TKey>, .<TKey, TValue>
+        where TKey :  notnull
+    {
+        public DictionaryAdapter(.<TKey, TValue>? source) { }
+        public int Count { get; }
+        public string? Description { get; }
+        public bool IsEmpty { get; }
+        public .<TKey> Keys { get; }
+        public .<TValue> Values { get; }
+        public .<.<TKey, TValue>> AsEnumerable() { }
+        public bool ContainsKey(TKey key) { }
+        public bool ContainsValue(TValue value, .<TValue>? comparer = null) { }
+        public bool TryGetValue(TKey key, out TValue? value) { }
+    }
+    public readonly struct EnumerableAdapter<TItem> : .<TItem>, .<TItem>, ., .<TItem>
+    {
+        public EnumerableAdapter(.<TItem>? source) { }
+        public int Count { get; }
+        public string? Description { get; }
+        public bool IsEmpty { get; }
+        public .<TItem> AsEnumerable() { }
+        public bool Contains(TItem item, .<TItem>? comparer = null) { }
+    }
+    public readonly struct MemoryAdapter<TItem> : .<TItem>, .<TItem>, ., .<TItem>, .<TItem>
+    {
+        public MemoryAdapter(<TItem> source) { }
+        public int Count { get; }
+        public string? Description { get; }
+        public bool IsEmpty { get; }
+        public TItem this[int index] { get; }
+        public int Length { get; }
+        public .<TItem> AsEnumerable() { }
+        public bool Contains(TItem item, .<TItem>? comparer = null) { }
+    }
+    public readonly struct ReadOnlyDictionaryAdapter<TKey, TValue> : .<.<TKey, TValue>>, ., .<TKey, TValue>, .<.<TKey, TValue>>, .<TKey>, .<TKey, TValue>
+        where TKey :  notnull
+    {
+        public ReadOnlyDictionaryAdapter(.<TKey, TValue>? source) { }
+        public int Count { get; }
+        public string? Description { get; }
+        public bool IsEmpty { get; }
+        public .<TKey> Keys { get; }
+        public .<TValue> Values { get; }
+        public .<.<TKey, TValue>> AsEnumerable() { }
+        public bool ContainsKey(TKey key) { }
+        public bool ContainsValue(TValue value, .<TValue>? comparer = null) { }
+        public bool TryGetValue(TKey key, out TValue? value) { }
+    }
+    public readonly struct ReadOnlyMemoryAdapter<TItem> : .<TItem>, .<TItem>, ., .<TItem>, .<TItem>
+    {
+        public ReadOnlyMemoryAdapter(<TItem> source) { }
+        public int Count { get; }
+        public string? Description { get; }
+        public bool IsEmpty { get; }
+        public TItem this[int index] { get; }
+        public int Length { get; }
+        public .<TItem> AsEnumerable() { }
+        public bool Contains(TItem item, .<TItem>? comparer = null) { }
+    }
+    public readonly struct ReadOnlySetAdapter<TItem> : .<TItem>, .<TItem>, ., .<TItem>, .<TItem>, .<TItem>
+    {
+        public ReadOnlySetAdapter(.<TItem>? source) { }
+        public int Count { get; }
+        public string? Description { get; }
+        public bool IsEmpty { get; }
+        public .<TItem> AsEnumerable() { }
+        public bool Contains(TItem item, .<TItem>? comparer = null) { }
+        public bool IsProperSubsetOf(.<TItem> other) { }
+        public bool IsProperSupersetOf(.<TItem> other) { }
+        public bool IsSubsetOf(.<TItem> other) { }
+        public bool IsSupersetOf(.<TItem> other) { }
+        public bool Overlaps(.<TItem> other) { }
+        public bool SetEquals(.<TItem> other) { }
+    }
+    public readonly struct SetAdapter<TItem> : .<TItem>, .<TItem>, ., .<TItem>, .<TItem>, .<TItem>
+    {
+        public SetAdapter(.<TItem>? source) { }
+        public int Count { get; }
+        public string? Description { get; }
+        public bool IsEmpty { get; }
+        public .<TItem> AsEnumerable() { }
+        public bool Contains(TItem item, .<TItem>? comparer = null) { }
+        public bool IsProperSubsetOf(.<TItem> other) { }
+        public bool IsProperSupersetOf(.<TItem> other) { }
+        public bool IsSubsetOf(.<TItem> other) { }
+        public bool IsSupersetOf(.<TItem> other) { }
+        public bool Overlaps(.<TItem> other) { }
+        public bool SetEquals(.<TItem> other) { }
+    }
+}
 namespace 
 {
     public static class Assert
@@ -19,18 +158,29 @@ namespace
         public static . That(. task, [.("task")] string? expression = null) { }
         [.(2)]
         public static .<string> That(string? value, [.("value")] string? expression = null) { }
+        [.(3)]
+        public static .<TItem> That<TItem>(.<TItem> value, [.("value")] string? expression = null) { }
         [.(1)]
         public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
+        [.(2)]
+        public static .<TItem> That<TItem>(.<TItem> value, [.("value")] string? expression = null) { }
+        [.(2)]
+        public static .<TItem> That<TItem>(.<TItem> value, [.("value")] string? expression = null) { }
         [.(1)]
         public static .<TItem> That<TItem>(<.<TItem>?> func, [.("func")] string? expression = null) { }
         [.(1)]
         public static .<TItem> That<TItem>(<.<.<TItem>?>> func, [.("func")] string? expression = null) { }
         public static .<TValue> That<TValue>(<.<TValue?>> func, [.("func")] string? expression = null) { }
         public static .<TValue> That<TValue>(<TValue?> func, [.("func")] string? expression = null) { }
+        [.(1)]
+        public static .<TItem> That<TItem>(<TItem> value, [.("value")] string? expression = null) { }
+        [.(1)]
+        public static .<TItem> That<TItem>(<TItem> value, [.("value")] string? expression = null) { }
         public static .<TValue> That<TValue>(.<TValue> task, [.("task")] string? expression = null) { }
         public static .<TValue> That<TValue>(TValue? value, [.("value")] string? expression = null) { }
         [.(3)]
-        public static .<TKey, TValue> That<TKey, TValue>(.<TKey, TValue> value, [.("value")] string? expression = null) { }
+        public static .<TKey, TValue> That<TKey, TValue>(.<TKey, TValue> value, [.("value")] string? expression = null)
+            where TKey :  notnull { }
         public static  Throws( exceptionType,  action) { }
         public static TException Throws<TException>( action)
             where TException :  { }
@@ -272,6 +422,129 @@ namespace .Chaining
         public OrAssertion(.<TValue> first, .<TValue> second) { }
         public new .<TValue> And { get; }
         public override .<TValue?> AssertAsync() { }
+        protected override string GetExpectation() { }
+    }
+}
+namespace .Collections
+{
+    public static class CollectionChecks
+    {
+        public static . CheckAll<TItem>(.<TItem> adapter, <TItem, bool> predicate, string predicateExpression) { }
+        public static . CheckAllKeys<TKey, TValue>(.<TKey, TValue> adapter, <TKey, bool> predicate) { }
+        public static . CheckAllValues<TKey, TValue>(.<TKey, TValue> adapter, <TValue, bool> predicate) { }
+        public static . CheckAny<TItem>(.<TItem> adapter, <TItem, bool> predicate) { }
+        public static . CheckAnyKey<TKey, TValue>(.<TKey, TValue> adapter, <TKey, bool> predicate) { }
+        public static . CheckAnyValue<TKey, TValue>(.<TKey, TValue> adapter, <TValue, bool> predicate) { }
+        public static . CheckContains<TItem>(.<TItem> adapter, TItem expected, .<TItem>? comparer = null) { }
+        public static . CheckContainsKey<TKey, TValue>(.<TKey, TValue> adapter, TKey key) { }
+        public static . CheckContainsKeyWithValue<TKey, TValue>(.<TKey, TValue> adapter, TKey key, TValue expectedValue, .<TValue>? comparer = null) { }
+        public static . CheckContainsPredicate<TItem>(.<TItem> adapter, <TItem, bool> predicate, out TItem? foundItem) { }
+        public static . CheckContainsValue<TKey, TValue>(.<TKey, TValue> adapter, TValue value, .<TValue>? comparer = null) { }
+        public static . CheckCount<TItem>(.<TItem> adapter, int expected) { }
+        public static . CheckDoesNotContain<TItem>(.<TItem> adapter, TItem expected, .<TItem>? comparer = null) { }
+        public static . CheckDoesNotContainKey<TKey, TValue>(.<TKey, TValue> adapter, TKey key) { }
+        public static . CheckDoesNotContainPredicate<TItem>(.<TItem> adapter, <TItem, bool> predicate) { }
+        public static . CheckDoesNotContainValue<TKey, TValue>(.<TKey, TValue> adapter, TValue value, .<TValue>? comparer = null) { }
+        public static . CheckDoesNotOverlap<TItem>(.<TItem> adapter, .<TItem> other) { }
+        public static . CheckHasDistinctItems<TItem>(.<TItem> adapter, .<TItem>? comparer = null) { }
+        public static . CheckHasSingleItem<TItem>(.<TItem> adapter) { }
+        public static . CheckIsEmpty<TItem>(.<TItem> adapter) { }
+        public static . CheckIsInDescendingOrder<TItem>(.<TItem> adapter, .<TItem>? comparer = null) { }
+        public static . CheckIsInOrder<TItem>(.<TItem> adapter, .<TItem>? comparer = null) { }
+        public static . CheckIsNotEmpty<TItem>(.<TItem> adapter) { }
+        public static . CheckIsProperSubsetOf<TItem>(.<TItem> adapter, .<TItem> other) { }
+        public static . CheckIsProperSupersetOf<TItem>(.<TItem> adapter, .<TItem> other) { }
+        public static . CheckIsSubsetOf<TItem>(.<TItem> adapter, .<TItem> other) { }
+        public static . CheckIsSupersetOf<TItem>(.<TItem> adapter, .<TItem> other) { }
+        public static . CheckOverlaps<TItem>(.<TItem> adapter, .<TItem> other) { }
+        public static . CheckSetEquals<TItem>(.<TItem> adapter, .<TItem> other) { }
+    }
+    public class MemoryAllAssertion<TMemory, TItem> : .<TMemory, TItem>
+    {
+        public MemoryAllAssertion(.<TMemory> context, <TMemory, .<TItem>> adapterFactory, <TItem, bool> predicate, string predicateExpression) { }
+        protected override .<.> CheckAsync(.<TMemory> metadata) { }
+        protected override .<TItem> CreateAdapter(TMemory value) { }
+        protected override string GetExpectation() { }
+    }
+    public class MemoryAnyAssertion<TMemory, TItem> : .<TMemory, TItem>
+    {
+        public MemoryAnyAssertion(.<TMemory> context, <TMemory, .<TItem>> adapterFactory, <TItem, bool> predicate) { }
+        protected override .<.> CheckAsync(.<TMemory> metadata) { }
+        protected override .<TItem> CreateAdapter(TMemory value) { }
+        protected override string GetExpectation() { }
+    }
+    public class MemoryContainsAssertion<TMemory, TItem> : .<TMemory, TItem>
+    {
+        public MemoryContainsAssertion(.<TMemory> context, <TMemory, .<TItem>> adapterFactory, TItem expected, .<TItem>? comparer = null) { }
+        protected override .<.> CheckAsync(.<TMemory> metadata) { }
+        protected override .<TItem> CreateAdapter(TMemory value) { }
+        protected override string GetExpectation() { }
+    }
+    public class MemoryCountEqualsAssertion<TMemory, TItem> : .<TMemory, TItem>
+    {
+        protected override .<.> CheckAsync(.<TMemory> metadata) { }
+        protected override .<TItem> CreateAdapter(TMemory value) { }
+        protected override string GetExpectation() { }
+    }
+    public class MemoryCountSource<TMemory, TItem>
+    {
+        public MemoryCountSource(.<TMemory> context, <TMemory, .<TItem>> adapterFactory) { }
+        public .<TMemory, TItem> IsEqualTo(int expected, [.("expected")] string? expression = null) { }
+        public .<TMemory, TItem> IsGreaterThan(int expected, [.("expected")] string? expression = null) { }
+        public .<TMemory, TItem> IsGreaterThanOrEqualTo(int expected, [.("expected")] string? expression = null) { }
+        public .<TMemory, TItem> IsLessThan(int expected, [.("expected")] string? expression = null) { }
+        public .<TMemory, TItem> IsLessThanOrEqualTo(int expected, [.("expected")] string? expression = null) { }
+        public .<TMemory, TItem> IsNotEqualTo(int expected, [.("expected")] string? expression = null) { }
+        public .<TMemory, TItem> IsPositive() { }
+        public .<TMemory, TItem> IsZero() { }
+    }
+    public class MemoryDoesNotContainAssertion<TMemory, TItem> : .<TMemory, TItem>
+    {
+        public MemoryDoesNotContainAssertion(.<TMemory> context, <TMemory, .<TItem>> adapterFactory, TItem expected, .<TItem>? comparer = null) { }
+        protected override .<.> CheckAsync(.<TMemory> metadata) { }
+        protected override .<TItem> CreateAdapter(TMemory value) { }
+        protected override string GetExpectation() { }
+    }
+    public class MemoryHasDistinctItemsAssertion<TMemory, TItem> : .<TMemory, TItem>
+    {
+        public MemoryHasDistinctItemsAssertion(.<TMemory> context, <TMemory, .<TItem>> adapterFactory, .<TItem>? comparer = null) { }
+        protected override .<.> CheckAsync(.<TMemory> metadata) { }
+        protected override .<TItem> CreateAdapter(TMemory value) { }
+        protected override string GetExpectation() { }
+    }
+    public class MemoryHasSingleItemAssertion<TMemory, TItem> : .<TMemory, TItem>
+    {
+        public MemoryHasSingleItemAssertion(.<TMemory> context, <TMemory, .<TItem>> adapterFactory) { }
+        protected override .<.> CheckAsync(.<TMemory> metadata) { }
+        protected override .<TItem> CreateAdapter(TMemory value) { }
+        protected override string GetExpectation() { }
+    }
+    public class MemoryIsEmptyAssertion<TMemory, TItem> : .<TMemory, TItem>
+    {
+        public MemoryIsEmptyAssertion(.<TMemory> context, <TMemory, .<TItem>> adapterFactory) { }
+        protected override .<.> CheckAsync(.<TMemory> metadata) { }
+        protected override .<TItem> CreateAdapter(TMemory value) { }
+        protected override string GetExpectation() { }
+    }
+    public class MemoryIsInDescendingOrderAssertion<TMemory, TItem> : .<TMemory, TItem>
+    {
+        public MemoryIsInDescendingOrderAssertion(.<TMemory> context, <TMemory, .<TItem>> adapterFactory, .<TItem>? comparer = null) { }
+        protected override .<.> CheckAsync(.<TMemory> metadata) { }
+        protected override .<TItem> CreateAdapter(TMemory value) { }
+        protected override string GetExpectation() { }
+    }
+    public class MemoryIsInOrderAssertion<TMemory, TItem> : .<TMemory, TItem>
+    {
+        public MemoryIsInOrderAssertion(.<TMemory> context, <TMemory, .<TItem>> adapterFactory, .<TItem>? comparer = null) { }
+        protected override .<.> CheckAsync(.<TMemory> metadata) { }
+        protected override .<TItem> CreateAdapter(TMemory value) { }
+        protected override string GetExpectation() { }
+    }
+    public class MemoryIsNotEmptyAssertion<TMemory, TItem> : .<TMemory, TItem>
+    {
+        public MemoryIsNotEmptyAssertion(.<TMemory> context, <TMemory, .<TItem>> adapterFactory) { }
+        protected override .<.> CheckAsync(.<TMemory> metadata) { }
+        protected override .<TItem> CreateAdapter(TMemory value) { }
         protected override string GetExpectation() { }
     }
 }
@@ -589,8 +862,41 @@ namespace .Conditions
         protected override bool HasToleranceValue() { }
         protected override bool IsWithinTolerance(decimal actual, decimal expected, decimal tolerance) { }
     }
+    public class DictionaryAllKeysAssertion<TDictionary, TKey, TValue> : .<TDictionary, TKey, TValue>
+        where TDictionary : .<TKey, TValue>
+        where TKey :  notnull
+    {
+        public DictionaryAllKeysAssertion(.<TDictionary> context, <TKey, bool> predicate) { }
+        protected override .<.> CheckAsync(.<TDictionary> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class DictionaryAllValuesAssertion<TDictionary, TKey, TValue> : .<TDictionary, TKey, TValue>
+        where TDictionary : .<TKey, TValue>
+        where TKey :  notnull
+    {
+        public DictionaryAllValuesAssertion(.<TDictionary> context, <TValue, bool> predicate) { }
+        protected override .<.> CheckAsync(.<TDictionary> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class DictionaryAnyKeyAssertion<TDictionary, TKey, TValue> : .<TDictionary, TKey, TValue>
+        where TDictionary : .<TKey, TValue>
+        where TKey :  notnull
+    {
+        public DictionaryAnyKeyAssertion(.<TDictionary> context, <TKey, bool> predicate) { }
+        protected override .<.> CheckAsync(.<TDictionary> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class DictionaryAnyValueAssertion<TDictionary, TKey, TValue> : .<TDictionary, TKey, TValue>
+        where TDictionary : .<TKey, TValue>
+        where TKey :  notnull
+    {
+        public DictionaryAnyValueAssertion(.<TDictionary> context, <TValue, bool> predicate) { }
+        protected override .<.> CheckAsync(.<TDictionary> metadata) { }
+        protected override string GetExpectation() { }
+    }
     public class DictionaryContainsKeyAssertion<TDictionary, TKey, TValue> : .<TDictionary, TKey, TValue>
         where TDictionary : .<TKey, TValue>
+        where TKey :  notnull
     {
         public DictionaryContainsKeyAssertion(.<TDictionary> context, TKey expectedKey, .<TKey>? comparer = null) { }
         protected override .<.> CheckAsync(.<TDictionary> metadata) { }
@@ -598,15 +904,41 @@ namespace .Conditions
         public .<TDictionary, TKey, TValue> Using(.<TKey> comparer) { }
         public .<TDictionary, TKey, TValue> Using(<TKey?, TKey?, bool> equalityPredicate) { }
     }
+    public class DictionaryContainsKeyWithValueAssertion<TDictionary, TKey, TValue> : .<TDictionary, TKey, TValue>
+        where TDictionary : .<TKey, TValue>
+        where TKey :  notnull
+    {
+        public DictionaryContainsKeyWithValueAssertion(.<TDictionary> context, TKey expectedKey, TValue expectedValue, .<TValue>? comparer = null) { }
+        protected override .<.> CheckAsync(.<TDictionary> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class DictionaryContainsValueAssertion<TDictionary, TKey, TValue> : .<TDictionary, TKey, TValue>
+        where TDictionary : .<TKey, TValue>
+        where TKey :  notnull
+    {
+        public DictionaryContainsValueAssertion(.<TDictionary> context, TValue expectedValue, .<TValue>? comparer = null) { }
+        protected override .<.> CheckAsync(.<TDictionary> metadata) { }
+        protected override string GetExpectation() { }
+    }
     public class DictionaryDoesNotContainKeyAssertion<TDictionary, TKey, TValue> : .<TDictionary, TKey, TValue>
         where TDictionary : .<TKey, TValue>
+        where TKey :  notnull
     {
         public DictionaryDoesNotContainKeyAssertion(.<TDictionary> context, TKey expectedKey) { }
         protected override .<.> CheckAsync(.<TDictionary> metadata) { }
         protected override string GetExpectation() { }
     }
+    public class DictionaryDoesNotContainValueAssertion<TDictionary, TKey, TValue> : .<TDictionary, TKey, TValue>
+        where TDictionary : .<TKey, TValue>
+        where TKey :  notnull
+    {
+        public DictionaryDoesNotContainValueAssertion(.<TDictionary> context, TValue expectedValue, .<TValue>? comparer = null) { }
+        protected override .<.> CheckAsync(.<TDictionary> metadata) { }
+        protected override string GetExpectation() { }
+    }
     public class DictionaryMemberAssertionAdapter<TDictionary, TKey, TValue> : .<TDictionary, TKey, TValue>
-        where TDictionary : .<TKey, TValue> { }
+        where TDictionary : .<TKey, TValue>
+        where TKey :  notnull { }
     [.("HasFiles")]
     public class DirectoryHasFilesAssertion : .<.DirectoryInfo>
     {
@@ -1046,6 +1378,62 @@ namespace .Conditions
     {
         public SatisfiesAssertion(.<TValue> context, <TValue?, bool> predicate, string predicateDescription) { }
         protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class SetDoesNotOverlapAssertion<TSet, TItem> : .<TSet, TItem>
+        where TSet : .<TItem>
+    {
+        public SetDoesNotOverlapAssertion(.<TSet> context, <TSet, .<TItem>> adapterFactory, .<TItem> other) { }
+        protected override .<.> CheckAsync(.<TSet> metadata) { }
+        protected override .<TItem> CreateSetAdapter(TSet value) { }
+        protected override string GetExpectation() { }
+    }
+    public class SetEqualsAssertion<TSet, TItem> : .<TSet, TItem>
+        where TSet : .<TItem>
+    {
+        public SetEqualsAssertion(.<TSet> context, <TSet, .<TItem>> adapterFactory, .<TItem> other) { }
+        protected override .<.> CheckAsync(.<TSet> metadata) { }
+        protected override .<TItem> CreateSetAdapter(TSet value) { }
+        protected override string GetExpectation() { }
+    }
+    public class SetIsProperSubsetOfAssertion<TSet, TItem> : .<TSet, TItem>
+        where TSet : .<TItem>
+    {
+        public SetIsProperSubsetOfAssertion(.<TSet> context, <TSet, .<TItem>> adapterFactory, .<TItem> other) { }
+        protected override .<.> CheckAsync(.<TSet> metadata) { }
+        protected override .<TItem> CreateSetAdapter(TSet value) { }
+        protected override string GetExpectation() { }
+    }
+    public class SetIsProperSupersetOfAssertion<TSet, TItem> : .<TSet, TItem>
+        where TSet : .<TItem>
+    {
+        public SetIsProperSupersetOfAssertion(.<TSet> context, <TSet, .<TItem>> adapterFactory, .<TItem> other) { }
+        protected override .<.> CheckAsync(.<TSet> metadata) { }
+        protected override .<TItem> CreateSetAdapter(TSet value) { }
+        protected override string GetExpectation() { }
+    }
+    public class SetIsSubsetOfAssertion<TSet, TItem> : .<TSet, TItem>
+        where TSet : .<TItem>
+    {
+        public SetIsSubsetOfAssertion(.<TSet> context, <TSet, .<TItem>> adapterFactory, .<TItem> other) { }
+        protected override .<.> CheckAsync(.<TSet> metadata) { }
+        protected override .<TItem> CreateSetAdapter(TSet value) { }
+        protected override string GetExpectation() { }
+    }
+    public class SetIsSupersetOfAssertion<TSet, TItem> : .<TSet, TItem>
+        where TSet : .<TItem>
+    {
+        public SetIsSupersetOfAssertion(.<TSet> context, <TSet, .<TItem>> adapterFactory, .<TItem> other) { }
+        protected override .<.> CheckAsync(.<TSet> metadata) { }
+        protected override .<TItem> CreateSetAdapter(TSet value) { }
+        protected override string GetExpectation() { }
+    }
+    public class SetOverlapsAssertion<TSet, TItem> : .<TSet, TItem>
+        where TSet : .<TItem>
+    {
+        public SetOverlapsAssertion(.<TSet> context, <TSet, .<TItem>> adapterFactory, .<TItem> other) { }
+        protected override .<.> CheckAsync(.<TSet> metadata) { }
+        protected override .<TItem> CreateSetAdapter(TSet value) { }
         protected override string GetExpectation() { }
     }
     [.<float>("IsFinite", CustomName="IsNotFinite", ExpectationMessage="be finite", NegateLogic=true)]
@@ -1522,9 +1910,11 @@ namespace .Core
     public class CollectionOrContinuation<TCollection, TItem> : .<TCollection, TItem>
         where TCollection : .<TItem> { }
     public class DictionaryAndContinuation<TDictionary, TKey, TValue> : .<TDictionary, TKey, TValue>
-        where TDictionary : .<TKey, TValue> { }
+        where TDictionary : .<TKey, TValue>
+        where TKey :  notnull { }
     public class DictionaryOrContinuation<TDictionary, TKey, TValue> : .<TDictionary, TKey, TValue>
-        where TDictionary : .<TKey, TValue> { }
+        where TDictionary : .<TKey, TValue>
+        where TKey :  notnull { }
     public sealed class EvaluationContext<TValue>
     {
         public EvaluationContext(<.<<TValue?, ?>>> evaluator) { }
@@ -1744,15 +2134,18 @@ namespace .Extensions
         [.(2)]
         public static .<TObject> Member<TObject, TItem, TTransformed>(this .<TObject> source, .<<TObject, .<TItem>>> memberSelector, <.<.<TItem>, TItem>, .<TTransformed>> assertions) { }
         [.(2)]
-        public static .<TObject> Member<TObject, TKey, TValue>(this .<TObject> source, .<<TObject, .<TKey, TValue>>> memberSelector, <.<.<TKey, TValue>, TKey, TValue>, .<.<TKey, TValue>>> assertions) { }
+        public static .<TObject> Member<TObject, TKey, TValue>(this .<TObject> source, .<<TObject, .<TKey, TValue>>> memberSelector, <.<.<TKey, TValue>, TKey, TValue>, .<.<TKey, TValue>>> assertions)
+            where TKey :  notnull { }
         [.("Uses reflection for legacy compatibility. For AOT compatibility, use the Member<T" +
             "Object, TKey, TValue, TTransformed> overload with strongly-typed assertions.")]
         [.(2)]
-        public static .<TObject> Member<TObject, TKey, TValue>(this .<TObject> source, .<<TObject, .<TKey, TValue>>> memberSelector, <.<.<TKey, TValue>, TKey, TValue>, object> assertions) { }
+        public static .<TObject> Member<TObject, TKey, TValue>(this .<TObject> source, .<<TObject, .<TKey, TValue>>> memberSelector, <.<.<TKey, TValue>, TKey, TValue>, object> assertions)
+            where TKey :  notnull { }
         [.(1)]
         public static .<TObject> Member<TObject, TMember, TTransformed>(this .<TObject> source, .<<TObject, TMember>> memberSelector, <.<TMember>, .<TTransformed>> assertions) { }
         [.(3)]
-        public static .<TObject> Member<TObject, TKey, TValue, TTransformed>(this .<TObject> source, .<<TObject, .<TKey, TValue>>> memberSelector, <.<.<TKey, TValue>, TKey, TValue>, .<TTransformed>> assertions) { }
+        public static .<TObject> Member<TObject, TKey, TValue, TTransformed>(this .<TObject> source, .<<TObject, .<TKey, TValue>>> memberSelector, <.<.<TKey, TValue>, TKey, TValue>, .<TTransformed>> assertions)
+            where TKey :  notnull { }
         public static .<TValue> Satisfies<TValue>(this .<TValue> source, <TValue?, bool> predicate, [.("predicate")] string? expression = null) { }
         public static .<TValue, TMapped> Satisfies<TValue, TMapped>(this .<TValue> source, <TValue?, TMapped> selector, <.<TMapped>, .?> assertions, [.("selector")] string? selectorExpression = null) { }
         public static .<TValue, TMapped> SatisfiesAsync<TValue, TMapped>(this .<TValue> source, <TValue?, .<TMapped?>> selector, <.<TMapped>, .?> assertions, [.("selector")] string? selectorExpression = null) { }
@@ -4681,16 +5074,25 @@ namespace .Sources
     }
     public abstract class DictionaryAssertionBase<TDictionary, TKey, TValue> : .<TDictionary, .<TKey, TValue>>
         where TDictionary : .<TKey, TValue>
+        where TKey :  notnull
     {
         protected DictionaryAssertionBase(.<TDictionary> context) { }
         public new .<TDictionary, TKey, TValue> And { get; }
         public new .<TDictionary, TKey, TValue> Or { get; }
+        public .<TDictionary, TKey, TValue> AllKeys(<TKey, bool> predicate, [.("predicate")] string? expression = null) { }
+        public .<TDictionary, TKey, TValue> AllValues(<TValue, bool> predicate, [.("predicate")] string? expression = null) { }
+        public .<TDictionary, TKey, TValue> AnyKey(<TKey, bool> predicate, [.("predicate")] string? expression = null) { }
+        public .<TDictionary, TKey, TValue> AnyValue(<TValue, bool> predicate, [.("predicate")] string? expression = null) { }
         public .<TDictionary, TKey, TValue> ContainsKey(TKey expectedKey, [.("expectedKey")] string? expression = null) { }
         public .<TDictionary, TKey, TValue> ContainsKey(TKey expectedKey, .<TKey>? comparer, [.("expectedKey")] string? keyExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public .<TDictionary, TKey, TValue> ContainsKeyWithValue(TKey expectedKey, TValue expectedValue, [.("expectedKey")] string? keyExpression = null, [.("expectedValue")] string? valueExpression = null) { }
+        public .<TDictionary, TKey, TValue> ContainsValue(TValue expectedValue, [.("expectedValue")] string? expression = null) { }
         public .<TDictionary, TKey, TValue> DoesNotContainKey(TKey expectedKey, [.("expectedKey")] string? expression = null) { }
+        public .<TDictionary, TKey, TValue> DoesNotContainValue(TValue expectedValue, [.("expectedValue")] string? expression = null) { }
         protected override string GetExpectation() { }
     }
     public class DictionaryAssertion<TKey, TValue> : .<.<TKey, TValue>, TKey, TValue>
+        where TKey :  notnull
     {
         public DictionaryAssertion(.<TKey, TValue> value, string? expression) { }
     }
@@ -4714,6 +5116,88 @@ namespace .Sources
             where TException :  { }
         public .<TException> ThrowsExactly<TException>()
             where TException :  { }
+    }
+    public class HashSetAssertion<TItem> : .<.<TItem>, TItem>, ., .<.<TItem>>
+    {
+        public HashSetAssertion(.<TItem> value, string expression) { }
+        protected override .<TItem> CreateSetAdapter(.<TItem> value) { }
+    }
+    public class MemoryAndContinuation<TMemory, TItem> : .<TMemory, TItem>
+    {
+        protected override .<TItem> CreateAdapter(TMemory value) { }
+    }
+    public abstract class MemoryAssertionBase<TMemory, TItem> : .<TMemory>, ., .<TMemory>
+    {
+        protected MemoryAssertionBase(.<TMemory> context) { }
+        public new .<TMemory, TItem> And { get; }
+        public new .<TMemory, TItem> Or { get; }
+        public .<TMemory, TItem> All(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public .<TMemory, TItem> Any(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public .<TMemory, TItem> Contains(TItem expected, [.("expected")] string? expression = null) { }
+        public .<TMemory, TItem> Count() { }
+        protected abstract .<TItem> CreateAdapter(TMemory value);
+        public .<TMemory, TItem> DoesNotContain(TItem expected, [.("expected")] string? expression = null) { }
+        protected override string GetExpectation() { }
+        public .<TMemory, TItem> HasDistinctItems() { }
+        public .<TMemory, TItem> HasSingleItem() { }
+        public .<TTarget, TMemory> IsAssignableTo<TTarget>() { }
+        public .<TMemory, TItem> IsEmpty() { }
+        public .<TMemory, TItem> IsInDescendingOrder() { }
+        public .<TMemory, TItem> IsInOrder() { }
+        public .<TTarget, TMemory> IsNotAssignableTo<TTarget>() { }
+        public .<TMemory, TItem> IsNotEmpty() { }
+        public .<TMemory, TExpected> IsNotTypeOf<TExpected>() { }
+        public .<TMemory, TExpected> IsTypeOf<TExpected>() { }
+    }
+    public class MemoryAssertion<TItem> : .<<TItem>, TItem>, ., .<<TItem>>
+    {
+        public MemoryAssertion(<TItem> value, string expression) { }
+        protected override .<TItem> CreateAdapter(<TItem> value) { }
+    }
+    public class MemoryOrContinuation<TMemory, TItem> : .<TMemory, TItem>
+    {
+        protected override .<TItem> CreateAdapter(TMemory value) { }
+    }
+    public class ReadOnlyMemoryAssertion<TItem> : .<<TItem>, TItem>, ., .<<TItem>>
+    {
+        public ReadOnlyMemoryAssertion(<TItem> value, string expression) { }
+        protected override .<TItem> CreateAdapter(<TItem> value) { }
+    }
+    public class ReadOnlySetAssertion<TItem> : .<.<TItem>, TItem>, ., .<.<TItem>>
+    {
+        public ReadOnlySetAssertion(.<TItem> value, string expression) { }
+        protected override .<TItem> CreateSetAdapter(.<TItem> value) { }
+    }
+    public class SetAndContinuation<TSet, TItem> : .<TSet, TItem>
+        where TSet : .<TItem>
+    {
+        protected override .<TItem> CreateSetAdapter(TSet value) { }
+    }
+    public abstract class SetAssertionBase<TSet, TItem> : .<TSet, TItem>
+        where TSet : .<TItem>
+    {
+        protected SetAssertionBase(.<TSet> context) { }
+        public new .<TSet, TItem> And { get; }
+        public new .<TSet, TItem> Or { get; }
+        protected abstract .<TItem> CreateSetAdapter(TSet value);
+        public .<TSet, TItem> DoesNotOverlap(.<TItem> other, [.("other")] string? expression = null) { }
+        protected override string GetExpectation() { }
+        public .<TSet, TItem> IsProperSubsetOf(.<TItem> other, [.("other")] string? expression = null) { }
+        public .<TSet, TItem> IsProperSupersetOf(.<TItem> other, [.("other")] string? expression = null) { }
+        public .<TSet, TItem> IsSubsetOf(.<TItem> other, [.("other")] string? expression = null) { }
+        public .<TSet, TItem> IsSupersetOf(.<TItem> other, [.("other")] string? expression = null) { }
+        public .<TSet, TItem> Overlaps(.<TItem> other, [.("other")] string? expression = null) { }
+        public .<TSet, TItem> SetEquals(.<TItem> other, [.("other")] string? expression = null) { }
+    }
+    public class SetAssertion<TItem> : .<.<TItem>, TItem>, ., .<.<TItem>>
+    {
+        public SetAssertion(.<TItem> value, string expression) { }
+        protected override .<TItem> CreateSetAdapter(.<TItem> value) { }
+    }
+    public class SetOrContinuation<TSet, TItem> : .<TSet, TItem>
+        where TSet : .<TItem>
+    {
+        protected override .<TItem> CreateSetAdapter(TSet value) { }
     }
     public class TaskAssertion<TValue> : ., .<.<TValue?>>, .<TValue>, .<TValue>
     {
