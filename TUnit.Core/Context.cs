@@ -79,7 +79,7 @@ public abstract class Context : IContext, IDisposable
 
         try
         {
-            return _outputBuilder.ToString().Trim();
+            return _outputBuilder.ToString();
         }
         finally
         {
@@ -98,7 +98,7 @@ public abstract class Context : IContext, IDisposable
 
         try
         {
-            return _errorOutputBuilder.ToString().Trim();
+            return _errorOutputBuilder.ToString();
         }
         finally
         {
