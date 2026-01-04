@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Core.Helpers;
 
@@ -48,12 +49,17 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         s_trackedObjects.GetOrAdd(obj, static _ => new Counter());
 
     /// <summary>
-    /// Flattens a ConcurrentDictionary of depth-keyed HashSets into a single HashSet.
+    /// Flattens a ConcurrentDictionary of depth-keyed HashSets into a single ISet.
     /// Thread-safe: locks each HashSet while copying.
     /// Pre-calculates capacity to avoid HashSet resizing during population.
     /// </summary>
-    private static HashSet<object> FlattenTrackedObjects(ConcurrentDictionary<int, HashSet<object>> trackedObjects)
+    private static ISet<object> FlattenTrackedObjects(ConcurrentDictionary<int, HashSet<object>> trackedObjects)
     {
+        if (trackedObjects.IsEmpty)
+        {
+            return ImmutableHashSet<object>.Empty;
+        }
+
 #if NETSTANDARD2_0
         // .NET Standard 2.0 doesn't support HashSet capacity constructor
         var result = new HashSet<object>(Helpers.ReferenceEqualityComparer.Instance);
@@ -91,8 +97,13 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         var alreadyTracked = FlattenTrackedObjects(testContext.TrackedObjects);
 
         // Get new trackable objects
-        var newTrackableObjects = new HashSet<object>(Helpers.ReferenceEqualityComparer.Instance);
         var trackableDict = trackableObjectGraphProvider.GetTrackableObjects(testContext);
+        if (trackableDict.IsEmpty && alreadyTracked.Count == 0)
+        {
+            return;
+        }
+
+        var newTrackableObjects = new HashSet<object>(Helpers.ReferenceEqualityComparer.Instance);
         foreach (var kvp in trackableDict)
         {
             lock (kvp.Value)
@@ -113,11 +124,20 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         }
     }
 
-    public async ValueTask UntrackObjects(TestContext testContext, List<Exception> cleanupExceptions)
+    public ValueTask UntrackObjects(TestContext testContext, List<Exception> cleanupExceptions)
     {
         // Get all objects to untrack (DRY: use helper method)
         var objectsToUntrack = FlattenTrackedObjects(testContext.TrackedObjects);
+        if (objectsToUntrack.Count == 0)
+        {
+            return ValueTask.CompletedTask;
+        }
 
+        return UntrackObjectsAsync(cleanupExceptions, objectsToUntrack);
+    }
+
+    private async ValueTask UntrackObjectsAsync(List<Exception> cleanupExceptions, ISet<object> objectsToUntrack)
+    {
         foreach (var obj in objectsToUntrack)
         {
             try
