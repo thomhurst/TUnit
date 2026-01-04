@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace TUnit.Engine.Helpers;
+namespace TUnit.Core.Helpers;
 
 // From https://github.com/dotnet/runtime/blob/d968dc4bbdc0c26876c2cdaadf42740e891586b9/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/ValueListBuilder.cs#L8
 internal ref partial struct ValueListBuilder<T>

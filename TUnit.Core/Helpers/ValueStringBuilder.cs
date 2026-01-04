@@ -148,12 +148,12 @@ internal ref struct ValueStringBuilder
 
     public void Append(int value) => AppendSpanFormattable(value);
 
-    #if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER
     private void AppendSpanFormattable<T>(T value) where T : ISpanFormattable
     {
         Debug.Assert(typeof(T).Assembly.Equals(typeof(object).Assembly), "Implementation trusts the results of TryFormat because T is expected to be something known");
 
-        if (value.TryFormat(_chars, out int charsWritten, format: default, provider: null))
+        if (value.TryFormat(_chars[_pos..], out int charsWritten, format: default, provider: null))
         {
             _pos += charsWritten;
             return;

@@ -1,7 +1,6 @@
-using System.Text;
 using TUnit.Core;
+using TUnit.Core.Helpers;
 using TUnit.Engine.Building;
-using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Services;
 
@@ -18,32 +17,39 @@ internal static class TestIdentifierService
         // Use ValueStringBuilder for efficient string concatenation
         var vsb = new ValueStringBuilder(stackalloc char[256]); // Pre-size for typical test ID length
 
-        vsb.Append(methodMetadata.Class.Namespace);
-        vsb.Append('.');
-        WriteTypeNameWithGenerics(ref vsb, metadata.TestClassType);
-        WriteTypeWithParameters(ref vsb, constructorParameters);
-        vsb.Append('.');
-        vsb.Append(combination.ClassDataSourceAttributeIndex);
-        vsb.Append('.');
-        vsb.Append(combination.ClassDataLoopIndex);
-        vsb.Append('.');
-        vsb.Append(metadata.TestMethodName);
-        WriteTypeWithParameters(ref vsb, methodParameters);
-        vsb.Append('.');
-        vsb.Append(combination.MethodDataSourceAttributeIndex);
-        vsb.Append('.');
-        vsb.Append(combination.MethodDataLoopIndex);
-        vsb.Append('.');
-        vsb.Append(combination.RepeatIndex);
-
-        // Add inheritance information to ensure uniqueness
-        if (combination.InheritanceDepth > 0)
+        try
         {
-            vsb.Append("_inherited");
-            vsb.Append(combination.InheritanceDepth);
-        }
+            vsb.Append(methodMetadata.Class.Namespace);
+            vsb.Append('.');
+            WriteTypeNameWithGenerics(ref vsb, metadata.TestClassType);
+            WriteTypeWithParameters(ref vsb, constructorParameters);
+            vsb.Append('.');
+            vsb.Append(combination.ClassDataSourceAttributeIndex);
+            vsb.Append('.');
+            vsb.Append(combination.ClassDataLoopIndex);
+            vsb.Append('.');
+            vsb.Append(metadata.TestMethodName);
+            WriteTypeWithParameters(ref vsb, methodParameters);
+            vsb.Append('.');
+            vsb.Append(combination.MethodDataSourceAttributeIndex);
+            vsb.Append('.');
+            vsb.Append(combination.MethodDataLoopIndex);
+            vsb.Append('.');
+            vsb.Append(combination.RepeatIndex);
 
-        return vsb.ToString();
+            // Add inheritance information to ensure uniqueness
+            if (combination.InheritanceDepth > 0)
+            {
+                vsb.Append("_inherited");
+                vsb.Append(combination.InheritanceDepth);
+            }
+
+            return vsb.ToString();
+        }
+        finally
+        {
+            vsb.Dispose();
+        }
     }
 
     public static string GenerateFailedTestId(TestMetadata metadata)
@@ -63,90 +69,101 @@ internal static class TestIdentifierService
         // Use ValueStringBuilder for efficient string concatenation
         var vsb = new ValueStringBuilder(stackalloc char[256]); // Pre-size for typical test ID length
 
-        vsb.Append(methodMetadata.Class.Namespace);
-        vsb.Append('.');
-        WriteTypeNameWithGenerics(ref vsb, metadata.TestClassType);
-        WriteTypeWithParameters(ref vsb, constructorParameters);
-        vsb.Append('.');
-        vsb.Append(combination.ClassDataSourceIndex);
-        vsb.Append('.');
-        vsb.Append(combination.ClassLoopIndex);
-        vsb.Append('.');
-        vsb.Append(metadata.TestMethodName);
-        WriteTypeWithParameters(ref vsb, methodParameters);
-        vsb.Append('.');
-        vsb.Append(combination.MethodDataSourceIndex);
-        vsb.Append('.');
-        vsb.Append(combination.MethodLoopIndex);
-        vsb.Append('.');
-        vsb.Append(combination.RepeatIndex);
-        vsb.Append("_DataGenerationError");
+        try
+        {
+            vsb.Append(methodMetadata.Class.Namespace);
+            vsb.Append('.');
+            WriteTypeNameWithGenerics(ref vsb, metadata.TestClassType);
+            WriteTypeWithParameters(ref vsb, constructorParameters);
+            vsb.Append('.');
+            vsb.Append(combination.ClassDataSourceIndex);
+            vsb.Append('.');
+            vsb.Append(combination.ClassLoopIndex);
+            vsb.Append('.');
+            vsb.Append(metadata.TestMethodName);
+            WriteTypeWithParameters(ref vsb, methodParameters);
+            vsb.Append('.');
+            vsb.Append(combination.MethodDataSourceIndex);
+            vsb.Append('.');
+            vsb.Append(combination.MethodLoopIndex);
+            vsb.Append('.');
+            vsb.Append(combination.RepeatIndex);
+            vsb.Append("_DataGenerationError");
 
-        return vsb.ToString();
+            return vsb.ToString();
+        }
+        finally
+        {
+            vsb.Dispose();
+        }
     }
 
     private static void WriteTypeNameWithGenerics(ref ValueStringBuilder vsb, Type type)
     {
         // Build the full type hierarchy including all containing types
         var typeHierarchy = new ValueListBuilder<string>([null, null, null, null]);
-        var currentType = type;
-
-        while (currentType != null)
+        var typeVsb = new ValueStringBuilder(stackalloc char[128]);
+        try
         {
-            if (currentType.IsGenericType)
-            {
-                var typeSb = new StringBuilder();
-                var name = currentType.Name;
+            var currentType = type;
 
-                var backtickIndex = name.IndexOf('`');
-                if (backtickIndex > 0)
+            while (currentType != null)
+            {
+                if (currentType.IsGenericType)
                 {
-#if NET6_0_OR_GREATER
-                    typeSb.Append(name.AsSpan(0, backtickIndex));
-#else
-                    typeSb.Append(name.Substring(0, backtickIndex));
-#endif
+                    var name = currentType.Name;
+
+                    var backtickIndex = name.IndexOf('`');
+                    if (backtickIndex > 0)
+                    {
+                        typeVsb.Append(name.AsSpan(0, backtickIndex));
+                    }
+                    else
+                    {
+                        typeVsb.Append(name);
+                    }
+
+                    // Add the generic type arguments
+                    var genericArgs = currentType.GetGenericArguments();
+                    typeVsb.Append('<');
+                    for (var i = 0; i < genericArgs.Length; i++)
+                    {
+                        if (i > 0)
+                        {
+                            typeVsb.Append(", ");
+                        }
+                        // Use the full name for generic arguments to ensure uniqueness
+                        typeVsb.Append(genericArgs[i].FullName ?? genericArgs[i].Name);
+                    }
+                    typeVsb.Append('>');
+
+                    typeHierarchy.Append(typeVsb.AsSpan().ToString());
+                    typeVsb.Length = 0;
                 }
                 else
                 {
-                    typeSb.Append(name);
+                    typeHierarchy.Append(currentType.Name);
                 }
 
-                // Add the generic type arguments
-                var genericArgs = currentType.GetGenericArguments();
-                typeSb.Append('<');
-                for (var i = 0; i < genericArgs.Length; i++)
+                currentType = currentType.DeclaringType;
+            }
+
+            // Reverse to get outer-to-inner order
+            // Append all types with + separator (matching .NET Type.FullName convention for nested types)
+            for (var i = typeHierarchy.Length - 1; i >= 0; i--)
+            {
+                if (i < typeHierarchy.Length - 1)
                 {
-                    if (i > 0)
-                    {
-                        typeSb.Append(", ");
-                    }
-                    // Use the full name for generic arguments to ensure uniqueness
-                    typeSb.Append(genericArgs[i].FullName ?? genericArgs[i].Name);
+                    vsb.Append('+');
                 }
-                typeSb.Append('>');
-
-                typeHierarchy.Append(typeSb.ToString());
+                vsb.Append(typeHierarchy[i]);
             }
-            else
-            {
-                typeHierarchy.Append(currentType.Name);
-            }
-
-            currentType = currentType.DeclaringType;
         }
-
-        // Reverse to get outer-to-inner order
-        // Append all types with + separator (matching .NET Type.FullName convention for nested types)
-        for (var i = typeHierarchy.Length - 1; i >= 0; i--)
+        finally
         {
-            if (i > 0)
-            {
-                vsb.Append('+');
-            }
-            vsb.Append(typeHierarchy[i]);
+            typeHierarchy.Dispose();
+            typeVsb.Dispose();
         }
-        typeHierarchy.Dispose();
     }
 
     private static void WriteTypeWithParameters(ref ValueStringBuilder vsb, ReadOnlySpan<ParameterMetadata> parameterTypes)
