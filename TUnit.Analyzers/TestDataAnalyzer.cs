@@ -794,6 +794,13 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             type = genericType.TypeArguments[0];
         }
 
+        // Check for TestDataRow<T> wrapper - unwrap to get the inner data type
+        if (type is INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1 } testDataRowType
+            && testDataRowType.Name == "TestDataRow")
+        {
+            type = testDataRowType.TypeArguments[0];
+        }
+
         if (type is INamedTypeSymbol namedType && namedType.IsTupleType)
         {
             var tupleType = namedType;
