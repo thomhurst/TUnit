@@ -795,8 +795,11 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         // Check for TestDataRow<T> wrapper - unwrap to get the inner data type
-        if (type is INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1 } testDataRowType
-            && testDataRowType.Name == "TestDataRow")
+        // This must come after Func<T> unwrapping so that Func<TestDataRow<T>> → TestDataRow<T> → T
+        var testDataRowTypeSymbol = context.Compilation.GetTypeByMetadataName("TUnit.Core.TestDataRow`1");
+        if (testDataRowTypeSymbol != null
+            && type is INamedTypeSymbol { IsGenericType: true } testDataRowType
+            && SymbolEqualityComparer.Default.Equals(testDataRowType.OriginalDefinition, testDataRowTypeSymbol))
         {
             type = testDataRowType.TypeArguments[0];
         }
