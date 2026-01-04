@@ -863,4 +863,39 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 """
             );
     }
+
+    [Test]
+    public async Task Method_Data_Source_With_Func_TestDataRow_ReferenceType_No_Warning()
+    {
+        // Func<TestDataRow<T>> with reference type should NOT trigger TUnit0046
+        // because Func provides the isolation
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using System;
+                using System.Collections.Generic;
+
+                public class MyData(string value)
+                {
+                    public string Value { get; } = value;
+                }
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(GetData))]
+                    [Test]
+                    public void MyTest(MyData data)
+                    {
+                    }
+
+                    public static IEnumerable<Func<TestDataRow<MyData>>> GetData()
+                    {
+                        yield return () => new(new MyData("test1"), DisplayName: "First");
+                        yield return () => new(new MyData("test2"), DisplayName: "Second");
+                    }
+                }
+                """
+            );
+    }
 }
