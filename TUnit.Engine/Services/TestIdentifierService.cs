@@ -1,14 +1,12 @@
-using System.Buffers;
 using System.Text;
 using TUnit.Core;
 using TUnit.Engine.Building;
+using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Services;
 
 internal static class TestIdentifierService
 {
-    private const int MaxStackAllocSize = 16;
-
     public static string GenerateTestId(TestMetadata metadata, TestBuilder.TestData combination)
     {
         var methodMetadata = metadata.MethodMetadata;
@@ -17,63 +15,35 @@ internal static class TestIdentifierService
         var constructorParameters = classMetadata.Parameters;
         var methodParameters = methodMetadata.Parameters;
 
-        // Use ArrayPool to avoid heap allocations for Type arrays
-        // Note: Cannot use stackalloc because Type is a managed reference type
-        var constructorParameterTypes = ArrayPool<Type>.Shared.Rent(constructorParameters.Length);
-        var methodParameterTypes = ArrayPool<Type>.Shared.Rent(methodParameters.Length);
+        // Use ValueStringBuilder for efficient string concatenation
+        var vsb = new ValueStringBuilder(stackalloc char[256]); // Pre-size for typical test ID length
 
-        try
+        vsb.Append(methodMetadata.Class.Namespace);
+        vsb.Append('.');
+        WriteTypeNameWithGenerics(ref vsb, metadata.TestClassType);
+        WriteTypeWithParameters(ref vsb, constructorParameters);
+        vsb.Append('.');
+        vsb.Append(combination.ClassDataSourceAttributeIndex);
+        vsb.Append('.');
+        vsb.Append(combination.ClassDataLoopIndex);
+        vsb.Append('.');
+        vsb.Append(metadata.TestMethodName);
+        WriteTypeWithParameters(ref vsb, methodParameters);
+        vsb.Append('.');
+        vsb.Append(combination.MethodDataSourceAttributeIndex);
+        vsb.Append('.');
+        vsb.Append(combination.MethodDataLoopIndex);
+        vsb.Append('.');
+        vsb.Append(combination.RepeatIndex);
+
+        // Add inheritance information to ensure uniqueness
+        if (combination.InheritanceDepth > 0)
         {
-            // Fill arrays with actual types
-            for (var i = 0; i < constructorParameters.Length; i++)
-            {
-                constructorParameterTypes[i] = constructorParameters[i].Type;
-            }
-
-            for (var i = 0; i < methodParameters.Length; i++)
-            {
-                methodParameterTypes[i] = methodParameters[i].Type;
-            }
-
-            var classTypeWithParameters = BuildTypeWithParameters(
-                GetTypeNameWithGenerics(metadata.TestClassType),
-                constructorParameterTypes.AsSpan(0, constructorParameters.Length));
-
-            var methodWithParameters = BuildTypeWithParameters(
-                metadata.TestMethodName,
-                methodParameterTypes.AsSpan(0, methodParameters.Length));
-
-            // Use StringBuilder for efficient string concatenation
-            var sb = new StringBuilder(256); // Pre-size for typical test ID length
-            sb.Append(methodMetadata.Class.Namespace)
-              .Append('.')
-              .Append(classTypeWithParameters)
-              .Append('.')
-              .Append(combination.ClassDataSourceAttributeIndex)
-              .Append('.')
-              .Append(combination.ClassDataLoopIndex)
-              .Append('.')
-              .Append(methodWithParameters)
-              .Append('.')
-              .Append(combination.MethodDataSourceAttributeIndex)
-              .Append('.')
-              .Append(combination.MethodDataLoopIndex)
-              .Append('.')
-              .Append(combination.RepeatIndex);
-
-            // Add inheritance information to ensure uniqueness
-            if (combination.InheritanceDepth > 0)
-            {
-                sb.Append("_inherited").Append(combination.InheritanceDepth);
-            }
-
-            return sb.ToString();
+            vsb.Append("_inherited");
+            vsb.Append(combination.InheritanceDepth);
         }
-        finally
-        {
-            ArrayPool<Type>.Shared.Return(constructorParameterTypes);
-            ArrayPool<Type>.Shared.Return(methodParameterTypes);
-        }
+
+        return vsb.ToString();
     }
 
     public static string GenerateFailedTestId(TestMetadata metadata)
@@ -90,65 +60,35 @@ internal static class TestIdentifierService
         var constructorParameters = classMetadata.Parameters;
         var methodParameters = methodMetadata.Parameters;
 
-        // Use ArrayPool to avoid heap allocations for Type arrays
-        var constructorParameterTypes = ArrayPool<Type>.Shared.Rent(constructorParameters.Length);
-        var methodParameterTypes = ArrayPool<Type>.Shared.Rent(methodParameters.Length);
+        // Use ValueStringBuilder for efficient string concatenation
+        var vsb = new ValueStringBuilder(stackalloc char[256]); // Pre-size for typical test ID length
 
-        try
-        {
-            // Fill arrays with actual types
-            for (var i = 0; i < constructorParameters.Length; i++)
-            {
-                constructorParameterTypes[i] = constructorParameters[i].Type;
-            }
+        vsb.Append(methodMetadata.Class.Namespace);
+        vsb.Append('.');
+        WriteTypeNameWithGenerics(ref vsb, metadata.TestClassType);
+        WriteTypeWithParameters(ref vsb, constructorParameters);
+        vsb.Append('.');
+        vsb.Append(combination.ClassDataSourceIndex);
+        vsb.Append('.');
+        vsb.Append(combination.ClassLoopIndex);
+        vsb.Append('.');
+        vsb.Append(metadata.TestMethodName);
+        WriteTypeWithParameters(ref vsb, methodParameters);
+        vsb.Append('.');
+        vsb.Append(combination.MethodDataSourceIndex);
+        vsb.Append('.');
+        vsb.Append(combination.MethodLoopIndex);
+        vsb.Append('.');
+        vsb.Append(combination.RepeatIndex);
+        vsb.Append("_DataGenerationError");
 
-            for (var i = 0; i < methodParameters.Length; i++)
-            {
-                methodParameterTypes[i] = methodParameters[i].Type;
-            }
-
-            var classTypeWithParameters = BuildTypeWithParameters(
-                GetTypeNameWithGenerics(metadata.TestClassType),
-                constructorParameterTypes.AsSpan(0, constructorParameters.Length));
-
-            var methodWithParameters = BuildTypeWithParameters(
-                metadata.TestMethodName,
-                methodParameterTypes.AsSpan(0, methodParameters.Length));
-
-            // Use StringBuilder for efficient string concatenation
-            var sb = new StringBuilder(256); // Pre-size for typical test ID length
-            sb.Append(methodMetadata.Class.Namespace)
-              .Append('.')
-              .Append(classTypeWithParameters)
-              .Append('.')
-              .Append(combination.ClassDataSourceIndex)
-              .Append('.')
-              .Append(combination.ClassLoopIndex)
-              .Append('.')
-              .Append(methodWithParameters)
-              .Append('.')
-              .Append(combination.MethodDataSourceIndex)
-              .Append('.')
-              .Append(combination.MethodLoopIndex)
-              .Append('.')
-              .Append(combination.RepeatIndex)
-              .Append("_DataGenerationError");
-
-            return sb.ToString();
-        }
-        finally
-        {
-            ArrayPool<Type>.Shared.Return(constructorParameterTypes);
-            ArrayPool<Type>.Shared.Return(methodParameterTypes);
-        }
+        return vsb.ToString();
     }
 
-    private static string GetTypeNameWithGenerics(Type type)
+    private static void WriteTypeNameWithGenerics(ref ValueStringBuilder vsb, Type type)
     {
-        var sb = new StringBuilder();
-
         // Build the full type hierarchy including all containing types
-        var typeHierarchy = new List<string>();
+        var typeHierarchy = new ValueListBuilder<string>([null, null, null, null]);
         var currentType = type;
 
         while (currentType != null)
@@ -186,53 +126,48 @@ internal static class TestIdentifierService
                 }
                 typeSb.Append('>');
 
-                typeHierarchy.Add(typeSb.ToString());
+                typeHierarchy.Append(typeSb.ToString());
             }
             else
             {
-                typeHierarchy.Add(currentType.Name);
+                typeHierarchy.Append(currentType.Name);
             }
 
             currentType = currentType.DeclaringType;
         }
 
         // Reverse to get outer-to-inner order
-        typeHierarchy.Reverse();
-
         // Append all types with + separator (matching .NET Type.FullName convention for nested types)
-        for (var i = 0; i < typeHierarchy.Count; i++)
+        for (var i = typeHierarchy.Length - 1; i >= 0; i--)
         {
             if (i > 0)
             {
-                sb.Append('+');
+                vsb.Append('+');
             }
-            sb.Append(typeHierarchy[i]);
+            vsb.Append(typeHierarchy[i]);
         }
-
-        return sb.ToString();
+        typeHierarchy.Dispose();
     }
 
-    private static string BuildTypeWithParameters(string typeName, ReadOnlySpan<Type> parameterTypes)
+    private static void WriteTypeWithParameters(ref ValueStringBuilder vsb, ReadOnlySpan<ParameterMetadata> parameterTypes)
     {
         if (parameterTypes.Length == 0)
         {
-            return typeName;
+            return;
         }
 
-        // Use StringBuilder for efficient parameter list construction
-        var sb = new StringBuilder(typeName.Length + parameterTypes.Length * 20); // Estimate capacity
-        sb.Append(typeName).Append('(');
+        vsb.Append('(');
 
         for (var i = 0; i < parameterTypes.Length; i++)
         {
             if (i > 0)
             {
-                sb.Append(", ");
+                vsb.Append(", ");
             }
-            sb.Append(parameterTypes[i]);
+
+            vsb.Append(parameterTypes[i].Type.ToString());
         }
 
-        sb.Append(')');
-        return sb.ToString();
+        vsb.Append(')');
     }
 }
