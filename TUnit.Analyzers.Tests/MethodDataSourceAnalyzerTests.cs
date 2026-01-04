@@ -712,7 +712,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                     public void MyTest(int value)
                     {
                     }
-                    
+
                     public int One()
                     {
                         return 1;
@@ -721,6 +721,181 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 """,
                 Verifier.Diagnostic(Rules.InstanceMethodSource)
                     .WithLocation(0)
+            );
+    }
+
+    [Test]
+    public async Task Method_Data_Source_With_TestDataRow_DisplayName_No_Error()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using System;
+                using System.Collections.Generic;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(GetData))]
+                    [Test]
+                    public void MyTest(string arg1, string arg2)
+                    {
+                    }
+
+                    public static IEnumerable<TestDataRow<(string, string)>> GetData()
+                    {
+                        yield return new(("preferLocal", "AutoResolvePreferLocal"), DisplayName: "Auto-resolve as prefer local");
+                        yield return new(("preferRemote", "AutoResolvePreferRemote"), DisplayName: "Auto-resolve as prefer remote");
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Method_Data_Source_With_TestDataRow_Skip_No_Error()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using System;
+                using System.Collections.Generic;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(GetData))]
+                    [Test]
+                    public void MyTest(string arg1, string arg2)
+                    {
+                    }
+
+                    public static IEnumerable<TestDataRow<(string, string)>> GetData()
+                    {
+                        yield return new(("test1", "value1"), Skip: "Temporarily skipped");
+                        yield return new(("test2", "value2"));
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Method_Data_Source_With_TestDataRow_Categories_No_Error()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using System;
+                using System.Collections.Generic;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(GetData))]
+                    [Test]
+                    public void MyTest(string arg)
+                    {
+                    }
+
+                    public static IEnumerable<TestDataRow<string>> GetData()
+                    {
+                        yield return new("value1", Categories: new[] { "smoke", "fast" });
+                        yield return new("value2", DisplayName: "Custom name", Categories: new[] { "integration" });
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Method_Data_Source_With_TestDataRow_All_Metadata_No_Error()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using System;
+                using System.Collections.Generic;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(GetData))]
+                    [Test]
+                    public void MyTest(string arg1, string arg2)
+                    {
+                    }
+
+                    public static IEnumerable<TestDataRow<(string, string)>> GetData()
+                    {
+                        yield return new(("test1", "value1"), DisplayName: "Test case 1", Skip: null, Categories: new[] { "smoke" });
+                        yield return new(("test2", "value2"), DisplayName: "Test case 2", Categories: new[] { "integration" });
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Method_Data_Source_With_Func_TestDataRow_No_Error()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using System;
+                using System.Collections.Generic;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(GetData))]
+                    [Test]
+                    public void MyTest(string arg)
+                    {
+                    }
+
+                    public static IEnumerable<Func<TestDataRow<string>>> GetData()
+                    {
+                        yield return () => new("value1", DisplayName: "First test");
+                        yield return () => new("value2", DisplayName: "Second test");
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Method_Data_Source_With_Func_TestDataRow_ReferenceType_No_Warning()
+    {
+        // Func<TestDataRow<T>> with reference type should NOT trigger TUnit0046
+        // because Func provides the isolation
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using System;
+                using System.Collections.Generic;
+
+                public class MyData(string value)
+                {
+                    public string Value { get; } = value;
+                }
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(GetData))]
+                    [Test]
+                    public void MyTest(MyData data)
+                    {
+                    }
+
+                    public static IEnumerable<Func<TestDataRow<MyData>>> GetData()
+                    {
+                        yield return () => new(new MyData("test1"), DisplayName: "First");
+                        yield return () => new(new MyData("test2"), DisplayName: "Second");
+                    }
+                }
+                """
             );
     }
 }

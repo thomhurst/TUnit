@@ -71,11 +71,13 @@ namespace
     public sealed class ArgumentsAttribute : , .IDataSourceAttribute, ., .
     {
         public ArgumentsAttribute(params object?[]? values) { }
+        public string[]? Categories { get; set; }
+        public string? DisplayName { get; set; }
         public int Order { get; }
         public string? Skip { get; set; }
         public bool SkipIfEmpty { get; set; }
         public object?[] Values { get; }
-        [.(typeof(.ArgumentsAttribute.<GetDataRowsAsync>d__12))]
+        [.(typeof(.ArgumentsAttribute.<GetDataRowsAsync>d__20))]
         public .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
         public . OnTestRegistered(.TestRegisteredContext context) { }
     }
@@ -83,10 +85,12 @@ namespace
     public sealed class ArgumentsAttribute<T> : .TypedDataSourceAttribute<T>, ., .
     {
         public ArgumentsAttribute(T value) { }
+        public string[]? Categories { get; set; }
+        public string? DisplayName { get; set; }
         public int Order { get; }
         public string? Skip { get; set; }
         public override bool SkipIfEmpty { get; set; }
-        [.(typeof(.ArgumentsAttribute<T>.<GetTypedDataRowsAsync>d__10))]
+        [.(typeof(.ArgumentsAttribute<T>.<GetTypedDataRowsAsync>d__18))]
         public override .<<.<T>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
         public . OnTestRegistered(.TestRegisteredContext context) { }
     }
@@ -1348,6 +1352,7 @@ namespace
     public class TestDataCombination
     {
         public TestDataCombination() { }
+        public string[]? Categories { get; init; }
         public <.<object?>>[] ClassDataFactories { get; init; }
         public int ClassDataSourceIndex { get; init; }
         public int ClassLoopIndex { get; init; }
@@ -1358,6 +1363,15 @@ namespace
         public int MethodLoopIndex { get; init; }
         public int RepeatIndex { get; init; }
         public .<string, >? ResolvedGenericTypes { get; init; }
+        public string? Skip { get; init; }
+    }
+    public class TestDataRow<T> : <.TestDataRow<T>>
+    {
+        public TestDataRow(T Data, string? DisplayName = null, string? Skip = null, string[]? Categories = null) { }
+        public string[]? Categories { get; init; }
+        public T Data { get; init; }
+        public string? DisplayName { get; init; }
+        public string? Skip { get; init; }
     }
     public class TestDefinition : .ITestDefinition
     {

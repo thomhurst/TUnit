@@ -47,6 +47,15 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         isEnabledByDefault: true,
         description: "Methods decorated with [GenerateAssertion] must return bool, AssertionResult, Task<bool>, or Task<AssertionResult>.");
 
+    private static readonly DiagnosticDescriptor RefStructRequiresInliningRule = new DiagnosticDescriptor(
+        id: "TUNITGEN004",
+        title: "Ref struct parameter requires method body inlining",
+        messageFormat: "Method '{0}' has ref struct parameter '{1}' of type '{2}'. Use InlineMethodBody = true and ensure the method has a single-expression or single-return-statement body",
+        category: "TUnit.Assertions.SourceGenerator",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true,
+        description: "Methods with ref struct parameters (like DefaultInterpolatedStringHandler) require InlineMethodBody = true because ref structs cannot be stored as class fields. The method must have a simple body that can be inlined.");
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         // Find all methods decorated with [GenerateAssertion]
@@ -256,6 +265,22 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             if (expressionNode != null && methodBody != null)
             {
                 methodBody = FullyQualifyExpression(methodBody, context.SemanticModel, expressionNode) ?? methodBody;
+            }
+        }
+
+        // Validate that methods with ref struct parameters have inlined method bodies
+        // Ref structs cannot be stored as class fields, so we need to inline the method body
+        foreach (var param in additionalParameters)
+        {
+            if (IsRefStruct(param.Type) && string.IsNullOrEmpty(methodBody))
+            {
+                var diagnostic = Diagnostic.Create(
+                    RefStructRequiresInliningRule,
+                    location,
+                    methodSymbol.Name,
+                    param.Name,
+                    param.Type.ToDisplayString());
+                return (null, diagnostic);
             }
         }
 
@@ -545,9 +570,11 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         sb.AppendLine("{");
 
         // Private fields for additional parameters
+        // Note: Ref struct types (like DefaultInterpolatedStringHandler) are stored as string
         foreach (var param in data.AdditionalParameters)
         {
-            sb.AppendLine($"    private readonly {param.Type.ToDisplayString()} _{param.Name};");
+            var fieldType = IsRefStruct(param.Type) ? "string" : param.Type.ToDisplayString();
+            sb.AppendLine($"    private readonly {fieldType} _{param.Name};");
         }
 
         if (data.AdditionalParameters.Length > 0)
@@ -556,10 +583,12 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         }
 
         // Constructor
+        // Note: Ref struct parameters are received as string (pre-converted by extension method)
         sb.Append($"    public {className}(AssertionContext<{targetTypeName}> context");
         foreach (var param in data.AdditionalParameters)
         {
-            sb.Append($", {param.Type.ToDisplayString()} {param.Name}");
+            var paramType = IsRefStruct(param.Type) ? "string" : param.Type.ToDisplayString();
+            sb.Append($", {paramType} {param.Name}");
         }
         sb.AppendLine(")");
         sb.AppendLine("        : base(context)");
@@ -730,6 +759,26 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
                 $"_{paramName}");
         }
 
+        // For ref struct parameters that have been converted to strings,
+        // remove calls to .ToStringAndClear() and .ToString() since the value is already a string
+        foreach (var param in data.AdditionalParameters)
+        {
+            if (IsRefStruct(param.Type))
+            {
+                var fieldName = $"_{param.Name}";
+                // Remove .ToStringAndClear() - the value is already a string
+                inlinedBody = Regex.Replace(
+                    inlinedBody,
+                    $@"{Regex.Escape(fieldName)}\.ToStringAndClear\(\)",
+                    fieldName);
+                // Remove .ToString() - the value is already a string
+                inlinedBody = Regex.Replace(
+                    inlinedBody,
+                    $@"{Regex.Escape(fieldName)}\.ToString\(\)",
+                    fieldName);
+            }
+        }
+
         // Add null-forgiving operator for reference types if not already present
         // This is safe because we've already checked for null above
         var isNullable = data.TargetType.IsReferenceType || data.TargetType.NullableAnnotation == NullableAnnotation.Annotated;
@@ -873,10 +922,23 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         }
 
         // Construct and return assertion
+        // Note: Ref struct parameters (like interpolated string handlers) are converted to string
         sb.Append($"        return new {className}{genericDeclaration}(source.Context");
         foreach (var param in data.AdditionalParameters)
         {
-            sb.Append($", {param.Name}");
+            if (IsRefStruct(param.Type))
+            {
+                // Convert ref struct to string - use ToStringAndClear for interpolated string handlers
+                // or ToString() for other ref structs
+                var conversion = IsInterpolatedStringHandler(param.Type)
+                    ? $"{param.Name}.ToStringAndClear()"
+                    : $"{param.Name}.ToString()";
+                sb.Append($", {conversion}");
+            }
+            else
+            {
+                sb.Append($", {param.Name}");
+            }
         }
         sb.AppendLine(");");
 
@@ -999,6 +1061,61 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         }
 
         return constraints;
+    }
+
+    /// <summary>
+    /// Checks if a type is a ref struct (ref-like type).
+    /// Ref structs cannot be stored as fields in classes.
+    /// </summary>
+    private static bool IsRefStruct(ITypeSymbol type)
+    {
+        if (type is not INamedTypeSymbol namedType)
+        {
+            return false;
+        }
+
+        // Use reflection to access IsRefLikeType property which may not be available in all Roslyn versions
+        var isRefLikeProperty = namedType.GetType().GetProperty("IsRefLikeType");
+        if (isRefLikeProperty?.GetValue(namedType) is bool isRefLike && isRefLike)
+        {
+            return true;
+        }
+
+        // Fallback: check for common ref struct types by name
+        var typeName = namedType.ToDisplayString();
+        if (typeName.StartsWith("System.Span<") ||
+            typeName.StartsWith("System.ReadOnlySpan<") ||
+            typeName == "System.Runtime.CompilerServices.DefaultInterpolatedStringHandler")
+        {
+            return true;
+        }
+
+        // Check for InterpolatedStringHandlerAttribute on the type
+        return namedType.GetAttributes().Any(attr =>
+            attr.AttributeClass?.ToDisplayString() == "System.Runtime.CompilerServices.InterpolatedStringHandlerAttribute");
+    }
+
+    /// <summary>
+    /// Checks if a type is an interpolated string handler (e.g., DefaultInterpolatedStringHandler).
+    /// These types need special handling as they should be converted to string.
+    /// </summary>
+    private static bool IsInterpolatedStringHandler(ITypeSymbol type)
+    {
+        if (type is not INamedTypeSymbol namedType)
+        {
+            return false;
+        }
+
+        // Check for DefaultInterpolatedStringHandler specifically
+        var typeName = namedType.ToDisplayString();
+        if (typeName == "System.Runtime.CompilerServices.DefaultInterpolatedStringHandler")
+        {
+            return true;
+        }
+
+        // Check for InterpolatedStringHandlerAttribute on the type
+        return namedType.GetAttributes().Any(attr =>
+            attr.AttributeClass?.ToDisplayString() == "System.Runtime.CompilerServices.InterpolatedStringHandlerAttribute");
     }
 
     private enum ReturnTypeKind

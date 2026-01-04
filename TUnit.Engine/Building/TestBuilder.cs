@@ -319,8 +319,16 @@ internal sealed class TestBuilder : ITestBuilder
                                     ClassConstructor = testBuilderContext.ClassConstructor  // Preserve ClassConstructor for instance creation
                                 };
 
-                                classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
-                                var methodData = DataUnwrapper.UnwrapWithTypes(await methodDataFactory() ?? [], metadata.MethodMetadata.Parameters);
+                                var (classDataUnwrapped, classRowMetadata) = DataUnwrapper.UnwrapWithMetadata(await classDataFactory() ?? []);
+                                classData = classDataUnwrapped;
+                                var (methodData, methodRowMetadata) = DataUnwrapper.UnwrapWithTypesAndMetadata(await methodDataFactory() ?? [], metadata.MethodMetadata.Parameters);
+
+                                // Extract and merge metadata from data source attributes and TestDataRow wrappers
+                                var classAttrMetadata = DataSourceMetadataExtractor.ExtractFromAttribute(classDataSource);
+                                var methodAttrMetadata = DataSourceMetadataExtractor.ExtractFromAttribute(methodDataSource);
+                                var mergedClassMetadata = DataSourceMetadataExtractor.Merge(classRowMetadata, classAttrMetadata);
+                                var mergedMethodMetadata = DataSourceMetadataExtractor.Merge(methodRowMetadata, methodAttrMetadata);
+                                var finalMetadata = DataSourceMetadataExtractor.Merge(mergedMethodMetadata, mergedClassMetadata);
 
                                 // Initialize method data objects (ObjectInitializer is phase-aware)
                                 await InitializeClassDataAsync(methodData);
@@ -431,7 +439,8 @@ internal sealed class TestBuilder : ITestBuilder
                                     RepeatIndex = i,
                                     InheritanceDepth = metadata.InheritanceDepth,
                                     ResolvedClassGenericArguments = resolvedClassGenericArgs,
-                                    ResolvedMethodGenericArguments = resolvedMethodGenericArgs
+                                    ResolvedMethodGenericArguments = resolvedMethodGenericArgs,
+                                    Metadata = finalMetadata
                                 };
 
                                 var testSpecificContext = new TestBuilderContext
@@ -861,6 +870,31 @@ internal sealed class TestBuilder : ITestBuilder
         context.IsDiscoveryInstanceReused = isReusingDiscoveryInstance;
 
         context.Metadata.TestDetails.ClassInstance = PlaceholderInstance.Instance;
+
+        // Apply metadata from TestDataRow or data source attributes
+        if (testData.Metadata is { } dataRowMetadata)
+        {
+            // Apply custom display name (will be processed by DisplayNameBuilder)
+            if (!string.IsNullOrEmpty(dataRowMetadata.DisplayName))
+            {
+                context.SetDataSourceDisplayName(dataRowMetadata.DisplayName!);
+            }
+
+            // Apply skip reason from data source
+            if (!string.IsNullOrEmpty(dataRowMetadata.Skip))
+            {
+                context.SkipReason = dataRowMetadata.Skip;
+            }
+
+            // Apply categories from data source
+            if (dataRowMetadata.Categories is { Length: > 0 })
+            {
+                foreach (var category in dataRowMetadata.Categories)
+                {
+                    context.Metadata.TestDetails.Categories.Add(category);
+                }
+            }
+        }
 
         // Arguments will be tracked by TestArgumentTrackingService during TestRegistered event
         // This ensures proper reference counting for shared instances
@@ -1338,6 +1372,12 @@ internal sealed class TestBuilder : ITestBuilder
         /// Will be Type.EmptyTypes if the method is not generic.
         /// </summary>
         public Type[] ResolvedMethodGenericArguments { get; set; } = Type.EmptyTypes;
+
+        /// <summary>
+        /// Metadata extracted from TestDataRow wrappers or data source attributes.
+        /// Contains custom DisplayName, Skip reason, and Categories.
+        /// </summary>
+        public TestDataRowMetadata? Metadata { get; set; }
     }
 
     /// <summary>
@@ -1510,7 +1550,8 @@ internal sealed class TestBuilder : ITestBuilder
                                 metadata, classDataFactory, methodDataFactory,
                                 classDataAttributeIndex, classDataLoopIndex,
                                 methodDataAttributeIndex, methodDataLoopIndex,
-                                i, contextAccessor);
+                                i, contextAccessor,
+                                classDataSource, methodDataSource);
 
                             if (test != null)
                             {
@@ -1580,13 +1621,21 @@ internal sealed class TestBuilder : ITestBuilder
         int methodDataAttributeIndex,
         int methodDataLoopIndex,
         int repeatIndex,
-        TestBuilderContextAccessor contextAccessor)
+        TestBuilderContextAccessor contextAccessor,
+        IDataSourceAttribute? classDataSource = null,
+        IDataSourceAttribute? methodDataSource = null)
     {
         try
         {
-            var classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
+            var (classData, classRowMetadata) = DataUnwrapper.UnwrapWithMetadata(await classDataFactory() ?? []);
+            var (methodData, methodRowMetadata) = DataUnwrapper.UnwrapWithTypesAndMetadata(await methodDataFactory() ?? [], metadata.MethodMetadata.Parameters);
 
-            var methodData = DataUnwrapper.UnwrapWithTypes(await methodDataFactory() ?? [], metadata.MethodMetadata.Parameters);
+            // Extract and merge metadata from data source attributes and TestDataRow wrappers
+            var classAttrMetadata = DataSourceMetadataExtractor.ExtractFromAttribute(classDataSource);
+            var methodAttrMetadata = DataSourceMetadataExtractor.ExtractFromAttribute(methodDataSource);
+            var mergedClassMetadata = DataSourceMetadataExtractor.Merge(classRowMetadata, classAttrMetadata);
+            var mergedMethodMetadata = DataSourceMetadataExtractor.Merge(methodRowMetadata, methodAttrMetadata);
+            var finalMetadata = DataSourceMetadataExtractor.Merge(mergedMethodMetadata, mergedClassMetadata);
 
             // Initialize method data objects (ObjectInitializer is phase-aware)
             await InitializeClassDataAsync(methodData);
@@ -1679,7 +1728,8 @@ internal sealed class TestBuilder : ITestBuilder
                 RepeatIndex = repeatIndex,
                 InheritanceDepth = metadata.InheritanceDepth,
                 ResolvedClassGenericArguments = resolvedClassGenericArgs,
-                ResolvedMethodGenericArguments = resolvedMethodGenericArgs
+                ResolvedMethodGenericArguments = resolvedMethodGenericArgs,
+                Metadata = finalMetadata
             };
 
             var testSpecificContext = new TestBuilderContext

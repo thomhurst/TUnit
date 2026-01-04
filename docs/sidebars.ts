@@ -132,6 +132,7 @@ const sidebars: SidebarsConfig = {
             'test-authoring/arguments',
             'test-authoring/method-data-source',
             'test-authoring/class-data-source',
+            'test-authoring/test-data-row',
             'test-authoring/matrix-tests',
             'test-authoring/combined-data-source',
             'test-authoring/nested-data-sources',

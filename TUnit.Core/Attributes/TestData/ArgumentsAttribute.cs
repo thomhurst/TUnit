@@ -36,6 +36,27 @@ public sealed class ArgumentsAttribute : Attribute, IDataSourceAttribute, ITestR
 
     public string? Skip { get; set; }
 
+    /// <summary>
+    /// Gets or sets a custom display name for this test case.
+    /// Supports parameter substitution using $paramName or $arg1, $arg2, etc.
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// [Arguments("admin", "secret", DisplayName = "Login as $arg1")]
+    /// </code>
+    /// </example>
+    public string? DisplayName { get; set; }
+
+    /// <summary>
+    /// Gets or sets categories to apply to this specific test case.
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// [Arguments("value", Categories = ["smoke", "integration"])]
+    /// </code>
+    /// </example>
+    public string[]? Categories { get; set; }
+
     /// <inheritdoc />
     public bool SkipIfEmpty { get; set; }
 
@@ -65,6 +86,22 @@ public ValueTask OnTestRegistered(TestRegisteredContext context)
             context.TestContext.Metadata.TestDetails.ClassInstance = SkippedTestInstance.Instance;
         }
 
+        if (!string.IsNullOrEmpty(DisplayName))
+        {
+            context.TestContext.SetDataSourceDisplayName(DisplayName!);
+        }
+
+        if (Categories is { Length: > 0 })
+        {
+            foreach (var category in Categories)
+            {
+                if (!string.IsNullOrWhiteSpace(category) && !context.TestDetails.Categories.Contains(category))
+                {
+                    context.TestDetails.Categories.Add(category);
+                }
+            }
+        }
+
         return default;
     }
 
@@ -75,6 +112,17 @@ public ValueTask OnTestRegistered(TestRegisteredContext context)
 public sealed class ArgumentsAttribute<T>(T value) : TypedDataSourceAttribute<T>, ITestRegisteredEventReceiver
 {
     public string? Skip { get; set; }
+
+    /// <summary>
+    /// Gets or sets a custom display name for this test case.
+    /// Supports parameter substitution using $paramName or $arg1, $arg2, etc.
+    /// </summary>
+    public string? DisplayName { get; set; }
+
+    /// <summary>
+    /// Gets or sets categories to apply to this specific test case.
+    /// </summary>
+    public string[]? Categories { get; set; }
 
     /// <inheritdoc />
     public override bool SkipIfEmpty { get; set; }
@@ -91,6 +139,22 @@ public ValueTask OnTestRegistered(TestRegisteredContext context)
         {
             context.TestContext.SkipReason = Skip;
             context.TestContext.Metadata.TestDetails.ClassInstance = SkippedTestInstance.Instance;
+        }
+
+        if (!string.IsNullOrEmpty(DisplayName))
+        {
+            context.TestContext.SetDataSourceDisplayName(DisplayName!);
+        }
+
+        if (Categories is { Length: > 0 })
+        {
+            foreach (var category in Categories)
+            {
+                if (!string.IsNullOrWhiteSpace(category) && !context.TestDetails.Categories.Contains(category))
+                {
+                    context.TestDetails.Categories.Add(category);
+                }
+            }
         }
 
         return default;

@@ -1,11 +1,12 @@
-using System.Text;
+using TUnit.Assertions.Adapters;
+using TUnit.Assertions.Collections;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
 
 /// <summary>
 /// Asserts that a collection contains only distinct (unique) items.
-/// Inherits from CollectionAssertionBase to enable chaining of collection methods.
+/// Delegates to CollectionChecks for the actual logic.
 /// </summary>
 public class HasDistinctItemsAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
@@ -18,39 +19,18 @@ public class HasDistinctItemsAssertion<TCollection, TItem> : Sources.CollectionA
 
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
+        if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
         }
 
-        if (value == null)
+        if (metadata.Value == null)
         {
             return Task.FromResult(AssertionResult.Failed("collection was null"));
         }
 
-        var seen = new HashSet<TItem>();
-        var duplicates = new List<TItem>();
-        var totalCount = 0;
-
-        foreach (var item in value)
-        {
-            totalCount++;
-            if (!seen.Add(item) && !duplicates.Contains(item))
-            {
-                duplicates.Add(item);
-            }
-        }
-
-        if (duplicates.Count == 0)
-        {
-            return Task.FromResult(AssertionResult.Passed);
-        }
-
-        return Task.FromResult(AssertionResult.Failed(
-            $"found {totalCount - seen.Count} duplicate(s): {string.Join(", ", duplicates)}"));
+        var adapter = new EnumerableAdapter<TItem>(metadata.Value);
+        return Task.FromResult(CollectionChecks.CheckHasDistinctItems(adapter));
     }
 
     protected override string GetExpectation() => "to have distinct items";

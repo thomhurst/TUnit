@@ -41,6 +41,7 @@
     <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.1.0" />
     <PackageVersion Include="Microsoft.Testing.Extensions.CrashDump" Version="2.0.2" />
     <PackageVersion Include="Microsoft.Testing.Extensions.HangDump" Version="2.0.2" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.Telemetry" Version="2.0.2" />
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="2.0.2" />
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" Version="2.0.2" />
     <PackageVersion Include="Microsoft.Testing.Platform" Version="2.0.2" />
@@ -61,7 +62,7 @@
     <PackageVersion Include="OneOf" Version="3.0.271" />
     <PackageVersion Include="OneOf.SourceGenerator" Version="3.0.271" />
     <PackageVersion Include="Polly" Version="8.6.5" />
-    <PackageVersion Include="Polyfill" Version="9.5.0" />
+    <PackageVersion Include="Polyfill" Version="9.6.0" />
     <PackageVersion Include="PublicApiGenerator" Version="11.5.4" />
     <PackageVersion Include="RandomDataGenerator.Net" Version="1.0.19.1" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
@@ -79,17 +80,17 @@
     <PackageVersion Include="System.CommandLine" Version="2.0.1" />
     <PackageVersion Include="System.Text.Json" Version="9.0.0" />
     <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
-    <PackageVersion Include="Testcontainers.Kafka" Version="4.9.0" />
-    <PackageVersion Include="Testcontainers.PostgreSql" Version="4.9.0" />
-    <PackageVersion Include="Testcontainers.Redis" Version="4.9.0" />
+    <PackageVersion Include="Testcontainers.Kafka" Version="4.10.0" />
+    <PackageVersion Include="Testcontainers.PostgreSql" Version="4.10.0" />
+    <PackageVersion Include="Testcontainers.Redis" Version="4.10.0" />
     <PackageVersion Include="trxparser" Version="0.5.0" />
     <PackageVersion Include="TUnit.Assertions.FSharp" Version="0.75.38-PullRequest3485.0" />
     <PackageVersion Include="Verify" Version="31.9.3" />
     <PackageVersion Include="Verify.NUnit" Version="31.9.3" />
-    <PackageVersion Include="TUnit" Version="1.7.7" />
-    <PackageVersion Include="TUnit.AspNetCore" Version="1.7.7" />
-    <PackageVersion Include="TUnit.Core" Version="1.7.7" />
-    <PackageVersion Include="TUnit.Assertions" Version="1.7.7" />
+    <PackageVersion Include="TUnit" Version="1.9.2" />
+    <PackageVersion Include="TUnit.AspNetCore" Version="1.9.2" />
+    <PackageVersion Include="TUnit.Core" Version="1.9.2" />
+    <PackageVersion Include="TUnit.Assertions" Version="1.9.2" />
     <PackageVersion Include="Verify.TUnit" Version="31.9.3" />
     <PackageVersion Include="Vogen" Version="8.0.4" />
     <PackageVersion Include="xunit" Version="2.9.3" />

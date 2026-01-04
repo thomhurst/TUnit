@@ -7,13 +7,24 @@ public partial class TestContext
 {
     internal string GetDisplayName()
     {
-        if(!string.IsNullOrEmpty(CustomDisplayName))
+        if (!string.IsNullOrEmpty(CustomDisplayName))
         {
             return CustomDisplayName!;
         }
 
         if (_cachedDisplayName != null)
         {
+            return _cachedDisplayName;
+        }
+
+        // Check for data source display name (from TestDataRow or ArgumentsAttribute.DisplayName)
+        if (!string.IsNullOrEmpty(DataSourceDisplayName))
+        {
+            _cachedDisplayName = DisplayNameSubstitutor.Substitute(
+                DataSourceDisplayName!,
+                TestDetails.MethodMetadata.Parameters,
+                TestDetails.TestMethodArguments,
+                ArgumentDisplayFormatters);
             return _cachedDisplayName;
         }
 

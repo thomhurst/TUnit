@@ -201,4 +201,37 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             // Snapshot test - the actual verification is done by snapshot comparison
             await Assert.That(generatedFiles.Count).IsGreaterThanOrEqualTo(1);
         });
+
+#if NET6_0_OR_GREATER
+    [Test]
+    public Task RefStructParameter() => RunTest(
+        Path.Combine(Sourcy.Git.RootDirectory.FullName,
+            "TUnit.Assertions.SourceGenerator.Tests",
+            "TestData",
+            "RefStructParameterAssertion.cs"),
+        async generatedFiles =>
+        {
+            await Assert.That(generatedFiles).HasCount(1);
+
+            var mainFile = generatedFiles.First();
+            await Assert.That(mainFile).IsNotNull();
+
+            // Verify that the field type is string, not the ref struct
+            await Assert.That(mainFile).Contains("private readonly string _message;");
+            await Assert.That(mainFile).Contains("private readonly string _suffix;");
+
+            // Verify that the extension method converts the ref struct to string
+            await Assert.That(mainFile).Contains("message.ToStringAndClear()");
+            await Assert.That(mainFile).Contains("suffix.ToStringAndClear()");
+
+            // Verify the constructor takes string, not the ref struct
+            await Assert.That(mainFile).Contains("string message)");
+            await Assert.That(mainFile).Contains("string suffix)");
+
+            // Verify that .ToStringAndClear() is removed in the inlined body
+            // (since the field is already a string)
+            // The inlined body should use _message directly, not _message.ToStringAndClear()
+            await Assert.That(mainFile).Contains("value!.Contains(_message)");
+        });
+#endif
 }

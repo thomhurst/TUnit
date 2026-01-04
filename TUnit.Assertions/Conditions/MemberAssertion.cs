@@ -199,6 +199,7 @@ public class CollectionMemberAssertionAdapter<TCollection, TItem> : Sources.Coll
 /// </summary>
 public class DictionaryMemberAssertionAdapter<TDictionary, TKey, TValue> : Sources.DictionaryAssertionBase<TDictionary, TKey, TValue>
     where TDictionary : IReadOnlyDictionary<TKey, TValue>
+    where TKey : notnull
 {
     internal DictionaryMemberAssertionAdapter(AssertionContext<TDictionary> context)
         : base(context)
