@@ -66,11 +66,11 @@
     <PackageVersion Include="RandomDataGenerator.Net" Version="1.0.19.1" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
     <PackageVersion Include="StackExchange.Redis" Version="2.8.37" />
-    <PackageVersion Include="Sourcy.DotNet" Version="0.7.11">
+    <PackageVersion Include="Sourcy.DotNet" Version="1.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>
-    <PackageVersion Include="Sourcy.Git" Version="0.7.11">
+    <PackageVersion Include="Sourcy.Git" Version="1.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>
