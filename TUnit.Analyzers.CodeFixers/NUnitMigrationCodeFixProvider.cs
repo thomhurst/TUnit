@@ -601,35 +601,117 @@ public class NUnitAssertionRewriter : AssertionRewriter
 
     private ExpressionSyntax ConvertNUnitThrows(InvocationExpressionSyntax invocation)
     {
-        if (invocation.Expression is MemberAccessExpressionSyntax memberAccess &&
-            memberAccess.Name is GenericNameSyntax genericName)
+        if (invocation.Expression is MemberAccessExpressionSyntax memberAccess)
         {
-            var exceptionType = genericName.TypeArgumentList.Arguments[0];
-            var action = invocation.ArgumentList.Arguments[0].Expression;
+            // Handle generic form: Assert.Throws<T>(() => ...) or Assert.ThrowsAsync<T>(() => ...)
+            if (memberAccess.Name is GenericNameSyntax genericName)
+            {
+                var exceptionType = genericName.TypeArgumentList.Arguments[0];
+                var action = invocation.ArgumentList.Arguments[0].Expression;
 
-            var throwsAsyncInvocation = SyntaxFactory.InvocationExpression(
-                SyntaxFactory.MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    SyntaxFactory.IdentifierName("Assert"),
-                    SyntaxFactory.GenericName("ThrowsAsync")
-                        .WithTypeArgumentList(
-                            SyntaxFactory.TypeArgumentList(
-                                SyntaxFactory.SingletonSeparatedList(exceptionType)
+                var throwsAsyncInvocation = SyntaxFactory.InvocationExpression(
+                    SyntaxFactory.MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        SyntaxFactory.IdentifierName("Assert"),
+                        SyntaxFactory.GenericName("ThrowsAsync")
+                            .WithTypeArgumentList(
+                                SyntaxFactory.TypeArgumentList(
+                                    SyntaxFactory.SingletonSeparatedList(exceptionType)
+                                )
+                            )
+                    ),
+                    SyntaxFactory.ArgumentList(
+                        SyntaxFactory.SingletonSeparatedList(
+                            SyntaxFactory.Argument(action)
+                        )
+                    )
+                );
+
+                return SyntaxFactory.AwaitExpression(throwsAsyncInvocation);
+            }
+            
+            // Handle non-generic constraint-based form: Assert.Throws(constraint, () => ...) or Assert.ThrowsAsync(constraint, () => ...)
+            // where constraint is typically Is.TypeOf(typeof(T))
+            if (invocation.ArgumentList.Arguments.Count >= 2)
+            {
+                var constraint = invocation.ArgumentList.Arguments[0].Expression;
+                var action = invocation.ArgumentList.Arguments[1].Expression;
+                
+                // Try to extract the exception type from the constraint
+                var exceptionType = TryExtractTypeFromConstraint(constraint);
+                
+                if (exceptionType != null)
+                {
+                    // Convert to generic ThrowsAsync form: Assert.ThrowsAsync<T>(() => ...)
+                    var throwsAsyncInvocation = SyntaxFactory.InvocationExpression(
+                        SyntaxFactory.MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            SyntaxFactory.IdentifierName("Assert"),
+                            SyntaxFactory.GenericName("ThrowsAsync")
+                                .WithTypeArgumentList(
+                                    SyntaxFactory.TypeArgumentList(
+                                        SyntaxFactory.SingletonSeparatedList(exceptionType)
+                                    )
+                                )
+                        ),
+                        SyntaxFactory.ArgumentList(
+                            SyntaxFactory.SingletonSeparatedList(
+                                SyntaxFactory.Argument(action)
                             )
                         )
-                ),
-                SyntaxFactory.ArgumentList(
-                    SyntaxFactory.SingletonSeparatedList(
-                        SyntaxFactory.Argument(action)
-                    )
-                )
-            );
+                    );
 
-            return SyntaxFactory.AwaitExpression(throwsAsyncInvocation);
+                    return SyntaxFactory.AwaitExpression(throwsAsyncInvocation);
+                }
+            }
         }
 
-        // Fallback for non-generic Throws
+        // Fallback for unsupported Throws patterns
         return CreateTUnitAssertion("Throws", invocation.ArgumentList.Arguments[0].Expression);
+    }
+    
+    /// <summary>
+    /// Attempts to extract the exception type from NUnit constraint expressions like Is.TypeOf(typeof(T)).
+    /// Returns null if the type cannot be extracted.
+    /// </summary>
+    private TypeSyntax? TryExtractTypeFromConstraint(ExpressionSyntax constraint)
+    {
+        // Handle Is.TypeOf(typeof(T)) pattern
+        if (constraint is InvocationExpressionSyntax invocation)
+        {
+            // Check if it's a method call like Is.TypeOf(...) or TypeOf(...)
+            if (invocation.Expression is MemberAccessExpressionSyntax memberAccess &&
+                memberAccess.Name.Identifier.Text == "TypeOf" &&
+                invocation.ArgumentList.Arguments.Count > 0)
+            {
+                // Extract the argument to TypeOf - should be typeof(T)
+                var typeofArg = invocation.ArgumentList.Arguments[0].Expression;
+                return ExtractTypeFromTypeof(typeofArg);
+            }
+            
+            // Handle standalone TypeOf(typeof(T)) calls
+            if (invocation.Expression is IdentifierNameSyntax { Identifier.Text: "TypeOf" } &&
+                invocation.ArgumentList.Arguments.Count > 0)
+            {
+                var typeofArg = invocation.ArgumentList.Arguments[0].Expression;
+                return ExtractTypeFromTypeof(typeofArg);
+            }
+        }
+        
+        return null;
+    }
+    
+    /// <summary>
+    /// Extracts the type from a typeof(T) expression.
+    /// </summary>
+    private TypeSyntax? ExtractTypeFromTypeof(ExpressionSyntax expression)
+    {
+        if (expression is TypeOfExpressionSyntax typeofExpression)
+        {
+            return typeofExpression.Type;
+        }
+        
+        return null;
     }
 
     private ExpressionSyntax CreatePassAssertion(SeparatedSyntaxList<ArgumentSyntax> arguments)
