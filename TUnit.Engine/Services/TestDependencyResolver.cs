@@ -176,16 +176,9 @@ internal sealed class TestDependencyResolver
 
     private void ResolvePendingDependencies()
     {
-        var pendingTests = _testsWithPendingDependencies.ToList();
-
-        foreach (var test in pendingTests)
+        _testsWithPendingDependencies.RemoveWhere(static test => test.Dependencies.Length > 0);
+        foreach (var test in _testsWithPendingDependencies)
         {
-            if (test.Dependencies.Length > 0)
-            {
-                _testsWithPendingDependencies.Remove(test);
-                continue;
-            }
-
             ResolveDependenciesForTest(test);
         }
     }
