@@ -430,16 +430,28 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
 
         // Build expression string for error messages
         // Only include parameters that were actually provided (non-null expressions)
-        sourceBuilder.Append($"        source.Context.ExpressionBuilder.Append(\".{methodName}(\"");
-        if (additionalParams.Length > 0)
+        sourceBuilder.Append($"        source.Context.ExpressionBuilder.Append(\".{methodName}(\");");
+        if (additionalParams.Length == 1)
         {
             sourceBuilder.AppendLine();
-            sourceBuilder.Append("            + string.Join(\", \", new[] { ");
-            var expressionParts = additionalParams.Select(p => $"{p.Name}Expression");
-            sourceBuilder.Append(string.Join(", ", expressionParts));
-            sourceBuilder.Append(" }.Where(e => e != null))");
+            sourceBuilder.AppendLine($"        source.Context.ExpressionBuilder.Append({additionalParams[0].Name}Expression);");
         }
-        sourceBuilder.AppendLine(" + \")\");");
+        else if (additionalParams.Length > 0)
+        {
+            sourceBuilder.AppendLine();
+            sourceBuilder.AppendLine("        var added = false;");
+            foreach (var param in additionalParams)
+            {
+                sourceBuilder.AppendLine($"        if ({param.Name}Expression != null)");
+                sourceBuilder.AppendLine("        {");
+                sourceBuilder.AppendLine("            source.Context.ExpressionBuilder.Append(added ? \", \" : \"\");");
+                sourceBuilder.AppendLine($"            source.Context.ExpressionBuilder.Append({param.Name}Expression);");
+                sourceBuilder.AppendLine($"            added = true;");
+                sourceBuilder.AppendLine("        }");
+
+            }
+        }
+        sourceBuilder.AppendLine("        source.Context.ExpressionBuilder.Append(\")\");");
 
         // Construct and return the assertion
         sourceBuilder.Append($"        return new {assertionType.Name}");
