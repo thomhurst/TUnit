@@ -17,7 +17,7 @@
       "rollForward": true
     },
     "dotnet-trace": {
-      "version": "9.0.652701",
+      "version": "9.0.661903",
       "commands": [
         "dotnet-trace"
       ],
