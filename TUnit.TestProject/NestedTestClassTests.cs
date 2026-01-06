@@ -5,7 +5,7 @@ namespace TUnit.TestProject;
 /// <summary>
 /// Tests for nested class filtering support.
 /// This validates that tests in nested classes can be filtered using the OuterClass+NestedClass syntax.
-/// See: https://github.com/thomhurst/TUnit/issues/XXXX
+/// See: https://github.com/thomhurst/TUnit/issues/4149
 /// </summary>
 [EngineTest(ExpectedResult.Pass)]
 public class NestedTestClassTests
