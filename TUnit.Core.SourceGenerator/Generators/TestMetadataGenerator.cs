@@ -2164,15 +2164,44 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Extract ProceedOnFailure property value
         var proceedOnFailure = GetProceedOnFailureValue(attributeData);
 
+        // Check if this is a generic DependsOnAttribute<T> - extract the type from the type argument
+        ITypeSymbol? genericTypeArgument = null;
+        if (attributeData.AttributeClass is INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1 } genericAttr)
+        {
+            genericTypeArgument = genericAttr.TypeArguments[0];
+        }
+
         // Handle the different constructor overloads of DependsOnAttribute
-        if (constructorArgs.Length == 1)
+        if (constructorArgs.Length == 0 && genericTypeArgument != null)
+        {
+            // DependsOnAttribute<T>() - dependency on all tests in class T
+            var className = genericTypeArgument.GloballyQualified();
+            var genericArity = genericTypeArgument is INamedTypeSymbol { IsGenericType: true } namedType
+                ? namedType.Arity
+                : 0;
+            writer.AppendLine($"new global::TUnit.Core.TestDependency {{ ClassType = typeof({className}), ClassGenericArity = {genericArity}, ProceedOnFailure = {proceedOnFailure.ToString().ToLower()} }}");
+        }
+        else if (constructorArgs.Length == 1)
         {
             var arg = constructorArgs[0];
             if (arg.Type?.Name == "String")
             {
-                // DependsOnAttribute(string testName) - dependency on test in same class
                 var testName = arg.Value?.ToString() ?? "";
-                writer.AppendLine($"new global::TUnit.Core.TestDependency {{ MethodName = \"{testName}\", ProceedOnFailure = {proceedOnFailure.ToString().ToLower()} }}");
+                
+                if (genericTypeArgument != null)
+                {
+                    // DependsOnAttribute<T>(string testName) - dependency on specific test in class T
+                    var className = genericTypeArgument.GloballyQualified();
+                    var genericArity = genericTypeArgument is INamedTypeSymbol { IsGenericType: true } namedType
+                        ? namedType.Arity
+                        : 0;
+                    writer.AppendLine($"new global::TUnit.Core.TestDependency {{ ClassType = typeof({className}), ClassGenericArity = {genericArity}, MethodName = \"{testName}\", ProceedOnFailure = {proceedOnFailure.ToString().ToLower()} }}");
+                }
+                else
+                {
+                    // DependsOnAttribute(string testName) - dependency on test in same class
+                    writer.AppendLine($"new global::TUnit.Core.TestDependency {{ MethodName = \"{testName}\", ProceedOnFailure = {proceedOnFailure.ToString().ToLower()} }}");
+                }
             }
             else if (arg.Type?.TypeKind == TypeKind.Class || arg.Type?.Name == "Type")
             {
@@ -2194,9 +2223,22 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             if (firstArg.Type?.Name == "String" && secondArg.Type is IArrayTypeSymbol)
             {
-                // DependsOnAttribute(string testName, Type[] parameterTypes)
                 var testName = firstArg.Value?.ToString() ?? "";
-                writer.Append($"new global::TUnit.Core.TestDependency {{ MethodName = \"{testName}\"");
+                
+                if (genericTypeArgument != null)
+                {
+                    // DependsOnAttribute<T>(string testName, Type[] parameterTypes) - dependency on specific test with parameters in class T
+                    var className = genericTypeArgument.GloballyQualified();
+                    var genericArity = genericTypeArgument is INamedTypeSymbol { IsGenericType: true } namedType
+                        ? namedType.Arity
+                        : 0;
+                    writer.Append($"new global::TUnit.Core.TestDependency {{ ClassType = typeof({className}), ClassGenericArity = {genericArity}, MethodName = \"{testName}\"");
+                }
+                else
+                {
+                    // DependsOnAttribute(string testName, Type[] parameterTypes)
+                    writer.Append($"new global::TUnit.Core.TestDependency {{ MethodName = \"{testName}\"");
+                }
 
                 // Handle parameter types
                 if (secondArg.Values.Length > 0)
