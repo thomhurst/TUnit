@@ -13,17 +13,17 @@ namespace TUnit.Assertions.Sources;
 public class MutableDictionaryAssertion<TKey, TValue> : MutableDictionaryAssertionBase<IDictionary<TKey, TValue>, TKey, TValue>
     where TKey : notnull
 {
-    public MutableDictionaryAssertion(IDictionary<TKey, TValue> value, string? expression)
+    public MutableDictionaryAssertion(IDictionary<TKey, TValue>? value, string? expression)
         : base(CreateContext(value, expression))
     {
     }
 
     private static AssertionContext<IDictionary<TKey, TValue>> CreateContext(
-        IDictionary<TKey, TValue> value,
+        IDictionary<TKey, TValue>? value,
         string? expression)
     {
         var expressionBuilder = new StringBuilder();
         expressionBuilder.Append($"Assert.That({expression ?? "?"})");
-        return new AssertionContext<IDictionary<TKey, TValue>>(value, expressionBuilder);
+        return new AssertionContext<IDictionary<TKey, TValue>>(value!, expressionBuilder);
     }
 }

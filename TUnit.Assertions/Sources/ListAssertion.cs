@@ -11,7 +11,7 @@ namespace TUnit.Assertions.Sources;
 /// </summary>
 public class ListAssertion<TItem> : ListAssertionBase<IList<TItem>, TItem>
 {
-    public ListAssertion(IList<TItem> value, string? expression)
+    public ListAssertion(IList<TItem>? value, string? expression)
         : base(CreateContext(value, expression))
     {
     }
@@ -22,11 +22,11 @@ public class ListAssertion<TItem> : ListAssertionBase<IList<TItem>, TItem>
     }
 
     private static AssertionContext<IList<TItem>> CreateContext(
-        IList<TItem> value,
+        IList<TItem>? value,
         string? expression)
     {
         var expressionBuilder = new StringBuilder();
         expressionBuilder.Append($"Assert.That({expression ?? "?"})");
-        return new AssertionContext<IList<TItem>>(value, expressionBuilder);
+        return new AssertionContext<IList<TItem>>(value!, expressionBuilder);
     }
 }

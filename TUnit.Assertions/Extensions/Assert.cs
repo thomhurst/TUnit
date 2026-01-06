@@ -21,7 +21,7 @@ public static class Assert
     /// </summary>
     [OverloadResolutionPriority(3)]
     public static DictionaryAssertion<TKey, TValue> That<TKey, TValue>(
-        IReadOnlyDictionary<TKey, TValue> value,
+        IReadOnlyDictionary<TKey, TValue>? value,
         [CallerArgumentExpression(nameof(value))] string? expression = null)
         where TKey : notnull
     {
@@ -35,7 +35,7 @@ public static class Assert
     /// </summary>
     [OverloadResolutionPriority(2)]
     public static MutableDictionaryAssertion<TKey, TValue> That<TKey, TValue>(
-        IDictionary<TKey, TValue> value,
+        IDictionary<TKey, TValue>? value,
         [CallerArgumentExpression(nameof(value))] string? expression = null)
         where TKey : notnull
     {
@@ -108,7 +108,7 @@ public static class Assert
     /// </summary>
     [OverloadResolutionPriority(2)]
     public static ReadOnlySetAssertion<TItem> That<TItem>(
-        IReadOnlySet<TItem> value,
+        IReadOnlySet<TItem>? value,
         [CallerArgumentExpression(nameof(value))] string? expression = null)
     {
         return new ReadOnlySetAssertion<TItem>(value, expression ?? "set");
@@ -138,7 +138,7 @@ public static class Assert
     /// </summary>
     [OverloadResolutionPriority(2)]
     public static SetAssertion<TItem> That<TItem>(
-        ISet<TItem> value,
+        ISet<TItem>? value,
         [CallerArgumentExpression(nameof(value))] string? expression = null)
     {
         return new SetAssertion<TItem>(value, expression ?? "set");
@@ -153,7 +153,7 @@ public static class Assert
     /// </summary>
     [OverloadResolutionPriority(4)]
     public static ListAssertion<TItem> That<TItem>(
-        IList<TItem> value,
+        IList<TItem>? value,
         [CallerArgumentExpression(nameof(value))] string? expression = null)
     {
         return new ListAssertion<TItem>(value, expression ?? "list");
@@ -166,7 +166,7 @@ public static class Assert
     /// </summary>
     [OverloadResolutionPriority(5)]
     public static CollectionAssertion<TItem> That<TItem>(
-        TItem[] value,
+        TItem[]? value,
         [CallerArgumentExpression(nameof(value))] string? expression = null)
     {
         return new CollectionAssertion<TItem>(value!, expression);
@@ -181,7 +181,7 @@ public static class Assert
     /// </summary>
     [OverloadResolutionPriority(3)]
     public static ReadOnlyListAssertion<TItem> That<TItem>(
-        IReadOnlyList<TItem> value,
+        IReadOnlyList<TItem>? value,
         [CallerArgumentExpression(nameof(value))] string? expression = null)
     {
         return new ReadOnlyListAssertion<TItem>(value, expression ?? "readOnlyList");
@@ -195,7 +195,7 @@ public static class Assert
     /// </summary>
     [OverloadResolutionPriority(3)]
     public static HashSetAssertion<TItem> That<TItem>(
-        HashSet<TItem> value,
+        HashSet<TItem>? value,
         [CallerArgumentExpression(nameof(value))] string? expression = null)
     {
         return new HashSetAssertion<TItem>(value, expression ?? "hashSet");

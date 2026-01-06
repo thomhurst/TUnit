@@ -179,13 +179,13 @@ namespace
         public static . That(<.> action, [.("action")] string? expression = null) { }
         public static . That(. task, [.("task")] string? expression = null) { }
         public static .<string> That(string? value, [.("value")] string? expression = null) { }
-        public static .<TItem> That<TItem>(.<TItem> value, [.("value")] string? expression = null) { }
-        public static .<TItem> That<TItem>(.<TItem> value, [.("value")] string? expression = null) { }
         public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
         public static .<TItem> That<TItem>(.<TItem> value, [.("value")] string? expression = null) { }
-        public static .<TItem> That<TItem>(.<TItem> value, [.("value")] string? expression = null) { }
-        public static .<TItem> That<TItem>(.<TItem> value, [.("value")] string? expression = null) { }
-        public static .<TItem> That<TItem>(.<TItem> value, [.("value")] string? expression = null) { }
+        public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
+        public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
+        public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
+        public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
+        public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
         public static .<TItem> That<TItem>(<.<TItem>?> func, [.("func")] string? expression = null) { }
         public static .<TItem> That<TItem>(<.<.<TItem>?>> func, [.("func")] string? expression = null) { }
         public static .<TValue> That<TValue>(<.<TValue?>> func, [.("func")] string? expression = null) { }
@@ -193,11 +193,11 @@ namespace
         public static .<TItem> That<TItem>(<TItem> value, [.("value")] string? expression = null) { }
         public static .<TItem> That<TItem>(<TItem> value, [.("value")] string? expression = null) { }
         public static .<TValue> That<TValue>(.<TValue> task, [.("task")] string? expression = null) { }
-        public static .<TItem> That<TItem>(TItem[] value, [.("value")] string? expression = null) { }
+        public static .<TItem> That<TItem>(TItem[]? value, [.("value")] string? expression = null) { }
         public static .<TValue> That<TValue>(TValue? value, [.("value")] string? expression = null) { }
-        public static .<TKey, TValue> That<TKey, TValue>(.<TKey, TValue> value, [.("value")] string? expression = null)
+        public static .<TKey, TValue> That<TKey, TValue>(.<TKey, TValue>? value, [.("value")] string? expression = null)
             where TKey :  notnull { }
-        public static .<TKey, TValue> That<TKey, TValue>(.<TKey, TValue> value, [.("value")] string? expression = null)
+        public static .<TKey, TValue> That<TKey, TValue>(.<TKey, TValue>? value, [.("value")] string? expression = null)
             where TKey :  notnull { }
         public static  Throws( exceptionType,  action) { }
         public static TException Throws<TException>( action)
@@ -5389,7 +5389,7 @@ namespace .Sources
     public class DictionaryAssertion<TKey, TValue> : .<.<TKey, TValue>, TKey, TValue>
         where TKey :  notnull
     {
-        public DictionaryAssertion(.<TKey, TValue> value, string? expression) { }
+        public DictionaryAssertion(.<TKey, TValue>? value, string? expression) { }
     }
     public class FuncAssertion<TValue> : ., .<TValue>, .<TValue>
     {
@@ -5414,7 +5414,7 @@ namespace .Sources
     }
     public class HashSetAssertion<TItem> : .<.<TItem>, TItem>, ., .<.<TItem>>
     {
-        public HashSetAssertion(.<TItem> value, string expression) { }
+        public HashSetAssertion(.<TItem>? value, string expression) { }
         protected override .<TItem> CreateSetAdapter(.<TItem> value) { }
     }
     public abstract class ListAssertionBase<TList, TItem> : .<TList, TItem>
@@ -5430,7 +5430,7 @@ namespace .Sources
     }
     public class ListAssertion<TItem> : .<.<TItem>, TItem>
     {
-        public ListAssertion(.<TItem> value, string? expression) { }
+        public ListAssertion(.<TItem>? value, string? expression) { }
     }
     public class MemoryAndContinuation<TMemory, TItem> : .<TMemory, TItem>
     {
@@ -5490,7 +5490,7 @@ namespace .Sources
     public class MutableDictionaryAssertion<TKey, TValue> : .<.<TKey, TValue>, TKey, TValue>
         where TKey :  notnull
     {
-        public MutableDictionaryAssertion(.<TKey, TValue> value, string? expression) { }
+        public MutableDictionaryAssertion(.<TKey, TValue>? value, string? expression) { }
     }
     public abstract class ReadOnlyListAssertionBase<TList, TItem> : .<TList, TItem>
         where TList : .<TItem>
@@ -5514,7 +5514,7 @@ namespace .Sources
     }
     public class ReadOnlySetAssertion<TItem> : .<.<TItem>, TItem>, ., .<.<TItem>>
     {
-        public ReadOnlySetAssertion(.<TItem> value, string expression) { }
+        public ReadOnlySetAssertion(.<TItem>? value, string expression) { }
         protected override .<TItem> CreateSetAdapter(.<TItem> value) { }
     }
     public class SetAndContinuation<TSet, TItem> : .<TSet, TItem>
@@ -5540,7 +5540,7 @@ namespace .Sources
     }
     public class SetAssertion<TItem> : .<.<TItem>, TItem>, ., .<.<TItem>>
     {
-        public SetAssertion(.<TItem> value, string expression) { }
+        public SetAssertion(.<TItem>? value, string expression) { }
         protected override .<TItem> CreateSetAdapter(.<TItem> value) { }
     }
     public class SetOrContinuation<TSet, TItem> : .<TSet, TItem>
