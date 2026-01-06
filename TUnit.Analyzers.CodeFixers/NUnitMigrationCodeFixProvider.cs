@@ -667,7 +667,12 @@ public class NUnitAssertionRewriter : AssertionRewriter
         }
 
         // Fallback for unsupported Throws patterns
-        return CreateTUnitAssertion("Throws", invocation.ArgumentList.Arguments[0].Expression);
+        // If we have 2+ arguments, it's a constraint-based form where arg[1] is the action
+        // Otherwise, it's a single-argument form where arg[0] is the action
+        var fallbackArg = invocation.ArgumentList.Arguments.Count >= 2
+            ? invocation.ArgumentList.Arguments[1].Expression
+            : invocation.ArgumentList.Arguments[0].Expression;
+        return CreateTUnitAssertion("Throws", fallbackArg);
     }
     
     /// <summary>
