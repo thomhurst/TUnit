@@ -78,6 +78,9 @@ internal static class ReflectionMetadataBuilder
                 .Select((p, i) => CreateParameterMetadata(p.ParameterType, p.Name, i, p))
                 .ToArray() ?? [];
 
+            // Create parent metadata for nested types
+            var parent = type.DeclaringType != null ? CreateClassMetadata(type.DeclaringType) : null;
+
             return new ClassMetadata
             {
                 Name = type.Name,
@@ -90,7 +93,7 @@ internal static class ReflectionMetadataBuilder
                 }),
                 Parameters = constructorParameters,
                 Properties = [],
-                Parent = null
+                Parent = parent
             };
         });
     }

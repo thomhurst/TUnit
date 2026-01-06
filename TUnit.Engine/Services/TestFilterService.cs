@@ -137,7 +137,7 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
         var classMetadata = test.Context.Metadata.TestDetails.MethodMetadata.Class;
         var assemblyName = classMetadata.Assembly.Name ?? metadata.TestClassType.Assembly.GetName().Name ?? "*";
         var namespaceName = classMetadata.Namespace ?? "*";
-        var classTypeName = classMetadata.Name;
+        var classTypeName = GetNestedClassName(classMetadata);
 
         var path = $"/{assemblyName}/{namespaceName}/{classTypeName}/{metadata.TestMethodName}";
 
@@ -145,6 +145,35 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
         test.CachedFilterPath = path;
 
         return path;
+    }
+
+    /// <summary>
+    /// Gets the full nested class name with '+' separator (matching .NET Type.FullName convention).
+    /// For example: OuterClass+InnerClass
+    /// </summary>
+    private static string GetNestedClassName(ClassMetadata classMetadata)
+    {
+        // If no parent, just return the simple name
+        if (classMetadata.Parent == null)
+        {
+            return classMetadata.Name;
+        }
+
+        // Build the type hierarchy by walking up through parents
+        var typeHierarchy = new List<string>();
+        var current = classMetadata;
+
+        while (current != null)
+        {
+            typeHierarchy.Add(current.Name);
+            current = current.Parent;
+        }
+
+        // Reverse to get outer-to-inner order
+        typeHierarchy.Reverse();
+
+        // Join with '+' separator (matching .NET Type.FullName convention for nested types)
+        return string.Join("+", typeHierarchy);
     }
 
     private bool CheckTreeNodeFilter(
