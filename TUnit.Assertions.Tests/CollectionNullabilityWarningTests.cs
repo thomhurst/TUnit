@@ -215,6 +215,34 @@ public class CollectionNullabilityWarningTests
         await Assert.That(set).IsNull();
     }
 
+#if NET5_0_OR_GREATER
+    // ===================================
+    // IReadOnlySet<T>? Tests
+    // ===================================
+
+    [Test]
+    public async Task NullableIReadOnlySet_AcceptsNullableValue_NoWarning()
+    {
+        IReadOnlySet<string>? set = new HashSet<string> { "a", "b", "c" };
+        await Assert.That(set).IsNotNull();
+    }
+
+    [Test]
+    public async Task NullableIReadOnlySet_WithNullValue_IsNotNull_Fails()
+    {
+        IReadOnlySet<string>? set = null;
+        var action = async () => await Assert.That(set).IsNotNull();
+        await Assert.That(action).Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task NullableIReadOnlySet_WithNullValue_IsNull_Passes()
+    {
+        IReadOnlySet<string>? set = null;
+        await Assert.That(set).IsNull();
+    }
+#endif
+
     // ===================================
     // IReadOnlyList<T>? Tests
     // ===================================
