@@ -112,7 +112,9 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
                         if (typeInfo.Type?.IsDisposable() is true || typeInfo.Type?.IsAsyncDisposable() is true)
                         {
                             var fieldSymbol = context.SemanticModel.GetDeclaredSymbol(variable) as IFieldSymbol;
-                            if (fieldSymbol != null)
+                            // Only flag if the field type itself is disposable (not e.g. Func<IDisposable>)
+                            if (fieldSymbol != null &&
+                                (fieldSymbol.Type.IsDisposable() || fieldSymbol.Type.IsAsyncDisposable()))
                             {
                                 createdObjects.TryAdd(fieldSymbol, HookLevel.Test);
                                 break; // Only need to add once
@@ -145,7 +147,9 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
                     if (typeInfo.Type?.IsDisposable() is true || typeInfo.Type?.IsAsyncDisposable() is true)
                     {
                         var propertySymbol = context.SemanticModel.GetDeclaredSymbol(propertyDeclaration) as IPropertySymbol;
-                        if (propertySymbol != null)
+                        // Only flag if the property type itself is disposable (not e.g. Func<IDisposable>)
+                        if (propertySymbol != null &&
+                            (propertySymbol.Type.IsDisposable() || propertySymbol.Type.IsAsyncDisposable()))
                         {
                             createdObjects.TryAdd(propertySymbol, HookLevel.Test);
                             break; // Only need to add once
