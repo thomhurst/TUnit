@@ -25,7 +25,7 @@ internal static class PropertyInjectionCache
     /// </summary>
     public static PropertyInjectionPlan GetOrCreatePlan(Type type)
     {
-        return _injectionPlans.GetOrAdd(type, _ => PropertyInjectionPlanBuilder.Build(type));
+        return _injectionPlans.GetOrAdd(type, PropertyInjectionPlanBuilder.Build);
     }
 
     /// <summary>
