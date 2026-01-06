@@ -439,10 +439,17 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         else if (additionalParams.Length > 0)
         {
             sourceBuilder.AppendLine();
-            sourceBuilder.Append("        source.Context.ExpressionBuilder.Append(string.Join(\", \", new[] { ");
-            var expressionParts = additionalParams.Select(p => $"{p.Name}Expression");
-            sourceBuilder.Append(string.Join(", ", expressionParts));
-            sourceBuilder.AppendLine(" }.Where(e => e != null)));");
+            sourceBuilder.AppendLine("        var added = false;");
+            foreach (var param in additionalParams)
+            {
+                sourceBuilder.AppendLine($"        if ({param.Name}Expression != null)");
+                sourceBuilder.AppendLine("        {");
+                sourceBuilder.AppendLine("            source.Context.ExpressionBuilder.Append(added ? \", \" : \"\");");
+                sourceBuilder.AppendLine($"            source.Context.ExpressionBuilder.Append({param.Name}Expression);");
+                sourceBuilder.AppendLine($"            added = true;");
+                sourceBuilder.AppendLine("        }");
+
+            }
         }
         sourceBuilder.AppendLine("        source.Context.ExpressionBuilder.Append(\")\");");
 
