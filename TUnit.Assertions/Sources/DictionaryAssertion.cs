@@ -13,17 +13,17 @@ namespace TUnit.Assertions.Sources;
 public class DictionaryAssertion<TKey, TValue> : DictionaryAssertionBase<IReadOnlyDictionary<TKey, TValue>, TKey, TValue>
     where TKey : notnull
 {
-    public DictionaryAssertion(IReadOnlyDictionary<TKey, TValue> value, string? expression)
+    public DictionaryAssertion(IReadOnlyDictionary<TKey, TValue>? value, string? expression)
         : base(CreateContext(value, expression))
     {
     }
 
     private static AssertionContext<IReadOnlyDictionary<TKey, TValue>> CreateContext(
-        IReadOnlyDictionary<TKey, TValue> value,
+        IReadOnlyDictionary<TKey, TValue>? value,
         string? expression)
     {
         var expressionBuilder = new StringBuilder();
         expressionBuilder.Append($"Assert.That({expression ?? "?"})");
-        return new AssertionContext<IReadOnlyDictionary<TKey, TValue>>(value, expressionBuilder);
+        return new AssertionContext<IReadOnlyDictionary<TKey, TValue>>(value!, expressionBuilder);
     }
 }

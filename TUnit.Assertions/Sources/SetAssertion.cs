@@ -15,8 +15,8 @@ public class SetAssertion<TItem> : SetAssertionBase<ISet<TItem>, TItem>, IAssert
     /// <summary>
     /// Creates a new SetAssertion for the given set.
     /// </summary>
-    public SetAssertion(ISet<TItem> value, string expression)
-        : base(new AssertionContext<ISet<TItem>>(new EvaluationContext<ISet<TItem>>(value), CreateExpressionBuilder(expression)))
+    public SetAssertion(ISet<TItem>? value, string expression)
+        : base(new AssertionContext<ISet<TItem>>(new EvaluationContext<ISet<TItem>>(value!), CreateExpressionBuilder(expression)))
     {
     }
 
@@ -53,8 +53,8 @@ public class ReadOnlySetAssertion<TItem> : SetAssertionBase<IReadOnlySet<TItem>,
     /// <summary>
     /// Creates a new ReadOnlySetAssertion for the given read-only set.
     /// </summary>
-    public ReadOnlySetAssertion(IReadOnlySet<TItem> value, string expression)
-        : base(new AssertionContext<IReadOnlySet<TItem>>(new EvaluationContext<IReadOnlySet<TItem>>(value), CreateExpressionBuilder(expression)))
+    public ReadOnlySetAssertion(IReadOnlySet<TItem>? value, string expression)
+        : base(new AssertionContext<IReadOnlySet<TItem>>(new EvaluationContext<IReadOnlySet<TItem>>(value!), CreateExpressionBuilder(expression)))
     {
     }
 
@@ -91,8 +91,8 @@ public class HashSetAssertion<TItem> : SetAssertionBase<HashSet<TItem>, TItem>, 
     /// <summary>
     /// Creates a new HashSetAssertion for the given hash set.
     /// </summary>
-    public HashSetAssertion(HashSet<TItem> value, string expression)
-        : base(new AssertionContext<HashSet<TItem>>(new EvaluationContext<HashSet<TItem>>(value), CreateExpressionBuilder(expression)))
+    public HashSetAssertion(HashSet<TItem>? value, string expression)
+        : base(new AssertionContext<HashSet<TItem>>(new EvaluationContext<HashSet<TItem>>(value!), CreateExpressionBuilder(expression)))
     {
     }
 
