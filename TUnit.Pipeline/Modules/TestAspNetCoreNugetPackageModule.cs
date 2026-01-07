@@ -45,6 +45,11 @@ public class TestAspNetCoreNugetPackageModule : TestBaseModule
             Properties =
             [
                 new KeyValue("TUnitVersion", version.Value!.SemVer!)
+            ],
+            Arguments =
+            [
+                "--coverage",
+                "--report-trx"
             ]
         };
     }

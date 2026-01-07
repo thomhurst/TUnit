@@ -68,6 +68,11 @@ public abstract class AbstractTestNugetPackageModule : TestBaseModule
             Properties =
             [
                 new KeyValue("TUnitVersion", version.Value!.SemVer!)
+            ],
+            Arguments =
+            [
+                "--coverage",
+                "--report-trx"
             ]
         };
     }
