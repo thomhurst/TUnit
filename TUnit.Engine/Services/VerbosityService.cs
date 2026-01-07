@@ -27,6 +27,11 @@ public sealed class VerbosityService
     public bool ShowDetailedStackTrace => _logLevel <= LogLevel.Debug;
 
     /// <summary>
+    /// Whether detailed output mode is enabled (--output Detailed)
+    /// </summary>
+    public bool IsDetailedOutput => _isDetailedOutput;
+
+    /// <summary>
     /// Whether to hide real-time test output (hidden with --output Normal, unless log level is Debug/Trace)
     /// </summary>
     public bool HideTestOutput => !_isDetailedOutput && _logLevel > LogLevel.Debug;
