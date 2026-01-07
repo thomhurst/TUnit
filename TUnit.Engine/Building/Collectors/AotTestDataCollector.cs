@@ -155,15 +155,17 @@ internal sealed class AotTestDataCollector : ITestDataCollector
 
     private static Attribute[] GetDynamicTestAttributes(DynamicDiscoveryResult result)
     {
+        if (result.TestClassType == null)
+        {
+            return result.Attributes.ToArray();
+        }
+
         // Merge explicitly provided attributes with inherited class/assembly attributes
         // Order matches GetAllAttributes: method-level first (explicit), then class, then assembly
         var attributes = new List<Attribute>(result.Attributes);
 
-        if (result.TestClassType != null)
-        {
-            attributes.AddRange(result.TestClassType.GetCustomAttributes().OfType<Attribute>());
-            attributes.AddRange(result.TestClassType.Assembly.GetCustomAttributes().OfType<Attribute>());
-        }
+        attributes.AddRange(result.TestClassType.GetCustomAttributes());
+        attributes.AddRange(result.TestClassType.Assembly.GetCustomAttributes());
 
         return attributes.ToArray();
     }
