@@ -1598,6 +1598,285 @@ public class NUnitMigrationAnalyzerTests
         );
     }
 
+    [Test]
+    public async Task NUnit_ThrowsAsync_Generic_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+                using System;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void TestMethod()
+                    {
+                        Assert.ThrowsAsync<ArgumentException>(async () => await SomeAsyncMethod());
+                    }
+                    
+                    private async System.Threading.Tasks.Task SomeAsyncMethod() => throw new ArgumentException();
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        await Assert.ThrowsAsync<ArgumentException>(async () => await SomeAsyncMethod());
+                    }
+                    
+                    private async System.Threading.Tasks.Task SomeAsyncMethod() => throw new ArgumentException();
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_ThrowsAsync_WithConstraint_TypeOf_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+                using System;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void TestMethod()
+                    {
+                        Assert.ThrowsAsync(Is.TypeOf(typeof(ArgumentException)), async () => await SomeAsyncMethod());
+                    }
+                    
+                    private async System.Threading.Tasks.Task SomeAsyncMethod() => throw new ArgumentException();
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        await Assert.ThrowsAsync<ArgumentException>(async () => await SomeAsyncMethod());
+                    }
+                    
+                    private async System.Threading.Tasks.Task SomeAsyncMethod() => throw new ArgumentException();
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_ThrowsAsync_WithConstraint_TypeOf_With_Code_To_Execute()
+    {
+        // This is the exact scenario from the bug report
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+                using System;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void TestMethod()
+                    {
+                        var sut = new Sut();
+                        Assert.ThrowsAsync(Is.TypeOf(typeof(ArgumentException)), async () => await sut.Execute(10));
+                    }
+                }
+                
+                public class Sut
+                {
+                    public async System.Threading.Tasks.Task Execute(int value)
+                    {
+                        await System.Threading.Tasks.Task.Delay(1);
+                        throw new ArgumentException();
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        var sut = new Sut();
+                        await Assert.ThrowsAsync<ArgumentException>(async () => await sut.Execute(10));
+                    }
+                }
+                
+                public class Sut
+                {
+                    public async System.Threading.Tasks.Task Execute(int value)
+                    {
+                        await System.Threading.Tasks.Task.Delay(1);
+                        throw new ArgumentException();
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_Throws_Generic_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+                using System;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void TestMethod()
+                    {
+                        Assert.Throws<ArgumentException>(() => throw new ArgumentException());
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        await Assert.ThrowsAsync<ArgumentException>(() => throw new ArgumentException());
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_Throws_WithConstraint_TypeOf_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+                using System;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void TestMethod()
+                    {
+                        Assert.Throws(Is.TypeOf(typeof(ArgumentException)), () => throw new ArgumentException());
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        await Assert.ThrowsAsync<ArgumentException>(() => throw new ArgumentException());
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_ThrowsAsync_WithUnrecognizedConstraint_PreservesAction()
+    {
+        // Test that unrecognized constraint patterns still preserve the action lambda
+        // This tests the fallback path in ConvertNUnitThrows
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+                using System;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void TestMethod()
+                    {
+                        // Using Is.InstanceOf which is not recognized by TryExtractTypeFromConstraint
+                        Assert.ThrowsAsync(Is.InstanceOf<ArgumentException>(), async () => await SomeMethod());
+                    }
+                    
+                    private async System.Threading.Tasks.Task SomeMethod()
+                    {
+                        await System.Threading.Tasks.Task.Delay(1);
+                        throw new ArgumentException();
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        // Using Is.InstanceOf which is not recognized by TryExtractTypeFromConstraint
+                        await Assert.That(async () => await SomeMethod()).Throws();
+                    }
+                    
+                    private async System.Threading.Tasks.Task SomeMethod()
+                    {
+                        await System.Threading.Tasks.Task.Delay(1);
+                        throw new ArgumentException();
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
     private static void ConfigureNUnitTest(Verifier.Test test)
     {
         test.TestState.AdditionalReferences.Add(typeof(NUnit.Framework.TestAttribute).Assembly);
