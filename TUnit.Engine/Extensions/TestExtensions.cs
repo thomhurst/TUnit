@@ -4,6 +4,7 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
 using TUnit.Core.Extensions;
 using TUnit.Engine.Capabilities;
+using TUnit.Engine.Services;
 #pragma warning disable TPEXP
 
 namespace TUnit.Engine.Extensions;
@@ -11,6 +12,7 @@ namespace TUnit.Engine.Extensions;
 internal static class TestExtensions
 {
     private static bool? _cachedIsTrxEnabled;
+    private static bool? _cachedIsDetailedOutput;
 
     internal static TestNode ToTestNode(this TestContext testContext, TestNodeStateProperty stateProperty)
     {
@@ -60,17 +62,27 @@ internal static class TestExtensions
         }
 
         string? output = null;
-        if (isFinalState && testContext.GetStandardOutput() is {} standardOutput && !string.IsNullOrEmpty(standardOutput))
-        {
-            output = standardOutput;
-            properties.Add(new StandardOutputProperty(standardOutput));
-        }
-
         string? error = null;
-        if (isFinalState && testContext.GetErrorOutput() is {} standardError && !string.IsNullOrEmpty(standardError))
+
+        if (isFinalState)
         {
-            error = standardError;
-            properties.Add(new StandardErrorProperty(standardError));
+            output = testContext.GetStandardOutput();
+            error = testContext.GetErrorOutput();
+
+            // Only add output properties when NOT in detailed output mode to avoid duplication
+            // In detailed mode, the output is already shown in real-time by the platform
+            if (!IsDetailedOutput(testContext))
+            {
+                if (!string.IsNullOrEmpty(output))
+                {
+                    properties.Add(new StandardOutputProperty(output));
+                }
+
+                if (!string.IsNullOrEmpty(error))
+                {
+                    properties.Add(new StandardErrorProperty(error));
+                }
+            }
         }
 
         // TRX Report Properties
@@ -193,6 +205,23 @@ internal static class TestExtensions
 
         _cachedIsTrxEnabled = trxCapability.IsTrxEnabled;
         return _cachedIsTrxEnabled.Value;
+    }
+
+    private static bool IsDetailedOutput(TestContext testContext)
+    {
+        if (_cachedIsDetailedOutput.HasValue)
+        {
+            return _cachedIsDetailedOutput.Value;
+        }
+
+        if (testContext.Services.GetService<VerbosityService>() is not {} verbosityService)
+        {
+            _cachedIsDetailedOutput = false;
+            return false;
+        }
+
+        _cachedIsDetailedOutput = verbosityService.IsDetailedOutput;
+        return _cachedIsDetailedOutput.Value;
     }
 
     private static IEnumerable<TestMetadataProperty> ExtractProperties(TestDetails testDetails)
