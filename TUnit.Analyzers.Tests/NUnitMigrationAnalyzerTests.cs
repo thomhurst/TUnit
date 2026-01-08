@@ -2304,6 +2304,176 @@ public class NUnitMigrationAnalyzerTests
         );
     }
 
+    [Test]
+    public async Task NUnit_AssertMultiple_Lambda_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void TestMethod()
+                    {
+                        int x = 1;
+                        int y = 2;
+                        Assert.Multiple(() =>
+                        {
+                            Assert.That(x, Is.EqualTo(1));
+                            Assert.That(y, Is.EqualTo(2));
+                        });
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        int x = 1;
+                        int y = 2;
+                        using (Assert.Multiple())
+                        {
+                            await Assert.That(x).IsEqualTo(1);
+                            await Assert.That(y).IsEqualTo(2);
+                        }
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_HasCount_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+                using System.Collections.Generic;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void TestMethod()
+                    {
+                        var list = new List<int> { 1, 2, 3, 4, 5 };
+                        Assert.That(list, Has.Count.EqualTo(5));
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        var list = new List<int> { 1, 2, 3, 4, 5 };
+                        await Assert.That(list).Count().IsEqualTo(5);
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_HasExactlyItems_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+                using System.Collections.Generic;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void TestMethod()
+                    {
+                        var list = new List<int> { 1, 2, 3, 4, 5 };
+                        Assert.That(list, Has.Exactly(5).Items);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        var list = new List<int> { 1, 2, 3, 4, 5 };
+                        await Assert.That(list).Count().IsEqualTo(5);
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_IsNotZero_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void TestMethod()
+                    {
+                        int value = 42;
+                        Assert.That(value, Is.Not.Zero);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        int value = 42;
+                        await Assert.That(value).IsNotZero();
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
     private static void ConfigureNUnitTest(Verifier.Test test)
     {
         test.TestState.AdditionalReferences.Add(typeof(NUnit.Framework.TestAttribute).Assembly);
