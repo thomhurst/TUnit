@@ -355,4 +355,68 @@ public class XUnitAssertionCodeFixProviderTests
                 """
             );
     }
+
+    [Test]
+    public async Task Xunit_Fail_With_Message()
+    {
+        await Verifier
+            .VerifyCodeFixAsync(
+                """
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    public void MyTest()
+                    {
+                        {|#0:Xunit.Assert.Fail("test failure message")|};
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.XUnitAssertion)
+                    .WithLocation(0),
+                """
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    public void MyTest()
+                    {
+                        Fail.Test("test failure message");
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Xunit_Skip_With_Reason()
+    {
+        await Verifier
+            .VerifyCodeFixAsync(
+                """
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    public void MyTest()
+                    {
+                        {|#0:Xunit.Assert.Skip("skipping because of reason")|};
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.XUnitAssertion)
+                    .WithLocation(0),
+                """
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    public void MyTest()
+                    {
+                        Skip.Test("skipping because of reason");
+                    }
+                }
+                """
+            );
+    }
 }

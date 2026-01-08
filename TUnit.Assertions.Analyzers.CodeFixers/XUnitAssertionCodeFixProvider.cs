@@ -202,9 +202,9 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
 
             "NotEmpty" => SyntaxFactory.ParseExpression($"Assert.That({actual}).IsNotEmpty()"),
 
-            "Fail" => SyntaxFactory.ParseExpression("Fail.Test()"),
+            "Fail" => SyntaxFactory.ParseExpression($"Fail.Test({expected})"),
 
-            "Skip" => SyntaxFactory.ParseExpression("Skip.Test()"),
+            "Skip" => SyntaxFactory.ParseExpression($"Skip.Test({expected})"),
 
             "Throws" or "ThrowsAsync" => isGeneric
                 ? SyntaxFactory.ParseExpression($"Assert.That({actual}).ThrowsExactly<{genericArgs}>()")
