@@ -186,6 +186,59 @@ public class CollectionStructuralEquivalenceTests
 
         await TUnitAssert.That(listA).IsEquivalentTo(listB).Using(StringComparer.OrdinalIgnoreCase);
     }
+
+    /// <summary>
+    /// Tests for issue #3722: IsEquivalentTo does not respect IEquatable{T} for types like Vector2
+    /// </summary>
+    [Test]
+    public async Task Collections_With_Vector2_Are_Equivalent_Using_IEquatable()
+    {
+        var array = new System.Numerics.Vector2[]
+        {
+            new System.Numerics.Vector2(1, 2),
+            new System.Numerics.Vector2(3, 4),
+            new System.Numerics.Vector2(5, 6),
+        };
+        var list = new List<System.Numerics.Vector2>(array);
+
+        await TUnitAssert.That(array).IsEquivalentTo(list);
+    }
+
+    [Test]
+    public async Task Collections_With_Vector2_Different_Values_Are_Not_Equivalent()
+    {
+        var array = new System.Numerics.Vector2[]
+        {
+            new System.Numerics.Vector2(1, 2),
+            new System.Numerics.Vector2(3, 4),
+        };
+        var list = new List<System.Numerics.Vector2>
+        {
+            new System.Numerics.Vector2(1, 2),
+            new System.Numerics.Vector2(5, 6),
+        };
+
+        await TUnitAssert.That(array).IsNotEquivalentTo(list);
+    }
+
+    [Test]
+    public async Task Collections_With_Uri_Are_Equivalent_Using_IEquatable()
+    {
+        var listA = new List<Uri> { new Uri("http://example.com"), new Uri("http://test.com") };
+        var listB = new List<Uri> { new Uri("http://example.com"), new Uri("http://test.com") };
+
+        await TUnitAssert.That(listA).IsEquivalentTo(listB);
+    }
+
+    [Test]
+    public async Task Collections_With_Uri_Different_Values_Are_Not_Equivalent()
+    {
+        var listA = new List<Uri> { new Uri("http://example.com") };
+        var listB = new List<Uri> { new Uri("http://different.com") };
+
+        await TUnitAssert.That(listA).IsNotEquivalentTo(listB);
+    }
+
     public class Message
     {
         public string? Content { get; set; }

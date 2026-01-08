@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 
 namespace TUnit.Assertions.Conditions.Helpers;
 
@@ -59,6 +60,8 @@ internal static class TypeHelper
     /// </summary>
     /// <param name="type">The type to check.</param>
     /// <returns>True if the type should use value equality; false for structural comparison.</returns>
+    [UnconditionalSuppressMessage("Trimming", "IL2067",
+        Justification = "This method is only called from code paths that already require reflection (StructuralEqualityComparer)")]
     public static bool IsPrimitiveOrWellKnownType(Type type)
     {
         // Check user-defined primitives first (fast path for common case)
@@ -67,18 +70,55 @@ internal static class TypeHelper
             return true;
         }
 
-        return type.IsPrimitive
-               || type.IsEnum
-               || type == typeof(string)
-               || type == typeof(decimal)
-               || type == typeof(DateTime)
-               || type == typeof(DateTimeOffset)
-               || type == typeof(TimeSpan)
-               || type == typeof(Guid)
+        if (type.IsPrimitive
+            || type.IsEnum
+            || type == typeof(string)
+            || type == typeof(decimal)
+            || type == typeof(DateTime)
+            || type == typeof(DateTimeOffset)
+            || type == typeof(TimeSpan)
+            || type == typeof(Guid)
 #if NET6_0_OR_GREATER
-               || type == typeof(DateOnly)
-               || type == typeof(TimeOnly)
+            || type == typeof(DateOnly)
+            || type == typeof(TimeOnly)
 #endif
-            ;
+           )
+        {
+            return true;
+        }
+
+        // Check if the type is a value type (struct) that implements IEquatable<T> for itself
+        // Value types like Vector2, Matrix3x2, etc. that implement IEquatable<T>
+        // should use value equality rather than structural comparison.
+        // We only check value types to avoid affecting records/classes that may have
+        // collection properties requiring structural comparison.
+        if (type.IsValueType && ImplementsSelfEquatable(type))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Checks if a type implements IEquatable{T} where T is the type itself.
+    /// </summary>
+    private static bool ImplementsSelfEquatable(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)]
+        Type type)
+    {
+        // Iterate through interfaces to find IEquatable<T> where T is the type itself
+        // This approach is AOT-compatible as it doesn't use MakeGenericType
+        foreach (var iface in type.GetInterfaces())
+        {
+            if (iface.IsGenericType 
+                && iface.GetGenericTypeDefinition() == typeof(IEquatable<>)
+                && iface.GenericTypeArguments[0] == type)
+            {
+                return true;
+            }
+        }
+        
+        return false;
     }
 }
