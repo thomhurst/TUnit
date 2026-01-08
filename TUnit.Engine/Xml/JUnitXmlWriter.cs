@@ -10,6 +10,39 @@ namespace TUnit.Engine.Xml;
 
 internal static class JUnitXmlWriter
 {
+    /// <summary>
+    /// Sanitizes a string to be XML-safe by removing invalid XML characters.
+    /// According to XML 1.0 spec, valid characters are:
+    /// #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]
+    /// </summary>
+    private static string SanitizeForXml(string? value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            return string.Empty;
+        }
+
+        // At this point, value is guaranteed to not be null
+        var builder = new StringBuilder(value!.Length);
+        foreach (var ch in value!)
+        {
+            // Check if character is valid according to XML 1.0 spec
+            if (ch == 0x9 || ch == 0xA || ch == 0xD ||
+                (ch >= 0x20 && ch <= 0xD7FF) ||
+                (ch >= 0xE000 && ch <= 0xFFFD))
+            {
+                builder.Append(ch);
+            }
+            else
+            {
+                // Replace invalid character with its hex representation
+                builder.Append($"[0x{((int)ch):X}]");
+            }
+        }
+
+        return builder.ToString();
+    }
+
     public static string GenerateXml(
         IEnumerable<TestNodeUpdateMessage> testUpdates,
         string? filter)
@@ -49,7 +82,7 @@ internal static class JUnitXmlWriter
 
         // <testsuites>
         xmlWriter.WriteStartElement("testsuites");
-        xmlWriter.WriteAttributeString("name", assemblyName);
+        xmlWriter.WriteAttributeString("name", SanitizeForXml(assemblyName));
         xmlWriter.WriteAttributeString("tests", summary.Total.ToString(CultureInfo.InvariantCulture));
         xmlWriter.WriteAttributeString("failures", summary.Failures.ToString(CultureInfo.InvariantCulture));
         xmlWriter.WriteAttributeString("errors", summary.Errors.ToString(CultureInfo.InvariantCulture));
@@ -75,14 +108,14 @@ internal static class JUnitXmlWriter
         string? filter)
     {
         writer.WriteStartElement("testsuite");
-        writer.WriteAttributeString("name", assemblyName);
+        writer.WriteAttributeString("name", SanitizeForXml(assemblyName));
         writer.WriteAttributeString("tests", summary.Total.ToString(CultureInfo.InvariantCulture));
         writer.WriteAttributeString("failures", summary.Failures.ToString(CultureInfo.InvariantCulture));
         writer.WriteAttributeString("errors", summary.Errors.ToString(CultureInfo.InvariantCulture));
         writer.WriteAttributeString("skipped", summary.Skipped.ToString(CultureInfo.InvariantCulture));
         writer.WriteAttributeString("time", summary.TotalTime.TotalSeconds.ToString("F3", CultureInfo.InvariantCulture));
         writer.WriteAttributeString("timestamp", summary.Timestamp.ToString("o", CultureInfo.InvariantCulture));
-        writer.WriteAttributeString("hostname", Environment.MachineName);
+        writer.WriteAttributeString("hostname", SanitizeForXml(Environment.MachineName));
 
         // Write properties
         WriteProperties(writer, targetFramework, filter);
@@ -102,24 +135,24 @@ internal static class JUnitXmlWriter
 
         writer.WriteStartElement("property");
         writer.WriteAttributeString("name", "framework");
-        writer.WriteAttributeString("value", targetFramework);
+        writer.WriteAttributeString("value", SanitizeForXml(targetFramework));
         writer.WriteEndElement();
 
         writer.WriteStartElement("property");
         writer.WriteAttributeString("name", "platform");
-        writer.WriteAttributeString("value", RuntimeInformation.OSDescription);
+        writer.WriteAttributeString("value", SanitizeForXml(RuntimeInformation.OSDescription));
         writer.WriteEndElement();
 
         writer.WriteStartElement("property");
         writer.WriteAttributeString("name", "runtime");
-        writer.WriteAttributeString("value", RuntimeInformation.FrameworkDescription);
+        writer.WriteAttributeString("value", SanitizeForXml(RuntimeInformation.FrameworkDescription));
         writer.WriteEndElement();
 
         if (!string.IsNullOrEmpty(filter))
         {
             writer.WriteStartElement("property");
             writer.WriteAttributeString("name", "filter");
-            writer.WriteAttributeString("value", filter);
+            writer.WriteAttributeString("value", SanitizeForXml(filter));
             writer.WriteEndElement();
         }
 
@@ -152,8 +185,8 @@ internal static class JUnitXmlWriter
 
         // Write testcase element
         writer.WriteStartElement("testcase");
-        writer.WriteAttributeString("name", testName);
-        writer.WriteAttributeString("classname", className);
+        writer.WriteAttributeString("name", SanitizeForXml(testName));
+        writer.WriteAttributeString("classname", SanitizeForXml(className));
         writer.WriteAttributeString("time", duration.TotalSeconds.ToString("F3", CultureInfo.InvariantCulture));
 
         // Write state-specific child elements
@@ -198,16 +231,16 @@ internal static class JUnitXmlWriter
         var exception = failed.Exception;
         if (exception != null)
         {
-            writer.WriteAttributeString("message", exception.Message);
+            writer.WriteAttributeString("message", SanitizeForXml(exception.Message));
             writer.WriteAttributeString("type", exception.GetType().FullName ?? "AssertionException");
-            writer.WriteString(exception.ToString());
+            writer.WriteString(SanitizeForXml(exception.ToString()));
         }
         else
         {
             var message = failed.Explanation ?? "Test failed";
-            writer.WriteAttributeString("message", message);
+            writer.WriteAttributeString("message", SanitizeForXml(message));
             writer.WriteAttributeString("type", "TestFailedException");
-            writer.WriteString(message);
+            writer.WriteString(SanitizeForXml(message));
         }
 
         writer.WriteEndElement(); // failure
@@ -220,16 +253,16 @@ internal static class JUnitXmlWriter
         var exception = error.Exception;
         if (exception != null)
         {
-            writer.WriteAttributeString("message", exception.Message);
+            writer.WriteAttributeString("message", SanitizeForXml(exception.Message));
             writer.WriteAttributeString("type", exception.GetType().FullName ?? "Exception");
-            writer.WriteString(exception.ToString());
+            writer.WriteString(SanitizeForXml(exception.ToString()));
         }
         else
         {
             var message = error.Explanation ?? "Test error";
-            writer.WriteAttributeString("message", message);
+            writer.WriteAttributeString("message", SanitizeForXml(message));
             writer.WriteAttributeString("type", "TestErrorException");
-            writer.WriteString(message);
+            writer.WriteString(SanitizeForXml(message));
         }
 
         writer.WriteEndElement(); // error
@@ -239,9 +272,9 @@ internal static class JUnitXmlWriter
     {
         writer.WriteStartElement("error");
         var message = timeout.Explanation ?? "Test timed out";
-        writer.WriteAttributeString("message", message);
+        writer.WriteAttributeString("message", SanitizeForXml(message));
         writer.WriteAttributeString("type", "TimeoutException");
-        writer.WriteString(message);
+        writer.WriteString(SanitizeForXml(message));
         writer.WriteEndElement(); // error
     }
 
@@ -267,8 +300,8 @@ internal static class JUnitXmlWriter
     {
         writer.WriteStartElement("skipped");
         var message = skipped.Explanation ?? "Test skipped";
-        writer.WriteAttributeString("message", message);
-        writer.WriteString(message);
+        writer.WriteAttributeString("message", SanitizeForXml(message));
+        writer.WriteString(SanitizeForXml(message));
         writer.WriteEndElement(); // skipped
     }
 
