@@ -123,7 +123,70 @@ public abstract class AssertionRewriter : CSharpSyntaxRewriter
         return SyntaxFactory.AwaitExpression(awaitKeyword, fullInvocation);
     }
 
-    private static bool IsEmptyOrNullMessage(ExpressionSyntax message)
+    /// <summary>
+    /// Creates a TUnit generic assertion like Assert.That(value).IsTypeOf&lt;T&gt;()
+    /// </summary>
+    protected ExpressionSyntax CreateTUnitGenericAssertion(
+        string methodName,
+        ExpressionSyntax actualValue,
+        TypeSyntax typeArg,
+        ExpressionSyntax? message)
+    {
+        // Create Assert.That(actualValue)
+        var assertThatInvocation = SyntaxFactory.InvocationExpression(
+            SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                SyntaxFactory.IdentifierName("Assert"),
+                SyntaxFactory.IdentifierName("That")
+            ),
+            SyntaxFactory.ArgumentList(
+                SyntaxFactory.SingletonSeparatedList(
+                    SyntaxFactory.Argument(actualValue)
+                )
+            )
+        );
+
+        // Create Assert.That(actualValue).MethodName<T>()
+        var genericMethodName = SyntaxFactory.GenericName(methodName)
+            .WithTypeArgumentList(
+                SyntaxFactory.TypeArgumentList(
+                    SyntaxFactory.SingletonSeparatedList(typeArg)
+                )
+            );
+
+        var methodAccess = SyntaxFactory.MemberAccessExpression(
+            SyntaxKind.SimpleMemberAccessExpression,
+            assertThatInvocation,
+            genericMethodName
+        );
+
+        ExpressionSyntax fullInvocation = SyntaxFactory.InvocationExpression(methodAccess, SyntaxFactory.ArgumentList());
+
+        // Add .Because(message) if message is provided and non-empty
+        if (message != null && !IsEmptyOrNullMessage(message))
+        {
+            var becauseAccess = SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                fullInvocation,
+                SyntaxFactory.IdentifierName("Because")
+            );
+
+            fullInvocation = SyntaxFactory.InvocationExpression(
+                becauseAccess,
+                SyntaxFactory.ArgumentList(
+                    SyntaxFactory.SingletonSeparatedList(
+                        SyntaxFactory.Argument(message)
+                    )
+                )
+            );
+        }
+
+        var awaitKeyword = SyntaxFactory.Token(SyntaxKind.AwaitKeyword)
+            .WithTrailingTrivia(SyntaxFactory.Space);
+        return SyntaxFactory.AwaitExpression(awaitKeyword, fullInvocation);
+    }
+
+    protected static bool IsEmptyOrNullMessage(ExpressionSyntax message)
     {
         // Check for null literal
         if (message is LiteralExpressionSyntax literal)

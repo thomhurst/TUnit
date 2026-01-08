@@ -65,9 +65,43 @@ public class NUnitAttributeRewriter : AttributeRewriter
         {
             "Test" or "TestCase" or "TestCaseSource" or 
             "SetUp" or "TearDown" or "OneTimeSetUp" or "OneTimeTearDown" or
-            "TestFixture" or "Category" or "Ignore" or "Explicit" => true,
+            "TestFixture" or "Category" or "Ignore" or "Explicit" or "Apartment" => true,
             _ => false
         };
+    }
+    
+    protected override AttributeSyntax? ConvertAttribute(AttributeSyntax attribute)
+    {
+        var attributeName = MigrationHelpers.GetAttributeName(attribute);
+        
+        // Special handling for [Apartment(ApartmentState.STA)] -> [STAThreadExecutor]
+        if (attributeName == "Apartment")
+        {
+            return ConvertApartmentAttribute(attribute);
+        }
+        
+        return base.ConvertAttribute(attribute);
+    }
+    
+    private AttributeSyntax? ConvertApartmentAttribute(AttributeSyntax attribute)
+    {
+        // Check if the argument is ApartmentState.STA
+        if (attribute.ArgumentList?.Arguments.Count > 0)
+        {
+            var arg = attribute.ArgumentList.Arguments[0].Expression;
+            
+            // Check for ApartmentState.STA pattern
+            if (arg is MemberAccessExpressionSyntax memberAccess &&
+                memberAccess.Name.Identifier.Text == "STA")
+            {
+                // Convert to [STAThreadExecutor]
+                return SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("STAThreadExecutor"));
+            }
+        }
+        
+        // For other ApartmentState values, we can't convert automatically - return null to remove
+        // Add TODO comment would be ideal but can't easily add comments on attributes
+        return null;
     }
     
     protected override AttributeArgumentListSyntax? ConvertAttributeArguments(AttributeArgumentListSyntax argumentList, string attributeName)
@@ -255,7 +289,57 @@ public class NUnitAssertionRewriter : AssertionRewriter
     {
         if (constraint.Expression is MemberAccessExpressionSyntax memberAccess)
         {
-            var methodName = memberAccess.Name.Identifier.Text;
+            // Get method name - handle both regular and generic method names
+            var methodName = memberAccess.Name switch
+            {
+                GenericNameSyntax genericName => genericName.Identifier.Text,
+                IdentifierNameSyntax identifierName => identifierName.Identifier.Text,
+                _ => memberAccess.Name.ToString()
+            };
+
+            // Handle chained constraint modifiers like .Within(delta) on Is.EqualTo(x).Within(delta)
+            if (methodName == "Within" && memberAccess.Expression is InvocationExpressionSyntax innerConstraint)
+            {
+                // Get the base assertion (e.g., IsEqualTo(5)) first
+                var baseAssertion = ConvertConstraintToTUnitWithMessage(actualValue, innerConstraint, message);
+                
+                // Now chain .Within(delta) to it
+                return ChainMethodCall(baseAssertion, "Within", constraint.ArgumentList.Arguments.ToArray());
+            }
+
+            // Handle generic type constraints: Is.TypeOf<T>(), Is.InstanceOf<T>(), Is.AssignableFrom<T>()
+            if (memberAccess.Name is GenericNameSyntax genericMethodName)
+            {
+                var typeArg = genericMethodName.TypeArgumentList.Arguments.FirstOrDefault();
+                if (typeArg != null)
+                {
+                    // Handle Is.Not.TypeOf<T>(), Is.Not.InstanceOf<T>()
+                    if (memberAccess.Expression is MemberAccessExpressionSyntax chainedAccessGeneric &&
+                        chainedAccessGeneric.Expression is IdentifierNameSyntax { Identifier.Text: "Is" } &&
+                        chainedAccessGeneric.Name.Identifier.Text == "Not")
+                    {
+                        return methodName switch
+                        {
+                            "TypeOf" => CreateTUnitGenericAssertion("IsNotTypeOf", actualValue, typeArg, message),
+                            "InstanceOf" => CreateTUnitGenericAssertion("IsNotAssignableTo", actualValue, typeArg, message),
+                            "AssignableFrom" => CreateTUnitGenericAssertion("IsNotAssignableTo", actualValue, typeArg, message),
+                            _ => CreateTUnitAssertionWithMessage("IsEqualTo", actualValue, message, SyntaxFactory.Argument(constraint))
+                        };
+                    }
+
+                    // Handle Is.TypeOf<T>(), Is.InstanceOf<T>(), Is.AssignableFrom<T>()
+                    if (memberAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Is" })
+                    {
+                        return methodName switch
+                        {
+                            "TypeOf" => CreateTUnitGenericAssertion("IsTypeOf", actualValue, typeArg, message),
+                            "InstanceOf" => CreateTUnitGenericAssertion("IsAssignableTo", actualValue, typeArg, message),
+                            "AssignableFrom" => CreateTUnitGenericAssertion("IsAssignableTo", actualValue, typeArg, message),
+                            _ => CreateTUnitAssertionWithMessage("IsEqualTo", actualValue, message, SyntaxFactory.Argument(constraint))
+                        };
+                    }
+                }
+            }
 
             // Handle Is.Not.EqualTo, Is.Not.GreaterThan, etc. (invocation patterns)
             if (memberAccess.Expression is MemberAccessExpressionSyntax chainedAccess &&
@@ -270,7 +354,8 @@ public class NUnitAssertionRewriter : AssertionRewriter
                     "GreaterThanOrEqualTo" => CreateTUnitAssertionWithMessage("IsLessThan", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
                     "LessThanOrEqualTo" => CreateTUnitAssertionWithMessage("IsGreaterThan", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
                     "SameAs" => CreateTUnitAssertionWithMessage("IsNotSameReferenceAs", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
-                    "InstanceOf" => CreateTUnitAssertionWithMessage("IsNotTypeOf", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
+                    "InstanceOf" => CreateTUnitAssertionWithMessage("IsNotAssignableTo", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
+                    "TypeOf" => CreateTUnitAssertionWithMessage("IsNotTypeOf", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
                     _ => CreateTUnitAssertionWithMessage("IsNotEqualTo", actualValue, message, constraint.ArgumentList.Arguments.ToArray())
                 };
             }
@@ -286,6 +371,16 @@ public class NUnitAssertionRewriter : AssertionRewriter
                     "EndWith" => CreateTUnitAssertionWithMessage("DoesNotEndWith", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
                     "Contain" => CreateTUnitAssertionWithMessage("DoesNotContain", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
                     _ => CreateTUnitAssertionWithMessage("DoesNotContain", actualValue, message, constraint.ArgumentList.Arguments.ToArray())
+                };
+            }
+
+            // Handle Has.Member(item) -> Contains(item)
+            if (memberAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Has" })
+            {
+                return methodName switch
+                {
+                    "Member" => CreateTUnitAssertionWithMessage("Contains", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
+                    _ => CreateTUnitAssertionWithMessage("IsEqualTo", actualValue, message, SyntaxFactory.Argument(constraint))
                 };
             }
 
@@ -312,7 +407,8 @@ public class NUnitAssertionRewriter : AssertionRewriter
                 "StartsWith" => CreateTUnitAssertionWithMessage("StartsWith", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
                 "EndsWith" => CreateTUnitAssertionWithMessage("EndsWith", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
                 "SameAs" => CreateTUnitAssertionWithMessage("IsSameReferenceAs", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
-                "InstanceOf" => CreateTUnitAssertionWithMessage("IsTypeOf", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
+                "InstanceOf" => CreateTUnitAssertionWithMessage("IsAssignableTo", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
+                "TypeOf" => CreateTUnitAssertionWithMessage("IsTypeOf", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
                 _ => CreateTUnitAssertionWithMessage("IsEqualTo", actualValue, message, SyntaxFactory.Argument(constraint))
             };
         }
@@ -359,7 +455,57 @@ public class NUnitAssertionRewriter : AssertionRewriter
     {
         if (constraint.Expression is MemberAccessExpressionSyntax memberAccess)
         {
-            var methodName = memberAccess.Name.Identifier.Text;
+            // Get method name - handle both regular and generic method names
+            var methodName = memberAccess.Name switch
+            {
+                GenericNameSyntax genericName => genericName.Identifier.Text,
+                IdentifierNameSyntax identifierName => identifierName.Identifier.Text,
+                _ => memberAccess.Name.ToString()
+            };
+
+            // Handle chained constraint modifiers like .Within(delta) on Is.EqualTo(x).Within(delta)
+            if (methodName == "Within" && memberAccess.Expression is InvocationExpressionSyntax innerConstraint)
+            {
+                // Get the base assertion (e.g., IsEqualTo(5)) first
+                var baseAssertion = ConvertConstraintToTUnit(actualValue, innerConstraint);
+                
+                // Now chain .Within(delta) to it
+                return ChainMethodCall(baseAssertion, "Within", constraint.ArgumentList.Arguments.ToArray());
+            }
+
+            // Handle generic type constraints: Is.TypeOf<T>(), Is.InstanceOf<T>(), Is.AssignableFrom<T>()
+            if (memberAccess.Name is GenericNameSyntax genericMethodName)
+            {
+                var typeArg = genericMethodName.TypeArgumentList.Arguments.FirstOrDefault();
+                if (typeArg != null)
+                {
+                    // Handle Is.Not.TypeOf<T>(), Is.Not.InstanceOf<T>()
+                    if (memberAccess.Expression is MemberAccessExpressionSyntax chainedAccessGeneric &&
+                        chainedAccessGeneric.Expression is IdentifierNameSyntax { Identifier.Text: "Is" } &&
+                        chainedAccessGeneric.Name.Identifier.Text == "Not")
+                    {
+                        return methodName switch
+                        {
+                            "TypeOf" => CreateTUnitGenericAssertion("IsNotTypeOf", actualValue, typeArg, null),
+                            "InstanceOf" => CreateTUnitGenericAssertion("IsNotAssignableTo", actualValue, typeArg, null),
+                            "AssignableFrom" => CreateTUnitGenericAssertion("IsNotAssignableTo", actualValue, typeArg, null),
+                            _ => CreateTUnitAssertion("IsEqualTo", actualValue, SyntaxFactory.Argument(constraint))
+                        };
+                    }
+
+                    // Handle Is.TypeOf<T>(), Is.InstanceOf<T>(), Is.AssignableFrom<T>()
+                    if (memberAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Is" })
+                    {
+                        return methodName switch
+                        {
+                            "TypeOf" => CreateTUnitGenericAssertion("IsTypeOf", actualValue, typeArg, null),
+                            "InstanceOf" => CreateTUnitGenericAssertion("IsAssignableTo", actualValue, typeArg, null),
+                            "AssignableFrom" => CreateTUnitGenericAssertion("IsAssignableTo", actualValue, typeArg, null),
+                            _ => CreateTUnitAssertion("IsEqualTo", actualValue, SyntaxFactory.Argument(constraint))
+                        };
+                    }
+                }
+            }
 
             // Handle Is.Not.EqualTo, Is.Not.GreaterThan, etc. (invocation patterns)
             if (memberAccess.Expression is MemberAccessExpressionSyntax chainedAccess &&
@@ -374,7 +520,8 @@ public class NUnitAssertionRewriter : AssertionRewriter
                     "GreaterThanOrEqualTo" => CreateTUnitAssertion("IsLessThan", actualValue, constraint.ArgumentList.Arguments.ToArray()),
                     "LessThanOrEqualTo" => CreateTUnitAssertion("IsGreaterThan", actualValue, constraint.ArgumentList.Arguments.ToArray()),
                     "SameAs" => CreateTUnitAssertion("IsNotSameReferenceAs", actualValue, constraint.ArgumentList.Arguments.ToArray()),
-                    "InstanceOf" => CreateTUnitAssertion("IsNotTypeOf", actualValue, constraint.ArgumentList.Arguments.ToArray()),
+                    "InstanceOf" => CreateTUnitAssertion("IsNotAssignableTo", actualValue, constraint.ArgumentList.Arguments.ToArray()),
+                    "TypeOf" => CreateTUnitAssertion("IsNotTypeOf", actualValue, constraint.ArgumentList.Arguments.ToArray()),
                     _ => CreateTUnitAssertion("IsNotEqualTo", actualValue, constraint.ArgumentList.Arguments.ToArray())
                 };
             }
@@ -390,6 +537,16 @@ public class NUnitAssertionRewriter : AssertionRewriter
                     "EndWith" => CreateTUnitAssertion("DoesNotEndWith", actualValue, constraint.ArgumentList.Arguments.ToArray()),
                     "Contain" => CreateTUnitAssertion("DoesNotContain", actualValue, constraint.ArgumentList.Arguments.ToArray()),
                     _ => CreateTUnitAssertion("DoesNotContain", actualValue, constraint.ArgumentList.Arguments.ToArray())
+                };
+            }
+
+            // Handle Has.Member(item) -> Contains(item)
+            if (memberAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Has" })
+            {
+                return methodName switch
+                {
+                    "Member" => CreateTUnitAssertion("Contains", actualValue, constraint.ArgumentList.Arguments.ToArray()),
+                    _ => CreateTUnitAssertion("IsEqualTo", actualValue, SyntaxFactory.Argument(constraint))
                 };
             }
 
@@ -416,7 +573,8 @@ public class NUnitAssertionRewriter : AssertionRewriter
                 "StartsWith" => CreateTUnitAssertion("StartsWith", actualValue, constraint.ArgumentList.Arguments.ToArray()),
                 "EndsWith" => CreateTUnitAssertion("EndsWith", actualValue, constraint.ArgumentList.Arguments.ToArray()),
                 "SameAs" => CreateTUnitAssertion("IsSameReferenceAs", actualValue, constraint.ArgumentList.Arguments.ToArray()),
-                "InstanceOf" => CreateTUnitAssertion("IsTypeOf", actualValue, constraint.ArgumentList.Arguments.ToArray()),
+                "InstanceOf" => CreateTUnitAssertion("IsAssignableTo", actualValue, constraint.ArgumentList.Arguments.ToArray()),
+                "TypeOf" => CreateTUnitAssertion("IsTypeOf", actualValue, constraint.ArgumentList.Arguments.ToArray()),
                 "SubsetOf" => CreateTUnitAssertion("IsSubsetOf", actualValue, constraint.ArgumentList.Arguments.ToArray()),
                 "SupersetOf" => CreateTUnitAssertion("IsSupersetOf", actualValue, constraint.ArgumentList.Arguments.ToArray()),
                 "EquivalentTo" => CreateTUnitAssertion("IsEquivalentTo", actualValue, constraint.ArgumentList.Arguments.ToArray()),
@@ -475,6 +633,43 @@ public class NUnitAssertionRewriter : AssertionRewriter
         }
         return CreateTUnitAssertion("IsInRange", actualValue);
     }
+
+    /// <summary>
+    /// Chains a method call onto an existing await expression.
+    /// For example: await Assert.That(x).IsEqualTo(5) becomes await Assert.That(x).IsEqualTo(5).Within(2)
+    /// </summary>
+    private ExpressionSyntax ChainMethodCall(ExpressionSyntax baseExpression, string methodName, params ArgumentSyntax[] arguments)
+    {
+        // The base expression is an AwaitExpression like: await Assert.That(x).IsEqualTo(5)
+        // We need to extract the invocation, add .Within(2) to it, and re-wrap in await
+        if (baseExpression is AwaitExpressionSyntax awaitExpr)
+        {
+            var innerInvocation = awaitExpr.Expression;
+            
+            // Create the chained method access: Assert.That(x).IsEqualTo(5).Within
+            var chainedAccess = SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                innerInvocation,
+                SyntaxFactory.IdentifierName(methodName)
+            );
+            
+            // Create the invocation: Assert.That(x).IsEqualTo(5).Within(2)
+            var chainedInvocation = SyntaxFactory.InvocationExpression(
+                chainedAccess,
+                arguments.Length > 0
+                    ? SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(arguments))
+                    : SyntaxFactory.ArgumentList()
+            );
+            
+            // Re-wrap in await
+            var awaitKeyword = SyntaxFactory.Token(SyntaxKind.AwaitKeyword)
+                .WithTrailingTrivia(SyntaxFactory.Space);
+            return SyntaxFactory.AwaitExpression(awaitKeyword, chainedInvocation);
+        }
+        
+        // Fallback: just return the base expression if it's not the expected shape
+        return baseExpression;
+    }
     
     private ExpressionSyntax? ConvertClassicAssertion(InvocationExpressionSyntax invocation, string methodName)
     {
@@ -484,6 +679,12 @@ public class NUnitAssertionRewriter : AssertionRewriter
         if (methodName is "Throws" or "ThrowsAsync")
         {
             return ConvertNUnitThrows(invocation);
+        }
+
+        // Handle Assert.DoesNotThrow and Assert.DoesNotThrowAsync
+        if (methodName is "DoesNotThrow" or "DoesNotThrowAsync")
+        {
+            return ConvertDoesNotThrow(arguments);
         }
 
         // Handle special assertions (Pass, Inconclusive, Fail, Warn)
@@ -674,6 +875,44 @@ public class NUnitAssertionRewriter : AssertionRewriter
             : invocation.ArgumentList.Arguments[0].Expression;
         return CreateTUnitAssertion("Throws", fallbackArg);
     }
+
+    private ExpressionSyntax ConvertDoesNotThrow(SeparatedSyntaxList<ArgumentSyntax> arguments)
+    {
+        // Assert.DoesNotThrow(() => action) -> await Assert.That(() => action).ThrowsNothing()
+        // Use the action from arguments, or a no-op lambda as fallback
+        var action = arguments.Count > 0
+            ? arguments[0].Expression
+            : SyntaxFactory.ParenthesizedLambdaExpression(SyntaxFactory.Block());
+        
+        // Create Assert.That(() => action)
+        var assertThatInvocation = SyntaxFactory.InvocationExpression(
+            SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                SyntaxFactory.IdentifierName("Assert"),
+                SyntaxFactory.IdentifierName("That")
+            ),
+            SyntaxFactory.ArgumentList(
+                SyntaxFactory.SingletonSeparatedList(
+                    SyntaxFactory.Argument(action)
+                )
+            )
+        );
+        
+        // Chain .ThrowsNothing()
+        var throwsNothingInvocation = SyntaxFactory.InvocationExpression(
+            SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                assertThatInvocation,
+                SyntaxFactory.IdentifierName("ThrowsNothing")
+            ),
+            SyntaxFactory.ArgumentList()
+        );
+        
+        // Wrap in await
+        var awaitKeyword = SyntaxFactory.Token(SyntaxKind.AwaitKeyword)
+            .WithTrailingTrivia(SyntaxFactory.Space);
+        return SyntaxFactory.AwaitExpression(awaitKeyword, throwsNothingInvocation);
+    }
     
     /// <summary>
     /// Attempts to extract the exception type from NUnit constraint expressions like Is.TypeOf(typeof(T)).
@@ -737,34 +976,46 @@ public class NUnitAssertionRewriter : AssertionRewriter
 
     private ExpressionSyntax CreateFailAssertion(SeparatedSyntaxList<ArgumentSyntax> arguments)
     {
+        // TUnit: Fail.Test("reason") - not awaited, throws synchronously
+        var reasonArg = arguments.Count > 0
+            ? arguments[0]
+            : SyntaxFactory.Argument(
+                SyntaxFactory.LiteralExpression(
+                    SyntaxKind.StringLiteralExpression,
+                    SyntaxFactory.Literal("Test failed")));
+
         var failInvocation = SyntaxFactory.InvocationExpression(
             SyntaxFactory.MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression,
-                SyntaxFactory.IdentifierName("Assert"),
-                SyntaxFactory.IdentifierName("Fail")
+                SyntaxFactory.IdentifierName("Fail"),
+                SyntaxFactory.IdentifierName("Test")
             ),
-            arguments.Count > 0
-                ? SyntaxFactory.ArgumentList(SyntaxFactory.SingletonSeparatedList(arguments[0]))
-                : SyntaxFactory.ArgumentList()
+            SyntaxFactory.ArgumentList(SyntaxFactory.SingletonSeparatedList(reasonArg))
         );
 
-        return SyntaxFactory.AwaitExpression(failInvocation);
+        return failInvocation;
     }
 
     private ExpressionSyntax CreateSkipAssertion(SeparatedSyntaxList<ArgumentSyntax> arguments)
     {
+        // TUnit: Skip.Test("reason") - not awaited, throws SkipTestException
+        var reasonArg = arguments.Count > 0
+            ? arguments[0]
+            : SyntaxFactory.Argument(
+                SyntaxFactory.LiteralExpression(
+                    SyntaxKind.StringLiteralExpression,
+                    SyntaxFactory.Literal("Test skipped")));
+
         var skipInvocation = SyntaxFactory.InvocationExpression(
             SyntaxFactory.MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression,
-                SyntaxFactory.IdentifierName("Assert"),
-                SyntaxFactory.IdentifierName("Skip")
+                SyntaxFactory.IdentifierName("Skip"),
+                SyntaxFactory.IdentifierName("Test")
             ),
-            arguments.Count > 0
-                ? SyntaxFactory.ArgumentList(SyntaxFactory.SingletonSeparatedList(arguments[0]))
-                : SyntaxFactory.ArgumentList()
+            SyntaxFactory.ArgumentList(SyntaxFactory.SingletonSeparatedList(reasonArg))
         );
 
-        return SyntaxFactory.AwaitExpression(skipInvocation);
+        return skipInvocation;
     }
 }
 
