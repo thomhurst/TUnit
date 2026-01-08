@@ -31,4 +31,11 @@ public class JUnitReporterInvalidXmlCharacterTests
     {
         await Assert.That(parameter).IsNotNull();
     }
+
+    [Test]
+    public async Task TestFailingWithInvalidCharacterInException()
+    {
+        // This test intentionally fails with an exception message containing invalid XML characters
+        throw new InvalidOperationException("Error with invalid \x04 character in exception message");
+    }
 }
