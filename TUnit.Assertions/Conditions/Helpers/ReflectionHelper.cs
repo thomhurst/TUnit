@@ -11,6 +11,7 @@ internal static class ReflectionHelper
 {
     /// <summary>
     /// Gets all public instance properties and fields to compare for structural equivalency.
+    /// Filters out indexed properties (like indexers) that require parameters.
     /// </summary>
     /// <param name="type">The type to get members from.</param>
     /// <returns>A list of PropertyInfo and FieldInfo members.</returns>
@@ -19,7 +20,17 @@ internal static class ReflectionHelper
         Type type)
     {
         var members = new List<MemberInfo>();
-        members.AddRange(type.GetProperties(BindingFlags.Public | BindingFlags.Instance));
+        
+        // Filter out indexed properties (properties with parameters like this[int index])
+        var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+        foreach (var prop in properties)
+        {
+            if (prop.GetIndexParameters().Length == 0)
+            {
+                members.Add(prop);
+            }
+        }
+        
         members.AddRange(type.GetFields(BindingFlags.Public | BindingFlags.Instance));
         return members;
     }
