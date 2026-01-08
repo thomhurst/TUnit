@@ -9,6 +9,10 @@ on:
         required: true
         type: number
 
+env:
+  GITHUB_TOKEN: ${{ secrets.PR_REVIEW }}
+  GH_TOKEN: ${{ secrets.PR_REVIEW }}
+
 jobs:
   external-review:
     runs-on: ubuntu-latest
@@ -24,8 +28,6 @@ jobs:
           fetch-depth: 1
 
       - uses: anthropics/claude-code-action@v1
-        env:
-          GH_TOKEN: ${{ secrets.PR_REVIEW }}
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.PR_REVIEW }}
