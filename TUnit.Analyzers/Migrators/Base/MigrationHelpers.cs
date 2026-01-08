@@ -29,6 +29,7 @@ public static class MigrationHelpers
                 "OneTimeSetUp" => "Before",
                 "OneTimeTearDown" => "After",
                 "TestFixture" => null!, // Remove
+                "Apartment" => "STAThreadExecutor", // Special handling in attribute rewriter
                 _ => attributeName
             },
             "MSTest" => attributeName switch

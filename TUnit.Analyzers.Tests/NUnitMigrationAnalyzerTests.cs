@@ -1877,6 +1877,283 @@ public class NUnitMigrationAnalyzerTests
         );
     }
 
+    [Test]
+    public async Task NUnit_IsTypeOf_Generic_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void TestMethod()
+                    {
+                        object value = "test";
+                        Assert.That(value, Is.TypeOf<string>());
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        object value = "test";
+                        await Assert.That(value).IsTypeOf<string>();
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_IsInstanceOf_Generic_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void TestMethod()
+                    {
+                        object value = "test";
+                        Assert.That(value, Is.InstanceOf<string>());
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        object value = "test";
+                        await Assert.That(value).IsAssignableTo<string>();
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_IsNotTypeOf_Generic_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void TestMethod()
+                    {
+                        object value = "test";
+                        Assert.That(value, Is.Not.TypeOf<int>());
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        object value = "test";
+                        await Assert.That(value).IsNotTypeOf<int>();
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_IsNotInstanceOf_Generic_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void TestMethod()
+                    {
+                        object value = "test";
+                        Assert.That(value, Is.Not.InstanceOf<int>());
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        object value = "test";
+                        await Assert.That(value).IsNotAssignableTo<int>();
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_HasMember_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+                using System.Collections.Generic;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void TestMethod()
+                    {
+                        var list = new List<int> { 1, 2, 3 };
+                        Assert.That(list, Has.Member(2));
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        var list = new List<int> { 1, 2, 3 };
+                        await Assert.That(list).Contains(2);
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_Apartment_STA_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+                using System.Threading;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    [Apartment(ApartmentState.STA)]
+                    public void TestMethod()
+                    {
+                        Assert.That(true, Is.True);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    [STAThreadExecutor]
+                    public async Task TestMethod()
+                    {
+                        await Assert.That(true).IsTrue();
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_IsTypeOf_Generic_WithMessage_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void TestMethod()
+                    {
+                        object value = "test";
+                        Assert.That(value, Is.TypeOf<string>(), "Type should be string");
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        object value = "test";
+                        await Assert.That(value).IsTypeOf<string>().Because("Type should be string");
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
     private static void ConfigureNUnitTest(Verifier.Test test)
     {
         test.TestState.AdditionalReferences.Add(typeof(NUnit.Framework.TestAttribute).Assembly);
