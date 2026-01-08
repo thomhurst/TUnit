@@ -159,12 +159,12 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
                 : SyntaxFactory.ParseExpression($"Assert.That({actual}).IsNull()"),
 
             "True" => isInSatisfy && parameterName != null
-                ? SyntaxFactory.ParseExpression($"{actual}.IsTrue()")
-                : SyntaxFactory.ParseExpression($"Assert.That({actual}).IsTrue()"),
+                ? SyntaxFactory.ParseExpression($"{expected}.IsTrue()")
+                : CreateBooleanAssertion(expected, argumentListArguments, "IsTrue"),
 
             "False" => isInSatisfy && parameterName != null
-                ? SyntaxFactory.ParseExpression($"{actual}.IsFalse()")
-                : SyntaxFactory.ParseExpression($"Assert.That({actual}).IsFalse()"),
+                ? SyntaxFactory.ParseExpression($"{expected}.IsFalse()")
+                : CreateBooleanAssertion(expected, argumentListArguments, "IsFalse"),
 
             "Same" => SyntaxFactory.ParseExpression($"Assert.That({actual}).IsSameReferenceAs({expected})"),
 
@@ -313,6 +313,22 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
         }
 
         return typeSymbol.AllInterfaces.Any(i => i.GloballyQualified() == "global::System.Collections.IEnumerable");
+    }
+
+    private static ExpressionSyntax CreateBooleanAssertion(
+        ArgumentSyntax? condition,
+        SeparatedSyntaxList<ArgumentSyntax> argumentListArguments,
+        string assertionMethod)
+    {
+        // Check if there's a user message (second argument)
+        var userMessage = argumentListArguments.ElementAtOrDefault(1);
+
+        if (userMessage != null)
+        {
+            return SyntaxFactory.ParseExpression($"Assert.That({condition}).{assertionMethod}().Because({userMessage})");
+        }
+
+        return SyntaxFactory.ParseExpression($"Assert.That({condition}).{assertionMethod}()");
     }
 
     private static async Task<ExpressionSyntax> Contains(CodeFixContext context,
@@ -508,8 +524,12 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
                         SyntaxFactory.ParseExpression($"Assert.That({args[0]}).IsNotNull()"),
                     "Null" when args.Count >= 1 =>
                         SyntaxFactory.ParseExpression($"Assert.That({args[0]}).IsNull()"),
+                    "True" when args.Count >= 2 =>
+                        SyntaxFactory.ParseExpression($"Assert.That({args[0]}).IsTrue().Because({args[1]})"),
                     "True" when args.Count >= 1 =>
                         SyntaxFactory.ParseExpression($"Assert.That({args[0]}).IsTrue()"),
+                    "False" when args.Count >= 2 =>
+                        SyntaxFactory.ParseExpression($"Assert.That({args[0]}).IsFalse().Because({args[1]})"),
                     "False" when args.Count >= 1 =>
                         SyntaxFactory.ParseExpression($"Assert.That({args[0]}).IsFalse()"),
                     "Equal" when args.Count >= 2 =>

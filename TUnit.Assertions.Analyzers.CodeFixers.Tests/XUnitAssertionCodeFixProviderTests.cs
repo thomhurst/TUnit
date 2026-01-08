@@ -219,4 +219,140 @@ public class XUnitAssertionCodeFixProviderTests
                 """
             );
     }
+
+    [Test]
+    public async Task Xunit_True_Without_Message()
+    {
+        await Verifier
+            .VerifyCodeFixAsync(
+                """
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    public void MyTest()
+                    {
+                        bool result = true;
+                        {|#0:Xunit.Assert.True(result)|};
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.XUnitAssertion)
+                    .WithLocation(0),
+                """
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    public void MyTest()
+                    {
+                        bool result = true;
+                        Assert.That(result).IsTrue();
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Xunit_True_With_Message()
+    {
+        await Verifier
+            .VerifyCodeFixAsync(
+                """
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    public void MyTest()
+                    {
+                        bool result = true;
+                        {|#0:Xunit.Assert.True(result, "user message if false")|};
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.XUnitAssertion)
+                    .WithLocation(0),
+                """
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    public void MyTest()
+                    {
+                        bool result = true;
+                        Assert.That(result).IsTrue().Because("user message if false");
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Xunit_False_Without_Message()
+    {
+        await Verifier
+            .VerifyCodeFixAsync(
+                """
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    public void MyTest()
+                    {
+                        bool result = false;
+                        {|#0:Xunit.Assert.False(result)|};
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.XUnitAssertion)
+                    .WithLocation(0),
+                """
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    public void MyTest()
+                    {
+                        bool result = false;
+                        Assert.That(result).IsFalse();
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Xunit_False_With_Message()
+    {
+        await Verifier
+            .VerifyCodeFixAsync(
+                """
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    public void MyTest()
+                    {
+                        bool result = false;
+                        {|#0:Xunit.Assert.False(result, "user message if true")|};
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.XUnitAssertion)
+                    .WithLocation(0),
+                """
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    public void MyTest()
+                    {
+                        bool result = false;
+                        Assert.That(result).IsFalse().Because("user message if true");
+                    }
+                }
+                """
+            );
+    }
 }
