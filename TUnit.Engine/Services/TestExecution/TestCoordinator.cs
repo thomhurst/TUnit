@@ -276,7 +276,10 @@ internal sealed class TestCoordinator : ITestCoordinator
                     await _messageBus.Failed(test.Context, test.Context.Execution.Result?.Exception!, test.StartTime.GetValueOrDefault()).ConfigureAwait(false);
                     break;
                 case TestState.Skipped:
-                    await _messageBus.Skipped(test.Context, test.Context.SkipReason ?? "Skipped").ConfigureAwait(false);
+                    var skipReason = test.Context.SkipReason
+                                     ?? (test.Context.Execution.Result?.IsOverridden == true ? test.Context.Execution.Result.OverrideReason : null)
+                                     ?? "Skipped";
+                    await _messageBus.Skipped(test.Context, skipReason).ConfigureAwait(false);
                     break;
                 case TestState.Cancelled:
                     await _messageBus.Cancelled(test.Context, test.StartTime.GetValueOrDefault()).ConfigureAwait(false);
