@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using TUnit.Core;
 using TUnit.Core.Hooks;
 using TUnit.Core.Interfaces;
@@ -12,7 +13,7 @@ internal static class HookTimeoutHelper
     /// <summary>
     /// Creates a timeout-aware action wrapper for a hook
     /// </summary>
-    public static Func<Task> CreateTimeoutHookAction<T>(
+    public static Task CreateTimeoutHookAction<T>(
         StaticHookMethod<T> hook,
         T context,
         CancellationToken cancellationToken)
@@ -24,13 +25,20 @@ internal static class HookTimeoutHelper
         if (timeout == null)
         {
             // No timeout specified, execute with potential custom executor
-            return async () => await ExecuteHookWithPotentialCustomExecutor(hook, context, cancellationToken);
+            return ExecuteHookWithPotentialCustomExecutor(hook, context, cancellationToken).AsTask();
         }
 
-        return async () =>
+        var timeoutMs = (int)timeout.Value.TotalMilliseconds;
+
+        return CreateTimeoutHookActionAsync(hook, context, timeoutMs, cancellationToken);
+
+        static async Task CreateTimeoutHookActionAsync(
+            StaticHookMethod<T> hook,
+            T context,
+            int timeoutMs,
+            CancellationToken cancellationToken)
         {
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            var timeoutMs = (int)timeout.Value.TotalMilliseconds;
             cts.CancelAfter(timeoutMs);
 
             try
@@ -41,7 +49,7 @@ internal static class HookTimeoutHelper
             {
                 throw new TimeoutException($"Hook '{hook.Name}' exceeded timeout of {timeoutMs}ms");
             }
-        };
+        }
     }
 
     /// <summary>
@@ -58,25 +66,33 @@ internal static class HookTimeoutHelper
             // Determine which executor method to call based on hook type
             if (hook is BeforeTestHookMethod || hook is InstanceHookMethod)
             {
-                return customExecutor.ExecuteBeforeTestHook(
-                    hook.MethodInfo,
-                    testContext,
-                    () => hook.Body!.Invoke(context, cancellationToken)
-                );
+                return ExecuteBeforeTestHook(hook, context, cancellationToken, customExecutor, testContext);
             }
             else if (hook is AfterTestHookMethod)
             {
-                return customExecutor.ExecuteAfterTestHook(
-                    hook.MethodInfo,
-                    testContext,
-                    () => hook.Body!.Invoke(context, cancellationToken)
-                );
+                return ExecuteAfterTestHook(hook, context, cancellationToken, customExecutor, testContext);
             }
         }
 
         // No custom executor, use the hook's default executor
         return hook.ExecuteAsync(context, cancellationToken);
     }
+
+    private static ValueTask ExecuteBeforeTestHook<T>(StaticHookMethod<T> hook, [DisallowNull] T context,
+        CancellationToken cancellationToken, IHookExecutor customExecutor, TestContext testContext) =>
+        customExecutor.ExecuteBeforeTestHook(
+            hook.MethodInfo,
+            testContext,
+            () => hook.Body!.Invoke(context, cancellationToken)
+        );
+
+    private static ValueTask ExecuteAfterTestHook<T>(StaticHookMethod<T> hook, [DisallowNull] T context,
+        CancellationToken cancellationToken, IHookExecutor customExecutor, TestContext testContext) =>
+        customExecutor.ExecuteAfterTestHook(
+            hook.MethodInfo,
+            testContext,
+            () => hook.Body!.Invoke(context, cancellationToken)
+        );
 
     /// <summary>
     /// Creates a timeout-aware action wrapper for a hook delegate
@@ -94,10 +110,11 @@ internal static class HookTimeoutHelper
             return async () => await hookDelegate(context, cancellationToken);
         }
 
+        var timeoutMs = (int)timeout.Value.TotalMilliseconds;
+
         return async () =>
         {
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            var timeoutMs = (int)timeout.Value.TotalMilliseconds;
             cts.CancelAfter(timeoutMs);
 
             try
@@ -129,10 +146,11 @@ internal static class HookTimeoutHelper
             return async () => await hookDelegate(context, cancellationToken);
         }
 
+        var timeoutMs = (int)timeout.Value.TotalMilliseconds;
+
         return async () =>
         {
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            var timeoutMs = (int)timeout.Value.TotalMilliseconds;
             cts.CancelAfter(timeoutMs);
 
             try
