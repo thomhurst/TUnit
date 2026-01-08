@@ -113,7 +113,6 @@ internal static class TypeHelper
         {
             if (iface.IsGenericType 
                 && iface.GetGenericTypeDefinition() == typeof(IEquatable<>)
-                && iface.GenericTypeArguments.Length == 1
                 && iface.GenericTypeArguments[0] == type)
             {
                 return true;
