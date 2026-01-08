@@ -879,19 +879,10 @@ public class NUnitAssertionRewriter : AssertionRewriter
     private ExpressionSyntax ConvertDoesNotThrow(SeparatedSyntaxList<ArgumentSyntax> arguments)
     {
         // Assert.DoesNotThrow(() => action) -> await Assert.That(() => action).ThrowsNothing()
-        if (arguments.Count == 0)
-        {
-            // Fallback - shouldn't happen but handle gracefully
-            return SyntaxFactory.InvocationExpression(
-                SyntaxFactory.MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    SyntaxFactory.IdentifierName("Assert"),
-                    SyntaxFactory.IdentifierName("Pass")
-                )
-            );
-        }
-
-        var action = arguments[0].Expression;
+        // Use the action from arguments, or a no-op lambda as fallback
+        var action = arguments.Count > 0
+            ? arguments[0].Expression
+            : SyntaxFactory.ParenthesizedLambdaExpression(SyntaxFactory.Block());
         
         // Create Assert.That(() => action)
         var assertThatInvocation = SyntaxFactory.InvocationExpression(
