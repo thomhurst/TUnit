@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
@@ -75,29 +76,45 @@ public partial class TestContext
 
     internal string GetOutput()
     {
+        var vsb = new ValueStringBuilder(stackalloc char[256]);
+
         var buildOutput = _buildTimeOutput ?? string.Empty;
         var baseOutput = base.GetStandardOutput();  // Get output from base class (Context)
         var writerOutput = _outputWriter?.ToString() ?? string.Empty;
 
-        // Combine all three sources: build-time, base class output, and writer output
-        var parts = new[] { buildOutput, baseOutput, writerOutput }
-            .Where(s => !string.IsNullOrEmpty(s))
-            .ToArray();
+        AppendIfNotNullOrEmpty(ref vsb, buildOutput);
+        AppendIfNotNullOrEmpty(ref vsb, baseOutput);
+        AppendIfNotNullOrEmpty(ref vsb, writerOutput);
 
-        return parts.Length == 0 ? string.Empty : string.Join(Environment.NewLine, parts);
+        return vsb.ToString();
     }
 
     internal string GetOutputError()
     {
+        var vsb = new ValueStringBuilder(stackalloc char[256]);
+
         var buildErrorOutput = _buildTimeErrorOutput ?? string.Empty;
         var baseErrorOutput = base.GetErrorOutput();  // Get error output from base class (Context)
         var writerErrorOutput = _errorWriter?.ToString() ?? string.Empty;
 
-        // Combine all three sources: build-time error, base class error output, and writer error output
-        var parts = new[] { buildErrorOutput, baseErrorOutput, writerErrorOutput }
-            .Where(s => !string.IsNullOrEmpty(s))
-            .ToArray();
+        AppendIfNotNullOrEmpty(ref vsb, buildErrorOutput);
+        AppendIfNotNullOrEmpty(ref vsb, baseErrorOutput);
+        AppendIfNotNullOrEmpty(ref vsb, writerErrorOutput);
 
-        return parts.Length == 0 ? string.Empty : string.Join(Environment.NewLine, parts);
+        return vsb.ToString();
+    }
+
+    private static void AppendIfNotNullOrEmpty(ref ValueStringBuilder builder, string? value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            return;
+        }
+
+        if (builder.Length > 0)
+        {
+            builder.Append(Environment.NewLine);
+        }
+        builder.Append(value);
     }
 }
