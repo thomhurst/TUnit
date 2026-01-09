@@ -1285,4 +1285,75 @@ public class DisposableFieldPropertyAnalyzerTests
                 """
             );
     }
+
+    [Test]
+    public async Task Constructor_Func_Returning_Disposable_No_Issue()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Net.Http;
+                using TUnit.Core;
+
+                public interface IMyInterface : IDisposable
+                {
+                }
+
+                public class MyClass : IMyInterface
+                {
+                    public void Dispose()
+                    {
+                        Console.WriteLine("disposed");
+                    }
+                }
+
+                public class ExampleTest
+                {
+                    private readonly Func<IMyInterface> _factory;
+
+                    public ExampleTest()
+                    {
+                        _factory = () => new MyClass();
+                    }
+
+                    [Test]
+                    public void Test1()
+                    {
+                        using var t = _factory();
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task BeforeTest_Func_Returning_Disposable_No_Issue()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Net.Http;
+                using TUnit.Core;
+
+                public class DisposableFieldTests
+                {
+                    private Func<HttpClient>? _clientFactory;
+
+                    [Before(HookType.Test)]
+                    public void Setup()
+                    {
+                        _clientFactory = () => new HttpClient();
+                    }
+
+                    [Test]
+                    public void Test1()
+                    {
+                        using var client = _clientFactory!();
+                    }
+                }
+                """
+            );
+    }
 }
