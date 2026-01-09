@@ -292,58 +292,58 @@ internal sealed class HookCollectionService : IHookCollectionService
     }
 
     private async Task<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> BuildBeforeTestHooksAsync(Type type)
+    {
+        var hooksByType = new List<(Type type, List<(int order, int registrationIndex, Func<TestContext, CancellationToken, Task> hook)> hooks)>();
+
+        // Collect hooks for each type in the hierarchy
+        var currentType = type;
+        while (currentType != null)
         {
-            var hooksByType = new List<(Type type, List<(int order, int registrationIndex, Func<TestContext, CancellationToken, Task> hook)> hooks)>();
+            var typeHooks = new List<(int order, int registrationIndex, Func<TestContext, CancellationToken, Task> hook)>();
 
-            // Collect hooks for each type in the hierarchy
-            var currentType = type;
-            while (currentType != null)
+            if (Sources.BeforeTestHooks.TryGetValue(currentType, out var sourceHooks))
             {
-                var typeHooks = new List<(int order, int registrationIndex, Func<TestContext, CancellationToken, Task> hook)>();
-
-                if (Sources.BeforeTestHooks.TryGetValue(currentType, out var sourceHooks))
+                foreach (var hook in sourceHooks)
                 {
-                    foreach (var hook in sourceHooks)
+                    var hookFunc = await CreateInstanceHookDelegateAsync(hook);
+                    typeHooks.Add((hook.Order, hook.RegistrationIndex, hookFunc));
+                }
+            }
+
+            // Also check the open generic type definition for generic types
+            if (currentType is { IsGenericType: true, IsGenericTypeDefinition: false })
+            {
+                var openGenericType = GetCachedGenericTypeDefinition(currentType);
+                if (Sources.BeforeTestHooks.TryGetValue(openGenericType, out var openTypeHooks))
+                {
+                    foreach (var hook in openTypeHooks)
                     {
                         var hookFunc = await CreateInstanceHookDelegateAsync(hook);
                         typeHooks.Add((hook.Order, hook.RegistrationIndex, hookFunc));
                     }
                 }
-
-                // Also check the open generic type definition for generic types
-                if (currentType is { IsGenericType: true, IsGenericTypeDefinition: false })
-                {
-                    var openGenericType = GetCachedGenericTypeDefinition(currentType);
-                    if (Sources.BeforeTestHooks.TryGetValue(openGenericType, out var openTypeHooks))
-                    {
-                        foreach (var hook in openTypeHooks)
-                        {
-                            var hookFunc = await CreateInstanceHookDelegateAsync(hook);
-                            typeHooks.Add((hook.Order, hook.RegistrationIndex, hookFunc));
-                        }
-                    }
-                }
-
-                if (typeHooks.Count > 0)
-                {
-                    hooksByType.Add((currentType, typeHooks));
-                }
-
-                currentType = currentType.BaseType;
             }
 
-            // For Before hooks: base class hooks run first
-            // Reverse the list since we collected from derived to base
-            hooksByType.Reverse();
-
-            var finalHooks = new List<Func<TestContext, CancellationToken, Task>>();
-            foreach (var (_, typeHooks) in hooksByType)
+            if (typeHooks.Count > 0)
             {
-                // Within each type level, sort by Order then by RegistrationIndex
-                SortAndAddHooks(finalHooks, typeHooks);
+                hooksByType.Add((currentType, typeHooks));
             }
 
-            return finalHooks;
+            currentType = currentType.BaseType;
+        }
+
+        // For Before hooks: base class hooks run first
+        // Reverse the list since we collected from derived to base
+        hooksByType.Reverse();
+
+        var finalHooks = new List<Func<TestContext, CancellationToken, Task>>();
+        foreach (var (_, typeHooks) in hooksByType)
+        {
+            // Within each type level, sort by Order then by RegistrationIndex
+            SortAndAddHooks(finalHooks, typeHooks);
+        }
+
+        return finalHooks;
     }
 
     public async ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> CollectAfterTestHooksAsync(Type testClassType)
@@ -359,57 +359,57 @@ internal sealed class HookCollectionService : IHookCollectionService
     }
 
     private async Task<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> BuildAfterTestHooksAsync(Type type)
+    {
+        var hooksByType = new List<(Type type, List<(int order, int registrationIndex, Func<TestContext, CancellationToken, Task> hook)> hooks)>();
+
+        // Collect hooks for each type in the hierarchy
+        var currentType = type;
+        while (currentType != null)
         {
-            var hooksByType = new List<(Type type, List<(int order, int registrationIndex, Func<TestContext, CancellationToken, Task> hook)> hooks)>();
+            var typeHooks = new List<(int order, int registrationIndex, Func<TestContext, CancellationToken, Task> hook)>();
 
-            // Collect hooks for each type in the hierarchy
-            var currentType = type;
-            while (currentType != null)
+            if (Sources.AfterTestHooks.TryGetValue(currentType, out var sourceHooks))
             {
-                var typeHooks = new List<(int order, int registrationIndex, Func<TestContext, CancellationToken, Task> hook)>();
-
-                if (Sources.AfterTestHooks.TryGetValue(currentType, out var sourceHooks))
+                foreach (var hook in sourceHooks)
                 {
-                    foreach (var hook in sourceHooks)
+                    var hookFunc = await CreateInstanceHookDelegateAsync(hook);
+                    typeHooks.Add((hook.Order, hook.RegistrationIndex, hookFunc));
+                }
+            }
+
+            // Also check the open generic type definition for generic types
+            if (currentType is { IsGenericType: true, IsGenericTypeDefinition: false })
+            {
+                var openGenericType = GetCachedGenericTypeDefinition(currentType);
+                if (Sources.AfterTestHooks.TryGetValue(openGenericType, out var openTypeHooks))
+                {
+                    foreach (var hook in openTypeHooks)
                     {
                         var hookFunc = await CreateInstanceHookDelegateAsync(hook);
                         typeHooks.Add((hook.Order, hook.RegistrationIndex, hookFunc));
                     }
                 }
-
-                // Also check the open generic type definition for generic types
-                if (currentType is { IsGenericType: true, IsGenericTypeDefinition: false })
-                {
-                    var openGenericType = GetCachedGenericTypeDefinition(currentType);
-                    if (Sources.AfterTestHooks.TryGetValue(openGenericType, out var openTypeHooks))
-                    {
-                        foreach (var hook in openTypeHooks)
-                        {
-                            var hookFunc = await CreateInstanceHookDelegateAsync(hook);
-                            typeHooks.Add((hook.Order, hook.RegistrationIndex, hookFunc));
-                        }
-                    }
-                }
-
-                if (typeHooks.Count > 0)
-                {
-                    hooksByType.Add((currentType, typeHooks));
-                }
-
-                currentType = currentType.BaseType;
             }
 
-            // For After hooks: derived class hooks run first
-            // No need to reverse since we collected from derived to base
-
-            var finalHooks = new List<Func<TestContext, CancellationToken, Task>>();
-            foreach (var (_, typeHooks) in hooksByType)
+            if (typeHooks.Count > 0)
             {
-                // Within each type level, sort by Order then by RegistrationIndex
-                SortAndAddHooks(finalHooks, typeHooks);
+                hooksByType.Add((currentType, typeHooks));
             }
 
-            return finalHooks;
+            currentType = currentType.BaseType;
+        }
+
+        // For After hooks: derived class hooks run first
+        // No need to reverse since we collected from derived to base
+
+        var finalHooks = new List<Func<TestContext, CancellationToken, Task>>();
+        foreach (var (_, typeHooks) in hooksByType)
+        {
+            // Within each type level, sort by Order then by RegistrationIndex
+            SortAndAddHooks(finalHooks, typeHooks);
+        }
+
+        return finalHooks;
     }
 
     public ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> CollectBeforeEveryTestHooksAsync(Type testClassType)
@@ -834,5 +834,4 @@ internal sealed class HookCollectionService : IHookCollectionService
                 cancellationToken);
         };
     }
-
 }
