@@ -704,27 +704,20 @@ internal sealed class HookCollectionService : IHookCollectionService
         // Process hook registration event receivers
         await ProcessHookRegistrationAsync(hook);
 
-        return async (context, cancellationToken) =>
-        {
-            var timeoutAction = HookTimeoutHelper.CreateTimeoutHookAction(
-                hook,
-                context,
-                cancellationToken);
-
-            await timeoutAction();
-        };
+        return (context, cancellationToken) => HookTimeoutHelper.CreateTimeoutHookAction(
+            hook,
+            context,
+            cancellationToken);
     }
 
     private static Func<ClassHookContext, CancellationToken, Task> CreateClassHookDelegate(StaticHookMethod<ClassHookContext> hook)
     {
-        return async (context, cancellationToken) =>
+        return (context, cancellationToken) =>
         {
-            var timeoutAction = HookTimeoutHelper.CreateTimeoutHookAction(
+            return HookTimeoutHelper.CreateTimeoutHookAction(
                 hook,
                 context,
                 cancellationToken);
-
-            await timeoutAction();
         };
     }
 
@@ -733,27 +726,23 @@ internal sealed class HookCollectionService : IHookCollectionService
         // Process hook registration event receivers
         await ProcessHookRegistrationAsync(hook);
 
-        return async (context, cancellationToken) =>
+        return (context, cancellationToken) =>
         {
-            var timeoutAction = HookTimeoutHelper.CreateTimeoutHookAction(
+            return HookTimeoutHelper.CreateTimeoutHookAction(
                 hook,
                 context,
                 cancellationToken);
-
-            await timeoutAction();
         };
     }
 
     private static Func<AssemblyHookContext, CancellationToken, Task> CreateAssemblyHookDelegate(StaticHookMethod<AssemblyHookContext> hook)
     {
-        return async (context, cancellationToken) =>
+        return (context, cancellationToken) =>
         {
-            var timeoutAction = HookTimeoutHelper.CreateTimeoutHookAction(
+            return HookTimeoutHelper.CreateTimeoutHookAction(
                 hook,
                 context,
                 cancellationToken);
-
-            await timeoutAction();
         };
     }
 
@@ -762,27 +751,23 @@ internal sealed class HookCollectionService : IHookCollectionService
         // Process hook registration event receivers
         await ProcessHookRegistrationAsync(hook);
 
-        return async (context, cancellationToken) =>
+        return (context, cancellationToken) =>
         {
-            var timeoutAction = HookTimeoutHelper.CreateTimeoutHookAction(
+            return HookTimeoutHelper.CreateTimeoutHookAction(
                 hook,
                 context,
                 cancellationToken);
-
-            await timeoutAction();
         };
     }
 
     private static Func<TestSessionContext, CancellationToken, Task> CreateTestSessionHookDelegate(StaticHookMethod<TestSessionContext> hook)
     {
-        return async (context, cancellationToken) =>
+        return (context, cancellationToken) =>
         {
-            var timeoutAction = HookTimeoutHelper.CreateTimeoutHookAction(
+            return HookTimeoutHelper.CreateTimeoutHookAction(
                 hook,
                 context,
                 cancellationToken);
-
-            await timeoutAction();
         };
     }
 
@@ -791,27 +776,23 @@ internal sealed class HookCollectionService : IHookCollectionService
         // Process hook registration event receivers
         await ProcessHookRegistrationAsync(hook);
 
-        return async (context, cancellationToken) =>
+        return (context, cancellationToken) =>
         {
-            var timeoutAction = HookTimeoutHelper.CreateTimeoutHookAction(
+            return HookTimeoutHelper.CreateTimeoutHookAction(
                 hook,
                 context,
                 cancellationToken);
-
-            await timeoutAction();
         };
     }
 
     private static Func<BeforeTestDiscoveryContext, CancellationToken, Task> CreateBeforeTestDiscoveryHookDelegate(StaticHookMethod<BeforeTestDiscoveryContext> hook)
     {
-        return async (context, cancellationToken) =>
+        return (context, cancellationToken) =>
         {
-            var timeoutAction = HookTimeoutHelper.CreateTimeoutHookAction(
+            return HookTimeoutHelper.CreateTimeoutHookAction(
                 hook,
                 context,
                 cancellationToken);
-
-            await timeoutAction();
         };
     }
 
@@ -820,27 +801,23 @@ internal sealed class HookCollectionService : IHookCollectionService
         // Process hook registration event receivers
         await ProcessHookRegistrationAsync(hook);
 
-        return async (context, cancellationToken) =>
+        return (context, cancellationToken) =>
         {
-            var timeoutAction = HookTimeoutHelper.CreateTimeoutHookAction(
+            return HookTimeoutHelper.CreateTimeoutHookAction(
                 hook,
                 context,
                 cancellationToken);
-
-            await timeoutAction();
         };
     }
 
     private static Func<TestDiscoveryContext, CancellationToken, Task> CreateTestDiscoveryHookDelegate(StaticHookMethod<TestDiscoveryContext> hook)
     {
-        return async (context, cancellationToken) =>
+        return (context, cancellationToken) =>
         {
-            var timeoutAction = HookTimeoutHelper.CreateTimeoutHookAction(
+            return HookTimeoutHelper.CreateTimeoutHookAction(
                 hook,
                 context,
                 cancellationToken);
-
-            await timeoutAction();
         };
     }
 
@@ -849,14 +826,12 @@ internal sealed class HookCollectionService : IHookCollectionService
         // Process hook registration event receivers
         await ProcessHookRegistrationAsync(hook);
 
-        return async (context, cancellationToken) =>
+        return (context, cancellationToken) =>
         {
-            var timeoutAction = HookTimeoutHelper.CreateTimeoutHookAction(
+            return HookTimeoutHelper.CreateTimeoutHookAction(
                 hook,
                 context,
                 cancellationToken);
-
-            await timeoutAction();
         };
     }
 
