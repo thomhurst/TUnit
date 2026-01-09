@@ -205,14 +205,18 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
                .OfType<IObjectCreationOperation>()
                .Any(x => x.Type?.IsDisposable() is true || x.Type?.IsAsyncDisposable() is true))
             {
+                // Only flag if the field type itself is disposable (not e.g. Func<IDisposable>)
                 if (assignmentOperation.Target is IFieldReferenceOperation fieldReferenceOperation
-                   && context.Compilation.HasImplicitConversion(methodSymbol.ContainingType, fieldReferenceOperation.Field.ContainingType))
+                   && context.Compilation.HasImplicitConversion(methodSymbol.ContainingType, fieldReferenceOperation.Field.ContainingType)
+                   && (fieldReferenceOperation.Field.Type?.IsDisposable() is true || fieldReferenceOperation.Field.Type?.IsAsyncDisposable() is true))
                 {
                     createdObjects.TryAdd(fieldReferenceOperation.Field, level);
                 }
 
+                // Only flag if the property type itself is disposable (not e.g. Func<IDisposable>)
                 if (assignmentOperation.Target is IPropertyReferenceOperation propertyReferenceOperation
-                   && context.Compilation.HasImplicitConversion(methodSymbol.ContainingType, propertyReferenceOperation.Property.ContainingType))
+                   && context.Compilation.HasImplicitConversion(methodSymbol.ContainingType, propertyReferenceOperation.Property.ContainingType)
+                   && (propertyReferenceOperation.Property.Type?.IsDisposable() is true || propertyReferenceOperation.Property.Type?.IsAsyncDisposable() is true))
                 {
                     createdObjects.TryAdd(propertyReferenceOperation.Property, level);
                 }
