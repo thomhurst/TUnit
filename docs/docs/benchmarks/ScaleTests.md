@@ -7,7 +7,7 @@ sidebar_position: 6
 # ScaleTests Benchmark
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-01-08** from the latest CI run.
+This benchmark was automatically generated on **2026-01-09** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.101
 :::
@@ -16,11 +16,11 @@ This benchmark was automatically generated on **2026-01-08** from the latest CI 
 
 | Framework | Version | Mean | Median | StdDev |
 |-----------|---------|------|--------|--------|
-| **TUnit** | 1.9.26 | 693.49 ms | 694.70 ms | 13.048 ms |
-| NUnit | 4.4.0 | 655.26 ms | 654.38 ms | 11.859 ms |
-| MSTest | 4.0.2 | 659.70 ms | 654.87 ms | 13.988 ms |
-| xUnit3 | 3.2.1 | 668.36 ms | 667.71 ms | 10.839 ms |
-| **TUnit (AOT)** | 1.9.26 | 47.56 ms | 46.83 ms | 3.473 ms |
+| **TUnit** | 1.9.26 | 624.93 ms | 625.49 ms | 7.271 ms |
+| NUnit | 4.4.0 | 623.08 ms | 623.52 ms | 7.463 ms |
+| MSTest | 4.0.2 | 498.92 ms | 499.90 ms | 12.556 ms |
+| xUnit3 | 3.2.1 | 582.10 ms | 582.79 ms | 8.905 ms |
+| **TUnit (AOT)** | 1.9.26 | 39.13 ms | 38.88 ms | 1.995 ms |
 
 ## 📈 Visual Comparison
 
@@ -58,8 +58,8 @@ This benchmark was automatically generated on **2026-01-08** from the latest CI 
 xychart-beta
   title "ScaleTests Performance Comparison"
   x-axis ["TUnit", "NUnit", "MSTest", "xUnit3", "TUnit_AOT"]
-  y-axis "Time (ms)" 0 --> 833
-  bar [693.49, 655.26, 659.7, 668.36, 47.56]
+  y-axis "Time (ms)" 0 --> 750
+  bar [624.93, 623.08, 498.92, 582.1, 39.13]
 ```
 
 ## 🎯 Key Insights
@@ -72,4 +72,4 @@ This benchmark compares TUnit's performance against NUnit, MSTest, xUnit3 using 
 View the [benchmarks overview](/docs/benchmarks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-01-08T00:30:37.883Z*
+*Last generated: 2026-01-09T00:29:36.472Z*
