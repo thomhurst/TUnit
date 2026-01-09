@@ -221,11 +221,114 @@ public class NUnitAttributeRewriter : AttributeRewriter
 public class NUnitAssertionRewriter : AssertionRewriter
 {
     protected override string FrameworkName => "NUnit";
-    
+
     public NUnitAssertionRewriter(SemanticModel semanticModel) : base(semanticModel)
     {
     }
-    
+
+    /// <summary>
+    /// Handles Assert.Multiple(() => { ... }) conversion to using (Assert.Multiple()) { ... }
+    /// </summary>
+    public override SyntaxNode? VisitExpressionStatement(ExpressionStatementSyntax node)
+    {
+        // Check if this is Assert.Multiple(() => { ... })
+        if (node.Expression is InvocationExpressionSyntax invocation &&
+            invocation.Expression is MemberAccessExpressionSyntax memberAccess &&
+            memberAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Assert" } &&
+            memberAccess.Name.Identifier.Text == "Multiple" &&
+            invocation.ArgumentList.Arguments.Count == 1)
+        {
+            var argument = invocation.ArgumentList.Arguments[0].Expression;
+
+            // Handle lambda: Assert.Multiple(() => { ... })
+            if (argument is ParenthesizedLambdaExpressionSyntax lambda)
+            {
+                return ConvertAssertMultipleLambda(node, lambda);
+            }
+
+            // Handle simple lambda: Assert.Multiple(() => expr)
+            if (argument is SimpleLambdaExpressionSyntax simpleLambda)
+            {
+                return ConvertAssertMultipleSimpleLambda(node, simpleLambda);
+            }
+        }
+
+        return base.VisitExpressionStatement(node);
+    }
+
+    private SyntaxNode ConvertAssertMultipleLambda(ExpressionStatementSyntax originalStatement, ParenthesizedLambdaExpressionSyntax lambda)
+    {
+        // Extract statements from lambda body
+        SyntaxList<StatementSyntax> statements;
+        if (lambda.Body is BlockSyntax block)
+        {
+            // Visit each statement to convert inner assertions
+            var convertedStatements = block.Statements.Select(s => (StatementSyntax)Visit(s)!).ToArray();
+            statements = SyntaxFactory.List(convertedStatements);
+        }
+        else if (lambda.Body is ExpressionSyntax expr)
+        {
+            // Single expression lambda - convert it
+            var visitedExpr = (ExpressionSyntax)Visit(expr)!;
+            statements = SyntaxFactory.SingletonList<StatementSyntax>(
+                SyntaxFactory.ExpressionStatement(visitedExpr));
+        }
+        else
+        {
+            return originalStatement;
+        }
+
+        return CreateUsingMultipleStatement(originalStatement, statements);
+    }
+
+    private SyntaxNode ConvertAssertMultipleSimpleLambda(ExpressionStatementSyntax originalStatement, SimpleLambdaExpressionSyntax lambda)
+    {
+        SyntaxList<StatementSyntax> statements;
+        if (lambda.Body is BlockSyntax block)
+        {
+            var convertedStatements = block.Statements.Select(s => (StatementSyntax)Visit(s)!).ToArray();
+            statements = SyntaxFactory.List(convertedStatements);
+        }
+        else if (lambda.Body is ExpressionSyntax expr)
+        {
+            var visitedExpr = (ExpressionSyntax)Visit(expr)!;
+            statements = SyntaxFactory.SingletonList<StatementSyntax>(
+                SyntaxFactory.ExpressionStatement(visitedExpr));
+        }
+        else
+        {
+            return originalStatement;
+        }
+
+        return CreateUsingMultipleStatement(originalStatement, statements);
+    }
+
+    private UsingStatementSyntax CreateUsingMultipleStatement(ExpressionStatementSyntax originalStatement, SyntaxList<StatementSyntax> statements)
+    {
+        // Create: Assert.Multiple()
+        var assertMultipleInvocation = SyntaxFactory.InvocationExpression(
+            SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                SyntaxFactory.IdentifierName("Assert"),
+                SyntaxFactory.IdentifierName("Multiple")),
+            SyntaxFactory.ArgumentList());
+
+        // Create the using statement: using (Assert.Multiple()) { ... }
+        var usingStatement = SyntaxFactory.UsingStatement(
+            declaration: null,
+            expression: assertMultipleInvocation,
+            statement: SyntaxFactory.Block(statements)
+                .WithOpenBraceToken(SyntaxFactory.Token(SyntaxKind.OpenBraceToken).WithLeadingTrivia(SyntaxFactory.LineFeed))
+                .WithCloseBraceToken(SyntaxFactory.Token(SyntaxKind.CloseBraceToken).WithLeadingTrivia(originalStatement.GetLeadingTrivia())));
+
+        return usingStatement
+            .WithUsingKeyword(SyntaxFactory.Token(SyntaxKind.UsingKeyword).WithTrailingTrivia(SyntaxFactory.Space))
+            .WithOpenParenToken(SyntaxFactory.Token(SyntaxKind.OpenParenToken))
+            .WithCloseParenToken(SyntaxFactory.Token(SyntaxKind.CloseParenToken))
+            .WithLeadingTrivia(originalStatement.GetLeadingTrivia())
+            .WithTrailingTrivia(originalStatement.GetTrailingTrivia());
+    }
+
     protected override bool IsFrameworkAssertionNamespace(string namespaceName)
     {
         // Exclude NUnit.Framework.Legacy - ClassicAssert should not be converted
@@ -374,7 +477,25 @@ public class NUnitAssertionRewriter : AssertionRewriter
                 };
             }
 
+            // Handle Has.Count.EqualTo(n) -> Count().IsEqualTo(n)
+            // Pattern: Has.Count is a MemberAccess, then .EqualTo(n) is invoked on it
+            if (memberAccess.Expression is MemberAccessExpressionSyntax hasCountAccess &&
+                hasCountAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Has" } &&
+                hasCountAccess.Name.Identifier.Text == "Count")
+            {
+                return methodName switch
+                {
+                    "EqualTo" => CreateCountAssertion(actualValue, "IsEqualTo", message, constraint.ArgumentList.Arguments.ToArray()),
+                    "GreaterThan" => CreateCountAssertion(actualValue, "IsGreaterThan", message, constraint.ArgumentList.Arguments.ToArray()),
+                    "LessThan" => CreateCountAssertion(actualValue, "IsLessThan", message, constraint.ArgumentList.Arguments.ToArray()),
+                    "GreaterThanOrEqualTo" => CreateCountAssertion(actualValue, "IsGreaterThanOrEqualTo", message, constraint.ArgumentList.Arguments.ToArray()),
+                    "LessThanOrEqualTo" => CreateCountAssertion(actualValue, "IsLessThanOrEqualTo", message, constraint.ArgumentList.Arguments.ToArray()),
+                    _ => CreateCountAssertion(actualValue, "IsEqualTo", message, constraint.ArgumentList.Arguments.ToArray())
+                };
+            }
+
             // Handle Has.Member(item) -> Contains(item)
+            // Handle Has.Exactly(n) -> will be picked up in member pattern for Has.Exactly(n).Items
             if (memberAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Has" })
             {
                 return methodName switch
@@ -420,6 +541,20 @@ public class NUnitAssertionRewriter : AssertionRewriter
     {
         var memberName = constraint.Name.Identifier.Text;
 
+        // Handle Has.Exactly(n).Items -> Count().IsEqualTo(n)
+        // Pattern: constraint.Name is "Items", constraint.Expression is Has.Exactly(n) invocation
+        if (memberName == "Items" &&
+            constraint.Expression is InvocationExpressionSyntax exactlyInvocation &&
+            exactlyInvocation.Expression is MemberAccessExpressionSyntax exactlyMemberAccess &&
+            exactlyMemberAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Has" } &&
+            exactlyMemberAccess.Name.Identifier.Text == "Exactly" &&
+            exactlyInvocation.ArgumentList.Arguments.Count > 0)
+        {
+            // Extract the count argument from Has.Exactly(n)
+            var countArg = exactlyInvocation.ArgumentList.Arguments[0];
+            return CreateCountAssertion(actualValue, "IsEqualTo", message, countArg);
+        }
+
         // Handle Is.Not.X patterns (member access, not invocation)
         if (constraint.Expression is MemberAccessExpressionSyntax innerMemberAccess &&
             innerMemberAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Is" } &&
@@ -433,7 +568,7 @@ public class NUnitAssertionRewriter : AssertionRewriter
                 "False" => CreateTUnitAssertionWithMessage("IsTrue", actualValue, message),
                 "Positive" => CreateTUnitAssertionWithMessage("IsLessThanOrEqualTo", actualValue, message, SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(0)))),
                 "Negative" => CreateTUnitAssertionWithMessage("IsGreaterThanOrEqualTo", actualValue, message, SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(0)))),
-                "Zero" => CreateTUnitAssertionWithMessage("IsNotEqualTo", actualValue, message, SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(0)))),
+                "Zero" => CreateTUnitAssertionWithMessage("IsNotZero", actualValue, message),
                 _ => CreateTUnitAssertionWithMessage("IsNotEqualTo", actualValue, message, SyntaxFactory.Argument(constraint))
             };
         }
@@ -591,6 +726,20 @@ public class NUnitAssertionRewriter : AssertionRewriter
     {
         var memberName = constraint.Name.Identifier.Text;
 
+        // Handle Has.Exactly(n).Items -> Count().IsEqualTo(n)
+        // Pattern: constraint.Name is "Items", constraint.Expression is Has.Exactly(n) invocation
+        if (memberName == "Items" &&
+            constraint.Expression is InvocationExpressionSyntax exactlyInvocation &&
+            exactlyInvocation.Expression is MemberAccessExpressionSyntax exactlyMemberAccess &&
+            exactlyMemberAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Has" } &&
+            exactlyMemberAccess.Name.Identifier.Text == "Exactly" &&
+            exactlyInvocation.ArgumentList.Arguments.Count > 0)
+        {
+            // Extract the count argument from Has.Exactly(n)
+            var countArg = exactlyInvocation.ArgumentList.Arguments[0];
+            return CreateCountAssertion(actualValue, "IsEqualTo", null, countArg);
+        }
+
         // Handle Is.Not.X patterns (member access, not invocation)
         if (constraint.Expression is MemberAccessExpressionSyntax innerMemberAccess &&
             innerMemberAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Is" } &&
@@ -604,7 +753,7 @@ public class NUnitAssertionRewriter : AssertionRewriter
                 "False" => CreateTUnitAssertion("IsTrue", actualValue),
                 "Positive" => CreateTUnitAssertion("IsLessThanOrEqualTo", actualValue, SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(0)))),
                 "Negative" => CreateTUnitAssertion("IsGreaterThanOrEqualTo", actualValue, SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(0)))),
-                "Zero" => CreateTUnitAssertion("IsNotEqualTo", actualValue, SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(0)))),
+                "Zero" => CreateTUnitAssertion("IsNotZero", actualValue),
                 _ => CreateTUnitAssertion("IsNotEqualTo", actualValue, SyntaxFactory.Argument(constraint))
             };
         }
@@ -632,6 +781,74 @@ public class NUnitAssertionRewriter : AssertionRewriter
             return CreateTUnitAssertion("IsInRange", actualValue, arguments[0], arguments[1]);
         }
         return CreateTUnitAssertion("IsInRange", actualValue);
+    }
+
+    /// <summary>
+    /// Creates a count-based assertion: await Assert.That(collection).Count().IsEqualTo(n)
+    /// Used for Has.Count.EqualTo(n) and Has.Exactly(n).Items patterns
+    /// </summary>
+    private ExpressionSyntax CreateCountAssertion(ExpressionSyntax actualValue, string comparisonMethod, ExpressionSyntax? message, params ArgumentSyntax[] arguments)
+    {
+        // Create Assert.That(collection)
+        var assertThatInvocation = SyntaxFactory.InvocationExpression(
+            SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                SyntaxFactory.IdentifierName("Assert"),
+                SyntaxFactory.IdentifierName("That")
+            ),
+            SyntaxFactory.ArgumentList(
+                SyntaxFactory.SingletonSeparatedList(
+                    SyntaxFactory.Argument(actualValue)
+                )
+            )
+        );
+
+        // Create Assert.That(collection).Count()
+        var countInvocation = SyntaxFactory.InvocationExpression(
+            SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                assertThatInvocation,
+                SyntaxFactory.IdentifierName("Count")
+            ),
+            SyntaxFactory.ArgumentList()
+        );
+
+        // Create Assert.That(collection).Count().IsEqualTo(n) (or other comparison method)
+        var comparisonAccess = SyntaxFactory.MemberAccessExpression(
+            SyntaxKind.SimpleMemberAccessExpression,
+            countInvocation,
+            SyntaxFactory.IdentifierName(comparisonMethod)
+        );
+
+        var comparisonArgs = arguments.Length > 0
+            ? SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(arguments))
+            : SyntaxFactory.ArgumentList();
+
+        ExpressionSyntax fullInvocation = SyntaxFactory.InvocationExpression(comparisonAccess, comparisonArgs);
+
+        // Add .Because(message) if message is provided
+        if (message != null)
+        {
+            var becauseAccess = SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                fullInvocation,
+                SyntaxFactory.IdentifierName("Because")
+            );
+
+            fullInvocation = SyntaxFactory.InvocationExpression(
+                becauseAccess,
+                SyntaxFactory.ArgumentList(
+                    SyntaxFactory.SingletonSeparatedList(
+                        SyntaxFactory.Argument(message)
+                    )
+                )
+            );
+        }
+
+        // Wrap in await
+        var awaitKeyword = SyntaxFactory.Token(SyntaxKind.AwaitKeyword)
+            .WithTrailingTrivia(SyntaxFactory.Space);
+        return SyntaxFactory.AwaitExpression(awaitKeyword, fullInvocation);
     }
 
     /// <summary>
