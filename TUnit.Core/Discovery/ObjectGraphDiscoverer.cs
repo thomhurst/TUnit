@@ -651,8 +651,13 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
             return true; // Malformed key, treat as direct
         }
 
+#if NET9_0_OR_GREATER
+        var declaringTypeName = cacheKey.AsSpan()[..lastDotIndex];
+        return hierarchyTypes.GetAlternateLookup<ReadOnlySpan<char>>().Contains(declaringTypeName);
+#else
         var declaringTypeName = cacheKey.Substring(0, lastDotIndex);
         return hierarchyTypes.Contains(declaringTypeName);
+#endif
     }
 
     /// <summary>
