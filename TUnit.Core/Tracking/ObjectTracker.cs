@@ -60,23 +60,8 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
             return ImmutableHashSet<object>.Empty;
         }
 
-#if NETSTANDARD2_0
-        // .NET Standard 2.0 doesn't support HashSet capacity constructor
         var result = new HashSet<object>(Helpers.ReferenceEqualityComparer.Instance);
-#else
-        // First pass: calculate total capacity to avoid resizing
-        var totalCapacity = 0;
-        foreach (var kvp in trackedObjects)
-        {
-            lock (kvp.Value)
-            {
-                totalCapacity += kvp.Value.Count;
-            }
-        }
 
-        // Second pass: populate with pre-sized HashSet
-        var result = new HashSet<object>(totalCapacity, Helpers.ReferenceEqualityComparer.Instance);
-#endif
         foreach (var kvp in trackedObjects)
         {
             lock (kvp.Value)
