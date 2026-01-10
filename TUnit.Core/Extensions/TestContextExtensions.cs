@@ -15,7 +15,6 @@ public static class TestContextExtensions
             return context.Metadata.TestDetails.ClassType.Name;
         }
 
-        // PERFORMANCE: Use pooled StringBuilder to avoid allocations
         var args = context.Metadata.TestDetails.TestClassArguments;
         var sb = StringBuilderPool.Get();
         try

@@ -16,19 +16,9 @@ internal static class TestExtensions
     private static bool? _cachedIsTrxEnabled;
     private static bool? _cachedIsDetailedOutput;
 
-    // PERFORMANCE: Cache assembly full names to avoid repeated GetName() allocations
-    // Assembly.GetName() allocates a new AssemblyName object each time - this was a major hotspot
     private static readonly ConcurrentDictionary<Assembly, string> AssemblyFullNameCache = new();
-
-    // PERFORMANCE: Cache static properties per test that never change between state transitions
-    // ToTestNode is called 3+ times per test (discovered, in-progress, passed/failed)
-    // These properties are identical each time, so caching eliminates redundant allocations
     private static readonly ConcurrentDictionary<string, CachedTestNodeProperties> TestNodePropertiesCache = new();
 
-    /// <summary>
-    /// Cached properties that don't change between test state transitions.
-    /// This significantly reduces allocations since ToTestNode is called multiple times per test.
-    /// </summary>
     private sealed class CachedTestNodeProperties
     {
         public required TestFileLocationProperty FileLocation { get; init; }
@@ -51,13 +41,11 @@ internal static class TestExtensions
 
         return TestNodePropertiesCache.GetOrAdd(testId, _ =>
         {
-            // Create file location property (never changes)
             var fileLocation = new TestFileLocationProperty(testDetails.TestFilePath, new LinePositionSpan(
                 new LinePosition(testDetails.TestLineNumber, 0),
                 new LinePosition(testDetails.TestLineNumber, 0)
             ));
 
-            // Create method identifier property (never changes)
             var methodIdentifier = new TestMethodIdentifierProperty(
                 @namespace: testDetails.MethodMetadata.Class.Type.Namespace ?? "",
                 assemblyFullName: GetCachedAssemblyFullName(testDetails.MethodMetadata.Class.Type.Assembly),
@@ -68,7 +56,6 @@ internal static class TestExtensions
                 methodArity: testDetails.MethodMetadata.GenericTypeCount
             );
 
-            // Cache category properties (never change)
             TestMetadataProperty[]? categoryProps = null;
             if (testDetails.Categories.Count > 0)
             {
@@ -79,7 +66,6 @@ internal static class TestExtensions
                 }
             }
 
-            // Cache custom properties (never change)
             TestMetadataProperty[]? customProps = null;
             if (testDetails.CustomProperties.Count > 0)
             {
@@ -100,10 +86,8 @@ internal static class TestExtensions
                 }
             }
 
-            // Cache TRX type name (never changes)
             var trxTypeName = testDetails.MethodMetadata.Class.Type.FullName ?? testDetails.ClassType.FullName ?? "UnknownType";
 
-            // Cache TRX categories (never change)
             TrxCategoriesProperty? trxCategories = null;
             if (testDetails.Categories.Count > 0)
             {
@@ -130,7 +114,6 @@ internal static class TestExtensions
 
         var isTrxEnabled = isFinalState && IsTrxEnabled(testContext);
 
-        // Get cached properties that don't change between state transitions
         var cachedProps = GetOrCreateCachedProperties(testContext);
 
         var estimatedCount = EstimateCount(testContext, stateProperty, isTrxEnabled);
@@ -142,19 +125,16 @@ internal static class TestExtensions
             cachedProps.MethodIdentifier
         };
 
-        // Add cached category properties
         if (cachedProps.CategoryProperties != null)
         {
             properties.AddRange(cachedProps.CategoryProperties);
         }
 
-        // Add cached custom properties
         if (cachedProps.CustomProperties != null)
         {
             properties.AddRange(cachedProps.CustomProperties);
         }
 
-        // Artifacts (only in final state, and these are dynamic)
         if (isFinalState && testContext.Output.Artifacts.Count > 0)
         {
             foreach (var artifact in testContext.Artifacts)
@@ -171,8 +151,6 @@ internal static class TestExtensions
             output = testContext.GetStandardOutput();
             error = testContext.GetErrorOutput();
 
-            // Only add output properties when NOT in detailed output mode to avoid duplication
-            // In detailed mode, the output is already shown in real-time by the platform
             if (!IsDetailedOutput(testContext))
             {
                 if (!string.IsNullOrEmpty(output))
@@ -187,7 +165,6 @@ internal static class TestExtensions
             }
         }
 
-        // TRX Report Properties
         if (isFinalState && isTrxEnabled)
         {
             properties.Add(new TrxFullyQualifiedTypeNameProperty(cachedProps.TrxFullyQualifiedTypeName!));
@@ -363,9 +340,6 @@ internal static class TestExtensions
         }
     }
 
-    /// <summary>
-    /// Efficiently create parameter type array without LINQ materialization
-    /// </summary>
     private static string[] CreateParameterTypeArray(ParameterMetadata[] parameters)
     {
         if (parameters.Length == 0)
