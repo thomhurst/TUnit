@@ -56,25 +56,12 @@ internal static class TimeoutHelper
         CancellationToken cancellationToken,
         string? timeoutMessage = null)
     {
-        // Fast path: no timeout specified
+        // Fast path: no timeout specified - just await directly
+        // The task factory receives the cancellationToken, so cancellation is handled
+        // cooperatively by the task itself (throws OperationCanceledException)
         if (!timeout.HasValue)
         {
-            var task = taskFactory(cancellationToken);
-
-            // If the token can't be cancelled, just await directly (avoid allocations)
-            if (!cancellationToken.CanBeCanceled)
-            {
-                return await task.ConfigureAwait(false);
-            }
-
-            // Race against cancellation - TrySetCanceled makes the TCS throw OperationCanceledException when awaited
-            var tcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
-            using var reg = cancellationToken.Register(
-                static state => ((TaskCompletionSource<T>)state!).TrySetCanceled(),
-                tcs);
-
-            // await await: first gets winning task, then awaits it (propagates result or exception)
-            return await await Task.WhenAny(task, tcs.Task).ConfigureAwait(false);
+            return await taskFactory(cancellationToken).ConfigureAwait(false);
         }
 
         // Timeout path: create linked token so task can observe both timeout and external cancellation.
