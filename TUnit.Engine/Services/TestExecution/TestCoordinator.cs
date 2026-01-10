@@ -103,78 +103,33 @@ internal sealed class TestCoordinator : ITestCoordinator
             // Ensure TestSession hooks run before creating test instances
             await _testExecutor.EnsureTestSessionHooksExecutedAsync(cancellationToken).ConfigureAwait(false);
 
-            // Execute test with retry logic - each retry gets a fresh instance
-            // Timeout is applied per retry attempt, not across all retries
-            await RetryHelper.ExecuteWithRetry(test.Context, async () =>
+            // Check if we can use the fast path (no retry, no timeout)
+            // Note: retryLimit == 0 means "no retries" (run once), not "unlimited retries"
+            var retryLimit = test.Context.Metadata.TestDetails.RetryLimit;
+            var testTimeout = test.Context.Metadata.TestDetails.Timeout;
+
+            if (retryLimit == 0 && !testTimeout.HasValue)
             {
-                // Get timeout configuration for this attempt
-                var testTimeout = test.Context.Metadata.TestDetails.Timeout;
-                var timeoutMessage = testTimeout.HasValue
-                    ? $"Test '{test.Context.Metadata.TestDetails.TestName}' timed out after {testTimeout.Value}"
-                    : null;
+                // Fast path: direct execution without wrapper overhead
+                test.Context.CurrentRetryAttempt = 0;
+                await ExecuteTestLifecycleAsync(test, cancellationToken).ConfigureAwait(false);
+            }
+            else
+            {
+                // Slow path: use retry and timeout wrappers
+                await RetryHelper.ExecuteWithRetry(test.Context, async () =>
+                {
+                    var timeoutMessage = testTimeout.HasValue
+                        ? $"Test '{test.Context.Metadata.TestDetails.TestName}' timed out after {testTimeout.Value}"
+                        : null;
 
-                // Wrap entire lifecycle (instance creation, initialization, execution) with timeout
-                await TimeoutHelper.ExecuteWithTimeoutAsync(
-                    async ct =>
-                    {
-                        test.Context.Metadata.TestDetails.ClassInstance = await test.CreateInstanceAsync().ConfigureAwait(false);
-
-                        // Invalidate cached eligible event objects since ClassInstance changed
-                        test.Context.CachedEligibleEventObjects = null;
-
-                        // Check if this test should be skipped (after creating instance)
-                        if (test.Context.Metadata.TestDetails.ClassInstance is SkippedTestInstance ||
-                            !string.IsNullOrEmpty(test.Context.SkipReason))
-                        {
-                            await _stateManager.MarkSkippedAsync(test, test.Context.SkipReason ?? "Test was skipped").ConfigureAwait(false);
-
-                            await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, ct).ConfigureAwait(false);
-
-                            await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context, ct).ConfigureAwait(false);
-
-                            return;
-                        }
-
-                        try
-                        {
-                            _testInitializer.PrepareTest(test, ct);
-                            test.Context.RestoreExecutionContext();
-                            await _testExecutor.ExecuteAsync(test, _testInitializer, ct).ConfigureAwait(false);
-                        }
-                        finally
-                        {
-                            // Dispose test instance and fire OnDispose after each attempt
-                            // This ensures each retry gets a fresh instance
-                            var onDispose = test.Context.InternalEvents.OnDispose;
-                            if (onDispose?.InvocationList != null)
-                            {
-                                foreach (var invocation in onDispose.InvocationList)
-                                {
-                                    try
-                                    {
-                                        await invocation.InvokeAsync(test.Context, test.Context).ConfigureAwait(false);
-                                    }
-                                    catch (Exception disposeEx)
-                                    {
-                                        await _logger.LogErrorAsync($"Error during OnDispose for {test.TestId}: {disposeEx}").ConfigureAwait(false);
-                                    }
-                                }
-                            }
-
-                            try
-                            {
-                                await TestExecutor.DisposeTestInstance(test).ConfigureAwait(false);
-                            }
-                            catch (Exception disposeEx)
-                            {
-                                await _logger.LogErrorAsync($"Error disposing test instance for {test.TestId}: {disposeEx}").ConfigureAwait(false);
-                            }
-                        }
-                    },
-                    testTimeout,
-                    cancellationToken,
-                    timeoutMessage).ConfigureAwait(false);
-            }).ConfigureAwait(false);
+                    await TimeoutHelper.ExecuteWithTimeoutAsync(
+                        ct => ExecuteTestLifecycleAsync(test, ct),
+                        testTimeout,
+                        cancellationToken,
+                        timeoutMessage).ConfigureAwait(false);
+                }).ConfigureAwait(false);
+            }
 
             await _stateManager.MarkCompletedAsync(test).ConfigureAwait(false);
 
@@ -303,6 +258,67 @@ internal sealed class TestCoordinator : ITestCoordinator
             if (collected.Add(dependency.Test.Context.Metadata.TestDetails))
             {
                 CollectAllDependencies(dependency.Test, collected, visited);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Core test lifecycle execution: instance creation, initialization, execution, and disposal.
+    /// Extracted to allow bypassing retry/timeout wrappers when not needed.
+    /// </summary>
+    private async Task ExecuteTestLifecycleAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    {
+        test.Context.Metadata.TestDetails.ClassInstance = await test.CreateInstanceAsync().ConfigureAwait(false);
+
+        // Invalidate cached eligible event objects since ClassInstance changed
+        test.Context.CachedEligibleEventObjects = null;
+
+        // Check if this test should be skipped (after creating instance)
+        if (test.Context.Metadata.TestDetails.ClassInstance is SkippedTestInstance ||
+            !string.IsNullOrEmpty(test.Context.SkipReason))
+        {
+            await _stateManager.MarkSkippedAsync(test, test.Context.SkipReason ?? "Test was skipped").ConfigureAwait(false);
+
+            await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
+
+            await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
+
+            return;
+        }
+
+        try
+        {
+            _testInitializer.PrepareTest(test, cancellationToken);
+            test.Context.RestoreExecutionContext();
+            await _testExecutor.ExecuteAsync(test, _testInitializer, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            // Dispose test instance and fire OnDispose after each attempt
+            // This ensures each retry gets a fresh instance
+            var onDispose = test.Context.InternalEvents.OnDispose;
+            if (onDispose?.InvocationList != null)
+            {
+                foreach (var invocation in onDispose.InvocationList)
+                {
+                    try
+                    {
+                        await invocation.InvokeAsync(test.Context, test.Context).ConfigureAwait(false);
+                    }
+                    catch (Exception disposeEx)
+                    {
+                        await _logger.LogErrorAsync($"Error during OnDispose for {test.TestId}: {disposeEx}").ConfigureAwait(false);
+                    }
+                }
+            }
+
+            try
+            {
+                await TestExecutor.DisposeTestInstance(test).ConfigureAwait(false);
+            }
+            catch (Exception disposeEx)
+            {
+                await _logger.LogErrorAsync($"Error disposing test instance for {test.TestId}: {disposeEx}").ConfigureAwait(false);
             }
         }
     }
