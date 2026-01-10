@@ -1,4 +1,5 @@
 ﻿using TUnit.Core.Exceptions;
+using TUnit.Core.Helpers;
 
 namespace TUnit.Engine.Exceptions;
 
@@ -23,9 +24,21 @@ public abstract class TUnitFailedException : TUnitException
             return string.Empty;
         }
 
-        var lines = stackTrace!.Split([Environment.NewLine], StringSplitOptions.None);
+        var vsb = new ValueStringBuilder(stackalloc char[256]);
 
-        return string.Join(Environment.NewLine,
-            lines.TakeWhile(x => !x.Trim().StartsWith("at TUnit")));
+        var added = false;
+        foreach(var range in stackTrace.AsSpan().Split(Environment.NewLine))
+        {
+            var slice = stackTrace.AsSpan()[range];
+            if (slice.Trim().StartsWith("at TUnit"))
+            {
+                break;
+            }
+            vsb.Append(added ? Environment.NewLine : "");
+            vsb.Append(slice);
+            added = true;
+        }
+
+        return vsb.ToString();
     }
 }
