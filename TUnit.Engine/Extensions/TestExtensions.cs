@@ -1,4 +1,6 @@
-﻿using Microsoft.Testing.Extensions.TrxReport.Abstractions;
+﻿using System.Collections.Concurrent;
+using System.Reflection;
+using Microsoft.Testing.Extensions.TrxReport.Abstractions;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
@@ -14,6 +16,112 @@ internal static class TestExtensions
     private static bool? _cachedIsTrxEnabled;
     private static bool? _cachedIsDetailedOutput;
 
+    // PERFORMANCE: Cache assembly full names to avoid repeated GetName() allocations
+    // Assembly.GetName() allocates a new AssemblyName object each time - this was a major hotspot
+    private static readonly ConcurrentDictionary<Assembly, string> AssemblyFullNameCache = new();
+
+    // PERFORMANCE: Cache static properties per test that never change between state transitions
+    // ToTestNode is called 3+ times per test (discovered, in-progress, passed/failed)
+    // These properties are identical each time, so caching eliminates redundant allocations
+    private static readonly ConcurrentDictionary<string, CachedTestNodeProperties> TestNodePropertiesCache = new();
+
+    /// <summary>
+    /// Cached properties that don't change between test state transitions.
+    /// This significantly reduces allocations since ToTestNode is called multiple times per test.
+    /// </summary>
+    private sealed class CachedTestNodeProperties
+    {
+        public required TestFileLocationProperty FileLocation { get; init; }
+        public required TestMethodIdentifierProperty MethodIdentifier { get; init; }
+        public TestMetadataProperty[]? CategoryProperties { get; init; }
+        public TestMetadataProperty[]? CustomProperties { get; init; }
+        public string? TrxFullyQualifiedTypeName { get; init; }
+        public TrxCategoriesProperty? TrxCategories { get; init; }
+    }
+
+    private static string GetCachedAssemblyFullName(Assembly assembly)
+    {
+        return AssemblyFullNameCache.GetOrAdd(assembly, static a => a.GetName().FullName);
+    }
+
+    private static CachedTestNodeProperties GetOrCreateCachedProperties(TestContext testContext)
+    {
+        var testDetails = testContext.Metadata.TestDetails;
+        var testId = testDetails.TestId;
+
+        return TestNodePropertiesCache.GetOrAdd(testId, _ =>
+        {
+            // Create file location property (never changes)
+            var fileLocation = new TestFileLocationProperty(testDetails.TestFilePath, new LinePositionSpan(
+                new LinePosition(testDetails.TestLineNumber, 0),
+                new LinePosition(testDetails.TestLineNumber, 0)
+            ));
+
+            // Create method identifier property (never changes)
+            var methodIdentifier = new TestMethodIdentifierProperty(
+                @namespace: testDetails.MethodMetadata.Class.Type.Namespace ?? "",
+                assemblyFullName: GetCachedAssemblyFullName(testDetails.MethodMetadata.Class.Type.Assembly),
+                typeName: testContext.GetClassTypeName(),
+                methodName: testDetails.MethodName,
+                parameterTypeFullNames: CreateParameterTypeArray(testDetails.MethodMetadata.Parameters),
+                returnTypeFullName: testDetails.ReturnType.FullName ?? typeof(void).FullName!,
+                methodArity: testDetails.MethodMetadata.GenericTypeCount
+            );
+
+            // Cache category properties (never change)
+            TestMetadataProperty[]? categoryProps = null;
+            if (testDetails.Categories.Count > 0)
+            {
+                categoryProps = new TestMetadataProperty[testDetails.Categories.Count];
+                for (var i = 0; i < testDetails.Categories.Count; i++)
+                {
+                    categoryProps[i] = new TestMetadataProperty(testDetails.Categories[i]);
+                }
+            }
+
+            // Cache custom properties (never change)
+            TestMetadataProperty[]? customProps = null;
+            if (testDetails.CustomProperties.Count > 0)
+            {
+                var count = 0;
+                foreach (var prop in testDetails.CustomProperties)
+                {
+                    count += prop.Value.Count;
+                }
+
+                customProps = new TestMetadataProperty[count];
+                var idx = 0;
+                foreach (var prop in testDetails.CustomProperties)
+                {
+                    foreach (var value in prop.Value)
+                    {
+                        customProps[idx++] = new TestMetadataProperty(prop.Key, value);
+                    }
+                }
+            }
+
+            // Cache TRX type name (never changes)
+            var trxTypeName = testDetails.MethodMetadata.Class.Type.FullName ?? testDetails.ClassType.FullName ?? "UnknownType";
+
+            // Cache TRX categories (never change)
+            TrxCategoriesProperty? trxCategories = null;
+            if (testDetails.Categories.Count > 0)
+            {
+                trxCategories = new TrxCategoriesProperty([..testDetails.Categories]);
+            }
+
+            return new CachedTestNodeProperties
+            {
+                FileLocation = fileLocation,
+                MethodIdentifier = methodIdentifier,
+                CategoryProperties = categoryProps,
+                CustomProperties = customProps,
+                TrxFullyQualifiedTypeName = trxTypeName,
+                TrxCategories = trxCategories
+            };
+        });
+    }
+
     internal static TestNode ToTestNode(this TestContext testContext, TestNodeStateProperty stateProperty)
     {
         var testDetails = testContext.Metadata.TestDetails ?? throw new ArgumentNullException(nameof(testContext.Metadata.TestDetails));
@@ -22,43 +130,37 @@ internal static class TestExtensions
 
         var isTrxEnabled = isFinalState && IsTrxEnabled(testContext);
 
+        // Get cached properties that don't change between state transitions
+        var cachedProps = GetOrCreateCachedProperties(testContext);
+
         var estimatedCount = EstimateCount(testContext, stateProperty, isTrxEnabled);
 
         var properties = new List<IProperty>(estimatedCount)
         {
             stateProperty,
-
-            new TestFileLocationProperty(testDetails.TestFilePath, new LinePositionSpan(
-                new LinePosition(testDetails.TestLineNumber, 0),
-                new LinePosition(testDetails.TestLineNumber, 0)
-            )),
-
-            new TestMethodIdentifierProperty(
-                @namespace: testDetails.MethodMetadata.Class.Type.Namespace ?? "",
-                assemblyFullName: testDetails.MethodMetadata.Class.Type.Assembly.GetName().FullName,
-                typeName: testContext.GetClassTypeName(),
-                methodName: testDetails.MethodName,
-                parameterTypeFullNames: CreateParameterTypeArray(testDetails.MethodMetadata.Parameters),
-                returnTypeFullName: testDetails.ReturnType.FullName ?? typeof(void).FullName!,
-                methodArity: testDetails.MethodMetadata.GenericTypeCount
-            )
+            cachedProps.FileLocation,
+            cachedProps.MethodIdentifier
         };
 
-        // Custom TUnit Properties
-        if (testDetails.Categories.Count > 0)
+        // Add cached category properties
+        if (cachedProps.CategoryProperties != null)
         {
-            properties.AddRange(testDetails.Categories.Select(static category => new TestMetadataProperty(category)));
+            properties.AddRange(cachedProps.CategoryProperties);
         }
 
-        if (testDetails.CustomProperties.Count > 0)
+        // Add cached custom properties
+        if (cachedProps.CustomProperties != null)
         {
-            properties.AddRange(ExtractProperties(testDetails));
+            properties.AddRange(cachedProps.CustomProperties);
         }
 
-        // Artifacts
-        if(isFinalState && testContext.Output.Artifacts.Count > 0)
+        // Artifacts (only in final state, and these are dynamic)
+        if (isFinalState && testContext.Output.Artifacts.Count > 0)
         {
-            properties.AddRange(testContext.Artifacts.Select(static x => new FileArtifactProperty(x.File, x.DisplayName, x.Description)));
+            foreach (var artifact in testContext.Artifacts)
+            {
+                properties.Add(new FileArtifactProperty(artifact.File, artifact.DisplayName, artifact.Description));
+            }
         }
 
         string? output = null;
@@ -88,19 +190,19 @@ internal static class TestExtensions
         // TRX Report Properties
         if (isFinalState && isTrxEnabled)
         {
-            properties.Add(new TrxFullyQualifiedTypeNameProperty(testDetails.MethodMetadata.Class.Type.FullName ?? testDetails.ClassType.FullName ?? "UnknownType"));
+            properties.Add(new TrxFullyQualifiedTypeNameProperty(cachedProps.TrxFullyQualifiedTypeName!));
 
-            if(testDetails.Categories.Count > 0)
+            if (cachedProps.TrxCategories != null)
             {
-                properties.Add(new TrxCategoriesProperty([..testDetails.Categories]));
+                properties.Add(cachedProps.TrxCategories);
             }
 
-            if (isFinalState && GetTrxMessages(testContext, output, error).ToArray() is { Length: > 0 } trxMessages)
+            if (GetTrxMessages(testContext, output, error).ToArray() is { Length: > 0 } trxMessages)
             {
                 properties.Add(new TrxMessagesProperty(trxMessages));
             }
 
-            if(stateProperty is ErrorTestNodeStateProperty or FailedTestNodeStateProperty or TimeoutTestNodeStateProperty)
+            if (stateProperty is ErrorTestNodeStateProperty or FailedTestNodeStateProperty or TimeoutTestNodeStateProperty)
             {
                 var (exception, explanation) = GetException(stateProperty);
 
@@ -115,7 +217,7 @@ internal static class TestExtensions
             }
         }
 
-        if(isFinalState)
+        if (isFinalState)
         {
             properties.Add(GetTimingProperty(testContext, testContext.Execution.TestStart.GetValueOrDefault()));
         }
@@ -170,12 +272,12 @@ internal static class TestExtensions
         {
             count += 2; // TRX TypeName + TRX Messages
 
-            if(testDetails.Categories.Count > 0)
+            if (testDetails.Categories.Count > 0)
             {
                 count += 1; // TRX Categories
             }
 
-            if(stateProperty is ErrorTestNodeStateProperty or FailedTestNodeStateProperty or TimeoutTestNodeStateProperty)
+            if (stateProperty is ErrorTestNodeStateProperty or FailedTestNodeStateProperty or TimeoutTestNodeStateProperty)
             {
                 count += 1; // Trx Exception
             }
@@ -191,13 +293,13 @@ internal static class TestExtensions
             return _cachedIsTrxEnabled.Value;
         }
 
-        if(testContext.Services.GetService<ITestFrameworkCapabilities>() is not {} capabilities)
+        if (testContext.Services.GetService<ITestFrameworkCapabilities>() is not {} capabilities)
         {
             _cachedIsTrxEnabled = false;
             return false;
         }
 
-        if(capabilities.GetCapability<ITrxReportCapability>() is not TrxReportCapability trxCapability)
+        if (capabilities.GetCapability<ITrxReportCapability>() is not TrxReportCapability trxCapability)
         {
             _cachedIsTrxEnabled = false;
             return false;
@@ -222,17 +324,6 @@ internal static class TestExtensions
 
         _cachedIsDetailedOutput = verbosityService.IsDetailedOutput;
         return _cachedIsDetailedOutput.Value;
-    }
-
-    private static IEnumerable<TestMetadataProperty> ExtractProperties(TestDetails testDetails)
-    {
-        foreach (var propertyGroup in testDetails.CustomProperties)
-        {
-            foreach (var propertyValue in propertyGroup.Value)
-            {
-                yield return new TestMetadataProperty(propertyGroup.Key, propertyValue);
-            }
-        }
     }
 
     private static TimingProperty GetTimingProperty(TestContext testContext, DateTimeOffset overallStart)
