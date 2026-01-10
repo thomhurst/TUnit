@@ -17,6 +17,7 @@ using TUnit.Engine.Building.Collectors;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Discovery;
+using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
@@ -305,5 +306,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         }
 
         _services.Clear();
+
+        TestExtensions.ClearCaches();
     }
 }

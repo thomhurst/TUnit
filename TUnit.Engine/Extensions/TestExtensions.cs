@@ -29,6 +29,14 @@ internal static class TestExtensions
         public TrxCategoriesProperty? TrxCategories { get; init; }
     }
 
+    internal static void ClearCaches()
+    {
+        AssemblyFullNameCache.Clear();
+        TestNodePropertiesCache.Clear();
+        _cachedIsTrxEnabled = null;
+        _cachedIsDetailedOutput = null;
+    }
+
     private static string GetCachedAssemblyFullName(Assembly assembly)
     {
         return AssemblyFullNameCache.GetOrAdd(assembly, static a => a.GetName().FullName);
