@@ -15,23 +15,29 @@ public static class TestContextExtensions
             return context.Metadata.TestDetails.ClassType.Name;
         }
 
-        // Optimize: Use StringBuilder to avoid string concatenation allocations
         var args = context.Metadata.TestDetails.TestClassArguments;
-        var sb = new System.Text.StringBuilder();
-        sb.Append(context.Metadata.TestDetails.ClassType.Name);
-        sb.Append('(');
-
-        for (int i = 0; i < args.Length; i++)
+        var sb = StringBuilderPool.Get();
+        try
         {
-            if (i > 0)
-            {
-                sb.Append(", ");
-            }
-            sb.Append(ArgumentFormatter.Format(args[i], context.ArgumentDisplayFormatters));
-        }
+            sb.Append(context.Metadata.TestDetails.ClassType.Name);
+            sb.Append('(');
 
-        sb.Append(')');
-        return sb.ToString();
+            for (var i = 0; i < args.Length; i++)
+            {
+                if (i > 0)
+                {
+                    sb.Append(", ");
+                }
+                sb.Append(ArgumentFormatter.Format(args[i], context.ArgumentDisplayFormatters));
+            }
+
+            sb.Append(')');
+            return sb.ToString();
+        }
+        finally
+        {
+            StringBuilderPool.Return(sb);
+        }
     }
 
     #if NET6_0_OR_GREATER
