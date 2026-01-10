@@ -14,6 +14,7 @@ public class TestMetadata<
 {
     private Func<Type[], object?[], T>? _instanceFactory;
     private Func<T, object?[], Task>? _testInvoker;
+    private Func<ExecutableTestCreationContext, TestMetadata, AbstractExecutableTest>? _cachedExecutableTestFactory;
 
     /// <summary>
     /// Strongly typed instance factory
@@ -63,10 +64,16 @@ public class TestMetadata<
     {
         get
         {
+            // Return cached factory if available
+            if (_cachedExecutableTestFactory != null)
+            {
+                return _cachedExecutableTestFactory;
+            }
+
             // For AOT mode, create delegates from the strongly-typed ones
             if (InstanceFactory != null && InvokeTypedTest != null)
             {
-                return (context, metadata) =>
+                _cachedExecutableTestFactory = (context, metadata) =>
                 {
                     var typedMetadata = (TestMetadata<T>)metadata;
 
@@ -109,6 +116,8 @@ public class TestMetadata<
                         Context = context.Context
                     };
                 };
+
+                return _cachedExecutableTestFactory;
             }
 
             throw new InvalidOperationException($"InstanceFactory and InvokeTypedTest must be set for {typeof(T).Name}");
