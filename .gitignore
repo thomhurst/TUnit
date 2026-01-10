@@ -436,3 +436,6 @@ doc/plans/
 
 # Dotnet trace files
 *.nettrace
+
+# Git worktrees
+.worktrees/
