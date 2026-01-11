@@ -1355,6 +1355,24 @@ namespace
         public static .TestDependency FromClassAndMethod( classType, string methodName, bool proceedOnFailure = false) { }
         public static .TestDependency FromMethodName(string methodName, bool proceedOnFailure = false) { }
     }
+    public readonly struct TestDescriptor
+    {
+        public TestDescriptor() { }
+        public string[] Categories { get; init; }
+        public required string ClassName { get; init; }
+        public string[] DependsOn { get; init; }
+        public required string FilePath { get; init; }
+        public required string FullyQualifiedName { get; init; }
+        public bool HasDataSource { get; init; }
+        public required int LineNumber { get; init; }
+        public required <string, .CancellationToken, .<.TestMetadata>> Materializer { get; init; }
+        public required string MethodName { get; init; }
+        public string[] Properties { get; init; }
+        public int RepeatCount { get; init; }
+        public required string TestId { get; init; }
+        public bool HasCategory(string category) { }
+        public bool HasProperty(string key, string? value = null) { }
+    }
     public class TestDetails : ., ., ., ., ., .
     {
         public TestDetails() { }
@@ -2483,6 +2501,10 @@ namespace .
         bool ShouldInitialize { get; }
          Type { get; }
         .<..PropertyInjectionMetadata> GetPropertyMetadata();
+    }
+    public interface ITestDescriptorSource
+    {
+        .<.TestDescriptor> EnumerateTestDescriptors();
     }
     public interface ITestSource
     {
