@@ -1,7 +1,5 @@
-using System.Diagnostics.CodeAnalysis;
-using Polyfills;
 using TUnit.Core;
-using TUnit.Engine.Helpers;
+using TUnit.Core.Helpers;
 
 namespace TUnit.Engine.Utilities;
 
@@ -16,10 +14,10 @@ internal static class ScopedAttributeFilter
     /// <typeparam name="T">The type of objects to filter</typeparam>
     /// <param name="items">The collection of items to filter</param>
     /// <returns>A filtered collection with only one instance per scoped attribute type</returns>
-    public static List<T> FilterScopedAttributes<T>(IEnumerable<T?> items) where T : class
+    public static T[] FilterScopedAttributes<T>(IEnumerable<T?> items) where T : class
     {
-        var result = new List<T>();
-        var scopedAttributesByType = new Dictionary<Type, T>();
+        var vlb = new ValueListBuilder<T>([null,null,null,null]);
+        Dictionary<Type, T>? scopedAttributesByType = null;
 
         // First pass: collect all scoped attributes, keeping only the first occurrence of each type
         foreach (var item in items)
@@ -31,17 +29,26 @@ internal static class ScopedAttributeFilter
 
             if (item is IScopedAttribute scopedAttribute)
             {
+                scopedAttributesByType ??= new Dictionary<Type, T>();
                 scopedAttributesByType.TryAdd(scopedAttribute.ScopeType, item);
             }
             else
             {
                 // Not a scoped attribute, include it immediately
-                result.Add(item);
+                vlb.Append(item);
             }
         }
 
-        result.AddRange(scopedAttributesByType.Values);
+        if (scopedAttributesByType != null)
+        {
+            foreach (var value in scopedAttributesByType.Values)
+            {
+                vlb.Append(value);
+            }
+        }
 
+        var result = vlb.AsSpan().ToArray();
+        vlb.Dispose();
         return result;
     }
 }
