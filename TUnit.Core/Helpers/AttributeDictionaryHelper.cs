@@ -27,12 +27,21 @@ public static class AttributeDictionaryHelper
             var type = attr.GetType();
             if (!result.TryGetValue(type, out var list))
             {
-                var newList = new List<Attribute> { attr };
-                result[type] = newList;
+                var newCollection = new [] { attr };
+                result[type] = newCollection;
             }
             else
             {
-                ((List<Attribute>)list).Add(attr);
+                // first attribute is added to an array, move to a list for addtional values
+                if (list is Attribute[])
+                {
+                    var newlist = new List<Attribute> { list[0], attr };
+                    result[type] = newlist;
+                }
+                else
+                {
+                    ((List<Attribute>)list).Add(attr);
+                }
             }
         }
 
