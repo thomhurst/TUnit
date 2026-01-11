@@ -181,6 +181,31 @@ public partial class TestContext : Context,
 
     internal object[]? CachedEligibleEventObjects { get; set; }
 
+    // Pre-computed typed event receivers (filtered, sorted, scoped-attribute filtered)
+    // These are computed lazily on first access and cached
+    internal ITestStartEventReceiver[]? CachedTestStartReceivers { get; set; }
+    internal ITestEndEventReceiver[]? CachedTestEndReceivers { get; set; }
+    internal ITestSkippedEventReceiver[]? CachedTestSkippedReceivers { get; set; }
+    internal ITestDiscoveryEventReceiver[]? CachedTestDiscoveryReceivers { get; set; }
+    internal ITestRegisteredEventReceiver[]? CachedTestRegisteredReceivers { get; set; }
+
+    // Track the class instance used when building caches for invalidation on retry
+    internal object? CachedClassInstance { get; set; }
+
+    /// <summary>
+    /// Invalidates all cached event receiver data. Called when class instance changes (e.g., on retry).
+    /// </summary>
+    internal void InvalidateEventReceiverCaches()
+    {
+        CachedEligibleEventObjects = null;
+        CachedTestStartReceivers = null;
+        CachedTestEndReceivers = null;
+        CachedTestSkippedReceivers = null;
+        CachedTestDiscoveryReceivers = null;
+        CachedTestRegisteredReceivers = null;
+        CachedClassInstance = null;
+    }
+
 
     internal ConcurrentDictionary<string, object?> ObjectBag => _testBuilderContext.StateBag;
 

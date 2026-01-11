@@ -1,11 +1,119 @@
 ﻿using TUnit.Core;
+using TUnit.Core.Interfaces;
+using TUnit.Engine.Utilities;
 
 namespace TUnit.Engine.Extensions;
 
 internal static class TestContextExtensions
 {
+    /// <summary>
+    /// Checks if the class instance has changed since caches were built, and invalidates if needed.
+    /// </summary>
+    /// <remarks>
+    /// Class instances change in these scenarios:
+    /// - Test retries: A new instance is created for each retry attempt
+    /// - Keyed test instances: Different data combinations may use different instances
+    /// When this happens, eligible event objects may include the new instance (if it implements
+    /// event receiver interfaces), so all caches must be invalidated and rebuilt.
+    /// </remarks>
+    private static void InvalidateCachesIfClassInstanceChanged(TestContext testContext)
+    {
+        var currentClassInstance = testContext.Metadata.TestDetails.ClassInstance;
+        if (testContext.CachedClassInstance != null &&
+            !ReferenceEquals(testContext.CachedClassInstance, currentClassInstance))
+        {
+            // Class instance changed - invalidate all caches so they're rebuilt with the new instance
+            testContext.InvalidateEventReceiverCaches();
+        }
+        testContext.CachedClassInstance = currentClassInstance;
+    }
+
+    /// <summary>
+    /// Ensures all event receiver caches are populated. Iterates through eligible objects once
+    /// and categorizes them by type in a single pass.
+    /// </summary>
+    private static void EnsureEventReceiversCached(TestContext testContext)
+    {
+        InvalidateCachesIfClassInstanceChanged(testContext);
+
+        // If any cache is already populated, all are populated (we fill them together)
+        if (testContext.CachedTestStartReceivers != null)
+        {
+            return;
+        }
+
+        // Get eligible objects (builds and caches if needed)
+        var eligibleObjects = GetEligibleEventObjects(testContext);
+
+        // Single pass: categorize each object by interface type
+        List<ITestStartEventReceiver>? startReceivers = null;
+        List<ITestEndEventReceiver>? endReceivers = null;
+        List<ITestSkippedEventReceiver>? skippedReceivers = null;
+        List<ITestDiscoveryEventReceiver>? discoveryReceivers = null;
+        List<ITestRegisteredEventReceiver>? registeredReceivers = null;
+
+        foreach (var obj in eligibleObjects)
+        {
+            // Check each interface - an object can implement multiple
+            if (obj is ITestStartEventReceiver startReceiver)
+            {
+                startReceivers ??= [];
+                startReceivers.Add(startReceiver);
+            }
+
+            if (obj is ITestEndEventReceiver endReceiver)
+            {
+                endReceivers ??= [];
+                endReceivers.Add(endReceiver);
+            }
+
+            if (obj is ITestSkippedEventReceiver skippedReceiver)
+            {
+                skippedReceivers ??= [];
+                skippedReceivers.Add(skippedReceiver);
+            }
+
+            if (obj is ITestDiscoveryEventReceiver discoveryReceiver)
+            {
+                discoveryReceivers ??= [];
+                discoveryReceivers.Add(discoveryReceiver);
+            }
+
+            if (obj is ITestRegisteredEventReceiver registeredReceiver)
+            {
+                registeredReceivers ??= [];
+                registeredReceivers.Add(registeredReceiver);
+            }
+        }
+
+        // Sort and apply scoped filtering, then cache
+        testContext.CachedTestStartReceivers = SortAndFilter(startReceivers);
+        testContext.CachedTestEndReceivers = SortAndFilter(endReceivers);
+        testContext.CachedTestSkippedReceivers = SortAndFilter(skippedReceivers);
+        testContext.CachedTestDiscoveryReceivers = SortAndFilter(discoveryReceivers);
+        testContext.CachedTestRegisteredReceivers = SortAndFilter(registeredReceivers);
+    }
+
+    private static T[] SortAndFilter<T>(List<T>? receivers) where T : class, IEventReceiver
+    {
+        if (receivers == null || receivers.Count == 0)
+        {
+            return [];
+        }
+
+        // Sort by Order
+        receivers.Sort((a, b) => a.Order.CompareTo(b.Order));
+
+        // Apply scoped attribute filtering and return as array
+        var filtered = ScopedAttributeFilter.FilterScopedAttributes(receivers);
+        return filtered.ToArray();
+    }
+
     public static IEnumerable<object> GetEligibleEventObjects(this TestContext testContext)
     {
+        // Check if class instance changed and invalidate caches if needed
+        InvalidateCachesIfClassInstanceChanged(testContext);
+
         // Return cached result if available
         if (testContext.CachedEligibleEventObjects != null)
         {
@@ -118,5 +226,50 @@ internal static class TestContextExtensions
             }
         }
         return count;
+    }
+
+    /// <summary>
+    /// Gets pre-computed test start receivers (filtered, sorted, scoped-attribute filtered).
+    /// </summary>
+    public static ITestStartEventReceiver[] GetTestStartReceivers(this TestContext testContext)
+    {
+        EnsureEventReceiversCached(testContext);
+        return testContext.CachedTestStartReceivers!;
+    }
+
+    /// <summary>
+    /// Gets pre-computed test end receivers (filtered, sorted, scoped-attribute filtered).
+    /// </summary>
+    public static ITestEndEventReceiver[] GetTestEndReceivers(this TestContext testContext)
+    {
+        EnsureEventReceiversCached(testContext);
+        return testContext.CachedTestEndReceivers!;
+    }
+
+    /// <summary>
+    /// Gets pre-computed test skipped receivers (filtered, sorted, scoped-attribute filtered).
+    /// </summary>
+    public static ITestSkippedEventReceiver[] GetTestSkippedReceivers(this TestContext testContext)
+    {
+        EnsureEventReceiversCached(testContext);
+        return testContext.CachedTestSkippedReceivers!;
+    }
+
+    /// <summary>
+    /// Gets pre-computed test discovery receivers (filtered, sorted, scoped-attribute filtered).
+    /// </summary>
+    public static ITestDiscoveryEventReceiver[] GetTestDiscoveryReceivers(this TestContext testContext)
+    {
+        EnsureEventReceiversCached(testContext);
+        return testContext.CachedTestDiscoveryReceivers!;
+    }
+
+    /// <summary>
+    /// Gets pre-computed test registered receivers (filtered, sorted, scoped-attribute filtered).
+    /// </summary>
+    public static ITestRegisteredEventReceiver[] GetTestRegisteredReceivers(this TestContext testContext)
+    {
+        EnsureEventReceiversCached(testContext);
+        return testContext.CachedTestRegisteredReceivers!;
     }
 }

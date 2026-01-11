@@ -83,9 +83,8 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
             return;
         }
 
-        var eventObjects = test.Context.GetEligibleEventObjects();
-
-        foreach (var receiver in eventObjects.OfType<ITestRegisteredEventReceiver>())
+        // Use pre-computed receivers (already filtered, sorted, and scoped-attribute filtered)
+        foreach (var receiver in test.Context.GetTestRegisteredReceivers())
         {
             try
             {
