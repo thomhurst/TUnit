@@ -165,12 +165,15 @@ internal sealed class TestBuilderPipeline
         // Use pre-extracted repeat count from metadata (avoids instantiating attributes)
         var repeatCount = metadata.RepeatCount ?? 0;
 
+        // Get dynamic test metadata for DisplayName support
+        var dynamicTestMetadata = metadata as IDynamicTestMetadata;
+
         return await Enumerable.Range(0, repeatCount + 1)
             .SelectAsync(async repeatIndex =>
         {
             // Create a simple TestData for ID generation
             // Use DynamicTestIndex from the metadata to ensure unique test IDs for multiple dynamic tests
-            var dynamicTestIndex = metadata is IDynamicTestMetadata dynMeta ? dynMeta.DynamicTestIndex : 0;
+            var dynamicTestIndex = dynamicTestMetadata?.DynamicTestIndex ?? 0;
             var testData = new TestBuilder.TestData
             {
                 TestClassInstanceFactory = () => Task.FromResult(metadata.InstanceFactory(Type.EmptyTypes, [])),
@@ -188,9 +191,11 @@ internal sealed class TestBuilderPipeline
 
             var testId = TestIdentifierService.GenerateTestId(metadata, testData);
 
+            // Use custom DisplayName if specified, otherwise fall back to TestName
+            var baseDisplayName = dynamicTestMetadata?.DisplayName ?? metadata.TestName;
             var displayName = repeatCount > 0
-                ? $"{metadata.TestName} (Repeat {repeatIndex + 1}/{repeatCount + 1})"
-                : metadata.TestName;
+                ? $"{baseDisplayName} (Repeat {repeatIndex + 1}/{repeatCount + 1})"
+                : baseDisplayName;
 
             // Get attributes first
             var attributes = metadata.AttributeFactory();
@@ -224,6 +229,12 @@ internal sealed class TestBuilderPipeline
 
             // Set the TestDetails on the context
             context.Metadata.TestDetails = testDetails;
+
+            // Set custom display name for dynamic tests if specified
+            if (dynamicTestMetadata?.DisplayName != null)
+            {
+                context.Metadata.DisplayName = dynamicTestMetadata.DisplayName;
+            }
 
             // Invoke discovery event receivers to properly handle all attribute behaviors
             await InvokeDiscoveryEventReceiversAsync(context).ConfigureAwait(false);
