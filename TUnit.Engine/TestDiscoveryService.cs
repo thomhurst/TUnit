@@ -74,16 +74,17 @@ internal sealed class TestDiscoveryService : IDataProducer
         }
         else
         {
-            var allMetadata = await _testBuilderPipeline.CollectTestMetadataAsync(testSessionId).ConfigureAwait(false);
+            // Use filter-aware collection to pre-filter by type before materializing all metadata
+            var allMetadata = await _testBuilderPipeline.CollectTestMetadataAsync(testSessionId, filter).ConfigureAwait(false);
             var allMetadataList = allMetadata.ToList();
 
             var metadataToInclude = _dependencyExpander.ExpandToIncludeDependencies(allMetadataList, filter);
 
+            // Build tests directly from the pre-collected metadata (avoid re-collecting)
             var buildingContext = new Building.TestBuildingContext(isForExecution, Filter: null);
-            var tests = await _testBuilderPipeline.BuildTestsStreamingAsync(
-                testSessionId,
+            var tests = await _testBuilderPipeline.BuildTestsFromMetadataAsync(
+                metadataToInclude,
                 buildingContext,
-                metadataFilter: m => metadataToInclude.Contains(m),
                 cancellationToken).ConfigureAwait(false);
 
             var testsList = tests.ToList();
