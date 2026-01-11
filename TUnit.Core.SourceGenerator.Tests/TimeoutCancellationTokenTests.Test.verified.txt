@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_DefaultTest__CancellationToken_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_DefaultTest__CancellationToken_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -119,6 +119,23 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_DefaultTes
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.TimeoutCancellationTokenTests.DefaultTest",
+            ClassName = "TimeoutCancellationTokenTests",
+            MethodName = "DefaultTest",
+            FullyQualifiedName = "TUnit.TestProject.TimeoutCancellationTokenTests.DefaultTest",
+            FilePath = @"",
+            LineNumber = 14,
+            Categories = new string[] { "Timeout Cancellation Token Tests" },
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_TimeoutCancellationTokenTests_DefaultTest__CancellationToken_ModuleInitializer
 {
@@ -137,7 +154,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests_DefaultTes
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_BasicTest__CancellationToken_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_BasicTest__CancellationToken_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -255,6 +272,23 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_BasicTest_
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.TimeoutCancellationTokenTests.BasicTest",
+            ClassName = "TimeoutCancellationTokenTests",
+            MethodName = "BasicTest",
+            FullyQualifiedName = "TUnit.TestProject.TimeoutCancellationTokenTests.BasicTest",
+            FilePath = @"",
+            LineNumber = 21,
+            Categories = new string[] { "Blah", "Timeout Cancellation Token Tests" },
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_TimeoutCancellationTokenTests_BasicTest__CancellationToken_ModuleInitializer
 {
@@ -273,7 +307,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests_BasicTest_
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_InheritedTimeoutAttribute__CancellationToken_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_InheritedTimeoutAttribute__CancellationToken_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -390,6 +424,23 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_InheritedT
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.TimeoutCancellationTokenTests.InheritedTimeoutAttribute",
+            ClassName = "TimeoutCancellationTokenTests",
+            MethodName = "InheritedTimeoutAttribute",
+            FullyQualifiedName = "TUnit.TestProject.TimeoutCancellationTokenTests.InheritedTimeoutAttribute",
+            FilePath = @"",
+            LineNumber = 30,
+            Categories = new string[] { "Timeout Cancellation Token Tests" },
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_TimeoutCancellationTokenTests_InheritedTimeoutAttribute__CancellationToken_ModuleInitializer
 {
@@ -408,7 +459,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests_InheritedT
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_DataTest__int_CancellationToken_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_DataTest__int_CancellationToken_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -544,6 +595,23 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_DataTest__
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.TimeoutCancellationTokenTests.DataTest",
+            ClassName = "TimeoutCancellationTokenTests",
+            MethodName = "DataTest",
+            FullyQualifiedName = "TUnit.TestProject.TimeoutCancellationTokenTests.DataTest",
+            FilePath = @"",
+            LineNumber = 38,
+            Categories = new string[] { "Timeout Cancellation Token Tests" },
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_TimeoutCancellationTokenTests_DataTest__int_CancellationToken_ModuleInitializer
 {
@@ -562,7 +630,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests_DataTest__
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_DataSourceTest__int_CancellationToken_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_DataSourceTest__int_CancellationToken_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -719,6 +787,23 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_DataSource
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.TimeoutCancellationTokenTests.DataSourceTest",
+            ClassName = "TimeoutCancellationTokenTests",
+            MethodName = "DataSourceTest",
+            FullyQualifiedName = "TUnit.TestProject.TimeoutCancellationTokenTests.DataSourceTest",
+            FilePath = @"",
+            LineNumber = 48,
+            Categories = new string[] { "Timeout Cancellation Token Tests" },
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_TimeoutCancellationTokenTests_DataSourceTest__int_CancellationToken_ModuleInitializer
 {
@@ -737,7 +822,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests_DataSource
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_MatrixTest__int_CancellationToken_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_MatrixTest__int_CancellationToken_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -874,6 +959,23 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_MatrixTest
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.TimeoutCancellationTokenTests.MatrixTest",
+            ClassName = "TimeoutCancellationTokenTests",
+            MethodName = "MatrixTest",
+            FullyQualifiedName = "TUnit.TestProject.TimeoutCancellationTokenTests.MatrixTest",
+            FilePath = @"",
+            LineNumber = 58,
+            Categories = new string[] { "Blah", "Timeout Cancellation Token Tests" },
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_TimeoutCancellationTokenTests_MatrixTest__int_CancellationToken_ModuleInitializer
 {
@@ -892,7 +994,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests_MatrixTest
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_TimeoutDoesNotFireTests_QuickTestDoesNotTimeout__CancellationToken_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_TimeoutDoesNotFireTests_QuickTestDoesNotTimeout__CancellationToken_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -1009,6 +1111,23 @@ internal sealed class TUnit_TestProject_TimeoutDoesNotFireTests_QuickTestDoesNot
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.TimeoutDoesNotFireTests.QuickTestDoesNotTimeout",
+            ClassName = "TimeoutDoesNotFireTests",
+            MethodName = "QuickTestDoesNotTimeout",
+            FullyQualifiedName = "TUnit.TestProject.TimeoutDoesNotFireTests.QuickTestDoesNotTimeout",
+            FilePath = @"",
+            LineNumber = 86,
+            Categories = new string[] { "Timeout Cancellation Token Tests" },
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_TimeoutDoesNotFireTests_QuickTestDoesNotTimeout__CancellationToken_ModuleInitializer
 {
@@ -1027,7 +1146,7 @@ internal static class TUnit_TestProject_TimeoutDoesNotFireTests_QuickTestDoesNot
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_CancellationTokenTriggeredTests_CancellationTokenIsTriggered__CancellationToken_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_CancellationTokenTriggeredTests_CancellationTokenIsTriggered__CancellationToken_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -1143,6 +1262,23 @@ internal sealed class TUnit_TestProject_CancellationTokenTriggeredTests_Cancella
         metadata.UseRuntimeDataGeneration(testSessionId);
         yield return metadata;
         yield break;
+    }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.CancellationTokenTriggeredTests.CancellationTokenIsTriggered",
+            ClassName = "CancellationTokenTriggeredTests",
+            MethodName = "CancellationTokenIsTriggered",
+            FullyQualifiedName = "TUnit.TestProject.CancellationTokenTriggeredTests.CancellationTokenIsTriggered",
+            FilePath = @"",
+            LineNumber = 106,
+            Categories = new string[] { "Timeout Cancellation Token Tests" },
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
     }
 }
 internal static class TUnit_TestProject_CancellationTokenTriggeredTests_CancellationTokenIsTriggered__CancellationToken_ModuleInitializer

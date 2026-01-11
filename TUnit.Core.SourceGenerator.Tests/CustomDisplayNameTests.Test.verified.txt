@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -86,6 +86,23 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test_TestSource :
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.CustomDisplayNameTests.Test",
+            ClassName = "CustomDisplayNameTests",
+            MethodName = "Test",
+            FullyQualifiedName = "TUnit.TestProject.CustomDisplayNameTests.Test",
+            FilePath = @"",
+            LineNumber = 11,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = false,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_CustomDisplayNameTests_Test_ModuleInitializer
 {
@@ -104,7 +121,7 @@ internal static class TUnit_TestProject_CustomDisplayNameTests_Test_ModuleInitia
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test2_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test2_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -187,6 +204,23 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test2_TestSource 
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.CustomDisplayNameTests.Test2",
+            ClassName = "CustomDisplayNameTests",
+            MethodName = "Test2",
+            FullyQualifiedName = "TUnit.TestProject.CustomDisplayNameTests.Test2",
+            FilePath = @"",
+            LineNumber = 18,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = false,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_CustomDisplayNameTests_Test2_ModuleInitializer
 {
@@ -205,7 +239,7 @@ internal static class TUnit_TestProject_CustomDisplayNameTests_Test2_ModuleIniti
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test3__string_int_bool_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test3__string_int_bool_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -323,6 +357,23 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test3__string_int
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.CustomDisplayNameTests.Test3",
+            ClassName = "CustomDisplayNameTests",
+            MethodName = "Test3",
+            FullyQualifiedName = "TUnit.TestProject.CustomDisplayNameTests.Test3",
+            FilePath = @"",
+            LineNumber = 25,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_CustomDisplayNameTests_Test3__string_int_bool_ModuleInitializer
 {
@@ -341,7 +392,7 @@ internal static class TUnit_TestProject_CustomDisplayNameTests_Test3__string_int
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_CustomDisplayNameTests_MethodDataSourceTest__string_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_CustomDisplayNameTests_MethodDataSourceTest__string_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -455,6 +506,23 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_MethodDataSourceT
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.CustomDisplayNameTests.MethodDataSourceTest",
+            ClassName = "CustomDisplayNameTests",
+            MethodName = "MethodDataSourceTest",
+            FullyQualifiedName = "TUnit.TestProject.CustomDisplayNameTests.MethodDataSourceTest",
+            FilePath = @"",
+            LineNumber = 37,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_CustomDisplayNameTests_MethodDataSourceTest__string_ModuleInitializer
 {
@@ -473,7 +541,7 @@ internal static class TUnit_TestProject_CustomDisplayNameTests_MethodDataSourceT
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_CustomDisplayNameTests_TestParameterNamePrefixBug__int_string_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_CustomDisplayNameTests_TestParameterNamePrefixBug__int_string_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -585,6 +653,23 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_TestParameterName
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.CustomDisplayNameTests.TestParameterNamePrefixBug",
+            ClassName = "CustomDisplayNameTests",
+            MethodName = "TestParameterNamePrefixBug",
+            FullyQualifiedName = "TUnit.TestProject.CustomDisplayNameTests.TestParameterNamePrefixBug",
+            FilePath = @"",
+            LineNumber = 45,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_CustomDisplayNameTests_TestParameterNamePrefixBug__int_string_ModuleInitializer
 {
@@ -603,7 +688,7 @@ internal static class TUnit_TestProject_CustomDisplayNameTests_TestParameterName
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_CustomDisplayNameTests_PasswordTest__string_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_CustomDisplayNameTests_PasswordTest__string_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -705,6 +790,23 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_PasswordTest__str
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.CustomDisplayNameTests.PasswordTest",
+            ClassName = "CustomDisplayNameTests",
+            MethodName = "PasswordTest",
+            FullyQualifiedName = "TUnit.TestProject.CustomDisplayNameTests.PasswordTest",
+            FilePath = @"",
+            LineNumber = 65,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_CustomDisplayNameTests_PasswordTest__string_ModuleInitializer
 {
@@ -723,7 +825,7 @@ internal static class TUnit_TestProject_CustomDisplayNameTests_PasswordTest__str
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_CustomDisplayNameTests_SameClassConstantTest_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_CustomDisplayNameTests_SameClassConstantTest_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -806,6 +908,23 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_SameClassConstant
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.CustomDisplayNameTests.SameClassConstantTest",
+            ClassName = "CustomDisplayNameTests",
+            MethodName = "SameClassConstantTest",
+            FullyQualifiedName = "TUnit.TestProject.CustomDisplayNameTests.SameClassConstantTest",
+            FilePath = @"",
+            LineNumber = 72,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = false,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_CustomDisplayNameTests_SameClassConstantTest_ModuleInitializer
 {
@@ -824,7 +943,7 @@ internal static class TUnit_TestProject_CustomDisplayNameTests_SameClassConstant
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_CustomDisplayNameTests_DifferentClassConstantTest_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_CustomDisplayNameTests_DifferentClassConstantTest_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -907,6 +1026,23 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_DifferentClassCon
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.CustomDisplayNameTests.DifferentClassConstantTest",
+            ClassName = "CustomDisplayNameTests",
+            MethodName = "DifferentClassConstantTest",
+            FullyQualifiedName = "TUnit.TestProject.CustomDisplayNameTests.DifferentClassConstantTest",
+            FilePath = @"",
+            LineNumber = 79,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = false,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_CustomDisplayNameTests_DifferentClassConstantTest_ModuleInitializer
 {
@@ -925,7 +1061,7 @@ internal static class TUnit_TestProject_CustomDisplayNameTests_DifferentClassCon
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_CustomDisplayNameTests_NestedClassConstantTest_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_CustomDisplayNameTests_NestedClassConstantTest_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -1007,6 +1143,23 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_NestedClassConsta
         metadata.UseRuntimeDataGeneration(testSessionId);
         yield return metadata;
         yield break;
+    }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.CustomDisplayNameTests.NestedClassConstantTest",
+            ClassName = "CustomDisplayNameTests",
+            MethodName = "NestedClassConstantTest",
+            FullyQualifiedName = "TUnit.TestProject.CustomDisplayNameTests.NestedClassConstantTest",
+            FilePath = @"",
+            LineNumber = 86,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = false,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
     }
 }
 internal static class TUnit_TestProject_CustomDisplayNameTests_NestedClassConstantTest_ModuleInitializer

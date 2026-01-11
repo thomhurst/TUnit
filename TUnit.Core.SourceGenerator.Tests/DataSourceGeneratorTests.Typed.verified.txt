@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_Method__int_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_Method__int_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -125,6 +125,23 @@ internal sealed class TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_M
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.DataSourceGeneratorTests.GeneratedData_Method",
+            ClassName = "DataSourceGeneratorTests",
+            MethodName = "GeneratedData_Method",
+            FullyQualifiedName = "TUnit.TestProject.DataSourceGeneratorTests.GeneratedData_Method",
+            FilePath = @"",
+            LineNumber = 12,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_Method__int_ModuleInitializer
 {
@@ -143,7 +160,7 @@ internal static class TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_M
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_Method2__int_string_bool_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_Method2__int_string_bool_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -279,6 +296,23 @@ internal sealed class TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_M
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.DataSourceGeneratorTests.GeneratedData_Method2",
+            ClassName = "DataSourceGeneratorTests",
+            MethodName = "GeneratedData_Method2",
+            FullyQualifiedName = "TUnit.TestProject.DataSourceGeneratorTests.GeneratedData_Method2",
+            FilePath = @"",
+            LineNumber = 18,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_Method2__int_string_bool_ModuleInitializer
 {
@@ -297,7 +331,7 @@ internal static class TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_M
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_Method3__int_string_bool_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_Method3__int_string_bool_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -432,6 +466,23 @@ internal sealed class TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_M
         metadata.UseRuntimeDataGeneration(testSessionId);
         yield return metadata;
         yield break;
+    }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.DataSourceGeneratorTests.GeneratedData_Method3",
+            ClassName = "DataSourceGeneratorTests",
+            MethodName = "GeneratedData_Method3",
+            FullyQualifiedName = "TUnit.TestProject.DataSourceGeneratorTests.GeneratedData_Method3",
+            FilePath = @"",
+            LineNumber = 24,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
     }
 }
 internal static class TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_Method3__int_string_bool_ModuleInitializer

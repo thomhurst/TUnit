@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_RepeatTests_One_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_RepeatTests_One_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -76,6 +76,23 @@ internal sealed class TUnit_TestProject_RepeatTests_One_TestSource : global::TUn
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.RepeatTests.One",
+            ClassName = "RepeatTests",
+            MethodName = "One",
+            FullyQualifiedName = "TUnit.TestProject.RepeatTests.One",
+            FilePath = @"",
+            LineNumber = 9,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = false,
+            RepeatCount = 1,
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_RepeatTests_One_ModuleInitializer
 {
@@ -94,7 +111,7 @@ internal static class TUnit_TestProject_RepeatTests_One_ModuleInitializer
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_RepeatTests_Two_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_RepeatTests_Two_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -167,6 +184,23 @@ internal sealed class TUnit_TestProject_RepeatTests_Two_TestSource : global::TUn
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.RepeatTests.Two",
+            ClassName = "RepeatTests",
+            MethodName = "Two",
+            FullyQualifiedName = "TUnit.TestProject.RepeatTests.Two",
+            FilePath = @"",
+            LineNumber = 16,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = false,
+            RepeatCount = 2,
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_RepeatTests_Two_ModuleInitializer
 {
@@ -185,7 +219,7 @@ internal static class TUnit_TestProject_RepeatTests_Two_ModuleInitializer
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_RepeatTests_Three_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_RepeatTests_Three_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -256,6 +290,23 @@ internal sealed class TUnit_TestProject_RepeatTests_Three_TestSource : global::T
         metadata.UseRuntimeDataGeneration(testSessionId);
         yield return metadata;
         yield break;
+    }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.RepeatTests.Three",
+            ClassName = "RepeatTests",
+            MethodName = "Three",
+            FullyQualifiedName = "TUnit.TestProject.RepeatTests.Three",
+            FilePath = @"",
+            LineNumber = 23,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = false,
+            RepeatCount = 3,
+            Materializer = GetTestsAsync
+        };
     }
 }
 internal static class TUnit_TestProject_RepeatTests_Three_ModuleInitializer

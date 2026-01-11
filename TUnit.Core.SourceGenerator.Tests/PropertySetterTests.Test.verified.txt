@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_PropertySetterTests_Test_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_PropertySetterTests_Test_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     #if NET8_0_OR_GREATER
     [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "<Property2>k__BackingField")]
@@ -335,6 +335,23 @@ internal sealed class TUnit_TestProject_PropertySetterTests_Test_TestSource : gl
         metadata.UseRuntimeDataGeneration(testSessionId);
         yield return metadata;
         yield break;
+    }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.PropertySetterTests.Test",
+            ClassName = "PropertySetterTests",
+            MethodName = "Test",
+            FullyQualifiedName = "TUnit.TestProject.PropertySetterTests.Test",
+            FilePath = @"",
+            LineNumber = 69,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = false,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
     }
 }
 internal static class TUnit_TestProject_PropertySetterTests_Test_ModuleInitializer

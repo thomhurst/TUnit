@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_BeforeTests_SetupTests_Test1_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_BeforeTests_SetupTests_Test1_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -71,6 +71,23 @@ internal sealed class TUnit_TestProject_BeforeTests_SetupTests_Test1_TestSource 
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.BeforeTests.SetupTests.Test1",
+            ClassName = "SetupTests",
+            MethodName = "Test1",
+            FullyQualifiedName = "TUnit.TestProject.BeforeTests.SetupTests.Test1",
+            FilePath = @"",
+            LineNumber = 98,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = false,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_BeforeTests_SetupTests_Test1_ModuleInitializer
 {
@@ -89,7 +106,7 @@ internal static class TUnit_TestProject_BeforeTests_SetupTests_Test1_ModuleIniti
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_BeforeTests_SetupTests_Test2_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_BeforeTests_SetupTests_Test2_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -156,6 +173,23 @@ internal sealed class TUnit_TestProject_BeforeTests_SetupTests_Test2_TestSource 
         metadata.UseRuntimeDataGeneration(testSessionId);
         yield return metadata;
         yield break;
+    }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.BeforeTests.SetupTests.Test2",
+            ClassName = "SetupTests",
+            MethodName = "Test2",
+            FullyQualifiedName = "TUnit.TestProject.BeforeTests.SetupTests.Test2",
+            FilePath = @"",
+            LineNumber = 104,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = false,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
     }
 }
 internal static class TUnit_TestProject_BeforeTests_SetupTests_Test2_ModuleInitializer

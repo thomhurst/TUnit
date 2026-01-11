@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_PriorityFilteringTests_High_1_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_PriorityFilteringTests_High_1_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -72,6 +72,23 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_High_1_TestSource
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.PriorityFilteringTests.High_1",
+            ClassName = "PriorityFilteringTests",
+            MethodName = "High_1",
+            FullyQualifiedName = "TUnit.TestProject.PriorityFilteringTests.High_1",
+            FilePath = @"",
+            LineNumber = 12,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = false,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_PriorityFilteringTests_High_1_ModuleInitializer
 {
@@ -90,7 +107,7 @@ internal static class TUnit_TestProject_PriorityFilteringTests_High_1_ModuleInit
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_PriorityFilteringTests_High_2_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_PriorityFilteringTests_High_2_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -159,6 +176,23 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_High_2_TestSource
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.PriorityFilteringTests.High_2",
+            ClassName = "PriorityFilteringTests",
+            MethodName = "High_2",
+            FullyQualifiedName = "TUnit.TestProject.PriorityFilteringTests.High_2",
+            FilePath = @"",
+            LineNumber = 18,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = false,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_PriorityFilteringTests_High_2_ModuleInitializer
 {
@@ -177,7 +211,7 @@ internal static class TUnit_TestProject_PriorityFilteringTests_High_2_ModuleInit
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_PriorityFilteringTests_High_3_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_PriorityFilteringTests_High_3_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -246,6 +280,23 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_High_3_TestSource
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.PriorityFilteringTests.High_3",
+            ClassName = "PriorityFilteringTests",
+            MethodName = "High_3",
+            FullyQualifiedName = "TUnit.TestProject.PriorityFilteringTests.High_3",
+            FilePath = @"",
+            LineNumber = 24,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = false,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_PriorityFilteringTests_High_3_ModuleInitializer
 {
@@ -264,7 +315,7 @@ internal static class TUnit_TestProject_PriorityFilteringTests_High_3_ModuleInit
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_PriorityFilteringTests_Medium_1_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_PriorityFilteringTests_Medium_1_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -333,6 +384,23 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_Medium_1_TestSour
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.PriorityFilteringTests.Medium_1",
+            ClassName = "PriorityFilteringTests",
+            MethodName = "Medium_1",
+            FullyQualifiedName = "TUnit.TestProject.PriorityFilteringTests.Medium_1",
+            FilePath = @"",
+            LineNumber = 30,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = false,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_PriorityFilteringTests_Medium_1_ModuleInitializer
 {
@@ -351,7 +419,7 @@ internal static class TUnit_TestProject_PriorityFilteringTests_Medium_1_ModuleIn
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_PriorityFilteringTests_Medium_2_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_PriorityFilteringTests_Medium_2_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -420,6 +488,23 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_Medium_2_TestSour
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.PriorityFilteringTests.Medium_2",
+            ClassName = "PriorityFilteringTests",
+            MethodName = "Medium_2",
+            FullyQualifiedName = "TUnit.TestProject.PriorityFilteringTests.Medium_2",
+            FilePath = @"",
+            LineNumber = 36,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = false,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_PriorityFilteringTests_Medium_2_ModuleInitializer
 {
@@ -438,7 +523,7 @@ internal static class TUnit_TestProject_PriorityFilteringTests_Medium_2_ModuleIn
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_PriorityFilteringTests_Low_1_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_PriorityFilteringTests_Low_1_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -506,6 +591,23 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_Low_1_TestSource 
         metadata.UseRuntimeDataGeneration(testSessionId);
         yield return metadata;
         yield break;
+    }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.PriorityFilteringTests.Low_1",
+            ClassName = "PriorityFilteringTests",
+            MethodName = "Low_1",
+            FullyQualifiedName = "TUnit.TestProject.PriorityFilteringTests.Low_1",
+            FilePath = @"",
+            LineNumber = 42,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = false,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
     }
 }
 internal static class TUnit_TestProject_PriorityFilteringTests_Low_1_ModuleInitializer

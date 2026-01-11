@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_Bugs__1304_Tests_TryParse_InvalidString_ReturnsFailure__string__CancellationToken_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_Bugs__1304_Tests_TryParse_InvalidString_ReturnsFailure__string__CancellationToken_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -104,6 +104,23 @@ internal sealed class TUnit_TestProject_Bugs__1304_Tests_TryParse_InvalidString_
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.Bugs._1304.Tests.TryParse_InvalidString_ReturnsFailure",
+            ClassName = "Tests",
+            MethodName = "TryParse_InvalidString_ReturnsFailure",
+            FullyQualifiedName = "TUnit.TestProject.Bugs._1304.Tests.TryParse_InvalidString_ReturnsFailure",
+            FilePath = @"",
+            LineNumber = 9,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_Bugs__1304_Tests_TryParse_InvalidString_ReturnsFailure__string__CancellationToken_ModuleInitializer
 {
@@ -122,7 +139,7 @@ internal static class TUnit_TestProject_Bugs__1304_Tests_TryParse_InvalidString_
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_Bugs__1304_Tests_Parse_InvalidString_ThrowsException__string__TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_Bugs__1304_Tests_Parse_InvalidString_ThrowsException__string__TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -215,6 +232,23 @@ internal sealed class TUnit_TestProject_Bugs__1304_Tests_Parse_InvalidString_Thr
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.Bugs._1304.Tests.Parse_InvalidString_ThrowsException",
+            ClassName = "Tests",
+            MethodName = "Parse_InvalidString_ThrowsException",
+            FullyQualifiedName = "TUnit.TestProject.Bugs._1304.Tests.Parse_InvalidString_ThrowsException",
+            FilePath = @"",
+            LineNumber = 26,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_Bugs__1304_Tests_Parse_InvalidString_ThrowsException__string__ModuleInitializer
 {
@@ -233,7 +267,7 @@ internal static class TUnit_TestProject_Bugs__1304_Tests_Parse_InvalidString_Thr
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_Bugs__1304_Tests_TryParse_ValidString_ReturnsAccountId__string_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_Bugs__1304_Tests_TryParse_ValidString_ReturnsAccountId__string_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -322,6 +356,23 @@ internal sealed class TUnit_TestProject_Bugs__1304_Tests_TryParse_ValidString_Re
         metadata.UseRuntimeDataGeneration(testSessionId);
         yield return metadata;
         yield break;
+    }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.Bugs._1304.Tests.TryParse_ValidString_ReturnsAccountId",
+            ClassName = "Tests",
+            MethodName = "TryParse_ValidString_ReturnsAccountId",
+            FullyQualifiedName = "TUnit.TestProject.Bugs._1304.Tests.TryParse_ValidString_ReturnsAccountId",
+            FilePath = @"",
+            LineNumber = 38,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
     }
 }
 internal static class TUnit_TestProject_Bugs__1304_Tests_TryParse_ValidString_ReturnsAccountId__string_ModuleInitializer

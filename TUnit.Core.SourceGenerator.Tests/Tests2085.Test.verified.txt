@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_Bugs__2085_Tests_Double_SpecialConsts__double_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_Bugs__2085_Tests_Double_SpecialConsts__double_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -92,6 +92,23 @@ internal sealed class TUnit_TestProject_Bugs__2085_Tests_Double_SpecialConsts__d
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.Bugs._2085.Tests.Double_SpecialConsts",
+            ClassName = "Tests",
+            MethodName = "Double_SpecialConsts",
+            FullyQualifiedName = "TUnit.TestProject.Bugs._2085.Tests.Double_SpecialConsts",
+            FilePath = @"",
+            LineNumber = 8,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_Bugs__2085_Tests_Double_SpecialConsts__double_ModuleInitializer
 {
@@ -110,7 +127,7 @@ internal static class TUnit_TestProject_Bugs__2085_Tests_Double_SpecialConsts__d
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_Bugs__2085_Tests_Float_SpecialConsts__float_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_Bugs__2085_Tests_Float_SpecialConsts__float_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -198,6 +215,23 @@ internal sealed class TUnit_TestProject_Bugs__2085_Tests_Float_SpecialConsts__fl
         metadata.UseRuntimeDataGeneration(testSessionId);
         yield return metadata;
         yield break;
+    }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.Bugs._2085.Tests.Float_SpecialConsts",
+            ClassName = "Tests",
+            MethodName = "Float_SpecialConsts",
+            FullyQualifiedName = "TUnit.TestProject.Bugs._2085.Tests.Float_SpecialConsts",
+            FilePath = @"",
+            LineNumber = 15,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
     }
 }
 internal static class TUnit_TestProject_Bugs__2085_Tests_Float_SpecialConsts__float_ModuleInitializer

@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_StringArgumentTests_Normal__string_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_StringArgumentTests_Normal__string_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -104,6 +104,23 @@ internal sealed class TUnit_TestProject_StringArgumentTests_Normal__string_TestS
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.StringArgumentTests.Normal",
+            ClassName = "StringArgumentTests",
+            MethodName = "Normal",
+            FullyQualifiedName = "TUnit.TestProject.StringArgumentTests.Normal",
+            FilePath = @"",
+            LineNumber = 8,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_StringArgumentTests_Normal__string_ModuleInitializer
 {
@@ -122,7 +139,7 @@ internal static class TUnit_TestProject_StringArgumentTests_Normal__string_Modul
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_StringArgumentTests_Nullable__string__TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_StringArgumentTests_Nullable__string__TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -218,6 +235,23 @@ internal sealed class TUnit_TestProject_StringArgumentTests_Nullable__string__Te
         metadata.UseRuntimeDataGeneration(testSessionId);
         yield return metadata;
         yield break;
+    }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.StringArgumentTests.Nullable",
+            ClassName = "StringArgumentTests",
+            MethodName = "Nullable",
+            FullyQualifiedName = "TUnit.TestProject.StringArgumentTests.Nullable",
+            FilePath = @"",
+            LineNumber = 27,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            Materializer = GetTestsAsync
+        };
     }
 }
 internal static class TUnit_TestProject_StringArgumentTests_Nullable__string__ModuleInitializer
