@@ -2,7 +2,7 @@
 [assembly: .(@", PublicKey=0024000004800000940000000602000000240000525341310004000001000100698a70398fa0b2230c5a72e3bd9d56b48f809f6173e49a19fbb942d621be93ad48c5566b47b28faabc359b9ad3ff4e00bbdea88f5bdfa250f391fedd28182b2e37b55d429c0151a42a98ea7a5821818cd15a79fef9903e8607a88304cf3e0317bf86ec96e32e1381535a6582251e5a6eed40b5a3ed82bc444598b1269cce57a7")]
 [assembly: .(@", PublicKey=0024000004800000940000000602000000240000525341310004000001000100698a70398fa0b2230c5a72e3bd9d56b48f809f6173e49a19fbb942d621be93ad48c5566b47b28faabc359b9ad3ff4e00bbdea88f5bdfa250f391fedd28182b2e37b55d429c0151a42a98ea7a5821818cd15a79fef9903e8607a88304cf3e0317bf86ec96e32e1381535a6582251e5a6eed40b5a3ed82bc444598b1269cce57a7")]
 [assembly: .(".NETStandard,Version=v2.0", FrameworkDisplayName=".NET Standard 2.0")]
-namespace 
+namespace
 {
     public abstract class AbstractDynamicTest
     {
@@ -406,7 +406,7 @@ namespace
         public CultureExecutor(.CultureInfo cultureInfo) { }
         protected override void ConfigureThread(.Thread thread) { }
     }
-    public class DataGenerationException : 
+    public class DataGenerationException :
     {
         public DataGenerationException(string message) { }
         public DataGenerationException(string message,  innerException) { }
@@ -653,7 +653,7 @@ namespace
         public object?[]? TestMethodArguments { get; set; }
         public override .<.DiscoveryResult> GetTests() { }
     }
-    public class EngineCancellationToken : 
+    public class EngineCancellationToken :
     {
         public EngineCancellationToken() { }
         public .CancellationToken Token { get; }
@@ -726,7 +726,7 @@ namespace
         public override .<.DiscoveryResult> GetTests() { }
     }
     [(.Class | .Method, AllowMultiple=true)]
-    public sealed class GenerateGenericTestAttribute : 
+    public sealed class GenerateGenericTestAttribute :
     {
         public GenerateGenericTestAttribute(params [] typeArguments) { }
         public [] TypeArguments { get; }
@@ -1112,7 +1112,7 @@ namespace
         public static void Register( type, ..IPropertySource source) { }
     }
     [(.Assembly, AllowMultiple=false, Inherited=false)]
-    public sealed class ReflectionModeAttribute : 
+    public sealed class ReflectionModeAttribute :
     {
         public ReflectionModeAttribute() { }
     }
@@ -1228,7 +1228,7 @@ namespace
     {
         public TestAttribute([.] string file = "", [.] int line = 0) { }
     }
-    public sealed class TestBuildContext : .Context, 
+    public sealed class TestBuildContext : .Context,
     {
         public TestBuildContext() { }
         public new static .TestBuildContext? Current { get; }
@@ -1254,7 +1254,7 @@ namespace
         public TestBuilderContextAccessor(.TestBuilderContext context) { }
         public .TestBuilderContext Current { get; set; }
     }
-    public class TestBuilderException : 
+    public class TestBuilderException :
     {
         public TestBuilderException() { }
         public TestBuilderException(string message) { }
@@ -1375,7 +1375,7 @@ namespace
     }
     public class TestDetails : ., ., ., ., ., .
     {
-        public TestDetails() { }
+        public TestDetails(IReadOnlyList<Attribute> allAttributes) { }
         public . Attributes { get; }
         public required .<, .<>> AttributesByType { get; init; }
         public .<string> Categories { get; }
@@ -1411,7 +1411,7 @@ namespace
     public class TestDetails<T> : .TestDetails
         where T :  class
     {
-        public TestDetails() { }
+        public TestDetails(IReadOnlyList<Attribute> allAttributes) { }
     }
     public class TestDiscoveryContext : .Context
     {
@@ -1589,7 +1589,7 @@ namespace .AotCompatibility
         TupleInterfaceBased = 3,
     }
     [(.Method)]
-    public class AotCompatibleAttribute : 
+    public class AotCompatibleAttribute :
     {
         public AotCompatibleAttribute() { }
         public string? Details { get; init; }
@@ -1612,14 +1612,14 @@ namespace .AotCompatibility
 namespace .Attributes
 {
     [(.Class | .Constructor | .Method | .Property)]
-    public sealed class AotCompatibleAttribute : 
+    public sealed class AotCompatibleAttribute :
     {
         public AotCompatibleAttribute() { }
         public string? AlternativeForReflection { get; set; }
         public string? Notes { get; set; }
     }
     [(.Class | .Constructor | .Method | .Property)]
-    public sealed class RequiresReflectionAttribute : 
+    public sealed class RequiresReflectionAttribute :
     {
         public RequiresReflectionAttribute(string reason) { }
         public string? AotAlternative { get; set; }
@@ -1807,7 +1807,7 @@ namespace .Exceptions
     {
         public BeforeTestSessionException(string message,  innerException) { }
     }
-    public class CircularDependencyException : 
+    public class CircularDependencyException :
     {
         public CircularDependencyException() { }
         public CircularDependencyException(string message) { }
@@ -1819,7 +1819,7 @@ namespace .Exceptions
         public FailTestException(string reason) { }
         public string Reason { get; }
     }
-    public class GenericTypeResolutionException : 
+    public class GenericTypeResolutionException :
     {
         public GenericTypeResolutionException(string message) { }
         public GenericTypeResolutionException(string message,  innerException) { }
@@ -1833,7 +1833,7 @@ namespace .Exceptions
         public SkipTestException(string reason) { }
         public string Reason { get; }
     }
-    public class TUnitException : 
+    public class TUnitException :
     {
         public TUnitException() { }
         public TUnitException(string? message) { }
@@ -1852,7 +1852,7 @@ namespace .Exceptions
         public .<> HookExceptions { get; }
         public ? TestException { get; }
     }
-    public class TestFailedInitializationException : 
+    public class TestFailedInitializationException :
     {
         public TestFailedInitializationException(string? message, ? innerException) { }
     }
@@ -2695,7 +2695,7 @@ namespace .Services
         public string FormatArgumentValue(object? value) { }
         public string FormatTestName(string template, object?[]? classArgs = null, object?[]? methodArgs = null, .<string, object?>? propertyValues = null) { }
     }
-    public class TestServiceProvider : 
+    public class TestServiceProvider :
     {
         public TestServiceProvider() { }
         public . AddSingleton( serviceType, object service) { }
