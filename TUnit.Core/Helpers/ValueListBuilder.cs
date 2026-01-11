@@ -59,6 +59,14 @@ internal ref partial struct ValueListBuilder<T>
         }
     }
 
+    public void AppendIfNotNull(T? item)
+    {
+        if (item != null)
+        {
+            Append(item);
+        }
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Append(scoped ReadOnlySpan<T> source)
     {
