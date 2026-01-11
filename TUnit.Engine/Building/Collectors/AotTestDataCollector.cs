@@ -89,93 +89,93 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         string testSessionId,
         FilterHints filterHints)
     {
-        var results = new List<TestMetadata>();
-
-        // Phase 1: Enumerate all descriptors and build lookup indexes
-        var allDescriptors = new List<TestDescriptor>();
+        // Phase 1: Single-pass enumeration with filtering
+        // - Index all descriptors for dependency resolution
+        // - Immediately identify matching descriptors (no separate iteration)
+        // - Track if any matching descriptor has dependencies
         var descriptorsByClassAndMethod = new Dictionary<(string ClassName, string MethodName), TestDescriptor>();
         var descriptorsByClass = new Dictionary<string, List<TestDescriptor>>();
+        var matchingDescriptors = new List<TestDescriptor>();
+        var hasDependencies = false;
 
         foreach (var source in descriptorSources)
         {
             foreach (var descriptor in source.EnumerateTestDescriptors())
             {
-                allDescriptors.Add(descriptor);
-
-                // Index by class + method for specific dependencies
+                // Index by class + method for specific dependency lookups
                 var key = (descriptor.ClassName, descriptor.MethodName);
                 descriptorsByClassAndMethod[key] = descriptor;
 
-                // Index by class for class-level dependencies
+                // Index by class for class-level dependency lookups
                 if (!descriptorsByClass.TryGetValue(descriptor.ClassName, out var classDescriptors))
                 {
                     classDescriptors = [];
                     descriptorsByClass[descriptor.ClassName] = classDescriptors;
                 }
                 classDescriptors.Add(descriptor);
-            }
-        }
 
-        // Phase 2: Filter descriptors and expand dependencies
-        var matchingDescriptors = new HashSet<TestDescriptor>();
-        var queue = new Queue<TestDescriptor>();
-
-        // Start with descriptors that match the filter
-        foreach (var descriptor in allDescriptors)
-        {
-            if (filterHints.CouldDescriptorMatch(descriptor))
-            {
-                if (matchingDescriptors.Add(descriptor))
+                // Filter during enumeration - no separate pass needed
+                if (filterHints.CouldDescriptorMatch(descriptor))
                 {
-                    queue.Enqueue(descriptor);
-                }
-            }
-        }
-
-        // Expand dependencies transitively
-        while (queue.Count > 0)
-        {
-            var current = queue.Dequeue();
-
-            foreach (var dependency in current.DependsOn)
-            {
-                // Parse dependency format: "ClassName:MethodName"
-                var separatorIndex = dependency.IndexOf(':');
-                if (separatorIndex < 0)
-                {
-                    continue;
-                }
-
-                var depClassName = dependency.Substring(0, separatorIndex);
-                var depMethodName = dependency.Substring(separatorIndex + 1);
-
-                if (string.IsNullOrEmpty(depClassName))
-                {
-                    // Same-class dependency: use current descriptor's class
-                    depClassName = current.ClassName;
-                }
-
-                if (!string.IsNullOrEmpty(depMethodName))
-                {
-                    // Specific method dependency
-                    if (descriptorsByClassAndMethod.TryGetValue((depClassName, depMethodName), out var depDescriptor))
+                    matchingDescriptors.Add(descriptor);
+                    if (descriptor.DependsOn.Length > 0)
                     {
-                        if (matchingDescriptors.Add(depDescriptor))
-                        {
-                            queue.Enqueue(depDescriptor);
-                        }
+                        hasDependencies = true;
                     }
                 }
-                else
+            }
+        }
+
+        // Phase 2: Expand dependencies only if any matching descriptor has them
+        HashSet<TestDescriptor>? expandedSet = null;
+        if (hasDependencies)
+        {
+            expandedSet = new HashSet<TestDescriptor>(matchingDescriptors);
+            var queue = new Queue<TestDescriptor>(matchingDescriptors);
+
+            while (queue.Count > 0)
+            {
+                var current = queue.Dequeue();
+                var dependsOn = current.DependsOn;
+
+                for (var i = 0; i < dependsOn.Length; i++)
                 {
-                    // Class-level dependency: all tests in class
-                    if (descriptorsByClass.TryGetValue(depClassName, out var classDescriptors))
+                    var dependency = dependsOn[i];
+
+                    // Parse dependency format: "ClassName:MethodName"
+                    var separatorIndex = dependency.IndexOf(':');
+                    if (separatorIndex < 0)
                     {
-                        foreach (var depDescriptor in classDescriptors)
+                        continue;
+                    }
+
+                    var depClassName = separatorIndex == 0
+                        ? current.ClassName  // Same-class dependency
+                        : dependency.Substring(0, separatorIndex);
+                    var depMethodName = dependency.Substring(separatorIndex + 1);
+
+                    if (depMethodName.Length > 0)
+                    {
+                        // Specific method dependency
+                        if (descriptorsByClassAndMethod.TryGetValue((depClassName, depMethodName), out var depDescriptor))
                         {
-                            if (matchingDescriptors.Add(depDescriptor))
+                            if (expandedSet.Add(depDescriptor))
                             {
                                 queue.Enqueue(depDescriptor);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Class-level dependency: all tests in class
+                        if (descriptorsByClass.TryGetValue(depClassName, out var classDescriptors))
+                        {
+                            foreach (var depDescriptor in classDescriptors)
+                            {
+                                if (expandedSet.Add(depDescriptor))
+                                {
+                                    queue.Enqueue(depDescriptor);
+                                }
                             }
                         }
                     }
@@ -184,7 +184,10 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         }
 
         // Phase 3: Materialize matching descriptors (including dependencies)
-        foreach (var descriptor in matchingDescriptors)
+        var descriptorsToMaterialize = expandedSet ?? (IEnumerable<TestDescriptor>)matchingDescriptors;
+        var results = new List<TestMetadata>();
+
+        foreach (var descriptor in descriptorsToMaterialize)
         {
             await foreach (var metadata in descriptor.Materializer(testSessionId, CancellationToken.None).ConfigureAwait(false))
             {
