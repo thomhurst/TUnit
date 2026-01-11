@@ -162,11 +162,10 @@ internal sealed class TestBuilder : ITestBuilder
             }
 
             // Create a single context accessor that we'll reuse, updating its Current property for each test
+            // StateBag and Events are lazy-initialized, so we don't need to pre-allocate them
             var testBuilderContext = new TestBuilderContext
             {
                 TestMetadata = metadata.MethodMetadata,
-                Events = new TestContextEvents(),
-                StateBag = new ConcurrentDictionary<string, object?>(),
                 InitializedAttributes = attributes  // Store the initialized attributes
             };
 
@@ -309,11 +308,10 @@ internal sealed class TestBuilder : ITestBuilder
                             for (var i = 0; i < repeatCount + 1; i++)
                             {
                                 // Update context BEFORE calling data factories so they track objects in the right context
+                                // StateBag and Events are lazy-initialized for performance
                                 contextAccessor.Current = new TestBuilderContext
                                 {
                                     TestMetadata = metadata.MethodMetadata,
-                                    Events = new TestContextEvents(),
-                                    StateBag = new ConcurrentDictionary<string, object?>(),
                                     DataSourceAttribute = methodDataSource,
                                     InitializedAttributes = testBuilderContext.InitializedAttributes,  // Preserve attributes from parent context
                                     ClassConstructor = testBuilderContext.ClassConstructor  // Preserve ClassConstructor for instance creation
@@ -443,10 +441,10 @@ internal sealed class TestBuilder : ITestBuilder
                                     Metadata = finalMetadata
                                 };
 
+                                // Events is lazy-initialized; explicitly share StateBag from per-iteration context
                                 var testSpecificContext = new TestBuilderContext
                                 {
                                     TestMetadata = metadata.MethodMetadata,
-                                    Events = new TestContextEvents(),
                                     StateBag = contextAccessor.Current.StateBag,
                                     ClassConstructor = testBuilderContext.ClassConstructor,
                                     DataSourceAttribute = contextAccessor.Current.DataSourceAttribute,
@@ -508,11 +506,10 @@ internal sealed class TestBuilder : ITestBuilder
                                     ResolvedMethodGenericArguments = Type.EmptyTypes
                                 };
 
+                                // StateBag and Events are lazy-initialized
                                 var testSpecificContext = new TestBuilderContext
                                 {
                                     TestMetadata = metadata.MethodMetadata,
-                                    Events = new TestContextEvents(),
-                                    StateBag = new ConcurrentDictionary<string, object?>(),
                                     ClassConstructor = testBuilderContext.ClassConstructor,
                                     DataSourceAttribute = methodDataSource,
                                     InitializedAttributes = attributes
@@ -568,11 +565,10 @@ internal sealed class TestBuilder : ITestBuilder
                             ResolvedMethodGenericArguments = Type.EmptyTypes
                         };
 
+                        // StateBag and Events are lazy-initialized
                         var testSpecificContext = new TestBuilderContext
                         {
                             TestMetadata = metadata.MethodMetadata,
-                            Events = new TestContextEvents(),
-                            StateBag = new ConcurrentDictionary<string, object?>(),
                             ClassConstructor = testBuilderContext.ClassConstructor,
                             DataSourceAttribute = classDataSource,
                             InitializedAttributes = attributes
@@ -1428,11 +1424,10 @@ internal sealed class TestBuilder : ITestBuilder
         var attributes = await InitializeAttributesAsync(metadata.AttributeFactory.Invoke());
 
         // Create base context with ClassConstructor if present
+        // StateBag and Events are lazy-initialized for performance
         var baseContext = new TestBuilderContext
         {
             TestMetadata = metadata.MethodMetadata,
-            Events = new TestContextEvents(),
-            StateBag = new ConcurrentDictionary<string, object?>(),
             InitializedAttributes = attributes  // Store the initialized attributes
         };
 
@@ -1732,10 +1727,10 @@ internal sealed class TestBuilder : ITestBuilder
                 Metadata = finalMetadata
             };
 
+            // Events is lazy-initialized; explicitly share StateBag from per-iteration context
             var testSpecificContext = new TestBuilderContext
             {
                 TestMetadata = metadata.MethodMetadata,
-                Events = new TestContextEvents(),
                 StateBag = contextAccessor.Current.StateBag,
                 ClassConstructor = contextAccessor.Current.ClassConstructor,
                 DataSourceAttribute = contextAccessor.Current.DataSourceAttribute,

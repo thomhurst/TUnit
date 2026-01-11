@@ -9,6 +9,7 @@ namespace TUnit.Core;
 public record TestBuilderContext
 {
     private static readonly AsyncLocal<TestBuilderContext?> BuilderContexts = new();
+    private string? _definitionId;
 
     /// <summary>
     /// Gets the current test builder context.
@@ -19,17 +20,31 @@ public record TestBuilderContext
         internal set => BuilderContexts.Value = value;
     }
 
-    public string DefinitionId { get; } = Guid.NewGuid().ToString();
+    /// <summary>
+    /// Gets the unique definition ID for this context. Generated lazily on first access.
+    /// </summary>
+    public string DefinitionId => _definitionId ??= Guid.NewGuid().ToString();
 
      [Obsolete("Use StateBag property instead.")]
      public ConcurrentDictionary<string, object?> ObjectBag => StateBag;
 
+    private ConcurrentDictionary<string, object?>? _stateBag;
+    private TestContextEvents? _events;
+
     /// <summary>
     /// Gets the state bag for storing arbitrary data during test building.
     /// </summary>
-    public ConcurrentDictionary<string, object?> StateBag { get; set; } = new();
+    public ConcurrentDictionary<string, object?> StateBag
+    {
+        get => _stateBag ??= new ConcurrentDictionary<string, object?>();
+        set => _stateBag = value;
+    }
 
-    public TestContextEvents Events { get; set; } = new();
+    public TestContextEvents Events
+    {
+        get => _events ??= new TestContextEvents();
+        set => _events = value;
+    }
 
     public IDataSourceAttribute? DataSourceAttribute { get; set; }
 
