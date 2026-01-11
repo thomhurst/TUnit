@@ -73,6 +73,38 @@ internal readonly struct FilterHints
 
         return true;
     }
+
+    /// <summary>
+    /// Check if a test descriptor could match this filter based on the hints.
+    /// Uses pre-computed filter hints in the descriptor for fast matching.
+    /// Returns true if no hints or if the descriptor matches all available hints.
+    /// </summary>
+    public bool CouldDescriptorMatch(TestDescriptor descriptor)
+    {
+        // Check class name hint
+        if (ClassName != null)
+        {
+            // Handle generic types (e.g., MyClass`1)
+            if (descriptor.ClassName != ClassName && !descriptor.ClassName.StartsWith(ClassName + "`"))
+            {
+                return false;
+            }
+        }
+
+        // Check method name hint
+        if (MethodName != null)
+        {
+            if (descriptor.MethodName != MethodName)
+            {
+                return false;
+            }
+        }
+
+        // Note: We don't check assembly/namespace here because descriptors don't store that info
+        // The type-level filtering in CouldTypeMatch handles those hints during source enumeration
+
+        return true;
+    }
 }
 
 /// <summary>

@@ -52,25 +52,22 @@ internal sealed class AotTestDataCollector : ITestDataCollector
 
         var testSourcesList = testSourcesByType.SelectMany(kvp => kvp.Value).ToList();
 
-        // Use sequential processing for small test source sets to avoid task scheduling overhead
+        // Try two-phase discovery for sources that support it (with specific filter hints)
+        // This avoids creating full TestMetadata for tests that won't pass filtering
         IEnumerable<TestMetadata> standardTestMetadatas;
-        if (testSourcesList.Count < Building.ParallelThresholds.MinItemsForParallel)
+
+        if (filterHints.HasHints && testSourcesList.All(static s => s is ITestDescriptorSource))
         {
-            var results = new List<TestMetadata>();
-            foreach (var testSource in testSourcesList)
-            {
-                await foreach (var metadata in testSource.GetTestsAsync(testSessionId))
-                {
-                    results.Add(metadata);
-                }
-            }
-            standardTestMetadatas = results;
+            // Two-phase discovery: enumerate descriptors, filter, then materialize only matching
+            standardTestMetadatas = await CollectTestsWithTwoPhaseDiscoveryAsync(
+                testSourcesList.Cast<ITestDescriptorSource>(),
+                testSessionId,
+                filterHints).ConfigureAwait(false);
         }
         else
         {
-            standardTestMetadatas = await testSourcesList
-                .SelectManyAsync(testSource => testSource.GetTestsAsync(testSessionId))
-                .ProcessInParallel();
+            // Fallback: Use traditional collection (for legacy sources or no filter hints)
+            standardTestMetadatas = await CollectTestsTraditionalAsync(testSourcesList, testSessionId).ConfigureAwait(false);
         }
 
         // Dynamic tests are typically rare, collect sequentially
@@ -81,6 +78,71 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         }
 
         return [..standardTestMetadatas, ..dynamicTestMetadatas];
+    }
+
+    /// <summary>
+    /// Two-phase discovery: enumerate lightweight descriptors, apply filter hints, materialize only matching.
+    /// This is more efficient when filters are present as it avoids creating full TestMetadata for non-matching tests.
+    /// </summary>
+    private async Task<IEnumerable<TestMetadata>> CollectTestsWithTwoPhaseDiscoveryAsync(
+        IEnumerable<ITestDescriptorSource> descriptorSources,
+        string testSessionId,
+        FilterHints filterHints)
+    {
+        var results = new List<TestMetadata>();
+
+        // Phase 1: Enumerate lightweight descriptors and filter
+        var matchingDescriptors = new List<TestDescriptor>();
+        foreach (var source in descriptorSources)
+        {
+            foreach (var descriptor in source.EnumerateTestDescriptors())
+            {
+                if (filterHints.CouldDescriptorMatch(descriptor))
+                {
+                    matchingDescriptors.Add(descriptor);
+                }
+            }
+        }
+
+        // Phase 2: Materialize only matching descriptors
+        foreach (var descriptor in matchingDescriptors)
+        {
+            await foreach (var metadata in descriptor.Materializer(testSessionId, CancellationToken.None).ConfigureAwait(false))
+            {
+                results.Add(metadata);
+            }
+        }
+
+        return results;
+    }
+
+    /// <summary>
+    /// Traditional collection: materialize all tests from sources.
+    /// Used when filter hints are not available or sources don't support ITestDescriptorSource.
+    /// </summary>
+    private async Task<IEnumerable<TestMetadata>> CollectTestsTraditionalAsync(
+        List<ITestSource> testSourcesList,
+        string testSessionId)
+    {
+        // Use sequential processing for small test source sets to avoid task scheduling overhead
+        if (testSourcesList.Count < Building.ParallelThresholds.MinItemsForParallel)
+        {
+            var results = new List<TestMetadata>();
+            foreach (var testSource in testSourcesList)
+            {
+                await foreach (var metadata in testSource.GetTestsAsync(testSessionId))
+                {
+                    results.Add(metadata);
+                }
+            }
+            return results;
+        }
+        else
+        {
+            return await testSourcesList
+                .SelectManyAsync(testSource => testSource.GetTestsAsync(testSessionId))
+                .ProcessInParallel();
+        }
     }
 
     [RequiresUnreferencedCode("Dynamic test collection requires expression compilation and reflection")]
