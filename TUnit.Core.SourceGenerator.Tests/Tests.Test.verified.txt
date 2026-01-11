@@ -118,6 +118,7 @@ internal sealed class TUnit_TestProject_Bugs__1304_Tests_TryParse_InvalidString_
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -246,6 +247,7 @@ internal sealed class TUnit_TestProject_Bugs__1304_Tests_Parse_InvalidString_Thr
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -371,6 +373,7 @@ internal sealed class TUnit_TestProject_Bugs__1304_Tests_TryParse_ValidString_Re
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }

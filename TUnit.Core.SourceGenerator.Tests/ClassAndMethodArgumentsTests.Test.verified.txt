@@ -103,6 +103,7 @@ internal sealed class TUnit_TestProject_ClassAndMethodArgumentsTests_Simple_Test
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -245,6 +246,7 @@ internal sealed class TUnit_TestProject_ClassAndMethodArgumentsTests_WithMethodL
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -387,6 +389,7 @@ internal sealed class TUnit_TestProject_ClassAndMethodArgumentsTests_IgnoreParam
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }

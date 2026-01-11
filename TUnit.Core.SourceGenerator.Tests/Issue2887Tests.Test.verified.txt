@@ -100,6 +100,7 @@ internal sealed class TUnit_TestProject_Bugs__Issue2887_ActualTestClass_Test1_Te
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = false,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }

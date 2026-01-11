@@ -127,6 +127,7 @@ internal sealed class TUnit_TestProject_AsyncMethodDataSourceDrivenTests_AsyncMe
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -279,6 +280,7 @@ internal sealed class TUnit_TestProject_AsyncMethodDataSourceDrivenTests_AsyncMe
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -424,6 +426,7 @@ internal sealed class TUnit_TestProject_AsyncMethodDataSourceDrivenTests_AsyncMe
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -569,6 +572,7 @@ internal sealed class TUnit_TestProject_AsyncMethodDataSourceDrivenTests_AsyncMe
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -714,6 +718,7 @@ internal sealed class TUnit_TestProject_AsyncMethodDataSourceDrivenTests_AsyncMe
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -859,6 +864,7 @@ internal sealed class TUnit_TestProject_AsyncMethodDataSourceDrivenTests_AsyncMe
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -1004,6 +1010,7 @@ internal sealed class TUnit_TestProject_AsyncMethodDataSourceDrivenTests_ValueTa
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }

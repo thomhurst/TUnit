@@ -2063,6 +2063,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Extract repeat count from RepeatAttribute
         var repeatCount = ExtractRepeatCount(testMethod);
 
+        // Extract dependencies from DependsOnAttribute
+        var dependsOn = ExtractDependsOn(testMethod);
+        var dependsOnArray = dependsOn.Length == 0
+            ? "global::System.Array.Empty<string>()"
+            : $"new string[] {{ {string.Join(", ", dependsOn.Select(d => $"\"{EscapeString(d)}\""))} }}";
+
         writer.AppendLine("public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()");
         writer.AppendLine("{");
         writer.Indent();
@@ -2081,6 +2087,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"Properties = {propertiesArray},");
         writer.AppendLine($"HasDataSource = {(hasDataSource ? "true" : "false")},");
         writer.AppendLine($"RepeatCount = {repeatCount},");
+        writer.AppendLine($"DependsOn = {dependsOnArray},");
         writer.AppendLine("Materializer = GetTestsAsync");
 
         writer.Unindent();
@@ -2221,6 +2228,109 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         return 0;
+    }
+
+    private static string[] ExtractDependsOn(TestMethodMetadata testMethod)
+    {
+        var dependencies = new List<string>();
+
+        // Check method attributes
+        foreach (var attr in testMethod.MethodAttributes)
+        {
+            var attrClass = attr.AttributeClass;
+            if (attrClass == null)
+            {
+                continue;
+            }
+
+            // Handle DependsOnAttribute and DependsOnAttribute<T>
+            if (attrClass.Name == "DependsOnAttribute" ||
+                (attrClass.IsGenericType && attrClass.ConstructedFrom?.Name == "DependsOnAttribute"))
+            {
+                string? className = null;
+                string? methodName = null;
+
+                // For generic DependsOnAttribute<T>, get the type argument
+                if (attrClass.IsGenericType && attrClass.TypeArguments.Length > 0)
+                {
+                    className = attrClass.TypeArguments[0].Name;
+                }
+
+                // Check constructor arguments for class type and method name
+                for (int i = 0; i < attr.ConstructorArguments.Length; i++)
+                {
+                    var arg = attr.ConstructorArguments[i];
+                    // Skip array arguments (like parameterTypes)
+                    if (arg.Kind == TypedConstantKind.Array)
+                    {
+                        continue;
+                    }
+                    if (arg.Value is INamedTypeSymbol typeSymbol)
+                    {
+                        className = typeSymbol.Name;
+                    }
+                    else if (arg.Value is string strValue)
+                    {
+                        methodName = strValue;
+                    }
+                }
+
+                // Format: "ClassName:MethodName", ":MethodName" for same-class, "ClassName:" for all in class
+                var dependency = $"{className ?? ""}:{methodName ?? ""}";
+                if (dependency != ":")
+                {
+                    dependencies.Add(dependency);
+                }
+            }
+        }
+
+        // Check class attributes (class-level DependsOn)
+        foreach (var attr in testMethod.TypeSymbol.GetAttributes())
+        {
+            var attrClass = attr.AttributeClass;
+            if (attrClass == null)
+            {
+                continue;
+            }
+
+            if (attrClass.Name == "DependsOnAttribute" ||
+                (attrClass.IsGenericType && attrClass.ConstructedFrom?.Name == "DependsOnAttribute"))
+            {
+                string? className = null;
+                string? methodName = null;
+
+                if (attrClass.IsGenericType && attrClass.TypeArguments.Length > 0)
+                {
+                    className = attrClass.TypeArguments[0].Name;
+                }
+
+                for (int i = 0; i < attr.ConstructorArguments.Length; i++)
+                {
+                    var arg = attr.ConstructorArguments[i];
+                    // Skip array arguments (like parameterTypes)
+                    if (arg.Kind == TypedConstantKind.Array)
+                    {
+                        continue;
+                    }
+                    if (arg.Value is INamedTypeSymbol typeSymbol)
+                    {
+                        className = typeSymbol.Name;
+                    }
+                    else if (arg.Value is string strValue)
+                    {
+                        methodName = strValue;
+                    }
+                }
+
+                var dependency = $"{className ?? ""}:{methodName ?? ""}";
+                if (dependency != ":")
+                {
+                    dependencies.Add(dependency);
+                }
+            }
+        }
+
+        return dependencies.Distinct().ToArray();
     }
 
     private static string EscapeString(string value)

@@ -76,6 +76,14 @@ public readonly struct TestDescriptor
     public int RepeatCount { get; init; }
 
     /// <summary>
+    /// Gets the dependencies for this test (from DependsOnAttribute).
+    /// Pre-extracted at compile time to enable dependency expansion during filtering.
+    /// Format: "ClassName:MethodName" for cross-class, ":MethodName" for same-class,
+    /// "ClassName:" for all tests in class.
+    /// </summary>
+    public string[] DependsOn { get; init; }
+
+    /// <summary>
     /// Gets the factory delegate that creates the full TestMetadata.
     /// Only invoked for tests that pass filtering.
     /// </summary>
@@ -93,6 +101,7 @@ public readonly struct TestDescriptor
     {
         Categories = [];
         Properties = [];
+        DependsOn = [];
     }
 
     /// <summary>

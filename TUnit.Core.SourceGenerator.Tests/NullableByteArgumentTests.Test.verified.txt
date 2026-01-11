@@ -108,6 +108,7 @@ internal sealed class TUnit_TestProject_NullableByteArgumentTests_Test__byte__Te
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -241,6 +242,7 @@ internal sealed class TUnit_TestProject_NullableByteArgumentTests_Test2__byte_by
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }

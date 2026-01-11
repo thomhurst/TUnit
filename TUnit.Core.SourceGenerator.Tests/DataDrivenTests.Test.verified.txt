@@ -109,6 +109,7 @@ internal sealed class TUnit_TestProject_DataDrivenTests_DataSource_Method__int_T
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -243,6 +244,7 @@ internal sealed class TUnit_TestProject_DataDrivenTests_DataSource_Method__int_s
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -370,6 +372,7 @@ internal sealed class TUnit_TestProject_DataDrivenTests_EnumValue__TestEnum_Test
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -495,6 +498,7 @@ internal sealed class TUnit_TestProject_DataDrivenTests_NullValue__string__TestS
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -620,6 +624,7 @@ internal sealed class TUnit_TestProject_DataDrivenTests_EmptyString__string__Tes
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -745,6 +750,7 @@ internal sealed class TUnit_TestProject_DataDrivenTests_NonEmptyString__string__
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -872,6 +878,7 @@ internal sealed class TUnit_TestProject_DataDrivenTests_BooleanString__bool__Tes
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -997,6 +1004,7 @@ internal sealed class TUnit_TestProject_DataDrivenTests_Type__Type_TestSource : 
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -1122,6 +1130,7 @@ internal sealed class TUnit_TestProject_DataDrivenTests_IntegerArray__int___Test
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -1247,6 +1256,7 @@ internal sealed class TUnit_TestProject_DataDrivenTests_IntMaxValue__int_TestSou
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }

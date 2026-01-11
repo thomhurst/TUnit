@@ -350,6 +350,7 @@ internal sealed class TUnit_TestProject_PropertySetterTests_Test_TestSource : gl
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = false,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -618,6 +619,7 @@ internal sealed class TUnit_TestProject_InheritedPropertySetterTests_Test_TestSo
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = false,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }

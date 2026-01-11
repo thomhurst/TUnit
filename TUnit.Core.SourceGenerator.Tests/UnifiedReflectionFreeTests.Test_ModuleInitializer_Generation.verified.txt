@@ -86,6 +86,7 @@ internal sealed class TUnit_TestProject_ModuleInitializerTest_TestWithModuleInit
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = false,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }

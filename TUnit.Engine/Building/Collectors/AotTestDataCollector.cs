@@ -91,20 +91,99 @@ internal sealed class AotTestDataCollector : ITestDataCollector
     {
         var results = new List<TestMetadata>();
 
-        // Phase 1: Enumerate lightweight descriptors and filter
-        var matchingDescriptors = new List<TestDescriptor>();
+        // Phase 1: Enumerate all descriptors and build lookup indexes
+        var allDescriptors = new List<TestDescriptor>();
+        var descriptorsByClassAndMethod = new Dictionary<(string ClassName, string MethodName), TestDescriptor>();
+        var descriptorsByClass = new Dictionary<string, List<TestDescriptor>>();
+
         foreach (var source in descriptorSources)
         {
             foreach (var descriptor in source.EnumerateTestDescriptors())
             {
-                if (filterHints.CouldDescriptorMatch(descriptor))
+                allDescriptors.Add(descriptor);
+
+                // Index by class + method for specific dependencies
+                var key = (descriptor.ClassName, descriptor.MethodName);
+                descriptorsByClassAndMethod[key] = descriptor;
+
+                // Index by class for class-level dependencies
+                if (!descriptorsByClass.TryGetValue(descriptor.ClassName, out var classDescriptors))
                 {
-                    matchingDescriptors.Add(descriptor);
+                    classDescriptors = [];
+                    descriptorsByClass[descriptor.ClassName] = classDescriptors;
+                }
+                classDescriptors.Add(descriptor);
+            }
+        }
+
+        // Phase 2: Filter descriptors and expand dependencies
+        var matchingDescriptors = new HashSet<TestDescriptor>();
+        var queue = new Queue<TestDescriptor>();
+
+        // Start with descriptors that match the filter
+        foreach (var descriptor in allDescriptors)
+        {
+            if (filterHints.CouldDescriptorMatch(descriptor))
+            {
+                if (matchingDescriptors.Add(descriptor))
+                {
+                    queue.Enqueue(descriptor);
                 }
             }
         }
 
-        // Phase 2: Materialize only matching descriptors
+        // Expand dependencies transitively
+        while (queue.Count > 0)
+        {
+            var current = queue.Dequeue();
+
+            foreach (var dependency in current.DependsOn)
+            {
+                // Parse dependency format: "ClassName:MethodName"
+                var separatorIndex = dependency.IndexOf(':');
+                if (separatorIndex < 0)
+                {
+                    continue;
+                }
+
+                var depClassName = dependency.Substring(0, separatorIndex);
+                var depMethodName = dependency.Substring(separatorIndex + 1);
+
+                if (string.IsNullOrEmpty(depClassName))
+                {
+                    // Same-class dependency: use current descriptor's class
+                    depClassName = current.ClassName;
+                }
+
+                if (!string.IsNullOrEmpty(depMethodName))
+                {
+                    // Specific method dependency
+                    if (descriptorsByClassAndMethod.TryGetValue((depClassName, depMethodName), out var depDescriptor))
+                    {
+                        if (matchingDescriptors.Add(depDescriptor))
+                        {
+                            queue.Enqueue(depDescriptor);
+                        }
+                    }
+                }
+                else
+                {
+                    // Class-level dependency: all tests in class
+                    if (descriptorsByClass.TryGetValue(depClassName, out var classDescriptors))
+                    {
+                        foreach (var depDescriptor in classDescriptors)
+                        {
+                            if (matchingDescriptors.Add(depDescriptor))
+                            {
+                                queue.Enqueue(depDescriptor);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Phase 3: Materialize matching descriptors (including dependencies)
         foreach (var descriptor in matchingDescriptors)
         {
             await foreach (var metadata in descriptor.Materializer(testSessionId, CancellationToken.None).ConfigureAwait(false))

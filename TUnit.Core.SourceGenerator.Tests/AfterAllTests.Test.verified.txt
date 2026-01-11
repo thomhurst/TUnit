@@ -85,6 +85,7 @@ internal sealed class TUnit_TestProject_AfterTests_CleanupTests_Test1_TestSource
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = false,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -188,6 +189,7 @@ internal sealed class TUnit_TestProject_AfterTests_CleanupTests_Test2_TestSource
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = false,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }

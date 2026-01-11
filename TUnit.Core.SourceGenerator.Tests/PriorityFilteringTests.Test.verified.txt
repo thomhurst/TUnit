@@ -86,6 +86,7 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_High_1_TestSource
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = false,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -190,6 +191,7 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_High_2_TestSource
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = false,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -294,6 +296,7 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_High_3_TestSource
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = false,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -398,6 +401,7 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_Medium_1_TestSour
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = false,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -502,6 +506,7 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_Medium_2_TestSour
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = false,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -606,6 +611,7 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_Low_1_TestSource 
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = false,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }

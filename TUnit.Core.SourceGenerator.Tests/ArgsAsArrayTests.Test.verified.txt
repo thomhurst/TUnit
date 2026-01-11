@@ -136,6 +136,7 @@ internal sealed class TUnit_TestProject_ArgsAsArrayTests_Params__string___TestSo
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -290,6 +291,7 @@ internal sealed class TUnit_TestProject_ArgsAsArrayTests_ParamsEnumerable__IEnum
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -451,6 +453,7 @@ internal sealed class TUnit_TestProject_ArgsAsArrayTests_Following_Non_Params__i
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }

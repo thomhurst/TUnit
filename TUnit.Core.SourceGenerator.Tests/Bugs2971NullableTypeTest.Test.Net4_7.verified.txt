@@ -87,6 +87,7 @@ internal sealed class TUnit_TestProject_Bugs__2971_Tests_SimpleTest_TestSource :
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = false,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }

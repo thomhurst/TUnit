@@ -106,6 +106,7 @@ internal sealed class TUnit_TestProject_NameOfArgumentTests_TestName__string_Tes
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }

@@ -100,6 +100,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test_TestSource :
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = false,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -218,6 +219,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test2_TestSource 
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = false,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -371,6 +373,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test3__string_int
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -520,6 +523,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_MethodDataSourceT
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -667,6 +671,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_TestParameterName
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -804,6 +809,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_PasswordTest__str
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -922,6 +928,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_SameClassConstant
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = false,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -1040,6 +1047,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_DifferentClassCon
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = false,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -1158,6 +1166,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_NestedClassConsta
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = false,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }

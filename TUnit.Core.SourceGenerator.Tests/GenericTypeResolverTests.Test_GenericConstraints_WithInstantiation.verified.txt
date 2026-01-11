@@ -227,6 +227,7 @@ internal sealed class TUnit_TestProject_ConstrainedGenericTestClass_T_TestMethod
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = false,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }

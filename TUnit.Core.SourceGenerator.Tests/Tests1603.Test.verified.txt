@@ -106,6 +106,7 @@ internal sealed class TUnit_TestProject_Bugs__1603_Tests_Casted_Integer_To_Short
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -230,6 +231,7 @@ internal sealed class TUnit_TestProject_Bugs__1603_Tests_Integer_To_Short_Conver
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }

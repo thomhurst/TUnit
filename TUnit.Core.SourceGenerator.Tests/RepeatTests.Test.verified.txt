@@ -90,6 +90,7 @@ internal sealed class TUnit_TestProject_RepeatTests_One_TestSource : global::TUn
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = false,
             RepeatCount = 1,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -198,6 +199,7 @@ internal sealed class TUnit_TestProject_RepeatTests_Two_TestSource : global::TUn
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = false,
             RepeatCount = 2,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -305,6 +307,7 @@ internal sealed class TUnit_TestProject_RepeatTests_Three_TestSource : global::T
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = false,
             RepeatCount = 3,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }

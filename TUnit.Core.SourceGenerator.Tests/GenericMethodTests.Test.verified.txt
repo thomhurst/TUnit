@@ -448,6 +448,7 @@ internal sealed class TUnit_TestProject_GenericMethodTests_AggregateBy_HasExpect
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }

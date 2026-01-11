@@ -107,6 +107,7 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_Int__int_TestSource 
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -232,6 +233,7 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_Double__double_TestS
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -357,6 +359,7 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_Float__float_TestSou
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -482,6 +485,7 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_Long__long_TestSourc
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -607,6 +611,7 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_ULong__ulong_TestSou
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
@@ -732,6 +737,7 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_UInt__uint_TestSourc
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = true,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }

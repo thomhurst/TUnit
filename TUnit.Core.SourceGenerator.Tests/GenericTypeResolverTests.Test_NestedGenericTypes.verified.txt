@@ -227,6 +227,7 @@ internal sealed class TUnit_TestProject_NestedGenericTestClass_T_TestMethod_Test
             Properties = global::System.Array.Empty<string>(),
             HasDataSource = false,
             RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTestsAsync
         };
     }
