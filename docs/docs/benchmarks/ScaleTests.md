@@ -16,11 +16,11 @@ This benchmark was automatically generated on **2026-01-11** from the latest CI 
 
 | Framework | Version | Mean | Median | StdDev |
 |-----------|---------|------|--------|--------|
-| **TUnit** | 1.9.55 | 611.01 ms | 607.97 ms | 10.026 ms |
-| NUnit | 4.4.0 | 599.68 ms | 596.75 ms | 8.278 ms |
-| MSTest | 4.0.2 | 495.40 ms | 492.84 ms | 7.705 ms |
-| xUnit3 | 3.2.1 | 580.68 ms | 582.40 ms | 5.809 ms |
-| **TUnit (AOT)** | 1.9.55 | 39.10 ms | 38.94 ms | 1.964 ms |
+| **TUnit** | 1.9.55 | 663.73 ms | 662.53 ms | 8.894 ms |
+| NUnit | 4.4.0 | 655.64 ms | 655.98 ms | 8.064 ms |
+| MSTest | 4.0.2 | 641.40 ms | 641.40 ms | 11.954 ms |
+| xUnit3 | 3.2.1 | 628.00 ms | 627.99 ms | 4.277 ms |
+| **TUnit (AOT)** | 1.9.55 | 40.76 ms | 41.11 ms | 2.844 ms |
 
 ## 📈 Visual Comparison
 
@@ -58,8 +58,8 @@ This benchmark was automatically generated on **2026-01-11** from the latest CI 
 xychart-beta
   title "ScaleTests Performance Comparison"
   x-axis ["TUnit", "NUnit", "MSTest", "xUnit3", "TUnit_AOT"]
-  y-axis "Time (ms)" 0 --> 734
-  bar [611.01, 599.68, 495.4, 580.68, 39.1]
+  y-axis "Time (ms)" 0 --> 797
+  bar [663.73, 655.64, 641.4, 628, 40.76]
 ```
 
 ## 🎯 Key Insights
@@ -72,4 +72,4 @@ This benchmark compares TUnit's performance against NUnit, MSTest, xUnit3 using 
 View the [benchmarks overview](/docs/benchmarks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-01-11T00:04:12.404Z*
+*Last generated: 2026-01-11T00:32:36.339Z*

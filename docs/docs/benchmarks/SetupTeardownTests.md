@@ -16,10 +16,10 @@ This benchmark was automatically generated on **2026-01-11** from the latest CI 
 
 | Framework | Version | Mean | Median | StdDev |
 |-----------|---------|------|--------|--------|
-| **TUnit** | 1.9.55 | 730.9 ms | 731.9 ms | 13.51 ms |
-| NUnit | 4.4.0 | 1,249.2 ms | 1,246.4 ms | 17.47 ms |
-| MSTest | 4.0.2 | 1,169.3 ms | 1,167.8 ms | 9.33 ms |
-| xUnit3 | 3.2.1 | 1,254.0 ms | 1,252.8 ms | 7.02 ms |
+| **TUnit** | 1.9.55 | 696.6 ms | 694.1 ms | 11.93 ms |
+| NUnit | 4.4.0 | 1,218.3 ms | 1,220.7 ms | 12.79 ms |
+| MSTest | 4.0.2 | 1,166.7 ms | 1,168.2 ms | 9.01 ms |
+| xUnit3 | 3.2.1 | 1,250.8 ms | 1,251.8 ms | 8.53 ms |
 | **TUnit (AOT)** | 1.9.55 | NA | NA | NA |
 
 ## 📈 Visual Comparison
@@ -58,8 +58,8 @@ This benchmark was automatically generated on **2026-01-11** from the latest CI 
 xychart-beta
   title "SetupTeardownTests Performance Comparison"
   x-axis ["TUnit", "NUnit", "MSTest", "xUnit3", "TUnit_AOT"]
-  y-axis "Time (ms)" 0 --> 1505
-  bar [730.9, 1249.2, 1169.3, 1254, 0]
+  y-axis "Time (ms)" 0 --> 1501
+  bar [696.6, 1218.3, 1166.7, 1250.8, 0]
 ```
 
 ## 🎯 Key Insights
@@ -72,4 +72,4 @@ This benchmark compares TUnit's performance against NUnit, MSTest, xUnit3 using 
 View the [benchmarks overview](/docs/benchmarks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-01-11T00:04:12.404Z*
+*Last generated: 2026-01-11T00:32:36.340Z*
