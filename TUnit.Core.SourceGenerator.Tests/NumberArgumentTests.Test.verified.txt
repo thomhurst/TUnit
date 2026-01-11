@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_NumberArgumentTests_Int__int_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_NumberArgumentTests_Int__int_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -93,6 +93,24 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_Int__int_TestSource 
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.NumberArgumentTests.Int",
+            ClassName = "NumberArgumentTests",
+            MethodName = "Int",
+            FullyQualifiedName = "TUnit.TestProject.NumberArgumentTests.Int",
+            FilePath = @"",
+            LineNumber = 8,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_NumberArgumentTests_Int__int_ModuleInitializer
 {
@@ -111,7 +129,7 @@ internal static class TUnit_TestProject_NumberArgumentTests_Int__int_ModuleIniti
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_NumberArgumentTests_Double__double_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_NumberArgumentTests_Double__double_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -201,6 +219,24 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_Double__double_TestS
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.NumberArgumentTests.Double",
+            ClassName = "NumberArgumentTests",
+            MethodName = "Double",
+            FullyQualifiedName = "TUnit.TestProject.NumberArgumentTests.Double",
+            FilePath = @"",
+            LineNumber = 15,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_NumberArgumentTests_Double__double_ModuleInitializer
 {
@@ -219,7 +255,7 @@ internal static class TUnit_TestProject_NumberArgumentTests_Double__double_Modul
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_NumberArgumentTests_Float__float_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_NumberArgumentTests_Float__float_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -309,6 +345,24 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_Float__float_TestSou
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.NumberArgumentTests.Float",
+            ClassName = "NumberArgumentTests",
+            MethodName = "Float",
+            FullyQualifiedName = "TUnit.TestProject.NumberArgumentTests.Float",
+            FilePath = @"",
+            LineNumber = 22,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_NumberArgumentTests_Float__float_ModuleInitializer
 {
@@ -327,7 +381,7 @@ internal static class TUnit_TestProject_NumberArgumentTests_Float__float_ModuleI
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_NumberArgumentTests_Long__long_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_NumberArgumentTests_Long__long_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -417,6 +471,24 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_Long__long_TestSourc
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.NumberArgumentTests.Long",
+            ClassName = "NumberArgumentTests",
+            MethodName = "Long",
+            FullyQualifiedName = "TUnit.TestProject.NumberArgumentTests.Long",
+            FilePath = @"",
+            LineNumber = 29,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_NumberArgumentTests_Long__long_ModuleInitializer
 {
@@ -435,7 +507,7 @@ internal static class TUnit_TestProject_NumberArgumentTests_Long__long_ModuleIni
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_NumberArgumentTests_ULong__ulong_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_NumberArgumentTests_ULong__ulong_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -525,6 +597,24 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_ULong__ulong_TestSou
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.NumberArgumentTests.ULong",
+            ClassName = "NumberArgumentTests",
+            MethodName = "ULong",
+            FullyQualifiedName = "TUnit.TestProject.NumberArgumentTests.ULong",
+            FilePath = @"",
+            LineNumber = 36,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_NumberArgumentTests_ULong__ulong_ModuleInitializer
 {
@@ -543,7 +633,7 @@ internal static class TUnit_TestProject_NumberArgumentTests_ULong__ulong_ModuleI
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_NumberArgumentTests_UInt__uint_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_NumberArgumentTests_UInt__uint_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -632,6 +722,24 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_UInt__uint_TestSourc
         metadata.UseRuntimeDataGeneration(testSessionId);
         yield return metadata;
         yield break;
+    }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.NumberArgumentTests.UInt",
+            ClassName = "NumberArgumentTests",
+            MethodName = "UInt",
+            FullyQualifiedName = "TUnit.TestProject.NumberArgumentTests.UInt",
+            FilePath = @"",
+            LineNumber = 43,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
+            Materializer = GetTestsAsync
+        };
     }
 }
 internal static class TUnit_TestProject_NumberArgumentTests_UInt__uint_ModuleInitializer

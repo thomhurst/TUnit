@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Class__SomeAsyncDisposableClass_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Class__SomeAsyncDisposableClass_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -93,6 +93,24 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Cl
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.ClassDataSourceDrivenTests.DataSource_Class",
+            ClassName = "ClassDataSourceDrivenTests",
+            MethodName = "DataSource_Class",
+            FullyQualifiedName = "TUnit.TestProject.ClassDataSourceDrivenTests.DataSource_Class",
+            FilePath = @"",
+            LineNumber = 9,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Class__SomeAsyncDisposableClass_ModuleInitializer
 {
@@ -111,7 +129,7 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Cl
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Class_Generic__SomeAsyncDisposableClass_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Class_Generic__SomeAsyncDisposableClass_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -201,6 +219,24 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Cl
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.ClassDataSourceDrivenTests.DataSource_Class_Generic",
+            ClassName = "ClassDataSourceDrivenTests",
+            MethodName = "DataSource_Class_Generic",
+            FullyQualifiedName = "TUnit.TestProject.ClassDataSourceDrivenTests.DataSource_Class_Generic",
+            FilePath = @"",
+            LineNumber = 16,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Class_Generic__SomeAsyncDisposableClass_ModuleInitializer
 {
@@ -219,7 +255,7 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Cl
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_1_ClassDataSource__InitializableClass_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_1_ClassDataSource__InitializableClass_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -308,6 +344,24 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_1_ClassDataSource",
+            ClassName = "ClassDataSourceDrivenTests",
+            MethodName = "IsInitialized_With_1_ClassDataSource",
+            FullyQualifiedName = "TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_1_ClassDataSource",
+            FilePath = @"",
+            LineNumber = 23,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_1_ClassDataSource__InitializableClass_ModuleInitializer
 {
@@ -326,7 +380,7 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_2_ClassDataSources__InitializableClass_InitializableClass_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_2_ClassDataSources__InitializableClass_InitializableClass_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -422,6 +476,24 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_2_ClassDataSources",
+            ClassName = "ClassDataSourceDrivenTests",
+            MethodName = "IsInitialized_With_2_ClassDataSources",
+            FullyQualifiedName = "TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_2_ClassDataSources",
+            FilePath = @"",
+            LineNumber = 30,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_2_ClassDataSources__InitializableClass_InitializableClass_ModuleInitializer
 {
@@ -440,7 +512,7 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_3_ClassDataSources__InitializableClass_InitializableClass_InitializableClass_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_3_ClassDataSources__InitializableClass_InitializableClass_InitializableClass_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -543,6 +615,24 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_3_ClassDataSources",
+            ClassName = "ClassDataSourceDrivenTests",
+            MethodName = "IsInitialized_With_3_ClassDataSources",
+            FullyQualifiedName = "TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_3_ClassDataSources",
+            FilePath = @"",
+            LineNumber = 38,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_3_ClassDataSources__InitializableClass_InitializableClass_InitializableClass_ModuleInitializer
 {
@@ -561,7 +651,7 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_4_ClassDataSources__InitializableClass_InitializableClass_InitializableClass_InitializableClass_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_4_ClassDataSources__InitializableClass_InitializableClass_InitializableClass_InitializableClass_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -671,6 +761,24 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_4_ClassDataSources",
+            ClassName = "ClassDataSourceDrivenTests",
+            MethodName = "IsInitialized_With_4_ClassDataSources",
+            FullyQualifiedName = "TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_4_ClassDataSources",
+            FilePath = @"",
+            LineNumber = 47,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_4_ClassDataSources__InitializableClass_InitializableClass_InitializableClass_InitializableClass_ModuleInitializer
 {
@@ -689,7 +797,7 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_5_ClassDataSources__InitializableClass_InitializableClass_InitializableClass_InitializableClass_InitializableClass_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_5_ClassDataSources__InitializableClass_InitializableClass_InitializableClass_InitializableClass_InitializableClass_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -805,6 +913,24 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
         metadata.UseRuntimeDataGeneration(testSessionId);
         yield return metadata;
         yield break;
+    }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_5_ClassDataSources",
+            ClassName = "ClassDataSourceDrivenTests",
+            MethodName = "IsInitialized_With_5_ClassDataSources",
+            FullyQualifiedName = "TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_5_ClassDataSources",
+            FilePath = @"",
+            LineNumber = 57,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
+            Materializer = GetTestsAsync
+        };
     }
 }
 internal static class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_5_ClassDataSources__InitializableClass_InitializableClass_InitializableClass_InitializableClass_InitializableClass_ModuleInitializer

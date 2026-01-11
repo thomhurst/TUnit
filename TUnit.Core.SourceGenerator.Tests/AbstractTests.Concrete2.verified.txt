@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_AbstractTests_ConcreteClass2_SecondTest_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_AbstractTests_ConcreteClass2_SecondTest_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -74,6 +74,24 @@ internal sealed class TUnit_TestProject_AbstractTests_ConcreteClass2_SecondTest_
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.AbstractTests.ConcreteClass2.SecondTest",
+            ClassName = "ConcreteClass2",
+            MethodName = "SecondTest",
+            FullyQualifiedName = "TUnit.TestProject.AbstractTests.ConcreteClass2.SecondTest",
+            FilePath = @"",
+            LineNumber = 11,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = false,
+            RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_AbstractTests_ConcreteClass2_SecondTest_ModuleInitializer
 {
@@ -92,7 +110,7 @@ internal static class TUnit_TestProject_AbstractTests_ConcreteClass2_SecondTest_
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_AbstractTests_ConcreteClass2_AssertClassName_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_AbstractTests_ConcreteClass2_AssertClassName_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -162,6 +180,24 @@ internal sealed class TUnit_TestProject_AbstractTests_ConcreteClass2_AssertClass
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.AbstractTests.ConcreteClass2.AssertClassName",
+            ClassName = "ConcreteClass2",
+            MethodName = "AssertClassName",
+            FullyQualifiedName = "TUnit.TestProject.AbstractTests.ConcreteClass2.AssertClassName",
+            FilePath = @"",
+            LineNumber = 3,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = false,
+            RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_AbstractTests_ConcreteClass2_AssertClassName_ModuleInitializer
 {
@@ -180,7 +216,7 @@ internal static class TUnit_TestProject_AbstractTests_ConcreteClass2_AssertClass
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_AbstractTests_ConcreteClass1_AssertClassName_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_AbstractTests_ConcreteClass1_AssertClassName_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -248,6 +284,24 @@ internal sealed class TUnit_TestProject_AbstractTests_ConcreteClass1_AssertClass
         metadata.UseRuntimeDataGeneration(testSessionId);
         yield return metadata;
         yield break;
+    }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.AbstractTests.ConcreteClass1.AssertClassName",
+            ClassName = "ConcreteClass1",
+            MethodName = "AssertClassName",
+            FullyQualifiedName = "TUnit.TestProject.AbstractTests.ConcreteClass1.AssertClassName",
+            FilePath = @"",
+            LineNumber = 3,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = false,
+            RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
+            Materializer = GetTestsAsync
+        };
     }
 }
 internal static class TUnit_TestProject_AbstractTests_ConcreteClass1_AssertClassName_ModuleInitializer

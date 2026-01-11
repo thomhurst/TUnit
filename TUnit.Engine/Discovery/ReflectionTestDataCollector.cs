@@ -2100,4 +2100,165 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         };
     }
 
+    /// <summary>
+    /// Enumerates lightweight test descriptors for fast filtering.
+    /// In reflection mode, this scans assemblies to create descriptors without full materialization.
+    /// Note: Reflection mode is less optimized than source-gen mode since we can't pre-compute filter hints.
+    /// </summary>
+    public IEnumerable<TestDescriptor> EnumerateDescriptors()
+    {
+        // In reflection mode, we don't have pre-computed descriptors like source-gen mode.
+        // We enumerate types and methods to create descriptors, but can't extract
+        // filter hints (categories, properties) without instantiating attributes.
+        // This provides the structure for two-phase discovery but with limited optimization.
+
+        var allAssemblies = Assemblies;
+        foreach (var assembly in allAssemblies)
+        {
+            if (!ShouldScanAssembly(assembly))
+            {
+                continue;
+            }
+
+            var types = _assemblyTypesCache.GetOrAdd(assembly, asm =>
+            {
+                try
+                {
+                    return asm.GetTypes();
+                }
+                catch (ReflectionTypeLoadException rtle)
+                {
+                    return rtle.Types.Where(static x => x != null).ToArray()!;
+                }
+                catch
+                {
+                    return [];
+                }
+            });
+
+            foreach (var type in types)
+            {
+                if (!type.IsClass || type.IsAbstract || IsCompilerGenerated(type))
+                {
+                    continue;
+                }
+
+                // Skip generic type definitions for now - they're handled separately
+                if (type.IsGenericTypeDefinition)
+                {
+                    continue;
+                }
+
+                MethodInfo[] testMethods;
+                try
+                {
+                    var inheritsTests = type.IsDefined(typeof(InheritsTestsAttribute), inherit: false);
+                    if (inheritsTests)
+                    {
+                        var allMethods = GetAllTestMethods(type);
+                        var testMethodsList = new List<MethodInfo>();
+                        foreach (var method in allMethods)
+                        {
+                            if (method.IsDefined(typeof(TestAttribute), inherit: false) && !method.IsAbstract)
+                            {
+                                testMethodsList.Add(method);
+                            }
+                        }
+                        testMethods = testMethodsList.ToArray();
+                    }
+                    else
+                    {
+                        var declaredMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+                        var testMethodsList = new List<MethodInfo>(declaredMethods.Length);
+                        foreach (var method in declaredMethods)
+                        {
+                            if (method.IsDefined(typeof(TestAttribute), inherit: false) && !method.IsAbstract)
+                            {
+                                testMethodsList.Add(method);
+                            }
+                        }
+                        testMethods = testMethodsList.ToArray();
+                    }
+                }
+                catch
+                {
+                    continue;
+                }
+
+                foreach (var method in testMethods)
+                {
+                    // Create a descriptor for each test method
+                    // In reflection mode, we can't pre-extract filter hints without instantiating attributes
+                    var capturedType = type;
+                    var capturedMethod = method;
+
+                    yield return new TestDescriptor
+                    {
+                        TestId = $"{type.FullName}.{method.Name}",
+                        ClassName = type.Name,
+                        MethodName = method.Name,
+                        FullyQualifiedName = $"{type.FullName}.{method.Name}",
+                        FilePath = ExtractFilePath(method) ?? "Unknown",
+                        LineNumber = ExtractLineNumber(method) ?? 0,
+                        Categories = [], // Can't extract without attribute instantiation
+                        Properties = [], // Can't extract without attribute instantiation
+                        HasDataSource = method.IsDefined(typeof(IDataSourceAttribute), inherit: false) ||
+                                       type.IsDefined(typeof(IDataSourceAttribute), inherit: false),
+                        RepeatCount = 0, // Can't extract without attribute instantiation
+                        Materializer = CreateReflectionMaterializer(capturedType, capturedMethod)
+                    };
+                }
+            }
+        }
+    }
+
+    private static Func<string, CancellationToken, IAsyncEnumerable<TestMetadata>> CreateReflectionMaterializer(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)]
+        Type type,
+        MethodInfo method)
+    {
+        return (testSessionId, cancellationToken) => MaterializeSingleTestAsync(type, method, cancellationToken);
+    }
+
+    private static async IAsyncEnumerable<TestMetadata> MaterializeSingleTestAsync(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)]
+        Type type,
+        MethodInfo method,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        TestMetadata metadata;
+        try
+        {
+            metadata = await BuildTestMetadata(type, method).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            metadata = CreateFailedTestMetadata(type, method, ex);
+        }
+
+        yield return metadata;
+    }
+
+    /// <summary>
+    /// Materializes full test metadata from filtered descriptors.
+    /// Only called for tests that passed filtering.
+    /// </summary>
+    public async IAsyncEnumerable<TestMetadata> MaterializeFromDescriptorsAsync(
+        IEnumerable<TestDescriptor> descriptors,
+        string testSessionId,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        foreach (var descriptor in descriptors)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            await foreach (var metadata in descriptor.Materializer(testSessionId, cancellationToken).ConfigureAwait(false))
+            {
+                yield return metadata;
+            }
+        }
+    }
+
 }

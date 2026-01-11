@@ -283,7 +283,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var uniqueClassName = FileNameHelper.GetDeterministicFileNameForMethod(testMethod.TypeSymbol, testMethod.MethodSymbol)
             .Replace(".g.cs", "_TestSource");
 
-        writer.AppendLine($"internal sealed class {uniqueClassName} : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource");
+        writer.AppendLine($"internal sealed class {uniqueClassName} : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource");
         writer.AppendLine("{");
         writer.Indent();
 
@@ -338,6 +338,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("yield break;");
         writer.Unindent();
         writer.AppendLine("}");
+
+        writer.AppendLine();
+
+        // Generate EnumerateTestDescriptors method for fast filtering
+        GenerateEnumerateTestDescriptors(writer, testMethod, className);
 
         writer.Unindent();
         writer.AppendLine("}");
@@ -2030,6 +2035,313 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("},");
     }
 
+
+    private static void GenerateEnumerateTestDescriptors(CodeWriter writer, TestMethodMetadata testMethod, string className)
+    {
+        var methodName = testMethod.MethodSymbol.Name;
+        var namespaceName = testMethod.TypeSymbol.ContainingNamespace?.ToDisplayString() ?? "";
+        var simpleClassName = testMethod.TypeSymbol.Name;
+        var fullyQualifiedName = string.IsNullOrEmpty(namespaceName)
+            ? $"{simpleClassName}.{methodName}"
+            : $"{namespaceName}.{simpleClassName}.{methodName}";
+
+        // Extract categories from CategoryAttribute at compile time
+        var categories = ExtractCategories(testMethod);
+        var categoriesArray = categories.Length == 0
+            ? "global::System.Array.Empty<string>()"
+            : $"new string[] {{ {string.Join(", ", categories.Select(c => $"\"{EscapeString(c)}\""))} }}";
+
+        // Extract properties from PropertyAttribute at compile time
+        var properties = ExtractProperties(testMethod);
+        var propertiesArray = properties.Length == 0
+            ? "global::System.Array.Empty<string>()"
+            : $"new string[] {{ {string.Join(", ", properties.Select(p => $"\"{EscapeString(p)}\""))} }}";
+
+        // Check if test has data sources
+        var hasDataSource = HasDataSources(testMethod);
+
+        // Extract repeat count from RepeatAttribute
+        var repeatCount = ExtractRepeatCount(testMethod);
+
+        // Extract dependencies from DependsOnAttribute
+        var dependsOn = ExtractDependsOn(testMethod);
+        var dependsOnArray = dependsOn.Length == 0
+            ? "global::System.Array.Empty<string>()"
+            : $"new string[] {{ {string.Join(", ", dependsOn.Select(d => $"\"{EscapeString(d)}\""))} }}";
+
+        writer.AppendLine("public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()");
+        writer.AppendLine("{");
+        writer.Indent();
+
+        writer.AppendLine("yield return new global::TUnit.Core.TestDescriptor");
+        writer.AppendLine("{");
+        writer.Indent();
+
+        writer.AppendLine($"TestId = \"{EscapeString(fullyQualifiedName)}\",");
+        writer.AppendLine($"ClassName = \"{EscapeString(simpleClassName)}\",");
+        writer.AppendLine($"MethodName = \"{EscapeString(methodName)}\",");
+        writer.AppendLine($"FullyQualifiedName = \"{EscapeString(fullyQualifiedName)}\",");
+        writer.AppendLine($"FilePath = @\"{(testMethod.FilePath ?? "").Replace("\\", "\\\\")}\",");
+        writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
+        writer.AppendLine($"Categories = {categoriesArray},");
+        writer.AppendLine($"Properties = {propertiesArray},");
+        writer.AppendLine($"HasDataSource = {(hasDataSource ? "true" : "false")},");
+        writer.AppendLine($"RepeatCount = {repeatCount},");
+        writer.AppendLine($"DependsOn = {dependsOnArray},");
+        writer.AppendLine("Materializer = GetTestsAsync");
+
+        writer.Unindent();
+        writer.AppendLine("};");
+
+        writer.Unindent();
+        writer.AppendLine("}");
+    }
+
+    private static string[] ExtractCategories(TestMethodMetadata testMethod)
+    {
+        var categories = new List<string>();
+
+        // Check method attributes
+        foreach (var attr in testMethod.MethodAttributes)
+        {
+            if (attr.AttributeClass?.Name == "CategoryAttribute" &&
+                attr.ConstructorArguments.Length > 0 &&
+                attr.ConstructorArguments[0].Value is string category)
+            {
+                categories.Add(category);
+            }
+        }
+
+        // Check class attributes
+        foreach (var attr in testMethod.TypeSymbol.GetAttributes())
+        {
+            if (attr.AttributeClass?.Name == "CategoryAttribute" &&
+                attr.ConstructorArguments.Length > 0 &&
+                attr.ConstructorArguments[0].Value is string category)
+            {
+                categories.Add(category);
+            }
+        }
+
+        // Check assembly attributes
+        foreach (var attr in testMethod.TypeSymbol.ContainingAssembly.GetAttributes())
+        {
+            if (attr.AttributeClass?.Name == "CategoryAttribute" &&
+                attr.ConstructorArguments.Length > 0 &&
+                attr.ConstructorArguments[0].Value is string category)
+            {
+                categories.Add(category);
+            }
+        }
+
+        return categories.Distinct().ToArray();
+    }
+
+    private static string[] ExtractProperties(TestMethodMetadata testMethod)
+    {
+        var properties = new List<string>();
+
+        // Check method attributes
+        foreach (var attr in testMethod.MethodAttributes)
+        {
+            if (attr.AttributeClass?.Name == "PropertyAttribute" &&
+                attr.ConstructorArguments.Length >= 2 &&
+                attr.ConstructorArguments[0].Value is string key &&
+                attr.ConstructorArguments[1].Value is string value)
+            {
+                properties.Add($"{key}={value}");
+            }
+        }
+
+        // Check class attributes
+        foreach (var attr in testMethod.TypeSymbol.GetAttributes())
+        {
+            if (attr.AttributeClass?.Name == "PropertyAttribute" &&
+                attr.ConstructorArguments.Length >= 2 &&
+                attr.ConstructorArguments[0].Value is string key &&
+                attr.ConstructorArguments[1].Value is string value)
+            {
+                properties.Add($"{key}={value}");
+            }
+        }
+
+        // Check assembly attributes
+        foreach (var attr in testMethod.TypeSymbol.ContainingAssembly.GetAttributes())
+        {
+            if (attr.AttributeClass?.Name == "PropertyAttribute" &&
+                attr.ConstructorArguments.Length >= 2 &&
+                attr.ConstructorArguments[0].Value is string key &&
+                attr.ConstructorArguments[1].Value is string value)
+            {
+                properties.Add($"{key}={value}");
+            }
+        }
+
+        return properties.Distinct().ToArray();
+    }
+
+    private static bool HasDataSources(TestMethodMetadata testMethod)
+    {
+        // Check for data source attributes on the method
+        foreach (var attr in testMethod.MethodAttributes)
+        {
+            if (DataSourceAttributeHelper.IsDataSourceAttribute(attr.AttributeClass))
+            {
+                return true;
+            }
+        }
+
+        // Check for data source attributes on the class
+        foreach (var attr in testMethod.TypeSymbol.GetAttributes())
+        {
+            if (DataSourceAttributeHelper.IsDataSourceAttribute(attr.AttributeClass))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static int ExtractRepeatCount(TestMethodMetadata testMethod)
+    {
+        // Check method attributes first
+        foreach (var attr in testMethod.MethodAttributes)
+        {
+            if (attr.AttributeClass?.Name == "RepeatAttribute" &&
+                attr.ConstructorArguments.Length > 0 &&
+                attr.ConstructorArguments[0].Value is int count)
+            {
+                return count;
+            }
+        }
+
+        // Check class attributes
+        foreach (var attr in testMethod.TypeSymbol.GetAttributes())
+        {
+            if (attr.AttributeClass?.Name == "RepeatAttribute" &&
+                attr.ConstructorArguments.Length > 0 &&
+                attr.ConstructorArguments[0].Value is int count)
+            {
+                return count;
+            }
+        }
+
+        return 0;
+    }
+
+    private static string[] ExtractDependsOn(TestMethodMetadata testMethod)
+    {
+        var dependencies = new List<string>();
+
+        // Check method attributes
+        foreach (var attr in testMethod.MethodAttributes)
+        {
+            var attrClass = attr.AttributeClass;
+            if (attrClass == null)
+            {
+                continue;
+            }
+
+            // Handle DependsOnAttribute and DependsOnAttribute<T>
+            if (attrClass.Name == "DependsOnAttribute" ||
+                (attrClass.IsGenericType && attrClass.ConstructedFrom?.Name == "DependsOnAttribute"))
+            {
+                string? className = null;
+                string? methodName = null;
+
+                // For generic DependsOnAttribute<T>, get the type argument
+                if (attrClass.IsGenericType && attrClass.TypeArguments.Length > 0)
+                {
+                    className = attrClass.TypeArguments[0].Name;
+                }
+
+                // Check constructor arguments for class type and method name
+                for (int i = 0; i < attr.ConstructorArguments.Length; i++)
+                {
+                    var arg = attr.ConstructorArguments[i];
+                    // Skip array arguments (like parameterTypes)
+                    if (arg.Kind == TypedConstantKind.Array)
+                    {
+                        continue;
+                    }
+                    if (arg.Value is INamedTypeSymbol typeSymbol)
+                    {
+                        className = typeSymbol.Name;
+                    }
+                    else if (arg.Value is string strValue)
+                    {
+                        methodName = strValue;
+                    }
+                }
+
+                // Format: "ClassName:MethodName", ":MethodName" for same-class, "ClassName:" for all in class
+                var dependency = $"{className ?? ""}:{methodName ?? ""}";
+                if (dependency != ":")
+                {
+                    dependencies.Add(dependency);
+                }
+            }
+        }
+
+        // Check class attributes (class-level DependsOn)
+        foreach (var attr in testMethod.TypeSymbol.GetAttributes())
+        {
+            var attrClass = attr.AttributeClass;
+            if (attrClass == null)
+            {
+                continue;
+            }
+
+            if (attrClass.Name == "DependsOnAttribute" ||
+                (attrClass.IsGenericType && attrClass.ConstructedFrom?.Name == "DependsOnAttribute"))
+            {
+                string? className = null;
+                string? methodName = null;
+
+                if (attrClass.IsGenericType && attrClass.TypeArguments.Length > 0)
+                {
+                    className = attrClass.TypeArguments[0].Name;
+                }
+
+                for (int i = 0; i < attr.ConstructorArguments.Length; i++)
+                {
+                    var arg = attr.ConstructorArguments[i];
+                    // Skip array arguments (like parameterTypes)
+                    if (arg.Kind == TypedConstantKind.Array)
+                    {
+                        continue;
+                    }
+                    if (arg.Value is INamedTypeSymbol typeSymbol)
+                    {
+                        className = typeSymbol.Name;
+                    }
+                    else if (arg.Value is string strValue)
+                    {
+                        methodName = strValue;
+                    }
+                }
+
+                var dependency = $"{className ?? ""}:{methodName ?? ""}";
+                if (dependency != ":")
+                {
+                    dependencies.Add(dependency);
+                }
+            }
+        }
+
+        return dependencies.Distinct().ToArray();
+    }
+
+    private static string EscapeString(string value)
+    {
+        return value
+            .Replace("\\", "\\\\")
+            .Replace("\"", "\\\"")
+            .Replace("\n", "\\n")
+            .Replace("\r", "\\r")
+            .Replace("\t", "\\t");
+    }
 
     private static void GenerateModuleInitializer(CodeWriter writer, TestMethodMetadata testMethod, string uniqueClassName)
     {

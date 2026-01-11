@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_MultiGenericTestClass_T1_T2_TestMethod_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_MultiGenericTestClass_T1_T2_TestMethod_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -212,6 +212,24 @@ internal sealed class TUnit_TestProject_MultiGenericTestClass_T1_T2_TestMethod_T
         genericMetadata.TestSessionId = testSessionId;
         yield return genericMetadata;
         yield break;
+    }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.MultiGenericTestClass.TestMethod",
+            ClassName = "MultiGenericTestClass",
+            MethodName = "TestMethod",
+            FullyQualifiedName = "TUnit.TestProject.MultiGenericTestClass.TestMethod",
+            FilePath = @"",
+            LineNumber = 9,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = false,
+            RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
+            Materializer = GetTestsAsync
+        };
     }
 }
 internal static class TUnit_TestProject_MultiGenericTestClass_T1_T2_TestMethod_ModuleInitializer

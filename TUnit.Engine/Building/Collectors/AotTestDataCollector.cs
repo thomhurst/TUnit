@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -52,25 +52,22 @@ internal sealed class AotTestDataCollector : ITestDataCollector
 
         var testSourcesList = testSourcesByType.SelectMany(kvp => kvp.Value).ToList();
 
-        // Use sequential processing for small test source sets to avoid task scheduling overhead
+        // Try two-phase discovery for sources that support it (with specific filter hints)
+        // This avoids creating full TestMetadata for tests that won't pass filtering
         IEnumerable<TestMetadata> standardTestMetadatas;
-        if (testSourcesList.Count < Building.ParallelThresholds.MinItemsForParallel)
+
+        if (filterHints.HasHints && testSourcesList.All(static s => s is ITestDescriptorSource))
         {
-            var results = new List<TestMetadata>();
-            foreach (var testSource in testSourcesList)
-            {
-                await foreach (var metadata in testSource.GetTestsAsync(testSessionId))
-                {
-                    results.Add(metadata);
-                }
-            }
-            standardTestMetadatas = results;
+            // Two-phase discovery: enumerate descriptors, filter, then materialize only matching
+            standardTestMetadatas = await CollectTestsWithTwoPhaseDiscoveryAsync(
+                testSourcesList.Cast<ITestDescriptorSource>(),
+                testSessionId,
+                filterHints).ConfigureAwait(false);
         }
         else
         {
-            standardTestMetadatas = await testSourcesList
-                .SelectManyAsync(testSource => testSource.GetTestsAsync(testSessionId))
-                .ProcessInParallel();
+            // Fallback: Use traditional collection (for legacy sources or no filter hints)
+            standardTestMetadatas = await CollectTestsTraditionalAsync(testSourcesList, testSessionId).ConfigureAwait(false);
         }
 
         // Dynamic tests are typically rare, collect sequentially
@@ -81,6 +78,153 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         }
 
         return [..standardTestMetadatas, ..dynamicTestMetadatas];
+    }
+
+    /// <summary>
+    /// Two-phase discovery: enumerate lightweight descriptors, apply filter hints, materialize only matching.
+    /// This is more efficient when filters are present as it avoids creating full TestMetadata for non-matching tests.
+    /// </summary>
+    private async Task<IEnumerable<TestMetadata>> CollectTestsWithTwoPhaseDiscoveryAsync(
+        IEnumerable<ITestDescriptorSource> descriptorSources,
+        string testSessionId,
+        FilterHints filterHints)
+    {
+        // Phase 1: Single-pass enumeration with filtering
+        // - Index all descriptors for dependency resolution
+        // - Immediately identify matching descriptors (no separate iteration)
+        // - Track if any matching descriptor has dependencies
+        var descriptorsByClassAndMethod = new Dictionary<(string ClassName, string MethodName), TestDescriptor>();
+        var descriptorsByClass = new Dictionary<string, List<TestDescriptor>>();
+        var matchingDescriptors = new List<TestDescriptor>();
+        var hasDependencies = false;
+
+        foreach (var source in descriptorSources)
+        {
+            foreach (var descriptor in source.EnumerateTestDescriptors())
+            {
+                // Index by class + method for specific dependency lookups
+                var key = (descriptor.ClassName, descriptor.MethodName);
+                descriptorsByClassAndMethod[key] = descriptor;
+
+                // Index by class for class-level dependency lookups
+                if (!descriptorsByClass.TryGetValue(descriptor.ClassName, out var classDescriptors))
+                {
+                    classDescriptors = [];
+                    descriptorsByClass[descriptor.ClassName] = classDescriptors;
+                }
+                classDescriptors.Add(descriptor);
+
+                // Filter during enumeration - no separate pass needed
+                if (filterHints.CouldDescriptorMatch(descriptor))
+                {
+                    matchingDescriptors.Add(descriptor);
+                    if (descriptor.DependsOn.Length > 0)
+                    {
+                        hasDependencies = true;
+                    }
+                }
+            }
+        }
+
+        // Phase 2: Expand dependencies only if any matching descriptor has them
+        HashSet<TestDescriptor>? expandedSet = null;
+        if (hasDependencies)
+        {
+            expandedSet = new HashSet<TestDescriptor>(matchingDescriptors);
+            var queue = new Queue<TestDescriptor>(matchingDescriptors);
+
+            while (queue.Count > 0)
+            {
+                var current = queue.Dequeue();
+                var dependsOn = current.DependsOn;
+
+                for (var i = 0; i < dependsOn.Length; i++)
+                {
+                    var dependency = dependsOn[i];
+
+                    // Parse dependency format: "ClassName:MethodName"
+                    var separatorIndex = dependency.IndexOf(':');
+                    if (separatorIndex < 0)
+                    {
+                        continue;
+                    }
+
+                    var depClassName = separatorIndex == 0
+                        ? current.ClassName  // Same-class dependency
+                        : dependency.Substring(0, separatorIndex);
+                    var depMethodName = dependency.Substring(separatorIndex + 1);
+
+                    if (depMethodName.Length > 0)
+                    {
+                        // Specific method dependency
+                        if (descriptorsByClassAndMethod.TryGetValue((depClassName, depMethodName), out var depDescriptor))
+                        {
+                            if (expandedSet.Add(depDescriptor))
+                            {
+                                queue.Enqueue(depDescriptor);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Class-level dependency: all tests in class
+                        if (descriptorsByClass.TryGetValue(depClassName, out var classDescriptors))
+                        {
+                            foreach (var depDescriptor in classDescriptors)
+                            {
+                                if (expandedSet.Add(depDescriptor))
+                                {
+                                    queue.Enqueue(depDescriptor);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Phase 3: Materialize matching descriptors (including dependencies)
+        var descriptorsToMaterialize = expandedSet ?? (IEnumerable<TestDescriptor>)matchingDescriptors;
+        var results = new List<TestMetadata>();
+
+        foreach (var descriptor in descriptorsToMaterialize)
+        {
+            await foreach (var metadata in descriptor.Materializer(testSessionId, CancellationToken.None).ConfigureAwait(false))
+            {
+                results.Add(metadata);
+            }
+        }
+
+        return results;
+    }
+
+    /// <summary>
+    /// Traditional collection: materialize all tests from sources.
+    /// Used when filter hints are not available or sources don't support ITestDescriptorSource.
+    /// </summary>
+    private async Task<IEnumerable<TestMetadata>> CollectTestsTraditionalAsync(
+        List<ITestSource> testSourcesList,
+        string testSessionId)
+    {
+        // Use sequential processing for small test source sets to avoid task scheduling overhead
+        if (testSourcesList.Count < Building.ParallelThresholds.MinItemsForParallel)
+        {
+            var results = new List<TestMetadata>();
+            foreach (var testSource in testSourcesList)
+            {
+                await foreach (var metadata in testSource.GetTestsAsync(testSessionId))
+                {
+                    results.Add(metadata);
+                }
+            }
+            return results;
+        }
+        else
+        {
+            return await testSourcesList
+                .SelectManyAsync(testSource => testSource.GetTestsAsync(testSessionId))
+                .ProcessInParallel();
+        }
     }
 
     [RequiresUnreferencedCode("Dynamic test collection requires expression compilation and reflection")]
@@ -371,6 +515,71 @@ internal sealed class AotTestDataCollector : ITestDataCollector
                 ClassArguments = context.ClassArguments,
                 Context = context.Context
             };
+        }
+    }
+
+    /// <summary>
+    /// Enumerates lightweight test descriptors for fast filtering.
+    /// For sources implementing ITestDescriptorSource, returns pre-computed descriptors.
+    /// For legacy sources, creates descriptors with default filter hints.
+    /// </summary>
+    public IEnumerable<TestDescriptor> EnumerateDescriptors()
+    {
+        // Enumerate descriptors from all test sources
+        foreach (var kvp in Sources.TestSources)
+        {
+            foreach (var testSource in kvp.Value)
+            {
+                // Check if the source implements ITestDescriptorSource for optimized enumeration
+                if (testSource is ITestDescriptorSource descriptorSource)
+                {
+                    foreach (var descriptor in descriptorSource.EnumerateTestDescriptors())
+                    {
+                        yield return descriptor;
+                    }
+                }
+                // For legacy sources without ITestDescriptorSource, we can't enumerate descriptors
+                // without materializing - these will need to use the fallback path
+            }
+        }
+    }
+
+    /// <summary>
+    /// Materializes full test metadata from filtered descriptors.
+    /// Only called for tests that passed filtering, avoiding unnecessary materialization.
+    /// </summary>
+    public async IAsyncEnumerable<TestMetadata> MaterializeFromDescriptorsAsync(
+        IEnumerable<TestDescriptor> descriptors,
+        string testSessionId,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        foreach (var descriptor in descriptors)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // Use the materializer delegate to create full TestMetadata
+            await foreach (var metadata in descriptor.Materializer(testSessionId, cancellationToken).ConfigureAwait(false))
+            {
+                yield return metadata;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets test sources that don't implement ITestDescriptorSource.
+    /// These sources require full materialization for discovery.
+    /// </summary>
+    public IEnumerable<ITestSource> GetLegacyTestSources()
+    {
+        foreach (var kvp in Sources.TestSources)
+        {
+            foreach (var testSource in kvp.Value)
+            {
+                if (testSource is not ITestDescriptorSource)
+                {
+                    yield return testSource;
+                }
+            }
         }
     }
 }

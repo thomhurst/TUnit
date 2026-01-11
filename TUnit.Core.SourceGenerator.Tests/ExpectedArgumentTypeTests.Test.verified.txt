@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_ExpectedArgumentTypeTests_TypedArguments__object_Type_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_ExpectedArgumentTypeTests_TypedArguments__object_Type_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -111,6 +111,24 @@ internal sealed class TUnit_TestProject_ExpectedArgumentTypeTests_TypedArguments
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.ExpectedArgumentTypeTests.TypedArguments",
+            ClassName = "ExpectedArgumentTypeTests",
+            MethodName = "TypedArguments",
+            FullyQualifiedName = "TUnit.TestProject.ExpectedArgumentTypeTests.TypedArguments",
+            FilePath = @"",
+            LineNumber = 8,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_ExpectedArgumentTypeTests_TypedArguments__object_Type_ModuleInitializer
 {
@@ -129,7 +147,7 @@ internal static class TUnit_TestProject_ExpectedArgumentTypeTests_TypedArguments
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_ExpectedArgumentTypeTests_EnumTypes__object_Type_Type_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_ExpectedArgumentTypeTests_EnumTypes__object_Type_Type_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -238,6 +256,24 @@ internal sealed class TUnit_TestProject_ExpectedArgumentTypeTests_EnumTypes__obj
         metadata.UseRuntimeDataGeneration(testSessionId);
         yield return metadata;
         yield break;
+    }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.ExpectedArgumentTypeTests.EnumTypes",
+            ClassName = "ExpectedArgumentTypeTests",
+            MethodName = "EnumTypes",
+            FullyQualifiedName = "TUnit.TestProject.ExpectedArgumentTypeTests.EnumTypes",
+            FilePath = @"",
+            LineNumber = 25,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
+            Materializer = GetTestsAsync
+        };
     }
 }
 internal static class TUnit_TestProject_ExpectedArgumentTypeTests_EnumTypes__object_Type_Type_ModuleInitializer
