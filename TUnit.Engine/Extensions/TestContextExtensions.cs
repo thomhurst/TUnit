@@ -7,7 +7,8 @@ namespace TUnit.Engine.Extensions;
 internal static class TestContextExtensions
 {
     /// <summary>
-    /// Checks if the class instance has changed since caches were built, and invalidates if needed.
+    /// Ensures all event receiver caches are populated. Iterates through eligible objects once
+    /// and categorizes them by type in a single pass.
     /// </summary>
     /// <remarks>
     /// Class instances change in these scenarios:
@@ -16,34 +17,27 @@ internal static class TestContextExtensions
     /// When this happens, eligible event objects may include the new instance (if it implements
     /// event receiver interfaces), so all caches must be invalidated and rebuilt.
     /// </remarks>
-    private static void InvalidateCachesIfClassInstanceChanged(TestContext testContext)
-    {
-        var currentClassInstance = testContext.Metadata.TestDetails.ClassInstance;
-        if (testContext.CachedClassInstance != null &&
-            !ReferenceEquals(testContext.CachedClassInstance, currentClassInstance))
-        {
-            // Class instance changed - invalidate all caches so they're rebuilt with the new instance
-            testContext.InvalidateEventReceiverCaches();
-        }
-        testContext.CachedClassInstance = currentClassInstance;
-    }
-
-    /// <summary>
-    /// Ensures all event receiver caches are populated. Iterates through eligible objects once
-    /// and categorizes them by type in a single pass.
-    /// </summary>
     private static void EnsureEventReceiversCached(TestContext testContext)
     {
-        InvalidateCachesIfClassInstanceChanged(testContext);
+        var currentClassInstance = testContext.Metadata.TestDetails.ClassInstance;
 
-        // If any cache is already populated, all are populated (we fill them together)
-        if (testContext.CachedTestStartReceivers != null)
+        // Check if caches are valid (populated and class instance hasn't changed)
+        if (testContext.CachedTestStartReceivers != null &&
+            ReferenceEquals(testContext.CachedClassInstance, currentClassInstance))
         {
             return;
         }
 
-        // Get eligible objects (builds and caches if needed)
-        var eligibleObjects = GetEligibleEventObjects(testContext);
+        // Invalidate stale caches if class instance changed
+        if (testContext.CachedClassInstance != null &&
+            !ReferenceEquals(testContext.CachedClassInstance, currentClassInstance))
+        {
+            testContext.InvalidateEventReceiverCaches();
+        }
+
+        // Build caches - get eligible objects first
+        var eligibleObjects = BuildEligibleEventObjects(testContext);
+        testContext.CachedEligibleEventObjects = eligibleObjects;
 
         // Single pass: categorize each object by interface type
         List<ITestStartEventReceiver>? startReceivers = null;
@@ -92,6 +86,9 @@ internal static class TestContextExtensions
         testContext.CachedTestSkippedReceivers = SortAndFilter(skippedReceivers);
         testContext.CachedTestDiscoveryReceivers = SortAndFilter(discoveryReceivers);
         testContext.CachedTestRegisteredReceivers = SortAndFilter(registeredReceivers);
+
+        // Update cached class instance last
+        testContext.CachedClassInstance = currentClassInstance;
     }
 
     private static T[] SortAndFilter<T>(List<T>? receivers) where T : class, IEventReceiver
@@ -111,19 +108,9 @@ internal static class TestContextExtensions
 
     public static IEnumerable<object> GetEligibleEventObjects(this TestContext testContext)
     {
-        // Check if class instance changed and invalidate caches if needed
-        InvalidateCachesIfClassInstanceChanged(testContext);
-
-        // Return cached result if available
-        if (testContext.CachedEligibleEventObjects != null)
-        {
-            return testContext.CachedEligibleEventObjects;
-        }
-
-        // Build result directly with single allocation
-        var result = BuildEligibleEventObjects(testContext);
-        testContext.CachedEligibleEventObjects = result;
-        return result;
+        // Use EnsureEventReceiversCached which builds eligible objects as part of cache initialization
+        EnsureEventReceiversCached(testContext);
+        return testContext.CachedEligibleEventObjects!;
     }
 
     private static object[] BuildEligibleEventObjects(TestContext testContext)
