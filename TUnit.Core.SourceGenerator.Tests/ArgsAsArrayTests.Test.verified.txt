@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_ArgsAsArrayTests_Params__string___TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_ArgsAsArrayTests_Params__string___TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -122,6 +122,24 @@ internal sealed class TUnit_TestProject_ArgsAsArrayTests_Params__string___TestSo
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.ArgsAsArrayTests.Params",
+            ClassName = "ArgsAsArrayTests",
+            MethodName = "Params",
+            FullyQualifiedName = "TUnit.TestProject.ArgsAsArrayTests.Params",
+            FilePath = @"",
+            LineNumber = 5,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_ArgsAsArrayTests_Params__string___ModuleInitializer
 {
@@ -140,7 +158,7 @@ internal static class TUnit_TestProject_ArgsAsArrayTests_Params__string___Module
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_ArgsAsArrayTests_ParamsEnumerable__IEnumerable_string__TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_ArgsAsArrayTests_ParamsEnumerable__IEnumerable_string__TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -259,6 +277,24 @@ internal sealed class TUnit_TestProject_ArgsAsArrayTests_ParamsEnumerable__IEnum
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.ArgsAsArrayTests.ParamsEnumerable",
+            ClassName = "ArgsAsArrayTests",
+            MethodName = "ParamsEnumerable",
+            FullyQualifiedName = "TUnit.TestProject.ArgsAsArrayTests.ParamsEnumerable",
+            FilePath = @"",
+            LineNumber = 15,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_ArgsAsArrayTests_ParamsEnumerable__IEnumerable_string__ModuleInitializer
 {
@@ -277,7 +313,7 @@ internal static class TUnit_TestProject_ArgsAsArrayTests_ParamsEnumerable__IEnum
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_ArgsAsArrayTests_Following_Non_Params__int_IEnumerable_string__TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_ArgsAsArrayTests_Following_Non_Params__int_IEnumerable_string__TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -402,6 +438,24 @@ internal sealed class TUnit_TestProject_ArgsAsArrayTests_Following_Non_Params__i
         metadata.UseRuntimeDataGeneration(testSessionId);
         yield return metadata;
         yield break;
+    }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.ArgsAsArrayTests.Following_Non_Params",
+            ClassName = "ArgsAsArrayTests",
+            MethodName = "Following_Non_Params",
+            FullyQualifiedName = "TUnit.TestProject.ArgsAsArrayTests.Following_Non_Params",
+            FilePath = @"",
+            LineNumber = 25,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
+            Materializer = GetTestsAsync
+        };
     }
 }
 internal static class TUnit_TestProject_ArgsAsArrayTests_Following_Non_Params__int_IEnumerable_string__ModuleInitializer

@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_GenericMethodTests_AggregateBy_HasExpectedOutput__IEnumerable_TSource__Func_TSource__TKey__Func_TKey__TAccumulate__Func_TAccumulate__TSource__TAccumulate__IEqualityComparer_TKey___IEnumerable_KeyValuePair_TKey__TAccumulate___TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_GenericMethodTests_AggregateBy_HasExpectedOutput__IEnumerable_TSource__Func_TSource__TKey__Func_TKey__TAccumulate__Func_TAccumulate__TSource__TAccumulate__IEqualityComparer_TKey___IEnumerable_KeyValuePair_TKey__TAccumulate___TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -433,6 +433,24 @@ internal sealed class TUnit_TestProject_GenericMethodTests_AggregateBy_HasExpect
         genericMetadata.TestSessionId = testSessionId;
         yield return genericMetadata;
         yield break;
+    }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.GenericMethodTests.AggregateBy_HasExpectedOutput",
+            ClassName = "GenericMethodTests",
+            MethodName = "AggregateBy_HasExpectedOutput",
+            FullyQualifiedName = "TUnit.TestProject.GenericMethodTests.AggregateBy_HasExpectedOutput",
+            FilePath = @"",
+            LineNumber = 8,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
+            Materializer = GetTestsAsync
+        };
     }
 }
 internal static class TUnit_TestProject_GenericMethodTests_AggregateBy_HasExpectedOutput__IEnumerable_TSource__Func_TSource__TKey__Func_TKey__TAccumulate__Func_TAccumulate__TSource__TAccumulate__IEqualityComparer_TKey___IEnumerable_KeyValuePair_TKey__TAccumulate___ModuleInitializer

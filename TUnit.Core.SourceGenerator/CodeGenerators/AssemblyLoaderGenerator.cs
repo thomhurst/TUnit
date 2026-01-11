@@ -42,6 +42,9 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
 
     private void GenerateCode(SourceProductionContext context, Compilation compilation)
     {
+        // Find TUnit.Core assembly - only assemblies referencing this can contain tests
+        var tunitCoreAssembly = FindTUnitCoreAssembly(compilation);
+
         // Collect all assemblies: start with the current assembly, then traverse references
         var visitedAssemblies = new HashSet<IAssemblySymbol>(SymbolEqualityComparer.Default);
 
@@ -69,6 +72,11 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
             }
         }
 
+        // Build set of assemblies that reference TUnit.Core (directly or transitively)
+        var assembliesReferencingTUnit = tunitCoreAssembly != null
+            ? FindAssembliesReferencingTUnitCore(visitedAssemblies, tunitCoreAssembly)
+            : visitedAssemblies; // Fallback: register all if TUnit.Core not found
+
         var sourceBuilder = new CodeWriter();
 
         sourceBuilder.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]");
@@ -78,7 +86,7 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
             sourceBuilder.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
             using (sourceBuilder.BeginBlock("public static void Initialize()"))
             {
-                foreach (var assembly in visitedAssemblies)
+                foreach (var assembly in assembliesReferencingTUnit)
                 {
                     WriteAssemblyLoad(sourceBuilder, assembly, compilation);
                 }
@@ -87,9 +95,84 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
         context.AddSource("AssemblyLoader.g.cs", sourceBuilder.ToString());
     }
 
+    private static IAssemblySymbol? FindTUnitCoreAssembly(Compilation compilation)
+    {
+        // Check current assembly first
+        if (compilation.Assembly.Name == "TUnit.Core")
+        {
+            return compilation.Assembly;
+        }
+
+        // Search referenced assemblies
+        foreach (var reference in compilation.References)
+        {
+            if (compilation.GetAssemblyOrModuleSymbol(reference) is IAssemblySymbol assemblySymbol
+                && assemblySymbol.Name == "TUnit.Core")
+            {
+                return assemblySymbol;
+            }
+        }
+
+        return null;
+    }
+
+    private static HashSet<IAssemblySymbol> FindAssembliesReferencingTUnitCore(
+        HashSet<IAssemblySymbol> allAssemblies,
+        IAssemblySymbol tunitCoreAssembly)
+    {
+        // Build reverse dependency graph: for each assembly, which assemblies reference it?
+        var referencedBy = new Dictionary<IAssemblySymbol, List<IAssemblySymbol>>(SymbolEqualityComparer.Default);
+
+        foreach (var assembly in allAssemblies)
+        {
+            foreach (var referenced in assembly.Modules.SelectMany(m => m.ReferencedAssemblySymbols))
+            {
+                if (!referencedBy.TryGetValue(referenced, out var list))
+                {
+                    list = [];
+                    referencedBy[referenced] = list;
+                }
+                list.Add(assembly);
+            }
+        }
+
+        // BFS from TUnit.Core to find all assemblies that transitively reference it
+        var result = new HashSet<IAssemblySymbol>(SymbolEqualityComparer.Default);
+        var queue = new Queue<IAssemblySymbol>();
+
+        // Start with TUnit.Core itself
+        result.Add(tunitCoreAssembly);
+        queue.Enqueue(tunitCoreAssembly);
+
+        while (queue.Count > 0)
+        {
+            var current = queue.Dequeue();
+
+            // Find all assemblies that reference the current assembly
+            if (referencedBy.TryGetValue(current, out var dependents))
+            {
+                foreach (var dependent in dependents)
+                {
+                    if (result.Add(dependent))
+                    {
+                        queue.Enqueue(dependent);
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
     private static void WriteAssemblyLoad(ICodeWriter sourceBuilder, IAssemblySymbol assembly, Compilation compilation)
     {
         if (IsSystemAssembly(assembly))
+        {
+            return;
+        }
+
+        // Skip TUnit framework assemblies - they don't contain user tests
+        if (IsTUnitFrameworkAssembly(assembly))
         {
             return;
         }
@@ -101,6 +184,19 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
         }
 
         sourceBuilder.AppendLine($"global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load(\"{GetAssemblyFullName(assembly)}\"));");
+    }
+
+    private static bool IsTUnitFrameworkAssembly(IAssemblySymbol assembly)
+    {
+        var name = assembly.Name;
+        return name == "TUnit" ||
+               name == "TUnit.Core" ||
+               name == "TUnit.Engine" ||
+               name == "TUnit.Assertions" ||
+               name == "TUnit.Assertions.FSharp" ||
+               name == "TUnit.Playwright" ||
+               name == "TUnit.AspNetCore" ||
+               name.StartsWith("TUnit.Assertions.", StringComparison.Ordinal);
     }
 
     private static bool HasPhysicalLocation(IAssemblySymbol assembly, Compilation compilation)

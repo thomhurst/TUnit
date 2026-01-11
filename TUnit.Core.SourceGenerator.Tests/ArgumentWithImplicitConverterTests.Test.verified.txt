@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_ArgumentWithImplicitConverterTests_Explicit__ExplicitInteger_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_ArgumentWithImplicitConverterTests_Explicit__ExplicitInteger_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -95,6 +95,24 @@ internal sealed class TUnit_TestProject_ArgumentWithImplicitConverterTests_Expli
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.ArgumentWithImplicitConverterTests.Explicit",
+            ClassName = "ArgumentWithImplicitConverterTests",
+            MethodName = "Explicit",
+            FullyQualifiedName = "TUnit.TestProject.ArgumentWithImplicitConverterTests.Explicit",
+            FilePath = @"",
+            LineNumber = 8,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_ArgumentWithImplicitConverterTests_Explicit__ExplicitInteger_ModuleInitializer
 {
@@ -113,7 +131,7 @@ internal static class TUnit_TestProject_ArgumentWithImplicitConverterTests_Expli
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_ArgumentWithImplicitConverterTests_Implicit__ImplicitInteger_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_ArgumentWithImplicitConverterTests_Implicit__ImplicitInteger_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -204,6 +222,24 @@ internal sealed class TUnit_TestProject_ArgumentWithImplicitConverterTests_Impli
         metadata.UseRuntimeDataGeneration(testSessionId);
         yield return metadata;
         yield break;
+    }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.ArgumentWithImplicitConverterTests.Implicit",
+            ClassName = "ArgumentWithImplicitConverterTests",
+            MethodName = "Implicit",
+            FullyQualifiedName = "TUnit.TestProject.ArgumentWithImplicitConverterTests.Implicit",
+            FilePath = @"",
+            LineNumber = 17,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
+            Materializer = GetTestsAsync
+        };
     }
 }
 internal static class TUnit_TestProject_ArgumentWithImplicitConverterTests_Implicit__ImplicitInteger_ModuleInitializer

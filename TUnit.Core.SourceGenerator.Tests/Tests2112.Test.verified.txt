@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_Bugs__2112_Tests_Test__int_long___TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_Bugs__2112_Tests_Test__int_long___TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -131,6 +131,24 @@ internal sealed class TUnit_TestProject_Bugs__2112_Tests_Test__int_long___TestSo
         yield return metadata;
         yield break;
     }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.Bugs._2112.Tests.Test",
+            ClassName = "Tests",
+            MethodName = "Test",
+            FullyQualifiedName = "TUnit.TestProject.Bugs._2112.Tests.Test",
+            FilePath = @"",
+            LineNumber = 8,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
+            Materializer = GetTestsAsync
+        };
+    }
 }
 internal static class TUnit_TestProject_Bugs__2112_Tests_Test__int_long___ModuleInitializer
 {
@@ -149,7 +167,7 @@ internal static class TUnit_TestProject_Bugs__2112_Tests_Test__int_long___Module
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_Bugs__2112_Tests_Test2__int_long___TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_Bugs__2112_Tests_Test2__int_long___TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -276,6 +294,24 @@ internal sealed class TUnit_TestProject_Bugs__2112_Tests_Test2__int_long___TestS
         metadata.UseRuntimeDataGeneration(testSessionId);
         yield return metadata;
         yield break;
+    }
+    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    {
+        yield return new global::TUnit.Core.TestDescriptor
+        {
+            TestId = "TUnit.TestProject.Bugs._2112.Tests.Test2",
+            ClassName = "Tests",
+            MethodName = "Test2",
+            FullyQualifiedName = "TUnit.TestProject.Bugs._2112.Tests.Test2",
+            FilePath = @"",
+            LineNumber = 15,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
+            Materializer = GetTestsAsync
+        };
     }
 }
 internal static class TUnit_TestProject_Bugs__2112_Tests_Test2__int_long___ModuleInitializer
