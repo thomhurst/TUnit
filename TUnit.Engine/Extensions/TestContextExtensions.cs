@@ -1,4 +1,5 @@
 ﻿using TUnit.Core;
+using TUnit.Core.Enums;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Utilities;
 
@@ -22,11 +23,19 @@ internal static class TestContextExtensions
         var currentClassInstance = testContext.Metadata.TestDetails.ClassInstance;
 
         // Check if caches are valid (populated and class instance hasn't changed)
+#if NET
+        if (testContext.CachedTestStartReceiversEarly != null &&
+            ReferenceEquals(testContext.CachedClassInstance, currentClassInstance))
+        {
+            return;
+        }
+#else
         if (testContext.CachedTestStartReceivers != null &&
             ReferenceEquals(testContext.CachedClassInstance, currentClassInstance))
         {
             return;
         }
+#endif
 
         // Invalidate stale caches if class instance changed
         if (testContext.CachedClassInstance != null &&
@@ -40,8 +49,15 @@ internal static class TestContextExtensions
         testContext.CachedEligibleEventObjects = eligibleObjects;
 
         // Single pass: categorize each object by interface type
+#if NET
+        List<ITestStartEventReceiver>? startReceiversEarly = null;
+        List<ITestStartEventReceiver>? startReceiversLate = null;
+        List<ITestEndEventReceiver>? endReceiversEarly = null;
+        List<ITestEndEventReceiver>? endReceiversLate = null;
+#else
         List<ITestStartEventReceiver>? startReceivers = null;
         List<ITestEndEventReceiver>? endReceivers = null;
+#endif
         List<ITestSkippedEventReceiver>? skippedReceivers = null;
         List<ITestDiscoveryEventReceiver>? discoveryReceivers = null;
         List<ITestRegisteredEventReceiver>? registeredReceivers = null;
@@ -51,14 +67,40 @@ internal static class TestContextExtensions
             // Check each interface - an object can implement multiple
             if (obj is ITestStartEventReceiver startReceiver)
             {
+#if NET
+                if (startReceiver.Stage == EventReceiverStage.Early)
+                {
+                    startReceiversEarly ??= [];
+                    startReceiversEarly.Add(startReceiver);
+                }
+                else
+                {
+                    startReceiversLate ??= [];
+                    startReceiversLate.Add(startReceiver);
+                }
+#else
                 startReceivers ??= [];
                 startReceivers.Add(startReceiver);
+#endif
             }
 
             if (obj is ITestEndEventReceiver endReceiver)
             {
+#if NET
+                if (endReceiver.Stage == EventReceiverStage.Early)
+                {
+                    endReceiversEarly ??= [];
+                    endReceiversEarly.Add(endReceiver);
+                }
+                else
+                {
+                    endReceiversLate ??= [];
+                    endReceiversLate.Add(endReceiver);
+                }
+#else
                 endReceivers ??= [];
                 endReceivers.Add(endReceiver);
+#endif
             }
 
             if (obj is ITestSkippedEventReceiver skippedReceiver)
@@ -81,8 +123,15 @@ internal static class TestContextExtensions
         }
 
         // Sort and apply scoped filtering, then cache
+#if NET
+        testContext.CachedTestStartReceiversEarly = SortAndFilter(startReceiversEarly);
+        testContext.CachedTestStartReceiversLate = SortAndFilter(startReceiversLate);
+        testContext.CachedTestEndReceiversEarly = SortAndFilter(endReceiversEarly);
+        testContext.CachedTestEndReceiversLate = SortAndFilter(endReceiversLate);
+#else
         testContext.CachedTestStartReceivers = SortAndFilter(startReceivers);
         testContext.CachedTestEndReceivers = SortAndFilter(endReceivers);
+#endif
         testContext.CachedTestSkippedReceivers = SortAndFilter(skippedReceivers);
         testContext.CachedTestDiscoveryReceivers = SortAndFilter(discoveryReceivers);
         testContext.CachedTestRegisteredReceivers = SortAndFilter(registeredReceivers);
@@ -218,20 +267,40 @@ internal static class TestContextExtensions
     /// <summary>
     /// Gets pre-computed test start receivers (filtered, sorted, scoped-attribute filtered).
     /// </summary>
+#if NET
+    public static ITestStartEventReceiver[] GetTestStartReceivers(this TestContext testContext, EventReceiverStage stage)
+    {
+        EnsureEventReceiversCached(testContext);
+        return stage == EventReceiverStage.Early
+            ? testContext.CachedTestStartReceiversEarly!
+            : testContext.CachedTestStartReceiversLate!;
+    }
+#else
     public static ITestStartEventReceiver[] GetTestStartReceivers(this TestContext testContext)
     {
         EnsureEventReceiversCached(testContext);
         return testContext.CachedTestStartReceivers!;
     }
+#endif
 
     /// <summary>
     /// Gets pre-computed test end receivers (filtered, sorted, scoped-attribute filtered).
     /// </summary>
+#if NET
+    public static ITestEndEventReceiver[] GetTestEndReceivers(this TestContext testContext, EventReceiverStage stage)
+    {
+        EnsureEventReceiversCached(testContext);
+        return stage == EventReceiverStage.Early
+            ? testContext.CachedTestEndReceiversEarly!
+            : testContext.CachedTestEndReceiversLate!;
+    }
+#else
     public static ITestEndEventReceiver[] GetTestEndReceivers(this TestContext testContext)
     {
         EnsureEventReceiversCached(testContext);
         return testContext.CachedTestEndReceivers!;
     }
+#endif
 
     /// <summary>
     /// Gets pre-computed test skipped receivers (filtered, sorted, scoped-attribute filtered).

@@ -183,8 +183,17 @@ public partial class TestContext : Context,
 
     // Pre-computed typed event receivers (filtered, sorted, scoped-attribute filtered)
     // These are computed lazily on first access and cached
+#if NET
+    // Stage-specific caches for .NET 8+ (avoids runtime filtering by stage)
+    internal ITestStartEventReceiver[]? CachedTestStartReceiversEarly { get; set; }
+    internal ITestStartEventReceiver[]? CachedTestStartReceiversLate { get; set; }
+    internal ITestEndEventReceiver[]? CachedTestEndReceiversEarly { get; set; }
+    internal ITestEndEventReceiver[]? CachedTestEndReceiversLate { get; set; }
+#else
+    // Single cache for older frameworks (no stage concept)
     internal ITestStartEventReceiver[]? CachedTestStartReceivers { get; set; }
     internal ITestEndEventReceiver[]? CachedTestEndReceivers { get; set; }
+#endif
     internal ITestSkippedEventReceiver[]? CachedTestSkippedReceivers { get; set; }
     internal ITestDiscoveryEventReceiver[]? CachedTestDiscoveryReceivers { get; set; }
     internal ITestRegisteredEventReceiver[]? CachedTestRegisteredReceivers { get; set; }
@@ -198,8 +207,15 @@ public partial class TestContext : Context,
     internal void InvalidateEventReceiverCaches()
     {
         CachedEligibleEventObjects = null;
+#if NET
+        CachedTestStartReceiversEarly = null;
+        CachedTestStartReceiversLate = null;
+        CachedTestEndReceiversEarly = null;
+        CachedTestEndReceiversLate = null;
+#else
         CachedTestStartReceivers = null;
         CachedTestEndReceivers = null;
+#endif
         CachedTestSkippedReceivers = null;
         CachedTestDiscoveryReceivers = null;
         CachedTestRegisteredReceivers = null;

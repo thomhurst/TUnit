@@ -92,25 +92,38 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
     private async ValueTask InvokeTestStartEventReceiversCore(TestContext context, CancellationToken cancellationToken, EventReceiverStage? stage)
     {
-        // Use pre-computed receivers (already filtered, sorted, and scoped-attribute filtered)
-        var receivers = context.GetTestStartReceivers();
-
-        if (receivers.Length == 0)
+        // Use pre-computed receivers (already filtered by stage, sorted, and scoped-attribute filtered)
+#if NET
+        if (stage.HasValue)
         {
-            return;
+            var receivers = context.GetTestStartReceivers(stage.Value);
+            foreach (var receiver in receivers)
+            {
+                await receiver.OnTestStart(context);
+            }
         }
+        else
+        {
+            // No stage specified - invoke both Early and Late receivers in order
+            var earlyReceivers = context.GetTestStartReceivers(EventReceiverStage.Early);
+            foreach (var receiver in earlyReceivers)
+            {
+                await receiver.OnTestStart(context);
+            }
 
+            var lateReceivers = context.GetTestStartReceivers(EventReceiverStage.Late);
+            foreach (var receiver in lateReceivers)
+            {
+                await receiver.OnTestStart(context);
+            }
+        }
+#else
+        var receivers = context.GetTestStartReceivers();
         foreach (var receiver in receivers)
         {
-#if NET
-            // Filter by stage if specified (only on .NET 8.0+ where Stage property exists)
-            if (stage.HasValue && receiver.Stage != stage.Value)
-            {
-                continue;
-            }
-#endif
             await receiver.OnTestStart(context);
         }
+#endif
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -129,23 +142,62 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         // Defer exception list allocation until actually needed
         List<Exception>? exceptions = null;
 
-        // Use pre-computed receivers (already filtered, sorted, and scoped-attribute filtered)
-        var receivers = context.GetTestEndReceivers();
-
-        if (receivers.Length == 0)
+        // Use pre-computed receivers (already filtered by stage, sorted, and scoped-attribute filtered)
+#if NET
+        if (stage.HasValue)
         {
-            return [];
+            var receivers = context.GetTestEndReceivers(stage.Value);
+            foreach (var receiver in receivers)
+            {
+                try
+                {
+                    await receiver.OnTestEnd(context);
+                }
+                catch (Exception ex)
+                {
+                    await _logger.LogErrorAsync($"Error in test end event receiver: {ex.Message}");
+                    exceptions ??= [];
+                    exceptions.Add(ex);
+                }
+            }
         }
+        else
+        {
+            // No stage specified - invoke both Early and Late receivers in order
+            var earlyReceivers = context.GetTestEndReceivers(EventReceiverStage.Early);
+            foreach (var receiver in earlyReceivers)
+            {
+                try
+                {
+                    await receiver.OnTestEnd(context);
+                }
+                catch (Exception ex)
+                {
+                    await _logger.LogErrorAsync($"Error in test end event receiver: {ex.Message}");
+                    exceptions ??= [];
+                    exceptions.Add(ex);
+                }
+            }
 
+            var lateReceivers = context.GetTestEndReceivers(EventReceiverStage.Late);
+            foreach (var receiver in lateReceivers)
+            {
+                try
+                {
+                    await receiver.OnTestEnd(context);
+                }
+                catch (Exception ex)
+                {
+                    await _logger.LogErrorAsync($"Error in test end event receiver: {ex.Message}");
+                    exceptions ??= [];
+                    exceptions.Add(ex);
+                }
+            }
+        }
+#else
+        var receivers = context.GetTestEndReceivers();
         foreach (var receiver in receivers)
         {
-#if NET
-            // Filter by stage if specified (only on .NET 8.0+ where Stage property exists)
-            if (stage.HasValue && receiver.Stage != stage.Value)
-            {
-                continue;
-            }
-#endif
             try
             {
                 await receiver.OnTestEnd(context);
@@ -157,6 +209,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
                 exceptions.Add(ex);
             }
         }
+#endif
 
         return exceptions ?? [];
     }
