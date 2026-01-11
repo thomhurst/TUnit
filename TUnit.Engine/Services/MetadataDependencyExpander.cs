@@ -16,6 +16,16 @@ internal sealed class TestMetadataEqualityComparer : IEqualityComparer<TestMetad
         if (ReferenceEquals(x, y)) return true;
         if (x is null || y is null) return false;
 
+        // For dynamic tests, also compare DynamicTestIndex to distinguish
+        // multiple dynamic tests targeting the same method with different arguments
+        if (x is IDynamicTestMetadata xDynamic && y is IDynamicTestMetadata yDynamic)
+        {
+            if (xDynamic.DynamicTestIndex != yDynamic.DynamicTestIndex)
+            {
+                return false;
+            }
+        }
+
         return x.TestClassType == y.TestClassType &&
                x.TestMethodName == y.TestMethodName &&
                x.TestName == y.TestName;
@@ -29,6 +39,13 @@ internal sealed class TestMetadataEqualityComparer : IEqualityComparer<TestMetad
             hash = hash * 31 + (obj.TestClassType?.GetHashCode() ?? 0);
             hash = hash * 31 + (obj.TestMethodName?.GetHashCode() ?? 0);
             hash = hash * 31 + (obj.TestName?.GetHashCode() ?? 0);
+
+            // Include DynamicTestIndex in hash for dynamic tests
+            if (obj is IDynamicTestMetadata dynamicMetadata)
+            {
+                hash = hash * 31 + dynamicMetadata.DynamicTestIndex;
+            }
+
             return hash;
         }
     }
