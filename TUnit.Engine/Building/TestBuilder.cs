@@ -978,7 +978,7 @@ internal sealed class TestBuilder : ITestBuilder
             attributes = [..attributes, (Attribute)testBuilderContext.DataSourceAttribute];
         }
 
-        var testDetails = new TestDetails
+        var testDetails = new TestDetails(attributes)
         {
             TestId = testId,
             TestName = metadata.TestName,
@@ -1074,7 +1074,8 @@ internal sealed class TestBuilder : ITestBuilder
 
     private async Task<TestDetails> CreateFailedTestDetails(TestMetadata metadata, string testId)
     {
-        return new TestDetails
+        var attributes = (await InitializeAttributesAsync(metadata.AttributeFactory.Invoke()));
+        return new TestDetails(attributes)
         {
             TestId = testId,
             TestName = metadata.TestName,
@@ -1087,7 +1088,7 @@ internal sealed class TestBuilder : ITestBuilder
             TestLineNumber = metadata.LineNumber,
             ReturnType = typeof(Task),
             MethodMetadata = metadata.MethodMetadata,
-            AttributesByType = (await InitializeAttributesAsync(metadata.AttributeFactory.Invoke())).ToAttributeDictionary(),
+            AttributesByType = attributes.ToAttributeDictionary(),
             Timeout = TimeSpan.FromMinutes(30) // Default 30-minute timeout (can be overridden by TimeoutAttribute)
         };
     }

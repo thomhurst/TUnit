@@ -249,7 +249,7 @@ internal sealed class TestBuilderPipeline
             var attributes = metadata.AttributeFactory();
 
             // Create TestDetails for dynamic tests
-            var testDetails = new TestDetails
+            var testDetails = new TestDetails(attributes)
             {
                 TestId = testId,
                 TestName = metadata.TestName,
@@ -377,7 +377,7 @@ internal sealed class TestBuilderPipeline
                         : baseDisplayName;
 
                     // Create TestDetails for dynamic tests
-                    var testDetails = new TestDetails
+                    var testDetails = new TestDetails(attributes)
                     {
                         TestId = testId,
                         TestName = resolvedMetadata.TestName,
@@ -457,7 +457,7 @@ internal sealed class TestBuilderPipeline
         var testId = TestIdentifierService.GenerateFailedTestId(metadata);
         var displayName = $"{metadata.TestClassType.Name}.{metadata.TestName}";
 
-        var testDetails = new TestDetails
+        var testDetails = new TestDetails([])
         {
             TestId = testId,
             TestName = metadata.TestName,
@@ -509,7 +509,7 @@ internal sealed class TestBuilderPipeline
         var testId = TestIdentifierService.GenerateFailedTestId(metadata);
         var displayName = $"{metadata.TestName} [GENERIC RESOLUTION ERROR]";
 
-        var testDetails = new TestDetails
+        var testDetails = new TestDetails([])
         {
             TestId = testId,
             TestName = metadata.TestName,
