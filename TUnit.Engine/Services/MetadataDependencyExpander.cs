@@ -63,6 +63,63 @@ internal sealed class MetadataDependencyExpander
             .ToList();
 
         var result = new HashSet<TestMetadata>(matchingMetadata, TestMetadataEqualityComparer.Instance);
+
+        // Fast path: check if any matching metadata has dependencies
+        var hasDependencies = false;
+        foreach (var m in matchingMetadata)
+        {
+            if (m.Dependencies.Length > 0)
+            {
+                hasDependencies = true;
+                break;
+            }
+        }
+
+        if (!hasDependencies)
+        {
+            // No dependencies to expand - return early
+            return result;
+        }
+
+        // Build indexes for O(1) dependency lookup instead of O(n) scanning
+        // Index by class type for class-level dependencies
+        var byClassType = new Dictionary<Type, List<TestMetadata>>();
+        // Index by (class type, method name) for specific method dependencies
+        var byClassAndMethod = new Dictionary<(Type, string), List<TestMetadata>>();
+        // Index by method name for same-class dependencies
+        var byMethodName = new Dictionary<string, List<TestMetadata>>();
+
+        foreach (var metadata in metadataList)
+        {
+            var classType = metadata.TestClassType;
+            var methodName = metadata.TestMethodName;
+
+            // Add to class type index
+            if (!byClassType.TryGetValue(classType, out var classTypeList))
+            {
+                classTypeList = [];
+                byClassType[classType] = classTypeList;
+            }
+            classTypeList.Add(metadata);
+
+            // Add to class+method index
+            var classMethodKey = (classType, methodName);
+            if (!byClassAndMethod.TryGetValue(classMethodKey, out var classMethodList))
+            {
+                classMethodList = [];
+                byClassAndMethod[classMethodKey] = classMethodList;
+            }
+            classMethodList.Add(metadata);
+
+            // Add to method name index
+            if (!byMethodName.TryGetValue(methodName, out var methodNameList))
+            {
+                methodNameList = [];
+                byMethodName[methodName] = methodNameList;
+            }
+            methodNameList.Add(metadata);
+        }
+
         var queue = new Queue<TestMetadata>(matchingMetadata);
 
         while (queue.Count > 0)
@@ -71,7 +128,51 @@ internal sealed class MetadataDependencyExpander
 
             foreach (var dependency in current.Dependencies)
             {
-                foreach (var candidateMetadata in metadataList)
+                // Get candidate list based on dependency type for O(1) lookup
+                IEnumerable<TestMetadata> candidates;
+
+                if (dependency.ClassType != null && !string.IsNullOrEmpty(dependency.MethodName))
+                {
+                    // Specific class and method - use most specific index
+                    var key = (dependency.ClassType, dependency.MethodName!);
+                    if (byClassAndMethod.TryGetValue(key, out var list))
+                    {
+                        candidates = list;
+                    }
+                    else
+                    {
+                        // For generic types or inheritance, fall back to class index
+                        candidates = byClassType.TryGetValue(dependency.ClassType, out var classList)
+                            ? classList
+                            : [];
+                    }
+                }
+                else if (dependency.ClassType != null)
+                {
+                    // Class-level dependency - all tests in the class
+                    candidates = byClassType.TryGetValue(dependency.ClassType, out var list)
+                        ? list
+                        : [];
+                }
+                else if (!string.IsNullOrEmpty(dependency.MethodName))
+                {
+                    // Same-class dependency by method name - look up by method name, then filter by class
+                    if (byMethodName.TryGetValue(dependency.MethodName!, out var list))
+                    {
+                        candidates = list.Where(m => m.TestClassType == current.TestClassType);
+                    }
+                    else
+                    {
+                        candidates = [];
+                    }
+                }
+                else
+                {
+                    // Fallback for edge cases
+                    candidates = metadataList;
+                }
+
+                foreach (var candidateMetadata in candidates)
                 {
                     if (dependency.Matches(candidateMetadata, current))
                     {

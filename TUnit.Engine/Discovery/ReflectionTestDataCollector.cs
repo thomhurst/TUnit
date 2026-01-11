@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
+using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Core.Helpers;
 using TUnit.Engine.Building;
@@ -130,6 +131,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         } while (Interlocked.CompareExchange(ref _discoveredTests, updated, original) != original);
 
         return _discoveredTests;
+    }
+
+    public Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId, ITestExecutionFilter? filter)
+    {
+        // Reflection mode doesn't benefit from filter pre-filtering (no type-indexed sources)
+        // Delegate to the standard collection method
+        return CollectTestsAsync(testSessionId);
     }
 
     public async IAsyncEnumerable<TestMetadata> CollectTestsStreamingAsync(

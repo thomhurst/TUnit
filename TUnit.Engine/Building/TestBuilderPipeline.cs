@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using EnumerableAsyncProcessor.Extensions;
+using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
@@ -78,6 +79,15 @@ internal sealed class TestBuilderPipeline
     }
 
     /// <summary>
+    /// Collects test metadata without building tests, with optional filter-aware pre-filtering.
+    /// When a filter with extractable hints is provided, only test sources that could match are enumerated.
+    /// </summary>
+    public async Task<IEnumerable<TestMetadata>> CollectTestMetadataAsync(string testSessionId, ITestExecutionFilter? filter)
+    {
+        return await _dataCollector.CollectTestsAsync(testSessionId, filter).ConfigureAwait(false);
+    }
+
+    /// <summary>
     /// Streaming version that yields tests as they're built without buffering
     /// </summary>
     /// <param name="testSessionId">The test session identifier</param>
@@ -116,9 +126,16 @@ internal sealed class TestBuilderPipeline
         }
     }
 
+    /// <summary>
+    /// Builds tests from pre-collected metadata.
+    /// Use this when metadata has already been collected with filter-aware optimization.
+    /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
     [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT scenarios")]
-    public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsFromMetadataAsync(IEnumerable<TestMetadata> testMetadata, TestBuildingContext buildingContext)
+    public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsFromMetadataAsync(
+        IEnumerable<TestMetadata> testMetadata,
+        TestBuildingContext buildingContext,
+        CancellationToken cancellationToken = default)
     {
         var testGroups = await testMetadata.SelectAsync(async metadata =>
             {
@@ -137,7 +154,7 @@ internal sealed class TestBuilderPipeline
                     var failedTest = CreateFailedTestForDataGenerationError(metadata, ex);
                     return [failedTest];
                 }
-            })
+            }, cancellationToken: cancellationToken)
             .ProcessInParallel(Environment.ProcessorCount);
 
         return testGroups.SelectMany(x => x);

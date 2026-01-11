@@ -1,11 +1,15 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using EnumerableAsyncProcessor.Extensions;
+using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
+using TUnit.Core.Interfaces.SourceGenerator;
 using TUnit.Engine.Building.Interfaces;
+using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Building.Collectors;
 
@@ -21,11 +25,32 @@ internal sealed class AotTestDataCollector : ITestDataCollector
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Dynamic tests are optional and not used in AOT scenarios")]
     [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Dynamic tests are optional and not used in AOT scenarios")]
     #endif
-    public async Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId)
+    public Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId)
     {
-        // Stream from all test sources
-        var testSources = Sources.TestSources
-            .SelectMany(kvp => kvp.Value);
+        return CollectTestsAsync(testSessionId, filter: null);
+    }
+
+    #if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2046", Justification = "AOT implementation uses source-generated metadata, not reflection")]
+    [UnconditionalSuppressMessage("AOT", "IL3051", Justification = "AOT implementation uses source-generated metadata, not dynamic code")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Dynamic tests are optional and not used in AOT scenarios")]
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Dynamic tests are optional and not used in AOT scenarios")]
+    #endif
+    public async Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId, ITestExecutionFilter? filter)
+    {
+        // Extract hints from filter for pre-filtering test sources by type
+        var filterHints = MetadataFilterMatcher.ExtractFilterHints(filter);
+
+        // Get test sources, optionally pre-filtered by type
+        IEnumerable<KeyValuePair<Type, ConcurrentQueue<ITestSource>>> testSourcesByType = Sources.TestSources;
+
+        if (filterHints.HasHints)
+        {
+            // Pre-filter test sources by type based on class name hint
+            testSourcesByType = testSourcesByType.Where(kvp => filterHints.CouldTypeMatch(kvp.Key));
+        }
+
+        var testSources = testSourcesByType.SelectMany(kvp => kvp.Value);
 
         var standardTestMetadatas = await testSources
             .SelectManyAsync(testSource => testSource.GetTestsAsync(testSessionId))
