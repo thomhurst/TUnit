@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -371,6 +371,71 @@ internal sealed class AotTestDataCollector : ITestDataCollector
                 ClassArguments = context.ClassArguments,
                 Context = context.Context
             };
+        }
+    }
+
+    /// <summary>
+    /// Enumerates lightweight test descriptors for fast filtering.
+    /// For sources implementing ITestDescriptorSource, returns pre-computed descriptors.
+    /// For legacy sources, creates descriptors with default filter hints.
+    /// </summary>
+    public IEnumerable<TestDescriptor> EnumerateDescriptors()
+    {
+        // Enumerate descriptors from all test sources
+        foreach (var kvp in Sources.TestSources)
+        {
+            foreach (var testSource in kvp.Value)
+            {
+                // Check if the source implements ITestDescriptorSource for optimized enumeration
+                if (testSource is ITestDescriptorSource descriptorSource)
+                {
+                    foreach (var descriptor in descriptorSource.EnumerateTestDescriptors())
+                    {
+                        yield return descriptor;
+                    }
+                }
+                // For legacy sources without ITestDescriptorSource, we can't enumerate descriptors
+                // without materializing - these will need to use the fallback path
+            }
+        }
+    }
+
+    /// <summary>
+    /// Materializes full test metadata from filtered descriptors.
+    /// Only called for tests that passed filtering, avoiding unnecessary materialization.
+    /// </summary>
+    public async IAsyncEnumerable<TestMetadata> MaterializeFromDescriptorsAsync(
+        IEnumerable<TestDescriptor> descriptors,
+        string testSessionId,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        foreach (var descriptor in descriptors)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // Use the materializer delegate to create full TestMetadata
+            await foreach (var metadata in descriptor.Materializer(testSessionId, cancellationToken).ConfigureAwait(false))
+            {
+                yield return metadata;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets test sources that don't implement ITestDescriptorSource.
+    /// These sources require full materialization for discovery.
+    /// </summary>
+    public IEnumerable<ITestSource> GetLegacyTestSources()
+    {
+        foreach (var kvp in Sources.TestSources)
+        {
+            foreach (var testSource in kvp.Value)
+            {
+                if (testSource is not ITestDescriptorSource)
+                {
+                    yield return testSource;
+                }
+            }
         }
     }
 }
