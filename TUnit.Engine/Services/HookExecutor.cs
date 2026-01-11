@@ -64,13 +64,15 @@ internal sealed class HookExecutor
 
     public async ValueTask<List<Exception>> ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken)
     {
-        var exceptions = new List<Exception>();
         var hooks = await _hookCollectionService.CollectAfterTestSessionHooksAsync().ConfigureAwait(false);
 
         if (hooks.Count == 0)
         {
-            return exceptions;
+            return [];
         }
+
+        // Defer exception list allocation until actually needed
+        List<Exception>? exceptions = null;
 
         foreach (var hook in hooks)
         {
@@ -83,11 +85,12 @@ internal sealed class HookExecutor
             {
                 // Collect hook exceptions instead of throwing immediately
                 // This allows all hooks to run even if some fail
+                exceptions ??= [];
                 exceptions.Add(new AfterTestSessionException($"AfterTestSession hook failed: {ex.Message}", ex));
             }
         }
 
-        return exceptions;
+        return exceptions ?? [];
     }
 
     public async ValueTask ExecuteBeforeAssemblyHooksAsync(Assembly assembly, CancellationToken cancellationToken)
@@ -126,13 +129,15 @@ internal sealed class HookExecutor
 
     public async ValueTask<List<Exception>> ExecuteAfterAssemblyHooksAsync(Assembly assembly, CancellationToken cancellationToken)
     {
-        var exceptions = new List<Exception>();
         var hooks = await _hookCollectionService.CollectAfterAssemblyHooksAsync(assembly).ConfigureAwait(false);
 
         if (hooks.Count == 0)
         {
-            return exceptions;
+            return [];
         }
+
+        // Defer exception list allocation until actually needed
+        List<Exception>? exceptions = null;
 
         foreach (var hook in hooks)
         {
@@ -146,11 +151,12 @@ internal sealed class HookExecutor
             {
                 // Collect hook exceptions instead of throwing immediately
                 // This allows all hooks to run even if some fail
+                exceptions ??= [];
                 exceptions.Add(new AfterAssemblyException($"AfterAssembly hook failed: {ex.Message}", ex));
             }
         }
 
-        return exceptions;
+        return exceptions ?? [];
     }
 
     public async ValueTask ExecuteBeforeClassHooksAsync(
@@ -193,13 +199,15 @@ internal sealed class HookExecutor
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type testClass, CancellationToken cancellationToken)
     {
-        var exceptions = new List<Exception>();
         var hooks = await _hookCollectionService.CollectAfterClassHooksAsync(testClass).ConfigureAwait(false);
 
         if (hooks.Count == 0)
         {
-            return exceptions;
+            return [];
         }
+
+        // Defer exception list allocation until actually needed
+        List<Exception>? exceptions = null;
 
         foreach (var hook in hooks)
         {
@@ -213,11 +221,12 @@ internal sealed class HookExecutor
             {
                 // Collect hook exceptions instead of throwing immediately
                 // This allows all hooks to run even if some fail
+                exceptions ??= [];
                 exceptions.Add(new AfterClassException($"AfterClass hook failed: {ex.Message}", ex));
             }
         }
 
-        return exceptions;
+        return exceptions ?? [];
     }
 
     public async ValueTask ExecuteBeforeTestHooksAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
@@ -285,7 +294,8 @@ internal sealed class HookExecutor
 
     public async ValueTask<List<Exception>> ExecuteAfterTestHooksAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
-        var exceptions = new List<Exception>();
+        // Defer exception list allocation until actually needed
+        List<Exception>? exceptions = null;
         var testClassType = test.Metadata.TestClassType;
 
         // Execute After(Test) hooks first (specific hooks run before global hooks for cleanup)
@@ -302,6 +312,7 @@ internal sealed class HookExecutor
                 }
                 catch (Exception ex)
                 {
+                    exceptions ??= [];
                     exceptions.Add(new AfterTestException($"After(Test) hook failed: {ex.Message}", ex));
                 }
             }
@@ -321,12 +332,13 @@ internal sealed class HookExecutor
                 }
                 catch (Exception ex)
                 {
+                    exceptions ??= [];
                     exceptions.Add(new AfterTestException($"AfterEvery(Test) hook failed: {ex.Message}", ex));
                 }
             }
         }
 
-        return exceptions;
+        return exceptions ?? [];
     }
 
     public async ValueTask ExecuteBeforeTestDiscoveryHooksAsync(CancellationToken cancellationToken)

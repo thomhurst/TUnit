@@ -40,43 +40,37 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
     public void RegisterReceivers(TestContext context, CancellationToken cancellationToken)
     {
-        var objectsToRegister = new List<object>();
+        List<object>? objectsToRegister = null;
 
         foreach (var obj in context.GetEligibleEventObjects())
         {
-            if (_initializedObjects.Contains(obj))
+            // Use single TryAdd operation instead of Contains + Add
+            if (!_initializedObjects.Add(obj))
             {
                 continue;
             }
 
-            if (_initializedObjects.Add(obj))
+            bool isFirstEventReceiver = obj is IFirstTestInTestSessionEventReceiver ||
+                                       obj is IFirstTestInAssemblyEventReceiver ||
+                                       obj is IFirstTestInClassEventReceiver;
+
+            if (isFirstEventReceiver)
             {
-                bool isFirstEventReceiver = obj is IFirstTestInTestSessionEventReceiver ||
-                                           obj is IFirstTestInAssemblyEventReceiver ||
-                                           obj is IFirstTestInClassEventReceiver;
+                var objType = obj.GetType();
 
-                if (isFirstEventReceiver)
+                // Use single TryAdd operation instead of Contains + Add
+                if (!_registeredFirstEventReceiverTypes.Add(objType))
                 {
-                    var objType = obj.GetType();
-
-                    if (_registeredFirstEventReceiverTypes.Contains(objType))
-                    {
-                        continue;
-                    }
-
-                    if (_registeredFirstEventReceiverTypes.Add(objType))
-                    {
-                        objectsToRegister.Add(obj);
-                    }
-                }
-                else
-                {
-                    objectsToRegister.Add(obj);
+                    continue;
                 }
             }
+
+            // Defer list allocation until actually needed
+            objectsToRegister ??= [];
+            objectsToRegister.Add(obj);
         }
 
-        if (objectsToRegister.Count > 0)
+        if (objectsToRegister is { Count: > 0 })
         {
             _registry.RegisterReceivers(objectsToRegister);
         }
@@ -147,7 +141,8 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
     private async ValueTask<List<Exception>> InvokeTestEndEventReceiversCore(TestContext context, CancellationToken cancellationToken, EventReceiverStage? stage)
     {
-        var exceptions = new List<Exception>();
+        // Defer exception list allocation until actually needed
+        List<Exception>? exceptions = null;
 
         // Manual filtering and sorting instead of LINQ to avoid allocations
         var eligibleObjects = context.GetEligibleEventObjects();
@@ -171,7 +166,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         if (receivers == null)
         {
-            return exceptions;
+            return [];
         }
 
         // Manual sort instead of OrderBy
@@ -188,11 +183,12 @@ internal sealed class EventReceiverOrchestrator : IDisposable
             catch (Exception ex)
             {
                 await _logger.LogErrorAsync($"Error in test end event receiver: {ex.Message}");
+                exceptions ??= [];
                 exceptions.Add(ex);
             }
         }
 
-        return exceptions;
+        return exceptions ?? [];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
