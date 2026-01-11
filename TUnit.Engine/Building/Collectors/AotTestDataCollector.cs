@@ -50,14 +50,35 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             testSourcesByType = testSourcesByType.Where(kvp => filterHints.CouldTypeMatch(kvp.Key));
         }
 
-        var testSources = testSourcesByType.SelectMany(kvp => kvp.Value);
+        var testSourcesList = testSourcesByType.SelectMany(kvp => kvp.Value).ToList();
 
-        var standardTestMetadatas = await testSources
-            .SelectManyAsync(testSource => testSource.GetTestsAsync(testSessionId))
-            .ProcessInParallel();
+        // Use sequential processing for small test source sets to avoid task scheduling overhead
+        IEnumerable<TestMetadata> standardTestMetadatas;
+        if (testSourcesList.Count < Building.ParallelThresholds.MinItemsForParallel)
+        {
+            var results = new List<TestMetadata>();
+            foreach (var testSource in testSourcesList)
+            {
+                await foreach (var metadata in testSource.GetTestsAsync(testSessionId))
+                {
+                    results.Add(metadata);
+                }
+            }
+            standardTestMetadatas = results;
+        }
+        else
+        {
+            standardTestMetadatas = await testSourcesList
+                .SelectManyAsync(testSource => testSource.GetTestsAsync(testSessionId))
+                .ProcessInParallel();
+        }
 
-        var dynamicTestMetadatas = await CollectDynamicTestsStreaming(testSessionId)
-            .ProcessInParallel();
+        // Dynamic tests are typically rare, collect sequentially
+        var dynamicTestMetadatas = new List<TestMetadata>();
+        await foreach (var metadata in CollectDynamicTestsStreaming(testSessionId))
+        {
+            dynamicTestMetadatas.Add(metadata);
+        }
 
         return [..standardTestMetadatas, ..dynamicTestMetadatas];
     }

@@ -12,6 +12,19 @@ using TUnit.Engine.Utilities;
 
 namespace TUnit.Engine.Building;
 
+/// <summary>
+/// Threshold below which sequential processing is used instead of parallel.
+/// For small test sets, the overhead of task scheduling exceeds parallelization benefits.
+/// </summary>
+internal static class ParallelThresholds
+{
+    /// <summary>
+    /// Minimum number of items before parallel processing is used.
+    /// Below this threshold, sequential processing avoids task scheduling overhead.
+    /// </summary>
+    public const int MinItemsForParallel = 8;
+}
+
 internal sealed class TestBuilderPipeline
 {
     private readonly ITestDataCollector _dataCollector;
@@ -137,25 +150,60 @@ internal sealed class TestBuilderPipeline
         TestBuildingContext buildingContext,
         CancellationToken cancellationToken = default)
     {
-        var testGroups = await testMetadata.SelectAsync(async metadata =>
+        // Materialize to check count - for small sets, sequential processing is faster
+        var metadataList = testMetadata as IList<TestMetadata> ?? testMetadata.ToList();
+
+        IEnumerable<IEnumerable<AbstractExecutableTest>> testGroups;
+
+        if (metadataList.Count < ParallelThresholds.MinItemsForParallel)
+        {
+            // Sequential processing for small sets - avoids task scheduling overhead
+            var results = new List<IEnumerable<AbstractExecutableTest>>(metadataList.Count);
+            foreach (var metadata in metadataList)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 try
                 {
-                    // Check if this is a dynamic test metadata that should bypass normal test building
                     if (metadata is IDynamicTestMetadata)
                     {
-                        return await GenerateDynamicTests(metadata).ConfigureAwait(false);
+                        results.Add(await GenerateDynamicTests(metadata).ConfigureAwait(false));
                     }
-
-                    return await _testBuilder.BuildTestsFromMetadataAsync(metadata, buildingContext).ConfigureAwait(false);
+                    else
+                    {
+                        results.Add(await _testBuilder.BuildTestsFromMetadataAsync(metadata, buildingContext).ConfigureAwait(false));
+                    }
                 }
                 catch (Exception ex)
                 {
                     var failedTest = CreateFailedTestForDataGenerationError(metadata, ex);
-                    return [failedTest];
+                    results.Add([failedTest]);
                 }
-            }, cancellationToken: cancellationToken)
-            .ProcessInParallel(Environment.ProcessorCount);
+            }
+            testGroups = results;
+        }
+        else
+        {
+            // Parallel processing for larger sets
+            testGroups = await metadataList.SelectAsync(async metadata =>
+                {
+                    try
+                    {
+                        // Check if this is a dynamic test metadata that should bypass normal test building
+                        if (metadata is IDynamicTestMetadata)
+                        {
+                            return await GenerateDynamicTests(metadata).ConfigureAwait(false);
+                        }
+
+                        return await _testBuilder.BuildTestsFromMetadataAsync(metadata, buildingContext).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        var failedTest = CreateFailedTestForDataGenerationError(metadata, ex);
+                        return (IEnumerable<AbstractExecutableTest>)[failedTest];
+                    }
+                }, cancellationToken: cancellationToken)
+                .ProcessInParallel(Environment.ProcessorCount);
+        }
 
         return testGroups.SelectMany(x => x);
     }
