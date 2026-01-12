@@ -29,7 +29,7 @@ internal sealed class DynamicTestQueue : IDynamicTestQueue
         });
     }
 
-    public async Task EnqueueAsync(AbstractExecutableTest test)
+    public void Enqueue(AbstractExecutableTest test)
     {
         Interlocked.Increment(ref _pendingCount);
 
@@ -39,7 +39,8 @@ internal sealed class DynamicTestQueue : IDynamicTestQueue
             throw new InvalidOperationException("Failed to enqueue test to dynamic test queue.");
         }
 
-        await _messageBus.Discovered(test.Context);
+        // Skip sending Discovered message - dynamic tests are created during execution,
+        // and Discovered messages are only needed for discovery requests
     }
 
     public bool TryDequeue(out AbstractExecutableTest? test)

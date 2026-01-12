@@ -10,11 +10,10 @@ namespace TUnit.Engine.Interfaces;
 internal interface IDynamicTestQueue
 {
     /// <summary>
-    /// Enqueues a test for execution and notifies the message bus. Thread-safe.
+    /// Enqueues a test for execution. Thread-safe.
     /// </summary>
     /// <param name="test">The test to enqueue</param>
-    /// <returns>Task that completes when the test is enqueued and discovery is notified</returns>
-    Task EnqueueAsync(AbstractExecutableTest test);
+    void Enqueue(AbstractExecutableTest test);
 
     /// <summary>
     /// Attempts to dequeue the next test. Thread-safe.
