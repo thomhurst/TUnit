@@ -937,6 +937,44 @@ public class XUnitMigrationAnalyzerTests
             );
     }
 
+    [Test]
+    public async Task Assert_All_Can_Be_Converted()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using System;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Fact]
+                    public void MyTest()
+                    {
+                        var items = new[] { 1, 2, 3 };
+                        Assert.All(items, item => Assert.True(item > 0));
+                    }
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+                using System;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task MyTest()
+                    {
+                        var items = new[] { 1, 2, 3 };
+                        await Assert.That(items).All(item => item > 0);
+                    }
+                }
+                """,
+                ConfigureXUnitTest
+            );
+    }
+
     private static void ConfigureXUnitTest(Verifier.Test test)
     {
         var globalUsings = ("GlobalUsings.cs", SourceText.From("global using Xunit;"));
