@@ -227,4 +227,124 @@ public class IgnoringTypeEquivalentTests
         public string Name { get; set; } = string.Empty;
         public int Value { get; set; }
     }
+
+    // Test classes for ValueType/Tuple tests
+    private class IgnoreMe
+    {
+        public string Message { get; set; } = string.Empty;
+
+        public IgnoreMe() { }
+        public IgnoreMe(string message) => Message = message;
+    }
+
+    private class ClassWithTupleProperty
+    {
+        public string Name { get; set; } = string.Empty;
+        public (IgnoreMe, IgnoreMe) Ignores { get; set; }
+        public int Value { get; set; }
+    }
+
+    private class ClassWithNestedTupleProperty
+    {
+        public string Name { get; set; } = string.Empty;
+        public ((IgnoreMe, int), string) NestedIgnores { get; set; }
+        public int Value { get; set; }
+    }
+
+    private class ClassWithMixedTupleProperty
+    {
+        public string Name { get; set; } = string.Empty;
+        public (IgnoreMe, int) MixedTuple { get; set; }
+        public int Value { get; set; }
+    }
+
+    [Test]
+    public async Task IgnoringType_In_Tuple_Properties_Are_Ignored()
+    {
+        var object1 = new ClassWithTupleProperty
+        {
+            Name = "Test",
+            Ignores = (new IgnoreMe("foobar"), new IgnoreMe("foobar")),
+            Value = 123
+        };
+
+        var object2 = new ClassWithTupleProperty
+        {
+            Name = "Test",
+            Ignores = (new IgnoreMe("baz"), new IgnoreMe("baz")),
+            Value = 123
+        };
+
+        await TUnitAssert.That(object1)
+            .IsEquivalentTo(object2)
+            .IgnoringType<IgnoreMe>();
+    }
+
+    [Test]
+    public async Task IgnoringType_In_Nested_Tuple_Properties_Are_Ignored()
+    {
+        var object1 = new ClassWithNestedTupleProperty
+        {
+            Name = "Test",
+            NestedIgnores = ((new IgnoreMe("foobar"), 1), "hello"),
+            Value = 123
+        };
+
+        var object2 = new ClassWithNestedTupleProperty
+        {
+            Name = "Test",
+            NestedIgnores = ((new IgnoreMe("baz"), 1), "hello"),
+            Value = 123
+        };
+
+        await TUnitAssert.That(object1)
+            .IsEquivalentTo(object2)
+            .IgnoringType<IgnoreMe>();
+    }
+
+    [Test]
+    public async Task IgnoringType_In_Mixed_Tuple_Still_Compares_Non_Ignored_Parts()
+    {
+        var object1 = new ClassWithMixedTupleProperty
+        {
+            Name = "Test",
+            MixedTuple = (new IgnoreMe("foobar"), 42),
+            Value = 123
+        };
+
+        var object2 = new ClassWithMixedTupleProperty
+        {
+            Name = "Test",
+            MixedTuple = (new IgnoreMe("baz"), 99), // Different int value
+            Value = 123
+        };
+
+        // Should fail because the int part (42 vs 99) is different
+        await TUnitAssert.That(object1)
+            .IsNotEquivalentTo(object2)
+            .IgnoringType<IgnoreMe>();
+    }
+
+    [Test]
+    public async Task IgnoringType_In_Mixed_Tuple_Passes_When_NonIgnored_Parts_Match()
+    {
+        var object1 = new ClassWithMixedTupleProperty
+        {
+            Name = "Test",
+            MixedTuple = (new IgnoreMe("foobar"), 42),
+            Value = 123
+        };
+
+        var object2 = new ClassWithMixedTupleProperty
+        {
+            Name = "Test",
+            MixedTuple = (new IgnoreMe("baz"), 42), // Same int value
+            Value = 123
+        };
+
+        // Should pass because the int part is the same and IgnoreMe is ignored
+        await TUnitAssert.That(object1)
+            .IsEquivalentTo(object2)
+            .IgnoringType<IgnoreMe>();
+    }
 }
