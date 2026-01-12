@@ -50,6 +50,11 @@ public abstract class BaseMigrationCodeFixProvider : CodeFixProvider
 
         try
         {
+            // IMPORTANT: Collect interface-implementing methods BEFORE any syntax modifications
+            // while the semantic model is still valid for the original syntax tree
+            var interfaceImplementingMethods = AsyncMethodSignatureRewriter.CollectInterfaceImplementingMethods(
+                compilationUnit, semanticModel);
+
             // Convert assertions FIRST (while semantic model still matches the syntax tree)
             var assertionRewriter = CreateAssertionRewriter(semanticModel, compilation);
             compilationUnit = (CompilationUnitSyntax)assertionRewriter.Visit(compilationUnit);
@@ -58,7 +63,8 @@ public abstract class BaseMigrationCodeFixProvider : CodeFixProvider
             compilationUnit = ApplyFrameworkSpecificConversions(compilationUnit, semanticModel, compilation);
 
             // Fix method signatures that now contain await but aren't marked async
-            var asyncSignatureRewriter = new AsyncMethodSignatureRewriter();
+            // Pass the collected interface methods to avoid converting interface implementations
+            var asyncSignatureRewriter = new AsyncMethodSignatureRewriter(interfaceImplementingMethods);
             compilationUnit = (CompilationUnitSyntax)asyncSignatureRewriter.Visit(compilationUnit);
 
             // Remove unnecessary base classes and interfaces

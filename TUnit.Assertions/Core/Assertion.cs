@@ -137,30 +137,42 @@ public abstract class Assertion<TValue> : IAssertion
         }
 
         // Normal single-assertion execution (never delegates to wrapper)
-        var (value, exception) = await Context.GetAsync();
-        var (startTime, endTime) = Context.GetTiming();
-
-        var metadata = new EvaluationMetadata<TValue>(value, exception, startTime, endTime);
-        var result = await CheckAsync(metadata);
+        var contextResult = await Context.GetAsync();
+        var result = await CreateMetadataAndCheckAsync(contextResult.Value, contextResult.Exception);
 
         if (!result.IsPassed)
         {
-            var assertionException = CreateException(result);
-            var currentScope = AssertionScope.GetCurrentAssertionScope();
-
-            if (currentScope != null)
-            {
-                // Within Assert.Multiple - accumulate exception instead of throwing
-                currentScope.AddException((AssertionException)assertionException);
-            }
-            else
-            {
-                // No scope - throw immediately
-                throw assertionException;
-            }
+            ThrowOrAccumulateFailure(result);
         }
 
-        return value;
+        return contextResult.Value;
+    }
+
+    // Create EvaluationMetadata in a separate scope to avoid creating additional
+    //  DateTimeOffset fields in the state machine
+    private Task<AssertionResult> CreateMetadataAndCheckAsync(TValue? value, Exception? exception)
+    {
+        var (startTime, endTime) = Context.GetTiming();
+
+        var metadata = new EvaluationMetadata<TValue>(value, exception, startTime, endTime);
+        return CheckAsync(metadata);
+    }
+
+    private void ThrowOrAccumulateFailure(AssertionResult result)
+    {
+        var assertionException = CreateException(result);
+        var currentScope = AssertionScope.GetCurrentAssertionScope();
+
+        if (currentScope != null)
+        {
+            // Within Assert.Multiple - accumulate exception instead of throwing
+            currentScope.AddException((AssertionException)assertionException);
+        }
+        else
+        {
+            // No scope - throw immediately
+            throw assertionException;
+        }
     }
 
     /// <summary>

@@ -861,6 +861,120 @@ public class XUnitMigrationAnalyzerTests
             );
     }
 
+    [Test]
+    public async Task Assert_Same_Can_Be_Converted()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Fact]
+                    public void MyTest()
+                    {
+                        var expected = new object();
+                        var actual = expected;
+                        Assert.Same(expected, actual);
+                    }
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task MyTest()
+                    {
+                        var expected = new object();
+                        var actual = expected;
+                        await Assert.That(actual).IsSameReferenceAs(expected);
+                    }
+                }
+                """,
+                ConfigureXUnitTest
+            );
+    }
+
+    [Test]
+    public async Task Assert_NotSame_Can_Be_Converted()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Fact]
+                    public void MyTest()
+                    {
+                        var obj1 = new object();
+                        var obj2 = new object();
+                        Assert.NotSame(obj1, obj2);
+                    }
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task MyTest()
+                    {
+                        var obj1 = new object();
+                        var obj2 = new object();
+                        await Assert.That(obj2).IsNotSameReferenceAs(obj1);
+                    }
+                }
+                """,
+                ConfigureXUnitTest
+            );
+    }
+
+    [Test]
+    public async Task Assert_All_Can_Be_Converted()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using System;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Fact]
+                    public void MyTest()
+                    {
+                        var items = new[] { 1, 2, 3 };
+                        Assert.All(items, item => Assert.True(item > 0));
+                    }
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+                using System;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task MyTest()
+                    {
+                        var items = new[] { 1, 2, 3 };
+                        await Assert.That(items).All(item => item > 0);
+                    }
+                }
+                """,
+                ConfigureXUnitTest
+            );
+    }
+
     private static void ConfigureXUnitTest(Verifier.Test test)
     {
         var globalUsings = ("GlobalUsings.cs", SourceText.From("global using Xunit;"));
