@@ -120,7 +120,8 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
         var expectedType = expected.GetType();
 
         // Handle primitive types and strings
-        if (TypeHelper.IsPrimitiveOrWellKnownType(actualType))
+        // But don't treat generic value types as primitive if they contain ignored types
+        if (TypeHelper.IsPrimitiveOrWellKnownType(actualType) && !ContainsIgnoredGenericArgument(actualType))
         {
             if (!Equals(actual, expected))
             {
@@ -299,6 +300,34 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
         if (underlyingType != null && _ignoredTypes.Contains(underlyingType))
         {
             return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Checks if a generic type (like ValueTuple) contains any ignored types as generic arguments.
+    /// This prevents tuples containing ignored types from being compared as primitive values.
+    /// </summary>
+    private bool ContainsIgnoredGenericArgument(Type type)
+    {
+        if (!type.IsGenericType || _ignoredTypes.Count == 0)
+        {
+            return false;
+        }
+
+        foreach (var genericArg in type.GetGenericArguments())
+        {
+            if (_ignoredTypes.Contains(genericArg))
+            {
+                return true;
+            }
+
+            // Recursively check nested generic types (e.g., Tuple<Tuple<IgnoreMe, int>, string>)
+            if (ContainsIgnoredGenericArgument(genericArg))
+            {
+                return true;
+            }
         }
 
         return false;
