@@ -1420,7 +1420,7 @@ namespace
     }
     public class TestDetails : ., ., ., ., ., .
     {
-        public TestDetails() { }
+        public TestDetails(.<> allAttributes) { }
         public . Attributes { get; }
         public required .<, .<>> AttributesByType { get; init; }
         public .<string> Categories { get; }
@@ -1457,7 +1457,7 @@ namespace
     public class TestDetails<T> : .TestDetails
         where T :  class
     {
-        public TestDetails() { }
+        public TestDetails(.<> allAttributes) { }
     }
     public class TestDiscoveryContext : .Context
     {

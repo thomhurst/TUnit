@@ -9,6 +9,8 @@ namespace TUnit.Core;
 /// </summary>
 public partial class TestDetails : ITestIdentity, ITestClass, ITestMethod, ITestConfiguration, ITestLocation, ITestDetailsMetadata
 {
+    private readonly IReadOnlyList<Attribute> _allAttributes;
+
     // Zero-allocation interface properties for organized API access
     public ITestIdentity Identity => this;
     public ITestClass Class => this;
@@ -40,19 +42,9 @@ public partial class TestDetails : ITestIdentity, ITestClass, ITestMethod, ITest
 
     public required IReadOnlyDictionary<Type, IReadOnlyList<Attribute>> AttributesByType { get; init; }
 
-    private readonly Lazy<IReadOnlyList<Attribute>> _cachedAllAttributes;
-
-    public TestDetails()
+    public TestDetails(IReadOnlyList<Attribute> allAttributes)
     {
-        _cachedAllAttributes = new Lazy<IReadOnlyList<Attribute>>(() =>
-        {
-            var allAttrs = new List<Attribute>();
-            foreach (var attrList in AttributesByType?.Values ?? [])
-            {
-                allAttrs.AddRange(attrList);
-            }
-            return allAttrs;
-        });
+        _allAttributes = allAttributes;
     }
 
     /// <summary>
@@ -75,10 +67,9 @@ public partial class TestDetails : ITestIdentity, ITestClass, ITestMethod, ITest
 
     /// <summary>
     /// Gets all attributes as a flattened collection.
-    /// Cached after first access for performance.
     /// </summary>
     /// <returns>All attributes associated with this test.</returns>
-    public IReadOnlyList<Attribute> GetAllAttributes() => _cachedAllAttributes.Value;
+    public IReadOnlyList<Attribute> GetAllAttributes() => _allAttributes;
 
     /// <summary>
     /// Resolved generic type arguments for the test method.
@@ -96,4 +87,4 @@ public partial class TestDetails : ITestIdentity, ITestClass, ITestMethod, ITest
 /// <summary>
 /// Generic version of TestDetails for compatibility with tests
 /// </summary>
-public class TestDetails<T> : TestDetails where T : class;
+public class TestDetails<T>(IReadOnlyList<Attribute> allAttributes) : TestDetails(allAttributes) where T : class;

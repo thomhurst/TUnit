@@ -14,4 +14,5 @@ public partial class TestDetails
     bool ITestDetailsMetadata.HasAttribute<T>() => HasAttribute<T>();
     IEnumerable<T> ITestDetailsMetadata.GetAttributes<T>() => GetAttributes<T>();
     IReadOnlyList<Attribute> ITestDetailsMetadata.GetAllAttributes() => GetAllAttributes();
+
 }
