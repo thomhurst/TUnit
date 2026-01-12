@@ -610,7 +610,7 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
                 "Single" when arguments.Count >= 1 =>
                     CreateTUnitAssertion("HasSingleItem", arguments[0].Expression),
                 "All" when arguments.Count >= 2 =>
-                    CreateTUnitAssertion("AllSatisfy", arguments[0].Expression, arguments[1]),
+                    CreateAllAssertion(arguments[0].Expression, arguments[1].Expression),
 
                 // Subset/superset
                 "Subset" when arguments.Count >= 2 =>
@@ -742,6 +742,143 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
             return result.WithLeadingTrivia(
                 SyntaxFactory.Comment("// TODO: TUnit migration - ProperSuperset requires strict superset (not equal). Add additional assertion if needed."),
                 SyntaxFactory.EndOfLine("\n"));
+        }
+
+        private ExpressionSyntax CreateAllAssertion(ExpressionSyntax collection, ExpressionSyntax actionOrPredicate)
+        {
+            // Assert.All(collection, action) -> await Assert.That(collection).All(predicate)
+            // Try to extract a simple predicate from the action if possible
+
+            var predicateExpression = TryConvertActionToPredicate(actionOrPredicate);
+
+            // Create Assert.That(collection)
+            var assertThatInvocation = SyntaxFactory.InvocationExpression(
+                SyntaxFactory.MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    SyntaxFactory.IdentifierName("Assert"),
+                    SyntaxFactory.IdentifierName("That")
+                ),
+                SyntaxFactory.ArgumentList(
+                    SyntaxFactory.SingletonSeparatedList(
+                        SyntaxFactory.Argument(collection)
+                    )
+                )
+            );
+
+            // Create Assert.That(collection).All(predicate)
+            var allInvocation = SyntaxFactory.InvocationExpression(
+                SyntaxFactory.MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    assertThatInvocation,
+                    SyntaxFactory.IdentifierName("All")
+                ),
+                SyntaxFactory.ArgumentList(
+                    SyntaxFactory.SingletonSeparatedList(
+                        SyntaxFactory.Argument(predicateExpression)
+                    )
+                )
+            );
+
+            // Wrap in await
+            var awaitKeyword = SyntaxFactory.Token(SyntaxKind.AwaitKeyword)
+                .WithTrailingTrivia(SyntaxFactory.Space);
+            return SyntaxFactory.AwaitExpression(awaitKeyword, allInvocation);
+        }
+
+        private ExpressionSyntax TryConvertActionToPredicate(ExpressionSyntax actionExpression)
+        {
+            // Try to convert xUnit action patterns to TUnit predicates
+            // Pattern: item => Assert.True(item > 0) -> item => item > 0
+            // Pattern: item => Assert.False(item < 0) -> item => !(item < 0)
+            // Pattern: item => Assert.NotNull(item) -> item => item != null
+            // Pattern: item => Assert.Null(item) -> item => item == null
+
+            if (actionExpression is SimpleLambdaExpressionSyntax simpleLambda)
+            {
+                var parameter = simpleLambda.Parameter;
+                var body = simpleLambda.Body;
+
+                // Check if body is an xUnit assertion invocation
+                if (body is InvocationExpressionSyntax invocation &&
+                    invocation.Expression is MemberAccessExpressionSyntax memberAccess &&
+                    memberAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Assert" })
+                {
+                    var methodName = memberAccess.Name.Identifier.Text;
+                    var args = invocation.ArgumentList.Arguments;
+
+                    ExpressionSyntax? predicateBody = methodName switch
+                    {
+                        "True" when args.Count >= 1 => args[0].Expression,
+                        "False" when args.Count >= 1 => SyntaxFactory.PrefixUnaryExpression(
+                            SyntaxKind.LogicalNotExpression,
+                            SyntaxFactory.ParenthesizedExpression(args[0].Expression)),
+                        "NotNull" when args.Count >= 1 => SyntaxFactory.BinaryExpression(
+                            SyntaxKind.NotEqualsExpression,
+                            args[0].Expression,
+                            SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression)),
+                        "Null" when args.Count >= 1 => SyntaxFactory.BinaryExpression(
+                            SyntaxKind.EqualsExpression,
+                            args[0].Expression,
+                            SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression)),
+                        _ => null
+                    };
+
+                    if (predicateBody != null)
+                    {
+                        return SyntaxFactory.SimpleLambdaExpression(parameter, predicateBody)
+                            .WithArrowToken(SyntaxFactory.Token(SyntaxKind.EqualsGreaterThanToken)
+                                .WithTrailingTrivia(SyntaxFactory.Space));
+                    }
+                }
+            }
+            else if (actionExpression is ParenthesizedLambdaExpressionSyntax parenLambda)
+            {
+                // Handle (item) => Assert.True(expr) pattern
+                if (parenLambda.ParameterList.Parameters.Count == 1)
+                {
+                    var parameter = parenLambda.ParameterList.Parameters[0];
+                    var body = parenLambda.Body;
+
+                    if (body is InvocationExpressionSyntax invocation &&
+                        invocation.Expression is MemberAccessExpressionSyntax memberAccess &&
+                        memberAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Assert" })
+                    {
+                        var methodName = memberAccess.Name.Identifier.Text;
+                        var args = invocation.ArgumentList.Arguments;
+
+                        ExpressionSyntax? predicateBody = methodName switch
+                        {
+                            "True" when args.Count >= 1 => args[0].Expression,
+                            "False" when args.Count >= 1 => SyntaxFactory.PrefixUnaryExpression(
+                                SyntaxKind.LogicalNotExpression,
+                                SyntaxFactory.ParenthesizedExpression(args[0].Expression)),
+                            "NotNull" when args.Count >= 1 => SyntaxFactory.BinaryExpression(
+                                SyntaxKind.NotEqualsExpression,
+                                args[0].Expression,
+                                SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression)),
+                            "Null" when args.Count >= 1 => SyntaxFactory.BinaryExpression(
+                                SyntaxKind.EqualsExpression,
+                                args[0].Expression,
+                                SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression)),
+                            _ => null
+                        };
+
+                        if (predicateBody != null)
+                        {
+                            // Convert to simple lambda for cleaner output
+                            return SyntaxFactory.SimpleLambdaExpression(
+                                SyntaxFactory.Parameter(parameter.Identifier),
+                                predicateBody)
+                                .WithArrowToken(SyntaxFactory.Token(SyntaxKind.EqualsGreaterThanToken)
+                                    .WithTrailingTrivia(SyntaxFactory.Space));
+                        }
+                    }
+                }
+            }
+
+            // Fallback: return the original expression as-is
+            // This will likely cause a compilation error, prompting manual conversion
+            return actionExpression;
         }
 
         private ExpressionSyntax ConvertThrowsAny(InvocationExpressionSyntax invocation, SimpleNameSyntax nameNode)

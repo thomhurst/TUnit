@@ -617,7 +617,7 @@ public class MSTestAssertionRewriter : AssertionRewriter
             "AllItemsAreNotNull" when arguments.Count >= 2 =>
                 CreateAllItemsAreNotNullWithMessage(arguments[0].Expression, arguments[1].Expression),
             "AllItemsAreNotNull" when arguments.Count >= 1 =>
-                CreateTUnitAssertion("AllSatisfy", arguments[0].Expression,
+                CreateTUnitAssertion("All", arguments[0].Expression,
                     SyntaxFactory.Argument(CreateNotNullLambda())),
 
             // AllItemsAreInstancesOfType
@@ -632,7 +632,7 @@ public class MSTestAssertionRewriter : AssertionRewriter
 
     private ExpressionSyntax CreateAllItemsAreNotNullWithMessage(ExpressionSyntax collection, ExpressionSyntax message)
     {
-        return CreateTUnitAssertionWithMessage("AllSatisfy", collection, message,
+        return CreateTUnitAssertionWithMessage("All", collection, message,
             SyntaxFactory.Argument(CreateNotNullLambda()));
     }
 
@@ -645,63 +645,42 @@ public class MSTestAssertionRewriter : AssertionRewriter
                 SyntaxFactory.IdentifierName("x"),
                 SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression)
             )
-        );
+        ).WithArrowToken(SyntaxFactory.Token(SyntaxKind.EqualsGreaterThanToken)
+            .WithTrailingTrivia(SyntaxFactory.Space));
     }
 
     private ExpressionSyntax CreateAllItemsAreInstancesOfType(ExpressionSyntax collection, ExpressionSyntax expectedType)
     {
-        // Create a lambda: x => x.GetType() == expectedType or x is Type
-        var isExpression = SyntaxFactory.IsPatternExpression(
-            SyntaxFactory.IdentifierName("x"),
-            SyntaxFactory.DeclarationPattern(
-                SyntaxFactory.IdentifierName("_"),
-                SyntaxFactory.SingleVariableDesignation(SyntaxFactory.Identifier("_"))
-            )
-        );
+        // Use All with type check: x => expectedType.IsInstanceOfType(x)
+        var result = CreateTUnitAssertion("All", collection,
+            SyntaxFactory.Argument(CreateIsInstanceOfTypeLambda(expectedType)));
+        return result;
+    }
 
-        // Simpler approach: use AllSatisfy with type check
-        // Since we have a Type argument, we'll create a comment explaining manual conversion needed
-        var result = CreateTUnitAssertion("AllSatisfy", collection,
-            SyntaxFactory.Argument(
-                SyntaxFactory.SimpleLambdaExpression(
-                    SyntaxFactory.Parameter(SyntaxFactory.Identifier("x")),
-                    SyntaxFactory.InvocationExpression(
-                        SyntaxFactory.MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            expectedType,
-                            SyntaxFactory.IdentifierName("IsInstanceOfType")
-                        ),
-                        SyntaxFactory.ArgumentList(
-                            SyntaxFactory.SingletonSeparatedList(
-                                SyntaxFactory.Argument(SyntaxFactory.IdentifierName("x"))
-                            )
-                        )
+    private static ExpressionSyntax CreateIsInstanceOfTypeLambda(ExpressionSyntax expectedType)
+    {
+        return SyntaxFactory.SimpleLambdaExpression(
+            SyntaxFactory.Parameter(SyntaxFactory.Identifier("x")),
+            SyntaxFactory.InvocationExpression(
+                SyntaxFactory.MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    expectedType,
+                    SyntaxFactory.IdentifierName("IsInstanceOfType")
+                ),
+                SyntaxFactory.ArgumentList(
+                    SyntaxFactory.SingletonSeparatedList(
+                        SyntaxFactory.Argument(SyntaxFactory.IdentifierName("x"))
                     )
                 )
-            ));
-        return result;
+            )
+        ).WithArrowToken(SyntaxFactory.Token(SyntaxKind.EqualsGreaterThanToken)
+            .WithTrailingTrivia(SyntaxFactory.Space));
     }
 
     private ExpressionSyntax CreateAllItemsAreInstancesOfTypeWithMessage(ExpressionSyntax collection, ExpressionSyntax expectedType, ExpressionSyntax message)
     {
-        var result = CreateTUnitAssertionWithMessage("AllSatisfy", collection, message,
-            SyntaxFactory.Argument(
-                SyntaxFactory.SimpleLambdaExpression(
-                    SyntaxFactory.Parameter(SyntaxFactory.Identifier("x")),
-                    SyntaxFactory.InvocationExpression(
-                        SyntaxFactory.MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            expectedType,
-                            SyntaxFactory.IdentifierName("IsInstanceOfType")
-                        ),
-                        SyntaxFactory.ArgumentList(
-                            SyntaxFactory.SingletonSeparatedList(
-                                SyntaxFactory.Argument(SyntaxFactory.IdentifierName("x"))
-                            )
-                        )
-                    )
-                )
-            ));
+        var result = CreateTUnitAssertionWithMessage("All", collection, message,
+            SyntaxFactory.Argument(CreateIsInstanceOfTypeLambda(expectedType)));
         return result;
     }
     
