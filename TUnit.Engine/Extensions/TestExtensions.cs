@@ -6,7 +6,6 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
 using TUnit.Core.Extensions;
 using TUnit.Engine.Capabilities;
-using TUnit.Engine.Services;
 #pragma warning disable TPEXP
 
 namespace TUnit.Engine.Extensions;
@@ -14,7 +13,6 @@ namespace TUnit.Engine.Extensions;
 internal static class TestExtensions
 {
     private static bool? _cachedIsTrxEnabled;
-    private static bool? _cachedIsDetailedOutput;
 
     private static readonly ConcurrentDictionary<Assembly, string> AssemblyFullNameCache = new();
     private static readonly ConcurrentDictionary<string, CachedTestNodeProperties> TestNodePropertiesCache = new();
@@ -34,7 +32,6 @@ internal static class TestExtensions
         AssemblyFullNameCache.Clear();
         TestNodePropertiesCache.Clear();
         _cachedIsTrxEnabled = null;
-        _cachedIsDetailedOutput = null;
     }
 
     private static string GetCachedAssemblyFullName(Assembly assembly)
@@ -159,17 +156,14 @@ internal static class TestExtensions
             output = testContext.GetStandardOutput();
             error = testContext.GetErrorOutput();
 
-            if (!IsDetailedOutput(testContext))
+            if (!string.IsNullOrEmpty(output))
             {
-                if (!string.IsNullOrEmpty(output))
-                {
-                    properties.Add(new StandardOutputProperty(output));
-                }
+                properties.Add(new StandardOutputProperty(output));
+            }
 
-                if (!string.IsNullOrEmpty(error))
-                {
-                    properties.Add(new StandardErrorProperty(error));
-                }
+            if (!string.IsNullOrEmpty(error))
+            {
+                properties.Add(new StandardErrorProperty(error));
             }
         }
 
@@ -292,23 +286,6 @@ internal static class TestExtensions
 
         _cachedIsTrxEnabled = trxCapability.IsTrxEnabled;
         return _cachedIsTrxEnabled.Value;
-    }
-
-    private static bool IsDetailedOutput(TestContext testContext)
-    {
-        if (_cachedIsDetailedOutput.HasValue)
-        {
-            return _cachedIsDetailedOutput.Value;
-        }
-
-        if (testContext.Services.GetService<VerbosityService>() is not {} verbosityService)
-        {
-            _cachedIsDetailedOutput = false;
-            return false;
-        }
-
-        _cachedIsDetailedOutput = verbosityService.IsDetailedOutput;
-        return _cachedIsDetailedOutput.Value;
     }
 
     private static TimingProperty GetTimingProperty(TestContext testContext, DateTimeOffset overallStart)
