@@ -65,9 +65,8 @@ public partial class TestDetails : ITestIdentity, ITestClass, ITestMethod, ITest
             ? attrs.OfType<T>()
             : [];
 
-    // <summary>
+    /// <summary>
     /// Gets all attributes as a flattened collection.
-    /// Cached after first access for performance.
     /// </summary>
     /// <returns>All attributes associated with this test.</returns>
     public IReadOnlyList<Attribute> GetAllAttributes() => _allAttributes;
