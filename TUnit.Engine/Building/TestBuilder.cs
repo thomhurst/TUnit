@@ -1029,9 +1029,8 @@ internal sealed class TestBuilder : ITestBuilder
         // First, invoke the global test argument registration service to register shared instances
         await _testArgumentRegistrationService.RegisterTestArgumentsAsync(context);
 
-        var eventObjects = context.GetEligibleEventObjects();
-
-        foreach (var receiver in eventObjects.OfType<ITestRegisteredEventReceiver>())
+        // Use pre-computed receivers (already filtered, sorted, and scoped-attribute filtered)
+        foreach (var receiver in context.GetTestRegisteredReceivers())
         {
             await receiver.OnTestRegistered(registeredContext);
         }

@@ -92,40 +92,38 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
     private async ValueTask InvokeTestStartEventReceiversCore(TestContext context, CancellationToken cancellationToken, EventReceiverStage? stage)
     {
-        // Manual filtering and sorting instead of LINQ to avoid allocations
-        var eligibleObjects = context.GetEligibleEventObjects();
-        List<ITestStartEventReceiver>? receivers = null;
-
-        foreach (var obj in eligibleObjects)
-        {
-            if (obj is ITestStartEventReceiver receiver)
-            {
+        // Use pre-computed receivers (already filtered by stage, sorted, and scoped-attribute filtered)
 #if NET
-                // Filter by stage if specified (only on .NET 8.0+ where Stage property exists)
-                if (stage.HasValue && receiver.Stage != stage.Value)
-                {
-                    continue;
-                }
-#endif
-                receivers ??= [];
-                receivers.Add(receiver);
+        if (stage.HasValue)
+        {
+            var receivers = context.GetTestStartReceivers(stage.Value);
+            foreach (var receiver in receivers)
+            {
+                await receiver.OnTestStart(context);
             }
         }
-
-        if (receivers == null)
+        else
         {
-            return;
+            // No stage specified - invoke both Early and Late receivers in order
+            var earlyReceivers = context.GetTestStartReceivers(EventReceiverStage.Early);
+            foreach (var receiver in earlyReceivers)
+            {
+                await receiver.OnTestStart(context);
+            }
+
+            var lateReceivers = context.GetTestStartReceivers(EventReceiverStage.Late);
+            foreach (var receiver in lateReceivers)
+            {
+                await receiver.OnTestStart(context);
+            }
         }
-
-        // Manual sort instead of OrderBy
-        receivers.Sort((a, b) => a.Order.CompareTo(b.Order));
-
-        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(receivers);
-
-        foreach (var receiver in filteredReceivers)
+#else
+        var receivers = context.GetTestStartReceivers();
+        foreach (var receiver in receivers)
         {
             await receiver.OnTestStart(context);
         }
+#endif
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -144,37 +142,61 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         // Defer exception list allocation until actually needed
         List<Exception>? exceptions = null;
 
-        // Manual filtering and sorting instead of LINQ to avoid allocations
-        var eligibleObjects = context.GetEligibleEventObjects();
-        List<ITestEndEventReceiver>? receivers = null;
-
-        foreach (var obj in eligibleObjects)
-        {
-            if (obj is ITestEndEventReceiver receiver)
-            {
+        // Use pre-computed receivers (already filtered by stage, sorted, and scoped-attribute filtered)
 #if NET
-                // Filter by stage if specified (only on .NET 8.0+ where Stage property exists)
-                if (stage.HasValue && receiver.Stage != stage.Value)
+        if (stage.HasValue)
+        {
+            var receivers = context.GetTestEndReceivers(stage.Value);
+            foreach (var receiver in receivers)
+            {
+                try
                 {
-                    continue;
+                    await receiver.OnTestEnd(context);
                 }
-#endif
-                receivers ??= [];
-                receivers.Add(receiver);
+                catch (Exception ex)
+                {
+                    await _logger.LogErrorAsync($"Error in test end event receiver: {ex.Message}");
+                    exceptions ??= [];
+                    exceptions.Add(ex);
+                }
             }
         }
-
-        if (receivers == null)
+        else
         {
-            return [];
+            // No stage specified - invoke both Early and Late receivers in order
+            var earlyReceivers = context.GetTestEndReceivers(EventReceiverStage.Early);
+            foreach (var receiver in earlyReceivers)
+            {
+                try
+                {
+                    await receiver.OnTestEnd(context);
+                }
+                catch (Exception ex)
+                {
+                    await _logger.LogErrorAsync($"Error in test end event receiver: {ex.Message}");
+                    exceptions ??= [];
+                    exceptions.Add(ex);
+                }
+            }
+
+            var lateReceivers = context.GetTestEndReceivers(EventReceiverStage.Late);
+            foreach (var receiver in lateReceivers)
+            {
+                try
+                {
+                    await receiver.OnTestEnd(context);
+                }
+                catch (Exception ex)
+                {
+                    await _logger.LogErrorAsync($"Error in test end event receiver: {ex.Message}");
+                    exceptions ??= [];
+                    exceptions.Add(ex);
+                }
+            }
         }
-
-        // Manual sort instead of OrderBy
-        receivers.Sort((a, b) => a.Order.CompareTo(b.Order));
-
-        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(receivers);
-
-        foreach (var receiver in filteredReceivers)
+#else
+        var receivers = context.GetTestEndReceivers();
+        foreach (var receiver in receivers)
         {
             try
             {
@@ -187,6 +209,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
                 exceptions.Add(ex);
             }
         }
+#endif
 
         return exceptions ?? [];
     }
@@ -204,30 +227,15 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
     private async ValueTask InvokeTestSkippedEventReceiversCore(TestContext context, CancellationToken cancellationToken)
     {
-        // Manual filtering and sorting instead of LINQ to avoid allocations
-        var eligibleObjects = context.GetEligibleEventObjects();
-        List<ITestSkippedEventReceiver>? receivers = null;
+        // Use pre-computed receivers (already filtered, sorted, and scoped-attribute filtered)
+        var receivers = context.GetTestSkippedReceivers();
 
-        foreach (var obj in eligibleObjects)
-        {
-            if (obj is ITestSkippedEventReceiver receiver)
-            {
-                receivers ??= [];
-                receivers.Add(receiver);
-            }
-        }
-
-        if (receivers == null)
+        if (receivers.Length == 0)
         {
             return;
         }
 
-        // Manual sort instead of OrderBy
-        receivers.Sort((a, b) => a.Order.CompareTo(b.Order));
-
-        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(receivers);
-
-        foreach (var receiver in filteredReceivers)
+        foreach (var receiver in receivers)
         {
             await receiver.OnTestSkipped(context);
         }
@@ -235,13 +243,10 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
     public async ValueTask InvokeTestDiscoveryEventReceiversAsync(TestContext context, DiscoveredTestContext discoveredContext, CancellationToken cancellationToken)
     {
-        var eventReceivers = context.GetEligibleEventObjects()
-            .OfType<ITestDiscoveryEventReceiver>();
+        // Use pre-computed receivers (already filtered, sorted, and scoped-attribute filtered)
+        var receivers = context.GetTestDiscoveryReceivers();
 
-        // Filter scoped attributes to ensure only the highest priority one of each type is invoked
-        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(eventReceivers);
-
-        foreach (var receiver in filteredReceivers.OrderBy(static r => r.Order))
+        foreach (var receiver in receivers)
         {
             await receiver.OnTestDiscovered(discoveredContext);
         }
