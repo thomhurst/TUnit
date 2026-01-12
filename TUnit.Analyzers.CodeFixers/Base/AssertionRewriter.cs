@@ -8,12 +8,37 @@ public abstract class AssertionRewriter : CSharpSyntaxRewriter
 {
     protected readonly SemanticModel SemanticModel;
     protected abstract string FrameworkName { get; }
-    
+
+    /// <summary>
+    /// Tracks whether the current method has ref, out, or in parameters.
+    /// Methods with these parameters cannot be async, so assertions must use .Wait() instead of await.
+    /// </summary>
+    private bool _currentMethodHasRefOutInParameters;
+
     protected AssertionRewriter(SemanticModel semanticModel)
     {
         SemanticModel = semanticModel;
     }
-    
+
+    public override SyntaxNode? VisitMethodDeclaration(MethodDeclarationSyntax node)
+    {
+        // Track whether this method has ref/out/in parameters
+        var previousValue = _currentMethodHasRefOutInParameters;
+        _currentMethodHasRefOutInParameters = node.ParameterList.Parameters.Any(p =>
+            p.Modifiers.Any(SyntaxKind.RefKeyword) ||
+            p.Modifiers.Any(SyntaxKind.OutKeyword) ||
+            p.Modifiers.Any(SyntaxKind.InKeyword));
+
+        try
+        {
+            return base.VisitMethodDeclaration(node);
+        }
+        finally
+        {
+            _currentMethodHasRefOutInParameters = previousValue;
+        }
+    }
+
     public override SyntaxNode? VisitInvocationExpression(InvocationExpressionSyntax node)
     {
         var convertedAssertion = ConvertAssertionIfNeeded(node);
@@ -116,11 +141,8 @@ public abstract class AssertionRewriter : CSharpSyntaxRewriter
             );
         }
 
-        // Now wrap the entire thing in await: await Assert.That(actualValue).MethodName(args).Because(message)
-        // Need to add a trailing space after 'await' keyword
-        var awaitKeyword = SyntaxFactory.Token(SyntaxKind.AwaitKeyword)
-            .WithTrailingTrivia(SyntaxFactory.Space);
-        return SyntaxFactory.AwaitExpression(awaitKeyword, fullInvocation);
+        // Wrap in await or .Wait() depending on whether the method can be async
+        return WrapAssertionForAsync(fullInvocation);
     }
 
     /// <summary>
@@ -181,9 +203,31 @@ public abstract class AssertionRewriter : CSharpSyntaxRewriter
             );
         }
 
+        // Wrap in await or .Wait() depending on whether the method can be async
+        return WrapAssertionForAsync(fullInvocation);
+    }
+
+    /// <summary>
+    /// Wraps an assertion expression in await or .Wait() depending on whether the containing method
+    /// can be async (methods with ref/out/in parameters cannot be async).
+    /// </summary>
+    protected ExpressionSyntax WrapAssertionForAsync(ExpressionSyntax assertionExpression)
+    {
+        if (_currentMethodHasRefOutInParameters)
+        {
+            // Method has ref/out/in parameters, cannot be async - use .Wait()
+            var waitAccess = SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                assertionExpression,
+                SyntaxFactory.IdentifierName("Wait")
+            );
+            return SyntaxFactory.InvocationExpression(waitAccess, SyntaxFactory.ArgumentList());
+        }
+
+        // Method can be async - use await
         var awaitKeyword = SyntaxFactory.Token(SyntaxKind.AwaitKeyword)
             .WithTrailingTrivia(SyntaxFactory.Space);
-        return SyntaxFactory.AwaitExpression(awaitKeyword, fullInvocation);
+        return SyntaxFactory.AwaitExpression(awaitKeyword, assertionExpression);
     }
 
     protected static bool IsEmptyOrNullMessage(ExpressionSyntax message)

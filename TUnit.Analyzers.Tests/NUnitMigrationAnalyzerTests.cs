@@ -2474,6 +2474,110 @@ public class NUnitMigrationAnalyzerTests
         );
     }
 
+    [Test]
+    public async Task NUnit_Method_With_Ref_Parameter_Not_Converted_To_Async()
+    {
+        // Test that methods with ref parameters use .Wait() instead of await
+        // Since HandleRealized has a ref parameter, it uses .Wait() and doesn't become async
+        // MyTest has no assertions directly, so it doesn't become async either
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void MyTest()
+                    {
+                        bool realized = false;
+                        HandleRealized(this, ref realized);
+                    }
+
+                    private static void HandleRealized(object sender, ref bool realized)
+                    {
+                        Assert.That(sender, Is.Not.Null);
+                        realized = true;
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public void MyTest()
+                    {
+                        bool realized = false;
+                        HandleRealized(this, ref realized);
+                    }
+
+                    private static void HandleRealized(object sender, ref bool realized)
+                    {
+                        Assert.That(sender).IsNotNull().Wait();
+                        realized = true;
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_Method_With_Out_Parameter_Not_Converted_To_Async()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void MyTest()
+                    {
+                        TryGetValue("key", out int value);
+                        Assert.That(value, Is.EqualTo(42));
+                    }
+
+                    private static void TryGetValue(string key, out int value)
+                    {
+                        Assert.That(key, Is.Not.Null);
+                        value = 42;
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task MyTest()
+                    {
+                        TryGetValue("key", out int value);
+                        await Assert.That(value).IsEqualTo(42);
+                    }
+
+                    private static void TryGetValue(string key, out int value)
+                    {
+                        Assert.That(key).IsNotNull().Wait();
+                        value = 42;
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
     private static void ConfigureNUnitTest(Verifier.Test test)
     {
         test.TestState.AdditionalReferences.Add(typeof(NUnit.Framework.TestAttribute).Assembly);
