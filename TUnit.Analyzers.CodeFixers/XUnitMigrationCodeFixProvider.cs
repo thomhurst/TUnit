@@ -569,9 +569,9 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
 
                 // Reference assertions
                 "Same" when arguments.Count >= 2 =>
-                    CreateTUnitAssertion("IsSameReference", arguments[1].Expression, arguments[0]),
+                    CreateTUnitAssertion("IsSameReferenceAs", arguments[1].Expression, arguments[0]),
                 "NotSame" when arguments.Count >= 2 =>
-                    CreateTUnitAssertion("IsNotSameReference", arguments[1].Expression, arguments[0]),
+                    CreateTUnitAssertion("IsNotSameReferenceAs", arguments[1].Expression, arguments[0]),
 
                 // String/Collection contains
                 "Contains" when arguments.Count >= 2 =>
