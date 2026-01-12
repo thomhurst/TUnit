@@ -87,6 +87,11 @@ public abstract class BaseMigrationCodeFixProvider : CodeFixProvider
             {
                 compilationUnit = MigrationHelpers.AddTUnitUsings(compilationUnit);
             }
+            else
+            {
+                // Even if not adding TUnit usings, always add System.Threading.Tasks if there's async code
+                compilationUnit = MigrationHelpers.AddSystemThreadingTasksUsing(compilationUnit);
+            }
 
             // Clean up trivia issues that can occur after transformations
             compilationUnit = CleanupClassMemberLeadingTrivia(compilationUnit);

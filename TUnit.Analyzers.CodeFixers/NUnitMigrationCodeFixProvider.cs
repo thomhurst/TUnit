@@ -63,9 +63,10 @@ public class NUnitAttributeRewriter : AttributeRewriter
     {
         return attributeName switch
         {
-            "Test" or "TestCase" or "TestCaseSource" or 
+            "Test" or "Theory" or "TestCase" or "TestCaseSource" or
             "SetUp" or "TearDown" or "OneTimeSetUp" or "OneTimeTearDown" or
-            "TestFixture" or "Category" or "Ignore" or "Explicit" or "Apartment" => true,
+            "TestFixture" or "Category" or "Ignore" or "Explicit" or "Apartment" or
+            "Description" => true,
             _ => false
         };
     }

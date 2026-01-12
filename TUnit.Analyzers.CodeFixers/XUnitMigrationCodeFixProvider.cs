@@ -569,9 +569,9 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
 
                 // Reference assertions
                 "Same" when arguments.Count >= 2 =>
-                    CreateTUnitAssertion("IsSameReference", arguments[1].Expression, arguments[0]),
+                    CreateTUnitAssertion("IsSameReferenceAs", arguments[1].Expression, arguments[0]),
                 "NotSame" when arguments.Count >= 2 =>
-                    CreateTUnitAssertion("IsNotSameReference", arguments[1].Expression, arguments[0]),
+                    CreateTUnitAssertion("IsNotSameReferenceAs", arguments[1].Expression, arguments[0]),
 
                 // String/Collection contains
                 "Contains" when arguments.Count >= 2 =>
@@ -771,7 +771,9 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
                     )
                 );
 
-                return SyntaxFactory.AwaitExpression(invocationExpression);
+                var awaitKeyword = SyntaxFactory.Token(SyntaxKind.AwaitKeyword)
+                    .WithTrailingTrivia(SyntaxFactory.Space);
+                return SyntaxFactory.AwaitExpression(awaitKeyword, invocationExpression);
             }
 
             return CreateTUnitAssertion("Throws", invocation.ArgumentList.Arguments[0].Expression);
@@ -816,7 +818,9 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
                 );
 
                 var fullInvocation = SyntaxFactory.InvocationExpression(methodAccess, SyntaxFactory.ArgumentList());
-                return SyntaxFactory.AwaitExpression(fullInvocation);
+                var awaitKeyword = SyntaxFactory.Token(SyntaxKind.AwaitKeyword)
+                    .WithTrailingTrivia(SyntaxFactory.Space);
+                return SyntaxFactory.AwaitExpression(awaitKeyword, fullInvocation);
             }
 
             return CreateTUnitAssertion("IsNotTypeOf", invocation.ArgumentList.Arguments[0].Expression);
@@ -848,7 +852,9 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
                     )
                 );
 
-                return SyntaxFactory.AwaitExpression(invocationExpression);
+                var awaitKeyword = SyntaxFactory.Token(SyntaxKind.AwaitKeyword)
+                    .WithTrailingTrivia(SyntaxFactory.Space);
+                return SyntaxFactory.AwaitExpression(awaitKeyword, invocationExpression);
             }
 
             // Fallback
@@ -881,7 +887,9 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
                     )
                 );
 
-                return SyntaxFactory.AwaitExpression(invocationExpression);
+                var awaitKeyword2 = SyntaxFactory.Token(SyntaxKind.AwaitKeyword)
+                    .WithTrailingTrivia(SyntaxFactory.Space);
+                return SyntaxFactory.AwaitExpression(awaitKeyword2, invocationExpression);
             }
 
             return CreateTUnitAssertion("ThrowsAsync", invocation.ArgumentList.Arguments[0].Expression);
@@ -920,7 +928,9 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
                 );
 
                 var fullInvocation = SyntaxFactory.InvocationExpression(methodAccess, SyntaxFactory.ArgumentList());
-                return SyntaxFactory.AwaitExpression(fullInvocation);
+                var awaitKeyword = SyntaxFactory.Token(SyntaxKind.AwaitKeyword)
+                    .WithTrailingTrivia(SyntaxFactory.Space);
+                return SyntaxFactory.AwaitExpression(awaitKeyword, fullInvocation);
             }
 
             return CreateTUnitAssertion("IsTypeOf", invocation.ArgumentList.Arguments[0].Expression);
@@ -959,7 +969,9 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
                 );
 
                 var fullInvocation = SyntaxFactory.InvocationExpression(methodAccess, SyntaxFactory.ArgumentList());
-                return SyntaxFactory.AwaitExpression(fullInvocation);
+                var awaitKeyword = SyntaxFactory.Token(SyntaxKind.AwaitKeyword)
+                    .WithTrailingTrivia(SyntaxFactory.Space);
+                return SyntaxFactory.AwaitExpression(awaitKeyword, fullInvocation);
             }
 
             return CreateTUnitAssertion("IsAssignableTo", invocation.ArgumentList.Arguments[0].Expression);
