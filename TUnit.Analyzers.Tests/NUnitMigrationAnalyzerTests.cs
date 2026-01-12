@@ -2474,6 +2474,70 @@ public class NUnitMigrationAnalyzerTests
         );
     }
 
+    [Test]
+    public async Task NUnit_InterfaceImplementation_NotConvertedToAsync()
+    {
+        // Methods that implement interface members should NOT be converted to async
+        // because that would break the interface implementation contract.
+        // The interface method contains no NUnit assertions, so no await is added.
+        // Only the test method (which doesn't implement an interface) gets converted to async.
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+                using System.Threading.Tasks;
+
+                public interface ITestRunner
+                {
+                    void Run();
+                }
+
+                {|#0:public class MyClass|} : ITestRunner
+                {
+                    [Test]
+                    public void TestMethod()
+                    {
+                        Assert.That(true, Is.True);
+                    }
+
+                    public void Run()
+                    {
+                        // This implements ITestRunner.Run() and should stay void
+                        var x = 1;
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public interface ITestRunner
+                {
+                    void Run();
+                }
+
+                public class MyClass : ITestRunner
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        await Assert.That(true).IsTrue();
+                    }
+
+                    public void Run()
+                    {
+                        // This implements ITestRunner.Run() and should stay void
+                        var x = 1;
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
     private static void ConfigureNUnitTest(Verifier.Test test)
     {
         test.TestState.AdditionalReferences.Add(typeof(NUnit.Framework.TestAttribute).Assembly);
