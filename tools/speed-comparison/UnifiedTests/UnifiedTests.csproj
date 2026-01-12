@@ -1,5 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+    <!-- Import TUnit props when using TUnit framework -->
+    <Import Project="..\..\..\TUnit.Engine\TUnit.Engine.props" Condition="'$(TestFramework)' == 'TUNIT'" />
+
     <PropertyGroup Condition="'$(TestFramework)' == ''">
         <TestFramework>TUNIT</TestFramework>
     </PropertyGroup>
@@ -41,6 +44,8 @@
     <ItemGroup Condition="'$(TestFramework)' == 'TUNIT'">
         <ProjectReference Include="..\..\..\TUnit.Engine\TUnit.Engine.csproj" />
         <ProjectReference Include="..\..\..\TUnit.Assertions\TUnit.Assertions.csproj" />
+        <ProjectReference Include="..\..\..\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+        <PackageReference Include="Microsoft.Testing.Platform.MSBuild" />
     </ItemGroup>
 
     <!-- xUnit v3 packages -->
