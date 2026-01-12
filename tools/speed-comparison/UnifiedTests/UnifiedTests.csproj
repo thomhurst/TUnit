@@ -37,9 +37,10 @@
         <IntermediateOutputPath>obj\$(Configuration)-$(TestFramework)\$(TargetFramework)\</IntermediateOutputPath>
     </PropertyGroup>
 
-    <!-- TUnit packages -->
+    <!-- TUnit packages - use direct references to avoid telemetry/code coverage overhead in benchmarks -->
     <ItemGroup Condition="'$(TestFramework)' == 'TUNIT'">
-        <PackageReference Include="TUnit" />
+        <ProjectReference Include="..\..\..\TUnit.Engine\TUnit.Engine.csproj" />
+        <ProjectReference Include="..\..\..\TUnit.Assertions\TUnit.Assertions.csproj" />
     </ItemGroup>
 
     <!-- xUnit v3 packages -->
