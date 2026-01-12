@@ -37,7 +37,7 @@ internal sealed class PropertyInjector
     /// Resolves and caches property values for a test class type WITHOUT setting them on an instance.
     /// Used during registration to create shared objects early and enable proper reference counting.
     /// </summary>
-    public async Task ResolveAndCachePropertiesAsync(
+    public Task ResolveAndCachePropertiesAsync(
         Type testClassType,
         ConcurrentDictionary<string, object?> objectBag,
         MethodMetadata? methodMetadata,
@@ -47,16 +47,27 @@ internal sealed class PropertyInjector
         // Skip property resolution if this test is reusing the discovery instance (already initialized)
         if (testContext.IsDiscoveryInstanceReused)
         {
-            return;
+            return Task.CompletedTask;
         }
 
         var plan = PropertyInjectionCache.GetOrCreatePlan(testClassType);
 
         if (!plan.HasProperties)
         {
-            return;
+            return Task.CompletedTask;
         }
 
+        if (plan.SourceGeneratedProperties.Length > 0 || plan.ReflectionProperties.Length > 0)
+        {
+            return ResolveAndCachePropertiesCoreAsync(objectBag, methodMetadata, events, testContext, plan);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private async Task ResolveAndCachePropertiesCoreAsync(ConcurrentDictionary<string, object?> objectBag, MethodMetadata? methodMetadata,
+        TestContextEvents events, TestContext testContext, PropertyInjectionPlan plan)
+    {
         // Resolve properties based on what's available in the plan
         if (plan.SourceGeneratedProperties.Length > 0)
         {
@@ -333,7 +344,7 @@ internal sealed class PropertyInjector
         propertySetter(instance, resolvedValue);
     }
 
-    private async Task RecurseIntoNestedPropertiesAsync(
+    private Task RecurseIntoNestedPropertiesAsync(
         object instance,
         PropertyInjectionPlan plan,
         ConcurrentDictionary<string, object?> objectBag,
@@ -343,9 +354,21 @@ internal sealed class PropertyInjector
     {
         if (!plan.HasProperties)
         {
-            return;
+            return Task.CompletedTask;
         }
 
+        if (plan.SourceGeneratedProperties.Length > 0 || plan.ReflectionProperties.Length > 0)
+        {
+            return RecurseIntoNestedPropertiesCoreAsync(instance, plan, objectBag, methodMetadata, events, visitedObjects);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private async Task RecurseIntoNestedPropertiesCoreAsync(object instance, PropertyInjectionPlan plan,
+        ConcurrentDictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events,
+        ConcurrentDictionary<object, byte> visitedObjects)
+    {
         if (plan.SourceGeneratedProperties.Length > 0)
         {
             foreach (var metadata in plan.SourceGeneratedProperties)
