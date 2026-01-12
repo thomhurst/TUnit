@@ -105,15 +105,15 @@ public abstract class Assertion<TValue> : IAssertion
     /// and throws if the assertion fails (or adds to AssertionScope if within Assert.Multiple).
     /// If this assertion is part of an And/Or chain, delegates to the wrapper.
     /// </summary>
-    public virtual async Task<TValue?> AssertAsync()
+    public virtual Task<TValue?> AssertAsync()
     {
         // If part of an And/Or chain, delegate to the wrapper
         if (_wrappedExecution != null)
         {
-            return await _wrappedExecution.AssertAsync();
+            return _wrappedExecution.AssertAsync();
         }
 
-        return await ExecuteCoreAsync();
+        return ExecuteCoreAsync();
     }
 
     /// <summary>
