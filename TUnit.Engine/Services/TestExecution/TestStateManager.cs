@@ -10,14 +10,13 @@ namespace TUnit.Engine.Services.TestExecution;
 /// </summary>
 internal sealed class TestStateManager
 {
-    public Task MarkRunningAsync(AbstractExecutableTest test)
+    public void MarkRunning(AbstractExecutableTest test)
     {
         test.State = TestState.Running;
         test.StartTime = DateTimeOffset.UtcNow;
-        return Task.CompletedTask;
     }
 
-    public Task MarkCompletedAsync(AbstractExecutableTest test)
+    public void MarkCompleted(AbstractExecutableTest test)
     {
         var now = DateTimeOffset.UtcNow;
 
@@ -33,11 +32,9 @@ internal sealed class TestStateManager
 
         test.State = test.Result.State;
         test.EndTime = now;
-
-        return Task.CompletedTask;
     }
 
-    public Task MarkFailedAsync(AbstractExecutableTest test, Exception exception)
+    public void MarkFailed(AbstractExecutableTest test, Exception exception)
     {
         // Check if result has been overridden - if so, respect the override
         if (test.Context.Execution.Result?.IsOverridden == true)
@@ -59,11 +56,9 @@ internal sealed class TestStateManager
                 ComputerName = EnvironmentHelper.MachineName
             };
         }
-
-        return Task.CompletedTask;
     }
 
-    public Task MarkSkippedAsync(AbstractExecutableTest test, string reason)
+    public void MarkSkipped(AbstractExecutableTest test, string reason)
     {
         test.State = TestState.Skipped;
         var now = DateTimeOffset.UtcNow;
@@ -84,11 +79,9 @@ internal sealed class TestStateManager
             Duration = test.EndTime - test.StartTime.GetValueOrDefault(),
             ComputerName = EnvironmentHelper.MachineName
         };
-
-        return Task.CompletedTask;
     }
 
-    public Task MarkCircularDependencyFailedAsync(AbstractExecutableTest test, Exception exception)
+    public void MarkCircularDependencyFailed(AbstractExecutableTest test, Exception exception)
     {
         test.State = TestState.Failed;
         var now = DateTimeOffset.UtcNow;
@@ -101,11 +94,9 @@ internal sealed class TestStateManager
             Duration = TimeSpan.Zero,
             ComputerName = EnvironmentHelper.MachineName
         };
-
-        return Task.CompletedTask;
     }
 
-    public Task MarkDependencyResolutionFailedAsync(AbstractExecutableTest test, Exception exception)
+    public void MarkDependencyResolutionFailed(AbstractExecutableTest test, Exception exception)
     {
         test.State = TestState.Failed;
 
@@ -120,7 +111,5 @@ internal sealed class TestStateManager
             Duration = TimeSpan.Zero,
             ComputerName = EnvironmentHelper.MachineName
         };
-
-        return Task.CompletedTask;
     }
 }

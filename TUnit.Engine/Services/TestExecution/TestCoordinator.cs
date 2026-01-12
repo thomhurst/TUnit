@@ -60,8 +60,9 @@ internal sealed class TestCoordinator : ITestCoordinator
     {
         try
         {
-            await _stateManager.MarkRunningAsync(test).ConfigureAwait(false);
-            await _messageBus.InProgress(test.Context).ConfigureAwait(false);
+            _stateManager.MarkRunning(test);
+            // Fire-and-forget InProgress - it's informational and doesn't need to block test execution
+            _ = _messageBus.InProgress(test.Context);
 
             _contextRestorer.RestoreContext(test);
 
@@ -71,7 +72,7 @@ internal sealed class TestCoordinator : ITestCoordinator
             if (existingResult?.State == TestState.Failed)
             {
                 var exception = existingResult.Exception ?? new InvalidOperationException("Test failed during registration");
-                await _stateManager.MarkFailedAsync(test, exception).ConfigureAwait(false);
+                _stateManager.MarkFailed(test, exception);
                 await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
                 return;
             }
@@ -131,19 +132,19 @@ internal sealed class TestCoordinator : ITestCoordinator
                 }).ConfigureAwait(false);
             }
 
-            await _stateManager.MarkCompletedAsync(test).ConfigureAwait(false);
+            _stateManager.MarkCompleted(test);
 
         }
         catch (SkipTestException ex)
         {
             test.Context.SkipReason = ex.Message;
-            await _stateManager.MarkSkippedAsync(test, ex.Message).ConfigureAwait(false);
+            _stateManager.MarkSkipped(test, ex.Message);
 
             await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
-            await _stateManager.MarkFailedAsync(test, ex).ConfigureAwait(false);
+            _stateManager.MarkFailed(test, ex);
         }
         finally
         {
@@ -211,7 +212,7 @@ internal sealed class TestCoordinator : ITestCoordinator
                     ? cleanupExceptions[0]
                     : new AggregateException("One or more errors occurred during test cleanup", cleanupExceptions);
 
-                await _stateManager.MarkFailedAsync(test, aggregatedException).ConfigureAwait(false);
+                _stateManager.MarkFailed(test, aggregatedException);
             }
 
             switch (test.State)
@@ -277,7 +278,7 @@ internal sealed class TestCoordinator : ITestCoordinator
         if (test.Context.Metadata.TestDetails.ClassInstance is SkippedTestInstance ||
             !string.IsNullOrEmpty(test.Context.SkipReason))
         {
-            await _stateManager.MarkSkippedAsync(test, test.Context.SkipReason ?? "Test was skipped").ConfigureAwait(false);
+            _stateManager.MarkSkipped(test, test.Context.SkipReason ?? "Test was skipped");
 
             await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
 
