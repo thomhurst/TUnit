@@ -65,11 +65,8 @@ internal sealed class TestRequestHandler : IRequestHandler
 
         var allTests = discoveryResult.Tests.ToArray();
 
-        foreach (var test in allTests)
-        {
-            context.CancellationToken.ThrowIfCancellationRequested();
-            await serviceProvider.MessageBus.Discovered(test.Context);
-        }
+        // Skip sending Discovered messages during execution - they're only needed for discovery requests
+        // This saves significant time and allocations when running tests
 
         await serviceProvider.TestSessionCoordinator.ExecuteTests(
             allTests,

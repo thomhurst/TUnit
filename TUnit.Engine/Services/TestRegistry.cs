@@ -101,7 +101,7 @@ internal sealed class TestRegistry : ITestRegistry
 
         foreach (var test in builtTests)
         {
-            await _dynamicTestQueue.EnqueueAsync(test);
+            _dynamicTestQueue.Enqueue(test);
         }
     }
 
