@@ -22,6 +22,7 @@ public static class MigrationHelpers
             "NUnit" => attributeName switch
             {
                 "Test" => "Test",
+                "Theory" => "Test", // NUnit [Theory] is same as [Test]
                 "TestCase" => "Arguments",
                 "TestCaseSource" => "MethodDataSource",
                 "SetUp" => "Before",
@@ -29,6 +30,9 @@ public static class MigrationHelpers
                 "OneTimeSetUp" => "Before",
                 "OneTimeTearDown" => "After",
                 "TestFixture" => null!, // Remove
+                "Ignore" => "Skip", // NUnit [Ignore] -> TUnit [Skip]
+                "Description" => null!, // Remove - no direct equivalent, use [Property] if needed
+                "Platform" => null!, // Remove - no direct equivalent, use runtime checks
                 "Apartment" => "STAThreadExecutor", // Special handling in attribute rewriter
                 _ => attributeName
             },
@@ -116,7 +120,7 @@ public static class MigrationHelpers
     {
         return framework switch
         {
-            "NUnit" => attributeName is "TestFixture",
+            "NUnit" => attributeName is "TestFixture" or "Platform" or "Description",
             "MSTest" => attributeName is "TestClass",
             _ => false
         };
