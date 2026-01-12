@@ -102,7 +102,7 @@ internal sealed class TestScheduler : ITestScheduler
             {
                 if (testsInCircularDependencies.Add(chainTest))
                 {
-                    await _testStateManager.MarkCircularDependencyFailedAsync(chainTest, exception).ConfigureAwait(false);
+                    _testStateManager.MarkCircularDependencyFailed(chainTest, exception);
                     await _messageBus.Failed(chainTest.Context, exception, DateTimeOffset.UtcNow).ConfigureAwait(false);
                 }
             }
