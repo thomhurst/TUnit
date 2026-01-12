@@ -178,7 +178,13 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
         foreach (var testNodeUpdateMessage in last.Values)
         {
-            var name = testNodeUpdateMessage.TestNode.DisplayName;
+            var testMethodIdentifier = testNodeUpdateMessage.TestNode.Properties.AsEnumerable()
+                .OfType<TestMethodIdentifierProperty>()
+                .FirstOrDefault();
+
+            var className = testMethodIdentifier?.TypeName;
+            var displayName = testNodeUpdateMessage.TestNode.DisplayName;
+            var name = string.IsNullOrEmpty(className) ? displayName : $"{className}.{displayName}";
 
             var passedProperty = testNodeUpdateMessage.TestNode.Properties.OfType<PassedTestNodeStateProperty>().FirstOrDefault();
 
