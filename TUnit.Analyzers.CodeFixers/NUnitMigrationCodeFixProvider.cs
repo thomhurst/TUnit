@@ -754,6 +754,19 @@ public class NUnitAssertionRewriter : AssertionRewriter
             return CreateCountAssertion(actualValue, "IsEqualTo", message, countArg);
         }
 
+        // Handle Is.Ordered.Ascending and Is.Ordered.Descending
+        if (constraint.Expression is MemberAccessExpressionSyntax orderedMemberAccess &&
+            orderedMemberAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Is" } &&
+            orderedMemberAccess.Name.Identifier.Text == "Ordered")
+        {
+            return memberName switch
+            {
+                "Ascending" => CreateTUnitAssertionWithMessage("IsInAscendingOrder", actualValue, message),
+                "Descending" => CreateTUnitAssertionWithMessage("IsInDescendingOrder", actualValue, message),
+                _ => CreateTUnitAssertionWithMessage("IsInAscendingOrder", actualValue, message) // Default to ascending for Is.Ordered
+            };
+        }
+
         // Handle Is.Not.X patterns (member access, not invocation)
         if (constraint.Expression is MemberAccessExpressionSyntax innerMemberAccess &&
             innerMemberAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Is" } &&
@@ -781,6 +794,8 @@ public class NUnitAssertionRewriter : AssertionRewriter
             "Positive" => CreateTUnitAssertionWithMessage("IsPositive", actualValue, message),
             "Negative" => CreateTUnitAssertionWithMessage("IsNegative", actualValue, message),
             "Zero" => CreateTUnitAssertionWithMessage("IsZero", actualValue, message),
+            "Unique" => CreateTUnitAssertionWithMessage("HasDistinctItems", actualValue, message),
+            "Ordered" => CreateTUnitAssertionWithMessage("IsInAscendingOrder", actualValue, message),
             _ => CreateTUnitAssertionWithMessage("IsEqualTo", actualValue, message, SyntaxFactory.Argument(constraint))
         };
     }
@@ -937,6 +952,19 @@ public class NUnitAssertionRewriter : AssertionRewriter
             // Extract the count argument from Has.Exactly(n)
             var countArg = exactlyInvocation.ArgumentList.Arguments[0];
             return CreateCountAssertion(actualValue, "IsEqualTo", null, countArg);
+        }
+
+        // Handle Is.Ordered.Ascending and Is.Ordered.Descending
+        if (constraint.Expression is MemberAccessExpressionSyntax orderedMemberAccess &&
+            orderedMemberAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Is" } &&
+            orderedMemberAccess.Name.Identifier.Text == "Ordered")
+        {
+            return memberName switch
+            {
+                "Ascending" => CreateTUnitAssertion("IsInAscendingOrder", actualValue),
+                "Descending" => CreateTUnitAssertion("IsInDescendingOrder", actualValue),
+                _ => CreateTUnitAssertion("IsInAscendingOrder", actualValue) // Default to ascending for Is.Ordered
+            };
         }
 
         // Handle Is.Not.X patterns (member access, not invocation)
