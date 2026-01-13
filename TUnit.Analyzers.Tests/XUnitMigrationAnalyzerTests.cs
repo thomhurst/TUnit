@@ -1034,6 +1034,92 @@ public class XUnitMigrationAnalyzerTests
     }
 
     [Test]
+    public async Task Assert_Throws_With_Property_Access_Can_Be_Converted()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using System;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Fact]
+                    public void MyTest()
+                    {
+                        var ex = Assert.Throws<ArgumentException>(() => ThrowException());
+                        Assert.Equal("param", ex.ParamName);
+                    }
+
+                    private void ThrowException() => throw new ArgumentException("error", "param");
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+                using System;
+                using TUnit.Core;
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task MyTest()
+                    {
+                        var ex = await Assert.ThrowsAsync<ArgumentException>(() => ThrowException());
+                        await Assert.That(ex.ParamName).IsEqualTo("param");
+                    }
+
+                    private void ThrowException() => throw new ArgumentException("error", "param");
+                }
+                """,
+                ConfigureXUnitTest
+            );
+    }
+
+    [Test]
+    public async Task Assert_Throws_With_Message_Contains_Can_Be_Converted()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using System;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Fact]
+                    public void MyTest()
+                    {
+                        var ex = Assert.Throws<InvalidOperationException>(() => ThrowException());
+                        Assert.Contains("error occurred", ex.Message);
+                    }
+
+                    private void ThrowException() => throw new InvalidOperationException("An error occurred");
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+                using System;
+                using TUnit.Core;
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task MyTest()
+                    {
+                        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => ThrowException());
+                        await Assert.That(ex.Message).Contains("error occurred");
+                    }
+
+                    private void ThrowException() => throw new InvalidOperationException("An error occurred");
+                }
+                """,
+                ConfigureXUnitTest
+            );
+    }
+
+    [Test]
     public async Task Record_Exception_With_Method_Call_Can_Be_Converted()
     {
         await CodeFixer
