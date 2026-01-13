@@ -775,9 +775,9 @@ public class NUnitAssertionRewriter : AssertionRewriter
         {
             return memberName switch
             {
-                "Ascending" => CreateTUnitAssertionWithMessage("IsInAscendingOrder", actualValue, message),
+                "Ascending" => CreateTUnitAssertionWithMessage("IsInOrder", actualValue, message),
                 "Descending" => CreateTUnitAssertionWithMessage("IsInDescendingOrder", actualValue, message),
-                _ => CreateTUnitAssertionWithMessage("IsInAscendingOrder", actualValue, message) // Default to ascending for Is.Ordered
+                _ => CreateTUnitAssertionWithMessage("IsInOrder", actualValue, message) // Default to ascending for Is.Ordered
             };
         }
 
@@ -811,7 +811,7 @@ public class NUnitAssertionRewriter : AssertionRewriter
             "Zero" => CreateTUnitAssertionWithMessage("IsZero", actualValue, message),
             "NaN" => CreateTUnitAssertionWithMessage("IsNaN", actualValue, message),
             "Unique" => CreateTUnitAssertionWithMessage("HasDistinctItems", actualValue, message),
-            "Ordered" => CreateTUnitAssertionWithMessage("IsInAscendingOrder", actualValue, message),
+            "Ordered" => CreateTUnitAssertionWithMessage("IsInOrder", actualValue, message),
             _ => CreateTUnitAssertionWithMessage("IsEqualTo", actualValue, message, SyntaxFactory.Argument(constraint))
         };
     }
@@ -977,9 +977,9 @@ public class NUnitAssertionRewriter : AssertionRewriter
         {
             return memberName switch
             {
-                "Ascending" => CreateTUnitAssertion("IsInAscendingOrder", actualValue),
+                "Ascending" => CreateTUnitAssertion("IsInOrder", actualValue),
                 "Descending" => CreateTUnitAssertion("IsInDescendingOrder", actualValue),
-                _ => CreateTUnitAssertion("IsInAscendingOrder", actualValue) // Default to ascending for Is.Ordered
+                _ => CreateTUnitAssertion("IsInOrder", actualValue) // Default to ascending for Is.Ordered
             };
         }
 
@@ -1013,7 +1013,7 @@ public class NUnitAssertionRewriter : AssertionRewriter
             "Zero" => CreateTUnitAssertion("IsZero", actualValue),
             "NaN" => CreateTUnitAssertion("IsNaN", actualValue),
             "Unique" => CreateTUnitAssertion("HasDistinctItems", actualValue),
-            "Ordered" => CreateTUnitAssertion("IsInAscendingOrder", actualValue),
+            "Ordered" => CreateTUnitAssertion("IsInOrder", actualValue),
             _ => CreateTUnitAssertion("IsEqualTo", actualValue, SyntaxFactory.Argument(constraint))
         };
     }
@@ -1704,8 +1704,8 @@ public class NUnitAssertionRewriter : AssertionRewriter
             "IsNotEmpty" when arguments.Count >= 1 => CreateTUnitAssertion("IsNotEmpty", arguments[0].Expression),
             // CollectionAssert.AllItemsAreUnique(collection) -> Assert.That(collection).HasDistinctItems()
             "AllItemsAreUnique" when arguments.Count >= 1 => CreateTUnitAssertion("HasDistinctItems", arguments[0].Expression),
-            // CollectionAssert.IsOrdered(collection) -> Assert.That(collection).IsInAscendingOrder()
-            "IsOrdered" when arguments.Count >= 1 => CreateTUnitAssertion("IsInAscendingOrder", arguments[0].Expression),
+            // CollectionAssert.IsOrdered(collection) -> Assert.That(collection).IsInOrder()
+            "IsOrdered" when arguments.Count >= 1 => CreateTUnitAssertion("IsInOrder", arguments[0].Expression),
             // CollectionAssert.IsSubsetOf(subset, superset) -> Assert.That(subset).IsSubsetOf(superset)
             "IsSubsetOf" when arguments.Count >= 2 => CreateTUnitAssertion("IsSubsetOf", arguments[0].Expression, SyntaxFactory.Argument(arguments[1].Expression)),
             // CollectionAssert.IsSupersetOf(superset, subset) -> Assert.That(superset).IsSupersetOf(subset)

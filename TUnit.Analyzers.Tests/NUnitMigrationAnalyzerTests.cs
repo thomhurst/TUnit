@@ -3715,7 +3715,7 @@ public class NUnitMigrationAnalyzerTests
                     public async Task TestMethod()
                     {
                         var list = new List<int> { 1, 2, 3 };
-                        await Assert.That(list).IsInAscendingOrder();
+                        await Assert.That(list).IsInOrder();
                     }
                 }
                 """,
@@ -3797,7 +3797,7 @@ public class NUnitMigrationAnalyzerTests
                     public async Task TestMethod()
                     {
                         var list = new List<int> { 1, 2, 3 };
-                        await Assert.That(list).IsInAscendingOrder();
+                        await Assert.That(list).IsInOrder();
                     }
                 }
                 """,

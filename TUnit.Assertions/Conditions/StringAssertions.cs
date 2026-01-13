@@ -343,6 +343,140 @@ public class StringEndsWithAssertion : Assertion<string>
 }
 
 /// <summary>
+/// Asserts that a string does NOT start with the expected substring.
+/// </summary>
+[AssertionExtension("DoesNotStartWith")]
+public class StringDoesNotStartWithAssertion : Assertion<string>
+{
+    private readonly string _expected;
+    private StringComparison _comparison = StringComparison.Ordinal;
+
+    public StringDoesNotStartWithAssertion(
+        AssertionContext<string> context,
+        string expected)
+        : base(context)
+    {
+        _expected = expected;
+    }
+
+    public StringDoesNotStartWithAssertion(
+        AssertionContext<string> context,
+        string expected,
+        StringComparison comparison)
+        : base(context)
+    {
+        _expected = expected;
+        _comparison = comparison;
+    }
+
+    public StringDoesNotStartWithAssertion IgnoringCase()
+    {
+        _comparison = StringComparison.OrdinalIgnoreCase;
+        Context.ExpressionBuilder.Append(".IgnoringCase()");
+        return this;
+    }
+
+    public StringDoesNotStartWithAssertion WithComparison(StringComparison comparison)
+    {
+        _comparison = comparison;
+        Context.ExpressionBuilder.Append($".WithComparison({comparison})");
+        return this;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
+
+        if (value == null)
+        {
+            return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
+
+        if (!value.StartsWith(_expected, _comparison))
+        {
+            return Task.FromResult(AssertionResult.Passed);
+        }
+
+        return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
+    }
+
+    protected override string GetExpectation() => $"to not start with \"{_expected}\"";
+}
+
+/// <summary>
+/// Asserts that a string does NOT end with the expected substring.
+/// </summary>
+[AssertionExtension("DoesNotEndWith")]
+public class StringDoesNotEndWithAssertion : Assertion<string>
+{
+    private readonly string _expected;
+    private StringComparison _comparison = StringComparison.Ordinal;
+
+    public StringDoesNotEndWithAssertion(
+        AssertionContext<string> context,
+        string expected)
+        : base(context)
+    {
+        _expected = expected;
+    }
+
+    public StringDoesNotEndWithAssertion(
+        AssertionContext<string> context,
+        string expected,
+        StringComparison comparison)
+        : base(context)
+    {
+        _expected = expected;
+        _comparison = comparison;
+    }
+
+    public StringDoesNotEndWithAssertion IgnoringCase()
+    {
+        _comparison = StringComparison.OrdinalIgnoreCase;
+        Context.ExpressionBuilder.Append(".IgnoringCase()");
+        return this;
+    }
+
+    public StringDoesNotEndWithAssertion WithComparison(StringComparison comparison)
+    {
+        _comparison = comparison;
+        Context.ExpressionBuilder.Append($".WithComparison({comparison})");
+        return this;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
+
+        if (value == null)
+        {
+            return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
+
+        if (!value.EndsWith(_expected, _comparison))
+        {
+            return Task.FromResult(AssertionResult.Passed);
+        }
+
+        return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
+    }
+
+    protected override string GetExpectation() => $"to not end with \"{_expected}\"";
+}
+
+/// <summary>
 /// Asserts that a string is not empty or whitespace.
 /// </summary>
 [AssertionExtension("IsNotEmpty")]
