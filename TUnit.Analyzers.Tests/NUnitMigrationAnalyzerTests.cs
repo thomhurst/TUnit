@@ -2589,6 +2589,162 @@ public class NUnitMigrationAnalyzerTests
     }
 
     [Test]
+    public async Task NUnit_Is_Positive_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void TestMethod()
+                    {
+                        int value = 5;
+                        Assert.That(value, Is.Positive);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        int value = 5;
+                        await Assert.That(value).IsPositive();
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_Is_Negative_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void TestMethod()
+                    {
+                        int value = -5;
+                        Assert.That(value, Is.Negative);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        int value = -5;
+                        await Assert.That(value).IsNegative();
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_Is_Not_Positive_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void TestMethod()
+                    {
+                        int value = -5;
+                        Assert.That(value, Is.Not.Positive);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        int value = -5;
+                        await Assert.That(value).IsLessThanOrEqualTo(0);
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_Is_Not_Negative_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void TestMethod()
+                    {
+                        int value = 5;
+                        Assert.That(value, Is.Not.Negative);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        int value = 5;
+                        await Assert.That(value).IsGreaterThanOrEqualTo(0);
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
     public async Task NUnit_Platform_Attribute_Removed()
     {
         await CodeFixer.VerifyCodeFixAsync(
