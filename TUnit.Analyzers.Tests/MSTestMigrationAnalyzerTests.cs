@@ -823,6 +823,371 @@ public class MSTestMigrationAnalyzerTests
         );
     }
 
+    [Test]
+    public async Task MSTest_Priority_Attribute_Converted_To_Property()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+                public class MyClass
+                {
+                    {|#0:[TestMethod]|}
+                    [Priority(1)]
+                    public void TestMethod()
+                    {
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
+            """
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    [Property("Priority", "1")]
+                    public void TestMethod()
+                    {
+                    }
+                }
+                """,
+            ConfigureMSTestTest
+        );
+    }
+
+    [Test]
+    public async Task MSTest_TestCategory_Attribute_Converted_To_Property()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+                public class MyClass
+                {
+                    {|#0:[TestMethod]|}
+                    [TestCategory("Integration")]
+                    public void TestMethod()
+                    {
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
+            """
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    [Property("Category", "Integration")]
+                    public void TestMethod()
+                    {
+                    }
+                }
+                """,
+            ConfigureMSTestTest
+        );
+    }
+
+    [Test]
+    public async Task MSTest_Owner_Attribute_Converted_To_Property()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+                public class MyClass
+                {
+                    {|#0:[TestMethod]|}
+                    [Owner("JohnDoe")]
+                    public void TestMethod()
+                    {
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
+            """
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    [Property("Owner", "JohnDoe")]
+                    public void TestMethod()
+                    {
+                    }
+                }
+                """,
+            ConfigureMSTestTest
+        );
+    }
+
+    [Test]
+    public async Task MSTest_ExpectedException_Attribute_Converted_To_ThrowsAsync()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using System;
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+                public class MyClass
+                {
+                    {|#0:[TestMethod]|}
+                    [ExpectedException(typeof(ArgumentException))]
+                    public void TestMethod()
+                    {
+                        throw new ArgumentException("test");
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
+            """
+                using System;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        await Assert.ThrowsAsync<ArgumentException>(() =>
+                        {
+                            throw new ArgumentException("test");
+                        });
+                    }
+                }
+                """,
+            ConfigureMSTestTest
+        );
+    }
+
+    [Test]
+    public async Task MSTest_ExpectedException_Attribute_On_Async_Method_Converted_To_ThrowsAsync()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using System;
+                using System.Threading.Tasks;
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+                public class MyClass
+                {
+                    {|#0:[TestMethod]|}
+                    [ExpectedException(typeof(ArgumentException))]
+                    public async Task TestMethodAsync()
+                    {
+                        await Task.Delay(1);
+                        throw new ArgumentException("test");
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
+            """
+                using System;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethodAsync()
+                    {
+                        await Assert.ThrowsAsync<ArgumentException>(async () =>
+                        {
+                            await Task.Delay(1);
+                            throw new ArgumentException("test");
+                        });
+                    }
+                }
+                """,
+            ConfigureMSTestTest
+        );
+    }
+
+    [Test]
+    public async Task MSTest_DirectoryAssert_Exists_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+                using System.IO;
+
+                {|#0:[TestClass]|}
+                public class MyClass
+                {
+                    [TestMethod]
+                    public void TestMethod()
+                    {
+                        var dir = new DirectoryInfo("C:/temp");
+                        DirectoryAssert.Exists(dir);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
+            """
+                using System.IO;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        var dir = new DirectoryInfo("C:/temp");
+                        await Assert.That(dir.Exists).IsTrue();
+                    }
+                }
+                """,
+            ConfigureMSTestTest
+        );
+    }
+
+    [Test]
+    public async Task MSTest_DirectoryAssert_DoesNotExist_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+                using System.IO;
+
+                {|#0:[TestClass]|}
+                public class MyClass
+                {
+                    [TestMethod]
+                    public void TestMethod()
+                    {
+                        var dir = new DirectoryInfo("C:/nonexistent");
+                        DirectoryAssert.DoesNotExist(dir);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
+            """
+                using System.IO;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        var dir = new DirectoryInfo("C:/nonexistent");
+                        await Assert.That(dir.Exists).IsFalse();
+                    }
+                }
+                """,
+            ConfigureMSTestTest
+        );
+    }
+
+    [Test]
+    public async Task MSTest_FileAssert_Exists_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+                using System.IO;
+
+                {|#0:[TestClass]|}
+                public class MyClass
+                {
+                    [TestMethod]
+                    public void TestMethod()
+                    {
+                        var file = new FileInfo("C:/temp/file.txt");
+                        FileAssert.Exists(file);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
+            """
+                using System.IO;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        var file = new FileInfo("C:/temp/file.txt");
+                        await Assert.That(file.Exists).IsTrue();
+                    }
+                }
+                """,
+            ConfigureMSTestTest
+        );
+    }
+
+    [Test]
+    public async Task MSTest_FileAssert_DoesNotExist_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+                using System.IO;
+
+                {|#0:[TestClass]|}
+                public class MyClass
+                {
+                    [TestMethod]
+                    public void TestMethod()
+                    {
+                        var file = new FileInfo("C:/temp/nonexistent.txt");
+                        FileAssert.DoesNotExist(file);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
+            """
+                using System.IO;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        var file = new FileInfo("C:/temp/nonexistent.txt");
+                        await Assert.That(file.Exists).IsFalse();
+                    }
+                }
+                """,
+            ConfigureMSTestTest
+        );
+    }
+
     private static void ConfigureMSTestTest(Verifier.Test test)
     {
         test.TestState.AdditionalReferences.Add(typeof(TestMethodAttribute).Assembly);

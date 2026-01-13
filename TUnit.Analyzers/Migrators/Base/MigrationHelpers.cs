@@ -34,6 +34,15 @@ public static class MigrationHelpers
                 "Description" => null!, // Remove - no direct equivalent, use [Property] if needed
                 "Platform" => null!, // Remove - no direct equivalent, use runtime checks
                 "Apartment" => "STAThreadExecutor", // Special handling in attribute rewriter
+                // Parallelization attributes - special handling in code fixer
+                "NonParallelizable" => "NotInParallel",
+                "Parallelizable" => null!, // Remove by default, special handling for ParallelScope.None
+                // Repeat is the same in TUnit
+                "Repeat" => "Repeat",
+                // Parameter-level data attributes
+                "Values" => "Matrix",
+                "Range" => "MatrixRange", // Note: requires generic type argument in code fixer
+                "ValueSource" => "MatrixSourceMethod",
                 _ => attributeName
             },
             "MSTest" => attributeName switch
@@ -46,6 +55,10 @@ public static class MigrationHelpers
                 "ClassInitialize" => "Before",
                 "ClassCleanup" => "After",
                 "TestClass" => null!, // Remove
+                // Metadata attributes - convert to [Property] with appropriate arguments
+                "Priority" => "Property",
+                "TestCategory" => "Property",
+                "Owner" => "Property",
                 _ => attributeName
             },
             _ => attributeName
@@ -120,6 +133,8 @@ public static class MigrationHelpers
     {
         return framework switch
         {
+            // Note: Parallelizable is NOT listed here because it needs special handling in the code fixer
+            // for ParallelScope.None -> [NotInParallel]. ConvertAttribute handles all cases.
             "NUnit" => attributeName is "TestFixture" or "Platform" or "Description",
             "MSTest" => attributeName is "TestClass",
             _ => false
