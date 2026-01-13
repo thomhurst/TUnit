@@ -664,7 +664,15 @@ public class NUnitAssertionRewriter : AssertionRewriter
         return (namespaceName == "NUnit.Framework" || namespaceName.StartsWith("NUnit.Framework."))
                && namespaceName != "NUnit.Framework.Legacy";
     }
-    
+
+    protected override bool IsKnownAssertionTypeBySyntax(string targetType, string methodName)
+    {
+        // NUnit assertion types that can be detected by syntax
+        // NOTE: ClassicAssert is NOT included because it's in NUnit.Framework.Legacy namespace
+        // and should not be auto-converted. The semantic check excludes it properly.
+        return targetType is "Assert" or "CollectionAssert" or "StringAssert" or "FileAssert" or "DirectoryAssert";
+    }
+
     protected override ExpressionSyntax? ConvertAssertionIfNeeded(InvocationExpressionSyntax invocation)
     {
         // Handle FileAssert - check BEFORE IsFrameworkAssertion since FileAssert is a separate class
@@ -1361,7 +1369,7 @@ public class NUnitAssertionRewriter : AssertionRewriter
         var actual = arguments[1].Expression;
 
         // Check if 3rd argument is a comparer (not a string message)
-        if (arguments.Count >= 3 && IsLikelyComparerArgument(arguments[2]) == true)
+        if (arguments.Count >= 3 && IsLikelyComparerArgument(arguments[2]))
         {
             // Add TODO comment and skip the comparer
             var result = CreateTUnitAssertion("IsEqualTo", actual, expected);
@@ -1382,7 +1390,7 @@ public class NUnitAssertionRewriter : AssertionRewriter
         var actual = arguments[1].Expression;
 
         // Check if 3rd argument is a comparer
-        if (arguments.Count >= 3 && IsLikelyComparerArgument(arguments[2]) == true)
+        if (arguments.Count >= 3 && IsLikelyComparerArgument(arguments[2]))
         {
             var result = CreateTUnitAssertion("IsNotEqualTo", actual, expected);
             return result.WithLeadingTrivia(

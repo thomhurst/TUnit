@@ -760,6 +760,12 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
                    namespaceName.StartsWith("Xunit.", StringComparison.OrdinalIgnoreCase);
         }
 
+        protected override bool IsKnownAssertionTypeBySyntax(string targetType, string methodName)
+        {
+            // XUnit assertion type that can be detected by syntax
+            return targetType == "Assert";
+        }
+
         protected override ExpressionSyntax? ConvertAssertionIfNeeded(InvocationExpressionSyntax invocation)
         {
             if (!IsFrameworkAssertion(invocation))
@@ -783,11 +789,11 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
             return methodName switch
             {
                 // Equality assertions - check for comparer overloads
-                "Equal" when arguments.Count >= 3 && IsLikelyComparerArgument(arguments[2]) == true =>
+                "Equal" when arguments.Count >= 3 && IsLikelyComparerArgument(arguments[2]) =>
                     CreateEqualWithComparerComment(arguments),
                 "Equal" when arguments.Count >= 2 =>
                     CreateTUnitAssertion("IsEqualTo", arguments[1].Expression, arguments[0]),
-                "NotEqual" when arguments.Count >= 3 && IsLikelyComparerArgument(arguments[2]) == true =>
+                "NotEqual" when arguments.Count >= 3 && IsLikelyComparerArgument(arguments[2]) =>
                     CreateNotEqualWithComparerComment(arguments),
                 "NotEqual" when arguments.Count >= 2 =>
                     CreateTUnitAssertion("IsNotEqualTo", arguments[1].Expression, arguments[0]),
