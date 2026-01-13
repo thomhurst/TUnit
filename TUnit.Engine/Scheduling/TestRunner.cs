@@ -1,6 +1,5 @@
-using Microsoft.Testing.Platform.Extensions.Messages;
+using System.Collections.Concurrent;
 using TUnit.Core;
-using TUnit.Core.Data;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Services.TestExecution;
@@ -36,13 +35,17 @@ public sealed class TestRunner
         _testStateManager = testStateManager;
     }
 
-    private readonly ThreadSafeDictionary<string, TaskCompletionSource<bool>> _executingTests = new();
+    private readonly ConcurrentDictionary<string, TaskCompletionSource<bool>> _executingTests = new();
     private Exception? _firstFailFastException;
 
     public ValueTask ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
+        if (_executingTests.TryGetValue(test.TestId, out var existingTcs))
+        {
+            return new ValueTask(existingTcs.Task);
+        }
         var tcs = new TaskCompletionSource<bool>();
-        var existingTcs = _executingTests.GetOrAdd(test.TestId, _ => tcs);
+        existingTcs = _executingTests.GetOrAdd(test.TestId, tcs);
 
         if (existingTcs != tcs)
         {
