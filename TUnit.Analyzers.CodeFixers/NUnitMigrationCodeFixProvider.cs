@@ -662,7 +662,7 @@ public class NUnitAssertionRewriter : AssertionRewriter
                 };
             }
 
-            // Handle Does.Not.StartWith, Does.Not.EndWith, Does.Not.Contain
+            // Handle Does.Not.StartWith, Does.Not.EndWith, Does.Not.Contain, Does.Not.Match
             if (memberAccess.Expression is MemberAccessExpressionSyntax doesNotAccess &&
                 doesNotAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Does" } &&
                 doesNotAccess.Name.Identifier.Text == "Not")
@@ -672,6 +672,7 @@ public class NUnitAssertionRewriter : AssertionRewriter
                     "StartWith" => CreateTUnitAssertionWithMessage("DoesNotStartWith", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
                     "EndWith" => CreateTUnitAssertionWithMessage("DoesNotEndWith", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
                     "Contain" => CreateTUnitAssertionWithMessage("DoesNotContain", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
+                    "Match" => CreateTUnitAssertionWithMessage("DoesNotMatch", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
                     _ => CreateTUnitAssertionWithMessage("DoesNotContain", actualValue, message, constraint.ArgumentList.Arguments.ToArray())
                 };
             }
@@ -704,13 +705,14 @@ public class NUnitAssertionRewriter : AssertionRewriter
                 };
             }
 
-            // Handle Does.StartWith, Does.EndWith, Contains.Substring
+            // Handle Does.StartWith, Does.EndWith, Does.Match, Contains.Substring
             if (memberAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Does" or "Contains" })
             {
                 return methodName switch
                 {
                     "StartWith" => CreateTUnitAssertionWithMessage("StartsWith", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
                     "EndWith" => CreateTUnitAssertionWithMessage("EndsWith", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
+                    "Match" => CreateTUnitAssertionWithMessage("Matches", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
                     "Substring" => CreateTUnitAssertionWithMessage("Contains", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
                     _ => CreateTUnitAssertionWithMessage("IsEqualTo", actualValue, message, SyntaxFactory.Argument(constraint))
                 };
@@ -729,6 +731,7 @@ public class NUnitAssertionRewriter : AssertionRewriter
                 "SameAs" => CreateTUnitAssertionWithMessage("IsSameReferenceAs", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
                 "InstanceOf" => CreateTUnitAssertionWithMessage("IsAssignableTo", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
                 "TypeOf" => CreateTUnitAssertionWithMessage("IsTypeOf", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
+                "Matches" => CreateTUnitAssertionWithMessage("Matches", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
                 _ => CreateTUnitAssertionWithMessage("IsEqualTo", actualValue, message, SyntaxFactory.Argument(constraint))
             };
         }
@@ -877,7 +880,7 @@ public class NUnitAssertionRewriter : AssertionRewriter
                 };
             }
 
-            // Handle Does.Not.StartWith, Does.Not.EndWith, Does.Not.Contain
+            // Handle Does.Not.StartWith, Does.Not.EndWith, Does.Not.Contain, Does.Not.Match
             if (memberAccess.Expression is MemberAccessExpressionSyntax doesNotAccess &&
                 doesNotAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Does" } &&
                 doesNotAccess.Name.Identifier.Text == "Not")
@@ -887,6 +890,7 @@ public class NUnitAssertionRewriter : AssertionRewriter
                     "StartWith" => CreateTUnitAssertion("DoesNotStartWith", actualValue, constraint.ArgumentList.Arguments.ToArray()),
                     "EndWith" => CreateTUnitAssertion("DoesNotEndWith", actualValue, constraint.ArgumentList.Arguments.ToArray()),
                     "Contain" => CreateTUnitAssertion("DoesNotContain", actualValue, constraint.ArgumentList.Arguments.ToArray()),
+                    "Match" => CreateTUnitAssertion("DoesNotMatch", actualValue, constraint.ArgumentList.Arguments.ToArray()),
                     _ => CreateTUnitAssertion("DoesNotContain", actualValue, constraint.ArgumentList.Arguments.ToArray())
                 };
             }
@@ -901,13 +905,14 @@ public class NUnitAssertionRewriter : AssertionRewriter
                 };
             }
 
-            // Handle Does.StartWith, Does.EndWith, Contains.Substring
+            // Handle Does.StartWith, Does.EndWith, Does.Match, Contains.Substring
             if (memberAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Does" or "Contains" })
             {
                 return methodName switch
                 {
                     "StartWith" => CreateTUnitAssertion("StartsWith", actualValue, constraint.ArgumentList.Arguments.ToArray()),
                     "EndWith" => CreateTUnitAssertion("EndsWith", actualValue, constraint.ArgumentList.Arguments.ToArray()),
+                    "Match" => CreateTUnitAssertion("Matches", actualValue, constraint.ArgumentList.Arguments.ToArray()),
                     "Substring" => CreateTUnitAssertion("Contains", actualValue, constraint.ArgumentList.Arguments.ToArray()),
                     _ => CreateTUnitAssertion("IsEqualTo", actualValue, SyntaxFactory.Argument(constraint))
                 };
