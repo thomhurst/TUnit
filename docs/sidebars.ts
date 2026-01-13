@@ -195,6 +195,7 @@ const sidebars: SidebarsConfig = {
           items: [
             'examples/aspnet',
             'examples/playwright',
+            'examples/fscheck',
             'examples/complex-test-infrastructure',
           ],
         },
