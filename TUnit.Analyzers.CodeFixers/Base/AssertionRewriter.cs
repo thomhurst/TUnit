@@ -307,49 +307,100 @@ public abstract class AssertionRewriter : CSharpSyntaxRewriter
 
     /// <summary>
     /// Checks if the argument at the given index appears to be a comparer (IComparer, IEqualityComparer).
-    /// Returns null if the type cannot be determined.
+    /// Uses semantic analysis when available, with syntax-based fallback for resilience across TFMs.
     /// </summary>
-    protected bool? IsLikelyComparerArgument(ArgumentSyntax argument)
+    protected bool IsLikelyComparerArgument(ArgumentSyntax argument)
     {
-        var typeInfo = SemanticModel.GetTypeInfo(argument.Expression);
-        if (typeInfo.Type == null || typeInfo.Type.TypeKind == TypeKind.Error)
+        // First, try syntax-based detection for string literals (most common message case)
+        // This is deterministic and consistent across all TFMs
+        if (argument.Expression.IsKind(SyntaxKind.StringLiteralExpression) ||
+            argument.Expression.IsKind(SyntaxKind.InterpolatedStringExpression))
         {
-            // Type couldn't be resolved - return null to indicate unknown
-            return null;
+            return false; // String literals are messages, not comparers
         }
 
-        var typeName = typeInfo.Type.ToDisplayString();
-
-        // If it's a string type, it's definitely a message, not a comparer
-        if (typeInfo.Type.SpecialType == SpecialType.System_String ||
-            typeName == "string" || typeName == "System.String")
+        // Try semantic analysis
+        var typeInfo = SemanticModel.GetTypeInfo(argument.Expression);
+        if (typeInfo.Type != null && typeInfo.Type.TypeKind != TypeKind.Error)
         {
+            var typeName = typeInfo.Type.ToDisplayString();
+
+            // If it's a string type, it's definitely a message, not a comparer
+            if (typeInfo.Type.SpecialType == SpecialType.System_String ||
+                typeName == "string" || typeName == "System.String")
+            {
+                return false;
+            }
+
+            // Check for IComparer, IComparer<T>, IEqualityComparer, IEqualityComparer<T>
+            if (typeName.Contains("IComparer") || typeName.Contains("IEqualityComparer"))
+            {
+                return true;
+            }
+
+            // Check interfaces - also check for generic interface names like IComparer`1
+            if (typeInfo.Type is INamedTypeSymbol namedType)
+            {
+                if (namedType.AllInterfaces.Any(i =>
+                    i.Name.StartsWith("IComparer") ||
+                    i.Name.StartsWith("IEqualityComparer")))
+                {
+                    return true;
+                }
+            }
+
+            // Also check if the type name itself contains Comparer (for StringComparer, etc.)
+            if (typeName.Contains("Comparer"))
+            {
+                return true;
+            }
+
+            // Semantic analysis resolved to a non-comparer type
             return false;
         }
 
-        // Check for IComparer, IComparer<T>, IEqualityComparer, IEqualityComparer<T>
-        if (typeName.Contains("IComparer") || typeName.Contains("IEqualityComparer"))
+        // Fallback: Syntax-based detection when semantic analysis fails
+        // This ensures consistent behavior across TFMs
+        return IsLikelyComparerArgumentBySyntax(argument.Expression);
+    }
+
+    /// <summary>
+    /// Syntax-based fallback for comparer detection. Used when semantic analysis fails.
+    /// Must be deterministic to ensure consistent behavior across TFMs.
+    /// </summary>
+    private static bool IsLikelyComparerArgumentBySyntax(ExpressionSyntax expression)
+    {
+        var expressionText = expression.ToString();
+        var lowerExpressionText = expressionText.ToLowerInvariant();
+
+        // Check for variable names or expressions containing "comparer" (case-insensitive)
+        // This catches variable names like 'comparer', 'myComparer', 'stringComparer', etc.
+        if (lowerExpressionText.EndsWith("comparer") ||
+            lowerExpressionText.Contains("comparer.") ||
+            lowerExpressionText.Contains("comparer<") ||
+            lowerExpressionText.Contains("equalitycomparer"))
         {
             return true;
         }
 
-        // Check interfaces - also check for generic interface names like IComparer`1
-        if (typeInfo.Type is INamedTypeSymbol namedType)
+        // Check for new SomeComparer() or new SomeComparer<T>() patterns
+        if (expression is ObjectCreationExpressionSyntax objectCreation)
         {
-            if (namedType.AllInterfaces.Any(i =>
-                i.Name.StartsWith("IComparer") ||
-                i.Name.StartsWith("IEqualityComparer")))
+            var typeText = objectCreation.Type.ToString().ToLowerInvariant();
+            if (typeText.Contains("comparer"))
             {
                 return true;
             }
         }
 
-        // Also check if the type name itself contains Comparer (for StringComparer, etc.)
-        if (typeName.Contains("Comparer"))
+        // Check for ImplicitObjectCreationExpressionSyntax (new() { ... })
+        // These are ambiguous without semantic info, assume not a comparer
+        if (expression is ImplicitObjectCreationExpressionSyntax)
         {
-            return true;
+            return false;
         }
 
+        // Default: assume it's a message (conservative - avoids incorrect comparer handling)
         return false;
     }
 
@@ -361,19 +412,50 @@ public abstract class AssertionRewriter : CSharpSyntaxRewriter
         return SyntaxFactory.Comment($"// TODO: TUnit migration - {message}");
     }
     
+    /// <summary>
+    /// Determines if an invocation is a framework assertion method.
+    /// Uses semantic analysis when available, with syntax-based fallback for resilience across TFMs.
+    /// </summary>
     protected bool IsFrameworkAssertion(InvocationExpressionSyntax invocation)
     {
+        // Try semantic analysis first
         var symbolInfo = SemanticModel.GetSymbolInfo(invocation);
-        var symbol = symbolInfo.Symbol;
+        if (symbolInfo.Symbol is IMethodSymbol methodSymbol)
+        {
+            var namespaceName = methodSymbol.ContainingNamespace?.ToDisplayString() ?? "";
+            if (IsFrameworkAssertionNamespace(namespaceName))
+            {
+                return true;
+            }
+        }
 
-        if (symbol is not IMethodSymbol methodSymbol)
+        // Fallback: Syntax-based detection when semantic analysis fails
+        // This ensures consistent behavior across TFMs
+        return IsFrameworkAssertionBySyntax(invocation);
+    }
+
+    /// <summary>
+    /// Syntax-based fallback for framework assertion detection. Used when semantic analysis fails.
+    /// Must be deterministic to ensure consistent behavior across TFMs.
+    /// </summary>
+    private bool IsFrameworkAssertionBySyntax(InvocationExpressionSyntax invocation)
+    {
+        if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess)
         {
             return false;
         }
 
-        var namespaceName = methodSymbol.ContainingNamespace?.ToDisplayString() ?? "";
-        return IsFrameworkAssertionNamespace(namespaceName);
+        var targetType = memberAccess.Expression.ToString();
+        var methodName = memberAccess.Name.Identifier.Text;
+
+        return IsKnownAssertionTypeBySyntax(targetType, methodName);
     }
-    
+
+    /// <summary>
+    /// Checks if the target type and method name match known framework assertion patterns.
+    /// Override in derived classes to provide framework-specific patterns.
+    /// </summary>
+    protected abstract bool IsKnownAssertionTypeBySyntax(string targetType, string methodName);
+
     protected abstract bool IsFrameworkAssertionNamespace(string namespaceName);
 }

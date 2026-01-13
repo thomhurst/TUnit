@@ -202,10 +202,16 @@ public class MSTestAssertionRewriter : AssertionRewriter
     
     protected override bool IsFrameworkAssertionNamespace(string namespaceName)
     {
-        return namespaceName == "Microsoft.VisualStudio.TestTools.UnitTesting" || 
+        return namespaceName == "Microsoft.VisualStudio.TestTools.UnitTesting" ||
                namespaceName.StartsWith("Microsoft.VisualStudio.TestTools.UnitTesting.");
     }
-    
+
+    protected override bool IsKnownAssertionTypeBySyntax(string targetType, string methodName)
+    {
+        // MSTest assertion types that can be detected by syntax
+        return targetType is "Assert" or "CollectionAssert" or "StringAssert" or "FileAssert" or "DirectoryAssert";
+    }
+
     protected override ExpressionSyntax? ConvertAssertionIfNeeded(InvocationExpressionSyntax invocation)
     {
         // First try semantic analysis

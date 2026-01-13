@@ -782,8 +782,8 @@ public class MSTestMigrationAnalyzerTests
     [Test]
     public async Task MSTest_Assertions_With_Comparer_AddsTodoComment()
     {
-        // When the comparer type cannot be determined via semantic analysis (e.g., in test context),
-        // a TODO comment is added for manual review instead of passing invalid arguments to .Because().
+        // When a comparer is detected (via semantic or syntax-based detection),
+        // a TODO comment is added explaining that TUnit uses different comparison semantics.
         await CodeFixer.VerifyCodeFixAsync(
             """
                 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -814,7 +814,7 @@ public class MSTestMigrationAnalyzerTests
                     public async Task TestWithComparer()
                     {
                         var comparer = StringComparer.OrdinalIgnoreCase;
-                        // TODO: TUnit migration - third argument could not be identified as comparer or message. Manual verification required.
+                        // TODO: TUnit migration - IEqualityComparer was used. TUnit uses .IsEqualTo() which may have different comparison semantics.
                         await Assert.That("HELLO").IsEqualTo("hello");
                     }
                 }
