@@ -117,8 +117,7 @@ internal sealed class TestScheduler : ITestScheduler
             }
         }
 
-        var executableTestsArray = executableTests.ToArray();
-        if (executableTestsArray.Length == 0)
+        if (executableTests.Count == 0)
         {
             await _logger.LogDebugAsync("No executable tests found after removing circular dependencies").ConfigureAwait(false);
             return true;
@@ -131,7 +130,7 @@ internal sealed class TestScheduler : ITestScheduler
         _staticPropertyHandler.TrackStaticProperties();
 
         // Group tests by their parallel constraints
-        var groupedTests = await _groupingService.GroupTestsByConstraintsAsync(executableTestsArray).ConfigureAwait(false);
+        var groupedTests = await _groupingService.GroupTestsByConstraintsAsync(executableTests).ConfigureAwait(false);
 
         // Execute tests according to their grouping
         await ExecuteGroupedTestsAsync(groupedTests, cancellationToken).ConfigureAwait(false);

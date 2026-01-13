@@ -19,6 +19,7 @@ internal sealed class CircularDependencyDetector
         var testList = tests as IList<AbstractExecutableTest> ?? tests.ToList();
         var circularDependencies = new List<(AbstractExecutableTest Test, List<AbstractExecutableTest> DependencyChain)>();
         var visitedStates = new Dictionary<string, VisitState>(capacity: testList.Count);
+        var pathBuffer = new List<AbstractExecutableTest>(4);
 
         foreach (var test in testList)
         {
@@ -27,12 +28,14 @@ internal sealed class CircularDependencyDetector
                 continue;
             }
 
+            // Reuse path buffer for each test, making a copy when a cycle is found
+            pathBuffer.Clear();
+
             // Typical cycle depth is small (2-5 tests), pre-size to 4
-            var path = new List<AbstractExecutableTest>(4);
-            if (HasCycleDfs(test, testList, visitedStates, path))
+            if (HasCycleDfs(test, testList, visitedStates, pathBuffer))
             {
                 // Found a cycle - add all tests in the cycle to circular dependencies
-                var cycle = new List<AbstractExecutableTest>(path);
+                var cycle = new List<AbstractExecutableTest>(pathBuffer);
                 circularDependencies.Add((test, cycle));
             }
         }
