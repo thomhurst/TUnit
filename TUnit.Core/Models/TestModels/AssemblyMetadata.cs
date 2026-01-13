@@ -9,7 +9,7 @@ public record AssemblyMetadata
     private static readonly ConcurrentDictionary<string, AssemblyMetadata> Cache = [];
     public static AssemblyMetadata GetOrAdd(string name, Func<AssemblyMetadata> factory)
     {
-        return Cache.GetOrAdd(name, _ => factory());
+        return Cache.GetOrAdd(name, static (_, factory) => factory(), factory);
     }
 
     public virtual bool Equals(AssemblyMetadata? other)

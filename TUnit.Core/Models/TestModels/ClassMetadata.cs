@@ -24,9 +24,9 @@ public record ClassMetadata : IMemberMetadata
             }
             return existing;
         }
-        
+
         // Otherwise add new value
-        return Cache.GetOrAdd(name, _ => factory());
+        return Cache.GetOrAdd(name, static (_, factory) => factory(), factory);
     }
 
     public virtual bool Equals(ClassMetadata? other)
