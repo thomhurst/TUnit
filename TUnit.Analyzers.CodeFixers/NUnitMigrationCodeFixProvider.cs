@@ -66,7 +66,13 @@ public class NUnitAttributeRewriter : AttributeRewriter
             "Test" or "Theory" or "TestCase" or "TestCaseSource" or
             "SetUp" or "TearDown" or "OneTimeSetUp" or "OneTimeTearDown" or
             "TestFixture" or "Category" or "Ignore" or "Explicit" or "Apartment" or
-            "Platform" or "Description" => true,
+            "Platform" or "Description" or
+            // Parallelization attributes
+            "Parallelizable" or "NonParallelizable" or
+            // Repeat attribute (same in TUnit)
+            "Repeat" or
+            // Parameter-level data attributes (converted to Matrix/MatrixRange)
+            "Values" or "Range" or "ValueSource" => true,
             _ => false
         };
     }
@@ -74,13 +80,43 @@ public class NUnitAttributeRewriter : AttributeRewriter
     protected override AttributeSyntax? ConvertAttribute(AttributeSyntax attribute)
     {
         var attributeName = MigrationHelpers.GetAttributeName(attribute);
-        
+
         // Special handling for [Apartment(ApartmentState.STA)] -> [STAThreadExecutor]
         if (attributeName == "Apartment")
         {
             return ConvertApartmentAttribute(attribute);
         }
-        
+
+        // [Parallelizable(ParallelScope.None)] or [NonParallelizable] -> [NotInParallel]
+        if (attributeName is "Parallelizable" or "NonParallelizable")
+        {
+            return ConvertParallelizableAttribute(attribute, attributeName);
+        }
+
+        // [Repeat] has the same name in TUnit - just keep it
+        if (attributeName == "Repeat")
+        {
+            return attribute;
+        }
+
+        // [Values] -> [Matrix] (parameter-level attribute)
+        if (attributeName == "Values")
+        {
+            return ConvertValuesAttribute(attribute);
+        }
+
+        // [Range] -> [MatrixRange<T>] (parameter-level attribute)
+        if (attributeName == "Range")
+        {
+            return ConvertRangeAttribute(attribute);
+        }
+
+        // [ValueSource] -> [MatrixSourceMethod] (parameter-level attribute)
+        if (attributeName == "ValueSource")
+        {
+            return ConvertValueSourceAttribute(attribute);
+        }
+
         return base.ConvertAttribute(attribute);
     }
     
@@ -90,7 +126,7 @@ public class NUnitAttributeRewriter : AttributeRewriter
         if (attribute.ArgumentList?.Arguments.Count > 0)
         {
             var arg = attribute.ArgumentList.Arguments[0].Expression;
-            
+
             // Check for ApartmentState.STA pattern
             if (arg is MemberAccessExpressionSyntax memberAccess &&
                 memberAccess.Name.Identifier.Text == "STA")
@@ -99,10 +135,71 @@ public class NUnitAttributeRewriter : AttributeRewriter
                 return SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("STAThreadExecutor"));
             }
         }
-        
+
         // For other ApartmentState values, we can't convert automatically - return null to remove
         // Add TODO comment would be ideal but can't easily add comments on attributes
         return null;
+    }
+
+    private AttributeSyntax? ConvertParallelizableAttribute(AttributeSyntax attribute, string attributeName)
+    {
+        // [NonParallelizable] -> [NotInParallel]
+        if (attributeName == "NonParallelizable")
+        {
+            return SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("NotInParallel"));
+        }
+
+        // [Parallelizable] without arguments means parallel is allowed - no equivalent needed, remove
+        if (attribute.ArgumentList == null || attribute.ArgumentList.Arguments.Count == 0)
+        {
+            return null; // Remove - parallel is the default in TUnit
+        }
+
+        // Check the ParallelScope argument
+        var arg = attribute.ArgumentList.Arguments[0].Expression;
+
+        // Handle ParallelScope.None -> [NotInParallel]
+        if (arg is MemberAccessExpressionSyntax memberAccess &&
+            memberAccess.Name.Identifier.Text == "None")
+        {
+            return SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("NotInParallel"));
+        }
+
+        // For other ParallelScope values (Self, Children, Fixtures, All), parallel is allowed
+        // TUnit's parallel behavior is different - remove the attribute
+        return null;
+    }
+
+    private AttributeSyntax ConvertValuesAttribute(AttributeSyntax attribute)
+    {
+        // [Values(1, 2, 3)] -> [Matrix(1, 2, 3)]
+        return SyntaxFactory.Attribute(
+            SyntaxFactory.IdentifierName("Matrix"),
+            attribute.ArgumentList);
+    }
+
+    private AttributeSyntax ConvertRangeAttribute(AttributeSyntax attribute)
+    {
+        // [Range(1, 10)] -> [MatrixRange<int>(1, 10)]
+        // [Range(1, 10, 2)] -> [MatrixRange<int>(1, 10, 2)]
+        // Note: NUnit Range works with int by default, TUnit requires explicit generic type
+        // For now, we'll use int as the default type - the user may need to adjust for other types
+        return SyntaxFactory.Attribute(
+            SyntaxFactory.GenericName("MatrixRange")
+                .WithTypeArgumentList(
+                    SyntaxFactory.TypeArgumentList(
+                        SyntaxFactory.SingletonSeparatedList<TypeSyntax>(
+                            SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.IntKeyword))))),
+            attribute.ArgumentList);
+    }
+
+    private AttributeSyntax ConvertValueSourceAttribute(AttributeSyntax attribute)
+    {
+        // [ValueSource(nameof(MyMethod))] -> [MatrixSourceMethod(nameof(MyMethod))]
+        // Note: TUnit's MatrixSourceMethod expects a method that returns values for one parameter
+        return SyntaxFactory.Attribute(
+            SyntaxFactory.IdentifierName("MatrixSourceMethod"),
+            attribute.ArgumentList);
     }
     
     protected override AttributeArgumentListSyntax? ConvertAttributeArguments(AttributeArgumentListSyntax argumentList, string attributeName)

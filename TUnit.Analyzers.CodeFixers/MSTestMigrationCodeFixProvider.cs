@@ -37,7 +37,10 @@ public class MSTestMigrationCodeFixProvider : BaseMigrationCodeFixProvider
 
     protected override CompilationUnitSyntax ApplyFrameworkSpecificConversions(CompilationUnitSyntax compilationUnit, SemanticModel semanticModel, Compilation compilation)
     {
-        // MSTest-specific conversions if needed
+        // Handle [ExpectedException] attribute conversion
+        var expectedExceptionRewriter = new MSTestExpectedExceptionRewriter();
+        compilationUnit = (CompilationUnitSyntax)expectedExceptionRewriter.Visit(compilationUnit);
+
         return compilationUnit;
     }
 }
@@ -65,6 +68,7 @@ public class MSTestAttributeRewriter : AttributeRewriter
             "DynamicData" => ConvertDynamicDataArguments(argumentList),
             "TestCategory" => ConvertTestCategoryArguments(argumentList),
             "Priority" => ConvertPriorityArguments(argumentList),
+            "Owner" => ConvertOwnerArguments(argumentList),
             "ClassInitialize" or "ClassCleanup" => null, // These don't need arguments in TUnit
             _ => argumentList
         };
@@ -119,12 +123,12 @@ public class MSTestAttributeRewriter : AttributeRewriter
     {
         // Convert Priority to Property
         var arguments = new List<AttributeArgumentSyntax>();
-        
+
         arguments.Add(SyntaxFactory.AttributeArgument(
-            SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, 
+            SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression,
                 SyntaxFactory.Literal("Priority"))
         ));
-        
+
         if (argumentList.Arguments.Count > 0)
         {
             arguments.Add(SyntaxFactory.AttributeArgument(
@@ -132,10 +136,28 @@ public class MSTestAttributeRewriter : AttributeRewriter
                     SyntaxFactory.Literal(argumentList.Arguments[0].Expression.ToString()))
             ));
         }
-        
+
         return SyntaxFactory.AttributeArgumentList(SyntaxFactory.SeparatedList(arguments));
     }
-    
+
+    private AttributeArgumentListSyntax ConvertOwnerArguments(AttributeArgumentListSyntax argumentList)
+    {
+        // Convert Owner to Property
+        var arguments = new List<AttributeArgumentSyntax>();
+
+        arguments.Add(SyntaxFactory.AttributeArgument(
+            SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression,
+                SyntaxFactory.Literal("Owner"))
+        ));
+
+        if (argumentList.Arguments.Count > 0)
+        {
+            arguments.Add(argumentList.Arguments[0]);
+        }
+
+        return SyntaxFactory.AttributeArgumentList(SyntaxFactory.SeparatedList(arguments));
+    }
+
     public override SyntaxNode? VisitAttributeList(AttributeListSyntax node)
     {
         // Handle ClassInitialize and ClassCleanup specially - they need static context parameter removed
@@ -818,5 +840,144 @@ public class MSTestLifecycleRewriter : CSharpSyntaxRewriter
         }
 
         return base.VisitMethodDeclaration(node);
+    }
+}
+
+/// <summary>
+/// Handles [ExpectedException(typeof(T))] attribute conversion by:
+/// 1. Removing the attribute
+/// 2. Wrapping the method body in Assert.ThrowsAsync&lt;T&gt;()
+/// </summary>
+public class MSTestExpectedExceptionRewriter : CSharpSyntaxRewriter
+{
+    public override SyntaxNode? VisitMethodDeclaration(MethodDeclarationSyntax node)
+    {
+        // Find [ExpectedException] attribute
+        var expectedExceptionAttr = node.AttributeLists
+            .SelectMany(al => al.Attributes)
+            .FirstOrDefault(a => MigrationHelpers.GetAttributeName(a) == "ExpectedException");
+
+        if (expectedExceptionAttr == null)
+        {
+            return base.VisitMethodDeclaration(node);
+        }
+
+        // Extract the exception type from typeof(ExceptionType)
+        var exceptionType = ExtractExceptionType(expectedExceptionAttr);
+        if (exceptionType == null)
+        {
+            // Can't extract exception type, leave as-is with a TODO comment
+            return node;
+        }
+
+        // Remove the [ExpectedException] attribute
+        var newAttributeLists = RemoveExpectedExceptionAttribute(node.AttributeLists);
+
+        // Wrap the method body in Assert.ThrowsAsync<T>()
+        var newBody = WrapBodyInThrowsAsync(node.Body, node.ExpressionBody, exceptionType);
+
+        if (newBody == null)
+        {
+            return node.WithAttributeLists(SyntaxFactory.List(newAttributeLists));
+        }
+
+        return node
+            .WithAttributeLists(SyntaxFactory.List(newAttributeLists))
+            .WithBody(newBody)
+            .WithExpressionBody(null)
+            .WithSemicolonToken(default);
+    }
+
+    private static TypeSyntax? ExtractExceptionType(AttributeSyntax attribute)
+    {
+        if (attribute.ArgumentList == null || attribute.ArgumentList.Arguments.Count == 0)
+        {
+            return null;
+        }
+
+        var firstArg = attribute.ArgumentList.Arguments[0].Expression;
+
+        // Handle typeof(ExceptionType)
+        if (firstArg is TypeOfExpressionSyntax typeOfExpr)
+        {
+            return typeOfExpr.Type;
+        }
+
+        return null;
+    }
+
+    private static List<AttributeListSyntax> RemoveExpectedExceptionAttribute(SyntaxList<AttributeListSyntax> attributeLists)
+    {
+        var result = new List<AttributeListSyntax>();
+
+        foreach (var attrList in attributeLists)
+        {
+            var remainingAttrs = attrList.Attributes
+                .Where(a => MigrationHelpers.GetAttributeName(a) != "ExpectedException")
+                .ToList();
+
+            if (remainingAttrs.Count > 0)
+            {
+                result.Add(attrList.WithAttributes(SyntaxFactory.SeparatedList(remainingAttrs)));
+            }
+        }
+
+        return result;
+    }
+
+    private static BlockSyntax? WrapBodyInThrowsAsync(BlockSyntax? body, ArrowExpressionClauseSyntax? expressionBody, TypeSyntax exceptionType)
+    {
+        StatementSyntax[] originalStatements;
+
+        if (body != null)
+        {
+            originalStatements = body.Statements.ToArray();
+        }
+        else if (expressionBody != null)
+        {
+            // Convert expression body to a statement
+            originalStatements = [SyntaxFactory.ExpressionStatement(expressionBody.Expression)];
+        }
+        else
+        {
+            return null;
+        }
+
+        // Create: await Assert.ThrowsAsync<T>(() => { original statements });
+        var lambda = SyntaxFactory.ParenthesizedLambdaExpression(
+            SyntaxFactory.ParameterList(),
+            SyntaxFactory.Block(originalStatements)
+        );
+
+        var throwsAsyncCall = SyntaxFactory.InvocationExpression(
+            SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                SyntaxFactory.IdentifierName("Assert"),
+                SyntaxFactory.GenericName("ThrowsAsync")
+                    .WithTypeArgumentList(
+                        SyntaxFactory.TypeArgumentList(
+                            SyntaxFactory.SingletonSeparatedList(exceptionType.WithoutTrivia())
+                        )
+                    )
+            ),
+            SyntaxFactory.ArgumentList(
+                SyntaxFactory.SingletonSeparatedList(
+                    SyntaxFactory.Argument(lambda)
+                )
+            )
+        );
+
+        var awaitExpression = SyntaxFactory.AwaitExpression(throwsAsyncCall);
+
+        var newStatement = SyntaxFactory.ExpressionStatement(awaitExpression)
+            .WithLeadingTrivia(SyntaxFactory.TriviaList(
+                SyntaxFactory.Whitespace("        ")))
+            .WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
+
+        return SyntaxFactory.Block(newStatement)
+            .WithOpenBraceToken(SyntaxFactory.Token(SyntaxKind.OpenBraceToken)
+                .WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed))
+            .WithCloseBraceToken(SyntaxFactory.Token(SyntaxKind.CloseBraceToken)
+                .WithLeadingTrivia(SyntaxFactory.Whitespace("    ")));
     }
 }
