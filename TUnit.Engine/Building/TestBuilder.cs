@@ -967,7 +967,6 @@ internal sealed class TestBuilder : ITestBuilder
         return firstSkipAttribute?.Reason;
     }
 
-
     private async ValueTask<TestContext> CreateTestContextAsync(string testId, TestMetadata metadata, TestData testData, TestBuilderContext testBuilderContext)
     {
         // Use attributes from context if available, or create new ones
