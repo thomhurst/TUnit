@@ -231,6 +231,45 @@ public static partial class FileSystemComparisonAssertions
     }
 
     /// <summary>
+    /// Asserts that a file does NOT have the same binary content as another file.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    [GenerateAssertion(ExpectationMessage = "to not have same content as {expected}")]
+    public static AssertionResult DoesNotHaveSameContentAs(this FileInfo value, FileInfo expected)
+    {
+        if (value == null || expected == null)
+        {
+            return AssertionResult.Passed; // null is not the same as anything
+        }
+
+        value.Refresh();
+        expected.Refresh();
+
+        if (!value.Exists || !expected.Exists)
+        {
+            return AssertionResult.Passed; // non-existent files are not the same
+        }
+
+        if (value.Length != expected.Length)
+        {
+            return AssertionResult.Passed; // different sizes means different content
+        }
+
+        var actualBytes = File.ReadAllBytes(value.FullName);
+        var expectedBytes = File.ReadAllBytes(expected.FullName);
+
+        for (int i = 0; i < actualBytes.Length; i++)
+        {
+            if (actualBytes[i] != expectedBytes[i])
+            {
+                return AssertionResult.Passed; // found a difference
+            }
+        }
+
+        return AssertionResult.Failed("files have identical content");
+    }
+
+    /// <summary>
     /// Asserts that a directory has the same structure (file paths) as another directory.
     /// Does not compare file contents, only the relative paths of files and subdirectories.
     /// </summary>

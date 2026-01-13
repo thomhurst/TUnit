@@ -1495,21 +1495,13 @@ public class NUnitAssertionRewriter : AssertionRewriter
     {
         // NUnit's FileAssert.AreEqual compares file contents
         // Generate: Assert.That(new FileInfo(actual)).HasSameContentAs(new FileInfo(expected))
+        // Or for negated: Assert.That(new FileInfo(actual)).DoesNotHaveSameContentAs(new FileInfo(expected))
 
         var actualFileInfo = CreateFileInfoExpression(actual);
         var expectedFileInfo = CreateFileInfoExpression(expected);
 
-        // Note: HasSameContentAs doesn't have a negated version in TUnit.Assertions yet
-        // For now, use IsEquivalentTo on byte arrays for negated case
-        if (isNegated)
-        {
-            // Fall back to byte comparison for the negated case
-            var actualBytes = CreateFileReadAllBytes(actual);
-            var expectedBytes = CreateFileReadAllBytes(expected);
-            return CreateTUnitAssertion("IsNotEquivalentTo", actualBytes, SyntaxFactory.Argument(expectedBytes));
-        }
-
-        return CreateTUnitAssertion("HasSameContentAs", actualFileInfo, SyntaxFactory.Argument(expectedFileInfo));
+        var assertionMethod = isNegated ? "DoesNotHaveSameContentAs" : "HasSameContentAs";
+        return CreateTUnitAssertion(assertionMethod, actualFileInfo, SyntaxFactory.Argument(expectedFileInfo));
     }
 
     private static ExpressionSyntax CreateFileInfoExpression(ExpressionSyntax pathOrFileInfo)

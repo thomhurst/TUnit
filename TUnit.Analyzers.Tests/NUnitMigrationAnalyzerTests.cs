@@ -3364,6 +3364,44 @@ public class NUnitMigrationAnalyzerTests
     }
 
     [Test]
+    public async Task NUnit_FileAssert_AreNotEqual_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void TestMethod()
+                    {
+                        FileAssert.AreNotEqual("expected.txt", "actual.txt");
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.IO;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        await Assert.That(new FileInfo("actual.txt")).DoesNotHaveSameContentAs(new FileInfo("expected.txt"));
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
     public async Task NUnit_DirectoryAssert_Exists_Converted()
     {
         await CodeFixer.VerifyCodeFixAsync(
