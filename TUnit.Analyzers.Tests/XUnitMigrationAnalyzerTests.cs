@@ -968,6 +968,7 @@ public class XUnitMigrationAnalyzerTests
                 """
                 using System;
                 using TUnit.Core;
+                using System.Threading.Tasks;
 
                 public class MyClass
                 {
