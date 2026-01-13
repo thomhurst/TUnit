@@ -1493,13 +1493,42 @@ public class NUnitAssertionRewriter : AssertionRewriter
 
     private ExpressionSyntax CreateFileAreEqualAssertion(ExpressionSyntax expected, ExpressionSyntax actual, bool isNegated)
     {
-        // Create: File.ReadAllBytes(expected) and File.ReadAllBytes(actual)
-        // Then: Assert.That(actualBytes).IsEquivalentTo(expectedBytes)
-        ExpressionSyntax expectedBytes = CreateFileReadAllBytes(expected);
-        ExpressionSyntax actualBytes = CreateFileReadAllBytes(actual);
+        // NUnit's FileAssert.AreEqual compares file contents
+        // Generate: Assert.That(new FileInfo(actual)).HasSameContentAs(new FileInfo(expected))
 
-        var assertionMethod = isNegated ? "IsNotEquivalentTo" : "IsEquivalentTo";
-        return CreateTUnitAssertion(assertionMethod, actualBytes, SyntaxFactory.Argument(expectedBytes));
+        var actualFileInfo = CreateFileInfoExpression(actual);
+        var expectedFileInfo = CreateFileInfoExpression(expected);
+
+        // Note: HasSameContentAs doesn't have a negated version in TUnit.Assertions yet
+        // For now, use IsEquivalentTo on byte arrays for negated case
+        if (isNegated)
+        {
+            // Fall back to byte comparison for the negated case
+            var actualBytes = CreateFileReadAllBytes(actual);
+            var expectedBytes = CreateFileReadAllBytes(expected);
+            return CreateTUnitAssertion("IsNotEquivalentTo", actualBytes, SyntaxFactory.Argument(expectedBytes));
+        }
+
+        return CreateTUnitAssertion("HasSameContentAs", actualFileInfo, SyntaxFactory.Argument(expectedFileInfo));
+    }
+
+    private static ExpressionSyntax CreateFileInfoExpression(ExpressionSyntax pathOrFileInfo)
+    {
+        // If it's already a FileInfo (not a string path), use it directly
+        // If the expression is a string literal or looks like a path variable, wrap it
+        if (pathOrFileInfo is LiteralExpressionSyntax ||
+            pathOrFileInfo.ToString().EndsWith("Path", StringComparison.OrdinalIgnoreCase) ||
+            pathOrFileInfo.ToString().Contains("path", StringComparison.OrdinalIgnoreCase))
+        {
+            // Create: new FileInfo(path)
+            return SyntaxFactory.ObjectCreationExpression(
+                SyntaxFactory.IdentifierName("FileInfo"))
+                .WithArgumentList(SyntaxFactory.ArgumentList(
+                    SyntaxFactory.SingletonSeparatedList(SyntaxFactory.Argument(pathOrFileInfo))));
+        }
+
+        // Assume it's already a FileInfo or can be used as-is
+        return pathOrFileInfo;
     }
 
     private static ExpressionSyntax CreateFileReadAllBytes(ExpressionSyntax pathOrFileInfo)
@@ -1582,59 +1611,36 @@ public class NUnitAssertionRewriter : AssertionRewriter
 
     private ExpressionSyntax CreateDirectoryAreEqualAssertion(ExpressionSyntax expected, ExpressionSyntax actual, bool isNegated)
     {
-        // Create: Directory.GetFiles(expected, "*", SearchOption.AllDirectories) and same for actual
-        // This compares directory contents
-        // Note: NUnit's DirectoryAssert.AreEqual is complex - it compares directory contents recursively
-        // We'll use a simpler approach: compare file lists
-        ExpressionSyntax expectedFiles = CreateDirectoryGetFiles(expected);
-        ExpressionSyntax actualFiles = CreateDirectoryGetFiles(actual);
+        // NUnit's DirectoryAssert.AreEqual compares both file structure AND file contents
+        // Generate: Assert.That(new DirectoryInfo(actual)).IsEquivalentTo(new DirectoryInfo(expected))
+
+        var actualDirectoryInfo = CreateDirectoryInfoExpression(actual);
+        var expectedDirectoryInfo = CreateDirectoryInfoExpression(expected);
 
         var assertionMethod = isNegated ? "IsNotEquivalentTo" : "IsEquivalentTo";
-        var assertion = CreateTUnitAssertion(assertionMethod, actualFiles, SyntaxFactory.Argument(expectedFiles));
-
-        // Add a TODO comment warning about the semantic difference
-        return assertion.WithLeadingTrivia(
-            SyntaxFactory.Comment("// TODO: TUnit migration - This only compares file paths, not file contents. NUnit's DirectoryAssert.AreEqual also compared contents."),
-            SyntaxFactory.EndOfLine("\n"),
-            SyntaxFactory.Whitespace("        "));
+        return CreateTUnitAssertion(assertionMethod, actualDirectoryInfo, SyntaxFactory.Argument(expectedDirectoryInfo));
     }
 
-    private static ExpressionSyntax CreateDirectoryGetFiles(ExpressionSyntax pathOrDirectoryInfo)
+    private static ExpressionSyntax CreateDirectoryInfoExpression(ExpressionSyntax pathOrDirectoryInfo)
     {
-        // If it's a DirectoryInfo, use directoryInfo.FullName
-        ExpressionSyntax path;
+        // If it's already a DirectoryInfo (not a string path), use it directly
+        // We can't easily determine the type at syntax level, so we wrap in new DirectoryInfo() for string paths
+        // If the expression is a string literal or looks like a path variable, wrap it
         if (pathOrDirectoryInfo is LiteralExpressionSyntax ||
-            pathOrDirectoryInfo.ToString().EndsWith("Path", StringComparison.OrdinalIgnoreCase))
+            pathOrDirectoryInfo.ToString().EndsWith("Path", StringComparison.OrdinalIgnoreCase) ||
+            pathOrDirectoryInfo.ToString().Contains("path", StringComparison.OrdinalIgnoreCase))
         {
-            path = pathOrDirectoryInfo;
-        }
-        else
-        {
-            // Assume it's a DirectoryInfo - use .FullName property
-            path = SyntaxFactory.MemberAccessExpression(
-                SyntaxKind.SimpleMemberAccessExpression,
-                pathOrDirectoryInfo,
-                SyntaxFactory.IdentifierName("FullName"));
+            // Create: new DirectoryInfo(path)
+            return SyntaxFactory.ObjectCreationExpression(
+                SyntaxFactory.IdentifierName("DirectoryInfo"))
+                .WithArgumentList(SyntaxFactory.ArgumentList(
+                    SyntaxFactory.SingletonSeparatedList(SyntaxFactory.Argument(pathOrDirectoryInfo))));
         }
 
-        // Directory.GetFiles(path, "*", SearchOption.AllDirectories)
-        return SyntaxFactory.InvocationExpression(
-            SyntaxFactory.MemberAccessExpression(
-                SyntaxKind.SimpleMemberAccessExpression,
-                SyntaxFactory.IdentifierName("Directory"),
-                SyntaxFactory.IdentifierName("GetFiles")),
-            SyntaxFactory.ArgumentList(
-                SyntaxFactory.SeparatedList(new[]
-                {
-                    SyntaxFactory.Argument(path),
-                    SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal("*"))),
-                    SyntaxFactory.Argument(
-                        SyntaxFactory.MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            SyntaxFactory.IdentifierName("SearchOption"),
-                            SyntaxFactory.IdentifierName("AllDirectories")))
-                })));
+        // Assume it's already a DirectoryInfo or can be used as-is
+        return pathOrDirectoryInfo;
     }
+
 }
 
 public class NUnitBaseTypeRewriter : CSharpSyntaxRewriter

@@ -3355,7 +3355,7 @@ public class NUnitMigrationAnalyzerTests
                     [Test]
                     public async Task TestMethod()
                     {
-                        await Assert.That(File.ReadAllBytes("actual.txt")).IsEquivalentTo(File.ReadAllBytes("expected.txt"));
+                        await Assert.That(new FileInfo("actual.txt")).HasSameContentAs(new FileInfo("expected.txt"));
                     }
                 }
                 """,
@@ -3432,6 +3432,44 @@ public class NUnitMigrationAnalyzerTests
                     public async Task TestMethod()
                     {
                         await Assert.That(Directory.Exists("testDir")).IsFalse();
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_DirectoryAssert_AreEqual_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void TestMethod()
+                    {
+                        DirectoryAssert.AreEqual("expectedDir", "actualDir");
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.IO;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        await Assert.That(new DirectoryInfo("actualDir")).IsEquivalentTo(new DirectoryInfo("expectedDir"));
                     }
                 }
                 """,

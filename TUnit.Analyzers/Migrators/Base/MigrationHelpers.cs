@@ -261,19 +261,25 @@ public static class MigrationHelpers
     }
 
     /// <summary>
-    /// Adds System.IO using directive if the code contains File. or Directory. references.
-    /// This is needed when FileAssert or DirectoryAssert is converted to use File/Directory classes.
+    /// Adds System.IO using directive if the code contains File, Directory, FileInfo, or DirectoryInfo references.
+    /// This is needed when FileAssert or DirectoryAssert is converted to use System.IO classes.
     /// </summary>
     public static CompilationUnitSyntax AddSystemIOUsing(CompilationUnitSyntax compilationUnit)
     {
         var existingUsings = compilationUnit.Usings.ToList();
 
         // Check if code contains File. or Directory. member access
-        bool hasFileOrDirectoryCode = compilationUnit.DescendantNodes()
+        bool hasFileOrDirectoryMemberAccess = compilationUnit.DescendantNodes()
             .OfType<MemberAccessExpressionSyntax>()
             .Any(m => m.Expression is IdentifierNameSyntax { Identifier.Text: "File" or "Directory" });
 
-        if (hasFileOrDirectoryCode && !existingUsings.Any(u => u.Name?.ToString() == "System.IO"))
+        // Check if code contains new FileInfo(...) or new DirectoryInfo(...) object creation
+        bool hasFileInfoOrDirectoryInfoCreation = compilationUnit.DescendantNodes()
+            .OfType<ObjectCreationExpressionSyntax>()
+            .Any(o => o.Type is IdentifierNameSyntax { Identifier.Text: "FileInfo" or "DirectoryInfo" });
+
+        if ((hasFileOrDirectoryMemberAccess || hasFileInfoOrDirectoryInfoCreation) &&
+            !existingUsings.Any(u => u.Name?.ToString() == "System.IO"))
         {
             var ioUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.IO"));
             existingUsings.Insert(0, ioUsing); // Insert at beginning to keep System.* namespaces together
