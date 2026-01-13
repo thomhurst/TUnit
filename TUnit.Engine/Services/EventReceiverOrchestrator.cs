@@ -23,8 +23,8 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     private ThreadSafeDictionary<string, Task> _firstTestInSessionTasks = new();
 
     // Track remaining test counts for "last" events
-    private readonly ThreadSafeDictionary<string, Counter> _assemblyTestCounts = new();
-    private readonly ThreadSafeDictionary<Type, Counter> _classTestCounts = new();
+    private readonly ConcurrentDictionary<string, Counter> _assemblyTestCounts = new();
+    private readonly ConcurrentDictionary<Type, Counter> _classTestCounts = new();
     private int _sessionTestCount;
 
     // Track which objects have already been initialized to avoid duplicates
@@ -79,15 +79,15 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
     // Fast-path checks with inlining
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public async ValueTask InvokeTestStartEventReceiversAsync(TestContext context, CancellationToken cancellationToken, EventReceiverStage? stage = null)
+    public ValueTask InvokeTestStartEventReceiversAsync(TestContext context, CancellationToken cancellationToken, EventReceiverStage? stage = null)
     {
         // Fast path - no allocation if no receivers
         if (!_registry.HasTestStartReceivers())
         {
-            return;
+            return ValueTask.CompletedTask;
         }
 
-        await InvokeTestStartEventReceiversCore(context, cancellationToken, stage);
+        return InvokeTestStartEventReceiversCore(context, cancellationToken, stage);
     }
 
     private async ValueTask InvokeTestStartEventReceiversCore(TestContext context, CancellationToken cancellationToken, EventReceiverStage? stage)
@@ -127,17 +127,17 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public async ValueTask<List<Exception>> InvokeTestEndEventReceiversAsync(TestContext context, CancellationToken cancellationToken, EventReceiverStage? stage = null)
+    public ValueTask<IReadOnlyList<Exception>> InvokeTestEndEventReceiversAsync(TestContext context, CancellationToken cancellationToken, EventReceiverStage? stage = null)
     {
         if (!_registry.HasTestEndReceivers())
         {
-            return [];
+            return new ValueTask<IReadOnlyList<Exception>>([]);
         }
 
-        return await InvokeTestEndEventReceiversCore(context, cancellationToken, stage);
+        return InvokeTestEndEventReceiversCore(context, cancellationToken, stage);
     }
 
-    private async ValueTask<List<Exception>> InvokeTestEndEventReceiversCore(TestContext context, CancellationToken cancellationToken, EventReceiverStage? stage)
+    private async ValueTask<IReadOnlyList<Exception>> InvokeTestEndEventReceiversCore(TestContext context, CancellationToken cancellationToken, EventReceiverStage? stage)
     {
         // Defer exception list allocation until actually needed
         List<Exception>? exceptions = null;
@@ -211,18 +211,18 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         }
 #endif
 
-        return exceptions ?? [];
+        return exceptions == null ? Array.Empty<Exception>() : exceptions;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public async ValueTask InvokeTestSkippedEventReceiversAsync(TestContext context, CancellationToken cancellationToken)
+    public ValueTask InvokeTestSkippedEventReceiversAsync(TestContext context, CancellationToken cancellationToken)
     {
         if (!_registry.HasTestSkippedReceivers())
         {
-            return;
+            return ValueTask.CompletedTask;
         }
 
-        await InvokeTestSkippedEventReceiversCore(context, cancellationToken);
+        return InvokeTestSkippedEventReceiversCore(context, cancellationToken);
     }
 
     private async ValueTask InvokeTestSkippedEventReceiversCore(TestContext context, CancellationToken cancellationToken)
@@ -271,7 +271,6 @@ internal sealed class EventReceiverOrchestrator : IDisposable
             hookContext.HookMethod.Timeout = hookContext.Timeout;
         }
     }
-
 
     // First/Last event methods with fast-path checks
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -365,20 +364,22 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
     // Last event methods
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public async ValueTask InvokeLastTestInSessionEventReceiversAsync(
+    public ValueTask InvokeLastTestInSessionEventReceiversAsync(
         TestContext context,
         TestSessionContext sessionContext,
         CancellationToken cancellationToken)
     {
         if (!_registry.HasLastTestInSessionReceivers())
         {
-            return;
+            return ValueTask.CompletedTask;
         }
 
         if (Interlocked.Decrement(ref _sessionTestCount) == 0)
         {
-            await InvokeLastTestInSessionEventReceiversCore(context, sessionContext, cancellationToken);
+            return InvokeLastTestInSessionEventReceiversCore(context, sessionContext, cancellationToken);
         }
+
+        return ValueTask.CompletedTask;
     }
 
     private async ValueTask InvokeLastTestInSessionEventReceiversCore(
@@ -402,14 +403,14 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public async ValueTask InvokeLastTestInAssemblyEventReceiversAsync(
+    public ValueTask InvokeLastTestInAssemblyEventReceiversAsync(
         TestContext context,
         AssemblyHookContext assemblyContext,
         CancellationToken cancellationToken)
     {
         if (!_registry.HasLastTestInAssemblyReceivers())
         {
-            return;
+            return ValueTask.CompletedTask;
         }
 
         var assemblyName = assemblyContext.Assembly.GetName().FullName ?? "";
@@ -418,8 +419,10 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         if (assemblyCount == 0)
         {
-            await InvokeLastTestInAssemblyEventReceiversCore(context, assemblyContext, cancellationToken);
+            return InvokeLastTestInAssemblyEventReceiversCore(context, assemblyContext, cancellationToken);
         }
+
+        return ValueTask.CompletedTask;
     }
 
     private async ValueTask InvokeLastTestInAssemblyEventReceiversCore(
@@ -443,14 +446,14 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public async ValueTask InvokeLastTestInClassEventReceiversAsync(
+    public ValueTask InvokeLastTestInClassEventReceiversAsync(
         TestContext context,
         ClassHookContext classContext,
         CancellationToken cancellationToken)
     {
         if (!_registry.HasLastTestInClassReceivers())
         {
-            return;
+            return ValueTask.CompletedTask;
         }
 
         var classType = classContext.ClassType;
@@ -459,8 +462,10 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         if (classCount == 0)
         {
-            await InvokeLastTestInClassEventReceiversCore(context, classContext, cancellationToken);
+            return InvokeLastTestInClassEventReceiversCore(context, classContext, cancellationToken);
         }
+
+        return ValueTask.CompletedTask;
     }
 
     private async ValueTask InvokeLastTestInClassEventReceiversCore(
