@@ -292,7 +292,7 @@ internal sealed class HookExecutor
         }
     }
 
-    public async ValueTask<List<Exception>> ExecuteAfterTestHooksAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    public async ValueTask<IReadOnlyList<Exception>> ExecuteAfterTestHooksAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         // Defer exception list allocation until actually needed
         List<Exception>? exceptions = null;
@@ -338,7 +338,7 @@ internal sealed class HookExecutor
             }
         }
 
-        return exceptions ?? [];
+        return exceptions == null ? Array.Empty<Exception>() : exceptions;
     }
 
     public async ValueTask ExecuteBeforeTestDiscoveryHooksAsync(CancellationToken cancellationToken)
