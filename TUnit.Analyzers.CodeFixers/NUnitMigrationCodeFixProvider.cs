@@ -66,7 +66,7 @@ public class NUnitAttributeRewriter : AttributeRewriter
             "Test" or "Theory" or "TestCase" or "TestCaseSource" or
             "SetUp" or "TearDown" or "OneTimeSetUp" or "OneTimeTearDown" or
             "TestFixture" or "Category" or "Ignore" or "Explicit" or "Apartment" or
-            "Description" => true,
+            "Platform" or "Description" => true,
             _ => false
         };
     }
