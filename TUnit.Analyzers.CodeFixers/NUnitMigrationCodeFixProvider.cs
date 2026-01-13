@@ -1151,6 +1151,7 @@ public class NUnitAssertionRewriter : AssertionRewriter
             "Fail" => CreateFailAssertion(arguments),
             "Inconclusive" => CreateSkipAssertion(arguments),
             "Ignore" => CreateSkipAssertion(arguments),
+            "Warn" => CreateWarnAssertion(arguments),
 
             // 2-arg assertions (expected, actual) with optional message at index 2
             "AreEqual" when arguments.Count >= 2 => ConvertAreEqualWithComparer(arguments),
@@ -1467,6 +1468,46 @@ public class NUnitAssertionRewriter : AssertionRewriter
                 SyntaxFactory.IdentifierName("Test")
             ),
             SyntaxFactory.ArgumentList(SyntaxFactory.SingletonSeparatedList(reasonArg))
+        );
+
+        return skipInvocation;
+    }
+
+    private ExpressionSyntax CreateWarnAssertion(SeparatedSyntaxList<ArgumentSyntax> arguments)
+    {
+        // NUnit's Assert.Warn outputs a warning but allows the test to continue
+        // TUnit doesn't have a direct equivalent, so we convert to Skip.Test with a prefix
+        // Users may want to handle warnings differently (e.g., console output)
+        var messageArg = arguments.Count > 0
+            ? arguments[0]
+            : SyntaxFactory.Argument(
+                SyntaxFactory.LiteralExpression(
+                    SyntaxKind.StringLiteralExpression,
+                    SyntaxFactory.Literal("Warning")));
+
+        // Wrap the message in "Warning: " prefix
+        var prefixedMessage = SyntaxFactory.Argument(
+            SyntaxFactory.InterpolatedStringExpression(
+                SyntaxFactory.Token(SyntaxKind.InterpolatedStringStartToken),
+                SyntaxFactory.List<InterpolatedStringContentSyntax>(
+                    [
+                        SyntaxFactory.InterpolatedStringText()
+                            .WithTextToken(SyntaxFactory.Token(
+                                SyntaxFactory.TriviaList(),
+                                SyntaxKind.InterpolatedStringTextToken,
+                                "Warning: ",
+                                "Warning: ",
+                                SyntaxFactory.TriviaList())),
+                        SyntaxFactory.Interpolation(messageArg.Expression)
+                    ])));
+
+        var skipInvocation = SyntaxFactory.InvocationExpression(
+            SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                SyntaxFactory.IdentifierName("Skip"),
+                SyntaxFactory.IdentifierName("Test")
+            ),
+            SyntaxFactory.ArgumentList(SyntaxFactory.SingletonSeparatedList(prefixedMessage))
         );
 
         return skipInvocation;

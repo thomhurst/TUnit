@@ -2269,6 +2269,42 @@ public class NUnitMigrationAnalyzerTests
     }
 
     [Test]
+    public async Task NUnit_Warn_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void TestMethod()
+                    {
+                        Assert.Warn("This is a warning");
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public void TestMethod()
+                    {
+                        Skip.Test($"Warning: {"This is a warning"}");
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
     public async Task NUnit_Fail_Converted()
     {
         await CodeFixer.VerifyCodeFixAsync(
