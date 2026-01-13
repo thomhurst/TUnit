@@ -1913,11 +1913,12 @@ namespace .Exceptions
 namespace .Executors
 {
     [(.Assembly | .Class | .Method)]
-    public class CultureAttribute : .TUnitAttribute, ., .
+    public class CultureAttribute : .TUnitAttribute, .IScopedAttribute, ., .
     {
         public CultureAttribute(.CultureInfo cultureInfo) { }
         public CultureAttribute(string cultureName) { }
         public int Order { get; }
+        public  ScopeType { get; }
         public . OnTestRegistered(.TestRegisteredContext context) { }
     }
     public class HookExecutorAttribute : .TUnitAttribute
@@ -1938,25 +1939,28 @@ namespace .Executors
     }
     [(.Assembly | .Class | .Method)]
     [.("windows")]
-    public class STAThreadExecutorAttribute : .TUnitAttribute, ., .
+    public class STAThreadExecutorAttribute : .TUnitAttribute, .IScopedAttribute, ., .
     {
         public STAThreadExecutorAttribute() { }
         public int Order { get; }
+        public  ScopeType { get; }
         public . OnTestRegistered(.TestRegisteredContext context) { }
     }
     [(.Assembly | .Class | .Method)]
-    public sealed class TestExecutorAttribute : .TUnitAttribute, ., .
+    public sealed class TestExecutorAttribute : .TUnitAttribute, .IScopedAttribute, ., .
     {
         public TestExecutorAttribute([.(..PublicConstructors)]  type) { }
         public int Order { get; }
+        public  ScopeType { get; }
         public . OnTestRegistered(.TestRegisteredContext context) { }
     }
     [(.Assembly | .Class | .Method)]
-    public sealed class TestExecutorAttribute<T> : .TUnitAttribute, ., .
+    public sealed class TestExecutorAttribute<T> : .TUnitAttribute, .IScopedAttribute, ., .
         where T : ., new ()
     {
         public TestExecutorAttribute() { }
         public int Order { get; }
+        public  ScopeType { get; }
         public . OnTestRegistered(.TestRegisteredContext context) { }
     }
 }
