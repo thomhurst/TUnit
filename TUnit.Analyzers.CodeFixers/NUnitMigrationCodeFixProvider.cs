@@ -537,6 +537,20 @@ public class NUnitAssertionRewriter : AssertionRewriter
             return ConvertDirectoryAssertion(invocation, directoryAccess.Name.Identifier.Text);
         }
 
+        // Handle CollectionAssert
+        if (invocation.Expression is MemberAccessExpressionSyntax collectionAccess &&
+            collectionAccess.Expression is IdentifierNameSyntax { Identifier.Text: "CollectionAssert" })
+        {
+            return ConvertCollectionAssertion(invocation, collectionAccess.Name.Identifier.Text);
+        }
+
+        // Handle StringAssert
+        if (invocation.Expression is MemberAccessExpressionSyntax stringAccess &&
+            stringAccess.Expression is IdentifierNameSyntax { Identifier.Text: "StringAssert" })
+        {
+            return ConvertStringAssertion(invocation, stringAccess.Name.Identifier.Text);
+        }
+
         if (!IsFrameworkAssertion(invocation))
         {
             return null;
@@ -764,9 +778,9 @@ public class NUnitAssertionRewriter : AssertionRewriter
         {
             return memberName switch
             {
-                "Ascending" => CreateTUnitAssertionWithMessage("IsInAscendingOrder", actualValue, message),
+                "Ascending" => CreateTUnitAssertionWithMessage("IsInOrder", actualValue, message),
                 "Descending" => CreateTUnitAssertionWithMessage("IsInDescendingOrder", actualValue, message),
-                _ => CreateTUnitAssertionWithMessage("IsInAscendingOrder", actualValue, message) // Default to ascending for Is.Ordered
+                _ => CreateTUnitAssertionWithMessage("IsInOrder", actualValue, message) // Default to ascending for Is.Ordered
             };
         }
 
@@ -800,7 +814,7 @@ public class NUnitAssertionRewriter : AssertionRewriter
             "Zero" => CreateTUnitAssertionWithMessage("IsZero", actualValue, message),
             "NaN" => CreateTUnitAssertionWithMessage("IsNaN", actualValue, message),
             "Unique" => CreateTUnitAssertionWithMessage("HasDistinctItems", actualValue, message),
-            "Ordered" => CreateTUnitAssertionWithMessage("IsInAscendingOrder", actualValue, message),
+            "Ordered" => CreateTUnitAssertionWithMessage("IsInOrder", actualValue, message),
             _ => CreateTUnitAssertionWithMessage("IsEqualTo", actualValue, message, SyntaxFactory.Argument(constraint))
         };
     }
@@ -968,9 +982,9 @@ public class NUnitAssertionRewriter : AssertionRewriter
         {
             return memberName switch
             {
-                "Ascending" => CreateTUnitAssertion("IsInAscendingOrder", actualValue),
+                "Ascending" => CreateTUnitAssertion("IsInOrder", actualValue),
                 "Descending" => CreateTUnitAssertion("IsInDescendingOrder", actualValue),
-                _ => CreateTUnitAssertion("IsInAscendingOrder", actualValue) // Default to ascending for Is.Ordered
+                _ => CreateTUnitAssertion("IsInOrder", actualValue) // Default to ascending for Is.Ordered
             };
         }
 
@@ -1004,7 +1018,7 @@ public class NUnitAssertionRewriter : AssertionRewriter
             "Zero" => CreateTUnitAssertion("IsZero", actualValue),
             "NaN" => CreateTUnitAssertion("IsNaN", actualValue),
             "Unique" => CreateTUnitAssertion("HasDistinctItems", actualValue),
-            "Ordered" => CreateTUnitAssertion("IsInAscendingOrder", actualValue),
+            "Ordered" => CreateTUnitAssertion("IsInOrder", actualValue),
             _ => CreateTUnitAssertion("IsEqualTo", actualValue, SyntaxFactory.Argument(constraint))
         };
     }
@@ -1709,6 +1723,104 @@ public class NUnitAssertionRewriter : AssertionRewriter
 
         // Assume it's already a DirectoryInfo or can be used as-is
         return pathOrDirectoryInfo;
+    }
+
+    private ExpressionSyntax? ConvertCollectionAssertion(InvocationExpressionSyntax invocation, string methodName)
+    {
+        var arguments = invocation.ArgumentList.Arguments;
+
+        // CollectionAssert methods - note the argument order varies by method
+        return methodName switch
+        {
+            // CollectionAssert.AreEqual(expected, actual) -> Assert.That(actual).IsEquivalentTo(expected)
+            "AreEqual" when arguments.Count >= 2 => CreateTUnitAssertion("IsEquivalentTo", arguments[1].Expression, SyntaxFactory.Argument(arguments[0].Expression)),
+            // CollectionAssert.AreNotEqual(expected, actual) -> Assert.That(actual).IsNotEquivalentTo(expected)
+            "AreNotEqual" when arguments.Count >= 2 => CreateTUnitAssertion("IsNotEquivalentTo", arguments[1].Expression, SyntaxFactory.Argument(arguments[0].Expression)),
+            // CollectionAssert.AreEquivalent(expected, actual) -> Assert.That(actual).IsEquivalentTo(expected)
+            "AreEquivalent" when arguments.Count >= 2 => CreateTUnitAssertion("IsEquivalentTo", arguments[1].Expression, SyntaxFactory.Argument(arguments[0].Expression)),
+            // CollectionAssert.AreNotEquivalent(expected, actual) -> Assert.That(actual).IsNotEquivalentTo(expected)
+            "AreNotEquivalent" when arguments.Count >= 2 => CreateTUnitAssertion("IsNotEquivalentTo", arguments[1].Expression, SyntaxFactory.Argument(arguments[0].Expression)),
+            // CollectionAssert.Contains(collection, item) -> Assert.That(collection).Contains(item)
+            "Contains" when arguments.Count >= 2 => CreateTUnitAssertion("Contains", arguments[0].Expression, SyntaxFactory.Argument(arguments[1].Expression)),
+            // CollectionAssert.DoesNotContain(collection, item) -> Assert.That(collection).DoesNotContain(item)
+            "DoesNotContain" when arguments.Count >= 2 => CreateTUnitAssertion("DoesNotContain", arguments[0].Expression, SyntaxFactory.Argument(arguments[1].Expression)),
+            // CollectionAssert.IsEmpty(collection) -> Assert.That(collection).IsEmpty()
+            "IsEmpty" when arguments.Count >= 1 => CreateTUnitAssertion("IsEmpty", arguments[0].Expression),
+            // CollectionAssert.IsNotEmpty(collection) -> Assert.That(collection).IsNotEmpty()
+            "IsNotEmpty" when arguments.Count >= 1 => CreateTUnitAssertion("IsNotEmpty", arguments[0].Expression),
+            // CollectionAssert.AllItemsAreUnique(collection) -> Assert.That(collection).HasDistinctItems()
+            "AllItemsAreUnique" when arguments.Count >= 1 => CreateTUnitAssertion("HasDistinctItems", arguments[0].Expression),
+            // CollectionAssert.IsOrdered(collection) -> Assert.That(collection).IsInOrder()
+            "IsOrdered" when arguments.Count >= 1 => CreateTUnitAssertion("IsInOrder", arguments[0].Expression),
+            // CollectionAssert.IsSubsetOf(subset, superset) -> Assert.That(subset).IsSubsetOf(superset)
+            "IsSubsetOf" when arguments.Count >= 2 => CreateTUnitAssertion("IsSubsetOf", arguments[0].Expression, SyntaxFactory.Argument(arguments[1].Expression)),
+            // CollectionAssert.IsSupersetOf(superset, subset) -> Assert.That(superset).IsSupersetOf(subset)
+            "IsSupersetOf" when arguments.Count >= 2 => CreateTUnitAssertion("IsSupersetOf", arguments[0].Expression, SyntaxFactory.Argument(arguments[1].Expression)),
+            // CollectionAssert.AllItemsAreNotNull(collection) -> Assert.That(collection).DoesNotContain(null)
+            "AllItemsAreNotNull" when arguments.Count >= 1 => CreateTUnitAssertion("DoesNotContain", arguments[0].Expression, SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression))),
+            _ => null
+        };
+    }
+
+    private ExpressionSyntax? ConvertStringAssertion(InvocationExpressionSyntax invocation, string methodName)
+    {
+        var arguments = invocation.ArgumentList.Arguments;
+
+        // StringAssert methods - note: NUnit uses (expected, actual) order
+        return methodName switch
+        {
+            // StringAssert.Contains(expected, actual) -> Assert.That(actual).Contains(expected)
+            "Contains" when arguments.Count >= 2 => CreateTUnitAssertion("Contains", arguments[1].Expression, SyntaxFactory.Argument(arguments[0].Expression)),
+            // StringAssert.DoesNotContain(expected, actual) -> Assert.That(actual).DoesNotContain(expected)
+            "DoesNotContain" when arguments.Count >= 2 => CreateTUnitAssertion("DoesNotContain", arguments[1].Expression, SyntaxFactory.Argument(arguments[0].Expression)),
+            // StringAssert.StartsWith(expected, actual) -> Assert.That(actual).StartsWith(expected)
+            "StartsWith" when arguments.Count >= 2 => CreateTUnitAssertion("StartsWith", arguments[1].Expression, SyntaxFactory.Argument(arguments[0].Expression)),
+            // StringAssert.DoesNotStartWith(expected, actual) -> Assert.That(actual).DoesNotStartWith(expected)
+            "DoesNotStartWith" when arguments.Count >= 2 => CreateTUnitAssertion("DoesNotStartWith", arguments[1].Expression, SyntaxFactory.Argument(arguments[0].Expression)),
+            // StringAssert.EndsWith(expected, actual) -> Assert.That(actual).EndsWith(expected)
+            "EndsWith" when arguments.Count >= 2 => CreateTUnitAssertion("EndsWith", arguments[1].Expression, SyntaxFactory.Argument(arguments[0].Expression)),
+            // StringAssert.DoesNotEndWith(expected, actual) -> Assert.That(actual).DoesNotEndWith(expected)
+            "DoesNotEndWith" when arguments.Count >= 2 => CreateTUnitAssertion("DoesNotEndWith", arguments[1].Expression, SyntaxFactory.Argument(arguments[0].Expression)),
+            // StringAssert.IsMatch(pattern, actual) -> Assert.That(actual).Matches(pattern)
+            "IsMatch" when arguments.Count >= 2 => CreateTUnitAssertion("Matches", arguments[1].Expression, SyntaxFactory.Argument(arguments[0].Expression)),
+            // StringAssert.DoesNotMatch(pattern, actual) -> Assert.That(actual).DoesNotMatch(pattern)
+            "DoesNotMatch" when arguments.Count >= 2 => CreateTUnitAssertion("DoesNotMatch", arguments[1].Expression, SyntaxFactory.Argument(arguments[0].Expression)),
+            // StringAssert.AreEqualIgnoringCase(expected, actual) -> Assert.That(actual).IsEqualTo(expected, StringComparison.OrdinalIgnoreCase)
+            "AreEqualIgnoringCase" when arguments.Count >= 2 => CreateStringComparisonAssertion("IsEqualTo", arguments[1].Expression, arguments[0].Expression),
+            // StringAssert.AreNotEqualIgnoringCase(expected, actual) -> Assert.That(actual).IsNotEqualTo(expected, StringComparison.OrdinalIgnoreCase)
+            "AreNotEqualIgnoringCase" when arguments.Count >= 2 => CreateStringComparisonAssertion("IsNotEqualTo", arguments[1].Expression, arguments[0].Expression),
+            _ => null
+        };
+    }
+
+    private ExpressionSyntax CreateStringComparisonAssertion(string methodName, ExpressionSyntax actual, ExpressionSyntax expected)
+    {
+        // Create Assert.That(actual)
+        var assertThatInvocation = SyntaxFactory.InvocationExpression(
+            SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                SyntaxFactory.IdentifierName("Assert"),
+                SyntaxFactory.IdentifierName("That")),
+            SyntaxFactory.ArgumentList(
+                SyntaxFactory.SingletonSeparatedList(SyntaxFactory.Argument(actual))));
+
+        // Create Assert.That(actual).IsEqualTo(expected, StringComparison.OrdinalIgnoreCase)
+        var stringComparisonArg = SyntaxFactory.MemberAccessExpression(
+            SyntaxKind.SimpleMemberAccessExpression,
+            SyntaxFactory.IdentifierName("StringComparison"),
+            SyntaxFactory.IdentifierName("OrdinalIgnoreCase"));
+
+        return SyntaxFactory.InvocationExpression(
+            SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                assertThatInvocation,
+                SyntaxFactory.IdentifierName(methodName)),
+            SyntaxFactory.ArgumentList(
+                SyntaxFactory.SeparatedList(new[]
+                {
+                    SyntaxFactory.Argument(expected),
+                    SyntaxFactory.Argument(stringComparisonArg)
+                })));
     }
 
 }
