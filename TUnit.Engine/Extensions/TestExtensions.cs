@@ -41,11 +41,12 @@ internal static class TestExtensions
 
     private static CachedTestNodeProperties GetOrCreateCachedProperties(TestContext testContext)
     {
-        var testDetails = testContext.Metadata.TestDetails;
-        var testId = testDetails.TestId;
+        var testId = testContext.Metadata.TestDetails.TestId;
 
-        return TestNodePropertiesCache.GetOrAdd(testId, _ =>
+        return TestNodePropertiesCache.GetOrAdd(testId, static (_, testContext) =>
         {
+            var testDetails = testContext.Metadata.TestDetails;
+
             var fileLocation = new TestFileLocationProperty(testDetails.TestFilePath, new LinePositionSpan(
                 new LinePosition(testDetails.TestLineNumber, 0),
                 new LinePosition(testDetails.TestLineNumber, 0)
@@ -108,7 +109,7 @@ internal static class TestExtensions
                 TrxFullyQualifiedTypeName = trxTypeName,
                 TrxCategories = trxCategories
             };
-        });
+        }, testContext);
     }
 
     internal static TestNode ToTestNode(this TestContext testContext, TestNodeStateProperty stateProperty)
