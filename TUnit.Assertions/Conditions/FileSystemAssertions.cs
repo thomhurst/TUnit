@@ -520,7 +520,7 @@ public static partial class FileSystemComparisonAssertions
 
         return relativePath;
 #else
-        return GetRelativePath(relativeTo, path);
+        return Path.GetRelativePath(relativeTo, path);
 #endif
     }
 }
