@@ -138,6 +138,13 @@ public class NUnitAttributeRewriter : AttributeRewriter
             return null;
         }
 
+        // [Platform(Include = "Win")] -> [RunOn(OS.Windows)]
+        // [Platform(Exclude = "Linux")] -> [ExcludeOn(OS.Linux)]
+        if (attributeName == "Platform")
+        {
+            return ConvertPlatformAttribute(attribute);
+        }
+
         return base.ConvertAttribute(attribute);
     }
 
@@ -189,6 +196,143 @@ public class NUnitAttributeRewriter : AttributeRewriter
         // For other ParallelScope values (Self, Children, Fixtures, All), parallel is allowed
         // TUnit's parallel behavior is different - remove the attribute
         return null;
+    }
+
+    private AttributeSyntax? ConvertPlatformAttribute(AttributeSyntax attribute)
+    {
+        // [Platform(Include = "Win")] -> [RunOn(OS.Windows)]
+        // [Platform(Exclude = "Linux")] -> [ExcludeOn(OS.Linux)]
+        // [Platform("Win")] -> [RunOn(OS.Windows)]
+
+        string? includeValue = null;
+        string? excludeValue = null;
+
+        if (attribute.ArgumentList == null || attribute.ArgumentList.Arguments.Count == 0)
+        {
+            return null; // No arguments, remove the attribute
+        }
+
+        foreach (var arg in attribute.ArgumentList.Arguments)
+        {
+            var argName = arg.NameEquals?.Name.Identifier.Text;
+            var value = GetStringLiteralValue(arg.Expression);
+
+            if (argName == "Include" || argName == null)
+            {
+                // Named argument Include= or positional argument (which is Include)
+                includeValue = value;
+            }
+            else if (argName == "Exclude")
+            {
+                excludeValue = value;
+            }
+        }
+
+        // Prefer Include (RunOn) over Exclude (ExcludeOn) if both are present
+        if (!string.IsNullOrEmpty(includeValue))
+        {
+            var osBits = ParsePlatformString(includeValue);
+            if (osBits != null)
+            {
+                return CreateOsAttribute("RunOn", osBits);
+            }
+        }
+        else if (!string.IsNullOrEmpty(excludeValue))
+        {
+            var osBits = ParsePlatformString(excludeValue);
+            if (osBits != null)
+            {
+                return CreateOsAttribute("ExcludeOn", osBits);
+            }
+        }
+
+        // Cannot convert - return null to remove the attribute
+        return null;
+    }
+
+    private static string? GetStringLiteralValue(ExpressionSyntax expression)
+    {
+        return expression switch
+        {
+            LiteralExpressionSyntax literal when literal.IsKind(SyntaxKind.StringLiteralExpression)
+                => literal.Token.ValueText,
+            _ => null
+        };
+    }
+
+    private static List<string>? ParsePlatformString(string? platformString)
+    {
+        if (string.IsNullOrEmpty(platformString))
+        {
+            return null;
+        }
+
+        var osNames = new List<string>();
+        var platforms = platformString.Split(',');
+
+        foreach (var platform in platforms)
+        {
+            var trimmed = platform.Trim();
+            var osName = MapNUnitPlatformToTUnitOS(trimmed);
+            if (osName != null && !osNames.Contains(osName))
+            {
+                osNames.Add(osName);
+            }
+        }
+
+        return osNames.Count > 0 ? osNames : null;
+    }
+
+    private static string? MapNUnitPlatformToTUnitOS(string nunitPlatform)
+    {
+        // NUnit platform names: https://docs.nunit.org/articles/nunit/writing-tests/attributes/platform.html
+        return nunitPlatform.ToLowerInvariant() switch
+        {
+            "win" or "win32" or "win32s" or "win32nt" or "win32windows" or "wince" or "windows" => "Windows",
+            "linux" or "unix" => "Linux",
+            "macosx" or "macos" or "osx" or "mac" => "MacOs",
+            _ => null // Unknown platform - cannot convert
+        };
+    }
+
+    private static AttributeSyntax CreateOsAttribute(string attributeName, List<string> osNames)
+    {
+        // Build OS.Windows | OS.Linux | OS.MacOs expression
+        ExpressionSyntax osExpression;
+
+        if (osNames.Count == 1)
+        {
+            // Single OS: OS.Windows
+            osExpression = SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                SyntaxFactory.IdentifierName("OS"),
+                SyntaxFactory.IdentifierName(osNames[0]));
+        }
+        else
+        {
+            // Multiple OSes: OS.Windows | OS.Linux
+            osExpression = SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                SyntaxFactory.IdentifierName("OS"),
+                SyntaxFactory.IdentifierName(osNames[0]));
+
+            for (int i = 1; i < osNames.Count; i++)
+            {
+                osExpression = SyntaxFactory.BinaryExpression(
+                    SyntaxKind.BitwiseOrExpression,
+                    osExpression,
+                    SyntaxFactory.MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        SyntaxFactory.IdentifierName("OS"),
+                        SyntaxFactory.IdentifierName(osNames[i])));
+            }
+        }
+
+        return SyntaxFactory.Attribute(
+            SyntaxFactory.IdentifierName(attributeName),
+            SyntaxFactory.AttributeArgumentList(
+                SyntaxFactory.SingletonSeparatedList(
+                    SyntaxFactory.AttributeArgument(osExpression))));
     }
 
     private AttributeSyntax ConvertValuesAttribute(AttributeSyntax attribute)

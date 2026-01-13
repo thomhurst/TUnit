@@ -135,7 +135,8 @@ public static class MigrationHelpers
         {
             // Note: Parallelizable is NOT listed here because it needs special handling in the code fixer
             // for ParallelScope.None -> [NotInParallel]. ConvertAttribute handles all cases.
-            "NUnit" => attributeName is "TestFixture" or "Platform" or "Description",
+            // Note: Platform is NOT listed here because it gets converted to RunOn/ExcludeOn.
+            "NUnit" => attributeName is "TestFixture" or "Description",
             "MSTest" => attributeName is "TestClass",
             _ => false
         };

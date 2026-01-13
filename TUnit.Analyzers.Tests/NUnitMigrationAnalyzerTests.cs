@@ -2856,7 +2856,7 @@ public class NUnitMigrationAnalyzerTests
     }
 
     [Test]
-    public async Task NUnit_Platform_Attribute_Removed()
+    public async Task NUnit_Platform_Include_Converted_To_RunOn()
     {
         await CodeFixer.VerifyCodeFixAsync(
             """
@@ -2881,6 +2881,79 @@ public class NUnitMigrationAnalyzerTests
                 public class MyClass
                 {
                     [Test]
+                    [RunOn(OS.Windows)]
+                    public void TestMethod()
+                    {
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_Platform_Exclude_Converted_To_ExcludeOn()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                public class MyClass
+                {
+                    {|#0:[Test]|}
+                    [Platform(Exclude = "Linux")]
+                    public void TestMethod()
+                    {
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    [ExcludeOn(OS.Linux)]
+                    public void TestMethod()
+                    {
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_Platform_Multiple_Platforms_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                public class MyClass
+                {
+                    {|#0:[Test]|}
+                    [Platform(Include = "Win,Linux")]
+                    public void TestMethod()
+                    {
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    [RunOn(OS.Windows | OS.Linux)]
                     public void TestMethod()
                     {
                     }
