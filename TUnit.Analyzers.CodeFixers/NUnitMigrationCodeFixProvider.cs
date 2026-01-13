@@ -1590,7 +1590,13 @@ public class NUnitAssertionRewriter : AssertionRewriter
         ExpressionSyntax actualFiles = CreateDirectoryGetFiles(actual);
 
         var assertionMethod = isNegated ? "IsNotEquivalentTo" : "IsEquivalentTo";
-        return CreateTUnitAssertion(assertionMethod, actualFiles, SyntaxFactory.Argument(expectedFiles));
+        var assertion = CreateTUnitAssertion(assertionMethod, actualFiles, SyntaxFactory.Argument(expectedFiles));
+
+        // Add a TODO comment warning about the semantic difference
+        return assertion.WithLeadingTrivia(
+            SyntaxFactory.Comment("// TODO: TUnit migration - This only compares file paths, not file contents. NUnit's DirectoryAssert.AreEqual also compared contents."),
+            SyntaxFactory.EndOfLine("\n"),
+            SyntaxFactory.Whitespace("        "));
     }
 
     private static ExpressionSyntax CreateDirectoryGetFiles(ExpressionSyntax pathOrDirectoryInfo)
