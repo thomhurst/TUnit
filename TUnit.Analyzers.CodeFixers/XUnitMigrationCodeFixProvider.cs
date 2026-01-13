@@ -64,6 +64,9 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
         updatedRoot = ConvertTestOutputHelpers(ref compilation, ref syntaxTree, updatedRoot);
         UpdateSyntaxTrees(ref compilation, ref syntaxTree, ref updatedRoot);
 
+        updatedRoot = ConvertRecordException(ref compilation, ref syntaxTree, updatedRoot);
+        UpdateSyntaxTrees(ref compilation, ref syntaxTree, ref updatedRoot);
+
         return (CompilationUnitSyntax)updatedRoot;
     }
 
@@ -134,6 +137,244 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
 
         return methodSymbol.ContainingType?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)
             is "global::Xunit.Abstractions.ITestOutputHelper" or "global::Xunit.ITestOutputHelper";
+    }
+
+    private static SyntaxNode ConvertRecordException(ref Compilation compilation, ref SyntaxTree syntaxTree, SyntaxNode root)
+    {
+        var currentRoot = root;
+        var compilationValue = compilation;
+
+        // Find local declarations with Record.Exception() or Record.ExceptionAsync()
+        while (currentRoot.DescendantNodes()
+               .OfType<LocalDeclarationStatementSyntax>()
+               .FirstOrDefault(x => IsRecordExceptionDeclaration(compilationValue, x))
+               is { } localDeclaration)
+        {
+            var variableDeclarator = localDeclaration.Declaration.Variables.First();
+            var variableName = variableDeclarator.Identifier.Text;
+            var invocation = variableDeclarator.Initializer?.Value as InvocationExpressionSyntax;
+
+            if (invocation == null)
+            {
+                break;
+            }
+
+            // Get the action/func argument
+            var actionArg = invocation.ArgumentList.Arguments.FirstOrDefault()?.Expression;
+            if (actionArg == null)
+            {
+                break;
+            }
+
+            // Check if this is async (Record.ExceptionAsync)
+            var isAsync = invocation.Expression is MemberAccessExpressionSyntax memberAccess &&
+                          memberAccess.Name.Identifier.Text == "ExceptionAsync";
+
+            // Extract the body from the lambda/action
+            var actionBody = ExtractActionBody(actionArg);
+
+            // Create the try-catch replacement
+            // Exception? ex = null;
+            // try { actionBody; } catch (Exception e) { ex = e; }
+            var statements = CreateTryCatchStatements(variableName, actionBody, isAsync, localDeclaration.GetLeadingTrivia());
+
+            // Replace the local declaration with the try-catch statements
+            var parent = localDeclaration.Parent;
+            if (parent is BlockSyntax block)
+            {
+                var index = block.Statements.IndexOf(localDeclaration);
+                var newStatements = block.Statements
+                    .RemoveAt(index)
+                    .InsertRange(index, statements);
+                var newBlock = block.WithStatements(newStatements);
+                currentRoot = currentRoot.ReplaceNode(block, newBlock);
+            }
+            else
+            {
+                // If not in a block, just replace with the first statement (may not work perfectly)
+                currentRoot = currentRoot.ReplaceNode(localDeclaration, statements.First());
+            }
+
+            UpdateSyntaxTrees(ref compilation, ref syntaxTree, ref currentRoot);
+            compilationValue = compilation;
+        }
+
+        return currentRoot;
+    }
+
+    private static bool IsRecordExceptionDeclaration(Compilation compilation, LocalDeclarationStatementSyntax localDeclaration)
+    {
+        var variableDeclarator = localDeclaration.Declaration.Variables.FirstOrDefault();
+        if (variableDeclarator?.Initializer?.Value is not InvocationExpressionSyntax invocation)
+        {
+            return false;
+        }
+
+        if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess)
+        {
+            return false;
+        }
+
+        // Check if it's Record.Exception or Record.ExceptionAsync by name first (fast check)
+        if (memberAccess.Expression is not IdentifierNameSyntax { Identifier.Text: "Record" })
+        {
+            return false;
+        }
+
+        if (memberAccess.Name.Identifier.Text is not ("Exception" or "ExceptionAsync"))
+        {
+            return false;
+        }
+
+        // Verify with semantic model
+        var semanticModel = compilation.GetSemanticModel(invocation.SyntaxTree);
+        var symbolInfo = semanticModel.GetSymbolInfo(invocation);
+
+        if (symbolInfo.Symbol is not IMethodSymbol methodSymbol)
+        {
+            return false;
+        }
+
+        return methodSymbol.ContainingType?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)
+            is "global::Xunit.Record" or "global::Xunit.Assert";
+    }
+
+    private static StatementSyntax ExtractActionBody(ExpressionSyntax actionExpression)
+    {
+        // Handle lambda expressions: () => SomeMethod() or () => { statements }
+        if (actionExpression is SimpleLambdaExpressionSyntax simpleLambda)
+        {
+            return ConvertLambdaBodyToStatement(simpleLambda.Body);
+        }
+
+        if (actionExpression is ParenthesizedLambdaExpressionSyntax parenLambda)
+        {
+            return ConvertLambdaBodyToStatement(parenLambda.Body);
+        }
+
+        // Handle method group or direct invocation
+        // For Action delegates, wrap in invocation
+        return SyntaxFactory.ExpressionStatement(
+            SyntaxFactory.InvocationExpression(actionExpression));
+    }
+
+    private static StatementSyntax ConvertLambdaBodyToStatement(CSharpSyntaxNode body)
+    {
+        if (body is BlockSyntax block)
+        {
+            // If it's a single statement block, extract the statement
+            if (block.Statements.Count == 1)
+            {
+                return block.Statements[0];
+            }
+            // Otherwise return the block as-is (will need to be a compound statement)
+            return block;
+        }
+
+        // Handle throw expressions - convert to throw statement
+        if (body is ThrowExpressionSyntax throwExpression)
+        {
+            return SyntaxFactory.ThrowStatement(throwExpression.Expression);
+        }
+
+        if (body is ExpressionSyntax expression)
+        {
+            return SyntaxFactory.ExpressionStatement(expression);
+        }
+
+        // Fallback - wrap in expression statement
+        return SyntaxFactory.ExpressionStatement(
+            SyntaxFactory.IdentifierName("/* TODO: Convert lambda body */"));
+    }
+
+    private static IEnumerable<StatementSyntax> CreateTryCatchStatements(
+        string variableName,
+        StatementSyntax actionBody,
+        bool isAsync,
+        SyntaxTriviaList leadingTrivia)
+    {
+        // Extract the base indentation from leading trivia
+        var indentation = leadingTrivia.Where(t => t.IsKind(SyntaxKind.WhitespaceTrivia)).LastOrDefault();
+        var indentString = indentation.ToFullString();
+
+        // Exception? variableName = null;
+        var nullableExceptionType = SyntaxFactory.NullableType(
+            SyntaxFactory.IdentifierName("Exception"));
+
+        var declarationStatement = SyntaxFactory.LocalDeclarationStatement(
+            SyntaxFactory.VariableDeclaration(nullableExceptionType)
+                .WithVariables(SyntaxFactory.SingletonSeparatedList(
+                    SyntaxFactory.VariableDeclarator(variableName)
+                        .WithInitializer(SyntaxFactory.EqualsValueClause(
+                            SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression))))))
+            .WithLeadingTrivia(leadingTrivia)
+            .WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
+
+        // Prepare the action body with proper indentation (inside try block)
+        var tryBodyIndent = indentString + "    ";
+        StatementSyntax tryBodyStatement;
+
+        if (actionBody is BlockSyntax blockBody)
+        {
+            // If it's a block, use its statements directly
+            tryBodyStatement = blockBody
+                .WithOpenBraceToken(blockBody.OpenBraceToken.WithLeadingTrivia(SyntaxFactory.Whitespace(tryBodyIndent)))
+                .WithCloseBraceToken(blockBody.CloseBraceToken.WithLeadingTrivia(SyntaxFactory.Whitespace(tryBodyIndent)));
+        }
+        else
+        {
+            tryBodyStatement = actionBody
+                .WithLeadingTrivia(SyntaxFactory.Whitespace(tryBodyIndent))
+                .WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
+        }
+
+        // If async, we may need to await the action
+        if (isAsync && tryBodyStatement is ExpressionStatementSyntax exprStmt)
+        {
+            var awaitExpr = SyntaxFactory.AwaitExpression(
+                SyntaxFactory.Token(SyntaxKind.AwaitKeyword).WithTrailingTrivia(SyntaxFactory.Space),
+                exprStmt.Expression);
+            tryBodyStatement = SyntaxFactory.ExpressionStatement(awaitExpr)
+                .WithLeadingTrivia(SyntaxFactory.Whitespace(tryBodyIndent))
+                .WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
+        }
+
+        // catch (Exception e) { variableName = e; }
+        var catchClause = SyntaxFactory.CatchClause()
+            .WithCatchKeyword(SyntaxFactory.Token(SyntaxKind.CatchKeyword)
+                .WithLeadingTrivia(SyntaxFactory.CarriageReturnLineFeed, SyntaxFactory.Whitespace(indentString)))
+            .WithDeclaration(SyntaxFactory.CatchDeclaration(
+                SyntaxFactory.IdentifierName("Exception"),
+                SyntaxFactory.Identifier("e")))
+            .WithBlock(SyntaxFactory.Block(
+                SyntaxFactory.ExpressionStatement(
+                    SyntaxFactory.AssignmentExpression(
+                        SyntaxKind.SimpleAssignmentExpression,
+                        SyntaxFactory.IdentifierName(variableName),
+                        SyntaxFactory.IdentifierName("e")))
+                    .WithLeadingTrivia(SyntaxFactory.Whitespace(tryBodyIndent))
+                    .WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed))
+                .WithOpenBraceToken(SyntaxFactory.Token(SyntaxKind.OpenBraceToken)
+                    .WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed))
+                .WithCloseBraceToken(SyntaxFactory.Token(SyntaxKind.CloseBraceToken)
+                    .WithLeadingTrivia(SyntaxFactory.Whitespace(indentString))));
+
+        // try { actionBody; }
+        var tryBlock = SyntaxFactory.Block(tryBodyStatement)
+            .WithOpenBraceToken(SyntaxFactory.Token(SyntaxKind.OpenBraceToken)
+                .WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed))
+            .WithCloseBraceToken(SyntaxFactory.Token(SyntaxKind.CloseBraceToken)
+                .WithLeadingTrivia(SyntaxFactory.Whitespace(indentString)));
+
+        var tryStatement = SyntaxFactory.TryStatement()
+            .WithTryKeyword(SyntaxFactory.Token(SyntaxKind.TryKeyword)
+                .WithLeadingTrivia(SyntaxFactory.Whitespace(indentString)))
+            .WithBlock(tryBlock)
+            .WithCatches(SyntaxFactory.SingletonList(catchClause))
+            .WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
+
+        yield return declarationStatement;
+        yield return tryStatement;
     }
 
     private static SyntaxNode ConvertTheoryData(Compilation compilation, SyntaxNode root)
