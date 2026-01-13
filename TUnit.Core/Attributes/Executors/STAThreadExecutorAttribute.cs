@@ -5,11 +5,16 @@ namespace TUnit.Core.Executors;
 
 [SupportedOSPlatform("windows")]
 [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Method)]
-public class STAThreadExecutorAttribute : TUnitAttribute, ITestRegisteredEventReceiver
+public class STAThreadExecutorAttribute : TUnitAttribute, ITestRegisteredEventReceiver, IScopedAttribute
 {
+    /// <inheritdoc />
     public int Order => 0;
 
-public ValueTask OnTestRegistered(TestRegisteredContext context)
+    /// <inheritdoc />
+    public Type ScopeType => typeof(ITestExecutor);
+
+    /// <inheritdoc />
+    public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
         var executor = new STAThreadExecutor();
         context.SetTestExecutor(executor);
