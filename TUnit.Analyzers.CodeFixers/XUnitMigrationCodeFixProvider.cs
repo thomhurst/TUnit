@@ -385,7 +385,7 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
             var type = objectCreationExpressionSyntax switch
             {
                 ObjectCreationExpressionSyntax explicitObjectCreationExpressionSyntax => explicitObjectCreationExpressionSyntax.Type,
-                ImplicitObjectCreationExpressionSyntax implicitObjectCreationExpressionSyntax => SyntaxFactory.ParseTypeName(compilation.GetSemanticModel(implicitObjectCreationExpressionSyntax.SyntaxTree).GetTypeInfo(implicitObjectCreationExpressionSyntax).Type!.ToDisplayString()),
+                ImplicitObjectCreationExpressionSyntax implicitObjectCreationExpressionSyntax => GetTypeFromImplicitCreation(compilation, implicitObjectCreationExpressionSyntax),
                 _ => null
             };
 
@@ -454,6 +454,31 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
         }
 
         return currentRoot;
+    }
+
+    /// <summary>
+    /// Safely gets the type from an implicit object creation expression using semantic analysis.
+    /// Returns null if semantic analysis fails (defensive for multi-TFM scenarios).
+    /// </summary>
+    private static TypeSyntax? GetTypeFromImplicitCreation(Compilation compilation, ImplicitObjectCreationExpressionSyntax implicitCreation)
+    {
+        try
+        {
+            var semanticModel = compilation.GetSemanticModel(implicitCreation.SyntaxTree);
+            var typeInfo = semanticModel.GetTypeInfo(implicitCreation);
+
+            if (typeInfo.Type is null || typeInfo.Type.TypeKind == TypeKind.Error)
+            {
+                return null;
+            }
+
+            return SyntaxFactory.ParseTypeName(typeInfo.Type.ToDisplayString());
+        }
+        catch (InvalidOperationException)
+        {
+            // Semantic analysis failed due to invalid compilation state
+            return null;
+        }
     }
 
     private static SyntaxNode UpdateInitializeDispose(Compilation compilation, SyntaxNode root)
