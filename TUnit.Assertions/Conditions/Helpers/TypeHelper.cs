@@ -87,38 +87,12 @@ internal static class TypeHelper
             return true;
         }
 
-        // Check if the type is a value type (struct) that implements IEquatable<T> for itself
-        // Value types like Vector2, Matrix3x2, etc. that implement IEquatable<T>
-        // should use value equality rather than structural comparison.
-        // We only check value types to avoid affecting records/classes that may have
-        // collection properties requiring structural comparison.
-        if (type.IsValueType && ImplementsSelfEquatable(type))
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    /// <summary>
-    /// Checks if a type implements IEquatable{T} where T is the type itself.
-    /// </summary>
-    private static bool ImplementsSelfEquatable(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)]
-        Type type)
-    {
-        // Iterate through interfaces to find IEquatable<T> where T is the type itself
-        // This approach is AOT-compatible as it doesn't use MakeGenericType
-        foreach (var iface in type.GetInterfaces())
-        {
-            if (iface.IsGenericType 
-                && iface.GetGenericTypeDefinition() == typeof(IEquatable<>)
-                && iface.GenericTypeArguments[0] == type)
-            {
-                return true;
-            }
-        }
-        
+        // Note: We intentionally do NOT treat value types implementing IEquatable<T> as primitives.
+        // IsEquivalentTo should always perform structural comparison, comparing each field/property.
+        // Using Equals() for structs could miss structural differences when they contain reference
+        // types (e.g., ValueTuple containing records with array properties - issue #4358).
+        // For primitives like Vector2, structural comparison of X/Y yields the same result anyway.
+        // Users who want Equals() behavior should use IsEqualTo() instead.
         return false;
     }
 }
