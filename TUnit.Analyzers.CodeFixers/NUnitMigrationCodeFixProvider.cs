@@ -46,6 +46,10 @@ public class NUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
         var expectedResultRewriter = new NUnitExpectedResultRewriter(semanticModel);
         compilationUnit = (CompilationUnitSyntax)expectedResultRewriter.Visit(compilationUnit);
 
+        // Handle [ExpectedException] attribute conversion
+        var expectedExceptionRewriter = new NUnitExpectedExceptionRewriter();
+        compilationUnit = (CompilationUnitSyntax)expectedExceptionRewriter.Visit(compilationUnit);
+
         return compilationUnit;
     }
 
@@ -74,7 +78,9 @@ public class NUnitAttributeRewriter : AttributeRewriter
             // Parameter-level data attributes (converted to Matrix/MatrixRange)
             "Values" or "Range" or "ValueSource" or
             // Combinatorial strategy attributes
-            "Sequential" or "Combinatorial" => true,
+            "Sequential" or "Combinatorial" or
+            // Exception handling attribute (converted to Assert.ThrowsAsync)
+            "ExpectedException" => true,
             _ => false
         };
     }
@@ -517,11 +523,25 @@ public class NUnitAssertionRewriter : AssertionRewriter
     
     protected override ExpressionSyntax? ConvertAssertionIfNeeded(InvocationExpressionSyntax invocation)
     {
+        // Handle FileAssert - check BEFORE IsFrameworkAssertion since FileAssert is a separate class
+        if (invocation.Expression is MemberAccessExpressionSyntax fileAccess &&
+            fileAccess.Expression is IdentifierNameSyntax { Identifier.Text: "FileAssert" })
+        {
+            return ConvertFileAssertion(invocation, fileAccess.Name.Identifier.Text);
+        }
+
+        // Handle DirectoryAssert - check BEFORE IsFrameworkAssertion since DirectoryAssert is a separate class
+        if (invocation.Expression is MemberAccessExpressionSyntax directoryAccess &&
+            directoryAccess.Expression is IdentifierNameSyntax { Identifier.Text: "DirectoryAssert" })
+        {
+            return ConvertDirectoryAssertion(invocation, directoryAccess.Name.Identifier.Text);
+        }
+
         if (!IsFrameworkAssertion(invocation))
         {
             return null;
         }
-        
+
         // Handle Assert.That(value, constraint)
         if (invocation.Expression is MemberAccessExpressionSyntax memberAccess &&
             memberAccess.Name.Identifier.Text == "That" &&
@@ -529,14 +549,14 @@ public class NUnitAssertionRewriter : AssertionRewriter
         {
             return ConvertAssertThat(invocation);
         }
-        
+
         // Handle classic assertions like Assert.AreEqual, ClassicAssert.AreEqual, etc.
         if (invocation.Expression is MemberAccessExpressionSyntax classicMemberAccess &&
             classicMemberAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Assert" or "ClassicAssert" })
         {
             return ConvertClassicAssertion(invocation, classicMemberAccess.Name.Identifier.Text);
         }
-        
+
         return null;
     }
     
@@ -1419,6 +1439,196 @@ public class NUnitAssertionRewriter : AssertionRewriter
 
         return skipInvocation;
     }
+
+    private ExpressionSyntax? ConvertFileAssertion(InvocationExpressionSyntax invocation, string methodName)
+    {
+        var arguments = invocation.ArgumentList.Arguments;
+
+        // FileAssert.Exists(path) -> Assert.That(File.Exists(path)).IsTrue()
+        // FileAssert.DoesNotExist(path) -> Assert.That(File.Exists(path)).IsFalse()
+        // FileAssert.AreEqual(expected, actual) -> Assert.That(File.ReadAllBytes(actual)).IsEquivalentTo(File.ReadAllBytes(expected))
+        // FileAssert.AreNotEqual(expected, actual) -> Assert.That(File.ReadAllBytes(actual)).IsNotEquivalentTo(File.ReadAllBytes(expected))
+
+        return methodName switch
+        {
+            "Exists" when arguments.Count >= 1 => CreateFileExistsAssertion(arguments[0].Expression, isNegated: false),
+            "DoesNotExist" when arguments.Count >= 1 => CreateFileExistsAssertion(arguments[0].Expression, isNegated: true),
+            "AreEqual" when arguments.Count >= 2 => CreateFileAreEqualAssertion(arguments[0].Expression, arguments[1].Expression, isNegated: false),
+            "AreNotEqual" when arguments.Count >= 2 => CreateFileAreEqualAssertion(arguments[0].Expression, arguments[1].Expression, isNegated: true),
+            _ => null
+        };
+    }
+
+    private ExpressionSyntax CreateFileExistsAssertion(ExpressionSyntax pathOrFileInfo, bool isNegated)
+    {
+        // Create: File.Exists(path) or fileInfo.Exists
+        ExpressionSyntax existsCheck;
+
+        // If it's a string literal or string-like expression, use File.Exists(path)
+        // If it's a FileInfo, use fileInfo.Exists
+        if (pathOrFileInfo is LiteralExpressionSyntax ||
+            pathOrFileInfo.ToString().EndsWith("Path", StringComparison.OrdinalIgnoreCase))
+        {
+            // File.Exists(path)
+            existsCheck = SyntaxFactory.InvocationExpression(
+                SyntaxFactory.MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    SyntaxFactory.IdentifierName("File"),
+                    SyntaxFactory.IdentifierName("Exists")),
+                SyntaxFactory.ArgumentList(
+                    SyntaxFactory.SingletonSeparatedList(SyntaxFactory.Argument(pathOrFileInfo))));
+        }
+        else
+        {
+            // Assume it's a FileInfo - use .Exists property
+            existsCheck = SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                pathOrFileInfo,
+                SyntaxFactory.IdentifierName("Exists"));
+        }
+
+        var assertionMethod = isNegated ? "IsFalse" : "IsTrue";
+        return CreateTUnitAssertion(assertionMethod, existsCheck);
+    }
+
+    private ExpressionSyntax CreateFileAreEqualAssertion(ExpressionSyntax expected, ExpressionSyntax actual, bool isNegated)
+    {
+        // Create: File.ReadAllBytes(expected) and File.ReadAllBytes(actual)
+        // Then: Assert.That(actualBytes).IsEquivalentTo(expectedBytes)
+        ExpressionSyntax expectedBytes = CreateFileReadAllBytes(expected);
+        ExpressionSyntax actualBytes = CreateFileReadAllBytes(actual);
+
+        var assertionMethod = isNegated ? "IsNotEquivalentTo" : "IsEquivalentTo";
+        return CreateTUnitAssertion(assertionMethod, actualBytes, SyntaxFactory.Argument(expectedBytes));
+    }
+
+    private static ExpressionSyntax CreateFileReadAllBytes(ExpressionSyntax pathOrFileInfo)
+    {
+        // If it's a FileInfo, use fileInfo.FullName
+        ExpressionSyntax path;
+        if (pathOrFileInfo is LiteralExpressionSyntax ||
+            pathOrFileInfo.ToString().EndsWith("Path", StringComparison.OrdinalIgnoreCase))
+        {
+            path = pathOrFileInfo;
+        }
+        else
+        {
+            // Assume it's a FileInfo - use .FullName property
+            path = SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                pathOrFileInfo,
+                SyntaxFactory.IdentifierName("FullName"));
+        }
+
+        return SyntaxFactory.InvocationExpression(
+            SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                SyntaxFactory.IdentifierName("File"),
+                SyntaxFactory.IdentifierName("ReadAllBytes")),
+            SyntaxFactory.ArgumentList(
+                SyntaxFactory.SingletonSeparatedList(SyntaxFactory.Argument(path))));
+    }
+
+    private ExpressionSyntax? ConvertDirectoryAssertion(InvocationExpressionSyntax invocation, string methodName)
+    {
+        var arguments = invocation.ArgumentList.Arguments;
+
+        // DirectoryAssert.Exists(path) -> Assert.That(Directory.Exists(path)).IsTrue()
+        // DirectoryAssert.DoesNotExist(path) -> Assert.That(Directory.Exists(path)).IsFalse()
+        // DirectoryAssert.AreEqual(expected, actual) -> Assert.That(Directory.GetFiles(actual)).IsEquivalentTo(Directory.GetFiles(expected))
+        // DirectoryAssert.AreNotEqual(expected, actual) -> Assert.That(Directory.GetFiles(actual)).IsNotEquivalentTo(Directory.GetFiles(expected))
+
+        return methodName switch
+        {
+            "Exists" when arguments.Count >= 1 => CreateDirectoryExistsAssertion(arguments[0].Expression, isNegated: false),
+            "DoesNotExist" when arguments.Count >= 1 => CreateDirectoryExistsAssertion(arguments[0].Expression, isNegated: true),
+            "AreEqual" when arguments.Count >= 2 => CreateDirectoryAreEqualAssertion(arguments[0].Expression, arguments[1].Expression, isNegated: false),
+            "AreNotEqual" when arguments.Count >= 2 => CreateDirectoryAreEqualAssertion(arguments[0].Expression, arguments[1].Expression, isNegated: true),
+            _ => null
+        };
+    }
+
+    private ExpressionSyntax CreateDirectoryExistsAssertion(ExpressionSyntax pathOrDirectoryInfo, bool isNegated)
+    {
+        // Create: Directory.Exists(path) or directoryInfo.Exists
+        ExpressionSyntax existsCheck;
+
+        // If it's a string literal or string-like expression, use Directory.Exists(path)
+        // If it's a DirectoryInfo, use directoryInfo.Exists
+        if (pathOrDirectoryInfo is LiteralExpressionSyntax ||
+            pathOrDirectoryInfo.ToString().EndsWith("Path", StringComparison.OrdinalIgnoreCase))
+        {
+            // Directory.Exists(path)
+            existsCheck = SyntaxFactory.InvocationExpression(
+                SyntaxFactory.MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    SyntaxFactory.IdentifierName("Directory"),
+                    SyntaxFactory.IdentifierName("Exists")),
+                SyntaxFactory.ArgumentList(
+                    SyntaxFactory.SingletonSeparatedList(SyntaxFactory.Argument(pathOrDirectoryInfo))));
+        }
+        else
+        {
+            // Assume it's a DirectoryInfo - use .Exists property
+            existsCheck = SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                pathOrDirectoryInfo,
+                SyntaxFactory.IdentifierName("Exists"));
+        }
+
+        var assertionMethod = isNegated ? "IsFalse" : "IsTrue";
+        return CreateTUnitAssertion(assertionMethod, existsCheck);
+    }
+
+    private ExpressionSyntax CreateDirectoryAreEqualAssertion(ExpressionSyntax expected, ExpressionSyntax actual, bool isNegated)
+    {
+        // Create: Directory.GetFiles(expected, "*", SearchOption.AllDirectories) and same for actual
+        // This compares directory contents
+        // Note: NUnit's DirectoryAssert.AreEqual is complex - it compares directory contents recursively
+        // We'll use a simpler approach: compare file lists
+        ExpressionSyntax expectedFiles = CreateDirectoryGetFiles(expected);
+        ExpressionSyntax actualFiles = CreateDirectoryGetFiles(actual);
+
+        var assertionMethod = isNegated ? "IsNotEquivalentTo" : "IsEquivalentTo";
+        return CreateTUnitAssertion(assertionMethod, actualFiles, SyntaxFactory.Argument(expectedFiles));
+    }
+
+    private static ExpressionSyntax CreateDirectoryGetFiles(ExpressionSyntax pathOrDirectoryInfo)
+    {
+        // If it's a DirectoryInfo, use directoryInfo.FullName
+        ExpressionSyntax path;
+        if (pathOrDirectoryInfo is LiteralExpressionSyntax ||
+            pathOrDirectoryInfo.ToString().EndsWith("Path", StringComparison.OrdinalIgnoreCase))
+        {
+            path = pathOrDirectoryInfo;
+        }
+        else
+        {
+            // Assume it's a DirectoryInfo - use .FullName property
+            path = SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                pathOrDirectoryInfo,
+                SyntaxFactory.IdentifierName("FullName"));
+        }
+
+        // Directory.GetFiles(path, "*", SearchOption.AllDirectories)
+        return SyntaxFactory.InvocationExpression(
+            SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                SyntaxFactory.IdentifierName("Directory"),
+                SyntaxFactory.IdentifierName("GetFiles")),
+            SyntaxFactory.ArgumentList(
+                SyntaxFactory.SeparatedList(new[]
+                {
+                    SyntaxFactory.Argument(path),
+                    SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal("*"))),
+                    SyntaxFactory.Argument(
+                        SyntaxFactory.MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            SyntaxFactory.IdentifierName("SearchOption"),
+                            SyntaxFactory.IdentifierName("AllDirectories")))
+                })));
+    }
 }
 
 public class NUnitBaseTypeRewriter : CSharpSyntaxRewriter
@@ -1440,12 +1650,178 @@ public class NUnitLifecycleRewriter : CSharpSyntaxRewriter
         var hasLifecycleAttribute = node.AttributeLists
             .SelectMany(al => al.Attributes)
             .Any(a => a.Name.ToString() is "Before" or "After");
-        
+
         if (hasLifecycleAttribute && !node.Modifiers.Any(SyntaxKind.PublicKeyword))
         {
             return node.AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword));
         }
-        
+
         return base.VisitMethodDeclaration(node);
+    }
+}
+
+/// <summary>
+/// Handles NUnit [ExpectedException(typeof(T))] attribute conversion by:
+/// 1. Removing the attribute
+/// 2. Wrapping the method body in Assert.ThrowsAsync&lt;T&gt;()
+/// </summary>
+public class NUnitExpectedExceptionRewriter : CSharpSyntaxRewriter
+{
+    public override SyntaxNode? VisitMethodDeclaration(MethodDeclarationSyntax node)
+    {
+        // Find [ExpectedException] attribute
+        var expectedExceptionAttr = node.AttributeLists
+            .SelectMany(al => al.Attributes)
+            .FirstOrDefault(a => MigrationHelpers.GetAttributeName(a) == "ExpectedException");
+
+        if (expectedExceptionAttr == null)
+        {
+            return base.VisitMethodDeclaration(node);
+        }
+
+        // Extract the exception type from typeof(ExceptionType)
+        var exceptionType = ExtractExceptionType(expectedExceptionAttr);
+        if (exceptionType == null)
+        {
+            // Can't extract exception type, leave as-is with a TODO comment
+            return node;
+        }
+
+        // Remove the [ExpectedException] attribute
+        var newAttributeLists = RemoveExpectedExceptionAttribute(node.AttributeLists);
+
+        // Wrap the method body in Assert.ThrowsAsync<T>()
+        var newBody = WrapBodyInThrowsAsync(node.Body, node.ExpressionBody, exceptionType);
+
+        if (newBody == null)
+        {
+            return node.WithAttributeLists(SyntaxFactory.List(newAttributeLists));
+        }
+
+        return node
+            .WithAttributeLists(SyntaxFactory.List(newAttributeLists))
+            .WithBody(newBody)
+            .WithExpressionBody(null)
+            .WithSemicolonToken(default);
+    }
+
+    private static TypeSyntax? ExtractExceptionType(AttributeSyntax attribute)
+    {
+        if (attribute.ArgumentList == null || attribute.ArgumentList.Arguments.Count == 0)
+        {
+            return null;
+        }
+
+        var firstArg = attribute.ArgumentList.Arguments[0].Expression;
+
+        // Handle typeof(ExceptionType)
+        if (firstArg is TypeOfExpressionSyntax typeOfExpr)
+        {
+            return typeOfExpr.Type;
+        }
+
+        return null;
+    }
+
+    private static List<AttributeListSyntax> RemoveExpectedExceptionAttribute(SyntaxList<AttributeListSyntax> attributeLists)
+    {
+        var result = new List<AttributeListSyntax>();
+
+        foreach (var attrList in attributeLists)
+        {
+            var remainingAttrs = attrList.Attributes
+                .Where(a => MigrationHelpers.GetAttributeName(a) != "ExpectedException")
+                .ToList();
+
+            if (remainingAttrs.Count > 0)
+            {
+                result.Add(attrList.WithAttributes(SyntaxFactory.SeparatedList(remainingAttrs)));
+            }
+        }
+
+        return result;
+    }
+
+    private static BlockSyntax? WrapBodyInThrowsAsync(BlockSyntax? body, ArrowExpressionClauseSyntax? expressionBody, TypeSyntax exceptionType)
+    {
+        StatementSyntax[] originalStatements;
+
+        if (body != null)
+        {
+            originalStatements = body.Statements.ToArray();
+        }
+        else if (expressionBody != null)
+        {
+            // Convert expression body to a statement
+            originalStatements = [SyntaxFactory.ExpressionStatement(expressionBody.Expression)];
+        }
+        else
+        {
+            return null;
+        }
+
+        // Check if the original statements contain any await expressions
+        var hasAwait = originalStatements.Any(s => s.DescendantNodes().OfType<AwaitExpressionSyntax>().Any());
+
+        // Create: await Assert.ThrowsAsync<T>(() => { original statements });
+        // or: await Assert.ThrowsAsync<T>(async () => { original statements }); if async
+        // Add extra indentation for statements inside the lambda block (4 more spaces)
+        var indentedStatements = originalStatements.Select(s =>
+        {
+            var existingTrivia = s.GetLeadingTrivia();
+            var newTrivia = existingTrivia.Add(SyntaxFactory.Whitespace("    "));
+            return s.WithLeadingTrivia(newTrivia);
+        }).ToArray();
+        var lambdaBody = SyntaxFactory.Block(indentedStatements)
+            .WithOpenBraceToken(SyntaxFactory.Token(SyntaxKind.OpenBraceToken)
+                .WithLeadingTrivia(SyntaxFactory.Whitespace("        "))
+                .WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed))
+            .WithCloseBraceToken(SyntaxFactory.Token(SyntaxKind.CloseBraceToken)
+                .WithLeadingTrivia(SyntaxFactory.Whitespace("        ")));
+        ParenthesizedLambdaExpressionSyntax lambda;
+
+        lambda = SyntaxFactory.ParenthesizedLambdaExpression(
+            SyntaxFactory.ParameterList(),
+            lambdaBody
+        ).WithArrowToken(SyntaxFactory.Token(SyntaxKind.EqualsGreaterThanToken)
+            .WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed));
+
+        if (hasAwait)
+        {
+            // Need async lambda for await expressions
+            lambda = lambda.WithAsyncKeyword(SyntaxFactory.Token(SyntaxKind.AsyncKeyword)
+                .WithTrailingTrivia(SyntaxFactory.Space));
+        }
+
+        var throwsAsyncCall = SyntaxFactory.InvocationExpression(
+            SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                SyntaxFactory.IdentifierName("Assert"),
+                SyntaxFactory.GenericName("ThrowsAsync")
+                    .WithTypeArgumentList(
+                        SyntaxFactory.TypeArgumentList(
+                            SyntaxFactory.SingletonSeparatedList(exceptionType.WithoutTrivia())
+                        )
+                    )
+            ),
+            SyntaxFactory.ArgumentList(
+                SyntaxFactory.SingletonSeparatedList(
+                    SyntaxFactory.Argument(lambda)
+                )
+            )
+        );
+
+        var awaitExpression = SyntaxFactory.AwaitExpression(throwsAsyncCall);
+
+        var newStatement = SyntaxFactory.ExpressionStatement(awaitExpression)
+            .WithLeadingTrivia(SyntaxFactory.TriviaList(
+                SyntaxFactory.Whitespace("        ")))
+            .WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
+
+        return SyntaxFactory.Block(newStatement)
+            .WithOpenBraceToken(SyntaxFactory.Token(SyntaxKind.OpenBraceToken)
+                .WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed))
+            .WithCloseBraceToken(SyntaxFactory.Token(SyntaxKind.CloseBraceToken)
+                .WithLeadingTrivia(SyntaxFactory.Whitespace("    ")));
     }
 }

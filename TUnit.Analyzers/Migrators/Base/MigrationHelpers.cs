@@ -231,6 +231,9 @@ public static class MigrationHelpers
         // First add System.Threading.Tasks if needed
         compilationUnit = AddSystemThreadingTasksUsing(compilationUnit);
 
+        // Add System.IO if File. or Directory. is used (from FileAssert/DirectoryAssert conversion)
+        compilationUnit = AddSystemIOUsing(compilationUnit);
+
         var existingUsings = compilationUnit.Usings.ToList();
 
         if (!existingUsings.Any(u => u.Name?.ToString() == "TUnit.Core"))
@@ -255,5 +258,28 @@ public static class MigrationHelpers
         }
 
         return compilationUnit.WithUsings(SyntaxFactory.List(existingUsings));
+    }
+
+    /// <summary>
+    /// Adds System.IO using directive if the code contains File. or Directory. references.
+    /// This is needed when FileAssert or DirectoryAssert is converted to use File/Directory classes.
+    /// </summary>
+    public static CompilationUnitSyntax AddSystemIOUsing(CompilationUnitSyntax compilationUnit)
+    {
+        var existingUsings = compilationUnit.Usings.ToList();
+
+        // Check if code contains File. or Directory. member access
+        bool hasFileOrDirectoryCode = compilationUnit.DescendantNodes()
+            .OfType<MemberAccessExpressionSyntax>()
+            .Any(m => m.Expression is IdentifierNameSyntax { Identifier.Text: "File" or "Directory" });
+
+        if (hasFileOrDirectoryCode && !existingUsings.Any(u => u.Name?.ToString() == "System.IO"))
+        {
+            var ioUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.IO"));
+            existingUsings.Insert(0, ioUsing); // Insert at beginning to keep System.* namespaces together
+            return compilationUnit.WithUsings(SyntaxFactory.List(existingUsings));
+        }
+
+        return compilationUnit;
     }
 }
