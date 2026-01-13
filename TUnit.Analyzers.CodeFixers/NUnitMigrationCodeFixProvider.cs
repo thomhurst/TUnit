@@ -781,6 +781,7 @@ public class NUnitAssertionRewriter : AssertionRewriter
                 "Positive" => CreateTUnitAssertionWithMessage("IsLessThanOrEqualTo", actualValue, message, SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(0)))),
                 "Negative" => CreateTUnitAssertionWithMessage("IsGreaterThanOrEqualTo", actualValue, message, SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(0)))),
                 "Zero" => CreateTUnitAssertionWithMessage("IsNotZero", actualValue, message),
+                "NaN" => CreateTUnitAssertionWithMessage("IsNotNaN", actualValue, message),
                 _ => CreateTUnitAssertionWithMessage("IsNotEqualTo", actualValue, message, SyntaxFactory.Argument(constraint))
             };
         }
@@ -794,6 +795,7 @@ public class NUnitAssertionRewriter : AssertionRewriter
             "Positive" => CreateTUnitAssertionWithMessage("IsPositive", actualValue, message),
             "Negative" => CreateTUnitAssertionWithMessage("IsNegative", actualValue, message),
             "Zero" => CreateTUnitAssertionWithMessage("IsZero", actualValue, message),
+            "NaN" => CreateTUnitAssertionWithMessage("IsNaN", actualValue, message),
             "Unique" => CreateTUnitAssertionWithMessage("HasDistinctItems", actualValue, message),
             "Ordered" => CreateTUnitAssertionWithMessage("IsInAscendingOrder", actualValue, message),
             _ => CreateTUnitAssertionWithMessage("IsEqualTo", actualValue, message, SyntaxFactory.Argument(constraint))
@@ -981,6 +983,7 @@ public class NUnitAssertionRewriter : AssertionRewriter
                 "Positive" => CreateTUnitAssertion("IsLessThanOrEqualTo", actualValue, SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(0)))),
                 "Negative" => CreateTUnitAssertion("IsGreaterThanOrEqualTo", actualValue, SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(0)))),
                 "Zero" => CreateTUnitAssertion("IsNotZero", actualValue),
+                "NaN" => CreateTUnitAssertion("IsNotNaN", actualValue),
                 _ => CreateTUnitAssertion("IsNotEqualTo", actualValue, SyntaxFactory.Argument(constraint))
             };
         }
@@ -994,6 +997,7 @@ public class NUnitAssertionRewriter : AssertionRewriter
             "Positive" => CreateTUnitAssertion("IsPositive", actualValue),
             "Negative" => CreateTUnitAssertion("IsNegative", actualValue),
             "Zero" => CreateTUnitAssertion("IsZero", actualValue),
+            "NaN" => CreateTUnitAssertion("IsNaN", actualValue),
             "Unique" => CreateTUnitAssertion("HasDistinctItems", actualValue),
             "Ordered" => CreateTUnitAssertion("IsInAscendingOrder", actualValue),
             _ => CreateTUnitAssertion("IsEqualTo", actualValue, SyntaxFactory.Argument(constraint))
