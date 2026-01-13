@@ -301,11 +301,11 @@ public static partial class FileSystemComparisonAssertions
         }
 
         var actualPaths = value.EnumerateFileSystemInfos("*", SearchOption.AllDirectories)
-            .Select(f => Path.GetRelativePath(value.FullName, f.FullName))
+            .Select(f => GetRelativePath(value.FullName, f.FullName))
             .OrderBy(p => p)
             .ToList();
         var expectedPaths = expected.EnumerateFileSystemInfos("*", SearchOption.AllDirectories)
-            .Select(f => Path.GetRelativePath(expected.FullName, f.FullName))
+            .Select(f => GetRelativePath(expected.FullName, f.FullName))
             .OrderBy(p => p)
             .ToList();
 
@@ -371,11 +371,11 @@ public static partial class FileSystemComparisonAssertions
 
         // First check structure
         var actualFiles = value.EnumerateFiles("*", SearchOption.AllDirectories)
-            .Select(f => Path.GetRelativePath(value.FullName, f.FullName))
+            .Select(f => GetRelativePath(value.FullName, f.FullName))
             .OrderBy(p => p)
             .ToList();
         var expectedFiles = expected.EnumerateFiles("*", SearchOption.AllDirectories)
-            .Select(f => Path.GetRelativePath(expected.FullName, f.FullName))
+            .Select(f => GetRelativePath(expected.FullName, f.FullName))
             .OrderBy(p => p)
             .ToList();
 
@@ -453,11 +453,11 @@ public static partial class FileSystemComparisonAssertions
 
         // Check structure
         var actualFiles = value.EnumerateFiles("*", SearchOption.AllDirectories)
-            .Select(f => Path.GetRelativePath(value.FullName, f.FullName))
+            .Select(f => GetRelativePath(value.FullName, f.FullName))
             .OrderBy(p => p)
             .ToList();
         var expectedFiles = expected.EnumerateFiles("*", SearchOption.AllDirectories)
-            .Select(f => Path.GetRelativePath(expected.FullName, f.FullName))
+            .Select(f => GetRelativePath(expected.FullName, f.FullName))
             .OrderBy(p => p)
             .ToList();
 
@@ -482,5 +482,45 @@ public static partial class FileSystemComparisonAssertions
         }
 
         return AssertionResult.Failed("directories are equivalent");
+    }
+
+    /// <summary>
+    /// Gets a relative path from one path to another. This is a polyfill for Path.GetRelativePath
+    /// which is not available in netstandard2.0.
+    /// </summary>
+    private static string GetRelativePath(string relativeTo, string path)
+    {
+#if NETSTANDARD2_0
+        // Normalize paths
+        relativeTo = Path.GetFullPath(relativeTo);
+        path = Path.GetFullPath(path);
+
+        // Ensure relativeTo ends with directory separator for proper comparison
+        if (!relativeTo.EndsWith(Path.DirectorySeparatorChar.ToString()) &&
+            !relativeTo.EndsWith(Path.AltDirectorySeparatorChar.ToString()))
+        {
+            relativeTo += Path.DirectorySeparatorChar;
+        }
+
+        var relativeToUri = new Uri(relativeTo);
+        var pathUri = new Uri(path);
+
+        if (relativeToUri.Scheme != pathUri.Scheme)
+        {
+            return path;
+        }
+
+        var relativeUri = relativeToUri.MakeRelativeUri(pathUri);
+        var relativePath = Uri.UnescapeDataString(relativeUri.ToString());
+
+        if (string.Equals(pathUri.Scheme, Uri.UriSchemeFile, StringComparison.OrdinalIgnoreCase))
+        {
+            relativePath = relativePath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+        }
+
+        return relativePath;
+#else
+        return GetRelativePath(relativeTo, path);
+#endif
     }
 }
