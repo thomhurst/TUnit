@@ -283,13 +283,13 @@ public class MSTestAssertionRewriter : AssertionRewriter
             "AreEqual" => ConvertAreEqual(arguments),
             "AreNotEqual" => ConvertAreNotEqual(arguments),
             "AreSame" when arguments.Count >= 3 =>
-                CreateTUnitAssertionWithMessage("IsSameReferenceAs", arguments[1].Expression, arguments[2].Expression, arguments[0]),
+                CreateTUnitAssertionWithMessage("IsSameReference", arguments[1].Expression, arguments[2].Expression, arguments[0]),
             "AreSame" when arguments.Count >= 2 =>
-                CreateTUnitAssertion("IsSameReferenceAs", arguments[1].Expression, arguments[0]),
+                CreateTUnitAssertion("IsSameReference", arguments[1].Expression, arguments[0]),
             "AreNotSame" when arguments.Count >= 3 =>
-                CreateTUnitAssertionWithMessage("IsNotSameReferenceAs", arguments[1].Expression, arguments[2].Expression, arguments[0]),
+                CreateTUnitAssertionWithMessage("IsNotSameReference", arguments[1].Expression, arguments[2].Expression, arguments[0]),
             "AreNotSame" when arguments.Count >= 2 =>
-                CreateTUnitAssertion("IsNotSameReferenceAs", arguments[1].Expression, arguments[0]),
+                CreateTUnitAssertion("IsNotSameReference", arguments[1].Expression, arguments[0]),
 
             // 1-arg assertions with message as 2nd param
             "IsTrue" when arguments.Count >= 2 =>

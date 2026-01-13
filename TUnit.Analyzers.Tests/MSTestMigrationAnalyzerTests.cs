@@ -686,8 +686,8 @@ public class MSTestMigrationAnalyzerTests
                         var obj2 = obj1;
                         var obj3 = new object();
 
-                        await Assert.That(obj2).IsSameReferenceAs(obj1);
-                        await Assert.That(obj3).IsNotSameReferenceAs(obj1);
+                        await Assert.That(obj2).IsSameReference(obj1);
+                        await Assert.That(obj3).IsNotSameReference(obj1);
                     }
                 }
                 """,
