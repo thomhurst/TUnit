@@ -651,6 +651,7 @@ public class XUnitMigrationAnalyzerTests
                 Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
                 """
                 using TUnit.Core;
+                using System.Threading.Tasks;
 
                 public class MyClass
                 {
@@ -685,6 +686,7 @@ public class XUnitMigrationAnalyzerTests
                 Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
                 """
                 using TUnit.Core;
+                using System.Threading.Tasks;
 
                 public class MyClass
                 {
@@ -719,6 +721,7 @@ public class XUnitMigrationAnalyzerTests
                 Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
                 """
                 using TUnit.Core;
+                using System.Threading.Tasks;
 
                 public class MyClass
                 {
@@ -759,6 +762,7 @@ public class XUnitMigrationAnalyzerTests
                 """
                 using System;
                 using TUnit.Core;
+                using System.Threading.Tasks;
 
                 public class MyClass
                 {
@@ -801,6 +805,7 @@ public class XUnitMigrationAnalyzerTests
                 using System;
                 using System.Collections.Generic;
                 using TUnit.Core;
+                using System.Threading.Tasks;
 
                 public class MyClass
                 {
@@ -844,6 +849,7 @@ public class XUnitMigrationAnalyzerTests
                 using System;
                 using System.Collections.Generic;
                 using TUnit.Core;
+                using System.Threading.Tasks;
 
                 public class MyClass
                 {
@@ -883,6 +889,7 @@ public class XUnitMigrationAnalyzerTests
                 Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
                 """
                 using TUnit.Core;
+                using System.Threading.Tasks;
 
                 public class MyClass
                 {
@@ -921,6 +928,7 @@ public class XUnitMigrationAnalyzerTests
                 Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
                 """
                 using TUnit.Core;
+                using System.Threading.Tasks;
 
                 public class MyClass
                 {
@@ -960,6 +968,7 @@ public class XUnitMigrationAnalyzerTests
                 """
                 using System;
                 using TUnit.Core;
+                using System.Threading.Tasks;
 
                 public class MyClass
                 {

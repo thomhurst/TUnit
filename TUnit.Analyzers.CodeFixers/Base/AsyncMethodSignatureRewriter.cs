@@ -100,6 +100,15 @@ public class AsyncMethodSignatureRewriter : CSharpSyntaxRewriter
             return node;
         }
 
+        // Skip if method has ref, in, or out parameters (async methods cannot have these)
+        if (node.ParameterList.Parameters.Any(p =>
+            p.Modifiers.Any(SyntaxKind.RefKeyword) ||
+            p.Modifiers.Any(SyntaxKind.OutKeyword) ||
+            p.Modifiers.Any(SyntaxKind.InKeyword)))
+        {
+            return node;
+        }
+
         // Check if method contains await expressions
         bool hasAwait = node.DescendantNodes().OfType<AwaitExpressionSyntax>().Any();
         if (!hasAwait)

@@ -63,10 +63,10 @@ public class NUnitAttributeRewriter : AttributeRewriter
     {
         return attributeName switch
         {
-            "Test" or "TestCase" or "TestCaseSource" or
+            "Test" or "Theory" or "TestCase" or "TestCaseSource" or
             "SetUp" or "TearDown" or "OneTimeSetUp" or "OneTimeTearDown" or
             "TestFixture" or "Category" or "Ignore" or "Explicit" or "Apartment" or
-            "Platform" or "Theory" or "Description" => true,
+            "Platform" or "Description" => true,
             _ => false
         };
     }
@@ -846,47 +846,55 @@ public class NUnitAssertionRewriter : AssertionRewriter
             );
         }
 
-        // Wrap in await
-        var awaitKeyword = SyntaxFactory.Token(SyntaxKind.AwaitKeyword)
-            .WithTrailingTrivia(SyntaxFactory.Space);
-        return SyntaxFactory.AwaitExpression(awaitKeyword, fullInvocation);
+        // Wrap in await or .Wait() depending on whether the method can be async
+        return WrapAssertionForAsync(fullInvocation);
     }
 
     /// <summary>
-    /// Chains a method call onto an existing await expression.
+    /// Chains a method call onto an existing await expression or .Wait() expression.
     /// For example: await Assert.That(x).IsEqualTo(5) becomes await Assert.That(x).IsEqualTo(5).Within(2)
     /// </summary>
     private ExpressionSyntax ChainMethodCall(ExpressionSyntax baseExpression, string methodName, params ArgumentSyntax[] arguments)
     {
-        // The base expression is an AwaitExpression like: await Assert.That(x).IsEqualTo(5)
-        // We need to extract the invocation, add .Within(2) to it, and re-wrap in await
+        ExpressionSyntax innerInvocation;
+
+        // The base expression is either:
+        // 1. An AwaitExpression like: await Assert.That(x).IsEqualTo(5)
+        // 2. An InvocationExpression like: Assert.That(x).IsEqualTo(5).Wait() (for ref/out methods)
         if (baseExpression is AwaitExpressionSyntax awaitExpr)
         {
-            var innerInvocation = awaitExpr.Expression;
-            
-            // Create the chained method access: Assert.That(x).IsEqualTo(5).Within
-            var chainedAccess = SyntaxFactory.MemberAccessExpression(
-                SyntaxKind.SimpleMemberAccessExpression,
-                innerInvocation,
-                SyntaxFactory.IdentifierName(methodName)
-            );
-            
-            // Create the invocation: Assert.That(x).IsEqualTo(5).Within(2)
-            var chainedInvocation = SyntaxFactory.InvocationExpression(
-                chainedAccess,
-                arguments.Length > 0
-                    ? SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(arguments))
-                    : SyntaxFactory.ArgumentList()
-            );
-            
-            // Re-wrap in await
-            var awaitKeyword = SyntaxFactory.Token(SyntaxKind.AwaitKeyword)
-                .WithTrailingTrivia(SyntaxFactory.Space);
-            return SyntaxFactory.AwaitExpression(awaitKeyword, chainedInvocation);
+            innerInvocation = awaitExpr.Expression;
         }
-        
-        // Fallback: just return the base expression if it's not the expected shape
-        return baseExpression;
+        else if (baseExpression is InvocationExpressionSyntax waitInvocation &&
+                 waitInvocation.Expression is MemberAccessExpressionSyntax waitAccess &&
+                 waitAccess.Name.Identifier.Text == "Wait")
+        {
+            // Extract the expression before .Wait()
+            innerInvocation = waitAccess.Expression;
+        }
+        else
+        {
+            // Fallback: just return the base expression if it's not the expected shape
+            return baseExpression;
+        }
+
+        // Create the chained method access: Assert.That(x).IsEqualTo(5).Within
+        var chainedAccess = SyntaxFactory.MemberAccessExpression(
+            SyntaxKind.SimpleMemberAccessExpression,
+            innerInvocation,
+            SyntaxFactory.IdentifierName(methodName)
+        );
+
+        // Create the invocation: Assert.That(x).IsEqualTo(5).Within(2)
+        var chainedInvocation = SyntaxFactory.InvocationExpression(
+            chainedAccess,
+            arguments.Length > 0
+                ? SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(arguments))
+                : SyntaxFactory.ArgumentList()
+        );
+
+        // Re-wrap in await or .Wait() depending on method context
+        return WrapAssertionForAsync(chainedInvocation);
     }
     
     private ExpressionSyntax? ConvertClassicAssertion(InvocationExpressionSyntax invocation, string methodName)
@@ -1046,19 +1054,19 @@ public class NUnitAssertionRewriter : AssertionRewriter
                     )
                 );
 
-                return SyntaxFactory.AwaitExpression(throwsAsyncInvocation);
+                return WrapAssertionForAsync(throwsAsyncInvocation);
             }
-            
+
             // Handle non-generic constraint-based form: Assert.Throws(constraint, () => ...) or Assert.ThrowsAsync(constraint, () => ...)
             // where constraint is typically Is.TypeOf(typeof(T))
             if (invocation.ArgumentList.Arguments.Count >= 2)
             {
                 var constraint = invocation.ArgumentList.Arguments[0].Expression;
                 var action = invocation.ArgumentList.Arguments[1].Expression;
-                
+
                 // Try to extract the exception type from the constraint
                 var exceptionType = TryExtractTypeFromConstraint(constraint);
-                
+
                 if (exceptionType != null)
                 {
                     // Convert to generic ThrowsAsync form: Assert.ThrowsAsync<T>(() => ...)
@@ -1080,7 +1088,7 @@ public class NUnitAssertionRewriter : AssertionRewriter
                         )
                     );
 
-                    return SyntaxFactory.AwaitExpression(throwsAsyncInvocation);
+                    return WrapAssertionForAsync(throwsAsyncInvocation);
                 }
             }
         }
@@ -1126,12 +1134,10 @@ public class NUnitAssertionRewriter : AssertionRewriter
             SyntaxFactory.ArgumentList()
         );
         
-        // Wrap in await
-        var awaitKeyword = SyntaxFactory.Token(SyntaxKind.AwaitKeyword)
-            .WithTrailingTrivia(SyntaxFactory.Space);
-        return SyntaxFactory.AwaitExpression(awaitKeyword, throwsNothingInvocation);
+        // Wrap in await or .Wait() depending on method context
+        return WrapAssertionForAsync(throwsNothingInvocation);
     }
-    
+
     /// <summary>
     /// Attempts to extract the exception type from NUnit constraint expressions like Is.TypeOf(typeof(T)).
     /// Returns null if the type cannot be extracted.
@@ -1189,7 +1195,7 @@ public class NUnitAssertionRewriter : AssertionRewriter
                 : SyntaxFactory.ArgumentList()
         );
 
-        return SyntaxFactory.AwaitExpression(passInvocation);
+        return WrapAssertionForAsync(passInvocation);
     }
 
     private ExpressionSyntax CreateFailAssertion(SeparatedSyntaxList<ArgumentSyntax> arguments)

@@ -908,7 +908,9 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
                     )
                 );
 
-                return SyntaxFactory.AwaitExpression(invocationExpression);
+                var awaitKeyword = SyntaxFactory.Token(SyntaxKind.AwaitKeyword)
+                    .WithTrailingTrivia(SyntaxFactory.Space);
+                return SyntaxFactory.AwaitExpression(awaitKeyword, invocationExpression);
             }
 
             return CreateTUnitAssertion("Throws", invocation.ArgumentList.Arguments[0].Expression);
@@ -953,7 +955,9 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
                 );
 
                 var fullInvocation = SyntaxFactory.InvocationExpression(methodAccess, SyntaxFactory.ArgumentList());
-                return SyntaxFactory.AwaitExpression(fullInvocation);
+                var awaitKeyword = SyntaxFactory.Token(SyntaxKind.AwaitKeyword)
+                    .WithTrailingTrivia(SyntaxFactory.Space);
+                return SyntaxFactory.AwaitExpression(awaitKeyword, fullInvocation);
             }
 
             return CreateTUnitAssertion("IsNotTypeOf", invocation.ArgumentList.Arguments[0].Expression);
@@ -985,7 +989,9 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
                     )
                 );
 
-                return SyntaxFactory.AwaitExpression(invocationExpression);
+                var awaitKeyword = SyntaxFactory.Token(SyntaxKind.AwaitKeyword)
+                    .WithTrailingTrivia(SyntaxFactory.Space);
+                return SyntaxFactory.AwaitExpression(awaitKeyword, invocationExpression);
             }
 
             // Fallback
@@ -1018,7 +1024,9 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
                     )
                 );
 
-                return SyntaxFactory.AwaitExpression(invocationExpression);
+                var awaitKeyword2 = SyntaxFactory.Token(SyntaxKind.AwaitKeyword)
+                    .WithTrailingTrivia(SyntaxFactory.Space);
+                return SyntaxFactory.AwaitExpression(awaitKeyword2, invocationExpression);
             }
 
             return CreateTUnitAssertion("ThrowsAsync", invocation.ArgumentList.Arguments[0].Expression);
@@ -1057,7 +1065,9 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
                 );
 
                 var fullInvocation = SyntaxFactory.InvocationExpression(methodAccess, SyntaxFactory.ArgumentList());
-                return SyntaxFactory.AwaitExpression(fullInvocation);
+                var awaitKeyword = SyntaxFactory.Token(SyntaxKind.AwaitKeyword)
+                    .WithTrailingTrivia(SyntaxFactory.Space);
+                return SyntaxFactory.AwaitExpression(awaitKeyword, fullInvocation);
             }
 
             return CreateTUnitAssertion("IsTypeOf", invocation.ArgumentList.Arguments[0].Expression);
@@ -1096,7 +1106,9 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
                 );
 
                 var fullInvocation = SyntaxFactory.InvocationExpression(methodAccess, SyntaxFactory.ArgumentList());
-                return SyntaxFactory.AwaitExpression(fullInvocation);
+                var awaitKeyword = SyntaxFactory.Token(SyntaxKind.AwaitKeyword)
+                    .WithTrailingTrivia(SyntaxFactory.Space);
+                return SyntaxFactory.AwaitExpression(awaitKeyword, fullInvocation);
             }
 
             return CreateTUnitAssertion("IsAssignableTo", invocation.ArgumentList.Arguments[0].Expression);

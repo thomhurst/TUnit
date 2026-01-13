@@ -181,17 +181,12 @@ public static class MigrationHelpers
         return compilationUnit.WithUsings(SyntaxFactory.List(usingsToKeep));
     }
     
-    public static CompilationUnitSyntax AddTUnitUsings(CompilationUnitSyntax compilationUnit)
+    /// <summary>
+    /// Adds System.Threading.Tasks using directive if the code contains async methods or await expressions.
+    /// This is called unconditionally for all migrations since async methods need the Tasks namespace.
+    /// </summary>
+    public static CompilationUnitSyntax AddSystemThreadingTasksUsing(CompilationUnitSyntax compilationUnit)
     {
-        var tunitUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("TUnit.Core"));
-        // Add namespace using so Assert type name is available for Assert.That(...) syntax
-        var assertionsNamespaceUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("TUnit.Assertions"));
-        var assertionsStaticUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("TUnit.Assertions.Assert"))
-            .WithStaticKeyword(SyntaxFactory.Token(SyntaxKind.StaticKeyword));
-        var extensionsUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("TUnit.Assertions.Extensions"));
-        // Add System.Threading.Tasks for async Task methods
-        var tasksUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Threading.Tasks"));
-
         var existingUsings = compilationUnit.Usings.ToList();
 
         // Add System.Threading.Tasks only if the code has async methods or await expressions
@@ -201,8 +196,27 @@ public static class MigrationHelpers
 
         if (hasAsyncCode && !existingUsings.Any(u => u.Name?.ToString() == "System.Threading.Tasks"))
         {
+            var tasksUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Threading.Tasks"));
             existingUsings.Add(tasksUsing);
+            return compilationUnit.WithUsings(SyntaxFactory.List(existingUsings));
         }
+
+        return compilationUnit;
+    }
+
+    public static CompilationUnitSyntax AddTUnitUsings(CompilationUnitSyntax compilationUnit)
+    {
+        var tunitUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("TUnit.Core"));
+        // Add namespace using so Assert type name is available for Assert.That(...) syntax
+        var assertionsNamespaceUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("TUnit.Assertions"));
+        var assertionsStaticUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("TUnit.Assertions.Assert"))
+            .WithStaticKeyword(SyntaxFactory.Token(SyntaxKind.StaticKeyword));
+        var extensionsUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("TUnit.Assertions.Extensions"));
+
+        // First add System.Threading.Tasks if needed
+        compilationUnit = AddSystemThreadingTasksUsing(compilationUnit);
+
+        var existingUsings = compilationUnit.Usings.ToList();
 
         if (!existingUsings.Any(u => u.Name?.ToString() == "TUnit.Core"))
         {
