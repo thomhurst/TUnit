@@ -984,6 +984,106 @@ public class XUnitMigrationAnalyzerTests
             );
     }
 
+    [Test]
+    public async Task Record_Exception_Can_Be_Converted()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using System;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Fact]
+                    public void MyTest()
+                    {
+                        var ex = Record.Exception(() => throw new InvalidOperationException("Test"));
+                        Assert.NotNull(ex);
+                        Assert.IsType<InvalidOperationException>(ex);
+                    }
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+                using System;
+                using TUnit.Core;
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task MyTest()
+                    {
+                        Exception? ex = null;
+                        try
+                        {
+                            throw new InvalidOperationException("Test");
+                        }
+                        catch (Exception e)
+                        {
+                            ex = e;
+                        }
+                        await Assert.That(ex).IsNotNull();
+                        await Assert.That(ex).IsTypeOf<InvalidOperationException>();
+                    }
+                }
+                """,
+                ConfigureXUnitTest
+            );
+    }
+
+    [Test]
+    public async Task Record_Exception_With_Method_Call_Can_Be_Converted()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using System;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Fact]
+                    public void MyTest()
+                    {
+                        var ex = Record.Exception(() => DoSomething());
+                        Assert.Null(ex);
+                    }
+
+                    private void DoSomething() { }
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+                using System;
+                using TUnit.Core;
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task MyTest()
+                    {
+                        Exception? ex = null;
+                        try
+                        {
+                            DoSomething();
+                        }
+                        catch (Exception e)
+                        {
+                            ex = e;
+                        }
+                        await Assert.That(ex).IsNull();
+                    }
+
+                    private void DoSomething() { }
+                }
+                """,
+                ConfigureXUnitTest
+            );
+    }
+
     private static void ConfigureXUnitTest(Verifier.Test test)
     {
         var globalUsings = ("GlobalUsings.cs", SourceText.From("global using Xunit;"));
