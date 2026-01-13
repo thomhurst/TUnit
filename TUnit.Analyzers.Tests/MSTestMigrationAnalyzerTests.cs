@@ -975,6 +975,52 @@ public class MSTestMigrationAnalyzerTests
     }
 
     [Test]
+    public async Task MSTest_ExpectedException_Attribute_On_Async_Method_Converted_To_ThrowsAsync()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using System;
+                using System.Threading.Tasks;
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+                public class MyClass
+                {
+                    {|#0:[TestMethod]|}
+                    [ExpectedException(typeof(ArgumentException))]
+                    public async Task TestMethodAsync()
+                    {
+                        await Task.Delay(1);
+                        throw new ArgumentException("test");
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
+            """
+                using System;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethodAsync()
+                    {
+                        await Assert.ThrowsAsync<ArgumentException>(async () =>
+                        {
+                            await Task.Delay(1);
+                            throw new ArgumentException("test");
+                        });
+                    }
+                }
+                """,
+            ConfigureMSTestTest
+        );
+    }
+
+    [Test]
     public async Task MSTest_DirectoryAssert_Exists_Converted()
     {
         await CodeFixer.VerifyCodeFixAsync(

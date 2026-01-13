@@ -1055,11 +1055,38 @@ public class MSTestExpectedExceptionRewriter : CSharpSyntaxRewriter
             return null;
         }
 
+        // Check if the original statements contain any await expressions
+        var hasAwait = originalStatements.Any(s => s.DescendantNodes().OfType<AwaitExpressionSyntax>().Any());
+
         // Create: await Assert.ThrowsAsync<T>(() => { original statements });
-        var lambda = SyntaxFactory.ParenthesizedLambdaExpression(
+        // or: await Assert.ThrowsAsync<T>(async () => { original statements }); if async
+        // Add extra indentation for statements inside the lambda block (4 more spaces)
+        var indentedStatements = originalStatements.Select(s =>
+        {
+            var existingTrivia = s.GetLeadingTrivia();
+            var newTrivia = existingTrivia.Add(SyntaxFactory.Whitespace("    "));
+            return s.WithLeadingTrivia(newTrivia);
+        }).ToArray();
+        var lambdaBody = SyntaxFactory.Block(indentedStatements)
+            .WithOpenBraceToken(SyntaxFactory.Token(SyntaxKind.OpenBraceToken)
+                .WithLeadingTrivia(SyntaxFactory.Whitespace("        "))
+                .WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed))
+            .WithCloseBraceToken(SyntaxFactory.Token(SyntaxKind.CloseBraceToken)
+                .WithLeadingTrivia(SyntaxFactory.Whitespace("        ")));
+        ParenthesizedLambdaExpressionSyntax lambda;
+
+        lambda = SyntaxFactory.ParenthesizedLambdaExpression(
             SyntaxFactory.ParameterList(),
-            SyntaxFactory.Block(originalStatements)
-        );
+            lambdaBody
+        ).WithArrowToken(SyntaxFactory.Token(SyntaxKind.EqualsGreaterThanToken)
+            .WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed));
+
+        if (hasAwait)
+        {
+            // Need async lambda for await expressions
+            lambda = lambda.WithAsyncKeyword(SyntaxFactory.Token(SyntaxKind.AsyncKeyword)
+                .WithTrailingTrivia(SyntaxFactory.Space));
+        }
 
         var throwsAsyncCall = SyntaxFactory.InvocationExpression(
             SyntaxFactory.MemberAccessExpression(
