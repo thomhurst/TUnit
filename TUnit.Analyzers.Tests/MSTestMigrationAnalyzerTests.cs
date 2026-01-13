@@ -974,6 +974,174 @@ public class MSTestMigrationAnalyzerTests
         );
     }
 
+    [Test]
+    public async Task MSTest_DirectoryAssert_Exists_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+                using System.IO;
+
+                {|#0:[TestClass]|}
+                public class MyClass
+                {
+                    [TestMethod]
+                    public void TestMethod()
+                    {
+                        var dir = new DirectoryInfo("C:/temp");
+                        DirectoryAssert.Exists(dir);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
+            """
+                using System.IO;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        var dir = new DirectoryInfo("C:/temp");
+                        await Assert.That(dir.Exists).IsTrue();
+                    }
+                }
+                """,
+            ConfigureMSTestTest
+        );
+    }
+
+    [Test]
+    public async Task MSTest_DirectoryAssert_DoesNotExist_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+                using System.IO;
+
+                {|#0:[TestClass]|}
+                public class MyClass
+                {
+                    [TestMethod]
+                    public void TestMethod()
+                    {
+                        var dir = new DirectoryInfo("C:/nonexistent");
+                        DirectoryAssert.DoesNotExist(dir);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
+            """
+                using System.IO;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        var dir = new DirectoryInfo("C:/nonexistent");
+                        await Assert.That(dir.Exists).IsFalse();
+                    }
+                }
+                """,
+            ConfigureMSTestTest
+        );
+    }
+
+    [Test]
+    public async Task MSTest_FileAssert_Exists_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+                using System.IO;
+
+                {|#0:[TestClass]|}
+                public class MyClass
+                {
+                    [TestMethod]
+                    public void TestMethod()
+                    {
+                        var file = new FileInfo("C:/temp/file.txt");
+                        FileAssert.Exists(file);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
+            """
+                using System.IO;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        var file = new FileInfo("C:/temp/file.txt");
+                        await Assert.That(file.Exists).IsTrue();
+                    }
+                }
+                """,
+            ConfigureMSTestTest
+        );
+    }
+
+    [Test]
+    public async Task MSTest_FileAssert_DoesNotExist_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+                using System.IO;
+
+                {|#0:[TestClass]|}
+                public class MyClass
+                {
+                    [TestMethod]
+                    public void TestMethod()
+                    {
+                        var file = new FileInfo("C:/temp/nonexistent.txt");
+                        FileAssert.DoesNotExist(file);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
+            """
+                using System.IO;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        var file = new FileInfo("C:/temp/nonexistent.txt");
+                        await Assert.That(file.Exists).IsFalse();
+                    }
+                }
+                """,
+            ConfigureMSTestTest
+        );
+    }
+
     private static void ConfigureMSTestTest(Verifier.Test test)
     {
         test.TestState.AdditionalReferences.Add(typeof(TestMethodAttribute).Assembly);

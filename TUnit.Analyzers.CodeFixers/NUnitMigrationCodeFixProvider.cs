@@ -72,7 +72,9 @@ public class NUnitAttributeRewriter : AttributeRewriter
             // Repeat attribute (same in TUnit)
             "Repeat" or
             // Parameter-level data attributes (converted to Matrix/MatrixRange)
-            "Values" or "Range" or "ValueSource" => true,
+            "Values" or "Range" or "ValueSource" or
+            // Combinatorial strategy attributes
+            "Sequential" or "Combinatorial" => true,
             _ => false
         };
     }
@@ -117,9 +119,22 @@ public class NUnitAttributeRewriter : AttributeRewriter
             return ConvertValueSourceAttribute(attribute);
         }
 
+        // [Combinatorial] - Remove, TUnit's default behavior is combinatorial
+        if (attributeName == "Combinatorial")
+        {
+            return null;
+        }
+
+        // [Sequential] - No direct equivalent in TUnit, remove with TODO comment
+        // Note: The TODO comment is added in the overridden VisitAttributeList
+        if (attributeName == "Sequential")
+        {
+            return null;
+        }
+
         return base.ConvertAttribute(attribute);
     }
-    
+
     private AttributeSyntax? ConvertApartmentAttribute(AttributeSyntax attribute)
     {
         // Check if the argument is ApartmentState.STA
@@ -181,16 +196,82 @@ public class NUnitAttributeRewriter : AttributeRewriter
     private AttributeSyntax ConvertRangeAttribute(AttributeSyntax attribute)
     {
         // [Range(1, 10)] -> [MatrixRange<int>(1, 10)]
-        // [Range(1, 10, 2)] -> [MatrixRange<int>(1, 10, 2)]
-        // Note: NUnit Range works with int by default, TUnit requires explicit generic type
-        // For now, we'll use int as the default type - the user may need to adjust for other types
+        // [Range(1.0, 10.0)] -> [MatrixRange<double>(1.0, 10.0)]
+        // [Range(1L, 10L)] -> [MatrixRange<long>(1L, 10L)]
+        // Detect the type from the first argument
+        var rangeType = InferRangeType(attribute.ArgumentList);
+
         return SyntaxFactory.Attribute(
             SyntaxFactory.GenericName("MatrixRange")
                 .WithTypeArgumentList(
                     SyntaxFactory.TypeArgumentList(
-                        SyntaxFactory.SingletonSeparatedList<TypeSyntax>(
-                            SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.IntKeyword))))),
+                        SyntaxFactory.SingletonSeparatedList(rangeType))),
             attribute.ArgumentList);
+    }
+
+    private TypeSyntax InferRangeType(AttributeArgumentListSyntax? argumentList)
+    {
+        if (argumentList == null || argumentList.Arguments.Count == 0)
+        {
+            return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.IntKeyword));
+        }
+
+        // Look at the first argument to infer the type
+        var firstArg = argumentList.Arguments[0].Expression;
+
+        if (firstArg is LiteralExpressionSyntax literal)
+        {
+            // Check the token kind and text to determine the type
+            var tokenText = literal.Token.Text;
+
+            // Check for explicit suffixes first
+            if (tokenText.EndsWith("d", StringComparison.OrdinalIgnoreCase) ||
+                tokenText.EndsWith("D", StringComparison.OrdinalIgnoreCase) && !tokenText.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+            {
+                return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.DoubleKeyword));
+            }
+            if (tokenText.EndsWith("f", StringComparison.OrdinalIgnoreCase) ||
+                tokenText.EndsWith("F", StringComparison.OrdinalIgnoreCase))
+            {
+                return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.FloatKeyword));
+            }
+            if (tokenText.EndsWith("m", StringComparison.OrdinalIgnoreCase) ||
+                tokenText.EndsWith("M", StringComparison.OrdinalIgnoreCase))
+            {
+                return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.DecimalKeyword));
+            }
+            if (tokenText.EndsWith("L", StringComparison.OrdinalIgnoreCase) ||
+                tokenText.EndsWith("l", StringComparison.OrdinalIgnoreCase))
+            {
+                // Could be long or ulong - check for 'u' prefix on the suffix
+                if (tokenText.EndsWith("ul", StringComparison.OrdinalIgnoreCase) ||
+                    tokenText.EndsWith("lu", StringComparison.OrdinalIgnoreCase))
+                {
+                    return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ULongKeyword));
+                }
+                return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.LongKeyword));
+            }
+            if (tokenText.EndsWith("u", StringComparison.OrdinalIgnoreCase) ||
+                tokenText.EndsWith("U", StringComparison.OrdinalIgnoreCase))
+            {
+                return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.UIntKeyword));
+            }
+
+            // Check if it contains a decimal point (double by default in C#)
+            if (tokenText.Contains('.') || tokenText.Contains('e') || tokenText.Contains('E'))
+            {
+                return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.DoubleKeyword));
+            }
+        }
+
+        // Check for cast expressions like (byte)1
+        if (firstArg is CastExpressionSyntax castExpr)
+        {
+            return castExpr.Type;
+        }
+
+        // Default to int
+        return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.IntKeyword));
     }
 
     private AttributeSyntax ConvertValueSourceAttribute(AttributeSyntax attribute)

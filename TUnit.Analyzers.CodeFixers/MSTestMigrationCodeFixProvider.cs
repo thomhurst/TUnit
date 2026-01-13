@@ -225,7 +225,7 @@ public class MSTestAssertionRewriter : AssertionRewriter
 
         // Check if it looks like an MSTest assertion syntactically
         var isMsTestAssertionSyntax = invocation.Expression is MemberAccessExpressionSyntax ma &&
-                                       ma.Expression is IdentifierNameSyntax { Identifier.Text: "Assert" or "CollectionAssert" or "StringAssert" };
+                                       ma.Expression is IdentifierNameSyntax { Identifier.Text: "Assert" or "CollectionAssert" or "StringAssert" or "DirectoryAssert" or "FileAssert" };
 
         if (!isFrameworkAssertionViaSemantic && !isMsTestAssertionSyntax)
         {
@@ -250,6 +250,20 @@ public class MSTestAssertionRewriter : AssertionRewriter
             stringAccess.Expression is IdentifierNameSyntax { Identifier.Text: "StringAssert" })
         {
             return ConvertStringAssertion(invocation, stringAccess.Name.Identifier.Text);
+        }
+
+        // Handle DirectoryAssert
+        if (invocation.Expression is MemberAccessExpressionSyntax directoryAccess &&
+            directoryAccess.Expression is IdentifierNameSyntax { Identifier.Text: "DirectoryAssert" })
+        {
+            return ConvertDirectoryAssertion(invocation, directoryAccess.Name.Identifier.Text);
+        }
+
+        // Handle FileAssert
+        if (invocation.Expression is MemberAccessExpressionSyntax fileAccess &&
+            fileAccess.Expression is IdentifierNameSyntax { Identifier.Text: "FileAssert" })
+        {
+            return ConvertFileAssertion(invocation, fileAccess.Name.Identifier.Text);
         }
 
         return null;
@@ -737,7 +751,105 @@ public class MSTestAssertionRewriter : AssertionRewriter
             _ => null
         };
     }
-    
+
+    private ExpressionSyntax? ConvertDirectoryAssertion(InvocationExpressionSyntax invocation, string methodName)
+    {
+        var arguments = invocation.ArgumentList.Arguments;
+
+        // DirectoryAssert.Exists(path) -> Assert.That(Directory.Exists(path)).IsTrue()
+        // DirectoryAssert.DoesNotExist(path) -> Assert.That(Directory.Exists(path)).IsFalse()
+        // DirectoryAssert.Exists(DirectoryInfo) -> Assert.That(directoryInfo.Exists).IsTrue()
+
+        return methodName switch
+        {
+            "Exists" when arguments.Count >= 1 => CreateDirectoryExistsAssertion(arguments[0].Expression, isNegated: false),
+            "DoesNotExist" when arguments.Count >= 1 => CreateDirectoryExistsAssertion(arguments[0].Expression, isNegated: true),
+            _ => null
+        };
+    }
+
+    private ExpressionSyntax CreateDirectoryExistsAssertion(ExpressionSyntax pathOrDirectoryInfo, bool isNegated)
+    {
+        // Create: Directory.Exists(path) or directoryInfo.Exists
+        ExpressionSyntax existsCheck;
+
+        // If it's a string literal or string variable, use Directory.Exists(path)
+        // If it's a DirectoryInfo, use directoryInfo.Exists
+        // We'll detect string literals for now and use Directory.Exists
+        if (pathOrDirectoryInfo is LiteralExpressionSyntax ||
+            pathOrDirectoryInfo.ToString().EndsWith("Path", StringComparison.OrdinalIgnoreCase))
+        {
+            // Directory.Exists(path)
+            existsCheck = SyntaxFactory.InvocationExpression(
+                SyntaxFactory.MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    SyntaxFactory.IdentifierName("Directory"),
+                    SyntaxFactory.IdentifierName("Exists")),
+                SyntaxFactory.ArgumentList(
+                    SyntaxFactory.SingletonSeparatedList(SyntaxFactory.Argument(pathOrDirectoryInfo))));
+        }
+        else
+        {
+            // Assume it's a DirectoryInfo - use .Exists property
+            existsCheck = SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                pathOrDirectoryInfo,
+                SyntaxFactory.IdentifierName("Exists"));
+        }
+
+        var assertionMethod = isNegated ? "IsFalse" : "IsTrue";
+
+        return CreateTUnitAssertion(assertionMethod, existsCheck);
+    }
+
+    private ExpressionSyntax? ConvertFileAssertion(InvocationExpressionSyntax invocation, string methodName)
+    {
+        var arguments = invocation.ArgumentList.Arguments;
+
+        // FileAssert.Exists(path) -> Assert.That(File.Exists(path)).IsTrue()
+        // FileAssert.DoesNotExist(path) -> Assert.That(File.Exists(path)).IsFalse()
+
+        return methodName switch
+        {
+            "Exists" when arguments.Count >= 1 => CreateFileExistsAssertion(arguments[0].Expression, isNegated: false),
+            "DoesNotExist" when arguments.Count >= 1 => CreateFileExistsAssertion(arguments[0].Expression, isNegated: true),
+            _ => null
+        };
+    }
+
+    private ExpressionSyntax CreateFileExistsAssertion(ExpressionSyntax pathOrFileInfo, bool isNegated)
+    {
+        // Create: File.Exists(path) or fileInfo.Exists
+        ExpressionSyntax existsCheck;
+
+        // If it's a string literal or string variable, use File.Exists(path)
+        // If it's a FileInfo, use fileInfo.Exists
+        if (pathOrFileInfo is LiteralExpressionSyntax ||
+            pathOrFileInfo.ToString().EndsWith("Path", StringComparison.OrdinalIgnoreCase))
+        {
+            // File.Exists(path)
+            existsCheck = SyntaxFactory.InvocationExpression(
+                SyntaxFactory.MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    SyntaxFactory.IdentifierName("File"),
+                    SyntaxFactory.IdentifierName("Exists")),
+                SyntaxFactory.ArgumentList(
+                    SyntaxFactory.SingletonSeparatedList(SyntaxFactory.Argument(pathOrFileInfo))));
+        }
+        else
+        {
+            // Assume it's a FileInfo - use .Exists property
+            existsCheck = SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                pathOrFileInfo,
+                SyntaxFactory.IdentifierName("Exists"));
+        }
+
+        var assertionMethod = isNegated ? "IsFalse" : "IsTrue";
+
+        return CreateTUnitAssertion(assertionMethod, existsCheck);
+    }
+
     private ExpressionSyntax CreateThrowsAssertion(InvocationExpressionSyntax invocation)
     {
         // Convert Assert.ThrowsException<T>(action) to await Assert.ThrowsAsync<T>(action)

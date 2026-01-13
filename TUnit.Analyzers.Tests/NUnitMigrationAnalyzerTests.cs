@@ -2824,6 +2824,117 @@ public class NUnitMigrationAnalyzerTests
     }
 
     [Test]
+    public async Task NUnit_Range_Attribute_With_Double_Converted_To_MatrixRange_Double()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void TestMethod([Range(1.0, 5.0)] double value)
+                    {
+                        Assert.That(value > 0, Is.True);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod([MatrixRange<double>(1.0, 5.0)] double value)
+                    {
+                        await Assert.That(value > 0).IsTrue();
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_Range_Attribute_With_Long_Converted_To_MatrixRange_Long()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void TestMethod([Range(1L, 100L)] long value)
+                    {
+                        Assert.That(value > 0, Is.True);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod([MatrixRange<long>(1L, 100L)] long value)
+                    {
+                        await Assert.That(value > 0).IsTrue();
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_Range_Attribute_With_Float_Converted_To_MatrixRange_Float()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void TestMethod([Range(1.0f, 5.0f)] float value)
+                    {
+                        Assert.That(value > 0, Is.True);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod([MatrixRange<float>(1.0f, 5.0f)] float value)
+                    {
+                        await Assert.That(value > 0).IsTrue();
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
     public async Task NUnit_NonParallelizable_Attribute_Converted_To_NotInParallel()
     {
         await CodeFixer.VerifyCodeFixAsync(
@@ -3052,6 +3163,85 @@ public class NUnitMigrationAnalyzerTests
                     public async Task TestMethod([MatrixSourceMethod(nameof(Numbers))] int value)
                     {
                         await Assert.That(value > 0).IsTrue();
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_Combinatorial_Attribute_Removed()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    [Combinatorial]
+                    public void TestMethod([Values(1, 2)] int a, [Values("x", "y")] string b)
+                    {
+                        Assert.That(a > 0, Is.True);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod([Matrix(1, 2)] int a, [Matrix("x", "y")] string b)
+                    {
+                        await Assert.That(a > 0).IsTrue();
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_Sequential_Attribute_Removed()
+    {
+        // Note: [Sequential] has no direct TUnit equivalent.
+        // TUnit's default behavior with Matrix is combinatorial.
+        // Users may need to restructure tests using MethodDataSource for true sequential behavior.
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    [Sequential]
+                    public void TestMethod([Values(1, 2)] int a, [Values("x", "y")] string b)
+                    {
+                        Assert.That(a > 0, Is.True);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Assertions;
+                using static TUnit.Assertions.Assert;
+                using TUnit.Assertions.Extensions;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod([Matrix(1, 2)] int a, [Matrix("x", "y")] string b)
+                    {
+                        await Assert.That(a > 0).IsTrue();
                     }
                 }
                 """,
