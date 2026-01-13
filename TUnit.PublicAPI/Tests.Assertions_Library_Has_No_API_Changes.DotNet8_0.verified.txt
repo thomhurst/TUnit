@@ -1106,6 +1106,19 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<.FileInfo> metadata) { }
         protected override string GetExpectation() { }
     }
+    public static class FileSystemComparisonAssertions
+    {
+        [.(ExpectationMessage="to not have same content as {expected}")]
+        public static . DoesNotHaveSameContentAs(this .FileInfo value, .FileInfo expected) { }
+        [.(ExpectationMessage="to have same content as {expected}")]
+        public static . HasSameContentAs(this .FileInfo value, .FileInfo expected) { }
+        [.(ExpectationMessage="to have same structure as {expected}")]
+        public static . HasSameStructureAs(this .DirectoryInfo value, .DirectoryInfo expected) { }
+        [.(ExpectationMessage="to be equivalent to {expected}")]
+        public static . IsEquivalentTo(this .DirectoryInfo value, .DirectoryInfo expected) { }
+        [.(ExpectationMessage="to not be equivalent to {expected}")]
+        public static . IsNotEquivalentTo(this .DirectoryInfo value, .DirectoryInfo expected) { }
+    }
     [.("IsEqualTo", OverloadResolutionPriority=2)]
     public class FloatEqualsAssertion : .<float, float>
     {
@@ -3199,9 +3212,21 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<.DirectoryInfo> metadata) { }
         protected override string GetExpectation() { }
     }
+    public sealed class DirectoryInfo_HasSameStructureAs_DirectoryInfo_Assertion : .<.DirectoryInfo>
+    {
+        public DirectoryInfo_HasSameStructureAs_DirectoryInfo_Assertion(.<.DirectoryInfo> context, .DirectoryInfo expected) { }
+        protected override .<.> CheckAsync(.<.DirectoryInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
     public sealed class DirectoryInfo_IsEmpty_Assertion : .<.DirectoryInfo>
     {
         public DirectoryInfo_IsEmpty_Assertion(.<.DirectoryInfo> context) { }
+        protected override .<.> CheckAsync(.<.DirectoryInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class DirectoryInfo_IsEquivalentTo_DirectoryInfo_Assertion : .<.DirectoryInfo>
+    {
+        public DirectoryInfo_IsEquivalentTo_DirectoryInfo_Assertion(.<.DirectoryInfo> context, .DirectoryInfo expected) { }
         protected override .<.> CheckAsync(.<.DirectoryInfo> metadata) { }
         protected override string GetExpectation() { }
     }
@@ -3214,6 +3239,12 @@ namespace .Extensions
     public sealed class DirectoryInfo_IsNotEmpty_Assertion : .<.DirectoryInfo>
     {
         public DirectoryInfo_IsNotEmpty_Assertion(.<.DirectoryInfo> context) { }
+        protected override .<.> CheckAsync(.<.DirectoryInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class DirectoryInfo_IsNotEquivalentTo_DirectoryInfo_Assertion : .<.DirectoryInfo>
+    {
+        public DirectoryInfo_IsNotEquivalentTo_DirectoryInfo_Assertion(.<.DirectoryInfo> context, .DirectoryInfo expected) { }
         protected override .<.> CheckAsync(.<.DirectoryInfo> metadata) { }
         protected override string GetExpectation() { }
     }
@@ -3488,6 +3519,12 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<.FileInfo> metadata) { }
         protected override string GetExpectation() { }
     }
+    public sealed class FileInfo_DoesNotHaveSameContentAs_FileInfo_Assertion : .<.FileInfo>
+    {
+        public FileInfo_DoesNotHaveSameContentAs_FileInfo_Assertion(.<.FileInfo> context, .FileInfo expected) { }
+        protected override .<.> CheckAsync(.<.FileInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
     public sealed class FileInfo_HasExtension_Assertion : .<.FileInfo>
     {
         public FileInfo_HasExtension_Assertion(.<.FileInfo> context) { }
@@ -3497,6 +3534,12 @@ namespace .Extensions
     public sealed class FileInfo_HasNoExtension_Assertion : .<.FileInfo>
     {
         public FileInfo_HasNoExtension_Assertion(.<.FileInfo> context) { }
+        protected override .<.> CheckAsync(.<.FileInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class FileInfo_HasSameContentAs_FileInfo_Assertion : .<.FileInfo>
+    {
+        public FileInfo_HasSameContentAs_FileInfo_Assertion(.<.FileInfo> context, .FileInfo expected) { }
         protected override .<.> CheckAsync(.<.FileInfo> metadata) { }
         protected override string GetExpectation() { }
     }
@@ -3543,6 +3586,14 @@ namespace .Extensions
     public static class FileIsNotSystemAssertionExtensions
     {
         public static . IsNotSystem(this .<.FileInfo> source) { }
+    }
+    public static class FileSystemComparisonAssertions
+    {
+        public static ._DoesNotHaveSameContentAs_FileInfo_Assertion DoesNotHaveSameContentAs(this .<.FileInfo> source, .FileInfo expected, [.("expected")] string? expectedExpression = null) { }
+        public static ._HasSameContentAs_FileInfo_Assertion HasSameContentAs(this .<.FileInfo> source, .FileInfo expected, [.("expected")] string? expectedExpression = null) { }
+        public static ._HasSameStructureAs_DirectoryInfo_Assertion HasSameStructureAs(this .<.DirectoryInfo> source, .DirectoryInfo expected, [.("expected")] string? expectedExpression = null) { }
+        public static ._IsEquivalentTo_DirectoryInfo_Assertion IsEquivalentTo(this .<.DirectoryInfo> source, .DirectoryInfo expected, [.("expected")] string? expectedExpression = null) { }
+        public static ._IsNotEquivalentTo_DirectoryInfo_Assertion IsNotEquivalentTo(this .<.DirectoryInfo> source, .DirectoryInfo expected, [.("expected")] string? expectedExpression = null) { }
     }
     public static class FloatAssertions
     {
