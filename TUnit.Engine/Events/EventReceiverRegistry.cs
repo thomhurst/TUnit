@@ -23,16 +23,16 @@ internal sealed class EventReceiverRegistry
         LastTestInClass = 1 << 9,
         All = ~0
     }
-    
+
     private volatile EventTypes _registeredEvents = EventTypes.None;
     private readonly Dictionary<Type, object[]> _receiversByType = new();
     private readonly Dictionary<Type, Array> _cachedTypedReceivers = new();
     private readonly ReaderWriterLockSlim _lock = new();
-    
+
     /// <summary>
     /// Register event receivers from a collection of objects
     /// </summary>
-    public void RegisterReceivers(IEnumerable<object> objects)
+    public void RegisterReceivers(ReadOnlySpan<object> objects)
     {
         _lock.EnterWriteLock();
         try
@@ -47,7 +47,7 @@ internal sealed class EventReceiverRegistry
             _lock.ExitWriteLock();
         }
     }
-    
+
     /// <summary>
     /// Register a single event receiver
     /// </summary>
@@ -63,7 +63,7 @@ internal sealed class EventReceiverRegistry
             _lock.ExitWriteLock();
         }
     }
-    
+
     private void RegisterReceiverInternal(object receiver)
     {
         UpdateEventFlags(receiver);
@@ -83,7 +83,7 @@ internal sealed class EventReceiverRegistry
 
         _cachedTypedReceivers.Clear();
     }
-    
+
     private void RegisterIfImplements<T>(object receiver) where T : class
     {
         if (receiver is T)
@@ -102,43 +102,43 @@ internal sealed class EventReceiverRegistry
             }
         }
     }
-    
+
     /// <summary>
     /// Fast check if any receivers registered for event type
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool HasTestStartReceivers() => (_registeredEvents & EventTypes.TestStart) != 0;
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool HasTestEndReceivers() => (_registeredEvents & EventTypes.TestEnd) != 0;
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool HasTestSkippedReceivers() => (_registeredEvents & EventTypes.TestSkipped) != 0;
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool HasTestRegisteredReceivers() => (_registeredEvents & EventTypes.TestRegistered) != 0;
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool HasFirstTestInSessionReceivers() => (_registeredEvents & EventTypes.FirstTestInSession) != 0;
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool HasLastTestInSessionReceivers() => (_registeredEvents & EventTypes.LastTestInSession) != 0;
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool HasFirstTestInAssemblyReceivers() => (_registeredEvents & EventTypes.FirstTestInAssembly) != 0;
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool HasLastTestInAssemblyReceivers() => (_registeredEvents & EventTypes.LastTestInAssembly) != 0;
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool HasFirstTestInClassReceivers() => (_registeredEvents & EventTypes.FirstTestInClass) != 0;
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool HasLastTestInClassReceivers() => (_registeredEvents & EventTypes.LastTestInClass) != 0;
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool HasAnyReceivers() => _registeredEvents != EventTypes.None;
-    
+
     public T[] GetReceiversOfType<T>() where T : class
     {
         var typeKey = typeof(T);
@@ -202,7 +202,7 @@ internal sealed class EventReceiverRegistry
             _lock.ExitUpgradeableReadLock();
         }
     }
-    
+
     private void UpdateEventFlags(object receiver)
     {
         if (receiver is ITestStartEventReceiver)
@@ -246,8 +246,8 @@ internal sealed class EventReceiverRegistry
             _registeredEvents |= EventTypes.LastTestInClass;
         }
     }
-    
-    
+
+
     public void Dispose()
     {
         _lock?.Dispose();

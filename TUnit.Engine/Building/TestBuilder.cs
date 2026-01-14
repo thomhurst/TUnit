@@ -1038,15 +1038,13 @@ internal sealed class TestBuilder : ITestBuilder
 #if NET6_0_OR_GREATER
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
 #endif
-    private async Task InvokeDiscoveryEventReceiversAsync(TestContext context)
+    private Task InvokeDiscoveryEventReceiversAsync(TestContext context)
     {
         var discoveredContext = new DiscoveredTestContext(
             context.Metadata.TestDetails.TestName,
             context);
 
-        {
-            await _eventReceiverOrchestrator.InvokeTestDiscoveryEventReceiversAsync(context, discoveredContext, CancellationToken.None);
-        }
+        return _eventReceiverOrchestrator.InvokeTestDiscoveryEventReceiversAsync(context, discoveredContext, CancellationToken.None);
     }
 
     private async Task<AbstractExecutableTest> CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception)
