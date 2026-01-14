@@ -6,7 +6,7 @@ using TUnit.Core.SourceGenerator.Extensions;
 
 namespace TUnit.Core.SourceGenerator.Generators;
 
-[Generator]
+// [Generator] // Disabled - V2 is now active
 public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
