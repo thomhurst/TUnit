@@ -18,8 +18,7 @@ public class TestsBase
     public TestsBase<TestMetadataGenerator> TestMetadataGenerator = new();
     public TestsBase<AotConverterGenerator> AotConverterGenerator = new();
     public TestsBase<HookMetadataGenerator> HooksGenerator = new();
-    public TestsBase<AssemblyLoaderGenerator> AssemblyLoaderGenerator = new();
-    public TestsBase<DisableReflectionScannerGenerator> DisableReflectionScannerGenerator = new();
+    public TestsBase<InfrastructureGenerator> InfrastructureGenerator = new();
     public TestsBase<DynamicTestsGenerator> DynamicTestsGenerator = new();
 
     public Task RunTest(string inputFile, Func<string[], Task> assertions)

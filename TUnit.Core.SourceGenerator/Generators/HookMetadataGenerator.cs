@@ -14,7 +14,7 @@ namespace TUnit.Core.SourceGenerator.Generators;
 /// All symbol access happens in the transform step; only primitives are stored in the model.
 /// </summary>
 [Generator]
-public class HookMetadataGeneratorV2 : IIncrementalGenerator
+public class HookMetadataGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
