@@ -1,0 +1,222 @@
+using TUnit.Core.SourceGenerator.Models;
+
+namespace TUnit.Core.SourceGenerator.Models.Extracted;
+
+/// <summary>
+/// Primitive-only model for a class with properties that have data source attributes.
+/// Used by PropertyInjectionSourceGeneratorV2 for proper incremental caching.
+/// </summary>
+internal sealed record ClassPropertyInjectionModel : IEquatable<ClassPropertyInjectionModel>
+{
+    /// <summary>
+    /// Fully qualified class name (e.g., "global::MyNamespace.MyClass")
+    /// </summary>
+    public required string ClassFullyQualifiedName { get; init; }
+
+    /// <summary>
+    /// Safe class name for use in file names (dots/generics replaced with underscores)
+    /// </summary>
+    public required string SafeClassName { get; init; }
+
+    /// <summary>
+    /// Properties with data source attributes
+    /// </summary>
+    public required EquatableArray<PropertyDataSourceModel> Properties { get; init; }
+
+    public bool Equals(ClassPropertyInjectionModel? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return ClassFullyQualifiedName == other.ClassFullyQualifiedName
+            && SafeClassName == other.SafeClassName
+            && Properties.Equals(other.Properties);
+    }
+
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            var hash = ClassFullyQualifiedName.GetHashCode();
+            hash = (hash * 397) ^ SafeClassName.GetHashCode();
+            hash = (hash * 397) ^ Properties.GetHashCode();
+            return hash;
+        }
+    }
+}
+
+/// <summary>
+/// Primitive-only model for a property with a data source attribute.
+/// </summary>
+internal sealed record PropertyDataSourceModel : IEquatable<PropertyDataSourceModel>
+{
+    /// <summary>
+    /// Property name
+    /// </summary>
+    public required string PropertyName { get; init; }
+
+    /// <summary>
+    /// Fully qualified property type (e.g., "global::System.String")
+    /// </summary>
+    public required string PropertyTypeFullyQualified { get; init; }
+
+    /// <summary>
+    /// Property type for typeof() expression (non-nullable)
+    /// </summary>
+    public required string PropertyTypeForTypeof { get; init; }
+
+    /// <summary>
+    /// Fully qualified containing type (the type that declares this property, may differ from class if inherited)
+    /// </summary>
+    public required string ContainingTypeFullyQualified { get; init; }
+
+    /// <summary>
+    /// Whether the property has an init-only setter
+    /// </summary>
+    public required bool IsInitOnly { get; init; }
+
+    /// <summary>
+    /// Whether the property is static
+    /// </summary>
+    public required bool IsStatic { get; init; }
+
+    /// <summary>
+    /// Whether the property type is a value type
+    /// </summary>
+    public required bool IsValueType { get; init; }
+
+    /// <summary>
+    /// Whether the property type is a nullable value type (e.g., int?)
+    /// </summary>
+    public required bool IsNullableValueType { get; init; }
+
+    /// <summary>
+    /// Fully qualified attribute type name
+    /// </summary>
+    public required string AttributeTypeName { get; init; }
+
+    /// <summary>
+    /// Constructor arguments formatted as code (e.g., "\"value\"", "42", "typeof(Foo)")
+    /// </summary>
+    public required EquatableArray<string> ConstructorArgs { get; init; }
+
+    /// <summary>
+    /// Named arguments as key-value pairs with formatted values
+    /// </summary>
+    public required EquatableArray<NamedArgModel> NamedArgs { get; init; }
+
+    public bool Equals(PropertyDataSourceModel? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return PropertyName == other.PropertyName
+            && PropertyTypeFullyQualified == other.PropertyTypeFullyQualified
+            && PropertyTypeForTypeof == other.PropertyTypeForTypeof
+            && ContainingTypeFullyQualified == other.ContainingTypeFullyQualified
+            && IsInitOnly == other.IsInitOnly
+            && IsStatic == other.IsStatic
+            && IsValueType == other.IsValueType
+            && IsNullableValueType == other.IsNullableValueType
+            && AttributeTypeName == other.AttributeTypeName
+            && ConstructorArgs.Equals(other.ConstructorArgs)
+            && NamedArgs.Equals(other.NamedArgs);
+    }
+
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            var hash = PropertyName.GetHashCode();
+            hash = (hash * 397) ^ PropertyTypeFullyQualified.GetHashCode();
+            hash = (hash * 397) ^ PropertyTypeForTypeof.GetHashCode();
+            hash = (hash * 397) ^ ContainingTypeFullyQualified.GetHashCode();
+            hash = (hash * 397) ^ IsInitOnly.GetHashCode();
+            hash = (hash * 397) ^ IsStatic.GetHashCode();
+            hash = (hash * 397) ^ IsValueType.GetHashCode();
+            hash = (hash * 397) ^ IsNullableValueType.GetHashCode();
+            hash = (hash * 397) ^ AttributeTypeName.GetHashCode();
+            hash = (hash * 397) ^ ConstructorArgs.GetHashCode();
+            hash = (hash * 397) ^ NamedArgs.GetHashCode();
+            return hash;
+        }
+    }
+}
+
+/// <summary>
+/// Primitive model for a named argument (key-value pair).
+/// </summary>
+internal sealed record NamedArgModel : IEquatable<NamedArgModel>
+{
+    public required string Name { get; init; }
+    public required string FormattedValue { get; init; }
+
+    public bool Equals(NamedArgModel? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return Name == other.Name && FormattedValue == other.FormattedValue;
+    }
+
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            return (Name.GetHashCode() * 397) ^ FormattedValue.GetHashCode();
+        }
+    }
+}
+
+/// <summary>
+/// Model for IAsyncInitializer types with properties that return other IAsyncInitializer types.
+/// Used for AOT-compatible nested initializer discovery.
+/// </summary>
+internal sealed record AsyncInitializerModel : IEquatable<AsyncInitializerModel>
+{
+    public required string TypeFullyQualified { get; init; }
+    public required string SafeTypeName { get; init; }
+    public required EquatableArray<InitializerPropertyModel> Properties { get; init; }
+
+    public bool Equals(AsyncInitializerModel? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return TypeFullyQualified == other.TypeFullyQualified
+            && SafeTypeName == other.SafeTypeName
+            && Properties.Equals(other.Properties);
+    }
+
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            var hash = TypeFullyQualified.GetHashCode();
+            hash = (hash * 397) ^ SafeTypeName.GetHashCode();
+            hash = (hash * 397) ^ Properties.GetHashCode();
+            return hash;
+        }
+    }
+}
+
+/// <summary>
+/// Model for a property that returns an IAsyncInitializer type.
+/// </summary>
+internal sealed record InitializerPropertyModel : IEquatable<InitializerPropertyModel>
+{
+    public required string PropertyName { get; init; }
+    public required string PropertyTypeFullyQualified { get; init; }
+
+    public bool Equals(InitializerPropertyModel? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return PropertyName == other.PropertyName
+            && PropertyTypeFullyQualified == other.PropertyTypeFullyQualified;
+    }
+
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            return (PropertyName.GetHashCode() * 397) ^ PropertyTypeFullyQualified.GetHashCode();
+        }
+    }
+}
