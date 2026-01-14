@@ -30,7 +30,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\TUnit.Core\bin\$(Configuration)\netstandard2.0\TUnit.Core.dll">
+    <!-- Copy netstandard2.0 TUnit.Core.dll to a ref subfolder so it doesn't override the runtime version.
+         This can be used by source generator tests for compilation references against netstandard2.0 target. -->
+    <None Include="..\TUnit.Core\bin\$(Configuration)\netstandard2.0\TUnit.Core.dll"
+          Link="ref\TUnit.Core.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

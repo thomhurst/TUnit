@@ -202,10 +202,47 @@ public class HookMetadataGenerator : IIncrementalGenerator
 
     private static string GenerateMethodInfoExpression(Compilation compilation, INamedTypeSymbol typeSymbol, IMethodSymbol methodSymbol)
     {
-        // Generate the MethodMetadata expression as a string
-        using var writer = new CodeWriter();
+        // Generate the MethodMetadata expression as a string - no header since this is inline
+        using var writer = new CodeWriter(includeHeader: false);
         MetadataGenerationHelper.WriteMethodMetadata(writer, methodSymbol, typeSymbol);
         return writer.ToString();
+    }
+
+    /// <summary>
+    /// Appends multi-line text inline, where the first line continues on the current line
+    /// and subsequent lines are indented with the writer's current indentation level.
+    /// </summary>
+    private static void AppendInlineMultilineText(ICodeWriter writer, string text)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return;
+        }
+
+        var lines = text.Split(["\r\n", "\r", "\n"], StringSplitOptions.None);
+
+        // Skip trailing empty lines
+        var endIndex = lines.Length - 1;
+        while (endIndex >= 0 && string.IsNullOrWhiteSpace(lines[endIndex]))
+        {
+            endIndex--;
+        }
+
+        for (var i = 0; i <= endIndex; i++)
+        {
+            if (i == 0)
+            {
+                // First line: append directly (continues on current line), preserve trailing whitespace
+                writer.Append(lines[i]);
+            }
+            else
+            {
+                // Subsequent lines: use AppendLine then Append to get proper indentation
+                // Preserve trailing whitespace as it may be intentional
+                writer.AppendLine();
+                writer.Append(lines[i]);
+            }
+        }
     }
 
     private static bool IsValidHookMethod(IMethodSymbol method, string hookType)
@@ -365,7 +402,25 @@ public class HookMetadataGenerator : IIncrementalGenerator
     {
         // Create deterministic filename from full type name and method name
         // Use fully qualified type name to ensure uniqueness across namespaces
-        var safeName = $"{hook.FullyQualifiedTypeName}_{hook.MethodName}_{hook.ParameterCount}_{hook.HookKind}_{hook.HookType}"
+        var baseName = $"{hook.FullyQualifiedTypeName}_{hook.MethodName}";
+
+        // Add parameter types to ensure uniqueness for overloaded methods
+        // Only add if there are parameters (matches main branch behavior - no _0_ suffix for empty params)
+        if (hook.Parameters.Length > 0)
+        {
+            var paramTypes = string.Join("_", hook.Parameters.Select(p => SanitizeForFileName(GetSimpleTypeName(p.TypeName))));
+            baseName += $"__{paramTypes}";
+        }
+
+        // Add hook kind and type
+        baseName += $"_{hook.HookKind}_{hook.HookType}";
+
+        return SanitizeForFileName(baseName);
+    }
+
+    private static string SanitizeForFileName(string input)
+    {
+        return input
             .Replace("global::", "")
             .Replace(".", "_")
             .Replace("<", "_")
@@ -374,7 +429,22 @@ public class HookMetadataGenerator : IIncrementalGenerator
             .Replace(" ", "")
             .Replace("`", "_")
             .Replace("::", "_");
-        return safeName;
+    }
+
+    /// <summary>
+    /// Extracts the simple type name from a fully qualified type name.
+    /// e.g., "global::System.Threading.CancellationToken" -> "CancellationToken"
+    /// </summary>
+    private static string GetSimpleTypeName(string fullyQualifiedTypeName)
+    {
+        // Remove global:: prefix
+        var typeName = fullyQualifiedTypeName.StartsWith("global::")
+            ? fullyQualifiedTypeName.Substring(8)
+            : fullyQualifiedTypeName;
+
+        // Get the last segment (simple type name)
+        var lastDot = typeName.LastIndexOf('.');
+        return lastDot >= 0 ? typeName.Substring(lastDot + 1) : typeName;
     }
 
     private static void GenerateHookRegistration(CodeWriter writer, HookModel hook)
@@ -746,9 +816,9 @@ public class HookMetadataGenerator : IIncrementalGenerator
             writer.AppendLine($"InitClassType = typeof({hook.FullyQualifiedTypeName}),");
         }
 
-        // Use pre-generated method info expression
+        // Use pre-generated method info expression - append inline with proper indentation
         writer.Append("MethodInfo = ");
-        writer.Append(hook.MethodInfoExpression);
+        AppendInlineMultilineText(writer, hook.MethodInfoExpression);
         writer.AppendLine(",");
 
         writer.AppendLine($"HookExecutor = {HookExecutorHelper.GetHookExecutor(hook.HookExecutorTypeName)},");
