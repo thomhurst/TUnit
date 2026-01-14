@@ -14,7 +14,7 @@ using TUnit.Core.SourceGenerator.Models;
 
 namespace TUnit.Core.SourceGenerator.Generators;
 
-[Generator]
+// [Generator] // Disabled - V2 is now active
 public sealed class TestMetadataGenerator : IIncrementalGenerator
 {
     private const string GeneratedNamespace = "TUnit.Generated";
