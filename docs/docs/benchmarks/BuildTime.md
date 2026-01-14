@@ -18,10 +18,10 @@ Compilation time comparison across frameworks:
 
 | Framework | Version | Mean | Median | StdDev |
 |-----------|---------|------|--------|--------|
-| **TUnit** | 1.11.0 | 17.878 s | 17.823 s | 0.3615 s |
-| Build_NUnit | 4.4.0 | 1.542 s | 1.545 s | 0.0121 s |
-| Build_MSTest | 4.0.2 | 1.622 s | 1.619 s | 0.0110 s |
-| Build_xUnit3 | 3.2.1 | 1.548 s | 1.549 s | 0.0081 s |
+| **TUnit** | 1.11.18 | 1.898 s | 1.893 s | 0.0178 s |
+| Build_NUnit | 4.4.0 | 1.463 s | 1.463 s | 0.0288 s |
+| Build_MSTest | 4.0.2 | 1.526 s | 1.527 s | 0.0225 s |
+| Build_xUnit3 | 3.2.1 | 1.454 s | 1.451 s | 0.0224 s |
 
 ## 📈 Visual Comparison
 
@@ -59,8 +59,8 @@ Compilation time comparison across frameworks:
 xychart-beta
   title "Build Time Comparison"
   x-axis ["Build_TUnit", "Build_NUnit", "Build_MSTest", "Build_xUnit3"]
-  y-axis "Time (s)" 0 --> 22
-  bar [17.878, 1.542, 1.622, 1.548]
+  y-axis "Time (s)" 0 --> 3
+  bar [1.898, 1.463, 1.526, 1.454]
 ```
 
 ---
@@ -69,4 +69,4 @@ xychart-beta
 View the [benchmarks overview](/docs/benchmarks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-01-14T00:36:14.390Z*
+*Last generated: 2026-01-14T13:57:26.820Z*
