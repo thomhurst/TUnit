@@ -4167,6 +4167,259 @@ public class NUnitMigrationAnalyzerTests
         );
     }
 
+    [Test]
+    public async Task NUnit_KitchenSink_Comprehensive_Migration()
+    {
+        // This test combines MANY NUnit patterns together to ensure the code fixer
+        // can handle complex real-world scenarios in a single pass.
+        // Note: Some advanced patterns (constraint chaining, Assert.Fail) have known
+        // limitations - separate tests cover those edge cases.
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+                using NUnit.Framework.Legacy;
+                using System;
+                using System.Collections.Generic;
+
+                {|#0:[TestFixture]|}
+                [NonParallelizable]
+                [Category("Integration")]
+                public class KitchenSinkTests
+                {
+                    private List<string> _log;
+                    private int _counter;
+
+                    [OneTimeSetUp]
+                    public void ClassSetup()
+                    {
+                        _log = new List<string>();
+                    }
+
+                    [SetUp]
+                    public void TestSetup()
+                    {
+                        _counter = 0;
+                    }
+
+                    [Test]
+                    public void BasicTest()
+                    {
+                        Assert.That(_counter, Is.EqualTo(0));
+                        ClassicAssert.AreEqual(0, _counter);
+                    }
+
+                    [Test]
+                    [Repeat(3)]
+                    public void RepeatedTest()
+                    {
+                        _counter++;
+                        Assert.That(_counter, Is.GreaterThan(0));
+                    }
+
+                    [TestCase(1, 2, 3)]
+                    [TestCase(10, 20, 30)]
+                    [TestCase(-1, 1, 0)]
+                    public void ParameterizedTest(int a, int b, int expected)
+                    {
+                        var result = a + b;
+                        Assert.That(result, Is.EqualTo(expected));
+                    }
+
+                    [TestCaseSource(nameof(GetTestData))]
+                    public void DataSourceTest(string input, int expectedLength)
+                    {
+                        Assert.That(input.Length, Is.EqualTo(expectedLength));
+                        Assert.That(input, Is.Not.Null);
+                    }
+
+                    public static IEnumerable<object[]> GetTestData()
+                    {
+                        yield return new object[] { "hello", 5 };
+                        yield return new object[] { "world", 5 };
+                    }
+
+                    [Test]
+                    public void CollectionAssertTest()
+                    {
+                        var list = new List<int> { 1, 2, 3 };
+                        CollectionAssert.Contains(list, 2);
+                        CollectionAssert.IsNotEmpty(list);
+                        CollectionAssert.AllItemsAreUnique(list);
+                    }
+
+                    [Test]
+                    public void StringAssertTest()
+                    {
+                        var text = "Hello World";
+                        StringAssert.Contains("World", text);
+                        StringAssert.StartsWith("Hello", text);
+                        StringAssert.EndsWith("World", text);
+                    }
+
+                    [Test]
+                    public void ExceptionTest()
+                    {
+                        Assert.Throws<ArgumentException>(() => throw new ArgumentException("test"));
+                    }
+
+                    [Test]
+                    public void MultipleAssertionsTest()
+                    {
+                        var value = 42;
+                        Assert.Multiple(() =>
+                        {
+                            Assert.That(value, Is.GreaterThan(0));
+                            Assert.That(value, Is.LessThan(100));
+                            Assert.That(value, Is.EqualTo(42));
+                        });
+                    }
+
+                    [Test]
+                    public void NullAndTypeAssertions()
+                    {
+                        object obj = "test";
+                        Assert.That(obj, Is.Not.Null);
+                        Assert.That(obj, Is.TypeOf<string>());
+                    }
+
+                    [TearDown]
+                    public void TestTeardown()
+                    {
+                        _counter = 0;
+                    }
+
+                    [OneTimeTearDown]
+                    public void ClassTeardown()
+                    {
+                        _log.Clear();
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+
+                [NotInParallel]
+                [Category("Integration")]
+                public class KitchenSinkTests
+                {
+                    private List<string> _log;
+                    private int _counter;
+
+                    [Before(HookType.Class)]
+                    public void ClassSetup()
+                    {
+                        _log = new List<string>();
+                    }
+
+                    [Before(HookType.Test)]
+                    public void TestSetup()
+                    {
+                        _counter = 0;
+                    }
+
+                    [Test]
+                    public async Task BasicTest()
+                    {
+                        await Assert.That(_counter).IsEqualTo(0);
+                        await Assert.That(_counter).IsEqualTo(0);
+                    }
+
+                    [Test]
+                    [Repeat(3)]
+                    public async Task RepeatedTest()
+                    {
+                        _counter++;
+                        await Assert.That(_counter).IsGreaterThan(0);
+                    }
+
+                    [Test]
+                    [Arguments(1, 2, 3)]
+                    [Arguments(10, 20, 30)]
+                    [Arguments(-1, 1, 0)]
+                    public async Task ParameterizedTest(int a, int b, int expected)
+                    {
+                        var result = a + b;
+                        await Assert.That(result).IsEqualTo(expected);
+                    }
+
+                    [Test]
+                    [MethodDataSource(nameof(GetTestData))]
+                    public async Task DataSourceTest(string input, int expectedLength)
+                    {
+                        await Assert.That(input.Length).IsEqualTo(expectedLength);
+                        await Assert.That(input).IsNotNull();
+                    }
+
+                    public static IEnumerable<object[]> GetTestData()
+                    {
+                        yield return new object[] { "hello", 5 };
+                        yield return new object[] { "world", 5 };
+                    }
+
+                    [Test]
+                    public async Task CollectionAssertTest()
+                    {
+                        var list = new List<int> { 1, 2, 3 };
+                        await Assert.That(list).Contains(2);
+                        await Assert.That(list).IsNotEmpty();
+                        await Assert.That(list).HasDistinctItems();
+                    }
+
+                    [Test]
+                    public async Task StringAssertTest()
+                    {
+                        var text = "Hello World";
+                        await Assert.That(text).Contains("World");
+                        await Assert.That(text).StartsWith("Hello");
+                        await Assert.That(text).EndsWith("World");
+                    }
+
+                    [Test]
+                    public async Task ExceptionTest()
+                    {
+                        await Assert.ThrowsAsync<ArgumentException>(() => throw new ArgumentException("test"));
+                    }
+
+                    [Test]
+                    public async Task MultipleAssertionsTest()
+                    {
+                        var value = 42;
+                        using (Assert.Multiple())
+                        {
+                            await Assert.That(value).IsGreaterThan(0);
+                            await Assert.That(value).IsLessThan(100);
+                            await Assert.That(value).IsEqualTo(42);
+                        }
+                    }
+
+                    [Test]
+                    public async Task NullAndTypeAssertions()
+                    {
+                        object obj = "test";
+                        await Assert.That(obj).IsNotNull();
+                        await Assert.That(obj).IsTypeOf<string>();
+                    }
+
+                    [After(HookType.Test)]
+                    public void TestTeardown()
+                    {
+                        _counter = 0;
+                    }
+
+                    [After(HookType.Class)]
+                    public void ClassTeardown()
+                    {
+                        _log.Clear();
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
     private static void ConfigureNUnitTest(Verifier.Test test)
     {
         test.TestState.AdditionalReferences.Add(typeof(NUnit.Framework.TestAttribute).Assembly);
