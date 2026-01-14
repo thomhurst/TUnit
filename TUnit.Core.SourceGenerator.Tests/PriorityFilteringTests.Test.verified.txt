@@ -47,11 +47,6 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_High_1_TestSource
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    foreach (var prop in classMetadata.Properties)
-                    {
-                        prop.ClassMetadata = classMetadata;
-                        prop.ContainingTypeMetadata = classMetadata;
-                    }
                     return classMetadata;
                 })
             },
@@ -152,11 +147,6 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_High_2_TestSource
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    foreach (var prop in classMetadata.Properties)
-                    {
-                        prop.ClassMetadata = classMetadata;
-                        prop.ContainingTypeMetadata = classMetadata;
-                    }
                     return classMetadata;
                 })
             },
@@ -257,11 +247,6 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_High_3_TestSource
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    foreach (var prop in classMetadata.Properties)
-                    {
-                        prop.ClassMetadata = classMetadata;
-                        prop.ContainingTypeMetadata = classMetadata;
-                    }
                     return classMetadata;
                 })
             },
@@ -362,11 +347,6 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_Medium_1_TestSour
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    foreach (var prop in classMetadata.Properties)
-                    {
-                        prop.ClassMetadata = classMetadata;
-                        prop.ContainingTypeMetadata = classMetadata;
-                    }
                     return classMetadata;
                 })
             },
@@ -467,11 +447,6 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_Medium_2_TestSour
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    foreach (var prop in classMetadata.Properties)
-                    {
-                        prop.ClassMetadata = classMetadata;
-                        prop.ContainingTypeMetadata = classMetadata;
-                    }
                     return classMetadata;
                 })
             },
@@ -572,11 +547,6 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_Low_1_TestSource 
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    foreach (var prop in classMetadata.Properties)
-                    {
-                        prop.ClassMetadata = classMetadata;
-                        prop.ContainingTypeMetadata = classMetadata;
-                    }
                     return classMetadata;
                 })
             },

@@ -59,11 +59,6 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Cl
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    foreach (var prop in classMetadata.Properties)
-                    {
-                        prop.ClassMetadata = classMetadata;
-                        prop.ContainingTypeMetadata = classMetadata;
-                    }
                     return classMetadata;
                 })
             },
@@ -185,11 +180,6 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Cl
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    foreach (var prop in classMetadata.Properties)
-                    {
-                        prop.ClassMetadata = classMetadata;
-                        prop.ContainingTypeMetadata = classMetadata;
-                    }
                     return classMetadata;
                 })
             },
@@ -311,11 +301,6 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    foreach (var prop in classMetadata.Properties)
-                    {
-                        prop.ClassMetadata = classMetadata;
-                        prop.ContainingTypeMetadata = classMetadata;
-                    }
                     return classMetadata;
                 })
             },
@@ -443,11 +428,6 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    foreach (var prop in classMetadata.Properties)
-                    {
-                        prop.ClassMetadata = classMetadata;
-                        prop.ContainingTypeMetadata = classMetadata;
-                    }
                     return classMetadata;
                 })
             },
@@ -582,11 +562,6 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    foreach (var prop in classMetadata.Properties)
-                    {
-                        prop.ClassMetadata = classMetadata;
-                        prop.ContainingTypeMetadata = classMetadata;
-                    }
                     return classMetadata;
                 })
             },
@@ -728,11 +703,6 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    foreach (var prop in classMetadata.Properties)
-                    {
-                        prop.ClassMetadata = classMetadata;
-                        prop.ContainingTypeMetadata = classMetadata;
-                    }
                     return classMetadata;
                 })
             },
@@ -881,11 +851,6 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    foreach (var prop in classMetadata.Properties)
-                    {
-                        prop.ClassMetadata = classMetadata;
-                        prop.ContainingTypeMetadata = classMetadata;
-                    }
                     return classMetadata;
                 })
             },
