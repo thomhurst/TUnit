@@ -48,10 +48,12 @@ public abstract class AssertionRewriter : CSharpSyntaxRewriter
         {
             convertedAssertion = ConvertAssertionIfNeeded(node);
         }
-        catch
+        catch (Exception ex) when (ex is InvalidOperationException or ArgumentException or NotSupportedException)
         {
-            // If conversion fails for this specific assertion, skip it and continue
-            // This ensures partial conversion is better than no conversion
+            // If conversion fails for this specific assertion due to expected issues
+            // (e.g., invalid syntax, unsupported patterns), skip it and continue.
+            // This ensures partial conversion is better than no conversion.
+            // Unexpected exceptions will propagate for debugging.
             return base.VisitInvocationExpression(node);
         }
 
@@ -167,9 +169,10 @@ public abstract class AssertionRewriter : CSharpSyntaxRewriter
                 .WithTrailingTrivia(SyntaxFactory.Space);
             return SyntaxFactory.AwaitExpression(awaitKeyword, expression);
         }
-        catch
+        catch (Exception ex) when (ex is InvalidOperationException or ArgumentException)
         {
-            // Semantic analysis can fail in some TFM configurations - return expression unchanged
+            // Semantic analysis can fail in some TFM configurations (e.g., type not available
+            // in one target framework). Return expression unchanged and let the user handle it.
             return expression;
         }
     }
@@ -532,9 +535,10 @@ public abstract class AssertionRewriter : CSharpSyntaxRewriter
                 }
             }
         }
-        catch
+        catch (Exception ex) when (ex is InvalidOperationException or ArgumentException)
         {
-            // Semantic analysis can fail in edge cases - that's fine, we already tried syntax
+            // Semantic analysis can fail in edge cases (e.g., incomplete compilation state).
+            // That's fine - we already tried syntax-based detection above.
         }
 
         return false;
