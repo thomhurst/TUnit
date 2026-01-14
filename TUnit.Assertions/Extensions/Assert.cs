@@ -19,7 +19,7 @@ public static class Assert
     /// This overload enables better type inference for dictionary operations like ContainsKey.
     /// Example: await Assert.That(dict).ContainsKey("key");
     /// </summary>
-    [OverloadResolutionPriority(3)]
+    [OverloadResolutionPriority(2)]
     public static DictionaryAssertion<TKey, TValue> That<TKey, TValue>(
         IReadOnlyDictionary<TKey, TValue>? value,
         [CallerArgumentExpression(nameof(value))] string? expression = null)
@@ -33,7 +33,7 @@ public static class Assert
     /// This overload enables better type inference for dictionary operations like ContainsKey.
     /// Example: await Assert.That(dict).ContainsKey("key");
     /// </summary>
-    [OverloadResolutionPriority(2)]
+    [OverloadResolutionPriority(3)]
     public static MutableDictionaryAssertion<TKey, TValue> That<TKey, TValue>(
         IDictionary<TKey, TValue>? value,
         [CallerArgumentExpression(nameof(value))] string? expression = null)
@@ -136,7 +136,7 @@ public static class Assert
     /// Example: await Assert.That(set).IsSubsetOf(otherSet);
     /// Example: await Assert.That(set).Overlaps(otherSet);
     /// </summary>
-    [OverloadResolutionPriority(2)]
+    [OverloadResolutionPriority(3)]
     public static SetAssertion<TItem> That<TItem>(
         ISet<TItem>? value,
         [CallerArgumentExpression(nameof(value))] string? expression = null)

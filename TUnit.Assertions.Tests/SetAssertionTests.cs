@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+
 namespace TUnit.Assertions.Tests;
 
 /// <summary>
@@ -286,5 +288,12 @@ public class SetAssertionTests
         var superset = new HashSet<string> { "apple", "banana", "cherry", "date" };
 
         await Assert.That(set).IsProperSubsetOf(superset);
+    }
+
+    [Test]
+    public async Task Set_is_empty()
+    {
+        var set = ImmutableHashSet<int>.Empty;
+        await Assert.That(set).IsEmpty();
     }
 }
