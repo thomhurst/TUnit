@@ -1,8 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <!-- Import TUnit props when using TUnit framework -->
-    <Import Project="..\..\..\TUnit.Engine\TUnit.Engine.props" Condition="'$(TestFramework)' == 'TUNIT'" />
-
     <PropertyGroup Condition="'$(TestFramework)' == ''">
         <TestFramework>TUNIT</TestFramework>
     </PropertyGroup>
