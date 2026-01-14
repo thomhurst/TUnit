@@ -90,6 +90,7 @@
     <PackageVersion Include="TUnit" Version="1.11.18" />
     <PackageVersion Include="TUnit.AspNetCore" Version="1.11.18" />
     <PackageVersion Include="TUnit.Core" Version="1.11.18" />
+    <PackageVersion Include="TUnit.Engine" Version="1.11.18" />
     <PackageVersion Include="TUnit.Assertions" Version="1.11.18" />
     <PackageVersion Include="Verify.TUnit" Version="31.9.4" />
     <PackageVersion Include="Vogen" Version="8.0.4" />
