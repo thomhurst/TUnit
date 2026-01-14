@@ -39,7 +39,8 @@
 
     <!-- TUnit packages - use direct references to avoid telemetry/code coverage overhead in benchmarks -->
     <ItemGroup Condition="'$(TestFramework)' == 'TUNIT'">
-        <PackageReference Include="TUnit" />
+        <PackageReference Include="TUnit.Engine" />
+        <PackageReference Include="TUnit.Assertions" />
     </ItemGroup>
 
     <!-- xUnit v3 packages -->
