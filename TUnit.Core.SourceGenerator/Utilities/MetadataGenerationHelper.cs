@@ -576,7 +576,7 @@ internal static class MetadataGenerationHelper
 
         propertyCount = properties.Count;
 
-        if (!properties.Any())
+        if (properties.Count == 0)
         {
             writer.Append("global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>()");
             return;
@@ -618,7 +618,7 @@ internal static class MetadataGenerationHelper
 
         propertyCount = properties.Count;
 
-        if (!properties.Any())
+        if (properties.Count == 0)
         {
             return "global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>()";
         }
