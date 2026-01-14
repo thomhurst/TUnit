@@ -153,9 +153,9 @@ public class DynamicTestsGenerator : IIncrementalGenerator
             $$"""
               return new global::System.Collections.Generic.List<global::TUnit.Core.AbstractDynamicTest>
               {
-                  new global::TUnit.Core.FailedDynamicTest
+                  new global::TUnit.Core.FailedDynamicTest<{{model.FullyQualifiedTypeName}}>
                   {
-                      TestName = "{{model.MethodName}}",
+                      MethodName = "{{model.MethodName}}",
                       TestFilePath = @"{{model.FilePath}}",
                       TestLineNumber = {{model.LineNumber}},
                       Exception = exception
