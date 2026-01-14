@@ -1,3 +1,4 @@
+using Microsoft.CodeAnalysis.Testing;
 using Microsoft.CodeAnalysis.Text;
 using NUnit.Framework.Legacy;
 using CodeFixer = TUnit.Analyzers.Tests.Verifiers.CSharpCodeFixVerifier<TUnit.Analyzers.NUnitMigrationAnalyzer, TUnit.Analyzers.CodeFixers.NUnitMigrationCodeFixProvider>;
@@ -47,10 +48,6 @@ public class NUnitMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             $$"""
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -78,11 +75,6 @@ public class NUnitMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
-
                 public class MyClass
                 {
                     [Test]
@@ -92,7 +84,7 @@ public class NUnitMigrationAnalyzerTests
             ConfigureNUnitTest
         );
     }
-    
+
     [Test]
     public async Task NUnit_Assert_That_Converted()
     {
@@ -114,10 +106,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -156,27 +144,24 @@ public class NUnitMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
+                using System.Threading.Tasks;
 
                 public class MyClass
                 {
                     [Test]
-                    public void MyMethod()
+                    public async Task MyMethod()
                     {
-                        ClassicAssert.AreEqual(5, 5);
-                        ClassicAssert.IsTrue(true);
-                        ClassicAssert.IsNull(null);
-                        ClassicAssert.Greater(10, 5);
+                        await Assert.That(5).IsEqualTo(5);
+                        await Assert.That(true).IsTrue();
+                        await Assert.That(null).IsNull();
+                        await Assert.That(10).IsGreaterThan(5);
                     }
                 }
                 """,
             ConfigureNUnitTest
         );
     }
-    
+
     [Test]
     public async Task NUnit_Directive_Flagged()
     {
@@ -208,10 +193,6 @@ public class NUnitMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -243,10 +224,6 @@ public class NUnitMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -292,10 +269,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class OuterClass
                 {
@@ -339,10 +312,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class GenericTestClass<T>
                 {
@@ -382,10 +351,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -473,10 +438,6 @@ public class NUnitMigrationAnalyzerTests
             """
                 using System;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class CompleteTestClass
                 {
@@ -498,7 +459,7 @@ public class NUnitMigrationAnalyzerTests
                     public async Task Test1()
                     {
                         await Assert.That(_counter).IsGreaterThan(0);
-                        ClassicAssert.IsTrue(true);
+                        await Assert.That(true).IsTrue();
                     }
 
                     [Test]
@@ -564,10 +525,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -576,10 +533,10 @@ public class NUnitMigrationAnalyzerTests
                     {
                         var value = 42;
                         await Assert.That(value).IsNotNull();
-                        ClassicAssert.IsNotNull(value);
-                        ClassicAssert.AreEqual(42, value);
+                        await Assert.That(value).IsNotNull();
+                        await Assert.That(value).IsEqualTo(42);
                         await Assert.That(value).IsGreaterThan(0);
-                        ClassicAssert.Less(0, value);
+                        await Assert.That(0).IsLessThan(value);
                     }
                 }
                 """,
@@ -603,10 +560,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
             using System.Threading.Tasks;
-            using TUnit.Core;
-            using TUnit.Assertions;
-            using static TUnit.Assertions.Assert;
-            using TUnit.Assertions.Extensions;
 
             public class MyClass
             {
@@ -640,10 +593,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
             using System.Threading.Tasks;
-            using TUnit.Core;
-            using TUnit.Assertions;
-            using static TUnit.Assertions.Assert;
-            using TUnit.Assertions.Extensions;
 
             public class MyClass
             {
@@ -681,10 +630,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
             using System.Threading.Tasks;
-            using TUnit.Core;
-            using TUnit.Assertions;
-            using static TUnit.Assertions.Assert;
-            using TUnit.Assertions.Extensions;
 
             public class MyClass
             {
@@ -718,10 +663,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
             using System.Threading.Tasks;
-            using TUnit.Core;
-            using TUnit.Assertions;
-            using static TUnit.Assertions.Assert;
-            using TUnit.Assertions.Extensions;
 
             public class MyClass
             {
@@ -757,10 +698,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -794,10 +731,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -831,10 +764,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -868,10 +797,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -905,10 +830,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -942,10 +863,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -979,10 +896,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -1016,10 +929,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -1053,10 +962,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -1090,10 +995,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -1128,10 +1029,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -1168,10 +1065,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -1208,10 +1101,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -1249,10 +1138,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -1290,10 +1175,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -1329,10 +1210,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -1368,10 +1245,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -1407,10 +1280,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -1446,10 +1315,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -1487,10 +1352,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -1525,10 +1386,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -1565,10 +1422,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -1605,10 +1458,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -1646,10 +1495,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -1688,10 +1533,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -1732,10 +1573,6 @@ public class NUnitMigrationAnalyzerTests
             """
                 using System;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -1775,10 +1612,6 @@ public class NUnitMigrationAnalyzerTests
             """
                 using System;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -1827,10 +1660,6 @@ public class NUnitMigrationAnalyzerTests
             """
                 using System;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -1876,10 +1705,6 @@ public class NUnitMigrationAnalyzerTests
             """
                 using System;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -1915,10 +1740,6 @@ public class NUnitMigrationAnalyzerTests
             """
                 using System;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -1963,10 +1784,6 @@ public class NUnitMigrationAnalyzerTests
             """
                 using System;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -2008,10 +1825,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -2047,10 +1860,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -2086,10 +1895,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -2125,10 +1930,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -2166,10 +1967,6 @@ public class NUnitMigrationAnalyzerTests
             """
                 using System.Collections.Generic;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -2207,10 +2004,6 @@ public class NUnitMigrationAnalyzerTests
             """
                 using System.Threading;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -2246,10 +2039,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -2284,10 +2073,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -2323,10 +2108,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -2361,10 +2142,6 @@ public class NUnitMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -2397,10 +2174,6 @@ public class NUnitMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -2433,10 +2206,6 @@ public class NUnitMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -2476,10 +2245,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -2522,10 +2287,6 @@ public class NUnitMigrationAnalyzerTests
             """
                 using System.Collections.Generic;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -2563,10 +2324,6 @@ public class NUnitMigrationAnalyzerTests
             """
                 using System.Collections.Generic;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -2602,10 +2359,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -2641,10 +2394,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -2680,10 +2429,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -2719,10 +2464,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -2758,10 +2499,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -2797,10 +2534,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -2836,10 +2569,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -2873,10 +2602,6 @@ public class NUnitMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -2909,10 +2634,6 @@ public class NUnitMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -2945,10 +2666,6 @@ public class NUnitMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -2981,10 +2698,6 @@ public class NUnitMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -3026,10 +2739,6 @@ public class NUnitMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -3077,10 +2786,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -3137,10 +2842,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public interface ITestRunner
                 {
@@ -3185,10 +2886,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -3222,10 +2919,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -3259,10 +2952,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -3296,10 +2985,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -3333,10 +3018,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -3370,10 +3051,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -3408,10 +3085,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -3447,10 +3120,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -3486,10 +3155,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -3524,10 +3189,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -3562,10 +3223,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -3604,10 +3261,6 @@ public class NUnitMigrationAnalyzerTests
             """
                 using System.Collections.Generic;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -3644,10 +3297,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -3685,10 +3334,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -3723,10 +3368,6 @@ public class NUnitMigrationAnalyzerTests
             """
                 using System.IO;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -3761,10 +3402,6 @@ public class NUnitMigrationAnalyzerTests
             """
                 using System.IO;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -3799,10 +3436,6 @@ public class NUnitMigrationAnalyzerTests
             """
                 using System.IO;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -3837,10 +3470,6 @@ public class NUnitMigrationAnalyzerTests
             """
                 using System.IO;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -3875,10 +3504,6 @@ public class NUnitMigrationAnalyzerTests
             """
                 using System.IO;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -3913,10 +3538,6 @@ public class NUnitMigrationAnalyzerTests
             """
                 using System.IO;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -3951,10 +3572,6 @@ public class NUnitMigrationAnalyzerTests
             """
                 using System.IO;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -3991,10 +3608,6 @@ public class NUnitMigrationAnalyzerTests
             """
                 using System;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -4036,10 +3649,6 @@ public class NUnitMigrationAnalyzerTests
             """
                 using System;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -4080,10 +3689,6 @@ public class NUnitMigrationAnalyzerTests
             """
                 using System.Collections.Generic;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -4121,10 +3726,6 @@ public class NUnitMigrationAnalyzerTests
             """
                 using System.Collections.Generic;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -4162,10 +3763,6 @@ public class NUnitMigrationAnalyzerTests
             """
                 using System.Collections.Generic;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -4203,10 +3800,6 @@ public class NUnitMigrationAnalyzerTests
             """
                 using System.Collections.Generic;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -4244,10 +3837,6 @@ public class NUnitMigrationAnalyzerTests
             """
                 using System.Collections.Generic;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -4285,10 +3874,6 @@ public class NUnitMigrationAnalyzerTests
             """
                 using System.Collections.Generic;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -4326,10 +3911,6 @@ public class NUnitMigrationAnalyzerTests
             """
                 using System.Collections.Generic;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -4368,10 +3949,6 @@ public class NUnitMigrationAnalyzerTests
             """
                 using System.Collections.Generic;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -4410,10 +3987,6 @@ public class NUnitMigrationAnalyzerTests
             """
                 using System.Collections.Generic;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -4448,10 +4021,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -4485,10 +4054,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -4522,10 +4087,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -4559,10 +4120,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -4596,10 +4153,6 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -4621,10 +4174,22 @@ public class NUnitMigrationAnalyzerTests
 
     private static void ConfigureNUnitTest(CodeFixer.Test test)
     {
+        // Add NUnit assemblies to TestState (for input code compilation)
         test.TestState.AdditionalReferences.Add(typeof(NUnit.Framework.TestAttribute).Assembly);
         test.TestState.AdditionalReferences.Add(typeof(NUnit.Framework.Legacy.ClassicAssert).Assembly);
-        // FixedState should only have TUnit assemblies, not NUnit
+
+        // FixedState: TUnit assemblies only (NO NUnit inheritance)
+        // Use Explicit inheritance mode to prevent NUnit references from being inherited
+        // This ensures the analyzer's IsFrameworkAvailable check returns false for NUnit
+        test.FixedState.InheritanceMode = StateInheritanceMode.Explicit;
         test.FixedState.AdditionalReferences.Add(typeof(TUnit.Core.TestAttribute).Assembly);
         test.FixedState.AdditionalReferences.Add(typeof(TUnit.Assertions.Assert).Assembly);
+
+        // With Explicit mode, we need to copy AnalyzerConfigFiles from TestState
+        // The .editorconfig is added by CSharpCodeFixVerifier base class
+        test.FixedState.AnalyzerConfigFiles.Add(("/.editorconfig", SourceText.From("""
+            is_global = true
+            end_of_line = lf
+            """)));
     }
 }

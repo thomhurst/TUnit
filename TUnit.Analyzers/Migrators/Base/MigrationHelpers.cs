@@ -185,6 +185,9 @@ public static class MigrationHelpers
             _ => Array.Empty<string>()
         };
 
+        // Preserve leading trivia from the first using directive (may contain license header)
+        var leadingTrivia = compilationUnit.Usings.FirstOrDefault()?.GetLeadingTrivia() ?? default;
+
         var usingsToKeep = compilationUnit.Usings
             .Where(u =>
             {
@@ -192,9 +195,31 @@ public static class MigrationHelpers
                 return !namespacesToRemove.Any(ns =>
                     nameString == ns || nameString.StartsWith(ns + "."));
             })
-            .ToArray();
+            .ToList();
 
-        return compilationUnit.WithUsings(SyntaxFactory.List(usingsToKeep));
+        // Apply the preserved leading trivia to the new first using directive
+        if (usingsToKeep.Count > 0 && leadingTrivia.Count > 0)
+        {
+            usingsToKeep[0] = usingsToKeep[0].WithLeadingTrivia(leadingTrivia);
+        }
+
+        var result = compilationUnit.WithUsings(SyntaxFactory.List(usingsToKeep));
+
+        // If no usings remain but there was leading trivia, preserve it on the first member or EOF token
+        if (usingsToKeep.Count == 0 && leadingTrivia.Count > 0)
+        {
+            if (result.Members.Count > 0)
+            {
+                var firstMember = result.Members[0];
+                result = result.ReplaceNode(firstMember, firstMember.WithLeadingTrivia(leadingTrivia.AddRange(firstMember.GetLeadingTrivia())));
+            }
+            else
+            {
+                result = result.WithEndOfFileToken(result.EndOfFileToken.WithLeadingTrivia(leadingTrivia));
+            }
+        }
+
+        return result;
     }
     
     /// <summary>
@@ -203,62 +228,56 @@ public static class MigrationHelpers
     /// </summary>
     public static CompilationUnitSyntax AddSystemThreadingTasksUsing(CompilationUnitSyntax compilationUnit)
     {
-        var existingUsings = compilationUnit.Usings.ToList();
-
         // Add System.Threading.Tasks only if the code has async methods or await expressions
         bool hasAsyncCode = compilationUnit.DescendantNodes()
             .Any(n => n is AwaitExpressionSyntax ||
                      (n is MethodDeclarationSyntax m && m.Modifiers.Any(mod => mod.IsKind(SyntaxKind.AsyncKeyword))));
 
-        if (hasAsyncCode && !existingUsings.Any(u => u.Name?.ToString() == "System.Threading.Tasks"))
+        if (!hasAsyncCode || compilationUnit.Usings.Any(u => u.Name?.ToString() == "System.Threading.Tasks"))
         {
-            var tasksUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Threading.Tasks"));
-            existingUsings.Add(tasksUsing);
-            return compilationUnit.WithUsings(SyntaxFactory.List(existingUsings));
+            return compilationUnit;
         }
 
-        return compilationUnit;
+        // Preserve leading trivia from the first using directive (may contain license header)
+        var leadingTrivia = compilationUnit.Usings.FirstOrDefault()?.GetLeadingTrivia() ?? default;
+
+        var existingUsings = compilationUnit.Usings.ToList();
+
+        // Strip leading trivia from first using since we'll add it back at the end
+        if (existingUsings.Count > 0 && leadingTrivia.Count > 0)
+        {
+            existingUsings[0] = existingUsings[0].WithLeadingTrivia(SyntaxTriviaList.Empty);
+        }
+
+        var tasksUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Threading.Tasks"));
+        existingUsings.Add(tasksUsing);
+
+        // Restore leading trivia on the first using
+        if (existingUsings.Count > 0 && leadingTrivia.Count > 0)
+        {
+            existingUsings[0] = existingUsings[0].WithLeadingTrivia(leadingTrivia);
+        }
+
+        return compilationUnit.WithUsings(SyntaxFactory.List(existingUsings));
     }
 
     public static CompilationUnitSyntax AddTUnitUsings(CompilationUnitSyntax compilationUnit)
     {
-        var tunitUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("TUnit.Core"));
-        // Add namespace using so Assert type name is available for Assert.That(...) syntax
-        var assertionsNamespaceUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("TUnit.Assertions"));
-        var assertionsStaticUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("TUnit.Assertions.Assert"))
-            .WithStaticKeyword(SyntaxFactory.Token(SyntaxKind.StaticKeyword));
-        var extensionsUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("TUnit.Assertions.Extensions"));
+        // Note: TUnit package automatically sets up global usings via .targets files:
+        // - TUnit.Core and static TUnit.Core.HookType (from TUnit.Core.targets)
+        // - TUnit.Assertions and TUnit.Assertions.Extensions (from TUnit.Assertions.targets)
+        //
+        // We do NOT add explicit TUnit usings since they are already available via global usings.
+        // This keeps the migrated code clean. We only add System.* usings that are not part of
+        // the TUnit package's global usings.
 
-        // First add System.Threading.Tasks if needed
+        // Add System.Threading.Tasks if needed for async methods
         compilationUnit = AddSystemThreadingTasksUsing(compilationUnit);
 
         // Add System.IO if File. or Directory. is used (from FileAssert/DirectoryAssert conversion)
         compilationUnit = AddSystemIOUsing(compilationUnit);
 
-        var existingUsings = compilationUnit.Usings.ToList();
-
-        if (!existingUsings.Any(u => u.Name?.ToString() == "TUnit.Core"))
-        {
-            existingUsings.Add(tunitUsing);
-        }
-
-        // Add namespace using so Assert type name is resolvable
-        if (!existingUsings.Any(u => u.Name?.ToString() == "TUnit.Assertions" && !u.StaticKeyword.IsKind(SyntaxKind.StaticKeyword)))
-        {
-            existingUsings.Add(assertionsNamespaceUsing);
-        }
-
-        if (!existingUsings.Any(u => u.Name?.ToString() == "TUnit.Assertions.Assert" && u.StaticKeyword.IsKind(SyntaxKind.StaticKeyword)))
-        {
-            existingUsings.Add(assertionsStaticUsing);
-        }
-
-        if (!existingUsings.Any(u => u.Name?.ToString() == "TUnit.Assertions.Extensions"))
-        {
-            existingUsings.Add(extensionsUsing);
-        }
-
-        return compilationUnit.WithUsings(SyntaxFactory.List(existingUsings));
+        return compilationUnit;
     }
 
     /// <summary>
@@ -267,8 +286,6 @@ public static class MigrationHelpers
     /// </summary>
     public static CompilationUnitSyntax AddSystemIOUsing(CompilationUnitSyntax compilationUnit)
     {
-        var existingUsings = compilationUnit.Usings.ToList();
-
         // Check if code contains File. or Directory. member access
         bool hasFileOrDirectoryMemberAccess = compilationUnit.DescendantNodes()
             .OfType<MemberAccessExpressionSyntax>()
@@ -279,14 +296,32 @@ public static class MigrationHelpers
             .OfType<ObjectCreationExpressionSyntax>()
             .Any(o => o.Type is IdentifierNameSyntax { Identifier.Text: "FileInfo" or "DirectoryInfo" });
 
-        if ((hasFileOrDirectoryMemberAccess || hasFileInfoOrDirectoryInfoCreation) &&
-            !existingUsings.Any(u => u.Name?.ToString() == "System.IO"))
+        if ((!hasFileOrDirectoryMemberAccess && !hasFileInfoOrDirectoryInfoCreation) ||
+            compilationUnit.Usings.Any(u => u.Name?.ToString() == "System.IO"))
         {
-            var ioUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.IO"));
-            existingUsings.Insert(0, ioUsing); // Insert at beginning to keep System.* namespaces together
-            return compilationUnit.WithUsings(SyntaxFactory.List(existingUsings));
+            return compilationUnit;
         }
 
-        return compilationUnit;
+        // Preserve leading trivia from the first using directive (may contain license header)
+        var leadingTrivia = compilationUnit.Usings.FirstOrDefault()?.GetLeadingTrivia() ?? default;
+
+        var existingUsings = compilationUnit.Usings.ToList();
+
+        // Strip leading trivia from first using since we'll add it back at the end
+        if (existingUsings.Count > 0 && leadingTrivia.Count > 0)
+        {
+            existingUsings[0] = existingUsings[0].WithLeadingTrivia(SyntaxTriviaList.Empty);
+        }
+
+        var ioUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.IO"));
+
+        // Apply the leading trivia to the new System.IO using since it will be first
+        if (leadingTrivia.Count > 0)
+        {
+            ioUsing = ioUsing.WithLeadingTrivia(leadingTrivia);
+        }
+
+        existingUsings.Insert(0, ioUsing); // Insert at beginning to keep System.* namespaces together
+        return compilationUnit.WithUsings(SyntaxFactory.List(existingUsings));
     }
 }
