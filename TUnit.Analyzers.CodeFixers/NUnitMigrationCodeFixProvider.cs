@@ -660,17 +660,15 @@ public class NUnitAssertionRewriter : AssertionRewriter
 
     protected override bool IsFrameworkAssertionNamespace(string namespaceName)
     {
-        // Exclude NUnit.Framework.Legacy - ClassicAssert should not be converted
-        return (namespaceName == "NUnit.Framework" || namespaceName.StartsWith("NUnit.Framework."))
-               && namespaceName != "NUnit.Framework.Legacy";
+        // Include NUnit.Framework.Legacy - ClassicAssert should be converted to TUnit assertions
+        return namespaceName == "NUnit.Framework" || namespaceName.StartsWith("NUnit.Framework.");
     }
 
     protected override bool IsKnownAssertionTypeBySyntax(string targetType, string methodName)
     {
         // NUnit assertion types that can be detected by syntax
-        // NOTE: ClassicAssert is NOT included because it's in NUnit.Framework.Legacy namespace
-        // and should not be auto-converted. The semantic check excludes it properly.
-        return targetType is "Assert" or "CollectionAssert" or "StringAssert" or "FileAssert" or "DirectoryAssert";
+        // ClassicAssert is in NUnit.Framework.Legacy and should be converted
+        return targetType is "Assert" or "ClassicAssert" or "CollectionAssert" or "StringAssert" or "FileAssert" or "DirectoryAssert";
     }
 
     protected override ExpressionSyntax? ConvertAssertionIfNeeded(InvocationExpressionSyntax invocation)
@@ -717,15 +715,33 @@ public class NUnitAssertionRewriter : AssertionRewriter
         }
 
         // Handle classic assertions like Assert.AreEqual, ClassicAssert.AreEqual, etc.
-        if (invocation.Expression is MemberAccessExpressionSyntax classicMemberAccess &&
-            classicMemberAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Assert" or "ClassicAssert" })
+        // Also handles qualified names like NUnit.Framework.Assert.AreEqual
+        if (invocation.Expression is MemberAccessExpressionSyntax classicMemberAccess)
         {
-            return ConvertClassicAssertion(invocation, classicMemberAccess.Name.Identifier.Text);
+            var typeName = GetSimpleTypeName(classicMemberAccess.Expression);
+            if (typeName is "Assert" or "ClassicAssert")
+            {
+                return ConvertClassicAssertion(invocation, classicMemberAccess.Name.Identifier.Text);
+            }
         }
 
         return null;
     }
-    
+
+    /// <summary>
+    /// Extracts the simple type name from an expression.
+    /// Handles both simple identifiers and qualified names like "NUnit.Framework.Assert".
+    /// </summary>
+    private static string GetSimpleTypeName(ExpressionSyntax expression)
+    {
+        return expression switch
+        {
+            IdentifierNameSyntax identifier => identifier.Identifier.Text,
+            MemberAccessExpressionSyntax memberAccess => memberAccess.Name.Identifier.Text,
+            _ => expression.ToString()
+        };
+    }
+
     private ExpressionSyntax ConvertAssertThat(InvocationExpressionSyntax invocation)
     {
         var arguments = invocation.ArgumentList.Arguments;

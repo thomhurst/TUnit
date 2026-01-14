@@ -16,7 +16,7 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
     protected override string DiagnosticId => Rules.XunitMigration.Id;
     protected override string CodeFixTitle => Rules.XunitMigration.Title.ToString();
 
-    protected override bool ShouldAddTUnitUsings() => false;
+    protected override bool ShouldAddTUnitUsings() => true;
 
     protected override AttributeRewriter CreateAttributeRewriter(Compilation compilation)
     {
@@ -798,13 +798,31 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
                 return null;
             }
 
-            if (invocation.Expression is MemberAccessExpressionSyntax memberAccess &&
-                memberAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Assert" })
+            // Handle both simple (Assert.Equal) and qualified (Xunit.Assert.Equal) names
+            if (invocation.Expression is MemberAccessExpressionSyntax memberAccess)
             {
-                return ConvertXUnitAssertion(invocation, memberAccess.Name.Identifier.Text, memberAccess.Name);
+                var typeName = GetSimpleTypeName(memberAccess.Expression);
+                if (typeName == "Assert")
+                {
+                    return ConvertXUnitAssertion(invocation, memberAccess.Name.Identifier.Text, memberAccess.Name);
+                }
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Extracts the simple type name from an expression.
+        /// Handles both simple identifiers and qualified names like "Xunit.Assert".
+        /// </summary>
+        private static string GetSimpleTypeName(ExpressionSyntax expression)
+        {
+            return expression switch
+            {
+                IdentifierNameSyntax identifier => identifier.Identifier.Text,
+                MemberAccessExpressionSyntax memberAccess => memberAccess.Name.Identifier.Text,
+                _ => expression.ToString()
+            };
         }
 
         private ExpressionSyntax? ConvertXUnitAssertion(InvocationExpressionSyntax invocation, string methodName, SimpleNameSyntax nameNode)
@@ -845,21 +863,21 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
                 "NotSame" when arguments.Count >= 2 =>
                     CreateTUnitAssertion("IsNotSameReferenceAs", arguments[1].Expression, arguments[0]),
 
-                // String/Collection contains
+                // String/Collection contains - use collection assertion for proper overload resolution
                 "Contains" when arguments.Count >= 2 =>
-                    CreateTUnitAssertion("Contains", arguments[1].Expression, arguments[0]),
+                    CreateTUnitCollectionAssertion("Contains", arguments[1].Expression, arguments[0]),
                 "DoesNotContain" when arguments.Count >= 2 =>
-                    CreateTUnitAssertion("DoesNotContain", arguments[1].Expression, arguments[0]),
+                    CreateTUnitCollectionAssertion("DoesNotContain", arguments[1].Expression, arguments[0]),
                 "StartsWith" when arguments.Count >= 2 =>
                     CreateTUnitAssertion("StartsWith", arguments[1].Expression, arguments[0]),
                 "EndsWith" when arguments.Count >= 2 =>
                     CreateTUnitAssertion("EndsWith", arguments[1].Expression, arguments[0]),
 
-                // Empty/Not empty
+                // Empty/Not empty - use collection assertion for proper overload resolution
                 "Empty" when arguments.Count >= 1 =>
-                    CreateTUnitAssertion("IsEmpty", arguments[0].Expression),
+                    CreateTUnitCollectionAssertion("IsEmpty", arguments[0].Expression),
                 "NotEmpty" when arguments.Count >= 1 =>
-                    CreateTUnitAssertion("IsNotEmpty", arguments[0].Expression),
+                    CreateTUnitCollectionAssertion("IsNotEmpty", arguments[0].Expression),
 
                 // Exception assertions
                 "Throws" => ConvertThrows(invocation, nameNode),
@@ -878,29 +896,29 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
                 "NotInRange" when arguments.Count >= 3 =>
                     CreateTUnitAssertion("IsNotInRange", arguments[0].Expression, arguments[1], arguments[2]),
 
-                // Collection assertions
+                // Collection assertions - use collection assertion for proper overload resolution
                 "Single" when arguments.Count >= 1 =>
-                    CreateTUnitAssertion("HasSingleItem", arguments[0].Expression),
+                    CreateTUnitCollectionAssertion("HasSingleItem", arguments[0].Expression),
                 "All" when arguments.Count >= 2 =>
                     CreateAllAssertion(arguments[0].Expression, arguments[1].Expression),
 
-                // Subset/superset
+                // Subset/superset - use collection assertion for proper overload resolution
                 "Subset" when arguments.Count >= 2 =>
-                    CreateTUnitAssertion("IsSubsetOf", arguments[0].Expression, arguments[1]),
+                    CreateTUnitCollectionAssertion("IsSubsetOf", arguments[0].Expression, arguments[1]),
                 "Superset" when arguments.Count >= 2 =>
-                    CreateTUnitAssertion("IsSupersetOf", arguments[0].Expression, arguments[1]),
+                    CreateTUnitCollectionAssertion("IsSupersetOf", arguments[0].Expression, arguments[1]),
                 "ProperSubset" when arguments.Count >= 2 =>
                     CreateProperSubsetWithTodo(arguments),
                 "ProperSuperset" when arguments.Count >= 2 =>
                     CreateProperSupersetWithTodo(arguments),
 
-                // Unique items
+                // Unique items - use collection assertion for proper overload resolution
                 "Distinct" when arguments.Count >= 1 =>
-                    CreateTUnitAssertion("HasDistinctItems", arguments[0].Expression),
+                    CreateTUnitCollectionAssertion("HasDistinctItems", arguments[0].Expression),
 
-                // Equivalent (order independent)
+                // Equivalent (order independent) - use collection assertion for proper overload resolution
                 "Equivalent" when arguments.Count >= 2 =>
-                    CreateTUnitAssertion("IsEquivalentTo", arguments[1].Expression, arguments[0]),
+                    CreateTUnitCollectionAssertion("IsEquivalentTo", arguments[1].Expression, arguments[0]),
 
                 // Regex assertions
                 "Matches" when arguments.Count >= 2 =>
@@ -951,7 +969,7 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
             var collection = arguments[0].Expression;
             var inspectorCount = arguments.Count - 1;
 
-            var result = CreateTUnitAssertion("HasCount", collection,
+            var result = CreateTUnitCollectionAssertion("HasCount", collection,
                 SyntaxFactory.Argument(
                     SyntaxFactory.LiteralExpression(
                         SyntaxKind.NumericLiteralExpression,
@@ -1000,7 +1018,7 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
         {
             // ProperSubset means strict subset (not equal to superset)
             // TUnit's IsSubsetOf doesn't distinguish between proper/improper
-            var result = CreateTUnitAssertion("IsSubsetOf", arguments[0].Expression, arguments[1]);
+            var result = CreateTUnitCollectionAssertion("IsSubsetOf", arguments[0].Expression, arguments[1]);
             return result.WithLeadingTrivia(
                 SyntaxFactory.Comment("// TODO: TUnit migration - ProperSubset requires strict subset (not equal). Add additional assertion if needed."),
                 SyntaxFactory.EndOfLine("\n"));
@@ -1010,7 +1028,7 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
         {
             // ProperSuperset means strict superset (not equal to subset)
             // TUnit's IsSupersetOf doesn't distinguish between proper/improper
-            var result = CreateTUnitAssertion("IsSupersetOf", arguments[0].Expression, arguments[1]);
+            var result = CreateTUnitCollectionAssertion("IsSupersetOf", arguments[0].Expression, arguments[1]);
             return result.WithLeadingTrivia(
                 SyntaxFactory.Comment("// TODO: TUnit migration - ProperSuperset requires strict superset (not equal). Add additional assertion if needed."),
                 SyntaxFactory.EndOfLine("\n"));
@@ -1023,38 +1041,8 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
 
             var predicateExpression = TryConvertActionToPredicate(actionOrPredicate);
 
-            // Create Assert.That(collection)
-            var assertThatInvocation = SyntaxFactory.InvocationExpression(
-                SyntaxFactory.MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    SyntaxFactory.IdentifierName("Assert"),
-                    SyntaxFactory.IdentifierName("That")
-                ),
-                SyntaxFactory.ArgumentList(
-                    SyntaxFactory.SingletonSeparatedList(
-                        SyntaxFactory.Argument(collection)
-                    )
-                )
-            );
-
-            // Create Assert.That(collection).All(predicate)
-            var allInvocation = SyntaxFactory.InvocationExpression(
-                SyntaxFactory.MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    assertThatInvocation,
-                    SyntaxFactory.IdentifierName("All")
-                ),
-                SyntaxFactory.ArgumentList(
-                    SyntaxFactory.SingletonSeparatedList(
-                        SyntaxFactory.Argument(predicateExpression)
-                    )
-                )
-            );
-
-            // Wrap in await
-            var awaitKeyword = SyntaxFactory.Token(SyntaxKind.AwaitKeyword)
-                .WithTrailingTrivia(SyntaxFactory.Space);
-            return SyntaxFactory.AwaitExpression(awaitKeyword, allInvocation);
+            // Use CreateTUnitCollectionAssertion with the predicate as an argument
+            return CreateTUnitCollectionAssertion("All", collection, SyntaxFactory.Argument(predicateExpression));
         }
 
         private ExpressionSyntax TryConvertActionToPredicate(ExpressionSyntax actionExpression)
@@ -1155,8 +1143,40 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
 
         private ExpressionSyntax ConvertThrowsAny(InvocationExpressionSyntax invocation, SimpleNameSyntax nameNode)
         {
-            // Assert.ThrowsAny<T>(action) -> await Assert.ThrowsAsync<T>(action)
-            // Note: ThrowsAny accepts derived types, ThrowsAsync should work similarly
+            // xUnit Assert.ThrowsAny<T>(Action) -> TUnit Assert.Throws<T>(Action)
+            // Both are synchronous - ThrowsAny accepts derived types, TUnit's Throws does too
+            if (nameNode is GenericNameSyntax genericName)
+            {
+                var exceptionType = genericName.TypeArgumentList.Arguments[0];
+                var action = invocation.ArgumentList.Arguments[0].Expression;
+
+                // Keep it synchronous - TUnit's Assert.Throws<T>(Action) accepts derived types
+                return SyntaxFactory.InvocationExpression(
+                    SyntaxFactory.MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        SyntaxFactory.IdentifierName("Assert"),
+                        SyntaxFactory.GenericName("Throws")
+                            .WithTypeArgumentList(
+                                SyntaxFactory.TypeArgumentList(
+                                    SyntaxFactory.SingletonSeparatedList(exceptionType)
+                                )
+                            )
+                    ),
+                    SyntaxFactory.ArgumentList(
+                        SyntaxFactory.SingletonSeparatedList(
+                            SyntaxFactory.Argument(action)
+                        )
+                    )
+                );
+            }
+
+            return CreateTUnitAssertion("Throws", invocation.ArgumentList.Arguments[0].Expression);
+        }
+
+        private ExpressionSyntax ConvertThrowsAnyAsync(InvocationExpressionSyntax invocation, SimpleNameSyntax nameNode)
+        {
+            // xUnit Assert.ThrowsAnyAsync<T>(Func<Task>) -> await Assert.ThrowsAsync<T>(Func<Task>)
+            // ThrowsAnyAsync accepts derived types, TUnit's ThrowsAsync does too
             if (nameNode is GenericNameSyntax genericName)
             {
                 var exceptionType = genericName.TypeArgumentList.Arguments[0];
@@ -1185,13 +1205,7 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
                 return SyntaxFactory.AwaitExpression(awaitKeyword, invocationExpression);
             }
 
-            return CreateTUnitAssertion("Throws", invocation.ArgumentList.Arguments[0].Expression);
-        }
-
-        private ExpressionSyntax ConvertThrowsAnyAsync(InvocationExpressionSyntax invocation, SimpleNameSyntax nameNode)
-        {
-            // Same as ThrowsAny but for async
-            return ConvertThrowsAny(invocation, nameNode);
+            return CreateTUnitAssertion("ThrowsAsync", invocation.ArgumentList.Arguments[0].Expression);
         }
 
         private ExpressionSyntax ConvertIsNotType(InvocationExpressionSyntax invocation, SimpleNameSyntax nameNode)
@@ -1237,17 +1251,20 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
 
         private ExpressionSyntax ConvertThrows(InvocationExpressionSyntax invocation, SimpleNameSyntax nameNode)
         {
-            // Assert.Throws<T>(action) -> await Assert.ThrowsAsync<T>(action)
+            // xUnit Assert.Throws<T>(Action) -> TUnit Assert.Throws<T>(Action)
+            // Both are synchronous and return the exception directly
+            // NO async conversion needed - TUnit has a sync version that matches xUnit's signature
             if (nameNode is GenericNameSyntax genericName)
             {
                 var exceptionType = genericName.TypeArgumentList.Arguments[0];
                 var action = invocation.ArgumentList.Arguments[0].Expression;
 
-                var invocationExpression = SyntaxFactory.InvocationExpression(
+                // Keep it synchronous - TUnit's Assert.Throws<T>(Action) returns TException directly
+                return SyntaxFactory.InvocationExpression(
                     SyntaxFactory.MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
                         SyntaxFactory.IdentifierName("Assert"),
-                        SyntaxFactory.GenericName("ThrowsAsync")
+                        SyntaxFactory.GenericName("Throws")
                             .WithTypeArgumentList(
                                 SyntaxFactory.TypeArgumentList(
                                     SyntaxFactory.SingletonSeparatedList(exceptionType)
@@ -1260,13 +1277,9 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
                         )
                     )
                 );
-
-                var awaitKeyword = SyntaxFactory.Token(SyntaxKind.AwaitKeyword)
-                    .WithTrailingTrivia(SyntaxFactory.Space);
-                return SyntaxFactory.AwaitExpression(awaitKeyword, invocationExpression);
             }
 
-            // Fallback
+            // Fallback for non-generic Throws
             return CreateTUnitAssertion("Throws", invocation.ArgumentList.Arguments[0].Expression);
         }
 

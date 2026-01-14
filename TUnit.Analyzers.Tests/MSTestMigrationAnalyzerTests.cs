@@ -1,3 +1,4 @@
+using Microsoft.CodeAnalysis.Testing;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using CodeFixer = TUnit.Analyzers.Tests.Verifiers.CSharpCodeFixVerifier<TUnit.Analyzers.MSTestMigrationAnalyzer, TUnit.Analyzers.CodeFixers.MSTestMigrationCodeFixProvider>;
@@ -47,10 +48,6 @@ public class MSTestMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             $$"""
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -78,11 +75,6 @@ public class MSTestMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             """
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
-
                 public class MyClass
                 {
                     [Test]
@@ -115,10 +107,6 @@ public class MSTestMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -167,10 +155,6 @@ public class MSTestMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             """
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -202,10 +186,6 @@ public class MSTestMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             """
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -244,10 +224,6 @@ public class MSTestMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             """
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -287,10 +263,6 @@ public class MSTestMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -329,10 +301,6 @@ public class MSTestMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -377,10 +345,6 @@ public class MSTestMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class OuterClass
                 {
@@ -424,10 +388,6 @@ public class MSTestMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class GenericTestClass<T>
                 {
@@ -514,10 +474,6 @@ public class MSTestMigrationAnalyzerTests
             """
                 using System;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class CompleteTestClass
                 {
@@ -615,10 +571,6 @@ public class MSTestMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -672,10 +624,6 @@ public class MSTestMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -717,10 +665,6 @@ public class MSTestMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -741,13 +685,16 @@ public class MSTestMigrationAnalyzerTests
     [Test]
     public async Task MSTest_Assertions_With_FormatStrings_Converted()
     {
+        // Note: The diagnostic is on [TestMethod] because Assert.AreEqual with format strings
+        // isn't a valid MSTest overload, so semantic model doesn't resolve it.
+        // The analyzer detects the method attribute instead of the Assert call.
         await CodeFixer.VerifyCodeFixAsync(
             """
                 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-                {|#0:public class MyClass|}
+                public class MyClass
                 {
-                    [TestMethod]
+                    {|#0:[TestMethod]|}
                     public void TestWithFormatStrings()
                     {
                         int x = 5;
@@ -759,10 +706,6 @@ public class MSTestMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             """
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -784,14 +727,16 @@ public class MSTestMigrationAnalyzerTests
     {
         // When a comparer is detected (via semantic or syntax-based detection),
         // a TODO comment is added explaining that TUnit uses different comparison semantics.
+        // Note: The diagnostic is on [TestMethod] because Assert.AreEqual with comparer
+        // isn't a valid MSTest overload, so semantic model doesn't resolve it.
         await CodeFixer.VerifyCodeFixAsync(
             """
                 using Microsoft.VisualStudio.TestTools.UnitTesting;
                 using System.Collections.Generic;
 
-                {|#0:public class MyClass|}
+                public class MyClass
                 {
-                    [TestMethod]
+                    {|#0:[TestMethod]|}
                     public void TestWithComparer()
                     {
                         var comparer = StringComparer.OrdinalIgnoreCase;
@@ -803,10 +748,6 @@ public class MSTestMigrationAnalyzerTests
             """
                 using System.Collections.Generic;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -841,10 +782,6 @@ public class MSTestMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             """
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -877,10 +814,6 @@ public class MSTestMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             """
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -913,10 +846,6 @@ public class MSTestMigrationAnalyzerTests
                 """,
             Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             """
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -953,10 +882,6 @@ public class MSTestMigrationAnalyzerTests
             """
                 using System;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -998,10 +923,6 @@ public class MSTestMigrationAnalyzerTests
             """
                 using System;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -1043,10 +964,6 @@ public class MSTestMigrationAnalyzerTests
             """
                 using System.IO;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -1085,10 +1002,6 @@ public class MSTestMigrationAnalyzerTests
             """
                 using System.IO;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -1127,10 +1040,6 @@ public class MSTestMigrationAnalyzerTests
             """
                 using System.IO;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -1169,10 +1078,6 @@ public class MSTestMigrationAnalyzerTests
             """
                 using System.IO;
                 using System.Threading.Tasks;
-                using TUnit.Core;
-                using TUnit.Assertions;
-                using static TUnit.Assertions.Assert;
-                using TUnit.Assertions.Extensions;
 
                 public class MyClass
                 {
@@ -1188,6 +1093,248 @@ public class MSTestMigrationAnalyzerTests
         );
     }
 
+    [Test]
+    public async Task MSTest_KitchenSink_Comprehensive_Migration()
+    {
+        // This test combines MANY MSTest patterns together to ensure the code fixer
+        // can handle complex real-world scenarios in a single pass.
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+                using System;
+                using System.Collections.Generic;
+
+                {|#0:[TestClass]|}
+                public class KitchenSinkTests
+                {
+                    private static List<string> _log;
+                    private int _counter;
+
+                    [ClassInitialize]
+                    public static void ClassSetup(TestContext context)
+                    {
+                        _log = new List<string>();
+                    }
+
+                    [TestInitialize]
+                    public void TestSetup()
+                    {
+                        _counter = 0;
+                    }
+
+                    [TestMethod]
+                    public void BasicTest()
+                    {
+                        Assert.IsTrue(_counter == 0);
+                        Assert.AreEqual(0, _counter);
+                        Assert.IsNotNull(_log);
+                    }
+
+                    [TestMethod]
+                    [DataRow(1, 2, 3)]
+                    [DataRow(10, 20, 30)]
+                    [DataRow(-1, 1, 0)]
+                    public void ParameterizedTest(int a, int b, int expected)
+                    {
+                        var result = a + b;
+                        Assert.AreEqual(expected, result);
+                    }
+
+                    [TestMethod]
+                    [DynamicData(nameof(GetTestData))]
+                    public void DataSourceTest(string input, int expectedLength)
+                    {
+                        Assert.AreEqual(expectedLength, input.Length);
+                        Assert.IsNotNull(input);
+                    }
+
+                    public static IEnumerable<object[]> GetTestData()
+                    {
+                        yield return new object[] { "hello", 5 };
+                        yield return new object[] { "world", 5 };
+                    }
+
+                    [TestMethod]
+                    public void CollectionAssertTest()
+                    {
+                        var list = new List<int> { 1, 2, 3 };
+                        CollectionAssert.Contains(list, 2);
+                        CollectionAssert.AllItemsAreUnique(list);
+                    }
+
+                    [TestMethod]
+                    public void StringAssertTest()
+                    {
+                        var text = "Hello World";
+                        StringAssert.Contains(text, "World");
+                        StringAssert.StartsWith(text, "Hello");
+                        StringAssert.EndsWith(text, "World");
+                    }
+
+                    [TestMethod]
+                    public void ExceptionTest()
+                    {
+                        Assert.ThrowsException<ArgumentException>(() => throw new ArgumentException("test"));
+                    }
+
+                    [TestMethod]
+                    public void ComparisonAssertions()
+                    {
+                        var value = 42;
+                        Assert.IsTrue(value > 0);
+                        Assert.IsFalse(value < 0);
+                        Assert.AreNotEqual(0, value);
+                    }
+
+                    [TestMethod]
+                    public void NullAssertions()
+                    {
+                        string? nullValue = null;
+                        var notNullValue = "test";
+                        Assert.IsNull(nullValue);
+                        Assert.IsNotNull(notNullValue);
+                    }
+
+                    [TestMethod]
+                    public void TypeAssertions()
+                    {
+                        object obj = "test string";
+                        Assert.IsInstanceOfType(obj, typeof(string));
+                    }
+
+                    [TestCleanup]
+                    public void TestTeardown()
+                    {
+                        _counter = 0;
+                    }
+
+                    [ClassCleanup]
+                    public static void ClassTeardown()
+                    {
+                        _log.Clear();
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
+            """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+
+                public class KitchenSinkTests
+                {
+                    private static List<string> _log;
+                    private int _counter;
+
+                    [Before(HookType.Class)]
+                    public static void ClassSetup()
+                    {
+                        _log = new List<string>();
+                    }
+
+                    [Before(HookType.Test)]
+                    public void TestSetup()
+                    {
+                        _counter = 0;
+                    }
+
+                    [Test]
+                    public async Task BasicTest()
+                    {
+                        await Assert.That(_counter == 0).IsTrue();
+                        await Assert.That(_counter).IsEqualTo(0);
+                        await Assert.That(_log).IsNotNull();
+                    }
+
+                    [Test]
+                    [Arguments(1, 2, 3)]
+                    [Arguments(10, 20, 30)]
+                    [Arguments(-1, 1, 0)]
+                    public async Task ParameterizedTest(int a, int b, int expected)
+                    {
+                        var result = a + b;
+                        await Assert.That(result).IsEqualTo(expected);
+                    }
+
+                    [Test]
+                    [MethodDataSource(nameof(GetTestData))]
+                    public async Task DataSourceTest(string input, int expectedLength)
+                    {
+                        await Assert.That(input.Length).IsEqualTo(expectedLength);
+                        await Assert.That(input).IsNotNull();
+                    }
+
+                    public static IEnumerable<object[]> GetTestData()
+                    {
+                        yield return new object[] { "hello", 5 };
+                        yield return new object[] { "world", 5 };
+                    }
+
+                    [Test]
+                    public async Task CollectionAssertTest()
+                    {
+                        var list = new List<int> { 1, 2, 3 };
+                        await Assert.That(list).Contains(2);
+                        await Assert.That(list).HasDistinctItems();
+                    }
+
+                    [Test]
+                    public async Task StringAssertTest()
+                    {
+                        var text = "Hello World";
+                        await Assert.That(text).Contains("World");
+                        await Assert.That(text).StartsWith("Hello");
+                        await Assert.That(text).EndsWith("World");
+                    }
+
+                    [Test]
+                    public async Task ExceptionTest()
+                    {
+                        await Assert.ThrowsAsync<ArgumentException>(() => throw new ArgumentException("test"));
+                    }
+
+                    [Test]
+                    public async Task ComparisonAssertions()
+                    {
+                        var value = 42;
+                        await Assert.That(value > 0).IsTrue();
+                        await Assert.That(value < 0).IsFalse();
+                        await Assert.That(value).IsNotEqualTo(0);
+                    }
+
+                    [Test]
+                    public async Task NullAssertions()
+                    {
+                        string? nullValue = null;
+                        var notNullValue = "test";
+                        await Assert.That(nullValue).IsNull();
+                        await Assert.That(notNullValue).IsNotNull();
+                    }
+
+                    [Test]
+                    public async Task TypeAssertions()
+                    {
+                        object obj = "test string";
+                        await Assert.That(obj).IsAssignableTo(typeof(string));
+                    }
+
+                    [After(HookType.Test)]
+                    public void TestTeardown()
+                    {
+                        _counter = 0;
+                    }
+
+                    [After(HookType.Class)]
+                    public static void ClassTeardown()
+                    {
+                        _log.Clear();
+                    }
+                }
+                """,
+            ConfigureMSTestTest
+        );
+    }
+
     private static void ConfigureMSTestTest(Verifier.Test test)
     {
         test.TestState.AdditionalReferences.Add(typeof(TestMethodAttribute).Assembly);
@@ -1195,9 +1342,21 @@ public class MSTestMigrationAnalyzerTests
 
     private static void ConfigureMSTestTest(CodeFixer.Test test)
     {
+        // Add MSTest assemblies to TestState (for input code compilation)
         test.TestState.AdditionalReferences.Add(typeof(TestMethodAttribute).Assembly);
-        // FixedState should only have TUnit assemblies, not MSTest
+
+        // FixedState: TUnit assemblies only (NO MSTest inheritance)
+        // Use Explicit inheritance mode to prevent MSTest references from being inherited
+        // This ensures the analyzer's IsFrameworkAvailable check returns false for MSTest
+        test.FixedState.InheritanceMode = StateInheritanceMode.Explicit;
         test.FixedState.AdditionalReferences.Add(typeof(TUnit.Core.TestAttribute).Assembly);
         test.FixedState.AdditionalReferences.Add(typeof(TUnit.Assertions.Assert).Assembly);
+
+        // With Explicit mode, we need to copy AnalyzerConfigFiles from TestState
+        // The .editorconfig is added by CSharpCodeFixVerifier base class
+        test.FixedState.AnalyzerConfigFiles.Add(("/.editorconfig", SourceText.From("""
+            is_global = true
+            end_of_line = lf
+            """)));
     }
 }

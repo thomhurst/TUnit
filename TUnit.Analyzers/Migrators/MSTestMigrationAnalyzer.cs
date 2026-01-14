@@ -31,8 +31,17 @@ public class MSTestMigrationAnalyzer : BaseMigrationAnalyzer
     protected override bool IsFrameworkTypeName(string typeName)
     {
         // Check for MSTest assertion types by name (fallback when semantic model doesn't resolve)
-        return typeName == "Assert" ||
-               typeName == "CollectionAssert" ||
+        // Note: "Assert" is intentionally NOT included here because TUnit also uses Assert.
+        // For plain "Assert" calls, we rely on namespace checks in the semantic analysis.
+        // These other types are MSTest-specific and safe to detect by name alone.
+        return typeName == "CollectionAssert" ||
                typeName == "StringAssert";
+    }
+
+    protected override bool IsFrameworkAvailable(Compilation compilation)
+    {
+        // Check if MSTest types are available in the compilation
+        // This prevents false positives after migration when MSTest assembly has been removed
+        return compilation.GetTypeByMetadataName("Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute") != null;
     }
 }

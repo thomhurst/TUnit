@@ -136,6 +136,13 @@ public abstract class BaseMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
 
         foreach (var usingDirectiveSyntax in usingDirectiveSyntaxes)
         {
+            // Skip global using directives - they are typically in a separate file
+            // and should not trigger migration diagnostics (e.g., GlobalUsings.cs)
+            if (usingDirectiveSyntax.GlobalKeyword.IsKind(SyntaxKind.GlobalKeyword))
+            {
+                continue;
+            }
+
             var nameString = usingDirectiveSyntax.Name?.ToString() ?? "";
             if (IsFrameworkUsing(nameString))
             {
@@ -148,6 +155,13 @@ public abstract class BaseMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
 
     protected virtual bool HasFrameworkTypes(SyntaxNodeAnalysisContext context, INamedTypeSymbol namedTypeSymbol, ClassDeclarationSyntax classDeclarationSyntax)
     {
+        // Skip detection if the class or its methods already have TUnit attributes
+        // This indicates migration has started and we shouldn't re-flag based on framework types
+        if (HasTUnitAttributes(namedTypeSymbol))
+        {
+            return false;
+        }
+
         var members = namedTypeSymbol.GetMembers();
 
         // Check properties, return types, and fields
@@ -199,25 +213,17 @@ public abstract class BaseMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
             {
                 // Fallback: if symbol resolution fails completely, check the syntax directly
                 // This handles cases where the semantic model hasn't fully resolved types
-                // BUT: Don't apply this fallback if TUnit using directives are present (already converted code)
+                // Note: If TUnit is available, we already returned false above, so this only
+                // runs when TUnit is not present (pure source framework project).
                 if (invocation.Expression is MemberAccessExpressionSyntax memberAccess)
                 {
-                    // Check if TUnit using directives are present
-                    var usings = classDeclarationSyntax.SyntaxTree.GetCompilationUnitRoot().Usings;
-                    var hasTUnitUsings = usings.Any(u =>
-                    {
-                        var name = u.Name?.ToString() ?? "";
-                        return name == "TUnit.Core" || name == "TUnit.Assertions" || name.StartsWith("TUnit.");
-                    });
+                    var typeExpression = memberAccess.Expression.ToString();
 
-                    // If TUnit usings are present, don't apply fallback detection
-                    if (!hasTUnitUsings)
+                    // For framework-specific types, only flag if the framework is still available
+                    // This prevents flagging after migration when the framework assembly has been removed
+                    if (IsFrameworkTypeName(typeExpression) && IsFrameworkAvailable(context.SemanticModel.Compilation))
                     {
-                        var typeExpression = memberAccess.Expression.ToString();
-                        if (IsFrameworkTypeName(typeExpression))
-                        {
-                            return true;
-                        }
+                        return true;
                     }
                 }
             }
@@ -272,6 +278,48 @@ public abstract class BaseMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
 
     protected abstract bool IsFrameworkUsing(string usingName);
     protected abstract bool IsFrameworkNamespace(string? namespaceName);
+
+    /// <summary>
+    /// Checks if the class or any of its methods have TUnit attributes.
+    /// Used to skip flagging classes that have already started migration.
+    /// </summary>
+    protected virtual bool HasTUnitAttributes(INamedTypeSymbol namedTypeSymbol)
+    {
+        // Check class-level attributes
+        foreach (var attribute in namedTypeSymbol.GetAttributes())
+        {
+            var ns = attribute.AttributeClass?.ContainingNamespace?.ToDisplayString();
+            if (ns == "TUnit.Core" || (ns?.StartsWith("TUnit.Core.") ?? false))
+            {
+                return true;
+            }
+        }
+
+        // Check method-level attributes
+        foreach (var member in namedTypeSymbol.GetMembers().OfType<IMethodSymbol>())
+        {
+            foreach (var attribute in member.GetAttributes())
+            {
+                var ns = attribute.AttributeClass?.ContainingNamespace?.ToDisplayString();
+                if (ns == "TUnit.Core" || (ns?.StartsWith("TUnit.Core.") ?? false))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Checks if the target framework is available in the compilation.
+    /// Used to avoid false positives in fallback detection after migration.
+    /// </summary>
+    protected virtual bool IsFrameworkAvailable(Compilation compilation)
+    {
+        // By default, assume framework is available. Override in derived classes.
+        return true;
+    }
 
     protected void Flag(SyntaxNodeAnalysisContext context, Location location)
     {
