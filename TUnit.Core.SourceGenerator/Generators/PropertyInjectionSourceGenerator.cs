@@ -13,7 +13,7 @@ namespace TUnit.Core.SourceGenerator.Generators;
 /// All symbol access happens in the transform step; only primitives are stored in the model.
 /// </summary>
 [Generator]
-public sealed class PropertyInjectionSourceGeneratorV2 : IIncrementalGenerator
+public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
