@@ -1,20 +1,30 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.CodeGenerators.Equality;
+using TUnit.Core.SourceGenerator.Models;
+using TUnit.Core.SourceGenerator.Models.Extracted;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators;
 
+/// <summary>
+/// Consolidated infrastructure generator that handles:
+/// 1. Disabling reflection scanner (sets SourceRegistrar.IsEnabled = true)
+/// 2. Pre-loading assemblies that reference TUnit.Core
+///
+/// This combines DisableReflectionScannerGenerator and AssemblyLoaderGenerator
+/// into a single generator for efficiency.
+/// </summary>
 [Generator]
-public class AssemblyLoaderGenerator : IIncrementalGenerator
+public class InfrastructureGenerator : IIncrementalGenerator
 {
-    private static readonly string[] _excludedAssemblies =
+    private static readonly string[] ExcludedPublicKeyTokens =
     [
-        "b77a5c561934e089",
-        "b03f5f7f11d50a3a",
-        "31bf3856ad364e35",
-        "cc7b13ffcd2ddd51",
-        "7cec85d7bea7798e",
-
+        "b77a5c561934e089", // .NET Framework
+        "b03f5f7f11d50a3a", // mscorlib
+        "31bf3856ad364e35", // Microsoft
+        "cc7b13ffcd2ddd51", // System.Private
+        "7cec85d7bea7798e", // .NET Core
     ];
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var enabledProvider = context.AnalyzerConfigOptionsProvider
@@ -24,35 +34,41 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
                 return !string.Equals(value, "false", StringComparison.OrdinalIgnoreCase);
             });
 
-        var provider = context.CompilationProvider
+        // Extract assembly names as primitives in the transform step
+        // This enables proper incremental caching
+        var assemblyInfoProvider = context.CompilationProvider
             .WithComparer(new PreventCompilationTriggerOnEveryKeystrokeComparer())
+            .Select((compilation, _) => ExtractAssemblyInfo(compilation))
             .Combine(enabledProvider);
 
-        context.RegisterSourceOutput(provider, (sourceProductionContext, data) =>
+        context.RegisterSourceOutput(assemblyInfoProvider, (sourceContext, data) =>
         {
-            var (compilation, isEnabled) = data;
+            var (assemblyInfo, isEnabled) = data;
             if (!isEnabled)
             {
                 return;
             }
 
-            GenerateCode(sourceProductionContext, compilation);
+            GenerateCode(sourceContext, assemblyInfo);
         });
     }
 
-    private void GenerateCode(SourceProductionContext context, Compilation compilation)
+    /// <summary>
+    /// Extracts all needed data as primitives in the transform step.
+    /// This enables proper incremental caching - the model contains only strings.
+    /// </summary>
+    private static AssemblyInfoModel ExtractAssemblyInfo(Compilation compilation)
     {
+        var assembliesToLoad = new List<string>();
+
         // Find TUnit.Core assembly - only assemblies referencing this can contain tests
         var tunitCoreAssembly = FindTUnitCoreAssembly(compilation);
 
         // Collect all assemblies: start with the current assembly, then traverse references
         var visitedAssemblies = new HashSet<IAssemblySymbol>(SymbolEqualityComparer.Default);
-
         var assembliesToVisit = new Queue<IAssemblySymbol>();
 
-        var currentAssembly = compilation.Assembly;
-
-        assembliesToVisit.Enqueue(currentAssembly);
+        assembliesToVisit.Enqueue(compilation.Assembly);
 
         while (assembliesToVisit.Count > 0)
         {
@@ -75,35 +91,30 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
         // Build set of assemblies that reference TUnit.Core (directly or transitively)
         var assembliesReferencingTUnit = tunitCoreAssembly != null
             ? FindAssembliesReferencingTUnitCore(visitedAssemblies, tunitCoreAssembly)
-            : visitedAssemblies; // Fallback: register all if TUnit.Core not found
+            : visitedAssemblies;
 
-        var sourceBuilder = new CodeWriter();
-
-        sourceBuilder.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]");
-        sourceBuilder.AppendLine($"[global::System.CodeDom.Compiler.GeneratedCode(\"TUnit\", \"{typeof(AssemblyLoaderGenerator).Assembly.GetName().Version}\")]");
-        using (sourceBuilder.BeginBlock("file static class AssemblyLoader" + Guid.NewGuid().ToString("N")))
+        // Extract assembly names as primitives
+        foreach (var assembly in assembliesReferencingTUnit)
         {
-            sourceBuilder.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
-            using (sourceBuilder.BeginBlock("public static void Initialize()"))
+            if (ShouldLoadAssembly(assembly, compilation))
             {
-                foreach (var assembly in assembliesReferencingTUnit)
-                {
-                    WriteAssemblyLoad(sourceBuilder, assembly, compilation);
-                }
+                assembliesToLoad.Add(GetAssemblyFullName(assembly));
             }
         }
-        context.AddSource("AssemblyLoader.g.cs", sourceBuilder.ToString());
+
+        return new AssemblyInfoModel
+        {
+            AssembliesToLoad = new EquatableArray<string>([.. assembliesToLoad])
+        };
     }
 
     private static IAssemblySymbol? FindTUnitCoreAssembly(Compilation compilation)
     {
-        // Check current assembly first
         if (compilation.Assembly.Name == "TUnit.Core")
         {
             return compilation.Assembly;
         }
 
-        // Search referenced assemblies
         foreach (var reference in compilation.References)
         {
             if (compilation.GetAssemblyOrModuleSymbol(reference) is IAssemblySymbol assemblySymbol
@@ -120,7 +131,7 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
         HashSet<IAssemblySymbol> allAssemblies,
         IAssemblySymbol tunitCoreAssembly)
     {
-        // Build reverse dependency graph: for each assembly, which assemblies reference it?
+        // Build reverse dependency graph
         var referencedBy = new Dictionary<IAssemblySymbol, List<IAssemblySymbol>>(SymbolEqualityComparer.Default);
 
         foreach (var assembly in allAssemblies)
@@ -140,7 +151,6 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
         var result = new HashSet<IAssemblySymbol>(SymbolEqualityComparer.Default);
         var queue = new Queue<IAssemblySymbol>();
 
-        // Start with TUnit.Core itself
         result.Add(tunitCoreAssembly);
         queue.Enqueue(tunitCoreAssembly);
 
@@ -148,7 +158,6 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
         {
             var current = queue.Dequeue();
 
-            // Find all assemblies that reference the current assembly
             if (referencedBy.TryGetValue(current, out var dependents))
             {
                 foreach (var dependent in dependents)
@@ -164,26 +173,41 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
         return result;
     }
 
-    private static void WriteAssemblyLoad(ICodeWriter sourceBuilder, IAssemblySymbol assembly, Compilation compilation)
+    private static bool ShouldLoadAssembly(IAssemblySymbol assembly, Compilation compilation)
     {
+        // Skip system assemblies
         if (IsSystemAssembly(assembly))
         {
-            return;
+            return false;
         }
 
         // Skip TUnit framework assemblies - they don't contain user tests
         if (IsTUnitFrameworkAssembly(assembly))
         {
-            return;
+            return false;
         }
 
-        // Only emit assembly load code if the assembly has a physical location that exists
+        // Only load assemblies with physical locations
         if (!HasPhysicalLocation(assembly, compilation))
         {
-            return;
+            return false;
         }
 
-        sourceBuilder.AppendLine($"global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load(\"{GetAssemblyFullName(assembly)}\"));");
+        return true;
+    }
+
+    private static bool IsSystemAssembly(IAssemblySymbol assemblySymbol)
+    {
+        if (assemblySymbol.Identity.PublicKeyToken.IsDefaultOrEmpty)
+        {
+            return false;
+        }
+
+        var publicKeyToken = BitConverter.ToString(assemblySymbol.Identity.PublicKeyToken.ToArray())
+            .Replace("-", "")
+            .ToLowerInvariant();
+
+        return ExcludedPublicKeyTokens.Contains(publicKeyToken);
     }
 
     private static bool IsTUnitFrameworkAssembly(IAssemblySymbol assembly)
@@ -201,38 +225,47 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
 
     private static bool HasPhysicalLocation(IAssemblySymbol assembly, Compilation compilation)
     {
-        // Find the corresponding MetadataReference for this assembly
-        var correspondingReference = compilation.References.FirstOrDefault(r => 
+        var correspondingReference = compilation.References.FirstOrDefault(r =>
             SymbolEqualityComparer.Default.Equals(compilation.GetAssemblyOrModuleSymbol(r), assembly));
 
-        // If there's no corresponding reference, the assembly doesn't have a physical location
-        if (correspondingReference is not PortableExecutableReference peRef)
-        {
-            return false;
-        }
-
-        // Check if the file path exists (don't check file system - that's not allowed in source generators)
-        return !string.IsNullOrWhiteSpace(peRef.FilePath);
-    }
-
-    private static bool IsSystemAssembly(IAssemblySymbol assemblySymbol)
-    {
-        if (assemblySymbol.Identity.PublicKeyToken.IsDefaultOrEmpty)
-        {
-            return false;
-        }
-
-        var stringPublicTokenKey = BitConverter.ToString(assemblySymbol.Identity.PublicKeyToken.ToArray())
-            .Replace("-", "")
-            .ToLowerInvariant();
-
-        return _excludedAssemblies.Contains(stringPublicTokenKey);
+        return correspondingReference is PortableExecutableReference { FilePath: not null and not "" };
     }
 
     private static string GetAssemblyFullName(IAssemblySymbol assemblySymbol)
     {
         var identity = assemblySymbol.Identity;
-        return $"{identity.Name}, Version={identity.Version}, Culture={(string.IsNullOrEmpty(identity.CultureName) ? "neutral" : identity.CultureName)}, PublicKeyToken={(identity.PublicKeyToken.Length > 0 ? BitConverter.ToString(identity.PublicKeyToken.ToArray()).Replace("-", "").ToLowerInvariant() : "null")}";
+        var culture = string.IsNullOrEmpty(identity.CultureName) ? "neutral" : identity.CultureName;
+        var publicKeyToken = identity.PublicKeyToken.Length > 0
+            ? BitConverter.ToString(identity.PublicKeyToken.ToArray()).Replace("-", "").ToLowerInvariant()
+            : "null";
+
+        return $"{identity.Name}, Version={identity.Version}, Culture={culture}, PublicKeyToken={publicKeyToken}";
+    }
+
+    private static void GenerateCode(SourceProductionContext context, AssemblyInfoModel model)
+    {
+        var sourceBuilder = new CodeWriter();
+
+        sourceBuilder.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]");
+        sourceBuilder.AppendLine($"[global::System.CodeDom.Compiler.GeneratedCode(\"TUnit\", \"{typeof(InfrastructureGenerator).Assembly.GetName().Version}\")]");
+
+        // Using 'file' keyword ensures no naming collisions without needing GUIDs
+        using (sourceBuilder.BeginBlock("file static class TUnitInfrastructure"))
+        {
+            sourceBuilder.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
+            using (sourceBuilder.BeginBlock("public static void Initialize()"))
+            {
+                // Disable reflection scanner - source generation is active
+                sourceBuilder.AppendLine("global::TUnit.Core.SourceRegistrar.IsEnabled = true;");
+
+                // Pre-load assemblies that may contain tests
+                foreach (var assemblyName in model.AssembliesToLoad)
+                {
+                    sourceBuilder.AppendLine($"global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load(\"{assemblyName}\"));");
+                }
+            }
+        }
+
+        context.AddSource("TUnitInfrastructure.g.cs", sourceBuilder.ToString());
     }
 }
-
