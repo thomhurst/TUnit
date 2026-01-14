@@ -13,6 +13,8 @@ public sealed class DynamicTestModel : IEquatable<DynamicTestModel>
     public required bool IsStatic { get; init; }
     public required bool IsAsync { get; init; }
     public required string ReturnType { get; init; }
+    public required string FilePath { get; init; }
+    public required int LineNumber { get; init; }
 
     public bool Equals(DynamicTestModel? other)
     {
