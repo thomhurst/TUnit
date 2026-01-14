@@ -42,10 +42,7 @@
 
     <!-- TUnit packages - use direct references to avoid telemetry/code coverage overhead in benchmarks -->
     <ItemGroup Condition="'$(TestFramework)' == 'TUNIT'">
-        <ProjectReference Include="..\..\..\TUnit.Engine\TUnit.Engine.csproj" />
-        <ProjectReference Include="..\..\..\TUnit.Assertions\TUnit.Assertions.csproj" />
-        <ProjectReference Include="..\..\..\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-        <PackageReference Include="Microsoft.Testing.Platform.MSBuild" />
+        <PackageReference Include="TUnit" />
     </ItemGroup>
 
     <!-- xUnit v3 packages -->
