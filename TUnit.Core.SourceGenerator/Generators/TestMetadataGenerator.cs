@@ -11,13 +11,13 @@ namespace TUnit.Core.SourceGenerator.Generators;
 /// Generates ITestSource implementations for test methods.
 /// </summary>
 [Generator]
-public sealed class TestMetadataGeneratorV2 : IIncrementalGenerator
+public sealed class TestMetadataGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         context.RegisterPostInitializationOutput(static ctx =>
         {
-            ctx.AddSource("V2_Init.g.cs", "// TestMetadataGeneratorV2 started");
+            ctx.AddSource("V2_Init.g.cs", "// TestMetadataGenerator started");
         });
 
         var tests = context.SyntaxProvider
