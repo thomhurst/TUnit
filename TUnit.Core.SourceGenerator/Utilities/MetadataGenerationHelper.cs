@@ -164,7 +164,7 @@ internal static class MetadataGenerationHelper
         }
 
         writer.Append("Properties = ");
-        WritePropertyMetadataArray(writer, typeSymbol);
+        WritePropertyMetadataArray(writer, typeSymbol, out var propertyCount);
         writer.AppendLine(",");
         writer.Append($"Parent = {parentExpression ?? "null"}");
 
@@ -173,17 +173,20 @@ internal static class MetadataGenerationHelper
         writer.AppendLine();
         writer.AppendLine("};");
 
-        // Set ClassMetadata reference on each property
-        writer.AppendLine("foreach (var prop in classMetadata.Properties)");
-        writer.AppendLine("{");
+        if (propertyCount > 0)
+        {
+            // Set ClassMetadata reference on each property
+            writer.AppendLine("foreach (var prop in classMetadata.Properties)");
+            writer.AppendLine("{");
 
-        writer.SetIndentLevel(currentIndent + 2);
-        writer.AppendLine("prop.ClassMetadata = classMetadata;");
-        writer.Append("prop.ContainingTypeMetadata = classMetadata;");
+            writer.SetIndentLevel(currentIndent + 2);
+            writer.AppendLine("prop.ClassMetadata = classMetadata;");
+            writer.Append("prop.ContainingTypeMetadata = classMetadata;");
 
-        writer.SetIndentLevel(currentIndent + 1);
-        writer.AppendLine();
-        writer.AppendLine("}");
+            writer.SetIndentLevel(currentIndent + 1);
+            writer.AppendLine();
+            writer.AppendLine("}");
+        }
         writer.Append("return classMetadata;");
 
         // Back to original level
@@ -227,22 +230,25 @@ internal static class MetadataGenerationHelper
         {
             writer.AppendLine("Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),");
         }
-        writer.AppendLine($"Properties = {GeneratePropertyMetadataArray(typeSymbol, writer.IndentLevel)},");
+        writer.AppendLine($"Properties = {GeneratePropertyMetadataArray(typeSymbol, writer.IndentLevel, out var propertyCount)},");
         writer.AppendLine($"Parent = {parentExpression ?? "null"}");
 
         writer.Unindent();
         writer.AppendLine("};");
         writer.AppendLine();
 
-        // Set ClassMetadata reference on each property
-        writer.AppendLine("foreach (var prop in classMetadata.Properties)");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("prop.ClassMetadata = classMetadata;");
-        writer.AppendLine("prop.ContainingTypeMetadata = classMetadata;");
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.AppendLine();
+        if(propertyCount > 0)
+        {
+            // Set ClassMetadata reference on each property
+            writer.AppendLine("foreach (var prop in classMetadata.Properties)");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("prop.ClassMetadata = classMetadata;");
+            writer.AppendLine("prop.ContainingTypeMetadata = classMetadata;");
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.AppendLine();
+        }
 
         writer.AppendLine("return classMetadata;");
 
@@ -561,14 +567,16 @@ internal static class MetadataGenerationHelper
     /// <summary>
     /// Writes an array of PropertyMetadata objects
     /// </summary>
-    private static void WritePropertyMetadataArray(ICodeWriter writer, INamedTypeSymbol typeSymbol)
+    private static void WritePropertyMetadataArray(ICodeWriter writer, INamedTypeSymbol typeSymbol, out int propertyCount)
     {
         var properties = typeSymbol.GetMembers()
             .OfType<IPropertySymbol>()
             .Where(p => p.DeclaredAccessibility == Accessibility.Public && p.Name != "EqualityContract")
             .ToList();
 
-        if (!properties.Any())
+        propertyCount = properties.Count;
+
+        if (properties.Count == 0)
         {
             writer.Append("global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>()");
             return;
@@ -601,14 +609,16 @@ internal static class MetadataGenerationHelper
     /// <summary>
     /// Generates an array of PropertyMetadata objects
     /// </summary>
-    private static string GeneratePropertyMetadataArray(INamedTypeSymbol typeSymbol, int currentIndentLevel = 0)
+    private static string GeneratePropertyMetadataArray(INamedTypeSymbol typeSymbol, int currentIndentLevel, out int propertyCount)
     {
         var properties = typeSymbol.GetMembers()
             .OfType<IPropertySymbol>()
             .Where(p => p.DeclaredAccessibility == Accessibility.Public && p.Name != "EqualityContract")
             .ToList();
 
-        if (!properties.Any())
+        propertyCount = properties.Count;
+
+        if (properties.Count == 0)
         {
             return "global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>()";
         }

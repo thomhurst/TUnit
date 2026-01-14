@@ -70,11 +70,6 @@ internal sealed class TUnit_TestProject_Bugs__1304_Tests_TryParse_InvalidString_
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    foreach (var prop in classMetadata.Properties)
-                    {
-                        prop.ClassMetadata = classMetadata;
-                        prop.ContainingTypeMetadata = classMetadata;
-                    }
                     return classMetadata;
                 })
             },
@@ -200,11 +195,6 @@ internal sealed class TUnit_TestProject_Bugs__1304_Tests_Parse_InvalidString_Thr
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    foreach (var prop in classMetadata.Properties)
-                    {
-                        prop.ClassMetadata = classMetadata;
-                        prop.ContainingTypeMetadata = classMetadata;
-                    }
                     return classMetadata;
                 })
             },
@@ -326,11 +316,6 @@ internal sealed class TUnit_TestProject_Bugs__1304_Tests_TryParse_ValidString_Re
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    foreach (var prop in classMetadata.Properties)
-                    {
-                        prop.ClassMetadata = classMetadata;
-                        prop.ContainingTypeMetadata = classMetadata;
-                    }
                     return classMetadata;
                 })
             },

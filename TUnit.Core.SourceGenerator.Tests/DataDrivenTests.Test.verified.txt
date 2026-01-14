@@ -61,11 +61,6 @@ internal sealed class TUnit_TestProject_DataDrivenTests_DataSource_Method__int_T
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    foreach (var prop in classMetadata.Properties)
-                    {
-                        prop.ClassMetadata = classMetadata;
-                        prop.ContainingTypeMetadata = classMetadata;
-                    }
                     return classMetadata;
                 })
             },
@@ -196,11 +191,6 @@ internal sealed class TUnit_TestProject_DataDrivenTests_DataSource_Method__int_s
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    foreach (var prop in classMetadata.Properties)
-                    {
-                        prop.ClassMetadata = classMetadata;
-                        prop.ContainingTypeMetadata = classMetadata;
-                    }
                     return classMetadata;
                 })
             },
@@ -324,11 +314,6 @@ internal sealed class TUnit_TestProject_DataDrivenTests_EnumValue__TestEnum_Test
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    foreach (var prop in classMetadata.Properties)
-                    {
-                        prop.ClassMetadata = classMetadata;
-                        prop.ContainingTypeMetadata = classMetadata;
-                    }
                     return classMetadata;
                 })
             },
@@ -450,11 +435,6 @@ internal sealed class TUnit_TestProject_DataDrivenTests_NullValue__string__TestS
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    foreach (var prop in classMetadata.Properties)
-                    {
-                        prop.ClassMetadata = classMetadata;
-                        prop.ContainingTypeMetadata = classMetadata;
-                    }
                     return classMetadata;
                 })
             },
@@ -576,11 +556,6 @@ internal sealed class TUnit_TestProject_DataDrivenTests_EmptyString__string__Tes
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    foreach (var prop in classMetadata.Properties)
-                    {
-                        prop.ClassMetadata = classMetadata;
-                        prop.ContainingTypeMetadata = classMetadata;
-                    }
                     return classMetadata;
                 })
             },
@@ -702,11 +677,6 @@ internal sealed class TUnit_TestProject_DataDrivenTests_NonEmptyString__string__
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    foreach (var prop in classMetadata.Properties)
-                    {
-                        prop.ClassMetadata = classMetadata;
-                        prop.ContainingTypeMetadata = classMetadata;
-                    }
                     return classMetadata;
                 })
             },
@@ -830,11 +800,6 @@ internal sealed class TUnit_TestProject_DataDrivenTests_BooleanString__bool__Tes
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    foreach (var prop in classMetadata.Properties)
-                    {
-                        prop.ClassMetadata = classMetadata;
-                        prop.ContainingTypeMetadata = classMetadata;
-                    }
                     return classMetadata;
                 })
             },
@@ -956,11 +921,6 @@ internal sealed class TUnit_TestProject_DataDrivenTests_Type__Type_TestSource : 
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    foreach (var prop in classMetadata.Properties)
-                    {
-                        prop.ClassMetadata = classMetadata;
-                        prop.ContainingTypeMetadata = classMetadata;
-                    }
                     return classMetadata;
                 })
             },
@@ -1082,11 +1042,6 @@ internal sealed class TUnit_TestProject_DataDrivenTests_IntegerArray__int___Test
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    foreach (var prop in classMetadata.Properties)
-                    {
-                        prop.ClassMetadata = classMetadata;
-                        prop.ContainingTypeMetadata = classMetadata;
-                    }
                     return classMetadata;
                 })
             },
@@ -1208,11 +1163,6 @@ internal sealed class TUnit_TestProject_DataDrivenTests_IntMaxValue__int_TestSou
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    foreach (var prop in classMetadata.Properties)
-                    {
-                        prop.ClassMetadata = classMetadata;
-                        prop.ContainingTypeMetadata = classMetadata;
-                    }
                     return classMetadata;
                 })
             },
