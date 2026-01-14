@@ -192,7 +192,7 @@ namespace
         public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
         [.(2)]
         public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
-        [.(2)]
+        [.(3)]
         public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
         [.(1)]
         public static .<TItem> That<TItem>(<.<TItem>?> func, [.("func")] string? expression = null) { }
@@ -208,10 +208,10 @@ namespace
         [.(5)]
         public static .<TItem> That<TItem>(TItem[]? value, [.("value")] string? expression = null) { }
         public static .<TValue> That<TValue>(TValue? value, [.("value")] string? expression = null) { }
-        [.(2)]
+        [.(3)]
         public static .<TKey, TValue> That<TKey, TValue>(.<TKey, TValue>? value, [.("value")] string? expression = null)
             where TKey :  notnull { }
-        [.(3)]
+        [.(2)]
         public static .<TKey, TValue> That<TKey, TValue>(.<TKey, TValue>? value, [.("value")] string? expression = null)
             where TKey :  notnull { }
         public static  Throws( exceptionType,  action) { }
