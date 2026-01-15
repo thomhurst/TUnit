@@ -40,7 +40,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
     public void RegisterReceivers(TestContext context, CancellationToken cancellationToken)
     {
-        List<object>? objectsToRegister = null;
+        var vlb = new ValueListBuilder<object>([null, null, null, null]);
 
         foreach (var obj in context.GetEligibleEventObjects())
         {
@@ -66,14 +66,14 @@ internal sealed class EventReceiverOrchestrator : IDisposable
             }
 
             // Defer list allocation until actually needed
-            objectsToRegister ??= [];
-            objectsToRegister.Add(obj);
+            vlb.Append(obj);
         }
 
-        if (objectsToRegister is { Count: > 0 })
+        if (vlb.Length > 0)
         {
-            _registry.RegisterReceivers(objectsToRegister);
+            _registry.RegisterReceivers(vlb.AsSpan());
         }
+        vlb.Dispose();
     }
 
 
@@ -133,6 +133,26 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         {
             return new ValueTask<IReadOnlyList<Exception>>([]);
         }
+#if NET
+        if (stage.HasValue)
+        {
+            var receivers = context.GetTestEndReceivers(stage.Value);
+            if (receivers.Length == 0)
+            {
+                return new ValueTask<IReadOnlyList<Exception>>([]);
+            }
+        }
+        else
+        {
+            var earlyReceivers = context.GetTestEndReceivers(EventReceiverStage.Early);
+            var lateReceivers = context.GetTestEndReceivers(EventReceiverStage.Late);
+
+            if (earlyReceivers.Length == 0 && lateReceivers.Length == 0)
+            {
+                return new ValueTask<IReadOnlyList<Exception>>([]);
+            }
+        }
+#endif
 
         return InvokeTestEndEventReceiversCore(context, cancellationToken, stage);
     }
@@ -241,11 +261,21 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         }
     }
 
-    public async ValueTask InvokeTestDiscoveryEventReceiversAsync(TestContext context, DiscoveredTestContext discoveredContext, CancellationToken cancellationToken)
+    public Task InvokeTestDiscoveryEventReceiversAsync(TestContext context, DiscoveredTestContext discoveredContext, CancellationToken cancellationToken)
     {
         // Use pre-computed receivers (already filtered, sorted, and scoped-attribute filtered)
         var receivers = context.GetTestDiscoveryReceivers();
 
+        if(receivers.Length == 0)
+        {
+            return Task.CompletedTask;
+        }
+
+        return InvokeTestDiscoveryEventReceiversCoreAsync(receivers, discoveredContext);
+    }
+
+    private static async Task InvokeTestDiscoveryEventReceiversCoreAsync(ITestDiscoveryEventReceiver[] receivers, DiscoveredTestContext discoveredContext)
+    {
         foreach (var receiver in receivers)
         {
             await receiver.OnTestDiscovered(discoveredContext);
