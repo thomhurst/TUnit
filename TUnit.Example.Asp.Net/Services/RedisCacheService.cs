@@ -57,7 +57,8 @@ public class RedisCacheService : ICacheService, IAsyncDisposable
         _logger.LogDebug("Setting cache key {Key}", prefixedKey);
 
         var db = await GetDatabaseAsync();
-        await db.StringSetAsync(prefixedKey, value, expiry);
+        var expiration = expiry.HasValue ? expiry.Value : Expiration.Default;
+        await db.StringSetAsync(prefixedKey, value, expiration);
 
         _logger.LogInformation("Cached value for key {Key}, expiry={Expiry}", prefixedKey, expiry?.ToString() ?? "none");
     }
