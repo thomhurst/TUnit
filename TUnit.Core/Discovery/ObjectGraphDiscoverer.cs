@@ -97,7 +97,7 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
     private delegate void RootObjectCallback(object obj);
 
     /// <inheritdoc />
-    public IObjectGraph DiscoverObjectGraph(TestContext testContext, CancellationToken cancellationToken = default)
+    public ObjectGraph DiscoverObjectGraph(TestContext testContext, CancellationToken cancellationToken = default)
     {
         var objectsByDepth = new ConcurrentDictionary<int, HashSet<object>>();
         var allObjects = new HashSet<object>(ReferenceComparer);
@@ -128,11 +128,11 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
             obj => DiscoverNestedObjects(obj, objectsByDepth, visitedObjects, allObjects, allObjectsLock, currentDepth: 1, cancellationToken),
             cancellationToken);
 
-        return new ObjectGraph(objectsByDepth, allObjects);
+        return new ObjectGraph(objectsByDepth);
     }
 
     /// <inheritdoc />
-    public IObjectGraph DiscoverNestedObjectGraph(object rootObject, CancellationToken cancellationToken = default)
+    public ObjectGraph DiscoverNestedObjectGraph(object rootObject, CancellationToken cancellationToken = default)
     {
         var objectsByDepth = new ConcurrentDictionary<int, HashSet<object>>();
         var allObjects = new HashSet<object>(ReferenceComparer);
@@ -150,7 +150,7 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
             DiscoverNestedObjects(rootObject, objectsByDepth, visitedObjects, allObjects, allObjectsLock, currentDepth: 1, cancellationToken);
         }
 
-        return new ObjectGraph(objectsByDepth, allObjects);
+        return new ObjectGraph(objectsByDepth);
     }
 
     /// <summary>
