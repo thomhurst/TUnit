@@ -36,53 +36,158 @@ Migrating from MSTest to TUnit can improve test execution speed. Check the [benc
 
 ## Automated Migration with Code Fixers
 
-TUnit includes code fixers that automate most of the migration work.
+TUnit includes Roslyn analyzers and code fixers that automate most of the migration work. The `TUMS0001` diagnostic identifies MSTest code patterns and provides automatic fixes to convert them to TUnit equivalents.
 
-**What gets converted:**
-- Tests to `async Task` with awaited assertions
-- Removes `[TestClass]`, converts `[TestMethod]` → `[Test]`
-- MSTest assertions to TUnit's fluent syntax
-- `[DataRow]` → `[Arguments]`, `[DynamicData]` → `[MethodDataSource]`
-- `[TestInitialize]`/`[TestCleanup]` → `[Before(Test)]`/`[After(Test)]`
+**What gets converted automatically:**
+- `[TestClass]` → removed (not needed in TUnit)
+- `[TestMethod]` → `[Test]`
+- `[DataTestMethod]` → `[Test]`
+- `[DataRow(...)]` → `[Arguments(...)]`
+- `[DynamicData(nameof(...), ...)]` → `[MethodDataSource(nameof(...))]`
+- `[TestInitialize]` → `[Before(Test)]`
+- `[TestCleanup]` → `[After(Test)]`
+- `[ClassInitialize]` → `[Before(Class)]` (removes `TestContext` parameter)
+- `[ClassCleanup]` → `[After(Class)]`
+- `[AssemblyInitialize]` → `[Before(Assembly)]` (removes `TestContext` parameter)
+- `[AssemblyCleanup]` → `[After(Assembly)]`
+- `[Ignore]` → `[Skip]`
+- `[TestCategory("...")]` → `[Property("Category", "...")]`
+- `[Priority(n)]` → `[Property("Priority", "n")]`
+- `[Owner("...")]` → `[Property("Owner", "...")]`
+- `Assert.AreEqual(expected, actual)` → `await Assert.That(actual).IsEqualTo(expected)`
+- `Assert.IsTrue(condition)` → `await Assert.That(condition).IsTrue()`
+- `Assert.ThrowsException<T>(...)` → `await Assert.ThrowsAsync<T>(...)`
+- Test methods converted to `async Task` with `await` on assertions
 
-The code fixer handles most common patterns automatically (roughly 80-90% of typical test suites). You'll need to manually adjust complex cases like TestContext usage or intricate async patterns.
+The code fixer handles roughly 80-90% of typical test suites automatically.
 
-If you find something that should be automated but isn't, please [open an issue](https://github.com/thomhurst/TUnit/issues).
+**What requires manual adjustment:**
+- `public TestContext TestContext { get; set; }` property → inject `TestContext` as method parameter instead
+- `[ClassInitialize]` / `[AssemblyInitialize]` methods that use the `TestContext` parameter
+- Custom `[DynamicData]` return types (convert `IEnumerable<object[]>` to `IEnumerable<(...)>` tuples)
+- `[DeploymentItem]` attributes → configure file copying in `.csproj` instead
+- `Assert.Inconclusive("...")` → `Skip.Test("...")`
+- `[ExpectedException]` attribute (deprecated) → `await Assert.ThrowsAsync<T>(...)`
+- Complex `TestContext` property access patterns
 
-### Steps
+If you find a common pattern that should be automated but isn't, please [open an issue](https://github.com/thomhurst/TUnit/issues).
 
-#### Install the TUnit packages to your test projects
-Use your IDE or the dotnet CLI to add the TUnit packages to your test projects
+### Prerequisites
 
-#### Remove the automatically added global usings
-In your csproj add:
+- .NET SDK 8.0 or later (for `dotnet format` with analyzer support)
+- TUnit packages installed in your test project
 
-```xml
-    <PropertyGroup>
-        <TUnitImplicitUsings>false</TUnitImplicitUsings>
-        <TUnitAssertionsImplicitUsings>false</TUnitAssertionsImplicitUsings>
-    </PropertyGroup>
+### Step-by-Step Migration
+
+:::tip Safety First
+Commit your changes or create a backup before running the code fixer. This allows you to review changes and revert if needed.
+:::
+
+**1. Install TUnit packages**
+
+Add the TUnit packages to your test project alongside MSTest (temporarily):
+
+```bash
+dotnet add package TUnit
 ```
 
-This is temporary - Just to make sure no types clash, and so the code fixers can distinguish between MSTest and TUnit types with similar names.
+**2. Disable TUnit's implicit usings (temporary)**
 
-#### Rebuild the project
-This ensures the TUnit packages have been restored and the analyzers should be loaded.
+Add these properties to your `.csproj` to prevent type name conflicts between MSTest and TUnit:
 
-#### Run the code fixer via the dotnet CLI
+```xml
+<PropertyGroup>
+    <TUnitImplicitUsings>false</TUnitImplicitUsings>
+    <TUnitAssertionsImplicitUsings>false</TUnitAssertionsImplicitUsings>
+</PropertyGroup>
+```
 
-`dotnet format analyzers --severity info --diagnostics TUMS0001`
+This allows the code fixer to distinguish between `Microsoft.VisualStudio.TestTools.UnitTesting.Assert` and `TUnit.Assertions.Assert`.
 
-#### Revert step `Remove the automatically added global usings`
+**3. Rebuild the project**
 
-#### Perform any manual bits that are still necessary
-Review the converted code and make any necessary manual adjustments.
-Raise an issue if you think something could be automated.
+```bash
+dotnet build
+```
 
-#### Remove the MSTest packages
-Simply uninstall them once you've migrated
+This restores packages and loads the TUnit analyzers. You should see `TUMS0001` warnings in your build output for MSTest code that can be converted.
 
-#### Done! (Hopefully)
+**4. Run the automated code fixer**
+
+```bash
+dotnet format analyzers --severity info --diagnostics TUMS0001
+```
+
+This command applies all available fixes for the `TUMS0001` diagnostic. You'll see output indicating which files were modified.
+
+**5. Remove the implicit usings workaround**
+
+Remove or comment out the properties you added in step 2:
+
+```xml
+<!-- Remove these lines -->
+<PropertyGroup>
+    <TUnitImplicitUsings>false</TUnitImplicitUsings>
+    <TUnitAssertionsImplicitUsings>false</TUnitAssertionsImplicitUsings>
+</PropertyGroup>
+```
+
+**6. Fix remaining issues manually**
+
+Build the project and address any remaining compilation errors:
+
+```bash
+dotnet build
+```
+
+Common manual fixes needed:
+- Replace `public TestContext TestContext { get; set; }` with `TestContext` method parameter
+- Remove `TestContext` parameter from `[ClassInitialize]` and `[AssemblyInitialize]` methods
+- Convert data source methods to return tuples instead of `object[]`
+- Replace `[DeploymentItem]` with `.csproj` file copy configuration
+- Replace `Assert.Inconclusive(...)` with `Skip.Test(...)`
+- Add `using TUnit.Core;` and `using TUnit.Assertions;` if not using implicit usings
+
+**7. Remove MSTest packages**
+
+Once everything compiles and tests pass:
+
+```bash
+dotnet remove package MSTest.TestFramework
+dotnet remove package MSTest.TestAdapter
+```
+
+**8. Verify the migration**
+
+```bash
+dotnet build
+dotnet run -- --list-tests
+```
+
+### Troubleshooting
+
+**Code fixer doesn't run / no files changed:**
+- Ensure you rebuilt after adding TUnit packages
+- Check that `TUMS0001` warnings appear in build output
+- Try running with verbose output: `dotnet format analyzers --severity info --diagnostics TUMS0001 --verbosity detailed`
+
+**Build errors after running code fixer:**
+- Missing `await` keywords: ensure test methods are `async Task`
+- Ambiguous `Assert`: remove MSTest usings or fully qualify types
+- Type mismatch in data sources: convert `IEnumerable<object[]>` returns to `IEnumerable<(...)>` tuples
+
+**TestContext errors:**
+- Remove the `public TestContext TestContext { get; set; }` property
+- Add `TestContext context` parameter to test methods that need it
+- Access output via `context.OutputWriter.WriteLine(...)` instead of `TestContext.WriteLine(...)`
+
+**ClassInitialize/AssemblyInitialize errors:**
+- Remove the `TestContext context` parameter from these methods
+- If you need test context in setup, use `[Before(Test)]` instead which can receive `TestContext`
+
+**Analyzers not loading:**
+- Verify TUnit package is installed: `dotnet list package`
+- Try cleaning and rebuilding: `dotnet clean && dotnet build`
 
 ## Manual Migration Guide
 

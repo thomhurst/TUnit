@@ -31,53 +31,140 @@ Migrating from NUnit to TUnit can improve test execution speed. Check the [bench
 
 ## Automated Migration with Code Fixers
 
-TUnit includes code fixers that automate most of the migration work.
+TUnit includes Roslyn analyzers and code fixers that automate most of the migration work. The `TUNU0001` diagnostic identifies NUnit code patterns and provides automatic fixes to convert them to TUnit equivalents.
 
-**What gets converted:**
-- Tests to `async Task` with awaited assertions
-- Removes `[TestFixture]`, converts `[TestCase]` → `[Arguments]`
-- Both classic and constraint-based NUnit assertions to TUnit's fluent syntax
-- `[TestCaseSource]` → `[MethodDataSource]`
-- `[SetUp]`/`[TearDown]` → `[Before(Test)]`/`[After(Test)]`
+**What gets converted automatically:**
+- `[TestFixture]` → removed (not needed in TUnit)
+- `[Test]` → `[Test]` (stays the same)
+- `[TestCase(...)]` → `[Arguments(...)]`
+- `[TestCaseSource(nameof(...))]` → `[MethodDataSource(nameof(...))]`
+- `[SetUp]` → `[Before(Test)]`
+- `[TearDown]` → `[After(Test)]`
+- `[OneTimeSetUp]` → `[Before(Class)]`
+- `[OneTimeTearDown]` → `[After(Class)]`
+- `[Ignore]` → `[Skip]`
+- `[Category("...")]` → `[Property("Category", "...")]`
+- Classic assertions: `Assert.AreEqual(expected, actual)` → `await Assert.That(actual).IsEqualTo(expected)`
+- Constraint assertions: `Assert.That(actual, Is.EqualTo(expected))` → `await Assert.That(actual).IsEqualTo(expected)`
+- Test methods converted to `async Task` with `await` on assertions
 
-The code fixer handles most common patterns automatically (roughly 80-90% of typical test suites). You'll need to manually adjust complex cases like custom fixtures or intricate async patterns.
+The code fixer handles roughly 80-90% of typical test suites automatically.
 
-If you find something that should be automated but isn't, please [open an issue](https://github.com/thomhurst/TUnit/issues).
+**What requires manual adjustment:**
+- Custom `[TestCaseSource]` return types (convert `object[]` to tuples)
+- Complex async patterns or custom awaitable types
+- Custom fixtures or test base classes
+- `[SetUpFixture]` with namespace-scoped setup (convert to assembly hooks)
+- `TestContext.CurrentContext` static access (inject `TestContext` as parameter instead)
+- `Assert.Multiple` blocks (use assertion groups or multiple awaited assertions)
 
-### Steps
+If you find a common pattern that should be automated but isn't, please [open an issue](https://github.com/thomhurst/TUnit/issues).
 
-#### Install the TUnit packages to your test projects
-Use your IDE or the dotnet CLI to add the TUnit packages to your test projects
+### Prerequisites
 
-#### Remove the automatically added global usings
-In your csproj add:
+- .NET SDK 8.0 or later (for `dotnet format` with analyzer support)
+- TUnit packages installed in your test project
 
-```xml
-    <PropertyGroup>
-        <TUnitImplicitUsings>false</TUnitImplicitUsings>
-        <TUnitAssertionsImplicitUsings>false</TUnitAssertionsImplicitUsings>
-    </PropertyGroup>
+### Step-by-Step Migration
+
+:::tip Safety First
+Commit your changes or create a backup before running the code fixer. This allows you to review changes and revert if needed.
+:::
+
+**1. Install TUnit packages**
+
+Add the TUnit packages to your test project alongside NUnit (temporarily):
+
+```bash
+dotnet add package TUnit
 ```
 
-This is temporary - Just to make sure no types clash, and so the code fixers can distinguish between NUnit and TUnit types with similar names.
+**2. Disable TUnit's implicit usings (temporary)**
 
-#### Rebuild the project
-This ensures the TUnit packages have been restored and the analyzers should be loaded.
+Add these properties to your `.csproj` to prevent type name conflicts between NUnit and TUnit:
 
-#### Run the code fixer via the dotnet CLI
+```xml
+<PropertyGroup>
+    <TUnitImplicitUsings>false</TUnitImplicitUsings>
+    <TUnitAssertionsImplicitUsings>false</TUnitAssertionsImplicitUsings>
+</PropertyGroup>
+```
 
-`dotnet format analyzers --severity info --diagnostics TUNU0001`
+This allows the code fixer to distinguish between `NUnit.Framework.Assert` and `TUnit.Assertions.Assert`.
 
-#### Revert step `Remove the automatically added global usings`
+**3. Rebuild the project**
 
-#### Perform any manual bits that are still necessary
-Review the converted code and make any necessary manual adjustments.
-Raise an issue if you think something could be automated.
+```bash
+dotnet build
+```
 
-#### Remove the NUnit packages
-Simply uninstall them once you've migrated
+This restores packages and loads the TUnit analyzers. You should see `TUNU0001` warnings in your build output for NUnit code that can be converted.
 
-#### Done! (Hopefully)
+**4. Run the automated code fixer**
+
+```bash
+dotnet format analyzers --severity info --diagnostics TUNU0001
+```
+
+This command applies all available fixes for the `TUNU0001` diagnostic. You'll see output indicating which files were modified.
+
+**5. Remove the implicit usings workaround**
+
+Remove or comment out the properties you added in step 2:
+
+```xml
+<!-- Remove these lines -->
+<PropertyGroup>
+    <TUnitImplicitUsings>false</TUnitImplicitUsings>
+    <TUnitAssertionsImplicitUsings>false</TUnitAssertionsImplicitUsings>
+</PropertyGroup>
+```
+
+**6. Fix remaining issues manually**
+
+Build the project and address any remaining compilation errors:
+
+```bash
+dotnet build
+```
+
+Common manual fixes needed:
+- Add `using TUnit.Core;` and `using TUnit.Assertions;` if not using implicit usings
+- Convert data source methods to return tuples instead of `object[]`
+- Replace `TestContext.CurrentContext` with injected `TestContext` parameter
+- Update any custom assertion extensions
+
+**7. Remove NUnit packages**
+
+Once everything compiles and tests pass:
+
+```bash
+dotnet remove package NUnit
+dotnet remove package NUnit3TestAdapter
+```
+
+**8. Verify the migration**
+
+```bash
+dotnet build
+dotnet run -- --list-tests
+```
+
+### Troubleshooting
+
+**Code fixer doesn't run / no files changed:**
+- Ensure you rebuilt after adding TUnit packages
+- Check that `TUNU0001` warnings appear in build output
+- Try running with verbose output: `dotnet format analyzers --severity info --diagnostics TUNU0001 --verbosity detailed`
+
+**Build errors after running code fixer:**
+- Missing `await` keywords: ensure test methods are `async Task`
+- Ambiguous `Assert`: remove NUnit usings or fully qualify types
+- Type mismatch in data sources: convert `object[]` returns to tuples
+
+**Analyzers not loading:**
+- Verify TUnit package is installed: `dotnet list package`
+- Try cleaning and rebuilding: `dotnet clean && dotnet build`
 
 ## Manual Migration Guide
 
