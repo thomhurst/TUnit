@@ -437,25 +437,47 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
             return;
         }
 
-        // Try source-generated metadata first (AOT-compatible)
-        var registeredProperties = InitializerPropertyRegistry.GetProperties(type);
-        if (registeredProperties != null)
+        // Track processed property names to handle overrides correctly
+        // (derived class properties take precedence over base class properties)
+        var processedPropertyNames = new HashSet<string>(StringComparer.Ordinal);
+        var hasAnySourceGenRegistration = false;
+
+        // Walk up the inheritance chain to find all IAsyncInitializer properties
+        // This ensures base class properties are discovered even when derived class has source-gen registration
+        var currentType = type;
+        while (currentType != null && currentType != typeof(object))
         {
-            TraverseRegisteredInitializerProperties(obj, type, registeredProperties, tryAdd, recurse, currentDepth, cancellationToken);
-            return;
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var registeredProperties = InitializerPropertyRegistry.GetProperties(currentType);
+            if (registeredProperties != null)
+            {
+                hasAnySourceGenRegistration = true;
+                TraverseRegisteredInitializerPropertiesWithTracking(
+                    obj, currentType, registeredProperties, processedPropertyNames,
+                    tryAdd, recurse, currentDepth, cancellationToken);
+            }
+
+            currentType = currentType.BaseType;
         }
 
-        // Fall back to reflection (non-AOT path)
-        TraverseInitializerPropertiesViaReflection(obj, type, tryAdd, recurse, currentDepth, cancellationToken);
+        // If no source-gen registration was found in the entire hierarchy, fall back to reflection
+        // Reflection path already handles inheritance correctly via GetProperties without DeclaredOnly
+        if (!hasAnySourceGenRegistration)
+        {
+            TraverseInitializerPropertiesViaReflection(obj, type, tryAdd, recurse, currentDepth, cancellationToken);
+        }
     }
 
     /// <summary>
-    /// Traverses IAsyncInitializer properties using source-generated metadata (AOT-compatible).
+    /// Traverses source-generated IAsyncInitializer properties with property name tracking.
+    /// Skips properties that have already been processed (handles overrides in derived classes).
     /// </summary>
-    private static void TraverseRegisteredInitializerProperties(
+    private static void TraverseRegisteredInitializerPropertiesWithTracking(
         object obj,
         Type type,
         InitializerPropertyInfo[] properties,
+        HashSet<string> processedPropertyNames,
         TryAddObjectFunc tryAdd,
         RecurseFunc recurse,
         int currentDepth,
@@ -464,6 +486,12 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         foreach (var propInfo in properties)
         {
             cancellationToken.ThrowIfCancellationRequested();
+
+            // Skip if already processed (overridden in derived class)
+            if (!processedPropertyNames.Add(propInfo.PropertyName))
+            {
+                continue;
+            }
 
             try
             {
