@@ -152,6 +152,21 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     }
 
     /// <summary>
+    /// Initializes an object and its nested IAsyncInitializer objects for execution.
+    /// Used to initialize data source objects before they are passed to the test constructor.
+    /// </summary>
+    public async Task InitializeObjectForExecutionAsync(object? obj, CancellationToken cancellationToken = default)
+    {
+        if (obj is null)
+        {
+            return;
+        }
+
+        await InitializeNestedObjectsForExecutionAsync(obj, cancellationToken);
+        await ObjectInitializer.InitializeAsync(obj, cancellationToken);
+    }
+
+    /// <summary>
     /// Sets already-cached property values on a test class instance.
     /// This is used to apply cached property values to new instances created during retries.
     /// </summary>
