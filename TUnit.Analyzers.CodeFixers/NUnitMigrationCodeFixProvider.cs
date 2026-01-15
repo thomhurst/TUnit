@@ -437,11 +437,39 @@ public class NUnitAttributeRewriter : AttributeRewriter
     {
         return attributeName switch
         {
+            "Test" or "Theory" => ConvertTestArguments(argumentList),
             "TestCase" => ConvertTestCaseArguments(argumentList),
             "TestCaseSource" => ConvertTestCaseSourceArguments(argumentList),
             "Category" => ConvertCategoryArguments(argumentList),
             _ => argumentList
         };
+    }
+
+    private AttributeArgumentListSyntax? ConvertTestArguments(AttributeArgumentListSyntax argumentList)
+    {
+        // NUnit's [Test] attribute supports Description, Author, ExpectedResult, TestOf, etc.
+        // TUnit's [Test] attribute does not support these named properties.
+        // Strip all named arguments - they will be converted to [Property] attributes
+        // by NUnitTestCasePropertyRewriter (for Description and Author).
+        // ExpectedResult is not applicable for [Test] without parameters.
+
+        // If all arguments are named properties to strip, return null to remove argument list entirely
+        if (argumentList.Arguments.All(arg => arg.NameEquals != null))
+        {
+            return null;
+        }
+
+        // Keep only positional arguments (shouldn't normally exist for [Test])
+        var positionalArgs = argumentList.Arguments
+            .Where(arg => arg.NameEquals == null)
+            .ToList();
+
+        if (positionalArgs.Count == 0)
+        {
+            return null;
+        }
+
+        return SyntaxFactory.AttributeArgumentList(SyntaxFactory.SeparatedList(positionalArgs));
     }
 
     private AttributeArgumentListSyntax ConvertTestCaseArguments(AttributeArgumentListSyntax argumentList)

@@ -202,7 +202,63 @@ public class NUnitMigrationAnalyzerTests
             ConfigureNUnitTest
         );
     }
-    
+
+    [Test]
+    public async Task NUnit_Static_Using_Directive_Removed()
+    {
+        // Issue #4422: Static using directives should also be removed
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+                using static NUnit.Framework.Assert;
+
+                public class MyClass
+                {
+                    {|#0:[Test]|}
+                    public void MyMethod() { }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+
+                public class MyClass
+                {
+                    [Test]
+                    public void MyMethod() { }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_Subnamespace_Using_Directive_Removed()
+    {
+        // Issue #4422: Subnamespace using directives should also be removed
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+                using NUnit.Framework.Internal;
+
+                public class MyClass
+                {
+                    {|#0:[Test]|}
+                    public void MyMethod() { }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+
+                public class MyClass
+                {
+                    [Test]
+                    public void MyMethod() { }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
     [Test]
     public async Task NUnit_SetUp_TearDown_Converted()
     {
@@ -2702,6 +2758,103 @@ public class NUnitMigrationAnalyzerTests
                 public class MyClass
                 {
                     [Test]
+                    public void TestMethod()
+                    {
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_Test_Attribute_With_Description_Converted()
+    {
+        // Issue #4426: [Test(Description = "...")] should be converted properly
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                public class MyClass
+                {
+                    {|#0:[Test(Description = "This is a test description")]|}
+                    public void TestMethod()
+                    {
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+
+                public class MyClass
+                {
+                    [Test]
+                    [Property("Description", "This is a test description")]
+                    public void TestMethod()
+                    {
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_Test_Attribute_With_Author_Converted()
+    {
+        // [Test(Author = "...")] should be converted to [Test] + [Property("Author", "...")]
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                public class MyClass
+                {
+                    {|#0:[Test(Author = "John Doe")]|}
+                    public void TestMethod()
+                    {
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+
+                public class MyClass
+                {
+                    [Test]
+                    [Property("Author", "John Doe")]
+                    public void TestMethod()
+                    {
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_Test_Attribute_With_Multiple_Properties_Converted()
+    {
+        // [Test(Description = "...", Author = "...")] should be converted properly
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                public class MyClass
+                {
+                    {|#0:[Test(Description = "Test description", Author = "Jane Doe")]|}
+                    public void TestMethod()
+                    {
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+
+                public class MyClass
+                {
+                    [Test]
+                    [Property("Description", "Test description")]
+                    [Property("Author", "Jane Doe")]
                     public void TestMethod()
                     {
                     }
