@@ -359,6 +359,23 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
                     // Check constructor arguments for type parameters
                     foreach (var ctorArg in attr.ConstructorArguments)
                     {
+                        // Handle arrays - iterate over values to find concrete generic types
+                        if (ctorArg.Kind == TypedConstantKind.Array)
+                        {
+                            foreach (var arrayElement in ctorArg.Values)
+                            {
+                                if (arrayElement.Value is INamedTypeSymbol elementType && IsConcreteGenericType(elementType))
+                                {
+                                    var model = CreateConcreteGenericModel(elementType, dataSourceInterface, asyncInitializerInterface);
+                                    if (model != null)
+                                    {
+                                        results.Add(model);
+                                    }
+                                }
+                            }
+                            continue;
+                        }
+
                         if (ctorArg.Value is INamedTypeSymbol argType && IsConcreteGenericType(argType))
                         {
                             var model = CreateConcreteGenericModel(argType, dataSourceInterface, asyncInitializerInterface);
