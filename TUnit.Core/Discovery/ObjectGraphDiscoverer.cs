@@ -342,24 +342,18 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
             return;
         }
 
-        // The two modes differ in how they choose source-gen vs reflection:
-        // - Standard mode: Uses plan.SourceGeneratedProperties.Length > 0
-        // - Tracking mode: Uses SourceRegistrar.IsEnabled
-        bool useSourceGen = useSourceRegistrarCheck
-            ? SourceRegistrar.IsEnabled
-            : plan.SourceGeneratedProperties.Length > 0;
+        // Both modes should use source-gen ONLY if we actually have source-generated properties.
+        // This ensures fallback to reflection when source-gen is enabled but no metadata was generated
+        // for a specific type (e.g., user's WebApplicationFactory that wasn't processed by the generator).
+        bool useSourceGen = plan.SourceGeneratedProperties.Length > 0;
 
         if (useSourceGen)
         {
             TraverseSourceGeneratedProperties(obj, plan.SourceGeneratedProperties, tryAdd, recurse, currentDepth, cancellationToken);
         }
-        else
+        else if (plan.ReflectionProperties.Length > 0)
         {
-            var reflectionProps = useSourceRegistrarCheck
-                ? plan.ReflectionProperties
-                : (plan.ReflectionProperties.Length > 0 ? plan.ReflectionProperties : []);
-
-            TraverseReflectionProperties(obj, reflectionProps, tryAdd, recurse, currentDepth, cancellationToken);
+            TraverseReflectionProperties(obj, plan.ReflectionProperties, tryAdd, recurse, currentDepth, cancellationToken);
         }
     }
 
@@ -443,25 +437,47 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
             return;
         }
 
-        // Try source-generated metadata first (AOT-compatible)
-        var registeredProperties = InitializerPropertyRegistry.GetProperties(type);
-        if (registeredProperties != null)
+        // Track processed property names to handle overrides correctly
+        // (derived class properties take precedence over base class properties)
+        var processedPropertyNames = new HashSet<string>(StringComparer.Ordinal);
+        var hasAnySourceGenRegistration = false;
+
+        // Walk up the inheritance chain to find all IAsyncInitializer properties
+        // This ensures base class properties are discovered even when derived class has source-gen registration
+        var currentType = type;
+        while (currentType != null && currentType != typeof(object))
         {
-            TraverseRegisteredInitializerProperties(obj, type, registeredProperties, tryAdd, recurse, currentDepth, cancellationToken);
-            return;
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var registeredProperties = InitializerPropertyRegistry.GetProperties(currentType);
+            if (registeredProperties != null)
+            {
+                hasAnySourceGenRegistration = true;
+                TraverseRegisteredInitializerPropertiesWithTracking(
+                    obj, currentType, registeredProperties, processedPropertyNames,
+                    tryAdd, recurse, currentDepth, cancellationToken);
+            }
+
+            currentType = currentType.BaseType;
         }
 
-        // Fall back to reflection (non-AOT path)
-        TraverseInitializerPropertiesViaReflection(obj, type, tryAdd, recurse, currentDepth, cancellationToken);
+        // If no source-gen registration was found in the entire hierarchy, fall back to reflection
+        // Reflection path already handles inheritance correctly via GetProperties without DeclaredOnly
+        if (!hasAnySourceGenRegistration)
+        {
+            TraverseInitializerPropertiesViaReflection(obj, type, tryAdd, recurse, currentDepth, cancellationToken);
+        }
     }
 
     /// <summary>
-    /// Traverses IAsyncInitializer properties using source-generated metadata (AOT-compatible).
+    /// Traverses source-generated IAsyncInitializer properties with property name tracking.
+    /// Skips properties that have already been processed (handles overrides in derived classes).
     /// </summary>
-    private static void TraverseRegisteredInitializerProperties(
+    private static void TraverseRegisteredInitializerPropertiesWithTracking(
         object obj,
         Type type,
         InitializerPropertyInfo[] properties,
+        HashSet<string> processedPropertyNames,
         TryAddObjectFunc tryAdd,
         RecurseFunc recurse,
         int currentDepth,
@@ -470,6 +486,12 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         foreach (var propInfo in properties)
         {
             cancellationToken.ThrowIfCancellationRequested();
+
+            // Skip if already processed (overridden in derived class)
+            if (!processedPropertyNames.Add(propInfo.PropertyName))
+            {
+                continue;
+            }
 
             try
             {

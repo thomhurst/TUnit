@@ -220,3 +220,66 @@ internal sealed record InitializerPropertyModel : IEquatable<InitializerProperty
         }
     }
 }
+
+/// <summary>
+/// Model for a concrete instantiation of a generic type discovered at compile time.
+/// Used for generating source metadata for generic types (e.g., CustomWebApplicationFactory&lt;Program&gt;).
+/// </summary>
+internal sealed record ConcreteGenericTypeModel : IEquatable<ConcreteGenericTypeModel>
+{
+    /// <summary>
+    /// Fully qualified name of the concrete type (e.g., "global::MyNamespace.GenericClass&lt;System.String&gt;")
+    /// </summary>
+    public required string ConcreteTypeFullyQualified { get; init; }
+
+    /// <summary>
+    /// Safe type name for use in file names and class names
+    /// </summary>
+    public required string SafeTypeName { get; init; }
+
+    /// <summary>
+    /// Whether this type implements IAsyncInitializer
+    /// </summary>
+    public required bool ImplementsIAsyncInitializer { get; init; }
+
+    /// <summary>
+    /// Whether this type (or its base types) has properties with IDataSourceAttribute
+    /// </summary>
+    public required bool HasDataSourceProperties { get; init; }
+
+    /// <summary>
+    /// Properties with IDataSourceAttribute (from this type and base types)
+    /// </summary>
+    public required EquatableArray<PropertyDataSourceModel> DataSourceProperties { get; init; }
+
+    /// <summary>
+    /// Properties that return IAsyncInitializer types
+    /// </summary>
+    public required EquatableArray<InitializerPropertyModel> InitializerProperties { get; init; }
+
+    public bool Equals(ConcreteGenericTypeModel? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return ConcreteTypeFullyQualified == other.ConcreteTypeFullyQualified
+            && SafeTypeName == other.SafeTypeName
+            && ImplementsIAsyncInitializer == other.ImplementsIAsyncInitializer
+            && HasDataSourceProperties == other.HasDataSourceProperties
+            && DataSourceProperties.Equals(other.DataSourceProperties)
+            && InitializerProperties.Equals(other.InitializerProperties);
+    }
+
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            var hash = ConcreteTypeFullyQualified.GetHashCode();
+            hash = (hash * 397) ^ SafeTypeName.GetHashCode();
+            hash = (hash * 397) ^ ImplementsIAsyncInitializer.GetHashCode();
+            hash = (hash * 397) ^ HasDataSourceProperties.GetHashCode();
+            hash = (hash * 397) ^ DataSourceProperties.GetHashCode();
+            hash = (hash * 397) ^ InitializerProperties.GetHashCode();
+            return hash;
+        }
+    }
+}
