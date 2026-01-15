@@ -13,7 +13,7 @@ namespace TUnit.Core.Discovery;
 /// </remarks>
 internal readonly struct ObjectGraph
 {
-    private readonly ConcurrentDictionary<int, HashSet<object>> _objectsByDepth;
+    private readonly Dictionary<int, HashSet<object>> _objectsByDepth;
 
     // Cached sorted depths (computed once in constructor)
     private readonly int[] _sortedDepthsDescending;
@@ -22,8 +22,7 @@ internal readonly struct ObjectGraph
     /// Creates a new object graph from the discovered objects.
     /// </summary>
     /// <param name="objectsByDepth">Objects organized by depth level.</param>
-    /// <param name="allObjects">All unique objects in the graph.</param>
-    public ObjectGraph(ConcurrentDictionary<int, HashSet<object>> objectsByDepth)
+    public ObjectGraph(Dictionary<int, HashSet<object>> objectsByDepth)
     {
         _objectsByDepth = objectsByDepth;
 

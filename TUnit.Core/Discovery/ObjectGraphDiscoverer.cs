@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using TUnit.Core.Helpers;
+using TUnit.Core.Extensions;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Interfaces.SourceGenerator;
 using TUnit.Core.PropertyInjection;
@@ -99,24 +99,18 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
     /// <inheritdoc />
     public ObjectGraph DiscoverObjectGraph(TestContext testContext, CancellationToken cancellationToken = default)
     {
-        var objectsByDepth = new ConcurrentDictionary<int, HashSet<object>>();
-        var allObjects = new HashSet<object>(ReferenceComparer);
-        var allObjectsLock = new object(); // Thread-safety for allObjects HashSet
-        var visitedObjects = new ConcurrentDictionary<object, byte>(ReferenceComparer);
+        var objectsByDepth = new Dictionary<int, HashSet<object>>();
+        var visitedObjects = new HashSet<object>(ReferenceComparer);
 
         // Standard mode add callback (thread-safe)
         bool TryAddStandard(object obj, int depth)
         {
-            if (!visitedObjects.TryAdd(obj, 0))
+            if (!visitedObjects.Add(obj))
             {
                 return false;
             }
 
             AddToDepth(objectsByDepth, depth, obj);
-            lock (allObjectsLock)
-            {
-                allObjects.Add(obj);
-            }
 
             return true;
         }
@@ -125,7 +119,7 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         CollectRootObjects(
             testContext.Metadata.TestDetails,
             TryAddStandard,
-            obj => DiscoverNestedObjects(obj, objectsByDepth, visitedObjects, allObjects, allObjectsLock, currentDepth: 1, cancellationToken),
+            obj => DiscoverNestedObjects(obj, objectsByDepth, visitedObjects, currentDepth: 1, cancellationToken),
             cancellationToken);
 
         return new ObjectGraph(objectsByDepth);
@@ -134,20 +128,14 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
     /// <inheritdoc />
     public ObjectGraph DiscoverNestedObjectGraph(object rootObject, CancellationToken cancellationToken = default)
     {
-        var objectsByDepth = new ConcurrentDictionary<int, HashSet<object>>();
-        var allObjects = new HashSet<object>(ReferenceComparer);
-        var allObjectsLock = new object(); // Thread-safety for allObjects HashSet
-        var visitedObjects = new ConcurrentDictionary<object, byte>(ReferenceComparer);
+        var objectsByDepth = new Dictionary<int, HashSet<object>>();
+        var visitedObjects = new HashSet<object>(ReferenceComparer);
 
-        if (visitedObjects.TryAdd(rootObject, 0))
+        if (visitedObjects.Add(rootObject))
         {
             AddToDepth(objectsByDepth, 0, rootObject);
-            lock (allObjectsLock)
-            {
-                allObjects.Add(rootObject);
-            }
 
-            DiscoverNestedObjects(rootObject, objectsByDepth, visitedObjects, allObjects, allObjectsLock, currentDepth: 1, cancellationToken);
+            DiscoverNestedObjects(rootObject, objectsByDepth, visitedObjects, currentDepth: 1, cancellationToken);
         }
 
         return new ObjectGraph(objectsByDepth);
@@ -180,10 +168,8 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
     /// </summary>
     private void DiscoverNestedObjects(
         object obj,
-        ConcurrentDictionary<int, HashSet<object>> objectsByDepth,
-        ConcurrentDictionary<object, byte> visitedObjects,
-        HashSet<object> allObjects,
-        object allObjectsLock,
+        Dictionary<int, HashSet<object>> objectsByDepth,
+        HashSet<object> visitedObjects,
         int currentDepth,
         CancellationToken cancellationToken)
     {
@@ -197,16 +183,12 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         // Standard mode add callback: visitedObjects + objectsByDepth + allObjects (thread-safe)
         bool TryAddStandard(object value, int depth)
         {
-            if (!visitedObjects.TryAdd(value, 0))
+            if (!visitedObjects.Add(value))
             {
                 return false;
             }
 
             AddToDepth(objectsByDepth, depth, value);
-            lock (allObjectsLock)
-            {
-                allObjects.Add(value);
-            }
 
             return true;
         }
@@ -214,7 +196,7 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         // Recursive callback
         void Recurse(object value, int depth)
         {
-            DiscoverNestedObjects(value, objectsByDepth, visitedObjects, allObjects, allObjectsLock, depth, cancellationToken);
+            DiscoverNestedObjects(value, objectsByDepth, visitedObjects, depth, cancellationToken);
         }
 
         // Traverse injectable properties (useSourceRegistrarCheck = false)
@@ -281,15 +263,11 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
 
     /// <summary>
     /// Adds an object to the specified depth level.
-    /// Thread-safe: uses lock to protect HashSet modifications.
-    /// </summary>
-    private static void AddToDepth(ConcurrentDictionary<int, HashSet<object>> objectsByDepth, int depth, object obj)
+     /// </summary>
+    private static void AddToDepth(Dictionary<int, HashSet<object>> objectsByDepth, int depth, object obj)
     {
         var hashSet = objectsByDepth.GetOrAdd(depth, _ => new HashSet<object>(ReferenceComparer));
-        lock (hashSet)
-        {
-            hashSet.Add(obj);
-        }
+        hashSet.Add(obj);
     }
 
     /// <summary>
