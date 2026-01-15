@@ -136,6 +136,29 @@ public class SharedFixture : IAsyncInitializer
     public static void ResetCount() => _initCount = 0;
 }
 
+/// <summary>
+/// Fixture that does NOT implement IAsyncInitializer.
+/// Used to verify we don't break non-initializer fixtures.
+/// </summary>
+public class NonInitializerFixture
+{
+    public string Value { get; } = "StaticValue";
+}
+
+/// <summary>
+/// Fixture for method-level injection tests.
+/// </summary>
+public class MethodLevelFixture : IAsyncInitializer
+{
+    public int? MethodValue { get; private set; }
+
+    public async Task InitializeAsync()
+    {
+        await Task.Delay(5);
+        MethodValue = 999;
+    }
+}
+
 #endregion
 
 #region Test Classes
@@ -352,6 +375,70 @@ public class NonSharedFixtureTests
     public async Task Test2_FixtureShouldBeInitialized()
     {
         await Assert.That(_valueAtConstruction).IsEqualTo(123);
+    }
+}
+
+/// <summary>
+/// Regression test: Fixture without IAsyncInitializer should still work.
+/// </summary>
+[EngineTest(ExpectedResult.Pass)]
+[ClassDataSource<NonInitializerFixture>]
+public class NonInitializerFixtureTests
+{
+    private readonly string _valueAtConstruction;
+
+    public NonInitializerFixtureTests(NonInitializerFixture fixture)
+    {
+        _valueAtConstruction = fixture.Value;
+    }
+
+    [Test]
+    public async Task NonInitializerFixtureShouldWork()
+    {
+        await Assert.That(_valueAtConstruction).IsEqualTo("StaticValue");
+    }
+}
+
+/// <summary>
+/// Method-level data source injection test.
+/// </summary>
+[EngineTest(ExpectedResult.Pass)]
+public class MethodLevelInjectionTests
+{
+    [Test]
+    [ClassDataSource<MethodLevelFixture>]
+    public async Task MethodLevelFixtureShouldBeInitialized(MethodLevelFixture fixture)
+    {
+        await Assert.That(fixture.MethodValue).IsEqualTo(999);
+    }
+}
+
+/// <summary>
+/// Non-generic ClassDataSource with multiple types (tests source generator array handling).
+/// </summary>
+[EngineTest(ExpectedResult.Pass)]
+[ClassDataSource(typeof(FirstFixture), typeof(SecondFixture))]
+public class NonGenericMultiTypeTests
+{
+    private readonly string? _firstName;
+    private readonly string? _secondName;
+
+    public NonGenericMultiTypeTests(FirstFixture first, SecondFixture second)
+    {
+        _firstName = first.Name;
+        _secondName = second.Name;
+    }
+
+    [Test]
+    public async Task FirstFixtureShouldBeInitialized()
+    {
+        await Assert.That(_firstName).IsEqualTo("First");
+    }
+
+    [Test]
+    public async Task SecondFixtureShouldBeInitialized()
+    {
+        await Assert.That(_secondName).IsEqualTo("Second");
     }
 }
 
