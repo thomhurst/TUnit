@@ -2737,7 +2737,7 @@ public class NUnitMigrationAnalyzerTests
     }
 
     [Test]
-    public async Task NUnit_Description_Attribute_Removed()
+    public async Task NUnit_Description_Attribute_Converted_To_Property()
     {
         await CodeFixer.VerifyCodeFixAsync(
             """
@@ -2758,6 +2758,7 @@ public class NUnitMigrationAnalyzerTests
                 public class MyClass
                 {
                     [Test]
+                    [Property("Description", "This is a test description")]
                     public void TestMethod()
                     {
                     }
@@ -4566,6 +4567,623 @@ public class NUnitMigrationAnalyzerTests
                     public void ClassTeardown()
                     {
                         _log.Clear();
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    /// <summary>
+    /// Tests that hook attributes with sibling attributes preserve all attributes.
+    /// Bug fix: Early return in VisitAttributeList was losing sibling attributes.
+    /// Note: [Description] is currently removed; [Author] is kept inline (current behavior).
+    /// </summary>
+    [Test]
+    public async Task NUnit_Hook_With_Sibling_Attributes_Preserved()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:[TestFixture]|}
+                public class TestClass
+                {
+                    [SetUp, Category("Unit")]
+                    public void Setup()
+                    {
+                        // Setup code
+                    }
+
+                    [TearDown, Category("Unit")]
+                    public void Teardown()
+                    {
+                        // Teardown code
+                    }
+
+                    [OneTimeSetUp, Explicit]
+                    public void ClassSetup()
+                    {
+                        // Class setup
+                    }
+
+                    [Test]
+                    public void MyTest()
+                    {
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                public class TestClass
+                {
+                    [Before(HookType.Test), Category("Unit")]
+                    public void Setup()
+                    {
+                        // Setup code
+                    }
+
+                    [After(HookType.Test), Category("Unit")]
+                    public void Teardown()
+                    {
+                        // Teardown code
+                    }
+
+                    [Before(HookType.Class), Explicit]
+                    public void ClassSetup()
+                    {
+                        // Class setup
+                    }
+
+                    [Test]
+                    public void MyTest()
+                    {
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    /// <summary>
+    /// Tests that multiple classes in a single file are all processed correctly.
+    /// Bug fix: Trivia cleanup was failing on second class due to stale node references.
+    /// </summary>
+    [Test]
+    public async Task NUnit_Multiple_Classes_In_File_All_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:[TestFixture]|}
+                public class FirstTestClass
+                {
+                    [Test]
+                    public void FirstTest()
+                    {
+                        Assert.That(true, Is.True);
+                    }
+                }
+
+                [TestFixture]
+                public class SecondTestClass
+                {
+                    [Test]
+                    public void SecondTest()
+                    {
+                        Assert.That(false, Is.False);
+                    }
+                }
+
+                [TestFixture]
+                public class ThirdTestClass
+                {
+                    [SetUp]
+                    public void Setup()
+                    {
+                    }
+
+                    [Test]
+                    public void ThirdTest()
+                    {
+                        Assert.That(1, Is.EqualTo(1));
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+
+                public class FirstTestClass
+                {
+                    [Test]
+                    public async Task FirstTest()
+                    {
+                        await Assert.That(true).IsTrue();
+                    }
+                }
+                public class SecondTestClass
+                {
+                    [Test]
+                    public async Task SecondTest()
+                    {
+                        await Assert.That(false).IsFalse();
+                    }
+                }
+                public class ThirdTestClass
+                {
+                    [Before(HookType.Test)]
+                    public void Setup()
+                    {
+                    }
+
+                    [Test]
+                    public async Task ThirdTest()
+                    {
+                        await Assert.That(1).IsEqualTo(1);
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    /// <summary>
+    /// Tests that non-public lifecycle methods get public modifier added.
+    /// Bug fix: Lifecycle rewriter was checking for converted attribute names instead of original NUnit names.
+    /// </summary>
+    [Test]
+    public async Task NUnit_NonPublic_Lifecycle_Methods_Made_Public()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:[TestFixture]|}
+                public class TestClass
+                {
+                    [SetUp]
+                    void PrivateSetup()
+                    {
+                    }
+
+                    [TearDown]
+                    internal void InternalTeardown()
+                    {
+                    }
+
+                    [OneTimeSetUp]
+                    protected void ProtectedClassSetup()
+                    {
+                    }
+
+                    [OneTimeTearDown]
+                    private void PrivateClassTeardown()
+                    {
+                    }
+
+                    [Test]
+                    public void MyTest()
+                    {
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                public class TestClass
+                {
+                    [Before(HookType.Test)]
+                    public void PrivateSetup()
+                    {
+                    }
+
+                    [After(HookType.Test)]
+                    public void InternalTeardown()
+                    {
+                    }
+
+                    [Before(HookType.Class)]
+                    public void ProtectedClassSetup()
+                    {
+                    }
+
+                    [After(HookType.Class)]
+                    public void PrivateClassTeardown()
+                    {
+                    }
+
+                    [Test]
+                    public void MyTest()
+                    {
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    /// <summary>
+    /// Tests that [Description] and [Author] attributes are converted to [Property] attributes.
+    /// </summary>
+    [Test]
+    public async Task NUnit_Description_And_Author_Converted_To_Property()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:[TestFixture]|}
+                [Description("Test fixture description")]
+                public class TestClass
+                {
+                    [Test]
+                    [Description("Test method description")]
+                    [Author("Test Author")]
+                    public void MyTest()
+                    {
+                    }
+
+                    [Test]
+                    [Author("Another Author")]
+                    public void AnotherTest()
+                    {
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                [Property("Description", "Test fixture description")]
+                public class TestClass
+                {
+                    [Test]
+                    [Property("Description", "Test method description")]
+                    [Property("Author", "Test Author")]
+                    public void MyTest()
+                    {
+                    }
+
+                    [Test]
+                    [Property("Author", "Another Author")]
+                    public void AnotherTest()
+                    {
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    /// <summary>
+    /// Comprehensive "kitchen sink" test that exercises all NUnit migration code paths:
+    /// - Class-level lifecycle (OneTimeSetUp, OneTimeTearDown)
+    /// - Test-level lifecycle (SetUp, TearDown)
+    /// - Multiple test methods with various attributes
+    /// - Data-driven tests (TestCase with arguments)
+    /// - Metadata attributes (Description, Author, Category)
+    /// - Explicit tests
+    /// - Various assertion types
+    /// - Non-public lifecycle methods
+    /// - Multiple attributes on same method
+    /// </summary>
+    [Test]
+    public async Task NUnit_Comprehensive_Kitchen_Sink_Migration()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+                using System;
+                using System.Collections.Generic;
+
+                {|#0:[TestFixture]|}
+                [Description("Comprehensive test fixture for migration testing")]
+                [Category("Migration")]
+                [Author("Test Developer")]
+                public class ComprehensiveTests
+                {
+                    private List<string> _log;
+                    private int _counter;
+
+                    [OneTimeSetUp]
+                    public void ClassSetup()
+                    {
+                        _log = new List<string>();
+                    }
+
+                    [OneTimeTearDown]
+                    public void ClassTeardown()
+                    {
+                        _log.Clear();
+                    }
+
+                    [SetUp]
+                    public void TestSetup()
+                    {
+                        _counter = 0;
+                    }
+
+                    [TearDown, Category("Cleanup")]
+                    public void TestTeardown()
+                    {
+                        _counter = -1;
+                    }
+
+                    [Test]
+                    [Description("Simple test without parameters")]
+                    public void SimpleTest()
+                    {
+                        Assert.That(true, Is.True);
+                        Assert.That(false, Is.False);
+                    }
+
+                    [Test]
+                    [Category("Math")]
+                    [Author("Math Developer")]
+                    public void MathTest()
+                    {
+                        var result = 2 + 2;
+                        Assert.That(result, Is.EqualTo(4));
+                        Assert.That(result, Is.Not.EqualTo(5));
+                        Assert.That(result, Is.GreaterThan(3));
+                        Assert.That(result, Is.LessThan(5));
+                    }
+
+                    [TestCase(1, 2, 3)]
+                    [TestCase(5, 5, 10)]
+                    [TestCase(-1, 1, 0)]
+                    [Description("Parameterized addition test")]
+                    public void AdditionTest(int a, int b, int expected)
+                    {
+                        var result = a + b;
+                        Assert.That(result, Is.EqualTo(expected));
+                    }
+
+                    [TestCase("hello", 5)]
+                    [TestCase("world", 5)]
+                    [TestCase("", 0)]
+                    public void StringLengthTest(string input, int expectedLength)
+                    {
+                        Assert.That(input.Length, Is.EqualTo(expectedLength));
+                        Assert.That(input, Is.Not.Null);
+                    }
+
+                    [Test]
+                    [Explicit("This test is slow")]
+                    public void SlowTest()
+                    {
+                        Assert.That(true, Is.True);
+                    }
+
+                    [Test]
+                    [Category("Null")]
+                    public void NullAndTypeTests()
+                    {
+                        object obj = "test";
+                        object nullObj = null;
+
+                        Assert.That(obj, Is.Not.Null);
+                        Assert.That(nullObj, Is.Null);
+                        Assert.That(obj, Is.TypeOf<string>());
+                        Assert.That(obj, Is.InstanceOf<object>());
+                    }
+
+                    [Test]
+                    public void CollectionTests()
+                    {
+                        var list = new List<int> { 1, 2, 3 };
+                        var empty = new List<int>();
+
+                        Assert.That(list, Is.Not.Empty);
+                        Assert.That(empty, Is.Empty);
+                        Assert.That(list, Has.Count.EqualTo(3));
+                        Assert.That(list, Contains.Item(2));
+                    }
+
+                    [Test]
+                    public void StringTests()
+                    {
+                        var str = "Hello World";
+
+                        Assert.That(str, Does.StartWith("Hello"));
+                        Assert.That(str, Does.EndWith("World"));
+                        Assert.That(str, Does.Contain("lo Wo"));
+                        Assert.That(str, Is.Not.Empty);
+                    }
+
+                    [Test]
+                    [Ignore("This test is temporarily disabled")]
+                    public void IgnoredTest()
+                    {
+                        Assert.Fail("Should not run");
+                    }
+
+                    [SetUp]
+                    void PrivateSetup()
+                    {
+                        // Second setup - non-public
+                    }
+
+                    [TearDown]
+                    internal void InternalTeardown()
+                    {
+                        // Internal teardown
+                    }
+                }
+
+                [TestFixture]
+                [Category("Secondary")]
+                public class SecondaryTests
+                {
+                    [Test]
+                    public void AnotherTest()
+                    {
+                        Assert.That(1, Is.EqualTo(1));
+                    }
+
+                    [TestCase(true)]
+                    [TestCase(false)]
+                    public void BooleanTest(bool value)
+                    {
+                        Assert.That(value, Is.EqualTo(value));
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+
+                [Property("Description", "Comprehensive test fixture for migration testing")]
+                [Category("Migration")]
+                [Property("Author", "Test Developer")]
+                public class ComprehensiveTests
+                {
+                    private List<string> _log;
+                    private int _counter;
+
+                    [Before(HookType.Class)]
+                    public void ClassSetup()
+                    {
+                        _log = new List<string>();
+                    }
+
+                    [After(HookType.Class)]
+                    public void ClassTeardown()
+                    {
+                        _log.Clear();
+                    }
+
+                    [Before(HookType.Test)]
+                    public void TestSetup()
+                    {
+                        _counter = 0;
+                    }
+
+                    [After(HookType.Test), Category("Cleanup")]
+                    public void TestTeardown()
+                    {
+                        _counter = -1;
+                    }
+
+                    [Test]
+                    [Property("Description", "Simple test without parameters")]
+                    public async Task SimpleTest()
+                    {
+                        await Assert.That(true).IsTrue();
+                        await Assert.That(false).IsFalse();
+                    }
+
+                    [Test]
+                    [Category("Math")]
+                    [Property("Author", "Math Developer")]
+                    public async Task MathTest()
+                    {
+                        var result = 2 + 2;
+                        await Assert.That(result).IsEqualTo(4);
+                        await Assert.That(result).IsNotEqualTo(5);
+                        await Assert.That(result).IsGreaterThan(3);
+                        await Assert.That(result).IsLessThan(5);
+                    }
+
+                    [Test]
+                    [Arguments(1, 2, 3)]
+                    [Arguments(5, 5, 10)]
+                    [Arguments(-1, 1, 0)]
+                    [Property("Description", "Parameterized addition test")]
+                    public async Task AdditionTest(int a, int b, int expected)
+                    {
+                        var result = a + b;
+                        await Assert.That(result).IsEqualTo(expected);
+                    }
+
+                    [Test]
+                    [Arguments("hello", 5)]
+                    [Arguments("world", 5)]
+                    [Arguments("", 0)]
+                    public async Task StringLengthTest(string input, int expectedLength)
+                    {
+                        await Assert.That(input.Length).IsEqualTo(expectedLength);
+                        await Assert.That(input).IsNotNull();
+                    }
+
+                    [Test]
+                    [Explicit("This test is slow")]
+                    public async Task SlowTest()
+                    {
+                        await Assert.That(true).IsTrue();
+                    }
+
+                    [Test]
+                    [Category("Null")]
+                    public async Task NullAndTypeTests()
+                    {
+                        object obj = "test";
+                        object nullObj = null;
+
+                        await Assert.That(obj).IsNotNull();
+                        await Assert.That(nullObj).IsNull();
+                        await Assert.That(obj).IsTypeOf<string>();
+                        await Assert.That(obj).IsAssignableTo<object>();
+                    }
+
+                    [Test]
+                    public async Task CollectionTests()
+                    {
+                        var list = new List<int> { 1, 2, 3 };
+                        var empty = new List<int>();
+
+                        await Assert.That(list).IsNotEmpty();
+                        await Assert.That(empty).IsEmpty();
+                        await Assert.That(list).Count().IsEqualTo(3);
+                        await Assert.That(list).Contains(2);
+                    }
+
+                    [Test]
+                    public async Task StringTests()
+                    {
+                        var str = "Hello World";
+
+                        await Assert.That(str).StartsWith("Hello");
+                        await Assert.That(str).EndsWith("World");
+                        await Assert.That(str).Contains("lo Wo");
+                        await Assert.That(str).IsNotEmpty();
+                    }
+
+                    [Test]
+                    [Skip("This test is temporarily disabled")]
+                    public void IgnoredTest()
+                    {
+                        Fail.Test("Should not run");
+                    }
+
+                    [Before(HookType.Test)]
+                    public void PrivateSetup()
+                    {
+                        // Second setup - non-public
+                    }
+
+                    [After(HookType.Test)]
+                    public void InternalTeardown()
+                    {
+                        // Internal teardown
+                    }
+                }
+                [Category("Secondary")]
+                public class SecondaryTests
+                {
+                    [Test]
+                    public async Task AnotherTest()
+                    {
+                        await Assert.That(1).IsEqualTo(1);
+                    }
+
+                    [Test]
+                    [Arguments(true)]
+                    [Arguments(false)]
+                    public async Task BooleanTest(bool value)
+                    {
+                        await Assert.That(value).IsEqualTo(value);
                     }
                 }
                 """,

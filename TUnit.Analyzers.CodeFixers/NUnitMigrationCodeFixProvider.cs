@@ -70,7 +70,7 @@ public class NUnitAttributeRewriter : AttributeRewriter
             "Test" or "Theory" or "TestCase" or "TestCaseSource" or
             "SetUp" or "TearDown" or "OneTimeSetUp" or "OneTimeTearDown" or
             "TestFixture" or "Category" or "Ignore" or "Explicit" or "Apartment" or
-            "Platform" or "Description" or
+            "Platform" or "Description" or "Author" or
             // Parallelization attributes
             "Parallelizable" or "NonParallelizable" or
             // Repeat attribute (same in TUnit)
@@ -145,7 +145,43 @@ public class NUnitAttributeRewriter : AttributeRewriter
             return ConvertPlatformAttribute(attribute);
         }
 
+        // [Description("...")] -> [Property("Description", "...")]
+        if (attributeName == "Description")
+        {
+            return ConvertToPropertyAttribute("Description", attribute);
+        }
+
+        // [Author("...")] -> [Property("Author", "...")]
+        if (attributeName == "Author")
+        {
+            return ConvertToPropertyAttribute("Author", attribute);
+        }
+
         return base.ConvertAttribute(attribute);
+    }
+
+    private AttributeSyntax? ConvertToPropertyAttribute(string propertyName, AttributeSyntax attribute)
+    {
+        // Get the value from the attribute argument
+        if (attribute.ArgumentList == null || attribute.ArgumentList.Arguments.Count == 0)
+        {
+            return null; // No value, remove the attribute
+        }
+
+        var valueExpression = attribute.ArgumentList.Arguments[0].Expression;
+
+        // Create [Property("propertyName", value)]
+        return SyntaxFactory.Attribute(
+            SyntaxFactory.IdentifierName("Property"),
+            SyntaxFactory.AttributeArgumentList(
+                SyntaxFactory.SeparatedList(new[]
+                {
+                    SyntaxFactory.AttributeArgument(
+                        SyntaxFactory.LiteralExpression(
+                            SyntaxKind.StringLiteralExpression,
+                            SyntaxFactory.Literal(propertyName))),
+                    SyntaxFactory.AttributeArgument(valueExpression)
+                })));
     }
 
     private AttributeSyntax? ConvertApartmentAttribute(AttributeSyntax attribute)
@@ -915,15 +951,17 @@ public class NUnitAssertionRewriter : AssertionRewriter
                 };
             }
 
-            // Handle Does.StartWith, Does.EndWith, Does.Match, Contains.Substring
+            // Handle Does.StartWith, Does.EndWith, Does.Contain, Does.Match, Contains.Substring, Contains.Item
             if (memberAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Does" or "Contains" })
             {
                 return methodName switch
                 {
                     "StartWith" => CreateTUnitAssertionWithMessage("StartsWith", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
                     "EndWith" => CreateTUnitAssertionWithMessage("EndsWith", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
+                    "Contain" => CreateTUnitAssertionWithMessage("Contains", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
                     "Match" => CreateTUnitAssertionWithMessage("Matches", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
                     "Substring" => CreateTUnitAssertionWithMessage("Contains", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
+                    "Item" => CreateTUnitAssertionWithMessage("Contains", actualValue, message, constraint.ArgumentList.Arguments.ToArray()),
                     _ => CreateTUnitAssertionWithMessage("IsEqualTo", actualValue, message, SyntaxFactory.Argument(constraint))
                 };
             }
@@ -1115,15 +1153,17 @@ public class NUnitAssertionRewriter : AssertionRewriter
                 };
             }
 
-            // Handle Does.StartWith, Does.EndWith, Does.Match, Contains.Substring
+            // Handle Does.StartWith, Does.EndWith, Does.Contain, Does.Match, Contains.Substring, Contains.Item
             if (memberAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Does" or "Contains" })
             {
                 return methodName switch
                 {
                     "StartWith" => CreateTUnitAssertion("StartsWith", actualValue, constraint.ArgumentList.Arguments.ToArray()),
                     "EndWith" => CreateTUnitAssertion("EndsWith", actualValue, constraint.ArgumentList.Arguments.ToArray()),
+                    "Contain" => CreateTUnitAssertion("Contains", actualValue, constraint.ArgumentList.Arguments.ToArray()),
                     "Match" => CreateTUnitAssertion("Matches", actualValue, constraint.ArgumentList.Arguments.ToArray()),
                     "Substring" => CreateTUnitAssertion("Contains", actualValue, constraint.ArgumentList.Arguments.ToArray()),
+                    "Item" => CreateTUnitAssertion("Contains", actualValue, constraint.ArgumentList.Arguments.ToArray()),
                     _ => CreateTUnitAssertion("IsEqualTo", actualValue, SyntaxFactory.Argument(constraint))
                 };
             }
@@ -2037,13 +2077,46 @@ public class NUnitLifecycleRewriter : CSharpSyntaxRewriter
     {
         // Lifecycle methods are handled by attribute conversion
         // Just ensure they're public and have correct signature
+        // NOTE: Check for ORIGINAL NUnit attribute names since this runs BEFORE attribute conversion
         var hasLifecycleAttribute = node.AttributeLists
             .SelectMany(al => al.Attributes)
-            .Any(a => a.Name.ToString() is "Before" or "After");
+            .Select(a => MigrationHelpers.GetAttributeName(a))
+            .Any(name => name is "SetUp" or "TearDown" or "OneTimeSetUp" or "OneTimeTearDown");
 
         if (hasLifecycleAttribute && !node.Modifiers.Any(SyntaxKind.PublicKeyword))
         {
-            return node.AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword));
+            // Remove existing access modifiers (private, protected, internal) before adding public
+            var accessModifierKinds = new[]
+            {
+                SyntaxKind.PrivateKeyword,
+                SyntaxKind.ProtectedKeyword,
+                SyntaxKind.InternalKeyword
+            };
+
+            var newModifiers = node.Modifiers
+                .Where(m => !accessModifierKinds.Contains(m.Kind()))
+                .ToList();
+
+            // Preserve leading trivia from the first modifier, or get indentation from return type
+            var leadingTrivia = node.Modifiers.Any()
+                ? node.Modifiers.First().LeadingTrivia
+                : node.ReturnType.GetLeadingTrivia();
+
+            var publicToken = SyntaxFactory.Token(SyntaxKind.PublicKeyword)
+                .WithLeadingTrivia(leadingTrivia)
+                .WithTrailingTrivia(SyntaxFactory.Space);
+
+            newModifiers.Insert(0, publicToken);
+
+            // If there were no modifiers, we need to strip the leading trivia from the return type
+            // since it's now on the public keyword
+            var newNode = node.WithModifiers(SyntaxFactory.TokenList(newModifiers));
+            if (!node.Modifiers.Any())
+            {
+                newNode = newNode.WithReturnType(newNode.ReturnType.WithLeadingTrivia());
+            }
+
+            return newNode;
         }
 
         return base.VisitMethodDeclaration(node);

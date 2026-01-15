@@ -161,14 +161,17 @@ public class MSTestAttributeRewriter : AttributeRewriter
     public override SyntaxNode? VisitAttributeList(AttributeListSyntax node)
     {
         // Handle ClassInitialize and ClassCleanup specially - they need static context parameter removed
+        // Process all attributes, don't return early to preserve sibling attributes
         var attributes = new List<AttributeSyntax>();
-        
+        bool hasClassLifecycleAttribute = false;
+
         foreach (var attribute in node.Attributes)
         {
             var attributeName = MigrationHelpers.GetAttributeName(attribute);
-            
+
             if (attributeName is "ClassInitialize" or "ClassCleanup")
             {
+                hasClassLifecycleAttribute = true;
                 var hookType = attributeName == "ClassInitialize" ? "Before" : "After";
                 var newAttribute = SyntaxFactory.Attribute(
                     SyntaxFactory.IdentifierName(hookType),
@@ -184,10 +187,30 @@ public class MSTestAttributeRewriter : AttributeRewriter
                         )
                     )
                 );
-                return SyntaxFactory.AttributeList(SyntaxFactory.SingletonSeparatedList(newAttribute));
+                attributes.Add(newAttribute);
+                // Don't return early - continue processing other attributes!
+            }
+            else
+            {
+                // For non-ClassInitialize/ClassCleanup, use base conversion logic
+                var converted = ConvertAttribute(attribute);
+                if (converted != null)
+                {
+                    attributes.Add(converted);
+                }
             }
         }
-        
+
+        // If we processed class lifecycle attributes, return our combined list
+        if (hasClassLifecycleAttribute)
+        {
+            return attributes.Count > 0
+                ? node.WithAttributes(SyntaxFactory.SeparatedList(attributes))
+                    .WithLeadingTrivia(node.GetLeadingTrivia())
+                    .WithTrailingTrivia(node.GetTrailingTrivia())
+                : null;
+        }
+
         return base.VisitAttributeList(node);
     }
 }
