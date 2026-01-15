@@ -6,25 +6,30 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace TUnit.Analyzers.CodeFixers;
 
 /// <summary>
-/// Extracts NUnit TestCase properties and converts them to TUnit attributes.
-/// Maps: Description/Author → Property, Explicit → Explicit
-/// Note: TestName → DisplayName and Category → Categories are now handled inline on [Arguments]
+/// Extracts NUnit TestCase and Test properties and converts them to TUnit attributes.
+/// Maps: Description/Author -> Property, Explicit -> Explicit
+/// Note: TestName -> DisplayName and Category -> Categories are now handled inline on [Arguments]
 /// by NUnitAttributeRewriter, so we don't generate separate attributes for those.
 /// </summary>
 public class NUnitTestCasePropertyRewriter : CSharpSyntaxRewriter
 {
     public override SyntaxNode? VisitMethodDeclaration(MethodDeclarationSyntax node)
     {
-        // Get all TestCase attributes on this method
+        // Get all TestCase and Test attributes on this method
         var testCaseAttributes = GetTestCaseAttributes(node);
+        var testAttributes = GetTestAttributes(node);
 
-        if (testCaseAttributes.Count == 0)
+        if (testCaseAttributes.Count == 0 && testAttributes.Count == 0)
         {
             return base.VisitMethodDeclaration(node);
         }
 
-        // Extract properties from all TestCase attributes
+        // Extract properties from all TestCase and Test attributes
         var properties = ExtractProperties(testCaseAttributes);
+        var testProperties = ExtractTestProperties(testAttributes);
+
+        // Merge Test properties into TestCase properties (Test properties take precedence if both exist)
+        MergeProperties(properties, testProperties);
 
         // Generate new attribute lists for the extracted properties
         var newAttributeLists = GeneratePropertyAttributes(properties, node.AttributeLists);
@@ -48,6 +53,26 @@ public class NUnitTestCasePropertyRewriter : CSharpSyntaxRewriter
             {
                 var name = attribute.Name.ToString();
                 if (name is "TestCase" or "NUnit.Framework.TestCase" or "TestCaseAttribute" or "NUnit.Framework.TestCaseAttribute")
+                {
+                    result.Add(attribute);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private List<AttributeSyntax> GetTestAttributes(MethodDeclarationSyntax method)
+    {
+        var result = new List<AttributeSyntax>();
+
+        foreach (var attributeList in method.AttributeLists)
+        {
+            foreach (var attribute in attributeList.Attributes)
+            {
+                var name = attribute.Name.ToString();
+                if (name is "Test" or "NUnit.Framework.Test" or "TestAttribute" or "NUnit.Framework.TestAttribute"
+                    or "Theory" or "NUnit.Framework.Theory" or "TheoryAttribute" or "NUnit.Framework.TheoryAttribute")
                 {
                     result.Add(attribute);
                 }
@@ -132,6 +157,79 @@ public class NUnitTestCasePropertyRewriter : CSharpSyntaxRewriter
         return properties;
     }
 
+    private TestCaseProperties ExtractTestProperties(List<AttributeSyntax> testAttributes)
+    {
+        // Extract Description, Author, etc. from [Test] attributes
+        // NUnit's [Test] supports: Description, Author, ExpectedResult, TestOf
+        var properties = new TestCaseProperties();
+
+        foreach (var attribute in testAttributes)
+        {
+            if (attribute.ArgumentList == null)
+            {
+                continue;
+            }
+
+            foreach (var arg in attribute.ArgumentList.Arguments)
+            {
+                var propertyName = arg.NameEquals?.Name.Identifier.Text;
+
+                switch (propertyName)
+                {
+                    case "Description":
+                        var descValue = GetStringValue(arg.Expression);
+                        if (descValue != null)
+                        {
+                            properties.Descriptions.Add(descValue);
+                        }
+                        break;
+
+                    case "Author":
+                        var authorValue = GetStringValue(arg.Expression);
+                        if (authorValue != null)
+                        {
+                            properties.Authors.Add(authorValue);
+                        }
+                        break;
+
+                    // ExpectedResult on [Test] is used with return values, but TUnit doesn't support this
+                    // Just skip it - the user will need to handle this manually or use assertions
+                    case "ExpectedResult":
+                        break;
+
+                    // TestOf specifies the type being tested - convert to Property
+                    case "TestOf":
+                        // TestOf is a Type, not a string, so we need to handle it differently
+                        // For now, skip it as it's rarely used
+                        break;
+                }
+            }
+        }
+
+        return properties;
+    }
+
+    private void MergeProperties(TestCaseProperties target, TestCaseProperties source)
+    {
+        // Merge source properties into target
+        foreach (var desc in source.Descriptions)
+        {
+            target.Descriptions.Add(desc);
+        }
+        foreach (var author in source.Authors)
+        {
+            target.Authors.Add(author);
+        }
+        if (source.IsExplicit)
+        {
+            target.IsExplicit = true;
+        }
+        foreach (var reason in source.ExplicitReasons)
+        {
+            target.ExplicitReasons.Add(reason);
+        }
+    }
+
     private string? GetStringValue(ExpressionSyntax expression)
     {
         // Only handle string literals - interpolated strings, concatenation, and const references
@@ -157,7 +255,7 @@ public class NUnitTestCasePropertyRewriter : CSharpSyntaxRewriter
         // Get indentation from existing attributes
         var indentation = GetIndentation(leadingTrivia);
 
-        // Note: TestName → DisplayName and Category → Categories are now handled inline on [Arguments]
+        // Note: TestName -> DisplayName and Category -> Categories are now handled inline on [Arguments]
         // by NUnitAttributeRewriter.ConvertTestCaseArguments, so we don't generate separate attributes here.
 
         // Description - use Property attribute
