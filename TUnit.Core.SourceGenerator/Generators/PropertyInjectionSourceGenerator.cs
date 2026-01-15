@@ -67,6 +67,41 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
                 return;
             GenerateInitializerPropertySource(ctx, model);
         });
+
+        // Pipeline 3: Discover concrete generic types from inheritance chains and IDataSourceAttribute type arguments
+        var concreteGenericTypes = context.SyntaxProvider
+            .CreateSyntaxProvider(
+                predicate: static (node, _) => node is TypeDeclarationSyntax or PropertyDeclarationSyntax,
+                transform: static (ctx, _) => ExtractConcreteGenericTypes(ctx))
+            .Where(static x => x.Length > 0)
+            .SelectMany(static (types, _) => types);
+
+        // Collect and deduplicate by fully qualified type name
+        var distinctConcreteGenerics = concreteGenericTypes
+            .Collect()
+            .SelectMany(static (types, _) => DeduplicateConcreteGenericTypes(types));
+
+        var concreteGenericsWithEnabled = distinctConcreteGenerics.Combine(enabledProvider);
+
+        // Pipeline 4 & 5: Generate source for concrete generic types
+        context.RegisterSourceOutput(concreteGenericsWithEnabled, static (ctx, data) =>
+        {
+            var (model, isEnabled) = data;
+            if (!isEnabled)
+                return;
+
+            // Generate property data source if the type has data source properties
+            if (model.HasDataSourceProperties && model.DataSourceProperties.AsArray().Length > 0)
+            {
+                GenerateGenericPropertyInjectionSource(ctx, model);
+            }
+
+            // Generate initializer property source if the type has initializer properties
+            if (model.InitializerProperties.AsArray().Length > 0)
+            {
+                GenerateGenericInitializerPropertySource(ctx, model);
+            }
+        });
     }
 
     #region Property Data Source Extraction
@@ -250,6 +285,243 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
     #endregion
 
+    #region Concrete Generic Type Discovery
+
+    /// <summary>
+    /// Extracts concrete generic types from the current syntax node (type declarations and properties).
+    /// Looks for concrete generic types in:
+    /// 1. Inheritance chains (base types)
+    /// 2. IDataSourceAttribute type arguments
+    /// </summary>
+    private static ImmutableArray<ConcreteGenericTypeModel> ExtractConcreteGenericTypes(GeneratorSyntaxContext context)
+    {
+        var semanticModel = context.SemanticModel;
+        var results = new List<ConcreteGenericTypeModel>();
+
+        var dataSourceInterface = semanticModel.Compilation.GetTypeByMetadataName("TUnit.Core.IDataSourceAttribute");
+        var asyncInitializerInterface = semanticModel.Compilation.GetTypeByMetadataName("TUnit.Core.Interfaces.IAsyncInitializer");
+
+        if (dataSourceInterface == null || asyncInitializerInterface == null)
+            return ImmutableArray<ConcreteGenericTypeModel>.Empty;
+
+        // Discovery from type declarations (inheritance chains)
+        if (context.Node is TypeDeclarationSyntax typeDecl)
+        {
+            if (semanticModel.GetDeclaredSymbol(typeDecl) is INamedTypeSymbol typeSymbol)
+            {
+                // Walk inheritance chain to find concrete generic base types
+                var baseType = typeSymbol.BaseType;
+                while (baseType != null && baseType.SpecialType != SpecialType.System_Object)
+                {
+                    if (IsConcreteGenericType(baseType))
+                    {
+                        var model = CreateConcreteGenericModel(baseType, dataSourceInterface, asyncInitializerInterface);
+                        if (model != null)
+                        {
+                            results.Add(model);
+                        }
+                    }
+                    baseType = baseType.BaseType;
+                }
+
+                // Check implemented interfaces for concrete generics
+                foreach (var iface in typeSymbol.AllInterfaces)
+                {
+                    if (IsConcreteGenericType(iface))
+                    {
+                        var model = CreateConcreteGenericModel(iface, dataSourceInterface, asyncInitializerInterface);
+                        if (model != null)
+                        {
+                            results.Add(model);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Discovery from property declarations (IDataSourceAttribute type arguments)
+        if (context.Node is PropertyDeclarationSyntax propertyDecl)
+        {
+            if (semanticModel.GetDeclaredSymbol(propertyDecl) is IPropertySymbol propertySymbol)
+            {
+                foreach (var attr in propertySymbol.GetAttributes())
+                {
+                    if (attr.AttributeClass == null)
+                        continue;
+
+                    // Check if attribute implements IDataSourceAttribute
+                    if (!attr.AttributeClass.AllInterfaces.Contains(dataSourceInterface, SymbolEqualityComparer.Default))
+                        continue;
+
+                    // Check attribute type arguments for concrete generic types
+                    DiscoverGenericTypesFromTypeArguments(attr.AttributeClass, dataSourceInterface, asyncInitializerInterface, results);
+
+                    // Check constructor arguments for type parameters
+                    foreach (var ctorArg in attr.ConstructorArguments)
+                    {
+                        if (ctorArg.Value is INamedTypeSymbol argType && IsConcreteGenericType(argType))
+                        {
+                            var model = CreateConcreteGenericModel(argType, dataSourceInterface, asyncInitializerInterface);
+                            if (model != null)
+                            {
+                                results.Add(model);
+                            }
+                        }
+                    }
+                }
+
+                // Also check if the property type itself is a concrete generic
+                if (propertySymbol.Type is INamedTypeSymbol propertyType && IsConcreteGenericType(propertyType))
+                {
+                    var model = CreateConcreteGenericModel(propertyType, dataSourceInterface, asyncInitializerInterface);
+                    if (model != null)
+                    {
+                        results.Add(model);
+                    }
+                }
+            }
+        }
+
+        return results.Count > 0 ? results.ToImmutableArray() : ImmutableArray<ConcreteGenericTypeModel>.Empty;
+    }
+
+    /// <summary>
+    /// Recursively discovers concrete generic types from type arguments.
+    /// </summary>
+    private static void DiscoverGenericTypesFromTypeArguments(
+        INamedTypeSymbol typeSymbol,
+        INamedTypeSymbol dataSourceInterface,
+        INamedTypeSymbol asyncInitializerInterface,
+        List<ConcreteGenericTypeModel> results)
+    {
+        if (!typeSymbol.IsGenericType)
+            return;
+
+        foreach (var typeArg in typeSymbol.TypeArguments)
+        {
+            if (typeArg is INamedTypeSymbol namedTypeArg)
+            {
+                if (IsConcreteGenericType(namedTypeArg))
+                {
+                    var model = CreateConcreteGenericModel(namedTypeArg, dataSourceInterface, asyncInitializerInterface);
+                    if (model != null)
+                    {
+                        results.Add(model);
+                    }
+                }
+
+                // Recurse into nested type arguments
+                if (namedTypeArg.IsGenericType)
+                {
+                    DiscoverGenericTypesFromTypeArguments(namedTypeArg, dataSourceInterface, asyncInitializerInterface, results);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Checks if a type is a concrete instantiation of a generic type (not an open generic).
+    /// </summary>
+    private static bool IsConcreteGenericType(INamedTypeSymbol type)
+    {
+        return type.IsGenericType && !type.IsUnboundGenericType && type.TypeArguments.All(t => t.TypeKind != TypeKind.TypeParameter);
+    }
+
+    /// <summary>
+    /// Creates a ConcreteGenericTypeModel for a discovered concrete generic type.
+    /// Returns null if the type doesn't have any relevant properties or interfaces.
+    /// </summary>
+    private static ConcreteGenericTypeModel? CreateConcreteGenericModel(
+        INamedTypeSymbol concreteType,
+        INamedTypeSymbol dataSourceInterface,
+        INamedTypeSymbol asyncInitializerInterface)
+    {
+        // Check if this type implements IAsyncInitializer
+        var implementsIAsyncInitializer = concreteType.AllInterfaces.Contains(asyncInitializerInterface, SymbolEqualityComparer.Default);
+
+        // Find data source properties (walk inheritance chain)
+        var dataSourceProperties = new List<PropertyDataSourceModel>();
+        var initializerProperties = new List<InitializerPropertyModel>();
+
+        var currentType = concreteType;
+        while (currentType != null && currentType.SpecialType != SpecialType.System_Object)
+        {
+            foreach (var member in currentType.GetMembers())
+            {
+                if (member is not IPropertySymbol property)
+                    continue;
+
+                // Check for IDataSourceAttribute on property
+                if (property.SetMethod != null)
+                {
+                    foreach (var attr in property.GetAttributes())
+                    {
+                        if (attr.AttributeClass != null &&
+                            attr.AttributeClass.AllInterfaces.Contains(dataSourceInterface, SymbolEqualityComparer.Default))
+                        {
+                            dataSourceProperties.Add(ExtractPropertyModel(property, attr));
+                            break;
+                        }
+                    }
+                }
+
+                // Check if property returns IAsyncInitializer (only if the type itself implements IAsyncInitializer)
+                if (implementsIAsyncInitializer && property.GetMethod != null && !property.IsStatic && !property.IsIndexer)
+                {
+                    if (property.Type is INamedTypeSymbol propertyType)
+                    {
+                        if (propertyType.AllInterfaces.Contains(asyncInitializerInterface, SymbolEqualityComparer.Default) ||
+                            SymbolEqualityComparer.Default.Equals(propertyType, asyncInitializerInterface))
+                        {
+                            initializerProperties.Add(new InitializerPropertyModel
+                            {
+                                PropertyName = property.Name,
+                                PropertyTypeFullyQualified = property.Type.GloballyQualified()
+                            });
+                        }
+                    }
+                }
+            }
+
+            currentType = currentType.BaseType;
+        }
+
+        // Only return a model if the type has something relevant
+        var hasDataSourceProperties = dataSourceProperties.Count > 0;
+        var hasInitializerProperties = initializerProperties.Count > 0;
+
+        if (!hasDataSourceProperties && !hasInitializerProperties)
+            return null;
+
+        return new ConcreteGenericTypeModel
+        {
+            ConcreteTypeFullyQualified = concreteType.GloballyQualified(),
+            SafeTypeName = GetSafeClassName(concreteType),
+            ImplementsIAsyncInitializer = implementsIAsyncInitializer,
+            HasDataSourceProperties = hasDataSourceProperties,
+            DataSourceProperties = new EquatableArray<PropertyDataSourceModel>(dataSourceProperties.ToArray()),
+            InitializerProperties = new EquatableArray<InitializerPropertyModel>(initializerProperties.ToArray())
+        };
+    }
+
+    /// <summary>
+    /// Deduplicates concrete generic type models by their fully qualified name.
+    /// </summary>
+    private static IEnumerable<ConcreteGenericTypeModel> DeduplicateConcreteGenericTypes(
+        ImmutableArray<ConcreteGenericTypeModel> types)
+    {
+        var seen = new HashSet<string>();
+        foreach (var type in types)
+        {
+            if (seen.Add(type.ConcreteTypeFullyQualified))
+            {
+                yield return type;
+            }
+        }
+    }
+
+    #endregion
+
     #region Code Generation
 
     private static void GeneratePropertyInjectionSource(SourceProductionContext context, ClassPropertyInjectionModel model)
@@ -394,6 +666,105 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             sb.AppendLine($"                PropertyName = \"{prop.PropertyName}\",");
             sb.AppendLine($"                PropertyType = typeof({prop.PropertyTypeFullyQualified}),");
             sb.AppendLine($"                GetValue = static obj => (({model.TypeFullyQualified})obj).{prop.PropertyName}");
+            sb.AppendLine("            },");
+        }
+
+        sb.AppendLine("        });");
+        sb.AppendLine("    }");
+        sb.AppendLine("}");
+
+        context.AddSource(fileName, sb.ToString());
+    }
+
+    /// <summary>
+    /// Generates property injection source for a concrete generic type.
+    /// Similar to GeneratePropertyInjectionSource but uses ConcreteGenericTypeModel.
+    /// </summary>
+    private static void GenerateGenericPropertyInjectionSource(SourceProductionContext context, ConcreteGenericTypeModel model)
+    {
+        var sourceClassName = $"PropertyInjectionSource_Generic_{Math.Abs(model.ConcreteTypeFullyQualified.GetHashCode()):x}";
+        var fileName = $"{model.SafeTypeName}_Generic_PropertyInjection.g.cs";
+
+        var sb = new StringBuilder();
+        WriteFileHeader(sb);
+
+        // Module initializer
+        sb.AppendLine($"internal static class {model.SafeTypeName}_Generic_PropertyInjectionInitializer");
+        sb.AppendLine("{");
+        sb.AppendLine("    [global::System.Runtime.CompilerServices.ModuleInitializer]");
+        sb.AppendLine("    public static void Initialize()");
+        sb.AppendLine("    {");
+        sb.AppendLine($"        global::TUnit.Core.PropertySourceRegistry.Register(typeof({model.ConcreteTypeFullyQualified}), new {sourceClassName}());");
+        sb.AppendLine("    }");
+        sb.AppendLine("}");
+        sb.AppendLine();
+
+        // Property source class
+        sb.AppendLine($"internal sealed class {sourceClassName} : IPropertySource");
+        sb.AppendLine("{");
+        sb.AppendLine($"    public Type Type => typeof({model.ConcreteTypeFullyQualified});");
+        sb.AppendLine("    public bool ShouldInitialize => true;");
+        sb.AppendLine();
+
+        // Generate UnsafeAccessor methods for init-only properties
+        foreach (var prop in model.DataSourceProperties)
+        {
+            if (prop.IsInitOnly)
+            {
+                var backingFieldName = $"<{prop.PropertyName}>k__BackingField";
+                sb.AppendLine("#if NET8_0_OR_GREATER");
+                sb.AppendLine($"    [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = \"{backingFieldName}\")]");
+                sb.AppendLine($"    private static extern ref {prop.PropertyTypeFullyQualified} Get{prop.PropertyName}BackingField({prop.ContainingTypeFullyQualified} instance);");
+                sb.AppendLine("#endif");
+                sb.AppendLine();
+            }
+        }
+
+        // GetPropertyMetadata method
+        sb.AppendLine("    public IEnumerable<PropertyInjectionMetadata> GetPropertyMetadata()");
+        sb.AppendLine("    {");
+
+        foreach (var prop in model.DataSourceProperties)
+        {
+            GeneratePropertyMetadata(sb, prop, model.ConcreteTypeFullyQualified);
+        }
+
+        sb.AppendLine("    }");
+        sb.AppendLine("}");
+
+        context.AddSource(fileName, sb.ToString());
+    }
+
+    /// <summary>
+    /// Generates initializer property source for a concrete generic type.
+    /// Similar to GenerateInitializerPropertySource but uses ConcreteGenericTypeModel.
+    /// </summary>
+    private static void GenerateGenericInitializerPropertySource(SourceProductionContext context, ConcreteGenericTypeModel model)
+    {
+        var fileName = $"{model.SafeTypeName}_Generic_InitializerProperties.g.cs";
+
+        var sb = new StringBuilder();
+        sb.AppendLine("using System;");
+        sb.AppendLine("using TUnit.Core.Discovery;");
+        sb.AppendLine();
+        sb.AppendLine("namespace TUnit.Generated;");
+        sb.AppendLine();
+
+        sb.AppendLine($"internal static class {model.SafeTypeName}_Generic_InitializerPropertiesInitializer");
+        sb.AppendLine("{");
+        sb.AppendLine("    [global::System.Runtime.CompilerServices.ModuleInitializer]");
+        sb.AppendLine("    public static void Initialize()");
+        sb.AppendLine("    {");
+        sb.AppendLine($"        InitializerPropertyRegistry.Register(typeof({model.ConcreteTypeFullyQualified}), new InitializerPropertyInfo[]");
+        sb.AppendLine("        {");
+
+        foreach (var prop in model.InitializerProperties)
+        {
+            sb.AppendLine("            new InitializerPropertyInfo");
+            sb.AppendLine("            {");
+            sb.AppendLine($"                PropertyName = \"{prop.PropertyName}\",");
+            sb.AppendLine($"                PropertyType = typeof({prop.PropertyTypeFullyQualified}),");
+            sb.AppendLine($"                GetValue = static obj => (({model.ConcreteTypeFullyQualified})obj).{prop.PropertyName}");
             sb.AppendLine("            },");
         }
 
