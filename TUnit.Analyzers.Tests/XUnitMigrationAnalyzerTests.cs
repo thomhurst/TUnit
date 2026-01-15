@@ -1364,6 +1364,153 @@ public class XUnitMigrationAnalyzerTests
             );
     }
 
+    [Test]
+    public async Task XUnit_Assert_Empty_List_Converted()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using Xunit;
+                using System.Collections.Generic;
+
+                public class MyClass
+                {
+                    [Fact]
+                    public void MyTest()
+                    {
+                        var items = new List<string>();
+                        Assert.Empty(items);
+                    }
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task MyTest()
+                    {
+                        var items = new List<string>();
+                        await Assert.That(items).IsEmpty();
+                    }
+                }
+                """,
+                ConfigureXUnitTest
+            );
+    }
+
+    [Test]
+    public async Task XUnit_Assert_NotEmpty_List_Converted()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using Xunit;
+                using System.Collections.Generic;
+
+                public class MyClass
+                {
+                    [Fact]
+                    public void MyTest()
+                    {
+                        var items = new List<string> { "item" };
+                        Assert.NotEmpty(items);
+                    }
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task MyTest()
+                    {
+                        var items = new List<string> { "item" };
+                        await Assert.That(items).IsNotEmpty();
+                    }
+                }
+                """,
+                ConfigureXUnitTest
+            );
+    }
+
+    [Test]
+    public async Task XUnit_Assert_Empty_Array_Converted()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using Xunit;
+
+                public class MyClass
+                {
+                    [Fact]
+                    public void MyTest()
+                    {
+                        var items = new string[0];
+                        Assert.Empty(items);
+                    }
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task MyTest()
+                    {
+                        var items = new string[0];
+                        await Assert.That(items).IsEmpty();
+                    }
+                }
+                """,
+                ConfigureXUnitTest
+            );
+    }
+
+    [Test]
+    public async Task XUnit_Using_Directive_Removed()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using Xunit;
+                using Xunit.Abstractions;
+
+                public class MyClass
+                {
+                    [Fact]
+                    public void MyTest()
+                    {
+                        Assert.True(true);
+                    }
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task MyTest()
+                    {
+                        await Assert.That(true).IsTrue();
+                    }
+                }
+                """,
+                ConfigureXUnitTest
+            );
+    }
+
     private static void ConfigureXUnitTest(Verifier.Test test)
     {
         var globalUsings = ("GlobalUsings.cs", SourceText.From("global using Xunit;"));
