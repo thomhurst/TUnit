@@ -342,24 +342,18 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
             return;
         }
 
-        // The two modes differ in how they choose source-gen vs reflection:
-        // - Standard mode: Uses plan.SourceGeneratedProperties.Length > 0
-        // - Tracking mode: Uses SourceRegistrar.IsEnabled
-        bool useSourceGen = useSourceRegistrarCheck
-            ? SourceRegistrar.IsEnabled
-            : plan.SourceGeneratedProperties.Length > 0;
+        // Both modes should use source-gen ONLY if we actually have source-generated properties.
+        // This ensures fallback to reflection when source-gen is enabled but no metadata was generated
+        // for a specific type (e.g., user's WebApplicationFactory that wasn't processed by the generator).
+        bool useSourceGen = plan.SourceGeneratedProperties.Length > 0;
 
         if (useSourceGen)
         {
             TraverseSourceGeneratedProperties(obj, plan.SourceGeneratedProperties, tryAdd, recurse, currentDepth, cancellationToken);
         }
-        else
+        else if (plan.ReflectionProperties.Length > 0)
         {
-            var reflectionProps = useSourceRegistrarCheck
-                ? plan.ReflectionProperties
-                : (plan.ReflectionProperties.Length > 0 ? plan.ReflectionProperties : []);
-
-            TraverseReflectionProperties(obj, reflectionProps, tryAdd, recurse, currentDepth, cancellationToken);
+            TraverseReflectionProperties(obj, plan.ReflectionProperties, tryAdd, recurse, currentDepth, cancellationToken);
         }
     }
 
