@@ -66,8 +66,10 @@ internal sealed class TestBuilder : ITestBuilder
 
     private async Task<object> CreateInstance(TestMetadata metadata, Type[] resolvedClassGenericArgs, object?[] classData, TestBuilderContext builderContext)
     {
-        // Initialize any deferred IAsyncInitializer objects in class data
-        await InitializeClassDataAsync(classData);
+        foreach (var data in classData)
+        {
+            await _objectLifecycleService.InitializeObjectForExecutionAsync(data);
+        }
 
         // First try to create instance with ClassConstructor attribute
         // Use attributes from context if available
