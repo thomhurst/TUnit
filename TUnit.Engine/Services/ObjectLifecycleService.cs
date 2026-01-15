@@ -4,7 +4,6 @@ using TUnit.Core;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Core.PropertyInjection;
-using TUnit.Core.PropertyInjection.Initialization;
 using TUnit.Core.Tracking;
 
 namespace TUnit.Engine.Services;
@@ -72,7 +71,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     /// IObjectRegistry implementation - registers a single object.
     /// Injects properties but does NOT call IAsyncInitializer (deferred to execution).
     /// </summary>
-    public async Task RegisterObjectAsync(
+    public Task RegisterObjectAsync(
         object instance,
         ConcurrentDictionary<string, object?> objectBag,
         MethodMetadata? methodMetadata,
@@ -84,13 +83,13 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
         }
 
         // Inject properties during registration
-        await PropertyInjector.InjectPropertiesAsync(instance, objectBag, methodMetadata, events);
+        return PropertyInjector.InjectPropertiesAsync(instance, objectBag, methodMetadata, events);
     }
 
     /// <summary>
     /// IObjectRegistry implementation - registers multiple argument objects.
     /// </summary>
-    public async Task RegisterArgumentsAsync(
+    public Task RegisterArgumentsAsync(
         object?[] arguments,
         ConcurrentDictionary<string, object?> objectBag,
         MethodMetadata? methodMetadata,
@@ -98,23 +97,28 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     {
         if (arguments == null || arguments.Length == 0)
         {
-            return;
+            return Task.CompletedTask;
         }
 
         // Pre-allocate with expected capacity to avoid resizing
-        var tasks = new List<Task>(arguments.Length);
+        var tasks = new ValueListBuilder<Task>(arguments.Length);
         foreach (var argument in arguments)
         {
             if (argument != null)
             {
-                tasks.Add(RegisterObjectAsync(argument, objectBag, methodMetadata, events));
+                tasks.Append(RegisterObjectAsync(argument, objectBag, methodMetadata, events));
             }
         }
 
-        if (tasks.Count > 0)
-        {
-            await Task.WhenAll(tasks);
-        }
+#if NET9_0_OR_GREATER
+        var returnTask = Task.WhenAll(tasks.AsSpan());
+#else
+        var returnTask = tasks.Length == 1
+            ? tasks[0]
+            : Task.WhenAll(tasks.AsSpan().ToArray());
+#endif
+        tasks.Dispose();
+        return returnTask;
     }
 
     #endregion
@@ -141,10 +145,10 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     /// Initializes test objects (IAsyncInitializer) after BeforeClass hooks have run.
     /// This ensures resources like Docker containers are not started until needed.
     /// </summary>
-    public async Task InitializeTestObjectsAsync(TestContext testContext, CancellationToken cancellationToken)
+    public Task InitializeTestObjectsAsync(TestContext testContext, CancellationToken cancellationToken)
     {
         // Initialize all tracked objects (IAsyncInitializer) depth-first
-        await InitializeTrackedObjectsAsync(testContext, cancellationToken);
+        return InitializeTrackedObjectsAsync(testContext, cancellationToken);
     }
 
     /// <summary>
@@ -447,9 +451,9 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     /// Cleans up after test execution.
     /// Decrements reference counts and disposes objects when count reaches zero.
     /// </summary>
-    public async Task CleanupTestAsync(TestContext testContext, List<Exception> cleanupExceptions)
+    public Task CleanupTestAsync(TestContext testContext, List<Exception> cleanupExceptions)
     {
-        await _objectTracker.UntrackObjects(testContext, cleanupExceptions);
+        return _objectTracker.UntrackObjects(testContext, cleanupExceptions).AsTask();
     }
 
     #endregion
