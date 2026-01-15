@@ -141,33 +141,46 @@ public abstract class BaseMigrationCodeFixProvider : CodeFixProvider
     /// </summary>
     protected static CompilationUnitSyntax CleanupClassMemberLeadingTrivia(CompilationUnitSyntax root)
     {
-        var classesToFix = root.DescendantNodes().OfType<ClassDeclarationSyntax>()
-            .Where(c => c.Members.Any())
-            .ToList();
-
         var currentRoot = root;
-        foreach (var classDecl in classesToFix)
+
+        // Use a while loop to re-query after each modification.
+        // This is necessary because ReplaceNode returns a new tree, and node references
+        // from the original tree won't match nodes in the new tree.
+        ClassDeclarationSyntax? classToFix;
+        while ((classToFix = FindClassWithExcessiveLeadingTrivia(currentRoot)) != null)
         {
-            var firstMember = classDecl.Members.First();
+            var firstMember = classToFix.Members.First();
             var leadingTrivia = firstMember.GetLeadingTrivia();
-            int newlineCount = leadingTrivia.Count(t => t.IsKind(SyntaxKind.EndOfLineTrivia));
 
-            if (newlineCount > 0)
-            {
-                // Keep only indentation (whitespace), remove all newlines
-                var triviaToKeep = leadingTrivia
-                    .Where(t => !t.IsKind(SyntaxKind.EndOfLineTrivia))
-                    .Where(t => t.IsKind(SyntaxKind.WhitespaceTrivia) ||
-                                (!t.IsKind(SyntaxKind.WhitespaceTrivia) && !t.IsKind(SyntaxKind.EndOfLineTrivia)))
-                    .ToList();
+            // Keep only indentation (whitespace), remove all newlines
+            var triviaToKeep = leadingTrivia
+                .Where(t => !t.IsKind(SyntaxKind.EndOfLineTrivia))
+                .Where(t => t.IsKind(SyntaxKind.WhitespaceTrivia) ||
+                            (!t.IsKind(SyntaxKind.WhitespaceTrivia) && !t.IsKind(SyntaxKind.EndOfLineTrivia)))
+                .ToList();
 
-                var newFirstMember = firstMember.WithLeadingTrivia(triviaToKeep);
-                var updatedClass = classDecl.ReplaceNode(firstMember, newFirstMember);
-                currentRoot = currentRoot.ReplaceNode(classDecl, updatedClass);
-            }
+            var newFirstMember = firstMember.WithLeadingTrivia(triviaToKeep);
+            var updatedClass = classToFix.ReplaceNode(firstMember, newFirstMember);
+            currentRoot = currentRoot.ReplaceNode(classToFix, updatedClass);
         }
 
-        return (CompilationUnitSyntax)currentRoot;
+        return currentRoot;
+    }
+
+    /// <summary>
+    /// Finds a class with excessive leading trivia on its first member.
+    /// Returns null if no such class exists.
+    /// </summary>
+    private static ClassDeclarationSyntax? FindClassWithExcessiveLeadingTrivia(CompilationUnitSyntax root)
+    {
+        return root.DescendantNodes()
+            .OfType<ClassDeclarationSyntax>()
+            .Where(c => c.Members.Any())
+            .FirstOrDefault(c =>
+            {
+                var leadingTrivia = c.Members.First().GetLeadingTrivia();
+                return leadingTrivia.Any(t => t.IsKind(SyntaxKind.EndOfLineTrivia));
+            });
     }
 
     /// <summary>
@@ -251,11 +264,11 @@ public abstract class AttributeRewriter : CSharpSyntaxRewriter
                 var hookAttributeList = MigrationHelpers.ConvertHookAttribute(attribute, FrameworkName);
                 if (hookAttributeList != null)
                 {
-                    // Preserve only the leading trivia (indentation) from the original node
-                    // and strip any trailing trivia to prevent extra blank lines
-                    return hookAttributeList
-                        .WithLeadingTrivia(node.GetLeadingTrivia())
-                        .WithTrailingTrivia(node.GetTrailingTrivia());
+                    // Add converted hook attribute(s) to the list - don't return early!
+                    // This preserves other attributes that may be in the same attribute list.
+                    // e.g., [SetUp, Category("Unit")] -> [Before(HookType.Test), Category("Unit")]
+                    attributes.AddRange(hookAttributeList.Attributes);
+                    continue;
                 }
             }
 
@@ -268,6 +281,8 @@ public abstract class AttributeRewriter : CSharpSyntaxRewriter
 
         return attributes.Count > 0
             ? node.WithAttributes(SyntaxFactory.SeparatedList(attributes))
+                .WithLeadingTrivia(node.GetLeadingTrivia())
+                .WithTrailingTrivia(node.GetTrailingTrivia())
             : null;
     }
     

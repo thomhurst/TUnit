@@ -1335,6 +1335,440 @@ public class MSTestMigrationAnalyzerTests
         );
     }
 
+    /// <summary>
+    /// Tests that ClassInitialize/ClassCleanup with sibling attributes preserve all attributes.
+    /// Bug fix: Early return in VisitAttributeList was losing sibling attributes.
+    /// </summary>
+    [Test]
+    public async Task MSTest_ClassLifecycle_With_Sibling_Attributes_Preserved()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+                {|#0:[TestClass]|}
+                public class TestClass
+                {
+                    [ClassInitialize, Description("Class setup")]
+                    public static void ClassSetup(TestContext context)
+                    {
+                    }
+
+                    [ClassCleanup, Description("Class teardown")]
+                    public static void ClassTeardown()
+                    {
+                    }
+
+                    [TestInitialize, Description("Test setup")]
+                    public void TestSetup()
+                    {
+                    }
+
+                    [TestCleanup, Description("Test teardown")]
+                    public void TestTeardown()
+                    {
+                    }
+
+                    [TestMethod]
+                    public void MyTest()
+                    {
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
+            """
+                public class TestClass
+                {
+                    [Before(HookType.Class), Description("Class setup")]
+                    public static void ClassSetup()
+                    {
+                    }
+
+                    [After(HookType.Class), Description("Class teardown")]
+                    public static void ClassTeardown()
+                    {
+                    }
+
+                    [Before(HookType.Test), Description("Test setup")]
+                    public void TestSetup()
+                    {
+                    }
+
+                    [After(HookType.Test), Description("Test teardown")]
+                    public void TestTeardown()
+                    {
+                    }
+
+                    [Test]
+                    public void MyTest()
+                    {
+                    }
+                }
+                """,
+            ConfigureMSTestTest
+        );
+    }
+
+    /// <summary>
+    /// Tests that multiple classes in a single file are all processed correctly.
+    /// Bug fix: Trivia cleanup was failing on second class due to stale node references.
+    /// </summary>
+    [Test]
+    public async Task MSTest_Multiple_Classes_In_File_All_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+                {|#0:[TestClass]|}
+                public class FirstTestClass
+                {
+                    [TestMethod]
+                    public void FirstTest()
+                    {
+                        Assert.IsTrue(true);
+                    }
+                }
+
+                [TestClass]
+                public class SecondTestClass
+                {
+                    [TestMethod]
+                    public void SecondTest()
+                    {
+                        Assert.IsFalse(false);
+                    }
+                }
+
+                [TestClass]
+                public class ThirdTestClass
+                {
+                    [TestInitialize]
+                    public void Setup()
+                    {
+                    }
+
+                    [TestMethod]
+                    public void ThirdTest()
+                    {
+                        Assert.AreEqual(1, 1);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+
+                public class FirstTestClass
+                {
+                    [Test]
+                    public async Task FirstTest()
+                    {
+                        await Assert.That(true).IsTrue();
+                    }
+                }
+                public class SecondTestClass
+                {
+                    [Test]
+                    public async Task SecondTest()
+                    {
+                        await Assert.That(false).IsFalse();
+                    }
+                }
+                public class ThirdTestClass
+                {
+                    [Before(HookType.Test)]
+                    public void Setup()
+                    {
+                    }
+
+                    [Test]
+                    public async Task ThirdTest()
+                    {
+                        await Assert.That(1).IsEqualTo(1);
+                    }
+                }
+                """,
+            ConfigureMSTestTest
+        );
+    }
+
+    [Test]
+    public async Task MSTest_Comprehensive_Kitchen_Sink_Migration()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+                using System;
+                using System.Collections.Generic;
+
+                {|#0:[TestClass]|}
+                [Description("Comprehensive MSTest fixture for migration")]
+                [TestCategory("Migration")]
+                public class ComprehensiveTests
+                {
+                    private List<string> _log;
+                    private int _counter;
+
+                    [ClassInitialize]
+                    public static void ClassSetup(TestContext context)
+                    {
+                        // Class-level setup
+                    }
+
+                    [ClassCleanup]
+                    public static void ClassTeardown()
+                    {
+                        // Class-level teardown
+                    }
+
+                    [TestInitialize]
+                    public void TestSetup()
+                    {
+                        _log = new List<string>();
+                        _counter = 0;
+                    }
+
+                    [TestCleanup]
+                    public void TestTeardown()
+                    {
+                        _log.Clear();
+                        _counter = -1;
+                    }
+
+                    [TestMethod]
+                    [Description("Simple test without parameters")]
+                    public void SimpleTest()
+                    {
+                        Assert.IsTrue(true);
+                        Assert.IsFalse(false);
+                    }
+
+                    [TestMethod]
+                    [TestCategory("Math")]
+                    public void MathTest()
+                    {
+                        var result = 2 + 2;
+                        Assert.AreEqual(4, result);
+                        Assert.AreNotEqual(5, result);
+                    }
+
+                    [TestMethod]
+                    [DataRow(1, 2, 3)]
+                    [DataRow(5, 5, 10)]
+                    [DataRow(-1, 1, 0)]
+                    [Description("Parameterized addition test")]
+                    public void AdditionTest(int a, int b, int expected)
+                    {
+                        var result = a + b;
+                        Assert.AreEqual(expected, result);
+                    }
+
+                    [TestMethod]
+                    [DataRow("hello", 5)]
+                    [DataRow("world", 5)]
+                    public void StringLengthTest(string input, int expectedLength)
+                    {
+                        Assert.AreEqual(expectedLength, input.Length);
+                        Assert.IsNotNull(input);
+                    }
+
+                    [TestMethod]
+                    [TestCategory("Null")]
+                    public void NullAndTypeTests()
+                    {
+                        object obj = "test";
+                        object nullObj = null;
+
+                        Assert.IsNotNull(obj);
+                        Assert.IsNull(nullObj);
+                        Assert.IsInstanceOfType(obj, typeof(string));
+                    }
+
+                    [TestMethod]
+                    public void CollectionTests()
+                    {
+                        var list = new List<int> { 1, 2, 3 };
+                        var empty = new List<int>();
+
+                        CollectionAssert.Contains(list, 2);
+                        CollectionAssert.DoesNotContain(list, 4);
+                    }
+
+                    [TestMethod]
+                    public void StringTests()
+                    {
+                        var str = "Hello World";
+
+                        StringAssert.StartsWith(str, "Hello");
+                        StringAssert.EndsWith(str, "World");
+                        StringAssert.Contains(str, "lo Wo");
+                    }
+
+                    [TestMethod]
+                    [Ignore("This test is temporarily disabled")]
+                    public void IgnoredTest()
+                    {
+                        Assert.Fail("Should not run");
+                    }
+                }
+
+                [TestClass]
+                [TestCategory("Secondary")]
+                public class SecondaryTests
+                {
+                    [TestMethod]
+                    public void AnotherTest()
+                    {
+                        Assert.AreEqual(1, 1);
+                    }
+
+                    [TestMethod]
+                    [DataRow(true)]
+                    [DataRow(false)]
+                    public void BooleanTest(bool value)
+                    {
+                        Assert.AreEqual(value, value);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
+            """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+
+                [Description("Comprehensive MSTest fixture for migration")]
+                [Property("Category", "Migration")]
+                public class ComprehensiveTests
+                {
+                    private List<string> _log;
+                    private int _counter;
+
+                    [Before(HookType.Class)]
+                    public static void ClassSetup()
+                    {
+                        // Class-level setup
+                    }
+
+                    [After(HookType.Class)]
+                    public static void ClassTeardown()
+                    {
+                        // Class-level teardown
+                    }
+
+                    [Before(HookType.Test)]
+                    public void TestSetup()
+                    {
+                        _log = new List<string>();
+                        _counter = 0;
+                    }
+
+                    [After(HookType.Test)]
+                    public void TestTeardown()
+                    {
+                        _log.Clear();
+                        _counter = -1;
+                    }
+
+                    [Test]
+                    [Description("Simple test without parameters")]
+                    public async Task SimpleTest()
+                    {
+                        await Assert.That(true).IsTrue();
+                        await Assert.That(false).IsFalse();
+                    }
+
+                    [Test]
+                    [Property("Category", "Math")]
+                    public async Task MathTest()
+                    {
+                        var result = 2 + 2;
+                        await Assert.That(result).IsEqualTo(4);
+                        await Assert.That(result).IsNotEqualTo(5);
+                    }
+
+                    [Test]
+                    [Arguments(1, 2, 3)]
+                    [Arguments(5, 5, 10)]
+                    [Arguments(-1, 1, 0)]
+                    [Description("Parameterized addition test")]
+                    public async Task AdditionTest(int a, int b, int expected)
+                    {
+                        var result = a + b;
+                        await Assert.That(result).IsEqualTo(expected);
+                    }
+
+                    [Test]
+                    [Arguments("hello", 5)]
+                    [Arguments("world", 5)]
+                    public async Task StringLengthTest(string input, int expectedLength)
+                    {
+                        await Assert.That(input.Length).IsEqualTo(expectedLength);
+                        await Assert.That(input).IsNotNull();
+                    }
+
+                    [Test]
+                    [Property("Category", "Null")]
+                    public async Task NullAndTypeTests()
+                    {
+                        object obj = "test";
+                        object nullObj = null;
+
+                        await Assert.That(obj).IsNotNull();
+                        await Assert.That(nullObj).IsNull();
+                        await Assert.That(obj).IsAssignableTo(typeof(string));
+                    }
+
+                    [Test]
+                    public async Task CollectionTests()
+                    {
+                        var list = new List<int> { 1, 2, 3 };
+                        var empty = new List<int>();
+
+                        await Assert.That(list).Contains(2);
+                        await Assert.That(list).DoesNotContain(4);
+                    }
+
+                    [Test]
+                    public async Task StringTests()
+                    {
+                        var str = "Hello World";
+
+                        await Assert.That(str).StartsWith("Hello");
+                        await Assert.That(str).EndsWith("World");
+                        await Assert.That(str).Contains("lo Wo");
+                    }
+
+                    [Test]
+                    [Ignore("This test is temporarily disabled")]
+                    public async Task IgnoredTest()
+                    {
+                        await Assert.Fail("Should not run");
+                    }
+                }
+                [Property("Category", "Secondary")]
+                public class SecondaryTests
+                {
+                    [Test]
+                    public async Task AnotherTest()
+                    {
+                        await Assert.That(1).IsEqualTo(1);
+                    }
+
+                    [Test]
+                    [Arguments(true)]
+                    [Arguments(false)]
+                    public async Task BooleanTest(bool value)
+                    {
+                        await Assert.That(value).IsEqualTo(value);
+                    }
+                }
+                """,
+            ConfigureMSTestTest
+        );
+    }
+
     private static void ConfigureMSTestTest(Verifier.Test test)
     {
         test.TestState.AdditionalReferences.Add(typeof(TestMethodAttribute).Assembly);

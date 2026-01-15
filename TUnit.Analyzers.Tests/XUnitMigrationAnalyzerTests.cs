@@ -1511,6 +1511,233 @@ public class XUnitMigrationAnalyzerTests
             );
     }
 
+    [Test]
+    public async Task XUnit_Comprehensive_Kitchen_Sink_Migration()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                {|#0:using Xunit;
+                using System;
+                using System.Collections.Generic;
+
+                public class ComprehensiveTests
+                {
+                    private List<string> _log;
+                    private int _counter;
+
+                    public ComprehensiveTests()
+                    {
+                        // Constructor acts as setup
+                        _log = new List<string>();
+                        _counter = 0;
+                    }
+
+                    [Fact]
+                    public void SimpleTest()
+                    {
+                        Assert.True(true);
+                        Assert.False(false);
+                    }
+
+                    [Fact]
+                    public void MathTest()
+                    {
+                        var result = 2 + 2;
+                        Assert.Equal(4, result);
+                        Assert.NotEqual(5, result);
+                    }
+
+                    [Theory]
+                    [InlineData(1, 2, 3)]
+                    [InlineData(5, 5, 10)]
+                    [InlineData(-1, 1, 0)]
+                    public void AdditionTest(int a, int b, int expected)
+                    {
+                        var result = a + b;
+                        Assert.Equal(expected, result);
+                    }
+
+                    [Theory]
+                    [InlineData("hello", 5)]
+                    [InlineData("world", 5)]
+                    public void StringLengthTest(string input, int expectedLength)
+                    {
+                        Assert.Equal(expectedLength, input.Length);
+                        Assert.NotNull(input);
+                    }
+
+                    [Fact]
+                    public void NullAndTypeTests()
+                    {
+                        object obj = "test";
+                        object nullObj = null;
+
+                        Assert.NotNull(obj);
+                        Assert.Null(nullObj);
+                        Assert.IsType<string>(obj);
+                        Assert.IsAssignableFrom<object>(obj);
+                    }
+
+                    [Fact]
+                    public void CollectionTests()
+                    {
+                        var list = new List<int> { 1, 2, 3 };
+                        var empty = new List<int>();
+
+                        Assert.NotEmpty(list);
+                        Assert.Empty(empty);
+                        Assert.Contains(2, list);
+                        Assert.DoesNotContain(4, list);
+                    }
+
+                    [Fact]
+                    public void StringTests()
+                    {
+                        var str = "Hello World";
+
+                        Assert.StartsWith("Hello", str);
+                        Assert.EndsWith("World", str);
+                        Assert.Contains("lo Wo", str);
+                    }
+
+                    [Fact(Skip = "This test is temporarily disabled")]
+                    public void SkippedTest()
+                    {
+                        Assert.True(false, "Should not run");
+                    }
+                }
+
+                public class SecondaryTests
+                {
+                    [Fact]
+                    public void AnotherTest()
+                    {
+                        Assert.Equal(1, 1);
+                    }
+
+                    [Theory]
+                    [InlineData(true)]
+                    [InlineData(false)]
+                    public void BooleanTest(bool value)
+                    {
+                        Assert.Equal(value, value);
+                    }
+                }|}
+                """,
+            Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+            """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+
+                public class ComprehensiveTests
+                {
+                    private List<string> _log;
+                    private int _counter;
+
+                    public ComprehensiveTests()
+                    {
+                        // Constructor acts as setup
+                        _log = new List<string>();
+                        _counter = 0;
+                    }
+
+                    [Test]
+                    public async Task SimpleTest()
+                    {
+                        await Assert.That(true).IsTrue();
+                        await Assert.That(false).IsFalse();
+                    }
+
+                    [Test]
+                    public async Task MathTest()
+                    {
+                        var result = 2 + 2;
+                        await Assert.That(result).IsEqualTo(4);
+                        await Assert.That(result).IsNotEqualTo(5);
+                    }
+
+                    [Test]
+                    [Arguments(1, 2, 3)]
+                    [Arguments(5, 5, 10)]
+                    [Arguments(-1, 1, 0)]
+                    public async Task AdditionTest(int a, int b, int expected)
+                    {
+                        var result = a + b;
+                        await Assert.That(result).IsEqualTo(expected);
+                    }
+
+                    [Test]
+                    [Arguments("hello", 5)]
+                    [Arguments("world", 5)]
+                    public async Task StringLengthTest(string input, int expectedLength)
+                    {
+                        await Assert.That(input.Length).IsEqualTo(expectedLength);
+                        await Assert.That(input).IsNotNull();
+                    }
+
+                    [Test]
+                    public async Task NullAndTypeTests()
+                    {
+                        object obj = "test";
+                        object nullObj = null;
+
+                        await Assert.That(obj).IsNotNull();
+                        await Assert.That(nullObj).IsNull();
+                        await Assert.That(obj).IsTypeOf<string>();
+                        await Assert.That(obj).IsAssignableTo<object>();
+                    }
+
+                    [Test]
+                    public async Task CollectionTests()
+                    {
+                        var list = new List<int> { 1, 2, 3 };
+                        var empty = new List<int>();
+
+                        await Assert.That(list).IsNotEmpty();
+                        await Assert.That(empty).IsEmpty();
+                        await Assert.That(list).Contains(2);
+                        await Assert.That(list).DoesNotContain(4);
+                    }
+
+                    [Test]
+                    public async Task StringTests()
+                    {
+                        var str = "Hello World";
+
+                        await Assert.That(str).StartsWith("Hello");
+                        await Assert.That(str).EndsWith("World");
+                        await Assert.That(str).Contains("lo Wo");
+                    }
+
+                    [Test, Skip("This test is temporarily disabled")]
+                    public async Task SkippedTest()
+                    {
+                        await Assert.That(false).IsTrue().Because("Should not run");
+                    }
+                }
+
+                public class SecondaryTests
+                {
+                    [Test]
+                    public async Task AnotherTest()
+                    {
+                        await Assert.That(1).IsEqualTo(1);
+                    }
+
+                    [Test]
+                    [Arguments(true)]
+                    [Arguments(false)]
+                    public async Task BooleanTest(bool value)
+                    {
+                        await Assert.That(value).IsEqualTo(value);
+                    }
+                }
+                """,
+            ConfigureXUnitTest
+        );
+    }
+
     private static void ConfigureXUnitTest(Verifier.Test test)
     {
         var globalUsings = ("GlobalUsings.cs", SourceText.From("global using Xunit;"));
