@@ -3,6 +3,7 @@ using ModularPipelines.Context;
 using ModularPipelines.DotNet.Options;
 using ModularPipelines.Extensions;
 using ModularPipelines.Git.Extensions;
+using ModularPipelines.Options;
 using TUnit.Pipeline.Modules.Abstract;
 
 namespace TUnit.Pipeline.Modules;
@@ -16,21 +17,26 @@ public class RunRpcTestsModule : TestBaseModule
         "net8.0"
     ];
 
-    protected override Task<DotNetRunOptions> GetTestOptions(IPipelineContext context, string framework, CancellationToken cancellationToken)
+    protected override Task<(DotNetRunOptions Options, CommandExecutionOptions? ExecutionOptions)> GetTestOptions(IModuleContext context, string framework, CancellationToken cancellationToken)
     {
         var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.RpcTests.csproj").AssertExists();
 
-        return Task.FromResult(new DotNetRunOptions
-        {
-            WorkingDirectory = project.Folder!,
-            NoBuild = true,
-            Configuration = Configuration.Release,
-            Framework = framework,
-            EnvironmentVariables = new Dictionary<string, string?>
+        return Task.FromResult<(DotNetRunOptions, CommandExecutionOptions?)>((
+            new DotNetRunOptions
             {
-                ["DISABLE_GITHUB_REPORTER"] = "true",
+                NoBuild = true,
+                Configuration = "Release",
+                Framework = framework,
+                Arguments = ["--ignore-exit-code", "8"],
             },
-            Arguments = ["--ignore-exit-code", "8"],
-        });
+            new CommandExecutionOptions
+            {
+                WorkingDirectory = project.Folder!.Path,
+                EnvironmentVariables = new Dictionary<string, string?>
+                {
+                    ["DISABLE_GITHUB_REPORTER"] = "true",
+                }
+            }
+        ));
     }
 }

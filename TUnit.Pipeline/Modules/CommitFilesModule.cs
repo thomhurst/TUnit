@@ -1,4 +1,5 @@
 ﻿using ModularPipelines.Attributes;
+using ModularPipelines.Configuration;
 using ModularPipelines.Context;
 using ModularPipelines.Extensions;
 using ModularPipelines.Git.Attributes;
@@ -24,21 +25,25 @@ namespace TUnit.Pipeline.Modules;
 [ModuleCategory("ReadMe")]
 public class CommitFilesModule : Module<CommandResult>
 {
-    protected override async Task<SkipDecision> ShouldSkip(IPipelineContext context)
-    {
-        var generateReadMeModule = GetModuleIfRegistered<GenerateReadMeModule>();
-
-        if (generateReadMeModule is null)
+    protected override ModuleConfiguration Configure() => ModuleConfiguration.Create()
+        .WithSkipWhen(async ctx =>
         {
-            return "Nothing to commit";
-        }
+            var generateReadMeModule = ctx.GetModuleIfRegistered<GenerateReadMeModule>();
 
-        var result = await generateReadMeModule;
+            if (generateReadMeModule is null)
+            {
+                return SkipDecision.Skip("Nothing to commit");
+            }
 
-        return result.SkipDecision.ShouldSkip || !result.HasValue;
-    }
+            var result = await generateReadMeModule;
 
-    protected override async Task<CommandResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
+            return result.IsSkipped || !result.IsSuccess
+                ? SkipDecision.Skip("GenerateReadMeModule was skipped or has no value")
+                : SkipDecision.DoNotSkip;
+        })
+        .Build();
+
+    protected override async Task<CommandResult?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
     {
         var repositoryId = long.Parse(context.GitHub().EnvironmentVariables.RepositoryId!);
 
@@ -46,33 +51,36 @@ public class CommitFilesModule : Module<CommandResult>
         {
             Global = true,
             Arguments = ["user.name", context.GitHub().EnvironmentVariables.Actor!]
-        }, cancellationToken);
+        }, token: cancellationToken);
 
         await context.Git().Commands.Config(new GitConfigOptions
         {
             Global = true,
             Arguments = ["user.email", $"{context.GitHub().EnvironmentVariables.ActorId!}_{context.GitHub().EnvironmentVariables.Actor!}@users.noreply.github.com"]
-        }, cancellationToken);
+        }, token: cancellationToken);
 
         var newBranchName = $"feature/readme-{Guid.NewGuid():N}";
 
-        await context.Git().Commands.Checkout(new GitCheckoutOptions(newBranchName, true), cancellationToken);
+        await context.Git().Commands.Checkout(new GitCheckoutOptions(newBranchName, true), token: cancellationToken);
 
         await context.Git().Commands.Add(new GitAddOptions
         {
             Arguments = ["README.md"],
-            WorkingDirectory = context.Git().RootDirectory.AssertExists()
+        }, new CommandExecutionOptions
+        {
+            WorkingDirectory = context.Git().RootDirectory.AssertExists().Path
         }, cancellationToken);
 
         await context.Git().Commands.Commit(new GitCommitOptions
         {
             Message = "Update README.md"
-        }, cancellationToken);
+        }, token: cancellationToken);
 
         await context.Git().Commands.Push(new GitPushOptions
         {
-            Arguments = ["--set-upstream", "origin", newBranchName]
-        }, cancellationToken);
+            SetUpstream = true,
+            Arguments = ["origin", newBranchName]
+        }, token: cancellationToken);
 
         await context.Git().Commands.Push(token: cancellationToken);
 
@@ -85,12 +93,7 @@ public class CommitFilesModule : Module<CommandResult>
         await context.GitHub().Client.Issue.Update(repositoryId, pr.Number,
             issueUpdate);
 
-        return await context.Command.ExecuteCommandLineTool(new CommandLineToolOptions("gh", "pr", "merge", "--admin", "--squash", pr.Number.ToString())
-        {
-            EnvironmentVariables = new Dictionary<string, string?>
-            {
-                ["GH_TOKEN"] = Environment.GetEnvironmentVariable("ADMIN_TOKEN")
-            }
-        }, cancellationToken);
+        var adminToken = Environment.GetEnvironmentVariable("ADMIN_TOKEN");
+        return await context.Shell.Bash.Command(new BashCommandOptions($"GH_TOKEN={adminToken} gh pr merge --admin --squash {pr.Number}"), cancellationToken);
     }
 }

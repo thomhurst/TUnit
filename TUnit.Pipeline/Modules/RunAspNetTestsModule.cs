@@ -2,18 +2,18 @@
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
-using ModularPipelines.Enums;
 using ModularPipelines.Extensions;
 using ModularPipelines.Git.Extensions;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
+using ModularPipelines.Options;
 
 namespace TUnit.Pipeline.Modules;
 
 [NotInParallel("DotNetTests"), RunOnLinuxOnly, RunOnWindowsOnly]
 public class RunAspNetTestsModule : Module<CommandResult>
 {
-    protected override async Task<CommandResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
+    protected override async Task<CommandResult?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
     {
         var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.Example.Asp.Net.TestProject.csproj").AssertExists();
 
@@ -21,15 +21,23 @@ public class RunAspNetTestsModule : Module<CommandResult>
         {
             Project = project.Name,
             NoBuild = true,
-            Configuration = Configuration.Release,
+            Configuration = "Release",
             Framework = "net10.0",
-            WorkingDirectory = project.Folder!,
             Arguments = ["--hangdump", "--hangdump-filename", "hangdump.aspnet-tests.dmp", "--hangdump-timeout", "5m"],
+        }, new CommandExecutionOptions
+        {
+            WorkingDirectory = project.Folder!.Path,
             EnvironmentVariables = new Dictionary<string, string?>
             {
                 ["DISABLE_GITHUB_REPORTER"] = "true",
             },
-            CommandLogging = CommandLogging.Input | CommandLogging.Error | CommandLogging.Duration | CommandLogging.ExitCode
+            LogSettings = new CommandLoggingOptions
+            {
+                ShowCommandArguments = true,
+                ShowStandardError = true,
+                ShowExecutionTime = true,
+                ShowExitCode = true
+            }
         }, cancellationToken);
     }
 }

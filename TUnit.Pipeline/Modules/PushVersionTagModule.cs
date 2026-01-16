@@ -1,4 +1,5 @@
 ﻿using ModularPipelines.Attributes;
+using ModularPipelines.Configuration;
 using ModularPipelines.Context;
 using ModularPipelines.Git.Attributes;
 using ModularPipelines.Git.Extensions;
@@ -13,25 +14,26 @@ namespace TUnit.Pipeline.Modules;
 [DependsOn<GenerateVersionModule>]
 public class PushVersionTagModule : Module<CommandResult>
 {
-    protected override async Task<bool> ShouldIgnoreFailures(IPipelineContext context, Exception exception)
-    {
-        var versionInformation = await GetModule<GenerateVersionModule>();
+    protected override ModuleConfiguration Configure() => ModuleConfiguration.Create()
+        .WithIgnoreFailuresWhen(async (ctx, ex) =>
+        {
+            var versionInformation = await ctx.GetModule<GenerateVersionModule>();
+            return ex.Message.Contains($"tag 'v{versionInformation.ValueOrDefault!.SemVer}' already exists");
+        })
+        .Build();
 
-        return exception.Message.Contains($"tag 'v{versionInformation.Value!.SemVer}' already exists");
-    }
-
-    protected override async Task<CommandResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
+    protected override async Task<CommandResult?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
     {
-        var versionInformation = await GetModule<GenerateVersionModule>();
+        var versionInformation = await context.GetModule<GenerateVersionModule>();
 
         await context.Git().Commands.Tag(new GitTagOptions
         {
-            Arguments = [$"v{versionInformation.Value!.SemVer}"],
-        }, cancellationToken);
+            TagName = $"v{versionInformation.ValueOrDefault!.SemVer}",
+        }, token: cancellationToken);
 
         return await context.Git().Commands.Push(new GitPushOptions
         {
             Tags = true
-        }, cancellationToken);
+        }, token: cancellationToken);
     }
 }

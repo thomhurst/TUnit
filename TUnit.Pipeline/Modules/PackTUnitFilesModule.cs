@@ -2,9 +2,9 @@
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
-using ModularPipelines.Enums;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
+using ModularPipelines.Options;
 
 namespace TUnit.Pipeline.Modules;
 
@@ -13,24 +13,25 @@ namespace TUnit.Pipeline.Modules;
 [DependsOn<RunEngineTestsModule>]
 public class PackTUnitFilesModule : Module<List<PackedProject>>
 {
-    protected override async Task<List<PackedProject>?> ExecuteAsync(IPipelineContext context,
+    protected override async Task<List<PackedProject>?> ExecuteAsync(IModuleContext context,
         CancellationToken cancellationToken)
     {
-        var projects = await GetModule<GetPackageProjectsModule>();
-        var versionResult = await GetModule<GenerateVersionModule>();
+        var projects = await context.GetModule<GetPackageProjectsModule>();
+        var versionResult = await context.GetModule<GenerateVersionModule>();
 
-        var version = versionResult.Value!;
+        var version = versionResult.ValueOrDefault!;
 
         var packageVersion = version.SemVer!;
 
         var packedProjects = new List<PackedProject>();
 
-        foreach (var project in projects.Value!)
+        foreach (var project in projects.ValueOrDefault!)
         {
             await context.DotNet()
                 .Pack(
-                    new DotNetPackOptions(project)
+                    new DotNetPackOptions
                     {
+                        ProjectSolution = project.Path,
                         Properties =
                         [
                             new KeyValue("Version", version.SemVer!),
@@ -39,8 +40,16 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
                             new KeyValue("IsPackTarget", "true")
                         ],
                         IncludeSource = project == Sourcy.DotNet.Projects.TUnit_Templates ? false : true,
-                        Configuration = Configuration.Release,
-                        CommandLogging = CommandLogging.Input | CommandLogging.Error | CommandLogging.Duration | CommandLogging.ExitCode
+                        Configuration = "Release",
+                    }, new CommandExecutionOptions
+                    {
+                        LogSettings = new CommandLoggingOptions
+                        {
+                            ShowCommandArguments = true,
+                            ShowStandardError = true,
+                            ShowExecutionTime = true,
+                            ShowExitCode = true
+                        }
                     }, cancellationToken);
 
             packedProjects.Add(new PackedProject(project.NameWithoutExtension, version.SemVer!));
