@@ -184,9 +184,13 @@ namespace
         public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
         [.(1)]
         public static .<TItem> That<TItem>(.<TItem> value, [.("value")] string? expression = null) { }
+        [.(3)]
+        public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
         [.(1)]
         public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
         [.(4)]
+        public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
+        [.(2)]
         public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
         [.(3)]
         public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
