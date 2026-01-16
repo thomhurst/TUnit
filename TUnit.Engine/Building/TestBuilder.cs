@@ -397,7 +397,7 @@ internal sealed class TestBuilder : ITestBuilder
 
                                 if (metadata.TestClassType.IsGenericTypeDefinition && resolvedClassGenericArgs.Length == 0)
                                 {
-                                    throw new InvalidOperationException($"Cannot create instance of generic type {metadata.TestClassType.Name} with empty type arguments");
+                                    throw new InvalidOperationException($"Cannot create test for generic class '{metadata.TestClassType.Name}': No type arguments could be inferred. Add [GenerateGenericTest<ConcreteType>] to the class, or use a data source (like [ClassDataSource<T>] or [Arguments]) that provides constructor arguments to infer the generic type arguments from.");
                                 }
 
                                 var basicSkipReason = GetBasicSkipReason(metadata, attributes);
@@ -1727,7 +1727,7 @@ internal sealed class TestBuilder : ITestBuilder
 
             if (metadata.TestClassType.IsGenericTypeDefinition && resolvedClassGenericArgs.Length == 0)
             {
-                throw new InvalidOperationException($"Cannot create instance of generic type {metadata.TestClassType.Name} with empty type arguments");
+                throw new InvalidOperationException($"Cannot create test for generic class '{metadata.TestClassType.Name}': No type arguments could be inferred. Add [GenerateGenericTest<ConcreteType>] to the class, or use a data source (like [ClassDataSource<T>] or [Arguments]) that provides constructor arguments to infer the generic type arguments from.");
             }
 
             // Create instance factory
