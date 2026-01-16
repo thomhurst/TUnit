@@ -35,22 +35,20 @@ internal sealed class TestGenericTypeResolver
                 testData.ClassData);
         }
 
-        // Resolve method generic arguments if the test method is generic
-        if (metadata.GenericMethodInfo != null)
+        // First check if generic method type arguments are already resolved
+        // This handles constructed generic methods (created via MakeGenericMethod from [GenerateGenericTest])
+        if (metadata.GenericMethodTypeArguments is { Length: > 0 })
         {
-            // Check if generic method type arguments are already resolved
-            if (metadata.GenericMethodTypeArguments is { Length: > 0 })
-            {
-                result.ResolvedMethodGenericArguments = metadata.GenericMethodTypeArguments;
-            }
-            else
-            {
-                result.ResolvedMethodGenericArguments = ResolveMethodGenericArguments(
-                    metadata.MethodMetadata,
-                    metadata.GenericMethodInfo,
-                    testData.MethodData,
-                    metadata.MethodMetadata.Parameters.Select(p => p.Type).ToArray());
-            }
+            result.ResolvedMethodGenericArguments = metadata.GenericMethodTypeArguments;
+        }
+        // Otherwise resolve from GenericMethodInfo if the test method is a generic definition
+        else if (metadata.GenericMethodInfo != null)
+        {
+            result.ResolvedMethodGenericArguments = ResolveMethodGenericArguments(
+                metadata.MethodMetadata,
+                metadata.GenericMethodInfo,
+                testData.MethodData,
+                metadata.MethodMetadata.Parameters.Select(p => p.Type).ToArray());
         }
 
         return result;
