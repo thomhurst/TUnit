@@ -566,17 +566,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     {
         var discoveredTests = new List<TestMetadata>(100);
 
-        // Extract class-level data sources that will determine the generic type arguments
-        var classDataSources = ReflectionAttributeExtractor.ExtractDataSources(genericTypeDefinition);
-
-        if (classDataSources.Length == 0)
-        {
-            // This is expected for generic test classes in reflection mode
-            // They need data sources to determine concrete types
-            return discoveredTests;
-        }
-
-        // Get test methods from the generic type definition
+        // Get test methods from the generic type definition first (needed for both data sources and GenerateGenericTest)
         // Optimize: Manual filtering instead of LINQ Where().ToArray()
         var declaredMethods = genericTypeDefinition.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
         var testMethodsList = new List<MethodInfo>(declaredMethods.Length);
@@ -591,6 +581,55 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         if (testMethods.Length == 0)
         {
+            return discoveredTests;
+        }
+
+        // Check for GenerateGenericTest attributes that explicitly specify type arguments
+        var generateGenericTestAttributes = genericTypeDefinition.GetCustomAttributes<GenerateGenericTestAttribute>(inherit: false).ToArray();
+        foreach (var genAttr in generateGenericTestAttributes)
+        {
+            var typeArguments = genAttr.TypeArguments;
+            if (typeArguments.Length == 0)
+            {
+                continue;
+            }
+
+            try
+            {
+                // Create concrete type with validation
+                var concreteType = ReflectionGenericTypeResolver.CreateConcreteType(genericTypeDefinition, typeArguments);
+
+                // Build tests for each method in the concrete type
+                foreach (var genericMethod in testMethods)
+                {
+                    var concreteMethod = concreteType.GetMethod(genericMethod.Name,
+                        BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+
+                    if (concreteMethod != null)
+                    {
+                        // Build test metadata for the concrete type
+                        // No class data for GenerateGenericTest - it just provides type arguments
+                        var testMetadata = await BuildTestMetadata(concreteType, concreteMethod, null).ConfigureAwait(false);
+                        discoveredTests.Add(testMetadata);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException(
+                    $"Failed to create concrete type for {genericTypeDefinition.FullName ?? genericTypeDefinition.Name} from [GenerateGenericTest]. " +
+                    $"Error: {ex.Message}. " +
+                    $"Generic parameter count: {genericTypeDefinition.GetGenericArguments().Length}, " +
+                    $"Type arguments provided: {typeArguments.Length}", ex);
+            }
+        }
+
+        // Extract class-level data sources that will determine the generic type arguments
+        var classDataSources = ReflectionAttributeExtractor.ExtractDataSources(genericTypeDefinition);
+
+        if (classDataSources.Length == 0)
+        {
+            // Return any tests discovered from GenerateGenericTest attributes
             return discoveredTests;
         }
 
@@ -655,17 +694,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         Type genericTypeDefinition,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        // Extract class-level data sources that will determine the generic type arguments
-        var classDataSources = ReflectionAttributeExtractor.ExtractDataSources(genericTypeDefinition);
-
-        if (classDataSources.Length == 0)
-        {
-            // This is expected for generic test classes in reflection mode
-            // They need data sources to determine concrete types
-            yield break;
-        }
-
-        // Get test methods from the generic type definition
+        // Get test methods from the generic type definition first (needed for both data sources and GenerateGenericTest)
         // Optimize: Manual filtering instead of LINQ Where().ToArray()
         var declaredMethods = genericTypeDefinition.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
         var testMethodsList = new List<MethodInfo>(declaredMethods.Length);
@@ -680,6 +709,91 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         if (testMethods.Length == 0)
         {
+            yield break;
+        }
+
+        // Check for GenerateGenericTest attributes that explicitly specify type arguments
+        var generateGenericTestAttributes = genericTypeDefinition.GetCustomAttributes<GenerateGenericTestAttribute>(inherit: false).ToArray();
+        foreach (var genAttr in generateGenericTestAttributes)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var typeArguments = genAttr.TypeArguments;
+            if (typeArguments.Length == 0)
+            {
+                continue;
+            }
+
+            TestMetadata? failedMetadata = null;
+            List<TestMetadata>? successfulTests = null;
+
+            try
+            {
+                // Create concrete type with validation
+                var concreteType = ReflectionGenericTypeResolver.CreateConcreteType(genericTypeDefinition, typeArguments);
+
+                // Build tests for each method in the concrete type
+                foreach (var genericMethod in testMethods)
+                {
+                    var concreteMethod = concreteType.GetMethod(genericMethod.Name,
+                        BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+
+                    if (concreteMethod != null)
+                    {
+                        // Build test metadata for the concrete type
+                        // No class data for GenerateGenericTest - it just provides type arguments
+                        var testMetadata = await BuildTestMetadata(concreteType, concreteMethod, null).ConfigureAwait(false);
+
+                        if (successfulTests == null)
+                        {
+                            successfulTests = [];
+                        }
+                        successfulTests.Add(testMetadata);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                failedMetadata = new FailedTestMetadata(
+                    new InvalidOperationException(
+                        $"Failed to create concrete type for {genericTypeDefinition.FullName ?? genericTypeDefinition.Name} from [GenerateGenericTest]. " +
+                        $"Error: {ex.Message}. " +
+                        $"Generic parameter count: {genericTypeDefinition.GetGenericArguments().Length}, " +
+                        $"Type arguments: {string.Join(", ", typeArguments.Select(static t => t.Name))}", ex),
+                    $"[GENERIC TYPE CREATION FAILED] {genericTypeDefinition.Name}")
+                {
+                    TestName = $"[GENERIC TYPE CREATION FAILED] {genericTypeDefinition.Name}",
+                    TestClassType = genericTypeDefinition,
+                    TestMethodName = "GenericTypeCreationFailed",
+                    FilePath = "Unknown",
+                    LineNumber = 0,
+                    MethodMetadata = CreateDummyMethodMetadata(genericTypeDefinition, "GenericTypeCreationFailed"),
+                    AttributeFactory = () => [],
+                    DataSources = [],
+                    ClassDataSources = [],
+                    PropertyDataSources = []
+                };
+            }
+
+            if (failedMetadata != null)
+            {
+                yield return failedMetadata;
+            }
+            else if (successfulTests != null)
+            {
+                foreach (var test in successfulTests)
+                {
+                    yield return test;
+                }
+            }
+        }
+
+        // Extract class-level data sources that will determine the generic type arguments
+        var classDataSources = ReflectionAttributeExtractor.ExtractDataSources(genericTypeDefinition);
+
+        if (classDataSources.Length == 0)
+        {
+            // GenerateGenericTest tests have already been yielded above
             yield break;
         }
 
