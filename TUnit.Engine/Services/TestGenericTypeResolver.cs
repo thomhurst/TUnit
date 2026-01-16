@@ -97,7 +97,9 @@ internal sealed class TestGenericTypeResolver
             // For classes with parameterless constructors, throw a specific exception
             // that can be caught and handled by the caller
             throw new GenericTypeResolutionException(
-                $"Could not resolve type for generic parameter(s) of type '{genericClassType.Name}' from constructor arguments. Type inference from method data may be required.");
+                $"Cannot create test for generic class '{genericClassType.Name}': No type arguments could be inferred. " +
+                $"Add [GenerateGenericTest<ConcreteType>] to the class, or use a data source " +
+                $"(like [ClassDataSource<T>] or [Arguments]) that provides constructor arguments to infer the generic type arguments from.");
         }
 
         // Resolve all generic parameters
@@ -108,7 +110,8 @@ internal sealed class TestGenericTypeResolver
             if (!typeMapping.TryGetValue(genericParam, out var resolvedType))
             {
                 throw new GenericTypeResolutionException(
-                    $"Could not resolve type for generic parameter '{genericParam.Name}' of type '{genericClassType.Name}'");
+                    $"Cannot create test for generic class '{genericClassType.Name}': Could not resolve type for generic parameter '{genericParam.Name}'. " +
+                    $"Add [GenerateGenericTest<ConcreteType>] to the class, or use a data source that provides constructor arguments to infer the generic type arguments from.");
             }
             resolvedTypes[i] = resolvedType;
         }
