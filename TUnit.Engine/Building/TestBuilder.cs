@@ -397,7 +397,7 @@ internal sealed class TestBuilder : ITestBuilder
 
                                 if (metadata.TestClassType.IsGenericTypeDefinition && resolvedClassGenericArgs.Length == 0)
                                 {
-                                    throw new InvalidOperationException($"Cannot create instance of generic type {metadata.TestClassType.Name} with empty type arguments");
+                                    throw new InvalidOperationException($"Cannot create test for generic class '{metadata.TestClassType.Name}': No type arguments could be inferred. Add [GenerateGenericTest<ConcreteType>] to the class, or use a data source (like [ClassDataSource<T>] or [Arguments]) that provides constructor arguments to infer the generic type arguments from.");
                                 }
 
                                 var basicSkipReason = GetBasicSkipReason(metadata, attributes);
@@ -1165,6 +1165,30 @@ internal sealed class TestBuilder : ITestBuilder
             return true; // No specific types expected, allow all data
         }
 
+        // Check if any method parameter actually uses the method's generic type parameters.
+        // If none of the parameters use T, then data compatibility with the generic type doesn't matter.
+        // This is important for methods like GenericMethod<T>(string input) where the parameter
+        // is a concrete type (string) and doesn't depend on the generic type T.
+        if (metadata.GenericMethodTypeArguments is { Length: > 0 })
+        {
+            var anyParameterUsesMethodGeneric = false;
+            foreach (var param in metadata.MethodMetadata.Parameters)
+            {
+                if (ParameterUsesMethodGenericType(param.TypeInfo))
+                {
+                    anyParameterUsesMethodGeneric = true;
+                    break;
+                }
+            }
+
+            if (!anyParameterUsesMethodGeneric)
+            {
+                // None of the method parameters use the method's generic type parameters.
+                // The data doesn't need to match the generic types - allow all data.
+                return true;
+            }
+        }
+
         // For generic methods, we need to check if the data types match the expected types
         // The key is to determine what type of data this data source produces
 
@@ -1258,6 +1282,21 @@ internal sealed class TestBuilder : ITestBuilder
 
         // Default to false - if we can't determine compatibility, reject it
         return false;
+    }
+
+    /// <summary>
+    /// Checks if a parameter's type involves a method generic type parameter.
+    /// Returns true for parameters like T, List&lt;T&gt;, etc. where T is a method generic parameter.
+    /// Returns false for concrete types like string, int, etc.
+    /// </summary>
+    private static bool ParameterUsesMethodGenericType(TypeInfo? typeInfo)
+    {
+        return typeInfo switch
+        {
+            GenericParameter { IsMethodParameter: true } => true,
+            ConstructedGeneric cg => cg.TypeArguments.Any(ParameterUsesMethodGenericType),
+            _ => false
+        };
     }
 
     private static Type? GetExpectedTypeForParameter(ParameterMetadata param, Type[] genericTypeArgs)
@@ -1688,7 +1727,7 @@ internal sealed class TestBuilder : ITestBuilder
 
             if (metadata.TestClassType.IsGenericTypeDefinition && resolvedClassGenericArgs.Length == 0)
             {
-                throw new InvalidOperationException($"Cannot create instance of generic type {metadata.TestClassType.Name} with empty type arguments");
+                throw new InvalidOperationException($"Cannot create test for generic class '{metadata.TestClassType.Name}': No type arguments could be inferred. Add [GenerateGenericTest<ConcreteType>] to the class, or use a data source (like [ClassDataSource<T>] or [Arguments]) that provides constructor arguments to infer the generic type arguments from.");
             }
 
             // Create instance factory

@@ -321,12 +321,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 .Any(a => a.AttributeClass?.Name == "MethodDataSourceAttribute" &&
                           InferClassTypesFromMethodDataSource(compilation, testMethod, a) != null);
 
-            if (hasTypedDataSource || hasGenerateGenericTest || testMethod.IsGenericMethod || hasClassArguments || hasTypedDataSourceForGenericType || hasMethodArgumentsForGenericType || hasMethodDataSourceForGenericType)
+            // Check for class-level data sources that could help resolve generic type arguments
+            var hasClassDataSources = testMethod.IsGenericType && testMethod.TypeSymbol.GetAttributesIncludingBaseTypes()
+                .Any(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass));
+
+            if (hasTypedDataSource || hasGenerateGenericTest || testMethod.IsGenericMethod || hasClassArguments || hasTypedDataSourceForGenericType || hasMethodArgumentsForGenericType || hasMethodDataSourceForGenericType || hasClassDataSources)
             {
                 GenerateGenericTestWithConcreteTypes(writer, testMethod, className, uniqueClassName);
             }
             else
             {
+                // For generic classes with no way to resolve type arguments, this will generate
+                // GenericTestMetadata that the engine will fail with a clear error message
                 GenerateTestMetadataInstance(writer, testMethod, className, uniqueClassName);
             }
         }

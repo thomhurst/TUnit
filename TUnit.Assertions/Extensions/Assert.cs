@@ -58,6 +58,34 @@ public static class Assert
     }
 
     /// <summary>
+    /// Creates an assertion for an ICollection&lt;T&gt; value.
+    /// This overload enables better type inference for collection operations like IsInOrder, All, ContainsOnly.
+    /// Example: await Assert.That(collection).IsEmpty();
+    /// Example: await Assert.That(collection).Contains(item);
+    /// </summary>
+    [OverloadResolutionPriority(3)]
+    public static CollectionAssertion<TItem> That<TItem>(
+        ICollection<TItem>? value,
+        [CallerArgumentExpression(nameof(value))] string? expression = null)
+    {
+        return new CollectionAssertion<TItem>(value!, expression);
+    }
+
+    /// <summary>
+    /// Creates an assertion for an IReadOnlyCollection&lt;T&gt; value.
+    /// This overload enables better type inference for collection operations like IsInOrder, All, ContainsOnly.
+    /// Example: await Assert.That(readOnlyCollection).IsEmpty();
+    /// Example: await Assert.That(readOnlyCollection).Contains(item);
+    /// </summary>
+    [OverloadResolutionPriority(2)]
+    public static CollectionAssertion<TItem> That<TItem>(
+        IReadOnlyCollection<TItem>? value,
+        [CallerArgumentExpression(nameof(value))] string? expression = null)
+    {
+        return new CollectionAssertion<TItem>(value!, expression);
+    }
+
+    /// <summary>
     /// Creates an assertion for an IEnumerable (nullable or non-nullable).
     /// This overload enables better type inference for collection operations like IsInOrder, All, ContainsOnly.
     /// Works with any type implementing IEnumerable&lt;T&gt; including List, Array, DbSet, IQueryable, and custom collections.

@@ -35,22 +35,20 @@ internal sealed class TestGenericTypeResolver
                 testData.ClassData);
         }
 
-        // Resolve method generic arguments if the test method is generic
-        if (metadata.GenericMethodInfo != null)
+        // First check if generic method type arguments are already resolved
+        // This handles constructed generic methods (created via MakeGenericMethod from [GenerateGenericTest])
+        if (metadata.GenericMethodTypeArguments is { Length: > 0 })
         {
-            // Check if generic method type arguments are already resolved
-            if (metadata.GenericMethodTypeArguments is { Length: > 0 })
-            {
-                result.ResolvedMethodGenericArguments = metadata.GenericMethodTypeArguments;
-            }
-            else
-            {
-                result.ResolvedMethodGenericArguments = ResolveMethodGenericArguments(
-                    metadata.MethodMetadata,
-                    metadata.GenericMethodInfo,
-                    testData.MethodData,
-                    metadata.MethodMetadata.Parameters.Select(p => p.Type).ToArray());
-            }
+            result.ResolvedMethodGenericArguments = metadata.GenericMethodTypeArguments;
+        }
+        // Otherwise resolve from GenericMethodInfo if the test method is a generic definition
+        else if (metadata.GenericMethodInfo != null)
+        {
+            result.ResolvedMethodGenericArguments = ResolveMethodGenericArguments(
+                metadata.MethodMetadata,
+                metadata.GenericMethodInfo,
+                testData.MethodData,
+                metadata.MethodMetadata.Parameters.Select(p => p.Type).ToArray());
         }
 
         return result;
@@ -99,7 +97,9 @@ internal sealed class TestGenericTypeResolver
             // For classes with parameterless constructors, throw a specific exception
             // that can be caught and handled by the caller
             throw new GenericTypeResolutionException(
-                $"Could not resolve type for generic parameter(s) of type '{genericClassType.Name}' from constructor arguments. Type inference from method data may be required.");
+                $"Cannot create test for generic class '{genericClassType.Name}': No type arguments could be inferred. " +
+                $"Add [GenerateGenericTest<ConcreteType>] to the class, or use a data source " +
+                $"(like [ClassDataSource<T>] or [Arguments]) that provides constructor arguments to infer the generic type arguments from.");
         }
 
         // Resolve all generic parameters
@@ -110,7 +110,8 @@ internal sealed class TestGenericTypeResolver
             if (!typeMapping.TryGetValue(genericParam, out var resolvedType))
             {
                 throw new GenericTypeResolutionException(
-                    $"Could not resolve type for generic parameter '{genericParam.Name}' of type '{genericClassType.Name}'");
+                    $"Cannot create test for generic class '{genericClassType.Name}': Could not resolve type for generic parameter '{genericParam.Name}'. " +
+                    $"Add [GenerateGenericTest<ConcreteType>] to the class, or use a data source that provides constructor arguments to infer the generic type arguments from.");
             }
             resolvedTypes[i] = resolvedType;
         }
