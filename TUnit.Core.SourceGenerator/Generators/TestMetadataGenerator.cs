@@ -1537,15 +1537,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
                                 if (isGenericContainingType)
                                 {
-                                    // For generic types, use reflection-based setter
-                                    writer.AppendLine($"Setter = (instance, value) =>");
-                                    writer.AppendLine("{");
-                                    writer.Indent();
-                                    writer.AppendLine($"var backingField = instance.GetType().GetField(\"<{property.Name}>k__BackingField\",");
-                                    writer.AppendLine("    global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.NonPublic);");
-                                    writer.AppendLine($"backingField?.SetValue(instance, ({propertyType})value);");
-                                    writer.Unindent();
-                                    writer.AppendLine("},");
+                                    // For generic types, init-only properties with data sources are not supported
+                                    // UnsafeAccessor doesn't work with open generic types and reflection is not AOT-compatible
+                                    writer.AppendLine($"Setter = (instance, value) => throw new global::System.NotSupportedException(");
+                                    writer.AppendLine($"    \"Init-only property '{property.Name}' on generic type '{containingTypeName}' cannot be set. \" +");
+                                    writer.AppendLine($"    \"Use a regular settable property or constructor injection instead.\"),");
                                 }
                                 else
                                 {
