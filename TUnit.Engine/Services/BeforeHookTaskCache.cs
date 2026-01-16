@@ -14,8 +14,8 @@ internal sealed class BeforeHookTaskCache
     private readonly ThreadSafeDictionary<Type, Task> _beforeClassTasks = new();
     private readonly ThreadSafeDictionary<Assembly, Task> _beforeAssemblyTasks = new();
     private Task? _beforeTestSessionTask;
-    private readonly object _testSessionLock = new();
-    private readonly object _classLock = new();
+    private readonly Lock _testSessionLock = new();
+    private readonly Lock _classLock = new();
 
     public ValueTask GetOrCreateBeforeTestSessionTask(Func<CancellationToken, ValueTask> taskFactory, CancellationToken cancellationToken)
     {

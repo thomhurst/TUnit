@@ -21,7 +21,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         new(Helpers.ReferenceEqualityComparer.Instance);
 
     // Lock for atomic decrement-check-dispose operations to prevent race conditions
-    private static readonly object s_disposalLock = new();
+    private static readonly Lock s_disposalLock = new();
 
     // Collects errors from async disposal callbacks for post-session review
     private static readonly ConcurrentBag<Exception> s_asyncCallbackErrors = new();

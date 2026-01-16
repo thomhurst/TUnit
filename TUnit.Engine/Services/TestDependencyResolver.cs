@@ -17,7 +17,7 @@ internal sealed class TestDependencyResolver
     private readonly HashSet<AbstractExecutableTest> _testsBeingResolved =
     [
     ];
-    private readonly object _resolutionLock = new();
+    private readonly Lock _resolutionLock = new();
 
     public void RegisterTest(AbstractExecutableTest test)
     {
