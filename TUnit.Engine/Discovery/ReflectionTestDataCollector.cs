@@ -85,6 +85,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 #endif
 
         var allAssemblies = Assemblies;
+
         var assembliesList = new List<Assembly>(allAssemblies.Length);
         foreach (var assembly in allAssemblies)
         {
@@ -94,7 +95,6 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             }
         }
         var assemblies = assembliesList;
-
 
         var maxConcurrency = Math.Min(assemblies.Count, Environment.ProcessorCount * 2);
         var semaphore = new SemaphoreSlim(maxConcurrency, maxConcurrency);
@@ -409,14 +409,25 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
             foreach (var method in testMethods)
             {
-                try
+                // Resolve method-level generic instantiations
+                foreach (var (resolvedMethod, failedMetadata) in ResolveMethodInstantiations(type, method))
                 {
-                    discoveredTests.Add(await BuildTestMetadata(type, method).ConfigureAwait(false));
-                }
-                catch (Exception ex)
-                {
-                    var failedTest = CreateFailedTestMetadata(type, method, ex);
-                    discoveredTests.Add(failedTest);
+                    if (failedMetadata != null)
+                    {
+                        discoveredTests.Add(failedMetadata);
+                        continue;
+                    }
+
+                    try
+                    {
+                        var metadata = await BuildTestMetadata(type, resolvedMethod).ConfigureAwait(false);
+                        discoveredTests.Add(metadata);
+                    }
+                    catch (Exception ex)
+                    {
+                        var failedTest = CreateFailedTestMetadata(type, resolvedMethod, ex);
+                        discoveredTests.Add(failedTest);
+                    }
                 }
             }
         }
@@ -531,32 +542,42 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                TestMetadata? testMetadata = null;
-                TestMetadata? failedMetadata = null;
-
-                try
+                // Prevent duplicate test metadata for inherited tests
+                if (method.DeclaringType != type && !type.IsDefined(typeof(InheritsTestsAttribute), inherit: false))
                 {
-                    // Prevent duplicate test metadata for inherited tests
-                    if (method.DeclaringType != type && !type.IsDefined(typeof(InheritsTestsAttribute), inherit: false))
+                    continue;
+                }
+
+                // Resolve method-level generic instantiations
+                foreach (var (resolvedMethod, methodFailedMetadata) in ResolveMethodInstantiations(type, method))
+                {
+                    if (methodFailedMetadata != null)
                     {
+                        yield return methodFailedMetadata;
                         continue;
                     }
 
-                    testMetadata = await BuildTestMetadata(type, method).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    // Create a failed test metadata for discovery failures
-                    failedMetadata = CreateFailedTestMetadata(type, method, ex);
-                }
+                    TestMetadata? testMetadata = null;
+                    TestMetadata? failedMetadata = null;
 
-                if (testMetadata != null)
-                {
-                    yield return testMetadata;
-                }
-                else if (failedMetadata != null)
-                {
-                    yield return failedMetadata;
+                    try
+                    {
+                        testMetadata = await BuildTestMetadata(type, resolvedMethod).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Create a failed test metadata for discovery failures
+                        failedMetadata = CreateFailedTestMetadata(type, resolvedMethod, ex);
+                    }
+
+                    if (testMetadata != null)
+                    {
+                        yield return testMetadata;
+                    }
+                    else if (failedMetadata != null)
+                    {
+                        yield return failedMetadata;
+                    }
                 }
             }
         }
@@ -607,10 +628,20 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
                     if (concreteMethod != null)
                     {
-                        // Build test metadata for the concrete type
-                        // No class data for GenerateGenericTest - it just provides type arguments
-                        var testMetadata = await BuildTestMetadata(concreteType, concreteMethod, null).ConfigureAwait(false);
-                        discoveredTests.Add(testMetadata);
+                        // Resolve method-level generic instantiations
+                        foreach (var (resolvedMethod, methodFailedMetadata) in ResolveMethodInstantiations(concreteType, concreteMethod))
+                        {
+                            if (methodFailedMetadata != null)
+                            {
+                                discoveredTests.Add(methodFailedMetadata);
+                                continue;
+                            }
+
+                            // Build test metadata for the concrete type
+                            // No class data for GenerateGenericTest - it just provides type arguments
+                            var testMetadata = await BuildTestMetadata(concreteType, resolvedMethod, null).ConfigureAwait(false);
+                            discoveredTests.Add(testMetadata);
+                        }
                     }
                 }
             }
@@ -665,13 +696,23 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
                         if (concreteMethod != null)
                         {
-                            // Build test metadata for the concrete type
-                            // The concrete type already has its generic arguments resolved
-                            // For generic types with primary constructors that were resolved from class-level data sources,
-                            // we need to ensure the class data sources contain the specific data for this instantiation
-                            var testMetadata = await BuildTestMetadata(concreteType, concreteMethod, dataRow).ConfigureAwait(false);
+                            // Resolve method-level generic instantiations
+                            foreach (var (resolvedMethod, methodFailedMetadata) in ResolveMethodInstantiations(concreteType, concreteMethod))
+                            {
+                                if (methodFailedMetadata != null)
+                                {
+                                    discoveredTests.Add(methodFailedMetadata);
+                                    continue;
+                                }
 
-                            discoveredTests.Add(testMetadata);
+                                // Build test metadata for the concrete type
+                                // The concrete type already has its generic arguments resolved
+                                // For generic types with primary constructors that were resolved from class-level data sources,
+                                // we need to ensure the class data sources contain the specific data for this instantiation
+                                var testMetadata = await BuildTestMetadata(concreteType, resolvedMethod, dataRow).ConfigureAwait(false);
+
+                                discoveredTests.Add(testMetadata);
+                            }
                         }
                     }
                 }
@@ -740,15 +781,23 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
                     if (concreteMethod != null)
                     {
-                        // Build test metadata for the concrete type
-                        // No class data for GenerateGenericTest - it just provides type arguments
-                        var testMetadata = await BuildTestMetadata(concreteType, concreteMethod, null).ConfigureAwait(false);
-
-                        if (successfulTests == null)
+                        // Resolve method-level generic instantiations
+                        foreach (var (resolvedMethod, methodFailedMetadata) in ResolveMethodInstantiations(concreteType, concreteMethod))
                         {
-                            successfulTests = [];
+                            if (methodFailedMetadata != null)
+                            {
+                                successfulTests ??= [];
+                                successfulTests.Add(methodFailedMetadata);
+                                continue;
+                            }
+
+                            // Build test metadata for the concrete type
+                            // No class data for GenerateGenericTest - it just provides type arguments
+                            var testMetadata = await BuildTestMetadata(concreteType, resolvedMethod, null).ConfigureAwait(false);
+
+                            successfulTests ??= [];
+                            successfulTests.Add(testMetadata);
                         }
-                        successfulTests.Add(testMetadata);
                     }
                 }
             }
@@ -836,19 +885,25 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
                         if (concreteMethod != null)
                         {
-                            // Build test metadata for the concrete type
-                            // The concrete type already has its generic arguments resolved
-                            // For generic types with primary constructors that were resolved from class-level data sources,
-                            // we need to ensure the class data sources contain the specific data for this instantiation
-                            var testMetadata = await BuildTestMetadata(concreteType, concreteMethod, dataRow).ConfigureAwait(false);
-
-                            if (successfulTests == null)
+                            // Resolve method-level generic instantiations
+                            foreach (var (resolvedMethod, methodFailedMetadata) in ResolveMethodInstantiations(concreteType, concreteMethod))
                             {
-                                successfulTests =
-                                [
-                                ];
+                                if (methodFailedMetadata != null)
+                                {
+                                    successfulTests ??= [];
+                                    successfulTests.Add(methodFailedMetadata);
+                                    continue;
+                                }
+
+                                // Build test metadata for the concrete type
+                                // The concrete type already has its generic arguments resolved
+                                // For generic types with primary constructors that were resolved from class-level data sources,
+                                // we need to ensure the class data sources contain the specific data for this instantiation
+                                var testMetadata = await BuildTestMetadata(concreteType, resolvedMethod, dataRow).ConfigureAwait(false);
+
+                                successfulTests ??= [];
+                                successfulTests.Add(testMetadata);
                             }
-                            successfulTests.Add(testMetadata);
                         }
                     }
                 }
@@ -859,8 +914,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                             $"Failed to create concrete type for {genericTypeDefinition.FullName ?? genericTypeDefinition.Name}. " +
                             $"Error: {ex.Message}. " +
                             $"Generic parameter count: {genericTypeDefinition.GetGenericArguments().Length}, " +
-                            $"Type arguments: {string.Join(", ", typeArguments?.Select(static t => t.Name) ?? [
-                            ])}", ex),
+                            $"Type arguments: {string.Join(", ", typeArguments?.Select(static t => t.Name) ?? [])}",
+                            ex),
                         $"[GENERIC TYPE CREATION FAILED] {genericTypeDefinition.Name}")
                     {
                         TestName = $"[GENERIC TYPE CREATION FAILED] {genericTypeDefinition.Name}",
@@ -1136,6 +1191,129 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             // If we can't access the methods, treat it as not having test methods
             return false;
         }
+    }
+
+    /// <summary>
+    /// Resolves method-level generic instantiations from [GenerateGenericTest] attributes.
+    /// For non-generic methods, yields the method as-is.
+    /// For generic methods with [GenerateGenericTest], yields concrete method instantiations.
+    /// </summary>
+    private static IEnumerable<(MethodInfo Method, TestMetadata? FailedMetadata)> ResolveMethodInstantiations(
+        Type concreteClassType,
+        MethodInfo method)
+    {
+        // If method is not generic, yield it directly
+        if (!method.IsGenericMethodDefinition)
+        {
+            yield return (method, null);
+            yield break;
+        }
+
+        // Check for [GenerateGenericTest] attributes on the method
+        var generateGenericTestAttributes = method.GetCustomAttributes<GenerateGenericTestAttribute>(inherit: false).ToArray();
+
+        if (generateGenericTestAttributes.Length == 0)
+        {
+            // No [GenerateGenericTest] attributes - yield the generic method definition as-is
+            // TestBuilder will attempt to infer types from data sources later
+            yield return (method, null);
+            yield break;
+        }
+
+        var methodGenericParams = method.GetGenericArguments();
+
+        // Process each [GenerateGenericTest] attribute
+        foreach (var genAttr in generateGenericTestAttributes)
+        {
+            var typeArguments = genAttr.TypeArguments;
+
+            // Validate type argument count
+            if (typeArguments.Length == 0)
+            {
+                var failedMetadata = CreateFailedMethodGenericMetadata(
+                    concreteClassType,
+                    method,
+                    $"[GenerateGenericTest] on method '{method.Name}' has no type arguments");
+                yield return (method, failedMetadata);
+                continue;
+            }
+
+            if (typeArguments.Length != methodGenericParams.Length)
+            {
+                var failedMetadata = CreateFailedMethodGenericMetadata(
+                    concreteClassType,
+                    method,
+                    $"[GenerateGenericTest] on method '{method.Name}' provides {typeArguments.Length} type argument(s) " +
+                    $"but method requires {methodGenericParams.Length}. " +
+                    $"Provided: [{string.Join(", ", typeArguments.Select(static t => t.Name))}]");
+                yield return (method, failedMetadata);
+                continue;
+            }
+
+            // Try to create concrete method - capture result outside try-catch for yield
+            MethodInfo? resolvedMethod = null;
+            TestMetadata? errorMetadata = null;
+
+            try
+            {
+                // Create concrete method
+                resolvedMethod = method.MakeGenericMethod(typeArguments);
+            }
+            catch (ArgumentException ex)
+            {
+                // Constraint violation
+                errorMetadata = CreateFailedMethodGenericMetadata(
+                    concreteClassType,
+                    method,
+                    $"[GenerateGenericTest] constraint violation on method '{method.Name}': {ex.Message}. " +
+                    $"Type arguments: [{string.Join(", ", typeArguments.Select(static t => t.Name))}]");
+            }
+            catch (Exception ex)
+            {
+                errorMetadata = CreateFailedMethodGenericMetadata(
+                    concreteClassType,
+                    method,
+                    $"Failed to create concrete method for '{method.Name}': {ex.Message}");
+            }
+
+            // Yield result outside of try-catch
+            if (errorMetadata != null)
+            {
+                yield return (method, errorMetadata);
+            }
+            else if (resolvedMethod != null)
+            {
+                yield return (resolvedMethod, null);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Creates a failed test metadata for method-level generic resolution errors.
+    /// </summary>
+    private static TestMetadata CreateFailedMethodGenericMetadata(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)]
+        Type type,
+        MethodInfo method,
+        string errorMessage)
+    {
+        var testName = $"[GENERIC METHOD RESOLUTION FAILED] {type.FullName}.{method.Name}";
+        var displayName = $"{testName} - {errorMessage}";
+        var exception = new InvalidOperationException(errorMessage);
+
+        return new FailedTestMetadata(exception, displayName)
+        {
+            TestName = testName,
+            TestClassType = type,
+            TestMethodName = method.Name,
+            FilePath = ExtractFilePath(method) ?? "Unknown",
+            LineNumber = ExtractLineNumber(method) ?? 0,
+            MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(type, method),
+            AttributeFactory = () => method.GetCustomAttributes().ToArray(),
+            DataSources = [],
+            ClassDataSources = [],
+            PropertyDataSources = []
+        };
     }
 
     private static string? ExtractFilePath(MethodInfo method)
