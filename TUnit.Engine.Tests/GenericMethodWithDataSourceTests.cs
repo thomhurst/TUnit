@@ -15,12 +15,12 @@ public class GenericMethodWithDataSourceTests(TestMode testMode) : InvokableTest
         // This test verifies that a non-generic class with a generic method that has both
         // [GenerateGenericTest(typeof(int))] and [GenerateGenericTest(typeof(double))]
         // combined with [MethodDataSource(nameof(GetStrings))] generates 4 tests:
-        // - GenericMethod_With_DataSource<int>("hello")
-        // - GenericMethod_With_DataSource<int>("world")
-        // - GenericMethod_With_DataSource<double>("hello")
-        // - GenericMethod_With_DataSource<double>("world")
+        // - GenericMethodWithDataSource<int>("hello")
+        // - GenericMethodWithDataSource<int>("world")
+        // - GenericMethodWithDataSource<double>("hello")
+        // - GenericMethodWithDataSource<double>("world")
         await RunTestsWithFilter(
-            "/*/*/NonGenericClassWithGenericMethodAndDataSource/*",
+            "/*/*/Bug4440_NonGenericClassWithGenericMethodAndDataSource/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
                 result => result.ResultSummary.Counters.Total.ShouldBe(4),
@@ -50,16 +50,21 @@ public class GenericMethodWithDataSourceTests(TestMode testMode) : InvokableTest
     [Test]
     public async Task FullyGenericWithDataSources_Should_Generate_Tests()
     {
-        // Cartesian product: 2 class types × 2 method types × 2 data items = 8 tests internally
-        // However, test names are deduplicated because generic type args aren't in display names.
-        // Test names: CartesianProduct(True), CartesianProduct(False) - only data varies in name.
-        // Result: 4 unique test names reported (some tests share display names but all execute).
+        // Cartesian product: 2 class types × 2 method types × 2 data items = 8 tests
+        // - Bug4440_GenericClassGenericMethodWithDataSources<string>.CartesianProduct<int>(true)
+        // - Bug4440_GenericClassGenericMethodWithDataSources<string>.CartesianProduct<int>(false)
+        // - Bug4440_GenericClassGenericMethodWithDataSources<string>.CartesianProduct<double>(true)
+        // - Bug4440_GenericClassGenericMethodWithDataSources<string>.CartesianProduct<double>(false)
+        // - Bug4440_GenericClassGenericMethodWithDataSources<object>.CartesianProduct<int>(true)
+        // - Bug4440_GenericClassGenericMethodWithDataSources<object>.CartesianProduct<int>(false)
+        // - Bug4440_GenericClassGenericMethodWithDataSources<object>.CartesianProduct<double>(true)
+        // - Bug4440_GenericClassGenericMethodWithDataSources<object>.CartesianProduct<double>(false)
         await RunTestsWithFilter(
             "/*/*/Bug4440_GenericClassGenericMethodWithDataSources*/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(4),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(4),
+                result => result.ResultSummary.Counters.Total.ShouldBe(8),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(8),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0),
                 result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0)
             ]);
@@ -69,14 +74,13 @@ public class GenericMethodWithDataSourceTests(TestMode testMode) : InvokableTest
     public async Task GenericMethodWithoutDataSource_Should_Work()
     {
         // Generic method with 3 type arguments (int, string, object) but NO data source.
-        // All 3 tests have the same display name "GenericMethod_Should_Work" (type arg not in name),
-        // so they deduplicate to 1 reported test. All 3 execute but share the same name.
+        // Expected: 3 tests with unique names: GenericMethod_Should_Work<Int32>, <String>, <Object>
         await RunTestsWithFilter(
-            "/*/*/Bug4440_NonGenericClassWithGenericMethod/GenericMethod_Should_Work*",
+            "/*/*/Bug4440_NonGenericClassWithGenericMethod/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(1),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(1),
+                result => result.ResultSummary.Counters.Total.ShouldBe(3),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(3),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0),
                 result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0)
             ]);

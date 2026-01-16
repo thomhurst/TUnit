@@ -29,6 +29,23 @@ internal static class TestIdentifierService
             vsb.Append(combination.ClassDataLoopIndex);
             vsb.Append('.');
             vsb.Append(metadata.TestMethodName);
+
+            // Add method generic type arguments to ensure uniqueness for generic methods
+            // e.g., GenericMethod<int> vs GenericMethod<string> should have different IDs
+            if (combination.ResolvedMethodGenericArguments is { Length: > 0 })
+            {
+                vsb.Append('<');
+                for (var i = 0; i < combination.ResolvedMethodGenericArguments.Length; i++)
+                {
+                    if (i > 0)
+                    {
+                        vsb.Append(',');
+                    }
+                    vsb.Append(combination.ResolvedMethodGenericArguments[i].FullName ?? combination.ResolvedMethodGenericArguments[i].Name);
+                }
+                vsb.Append('>');
+            }
+
             WriteTypeWithParameters(ref vsb, methodParameters);
             vsb.Append('.');
             vsb.Append(combination.MethodDataSourceAttributeIndex);

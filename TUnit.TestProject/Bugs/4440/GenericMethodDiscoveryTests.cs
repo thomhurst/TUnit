@@ -16,7 +16,7 @@ namespace TUnit.TestProject.Bugs._4440;
 /// - GenericMethodWithDataSource&lt;double&gt;("hello")
 /// - GenericMethodWithDataSource&lt;double&gt;("world")
 /// </summary>
-public class NonGenericClassWithGenericMethodAndDataSource
+public class Bug4440_NonGenericClassWithGenericMethodAndDataSource
 {
     public static IEnumerable<string> GetStrings()
     {
