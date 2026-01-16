@@ -179,7 +179,7 @@ public async Task Login_With_Registered_User(string username, string password)
 }
 
 [Test]
-[ParallelLimit<LoadTestParallelLimit>] // Custom parallel control
+[ParallelLimiter<LoadTestParallelLimit>] // Custom parallel control
 [Repeat(100)] // Run 100 times
 public async Task Load_Test_Homepage()
 {
@@ -260,7 +260,7 @@ public async Task Login_After_Registration()
 ### **Load Testing**
 ```csharp
 [Test]
-[ParallelLimit<LoadTestLimit>]
+[ParallelLimiter<LoadTestLimit>]
 [Repeat(1000)]
 public async Task API_Handles_Concurrent_Requests()
 {
@@ -279,7 +279,7 @@ public async Task API_Handles_Concurrent_Requests()
 Tests are discovered at build time, not runtime. This means faster discovery, better IDE integration, and more predictable resource management.
 
 ### **Parallel by Default**
-Tests run in parallel by default. Use `[DependsOn]` to chain tests together, and `[ParallelLimit]` to control resource usage.
+Tests run in parallel by default. Use `[DependsOn]` to chain tests together, and `[ParallelLimiter]` to control resource usage.
 
 ### **Extensible**
 The `DataSourceGenerator<T>` pattern and custom attribute system let you extend TUnit without modifying the framework.
@@ -342,7 +342,7 @@ TUnit works with all major .NET IDEs:
 [Arguments("value1")]
 [Arguments("value2")]
 [Retry(3)]
-[ParallelLimit<CustomLimit>]
+[ParallelLimiter<CustomLimit>]
 public async Task Modern_TUnit_Test(string value) { }
 ```
 
