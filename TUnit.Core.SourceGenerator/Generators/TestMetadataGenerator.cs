@@ -1538,16 +1538,35 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                             {
                                 // For init-only properties, use UnsafeAccessor on .NET 8+ (but not for generic types)
                                 // UnsafeAccessor doesn't work with open generic types
-                                var containingTypeName = property.ContainingType.GloballyQualified();
-                                var isGenericContainingType = property.ContainingType.IsGenericType;
+                                // IMPORTANT: Use currentType (which is the closed generic type from the inheritance chain)
+                                // instead of property.ContainingType (which is the open generic type definition)
+                                var containingTypeName = currentType.GloballyQualified();
+                                var isGenericContainingType = currentType.IsGenericType;
 
                                 if (isGenericContainingType)
                                 {
-                                    // For generic types, init-only properties with data sources are not supported
-                                    // UnsafeAccessor doesn't work with open generic types and reflection is not AOT-compatible
-                                    writer.AppendLine($"Setter = (instance, value) => throw new global::System.NotSupportedException(");
-                                    writer.AppendLine($"    \"Init-only property '{property.Name}' on generic type '{containingTypeName}' cannot be set. \" +");
-                                    writer.AppendLine($"    \"Use a regular settable property or constructor injection instead.\"),");
+                                    // For init-only properties on generic types, use reflection with the closed generic type.
+                                    // UnsafeAccessor doesn't work with generic base classes, but reflection does.
+                                    // This is AOT-compatible because we use the closed generic type known at compile time.
+                                    writer.AppendLine("Setter = (instance, value) =>");
+                                    writer.AppendLine("{");
+                                    writer.Indent();
+                                    writer.AppendLine($"var backingField = typeof({containingTypeName}).GetField(\"<{property.Name}>k__BackingField\",");
+                                    writer.AppendLine("    global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.NonPublic);");
+                                    writer.AppendLine("if (backingField != null)");
+                                    writer.AppendLine("{");
+                                    writer.Indent();
+                                    writer.AppendLine("backingField.SetValue(instance, value);");
+                                    writer.Unindent();
+                                    writer.AppendLine("}");
+                                    writer.AppendLine("else");
+                                    writer.AppendLine("{");
+                                    writer.Indent();
+                                    writer.AppendLine($"throw new global::System.InvalidOperationException(\"Could not find backing field for property {property.Name} on type {containingTypeName}\");");
+                                    writer.Unindent();
+                                    writer.AppendLine("}");
+                                    writer.Unindent();
+                                    writer.AppendLine("},");
                                 }
                                 else
                                 {

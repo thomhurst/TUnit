@@ -167,7 +167,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             Property: propertyModel);
     }
 
-    private static PropertyDataSourceModel ExtractPropertyModel(IPropertySymbol property, AttributeData attribute)
+    private static PropertyDataSourceModel ExtractPropertyModel(IPropertySymbol property, AttributeData attribute, INamedTypeSymbol? containingTypeOverride = null)
     {
         var propertyType = property.Type;
         var isNullableValueType = propertyType is INamedTypeSymbol
@@ -175,6 +175,14 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             IsGenericType: true,
             ConstructedFrom.SpecialType: SpecialType.System_Nullable_T
         };
+
+        // Check if the original property type is a type parameter (e.g., T Provider { get; })
+        // We need to use the type parameter name in UnsafeAccessor for generic types
+        string? propertyTypeAsTypeParameter = null;
+        if (property.OriginalDefinition.Type is ITypeParameterSymbol typeParam)
+        {
+            propertyTypeAsTypeParameter = typeParam.Name;
+        }
 
         // Format constructor arguments
         var ctorArgs = attribute.ConstructorArguments
@@ -190,14 +198,39 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             })
             .ToArray();
 
+        // Use the override if provided (for closed generic types), otherwise use the declaring type
+        var containingType = containingTypeOverride ?? property.ContainingType;
+
+        // For generic types, extract the open generic type definition and type parameters
+        string? openGenericType = null;
+        string? typeParameters = null;
+        string? typeArguments = null;
+        string? typeConstraints = null;
+
+        if (containingType.IsGenericType)
+        {
+            var originalDefinition = containingType.OriginalDefinition;
+            openGenericType = originalDefinition.ToDisplayString();
+            typeParameters = string.Join(", ", originalDefinition.TypeParameters.Select(tp => tp.Name));
+            typeArguments = string.Join(", ", containingType.TypeArguments.Select(ta => ta.ToDisplayString()));
+            typeConstraints = GetTypeParameterConstraints(originalDefinition.TypeParameters);
+        }
+
         return new PropertyDataSourceModel
         {
             PropertyName = property.Name,
             PropertyTypeFullyQualified = GetNonNullableTypeName(propertyType),
             PropertyTypeForTypeof = GetNonNullableTypeString(propertyType),
-            ContainingTypeFullyQualified = property.ContainingType.ToDisplayString(),
+            ContainingTypeFullyQualified = containingType.ToDisplayString(),
+            ContainingTypeClrName = GetClrTypeName(containingType),
+            ContainingTypeOpenGeneric = openGenericType,
+            GenericTypeParameters = typeParameters,
+            GenericTypeArguments = typeArguments,
+            GenericTypeConstraints = typeConstraints,
             IsInitOnly = property.SetMethod?.IsInitOnly == true,
+            IsContainingTypeGeneric = containingType.IsGenericType,
             IsStatic = property.IsStatic,
+            PropertyTypeAsTypeParameter = propertyTypeAsTypeParameter,
             IsValueType = propertyType.IsValueType,
             IsNullableValueType = isNullableValueType,
             AttributeTypeName = attribute.AttributeClass!.ToDisplayString(),
@@ -476,7 +509,8 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
                         if (attr.AttributeClass != null &&
                             attr.AttributeClass.AllInterfaces.Contains(dataSourceInterface, SymbolEqualityComparer.Default))
                         {
-                            dataSourceProperties.Add(ExtractPropertyModel(property, attr));
+                            // Pass currentType as the containing type override for closed generic types
+                            dataSourceProperties.Add(ExtractPropertyModel(property, attr, currentType));
                             break;
                         }
                     }
@@ -567,12 +601,14 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         sb.AppendLine("    public bool ShouldInitialize => true;");
         sb.AppendLine();
 
-        // Generate UnsafeAccessor methods for init-only properties
+        // Generate UnsafeAccessor methods for init-only properties on non-generic types
         foreach (var prop in model.Properties)
         {
-            if (prop.IsInitOnly)
+            if (prop.IsInitOnly && !prop.IsContainingTypeGeneric)
             {
                 var backingFieldName = $"<{prop.PropertyName}>k__BackingField";
+
+                // For non-generic types: use regular UnsafeAccessor on .NET 8+
                 sb.AppendLine("#if NET8_0_OR_GREATER");
                 sb.AppendLine($"    [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = \"{backingFieldName}\")]");
                 sb.AppendLine($"    private static extern ref {prop.PropertyTypeFullyQualified} Get{prop.PropertyName}BackingField({prop.ContainingTypeFullyQualified} instance);");
@@ -587,16 +623,39 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
         foreach (var prop in model.Properties)
         {
-            GeneratePropertyMetadata(sb, prop, model.ClassFullyQualifiedName);
+            GeneratePropertyMetadata(sb, prop, model.ClassFullyQualifiedName, model.SafeClassName);
         }
 
         sb.AppendLine("    }");
         sb.AppendLine("}");
 
+        // Generate generic accessor classes for init-only properties on generic types
+        // These must be outside the property source class and be generic themselves
+        foreach (var prop in model.Properties)
+        {
+            if (prop.IsInitOnly && prop.IsContainingTypeGeneric && prop.GenericTypeParameters != null && prop.ContainingTypeOpenGeneric != null)
+            {
+                var backingFieldName = $"<{prop.PropertyName}>k__BackingField";
+                var accessorClassName = $"{model.SafeClassName}_{prop.PropertyName}_GenericAccessor";
+                var constraintsClause = prop.GenericTypeConstraints != null ? $" {prop.GenericTypeConstraints}" : "";
+                // Use type parameter name if property type is a type parameter (e.g., T), otherwise use concrete type
+                var returnType = prop.PropertyTypeAsTypeParameter ?? prop.PropertyTypeFullyQualified;
+
+                sb.AppendLine();
+                sb.AppendLine("#if NET9_0_OR_GREATER");
+                sb.AppendLine($"internal static class {accessorClassName}<{prop.GenericTypeParameters}>{constraintsClause}");
+                sb.AppendLine("{");
+                sb.AppendLine($"    [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = \"{backingFieldName}\")]");
+                sb.AppendLine($"    public static extern ref {returnType} GetBackingField({prop.ContainingTypeOpenGeneric} instance);");
+                sb.AppendLine("}");
+                sb.AppendLine("#endif");
+            }
+        }
+
         context.AddSource(fileName, sb.ToString());
     }
 
-    private static void GeneratePropertyMetadata(StringBuilder sb, PropertyDataSourceModel prop, string classTypeName)
+    private static void GeneratePropertyMetadata(StringBuilder sb, PropertyDataSourceModel prop, string classTypeName, string safeClassName)
     {
         var ctorArgsStr = string.Join(", ", prop.ConstructorArgs);
 
@@ -628,20 +687,37 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
         if (prop.IsInitOnly)
         {
-            sb.AppendLine("#if NET8_0_OR_GREATER");
-            if (prop.ContainingTypeFullyQualified != classTypeName)
+            if (prop.IsContainingTypeGeneric && prop.GenericTypeArguments != null)
             {
-                sb.AppendLine($"                Get{prop.PropertyName}BackingField(({prop.ContainingTypeFullyQualified})typedInstance) = {castExpression};");
+                // For generic types: .NET 9+ uses generic accessor class, older versions use reflection
+                var accessorClassName = $"{safeClassName}_{prop.PropertyName}_GenericAccessor";
+
+                sb.AppendLine("#if NET9_0_OR_GREATER");
+                sb.AppendLine($"                {accessorClassName}<{prop.GenericTypeArguments}>.GetBackingField(typedInstance) = {castExpression};");
+                sb.AppendLine("#else");
+                sb.AppendLine($"                var backingField = typeof({prop.ContainingTypeFullyQualified}).GetField(\"<{prop.PropertyName}>k__BackingField\",");
+                sb.AppendLine("                    global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.NonPublic);");
+                sb.AppendLine("                backingField.SetValue(typedInstance, value);");
+                sb.AppendLine("#endif");
             }
             else
             {
-                sb.AppendLine($"                Get{prop.PropertyName}BackingField(typedInstance) = {castExpression};");
+                // For non-generic types: .NET 8+ uses UnsafeAccessor
+                sb.AppendLine("#if NET8_0_OR_GREATER");
+                if (prop.ContainingTypeFullyQualified != classTypeName)
+                {
+                    sb.AppendLine($"                Get{prop.PropertyName}BackingField(({prop.ContainingTypeFullyQualified})typedInstance) = {castExpression};");
+                }
+                else
+                {
+                    sb.AppendLine($"                Get{prop.PropertyName}BackingField(typedInstance) = {castExpression};");
+                }
+                sb.AppendLine("#else");
+                sb.AppendLine($"                var backingField = typeof({prop.ContainingTypeFullyQualified}).GetField(\"<{prop.PropertyName}>k__BackingField\",");
+                sb.AppendLine("                    global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.NonPublic);");
+                sb.AppendLine("                backingField.SetValue(typedInstance, value);");
+                sb.AppendLine("#endif");
             }
-            sb.AppendLine("#else");
-            sb.AppendLine($"                var backingField = typeof({prop.ContainingTypeFullyQualified}).GetField(\"<{prop.PropertyName}>k__BackingField\",");
-            sb.AppendLine("                    global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.NonPublic);");
-            sb.AppendLine("                backingField.SetValue(typedInstance, value);");
-            sb.AppendLine("#endif");
         }
         else if (prop.IsStatic)
         {
@@ -723,12 +799,14 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         sb.AppendLine("    public bool ShouldInitialize => true;");
         sb.AppendLine();
 
-        // Generate UnsafeAccessor methods for init-only properties
+        // Generate UnsafeAccessor methods for init-only properties on non-generic types
         foreach (var prop in model.DataSourceProperties)
         {
-            if (prop.IsInitOnly)
+            if (prop.IsInitOnly && !prop.IsContainingTypeGeneric)
             {
                 var backingFieldName = $"<{prop.PropertyName}>k__BackingField";
+
+                // For non-generic types: use regular UnsafeAccessor on .NET 8+
                 sb.AppendLine("#if NET8_0_OR_GREATER");
                 sb.AppendLine($"    [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = \"{backingFieldName}\")]");
                 sb.AppendLine($"    private static extern ref {prop.PropertyTypeFullyQualified} Get{prop.PropertyName}BackingField({prop.ContainingTypeFullyQualified} instance);");
@@ -743,11 +821,33 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
         foreach (var prop in model.DataSourceProperties)
         {
-            GeneratePropertyMetadata(sb, prop, model.ConcreteTypeFullyQualified);
+            GeneratePropertyMetadata(sb, prop, model.ConcreteTypeFullyQualified, model.SafeTypeName);
         }
 
         sb.AppendLine("    }");
         sb.AppendLine("}");
+
+        // Generate generic accessor classes for init-only properties on generic types
+        foreach (var prop in model.DataSourceProperties)
+        {
+            if (prop.IsInitOnly && prop.IsContainingTypeGeneric && prop.GenericTypeParameters != null && prop.ContainingTypeOpenGeneric != null)
+            {
+                var backingFieldName = $"<{prop.PropertyName}>k__BackingField";
+                var accessorClassName = $"{model.SafeTypeName}_{prop.PropertyName}_GenericAccessor";
+                var constraintsClause = prop.GenericTypeConstraints != null ? $" {prop.GenericTypeConstraints}" : "";
+                // Use type parameter name if property type is a type parameter (e.g., T), otherwise use concrete type
+                var returnType = prop.PropertyTypeAsTypeParameter ?? prop.PropertyTypeFullyQualified;
+
+                sb.AppendLine();
+                sb.AppendLine("#if NET9_0_OR_GREATER");
+                sb.AppendLine($"internal static class {accessorClassName}<{prop.GenericTypeParameters}>{constraintsClause}");
+                sb.AppendLine("{");
+                sb.AppendLine($"    [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = \"{backingFieldName}\")]");
+                sb.AppendLine($"    public static extern ref {returnType} GetBackingField({prop.ContainingTypeOpenGeneric} instance);");
+                sb.AppendLine("}");
+                sb.AppendLine("#endif");
+            }
+        }
 
         context.AddSource(fileName, sb.ToString());
     }
@@ -957,6 +1057,209 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
     }
 
     private static string GetNonNullableTypeName(ITypeSymbol typeSymbol) => GetNonNullableTypeString(typeSymbol);
+
+    /// <summary>
+    /// Converts a type symbol to CLR type name format suitable for Type.GetType() and UnsafeAccessorType.
+    /// For generic types, produces format like: "Namespace.Type`1[[TypeArg, Assembly]]"
+    /// </summary>
+    private static string? GetClrTypeName(INamedTypeSymbol typeSymbol)
+    {
+        if (!typeSymbol.IsGenericType)
+        {
+            return null; // Not needed for non-generic types
+        }
+
+        var sb = new StringBuilder();
+
+        // Build the namespace and containing types
+        if (typeSymbol.ContainingNamespace != null && !typeSymbol.ContainingNamespace.IsGlobalNamespace)
+        {
+            sb.Append(typeSymbol.ContainingNamespace.ToDisplayString());
+            sb.Append('.');
+        }
+
+        // Handle nested types
+        var containingTypes = new Stack<INamedTypeSymbol>();
+        var current = typeSymbol.ContainingType;
+        while (current != null)
+        {
+            containingTypes.Push(current);
+            current = current.ContainingType;
+        }
+
+        foreach (var containingType in containingTypes)
+        {
+            sb.Append(containingType.MetadataName);
+            sb.Append('+');
+        }
+
+        // Add the type name with generic arity (e.g., "GenericType`1")
+        sb.Append(typeSymbol.MetadataName);
+
+        // Add type arguments in CLR format: [[TypeArg1, Assembly], [TypeArg2, Assembly]]
+        if (typeSymbol.TypeArguments.Length > 0)
+        {
+            sb.Append('[');
+            for (int i = 0; i < typeSymbol.TypeArguments.Length; i++)
+            {
+                if (i > 0) sb.Append(',');
+                sb.Append('[');
+                sb.Append(GetAssemblyQualifiedTypeName(typeSymbol.TypeArguments[i]));
+                sb.Append(']');
+            }
+            sb.Append(']');
+        }
+
+        // Add assembly name for the containing type
+        if (typeSymbol.ContainingAssembly != null)
+        {
+            sb.Append(", ");
+            sb.Append(typeSymbol.ContainingAssembly.Name);
+        }
+
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// Gets the assembly-qualified type name for a type symbol.
+    /// </summary>
+    private static string GetAssemblyQualifiedTypeName(ITypeSymbol typeSymbol)
+    {
+        var sb = new StringBuilder();
+
+        // Handle generic types recursively
+        if (typeSymbol is INamedTypeSymbol { IsGenericType: true } namedType)
+        {
+            // Build namespace
+            if (namedType.ContainingNamespace != null && !namedType.ContainingNamespace.IsGlobalNamespace)
+            {
+                sb.Append(namedType.ContainingNamespace.ToDisplayString());
+                sb.Append('.');
+            }
+
+            // Handle nested types
+            var containingTypes = new Stack<INamedTypeSymbol>();
+            var current = namedType.ContainingType;
+            while (current != null)
+            {
+                containingTypes.Push(current);
+                current = current.ContainingType;
+            }
+
+            foreach (var containingType in containingTypes)
+            {
+                sb.Append(containingType.MetadataName);
+                sb.Append('+');
+            }
+
+            sb.Append(namedType.MetadataName);
+
+            // Add type arguments recursively
+            if (namedType.TypeArguments.Length > 0)
+            {
+                sb.Append('[');
+                for (int i = 0; i < namedType.TypeArguments.Length; i++)
+                {
+                    if (i > 0) sb.Append(',');
+                    sb.Append('[');
+                    sb.Append(GetAssemblyQualifiedTypeName(namedType.TypeArguments[i]));
+                    sb.Append(']');
+                }
+                sb.Append(']');
+            }
+        }
+        else if (typeSymbol is INamedTypeSymbol simpleNamedType)
+        {
+            // Build namespace
+            if (simpleNamedType.ContainingNamespace != null && !simpleNamedType.ContainingNamespace.IsGlobalNamespace)
+            {
+                sb.Append(simpleNamedType.ContainingNamespace.ToDisplayString());
+                sb.Append('.');
+            }
+
+            // Handle nested types
+            var containingTypes = new Stack<INamedTypeSymbol>();
+            var current = simpleNamedType.ContainingType;
+            while (current != null)
+            {
+                containingTypes.Push(current);
+                current = current.ContainingType;
+            }
+
+            foreach (var containingType in containingTypes)
+            {
+                sb.Append(containingType.MetadataName);
+                sb.Append('+');
+            }
+
+            sb.Append(simpleNamedType.MetadataName);
+        }
+        else
+        {
+            // Fallback for other type kinds (arrays, pointers, etc.)
+            sb.Append(typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
+                .Replace("global::", ""));
+        }
+
+        // Add assembly name
+        if (typeSymbol.ContainingAssembly != null)
+        {
+            sb.Append(", ");
+            sb.Append(typeSymbol.ContainingAssembly.Name);
+        }
+
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// Generates type parameter constraints string (e.g., "where T : class" or "where T1 : class where T2 : struct, new()").
+    /// </summary>
+    private static string? GetTypeParameterConstraints(ImmutableArray<ITypeParameterSymbol> typeParameters)
+    {
+        var constraintParts = new List<string>();
+
+        foreach (var tp in typeParameters)
+        {
+            var constraints = new List<string>();
+
+            // Primary constraints (must come first)
+            if (tp.HasReferenceTypeConstraint)
+            {
+                constraints.Add("class");
+            }
+            else if (tp.HasValueTypeConstraint)
+            {
+                constraints.Add("struct");
+            }
+            else if (tp.HasNotNullConstraint)
+            {
+                constraints.Add("notnull");
+            }
+            else if (tp.HasUnmanagedTypeConstraint)
+            {
+                constraints.Add("unmanaged");
+            }
+
+            // Type constraints (base class and interfaces)
+            foreach (var constraintType in tp.ConstraintTypes)
+            {
+                constraints.Add(constraintType.ToDisplayString());
+            }
+
+            // Constructor constraint (must come last)
+            if (tp.HasConstructorConstraint)
+            {
+                constraints.Add("new()");
+            }
+
+            if (constraints.Count > 0)
+            {
+                constraintParts.Add($"where {tp.Name} : {string.Join(", ", constraints)}");
+            }
+        }
+
+        return constraintParts.Count > 0 ? string.Join(" ", constraintParts) : null;
+    }
 
     #endregion
 }

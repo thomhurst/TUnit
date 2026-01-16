@@ -67,10 +67,34 @@ internal static class PropertySetterFactory
 #endif
         }
 
-        var backingField = GetBackingField(property);
-        if (backingField != null)
+        // Check if the declaring type is an open generic type definition
+        // In this case, we need to resolve the backing field at runtime using the instance's actual type
+        var declaringType = property.DeclaringType;
+        if (declaringType != null && declaringType.IsGenericTypeDefinition)
         {
-            return (instance, value) => backingField.SetValue(instance, value);
+            // For open generic types, we must resolve the backing field at runtime
+            // because we don't know the closed generic type until we have an instance
+            return (instance, value) =>
+            {
+                var instanceType = instance.GetType();
+                var backingField = GetBackingField(property, instanceType);
+                if (backingField != null)
+                {
+                    backingField.SetValue(instance, value);
+                }
+                else
+                {
+                    throw new InvalidOperationException(
+                        $"Property '{property.Name}' on type '{declaringType.Name}' " +
+                        $"is not writable and no backing field was found for instance type '{instanceType.Name}'.");
+                }
+            };
+        }
+
+        var backingFieldStatic = GetBackingField(property);
+        if (backingFieldStatic != null)
+        {
+            return (instance, value) => backingFieldStatic.SetValue(instance, value);
         }
 
         throw new InvalidOperationException(
@@ -84,12 +108,23 @@ internal static class PropertySetterFactory
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Backing field access for init-only properties requires reflection")]
     #endif
-    private static FieldInfo? GetBackingField(PropertyInfo property)
+    private static FieldInfo? GetBackingField(PropertyInfo property, Type? instanceType = null)
     {
         var declaringType = property.DeclaringType;
         if (declaringType == null)
         {
             return null;
+        }
+
+        // If the declaring type is an open generic type definition (e.g., GenericBase<T>),
+        // we need to find the closed generic type from the instance type's hierarchy
+        if (declaringType.IsGenericTypeDefinition && instanceType != null)
+        {
+            declaringType = FindClosedGenericType(instanceType, declaringType);
+            if (declaringType == null)
+            {
+                return null;
+            }
         }
 
         var backingFieldFlags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy;
@@ -125,6 +160,24 @@ internal static class PropertySetterFactory
             return field;
         }
 
+        return null;
+    }
+
+    /// <summary>
+    /// Finds the closed generic type in the inheritance hierarchy that matches the open generic type definition.
+    /// </summary>
+    private static Type? FindClosedGenericType(Type instanceType, Type openGenericTypeDefinition)
+    {
+        var currentType = instanceType;
+        while (currentType != null && currentType != typeof(object))
+        {
+            if (currentType.IsGenericType &&
+                currentType.GetGenericTypeDefinition() == openGenericTypeDefinition)
+            {
+                return currentType;
+            }
+            currentType = currentType.BaseType;
+        }
         return null;
     }
 
