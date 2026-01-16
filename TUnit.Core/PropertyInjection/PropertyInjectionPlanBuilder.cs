@@ -39,6 +39,7 @@ internal static class PropertyInjectionPlanBuilder
         WalkInheritanceChain(type, currentType =>
         {
             var propertySource = PropertySourceRegistry.GetSource(currentType);
+
             if (propertySource?.ShouldInitialize == true)
             {
                 foreach (var metadata in propertySource.GetPropertyMetadata())

@@ -102,7 +102,7 @@ public static class PropertySourceRegistry
             {
                 try
                 {
-                    var injection = CreatePropertyInjection(property);
+                    var injection = CreatePropertyInjection(property, type);
                     injectableProperties.Add(injection);
                 }
                 catch (Exception ex)
@@ -150,9 +150,9 @@ public static class PropertySourceRegistry
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Backing field access for init-only properties requires reflection")]
     #endif
-    private static PropertyInjectionData CreatePropertyInjection(System.Reflection.PropertyInfo property)
+    private static PropertyInjectionData CreatePropertyInjection(System.Reflection.PropertyInfo property, Type? testClassType = null)
     {
-        var setter = CreatePropertySetter(property);
+        var setter = CreatePropertySetter(property, testClassType);
 
         return new PropertyInjectionData
         {
@@ -170,7 +170,7 @@ public static class PropertySourceRegistry
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Backing field access for init-only properties requires reflection")]
     #endif
-    private static Action<object, object?> CreatePropertySetter(System.Reflection.PropertyInfo property)
+    private static Action<object, object?> CreatePropertySetter(System.Reflection.PropertyInfo property, Type? testClassType = null)
     {
         if (property.CanWrite && property.SetMethod != null)
         {
@@ -187,7 +187,7 @@ public static class PropertySourceRegistry
 #endif
         }
 
-        var backingField = GetBackingField(property);
+        var backingField = GetBackingField(property, testClassType);
         if (backingField != null)
         {
             return (instance, value) => backingField.SetValue(instance, value);
@@ -204,12 +204,23 @@ public static class PropertySourceRegistry
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Backing field discovery needed for init-only properties in reflection mode")]
     #endif
-    private static System.Reflection.FieldInfo? GetBackingField(System.Reflection.PropertyInfo property)
+    private static System.Reflection.FieldInfo? GetBackingField(System.Reflection.PropertyInfo property, Type? testClassType = null)
     {
         var declaringType = property.DeclaringType;
         if (declaringType == null)
         {
             return null;
+        }
+
+        // If the declaring type is an open generic type definition (e.g., GenericBase<T>),
+        // we need to find the closed generic type from the test class hierarchy
+        if (declaringType.IsGenericTypeDefinition && testClassType != null)
+        {
+            declaringType = FindClosedGenericType(testClassType, declaringType);
+            if (declaringType == null)
+            {
+                return null;
+            }
         }
 
         var backingFieldFlags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.FlattenHierarchy;
@@ -245,6 +256,24 @@ public static class PropertySourceRegistry
             return field;
         }
 
+        return null;
+    }
+
+    /// <summary>
+    /// Finds the closed generic type in the inheritance hierarchy that matches the open generic type definition
+    /// </summary>
+    private static Type? FindClosedGenericType(Type testClassType, Type openGenericTypeDefinition)
+    {
+        var currentType = testClassType;
+        while (currentType != null && currentType != typeof(object))
+        {
+            if (currentType.IsGenericType &&
+                currentType.GetGenericTypeDefinition() == openGenericTypeDefinition)
+            {
+                return currentType;
+            }
+            currentType = currentType.BaseType;
+        }
         return null;
     }
 

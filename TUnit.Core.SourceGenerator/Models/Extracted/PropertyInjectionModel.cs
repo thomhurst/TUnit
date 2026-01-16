@@ -70,14 +70,56 @@ internal sealed record PropertyDataSourceModel : IEquatable<PropertyDataSourceMo
     public required string ContainingTypeFullyQualified { get; init; }
 
     /// <summary>
+    /// CLR type name format for UnsafeAccessorType attribute (e.g., "Namespace.GenericType`1[[Namespace.TypeArg, Assembly]]")
+    /// Only populated for generic containing types.
+    /// </summary>
+    public required string? ContainingTypeClrName { get; init; }
+
+    /// <summary>
+    /// The open generic type definition with type parameters (e.g., "global::NS.GenericBase&lt;T&gt;")
+    /// Only populated for generic containing types.
+    /// </summary>
+    public required string? ContainingTypeOpenGeneric { get; init; }
+
+    /// <summary>
+    /// Comma-separated list of type parameter names (e.g., "T" or "T1, T2")
+    /// Only populated for generic containing types.
+    /// </summary>
+    public required string? GenericTypeParameters { get; init; }
+
+    /// <summary>
+    /// Comma-separated list of concrete type arguments (e.g., "global::NS.ProviderType")
+    /// Only populated for generic containing types.
+    /// </summary>
+    public required string? GenericTypeArguments { get; init; }
+
+    /// <summary>
+    /// Type parameter constraints (e.g., "where T : class" or "where T1 : class where T2 : struct")
+    /// Only populated for generic containing types that have constraints.
+    /// </summary>
+    public required string? GenericTypeConstraints { get; init; }
+
+    /// <summary>
     /// Whether the property has an init-only setter
     /// </summary>
     public required bool IsInitOnly { get; init; }
 
     /// <summary>
+    /// Whether the containing type (where the property is declared) is a generic type
+    /// </summary>
+    public required bool IsContainingTypeGeneric { get; init; }
+
+    /// <summary>
     /// Whether the property is static
     /// </summary>
     public required bool IsStatic { get; init; }
+
+    /// <summary>
+    /// If the property type is a type parameter in the original definition (e.g., "T"),
+    /// this contains the type parameter name. Otherwise null.
+    /// Used for UnsafeAccessor generation on generic types.
+    /// </summary>
+    public required string? PropertyTypeAsTypeParameter { get; init; }
 
     /// <summary>
     /// Whether the property type is a value type
@@ -112,8 +154,15 @@ internal sealed record PropertyDataSourceModel : IEquatable<PropertyDataSourceMo
             && PropertyTypeFullyQualified == other.PropertyTypeFullyQualified
             && PropertyTypeForTypeof == other.PropertyTypeForTypeof
             && ContainingTypeFullyQualified == other.ContainingTypeFullyQualified
+            && ContainingTypeClrName == other.ContainingTypeClrName
+            && ContainingTypeOpenGeneric == other.ContainingTypeOpenGeneric
+            && GenericTypeParameters == other.GenericTypeParameters
+            && GenericTypeArguments == other.GenericTypeArguments
+            && GenericTypeConstraints == other.GenericTypeConstraints
             && IsInitOnly == other.IsInitOnly
+            && IsContainingTypeGeneric == other.IsContainingTypeGeneric
             && IsStatic == other.IsStatic
+            && PropertyTypeAsTypeParameter == other.PropertyTypeAsTypeParameter
             && IsValueType == other.IsValueType
             && IsNullableValueType == other.IsNullableValueType
             && AttributeTypeName == other.AttributeTypeName
@@ -129,8 +178,15 @@ internal sealed record PropertyDataSourceModel : IEquatable<PropertyDataSourceMo
             hash = (hash * 397) ^ PropertyTypeFullyQualified.GetHashCode();
             hash = (hash * 397) ^ PropertyTypeForTypeof.GetHashCode();
             hash = (hash * 397) ^ ContainingTypeFullyQualified.GetHashCode();
+            hash = (hash * 397) ^ (ContainingTypeClrName?.GetHashCode() ?? 0);
+            hash = (hash * 397) ^ (ContainingTypeOpenGeneric?.GetHashCode() ?? 0);
+            hash = (hash * 397) ^ (GenericTypeParameters?.GetHashCode() ?? 0);
+            hash = (hash * 397) ^ (GenericTypeArguments?.GetHashCode() ?? 0);
+            hash = (hash * 397) ^ (GenericTypeConstraints?.GetHashCode() ?? 0);
             hash = (hash * 397) ^ IsInitOnly.GetHashCode();
+            hash = (hash * 397) ^ IsContainingTypeGeneric.GetHashCode();
             hash = (hash * 397) ^ IsStatic.GetHashCode();
+            hash = (hash * 397) ^ (PropertyTypeAsTypeParameter?.GetHashCode() ?? 0);
             hash = (hash * 397) ^ IsValueType.GetHashCode();
             hash = (hash * 397) ^ IsNullableValueType.GetHashCode();
             hash = (hash * 397) ^ AttributeTypeName.GetHashCode();
