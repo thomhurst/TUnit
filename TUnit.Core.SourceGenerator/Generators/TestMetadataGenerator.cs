@@ -1530,22 +1530,35 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                             // Generate appropriate setter based on whether property is init-only
                             if (property.SetMethod.IsInitOnly)
                             {
-                                // For init-only properties, use UnsafeAccessor on .NET 8+, throw on older frameworks
-                                writer.AppendLine("#if NET8_0_OR_GREATER");
-                                // Cast to the property's containing type if needed
+                                // For init-only properties, use UnsafeAccessor on .NET 8+ (but not for generic types)
+                                // UnsafeAccessor doesn't work with open generic types
                                 var containingTypeName = property.ContainingType.GloballyQualified();
+                                var isGenericContainingType = property.ContainingType.IsGenericType;
 
-                                if (containingTypeName != className)
+                                if (isGenericContainingType)
                                 {
-                                    writer.AppendLine($"Setter = (instance, value) => Get{property.Name}BackingField(({containingTypeName})instance) = ({propertyType})value,");
+                                    // For generic types, init-only properties with data sources are not supported
+                                    // UnsafeAccessor doesn't work with open generic types and reflection is not AOT-compatible
+                                    writer.AppendLine($"Setter = (instance, value) => throw new global::System.NotSupportedException(");
+                                    writer.AppendLine($"    \"Init-only property '{property.Name}' on generic type '{containingTypeName}' cannot be set. \" +");
+                                    writer.AppendLine($"    \"Use a regular settable property or constructor injection instead.\"),");
                                 }
                                 else
                                 {
-                                    writer.AppendLine($"Setter = (instance, value) => Get{property.Name}BackingField(({className})instance) = ({propertyType})value,");
+                                    writer.AppendLine("#if NET8_0_OR_GREATER");
+                                    // Cast to the property's containing type if needed
+                                    if (containingTypeName != className)
+                                    {
+                                        writer.AppendLine($"Setter = (instance, value) => Get{property.Name}BackingField(({containingTypeName})instance) = ({propertyType})value,");
+                                    }
+                                    else
+                                    {
+                                        writer.AppendLine($"Setter = (instance, value) => Get{property.Name}BackingField(({className})instance) = ({propertyType})value,");
+                                    }
+                                    writer.AppendLine("#else");
+                                    writer.AppendLine("Setter = (instance, value) => throw new global::System.NotSupportedException(\"Setting init-only properties requires .NET 8 or later\"),");
+                                    writer.AppendLine("#endif");
                                 }
-                                writer.AppendLine("#else");
-                                writer.AppendLine("Setter = (instance, value) => throw new global::System.NotSupportedException(\"Setting init-only properties requires .NET 8 or later\"),");
-                                writer.AppendLine("#endif");
                             }
                             else
                             {
@@ -2936,10 +2949,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         // Generate UnsafeAccessor methods for init-only properties (only on .NET 8+)
-        if (initOnlyPropertiesWithDataSources.Any())
+        // Skip for generic types since UnsafeAccessor doesn't work with open generic types
+        var nonGenericProperties = initOnlyPropertiesWithDataSources
+            .Where(p => !p.ContainingType.IsGenericType)
+            .ToList();
+
+        if (nonGenericProperties.Any())
         {
             writer.AppendLine("#if NET8_0_OR_GREATER");
-            foreach (var property in initOnlyPropertiesWithDataSources)
+            foreach (var property in nonGenericProperties)
             {
                 var backingFieldName = $"<{property.Name}>k__BackingField";
                 var propertyType = property.Type.GloballyQualified();
@@ -3653,61 +3671,80 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
-        // Process GenerateGenericTest attributes from both methods and classes
-        var generateGenericTestAttributes = testMethod.MethodAttributes
+        // Process GenerateGenericTest attributes from both class and method levels
+        // When both class and method are generic, we need to generate cartesian products
+        var methodGenerateGenericTestAttributes = testMethod.MethodAttributes
             .Where(a => a.AttributeClass?.Name == "GenerateGenericTestAttribute")
             .ToList();
 
-        // For generic classes, also check class-level GenerateGenericTest attributes
-        if (testMethod.IsGenericType)
-        {
-            var classLevelAttributes = testMethod.TypeSymbol.GetAttributes()
+        var classLevelAttributes = testMethod.IsGenericType
+            ? testMethod.TypeSymbol.GetAttributes()
                 .Where(a => a.AttributeClass?.Name == "GenerateGenericTestAttribute")
-                .ToList();
-            generateGenericTestAttributes.AddRange(classLevelAttributes);
-        }
+                .ToList()
+            : new List<AttributeData>();
 
-        foreach (var genAttr in generateGenericTestAttributes)
+        // Extract type arguments from class-level attributes
+        var classTypeArgSets = ExtractTypeArgumentSets(classLevelAttributes);
+
+        // Extract type arguments from method-level attributes
+        var methodTypeArgSets = ExtractTypeArgumentSets(methodGenerateGenericTestAttributes);
+
+        // Handle all combinations
+        if (classTypeArgSets.Count > 0 && methodTypeArgSets.Count > 0 && testMethod.IsGenericMethod)
         {
-            // Extract type arguments from the attribute
-            if (genAttr.ConstructorArguments.Length > 0)
+            // Both class and method are generic - generate cartesian product
+            foreach (var classTypeArgs in classTypeArgSets)
             {
-                var typeArgs = new List<ITypeSymbol>();
-                foreach (var arg in genAttr.ConstructorArguments)
+                foreach (var methodTypeArgs in methodTypeArgSets)
                 {
-                    if (arg is { Kind: TypedConstantKind.Type, Value: ITypeSymbol typeSymbol })
+                    // Validate both class and method constraints
+                    if (ValidateClassTypeConstraints(testMethod.TypeSymbol, classTypeArgs) &&
+                        ValidateTypeConstraints(testMethod.MethodSymbol, methodTypeArgs))
                     {
-                        typeArgs.Add(typeSymbol);
-                    }
-                    else if (arg.Kind == TypedConstantKind.Array)
-                    {
-                        foreach (var arrayElement in arg.Values)
+                        // Combine class + method type arguments
+                        var combinedTypes = classTypeArgs.Concat(methodTypeArgs).ToArray();
+                        var typeKey = BuildTypeKey(combinedTypes);
+
+                        if (processedTypeCombinations.Add(typeKey))
                         {
-                            if (arrayElement is { Kind: TypedConstantKind.Type, Value: ITypeSymbol arrayTypeSymbol })
-                            {
-                                typeArgs.Add(arrayTypeSymbol);
-                            }
+                            writer.AppendLine($"[{string.Join(" + \",\" + ", combinedTypes.Select(FormatTypeForRuntimeName))}] = ");
+                            GenerateConcreteTestMetadata(writer, testMethod, className, combinedTypes);
+                            writer.AppendLine(",");
                         }
                     }
                 }
-
-                if (typeArgs.Count > 0)
+            }
+        }
+        else if (classTypeArgSets.Count > 0)
+        {
+            // Only class is generic
+            foreach (var classTypeArgs in classTypeArgSets)
+            {
+                if (ValidateClassTypeConstraints(testMethod.TypeSymbol, classTypeArgs))
                 {
-                    var inferredTypes = typeArgs.ToArray();
-                    var typeKey = BuildTypeKey(inferredTypes);
-
-                    // Skip if we've already processed this type combination
+                    var typeKey = BuildTypeKey(classTypeArgs);
                     if (processedTypeCombinations.Add(typeKey))
                     {
-                        // Validate constraints
-                        if (ValidateTypeConstraints(testMethod.MethodSymbol, inferredTypes))
-                        {
-                            // Generate a concrete instantiation for this type combination
-                            // Use the same key format as runtime: FullName ?? Name
-                            writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(FormatTypeForRuntimeName))}] = ");
-                            GenerateConcreteTestMetadata(writer, testMethod, className, inferredTypes);
-                            writer.AppendLine(",");
-                        }
+                        writer.AppendLine($"[{string.Join(" + \",\" + ", classTypeArgs.Select(FormatTypeForRuntimeName))}] = ");
+                        GenerateConcreteTestMetadata(writer, testMethod, className, classTypeArgs);
+                        writer.AppendLine(",");
+                    }
+                }
+            }
+        }
+        else if (methodTypeArgSets.Count > 0)
+        {
+            // Only method is generic
+            foreach (var methodTypeArgs in methodTypeArgSets)
+            {
+                if (ValidateTypeConstraints(testMethod.MethodSymbol, methodTypeArgs))
+                {
+                    var typeKey = BuildTypeKey(methodTypeArgs);
+                    if (processedTypeCombinations.Add(typeKey))
+                    {
+                        writer.AppendLine($"[{string.Join(" + \",\" + ", methodTypeArgs.Select(FormatTypeForRuntimeName))}] = ");
+                        GenerateConcreteTestMetadata(writer, testMethod, className, methodTypeArgs);
+                        writer.AppendLine(",");
                     }
                 }
             }
@@ -3721,6 +3758,115 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         writer.AppendLine("genericMetadata.TestSessionId = testSessionId;");
         writer.AppendLine("yield return genericMetadata;");
+    }
+
+    private static void ProcessGenerateGenericTestAttribute(
+        AttributeData genAttr,
+        TestMethodMetadata testMethod,
+        string className,
+        CodeWriter writer,
+        HashSet<string> processedTypeCombinations,
+        bool isClassLevel)
+    {
+        // Extract type arguments from the attribute
+        if (genAttr.ConstructorArguments.Length == 0)
+        {
+            return;
+        }
+
+        var typeArgs = new List<ITypeSymbol>();
+        foreach (var arg in genAttr.ConstructorArguments)
+        {
+            if (arg is { Kind: TypedConstantKind.Type, Value: ITypeSymbol typeSymbol })
+            {
+                typeArgs.Add(typeSymbol);
+            }
+            else if (arg.Kind == TypedConstantKind.Array)
+            {
+                foreach (var arrayElement in arg.Values)
+                {
+                    if (arrayElement is { Kind: TypedConstantKind.Type, Value: ITypeSymbol arrayTypeSymbol })
+                    {
+                        typeArgs.Add(arrayTypeSymbol);
+                    }
+                }
+            }
+        }
+
+        if (typeArgs.Count == 0)
+        {
+            return;
+        }
+
+        var inferredTypes = typeArgs.ToArray();
+        var typeKey = BuildTypeKey(inferredTypes);
+
+        // Skip if we've already processed this type combination
+        if (!processedTypeCombinations.Add(typeKey))
+        {
+            return;
+        }
+
+        // Validate constraints based on whether this is a class-level or method-level attribute
+        bool constraintsValid;
+        if (isClassLevel)
+        {
+            // For class-level [GenerateGenericTest], validate against class type constraints
+            constraintsValid = ValidateClassTypeConstraints(testMethod.TypeSymbol, inferredTypes);
+        }
+        else
+        {
+            // For method-level [GenerateGenericTest], validate against method type constraints
+            constraintsValid = ValidateTypeConstraints(testMethod.MethodSymbol, inferredTypes);
+        }
+
+        if (constraintsValid)
+        {
+            // Generate a concrete instantiation for this type combination
+            // Use the same key format as runtime: FullName ?? Name
+            writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(FormatTypeForRuntimeName))}] = ");
+            GenerateConcreteTestMetadata(writer, testMethod, className, inferredTypes);
+            writer.AppendLine(",");
+        }
+    }
+
+    private static List<ITypeSymbol[]> ExtractTypeArgumentSets(List<AttributeData> attributes)
+    {
+        var result = new List<ITypeSymbol[]>();
+
+        foreach (var attr in attributes)
+        {
+            if (attr.ConstructorArguments.Length == 0)
+            {
+                continue;
+            }
+
+            var typeArgs = new List<ITypeSymbol>();
+            foreach (var arg in attr.ConstructorArguments)
+            {
+                if (arg is { Kind: TypedConstantKind.Type, Value: ITypeSymbol typeSymbol })
+                {
+                    typeArgs.Add(typeSymbol);
+                }
+                else if (arg.Kind == TypedConstantKind.Array)
+                {
+                    foreach (var arrayElement in arg.Values)
+                    {
+                        if (arrayElement is { Kind: TypedConstantKind.Type, Value: ITypeSymbol arrayTypeSymbol })
+                        {
+                            typeArgs.Add(arrayTypeSymbol);
+                        }
+                    }
+                }
+            }
+
+            if (typeArgs.Count > 0)
+            {
+                result.Add(typeArgs.ToArray());
+            }
+        }
+
+        return result;
     }
 
     private static bool ValidateClassTypeConstraints(INamedTypeSymbol classSymbol, ITypeSymbol[] typeArguments)
@@ -4534,24 +4680,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static bool ValidateTypeConstraints(IMethodSymbol method, ITypeSymbol[] typeArguments)
     {
-        // Get all type parameters (class + method)
-        var allTypeParams = new List<ITypeParameterSymbol>();
+        // Only validate method type parameters here - class type parameters are validated separately
+        // by ValidateClassTypeConstraints in the cartesian product loop
+        var methodTypeParams = method.TypeParameters;
 
-        // Add class type parameters first
-        if (method.ContainingType.IsGenericType)
-        {
-            allTypeParams.AddRange(method.ContainingType.TypeParameters);
-        }
-
-        // Add method type parameters
-        allTypeParams.AddRange(method.TypeParameters);
-
-        if (allTypeParams.Count != typeArguments.Length)
+        if (methodTypeParams.Length != typeArguments.Length)
         {
             return false;
         }
 
-        return ValidateTypeParameterConstraints(allTypeParams, typeArguments);
+        return ValidateTypeParameterConstraints(methodTypeParams, typeArguments);
     }
 
     private static bool ValidateTypeParameterConstraints(IEnumerable<ITypeParameterSymbol> typeParams, ITypeSymbol[] typeArguments)
@@ -4848,6 +4986,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var methodSymbol = testMethod.MethodSymbol;
         var typeSymbol = testMethod.TypeSymbol;
 
+        // For generic classes, construct the closed generic type for data source generation
+        // This ensures that static methods are called on the concrete type rather than the open generic
+        INamedTypeSymbol concreteTypeSymbol = typeSymbol;
+        if (testMethod.IsGenericType && typeArguments.Length > 0)
+        {
+            var classTypeArgCount = typeSymbol.TypeParameters.Length;
+            if (classTypeArgCount > 0 && typeArguments.Length >= classTypeArgCount)
+            {
+                var classTypeArgs = typeArguments.Take(classTypeArgCount).ToArray();
+                concreteTypeSymbol = typeSymbol.Construct(classTypeArgs);
+            }
+        }
 
         GenerateDependencies(writer, compilation, methodSymbol);
 
@@ -4941,7 +5091,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             foreach (var attr in methodDataSources)
             {
-                GenerateDataSourceAttribute(writer, compilation, attr, methodSymbol, typeSymbol);
+                GenerateDataSourceAttribute(writer, compilation, attr, methodSymbol, concreteTypeSymbol);
             }
 
             writer.Unindent();
@@ -4961,7 +5111,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             foreach (var attr in classDataSources)
             {
-                GenerateDataSourceAttribute(writer, compilation, attr, methodSymbol, typeSymbol);
+                GenerateDataSourceAttribute(writer, compilation, attr, methodSymbol, concreteTypeSymbol);
             }
 
             writer.Unindent();
@@ -4971,7 +5121,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Empty property data sources for concrete instantiations
         writer.AppendLine("PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),");
 
-        GeneratePropertyInjections(writer, typeSymbol, typeSymbol.GloballyQualified());
+        GeneratePropertyInjections(writer, concreteTypeSymbol, concreteTypeSymbol.GloballyQualified());
 
         // Other metadata
         writer.AppendLine($"FilePath = @\"{(testMethod.FilePath ?? "").Replace("\\", "\\\\")}\",");

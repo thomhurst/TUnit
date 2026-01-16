@@ -1,0 +1,321 @@
+using System;
+using System.Collections.Generic;
+using TUnit.Core;
+using TUnit.Core.Interfaces.SourceGenerator;
+using TUnit.Core.Enums;
+using System.Linq;
+
+namespace TUnit.Core;
+
+internal static class TUnit_TestProject_GenericInitializerPropertyTests_PropertyInjectionInitializer
+{
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
+    public static void Initialize()
+    {
+        global::TUnit.Core.PropertySourceRegistry.Register(typeof(global::TUnit.TestProject.GenericInitializerPropertyTests), new PropertyInjectionSource_61ab58e());
+    }
+}
+
+internal sealed class PropertyInjectionSource_61ab58e : IPropertySource
+{
+    public Type Type => typeof(global::TUnit.TestProject.GenericInitializerPropertyTests);
+    public bool ShouldInitialize => true;
+
+#if NET8_0_OR_GREATER
+    [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "<Fixture>k__BackingField")]
+    private static extern ref global::TUnit.TestProject.GenericInitializerFixture<global::TUnit.TestProject.GenericInitializerPropertyTests> GetFixtureBackingField(TUnit.TestProject.GenericInitializerPropertyTests instance);
+#endif
+
+    public IEnumerable<PropertyInjectionMetadata> GetPropertyMetadata()
+    {
+        yield return new PropertyInjectionMetadata
+        {
+            PropertyName = "Fixture",
+            PropertyType = typeof(global::TUnit.TestProject.GenericInitializerFixture<global::TUnit.TestProject.GenericInitializerPropertyTests>),
+            ContainingType = typeof(TUnit.TestProject.GenericInitializerPropertyTests),
+            CreateDataSource = () =>
+            {
+                var dataSource = new TUnit.Core.ClassDataSourceAttribute<TUnit.TestProject.GenericInitializerFixture<TUnit.TestProject.GenericInitializerPropertyTests>>();
+                dataSource.Shared = (TUnit.Core.SharedType)3;
+                return dataSource;
+            },
+            SetProperty = (instance, value) =>
+            {
+                var typedInstance = (global::TUnit.TestProject.GenericInitializerPropertyTests)instance;
+#if NET8_0_OR_GREATER
+                GetFixtureBackingField((TUnit.TestProject.GenericInitializerPropertyTests)typedInstance) = (global::TUnit.TestProject.GenericInitializerFixture<global::TUnit.TestProject.GenericInitializerPropertyTests>)value;
+#else
+                var backingField = typeof(TUnit.TestProject.GenericInitializerPropertyTests).GetField("<Fixture>k__BackingField",
+                    global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.NonPublic);
+                backingField.SetValue(typedInstance, value);
+#endif
+            }
+        };
+
+    }
+}
+
+
+// ===== FILE SEPARATOR =====
+
+using System;
+using System.Collections.Generic;
+using TUnit.Core;
+using TUnit.Core.Interfaces.SourceGenerator;
+using TUnit.Core.Enums;
+using System.Linq;
+
+namespace TUnit.Core;
+
+internal static class TUnit_TestProject_GenericFixtureBase_TUnit_TestProject_GenericPropertyInjectionTests_TestProgram__Generic_PropertyInjectionInitializer
+{
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
+    public static void Initialize()
+    {
+        global::TUnit.Core.PropertySourceRegistry.Register(typeof(global::TUnit.TestProject.GenericFixtureBase<global::TUnit.TestProject.GenericPropertyInjectionTests.TestProgram>), new PropertyInjectionSource_Generic_7a6c8287());
+    }
+}
+
+internal sealed class PropertyInjectionSource_Generic_7a6c8287 : IPropertySource
+{
+    public Type Type => typeof(global::TUnit.TestProject.GenericFixtureBase<global::TUnit.TestProject.GenericPropertyInjectionTests.TestProgram>);
+    public bool ShouldInitialize => true;
+
+#if NET8_0_OR_GREATER
+    [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "<Postgres>k__BackingField")]
+    private static extern ref global::TUnit.TestProject.InMemoryDatabase GetPostgresBackingField(TUnit.TestProject.GenericFixtureBase<TUnit.TestProject.GenericPropertyInjectionTests.TestProgram> instance);
+#endif
+
+    public IEnumerable<PropertyInjectionMetadata> GetPropertyMetadata()
+    {
+        yield return new PropertyInjectionMetadata
+        {
+            PropertyName = "Postgres",
+            PropertyType = typeof(global::TUnit.TestProject.InMemoryDatabase),
+            ContainingType = typeof(TUnit.TestProject.GenericFixtureBase<TUnit.TestProject.GenericPropertyInjectionTests.TestProgram>),
+            CreateDataSource = () =>
+            {
+                var dataSource = new TUnit.Core.ClassDataSourceAttribute<TUnit.TestProject.InMemoryDatabase>();
+                dataSource.Shared = (TUnit.Core.SharedType)3;
+                return dataSource;
+            },
+            SetProperty = (instance, value) =>
+            {
+                var typedInstance = (global::TUnit.TestProject.GenericFixtureBase<global::TUnit.TestProject.GenericPropertyInjectionTests.TestProgram>)instance;
+#if NET8_0_OR_GREATER
+                GetPostgresBackingField((TUnit.TestProject.GenericFixtureBase<TUnit.TestProject.GenericPropertyInjectionTests.TestProgram>)typedInstance) = (global::TUnit.TestProject.InMemoryDatabase)value;
+#else
+                var backingField = typeof(TUnit.TestProject.GenericFixtureBase<TUnit.TestProject.GenericPropertyInjectionTests.TestProgram>).GetField("<Postgres>k__BackingField",
+                    global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.NonPublic);
+                backingField.SetValue(typedInstance, value);
+#endif
+            }
+        };
+
+    }
+}
+
+
+// ===== FILE SEPARATOR =====
+
+using System;
+using System.Collections.Generic;
+using TUnit.Core;
+using TUnit.Core.Interfaces.SourceGenerator;
+using TUnit.Core.Enums;
+using System.Linq;
+
+namespace TUnit.Core;
+
+internal static class TUnit_TestProject_GenericFixtureBase_TUnit_TestProject_MultipleGenericInstantiationTests_OtherProgram__Generic_PropertyInjectionInitializer
+{
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
+    public static void Initialize()
+    {
+        global::TUnit.Core.PropertySourceRegistry.Register(typeof(global::TUnit.TestProject.GenericFixtureBase<global::TUnit.TestProject.MultipleGenericInstantiationTests.OtherProgram>), new PropertyInjectionSource_Generic_64877686());
+    }
+}
+
+internal sealed class PropertyInjectionSource_Generic_64877686 : IPropertySource
+{
+    public Type Type => typeof(global::TUnit.TestProject.GenericFixtureBase<global::TUnit.TestProject.MultipleGenericInstantiationTests.OtherProgram>);
+    public bool ShouldInitialize => true;
+
+#if NET8_0_OR_GREATER
+    [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "<Postgres>k__BackingField")]
+    private static extern ref global::TUnit.TestProject.InMemoryDatabase GetPostgresBackingField(TUnit.TestProject.GenericFixtureBase<TUnit.TestProject.MultipleGenericInstantiationTests.OtherProgram> instance);
+#endif
+
+    public IEnumerable<PropertyInjectionMetadata> GetPropertyMetadata()
+    {
+        yield return new PropertyInjectionMetadata
+        {
+            PropertyName = "Postgres",
+            PropertyType = typeof(global::TUnit.TestProject.InMemoryDatabase),
+            ContainingType = typeof(TUnit.TestProject.GenericFixtureBase<TUnit.TestProject.MultipleGenericInstantiationTests.OtherProgram>),
+            CreateDataSource = () =>
+            {
+                var dataSource = new TUnit.Core.ClassDataSourceAttribute<TUnit.TestProject.InMemoryDatabase>();
+                dataSource.Shared = (TUnit.Core.SharedType)3;
+                return dataSource;
+            },
+            SetProperty = (instance, value) =>
+            {
+                var typedInstance = (global::TUnit.TestProject.GenericFixtureBase<global::TUnit.TestProject.MultipleGenericInstantiationTests.OtherProgram>)instance;
+#if NET8_0_OR_GREATER
+                GetPostgresBackingField((TUnit.TestProject.GenericFixtureBase<TUnit.TestProject.MultipleGenericInstantiationTests.OtherProgram>)typedInstance) = (global::TUnit.TestProject.InMemoryDatabase)value;
+#else
+                var backingField = typeof(TUnit.TestProject.GenericFixtureBase<TUnit.TestProject.MultipleGenericInstantiationTests.OtherProgram>).GetField("<Postgres>k__BackingField",
+                    global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.NonPublic);
+                backingField.SetValue(typedInstance, value);
+#endif
+            }
+        };
+
+    }
+}
+
+
+// ===== FILE SEPARATOR =====
+
+using System;
+using System.Collections.Generic;
+using TUnit.Core;
+using TUnit.Core.Interfaces.SourceGenerator;
+using TUnit.Core.Enums;
+using System.Linq;
+
+namespace TUnit.Core;
+
+internal static class TUnit_TestProject_IntermediateBase_TUnit_TestProject_DeepInheritanceGenericTests_DeepProgram__Generic_PropertyInjectionInitializer
+{
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
+    public static void Initialize()
+    {
+        global::TUnit.Core.PropertySourceRegistry.Register(typeof(global::TUnit.TestProject.IntermediateBase<global::TUnit.TestProject.DeepInheritanceGenericTests.DeepProgram>), new PropertyInjectionSource_Generic_344bd53a());
+    }
+}
+
+internal sealed class PropertyInjectionSource_Generic_344bd53a : IPropertySource
+{
+    public Type Type => typeof(global::TUnit.TestProject.IntermediateBase<global::TUnit.TestProject.DeepInheritanceGenericTests.DeepProgram>);
+    public bool ShouldInitialize => true;
+
+#if NET8_0_OR_GREATER
+    [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "<Postgres>k__BackingField")]
+    private static extern ref global::TUnit.TestProject.InMemoryDatabase GetPostgresBackingField(TUnit.TestProject.GenericFixtureBase<TUnit.TestProject.DeepInheritanceGenericTests.DeepProgram> instance);
+#endif
+
+    public IEnumerable<PropertyInjectionMetadata> GetPropertyMetadata()
+    {
+        yield return new PropertyInjectionMetadata
+        {
+            PropertyName = "Postgres",
+            PropertyType = typeof(global::TUnit.TestProject.InMemoryDatabase),
+            ContainingType = typeof(TUnit.TestProject.GenericFixtureBase<TUnit.TestProject.DeepInheritanceGenericTests.DeepProgram>),
+            CreateDataSource = () =>
+            {
+                var dataSource = new TUnit.Core.ClassDataSourceAttribute<TUnit.TestProject.InMemoryDatabase>();
+                dataSource.Shared = (TUnit.Core.SharedType)3;
+                return dataSource;
+            },
+            SetProperty = (instance, value) =>
+            {
+                var typedInstance = (global::TUnit.TestProject.IntermediateBase<global::TUnit.TestProject.DeepInheritanceGenericTests.DeepProgram>)instance;
+#if NET8_0_OR_GREATER
+                GetPostgresBackingField((TUnit.TestProject.GenericFixtureBase<TUnit.TestProject.DeepInheritanceGenericTests.DeepProgram>)typedInstance) = (global::TUnit.TestProject.InMemoryDatabase)value;
+#else
+                var backingField = typeof(TUnit.TestProject.GenericFixtureBase<TUnit.TestProject.DeepInheritanceGenericTests.DeepProgram>).GetField("<Postgres>k__BackingField",
+                    global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.NonPublic);
+                backingField.SetValue(typedInstance, value);
+#endif
+            }
+        };
+
+    }
+}
+
+
+// ===== FILE SEPARATOR =====
+
+using System;
+using System.Collections.Generic;
+using TUnit.Core;
+using TUnit.Core.Interfaces.SourceGenerator;
+using TUnit.Core.Enums;
+using System.Linq;
+
+namespace TUnit.Core;
+
+internal static class TUnit_TestProject_GenericFixtureBase_TUnit_TestProject_DeepInheritanceGenericTests_DeepProgram__Generic_PropertyInjectionInitializer
+{
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
+    public static void Initialize()
+    {
+        global::TUnit.Core.PropertySourceRegistry.Register(typeof(global::TUnit.TestProject.GenericFixtureBase<global::TUnit.TestProject.DeepInheritanceGenericTests.DeepProgram>), new PropertyInjectionSource_Generic_48a5b53f());
+    }
+}
+
+internal sealed class PropertyInjectionSource_Generic_48a5b53f : IPropertySource
+{
+    public Type Type => typeof(global::TUnit.TestProject.GenericFixtureBase<global::TUnit.TestProject.DeepInheritanceGenericTests.DeepProgram>);
+    public bool ShouldInitialize => true;
+
+#if NET8_0_OR_GREATER
+    [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "<Postgres>k__BackingField")]
+    private static extern ref global::TUnit.TestProject.InMemoryDatabase GetPostgresBackingField(TUnit.TestProject.GenericFixtureBase<TUnit.TestProject.DeepInheritanceGenericTests.DeepProgram> instance);
+#endif
+
+    public IEnumerable<PropertyInjectionMetadata> GetPropertyMetadata()
+    {
+        yield return new PropertyInjectionMetadata
+        {
+            PropertyName = "Postgres",
+            PropertyType = typeof(global::TUnit.TestProject.InMemoryDatabase),
+            ContainingType = typeof(TUnit.TestProject.GenericFixtureBase<TUnit.TestProject.DeepInheritanceGenericTests.DeepProgram>),
+            CreateDataSource = () =>
+            {
+                var dataSource = new TUnit.Core.ClassDataSourceAttribute<TUnit.TestProject.InMemoryDatabase>();
+                dataSource.Shared = (TUnit.Core.SharedType)3;
+                return dataSource;
+            },
+            SetProperty = (instance, value) =>
+            {
+                var typedInstance = (global::TUnit.TestProject.GenericFixtureBase<global::TUnit.TestProject.DeepInheritanceGenericTests.DeepProgram>)instance;
+#if NET8_0_OR_GREATER
+                GetPostgresBackingField((TUnit.TestProject.GenericFixtureBase<TUnit.TestProject.DeepInheritanceGenericTests.DeepProgram>)typedInstance) = (global::TUnit.TestProject.InMemoryDatabase)value;
+#else
+                var backingField = typeof(TUnit.TestProject.GenericFixtureBase<TUnit.TestProject.DeepInheritanceGenericTests.DeepProgram>).GetField("<Postgres>k__BackingField",
+                    global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.NonPublic);
+                backingField.SetValue(typedInstance, value);
+#endif
+            }
+        };
+
+    }
+}
+
+
+// ===== FILE SEPARATOR =====
+
+using System;
+using TUnit.Core.Discovery;
+
+namespace TUnit.Generated;
+
+internal static class TUnit_TestProject_GenericInitializerFixture_TUnit_TestProject_GenericInitializerPropertyTests__Generic_InitializerPropertiesInitializer
+{
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
+    public static void Initialize()
+    {
+        InitializerPropertyRegistry.Register(typeof(global::TUnit.TestProject.GenericInitializerFixture<global::TUnit.TestProject.GenericInitializerPropertyTests>), new InitializerPropertyInfo[]
+        {
+            new InitializerPropertyInfo
+            {
+                PropertyName = "Database",
+                PropertyType = typeof(global::TUnit.TestProject.InMemoryDatabase),
+                GetValue = static obj => ((global::TUnit.TestProject.GenericInitializerFixture<global::TUnit.TestProject.GenericInitializerPropertyTests>)obj).Database
+            },
+        });
+    }
+}
