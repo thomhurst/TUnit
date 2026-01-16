@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.IO.Compression;
+using System.Text;
 using Microsoft.Extensions.Logging;
 using ModularPipelines.Attributes;
 using ModularPipelines.Context;
@@ -20,7 +21,7 @@ namespace TUnit.Pipeline.Modules;
 [ModuleCategory("ReadMe")]
 public class GenerateReadMeModule : Module<File>
 {
-    protected override async Task<File?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
+    protected override async Task<File?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
     {
         var template = await context.Git()
             .RootDirectory
@@ -90,7 +91,8 @@ public class GenerateReadMeModule : Module<File>
                 var downloadedZip = File.GetNewTemporaryFilePath();
                 await downloadedZip.WriteAsync(stream, cancellationToken);
 
-                var unzippedDirectory = context.Zip.UnZipToFolder(downloadedZip, Folder.CreateTemporaryFolder());
+                var unzippedDirectory = Folder.CreateTemporaryFolder();
+                ZipFile.ExtractToDirectory(downloadedZip.Path, unzippedDirectory.Path);
 
                 var markdownFile = unzippedDirectory.FindFile(x => x.Extension == ".md").AssertExists();
 

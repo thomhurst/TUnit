@@ -4,5 +4,5 @@ namespace TUnit.Pipeline.Modules;
 
 public class ProcessorParallelLimit : IParallelLimit
 {
-    public int Limit { get; } = Environment.ProcessorCount * 4;
+    public static int Limit { get; } = Environment.ProcessorCount * 4;
 }

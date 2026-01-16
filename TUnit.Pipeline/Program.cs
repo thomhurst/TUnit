@@ -1,8 +1,8 @@
 ﻿using System.CommandLine;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using ModularPipelines;
 using ModularPipelines.Extensions;
-using ModularPipelines.Host;
 using ModularPipelines.Options;
 using TUnit.Pipeline;
 
@@ -17,35 +17,26 @@ var categoryOption = new Option<string[]>(
 
 var rootCommand = new RootCommand("The pipeline for building, testing and packaging TUnit");
 rootCommand.Add(categoryOption);
-rootCommand.SetAction(parseResult =>
+rootCommand.SetAction(async parseResult =>
 {
     var categories = parseResult.GetValue(categoryOption)!;
 
-    var pipelineHostBuilder = PipelineHostBuilder.Create()
-        .ConfigureAppConfiguration((_, builder) =>
-        {
-            builder.AddEnvironmentVariables();
-        })
-        .ConfigureServices((context, collection) =>
-        {
-            collection.Configure<NuGetOptions>(context.Configuration.GetSection("NuGet"));
-            collection.AddModulesFromAssembly(typeof(Program).Assembly);
-        })
-        .ConfigurePipelineOptions((_, options) => options.ExecutionMode = ExecutionMode.WaitForAllModules);
+    var builder = Pipeline.CreateBuilder();
+    builder.Configuration.AddEnvironmentVariables();
+    builder.Services.Configure<NuGetOptions>(builder.Configuration.GetSection("NuGet"));
+    builder.Services.AddModulesFromAssembly(typeof(Program).Assembly);
+    builder.Options.ExecutionMode = ExecutionMode.WaitForAllModules;
 
     if (categories.Length > 0)
     {
-        pipelineHostBuilder.RunCategories(categories);
+        builder.RunCategories(categories);
     }
     else
     {
-        pipelineHostBuilder.IgnoreCategories("ReadMe");
+        builder.IgnoreCategories("ReadMe");
     }
 
-    pipelineHostBuilder
-        .ExecutePipelineAsync()
-        .GetAwaiter()
-        .GetResult();
+    await builder.Build().RunAsync();
 });
 
 return await rootCommand.Parse(args).InvokeAsync();
