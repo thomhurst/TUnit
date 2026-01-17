@@ -7,6 +7,6 @@ namespace TUnit.Engine;
 /// </summary>
 internal class NullLoggerFactory : ILoggerFactory
 {
-    public ILogger<T> CreateLogger<T>() => new NullLogger<T>();
-    public ILogger CreateLogger(string categoryName) => new NullLogger<object>();
+    public ILogger<T> CreateLogger<T>() => new MtpNullLogger<T>();
+    public ILogger CreateLogger(string categoryName) => new MtpNullLogger<object>();
 }

@@ -126,7 +126,7 @@ public class DefaultLogger(Context context) : TUnitLogger
     {
         var level = isError ? LogLevel.Error : LogLevel.Information;
 
-        // Historical capture
+        // Write to context's buffered output for test results
         if (isError)
         {
             context.ErrorOutputWriter.WriteLine(message);
@@ -136,7 +136,7 @@ public class DefaultLogger(Context context) : TUnitLogger
             context.OutputWriter.WriteLine(message);
         }
 
-        // Real-time streaming to sinks
+        // Stream to registered log sinks (real-time output to IDEs, Seq, etc.)
         LogSinkRouter.RouteToSinks(level, message, null, context);
     }
 
@@ -151,7 +151,7 @@ public class DefaultLogger(Context context) : TUnitLogger
     {
         var level = isError ? LogLevel.Error : LogLevel.Information;
 
-        // Historical capture
+        // Write to context's buffered output for test results
         if (isError)
         {
             await context.ErrorOutputWriter.WriteLineAsync(message);
@@ -161,7 +161,7 @@ public class DefaultLogger(Context context) : TUnitLogger
             await context.OutputWriter.WriteLineAsync(message);
         }
 
-        // Real-time streaming to sinks
+        // Stream to registered log sinks (real-time output to IDEs, Seq, etc.)
         await LogSinkRouter.RouteToSinksAsync(level, message, null, context);
     }
 }

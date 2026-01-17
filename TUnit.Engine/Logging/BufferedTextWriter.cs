@@ -397,15 +397,6 @@ internal sealed class BufferedTextWriter : TextWriter, IDisposable
         }
     }
     
-    private void ProcessFlushQueue()
-    {
-        // Process all queued content
-        while (_flushQueue.TryDequeue(out var content))
-        {
-            _target.Write(content);
-        }
-    }
-    
     private void AutoFlush(object? state)
     {
         if (_disposed)

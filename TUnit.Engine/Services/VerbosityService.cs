@@ -8,7 +8,9 @@ using LogLevel = TUnit.Core.Logging.LogLevel;
 namespace TUnit.Engine.Services;
 
 /// <summary>
-/// Centralized service for managing TUnit output and diagnostic settings
+/// Centralized service for managing TUnit output and diagnostic settings.
+/// Controls whether output goes to console vs real-time streaming, and manages
+/// stack trace verbosity based on log levels and command-line options.
 /// </summary>
 public sealed class VerbosityService
 {
@@ -45,13 +47,14 @@ public sealed class VerbosityService
     public bool HideTestOutput => IsIdeClient || (!_isDetailedOutput && _logLevel > LogLevel.Debug);
 
     /// <summary>
-    /// Creates a summary of current output and diagnostic settings
+    /// Creates a summary of current output and diagnostic settings.
     /// </summary>
     public string CreateVerbositySummary()
     {
         var outputMode = _isDetailedOutput ? "Detailed" : "Normal";
-        return $"Output: {outputMode}, Log Level: {_logLevel} " +
-               $"(Stack traces: {ShowDetailedStackTrace}, ";
+        var clientType = IsIdeClient ? "IDE" : "Console";
+        return $"Output: {outputMode}, Log Level: {_logLevel}, Client: {clientType} " +
+               $"(Stack traces: {ShowDetailedStackTrace}, Hide output: {HideTestOutput})";
     }
 
     private static bool GetOutputLevel(ICommandLineOptions commandLineOptions, IServiceProvider serviceProvider)
