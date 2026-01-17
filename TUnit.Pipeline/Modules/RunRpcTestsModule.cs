@@ -8,7 +8,7 @@ using TUnit.Pipeline.Modules.Abstract;
 
 namespace TUnit.Pipeline.Modules;
 
-[NotInParallel("DotNetTests")]
+[NotInParallel("NetworkTests")]
 [RunOnLinuxOnly, RunOnWindowsOnly]
 public class RunRpcTestsModule : TestBaseModule
 {

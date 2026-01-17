@@ -10,7 +10,7 @@ using ModularPipelines.Options;
 
 namespace TUnit.Pipeline.Modules;
 
-[NotInParallel("DotNetTests")]
+[NotInParallel("SnapshotTests")]
 public class RunTemplateTestsModule : Module<CommandResult>
 {
     protected override async Task<CommandResult?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)

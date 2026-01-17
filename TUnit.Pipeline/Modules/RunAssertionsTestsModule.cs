@@ -8,7 +8,6 @@ using TUnit.Pipeline.Modules.Abstract;
 
 namespace TUnit.Pipeline.Modules;
 
-[NotInParallel("DotNetTests")]
 public class RunAssertionsTestsModule : TestBaseModule
 {
     protected override Task<(DotNetRunOptions Options, CommandExecutionOptions? ExecutionOptions)> GetTestOptions(IModuleContext context, string framework, CancellationToken cancellationToken)

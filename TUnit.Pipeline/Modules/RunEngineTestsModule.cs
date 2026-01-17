@@ -10,7 +10,7 @@ using ModularPipelines.Options;
 
 namespace TUnit.Pipeline.Modules;
 
-[NotInParallel("DotNetTests")]
+[NotInParallel("NetworkTests")]
 [DependsOn<RunAnalyzersTestsModule>]
 [DependsOn<RunUnitTestsModule>]
 [DependsOn<RunTemplateTestsModule>]
