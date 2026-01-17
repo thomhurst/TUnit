@@ -101,6 +101,16 @@ dotnet format analyzers --severity info --diagnostics TUXU0001
 
 This command applies all available fixes for the `TUXU0001` diagnostic. You'll see output indicating which files were modified.
 
+:::tip Multi-targeting Projects
+If your project targets multiple .NET versions (e.g., `net8.0;net9.0;net10.0`), specify the latest framework to avoid issues:
+
+```bash
+dotnet format analyzers --severity info --diagnostics TUXU0001 --framework net10.0
+```
+
+Replace `net10.0` with your project's highest supported target framework.
+:::
+
 **5. Remove the implicit usings workaround**
 
 Remove or comment out the properties you added in step 2:
