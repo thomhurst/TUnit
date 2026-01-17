@@ -438,4 +438,4 @@ doc/plans/
 *.nettrace
 
 # Git worktrees
-.worktrees/.worktrees/
+.worktrees/
