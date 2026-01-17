@@ -17,8 +17,8 @@ internal sealed class AfterHookPairTracker
     private readonly ThreadSafeDictionary<Type, Task<List<Exception>>> _afterClassTasks = new();
     private readonly ThreadSafeDictionary<Assembly, Task<List<Exception>>> _afterAssemblyTasks = new();
     private Task<List<Exception>>? _afterTestSessionTask;
-    private readonly object _testSessionLock = new();
-    private readonly object _classLock = new();
+    private readonly Lock _testSessionLock = new();
+    private readonly Lock _classLock = new();
 
     // Track cancellation registrations for cleanup
     private readonly ConcurrentBag<CancellationTokenRegistration> _registrations = [];
