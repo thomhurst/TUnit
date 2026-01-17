@@ -4,14 +4,15 @@ using TUnit.Core.Logging;
 namespace TUnit.Engine.Logging;
 
 /// <summary>
-/// A log sink that streams test output to IDEs in real-time by sending
+/// A log sink that streams test output in real-time by sending
 /// TestNodeUpdateMessage updates via the message bus.
+/// Enabled for IDE clients and when --output Detailed is used.
 /// </summary>
-internal class IdeOutputLogSink : ILogSink
+internal class RealTimeOutputSink : ILogSink
 {
     private readonly TUnitMessageBus _messageBus;
 
-    public IdeOutputLogSink(TUnitMessageBus messageBus)
+    public RealTimeOutputSink(TUnitMessageBus messageBus)
     {
         _messageBus = messageBus;
     }
@@ -36,7 +37,7 @@ internal class IdeOutputLogSink : ILogSink
             return;
         }
 
-        // Send just the new output to the IDE
+        // Send the output in real-time via TestNodeUpdateMessage
         await _messageBus.OutputUpdate(testContext, message).ConfigureAwait(false);
     }
 }

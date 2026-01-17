@@ -142,10 +142,10 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             frameworkServiceProvider,
             context));
 
-        // Register the built-in log sink for streaming test output to IDEs in real-time
-        if (isIdeClient)
+        // Register the real-time output sink for IDEs and --output Detailed mode
+        if (isIdeClient || VerbosityService.IsDetailedOutput)
         {
-            TUnitLoggerFactory.AddSink(new IdeOutputLogSink(MessageBus));
+            TUnitLoggerFactory.AddSink(new RealTimeOutputSink(MessageBus));
         }
 
         CancellationToken = Register(new EngineCancellationToken());

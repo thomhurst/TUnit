@@ -19,7 +19,13 @@ public sealed class VerbosityService
     {
         _isDetailedOutput = GetOutputLevel(commandLineOptions, serviceProvider);
         _logLevel = GetLogLevel(commandLineOptions);
+        IsIdeClient = !IsConsoleEnvironment(serviceProvider);
     }
+
+    /// <summary>
+    /// Whether running in an IDE (Rider, VS, etc.) vs console.
+    /// </summary>
+    public bool IsIdeClient { get; }
 
     /// <summary>
     /// Whether to show detailed stack traces (enabled with Debug/Trace log level)
@@ -32,9 +38,11 @@ public sealed class VerbosityService
     public bool IsDetailedOutput => _isDetailedOutput;
 
     /// <summary>
-    /// Whether to hide real-time test output (hidden with --output Normal, unless log level is Debug/Trace)
+    /// Whether to hide real-time test output from the console.
+    /// For IDE clients, we hide console output because we stream via TestNodeUpdateMessage instead.
+    /// For console clients, we hide if --output Normal and log level is not Debug/Trace.
     /// </summary>
-    public bool HideTestOutput => !_isDetailedOutput && _logLevel > LogLevel.Debug;
+    public bool HideTestOutput => IsIdeClient || (!_isDetailedOutput && _logLevel > LogLevel.Debug);
 
     /// <summary>
     /// Creates a summary of current output and diagnostic settings

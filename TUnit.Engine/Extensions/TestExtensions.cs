@@ -165,13 +165,8 @@ internal static class TestExtensions
         string? output = null;
         string? error = null;
 
-        // For streaming output (real-time), use the provided output directly
-        // For final state, get the accumulated output from context
-        if (streamingOutput is not null)
-        {
-            properties.Add(new StandardOutputProperty(streamingOutput));
-        }
-        else if (isFinalState)
+        // Include output for streaming (real-time) or final state
+        if (streamingOutput is not null || isFinalState)
         {
             output = testContext.GetStandardOutput();
             error = testContext.GetErrorOutput();
