@@ -11,6 +11,7 @@ using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
+using TUnit.Core.Logging;
 using TUnit.Core.Tracking;
 using TUnit.Engine.Building;
 using TUnit.Engine.Building.Collectors;
@@ -102,6 +103,9 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             outputDevice,
             loggerFactory.CreateLogger<TUnitFrameworkLogger>(),
             logLevelProvider));
+
+        // Register the built-in log sink for streaming logs to IDEs
+        TUnitLoggerFactory.AddSink(new OutputDeviceLogSink(outputDevice, extension));
 
         // Create initialization services using Lazy<T> to break circular dependencies
         // No more two-phase initialization with Initialize() calls
