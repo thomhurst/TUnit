@@ -89,6 +89,15 @@ public abstract class BaseMigrationCodeFixProvider : CodeFixProvider
         var transformer = new MigrationTransformer(plan, FrameworkName);
         var transformedRoot = transformer.Transform(annotatedRoot);
 
+        // Phase 2.5: Apply framework-specific syntax-only transformations
+        // These use CSharpSyntaxRewriter but don't need the semantic model
+        transformedRoot = ApplyTwoPhasePostTransformations(transformedRoot);
+
+        // Phase 2.6: Re-check usings after post-transformations
+        // Post-transformations like NUnitExpectedResultRewriter may introduce async code
+        // that wasn't present during the initial usings transformation
+        transformedRoot = MigrationHelpers.AddTUnitUsings(transformedRoot);
+
         // Final cleanup (pure syntax operations)
         transformedRoot = CleanupClassMemberLeadingTrivia(transformedRoot);
         transformedRoot = CleanupEndOfFileTrivia(transformedRoot);
@@ -101,6 +110,16 @@ public abstract class BaseMigrationCodeFixProvider : CodeFixProvider
         }
 
         return document.WithSyntaxRoot(transformedRoot);
+    }
+
+    /// <summary>
+    /// Apply framework-specific post-transformations after the main two-phase processing.
+    /// These should be pure syntax operations that don't require the semantic model.
+    /// Override in derived classes to add framework-specific transformations.
+    /// </summary>
+    protected virtual CompilationUnitSyntax ApplyTwoPhasePostTransformations(CompilationUnitSyntax compilationUnit)
+    {
+        return compilationUnit;
     }
 
     /// <summary>

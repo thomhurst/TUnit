@@ -62,6 +62,12 @@ public abstract class MigrationAnalyzer
         // 2. Analyze attributes
         annotatedRoot = AnalyzeAttributes(annotatedRoot);
 
+        // 2b. Analyze parameter attributes (e.g., [Range])
+        annotatedRoot = AnalyzeParameterAttributes(annotatedRoot);
+
+        // 2c. Analyze methods for missing attributes (e.g., add [Test] when only [TestCase])
+        annotatedRoot = AnalyzeMethodsForMissingAttributes(annotatedRoot);
+
         // 3. Analyze base types
         annotatedRoot = AnalyzeBaseTypes(annotatedRoot);
 
@@ -148,6 +154,26 @@ public abstract class MigrationAnalyzer
                 var conversion = AnalyzeAssertion(originalNode);
                 if (conversion != null)
                 {
+                    // Check if the containing method has ref/out parameters
+                    // If so, we can't make it async, so use .Wait() instead of await
+                    if (conversion.IntroducesAwait && ContainingMethodHasRefOrOutParameters(originalNode))
+                    {
+                        // Create a new conversion with .Wait() instead of await
+                        var newReplacementCode = conversion.ReplacementCode;
+                        if (newReplacementCode.StartsWith("await "))
+                        {
+                            newReplacementCode = newReplacementCode.Substring(6) + ".Wait()";
+                        }
+                        conversion = new AssertionConversion
+                        {
+                            Kind = conversion.Kind,
+                            OriginalText = conversion.OriginalText,
+                            ReplacementCode = newReplacementCode,
+                            IntroducesAwait = false,
+                            TodoComment = conversion.TodoComment
+                        };
+                    }
+
                     Plan.Assertions.Add(conversion);
 
                     // Find the corresponding node in the current tree by span
@@ -175,6 +201,23 @@ public abstract class MigrationAnalyzer
         }
 
         return currentRoot;
+    }
+
+    /// <summary>
+    /// Checks if the method containing this node has ref or out parameters.
+    /// Methods with ref/out parameters cannot be made async, so assertions must use .Wait() instead of await.
+    /// </summary>
+    private static bool ContainingMethodHasRefOrOutParameters(SyntaxNode node)
+    {
+        var containingMethod = node.Ancestors()
+            .OfType<MethodDeclarationSyntax>()
+            .FirstOrDefault();
+
+        if (containingMethod == null)
+            return false;
+
+        return containingMethod.ParameterList.Parameters
+            .Any(p => p.Modifiers.Any(m => m.IsKind(SyntaxKind.RefKeyword) || m.IsKind(SyntaxKind.OutKeyword)));
     }
 
     /// <summary>
@@ -262,6 +305,74 @@ public abstract class MigrationAnalyzer
     /// Returns null if this attribute should not be converted.
     /// </summary>
     protected abstract AttributeConversion? AnalyzeAttribute(AttributeSyntax node);
+
+    /// <summary>
+    /// Analyzes parameter attributes (e.g., [Range] on method parameters).
+    /// </summary>
+    protected virtual CompilationUnitSyntax AnalyzeParameterAttributes(CompilationUnitSyntax root)
+    {
+        var parameterNodes = _originalRoot.DescendantNodes().OfType<ParameterSyntax>().ToList();
+        var currentRoot = root;
+
+        foreach (var parameter in parameterNodes)
+        {
+            if (parameter.AttributeLists.Count == 0) continue;
+
+            foreach (var attributeList in parameter.AttributeLists)
+            {
+                foreach (var originalAttr in attributeList.Attributes)
+                {
+                    try
+                    {
+                        var conversion = AnalyzeParameterAttribute(originalAttr, parameter);
+                        if (conversion != null)
+                        {
+                            Plan.ParameterAttributes.Add(conversion);
+
+                            var nodeToAnnotate = currentRoot.DescendantNodes()
+                                .OfType<AttributeSyntax>()
+                                .FirstOrDefault(n => n.Span == originalAttr.Span);
+
+                            if (nodeToAnnotate != null)
+                            {
+                                var annotatedNode = nodeToAnnotate.WithAdditionalAnnotations(conversion.Annotation);
+                                currentRoot = currentRoot.ReplaceNode(nodeToAnnotate, annotatedNode);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Plan.Failures.Add(new ConversionFailure
+                        {
+                            Phase = "ParameterAttributeAnalysis",
+                            Description = ex.Message,
+                            OriginalCode = originalAttr.ToString(),
+                            Exception = ex
+                        });
+                    }
+                }
+            }
+        }
+
+        return currentRoot;
+    }
+
+    /// <summary>
+    /// Analyzes a single parameter attribute and returns the conversion info.
+    /// Returns null if this attribute should not be converted.
+    /// </summary>
+    protected virtual ParameterAttributeConversion? AnalyzeParameterAttribute(AttributeSyntax attr, ParameterSyntax parameter)
+    {
+        return null; // Default: no parameter attribute conversion
+    }
+
+    /// <summary>
+    /// Analyzes methods to add missing attributes (e.g., add [Test] when only [TestCase]).
+    /// </summary>
+    protected virtual CompilationUnitSyntax AnalyzeMethodsForMissingAttributes(CompilationUnitSyntax root)
+    {
+        return root; // Default: no missing attribute additions
+    }
 
     /// <summary>
     /// Analyzes base types and adds removals to the plan.

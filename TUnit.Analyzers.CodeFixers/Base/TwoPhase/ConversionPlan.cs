@@ -76,6 +76,11 @@ public class ConversionPlan
     public List<TheoryDataConversion> TheoryDataConversions { get; } = new();
 
     /// <summary>
+    /// Parameter attributes to convert (e.g., [Range(1, 5)] → [MatrixRange&lt;int&gt;(1, 5)])
+    /// </summary>
+    public List<ParameterAttributeConversion> ParameterAttributes { get; } = new();
+
+    /// <summary>
     /// Usings to add
     /// </summary>
     public List<string> UsingsToAdd { get; } = new();
@@ -107,6 +112,7 @@ public class ConversionPlan
         RecordExceptionConversions.Count > 0 ||
         InvocationReplacements.Count > 0 ||
         TheoryDataConversions.Count > 0 ||
+        ParameterAttributes.Count > 0 ||
         UsingsToAdd.Count > 0 ||
         UsingPrefixesToRemove.Count > 0;
 
@@ -164,22 +170,36 @@ public class AssertionConversion : ConversionTarget
 /// </summary>
 public enum AssertionConversionKind
 {
-    // Equality
+    // Equality (xUnit naming)
     Equal,
     NotEqual,
     Same,
     NotSame,
     StrictEqual,
 
-    // Boolean
+    // Equality (MSTest naming)
+    AreEqual,
+    AreNotEqual,
+    AreSame,
+    AreNotSame,
+
+    // Boolean (xUnit naming)
     True,
     False,
 
-    // Null
+    // Boolean (MSTest naming)
+    IsTrue,
+    IsFalse,
+
+    // Null (xUnit naming)
     Null,
     NotNull,
 
-    // Collections
+    // Null (MSTest naming)
+    IsNull,
+    IsNotNull,
+
+    // Collections (xUnit)
     Empty,
     NotEmpty,
     Single,
@@ -187,21 +207,44 @@ public enum AssertionConversionKind
     DoesNotContain,
     All,
 
+    // Collections (MSTest CollectionAssert)
+    CollectionAreEqual,
+    CollectionAreNotEqual,
+    CollectionAreEquivalent,
+    CollectionAreNotEquivalent,
+    CollectionContains,
+    CollectionDoesNotContain,
+    CollectionIsSubsetOf,
+    CollectionIsNotSubsetOf,
+    CollectionAllItemsAreUnique,
+    CollectionAllItemsAreNotNull,
+    CollectionAllItemsAreInstancesOfType,
+
     // Exceptions
     Throws,
     ThrowsAsync,
     ThrowsAny,
     ThrowsAnyAsync,
+    ThrowsException,
 
     // Type checks
     IsType,
     IsNotType,
     IsAssignableFrom,
+    IsInstanceOfType,
+    IsNotInstanceOfType,
 
-    // String
+    // String (xUnit)
     StartsWith,
     EndsWith,
     Matches,
+
+    // String (MSTest StringAssert)
+    StringContains,
+    StringStartsWith,
+    StringEndsWith,
+    StringMatches,
+    StringDoesNotMatch,
 
     // Comparison
     InRange,
@@ -210,6 +253,7 @@ public enum AssertionConversionKind
     // Other
     Fail,
     Skip,
+    Inconclusive,
     Collection,
     PropertyChanged,
 
@@ -296,6 +340,11 @@ public class MethodSignatureChange : ConversionTarget
     /// Whether to change return type from ValueTask to Task
     /// </summary>
     public bool ChangeValueTaskToTask { get; init; }
+
+    /// <summary>
+    /// Whether to make the method public (for lifecycle methods)
+    /// </summary>
+    public bool MakePublic { get; init; }
 }
 
 /// <summary>
@@ -436,4 +485,20 @@ public class TheoryDataConversion : ConversionTarget
     /// Annotation for the object creation expression to convert to array creation
     /// </summary>
     public SyntaxAnnotation? CreationAnnotation { get; init; }
+}
+
+/// <summary>
+/// Represents a parameter attribute to convert (e.g., [Range(1, 5)] → [MatrixRange&lt;int&gt;(1, 5)])
+/// </summary>
+public class ParameterAttributeConversion : ConversionTarget
+{
+    /// <summary>
+    /// The new attribute name (e.g., "MatrixRange&lt;int&gt;")
+    /// </summary>
+    public required string NewAttributeName { get; init; }
+
+    /// <summary>
+    /// The new argument list (null to keep original, empty string to remove)
+    /// </summary>
+    public string? NewArgumentList { get; init; }
 }

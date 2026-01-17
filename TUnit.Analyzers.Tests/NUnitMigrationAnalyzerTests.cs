@@ -1555,8 +1555,8 @@ public class NUnitMigrationAnalyzerTests
                 public class MyClass
                 {
                     [Test]
-                    [Arguments(1, DisplayName = "Test One", Skip = "Temporarily disabled", Categories = ["Unit"])]
-                    [Arguments(2, DisplayName = "Test Two", Skip = "WIP", Categories = ["Integration"])]
+                    [Arguments(1, DisplayName = "Test One", Categories = ["Unit"], Skip = "Temporarily disabled")]
+                    [Arguments(2, DisplayName = "Test Two", Categories = ["Integration"], Skip = "WIP")]
                     public async Task MyTest(int value)
                     {
                         await Assert.That(value > 0).IsTrue();
@@ -1593,7 +1593,7 @@ public class NUnitMigrationAnalyzerTests
                 public class MyClass
                 {
                     [Test]
-                    [Arguments(1, DisplayName = "Full featured test", Skip = "Testing migration", Categories = ["Comprehensive"])]
+                    [Arguments(1, DisplayName = "Full featured test", Categories = ["Comprehensive"], Skip = "Testing migration")]
                     [Property("Description", "A complete test case")]
                     [Property("Author", "Developer")]
                     public async Task MyTest(int value)
@@ -1811,10 +1811,9 @@ public class NUnitMigrationAnalyzerTests
     }
 
     [Test]
-    public async Task NUnit_ThrowsAsync_WithUnrecognizedConstraint_PreservesAction()
+    public async Task NUnit_ThrowsAsync_WithIsInstanceOf_Converted()
     {
-        // Test that unrecognized constraint patterns still preserve the action lambda
-        // This tests the fallback path in ConvertNUnitThrows
+        // Test that Is.InstanceOf<T>() constraint is recognized and converted to ThrowsAsync<T>
         await CodeFixer.VerifyCodeFixAsync(
             """
                 using NUnit.Framework;
@@ -1825,10 +1824,10 @@ public class NUnitMigrationAnalyzerTests
                     [Test]
                     public void TestMethod()
                     {
-                        // Using Is.InstanceOf which is not recognized by TryExtractTypeFromConstraint
+                        // Is.InstanceOf<T>() is recognized and the type is extracted
                         Assert.ThrowsAsync(Is.InstanceOf<ArgumentException>(), async () => await SomeMethod());
                     }
-                    
+
                     private async System.Threading.Tasks.Task SomeMethod()
                     {
                         await System.Threading.Tasks.Task.Delay(1);
@@ -1846,10 +1845,10 @@ public class NUnitMigrationAnalyzerTests
                     [Test]
                     public async Task TestMethod()
                     {
-                        // Using Is.InstanceOf which is not recognized by TryExtractTypeFromConstraint
-                        await Assert.That(async () => await SomeMethod()).Throws();
+                        // Is.InstanceOf<T>() is recognized and the type is extracted
+                        await Assert.ThrowsAsync<ArgumentException>(async () => await SomeMethod());
                     }
-                    
+
                     private async System.Threading.Tasks.Task SomeMethod()
                     {
                         await System.Threading.Tasks.Task.Delay(1);

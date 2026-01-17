@@ -50,6 +50,9 @@ public class MigrationTransformer
         // 6. Attributes
         currentRoot = TransformAttributes(currentRoot);
 
+        // 6b. Parameter attributes (e.g., [Range] → [MatrixRange])
+        currentRoot = TransformParameterAttributes(currentRoot);
+
         // 7. Remove attributes
         currentRoot = RemoveAttributes(currentRoot);
 
@@ -423,6 +426,36 @@ public class MigrationTransformer
                     newMethod = newMethod.WithReturnType(taskType);
                 }
 
+                // Make method public if needed (for lifecycle methods)
+                if (change.MakePublic)
+                {
+                    var hasPublicModifier = newMethod.Modifiers.Any(SyntaxKind.PublicKeyword);
+                    if (!hasPublicModifier)
+                    {
+                        // Remove existing access modifiers (private, protected, internal)
+                        var newModifiers = new SyntaxTokenList();
+                        var publicToken = SyntaxFactory.Token(SyntaxKind.PublicKeyword)
+                            .WithTrailingTrivia(SyntaxFactory.Space);
+
+                        // Add public at the start
+                        newModifiers = newModifiers.Add(publicToken);
+
+                        // Keep non-access modifiers (static, async, etc.)
+                        foreach (var modifier in newMethod.Modifiers)
+                        {
+                            if (!modifier.IsKind(SyntaxKind.PrivateKeyword) &&
+                                !modifier.IsKind(SyntaxKind.ProtectedKeyword) &&
+                                !modifier.IsKind(SyntaxKind.InternalKeyword) &&
+                                !modifier.IsKind(SyntaxKind.PublicKeyword))
+                            {
+                                newModifiers = newModifiers.Add(modifier);
+                            }
+                        }
+
+                        newMethod = newMethod.WithModifiers(newModifiers);
+                    }
+                }
+
                 if (newMethod != method)
                 {
                     currentRoot = currentRoot.ReplaceNode(method, newMethod);
@@ -501,45 +534,44 @@ public class MigrationTransformer
 
                     if (attributeList != null)
                     {
-                        // Build new attributes list
-                        var newAttributesList = new List<AttributeSyntax>();
+                        // Create separate attribute lists - each additional attribute on its own line
+                        var newAttributeLists = new List<AttributeListSyntax>();
 
-                        foreach (var attr in attributeList.Attributes)
+                        // Extract just the indentation from leading trivia (whitespace at the end)
+                        var fullLeadingTrivia = attributeList.GetLeadingTrivia();
+                        var indentationTrivia = SyntaxFactory.TriviaList(
+                            fullLeadingTrivia.Where(t => t.IsKind(SyntaxKind.WhitespaceTrivia)));
+
+                        // First, create the attribute list with the main converted attribute
+                        // Keep the full leading trivia (including any blank lines before) for the first attribute
+                        var mainAttrList = SyntaxFactory.AttributeList(
+                                SyntaxFactory.SingletonSeparatedList(newAttribute))
+                            .WithLeadingTrivia(fullLeadingTrivia)
+                            .WithTrailingTrivia(SyntaxFactory.EndOfLine("\n"));
+                        newAttributeLists.Add(mainAttrList);
+
+                        // Create separate attribute lists for each additional attribute
+                        foreach (var additional in conversion.AdditionalAttributes)
                         {
-                            if (attr.HasAnnotation(conversion.Annotation))
+                            var additionalAttr = SyntaxFactory.Attribute(
+                                SyntaxFactory.IdentifierName(additional.Name));
+
+                            if (!string.IsNullOrEmpty(additional.Arguments))
                             {
-                                // Replace the original with the converted one
-                                newAttributesList.Add(newAttribute
-                                    .WithLeadingTrivia(attr.GetLeadingTrivia())
-                                    .WithTrailingTrivia(SyntaxFactory.Space));
-
-                                // Add the additional attributes
-                                foreach (var additional in conversion.AdditionalAttributes)
-                                {
-                                    var additionalAttr = SyntaxFactory.Attribute(
-                                        SyntaxFactory.IdentifierName(additional.Name));
-
-                                    if (!string.IsNullOrEmpty(additional.Arguments))
-                                    {
-                                        additionalAttr = additionalAttr.WithArgumentList(
-                                            SyntaxFactory.ParseAttributeArgumentList(additional.Arguments));
-                                    }
-
-                                    newAttributesList.Add(additionalAttr);
-                                }
+                                additionalAttr = additionalAttr.WithArgumentList(
+                                    SyntaxFactory.ParseAttributeArgumentList(additional.Arguments));
                             }
-                            else
-                            {
-                                newAttributesList.Add(attr);
-                            }
+
+                            // Use only indentation for additional attributes (no blank lines)
+                            var additionalAttrList = SyntaxFactory.AttributeList(
+                                    SyntaxFactory.SingletonSeparatedList(additionalAttr))
+                                .WithLeadingTrivia(indentationTrivia)
+                                .WithTrailingTrivia(SyntaxFactory.EndOfLine("\n"));
+                            newAttributeLists.Add(additionalAttrList);
                         }
 
-                        var newAttrList = SyntaxFactory.AttributeList(
-                                SyntaxFactory.SeparatedList(newAttributesList))
-                            .WithLeadingTrivia(attributeList.GetLeadingTrivia())
-                            .WithTrailingTrivia(attributeList.GetTrailingTrivia());
-
-                        currentRoot = currentRoot.ReplaceNode(attributeList, newAttrList);
+                        // Replace original attribute list with multiple new ones
+                        currentRoot = currentRoot.ReplaceNode(attributeList, newAttributeLists);
                         continue;
                     }
                 }
@@ -553,6 +585,73 @@ public class MigrationTransformer
                 _plan.Failures.Add(new ConversionFailure
                 {
                     Phase = "AttributeTransformation",
+                    Description = ex.Message,
+                    OriginalCode = conversion.OriginalText,
+                    Exception = ex
+                });
+            }
+        }
+
+        return currentRoot;
+    }
+
+    private CompilationUnitSyntax TransformParameterAttributes(CompilationUnitSyntax root)
+    {
+        var currentRoot = root;
+
+        foreach (var conversion in _plan.ParameterAttributes)
+        {
+            try
+            {
+                var attribute = currentRoot.DescendantNodes()
+                    .OfType<AttributeSyntax>()
+                    .FirstOrDefault(a => a.HasAnnotation(conversion.Annotation));
+
+                if (attribute == null) continue;
+
+                // Build new attribute - handle generic names like MatrixRange<int>
+                AttributeSyntax newAttribute;
+                if (conversion.NewAttributeName.Contains('<'))
+                {
+                    // Generic attribute name - parse it properly
+                    var fullAttrCode = conversion.NewArgumentList != null && conversion.NewArgumentList.Length > 0
+                        ? conversion.NewAttributeName + conversion.NewArgumentList
+                        : conversion.NewArgumentList == null && attribute.ArgumentList != null
+                            ? conversion.NewAttributeName + attribute.ArgumentList
+                            : conversion.NewAttributeName;
+
+                    newAttribute = ParseAttributeCode(fullAttrCode);
+                }
+                else
+                {
+                    var newName = (NameSyntax)SyntaxFactory.IdentifierName(conversion.NewAttributeName);
+                    newAttribute = SyntaxFactory.Attribute(newName);
+
+                    // Add argument list if specified
+                    if (conversion.NewArgumentList != null && conversion.NewArgumentList.Length > 0)
+                    {
+                        var argList = SyntaxFactory.ParseAttributeArgumentList(conversion.NewArgumentList);
+                        newAttribute = newAttribute.WithArgumentList(argList);
+                    }
+                    else if (conversion.NewArgumentList == null && attribute.ArgumentList != null)
+                    {
+                        // Keep original arguments
+                        newAttribute = newAttribute.WithArgumentList(attribute.ArgumentList);
+                    }
+                }
+
+                // Preserve trivia
+                newAttribute = newAttribute
+                    .WithLeadingTrivia(attribute.GetLeadingTrivia())
+                    .WithTrailingTrivia(attribute.GetTrailingTrivia());
+
+                currentRoot = currentRoot.ReplaceNode(attribute, newAttribute);
+            }
+            catch (Exception ex)
+            {
+                _plan.Failures.Add(new ConversionFailure
+                {
+                    Phase = "ParameterAttributeTransformation",
                     Description = ex.Message,
                     OriginalCode = conversion.OriginalText,
                     Exception = ex
@@ -586,8 +685,9 @@ public class MigrationTransformer
 
                 if (attributeList.Attributes.Count == 1)
                 {
-                    // Remove the entire attribute list
-                    currentRoot = currentRoot.RemoveNode(attributeList, SyntaxRemoveOptions.KeepLeadingTrivia)!;
+                    // Remove the entire attribute list without keeping its trivia
+                    // This prevents extra indentation from being left behind
+                    currentRoot = currentRoot.RemoveNode(attributeList, SyntaxRemoveOptions.KeepNoTrivia)!;
                 }
                 else
                 {
@@ -855,14 +955,63 @@ public class MigrationTransformer
                     // No arguments: just the name
                     attribute = SyntaxFactory.Attribute(SyntaxFactory.ParseName(addition.AttributeCode));
                 }
-                var attributeList = SyntaxFactory.AttributeList(
+                // Get the leading trivia from the first attribute (if any) or method
+                var leadingTrivia = method.AttributeLists.Count > 0
+                    ? method.AttributeLists[0].GetLeadingTrivia()
+                    : method.GetLeadingTrivia();
+
+                // The leading trivia typically contains: [newlines...] [whitespace for indent]
+                // We want to:
+                // 1. Put the full leading trivia (including blank lines) on the new [Test] attribute
+                // 2. Put ONLY the trailing whitespace (indentation) on the first existing attribute
+                var triviaList = leadingTrivia.ToList();
+
+                // Find the last whitespace trivia - that's the indentation
+                var lastWhitespaceIndex = -1;
+                for (int i = triviaList.Count - 1; i >= 0; i--)
+                {
+                    if (triviaList[i].IsKind(SyntaxKind.WhitespaceTrivia))
+                    {
+                        lastWhitespaceIndex = i;
+                        break;
+                    }
+                }
+
+                // Indentation is just the final whitespace trivia (if any)
+                var indentationTrivia = lastWhitespaceIndex >= 0
+                    ? SyntaxFactory.TriviaList(triviaList[lastWhitespaceIndex])
+                    : SyntaxFactory.TriviaList();
+
+                // Build the new list of attribute lists manually
+                var newAttributeLists = new List<AttributeListSyntax>();
+
+                // Add the new [Test] attribute first with full leading trivia
+                // Explicitly clear trailing trivia - the first existing attribute's leading trivia has the newline
+                var newTestAttrList = SyntaxFactory.AttributeList(
                     SyntaxFactory.SingletonSeparatedList(attribute))
-                    .WithLeadingTrivia(method.GetLeadingTrivia())
-                    .WithTrailingTrivia(SyntaxFactory.EndOfLine("\n"));
+                    .WithLeadingTrivia(leadingTrivia)
+                    .WithTrailingTrivia(SyntaxFactory.TriviaList());
+                newAttributeLists.Add(newTestAttrList);
+
+                // Add existing attributes, updating the first one's leading trivia
+                for (int i = 0; i < method.AttributeLists.Count; i++)
+                {
+                    var existingAttr = method.AttributeLists[i];
+                    if (i == 0)
+                    {
+                        // First existing attribute: need newline + indentation
+                        // The newline separates it from [Test], the indentation aligns it
+                        var newLeading = SyntaxFactory.TriviaList(
+                            SyntaxFactory.EndOfLine("\n"))
+                            .AddRange(indentationTrivia);
+                        existingAttr = existingAttr.WithLeadingTrivia(newLeading);
+                    }
+                    newAttributeLists.Add(existingAttr);
+                }
 
                 var newMethod = method
                     .WithLeadingTrivia(SyntaxFactory.TriviaList())
-                    .AddAttributeLists(attributeList);
+                    .WithAttributeLists(SyntaxFactory.List(newAttributeLists));
 
                 // Change return type if specified
                 if (!string.IsNullOrEmpty(addition.NewReturnType))

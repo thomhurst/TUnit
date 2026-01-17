@@ -4,6 +4,8 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Analyzers.CodeFixers.Base;
+using TUnit.Analyzers.CodeFixers.Base.TwoPhase;
+using TUnit.Analyzers.CodeFixers.TwoPhase;
 using TUnit.Analyzers.Migrators.Base;
 
 namespace TUnit.Analyzers.CodeFixers;
@@ -14,7 +16,17 @@ public class MSTestMigrationCodeFixProvider : BaseMigrationCodeFixProvider
     protected override string FrameworkName => "MSTest";
     protected override string DiagnosticId => Rules.MSTestMigration.Id;
     protected override string CodeFixTitle => "Convert MSTest code to TUnit";
-    
+
+    protected override bool ShouldAddTUnitUsings() => true;
+
+    protected override MigrationAnalyzer? CreateTwoPhaseAnalyzer(SemanticModel semanticModel, Compilation compilation)
+    {
+        return new MSTestTwoPhaseAnalyzer(semanticModel, compilation);
+    }
+
+    // The following methods are required by the base class but are only used in the legacy
+    // conversion path. The two-phase analyzer handles these conversions directly.
+
     protected override AttributeRewriter CreateAttributeRewriter(Compilation compilation)
     {
         return new MSTestAttributeRewriter();
