@@ -23,6 +23,7 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
         "InRange", "NotInRange",
         "Fail", "Skip", "Collection",
         "PropertyChanged", "PropertyChangedAsync",
+        "Raises", "RaisesAsync", "RaisesAny", "RaisesAnyAsync",
         "Subset", "Superset", "ProperSubset", "ProperSuperset",
         "Distinct", "Equivalent"
     };
@@ -140,6 +141,7 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
             "NotNull" => ConvertNotNull(arguments),
             "Same" => ConvertSame(arguments),
             "NotSame" => ConvertNotSame(arguments),
+            "StrictEqual" => ConvertStrictEqual(arguments),
             "Empty" => ConvertEmpty(arguments),
             "NotEmpty" => ConvertNotEmpty(arguments),
             "Single" => ConvertSingle(arguments),
@@ -267,6 +269,16 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
         var actual = args[1].Expression.ToString();
 
         return (AssertionConversionKind.NotSame, $"await Assert.That({actual}).IsNotSameReferenceAs({expected})", true, null);
+    }
+
+    private (AssertionConversionKind, string?, bool, string?) ConvertStrictEqual(SeparatedSyntaxList<ArgumentSyntax> args)
+    {
+        if (args.Count < 2) return (AssertionConversionKind.StrictEqual, null, false, null);
+
+        var expected = args[0].Expression.ToString();
+        var actual = args[1].Expression.ToString();
+
+        return (AssertionConversionKind.StrictEqual, $"await Assert.That({actual}).IsStrictlyEqualTo({expected})", true, null);
     }
 
     private (AssertionConversionKind, string?, bool, string?) ConvertEmpty(SeparatedSyntaxList<ArgumentSyntax> args)
