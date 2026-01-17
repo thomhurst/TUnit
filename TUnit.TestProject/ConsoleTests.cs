@@ -19,7 +19,7 @@ public class ConsoleTests
         for (var i = 0; i < 10; i++)
         {
             Console.WriteLine(@$"{i}...");
-            await Task.Delay(TimeSpan.FromSeconds(3));
+            await Task.Delay(TimeSpan.FromSeconds(2));
         }
     }
 }
