@@ -124,16 +124,20 @@ public class DefaultLogger(Context context) : TUnitLogger
     /// <param name="isError">True if this is an error-level message.</param>
     protected virtual void WriteToOutput(string message, bool isError)
     {
+        var level = isError ? LogLevel.Error : LogLevel.Information;
+
+        // Historical capture
         if (isError)
         {
             context.ErrorOutputWriter.WriteLine(message);
-            GlobalContext.Current.OriginalConsoleError.WriteLine(message);
         }
         else
         {
             context.OutputWriter.WriteLine(message);
-            GlobalContext.Current.OriginalConsoleOut.WriteLine(message);
         }
+
+        // Real-time streaming to sinks
+        LogSinkRouter.RouteToSinks(level, message, null, context);
     }
 
     /// <summary>
@@ -145,15 +149,19 @@ public class DefaultLogger(Context context) : TUnitLogger
     /// <returns>A task representing the async operation.</returns>
     protected virtual async ValueTask WriteToOutputAsync(string message, bool isError)
     {
+        var level = isError ? LogLevel.Error : LogLevel.Information;
+
+        // Historical capture
         if (isError)
         {
             await context.ErrorOutputWriter.WriteLineAsync(message);
-            await GlobalContext.Current.OriginalConsoleError.WriteLineAsync(message);
         }
         else
         {
             await context.OutputWriter.WriteLineAsync(message);
-            await GlobalContext.Current.OriginalConsoleOut.WriteLineAsync(message);
         }
+
+        // Real-time streaming to sinks
+        await LogSinkRouter.RouteToSinksAsync(level, message, null, context);
     }
 }
