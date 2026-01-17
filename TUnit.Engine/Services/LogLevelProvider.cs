@@ -1,15 +1,21 @@
-﻿using Microsoft.Testing.Platform.CommandLine;
+using Microsoft.Testing.Platform.CommandLine;
 using TUnit.Core.Logging;
 using TUnit.Engine.CommandLineProviders;
 
 namespace TUnit.Engine.Services;
 
-public class LogLevelProvider(ICommandLineOptions commandLineOptions)
+public class LogLevelProvider
 {
-    internal static LogLevel? _logLevel;
-    public LogLevel LogLevel => _logLevel ??= GetLogLevel();
+    private readonly LogLevel _logLevel;
 
-    private LogLevel GetLogLevel()
+    public LogLevelProvider(ICommandLineOptions commandLineOptions)
+    {
+        _logLevel = GetLogLevel(commandLineOptions);
+    }
+
+    public LogLevel LogLevel => _logLevel;
+
+    private static LogLevel GetLogLevel(ICommandLineOptions commandLineOptions)
     {
         if (commandLineOptions.TryGetOptionArgumentList(LogLevelCommandProvider.LogLevelOption, out var values))
         {

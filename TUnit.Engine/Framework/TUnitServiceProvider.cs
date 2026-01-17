@@ -11,6 +11,7 @@ using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
+using TUnit.Core.Logging;
 using TUnit.Core.Tracking;
 using TUnit.Engine.Building;
 using TUnit.Engine.Building.Collectors;
@@ -24,6 +25,8 @@ using TUnit.Engine.Logging;
 using TUnit.Engine.Scheduling;
 using TUnit.Engine.Services;
 using TUnit.Engine.Services.TestExecution;
+
+#pragma warning disable TPEXP // Experimental API - GetClientInfo
 
 namespace TUnit.Engine.Framework;
 
@@ -135,6 +138,19 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             VerbosityService,
             frameworkServiceProvider,
             context));
+
+        // Register log sinks based on output mode
+
+        // TestOutputSink: Always registered - accumulates to Context.OutputWriter/ErrorOutputWriter for test results
+        TUnitLoggerFactory.AddSink(new TestOutputSink());
+
+        // ConsoleOutputSink: For --output Detailed mode - real-time console output
+        if (VerbosityService.IsDetailedOutput)
+        {
+            TUnitLoggerFactory.AddSink(new ConsoleOutputSink(
+                StandardOutConsoleInterceptor.DefaultOut,
+                StandardErrorConsoleInterceptor.DefaultError));
+        }
 
         CancellationToken = Register(new EngineCancellationToken());
 
@@ -269,8 +285,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
     private void InitializeConsoleInterceptors()
     {
-        var outInterceptor = new StandardOutConsoleInterceptor(VerbosityService);
-        var errorInterceptor = new StandardErrorConsoleInterceptor(VerbosityService);
+        var outInterceptor = new StandardOutConsoleInterceptor();
+        var errorInterceptor = new StandardErrorConsoleInterceptor();
 
         outInterceptor.Initialize();
         errorInterceptor.Initialize();
@@ -306,6 +322,9 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         }
 
         _services.Clear();
+
+        // Dispose all log sinks (flushes any remaining logs)
+        await TUnitLoggerFactory.DisposeAllAsync().ConfigureAwait(false);
 
         TestExtensions.ClearCaches();
     }

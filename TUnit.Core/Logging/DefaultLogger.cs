@@ -124,16 +124,13 @@ public class DefaultLogger(Context context) : TUnitLogger
     /// <param name="isError">True if this is an error-level message.</param>
     protected virtual void WriteToOutput(string message, bool isError)
     {
-        if (isError)
-        {
-            context.ErrorOutputWriter.WriteLine(message);
-            GlobalContext.Current.OriginalConsoleError.WriteLine(message);
-        }
-        else
-        {
-            context.OutputWriter.WriteLine(message);
-            GlobalContext.Current.OriginalConsoleOut.WriteLine(message);
-        }
+        var level = isError ? LogLevel.Error : LogLevel.Information;
+
+        // Route to registered log sinks - they handle output destinations:
+        // - TestOutputSink: accumulates to context for test results
+        // - ConsoleOutputSink: writes to console (if --output Detailed)
+        // - RealTimeOutputSink: streams to IDEs
+        LogSinkRouter.RouteToSinks(level, message, null, context);
     }
 
     /// <summary>
@@ -145,15 +142,12 @@ public class DefaultLogger(Context context) : TUnitLogger
     /// <returns>A task representing the async operation.</returns>
     protected virtual async ValueTask WriteToOutputAsync(string message, bool isError)
     {
-        if (isError)
-        {
-            await context.ErrorOutputWriter.WriteLineAsync(message);
-            await GlobalContext.Current.OriginalConsoleError.WriteLineAsync(message);
-        }
-        else
-        {
-            await context.OutputWriter.WriteLineAsync(message);
-            await GlobalContext.Current.OriginalConsoleOut.WriteLineAsync(message);
-        }
+        var level = isError ? LogLevel.Error : LogLevel.Information;
+
+        // Route to registered log sinks - they handle output destinations:
+        // - TestOutputSink: accumulates to context for test results
+        // - ConsoleOutputSink: writes to console (if --output Detailed)
+        // - RealTimeOutputSink: streams to IDEs
+        await LogSinkRouter.RouteToSinksAsync(level, message, null, context);
     }
 }

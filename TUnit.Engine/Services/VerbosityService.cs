@@ -8,7 +8,9 @@ using LogLevel = TUnit.Core.Logging.LogLevel;
 namespace TUnit.Engine.Services;
 
 /// <summary>
-/// Centralized service for managing TUnit output and diagnostic settings
+/// Centralized service for managing TUnit output and diagnostic settings.
+/// Controls whether output goes to console vs real-time streaming, and manages
+/// stack trace verbosity based on log levels and command-line options.
 /// </summary>
 public sealed class VerbosityService
 {
@@ -19,7 +21,13 @@ public sealed class VerbosityService
     {
         _isDetailedOutput = GetOutputLevel(commandLineOptions, serviceProvider);
         _logLevel = GetLogLevel(commandLineOptions);
+        IsIdeClient = !IsConsoleEnvironment(serviceProvider);
     }
+
+    /// <summary>
+    /// Whether running in an IDE (Rider, VS, etc.) vs console.
+    /// </summary>
+    public bool IsIdeClient { get; }
 
     /// <summary>
     /// Whether to show detailed stack traces (enabled with Debug/Trace log level)
@@ -32,18 +40,21 @@ public sealed class VerbosityService
     public bool IsDetailedOutput => _isDetailedOutput;
 
     /// <summary>
-    /// Whether to hide real-time test output (hidden with --output Normal, unless log level is Debug/Trace)
+    /// Whether to hide real-time test output from the console.
+    /// For IDE clients, we hide console output because we stream via TestNodeUpdateMessage instead.
+    /// For console clients, we hide if --output Normal and log level is not Debug/Trace.
     /// </summary>
-    public bool HideTestOutput => !_isDetailedOutput && _logLevel > LogLevel.Debug;
+    public bool HideTestOutput => IsIdeClient || (!_isDetailedOutput && _logLevel > LogLevel.Debug);
 
     /// <summary>
-    /// Creates a summary of current output and diagnostic settings
+    /// Creates a summary of current output and diagnostic settings.
     /// </summary>
     public string CreateVerbositySummary()
     {
         var outputMode = _isDetailedOutput ? "Detailed" : "Normal";
-        return $"Output: {outputMode}, Log Level: {_logLevel} " +
-               $"(Stack traces: {ShowDetailedStackTrace}, ";
+        var clientType = IsIdeClient ? "IDE" : "Console";
+        return $"Output: {outputMode}, Log Level: {_logLevel}, Client: {clientType} " +
+               $"(Stack traces: {ShowDetailedStackTrace}, Hide output: {HideTestOutput})";
     }
 
     private static bool GetOutputLevel(ICommandLineOptions commandLineOptions, IServiceProvider serviceProvider)

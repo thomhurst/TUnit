@@ -2,7 +2,10 @@
 
 namespace TUnit.Engine;
 
-internal class NullLogger<T> : ILogger<T>
+/// <summary>
+/// Null logger implementation for Microsoft Testing Platform's ILogger interface.
+/// </summary>
+internal class MtpNullLogger<T> : ILogger<T>
 {
     public Task LogAsync<TState>(LogLevel logLevel, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
         => Task.CompletedTask;
