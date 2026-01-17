@@ -1,33 +1,23 @@
 using System.Text;
 using TUnit.Core;
 using TUnit.Core.Logging;
-using TUnit.Engine.Services;
 
 #pragma warning disable CS8765 // Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes).
 
 namespace TUnit.Engine.Logging;
 
 /// <summary>
-/// Optimized console interceptor that eliminates tuple allocations and uses buffered output
+/// Console interceptor that captures output and routes it to registered sinks.
+/// The interceptor itself doesn't write anywhere - it only routes to sinks:
+/// - TestOutputSink: accumulates to Context.OutputWriter/ErrorOutputWriter
+/// - ConsoleOutputSink: writes to actual console
+/// - RealTimeOutputSink: streams to IDEs
 /// </summary>
 internal abstract class OptimizedConsoleInterceptor : TextWriter
 {
-    private readonly VerbosityService _verbosityService;
-    private readonly BufferedTextWriter? _originalOutBuffer;
+    private readonly StringBuilder _lineBuffer = new();
 
-    protected OptimizedConsoleInterceptor(VerbosityService verbosityService)
-    {
-        _verbosityService = verbosityService;
-
-        var originalOut = GetOriginalOut();
-
-        // Wrap outputs with buffered writers for better performance
-        _originalOutBuffer = originalOut != null ? new BufferedTextWriter(originalOut, 2048) : null;
-    }
-
-    public override Encoding Encoding => RedirectedOut?.Encoding ?? _originalOutBuffer?.Encoding ?? Encoding.UTF8;
-
-    protected abstract TextWriter? RedirectedOut { get; }
+    public override Encoding Encoding => Encoding.UTF8;
 
     /// <summary>
     /// Gets the log level to use when routing console output to sinks.
@@ -39,7 +29,7 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     private protected abstract void ResetDefault();
 
     /// <summary>
-    /// Routes the message to registered log sinks for real-time streaming.
+    /// Routes the message to registered log sinks.
     /// </summary>
     private void RouteToSinks(string? message)
     {
@@ -50,7 +40,7 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     }
 
     /// <summary>
-    /// Routes the message to registered log sinks asynchronously for real-time streaming.
+    /// Routes the message to registered log sinks asynchronously.
     /// </summary>
     private async ValueTask RouteToSinksAsync(string? message)
     {
@@ -64,603 +54,146 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     public override ValueTask DisposeAsync()
     {
         ResetDefault();
-        _originalOutBuffer?.Dispose();
-        // Don't dispose RedirectedOut as it's not owned by us
         return ValueTask.CompletedTask;
     }
 #endif
 
     public override void Flush()
     {
-        _originalOutBuffer?.Flush();
-        RedirectedOut?.Flush();
+        // Flush any buffered partial line
+        if (_lineBuffer.Length > 0)
+        {
+            RouteToSinks(_lineBuffer.ToString());
+            _lineBuffer.Clear();
+        }
     }
 
     public override async Task FlushAsync()
     {
-        if (_originalOutBuffer != null)
+        if (_lineBuffer.Length > 0)
         {
-            await _originalOutBuffer.FlushAsync();
-        }
-        if (RedirectedOut != null)
-        {
-            await RedirectedOut.FlushAsync();
+            await RouteToSinksAsync(_lineBuffer.ToString()).ConfigureAwait(false);
+            _lineBuffer.Clear();
         }
     }
 
-    // Optimized Write methods - no tuple allocations
-    
-    public override void Write(bool value)
-    {
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.Write(value.ToString());
-        }
-        RedirectedOut?.Write(value.ToString());
-    }
-
-    public override void Write(char value)
-    {
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.Write(value);
-        }
-        RedirectedOut?.Write(value);
-    }
-
+    // Write methods - buffer partial writes until we get a complete line
+    public override void Write(bool value) => Write(value.ToString());
+    public override void Write(char value) => BufferChar(value);
     public override void Write(char[]? buffer)
     {
-        if (buffer == null)
+        if (buffer != null)
         {
-            return;
+            BufferChars(buffer, 0, buffer.Length);
         }
-
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.Write(buffer);
-        }
-        RedirectedOut?.Write(buffer);
     }
-
-    public override void Write(decimal value)
-    {
-        var str = value.ToString();
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.Write(str);
-        }
-        RedirectedOut?.Write(str);
-    }
-
-    public override void Write(double value)
-    {
-        var str = value.ToString();
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.Write(str);
-        }
-        RedirectedOut?.Write(str);
-    }
-
-    public override void Write(int value)
-    {
-        var str = value.ToString();
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.Write(str);
-        }
-        RedirectedOut?.Write(str);
-    }
-
-    public override void Write(long value)
-    {
-        var str = value.ToString();
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.Write(str);
-        }
-        RedirectedOut?.Write(str);
-    }
-
-    public override void Write(object? value)
-    {
-        var str = value?.ToString() ?? string.Empty;
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.Write(str);
-        }
-        RedirectedOut?.Write(str);
-    }
-
-    public override void Write(float value)
-    {
-        var str = value.ToString();
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.Write(str);
-        }
-        RedirectedOut?.Write(str);
-    }
-
+    public override void Write(decimal value) => Write(value.ToString());
+    public override void Write(double value) => Write(value.ToString());
+    public override void Write(int value) => Write(value.ToString());
+    public override void Write(long value) => Write(value.ToString());
+    public override void Write(object? value) => Write(value?.ToString() ?? string.Empty);
+    public override void Write(float value) => Write(value.ToString());
     public override void Write(string? value)
     {
-        if (value == null)
-        {
-            return;
-        }
-
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.Write(value);
-        }
-        RedirectedOut?.Write(value);
+        if (value == null) return;
+        _lineBuffer.Append(value);
     }
+    public override void Write(uint value) => Write(value.ToString());
+    public override void Write(ulong value) => Write(value.ToString());
+    public override void Write(char[] buffer, int index, int count) => BufferChars(buffer, index, count);
+    public override void Write(string format, object? arg0) => Write(string.Format(format, arg0));
+    public override void Write(string format, object? arg0, object? arg1) => Write(string.Format(format, arg0, arg1));
+    public override void Write(string format, object? arg0, object? arg1, object? arg2) => Write(string.Format(format, arg0, arg1, arg2));
+    public override void Write(string format, params object?[] arg) => Write(string.Format(format, arg));
 
-    public override void Write(uint value)
+    private void BufferChar(char value)
     {
-        var str = value.ToString();
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.Write(str);
-        }
-        RedirectedOut?.Write(str);
+        _lineBuffer.Append(value);
     }
 
-    public override void Write(ulong value)
+    private void BufferChars(char[] buffer, int index, int count)
     {
-        var str = value.ToString();
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.Write(str);
-        }
-        RedirectedOut?.Write(str);
+        _lineBuffer.Append(buffer, index, count);
     }
 
-    public override void Write(char[] buffer, int index, int count)
-    {
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.Write(buffer, index, count);
-        }
-        RedirectedOut?.Write(buffer, index, count);
-    }
-
-    // Optimized formatted Write methods - no tuple allocations
-    public override void Write(string format, object? arg0)
-    {
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.WriteFormatted(format, arg0);
-        }
-        RedirectedOut?.Write(format, arg0);
-    }
-
-    public override void Write(string format, object? arg0, object? arg1)
-    {
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.WriteFormatted(format, arg0, arg1);
-        }
-        RedirectedOut?.Write(format, arg0, arg1);
-    }
-
-    public override void Write(string format, object? arg0, object? arg1, object? arg2)
-    {
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.WriteFormatted(format, arg0, arg1, arg2);
-        }
-        RedirectedOut?.Write(format, arg0, arg1, arg2);
-    }
-
-    public override void Write(string format, params object?[] arg)
-    {
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.WriteFormatted(format, arg);
-        }
-        RedirectedOut?.Write(format, arg);
-    }
-
-    // WriteLine methods
+    // WriteLine methods - flush buffer and route complete line to sinks
     public override void WriteLine()
     {
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.WriteLine();
-        }
-        RedirectedOut?.WriteLine();
+        var line = _lineBuffer.ToString();
+        _lineBuffer.Clear();
+        RouteToSinks(line);
     }
 
-    public override void WriteLine(bool value)
-    {
-        var str = value.ToString();
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.WriteLine(str);
-        }
-        RedirectedOut?.WriteLine(str);
-        RouteToSinks(str);
-    }
-
-    public override void WriteLine(char value)
-    {
-        var str = value.ToString();
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.WriteLine(str);
-        }
-        RedirectedOut?.WriteLine(str);
-        RouteToSinks(str);
-    }
-
-    public override void WriteLine(char[]? buffer)
-    {
-        if (buffer == null)
-        {
-            return;
-        }
-
-        var str = new string(buffer);
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.WriteLine(str);
-        }
-        RedirectedOut?.WriteLine(str);
-        RouteToSinks(str);
-    }
-
-    public override void WriteLine(char[] buffer, int index, int count)
-    {
-        var str = new string(buffer, index, count);
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.WriteLine(str);
-        }
-        RedirectedOut?.WriteLine(str);
-        RouteToSinks(str);
-    }
-
-    public override void WriteLine(decimal value)
-    {
-        var str = value.ToString();
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.WriteLine(str);
-        }
-        RedirectedOut?.WriteLine(str);
-        RouteToSinks(str);
-    }
-
-    public override void WriteLine(double value)
-    {
-        var str = value.ToString();
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.WriteLine(str);
-        }
-        RedirectedOut?.WriteLine(str);
-        RouteToSinks(str);
-    }
-
-    public override void WriteLine(int value)
-    {
-        var str = value.ToString();
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.WriteLine(str);
-        }
-        RedirectedOut?.WriteLine(str);
-        RouteToSinks(str);
-    }
-
-    public override void WriteLine(long value)
-    {
-        var str = value.ToString();
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.WriteLine(str);
-        }
-        RedirectedOut?.WriteLine(str);
-        RouteToSinks(str);
-    }
-
-    public override void WriteLine(object? value)
-    {
-        var str = value?.ToString() ?? string.Empty;
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.WriteLine(str);
-        }
-        RedirectedOut?.WriteLine(str);
-        RouteToSinks(str);
-    }
-
-    public override void WriteLine(float value)
-    {
-        var str = value.ToString();
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.WriteLine(str);
-        }
-        RedirectedOut?.WriteLine(str);
-        RouteToSinks(str);
-    }
+    public override void WriteLine(bool value) => WriteLine(value.ToString());
+    public override void WriteLine(char value) => WriteLine(value.ToString());
+    public override void WriteLine(char[]? buffer) => WriteLine(buffer != null ? new string(buffer) : string.Empty);
+    public override void WriteLine(char[] buffer, int index, int count) => WriteLine(new string(buffer, index, count));
+    public override void WriteLine(decimal value) => WriteLine(value.ToString());
+    public override void WriteLine(double value) => WriteLine(value.ToString());
+    public override void WriteLine(int value) => WriteLine(value.ToString());
+    public override void WriteLine(long value) => WriteLine(value.ToString());
+    public override void WriteLine(object? value) => WriteLine(value?.ToString() ?? string.Empty);
+    public override void WriteLine(float value) => WriteLine(value.ToString());
 
     public override void WriteLine(string? value)
     {
-        if (!_verbosityService.HideTestOutput)
+        // Prepend any buffered content
+        if (_lineBuffer.Length > 0)
         {
-            _originalOutBuffer?.WriteLine(value);
+            _lineBuffer.Append(value);
+            value = _lineBuffer.ToString();
+            _lineBuffer.Clear();
         }
-        RedirectedOut?.WriteLine(value);
         RouteToSinks(value);
     }
 
-    public override void WriteLine(uint value)
-    {
-        var str = value.ToString();
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.WriteLine(str);
-        }
-        RedirectedOut?.WriteLine(str);
-        RouteToSinks(str);
-    }
-
-    public override void WriteLine(ulong value)
-    {
-        var str = value.ToString();
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.WriteLine(str);
-        }
-        RedirectedOut?.WriteLine(str);
-        RouteToSinks(str);
-    }
-
-    // Optimized formatted WriteLine methods - no tuple allocations
-    public override void WriteLine(string format, object? arg0)
-    {
-        var str = string.Format(format, arg0);
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.WriteLine(str);
-        }
-        RedirectedOut?.WriteLine(str);
-        RouteToSinks(str);
-    }
-
-    public override void WriteLine(string format, object? arg0, object? arg1)
-    {
-        var str = string.Format(format, arg0, arg1);
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.WriteLine(str);
-        }
-        RedirectedOut?.WriteLine(str);
-        RouteToSinks(str);
-    }
-
-    public override void WriteLine(string format, object? arg0, object? arg1, object? arg2)
-    {
-        var str = string.Format(format, arg0, arg1, arg2);
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.WriteLine(str);
-        }
-        RedirectedOut?.WriteLine(str);
-        RouteToSinks(str);
-    }
-
-    public override void WriteLine(string format, params object?[] arg)
-    {
-        var str = string.Format(format, arg);
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.WriteLine(str);
-        }
-        RedirectedOut?.WriteLine(str);
-        RouteToSinks(str);
-    }
+    public override void WriteLine(uint value) => WriteLine(value.ToString());
+    public override void WriteLine(ulong value) => WriteLine(value.ToString());
+    public override void WriteLine(string format, object? arg0) => WriteLine(string.Format(format, arg0));
+    public override void WriteLine(string format, object? arg0, object? arg1) => WriteLine(string.Format(format, arg0, arg1));
+    public override void WriteLine(string format, object? arg0, object? arg1, object? arg2) => WriteLine(string.Format(format, arg0, arg1, arg2));
+    public override void WriteLine(string format, params object?[] arg) => WriteLine(string.Format(format, arg));
 
     // Async methods
-    public override async Task WriteLineAsync()
-    {
-        if (!_verbosityService.HideTestOutput && _originalOutBuffer != null)
-        {
-            await _originalOutBuffer.WriteAsync(Environment.NewLine);
-        }
-        if (RedirectedOut != null)
-        {
-            await RedirectedOut.WriteAsync(Environment.NewLine);
-        }
-    }
-
-    public override async Task WriteAsync(char value)
-    {
-        if (!_verbosityService.HideTestOutput && _originalOutBuffer != null)
-        {
-            await _originalOutBuffer.WriteAsync(value.ToString());
-        }
-        if (RedirectedOut != null)
-        {
-            await RedirectedOut.WriteAsync(value.ToString());
-        }
-    }
-
-    public override async Task WriteAsync(char[] buffer, int index, int count)
-    {
-        var str = new string(buffer, index, count);
-        if (!_verbosityService.HideTestOutput && _originalOutBuffer != null)
-        {
-            await _originalOutBuffer.WriteAsync(str);
-        }
-        if (RedirectedOut != null)
-        {
-            await RedirectedOut.WriteAsync(str);
-        }
-    }
-
-    public override async Task WriteAsync(string? value)
-    {
-        if (value == null)
-        {
-            return;
-        }
-
-        if (!_verbosityService.HideTestOutput && _originalOutBuffer != null)
-        {
-            await _originalOutBuffer.WriteAsync(value);
-        }
-        if (RedirectedOut != null)
-        {
-            await RedirectedOut.WriteAsync(value);
-        }
-    }
+    public override Task WriteLineAsync() => WriteLineAsync(string.Empty);
+    public override Task WriteAsync(char value) { Write(value); return Task.CompletedTask; }
+    public override Task WriteAsync(char[] buffer, int index, int count) { Write(buffer, index, count); return Task.CompletedTask; }
+    public override Task WriteAsync(string? value) { Write(value); return Task.CompletedTask; }
 
     public override async Task WriteLineAsync(char value)
     {
-        var charStr = value.ToString();
-        var str = charStr + Environment.NewLine;
-        if (!_verbosityService.HideTestOutput && _originalOutBuffer != null)
-        {
-            await _originalOutBuffer.WriteAsync(str);
-        }
-        if (RedirectedOut != null)
-        {
-            await RedirectedOut.WriteAsync(str);
-        }
-        await RouteToSinksAsync(charStr).ConfigureAwait(false);
+        await WriteLineAsync(value.ToString()).ConfigureAwait(false);
     }
 
     public override async Task WriteLineAsync(char[] buffer, int index, int count)
     {
-        var content = new string(buffer, index, count);
-        var str = content + Environment.NewLine;
-        if (!_verbosityService.HideTestOutput && _originalOutBuffer != null)
-        {
-            await _originalOutBuffer.WriteAsync(str);
-        }
-        if (RedirectedOut != null)
-        {
-            await RedirectedOut.WriteAsync(str);
-        }
-        await RouteToSinksAsync(content).ConfigureAwait(false);
+        await WriteLineAsync(new string(buffer, index, count)).ConfigureAwait(false);
     }
 
     public override async Task WriteLineAsync(string? value)
     {
-        var str = (value ?? string.Empty) + Environment.NewLine;
-        if (!_verbosityService.HideTestOutput && _originalOutBuffer != null)
+        if (_lineBuffer.Length > 0)
         {
-            await _originalOutBuffer.WriteAsync(str);
-        }
-        if (RedirectedOut != null)
-        {
-            await RedirectedOut.WriteAsync(str);
+            _lineBuffer.Append(value);
+            value = _lineBuffer.ToString();
+            _lineBuffer.Clear();
         }
         await RouteToSinksAsync(value).ConfigureAwait(false);
     }
 
 #if NET
-    public override void Write(ReadOnlySpan<char> buffer)
-    {
-        var str = new string(buffer);
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.Write(str);
-        }
-        RedirectedOut?.Write(str);
-    }
-
-    public override void Write(StringBuilder? value)
-    {
-        var str = value?.ToString() ?? string.Empty;
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.Write(str);
-        }
-        RedirectedOut?.Write(str);
-    }
-
-    public override async Task WriteAsync(ReadOnlyMemory<char> buffer, CancellationToken cancellationToken = new())
-    {
-        var str = new string(buffer.Span);
-        if (!_verbosityService.HideTestOutput && _originalOutBuffer != null)
-        {
-            await _originalOutBuffer.WriteAsync(str);
-        }
-        if (RedirectedOut != null)
-        {
-            await RedirectedOut.WriteAsync(str);
-        }
-    }
-
-    public override async Task WriteAsync(StringBuilder? value, CancellationToken cancellationToken = new())
-    {
-        var str = value?.ToString() ?? string.Empty;
-        if (!_verbosityService.HideTestOutput && _originalOutBuffer != null)
-        {
-            await _originalOutBuffer.WriteAsync(str);
-        }
-        if (RedirectedOut != null)
-        {
-            await RedirectedOut.WriteAsync(str);
-        }
-    }
-
-    public override void WriteLine(ReadOnlySpan<char> buffer)
-    {
-        var str = new string(buffer);
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.WriteLine(str);
-        }
-        RedirectedOut?.WriteLine(str);
-        RouteToSinks(str);
-    }
-
-    public override void WriteLine(StringBuilder? value)
-    {
-        var str = value?.ToString() ?? string.Empty;
-        if (!_verbosityService.HideTestOutput)
-        {
-            _originalOutBuffer?.WriteLine(str);
-        }
-        RedirectedOut?.WriteLine(str);
-        RouteToSinks(str);
-    }
-
-    public override async Task WriteLineAsync(ReadOnlyMemory<char> buffer, CancellationToken cancellationToken = new())
-    {
-        var content = new string(buffer.Span);
-        var str = content + Environment.NewLine;
-        if (!_verbosityService.HideTestOutput && _originalOutBuffer != null)
-        {
-            await _originalOutBuffer.WriteAsync(str);
-        }
-        if (RedirectedOut != null)
-        {
-            await RedirectedOut.WriteAsync(str);
-        }
-        await RouteToSinksAsync(content).ConfigureAwait(false);
-    }
-
-    public override async Task WriteLineAsync(StringBuilder? value, CancellationToken cancellationToken = new())
-    {
-        var content = value?.ToString() ?? string.Empty;
-        var str = content + Environment.NewLine;
-        if (!_verbosityService.HideTestOutput && _originalOutBuffer != null)
-        {
-            await _originalOutBuffer.WriteAsync(str);
-        }
-        if (RedirectedOut != null)
-        {
-            await RedirectedOut.WriteAsync(str);
-        }
-        await RouteToSinksAsync(content).ConfigureAwait(false);
-    }
+    public override void Write(ReadOnlySpan<char> buffer) => Write(new string(buffer));
+    public override void Write(StringBuilder? value) => Write(value?.ToString() ?? string.Empty);
+    public override Task WriteAsync(ReadOnlyMemory<char> buffer, CancellationToken cancellationToken = new())
+        => WriteAsync(new string(buffer.Span));
+    public override Task WriteAsync(StringBuilder? value, CancellationToken cancellationToken = new())
+        => WriteAsync(value?.ToString() ?? string.Empty);
+    public override void WriteLine(ReadOnlySpan<char> buffer) => WriteLine(new string(buffer));
+    public override void WriteLine(StringBuilder? value) => WriteLine(value?.ToString() ?? string.Empty);
+    public override Task WriteLineAsync(ReadOnlyMemory<char> buffer, CancellationToken cancellationToken = new())
+        => WriteLineAsync(new string(buffer.Span));
+    public override Task WriteLineAsync(StringBuilder? value, CancellationToken cancellationToken = new())
+        => WriteLineAsync(value?.ToString() ?? string.Empty);
 #endif
 
     public override IFormatProvider FormatProvider => GetOriginalOut().FormatProvider;
@@ -668,21 +201,12 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     public override string NewLine
     {
         get => GetOriginalOut().NewLine;
-        set
-        {
-            GetOriginalOut().NewLine = value;
-            if (RedirectedOut != null)
-            {
-                RedirectedOut.NewLine = value;
-            }
-        }
+        set => GetOriginalOut().NewLine = value;
     }
 
     public override void Close()
     {
         Flush();
-        _originalOutBuffer?.Dispose();
-        // Don't dispose RedirectedOut as it's not owned by us
         ResetDefault();
     }
 
@@ -690,8 +214,7 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     {
         if (disposing)
         {
-            _originalOutBuffer?.Dispose();
-            // Don't dispose RedirectedOut as it's not owned by us
+            Flush();
         }
         base.Dispose(disposing);
     }

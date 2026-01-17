@@ -142,10 +142,23 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             frameworkServiceProvider,
             context));
 
-        // Register the real-time output sink for IDEs and --output Detailed mode
-        if (isIdeClient || VerbosityService.IsDetailedOutput)
+        // Register log sinks based on client type and output mode
+
+        // TestOutputSink: Always registered - accumulates to Context.OutputWriter/ErrorOutputWriter for test results
+        TUnitLoggerFactory.AddSink(new TestOutputSink());
+
+        // RealTimeOutputSink: For IDE clients only - streams via TestNodeUpdateMessage
+        if (isIdeClient)
         {
             TUnitLoggerFactory.AddSink(new RealTimeOutputSink(MessageBus));
+        }
+
+        // ConsoleOutputSink: For --output Detailed mode - real-time console output
+        if (VerbosityService.IsDetailedOutput)
+        {
+            TUnitLoggerFactory.AddSink(new ConsoleOutputSink(
+                StandardOutConsoleInterceptor.DefaultOut,
+                StandardErrorConsoleInterceptor.DefaultError));
         }
 
         CancellationToken = Register(new EngineCancellationToken());
@@ -281,8 +294,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
     private void InitializeConsoleInterceptors()
     {
-        var outInterceptor = new StandardOutConsoleInterceptor(VerbosityService);
-        var errorInterceptor = new StandardErrorConsoleInterceptor(VerbosityService);
+        var outInterceptor = new StandardOutConsoleInterceptor();
+        var errorInterceptor = new StandardErrorConsoleInterceptor();
 
         outInterceptor.Initialize();
         errorInterceptor.Initialize();

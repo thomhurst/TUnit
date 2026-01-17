@@ -1,8 +1,4 @@
-﻿using TUnit.Core;
 using TUnit.Core.Logging;
-using TUnit.Engine.Services;
-
-#pragma warning disable CS8765 // Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes).
 
 namespace TUnit.Engine.Logging;
 
@@ -12,21 +8,17 @@ internal class StandardErrorConsoleInterceptor : OptimizedConsoleInterceptor
 
     public static TextWriter DefaultError { get; }
 
-    protected override TextWriter RedirectedOut => Context.Current.ErrorOutputWriter;
-
     protected override LogLevel SinkLogLevel => LogLevel.Error;
 
     static StandardErrorConsoleInterceptor()
     {
-        // Get the raw stream without SyncTextWriter synchronization wrapper
-        // BufferedTextWriter already provides thread safety, so we avoid double-locking
         DefaultError = new StreamWriter(Console.OpenStandardError())
         {
             AutoFlush = true
         };
     }
 
-    public StandardErrorConsoleInterceptor(VerbosityService verbosityService) : base(verbosityService)
+    public StandardErrorConsoleInterceptor()
     {
         Instance = this;
     }
@@ -36,13 +28,7 @@ internal class StandardErrorConsoleInterceptor : OptimizedConsoleInterceptor
         Console.SetError(this);
     }
 
-    private protected override TextWriter GetOriginalOut()
-    {
-        return DefaultError;
-    }
+    private protected override TextWriter GetOriginalOut() => DefaultError;
 
-    private protected override void ResetDefault()
-    {
-        Console.SetError(DefaultError);
-    }
+    private protected override void ResetDefault() => Console.SetError(DefaultError);
 }
