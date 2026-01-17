@@ -237,7 +237,7 @@ public class XUnitMigrationAnalyzerTests
 
                 public class MyType;
 
-                [NotInParallel, ClassDataSource<MyType>(Shared = SharedType.Keyed, Key = "MyCollection")]
+                [ClassDataSource<MyType>(Shared = SharedType.Keyed, Key = "MyCollection"), NotInParallel]
                 public class MyClass
                 {
                     [Test]
@@ -439,11 +439,6 @@ public class XUnitMigrationAnalyzerTests
 
                 public class MyClass
                 {
-                    [Test]
-                    public void MyTest()
-                    {
-                    }
-
                     [Before(Test)]
                     public Task InitializeAsync()
                     {
@@ -454,6 +449,11 @@ public class XUnitMigrationAnalyzerTests
                     public Task DisposeAsync()
                     {
                         return default;
+                    }
+
+                    [Test]
+                    public void MyTest()
+                    {
                     }
                 }
                 """,
@@ -1325,7 +1325,7 @@ public class XUnitMigrationAnalyzerTests
                     [Test]
                     public async Task AsyncExceptionTest()
                     {
-                        await await Assert.ThrowsAsync<ArgumentException>(async () =>
+                        await Assert.ThrowsAsync<ArgumentException>(async () =>
                         {
                             await Task.CompletedTask;
                             throw new ArgumentException("test");
