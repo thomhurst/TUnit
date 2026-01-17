@@ -51,12 +51,4 @@ internal interface ITUnitMessageBus
     /// </summary>
     /// <param name="artifact">The artifact.</param>
     ValueTask SessionArtifact(Artifact artifact);
-
-    /// <summary>
-    /// Sends an output update for a test that's currently in progress.
-    /// This allows IDEs to display test output in real-time.
-    /// </summary>
-    /// <param name="testContext">The test context.</param>
-    /// <param name="output">The new output to send.</param>
-    ValueTask OutputUpdate(TestContext testContext, string output);
 }

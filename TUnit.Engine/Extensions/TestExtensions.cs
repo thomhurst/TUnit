@@ -112,20 +112,7 @@ internal static class TestExtensions
         }, testContext);
     }
 
-    /// <summary>
-    /// Creates a test node with specific output for real-time streaming (used during InProgress state).
-    /// </summary>
-    internal static TestNode ToTestNodeWithOutput(this TestContext testContext, TestNodeStateProperty stateProperty, string output)
-    {
-        return ToTestNodeInternal(testContext, stateProperty, streamingOutput: output, excludeFinalOutput: false);
-    }
-
-    internal static TestNode ToTestNode(this TestContext testContext, TestNodeStateProperty stateProperty, bool excludeFinalOutput = false)
-    {
-        return ToTestNodeInternal(testContext, stateProperty, streamingOutput: null, excludeFinalOutput: excludeFinalOutput);
-    }
-
-    private static TestNode ToTestNodeInternal(TestContext testContext, TestNodeStateProperty stateProperty, string? streamingOutput, bool excludeFinalOutput)
+    internal static TestNode ToTestNode(this TestContext testContext, TestNodeStateProperty stateProperty)
     {
         var testDetails = testContext.Metadata.TestDetails ?? throw new ArgumentNullException(nameof(testContext.Metadata.TestDetails));
 
@@ -165,18 +152,8 @@ internal static class TestExtensions
         string? output = null;
         string? error = null;
 
-        if (streamingOutput is not null)
+        if (isFinalState)
         {
-            // Real-time streaming: use only the new output chunk
-            if (!string.IsNullOrEmpty(streamingOutput))
-            {
-                properties.Add(new StandardOutputProperty(streamingOutput));
-            }
-        }
-        else if (isFinalState && !excludeFinalOutput)
-        {
-            // Final state: include all accumulated output (unless excluded for IDE clients
-            // that already received streamed output)
             output = testContext.GetStandardOutput();
             error = testContext.GetErrorOutput();
 

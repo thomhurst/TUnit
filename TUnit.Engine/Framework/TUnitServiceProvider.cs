@@ -106,9 +106,6 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             loggerFactory.CreateLogger<TUnitFrameworkLogger>(),
             logLevelProvider));
 
-        // Defer log sink registration until after MessageBus is created
-        var isIdeClient = !IsConsoleClient(frameworkServiceProvider);
-
         // Create initialization services using Lazy<T> to break circular dependencies
         // No more two-phase initialization with Initialize() calls
         var objectGraphDiscoveryService = Register(new ObjectGraphDiscoveryService());
@@ -142,16 +139,10 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             frameworkServiceProvider,
             context));
 
-        // Register log sinks based on client type and output mode
+        // Register log sinks based on output mode
 
         // TestOutputSink: Always registered - accumulates to Context.OutputWriter/ErrorOutputWriter for test results
         TUnitLoggerFactory.AddSink(new TestOutputSink());
-
-        // RealTimeOutputSink: For IDE clients only - streams via TestNodeUpdateMessage
-        if (isIdeClient)
-        {
-            TUnitLoggerFactory.AddSink(new RealTimeOutputSink(MessageBus));
-        }
 
         // ConsoleOutputSink: For --output Detailed mode - real-time console output
         if (VerbosityService.IsDetailedOutput)
@@ -336,19 +327,5 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         await TUnitLoggerFactory.DisposeAllAsync().ConfigureAwait(false);
 
         TestExtensions.ClearCaches();
-    }
-
-    private static bool IsConsoleClient(IServiceProvider serviceProvider)
-    {
-        try
-        {
-            var clientInfo = serviceProvider.GetClientInfo();
-            return clientInfo.Id.Contains("console", StringComparison.OrdinalIgnoreCase);
-        }
-        catch
-        {
-            // If we can't determine, default to console behavior (skip IDE streaming)
-            return true;
-        }
     }
 }

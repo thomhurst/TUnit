@@ -51,8 +51,7 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
             return ValueTask.CompletedTask;
         }
 
-        // For IDE clients, exclude output from final result since we've already streamed it
-        var testNode = testContext.ToTestNode(PassedTestNodeStateProperty.CachedInstance, excludeFinalOutput: !IsConsole);
+        var testNode = testContext.ToTestNode(PassedTestNodeStateProperty.CachedInstance);
 
         return new ValueTask(context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
             sessionUid: _sessionSessionUid,
@@ -73,8 +72,7 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
 
         var updateType = GetFailureStateProperty(testContext, exception, duration ?? TimeSpan.Zero);
 
-        // For IDE clients, exclude output from final result since we've already streamed it
-        var testNode = testContext.ToTestNode(updateType, excludeFinalOutput: !IsConsole);
+        var testNode = testContext.ToTestNode(updateType);
 
         return new ValueTask(context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
             sessionUid: _sessionSessionUid,
@@ -103,8 +101,7 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
 
     public ValueTask Skipped(TestContext testContext, string reason)
     {
-        // For IDE clients, exclude output from final result since we've already streamed it
-        var testNode = testContext.ToTestNode(new SkippedTestNodeStateProperty(reason), excludeFinalOutput: !IsConsole);
+        var testNode = testContext.ToTestNode(new SkippedTestNodeStateProperty(reason));
 
         return new ValueTask(context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
             sessionUid: _sessionSessionUid,
@@ -114,8 +111,7 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
 
     public ValueTask Cancelled(TestContext testContext, DateTimeOffset start)
     {
-        // For IDE clients, exclude output from final result since we've already streamed it
-        var testNode = testContext.ToTestNode(new CancelledTestNodeStateProperty(), excludeFinalOutput: !IsConsole);
+        var testNode = testContext.ToTestNode(new CancelledTestNodeStateProperty());
 
         return new ValueTask(context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
             sessionUid: _sessionSessionUid,
@@ -133,17 +129,6 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
                 artifact.Description
             )
         ));
-    }
-
-    public ValueTask OutputUpdate(TestContext testContext, string output)
-    {
-        // Send an InProgress update with just the new output to stream to IDEs
-        var testNode = testContext.ToTestNodeWithOutput(InProgressTestNodeStateProperty.CachedInstance, output);
-
-        return new ValueTask(context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
-            sessionUid: _sessionSessionUid,
-            testNode: testNode
-        )));
     }
 
     private static TestNodeStateProperty GetFailureStateProperty(TestContext testContext, Exception e, TimeSpan duration)
