@@ -2616,6 +2616,12 @@ namespace .Logging
         protected virtual void WriteToOutput(string message, bool isError) { }
         protected virtual . WriteToOutputAsync(string message, bool isError) { }
     }
+    public interface ILogSink
+    {
+        bool IsEnabled(. level);
+        void Log(. level, string message, ? exception, .Context? context);
+        . LogAsync(. level, string message, ? exception, .Context? context);
+    }
     public interface ILogger
     {
         bool IsEnabled(. logLevel);
@@ -2658,6 +2664,12 @@ namespace .Logging
         public virtual bool IsEnabled(. logLevel) { }
         public abstract void Log<TState>(. logLevel, TState state, ? exception, <TState, ?, string> formatter);
         public abstract . LogAsync<TState>(. logLevel, TState state, ? exception, <TState, ?, string> formatter);
+    }
+    public static class TUnitLoggerFactory
+    {
+        public static void AddSink(. sink) { }
+        public static void AddSink<TSink>()
+            where TSink : ., new () { }
     }
 }
 namespace .Models
