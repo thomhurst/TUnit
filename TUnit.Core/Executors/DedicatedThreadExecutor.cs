@@ -18,17 +18,18 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
 
         var tcs = new TaskCompletionSource<object?>();
 
-        var thread = new Thread(() =>
+        var thread = new Thread(static state =>
         {
+            var (threadExecutor, action, tcs) = (ValueTuple<DedicatedThreadExecutor, Func<ValueTask>, TaskCompletionSource<object?>>)state!;
             Exception? capturedException = null;
 
             try
             {
-                Initialize();
+                threadExecutor.Initialize();
 
                 try
                 {
-                    ExecuteAsyncActionWithMessagePump(action, tcs);
+                    threadExecutor.ExecuteAsyncActionWithMessagePump(action, tcs);
                 }
                 catch (Exception e)
                 {
@@ -41,7 +42,7 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
             }
             finally
             {
-                CleanUp();
+                threadExecutor.CleanUp();
 
                 if (capturedException != null && !tcs.Task.IsCompleted)
                 {
@@ -50,8 +51,10 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
             }
         });
 
+        var state = (this, action, tcs);
+
         ConfigureThread(thread);
-        thread.Start();
+        thread.Start(state);
 
         await tcs.Task;
     }
@@ -409,7 +412,7 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
         }
     }
 
-public ValueTask OnTestRegistered(TestRegisteredContext context)
+    public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
         context.SetParallelLimiter(new ProcessorCountParallelLimit());
         return default(ValueTask);
