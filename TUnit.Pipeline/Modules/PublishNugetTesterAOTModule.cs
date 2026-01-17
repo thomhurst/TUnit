@@ -1,13 +1,14 @@
 using System.Runtime.InteropServices;
 using ModularPipelines.Attributes;
+using ModularPipelines.Configuration;
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
-using ModularPipelines.Enums;
 using ModularPipelines.Extensions;
 using ModularPipelines.Git.Extensions;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
+using ModularPipelines.Options;
 
 namespace TUnit.Pipeline.Modules;
 
@@ -16,15 +17,16 @@ namespace TUnit.Pipeline.Modules;
 [DependsOn<CopyToLocalNuGetModule>]
 public class PublishNugetTesterAOTModule : Module<IReadOnlyList<CommandResult>>
 {
-    protected override Task<SkipDecision> ShouldSkip(IPipelineContext context)
-    {
-        return Task.FromResult<SkipDecision>(EnvironmentVariables.IsNetFramework);
-    }
+    protected override ModuleConfiguration Configure() => ModuleConfiguration.Create()
+        .WithSkipWhen(_ => EnvironmentVariables.IsNetFramework
+            ? SkipDecision.Skip("Running on .NET Framework")
+            : SkipDecision.DoNotSkip)
+        .Build();
 
-    protected override async Task<IReadOnlyList<CommandResult>?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
+    protected override async Task<IReadOnlyList<CommandResult>?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
     {
         var results = new List<CommandResult>();
-        var version = await GetModule<GenerateVersionModule>();
+        var version = await context.GetModule<GenerateVersionModule>();
 
         var testProject = context.Git()
             .RootDirectory
@@ -35,20 +37,29 @@ public class PublishNugetTesterAOTModule : Module<IReadOnlyList<CommandResult>>
         // Test AOT publishing
         foreach (var framework in new[] { "net8.0", "net9.0", "net10.0" })
         {
-            var result = await SubModule($"AOT-{framework}", async () =>
+            var result = await context.SubModule<CommandResult>($"AOT-{framework}", async () =>
             {
-                return await context.DotNet().Publish(new DotNetPublishOptions(testProject)
+                return await context.DotNet().Publish(new DotNetPublishOptions
                 {
-                    RuntimeIdentifier = GetRuntimeIdentifier(),
-                    Configuration = Configuration.Release,
-                    OutputDirectory = $"NUGETTESTER_AOT_{framework}",
+                    ProjectSolution = testProject.Path,
+                    Runtime = GetRuntimeIdentifier(),
+                    Configuration = "Release",
+                    Output = $"NUGETTESTER_AOT_{framework}",
                     Properties =
                     [
                         new KeyValue("Aot", "true"),
-                        new KeyValue("TUnitVersion", version.Value!.SemVer!)
+                        new KeyValue("TUnitVersion", version.ValueOrDefault!.SemVer!)
                     ],
                     Framework = framework,
-                    CommandLogging = CommandLogging.Input | CommandLogging.Error | CommandLogging.Duration | CommandLogging.ExitCode
+                }, new CommandExecutionOptions
+                {
+                    LogSettings = new CommandLoggingOptions
+                    {
+                        ShowCommandArguments = true,
+                        ShowStandardError = true,
+                        ShowExecutionTime = true,
+                        ShowExitCode = true
+                    }
                 }, cancellationToken);
             });
 

@@ -2,9 +2,9 @@
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
-using ModularPipelines.Enums;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
+using ModularPipelines.Options;
 
 namespace TUnit.Pipeline.Modules.Abstract;
 
@@ -24,17 +24,19 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
         }
     }
 
-    protected sealed override async Task<IReadOnlyList<CommandResult>?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
+    protected sealed override async Task<IReadOnlyList<CommandResult>?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
     {
         var results = new List<CommandResult>();
 
         foreach (var framework in TestableFrameworks)
         {
-            var testResult = await SubModule(framework, async () =>
+            var testResult = await context.SubModule<CommandResult>(framework, async () =>
             {
-                var testOptions = SetDefaults(await GetTestOptions(context, framework, cancellationToken));
+                var (testOptions, executionOptions) = await GetTestOptions(context, framework, cancellationToken);
 
-                return await context.DotNet().Run(testOptions, cancellationToken);
+                var finalExecutionOptions = SetDefaults(testOptions, executionOptions ?? new CommandExecutionOptions(), framework);
+
+                return await context.DotNet().Run(testOptions, finalExecutionOptions, cancellationToken);
             });
 
             results.Add(testResult);
@@ -43,35 +45,30 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
         return results;
     }
 
-    private DotNetRunOptions SetDefaults(DotNetRunOptions testOptions)
+    private CommandExecutionOptions SetDefaults(DotNetRunOptions testOptions, CommandExecutionOptions executionOptions, string framework)
     {
-        if (testOptions.EnvironmentVariables?.Any(x => x.Key == "NET_VERSION") != true)
+        var envVars = executionOptions.EnvironmentVariables ?? new Dictionary<string, string?>();
+        if (!envVars.ContainsKey("NET_VERSION"))
         {
-            testOptions = testOptions with
+            envVars = new Dictionary<string, string?>(envVars)
             {
-                EnvironmentVariables = new Dictionary<string, string?>
-                {
-                    ["NET_VERSION"] = testOptions.Framework,
-                }
+                ["NET_VERSION"] = framework
             };
         }
 
-        // Add hangdump flags with 20 minute timeout
-        var arguments = testOptions.Arguments?.ToList() ?? new List<string>();
-        if (!arguments.Contains("--hangdump"))
-        {
-            arguments.AddRange(["--hangdump", "--hangdump-filename", $"hangdump.{Environment.OSVersion.Platform}.{GetType().Name}.dmp", "--hangdump-timeout", "5m"]);
-        }
-
         // Suppress output for successful operations, but show errors and basic info
-        testOptions = testOptions with
+        return executionOptions with
         {
-            Arguments = arguments,
-            CommandLogging = CommandLogging.Input | CommandLogging.Error | CommandLogging.Duration | CommandLogging.ExitCode
+            EnvironmentVariables = envVars,
+            LogSettings = new CommandLoggingOptions
+            {
+                ShowCommandArguments = true,
+                ShowStandardError = true,
+                ShowExecutionTime = true,
+                ShowExitCode = true
+            }
         };
-
-        return testOptions;
     }
 
-    protected abstract Task<DotNetRunOptions> GetTestOptions(IPipelineContext context, string framework, CancellationToken cancellationToken);
+    protected abstract Task<(DotNetRunOptions Options, CommandExecutionOptions? ExecutionOptions)> GetTestOptions(IModuleContext context, string framework, CancellationToken cancellationToken);
 }

@@ -2,29 +2,29 @@
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
-using ModularPipelines.Enums;
 using ModularPipelines.Extensions;
 using ModularPipelines.Git.Extensions;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
+using ModularPipelines.Options;
 
 namespace TUnit.Pipeline.Modules;
 
-[NotInParallel("DotNetTests")]
+[NotInParallel("NetworkTests")]
 [DependsOn<RunAnalyzersTestsModule>]
 [DependsOn<RunUnitTestsModule>]
 [DependsOn<RunTemplateTestsModule>]
-[DependsOn<RunAspNetTestsModule>]
+[DependsOn<RunAspNetTestsModule>(IgnoreIfNotRegistered = true)]
 [DependsOn<RunAssertionsTestsModule>]
-[DependsOn<RunPlaywrightTestsModule>]
-[DependsOn<RunRpcTestsModule>]
+[DependsOn<RunPlaywrightTestsModule>(IgnoreIfNotRegistered = true)]
+[DependsOn<RunRpcTestsModule>(IgnoreIfNotRegistered = true)]
 [DependsOn<RunAssertionsAnalyzersTestsModule>]
 [DependsOn<RunPublicAPITestsModule>]
 [DependsOn<RunSourceGeneratorTestsModule>]
 [DependsOn<RunAssertionsCodeFixersTestsModule>]
 public class RunEngineTestsModule : Module<CommandResult>
 {
-    protected override async Task<CommandResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
+    protected override async Task<CommandResult?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
     {
         var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.Engine.Tests.csproj").AssertExists();
 
@@ -32,18 +32,26 @@ public class RunEngineTestsModule : Module<CommandResult>
         {
             Project = project.Name,
             NoBuild = true,
-            Configuration = Configuration.Release,
+            Configuration = "Release",
             Framework = "net10.0",
-            WorkingDirectory = project.Folder!,
             Arguments = [
                 "--hangdump", "--hangdump-filename", $"hangdump.{Environment.OSVersion.Platform}.engine-tests.dmp", "--hangdump-timeout", "30m",
                 "--timeout", "35m",
             ],
+        }, new CommandExecutionOptions
+        {
+            WorkingDirectory = project.Folder!.Path,
             EnvironmentVariables = new Dictionary<string, string?>
             {
                 ["TUNIT_DISABLE_GITHUB_REPORTER"] = "true",
             },
-            CommandLogging = CommandLogging.Input | CommandLogging.Error | CommandLogging.Duration | CommandLogging.ExitCode
+            LogSettings = new CommandLoggingOptions
+            {
+                ShowCommandArguments = true,
+                ShowStandardError = true,
+                ShowExecutionTime = true,
+                ShowExitCode = true
+            }
         }, cancellationToken);
     }
 }

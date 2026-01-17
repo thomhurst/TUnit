@@ -2,9 +2,9 @@
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
-using ModularPipelines.Enums;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
+using ModularPipelines.Options;
 
 namespace TUnit.Pipeline.Modules;
 
@@ -12,40 +12,68 @@ namespace TUnit.Pipeline.Modules;
 [DependsOn<GenerateVersionModule>]
 public class TestTemplatePackageModule : Module<CommandResult>
 {
-    protected override async Task<CommandResult?> ExecuteAsync(IPipelineContext context,
+    protected override async Task<CommandResult?> ExecuteAsync(IModuleContext context,
         CancellationToken cancellationToken)
     {
-        var version = await GetModule<GenerateVersionModule>();
+        var version = await context.GetModule<GenerateVersionModule>();
 
-        await context.DotNet().New(new DotNetNewOptions("uninstall")
+        var logSettings = new CommandLoggingOptions
         {
-            Arguments = ["TUnit.Templates"],
+            ShowCommandArguments = true,
+            ShowStandardError = true,
+            ShowExecutionTime = true,
+            ShowExitCode = true
+        };
+
+        // Uninstall existing template
+        await context.DotNet().New.Execute(new DotNetNewOptions
+        {
+            TemplateShortName = "uninstall",
+            TemplateArgs = "TUnit.Templates",
+        }, new CommandExecutionOptions
+        {
             ThrowOnNonZeroExitCode = false,
-            CommandLogging = CommandLogging.Input | CommandLogging.Error | CommandLogging.Duration | CommandLogging.ExitCode
+            LogSettings = logSettings
         }, cancellationToken);
 
-        await context.DotNet().New(new DotNetNewOptions("install")
+        // Install template with specific version
+        await context.DotNet().New.Execute(new DotNetNewOptions
         {
-            Arguments = [$"TUnit.Templates::{version.Value!.SemVer}"],
-            CommandLogging = CommandLogging.Input | CommandLogging.Error | CommandLogging.Duration | CommandLogging.ExitCode
+            TemplateShortName = "install",
+            TemplateArgs = $"TUnit.Templates::{version.ValueOrDefault!.SemVer}",
+        }, new CommandExecutionOptions
+        {
+            LogSettings = logSettings
         }, cancellationToken);
 
-        await context.DotNet().New(new DotNetNewOptions("TUnit")
+        // Create TUnit project
+        await context.DotNet().New.Execute(new DotNetNewOptions
         {
+            TemplateShortName = "TUnit",
             Name = "MyTestProject",
-            CommandLogging = CommandLogging.Input | CommandLogging.Error | CommandLogging.Duration | CommandLogging.ExitCode
+        }, new CommandExecutionOptions
+        {
+            LogSettings = logSettings
         }, cancellationToken);
 
-        await context.DotNet().New(new DotNetNewOptions("TUnit.AspNet")
+        // Create TUnit.AspNet project
+        await context.DotNet().New.Execute(new DotNetNewOptions
         {
+            TemplateShortName = "TUnit.AspNet",
             Name = "MyTestProject2",
-            CommandLogging = CommandLogging.Input | CommandLogging.Error | CommandLogging.Duration | CommandLogging.ExitCode
+        }, new CommandExecutionOptions
+        {
+            LogSettings = logSettings
         }, cancellationToken);
 
-        return await context.DotNet().New(new DotNetNewOptions("TUnit.Playwright")
+        // Create TUnit.Playwright project
+        return await context.DotNet().New.Execute(new DotNetNewOptions
         {
+            TemplateShortName = "TUnit.Playwright",
             Name = "MyTestProject3",
-            CommandLogging = CommandLogging.Input | CommandLogging.Error | CommandLogging.Duration | CommandLogging.ExitCode
+        }, new CommandExecutionOptions
+        {
+            LogSettings = logSettings
         }, cancellationToken);
     }
 }

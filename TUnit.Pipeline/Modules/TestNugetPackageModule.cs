@@ -1,11 +1,12 @@
 ﻿using System.Runtime.InteropServices;
 using ModularPipelines.Attributes;
+using ModularPipelines.Configuration;
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Options;
 using ModularPipelines.Extensions;
 using ModularPipelines.Git.Extensions;
 using ModularPipelines.Models;
-using Polly.Retry;
+using ModularPipelines.Options;
 using TUnit.Pipeline.Modules.Abstract;
 
 namespace TUnit.Pipeline.Modules;
@@ -31,8 +32,10 @@ public class TestVBNugetPackageModule : AbstractTestNugetPackageModule
 [DependsOn<CopyToLocalNuGetModule>]
 public abstract class AbstractTestNugetPackageModule : TestBaseModule
 {
-    protected override AsyncRetryPolicy<IReadOnlyList<CommandResult>?> RetryPolicy
-        => CreateRetryPolicy(3);
+    protected override ModuleConfiguration Configure() => ModuleConfiguration.Create()
+        .WithRetryCount(3)
+        .Build();
+
     protected override IEnumerable<string> TestableFrameworks
     {
         get
@@ -50,10 +53,10 @@ public abstract class AbstractTestNugetPackageModule : TestBaseModule
         }
     }
 
-    protected override async Task<DotNetRunOptions> GetTestOptions(IPipelineContext context, string framework,
+    protected override async Task<(DotNetRunOptions Options, CommandExecutionOptions? ExecutionOptions)> GetTestOptions(IModuleContext context, string framework,
         CancellationToken cancellationToken)
     {
-        var version = await GetModule<GenerateVersionModule>();
+        var version = await context.GetModule<GenerateVersionModule>();
 
         var project = context.Git()
             .RootDirectory
@@ -61,20 +64,25 @@ public abstract class AbstractTestNugetPackageModule : TestBaseModule
             .FindFile(x => x.Name == ProjectName)
             .AssertExists();
 
-        return new DotNetRunOptions
-        {
-            WorkingDirectory = project.Folder!,
-            Framework = framework,
-            Properties =
-            [
-                new KeyValue("TUnitVersion", version.Value!.SemVer!)
-            ],
-            Arguments =
-            [
-                "--coverage",
-                "--report-trx"
-            ]
-        };
+        return (
+            new DotNetRunOptions
+            {
+                Framework = framework,
+                Properties =
+                [
+                    new KeyValue("TUnitVersion", version.ValueOrDefault!.SemVer!)
+                ],
+                Arguments =
+                [
+                    "--coverage",
+                    "--report-trx"
+                ]
+            },
+            new CommandExecutionOptions
+            {
+                WorkingDirectory = project.Folder!.Path,
+            }
+        );
     }
 
     public abstract string ProjectName { get; }

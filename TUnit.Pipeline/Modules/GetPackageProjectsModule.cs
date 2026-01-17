@@ -6,7 +6,7 @@ namespace TUnit.Pipeline.Modules;
 
 public class GetPackageProjectsModule : Module<List<File>>
 {
-    protected override async Task<List<File>?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
+    protected override async Task<List<File>?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
     {
         await Task.CompletedTask;
 
