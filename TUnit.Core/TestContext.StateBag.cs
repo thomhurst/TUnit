@@ -25,7 +25,7 @@ public partial class TestContext
     /// <inheritdoc/>
     T ITestStateBag.GetOrAdd<T>(string key, Func<string, T> valueFactory)
     {
-        var value = ObjectBag.GetOrAdd(key, k => valueFactory(k)!);
+        var value = ObjectBag.GetOrAdd(key, static (k, valueFactory) => valueFactory(k)!, valueFactory);
 
         if (value is T typedValue)
         {

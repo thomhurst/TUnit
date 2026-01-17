@@ -51,13 +51,11 @@ public class ContextProvider(IServiceProvider serviceProvider, string testSessio
     /// </summary>
     public AssemblyHookContext GetOrCreateAssemblyContext(Assembly assembly)
     {
-        return _assemblyContexts.GetOrAdd(assembly, asm =>
-        {
-            return new AssemblyHookContext(TestSessionContext)
+        return _assemblyContexts.GetOrAdd(assembly, static (assembly, context) =>
+            new AssemblyHookContext(context)
             {
                 Assembly = assembly
-            };
-        });
+            }, TestSessionContext);
     }
 
     /// <summary>

@@ -106,9 +106,10 @@ internal static class ObjectInitializer
         // is called exactly once, even under contention. GetOrAdd's factory may be
         // called multiple times, but Lazy ensures only one initialization runs.
         var lazyTask = InitializationTasks.GetOrAdd(obj,
-            _ => new Lazy<Task>(
+            static (_, asyncInitializer) => new Lazy<Task>(
                 asyncInitializer.InitializeAsync,
-                LazyThreadSafetyMode.ExecutionAndPublication));
+                LazyThreadSafetyMode.ExecutionAndPublication)
+            , asyncInitializer);
 
         try
         {
