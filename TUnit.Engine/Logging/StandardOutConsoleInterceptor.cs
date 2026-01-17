@@ -1,4 +1,5 @@
 ﻿using TUnit.Core;
+using TUnit.Core.Logging;
 using TUnit.Engine.Services;
 
 #pragma warning disable CS8765 // Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes).
@@ -12,6 +13,8 @@ internal class StandardOutConsoleInterceptor : OptimizedConsoleInterceptor
     public static TextWriter DefaultOut { get; }
 
     protected override TextWriter RedirectedOut => Context.Current.OutputWriter;
+
+    protected override LogLevel SinkLogLevel => LogLevel.Information;
 
     static StandardOutConsoleInterceptor()
     {

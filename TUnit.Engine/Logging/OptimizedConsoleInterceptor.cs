@@ -1,4 +1,6 @@
 using System.Text;
+using TUnit.Core;
+using TUnit.Core.Logging;
 using TUnit.Engine.Services;
 
 #pragma warning disable CS8765 // Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes).
@@ -16,9 +18,9 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     protected OptimizedConsoleInterceptor(VerbosityService verbosityService)
     {
         _verbosityService = verbosityService;
-        
+
         var originalOut = GetOriginalOut();
-        
+
         // Wrap outputs with buffered writers for better performance
         _originalOutBuffer = originalOut != null ? new BufferedTextWriter(originalOut, 2048) : null;
     }
@@ -27,9 +29,36 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
 
     protected abstract TextWriter? RedirectedOut { get; }
 
+    /// <summary>
+    /// Gets the log level to use when routing console output to sinks.
+    /// </summary>
+    protected abstract LogLevel SinkLogLevel { get; }
+
     private protected abstract TextWriter GetOriginalOut();
 
     private protected abstract void ResetDefault();
+
+    /// <summary>
+    /// Routes the message to registered log sinks for real-time streaming.
+    /// </summary>
+    private void RouteToSinks(string? message)
+    {
+        if (message is not null && message.Length > 0)
+        {
+            LogSinkRouter.RouteToSinks(SinkLogLevel, message, null, Context.Current);
+        }
+    }
+
+    /// <summary>
+    /// Routes the message to registered log sinks asynchronously for real-time streaming.
+    /// </summary>
+    private async ValueTask RouteToSinksAsync(string? message)
+    {
+        if (message is not null && message.Length > 0)
+        {
+            await LogSinkRouter.RouteToSinksAsync(SinkLogLevel, message, null, Context.Current).ConfigureAwait(false);
+        }
+    }
 
 #if NET
     public override ValueTask DisposeAsync()
@@ -245,20 +274,24 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
 
     public override void WriteLine(bool value)
     {
+        var str = value.ToString();
         if (!_verbosityService.HideTestOutput)
         {
-            _originalOutBuffer?.WriteLine(value.ToString());
+            _originalOutBuffer?.WriteLine(str);
         }
-        RedirectedOut?.WriteLine(value.ToString());
+        RedirectedOut?.WriteLine(str);
+        RouteToSinks(str);
     }
 
     public override void WriteLine(char value)
     {
+        var str = value.ToString();
         if (!_verbosityService.HideTestOutput)
         {
-            _originalOutBuffer?.WriteLine(value.ToString());
+            _originalOutBuffer?.WriteLine(str);
         }
-        RedirectedOut?.WriteLine(value.ToString());
+        RedirectedOut?.WriteLine(str);
+        RouteToSinks(str);
     }
 
     public override void WriteLine(char[]? buffer)
@@ -274,6 +307,7 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
             _originalOutBuffer?.WriteLine(str);
         }
         RedirectedOut?.WriteLine(str);
+        RouteToSinks(str);
     }
 
     public override void WriteLine(char[] buffer, int index, int count)
@@ -284,42 +318,51 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
             _originalOutBuffer?.WriteLine(str);
         }
         RedirectedOut?.WriteLine(str);
+        RouteToSinks(str);
     }
 
     public override void WriteLine(decimal value)
     {
+        var str = value.ToString();
         if (!_verbosityService.HideTestOutput)
         {
-            _originalOutBuffer?.WriteLine(value.ToString());
+            _originalOutBuffer?.WriteLine(str);
         }
-        RedirectedOut?.WriteLine(value.ToString());
+        RedirectedOut?.WriteLine(str);
+        RouteToSinks(str);
     }
 
     public override void WriteLine(double value)
     {
+        var str = value.ToString();
         if (!_verbosityService.HideTestOutput)
         {
-            _originalOutBuffer?.WriteLine(value.ToString());
+            _originalOutBuffer?.WriteLine(str);
         }
-        RedirectedOut?.WriteLine(value.ToString());
+        RedirectedOut?.WriteLine(str);
+        RouteToSinks(str);
     }
 
     public override void WriteLine(int value)
     {
+        var str = value.ToString();
         if (!_verbosityService.HideTestOutput)
         {
-            _originalOutBuffer?.WriteLine(value.ToString());
+            _originalOutBuffer?.WriteLine(str);
         }
-        RedirectedOut?.WriteLine(value.ToString());
+        RedirectedOut?.WriteLine(str);
+        RouteToSinks(str);
     }
 
     public override void WriteLine(long value)
     {
+        var str = value.ToString();
         if (!_verbosityService.HideTestOutput)
         {
-            _originalOutBuffer?.WriteLine(value.ToString());
+            _originalOutBuffer?.WriteLine(str);
         }
-        RedirectedOut?.WriteLine(value.ToString());
+        RedirectedOut?.WriteLine(str);
+        RouteToSinks(str);
     }
 
     public override void WriteLine(object? value)
@@ -330,15 +373,18 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
             _originalOutBuffer?.WriteLine(str);
         }
         RedirectedOut?.WriteLine(str);
+        RouteToSinks(str);
     }
 
     public override void WriteLine(float value)
     {
+        var str = value.ToString();
         if (!_verbosityService.HideTestOutput)
         {
-            _originalOutBuffer?.WriteLine(value.ToString());
+            _originalOutBuffer?.WriteLine(str);
         }
-        RedirectedOut?.WriteLine(value.ToString());
+        RedirectedOut?.WriteLine(str);
+        RouteToSinks(str);
     }
 
     public override void WriteLine(string? value)
@@ -348,61 +394,74 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
             _originalOutBuffer?.WriteLine(value);
         }
         RedirectedOut?.WriteLine(value);
+        RouteToSinks(value);
     }
 
     public override void WriteLine(uint value)
     {
+        var str = value.ToString();
         if (!_verbosityService.HideTestOutput)
         {
-            _originalOutBuffer?.WriteLine(value.ToString());
+            _originalOutBuffer?.WriteLine(str);
         }
-        RedirectedOut?.WriteLine(value.ToString());
+        RedirectedOut?.WriteLine(str);
+        RouteToSinks(str);
     }
 
     public override void WriteLine(ulong value)
     {
+        var str = value.ToString();
         if (!_verbosityService.HideTestOutput)
         {
-            _originalOutBuffer?.WriteLine(value.ToString());
+            _originalOutBuffer?.WriteLine(str);
         }
-        RedirectedOut?.WriteLine(value.ToString());
+        RedirectedOut?.WriteLine(str);
+        RouteToSinks(str);
     }
 
     // Optimized formatted WriteLine methods - no tuple allocations
     public override void WriteLine(string format, object? arg0)
     {
+        var str = string.Format(format, arg0);
         if (!_verbosityService.HideTestOutput)
         {
-            _originalOutBuffer?.WriteLineFormatted(format, arg0);
+            _originalOutBuffer?.WriteLine(str);
         }
-        RedirectedOut?.WriteLine(format, arg0);
+        RedirectedOut?.WriteLine(str);
+        RouteToSinks(str);
     }
 
     public override void WriteLine(string format, object? arg0, object? arg1)
     {
+        var str = string.Format(format, arg0, arg1);
         if (!_verbosityService.HideTestOutput)
         {
-            _originalOutBuffer?.WriteLineFormatted(format, arg0, arg1);
+            _originalOutBuffer?.WriteLine(str);
         }
-        RedirectedOut?.WriteLine(format, arg0, arg1);
+        RedirectedOut?.WriteLine(str);
+        RouteToSinks(str);
     }
 
     public override void WriteLine(string format, object? arg0, object? arg1, object? arg2)
     {
+        var str = string.Format(format, arg0, arg1, arg2);
         if (!_verbosityService.HideTestOutput)
         {
-            _originalOutBuffer?.WriteLineFormatted(format, arg0, arg1, arg2);
+            _originalOutBuffer?.WriteLine(str);
         }
-        RedirectedOut?.WriteLine(format, arg0, arg1, arg2);
+        RedirectedOut?.WriteLine(str);
+        RouteToSinks(str);
     }
 
     public override void WriteLine(string format, params object?[] arg)
     {
+        var str = string.Format(format, arg);
         if (!_verbosityService.HideTestOutput)
         {
-            _originalOutBuffer?.WriteLineFormatted(format, arg);
+            _originalOutBuffer?.WriteLine(str);
         }
-        RedirectedOut?.WriteLine(format, arg);
+        RedirectedOut?.WriteLine(str);
+        RouteToSinks(str);
     }
 
     // Async methods
@@ -462,7 +521,8 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
 
     public override async Task WriteLineAsync(char value)
     {
-        var str = value + Environment.NewLine;
+        var charStr = value.ToString();
+        var str = charStr + Environment.NewLine;
         if (!_verbosityService.HideTestOutput && _originalOutBuffer != null)
         {
             await _originalOutBuffer.WriteAsync(str);
@@ -471,11 +531,13 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
         {
             await RedirectedOut.WriteAsync(str);
         }
+        await RouteToSinksAsync(charStr).ConfigureAwait(false);
     }
 
     public override async Task WriteLineAsync(char[] buffer, int index, int count)
     {
-        var str = new string(buffer, index, count) + Environment.NewLine;
+        var content = new string(buffer, index, count);
+        var str = content + Environment.NewLine;
         if (!_verbosityService.HideTestOutput && _originalOutBuffer != null)
         {
             await _originalOutBuffer.WriteAsync(str);
@@ -484,6 +546,7 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
         {
             await RedirectedOut.WriteAsync(str);
         }
+        await RouteToSinksAsync(content).ConfigureAwait(false);
     }
 
     public override async Task WriteLineAsync(string? value)
@@ -497,6 +560,7 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
         {
             await RedirectedOut.WriteAsync(str);
         }
+        await RouteToSinksAsync(value).ConfigureAwait(false);
     }
 
 #if NET
@@ -554,6 +618,7 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
             _originalOutBuffer?.WriteLine(str);
         }
         RedirectedOut?.WriteLine(str);
+        RouteToSinks(str);
     }
 
     public override void WriteLine(StringBuilder? value)
@@ -564,11 +629,13 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
             _originalOutBuffer?.WriteLine(str);
         }
         RedirectedOut?.WriteLine(str);
+        RouteToSinks(str);
     }
 
     public override async Task WriteLineAsync(ReadOnlyMemory<char> buffer, CancellationToken cancellationToken = new())
     {
-        var str = new string(buffer.Span) + Environment.NewLine;
+        var content = new string(buffer.Span);
+        var str = content + Environment.NewLine;
         if (!_verbosityService.HideTestOutput && _originalOutBuffer != null)
         {
             await _originalOutBuffer.WriteAsync(str);
@@ -577,11 +644,13 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
         {
             await RedirectedOut.WriteAsync(str);
         }
+        await RouteToSinksAsync(content).ConfigureAwait(false);
     }
 
     public override async Task WriteLineAsync(StringBuilder? value, CancellationToken cancellationToken = new())
     {
-        var str = (value?.ToString() ?? string.Empty) + Environment.NewLine;
+        var content = value?.ToString() ?? string.Empty;
+        var str = content + Environment.NewLine;
         if (!_verbosityService.HideTestOutput && _originalOutBuffer != null)
         {
             await _originalOutBuffer.WriteAsync(str);
@@ -590,6 +659,7 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
         {
             await RedirectedOut.WriteAsync(str);
         }
+        await RouteToSinksAsync(content).ConfigureAwait(false);
     }
 #endif
 
