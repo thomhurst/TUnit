@@ -106,11 +106,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             loggerFactory.CreateLogger<TUnitFrameworkLogger>(),
             logLevelProvider));
 
-        // Register the built-in log sink for streaming logs to IDEs (skip for console clients)
-        if (!IsConsoleClient(frameworkServiceProvider))
-        {
-            TUnitLoggerFactory.AddSink(new OutputDeviceLogSink(outputDevice, extension));
-        }
+        // Defer log sink registration until after MessageBus is created
+        var isIdeClient = !IsConsoleClient(frameworkServiceProvider);
 
         // Create initialization services using Lazy<T> to break circular dependencies
         // No more two-phase initialization with Initialize() calls
@@ -144,6 +141,12 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             VerbosityService,
             frameworkServiceProvider,
             context));
+
+        // Register the built-in log sink for streaming test output to IDEs in real-time
+        if (isIdeClient)
+        {
+            TUnitLoggerFactory.AddSink(new IdeOutputLogSink(MessageBus));
+        }
 
         CancellationToken = Register(new EngineCancellationToken());
 

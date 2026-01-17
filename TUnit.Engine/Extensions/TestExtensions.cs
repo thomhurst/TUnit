@@ -112,7 +112,20 @@ internal static class TestExtensions
         }, testContext);
     }
 
+    /// <summary>
+    /// Creates a test node with output for real-time streaming (used during InProgress state).
+    /// </summary>
+    internal static TestNode ToTestNodeWithOutput(this TestContext testContext, TestNodeStateProperty stateProperty)
+    {
+        return ToTestNodeInternal(testContext, stateProperty, includeOutput: true);
+    }
+
     internal static TestNode ToTestNode(this TestContext testContext, TestNodeStateProperty stateProperty)
+    {
+        return ToTestNodeInternal(testContext, stateProperty, includeOutput: false);
+    }
+
+    private static TestNode ToTestNodeInternal(TestContext testContext, TestNodeStateProperty stateProperty, bool includeOutput)
     {
         var testDetails = testContext.Metadata.TestDetails ?? throw new ArgumentNullException(nameof(testContext.Metadata.TestDetails));
 
@@ -152,7 +165,8 @@ internal static class TestExtensions
         string? output = null;
         string? error = null;
 
-        if (isFinalState)
+        // Include output if it's final state OR if explicitly requested for real-time streaming
+        if (isFinalState || includeOutput)
         {
             output = testContext.GetStandardOutput();
             error = testContext.GetErrorOutput();
