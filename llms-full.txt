@@ -13523,50 +13523,226 @@ Instead, reference `TUnit.Core` instead - It has all of the models required for 
 ## Logging
 
 
-By default, TUnit will intercept any logs to the `Console`, and attempt to correlate them to the test that triggered that log by the current async context that it is in.
+TUnit provides a flexible logging system that captures all test output and routes it to configurable destinations called "log sinks".
 
-So for most scenarios, you can just rely on `Console.WriteLine(...)`.
+## Basic Usage
 
-## Logger Objects
-If you want a logger object, you can call `TestContext.Current.GetDefaultLogger()`, which will give you a logger that will write output to that test's output writer.
-
-This logger can also be used to map to other logging interfaces (e.g. Microsoft.Extensions.Logging), so that for example, Asp.NET web apps can log to your test's context, so that you have a cleaner, more isolated log output.
-
-## Log Level
-TUnit will use the same log level as provided to the Microsoft.Testing.Platform, which is set on the command line when invoking the test suite. If not defined, the default log level should be `Trace`.
-
-If you want to override this, you can inherit from `TUnitLogger` or `DefaultLogger` and override the `IsEnabled` method:
+By default, TUnit intercepts any logs to `Console.WriteLine()` and correlates them to the test that triggered the log using the current async context.
 
 ```csharp
- public override bool IsEnabled(LogLevel logLevel)
+[Test]
+public async Task MyTest()
 {
-    return logLevel >= LogLevel.Error;
+    Console.WriteLine("This output is captured and associated with this test");
 }
 ```
 
-## Log Level Command Line
-If you are executing tests via the command line, you can set the log level via the `--log-level` argument:
+### Logger Objects
 
+For more control, use `TestContext.Current.GetDefaultLogger()` to get a logger instance:
+
+```csharp
+[Test]
+public async Task MyTest()
+{
+    var logger = TestContext.Current!.GetDefaultLogger();
+    logger.LogInformation("Information message");
+    logger.LogWarning("Warning message");
+    logger.LogError("Error message");
+}
 ```
+
+This logger can integrate with other logging frameworks like Microsoft.Extensions.Logging for ASP.NET applications.
+
+## Log Sinks
+
+TUnit uses a sink-based architecture where all output is routed through registered log sinks. Each sink decides how to handle the messages - write to files, stream to IDEs, send to external services, etc.
+
+### Built-in Sinks
+
+TUnit automatically registers these sinks based on your execution context:
+
+| Sink | When Registered | Purpose |
+|------|-----------------|---------|
+| **TestOutputSink** | Always | Captures output for test results shown after execution |
+| **ConsoleOutputSink** | `--output Detailed` | Writes real-time output to the console |
+| **RealTimeOutputSink** | IDE clients (VS, Rider) | Streams output to IDE test explorers |
+
+### Creating Custom Log Sinks
+
+Implement the `ILogSink` interface to create a custom sink:
+
+```csharp
+using TUnit.Core;
+using TUnit.Core.Logging;
+
+public class FileLogSink : ILogSink, IAsyncDisposable
+{
+    private readonly StreamWriter _writer;
+
+    public FileLogSink(string filePath)
+    {
+        _writer = new StreamWriter(filePath, append: true);
+    }
+
+    public bool IsEnabled(LogLevel level)
+    {
+        // Return false to skip processing for performance
+        return level >= LogLevel.Information;
+    }
+
+    public void Log(LogLevel level, string message, Exception? exception, Context? context)
+    {
+        // Get test name from context if available
+        var testName = context is TestContext tc
+            ? tc.TestDetails.TestName
+            : "Unknown";
+
+        _writer.WriteLine($"[{DateTime.Now:HH:mm:ss}] [{level}] [{testName}] {message}");
+
+        if (exception != null)
+        {
+            _writer.WriteLine(exception.ToString());
+        }
+    }
+
+    public ValueTask LogAsync(LogLevel level, string message, Exception? exception, Context? context)
+    {
+        Log(level, message, exception, context);
+        return ValueTask.CompletedTask;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _writer.FlushAsync();
+        await _writer.DisposeAsync();
+    }
+}
+```
+
+### Registering Custom Sinks
+
+Register your sink in a `[Before(Assembly)]` hook so it's active before any tests run:
+
+```csharp
+public class TestSetup
+{
+    [Before(Assembly)]
+    public static void SetupLogging()
+    {
+        // Register by instance (for sinks needing configuration)
+        TUnitLoggerFactory.AddSink(new FileLogSink("test-output.log"));
+
+        // Or register by type (for simple sinks)
+        TUnitLoggerFactory.AddSink<DebugLogSink>();
+    }
+}
+```
+
+Sinks that implement `IDisposable` or `IAsyncDisposable` are automatically disposed when the test session ends.
+
+### Context Information
+
+The `context` parameter provides information about where the log originated:
+
+```csharp
+public void Log(LogLevel level, string message, Exception? exception, Context? context)
+{
+    switch (context)
+    {
+        case TestContext tc:
+            // During test execution
+            var testName = tc.TestDetails.TestName;
+            var className = tc.TestDetails.ClassType.Name;
+            break;
+
+        case ClassHookContext chc:
+            // During [Before(Class)] or [After(Class)] hooks
+            var classType = chc.ClassType;
+            break;
+
+        case AssemblyHookContext ahc:
+            // During [Before(Assembly)] or [After(Assembly)] hooks
+            var assembly = ahc.Assembly;
+            break;
+
+        case null:
+            // Outside test execution
+            break;
+    }
+}
+```
+
+### Example: Seq/Serilog Integration
+
+Here's an example sink that sends logs to Seq:
+
+```csharp
+public class SeqLogSink : ILogSink, IDisposable
+{
+    private readonly Serilog.ILogger _logger;
+
+    public SeqLogSink(string seqUrl)
+    {
+        _logger = new LoggerConfiguration()
+            .WriteTo.Seq(seqUrl)
+            .CreateLogger();
+    }
+
+    public bool IsEnabled(LogLevel level) => true;
+
+    public void Log(LogLevel level, string message, Exception? exception, Context? context)
+    {
+        var serilogLevel = level switch
+        {
+            LogLevel.Trace => Serilog.Events.LogEventLevel.Verbose,
+            LogLevel.Debug => Serilog.Events.LogEventLevel.Debug,
+            LogLevel.Information => Serilog.Events.LogEventLevel.Information,
+            LogLevel.Warning => Serilog.Events.LogEventLevel.Warning,
+            LogLevel.Error => Serilog.Events.LogEventLevel.Error,
+            LogLevel.Critical => Serilog.Events.LogEventLevel.Fatal,
+            _ => Serilog.Events.LogEventLevel.Information
+        };
+
+        var testName = context is TestContext tc ? tc.TestDetails.TestName : "Unknown";
+
+        _logger
+            .ForContext("TestName", testName)
+            .Write(serilogLevel, exception, message);
+    }
+
+    public ValueTask LogAsync(LogLevel level, string message, Exception? exception, Context? context)
+    {
+        Log(level, message, exception, context);
+        return ValueTask.CompletedTask;
+    }
+
+    public void Dispose()
+    {
+        (_logger as IDisposable)?.Dispose();
+    }
+}
+```
+
+## Log Levels
+
+TUnit uses the same log level as provided to the Microsoft.Testing.Platform via command line:
+
+```bash
 dotnet run --log-level Warning
 ```
 
-The above will show only logs that are `Warning` or higher (e.g. `Error`, `Critical`) while executing the test.
+Available levels (from least to most severe):
+- `Trace`
+- `Debug`
+- `Information` (default)
+- `Warning`
+- `Error`
+- `Critical`
 
 ## Custom Loggers
 
-The `DefaultLogger` class is designed to be extensible. You can inherit from it to customize message formatting and output behavior.
-
-### Available Extension Points
-
-- `Context` - Protected property to access the associated context
-- `GenerateMessage(string message, Exception? exception, LogLevel logLevel)` - Override to customize message formatting
-- `WriteToOutput(string message, bool isError)` - Override to customize how messages are written
-- `WriteToOutputAsync(string message, bool isError)` - Async version of WriteToOutput
-
-### Example: Adding Test Headers
-
-Here's an example of a custom logger that prepends a test identifier header before the first log message:
+You can also create custom loggers by inheriting from `DefaultLogger`:
 
 ```csharp
 public class TestHeaderLogger : DefaultLogger
@@ -13591,42 +13767,12 @@ public class TestHeaderLogger : DefaultLogger
 }
 ```
 
-### Using Custom Loggers
+### Available Extension Points
 
-Create an instance of your custom logger and use it directly:
-
-```csharp
-[Test]
-public async Task MyTest()
-{
-    var logger = new TestHeaderLogger(TestContext.Current!);
-    logger.LogInformation("This message will have a test header");
-    logger.LogInformation("Subsequent messages won't repeat the header");
-}
-```
-
-### Example: Custom Output Destinations
-
-You can override the write methods to send output to additional destinations:
-
-```csharp
-public class MultiDestinationLogger : DefaultLogger
-{
-    private readonly TextWriter _additionalOutput;
-
-    public MultiDestinationLogger(Context context, TextWriter additionalOutput)
-        : base(context)
-    {
-        _additionalOutput = additionalOutput;
-    }
-
-    protected override void WriteToOutput(string message, bool isError)
-    {
-        base.WriteToOutput(message, isError);
-        _additionalOutput.WriteLine(message);
-    }
-}
-```
+- `Context` - Protected property to access the associated context
+- `GenerateMessage(message, exception, logLevel)` - Override to customize message formatting
+- `WriteToOutput(message, isError)` - Override to customize synchronous output
+- `WriteToOutputAsync(message, isError)` - Override for asynchronous output
 
 ---
 
