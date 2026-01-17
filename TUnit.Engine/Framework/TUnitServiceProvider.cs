@@ -26,6 +26,8 @@ using TUnit.Engine.Scheduling;
 using TUnit.Engine.Services;
 using TUnit.Engine.Services.TestExecution;
 
+#pragma warning disable TPEXP // Experimental API - GetClientInfo
+
 namespace TUnit.Engine.Framework;
 
 internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
@@ -104,8 +106,11 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             loggerFactory.CreateLogger<TUnitFrameworkLogger>(),
             logLevelProvider));
 
-        // Register the built-in log sink for streaming logs to IDEs
-        TUnitLoggerFactory.AddSink(new OutputDeviceLogSink(outputDevice, extension));
+        // Register the built-in log sink for streaming logs to IDEs (skip for console clients)
+        if (!IsConsoleClient(frameworkServiceProvider))
+        {
+            TUnitLoggerFactory.AddSink(new OutputDeviceLogSink(outputDevice, extension));
+        }
 
         // Create initialization services using Lazy<T> to break circular dependencies
         // No more two-phase initialization with Initialize() calls
@@ -315,5 +320,19 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         await TUnitLoggerFactory.DisposeAllAsync().ConfigureAwait(false);
 
         TestExtensions.ClearCaches();
+    }
+
+    private static bool IsConsoleClient(IServiceProvider serviceProvider)
+    {
+        try
+        {
+            var clientInfo = serviceProvider.GetClientInfo();
+            return clientInfo.Id.Contains("console", StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            // If we can't determine, default to console behavior (skip IDE streaming)
+            return true;
+        }
     }
 }
