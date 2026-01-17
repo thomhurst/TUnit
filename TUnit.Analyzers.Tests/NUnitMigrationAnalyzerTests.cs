@@ -1555,8 +1555,8 @@ public class NUnitMigrationAnalyzerTests
                 public class MyClass
                 {
                     [Test]
-                    [Arguments(1, DisplayName = "Test One", Skip = "Temporarily disabled", Categories = ["Unit"])]
-                    [Arguments(2, DisplayName = "Test Two", Skip = "WIP", Categories = ["Integration"])]
+                    [Arguments(1, DisplayName = "Test One", Categories = ["Unit"], Skip = "Temporarily disabled")]
+                    [Arguments(2, DisplayName = "Test Two", Categories = ["Integration"], Skip = "WIP")]
                     public async Task MyTest(int value)
                     {
                         await Assert.That(value > 0).IsTrue();
@@ -1593,7 +1593,7 @@ public class NUnitMigrationAnalyzerTests
                 public class MyClass
                 {
                     [Test]
-                    [Arguments(1, DisplayName = "Full featured test", Skip = "Testing migration", Categories = ["Comprehensive"])]
+                    [Arguments(1, DisplayName = "Full featured test", Categories = ["Comprehensive"], Skip = "Testing migration")]
                     [Property("Description", "A complete test case")]
                     [Property("Author", "Developer")]
                     public async Task MyTest(int value)
@@ -1811,10 +1811,9 @@ public class NUnitMigrationAnalyzerTests
     }
 
     [Test]
-    public async Task NUnit_ThrowsAsync_WithUnrecognizedConstraint_PreservesAction()
+    public async Task NUnit_ThrowsAsync_WithIsInstanceOf_Converted()
     {
-        // Test that unrecognized constraint patterns still preserve the action lambda
-        // This tests the fallback path in ConvertNUnitThrows
+        // Test that Is.InstanceOf<T>() constraint is recognized and converted to ThrowsAsync<T>
         await CodeFixer.VerifyCodeFixAsync(
             """
                 using NUnit.Framework;
@@ -1825,10 +1824,10 @@ public class NUnitMigrationAnalyzerTests
                     [Test]
                     public void TestMethod()
                     {
-                        // Using Is.InstanceOf which is not recognized by TryExtractTypeFromConstraint
+                        // Is.InstanceOf<T>() is recognized and the type is extracted
                         Assert.ThrowsAsync(Is.InstanceOf<ArgumentException>(), async () => await SomeMethod());
                     }
-                    
+
                     private async System.Threading.Tasks.Task SomeMethod()
                     {
                         await System.Threading.Tasks.Task.Delay(1);
@@ -1846,10 +1845,10 @@ public class NUnitMigrationAnalyzerTests
                     [Test]
                     public async Task TestMethod()
                     {
-                        // Using Is.InstanceOf which is not recognized by TryExtractTypeFromConstraint
-                        await Assert.That(async () => await SomeMethod()).Throws();
+                        // Is.InstanceOf<T>() is recognized and the type is extracted
+                        await Assert.ThrowsAsync<ArgumentException>(async () => await SomeMethod());
                     }
-                    
+
                     private async System.Threading.Tasks.Task SomeMethod()
                     {
                         await System.Threading.Tasks.Task.Delay(1);
@@ -2954,6 +2953,110 @@ public class NUnitMigrationAnalyzerTests
                     {
                         Assert.That(key).IsNotNull().Wait();
                         value = 42;
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_Method_With_Ref_Parameter_Multiple_Assertions_Uses_Wait()
+    {
+        // Multiple assertions in a method with ref parameters should all use .Wait()
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void MyTest()
+                    {
+                        int value = 0;
+                        ProcessValue(ref value);
+                    }
+
+                    private static void ProcessValue(ref int value)
+                    {
+                        Assert.That(value, Is.EqualTo(0));
+                        value = 42;
+                        Assert.That(value, Is.EqualTo(42));
+                        Assert.That(value, Is.GreaterThan(0));
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+
+                public class MyClass
+                {
+                    [Test]
+                    public void MyTest()
+                    {
+                        int value = 0;
+                        ProcessValue(ref value);
+                    }
+
+                    private static void ProcessValue(ref int value)
+                    {
+                        Assert.That(value).IsEqualTo(0).Wait();
+                        value = 42;
+                        Assert.That(value).IsEqualTo(42).Wait();
+                        Assert.That(value).IsGreaterThan(0).Wait();
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_AssertMultiple_Inside_Ref_Parameter_Method_Uses_Wait()
+    {
+        // Assert.Multiple inside a method with ref parameters - assertions should use .Wait()
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void MyTest()
+                    {
+                        int value = 42;
+                        ValidateValue(ref value);
+                    }
+
+                    private static void ValidateValue(ref int value)
+                    {
+                        Assert.Multiple(() =>
+                        {
+                            Assert.That(value, Is.GreaterThan(0));
+                            Assert.That(value, Is.LessThan(100));
+                        });
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+
+                public class MyClass
+                {
+                    [Test]
+                    public void MyTest()
+                    {
+                        int value = 42;
+                        ValidateValue(ref value);
+                    }
+
+                    private static void ValidateValue(ref int value)
+                    {
+                        using (Assert.Multiple())
+                        {
+                            Assert.That(value).IsGreaterThan(0).Wait();
+                            Assert.That(value).IsLessThan(100).Wait();
+                        }
                     }
                 }
                 """,

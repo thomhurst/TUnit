@@ -180,7 +180,7 @@ public static class MigrationHelpers
     {
         var namespacesToRemove = framework switch
         {
-            "XUnit" => new[] { "Xunit", "Xunit.Abstractions" },
+            "XUnit" => new[] { "Xunit", "Xunit.Abstractions", "Xunit.Sdk" },
             "NUnit" => new[] { "NUnit.Framework", "NUnit.Framework.Legacy" },
             "MSTest" => new[] { "Microsoft.VisualStudio.TestTools.UnitTesting" },
             _ => Array.Empty<string>()

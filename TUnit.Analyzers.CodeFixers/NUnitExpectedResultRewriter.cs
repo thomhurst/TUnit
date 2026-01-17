@@ -524,10 +524,11 @@ public class NUnitExpectedResultRewriter : CSharpSyntaxRewriter
             newArgs.Add(categoriesArg);
         }
 
-        var newAttribute = attribute.WithArgumentList(
+        // Create a new Arguments attribute (renamed from TestCase)
+        var newAttribute = SyntaxFactory.Attribute(
+            SyntaxFactory.IdentifierName("Arguments"),
             SyntaxFactory.AttributeArgumentList(SyntaxFactory.SeparatedList(newArgs)));
 
-        // The attribute will be renamed to "Arguments" by the existing attribute rewriter
         return newAttribute;
     }
 

@@ -1,4 +1,5 @@
 using System.Collections;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.Conditions;
@@ -642,5 +643,235 @@ public static class Assert
         {
             throw new AssertionException($"Expected {expression ?? "value"} to be null, but it was {value.Value}");
         }
+    }
+
+    /// <summary>
+    /// Asserts that an <see cref="INotifyPropertyChanged"/> object raises the <see cref="INotifyPropertyChanged.PropertyChanged"/>
+    /// event for the specified property when the action is executed.
+    /// Example: Assert.PropertyChanged(viewModel, "Name", () => viewModel.Name = "new value");
+    /// </summary>
+    /// <param name="object">The object implementing INotifyPropertyChanged to monitor</param>
+    /// <param name="propertyName">The name of the property expected to change</param>
+    /// <param name="action">The action that should trigger the PropertyChanged event</param>
+    /// <exception cref="AssertionException">Thrown if the PropertyChanged event is not raised for the specified property</exception>
+    public static void PropertyChanged(
+        INotifyPropertyChanged @object,
+        string propertyName,
+        Action action)
+    {
+        var propertyChanged = false;
+
+        void Handler(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == propertyName)
+            {
+                propertyChanged = true;
+            }
+        }
+
+        @object.PropertyChanged += Handler;
+        try
+        {
+            action();
+        }
+        finally
+        {
+            @object.PropertyChanged -= Handler;
+        }
+
+        if (!propertyChanged)
+        {
+            throw new AssertionException($"Expected PropertyChanged event for property '{propertyName}' but it was not raised");
+        }
+    }
+
+    /// <summary>
+    /// Asserts that an <see cref="INotifyPropertyChanged"/> object raises the <see cref="INotifyPropertyChanged.PropertyChanged"/>
+    /// event for the specified property when the async action is executed.
+    /// Example: await Assert.PropertyChangedAsync(viewModel, "Name", async () => await viewModel.UpdateNameAsync("new value"));
+    /// </summary>
+    /// <param name="object">The object implementing INotifyPropertyChanged to monitor</param>
+    /// <param name="propertyName">The name of the property expected to change</param>
+    /// <param name="action">The async action that should trigger the PropertyChanged event</param>
+    /// <exception cref="AssertionException">Thrown if the PropertyChanged event is not raised for the specified property</exception>
+    public static async Task PropertyChangedAsync(
+        INotifyPropertyChanged @object,
+        string propertyName,
+        Func<Task> action)
+    {
+        var propertyChanged = false;
+
+        void Handler(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == propertyName)
+            {
+                propertyChanged = true;
+            }
+        }
+
+        @object.PropertyChanged += Handler;
+        try
+        {
+            await action().ConfigureAwait(false);
+        }
+        finally
+        {
+            @object.PropertyChanged -= Handler;
+        }
+
+        if (!propertyChanged)
+        {
+            throw new AssertionException($"Expected PropertyChanged event for property '{propertyName}' but it was not raised");
+        }
+    }
+
+    /// <summary>
+    /// Asserts that an event is raised when the action is executed and returns information about the raised event.
+    /// Example: var raised = Assert.Raises&lt;EventArgs&gt;(h => obj.Event += h, h => obj.Event -= h, () => obj.TriggerEvent());
+    /// </summary>
+    /// <typeparam name="T">The type of the event arguments</typeparam>
+    /// <param name="attach">Action to attach the event handler</param>
+    /// <param name="detach">Action to detach the event handler</param>
+    /// <param name="action">The action that should trigger the event</param>
+    /// <returns>A <see cref="RaisedEvent{T}"/> containing the sender and event arguments</returns>
+    /// <exception cref="AssertionException">Thrown if the event is not raised</exception>
+    public static RaisedEvent<T> Raises<T>(
+        Action<EventHandler<T>> attach,
+        Action<EventHandler<T>> detach,
+        Action action)
+        where T : EventArgs
+    {
+        RaisedEvent<T>? result = null;
+
+        void Handler(object? sender, T args)
+        {
+            result = new RaisedEvent<T>(sender, args);
+        }
+
+        attach(Handler);
+        try
+        {
+            action();
+        }
+        finally
+        {
+            detach(Handler);
+        }
+
+        if (result == null)
+        {
+            throw new AssertionException($"Expected event of type {typeof(T).Name} to be raised but it was not");
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Asserts that an event is raised when the async action is executed and returns information about the raised event.
+    /// Example: var raised = await Assert.RaisesAsync&lt;EventArgs&gt;(h => obj.Event += h, h => obj.Event -= h, async () => await obj.TriggerEventAsync());
+    /// </summary>
+    /// <typeparam name="T">The type of the event arguments</typeparam>
+    /// <param name="attach">Action to attach the event handler</param>
+    /// <param name="detach">Action to detach the event handler</param>
+    /// <param name="action">The async action that should trigger the event</param>
+    /// <returns>A <see cref="RaisedEvent{T}"/> containing the sender and event arguments</returns>
+    /// <exception cref="AssertionException">Thrown if the event is not raised</exception>
+    public static async Task<RaisedEvent<T>> RaisesAsync<T>(
+        Action<EventHandler<T>> attach,
+        Action<EventHandler<T>> detach,
+        Func<Task> action)
+        where T : EventArgs
+    {
+        RaisedEvent<T>? result = null;
+
+        void Handler(object? sender, T args)
+        {
+            result = new RaisedEvent<T>(sender, args);
+        }
+
+        attach(Handler);
+        try
+        {
+            await action().ConfigureAwait(false);
+        }
+        finally
+        {
+            detach(Handler);
+        }
+
+        if (result == null)
+        {
+            throw new AssertionException($"Expected event of type {typeof(T).Name} to be raised but it was not");
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Asserts that an event is raised (with any event args matching the constraint) when the action is executed.
+    /// Example: var raised = Assert.RaisesAny&lt;EventArgs&gt;(h => obj.Event += h, h => obj.Event -= h, () => obj.TriggerEvent());
+    /// </summary>
+    /// <typeparam name="T">The base type of the event arguments (will match any derived type)</typeparam>
+    /// <param name="attach">Action to attach the event handler</param>
+    /// <param name="detach">Action to detach the event handler</param>
+    /// <param name="action">The action that should trigger the event</param>
+    /// <returns>A <see cref="RaisedEvent{T}"/> containing the sender and event arguments</returns>
+    /// <exception cref="AssertionException">Thrown if the event is not raised</exception>
+    public static RaisedEvent<T> RaisesAny<T>(
+        Action<EventHandler<T>> attach,
+        Action<EventHandler<T>> detach,
+        Action action)
+        where T : EventArgs
+    {
+        // RaisesAny has the same implementation as Raises but the semantic is that it matches any derived type
+        return Raises(attach, detach, action);
+    }
+
+    /// <summary>
+    /// Asserts that an event is raised (with any event args matching the constraint) when the async action is executed.
+    /// Example: var raised = await Assert.RaisesAnyAsync&lt;EventArgs&gt;(h => obj.Event += h, h => obj.Event -= h, async () => await obj.TriggerEventAsync());
+    /// </summary>
+    /// <typeparam name="T">The base type of the event arguments (will match any derived type)</typeparam>
+    /// <param name="attach">Action to attach the event handler</param>
+    /// <param name="detach">Action to detach the event handler</param>
+    /// <param name="action">The async action that should trigger the event</param>
+    /// <returns>A <see cref="RaisedEvent{T}"/> containing the sender and event arguments</returns>
+    /// <exception cref="AssertionException">Thrown if the event is not raised</exception>
+    public static Task<RaisedEvent<T>> RaisesAnyAsync<T>(
+        Action<EventHandler<T>> attach,
+        Action<EventHandler<T>> detach,
+        Func<Task> action)
+        where T : EventArgs
+    {
+        // RaisesAnyAsync has the same implementation as RaisesAsync but the semantic is that it matches any derived type
+        return RaisesAsync(attach, detach, action);
+    }
+}
+
+/// <summary>
+/// Represents the result of a raised event, containing the sender and event arguments.
+/// </summary>
+/// <typeparam name="T">The type of the event arguments</typeparam>
+public class RaisedEvent<T> where T : EventArgs
+{
+    /// <summary>
+    /// Gets the sender of the event.
+    /// </summary>
+    public object? Sender { get; }
+
+    /// <summary>
+    /// Gets the event arguments.
+    /// </summary>
+    public T Arguments { get; }
+
+    /// <summary>
+    /// Creates a new instance of <see cref="RaisedEvent{T}"/>.
+    /// </summary>
+    /// <param name="sender">The sender of the event</param>
+    /// <param name="arguments">The event arguments</param>
+    public RaisedEvent(object? sender, T arguments)
+    {
+        Sender = sender;
+        Arguments = arguments;
     }
 }

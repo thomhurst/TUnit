@@ -4,6 +4,8 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Analyzers.CodeFixers.Base;
+using TUnit.Analyzers.CodeFixers.Base.TwoPhase;
+using TUnit.Analyzers.CodeFixers.TwoPhase;
 using TUnit.Analyzers.Migrators.Base;
 
 namespace TUnit.Analyzers.CodeFixers;
@@ -14,7 +16,17 @@ public class MSTestMigrationCodeFixProvider : BaseMigrationCodeFixProvider
     protected override string FrameworkName => "MSTest";
     protected override string DiagnosticId => Rules.MSTestMigration.Id;
     protected override string CodeFixTitle => "Convert MSTest code to TUnit";
-    
+
+    protected override bool ShouldAddTUnitUsings() => true;
+
+    protected override MigrationAnalyzer? CreateTwoPhaseAnalyzer(SemanticModel semanticModel, Compilation compilation)
+    {
+        return new MSTestTwoPhaseAnalyzer(semanticModel, compilation);
+    }
+
+    // The following methods are required by the base class but are only used in the legacy
+    // conversion path. The two-phase analyzer handles these conversions directly.
+
     protected override AttributeRewriter CreateAttributeRewriter(Compilation compilation)
     {
         return new MSTestAttributeRewriter();
@@ -40,6 +52,20 @@ public class MSTestMigrationCodeFixProvider : BaseMigrationCodeFixProvider
         // Handle [ExpectedException] attribute conversion
         var expectedExceptionRewriter = new MSTestExpectedExceptionRewriter();
         compilationUnit = (CompilationUnitSyntax)expectedExceptionRewriter.Visit(compilationUnit);
+
+        return compilationUnit;
+    }
+
+    protected override CompilationUnitSyntax ApplyTwoPhasePostTransformations(CompilationUnitSyntax compilationUnit)
+    {
+        // Handle [ExpectedException] attribute conversion - this is a syntax-only transformation
+        // that converts [ExpectedException(typeof(T))] to await Assert.ThrowsAsync<T>()
+        var expectedExceptionRewriter = new MSTestExpectedExceptionRewriter();
+        compilationUnit = (CompilationUnitSyntax)expectedExceptionRewriter.Visit(compilationUnit);
+
+        // Handle lifecycle method transformations - removes TestContext parameter
+        var lifecycleRewriter = new MSTestLifecycleRewriter();
+        compilationUnit = (CompilationUnitSyntax)lifecycleRewriter.Visit(compilationUnit);
 
         return compilationUnit;
     }
@@ -950,15 +976,31 @@ public class MSTestLifecycleRewriter : CSharpSyntaxRewriter
     public override SyntaxNode? VisitMethodDeclaration(MethodDeclarationSyntax node)
     {
         // Handle ClassInitialize, ClassCleanup, TestInitialize, TestCleanup - remove TestContext parameter where applicable
-        var lifecycleAttributes = node.AttributeLists
+        // Also check for the converted TUnit attribute names (Before/After with HookType.Class)
+        var allAttributes = node.AttributeLists
             .SelectMany(al => al.Attributes)
+            .ToList();
+
+        var lifecycleAttributeNames = allAttributes
             .Select(a => MigrationHelpers.GetAttributeName(a))
             .ToList();
 
-        var hasClassLifecycle = lifecycleAttributes.Any(name => name is "ClassInitialize" or "ClassCleanup");
-        var hasTestLifecycle = lifecycleAttributes.Any(name => name is "TestInitialize" or "TestCleanup");
+        var hasClassLifecycle = lifecycleAttributeNames.Any(name => name is "ClassInitialize" or "ClassCleanup");
+        var hasTestLifecycle = lifecycleAttributeNames.Any(name => name is "TestInitialize" or "TestCleanup");
 
-        if (hasClassLifecycle || hasTestLifecycle)
+        // Also check for converted TUnit attributes: [Before(HookType.Class)] or [After(HookType.Class)]
+        var hasTUnitClassLifecycle = allAttributes.Any(a =>
+        {
+            var attrName = MigrationHelpers.GetAttributeName(a);
+            if (attrName is not ("Before" or "After"))
+                return false;
+
+            // Check if it has HookType.Class argument
+            return a.ArgumentList?.Arguments.Any(arg =>
+                arg.Expression.ToString().Contains("HookType.Class")) == true;
+        });
+
+        if (hasClassLifecycle || hasTestLifecycle || hasTUnitClassLifecycle)
         {
             // Remove TestContext parameter if present
             var parameters = node.ParameterList?.Parameters ?? default;
@@ -973,8 +1015,8 @@ public class MSTestLifecycleRewriter : CSharpSyntaxRewriter
                 node = node.AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword));
             }
 
-            // Make sure ClassInitialize/ClassCleanup are static
-            if (hasClassLifecycle && !node.Modifiers.Any(SyntaxKind.StaticKeyword))
+            // Make sure ClassInitialize/ClassCleanup are static (and converted TUnit class-level hooks)
+            if ((hasClassLifecycle || hasTUnitClassLifecycle) && !node.Modifiers.Any(SyntaxKind.StaticKeyword))
             {
                 node = node.AddModifiers(SyntaxFactory.Token(SyntaxKind.StaticKeyword));
             }
@@ -1022,11 +1064,31 @@ public class MSTestExpectedExceptionRewriter : CSharpSyntaxRewriter
             return node.WithAttributeLists(SyntaxFactory.List(newAttributeLists));
         }
 
-        return node
+        var result = node
             .WithAttributeLists(SyntaxFactory.List(newAttributeLists))
             .WithBody(newBody)
             .WithExpressionBody(null)
             .WithSemicolonToken(default);
+
+        // If the method isn't already async, make it async Task
+        var isAlreadyAsync = result.Modifiers.Any(m => m.IsKind(SyntaxKind.AsyncKeyword));
+        if (!isAlreadyAsync)
+        {
+            var asyncModifier = SyntaxFactory.Token(SyntaxKind.AsyncKeyword).WithTrailingTrivia(SyntaxFactory.Space);
+            var newModifiers = result.Modifiers.Add(asyncModifier);
+            result = result.WithModifiers(newModifiers);
+
+            // Change void to Task
+            if (result.ReturnType is PredefinedTypeSyntax predefined &&
+                predefined.Keyword.IsKind(SyntaxKind.VoidKeyword))
+            {
+                var taskReturnType = SyntaxFactory.IdentifierName("Task")
+                    .WithTrailingTrivia(result.ReturnType.GetTrailingTrivia());
+                result = result.WithReturnType(taskReturnType);
+            }
+        }
+
+        return result;
     }
 
     private static TypeSyntax? ExtractExceptionType(AttributeSyntax attribute)

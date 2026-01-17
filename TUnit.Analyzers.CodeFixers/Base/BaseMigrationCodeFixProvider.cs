@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using TUnit.Analyzers.CodeFixers.Base.TwoPhase;
 using TUnit.Analyzers.Migrators.Base;
 
 namespace TUnit.Analyzers.CodeFixers.Base;
@@ -48,72 +49,317 @@ public abstract class BaseMigrationCodeFixProvider : CodeFixProvider
 
         var compilation = semanticModel.Compilation;
 
+        // Check if this framework supports the new two-phase architecture
+        var analyzer = CreateTwoPhaseAnalyzer(semanticModel, compilation);
+        if (analyzer != null)
+        {
+            return await ConvertCodeWithTwoPhaseAsync(document, compilationUnit, analyzer, root);
+        }
+
+        // Fall back to the legacy rewriter-based approach
+        return await ConvertCodeWithRewritersAsync(document, compilationUnit, semanticModel, compilation, root);
+    }
+
+    /// <summary>
+    /// Creates a two-phase migration analyzer for this framework.
+    /// Override in derived classes to enable the two-phase architecture.
+    /// Returns null to use the legacy rewriter-based approach.
+    /// </summary>
+    protected virtual MigrationAnalyzer? CreateTwoPhaseAnalyzer(SemanticModel semanticModel, Compilation compilation)
+    {
+        return null;
+    }
+
+    /// <summary>
+    /// New two-phase architecture: Analyze first (while semantic model valid), then transform (pure syntax).
+    /// This avoids semantic model staleness issues that plague the rewriter-based approach.
+    /// </summary>
+    private async Task<Document> ConvertCodeWithTwoPhaseAsync(
+        Document document,
+        CompilationUnitSyntax compilationUnit,
+        MigrationAnalyzer analyzer,
+        SyntaxNode? originalRoot)
+    {
+        // Phase 1: Analyze - collect all conversion targets while semantic model is valid
+        // Returns annotated root (nodes marked for conversion) and the conversion plan
+        var (annotatedRoot, plan) = analyzer.Analyze(compilationUnit);
+
+        // Phase 2: Transform - apply conversions using only syntax operations
+        // Uses annotations to find nodes, no semantic model needed
+        var transformer = new MigrationTransformer(plan, FrameworkName);
+        var transformedRoot = transformer.Transform(annotatedRoot);
+
+        // Phase 2.5: Apply framework-specific syntax-only transformations
+        // These use CSharpSyntaxRewriter but don't need the semantic model
+        transformedRoot = ApplyTwoPhasePostTransformations(transformedRoot);
+
+        // Phase 2.6: Re-check usings after post-transformations
+        // Post-transformations like NUnitExpectedResultRewriter may introduce async code
+        // that wasn't present during the initial usings transformation
+        transformedRoot = MigrationHelpers.AddTUnitUsings(transformedRoot);
+
+        // Final cleanup (pure syntax operations)
+        transformedRoot = CleanupClassMemberLeadingTrivia(transformedRoot);
+        transformedRoot = CleanupEndOfFileTrivia(transformedRoot);
+        transformedRoot = NormalizeLineEndings(transformedRoot, originalRoot!);
+
+        // Add TODO comments for any failures
+        if (plan.HasFailures)
+        {
+            transformedRoot = AddTwoPhaseFailureTodoComments(transformedRoot, plan);
+        }
+
+        return document.WithSyntaxRoot(transformedRoot);
+    }
+
+    /// <summary>
+    /// Apply framework-specific post-transformations after the main two-phase processing.
+    /// These should be pure syntax operations that don't require the semantic model.
+    /// Override in derived classes to add framework-specific transformations.
+    /// </summary>
+    protected virtual CompilationUnitSyntax ApplyTwoPhasePostTransformations(CompilationUnitSyntax compilationUnit)
+    {
+        return compilationUnit;
+    }
+
+    /// <summary>
+    /// Legacy rewriter-based approach for frameworks that haven't migrated to two-phase yet.
+    /// </summary>
+    private async Task<Document> ConvertCodeWithRewritersAsync(
+        Document document,
+        CompilationUnitSyntax compilationUnit,
+        SemanticModel semanticModel,
+        Compilation compilation,
+        SyntaxNode? root)
+    {
+        var context = new MigrationContext();
+
+        // Step 1: Collect interface-implementing methods BEFORE any syntax modifications
+        // while the semantic model is still valid for the original syntax tree
+        var interfaceImplementingMethods = TryCollectInterfaceMethods(
+            compilationUnit, semanticModel, context);
+
+        // Step 2: Convert assertions FIRST (while semantic model still matches the syntax tree)
+        compilationUnit = TryApplyRewriter(
+            compilationUnit,
+            () => CreateAssertionRewriter(semanticModel, compilation),
+            context,
+            "AssertionConversion");
+
+        // Step 3: Framework-specific conversions (also use semantic model while it still matches)
+        compilationUnit = TryApplyFrameworkSpecific(
+            compilationUnit, semanticModel, compilation, context);
+
+        // Step 4: Fix method signatures that now contain await but aren't marked async
+        // Pass the collected interface methods to avoid converting interface implementations
+        compilationUnit = TryApplyRewriter(
+            compilationUnit,
+            () => new AsyncMethodSignatureRewriter(interfaceImplementingMethods),
+            context,
+            "AsyncSignatureFix");
+
+        // Step 5: Remove unnecessary base classes and interfaces
+        compilationUnit = TryApplyRewriter(
+            compilationUnit,
+            () => CreateBaseTypeRewriter(semanticModel, compilation),
+            context,
+            "BaseTypeRemoval");
+
+        // Step 6: Update lifecycle methods
+        compilationUnit = TryApplyRewriter(
+            compilationUnit,
+            () => CreateLifecycleRewriter(compilation),
+            context,
+            "LifecycleConversion");
+
+        // Step 7: Convert attributes
+        compilationUnit = TryApplyRewriter(
+            compilationUnit,
+            () => CreateAttributeRewriter(compilation),
+            context,
+            "AttributeConversion");
+
+        // Step 8: Ensure [Test] attribute is present when data attributes exist (NUnit-specific)
+        if (ShouldEnsureTestAttribute())
+        {
+            compilationUnit = TryApplyRewriter(
+                compilationUnit,
+                () => new TestAttributeEnsurer(),
+                context,
+                "TestAttributeEnsurer");
+        }
+
+        // Step 9: Remove framework usings and add TUnit usings (do this LAST)
+        // These are pure syntax operations with minimal risk
+        compilationUnit = MigrationHelpers.RemoveFrameworkUsings(compilationUnit, FrameworkName);
+
+        if (ShouldAddTUnitUsings())
+        {
+            compilationUnit = MigrationHelpers.AddTUnitUsings(compilationUnit);
+        }
+        else
+        {
+            // Even if not adding TUnit usings, always add System.Threading.Tasks if there's async code
+            compilationUnit = MigrationHelpers.AddSystemThreadingTasksUsing(compilationUnit);
+        }
+
+        // Step 10: Clean up trivia issues that can occur after transformations
+        compilationUnit = CleanupClassMemberLeadingTrivia(compilationUnit);
+        compilationUnit = CleanupEndOfFileTrivia(compilationUnit);
+
+        // Normalize line endings to match original document (fixes cross-platform issues)
+        compilationUnit = NormalizeLineEndings(compilationUnit, root);
+
+        // Add TODO comments for any failures so users know what needs manual attention
+        if (context.HasFailures)
+        {
+            compilationUnit = AddFailureTodoComments(compilationUnit, context);
+        }
+
+        // Return the document with updated syntax root, preserving original formatting
+        return document.WithSyntaxRoot(compilationUnit);
+    }
+
+    /// <summary>
+    /// Safely collects interface-implementing methods before any syntax modifications.
+    /// </summary>
+    private static HashSet<string> TryCollectInterfaceMethods(
+        CompilationUnitSyntax root,
+        SemanticModel semanticModel,
+        MigrationContext context)
+    {
         try
         {
-            // IMPORTANT: Collect interface-implementing methods BEFORE any syntax modifications
-            // while the semantic model is still valid for the original syntax tree
-            var interfaceImplementingMethods = AsyncMethodSignatureRewriter.CollectInterfaceImplementingMethods(
-                compilationUnit, semanticModel);
-
-            // Convert assertions FIRST (while semantic model still matches the syntax tree)
-            var assertionRewriter = CreateAssertionRewriter(semanticModel, compilation);
-            compilationUnit = (CompilationUnitSyntax)assertionRewriter.Visit(compilationUnit);
-
-            // Framework-specific conversions (also use semantic model while it still matches)
-            compilationUnit = ApplyFrameworkSpecificConversions(compilationUnit, semanticModel, compilation);
-
-            // Fix method signatures that now contain await but aren't marked async
-            // Pass the collected interface methods to avoid converting interface implementations
-            var asyncSignatureRewriter = new AsyncMethodSignatureRewriter(interfaceImplementingMethods);
-            compilationUnit = (CompilationUnitSyntax)asyncSignatureRewriter.Visit(compilationUnit);
-
-            // Remove unnecessary base classes and interfaces
-            var baseTypeRewriter = CreateBaseTypeRewriter(semanticModel, compilation);
-            compilationUnit = (CompilationUnitSyntax)baseTypeRewriter.Visit(compilationUnit);
-
-            // Update lifecycle methods
-            var lifecycleRewriter = CreateLifecycleRewriter(compilation);
-            compilationUnit = (CompilationUnitSyntax)lifecycleRewriter.Visit(compilationUnit);
-
-            // Convert attributes
-            var attributeRewriter = CreateAttributeRewriter(compilation);
-            compilationUnit = (CompilationUnitSyntax)attributeRewriter.Visit(compilationUnit);
-
-            // Ensure [Test] attribute is present when data attributes exist (NUnit-specific)
-            if (ShouldEnsureTestAttribute())
-            {
-                var testAttributeEnsurer = new TestAttributeEnsurer();
-                compilationUnit = (CompilationUnitSyntax)testAttributeEnsurer.Visit(compilationUnit);
-            }
-
-            // Remove framework usings and add TUnit usings (do this LAST)
-            compilationUnit = MigrationHelpers.RemoveFrameworkUsings(compilationUnit, FrameworkName);
-
-            if (ShouldAddTUnitUsings())
-            {
-                compilationUnit = MigrationHelpers.AddTUnitUsings(compilationUnit);
-            }
-            else
-            {
-                // Even if not adding TUnit usings, always add System.Threading.Tasks if there's async code
-                compilationUnit = MigrationHelpers.AddSystemThreadingTasksUsing(compilationUnit);
-            }
-
-            // Clean up trivia issues that can occur after transformations
-            compilationUnit = CleanupClassMemberLeadingTrivia(compilationUnit);
-            compilationUnit = CleanupEndOfFileTrivia(compilationUnit);
-
-            // Normalize line endings to match original document (fixes cross-platform issues)
-            compilationUnit = NormalizeLineEndings(compilationUnit, root);
-
-            // Return the document with updated syntax root, preserving original formatting
-            return document.WithSyntaxRoot(compilationUnit);
+            return AsyncMethodSignatureRewriter.CollectInterfaceImplementingMethods(root, semanticModel);
         }
-        catch
+        catch (Exception ex)
         {
-            // If any transformation fails, return the original document unchanged
-            return document;
+            context.RecordFailure("CollectInterfaceMethods", ex);
+            return new HashSet<string>();
         }
+    }
+
+    /// <summary>
+    /// Safely applies a syntax rewriter, recording any failures to the migration context.
+    /// </summary>
+    private static CompilationUnitSyntax TryApplyRewriter(
+        CompilationUnitSyntax root,
+        Func<CSharpSyntaxRewriter> rewriterFactory,
+        MigrationContext context,
+        string stepName)
+    {
+        try
+        {
+            var rewriter = rewriterFactory();
+            return (CompilationUnitSyntax)rewriter.Visit(root);
+        }
+        catch (Exception ex)
+        {
+            context.RecordFailure(stepName, ex);
+            return root; // Return unchanged, continue with other steps
+        }
+    }
+
+    /// <summary>
+    /// Safely applies framework-specific conversions, recording any failures.
+    /// </summary>
+    private CompilationUnitSyntax TryApplyFrameworkSpecific(
+        CompilationUnitSyntax root,
+        SemanticModel semanticModel,
+        Compilation compilation,
+        MigrationContext context)
+    {
+        try
+        {
+            return ApplyFrameworkSpecificConversions(root, semanticModel, compilation);
+        }
+        catch (Exception ex)
+        {
+            context.RecordFailure("FrameworkSpecificConversions", ex);
+            return root;
+        }
+    }
+
+    /// <summary>
+    /// Adds TODO comments at the top of the file summarizing migration failures.
+    /// This helps users identify what needs manual attention.
+    /// </summary>
+    private static CompilationUnitSyntax AddFailureTodoComments(
+        CompilationUnitSyntax root,
+        MigrationContext context)
+    {
+        // Group failures by step and create summary comments
+        var failureSummary = context.Failures
+            .GroupBy(f => f.Step)
+            .Select(g => $"// TODO: TUnit migration - {g.Key}: {g.Count()} item(s) could not be converted automatically")
+            .ToList();
+
+        if (failureSummary.Count == 0)
+        {
+            return root;
+        }
+
+        // Add header comment
+        var commentTrivia = new List<SyntaxTrivia>
+        {
+            SyntaxFactory.Comment("// ============================================================"),
+            SyntaxFactory.EndOfLine("\n"),
+            SyntaxFactory.Comment("// TUnit Migration: Some items require manual attention"),
+            SyntaxFactory.EndOfLine("\n")
+        };
+
+        // Add failure summary lines
+        foreach (var summary in failureSummary)
+        {
+            commentTrivia.Add(SyntaxFactory.Comment(summary));
+            commentTrivia.Add(SyntaxFactory.EndOfLine("\n"));
+        }
+
+        commentTrivia.Add(SyntaxFactory.Comment("// ============================================================"));
+        commentTrivia.Add(SyntaxFactory.EndOfLine("\n"));
+        commentTrivia.Add(SyntaxFactory.EndOfLine("\n"));
+
+        var existingTrivia = root.GetLeadingTrivia();
+        return root.WithLeadingTrivia(SyntaxFactory.TriviaList(commentTrivia).AddRange(existingTrivia));
+    }
+
+    /// <summary>
+    /// Adds TODO comments for failures from the two-phase architecture's ConversionPlan.
+    /// </summary>
+    private static CompilationUnitSyntax AddTwoPhaseFailureTodoComments(
+        CompilationUnitSyntax root,
+        ConversionPlan plan)
+    {
+        var failureSummary = plan.Failures
+            .GroupBy(f => f.Phase)
+            .Select(g => $"// TODO: TUnit migration - {g.Key}: {g.Count()} item(s) could not be converted automatically")
+            .ToList();
+
+        if (failureSummary.Count == 0)
+        {
+            return root;
+        }
+
+        var commentTrivia = new List<SyntaxTrivia>
+        {
+            SyntaxFactory.Comment("// ============================================================"),
+            SyntaxFactory.EndOfLine("\n"),
+            SyntaxFactory.Comment("// TUnit Migration: Some items require manual attention"),
+            SyntaxFactory.EndOfLine("\n")
+        };
+
+        foreach (var summary in failureSummary)
+        {
+            commentTrivia.Add(SyntaxFactory.Comment(summary));
+            commentTrivia.Add(SyntaxFactory.EndOfLine("\n"));
+        }
+
+        commentTrivia.Add(SyntaxFactory.Comment("// ============================================================"));
+        commentTrivia.Add(SyntaxFactory.EndOfLine("\n"));
+        commentTrivia.Add(SyntaxFactory.EndOfLine("\n"));
+
+        var existingTrivia = root.GetLeadingTrivia();
+        return root.WithLeadingTrivia(SyntaxFactory.TriviaList(commentTrivia).AddRange(existingTrivia));
     }
 
     protected abstract AttributeRewriter CreateAttributeRewriter(Compilation compilation);

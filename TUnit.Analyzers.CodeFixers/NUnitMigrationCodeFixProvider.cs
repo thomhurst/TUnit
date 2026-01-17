@@ -4,6 +4,8 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Analyzers.CodeFixers.Base;
+using TUnit.Analyzers.CodeFixers.Base.TwoPhase;
+using TUnit.Analyzers.CodeFixers.TwoPhase;
 using TUnit.Analyzers.Migrators.Base;
 
 namespace TUnit.Analyzers.CodeFixers;
@@ -57,6 +59,31 @@ public class NUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
     /// NUnit allows [TestCase] alone, but TUnit requires [Test] + [Arguments].
     /// </summary>
     protected override bool ShouldEnsureTestAttribute() => true;
+
+    protected override bool ShouldAddTUnitUsings() => true;
+
+    protected override MigrationAnalyzer? CreateTwoPhaseAnalyzer(SemanticModel semanticModel, Compilation compilation)
+    {
+        return new NUnitTwoPhaseAnalyzer(semanticModel, compilation);
+    }
+
+    protected override CompilationUnitSyntax ApplyTwoPhasePostTransformations(CompilationUnitSyntax compilationUnit)
+    {
+        // Transform ExpectedResult patterns (TestCase with ExpectedResult → Arguments with assertion)
+        // The ExpectedResultRewriter doesn't actually need the semantic model (it's kept for API compatibility)
+        var expectedResultRewriter = new NUnitExpectedResultRewriter(null!);
+        compilationUnit = (CompilationUnitSyntax)expectedResultRewriter.Visit(compilationUnit);
+
+        // Handle [ExpectedException] attribute conversion
+        var expectedExceptionRewriter = new NUnitExpectedExceptionRewriter();
+        compilationUnit = (CompilationUnitSyntax)expectedExceptionRewriter.Visit(compilationUnit);
+
+        // Handle Assert.Multiple(() => { ... }) → using (Assert.Multiple()) { ... }
+        var assertMultipleRewriter = new NUnitAssertMultipleRewriter();
+        compilationUnit = (CompilationUnitSyntax)assertMultipleRewriter.Visit(compilationUnit);
+
+        return compilationUnit;
+    }
 }
 
 public class NUnitAttributeRewriter : AttributeRewriter
@@ -2161,11 +2188,34 @@ public class NUnitExpectedExceptionRewriter : CSharpSyntaxRewriter
             return node.WithAttributeLists(SyntaxFactory.List(newAttributeLists));
         }
 
-        return node
+        // Check if the method is already async
+        var isAlreadyAsync = node.Modifiers.Any(m => m.IsKind(SyntaxKind.AsyncKeyword));
+
+        var result = node
             .WithAttributeLists(SyntaxFactory.List(newAttributeLists))
             .WithBody(newBody)
             .WithExpressionBody(null)
             .WithSemicolonToken(default);
+
+        // If not already async, make it async Task
+        if (!isAlreadyAsync)
+        {
+            // Add async modifier
+            var asyncModifier = SyntaxFactory.Token(SyntaxKind.AsyncKeyword).WithTrailingTrivia(SyntaxFactory.Space);
+            var newModifiers = result.Modifiers.Add(asyncModifier);
+            result = result.WithModifiers(newModifiers);
+
+            // Change return type from void to Task
+            if (result.ReturnType is PredefinedTypeSyntax predefined &&
+                predefined.Keyword.IsKind(SyntaxKind.VoidKeyword))
+            {
+                var taskReturnType = SyntaxFactory.IdentifierName("Task")
+                    .WithTrailingTrivia(result.ReturnType.GetTrailingTrivia());
+                result = result.WithReturnType(taskReturnType);
+            }
+        }
+
+        return result;
     }
 
     private static TypeSyntax? ExtractExceptionType(AttributeSyntax attribute)
