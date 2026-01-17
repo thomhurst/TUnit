@@ -77,11 +77,11 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
 
             try
             {
-                var task = Task.Factory.StartNew(async () =>
+                var task = Task.Factory.StartNew(static async action =>
                 {
                     // Inside this task, TaskScheduler.Current will be our scheduler
-                    await action();
-                }, CancellationToken.None, TaskCreationOptions.None, taskScheduler).Unwrap();
+                    await ((Func<ValueTask>)action!)();
+                }, action, CancellationToken.None, TaskCreationOptions.None, taskScheduler).Unwrap();
 
                 // Try fast path first - many tests complete quickly
                 // Use IsCompleted to avoid synchronous wait
