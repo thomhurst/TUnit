@@ -117,15 +117,15 @@ internal static class TestExtensions
     /// </summary>
     internal static TestNode ToTestNodeWithOutput(this TestContext testContext, TestNodeStateProperty stateProperty, string output)
     {
-        return ToTestNodeInternal(testContext, stateProperty, streamingOutput: output);
+        return ToTestNodeInternal(testContext, stateProperty, streamingOutput: output, excludeFinalOutput: false);
     }
 
-    internal static TestNode ToTestNode(this TestContext testContext, TestNodeStateProperty stateProperty)
+    internal static TestNode ToTestNode(this TestContext testContext, TestNodeStateProperty stateProperty, bool excludeFinalOutput = false)
     {
-        return ToTestNodeInternal(testContext, stateProperty, streamingOutput: null);
+        return ToTestNodeInternal(testContext, stateProperty, streamingOutput: null, excludeFinalOutput: excludeFinalOutput);
     }
 
-    private static TestNode ToTestNodeInternal(TestContext testContext, TestNodeStateProperty stateProperty, string? streamingOutput)
+    private static TestNode ToTestNodeInternal(TestContext testContext, TestNodeStateProperty stateProperty, string? streamingOutput, bool excludeFinalOutput)
     {
         var testDetails = testContext.Metadata.TestDetails ?? throw new ArgumentNullException(nameof(testContext.Metadata.TestDetails));
 
@@ -173,9 +173,10 @@ internal static class TestExtensions
                 properties.Add(new StandardOutputProperty(streamingOutput));
             }
         }
-        else if (isFinalState)
+        else if (isFinalState && !excludeFinalOutput)
         {
-            // Final state: include all accumulated output
+            // Final state: include all accumulated output (unless excluded for IDE clients
+            // that already received streamed output)
             output = testContext.GetStandardOutput();
             error = testContext.GetErrorOutput();
 

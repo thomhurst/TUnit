@@ -51,7 +51,8 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
             return ValueTask.CompletedTask;
         }
 
-        var testNode = testContext.ToTestNode(PassedTestNodeStateProperty.CachedInstance);
+        // For IDE clients, exclude output from final result since we've already streamed it
+        var testNode = testContext.ToTestNode(PassedTestNodeStateProperty.CachedInstance, excludeFinalOutput: !IsConsole);
 
         return new ValueTask(context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
             sessionUid: _sessionSessionUid,
@@ -72,7 +73,8 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
 
         var updateType = GetFailureStateProperty(testContext, exception, duration ?? TimeSpan.Zero);
 
-        var testNode = testContext.ToTestNode(updateType);
+        // For IDE clients, exclude output from final result since we've already streamed it
+        var testNode = testContext.ToTestNode(updateType, excludeFinalOutput: !IsConsole);
 
         return new ValueTask(context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
             sessionUid: _sessionSessionUid,
@@ -101,7 +103,8 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
 
     public ValueTask Skipped(TestContext testContext, string reason)
     {
-        var testNode = testContext.ToTestNode(new SkippedTestNodeStateProperty(reason));
+        // For IDE clients, exclude output from final result since we've already streamed it
+        var testNode = testContext.ToTestNode(new SkippedTestNodeStateProperty(reason), excludeFinalOutput: !IsConsole);
 
         return new ValueTask(context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
             sessionUid: _sessionSessionUid,
@@ -111,7 +114,8 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
 
     public ValueTask Cancelled(TestContext testContext, DateTimeOffset start)
     {
-        var testNode = testContext.ToTestNode(new CancelledTestNodeStateProperty());
+        // For IDE clients, exclude output from final result since we've already streamed it
+        var testNode = testContext.ToTestNode(new CancelledTestNodeStateProperty(), excludeFinalOutput: !IsConsole);
 
         return new ValueTask(context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
             sessionUid: _sessionSessionUid,
