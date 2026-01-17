@@ -311,6 +311,9 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         _services.Clear();
 
+        // Dispose all log sinks (flushes any remaining logs)
+        await TUnitLoggerFactory.DisposeAllAsync().ConfigureAwait(false);
+
         TestExtensions.ClearCaches();
     }
 }
