@@ -20,13 +20,12 @@ internal class IdeOutputLogSink : ILogSink
 
     public void Log(LogLevel level, string message, Exception? exception, Context? context)
     {
-        // Fire and forget - the async call will complete in background
         _ = LogAsync(level, message, exception, context);
     }
 
     public async ValueTask LogAsync(LogLevel level, string message, Exception? exception, Context? context)
     {
-        if (!IsEnabled(level))
+        if (!IsEnabled(level) || string.IsNullOrEmpty(message))
         {
             return;
         }
@@ -37,7 +36,7 @@ internal class IdeOutputLogSink : ILogSink
             return;
         }
 
-        // Send an output update to the IDE
-        await _messageBus.OutputUpdate(testContext).ConfigureAwait(false);
+        // Send just the new output to the IDE
+        await _messageBus.OutputUpdate(testContext, message).ConfigureAwait(false);
     }
 }

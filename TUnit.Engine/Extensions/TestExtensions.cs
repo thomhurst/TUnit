@@ -113,19 +113,19 @@ internal static class TestExtensions
     }
 
     /// <summary>
-    /// Creates a test node with output for real-time streaming (used during InProgress state).
+    /// Creates a test node with specific output for real-time streaming (used during InProgress state).
     /// </summary>
-    internal static TestNode ToTestNodeWithOutput(this TestContext testContext, TestNodeStateProperty stateProperty)
+    internal static TestNode ToTestNodeWithOutput(this TestContext testContext, TestNodeStateProperty stateProperty, string output)
     {
-        return ToTestNodeInternal(testContext, stateProperty, includeOutput: true);
+        return ToTestNodeInternal(testContext, stateProperty, streamingOutput: output);
     }
 
     internal static TestNode ToTestNode(this TestContext testContext, TestNodeStateProperty stateProperty)
     {
-        return ToTestNodeInternal(testContext, stateProperty, includeOutput: false);
+        return ToTestNodeInternal(testContext, stateProperty, streamingOutput: null);
     }
 
-    private static TestNode ToTestNodeInternal(TestContext testContext, TestNodeStateProperty stateProperty, bool includeOutput)
+    private static TestNode ToTestNodeInternal(TestContext testContext, TestNodeStateProperty stateProperty, string? streamingOutput)
     {
         var testDetails = testContext.Metadata.TestDetails ?? throw new ArgumentNullException(nameof(testContext.Metadata.TestDetails));
 
@@ -165,8 +165,13 @@ internal static class TestExtensions
         string? output = null;
         string? error = null;
 
-        // Include output if it's final state OR if explicitly requested for real-time streaming
-        if (isFinalState || includeOutput)
+        // For streaming output (real-time), use the provided output directly
+        // For final state, get the accumulated output from context
+        if (streamingOutput is not null)
+        {
+            properties.Add(new StandardOutputProperty(streamingOutput));
+        }
+        else if (isFinalState)
         {
             output = testContext.GetStandardOutput();
             error = testContext.GetErrorOutput();

@@ -57,5 +57,6 @@ internal interface ITUnitMessageBus
     /// This allows IDEs to display test output in real-time.
     /// </summary>
     /// <param name="testContext">The test context.</param>
-    ValueTask OutputUpdate(TestContext testContext);
+    /// <param name="output">The new output to send.</param>
+    ValueTask OutputUpdate(TestContext testContext, string output);
 }

@@ -131,10 +131,10 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
         ));
     }
 
-    public ValueTask OutputUpdate(TestContext testContext)
+    public ValueTask OutputUpdate(TestContext testContext, string output)
     {
-        // Send an InProgress update with the current output to stream to IDEs
-        var testNode = testContext.ToTestNodeWithOutput(InProgressTestNodeStateProperty.CachedInstance);
+        // Send an InProgress update with just the new output to stream to IDEs
+        var testNode = testContext.ToTestNodeWithOutput(InProgressTestNodeStateProperty.CachedInstance, output);
 
         return new ValueTask(context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
             sessionUid: _sessionSessionUid,
