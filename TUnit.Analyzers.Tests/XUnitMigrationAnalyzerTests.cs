@@ -98,7 +98,8 @@ public class XUnitMigrationAnalyzerTests
 
                   public class MyClass
                   {
-                      [Test, Skip("Reason")]
+                      [Test]
+                      [Skip("Reason")]
                       public void MyTest()
                       {
                       }
@@ -237,7 +238,8 @@ public class XUnitMigrationAnalyzerTests
 
                 public class MyType;
 
-                [ClassDataSource<MyType>(Shared = SharedType.Keyed, Key = "MyCollection"), NotInParallel]
+                [ClassDataSource<MyType>(Shared = SharedType.Keyed, Key = "MyCollection")]
+                [NotInParallel]
                 public class MyClass
                 {
                     [Test]
@@ -1710,7 +1712,8 @@ public class XUnitMigrationAnalyzerTests
                         await Assert.That(str).Contains("lo Wo");
                     }
 
-                    [Test, Skip("This test is temporarily disabled")]
+                    [Test]
+                    [Skip("This test is temporarily disabled")]
                     public async Task SkippedTest()
                     {
                         await Assert.That(false).IsTrue().Because("Should not run");
@@ -1731,6 +1734,361 @@ public class XUnitMigrationAnalyzerTests
                     public async Task BooleanTest(bool value)
                     {
                         await Assert.That(value).IsEqualTo(value);
+                    }
+                }
+                """,
+            ConfigureXUnitTest
+        );
+    }
+
+    [Test]
+    public async Task XUnit_Method_With_Ref_Parameter_Not_Converted_To_Async()
+    {
+        // Test that methods with ref parameters use .Wait() instead of await
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                {|#0:using Xunit;
+
+                public class MyClass
+                {
+                    [Fact]
+                    public void MyTest()
+                    {
+                        bool realized = false;
+                        HandleRealized(this, ref realized);
+                    }
+
+                    private static void HandleRealized(object sender, ref bool realized)
+                    {
+                        Assert.NotNull(sender);
+                        realized = true;
+                    }
+                }|}
+                """,
+            Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+            """
+
+                public class MyClass
+                {
+                    [Test]
+                    public void MyTest()
+                    {
+                        bool realized = false;
+                        HandleRealized(this, ref realized);
+                    }
+
+                    private static void HandleRealized(object sender, ref bool realized)
+                    {
+                        Assert.That(sender).IsNotNull().Wait();
+                        realized = true;
+                    }
+                }
+                """,
+            ConfigureXUnitTest
+        );
+    }
+
+    [Test]
+    public async Task XUnit_Method_With_Out_Parameter_Not_Converted_To_Async()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                {|#0:using Xunit;
+
+                public class MyClass
+                {
+                    [Fact]
+                    public void MyTest()
+                    {
+                        TryGetValue("key", out int value);
+                        Assert.Equal(42, value);
+                    }
+
+                    private static void TryGetValue(string key, out int value)
+                    {
+                        Assert.NotNull(key);
+                        value = 42;
+                    }
+                }|}
+                """,
+            Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task MyTest()
+                    {
+                        TryGetValue("key", out int value);
+                        await Assert.That(value).IsEqualTo(42);
+                    }
+
+                    private static void TryGetValue(string key, out int value)
+                    {
+                        Assert.That(key).IsNotNull().Wait();
+                        value = 42;
+                    }
+                }
+                """,
+            ConfigureXUnitTest
+        );
+    }
+
+    [Test]
+    public async Task XUnit_InterfaceImplementation_NotConvertedToAsync()
+    {
+        // Methods that implement interface members should NOT be converted to async
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                {|#0:using Xunit;
+                using System.Threading.Tasks;
+
+                public interface ITestRunner
+                {
+                    void Run();
+                }
+
+                public class MyClass : ITestRunner
+                {
+                    [Fact]
+                    public void TestMethod()
+                    {
+                        Assert.True(true);
+                    }
+
+                    public void Run()
+                    {
+                        // This implements ITestRunner.Run() and should stay void
+                        var x = 1;
+                    }
+                }|}
+                """,
+            Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+
+                public interface ITestRunner
+                {
+                    void Run();
+                }
+
+                public class MyClass : ITestRunner
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        await Assert.That(true).IsTrue();
+                    }
+
+                    public void Run()
+                    {
+                        // This implements ITestRunner.Run() and should stay void
+                        var x = 1;
+                    }
+                }
+                """,
+            ConfigureXUnitTest
+        );
+    }
+
+    [Test]
+    public async Task XUnit_Nested_Class_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                {|#0:using Xunit;
+
+                public class OuterClass
+                {
+                    public class InnerTests
+                    {
+                        [Fact]
+                        public void InnerTest()
+                        {
+                            Assert.True(true);
+                        }
+                    }
+
+                    [Fact]
+                    public void OuterTest()
+                    {
+                        Assert.False(false);
+                    }
+                }|}
+                """,
+            Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+
+                public class OuterClass
+                {
+                    public class InnerTests
+                    {
+                        [Test]
+                        public async Task InnerTest()
+                        {
+                            await Assert.That(true).IsTrue();
+                        }
+                    }
+
+                    [Test]
+                    public async Task OuterTest()
+                    {
+                        await Assert.That(false).IsFalse();
+                    }
+                }
+                """,
+            ConfigureXUnitTest
+        );
+    }
+
+    [Test]
+    public async Task XUnit_Multiple_Classes_In_File_All_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                {|#0:using Xunit;
+
+                public class FirstTestClass
+                {
+                    [Fact]
+                    public void FirstTest()
+                    {
+                        Assert.True(true);
+                    }
+                }
+
+                public class SecondTestClass
+                {
+                    [Fact]
+                    public void SecondTest()
+                    {
+                        Assert.False(false);
+                    }
+                }
+
+                public class ThirdTestClass
+                {
+                    [Fact]
+                    public void ThirdTest()
+                    {
+                        Assert.Equal(1, 1);
+                    }
+                }|}
+                """,
+            Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+
+                public class FirstTestClass
+                {
+                    [Test]
+                    public async Task FirstTest()
+                    {
+                        await Assert.That(true).IsTrue();
+                    }
+                }
+
+                public class SecondTestClass
+                {
+                    [Test]
+                    public async Task SecondTest()
+                    {
+                        await Assert.That(false).IsFalse();
+                    }
+                }
+
+                public class ThirdTestClass
+                {
+                    [Test]
+                    public async Task ThirdTest()
+                    {
+                        await Assert.That(1).IsEqualTo(1);
+                    }
+                }
+                """,
+            ConfigureXUnitTest
+        );
+    }
+
+    [Test]
+    public async Task XUnit_Record_Exception_DoesNotThrow_Pattern()
+    {
+        // Record.Exception returning null is equivalent to DoesNotThrow
+        // The migration converts Record.Exception to a try-catch pattern
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                {|#0:using Xunit;
+
+                public class MyClass
+                {
+                    [Fact]
+                    public void TestMethod()
+                    {
+                        int x = 1;
+                        int y = 2;
+                        var ex = Record.Exception(() => x += y);
+                        Assert.Null(ex);
+                    }
+                }|}
+                """,
+            Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        int x = 1;
+                        int y = 2;
+                        Exception? ex = null;
+                        try
+                        {
+                            x += y;
+                        }
+                        catch (Exception e)
+                        {
+                            ex = e;
+                        }
+                        await Assert.That(ex).IsNull();
+                    }
+                }
+                """,
+            ConfigureXUnitTest
+        );
+    }
+
+    [Test]
+    public async Task XUnit_Generic_Test_Class_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                {|#0:using Xunit;
+
+                public class GenericTestClass<T>
+                {
+                    [Fact]
+                    public void GenericTest()
+                    {
+                        var instance = default(T);
+                        Assert.Equal(default(T), instance);
+                    }
+                }|}
+                """,
+            Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+
+                public class GenericTestClass<T>
+                {
+                    [Test]
+                    public async Task GenericTest()
+                    {
+                        var instance = default(T);
+                        await Assert.That(instance).IsEqualTo(default(T));
                     }
                 }
                 """,

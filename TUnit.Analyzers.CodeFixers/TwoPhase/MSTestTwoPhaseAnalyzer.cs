@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -33,6 +34,16 @@ public class MSTestTwoPhaseAnalyzer : MigrationAnalyzer
     private static readonly HashSet<string> MSTestStringAssertMethods = new()
     {
         "Contains", "StartsWith", "EndsWith", "Matches", "DoesNotMatch"
+    };
+
+    private static readonly HashSet<string> MSTestFileAssertMethods = new()
+    {
+        "Exists", "DoesNotExist"
+    };
+
+    private static readonly HashSet<string> MSTestDirectoryAssertMethods = new()
+    {
+        "Exists", "DoesNotExist"
     };
 
     private static readonly HashSet<string> MSTestAttributeNames = new()
@@ -85,6 +96,18 @@ public class MSTestTwoPhaseAnalyzer : MigrationAnalyzer
                 {
                     return VerifyMSTestNamespace(invocation);
                 }
+
+                // Check FileAssert methods
+                if (typeName == "FileAssert" && MSTestFileAssertMethods.Contains(methodName))
+                {
+                    return VerifyMSTestNamespace(invocation);
+                }
+
+                // Check DirectoryAssert methods
+                if (typeName == "DirectoryAssert" && MSTestDirectoryAssertMethods.Contains(methodName))
+                {
+                    return VerifyMSTestNamespace(invocation);
+                }
             }
         }
 
@@ -124,6 +147,8 @@ public class MSTestTwoPhaseAnalyzer : MigrationAnalyzer
             "Assert" => ConvertAssertMethod(methodName, arguments, memberAccess),
             "CollectionAssert" => ConvertCollectionAssertMethod(methodName, arguments),
             "StringAssert" => ConvertStringAssertMethod(methodName, arguments),
+            "FileAssert" => ConvertFileAssertMethod(methodName, arguments),
+            "DirectoryAssert" => ConvertDirectoryAssertMethod(methodName, arguments),
             _ => (AssertionConversionKind.Unknown, null, false, null)
         };
 
@@ -171,13 +196,17 @@ public class MSTestTwoPhaseAnalyzer : MigrationAnalyzer
         var actual = args[1].Expression.ToString();
 
         // Check for message parameter (3rd or later)
-        string? message = args.Count >= 3 ? GetMessageArgument(args, 2) : null;
+        var (message, hasComparer) = GetMessageWithFormatArgs(args, 2);
+
+        string? todoComment = hasComparer
+            ? "// TODO: TUnit migration - IEqualityComparer was used. TUnit uses .IsEqualTo() which may have different comparison semantics."
+            : null;
 
         var assertion = message != null
             ? $"await Assert.That({actual}).IsEqualTo({expected}).Because({message})"
             : $"await Assert.That({actual}).IsEqualTo({expected})";
 
-        return (AssertionConversionKind.AreEqual, assertion, true, null);
+        return (AssertionConversionKind.AreEqual, assertion, true, todoComment);
     }
 
     private (AssertionConversionKind, string?, bool, string?) ConvertAreNotEqual(SeparatedSyntaxList<ArgumentSyntax> args)
@@ -186,13 +215,17 @@ public class MSTestTwoPhaseAnalyzer : MigrationAnalyzer
 
         var expected = args[0].Expression.ToString();
         var actual = args[1].Expression.ToString();
-        string? message = args.Count >= 3 ? GetMessageArgument(args, 2) : null;
+        var (message, hasComparer) = GetMessageWithFormatArgs(args, 2);
+
+        string? todoComment = hasComparer
+            ? "// TODO: TUnit migration - IEqualityComparer was used. TUnit uses .IsNotEqualTo() which may have different comparison semantics."
+            : null;
 
         var assertion = message != null
             ? $"await Assert.That({actual}).IsNotEqualTo({expected}).Because({message})"
             : $"await Assert.That({actual}).IsNotEqualTo({expected})";
 
-        return (AssertionConversionKind.AreNotEqual, assertion, true, null);
+        return (AssertionConversionKind.AreNotEqual, assertion, true, todoComment);
     }
 
     private (AssertionConversionKind, string?, bool, string?) ConvertAreSame(SeparatedSyntaxList<ArgumentSyntax> args)
@@ -623,10 +656,108 @@ public class MSTestTwoPhaseAnalyzer : MigrationAnalyzer
         return (AssertionConversionKind.StringDoesNotMatch, assertion, true, null);
     }
 
+    private (AssertionConversionKind, string?, bool, string?) ConvertFileAssertMethod(
+        string methodName, SeparatedSyntaxList<ArgumentSyntax> args)
+    {
+        if (args.Count < 1)
+            return (AssertionConversionKind.Unknown, null, false, null);
+
+        var fileArg = args[0].Expression.ToString();
+        string? message = args.Count >= 2 ? GetMessageArgument(args, 1) : null;
+
+        // MSTest FileAssert methods take a FileInfo argument
+        // FileAssert.Exists(file) -> Assert.That(file.Exists).IsTrue()
+        // FileAssert.DoesNotExist(file) -> Assert.That(file.Exists).IsFalse()
+        return methodName switch
+        {
+            "Exists" => message != null
+                ? (AssertionConversionKind.True, $"await Assert.That({fileArg}.Exists).IsTrue().Because({message})", true, null)
+                : (AssertionConversionKind.True, $"await Assert.That({fileArg}.Exists).IsTrue()", true, null),
+            "DoesNotExist" => message != null
+                ? (AssertionConversionKind.False, $"await Assert.That({fileArg}.Exists).IsFalse().Because({message})", true, null)
+                : (AssertionConversionKind.False, $"await Assert.That({fileArg}.Exists).IsFalse()", true, null),
+            _ => (AssertionConversionKind.Unknown, null, false, $"// TODO: TUnit migration - FileAssert.{methodName} has no direct equivalent")
+        };
+    }
+
+    private (AssertionConversionKind, string?, bool, string?) ConvertDirectoryAssertMethod(
+        string methodName, SeparatedSyntaxList<ArgumentSyntax> args)
+    {
+        if (args.Count < 1)
+            return (AssertionConversionKind.Unknown, null, false, null);
+
+        var dirArg = args[0].Expression.ToString();
+        string? message = args.Count >= 2 ? GetMessageArgument(args, 1) : null;
+
+        // MSTest DirectoryAssert methods take a DirectoryInfo argument
+        // DirectoryAssert.Exists(dir) -> Assert.That(dir.Exists).IsTrue()
+        // DirectoryAssert.DoesNotExist(dir) -> Assert.That(dir.Exists).IsFalse()
+        return methodName switch
+        {
+            "Exists" => message != null
+                ? (AssertionConversionKind.True, $"await Assert.That({dirArg}.Exists).IsTrue().Because({message})", true, null)
+                : (AssertionConversionKind.True, $"await Assert.That({dirArg}.Exists).IsTrue()", true, null),
+            "DoesNotExist" => message != null
+                ? (AssertionConversionKind.False, $"await Assert.That({dirArg}.Exists).IsFalse().Because({message})", true, null)
+                : (AssertionConversionKind.False, $"await Assert.That({dirArg}.Exists).IsFalse()", true, null),
+            _ => (AssertionConversionKind.Unknown, null, false, $"// TODO: TUnit migration - DirectoryAssert.{methodName} has no direct equivalent")
+        };
+    }
+
+    /// <summary>
+    /// Gets the message argument, handling format strings and detecting comparer usage.
+    /// Returns (message, hasComparer) where message is wrapped in string.Format if format args present.
+    /// </summary>
+    private static (string? message, bool hasComparer) GetMessageWithFormatArgs(SeparatedSyntaxList<ArgumentSyntax> args, int startIndex)
+    {
+        if (args.Count <= startIndex)
+            return (null, false);
+
+        var arg = args[startIndex];
+
+        // Check if it's named "message"
+        if (arg.NameColon?.Name.Identifier.Text == "message")
+        {
+            return (arg.Expression.ToString(), false);
+        }
+
+        // Check if it's a string literal (potential format string or simple message)
+        if (arg.Expression is LiteralExpressionSyntax literal &&
+            literal.IsKind(SyntaxKind.StringLiteralExpression))
+        {
+            var messageString = arg.Expression.ToString();
+
+            // Check if there are format arguments after the message (4+ total args means format string)
+            if (args.Count > startIndex + 1)
+            {
+                // Collect format args
+                var formatArgs = new List<string>();
+                for (int i = startIndex + 1; i < args.Count; i++)
+                {
+                    formatArgs.Add(args[i].Expression.ToString());
+                }
+                // Wrap in string.Format
+                return ($"string.Format({messageString}, {string.Join(", ", formatArgs)})", false);
+            }
+
+            return (messageString, false);
+        }
+
+        // Check for interpolated string
+        if (arg.Expression is InterpolatedStringExpressionSyntax)
+        {
+            return (arg.Expression.ToString(), false);
+        }
+
+        // Not a string - likely a comparer
+        return (null, true);
+    }
+
+    /// <summary>
+    /// Gets a simple message argument (for methods that don't support format strings like CollectionAssert).
+    /// </summary>
     private static string? GetMessageArgument(SeparatedSyntaxList<ArgumentSyntax> args, int startIndex)
     {
-        // MSTest message parameters can be followed by format args
-        // For now, just return the message if it's a string literal
         if (args.Count > startIndex)
         {
             var arg = args[startIndex];
@@ -635,7 +766,7 @@ public class MSTestTwoPhaseAnalyzer : MigrationAnalyzer
             {
                 return arg.Expression.ToString();
             }
-            // Check if it looks like a string (not a comparer)
+            // Check if it looks like a string
             if (arg.Expression is LiteralExpressionSyntax literal &&
                 literal.IsKind(SyntaxKind.StringLiteralExpression))
             {

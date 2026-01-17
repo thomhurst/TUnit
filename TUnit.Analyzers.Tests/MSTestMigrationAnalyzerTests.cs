@@ -1741,7 +1741,7 @@ public class MSTestMigrationAnalyzerTests
                     }
 
                     [Test]
-                    [Ignore("This test is temporarily disabled")]
+                    [Skip("This test is temporarily disabled")]
                     public async Task IgnoredTest()
                     {
                         await Assert.Fail("Should not run");
@@ -1768,6 +1768,161 @@ public class MSTestMigrationAnalyzerTests
             ConfigureMSTestTest
         );
     }
+
+    [Test]
+    public async Task MSTest_Method_With_Ref_Parameter_Not_Converted_To_Async()
+    {
+        // Test that methods with ref parameters use .Wait() instead of await
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+                {|#0:[TestClass]|}
+                public class MyClass
+                {
+                    [TestMethod]
+                    public void MyTest()
+                    {
+                        bool realized = false;
+                        HandleRealized(this, ref realized);
+                    }
+
+                    private static void HandleRealized(object sender, ref bool realized)
+                    {
+                        Assert.IsNotNull(sender);
+                        realized = true;
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
+            """
+                public class MyClass
+                {
+                    [Test]
+                    public void MyTest()
+                    {
+                        bool realized = false;
+                        HandleRealized(this, ref realized);
+                    }
+
+                    private static void HandleRealized(object sender, ref bool realized)
+                    {
+                        Assert.That(sender).IsNotNull().Wait();
+                        realized = true;
+                    }
+                }
+                """,
+            ConfigureMSTestTest
+        );
+    }
+
+    [Test]
+    public async Task MSTest_Method_With_Out_Parameter_Not_Converted_To_Async()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+                {|#0:[TestClass]|}
+                public class MyClass
+                {
+                    [TestMethod]
+                    public void MyTest()
+                    {
+                        TryGetValue("key", out int value);
+                        Assert.AreEqual(42, value);
+                    }
+
+                    private static void TryGetValue(string key, out int value)
+                    {
+                        Assert.IsNotNull(key);
+                        value = 42;
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task MyTest()
+                    {
+                        TryGetValue("key", out int value);
+                        await Assert.That(value).IsEqualTo(42);
+                    }
+
+                    private static void TryGetValue(string key, out int value)
+                    {
+                        Assert.That(key).IsNotNull().Wait();
+                        value = 42;
+                    }
+                }
+                """,
+            ConfigureMSTestTest
+        );
+    }
+
+    [Test]
+    public async Task MSTest_InterfaceImplementation_NotConvertedToAsync()
+    {
+        // Methods that implement interface members should NOT be converted to async
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+                using System.Threading.Tasks;
+
+                public interface ITestRunner
+                {
+                    void Run();
+                }
+
+                {|#0:[TestClass]|}
+                public class MyClass : ITestRunner
+                {
+                    [TestMethod]
+                    public void TestMethod()
+                    {
+                        Assert.IsTrue(true);
+                    }
+
+                    public void Run()
+                    {
+                        // This implements ITestRunner.Run() and should stay void
+                        var x = 1;
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+
+                public interface ITestRunner
+                {
+                    void Run();
+                }
+                public class MyClass : ITestRunner
+                {
+                    [Test]
+                    public async Task TestMethod()
+                    {
+                        await Assert.That(true).IsTrue();
+                    }
+
+                    public void Run()
+                    {
+                        // This implements ITestRunner.Run() and should stay void
+                        var x = 1;
+                    }
+                }
+                """,
+            ConfigureMSTestTest
+        );
+    }
+
+    // NOTE: MSTest lifecycle visibility changes and DoNotParallelize conversion are not implemented
+    // These features exist in NUnit migration but not MSTest migration
 
     private static void ConfigureMSTestTest(Verifier.Test test)
     {
