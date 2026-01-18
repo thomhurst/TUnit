@@ -197,25 +197,7 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
         };
     }
 
-    private async Task SendOutputUpdateAsync(TestContext testContext, string? output, string? error)
-    {
-        try
-        {
-            var testNode = CreateOutputUpdateNode(testContext, output, error);
-            if (testNode is null)
-            {
-                return;
-            }
-
-            await _messageBus.PublishOutputUpdate(testNode).ConfigureAwait(false);
-        }
-        catch
-        {
-            // Swallow exceptions to prevent disrupting test execution
-        }
-    }
-
-    private static TestNode? CreateOutputUpdateNode(TestContext testContext, string? outputDelta, string? errorDelta)
+    private static TestNode? CreateOutputUpdateNode(TestContext testContext, string? output, string? error)
     {
         // Defensive: ensure TestDetails is available
         if (testContext.TestDetails?.TestId is not { } testId)
@@ -230,14 +212,14 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
             InProgressTestNodeStateProperty.CachedInstance
         };
 
-        if (!string.IsNullOrEmpty(outputDelta))
+        if (!string.IsNullOrEmpty(output))
         {
-            properties.Add(new StandardOutputProperty(outputDelta!));
+            properties.Add(new StandardOutputProperty(output!));
         }
 
-        if (!string.IsNullOrEmpty(errorDelta))
+        if (!string.IsNullOrEmpty(error))
         {
-            properties.Add(new StandardErrorProperty(errorDelta!));
+            properties.Add(new StandardErrorProperty(error!));
         }
 
         return new TestNode
@@ -270,8 +252,6 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
     {
         private int _isDirty;
         private int _isCompleted; // Set to 1 once we detect test completion - never send after this
-        private int _lastOutputPosition;
-        private int _lastErrorPosition;
 
         public TestContext TestContext { get; }
         public Timer? Timer { get; set; }
@@ -304,33 +284,6 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
         /// Returns true if this test has been marked as completed.
         /// </summary>
         public bool IsCompleted => Interlocked.CompareExchange(ref _isCompleted, 0, 0) == 1;
-
-        /// <summary>
-        /// Gets only the new output since the last call (delta).
-        /// IDEs like Rider append each update, so sending deltas builds up the correct output.
-        /// </summary>
-        public (string? Output, string? Error) GetOutputDelta()
-        {
-            var fullOutput = TestContext.GetStandardOutput();
-            var fullError = TestContext.GetErrorOutput();
-
-            string? outputDelta = null;
-            string? errorDelta = null;
-
-            if (!string.IsNullOrEmpty(fullOutput) && fullOutput.Length > _lastOutputPosition)
-            {
-                outputDelta = fullOutput.Substring(_lastOutputPosition);
-                _lastOutputPosition = fullOutput.Length;
-            }
-
-            if (!string.IsNullOrEmpty(fullError) && fullError.Length > _lastErrorPosition)
-            {
-                errorDelta = fullError.Substring(_lastErrorPosition);
-                _lastErrorPosition = fullError.Length;
-            }
-
-            return (outputDelta, errorDelta);
-        }
 
         public void Dispose()
         {
