@@ -117,15 +117,7 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
     {
         try
         {
-            var output = testContext.GetStandardOutput();
-            var error = testContext.GetErrorOutput();
-
-            if (string.IsNullOrEmpty(output) && string.IsNullOrEmpty(error))
-            {
-                return;
-            }
-
-            var testNode = CreateOutputUpdateNode(testContext, output, error);
+            var testNode = CreateOutputUpdateNode(testContext);
             if (testNode is null)
             {
                 return;
@@ -139,7 +131,7 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
         }
     }
 
-    private static TestNode? CreateOutputUpdateNode(TestContext testContext, string? output, string? error)
+    private static TestNode? CreateOutputUpdateNode(TestContext testContext)
     {
         // Defensive: ensure TestDetails is available
         if (testContext.TestDetails?.TestId is not { } testId)
@@ -147,26 +139,15 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
             return null;
         }
 
-        var properties = new List<IProperty>
-        {
-            InProgressTestNodeStateProperty.CachedInstance
-        };
-
-        if (!string.IsNullOrEmpty(output))
-        {
-            properties.Add(new StandardOutputProperty(output!));
-        }
-
-        if (!string.IsNullOrEmpty(error))
-        {
-            properties.Add(new StandardErrorProperty(error!));
-        }
-
+        // Note: We intentionally do NOT include StandardOutputProperty/StandardErrorProperty here.
+        // IDEs like Rider concatenate output from each update rather than replacing it.
+        // The final test result will include the complete output.
+        // This update serves as a "heartbeat" to show the test is still running.
         return new TestNode
         {
             Uid = new TestNodeUid(testId),
             DisplayName = testContext.GetDisplayName(),
-            Properties = new PropertyBag(properties)
+            Properties = new PropertyBag(InProgressTestNodeStateProperty.CachedInstance)
         };
     }
 
