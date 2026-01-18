@@ -14,8 +14,9 @@ namespace TUnit.Engine.Logging;
 /// </summary>
 /// <remarks>
 /// <para>
-/// <b>Cumulative Streaming:</b> Sends full output each update. Rider replaces the displayed
-/// output with each TestNodeUpdateMessage (not concatenates), so cumulative snapshots are needed.
+/// <b>Cumulative Streaming with Heartbeat:</b> Sends full output each update, followed by a
+/// heartbeat (no output). Rider concatenates the previous update with the current update, so
+/// the heartbeat clears the "previous" to prevent duplication on the next content update.
 /// </para>
 /// <para>
 /// <b>Cleanup Strategy:</b> Uses passive cleanup - each timer tick checks if the test
@@ -109,7 +110,9 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
             }
 
             // Send cumulative output snapshot
-            // Rider replaces the displayed output with each update (not concatenates)
+            // Rider concatenates the previous update with the current update.
+            // To prevent duplication, we send a heartbeat (no output) after each content update,
+            // so the next content update concatenates with empty = just the current content.
             var output = state.TestContext.GetStandardOutput();
             var error = state.TestContext.GetErrorOutput();
 
@@ -118,7 +121,7 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
                 return;
             }
 
-            _ = SendOutputUpdateAsync(state.TestContext, output, error);
+            _ = SendOutputUpdateWithFollowUpHeartbeatAsync(state.TestContext, output, error);
         }
         catch
         {
@@ -126,11 +129,53 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
         }
     }
 
-    private async Task SendOutputUpdateAsync(TestContext testContext, string? outputDelta, string? errorDelta)
+    private async Task SendOutputUpdateWithFollowUpHeartbeatAsync(TestContext testContext, string? output, string? error)
     {
         try
         {
-            var testNode = CreateOutputUpdateNode(testContext, outputDelta, errorDelta);
+            var testNode = CreateOutputUpdateNode(testContext, output, error);
+            if (testNode is null)
+            {
+                return;
+            }
+
+            // Send the content update
+            await _messageBus.PublishOutputUpdate(testNode).ConfigureAwait(false);
+
+            // Send a follow-up heartbeat (no output) to clear the "previous update"
+            // This prevents Rider from concatenating this content with the next content update
+            var heartbeat = CreateHeartbeatNode(testContext);
+            if (heartbeat is not null)
+            {
+                await _messageBus.PublishOutputUpdate(heartbeat).ConfigureAwait(false);
+            }
+        }
+        catch
+        {
+            // Swallow exceptions to prevent disrupting test execution
+        }
+    }
+
+    private static TestNode? CreateHeartbeatNode(TestContext testContext)
+    {
+        if (testContext.TestDetails?.TestId is not { } testId)
+        {
+            return null;
+        }
+
+        return new TestNode
+        {
+            Uid = new TestNodeUid(testId),
+            DisplayName = testContext.GetDisplayName(),
+            Properties = new PropertyBag(InProgressTestNodeStateProperty.CachedInstance)
+        };
+    }
+
+    private async Task SendOutputUpdateAsync(TestContext testContext, string? output, string? error)
+    {
+        try
+        {
+            var testNode = CreateOutputUpdateNode(testContext, output, error);
             if (testNode is null)
             {
                 return;
