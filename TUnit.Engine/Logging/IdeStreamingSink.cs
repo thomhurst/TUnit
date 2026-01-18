@@ -12,6 +12,18 @@ namespace TUnit.Engine.Logging;
 /// Sends cumulative output snapshots every 1 second during test execution.
 /// Only activated when running in an IDE environment (not console).
 /// </summary>
+/// <remarks>
+/// <para>
+/// <b>Cleanup Strategy:</b> Uses passive cleanup - each timer tick checks if the test
+/// has completed (Result is not null) and cleans up if so. This avoids the need to
+/// register for test completion events while ensuring timely resource release.
+/// </para>
+/// <para>
+/// <b>Thread Safety:</b> Uses Interlocked operations for the dirty flag and
+/// ConcurrentDictionary for test state tracking. Timer callbacks are wrapped
+/// in try-catch to prevent thread pool crashes.
+/// </para>
+/// </remarks>
 internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
 {
     private readonly TUnitMessageBus _messageBus;
@@ -200,6 +212,8 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
 
         public void Dispose()
         {
+            // Stop timer before disposing to prevent callback race
+            Timer?.Change(Timeout.Infinite, Timeout.Infinite);
             Timer?.Dispose();
         }
     }
