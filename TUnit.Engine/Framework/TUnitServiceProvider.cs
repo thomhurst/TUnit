@@ -152,6 +152,12 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
                 StandardErrorConsoleInterceptor.DefaultError));
         }
 
+        // IdeStreamingSink: For IDE clients - real-time output streaming
+        if (VerbosityService.IsIdeClient)
+        {
+            TUnitLoggerFactory.AddSink(new IdeStreamingSink(MessageBus));
+        }
+
         CancellationToken = Register(new EngineCancellationToken());
 
         EventReceiverOrchestrator = Register(new EventReceiverOrchestrator(Logger));
