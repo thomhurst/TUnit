@@ -249,15 +249,17 @@ public class WaitsForAssertionTests
         // This will take many polls before succeeding
         Func<int> getValue = () => Interlocked.Increment(ref counter);
 
+        // Use a more realistic polling interval (10ms) and target count (20)
+        // On .NET Framework, the minimum timer resolution is ~15ms, making 1ms intervals unreliable
         await Assert.That(getValue).WaitsFor(
-            assert => assert.IsGreaterThan(100),
+            assert => assert.IsGreaterThan(20),
             timeout: TimeSpan.FromSeconds(5),
-            pollingInterval: TimeSpan.FromMilliseconds(1));
+            pollingInterval: TimeSpan.FromMilliseconds(10));
 
         stopwatch.Stop();
 
-        // Should have made at least 100 attempts
-        await Assert.That(counter).IsGreaterThanOrEqualTo(101);
+        // Should have made at least 20 attempts
+        await Assert.That(counter).IsGreaterThanOrEqualTo(21);
 
         // Should complete in a reasonable time (well under 5 seconds)
         await Assert.That(stopwatch.Elapsed).IsLessThan(TimeSpan.FromSeconds(2));
