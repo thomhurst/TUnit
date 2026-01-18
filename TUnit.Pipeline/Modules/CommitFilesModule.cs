@@ -20,7 +20,7 @@ namespace TUnit.Pipeline.Modules;
 [DependsOn<TestNugetPackageModule>]
 [DependsOn<TestFSharpNugetPackageModule>]
 [DependsOn<TestVBNugetPackageModule>]
-[DependsOn<GenerateReadMeModule>(IgnoreIfNotRegistered = true)]
+[DependsOn<GenerateReadMeModule>(Optional = true)]
 [SkipIfDependabot]
 [ModuleCategory("ReadMe")]
 public class CommitFilesModule : Module<CommandResult>

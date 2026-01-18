@@ -11,7 +11,7 @@ namespace TUnit.Pipeline.Modules;
 
 [RunOnLinuxOnly]
 [RunOnlyOnBranch("main")]
-[DependsOn<UploadToNuGetModule>(IgnoreIfNotRegistered = true)]
+[DependsOn<UploadToNuGetModule>(Optional = true)]
 [DependsOn<GenerateVersionModule>]
 public class CreateReleaseModule : Module<Release>
 {
