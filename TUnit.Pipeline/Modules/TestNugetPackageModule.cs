@@ -16,13 +16,11 @@ public class TestNugetPackageModule : AbstractTestNugetPackageModule
     public override string ProjectName => "TUnit.NugetTester.csproj";
 }
 
-[RunOnWindowsOnly, RunOnLinuxOnly]
 public class TestFSharpNugetPackageModule : AbstractTestNugetPackageModule
 {
     public override string ProjectName => "TUnit.NugetTester.FSharp.fsproj";
 }
 
-[RunOnWindowsOnly, RunOnLinuxOnly]
 public class TestVBNugetPackageModule : AbstractTestNugetPackageModule
 {
     public override string ProjectName => "TUnit.NugetTester.VB.vbproj";
