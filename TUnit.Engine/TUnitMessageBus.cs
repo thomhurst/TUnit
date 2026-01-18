@@ -131,6 +131,14 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
         ));
     }
 
+    public ValueTask PublishOutputUpdate(TestNode testNode)
+    {
+        return new ValueTask(context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
+            sessionUid: _sessionSessionUid,
+            testNode: testNode
+        )));
+    }
+
     private static TestNodeStateProperty GetFailureStateProperty(TestContext testContext, Exception e, TimeSpan duration)
     {
         if (testContext.Metadata.TestDetails.Timeout != null
