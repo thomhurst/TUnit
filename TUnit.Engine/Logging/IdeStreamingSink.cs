@@ -34,8 +34,9 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
                 return;
             }
 
-            // Only stream for tests that have started execution
-            if (testContext.TestDetails?.TestId is not { } testId)
+            // Only stream for tests that have started execution (TestStart is set)
+            if (testContext.TestDetails?.TestId is not { } testId ||
+                testContext.Execution.TestStart is null)
             {
                 return;
             }
