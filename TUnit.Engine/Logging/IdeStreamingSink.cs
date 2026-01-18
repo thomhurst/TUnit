@@ -9,10 +9,15 @@ namespace TUnit.Engine.Logging;
 
 /// <summary>
 /// A log sink that streams test output in real-time to IDE test explorers.
-/// Sends cumulative output snapshots every 1 second during test execution.
+/// Sends delta output (new content since last update) every 1 second during test execution.
 /// Only activated when running in an IDE environment (not console).
 /// </summary>
 /// <remarks>
+/// <para>
+/// <b>Delta Streaming:</b> Sends only new output since the last update, not cumulative.
+/// IDEs like Rider concatenate output from each TestNodeUpdateMessage, so sending deltas
+/// builds up the correct output. The final test result contains the complete output.
+/// </para>
 /// <para>
 /// <b>Cleanup Strategy:</b> Uses passive cleanup - each timer tick checks if the test
 /// has completed (Result is not null) and cleans up if so. This avoids the need to
@@ -104,8 +109,14 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
                 return;
             }
 
-            // Send cumulative output snapshot
-            _ = SendOutputUpdateAsync(state.TestContext);
+            // Send delta output (only new content since last update)
+            var (outputDelta, errorDelta) = state.GetOutputDelta();
+            if (outputDelta is null && errorDelta is null)
+            {
+                return;
+            }
+
+            _ = SendOutputUpdateAsync(state.TestContext, outputDelta, errorDelta);
         }
         catch
         {
@@ -113,11 +124,11 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
         }
     }
 
-    private async Task SendOutputUpdateAsync(TestContext testContext)
+    private async Task SendOutputUpdateAsync(TestContext testContext, string? outputDelta, string? errorDelta)
     {
         try
         {
-            var testNode = CreateOutputUpdateNode(testContext);
+            var testNode = CreateOutputUpdateNode(testContext, outputDelta, errorDelta);
             if (testNode is null)
             {
                 return;
@@ -131,7 +142,7 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
         }
     }
 
-    private static TestNode? CreateOutputUpdateNode(TestContext testContext)
+    private static TestNode? CreateOutputUpdateNode(TestContext testContext, string? outputDelta, string? errorDelta)
     {
         // Defensive: ensure TestDetails is available
         if (testContext.TestDetails?.TestId is not { } testId)
@@ -139,15 +150,29 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
             return null;
         }
 
-        // Note: We intentionally do NOT include StandardOutputProperty/StandardErrorProperty here.
-        // IDEs like Rider concatenate output from each update rather than replacing it.
-        // The final test result will include the complete output.
-        // This update serves as a "heartbeat" to show the test is still running.
+        // Build properties list with delta output
+        // We send only new content since the last update (delta) because IDEs like Rider
+        // concatenate output from each update. This way the final result is correct.
+        var properties = new List<IProperty>(3)
+        {
+            InProgressTestNodeStateProperty.CachedInstance
+        };
+
+        if (!string.IsNullOrEmpty(outputDelta))
+        {
+            properties.Add(new StandardOutputProperty(outputDelta!));
+        }
+
+        if (!string.IsNullOrEmpty(errorDelta))
+        {
+            properties.Add(new StandardErrorProperty(errorDelta!));
+        }
+
         return new TestNode
         {
             Uid = new TestNodeUid(testId),
             DisplayName = testContext.GetDisplayName(),
-            Properties = new PropertyBag(InProgressTestNodeStateProperty.CachedInstance)
+            Properties = new PropertyBag(properties)
         };
     }
 
@@ -172,6 +197,8 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
     private sealed class TestStreamingState : IDisposable
     {
         private int _isDirty;
+        private int _lastOutputPosition;
+        private int _lastErrorPosition;
 
         public TestContext TestContext { get; }
         public Timer? Timer { get; set; }
@@ -189,6 +216,33 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
         public bool TryConsumeAndReset()
         {
             return Interlocked.Exchange(ref _isDirty, 0) == 1;
+        }
+
+        /// <summary>
+        /// Gets only the new output since the last call (delta).
+        /// IDEs like Rider append each update, so sending deltas builds up the correct output.
+        /// </summary>
+        public (string? Output, string? Error) GetOutputDelta()
+        {
+            var fullOutput = TestContext.GetStandardOutput();
+            var fullError = TestContext.GetErrorOutput();
+
+            string? outputDelta = null;
+            string? errorDelta = null;
+
+            if (!string.IsNullOrEmpty(fullOutput) && fullOutput.Length > _lastOutputPosition)
+            {
+                outputDelta = fullOutput.Substring(_lastOutputPosition);
+                _lastOutputPosition = fullOutput.Length;
+            }
+
+            if (!string.IsNullOrEmpty(fullError) && fullError.Length > _lastErrorPosition)
+            {
+                errorDelta = fullError.Substring(_lastErrorPosition);
+                _lastErrorPosition = fullError.Length;
+            }
+
+            return (outputDelta, errorDelta);
         }
 
         public void Dispose()
