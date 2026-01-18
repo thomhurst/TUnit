@@ -96,8 +96,17 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
                 return;
             }
 
-            // Passive cleanup: if test completed, dispose and remove
+            // Passive cleanup: if test completed, mark as completed and cleanup
+            // The atomic flag ensures we never send updates after detecting completion
             if (state.TestContext.Result is not null)
+            {
+                state.TryMarkCompleted();
+                CleanupTest(testId, state);
+                return;
+            }
+
+            // Double-check: if already marked completed by another path, don't proceed
+            if (state.IsCompleted)
             {
                 CleanupTest(testId, state);
                 return;
@@ -121,7 +130,7 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
                 return;
             }
 
-            _ = SendOutputUpdateWithFollowUpHeartbeatAsync(state.TestContext, output, error);
+            _ = SendOutputUpdateWithFollowUpHeartbeatAsync(state, output, error);
         }
         catch
         {
@@ -129,10 +138,19 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
         }
     }
 
-    private async Task SendOutputUpdateWithFollowUpHeartbeatAsync(TestContext testContext, string? output, string? error)
+    private async Task SendOutputUpdateWithFollowUpHeartbeatAsync(TestStreamingState state, string? output, string? error)
     {
         try
         {
+            var testContext = state.TestContext;
+
+            // Don't send if test already completed - final state has been sent
+            if (state.IsCompleted || testContext.Result is not null)
+            {
+                state.TryMarkCompleted();
+                return;
+            }
+
             var testNode = CreateOutputUpdateNode(testContext, output, error);
             if (testNode is null)
             {
@@ -144,6 +162,14 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
 
             // Send a follow-up heartbeat (no output) to clear the "previous update"
             // This prevents Rider from concatenating this content with the next content update
+            // CRITICAL: Check again that test hasn't completed - we must never send
+            // InProgressTestNodeStateProperty after the final state has been sent
+            if (state.IsCompleted || testContext.Result is not null)
+            {
+                state.TryMarkCompleted();
+                return;
+            }
+
             var heartbeat = CreateHeartbeatNode(testContext);
             if (heartbeat is not null)
             {
@@ -243,6 +269,7 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
     private sealed class TestStreamingState : IDisposable
     {
         private int _isDirty;
+        private int _isCompleted; // Set to 1 once we detect test completion - never send after this
         private int _lastOutputPosition;
         private int _lastErrorPosition;
 
@@ -263,6 +290,20 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
         {
             return Interlocked.Exchange(ref _isDirty, 0) == 1;
         }
+
+        /// <summary>
+        /// Atomically marks this test as completed. Once marked, no more updates will be sent.
+        /// </summary>
+        /// <returns>True if this call marked completion (first caller), false if already marked.</returns>
+        public bool TryMarkCompleted()
+        {
+            return Interlocked.Exchange(ref _isCompleted, 1) == 0;
+        }
+
+        /// <summary>
+        /// Returns true if this test has been marked as completed.
+        /// </summary>
+        public bool IsCompleted => Interlocked.CompareExchange(ref _isCompleted, 0, 0) == 1;
 
         /// <summary>
         /// Gets only the new output since the last call (delta).
