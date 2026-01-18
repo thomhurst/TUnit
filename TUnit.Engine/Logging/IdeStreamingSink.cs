@@ -27,16 +27,27 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
 
     public void Log(LogLevel level, string message, Exception? exception, Context? context)
     {
-        if (context is not TestContext testContext)
+        try
         {
-            return;
+            if (context is not TestContext testContext)
+            {
+                return;
+            }
+
+            // Only stream for tests that have started execution
+            if (testContext.TestDetails?.TestId is not { } testId)
+            {
+                return;
+            }
+
+            var state = _activeTests.GetOrAdd(testId, _ => CreateStreamingState(testContext));
+
+            state.MarkDirty();
         }
-
-        var testId = testContext.TestDetails.TestId;
-
-        var state = _activeTests.GetOrAdd(testId, _ => CreateStreamingState(testContext));
-
-        state.MarkDirty();
+        catch
+        {
+            // Swallow exceptions to prevent disrupting test execution
+        }
     }
 
     public ValueTask LogAsync(LogLevel level, string message, Exception? exception, Context? context)
@@ -60,26 +71,33 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
 
     private void OnTimerTick(string testId)
     {
-        if (!_activeTests.TryGetValue(testId, out var state))
+        try
         {
-            return;
-        }
+            if (!_activeTests.TryGetValue(testId, out var state))
+            {
+                return;
+            }
 
-        // Passive cleanup: if test completed, dispose and remove
-        if (state.TestContext.Result is not null)
+            // Passive cleanup: if test completed, dispose and remove
+            if (state.TestContext.Result is not null)
+            {
+                CleanupTest(testId, state);
+                return;
+            }
+
+            // Skip if no new output since last send
+            if (!state.TryConsumeAndReset())
+            {
+                return;
+            }
+
+            // Send cumulative output snapshot
+            _ = SendOutputUpdateAsync(state.TestContext);
+        }
+        catch
         {
-            CleanupTest(testId, state);
-            return;
+            // Swallow exceptions to prevent crashing thread pool
         }
-
-        // Skip if no new output since last send
-        if (!state.TryConsumeAndReset())
-        {
-            return;
-        }
-
-        // Send cumulative output snapshot
-        _ = SendOutputUpdateAsync(state.TestContext);
     }
 
     private async Task SendOutputUpdateAsync(TestContext testContext)
@@ -95,6 +113,11 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
             }
 
             var testNode = CreateOutputUpdateNode(testContext, output, error);
+            if (testNode is null)
+            {
+                return;
+            }
+
             await _messageBus.PublishOutputUpdate(testNode).ConfigureAwait(false);
         }
         catch
@@ -103,8 +126,14 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
         }
     }
 
-    private static TestNode CreateOutputUpdateNode(TestContext testContext, string? output, string? error)
+    private static TestNode? CreateOutputUpdateNode(TestContext testContext, string? output, string? error)
     {
+        // Defensive: ensure TestDetails is available
+        if (testContext.TestDetails?.TestId is not { } testId)
+        {
+            return null;
+        }
+
         var properties = new List<IProperty>
         {
             InProgressTestNodeStateProperty.CachedInstance
@@ -122,7 +151,7 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
 
         return new TestNode
         {
-            Uid = new TestNodeUid(testContext.TestDetails.TestId),
+            Uid = new TestNodeUid(testId),
             DisplayName = testContext.GetDisplayName(),
             Properties = new PropertyBag(properties)
         };
