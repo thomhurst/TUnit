@@ -28,3 +28,31 @@ public class DependsOnTests
         await Assert.That(_test2Start).IsAfterOrEqualTo(_test1Start.AddSeconds(4.9));
     }
 }
+
+public sealed class MyAsyncTest
+{
+    public static int NumberOfInvocations = 0;
+
+    [Test]
+    public async Task Test()
+    {
+        NumberOfInvocations += 1;
+        await Assert.That(NumberOfInvocations).IsEqualTo(1);
+    }
+}
+
+[EngineTest(ExpectedResult.Pass)]
+[DependsOn(typeof(MyAsyncTest), nameof(Test))]
+public sealed class DependsOn_AsyncTest
+{
+    [Test]
+    public async Task Test() => await Assert.That(MyAsyncTest.NumberOfInvocations).IsEqualTo(1);
+}
+
+[EngineTest(ExpectedResult.Pass)]
+[DependsOn(typeof(MyAsyncTest), nameof(Test))]
+public sealed class DependsOn_AsyncTest_Two
+{
+    [Test]
+    public async Task Test() => await Assert.That(MyAsyncTest.NumberOfInvocations).IsEqualTo(1);
+}

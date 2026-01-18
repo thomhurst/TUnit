@@ -2478,6 +2478,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private static void GenerateDependencies(CodeWriter writer, Compilation compilation, IMethodSymbol methodSymbol)
     {
         var dependsOnAttributes = methodSymbol.GetAttributes()
+            .Concat(methodSymbol.ContainingType.GetAttributes())
             .Where(attr => attr.AttributeClass?.Name == "DependsOnAttribute" &&
                           attr.AttributeClass.ContainingNamespace?.ToDisplayString() == "TUnit.Core")
             .ToList();
