@@ -9,14 +9,13 @@ namespace TUnit.Engine.Logging;
 
 /// <summary>
 /// A log sink that streams test output in real-time to IDE test explorers.
-/// Sends delta output (new content since last update) every 1 second during test execution.
+/// Sends cumulative output snapshots every 1 second during test execution.
 /// Only activated when running in an IDE environment (not console).
 /// </summary>
 /// <remarks>
 /// <para>
-/// <b>Delta Streaming:</b> Sends only new output since the last update, not cumulative.
-/// IDEs like Rider concatenate output from each TestNodeUpdateMessage, so sending deltas
-/// builds up the correct output. The final test result contains the complete output.
+/// <b>Cumulative Streaming:</b> Sends full output each update. Rider replaces the displayed
+/// output with each TestNodeUpdateMessage (not concatenates), so cumulative snapshots are needed.
 /// </para>
 /// <para>
 /// <b>Cleanup Strategy:</b> Uses passive cleanup - each timer tick checks if the test
@@ -109,14 +108,17 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
                 return;
             }
 
-            // Send delta output (only new content since last update)
-            var (outputDelta, errorDelta) = state.GetOutputDelta();
-            if (outputDelta is null && errorDelta is null)
+            // Send cumulative output snapshot
+            // Rider replaces the displayed output with each update (not concatenates)
+            var output = state.TestContext.GetStandardOutput();
+            var error = state.TestContext.GetErrorOutput();
+
+            if (string.IsNullOrEmpty(output) && string.IsNullOrEmpty(error))
             {
                 return;
             }
 
-            _ = SendOutputUpdateAsync(state.TestContext, outputDelta, errorDelta);
+            _ = SendOutputUpdateAsync(state.TestContext, output, error);
         }
         catch
         {
@@ -150,9 +152,8 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
             return null;
         }
 
-        // Build properties list with delta output
-        // We send only new content since the last update (delta) because IDEs like Rider
-        // concatenate output from each update. This way the final result is correct.
+        // Build properties list with cumulative output
+        // Rider replaces the displayed output with each update, so we send full snapshots.
         var properties = new List<IProperty>(3)
         {
             InProgressTestNodeStateProperty.CachedInstance
