@@ -14,9 +14,33 @@ namespace TUnit.Example.Asp.Net.TestProject;
 /// </summary>
 public class WebApplicationFactory : TestWebApplicationFactory<Program>
 {
-    private int _configuredWebHostCalled;
+    private int _configureWebHostCallCount;
+    private int _configureStartupConfigurationCallCount;
 
-    public int ConfiguredWebHostCalled => _configuredWebHostCalled;
+    /// <summary>
+    /// Number of times ConfigureWebHost has been called.
+    /// </summary>
+    public int ConfigureWebHostCallCount => _configureWebHostCallCount;
+
+    /// <summary>
+    /// Number of times ConfigureStartupConfiguration has been called.
+    /// </summary>
+    public int ConfigureStartupConfigurationCallCount => _configureStartupConfigurationCallCount;
+
+    /// <summary>
+    /// Order tracking callback - set by test to track when factory methods are called.
+    /// </summary>
+    public Func<int>? GetNextOrderCallback { get; set; }
+
+    /// <summary>
+    /// Order when ConfigureWebHost was called.
+    /// </summary>
+    public int ConfigureWebHostCalledOrder { get; private set; }
+
+    /// <summary>
+    /// Order when ConfigureStartupConfiguration was called.
+    /// </summary>
+    public int ConfigureStartupConfigurationCalledOrder { get; private set; }
 
     /// <summary>
     /// PostgreSQL container - shared across all tests in the session.
@@ -38,7 +62,11 @@ public class WebApplicationFactory : TestWebApplicationFactory<Program>
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        Interlocked.Increment(ref _configuredWebHostCalled);
+        Interlocked.Increment(ref _configureWebHostCallCount);
+        if (GetNextOrderCallback != null && ConfigureWebHostCalledOrder == 0)
+        {
+            ConfigureWebHostCalledOrder = GetNextOrderCallback();
+        }
 
         // Base configuration - tests will override with actual container connection strings
         // via OverrideConfigurationAsync
@@ -56,6 +84,12 @@ public class WebApplicationFactory : TestWebApplicationFactory<Program>
 
     protected override void ConfigureStartupConfiguration(IConfigurationBuilder configurationBuilder)
     {
+        Interlocked.Increment(ref _configureStartupConfigurationCallCount);
+        if (GetNextOrderCallback != null && ConfigureStartupConfigurationCalledOrder == 0)
+        {
+            ConfigureStartupConfigurationCalledOrder = GetNextOrderCallback();
+        }
+
         configurationBuilder.AddInMemoryCollection(new Dictionary<string, string?>
         {
             { "SomeKey", "SomeValue" }
