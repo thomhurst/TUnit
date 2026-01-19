@@ -1,5 +1,6 @@
 using System.Text;
 using TUnit.Assertions.Attributes;
+using TUnit.Assertions.Conditions.Helpers;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
@@ -123,6 +124,13 @@ public class StringEqualsAssertion<TActual> : Assertion<TActual>
 
     private string BuildStringDifferenceMessage(string? originalValue, string? actualValue, string? expectedValue)
     {
+        // Use line-based diff for multiline strings
+        if (LineDiffHelper.ShouldUseLineDiff(actualValue, expectedValue))
+        {
+            var diffResult = LineDiffHelper.GenerateDiff(actualValue!, expectedValue!, _comparison);
+            return diffResult.FormattedDiff;
+        }
+
         // For simple cases, just show the value
         if (actualValue == null || expectedValue == null ||
             (actualValue.Length <= 100 && expectedValue.Length <= 100))
