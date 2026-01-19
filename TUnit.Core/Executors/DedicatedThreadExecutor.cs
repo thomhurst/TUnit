@@ -205,10 +205,10 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
     {
         private readonly Thread _dedicatedThread;
         private readonly ManualResetEventSlim? _workAvailableEvent;
+        private readonly Lock _queueLock = new();
         private readonly List<Task> _taskQueue =
         [
         ];
-        private readonly Lock _queueLock = new();
 
         public DedicatedThreadTaskScheduler(Thread dedicatedThread, ManualResetEventSlim? workAvailableEvent)
         {
@@ -296,10 +296,10 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
 
     internal sealed class DedicatedThreadSynchronizationContext : SynchronizationContext
     {
+        private Queue<(SendOrPostCallback callback, object? state)>? _workQueue = null;
         private readonly Thread _dedicatedThread;
         private readonly DedicatedThreadTaskScheduler _taskScheduler;
         private readonly ManualResetEventSlim? _workAvailableEvent;
-        private readonly Queue<(SendOrPostCallback callback, object? state)> _workQueue = new();
         private readonly Lock _queueLock = new();
 
         public DedicatedThreadSynchronizationContext(DedicatedThreadTaskScheduler taskScheduler, ManualResetEventSlim? workAvailableEvent)
@@ -314,6 +314,7 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
             // Always queue the work to ensure it runs on the dedicated thread
             lock (_queueLock)
             {
+                _workQueue ??= new();
                 _workQueue.Enqueue((d, state));
             }
             // Signal that work is available (wake message pump immediately)
@@ -384,7 +385,7 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
 
                 lock (_queueLock)
                 {
-                    if (_workQueue.Count == 0)
+                    if (_workQueue == null || _workQueue.Count == 0)
                     {
                         break;
                     }
