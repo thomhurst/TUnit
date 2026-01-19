@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 
@@ -203,12 +204,10 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
 
     internal sealed class DedicatedThreadTaskScheduler : TaskScheduler
     {
+        private object? _taskQueue = null;
         private readonly Thread _dedicatedThread;
         private readonly ManualResetEventSlim? _workAvailableEvent;
         private readonly Lock _queueLock = new();
-        private readonly List<Task> _taskQueue =
-        [
-        ];
 
         public DedicatedThreadTaskScheduler(Thread dedicatedThread, ManualResetEventSlim? workAvailableEvent)
         {
@@ -220,7 +219,23 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
         {
             lock (_queueLock)
             {
-                _taskQueue.Add(task);
+                if (_taskQueue is null)
+                {
+                    _taskQueue = task;
+                }
+                else if (_taskQueue is Task existingTask)
+                {
+                    var newList = new List<Task> { existingTask, task };
+                    _taskQueue = newList;
+                }
+                else if (_taskQueue is List<Task> queue)
+                {
+                    queue.Add(task);
+                }
+                else
+                {
+                    throw new UnreachableException($"{nameof(_taskQueue)} has an invalid state.");
+                }
             }
             // Signal that work is available (wake message pump immediately)
             _workAvailableEvent?.Set();
@@ -236,9 +251,18 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
                 {
                     lock (_queueLock)
                     {
-                        if (_taskQueue.Contains(task))
+                        switch (_taskQueue)
                         {
-                            _taskQueue.Remove(task);
+                            case null:
+                                break;
+                            case Task existingTask when existingTask == task:
+                                _taskQueue = null;
+                                break;
+                            case List<Task> queue when queue.Contains(task):
+                                queue.Remove(task);
+                                break;
+                            default:
+                                throw new UnreachableException($"{nameof(_taskQueue)} has an invalid state.");
                         }
                     }
                 }
@@ -258,7 +282,13 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
         {
             lock (_queueLock)
             {
-                return _taskQueue.ToArray();
+                return _taskQueue switch
+                {
+                    null => [],
+                    Task existingTask => [existingTask],
+                    List<Task> queue => queue.ToArray(),
+                    _ => throw new UnreachableException($"{nameof(_taskQueue)} has an invalid state.")
+                };
             }
         }
 
@@ -276,13 +306,24 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
 
                 lock (_queueLock)
                 {
-                    if (_taskQueue.Count == 0)
+                    if (_taskQueue is null or List<Task> { Count: 0 })
                     {
                         break;
                     }
 
-                    task = _taskQueue[0];
-                    _taskQueue.RemoveAt(0);
+                    switch (_taskQueue)
+                    {
+                        case Task existingTask:
+                            task = existingTask;
+                            _taskQueue = null;
+                            break;
+                        case List<Task> queue:
+                            task = queue[0];
+                            queue.RemoveAt(0);
+                            break;
+                        default:
+                            throw new UnreachableException($"{nameof(_taskQueue)} has an invalid state.");
+                    }
                     hadWork = true;
                 }
 
