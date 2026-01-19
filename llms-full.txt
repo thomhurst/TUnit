@@ -14589,6 +14589,73 @@ public class MyTest : TestsBase
 }
 ```
 
+### Why does my Program.cs run before ConfigureWebHost's ConfigureAppConfiguration?
+
+**Problem:** You set configuration values in `ConfigureWebHost` using `ConfigureAppConfiguration`, but your app's `Program.cs` doesn't see them during startup. Your breakpoint in Program.cs hits **before** the `ConfigureAppConfiguration` callback.
+
+```csharp
+// Factory - this approach has a timing issue!
+protected override void ConfigureWebHost(IWebHostBuilder builder)
+{
+    Console.WriteLine("ConfigureWebHost called");  // This runs first...
+
+    builder.ConfigureAppConfiguration((_, config) =>
+    {
+        Console.WriteLine("ConfigureAppConfiguration callback");  // ...but THIS runs AFTER Program.cs!
+        config.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            { "SomeKey", "SomeValue" }
+        });
+    });
+}
+
+// Program.cs - this runs BEFORE ConfigureAppConfiguration callback!
+var builder = WebApplication.CreateBuilder(args);
+if (builder.Configuration["SomeKey"] != "SomeValue")
+{
+    throw new InvalidOperationException("SomeKey not found!");  // This throws!
+}
+```
+
+**Root Cause:** This is **expected behavior** of ASP.NET Core's `WebApplicationFactory`. The `ConfigureAppConfiguration` callbacks registered in `ConfigureWebHost` are **deferred** and run **after** your app's `Program.cs` code, not before.
+
+**Solution:** Use `ConfigureStartupConfiguration` instead, which uses `builder.UseSetting()` to apply configuration **before** your app's `Program.cs` runs:
+
+```csharp
+public class WebApplicationFactory : TestWebApplicationFactory<Program>
+{
+    /// <summary>
+    /// Use ConfigureStartupConfiguration for configuration your Program.cs needs during startup.
+    /// This runs BEFORE Program.cs.
+    /// </summary>
+    protected override void ConfigureStartupConfiguration(IConfigurationBuilder configurationBuilder)
+    {
+        configurationBuilder.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            { "SomeKey", "SomeValue" },  // Available when Program.cs runs!
+            { "Database:ConnectionString", "..." }
+        });
+    }
+
+    /// <summary>
+    /// ConfigureWebHost can still be used for other customizations,
+    /// but NOT for configuration that Program.cs needs during startup.
+    /// </summary>
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        // Safe to use ConfigureAppConfiguration for config that's only
+        // needed AFTER the app has started (e.g., in controllers, services)
+    }
+}
+```
+
+**When to use each method:**
+
+| Method | Runs When | Use For |
+|--------|-----------|---------|
+| `ConfigureStartupConfiguration` | Before Program.cs | Configuration needed during app startup |
+| `ConfigureWebHost` + `ConfigureAppConfiguration` | After Program.cs | Configuration only needed after app starts |
+
 ## API Reference
 
 ### WebApplicationTest Properties
