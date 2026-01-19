@@ -13891,15 +13891,63 @@ The `WebApplicationTest<TFactory, TEntryPoint>` base class provides:
 
 ### Lifecycle Order
 
-1. `GlobalFactory` is injected (shared per test session)
-2. `SetupAsync()` runs (for async operations like creating database tables)
-3. `ConfigureTestServices()` runs (sync, for DI configuration)
-4. `ConfigureTestConfiguration()` runs (sync, for app configuration)
-5. `ConfigureWebHostBuilder()` runs (sync, escape hatch for advanced scenarios)
-6. Test runs with isolated `Factory`
-7. Factory is disposed
+Understanding the execution order is critical for writing correct tests. Here's the complete verified order:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    TEST LIFECYCLE                               │
+├─────────────────────────────────────────────────────────────────┤
+│  1. ConfigureTestOptions        Set test options (HTTP capture) │
+│  2. SetupAsync                  Async setup (create tables)     │
+│  ───────────────────────────────────────────────────────────    │
+│  3. Factory.ConfigureWebHost    Base factory configuration      │
+│  4. Factory.ConfigureStartup... Base factory startup config     │
+│  ───────────────────────────────────────────────────────────    │
+│  5. ConfigureTestConfiguration  Test config (overrides factory) │
+│  6. ConfigureWebHostBuilder     Escape hatch (low-level access) │
+│  7. ConfigureTestServices       Test services (overrides)       │
+│  ───────────────────────────────────────────────────────────    │
+│  8. Application Startup         Server starts                   │
+│  ───────────────────────────────────────────────────────────    │
+│  9. Test Method Executes        Your test code runs             │
+│ 10. Factory Disposed            Cleanup                         │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Key Points:**
+
+| Hook | Scope | Purpose |
+|------|-------|---------|
+| `ConfigureTestOptions` | Per-test | Enable features like HTTP capture |
+| `SetupAsync` | Per-test | Async operations before config (create DB tables) |
+| `Factory.ConfigureWebHost` | Shared | Base configuration for all tests |
+| `Factory.ConfigureStartupConfiguration` | Shared | Base startup configuration |
+| `ConfigureTestConfiguration` | Per-test | Override factory configuration |
+| `ConfigureWebHostBuilder` | Per-test | Low-level escape hatch |
+| `ConfigureTestServices` | Per-test | Override factory services |
+
+:::tip Tests Can Override Factory
+The order is designed so that **tests can override factory defaults**. Factory configuration runs first (steps 3-4), then test-specific configuration (steps 5-7) can override those values.
+:::
+
+:::warning Factory Methods Run Once
+`Factory.ConfigureWebHost` and `Factory.ConfigureStartupConfiguration` run **once per test session** (when the factory is first used), not per-test. If different test classes need fundamentally different factory configurations, use different factory classes.
+:::
 
 ## Override Methods
+
+### ConfigureTestOptions
+
+Use to configure test-level options before anything else runs:
+
+```csharp
+protected override void ConfigureTestOptions(WebApplicationTestOptions options)
+{
+    options.EnableHttpExchangeCapture = true;  // Capture HTTP requests/responses
+}
+```
+
+This runs **first** in the lifecycle, before `SetupAsync`. Use it to enable features that affect how the test infrastructure is set up.
 
 ### SetupAsync
 
@@ -14347,6 +14395,234 @@ The key benefits:
 - `SetupAsync` enables async initialization before factory creation
 - `ConfigureTestServices` and `ConfigureTestConfiguration` are per-test
 - Built-in isolation helpers (`GetIsolatedName`, `GetIsolatedPrefix`)
+
+## FAQ & Troubleshooting
+
+### Why does my test configuration not override the factory?
+
+**Problem:** You set a value in `ConfigureTestConfiguration` but the factory's value is still used.
+
+**Solution:** Make sure you're using the same configuration key. The test configuration runs **after** the factory configuration (step 5 vs steps 3-4), so it should override. Check that:
+
+1. You're using `AddInMemoryCollection` which adds to the config sources
+2. The configuration key path is exactly the same
+3. You're not accidentally reading from a different source (e.g., `appsettings.json`)
+
+```csharp
+// Factory sets default
+protected override void ConfigureWebHost(IWebHostBuilder builder)
+{
+    builder.ConfigureAppConfiguration((_, config) =>
+    {
+        config.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            { "Database:ConnectionString", "factory-default" }
+        });
+    });
+}
+
+// Test overrides - this WILL work because it runs after
+protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
+{
+    config.AddInMemoryCollection(new Dictionary<string, string?>
+    {
+        { "Database:ConnectionString", "test-specific-value" }  // This wins!
+    });
+}
+```
+
+### Why can't I access SetupAsync results in ConfigureTestOptions?
+
+**Problem:** You want to use a value from `SetupAsync` in `ConfigureTestOptions`, but `ConfigureTestOptions` runs first.
+
+**Solution:** This is by design. `ConfigureTestOptions` runs before `SetupAsync` because test options affect how the infrastructure is set up. If you need async setup before options, consider:
+
+1. Moving the logic to a `[Before(HookType.Test)]` method that runs even earlier
+2. Using lazy initialization in `SetupAsync`
+
+### Why are my parallel tests interfering with each other?
+
+**Problem:** Tests that pass individually fail when run in parallel.
+
+**Solution:** You're sharing resources without isolation. Use `GetIsolatedName()` and `GetIsolatedPrefix()`:
+
+```csharp
+// BAD: All parallel tests share the same table
+var tableName = "todos";
+
+// GOOD: Each test gets its own table
+var tableName = GetIsolatedName("todos");  // "Test_42_todos", "Test_43_todos", etc.
+```
+
+### Can I have different factory configurations for different test classes?
+
+**Problem:** Test class A needs PostgreSQL, test class B needs SQLite.
+
+**Solution:** Create different factory classes:
+
+```csharp
+public class PostgresFactory : TestWebApplicationFactory<Program>
+{
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        // PostgreSQL configuration
+    }
+}
+
+public class SqliteFactory : TestWebApplicationFactory<Program>
+{
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        // SQLite configuration
+    }
+}
+
+public class PostgresTests : WebApplicationTest<PostgresFactory, Program> { }
+public class SqliteTests : WebApplicationTest<SqliteFactory, Program> { }
+```
+
+### What's the difference between Factory and GlobalFactory?
+
+| Property | Type | Scope | Use Case |
+|----------|------|-------|----------|
+| `Factory` | `WebApplicationFactory<TEntryPoint>` | Per-test | Creating HTTP clients, accessing services |
+| `GlobalFactory` | `TFactory` (your custom type) | Shared | Accessing custom factory properties (containers, etc.) |
+
+```csharp
+public class MyTests : WebApplicationTest<WebApplicationFactory, Program>
+{
+    [Test]
+    public async Task Example()
+    {
+        // Use Factory for per-test operations
+        var client = Factory.CreateClient();
+        var services = Factory.Services;
+
+        // Use GlobalFactory to access custom properties
+        var connectionString = GlobalFactory.Database.Container.GetConnectionString();
+    }
+}
+```
+
+### Why does my service registration not work?
+
+**Problem:** You register a service in `ConfigureTestServices` but the old implementation is still used.
+
+**Solution:** Use `ReplaceService` instead of `AddSingleton`:
+
+```csharp
+protected override void ConfigureTestServices(IServiceCollection services)
+{
+    // BAD: Adds a second registration, original may still be resolved
+    services.AddSingleton<IEmailService, FakeEmailService>();
+
+    // GOOD: Removes existing registration and adds new one
+    services.ReplaceService<IEmailService>(new FakeEmailService());
+}
+```
+
+### How do I debug lifecycle issues?
+
+Create a test that logs all lifecycle events:
+
+```csharp
+public class LifecycleDebugTest : WebApplicationTest<WebApplicationFactory, Program>
+{
+    protected override void ConfigureTestOptions(WebApplicationTestOptions options)
+    {
+        Console.WriteLine("1. ConfigureTestOptions");
+    }
+
+    protected override async Task SetupAsync()
+    {
+        Console.WriteLine("2. SetupAsync");
+        await base.SetupAsync();
+    }
+
+    protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
+    {
+        Console.WriteLine("5. ConfigureTestConfiguration");
+    }
+
+    protected override void ConfigureWebHostBuilder(IWebHostBuilder builder)
+    {
+        Console.WriteLine("6. ConfigureWebHostBuilder");
+    }
+
+    protected override void ConfigureTestServices(IServiceCollection services)
+    {
+        Console.WriteLine("7. ConfigureTestServices");
+    }
+
+    [Test]
+    public async Task Debug_Lifecycle()
+    {
+        Console.WriteLine("9. Test executing");
+        _ = Factory.CreateClient();
+        await Assert.That(true).IsTrue();
+    }
+}
+```
+
+### Can I run async code in ConfigureTestServices?
+
+**Problem:** ASP.NET Core's configuration methods are synchronous, but you need async initialization.
+
+**Solution:** Do async work in `SetupAsync`, then use the results in sync methods:
+
+```csharp
+public class MyTest : TestsBase
+{
+    private string _authToken = null!;
+
+    protected override async Task SetupAsync()
+    {
+        // Async work here
+        _authToken = await GetAuthTokenAsync();
+    }
+
+    protected override void ConfigureTestServices(IServiceCollection services)
+    {
+        // Use the result from SetupAsync
+        services.AddSingleton(new AuthConfig { Token = _authToken });
+    }
+}
+```
+
+## API Reference
+
+### WebApplicationTest Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `UniqueId` | `int` | Unique identifier for this test instance |
+| `GlobalFactory` | `TFactory` | Shared factory (your custom type) |
+| `Factory` | `WebApplicationFactory<TEntryPoint>` | Per-test isolated factory |
+| `Services` | `IServiceProvider` | DI container from per-test factory |
+| `HttpCapture` | `HttpExchangeCapture?` | Captured HTTP exchanges (if enabled) |
+
+### WebApplicationTest Methods
+
+| Method | Description |
+|--------|-------------|
+| `GetIsolatedName(string baseName)` | Returns `"Test_{UniqueId}_{baseName}"` |
+| `GetIsolatedPrefix(string separator = "_")` | Returns `"test{separator}{UniqueId}{separator}"` |
+
+### WebApplicationTestOptions
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `EnableHttpExchangeCapture` | `bool` | `false` | Capture HTTP requests/responses |
+
+### Service Collection Extensions
+
+| Method | Description |
+|--------|-------------|
+| `ReplaceService<T>(instance)` | Replace service with instance |
+| `ReplaceService<T>(factory)` | Replace service with factory |
+| `ReplaceService<TService, TImpl>()` | Replace service with implementation |
+| `RemoveService<T>()` | Remove service registration |
+| `AddTUnitLogging(context)` | Add TUnit logging provider |
 
 ---
 
