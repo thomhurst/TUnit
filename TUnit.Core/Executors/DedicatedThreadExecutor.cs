@@ -5,14 +5,13 @@ namespace TUnit.Core;
 
 public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredEventReceiver
 {
-    protected sealed override async ValueTask ExecuteAsync(Func<ValueTask> action)
+    protected sealed override ValueTask ExecuteAsync(Func<ValueTask> action)
     {
         // On browser platforms, threading is not supported, so fall back to direct execution
 #if NET5_0_OR_GREATER
         if (OperatingSystem.IsBrowser())
         {
-            await action();
-            return;
+            return action();
         }
 #endif
 
@@ -56,7 +55,7 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
         ConfigureThread(thread);
         thread.Start(state);
 
-        await tcs.Task;
+        return new ValueTask(tcs.Task);
     }
 
     private void ExecuteAsyncActionWithMessagePump(Func<ValueTask> action, TaskCompletionSource<object?> tcs)
@@ -74,17 +73,16 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
             workAvailableEvent = new ManualResetEventSlim(false);
 #endif
             var taskScheduler = new DedicatedThreadTaskScheduler(Thread.CurrentThread, workAvailableEvent);
-            var dedicatedContext = new DedicatedThreadSynchronizationContext(taskScheduler, workAvailableEvent);
+            var dedicatedContext = new DedicatedThreadSynchronizationContext(workAvailableEvent);
 
             SynchronizationContext.SetSynchronizationContext(dedicatedContext);
 
             try
             {
-                var task = Task.Factory.StartNew(static async action =>
-                {
-                    // Inside this task, TaskScheduler.Current will be our scheduler
-                    await ((Func<ValueTask>)action!)();
-                }, action, CancellationToken.None, TaskCreationOptions.None, taskScheduler).Unwrap();
+                var task = Task.Factory.StartNew(
+                    static action => ((Func<ValueTask>)action!)().AsTask(),
+                    action, CancellationToken.None, TaskCreationOptions.None, taskScheduler)
+                    .Unwrap();
 
                 // Try fast path first - many tests complete quickly
                 // Use IsCompleted to avoid synchronous wait
@@ -297,15 +295,13 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
     internal sealed class DedicatedThreadSynchronizationContext : SynchronizationContext
     {
         private readonly Thread _dedicatedThread;
-        private readonly DedicatedThreadTaskScheduler _taskScheduler;
         private readonly ManualResetEventSlim? _workAvailableEvent;
         private readonly Queue<(SendOrPostCallback callback, object? state)> _workQueue = new();
         private readonly Lock _queueLock = new();
 
-        public DedicatedThreadSynchronizationContext(DedicatedThreadTaskScheduler taskScheduler, ManualResetEventSlim? workAvailableEvent)
+        public DedicatedThreadSynchronizationContext(ManualResetEventSlim? workAvailableEvent)
         {
             _dedicatedThread = Thread.CurrentThread;
-            _taskScheduler = taskScheduler;
             _workAvailableEvent = workAvailableEvent;
         }
 
