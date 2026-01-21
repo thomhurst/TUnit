@@ -95,7 +95,7 @@ public class StringContainsAssertion : Assertion<string>
 
         if (actualValue.Contains(expectedValue, _comparison))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
@@ -199,7 +199,7 @@ public class StringDoesNotContainAssertion : Assertion<string>
 
         if (!value.Contains(_expected, _comparison))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"found \"{_expected}\" in \"{value}\""));
@@ -266,7 +266,7 @@ public class StringStartsWithAssertion : Assertion<string>
 
         if (value.StartsWith(_expected, _comparison))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
@@ -333,7 +333,7 @@ public class StringEndsWithAssertion : Assertion<string>
 
         if (value.EndsWith(_expected, _comparison))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
@@ -400,7 +400,7 @@ public class StringDoesNotStartWithAssertion : Assertion<string>
 
         if (!value.StartsWith(_expected, _comparison))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
@@ -467,7 +467,7 @@ public class StringDoesNotEndWithAssertion : Assertion<string>
 
         if (!value.EndsWith(_expected, _comparison))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
@@ -505,7 +505,7 @@ public class StringIsNotEmptyAssertion : Assertion<string>
 
         if (!string.IsNullOrEmpty(value))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
@@ -543,7 +543,7 @@ public class StringIsEmptyAssertion : Assertion<string>
 
         if (value == string.Empty)
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
@@ -584,7 +584,7 @@ public class StringLengthAssertion : Assertion<string>
 
         if (value.Length == _expectedLength)
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"found length {value.Length}"));
@@ -694,7 +694,7 @@ public class StringMatchesAssertion : Assertion<RegexMatchCollection>
         }
 
         // If we have a RegexMatchCollection, at least one match succeeded
-        return Task.FromResult(AssertionResult.Passed);
+        return AssertionResult._passedTask;
     }
 
     protected override string GetExpectation()
@@ -776,7 +776,7 @@ public class StringDoesNotMatchAssertion : Assertion<string>
 
         if (!isMatch)
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"The regex \"{_pattern}\" matches with \"{value}\""));

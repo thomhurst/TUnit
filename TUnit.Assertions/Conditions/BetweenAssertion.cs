@@ -89,7 +89,7 @@ public class BetweenAssertion<TValue> : Assertion<TValue>
 
         if (minOk && maxOk)
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"found {value}"));

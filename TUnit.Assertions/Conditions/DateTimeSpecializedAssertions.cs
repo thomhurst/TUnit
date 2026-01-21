@@ -21,7 +21,7 @@ public class DateTimeEqualsExactAssertion : Assertion<DateTime>
     {
         if (metadata.Value == _expected)
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed(

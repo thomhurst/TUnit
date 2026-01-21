@@ -45,7 +45,7 @@ public class ExceptionMessageContainsAssertion<TException> : Assertion<TExceptio
 
         if (exception.Message.Contains(_expectedSubstring, _comparison))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"exception message was \"{exception.Message}\""));
@@ -91,7 +91,7 @@ public class ExceptionMessageEqualsAssertion<TException> : Assertion<TException>
 
         if (string.Equals(exception.Message, _expectedMessage, _comparison))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"exception message was \"{exception.Message}\""));
@@ -141,7 +141,7 @@ public class ExceptionMessageNotContainsAssertion<TException> : Assertion<TExcep
                 $"exception message \"{exception.Message}\" should not contain \"{_notExpectedSubstring}\""));
         }
 
-        return Task.FromResult(AssertionResult.Passed);
+        return AssertionResult._passedTask;
     }
 
     protected override string GetExpectation() =>
@@ -187,7 +187,7 @@ public class ExceptionMessageMatchesPatternAssertion<TException> : Assertion<TEx
 
         if (MatchesPattern(exception.Message, _pattern))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed(
@@ -249,7 +249,7 @@ public class ExceptionMessageMatchesAssertion<TException> : Assertion<TException
 
         if (_matcher.IsMatch(exception.Message))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed(
@@ -305,7 +305,7 @@ public class ExceptionParameterNameAssertion<TException> : Assertion<TException>
         {
             if (argumentException.ParamName == _expectedParameterName)
             {
-                return Task.FromResult(AssertionResult.Passed);
+                return AssertionResult._passedTask;
             }
 
             return Task.FromResult(AssertionResult.Failed(

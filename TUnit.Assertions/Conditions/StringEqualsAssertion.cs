@@ -113,7 +113,7 @@ public class StringEqualsAssertion<TActual> : Assertion<TActual>
 
         if (string.Equals(actualValue, expectedValue, _comparison))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         // Build detailed error message for string comparison failures

@@ -5,6 +5,8 @@ namespace TUnit.Assertions.Core;
 /// </summary>
 public readonly struct AssertionResult
 {
+    internal static readonly Task<AssertionResult> _passedTask = Task.FromResult(Passed);
+
     public bool IsPassed { get; }
     public string Message { get; }
 

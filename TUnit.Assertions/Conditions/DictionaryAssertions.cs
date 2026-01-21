@@ -67,7 +67,7 @@ public class DictionaryContainsKeyAssertion<TDictionary, TKey, TValue> : Sources
 
         if (found)
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"key {_expectedKey} not found"));
@@ -112,7 +112,7 @@ public class DictionaryDoesNotContainKeyAssertion<TDictionary, TKey, TValue> : S
 
         if (!value.ContainsKey(_expectedKey))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"key {_expectedKey} was found"));

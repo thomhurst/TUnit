@@ -34,7 +34,7 @@ public class GreaterThanAssertion<TValue> : Assertion<TValue>
 
         if (value.CompareTo(_minimum) > 0)
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"found {value}"));
@@ -72,7 +72,7 @@ public class GreaterThanOrEqualAssertion<TValue> : Assertion<TValue>
 
         if (value.CompareTo(_minimum) >= 0)
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"found {value}"));

@@ -24,7 +24,7 @@ public class NullAssertion<TValue> : Assertion<TValue>
 
         if (value == null)
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"found {value}"));
@@ -50,7 +50,7 @@ public class NotNullAssertion<TValue> : Assertion<TValue>
 
         if (value != null)
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed("value is null"));
@@ -95,7 +95,7 @@ public class IsDefaultAssertion<TValue> : Assertion<TValue> where TValue : struc
 
         if (EqualityComparer<TValue>.Default.Equals(value!, default!))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"value is {value}"));
@@ -128,7 +128,7 @@ public class IsNotDefaultAssertion<TValue> : Assertion<TValue> where TValue : st
 
         if (!EqualityComparer<TValue>.Default.Equals(value!, default!))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"value is default({typeof(TValue).Name})"));
@@ -162,7 +162,7 @@ public class IsDefaultNullableAssertion<TValue> : Assertion<TValue?> where TValu
 
         if (!value.HasValue)
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"value is {value}"));
@@ -196,7 +196,7 @@ public class IsNotDefaultNullableAssertion<TValue> : Assertion<TValue?> where TV
 
         if (value.HasValue)
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"value is default({typeof(TValue).Name}?)"));
@@ -230,7 +230,7 @@ public class IsDefaultReferenceAssertion<TValue> : Assertion<TValue> where TValu
 
         if (EqualityComparer<TValue>.Default.Equals(value!, default!))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"value is {value}"));
@@ -264,7 +264,7 @@ public class IsNotDefaultReferenceAssertion<TValue> : Assertion<TValue> where TV
 
         if (!EqualityComparer<TValue>.Default.Equals(value!, default!))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"value is default({typeof(TValue).Name})"));

@@ -254,7 +254,7 @@ public class IntEqualsAssertion : Assertion<int>
             var diff = Math.Abs(value - _expected);
             if (diff <= _tolerance.Value)
             {
-                return Task.FromResult(AssertionResult.Passed);
+                return AssertionResult._passedTask;
             }
 
             return Task.FromResult(AssertionResult.Failed($"found {value}, which differs by {diff}"));
@@ -262,7 +262,7 @@ public class IntEqualsAssertion : Assertion<int>
 
         if (value == _expected)
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"found {value}"));
@@ -418,7 +418,7 @@ public class TimeSpanEqualsAssertion : Assertion<TimeSpan>
             var diff = value > _expected ? value - _expected : _expected - value;
             if (diff <= _tolerance.Value)
             {
-                return Task.FromResult(AssertionResult.Passed);
+                return AssertionResult._passedTask;
             }
 
             return Task.FromResult(AssertionResult.Failed($"found {value}, which differs by {diff}"));
@@ -426,7 +426,7 @@ public class TimeSpanEqualsAssertion : Assertion<TimeSpan>
 
         if (value == _expected)
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"found {value}"));

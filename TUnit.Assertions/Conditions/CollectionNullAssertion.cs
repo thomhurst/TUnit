@@ -22,7 +22,7 @@ public class CollectionNotNullAssertion<TCollection, TItem> : CollectionAssertio
 
         if (value != null)
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed("value is null"));

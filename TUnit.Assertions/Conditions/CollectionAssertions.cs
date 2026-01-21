@@ -702,7 +702,7 @@ public class CollectionIsOrderedByAssertion<TCollection, TItem, TKey> : Sources.
 
         if (enumerated.SequenceEqual(ordered))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         for (int i = 1; i < enumerated.Length; i++)
@@ -716,7 +716,7 @@ public class CollectionIsOrderedByAssertion<TCollection, TItem, TKey> : Sources.
             }
         }
 
-        return Task.FromResult(AssertionResult.Passed);
+        return AssertionResult._passedTask;
     }
 
     protected override string GetExpectation() => "to be ordered by key selector in ascending order";
@@ -764,7 +764,7 @@ public class CollectionIsOrderedByDescendingAssertion<TCollection, TItem, TKey> 
 
         if (enumerated.SequenceEqual(ordered))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         for (int i = 1; i < enumerated.Length; i++)
@@ -778,7 +778,7 @@ public class CollectionIsOrderedByDescendingAssertion<TCollection, TItem, TKey> 
             }
         }
 
-        return Task.FromResult(AssertionResult.Passed);
+        return AssertionResult._passedTask;
     }
 
     protected override string GetExpectation() => "to be ordered by key selector in descending order";

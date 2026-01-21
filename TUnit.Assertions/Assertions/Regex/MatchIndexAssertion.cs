@@ -52,7 +52,7 @@ public class MatchIndexAssertion : Assertion<RegexMatch>
         }
 
         // If we have a match, the assertion passed
-        return Task.FromResult(AssertionResult.Passed);
+        return AssertionResult._passedTask;
     }
 
     protected override string GetExpectation() => $"match at index {_index} to exist";

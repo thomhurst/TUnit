@@ -35,7 +35,7 @@ public class SatisfiesAssertion<TValue> : Assertion<TValue>
 
         if (_predicate(value))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"value {value} does not satisfy predicate"));
@@ -87,7 +87,7 @@ public class IsEquatableOrEqualToAssertion<TValue> : ComparerBasedAssertion<TVal
 
         if (comparer.Equals(value!, _expected))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"found {value}"));

@@ -42,7 +42,7 @@ public class DirectoryHasFilesAssertion : Assertion<DirectoryInfo>
             return Task.FromResult(AssertionResult.Failed($"directory '{value.FullName}' has no files"));
         }
 
-        return Task.FromResult(AssertionResult.Passed);
+        return AssertionResult._passedTask;
     }
 
     protected override string GetExpectation() => "to have files";
@@ -84,7 +84,7 @@ public class DirectoryHasNoSubdirectoriesAssertion : Assertion<DirectoryInfo>
             return Task.FromResult(AssertionResult.Failed($"directory '{value.FullName}' has {subdirectories.Length} subdirectories"));
         }
 
-        return Task.FromResult(AssertionResult.Passed);
+        return AssertionResult._passedTask;
     }
 
     protected override string GetExpectation() => "to have no subdirectories";
@@ -126,7 +126,7 @@ public class FileIsNotSystemAssertion : Assertion<FileInfo>
             return Task.FromResult(AssertionResult.Failed($"file '{value.FullName}' is a system file"));
         }
 
-        return Task.FromResult(AssertionResult.Passed);
+        return AssertionResult._passedTask;
     }
 
     protected override string GetExpectation() => "to not be a system file";
@@ -170,7 +170,7 @@ public class FileIsNotExecutableAssertion : Assertion<FileInfo>
             return Task.FromResult(AssertionResult.Failed($"file '{value.FullName}' is executable (extension: {value.Extension})"));
         }
 
-        return Task.FromResult(AssertionResult.Passed);
+        return AssertionResult._passedTask;
     }
 
     protected override string GetExpectation() => "to not be executable";
