@@ -2,6 +2,7 @@
 
 internal class NoDataSource : IDataSourceAttribute
 {
+    private static readonly Task<object?[]?> _emptyRowTask = Task.FromResult<object?[]?>([]);
     public static readonly NoDataSource Instance = new();
 
     /// <inheritdoc />
@@ -9,7 +10,7 @@ internal class NoDataSource : IDataSourceAttribute
 
     public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        yield return () => Task.FromResult<object?[]?>([]);
+        yield return static () => _emptyRowTask;
         await default(ValueTask);
     }
 }

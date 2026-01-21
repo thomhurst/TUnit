@@ -812,11 +812,13 @@ internal sealed class TestBuilder : ITestBuilder
         return resolvedTypes;
     }
 
+    private static readonly IDataSourceAttribute[] _dataSourceArray = [NoDataSource.Instance];
+
     private async Task<IDataSourceAttribute[]> GetDataSourcesAsync(IDataSourceAttribute[] dataSources)
     {
         if (dataSources.Length == 0)
         {
-            return [NoDataSource.Instance];
+            return _dataSourceArray;
         }
 
         // Inject properties into data sources during discovery (IAsyncInitializer deferred to execution)
