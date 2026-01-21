@@ -46,7 +46,7 @@ public abstract class ToleranceBasedEqualsAssertion<TValue, TTolerance> : Assert
         {
             if (IsWithinTolerance(value!, _expected, _tolerance))
             {
-                return Task.FromResult(AssertionResult.Passed);
+                return AssertionResult._passedTask;
             }
 
             var difference = CalculateDifference(value!, _expected);
@@ -56,7 +56,7 @@ public abstract class ToleranceBasedEqualsAssertion<TValue, TTolerance> : Assert
         // No tolerance - exact equality check
         if (AreExactlyEqual(value!, _expected))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"found {value}"));

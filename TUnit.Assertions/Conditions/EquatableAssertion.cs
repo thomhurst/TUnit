@@ -40,7 +40,7 @@ public class EquatableAssertion<TActual, TExpected> : Assertion<TActual>
         // Use IEquatable<TExpected>.Equals for comparison
         if (value.Equals(_expected))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"found {value}"));
@@ -85,7 +85,7 @@ public class NullableEquatableAssertion<TActual, TExpected> : Assertion<TActual?
         // Use IEquatable<TExpected>.Equals for comparison
         if (value.Value.Equals(_expected))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"found {value.Value}"));

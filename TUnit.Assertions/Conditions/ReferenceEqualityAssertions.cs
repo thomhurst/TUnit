@@ -32,7 +32,7 @@ public class SameReferenceAssertion<TValue> : Assertion<TValue>
 
         if (ReferenceEquals(value, _expected))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed("references are different"));
@@ -69,7 +69,7 @@ public class NotSameReferenceAssertion<TValue> : Assertion<TValue>
 
         if (!ReferenceEquals(value, _expected))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed("references are the same"));

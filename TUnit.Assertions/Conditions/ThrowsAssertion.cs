@@ -53,7 +53,7 @@ public abstract class BaseThrowsAssertion<TException, TSelf> : Assertion<TExcept
             return Task.FromResult(AssertionResult.Failed(typeErrorMessage!));
         }
 
-        return Task.FromResult(AssertionResult.Passed);
+        return AssertionResult._passedTask;
     }
 
     protected override string GetExpectation() =>
@@ -366,7 +366,7 @@ public class ThrowsNothingAssertion<TValue> : Assertion<TValue>
                 $"threw {exception.GetType().FullName}: {exception.Message}"));
         }
 
-        return Task.FromResult(AssertionResult.Passed);
+        return AssertionResult._passedTask;
     }
 
     protected override string GetExpectation() => "to not throw any exception";
@@ -419,7 +419,7 @@ public class HasMessageEqualToAssertion<TValue> : Assertion<TValue>
 
         if (string.Equals(exceptionToCheck.Message, _expectedMessage, _comparison))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"message was \"{exceptionToCheck.Message}\""));
@@ -475,7 +475,7 @@ public class HasMessageStartingWithAssertion<TValue> : Assertion<TValue>
 
         if (exceptionToCheck.Message.StartsWith(_expectedPrefix, _comparison))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"message was \"{exceptionToCheck.Message}\""));
@@ -531,7 +531,7 @@ public class HasMessageContainingAssertion<TValue> : Assertion<TValue>
 
         if (exceptionToCheck.Message.Contains(_expectedSubstring, _comparison))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"message was \"{exceptionToCheck.Message}\""));

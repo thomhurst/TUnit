@@ -565,7 +565,7 @@ public class MemoryCountEqualsAssertion<TMemory, TItem> : MemoryAssertionBase<TM
 
         if (passed)
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"found {actualCount}"));

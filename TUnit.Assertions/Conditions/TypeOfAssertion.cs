@@ -42,7 +42,7 @@ public class TypeOfAssertion<TFrom, TTo> : Assertion<TTo>
             return Task.FromResult(AssertionResult.Failed(exception.Message));
         }
 
-        return Task.FromResult(AssertionResult.Passed);
+        return AssertionResult._passedTask;
     }
 
     protected override string GetExpectation() => $"to be of type {_expectedType.Name}";
@@ -81,7 +81,7 @@ public class IsNotTypeOfAssertion<TValue, TExpected> : Assertion<TValue>
 
         if (actualType != _expectedType)
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"type was {actualType.Name}"));
@@ -131,7 +131,7 @@ public class IsAssignableToAssertion<TTarget, TValue> : Assertion<TValue>
 
         if (_targetType.IsAssignableFrom(actualType))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"type {actualType.Name} is not assignable to {_targetType.Name}"));
@@ -181,7 +181,7 @@ public class IsNotAssignableToAssertion<TTarget, TValue> : Assertion<TValue>
 
         if (!_targetType.IsAssignableFrom(actualType))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"type {actualType.Name} is assignable to {_targetType.Name}"));
@@ -224,7 +224,7 @@ public class IsTypeOfRuntimeAssertion<TValue> : Assertion<TValue>
 
         if (actualType == _expectedType)
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"type was {actualType.Name}"));

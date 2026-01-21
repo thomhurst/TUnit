@@ -47,7 +47,7 @@ public class IsParsableIntoAssertion<[DynamicallyAccessedMembers(DynamicallyAcce
 
         if (TryParse(value, _formatProvider, out _))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"\"{value}\" cannot be parsed into {typeof(T).Name}"));
@@ -146,12 +146,12 @@ public class IsNotParsableIntoAssertion<[DynamicallyAccessedMembers(DynamicallyA
 
         if (value == null)
         {
-            return Task.FromResult(AssertionResult.Passed); // null cannot be parsed
+            return AssertionResult._passedTask; // null cannot be parsed
         }
 
         if (!TryParse(value, _formatProvider, out _))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"\"{value}\" can be parsed into {typeof(T).Name}"));
@@ -330,7 +330,7 @@ public class WhenParsedIntoAssertion<[DynamicallyAccessedMembers(DynamicallyAcce
             return Task.FromResult(AssertionResult.Failed($"parsing failed: {exception.Message}"));
         }
 
-        return Task.FromResult(AssertionResult.Passed);
+        return AssertionResult._passedTask;
     }
 
     protected override string GetExpectation() => $"to be parsable into {typeof(T).Name}";

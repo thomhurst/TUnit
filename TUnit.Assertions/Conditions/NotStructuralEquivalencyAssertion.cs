@@ -104,7 +104,7 @@ public class NotStructuralEquivalencyAssertion<TValue> : Assertion<TValue>
             return Task.FromResult(AssertionResult.Failed("objects are equivalent but should not be"));
         }
 
-        return Task.FromResult(AssertionResult.Passed);
+        return AssertionResult._passedTask;
     }
 
     protected override string GetExpectation()

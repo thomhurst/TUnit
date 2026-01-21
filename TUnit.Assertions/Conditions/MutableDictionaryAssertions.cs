@@ -59,7 +59,7 @@ public class MutableDictionaryContainsKeyAssertion<TDictionary, TKey, TValue> : 
 
         if (found)
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"key {_expectedKey} not found"));
@@ -100,7 +100,7 @@ public class MutableDictionaryDoesNotContainKeyAssertion<TDictionary, TKey, TVal
             return Task.FromResult(AssertionResult.Failed($"key {_expectedKey} was found"));
         }
 
-        return Task.FromResult(AssertionResult.Passed);
+        return AssertionResult._passedTask;
     }
 }
 
@@ -138,7 +138,7 @@ public class MutableDictionaryContainsValueAssertion<TDictionary, TKey, TValue> 
         {
             if (comparer.Equals(v, _expectedValue))
             {
-                return Task.FromResult(AssertionResult.Passed);
+                return AssertionResult._passedTask;
             }
         }
 
@@ -184,7 +184,7 @@ public class MutableDictionaryDoesNotContainValueAssertion<TDictionary, TKey, TV
             }
         }
 
-        return Task.FromResult(AssertionResult.Passed);
+        return AssertionResult._passedTask;
     }
 }
 
@@ -227,7 +227,7 @@ public class MutableDictionaryContainsKeyWithValueAssertion<TDictionary, TKey, T
         var comparer = EqualityComparer<TValue>.Default;
         if (comparer.Equals(actualValue, _expectedValue))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"key {_expectedKey} has value {actualValue}, not {_expectedValue}"));
@@ -271,7 +271,7 @@ public class MutableDictionaryAllKeysAssertion<TDictionary, TKey, TValue> : Muta
             }
         }
 
-        return Task.FromResult(AssertionResult.Passed);
+        return AssertionResult._passedTask;
     }
 }
 
@@ -312,7 +312,7 @@ public class MutableDictionaryAllValuesAssertion<TDictionary, TKey, TValue> : Mu
             }
         }
 
-        return Task.FromResult(AssertionResult.Passed);
+        return AssertionResult._passedTask;
     }
 }
 
@@ -349,7 +349,7 @@ public class MutableDictionaryAnyKeyAssertion<TDictionary, TKey, TValue> : Mutab
         {
             if (_predicate(key))
             {
-                return Task.FromResult(AssertionResult.Passed);
+                return AssertionResult._passedTask;
             }
         }
 
@@ -390,7 +390,7 @@ public class MutableDictionaryAnyValueAssertion<TDictionary, TKey, TValue> : Mut
         {
             if (_predicate(value))
             {
-                return Task.FromResult(AssertionResult.Passed);
+                return AssertionResult._passedTask;
             }
         }
 

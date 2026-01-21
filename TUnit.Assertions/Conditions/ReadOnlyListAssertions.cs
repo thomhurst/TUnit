@@ -50,7 +50,7 @@ public class ReadOnlyListHasItemAtAssertion<TList, TItem> : ReadOnlyListAssertio
 
         if (comparer.Equals(actualItem, _expected))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"item at index {_index} was {actualItem}"));
@@ -311,12 +311,12 @@ public class ReadOnlyListItemAtEqualsAssertion<TList, TItem> : ReadOnlyListAsser
         {
             return areEqual
                 ? Task.FromResult(AssertionResult.Failed($"item at index {_index} was {actualItem}"))
-                : Task.FromResult(AssertionResult.Passed);
+                : AssertionResult._passedTask;
         }
         else
         {
             return areEqual
-                ? Task.FromResult(AssertionResult.Passed)
+                ? AssertionResult._passedTask
                 : Task.FromResult(AssertionResult.Failed($"item at index {_index} was {actualItem}"));
         }
     }
@@ -370,14 +370,14 @@ public class ReadOnlyListItemAtNullAssertion<TList, TItem> : ReadOnlyListAsserti
         if (_expectNull)
         {
             return isNull
-                ? Task.FromResult(AssertionResult.Passed)
+                ? AssertionResult._passedTask
                 : Task.FromResult(AssertionResult.Failed($"item at index {_index} was {actualItem}"));
         }
         else
         {
             return isNull
                 ? Task.FromResult(AssertionResult.Failed($"item at index {_index} was null"))
-                : Task.FromResult(AssertionResult.Passed);
+                : AssertionResult._passedTask;
         }
     }
 
@@ -491,12 +491,12 @@ public class ReadOnlyListLastItemEqualsAssertion<TList, TItem> : ReadOnlyListAss
         {
             return areEqual
                 ? Task.FromResult(AssertionResult.Failed($"last item was {lastItem}"))
-                : Task.FromResult(AssertionResult.Passed);
+                : AssertionResult._passedTask;
         }
         else
         {
             return areEqual
-                ? Task.FromResult(AssertionResult.Passed)
+                ? AssertionResult._passedTask
                 : Task.FromResult(AssertionResult.Failed($"last item was {lastItem}"));
         }
     }
@@ -546,14 +546,14 @@ public class ReadOnlyListLastItemNullAssertion<TList, TItem> : ReadOnlyListAsser
         if (_expectNull)
         {
             return isNull
-                ? Task.FromResult(AssertionResult.Passed)
+                ? AssertionResult._passedTask
                 : Task.FromResult(AssertionResult.Failed($"last item was {lastItem}"));
         }
         else
         {
             return isNull
                 ? Task.FromResult(AssertionResult.Failed("last item was null"))
-                : Task.FromResult(AssertionResult.Passed);
+                : AssertionResult._passedTask;
         }
     }
 

@@ -64,7 +64,7 @@ public class NotEqualsAssertion<TValue> : Assertion<TValue>
             var result = DeepEquals(value, _notExpected, _ignoredTypes);
             if (!result.IsSuccess)
             {
-                return Task.FromResult(AssertionResult.Passed);
+                return AssertionResult._passedTask;
             }
 
             return Task.FromResult(AssertionResult.Failed($"both values are equivalent"));
@@ -74,7 +74,7 @@ public class NotEqualsAssertion<TValue> : Assertion<TValue>
 
         if (!comparer.Equals(value!, _notExpected))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"both values are {value}"));

@@ -35,7 +35,7 @@ public class HasFlagAssertion<TEnum> : Assertion<TEnum>
 
         if (enumValue.HasFlag(enumFlag))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"value {value} does not have flag {_expectedFlag}"));
@@ -75,7 +75,7 @@ public class DoesNotHaveFlagAssertion<TEnum> : Assertion<TEnum>
 
         if (!enumValue.HasFlag(enumFlag))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"value {value} has flag {_unexpectedFlag}"));
@@ -112,7 +112,7 @@ public class IsDefinedAssertion<TEnum> : Assertion<TEnum>
         if (Enum.IsDefined(typeof(TEnum), value))
 #endif
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"value {value} is not defined in {typeof(TEnum).Name}"));
@@ -149,7 +149,7 @@ public class IsNotDefinedAssertion<TEnum> : Assertion<TEnum>
         if (!Enum.IsDefined(typeof(TEnum), value))
 #endif
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"value {value} is defined in {typeof(TEnum).Name}"));
@@ -189,7 +189,7 @@ public class HasSameNameAsAssertion<TEnum> : Assertion<TEnum>
 
         if (valueName == otherName)
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"value name \"{valueName}\" does not equal \"{otherName}\""));
@@ -230,7 +230,7 @@ public class HasSameValueAsAssertion<TEnum> : Assertion<TEnum>
 
         if (valueAsInt == otherAsInt)
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"value {valueAsInt} does not equal {otherAsInt}"));
@@ -270,7 +270,7 @@ public class DoesNotHaveSameNameAsAssertion<TEnum> : Assertion<TEnum>
 
         if (valueName != otherName)
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"value name \"{valueName}\" equals \"{otherName}\""));
@@ -310,7 +310,7 @@ public class DoesNotHaveSameValueAsAssertion<TEnum> : Assertion<TEnum>
 
         if (valueAsInt != otherAsInt)
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return AssertionResult._passedTask;
         }
 
         return Task.FromResult(AssertionResult.Failed($"value {valueAsInt} equals {otherAsInt}"));
