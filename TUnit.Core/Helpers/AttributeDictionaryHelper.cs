@@ -45,7 +45,7 @@ public static class AttributeDictionaryHelper
             }
         }
 
-        return new ReadOnlyDictionary<Type, IReadOnlyList<Attribute>>(result);
+        return result;
     }
 
     /// <summary>
