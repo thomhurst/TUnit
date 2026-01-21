@@ -92,7 +92,7 @@ internal sealed class TestLifecycleCoordinator
 /// <summary>
 /// Flags indicating which After hooks should be executed based on test completion counts.
 /// </summary>
-internal sealed class AfterHookExecutionFlags
+internal struct AfterHookExecutionFlags
 {
     public bool ShouldExecuteAfterClass { get; set; }
     public bool ShouldExecuteAfterAssembly { get; set; }
