@@ -14,7 +14,7 @@ public partial class TestContext
     internal ConcurrentBag<Timing> Timings { get; } = [];
     private readonly ConcurrentBag<Artifact> _artifactsBag = new();
 
-    internal IReadOnlyList<Artifact> Artifacts => _artifactsBag.ToList();
+    internal IReadOnlyList<Artifact> Artifacts => _artifactsBag.ToArray();
 
     // Explicit interface implementations for ITestOutput
     TextWriter ITestOutput.StandardOutput => OutputWriter;
