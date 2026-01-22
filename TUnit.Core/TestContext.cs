@@ -222,20 +222,11 @@ public partial class TestContext : Context,
         CachedClassInstance = null;
     }
 
-
     internal ConcurrentDictionary<string, object?> ObjectBag => _testBuilderContext.StateBag;
-
 
     internal AbstractExecutableTest InternalExecutableTest { get; set; } = null!;
 
-    private ConcurrentDictionary<int, HashSet<object>>? _trackedObjects;
-
-    /// <summary>
-    /// Thread-safe lazy initialization of TrackedObjects using LazyInitializer
-    /// to prevent race conditions when multiple threads access this property simultaneously.
-    /// </summary>
-    internal ConcurrentDictionary<int, HashSet<object>> TrackedObjects =>
-        LazyInitializer.EnsureInitialized(ref _trackedObjects)!;
+    internal Dictionary<int, HashSet<object>> TrackedObjects { get; } = new();
 
     /// <summary>
     /// Sets the output captured during test building phase.

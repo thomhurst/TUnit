@@ -53,9 +53,9 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     /// Thread-safe: locks each HashSet while copying.
     /// Pre-calculates capacity to avoid HashSet resizing during population.
     /// </summary>
-    private static ISet<object> FlattenTrackedObjects(ConcurrentDictionary<int, HashSet<object>> trackedObjects)
+    private static ISet<object> FlattenTrackedObjects(Dictionary<int, HashSet<object>> trackedObjects)
     {
-        if (trackedObjects.IsEmpty)
+        if (trackedObjects.Count == 0)
         {
             return ImmutableHashSet<object>.Empty;
         }
@@ -64,12 +64,9 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
         foreach (var kvp in trackedObjects)
         {
-            lock (kvp.Value)
+            foreach (var obj in kvp.Value)
             {
-                foreach (var obj in kvp.Value)
-                {
-                    result.Add(obj);
-                }
+                result.Add(obj);
             }
         }
 
@@ -83,7 +80,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
         // Get new trackable objects
         var trackableDict = trackableObjectGraphProvider.GetTrackableObjects(testContext);
-        if (trackableDict.IsEmpty && alreadyTracked.Count == 0)
+        if (trackableDict.Count == 0 && alreadyTracked.Count == 0)
         {
             return;
         }

@@ -34,7 +34,7 @@ internal class TrackableObjectGraphProvider
     /// </summary>
     /// <param name="testContext">The test context to get trackable objects from.</param>
     /// <param name="cancellationToken">Optional cancellation token for long-running discovery.</param>
-    public ConcurrentDictionary<int, HashSet<object>> GetTrackableObjects(TestContext testContext, CancellationToken cancellationToken = default)
+    public Dictionary<int, HashSet<object>> GetTrackableObjects(TestContext testContext, CancellationToken cancellationToken = default)
     {
         // OCP-compliant: Use the interface method directly instead of type-checking
         return _discoverer.DiscoverAndTrackObjects(testContext, cancellationToken);

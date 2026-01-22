@@ -235,17 +235,9 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
                     continue;
                 }
 
-                // Copy to array under lock to prevent concurrent modification
-                object[] objectsCopy;
-                lock (objectsAtLevel)
-                {
-                    objectsCopy = new object[objectsAtLevel.Count];
-                    objectsAtLevel.CopyTo(objectsCopy);
-                }
-
                 // Initialize all objects at this level in parallel
-                var tasks = new List<Task>(objectsCopy.Length);
-                foreach (var obj in objectsCopy)
+                var tasks = new List<Task>(objectsAtLevel.Count);
+                foreach (var obj in objectsAtLevel)
                 {
                     tasks.Add(InitializeObjectWithNestedAsync(obj, cancellationToken));
                 }
