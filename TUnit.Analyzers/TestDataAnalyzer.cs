@@ -410,12 +410,24 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         IPropertySymbol? propertySymbol = null)
     {
         {
+            // Guard against missing constructor arguments (can happen during compilation errors)
+            if (attribute.ConstructorArguments.IsDefaultOrEmpty)
+            {
+                return;
+            }
+
             var type = attribute.AttributeClass?.IsGenericType == true
                 ? attribute.AttributeClass.TypeArguments.First()
                 : attribute.ConstructorArguments[0].Value as INamedTypeSymbol ?? testClassType;
 
             var methodName = attribute.ConstructorArguments[0].Value as string
-                         ?? attribute.ConstructorArguments[1].Value as string;
+                         ?? (attribute.ConstructorArguments.Length > 1 ? attribute.ConstructorArguments[1].Value as string : null);
+
+            // If method name couldn't be resolved, skip validation (compilation error will be reported separately)
+            if (string.IsNullOrEmpty(methodName))
+            {
+                return;
+            }
 
             var argumentsNamedArgument = attribute.NamedArguments
                 .FirstOrDefault(x => x.Key == "Arguments")
