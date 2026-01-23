@@ -81,6 +81,11 @@ public class ThreadSafeDictionary<TKey,
             return existingLazy.Value;
         }
 
+        return GetOrAddSlow(key, func);
+    }
+
+    private TValue GetOrAddSlow(TKey key, Func<TKey, TValue> func)
+    {
         // Slow path: Key not found, need to create
         // Create Lazy instance OUTSIDE of GetOrAdd to prevent factory from running during race
         var newLazy = new Lazy<TValue>(() => func(key), LazyThreadSafetyMode.ExecutionAndPublication);
