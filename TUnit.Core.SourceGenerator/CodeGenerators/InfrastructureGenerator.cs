@@ -258,10 +258,22 @@ public class InfrastructureGenerator : IIncrementalGenerator
                 // Disable reflection scanner - source generation is active
                 sourceBuilder.AppendLine("global::TUnit.Core.SourceRegistrar.IsEnabled = true;");
 
-                // Pre-load assemblies that may contain tests
+                // Pre-load assemblies that may contain hooks or tests
+                // Loading the assemblies triggers their ModuleInitializers, which register hooks
                 foreach (var assemblyName in model.AssembliesToLoad)
                 {
-                    sourceBuilder.AppendLine($"global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load(\"{assemblyName}\"));");
+                    sourceBuilder.AppendLine("try");
+                    sourceBuilder.AppendLine("{");
+                    sourceBuilder.Indent();
+                    sourceBuilder.AppendLine($"_ = global::System.Reflection.Assembly.Load(\"{assemblyName}\");");
+                    sourceBuilder.Unindent();
+                    sourceBuilder.AppendLine("}");
+                    sourceBuilder.AppendLine("catch (global::System.Exception)");
+                    sourceBuilder.AppendLine("{");
+                    sourceBuilder.Indent();
+                    sourceBuilder.AppendLine("// Assembly load failed - continue with remaining assemblies");
+                    sourceBuilder.Unindent();
+                    sourceBuilder.AppendLine("}");
                 }
             }
         }
