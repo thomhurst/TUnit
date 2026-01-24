@@ -150,6 +150,18 @@ internal sealed class TestCoordinator : ITestCoordinator
         {
             var cleanupExceptions = new List<Exception>();
 
+            // Flush console interceptors to ensure all buffered output is captured
+            // This is critical for output from Console.Write() without newline
+            try
+            {
+                await Console.Out.FlushAsync().ConfigureAwait(false);
+                await Console.Error.FlushAsync().ConfigureAwait(false);
+            }
+            catch (Exception flushEx)
+            {
+                await _logger.LogErrorAsync($"Error flushing console output for {test.TestId}: {flushEx}").ConfigureAwait(false);
+            }
+
             await _objectTracker.UntrackObjects(test.Context, cleanupExceptions).ConfigureAwait(false);
 
             var testClass = test.Metadata.TestClassType;

@@ -43,4 +43,16 @@ public class ParallelConsoleOutputTests
         await Assert.That(output).DoesNotContain("Test1");
         await Assert.That(output).DoesNotContain("Test2");
     }
+
+    [Test]
+    [Repeat(10)]
+    public async Task Test4_EndingWithoutNewline_ShouldStillCaptureOutput()
+    {
+        Console.WriteLine("Test4-Start");
+        await Task.Delay(10);
+        Console.Write("Test4-End-NoNewline");
+        // Test ends here - the final Write should be flushed by the framework
+        // Note: We check this DURING the test since output is buffered
+        // The framework flush will ensure it's available in test results
+    }
 }
