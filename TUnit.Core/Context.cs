@@ -29,8 +29,9 @@ public abstract class Context : IContext, IDisposable
 
     // Console interceptor line buffers for partial writes (Console.Write without newline)
     // These are stored per-context to prevent output mixing between parallel tests
-    private StringBuilder? _consoleStdOutLineBuffer;
-    private StringBuilder? _consoleStdErrLineBuffer;
+    // Using Lazy<T> for thread-safe initialization
+    private readonly Lazy<StringBuilder> _consoleStdOutLineBuffer = new(() => new StringBuilder());
+    private readonly Lazy<StringBuilder> _consoleStdErrLineBuffer = new(() => new StringBuilder());
     private readonly object _consoleStdOutBufferLock = new();
     private readonly object _consoleStdErrBufferLock = new();
 
@@ -43,12 +44,12 @@ public abstract class Context : IContext, IDisposable
     // Internal accessors for console interceptor line buffers with thread safety
     internal (StringBuilder Buffer, object Lock) GetConsoleStdOutLineBuffer()
     {
-        return (_consoleStdOutLineBuffer ??= new StringBuilder(), _consoleStdOutBufferLock);
+        return (_consoleStdOutLineBuffer.Value, _consoleStdOutBufferLock);
     }
 
     internal (StringBuilder Buffer, object Lock) GetConsoleStdErrLineBuffer()
     {
-        return (_consoleStdErrLineBuffer ??= new StringBuilder(), _consoleStdErrBufferLock);
+        return (_consoleStdErrLineBuffer.Value, _consoleStdErrBufferLock);
     }
 
     internal Context(Context? parent)
