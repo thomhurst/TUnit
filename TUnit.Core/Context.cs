@@ -27,11 +27,29 @@ public abstract class Context : IContext, IDisposable
     private readonly ReaderWriterLockSlim _errorOutputLock = new(LockRecursionPolicy.NoRecursion);
     private DefaultLogger? _defaultLogger;
 
+    // Console interceptor line buffers for partial writes (Console.Write without newline)
+    // These are stored per-context to prevent output mixing between parallel tests
+    private StringBuilder? _consoleStdOutLineBuffer;
+    private StringBuilder? _consoleStdErrLineBuffer;
+    private readonly object _consoleStdOutBufferLock = new();
+    private readonly object _consoleStdErrBufferLock = new();
+
     [field: AllowNull, MaybeNull]
     public TextWriter OutputWriter => field ??= new ConcurrentStringWriter(_outputBuilder, _outputLock);
 
     [field: AllowNull, MaybeNull]
     public TextWriter ErrorOutputWriter => field ??= new ConcurrentStringWriter(_errorOutputBuilder, _errorOutputLock);
+
+    // Internal accessors for console interceptor line buffers with thread safety
+    internal (StringBuilder Buffer, object Lock) GetConsoleStdOutLineBuffer()
+    {
+        return (_consoleStdOutLineBuffer ??= new StringBuilder(), _consoleStdOutBufferLock);
+    }
+
+    internal (StringBuilder Buffer, object Lock) GetConsoleStdErrLineBuffer()
+    {
+        return (_consoleStdErrLineBuffer ??= new StringBuilder(), _consoleStdErrBufferLock);
+    }
 
     internal Context(Context? parent)
     {

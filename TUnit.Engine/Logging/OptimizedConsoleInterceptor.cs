@@ -15,14 +15,18 @@ namespace TUnit.Engine.Logging;
 /// </summary>
 internal abstract class OptimizedConsoleInterceptor : TextWriter
 {
-    private readonly StringBuilder _lineBuffer = new();
-
     public override Encoding Encoding => Encoding.UTF8;
 
     /// <summary>
     /// Gets the log level to use when routing console output to sinks.
     /// </summary>
     protected abstract LogLevel SinkLogLevel { get; }
+
+    /// <summary>
+    /// Gets the line buffer and lock from the current context.
+    /// This ensures each test has its own buffer, preventing output mixing between parallel tests.
+    /// </summary>
+    protected abstract (StringBuilder Buffer, object Lock) GetLineBuffer();
 
     private protected abstract TextWriter GetOriginalOut();
 
@@ -61,19 +65,32 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     public override void Flush()
     {
         // Flush any buffered partial line
-        if (_lineBuffer.Length > 0)
+        var (buffer, bufferLock) = GetLineBuffer();
+        lock (bufferLock)
         {
-            RouteToSinks(_lineBuffer.ToString());
-            _lineBuffer.Clear();
+            if (buffer.Length > 0)
+            {
+                RouteToSinks(buffer.ToString());
+                buffer.Clear();
+            }
         }
     }
 
     public override async Task FlushAsync()
     {
-        if (_lineBuffer.Length > 0)
+        var (buffer, bufferLock) = GetLineBuffer();
+        string? content = null;
+        lock (bufferLock)
         {
-            await RouteToSinksAsync(_lineBuffer.ToString()).ConfigureAwait(false);
-            _lineBuffer.Clear();
+            if (buffer.Length > 0)
+            {
+                content = buffer.ToString();
+                buffer.Clear();
+            }
+        }
+        if (content != null)
+        {
+            await RouteToSinksAsync(content).ConfigureAwait(false);
         }
     }
 
@@ -96,7 +113,11 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     public override void Write(string? value)
     {
         if (value == null) return;
-        _lineBuffer.Append(value);
+        var (buffer, bufferLock) = GetLineBuffer();
+        lock (bufferLock)
+        {
+            buffer.Append(value);
+        }
     }
     public override void Write(uint value) => Write(value.ToString());
     public override void Write(ulong value) => Write(value.ToString());
@@ -108,19 +129,32 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
 
     private void BufferChar(char value)
     {
-        _lineBuffer.Append(value);
+        var (buffer, bufferLock) = GetLineBuffer();
+        lock (bufferLock)
+        {
+            buffer.Append(value);
+        }
     }
 
     private void BufferChars(char[] buffer, int index, int count)
     {
-        _lineBuffer.Append(buffer, index, count);
+        var (lineBuffer, bufferLock) = GetLineBuffer();
+        lock (bufferLock)
+        {
+            lineBuffer.Append(buffer, index, count);
+        }
     }
 
     // WriteLine methods - flush buffer and route complete line to sinks
     public override void WriteLine()
     {
-        var line = _lineBuffer.ToString();
-        _lineBuffer.Clear();
+        var (buffer, bufferLock) = GetLineBuffer();
+        string line;
+        lock (bufferLock)
+        {
+            line = buffer.ToString();
+            buffer.Clear();
+        }
         RouteToSinks(line);
     }
 
@@ -138,11 +172,15 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     public override void WriteLine(string? value)
     {
         // Prepend any buffered content
-        if (_lineBuffer.Length > 0)
+        var (buffer, bufferLock) = GetLineBuffer();
+        lock (bufferLock)
         {
-            _lineBuffer.Append(value);
-            value = _lineBuffer.ToString();
-            _lineBuffer.Clear();
+            if (buffer.Length > 0)
+            {
+                buffer.Append(value);
+                value = buffer.ToString();
+                buffer.Clear();
+            }
         }
         RouteToSinks(value);
     }
@@ -172,11 +210,15 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
 
     public override async Task WriteLineAsync(string? value)
     {
-        if (_lineBuffer.Length > 0)
+        var (buffer, bufferLock) = GetLineBuffer();
+        lock (bufferLock)
         {
-            _lineBuffer.Append(value);
-            value = _lineBuffer.ToString();
-            _lineBuffer.Clear();
+            if (buffer.Length > 0)
+            {
+                buffer.Append(value);
+                value = buffer.ToString();
+                buffer.Clear();
+            }
         }
         await RouteToSinksAsync(value).ConfigureAwait(false);
     }
