@@ -419,6 +419,7 @@ namespace
         public .TestSessionContext TestSessionContext { get; }
         public .TestContext CreateTestContext(string testName, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType, .TestBuilderContext testBuilderContext, .CancellationToken cancellationToken) { }
         public .AssemblyHookContext GetOrCreateAssemblyContext(.Assembly assembly) { }
+        [.("Trimming", "IL2111", Justification="Type parameter is annotated at the method boundary.")]
         public .ClassHookContext GetOrCreateClassContext([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType) { }
     }
     public class CultureExecutor : .DedicatedThreadExecutor

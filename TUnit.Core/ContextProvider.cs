@@ -61,17 +61,20 @@ public class ContextProvider(IServiceProvider serviceProvider, string testSessio
     /// <summary>
     /// Gets or creates a class context
     /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2111",
+        Justification = "Type parameter is annotated at the method boundary.")]
     public ClassHookContext GetOrCreateClassContext(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type classType)
     {
-        return _classContexts.GetOrAdd(classType, type =>
+        return _classContexts.GetOrAdd(classType, static ([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
+            type, state) =>
         {
-            return new ClassHookContext(GetOrCreateAssemblyContext(classType.Assembly))
+            return new ClassHookContext(state.GetOrCreateAssemblyContext(type.Assembly))
             {
-                ClassType = classType
+                ClassType = type
             };
-        });
+        }, this);
     }
 
     /// <summary>

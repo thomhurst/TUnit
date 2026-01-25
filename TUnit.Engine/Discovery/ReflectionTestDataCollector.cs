@@ -170,7 +170,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             // Stream tests from this assembly
             await foreach (var test in DiscoverTestsInAssemblyStreamingAsync(assembly, cancellationToken))
             {
-                ImmutableInterlocked.Update(ref _discoveredTests, list => list.Add(test));
+                ImmutableInterlocked.Update(ref _discoveredTests, static (list, test) => list.Add(test), test);
                 yield return test;
             }
         }
@@ -178,7 +178,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // Stream dynamic tests
         await foreach (var dynamicTest in DiscoverDynamicTestsStreamingAsync(testSessionId, cancellationToken))
         {
-            ImmutableInterlocked.Update(ref _discoveredTests, list => list.Add(dynamicTest));
+            ImmutableInterlocked.Update(ref _discoveredTests, static (list, dynamicTest) => list.Add(dynamicTest), dynamicTest);
             yield return dynamicTest;
         }
     }
