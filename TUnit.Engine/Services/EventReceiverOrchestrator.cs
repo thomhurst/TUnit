@@ -546,6 +546,6 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
     public void Dispose()
     {
-        _registry.Dispose();
+        // No longer need to dispose _registry - it no longer uses ReaderWriterLockSlim
     }
 }

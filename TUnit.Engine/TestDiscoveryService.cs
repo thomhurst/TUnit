@@ -128,7 +128,7 @@ internal sealed class TestDiscoveryService : IDataProducer
                 }
             }
 
-            filteredTests = testsToInclude.ToList();
+            filteredTests = [.. testsToInclude];
         }
 
         contextProvider.TestDiscoveryContext.AddTests(allTests.Select(static t => t.Context));
