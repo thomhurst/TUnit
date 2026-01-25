@@ -189,6 +189,7 @@ public static class MigrationHelpers
         // Preserve leading trivia from the first using directive (may contain license header)
         var leadingTrivia = compilationUnit.Usings.FirstOrDefault()?.GetLeadingTrivia() ?? default;
 
+        // Step 1: Remove file-level usings
         var usingsToKeep = compilationUnit.Usings
             .Where(u =>
             {
@@ -220,7 +221,82 @@ public static class MigrationHelpers
             }
         }
 
+        // Step 2: Remove usings inside namespace blocks
+        result = RemoveUsingsFromNamespaces(result, namespacesToRemove);
+
         return result;
+    }
+
+    /// <summary>
+    /// Removes framework usings from inside namespace blocks (both classic and file-scoped namespaces).
+    /// </summary>
+    private static CompilationUnitSyntax RemoveUsingsFromNamespaces(CompilationUnitSyntax compilationUnit, string[] namespacesToRemove)
+    {
+        var currentRoot = compilationUnit;
+
+        // Handle classic namespace declarations (namespace Foo { ... })
+        var namespaceDeclarations = currentRoot.DescendantNodes()
+            .OfType<NamespaceDeclarationSyntax>()
+            .ToList();
+
+        foreach (var ns in namespaceDeclarations)
+        {
+            if (ns.Usings.Count == 0) continue;
+
+            var currentNs = currentRoot.DescendantNodes()
+                .OfType<NamespaceDeclarationSyntax>()
+                .FirstOrDefault(n => n.Span == ns.Span);
+
+            if (currentNs == null) continue;
+
+            var namespaceScopedUsingsToKeep = currentNs.Usings
+                .Where(u =>
+                {
+                    var nameString = u.Name?.ToString() ?? "";
+                    return !namespacesToRemove.Any(nsToRemove =>
+                        nameString == nsToRemove || nameString.StartsWith(nsToRemove + "."));
+                })
+                .ToList();
+
+            if (namespaceScopedUsingsToKeep.Count != currentNs.Usings.Count)
+            {
+                var updatedNs = currentNs.WithUsings(SyntaxFactory.List(namespaceScopedUsingsToKeep));
+                currentRoot = currentRoot.ReplaceNode(currentNs, updatedNs);
+            }
+        }
+
+        // Handle file-scoped namespace declarations (namespace Foo;)
+        var fileScopedNamespaces = currentRoot.DescendantNodes()
+            .OfType<FileScopedNamespaceDeclarationSyntax>()
+            .ToList();
+
+        foreach (var ns in fileScopedNamespaces)
+        {
+            if (ns.Usings.Count == 0) continue;
+
+            var currentNs = currentRoot.DescendantNodes()
+                .OfType<FileScopedNamespaceDeclarationSyntax>()
+                .FirstOrDefault(n => n.Span == ns.Span);
+
+            if (currentNs == null) continue;
+
+            var namespaceScopedUsingsToKeep = currentNs.Usings
+                .Where(u =>
+                {
+                    var nameString = u.Name?.ToString() ?? "";
+                    return !namespacesToRemove.Any(nsToRemove =>
+                        nameString == nsToRemove || nameString.StartsWith(nsToRemove + "."));
+                })
+                .ToList();
+
+            if (namespaceScopedUsingsToKeep.Count != currentNs.Usings.Count)
+            {
+                var updatedNs = currentNs.WithUsings(SyntaxFactory.List(namespaceScopedUsingsToKeep));
+                currentRoot = currentRoot.ReplaceNode(currentNs, updatedNs);
+            }
+        }
+
+        return currentRoot;
     }
     
     /// <summary>

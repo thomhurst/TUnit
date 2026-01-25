@@ -37,14 +37,16 @@ public class NUnitTwoPhaseAnalyzer : MigrationAnalyzer
         "Parallelizable", "NonParallelizable",
         "Repeat", "Values", "Range", "ValueSource",
         "Sequential", "Combinatorial", "Platform",
-        "ExpectedException"
+        "ExpectedException", "FixtureLifeCycle"
     };
 
     private static readonly HashSet<string> NUnitRemovableAttributeNames = new()
     {
         "TestFixture", // TestFixture is implicit in TUnit
         "Combinatorial", // TUnit's default behavior is combinatorial
-        "Sequential" // No direct equivalent - TUnit uses Matrix which is combinatorial by default
+        "Sequential", // No direct equivalent - TUnit uses Matrix which is combinatorial by default
+        "Platform", // No direct equivalent - use custom SkipAttribute for platform-specific skipping
+        "FixtureLifeCycle" // TUnit creates new instances by default (like InstancePerTestCase)
     };
 
     private static readonly HashSet<string> NUnitConditionallyRemovableAttributes = new()
@@ -1411,7 +1413,8 @@ public class NUnitTwoPhaseAnalyzer : MigrationAnalyzer
             "Platform" => ConvertPlatformAttribute(node),
             "Apartment" => ConvertApartmentAttribute(node),
             "ExpectedException" => (null, null), // Handled separately
-            "Sequential" => (null, null), // No direct equivalent - TODO needed
+            "Sequential" => (null, null), // No direct equivalent - removed
+            "FixtureLifeCycle" => (null, null), // TUnit uses instance-per-test by default - removed
             _ => (null, null)
         };
 
@@ -1648,53 +1651,12 @@ public class NUnitTwoPhaseAnalyzer : MigrationAnalyzer
 
     private (string?, string?) ConvertPlatformAttribute(AttributeSyntax node)
     {
-        // [Platform(Include = "Win")] -> [RunOn(OS.Windows)]
-        // [Platform(Exclude = "Linux")] -> [ExcludeOn(OS.Linux)]
-        if (node.ArgumentList?.Arguments.Count > 0)
-        {
-            foreach (var arg in node.ArgumentList.Arguments)
-            {
-                var nameText = arg.NameEquals?.Name.Identifier.Text;
-                var valueText = arg.Expression.ToString().Trim('"');
-
-                if (nameText == "Include")
-                {
-                    var os = MapPlatformToOS(valueText);
-                    return ("RunOn", $"({os})");
-                }
-                if (nameText == "Exclude")
-                {
-                    var os = MapPlatformToOS(valueText);
-                    return ("ExcludeOn", $"({os})");
-                }
-            }
-        }
+        // [Platform] attribute has no direct equivalent in TUnit.
+        // - TUnit doesn't have [ExcludeOn] for platform exclusion
+        // - [RunOn] exists but platform mapping is imprecise
+        // The attribute is in NUnitRemovableAttributeNames and will be removed.
+        // Users should implement custom SkipAttribute for platform-specific skipping.
         return (null, null);
-    }
-
-    private static string MapPlatformToOS(string platform)
-    {
-        // Handle multiple platforms separated by comma: "Win,Linux" -> "OS.Windows | OS.Linux"
-        if (platform.Contains(","))
-        {
-            var platforms = platform.Split(',')
-                .Select(p => MapSinglePlatformToOS(p.Trim()))
-                .ToArray();
-            return string.Join(" | ", platforms);
-        }
-
-        return MapSinglePlatformToOS(platform);
-    }
-
-    private static string MapSinglePlatformToOS(string platform)
-    {
-        return platform.ToLowerInvariant() switch
-        {
-            "win" or "windows" or "win32" or "win64" => "OS.Windows",
-            "linux" or "unix" => "OS.Linux",
-            "macos" or "osx" or "macosx" => "OS.MacOS",
-            _ => $"OS.{platform}"
-        };
     }
 
     private (string?, string?) ConvertApartmentAttribute(AttributeSyntax node)

@@ -329,14 +329,44 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
     {
         // TUnit has Assert.Throws<T>(action) with the same API as xUnit - no conversion needed!
         // TUnit's Assert.Throws returns TException just like xUnit.
-        return (AssertionConversionKind.Throws, null, false, null);
+        // We return the original expression to track it in the plan without modifying it.
+        if (args.Count < 1) return (AssertionConversionKind.Throws, null, false, null);
+
+        var action = args[0].Expression.ToString();
+
+        // Get the type argument from the generic method
+        if (memberAccess.Name is GenericNameSyntax genericName &&
+            genericName.TypeArgumentList.Arguments.Count > 0)
+        {
+            var exceptionType = genericName.TypeArgumentList.Arguments[0].ToString();
+            // Return the same expression to track it (no actual change)
+            return (AssertionConversionKind.Throws, $"Assert.Throws<{exceptionType}>({action})", false, null);
+        }
+
+        // Non-generic Throws
+        return (AssertionConversionKind.Throws, $"Assert.Throws({action})", false, null);
     }
 
     private (AssertionConversionKind, string?, bool, string?) ConvertThrowsAsync(MemberAccessExpressionSyntax memberAccess, SeparatedSyntaxList<ArgumentSyntax> args)
     {
         // TUnit has Assert.ThrowsAsync<T>(action) with similar API to xUnit - no conversion needed!
         // TUnit's Assert.ThrowsAsync returns ThrowsAssertion<T> which is awaitable like xUnit's Task<T>.
-        return (AssertionConversionKind.ThrowsAsync, null, false, null);
+        // We return the original expression to track it in the plan without modifying it.
+        if (args.Count < 1) return (AssertionConversionKind.ThrowsAsync, null, false, null);
+
+        var action = args[0].Expression.ToString();
+
+        // Get the type argument from the generic method
+        if (memberAccess.Name is GenericNameSyntax genericName &&
+            genericName.TypeArgumentList.Arguments.Count > 0)
+        {
+            var exceptionType = genericName.TypeArgumentList.Arguments[0].ToString();
+            // ThrowsAsync is already awaited in xUnit, keep the await
+            return (AssertionConversionKind.ThrowsAsync, $"await Assert.ThrowsAsync<{exceptionType}>({action})", false, null);
+        }
+
+        // Non-generic ThrowsAsync
+        return (AssertionConversionKind.ThrowsAsync, $"await Assert.ThrowsAsync({action})", false, null);
     }
 
     private (AssertionConversionKind, string?, bool, string?) ConvertThrowsAny(MemberAccessExpressionSyntax memberAccess, SeparatedSyntaxList<ArgumentSyntax> args)
