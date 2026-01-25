@@ -45,7 +45,6 @@ public class NUnitTwoPhaseAnalyzer : MigrationAnalyzer
         "TestFixture", // TestFixture is implicit in TUnit
         "Combinatorial", // TUnit's default behavior is combinatorial
         "Sequential", // No direct equivalent - TUnit uses Matrix which is combinatorial by default
-        "Platform", // No direct equivalent - use custom SkipAttribute for platform-specific skipping
         "FixtureLifeCycle" // TUnit creates new instances by default (like InstancePerTestCase)
     };
 
@@ -1651,12 +1650,53 @@ public class NUnitTwoPhaseAnalyzer : MigrationAnalyzer
 
     private (string?, string?) ConvertPlatformAttribute(AttributeSyntax node)
     {
-        // [Platform] attribute has no direct equivalent in TUnit.
-        // - TUnit doesn't have [ExcludeOn] for platform exclusion
-        // - [RunOn] exists but platform mapping is imprecise
-        // The attribute is in NUnitRemovableAttributeNames and will be removed.
-        // Users should implement custom SkipAttribute for platform-specific skipping.
+        // [Platform(Include = "Win")] -> [RunOn(OS.Windows)]
+        // [Platform(Exclude = "Linux")] -> [ExcludeOn(OS.Linux)]
+        if (node.ArgumentList?.Arguments.Count > 0)
+        {
+            foreach (var arg in node.ArgumentList.Arguments)
+            {
+                var nameText = arg.NameEquals?.Name.Identifier.Text;
+                var valueText = arg.Expression.ToString().Trim('"');
+
+                if (nameText == "Include")
+                {
+                    var os = MapPlatformToOS(valueText);
+                    return ("RunOn", $"({os})");
+                }
+                if (nameText == "Exclude")
+                {
+                    var os = MapPlatformToOS(valueText);
+                    return ("ExcludeOn", $"({os})");
+                }
+            }
+        }
         return (null, null);
+    }
+
+    private static string MapPlatformToOS(string platform)
+    {
+        // Handle multiple platforms separated by comma: "Win,Linux" -> "OS.Windows | OS.Linux"
+        if (platform.Contains(","))
+        {
+            var platforms = platform.Split(',')
+                .Select(p => MapSinglePlatformToOS(p.Trim()))
+                .ToArray();
+            return string.Join(" | ", platforms);
+        }
+
+        return MapSinglePlatformToOS(platform);
+    }
+
+    private static string MapSinglePlatformToOS(string platform)
+    {
+        return platform.ToLowerInvariant() switch
+        {
+            "win" or "windows" or "win32" or "win64" => "OS.Windows",
+            "linux" or "unix" => "OS.Linux",
+            "macos" or "osx" or "macosx" => "OS.MacOS",
+            _ => $"OS.{platform}"
+        };
     }
 
     private (string?, string?) ConvertApartmentAttribute(AttributeSyntax node)
