@@ -256,7 +256,7 @@ public class CombinedDataSourceTests
     #region Verification Tests - Ensure Correct Combinations
 
     private static readonly HashSet<string> _seenCombinations = new();
-    private static readonly object _lock = new();
+    private static readonly Lock _lock = new();
 
     [Test]
     [CombinedDataSources]

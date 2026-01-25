@@ -8,7 +8,7 @@ public class AdaptiveParallelismTests
 {
     private static int _currentlyRunning;
     private static int _maxConcurrent;
-    private static readonly object _lock = new();
+    private static readonly Lock _lock = new();
 
     [Test]
     [Repeat(1000)]

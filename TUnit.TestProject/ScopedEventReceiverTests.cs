@@ -7,7 +7,7 @@ namespace TUnit.TestProject;
 [TestEndLogger(source: "assembly")]
 public class ScopedEventReceiverTests
 {
-    internal static readonly object _lock = new();
+    internal static readonly Lock _lock = new();
     internal static readonly Dictionary<string, List<string>> _testStartEvents = new();
     internal static readonly Dictionary<string, List<string>> _testEndEvents = new();
 

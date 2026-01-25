@@ -28,7 +28,7 @@ internal sealed class EventReceiverRegistry
     private volatile EventTypes _registeredEvents = EventTypes.None;
     private readonly Dictionary<Type, object[]> _receiversByType = new();
     private readonly ConcurrentDictionary<Type, Array> _cachedTypedReceivers = new();
-    private readonly object _lock = new();
+    private readonly Lock _lock = new();
 
     /// <summary>
     /// Register event receivers from a collection of objects
