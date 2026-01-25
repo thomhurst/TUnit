@@ -569,6 +569,13 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
 
         sb.AppendLine("{");
 
+        if (data.ReturnTypeInfo.Kind is ReturnTypeKind.Bool)
+        {
+            sb.AppendLine(
+                "    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);");
+            sb.AppendLine();
+        }
+
         // Private fields for additional parameters
         // Note: Ref struct types (like DefaultInterpolatedStringHandler) are stored as string
         foreach (var param in data.AdditionalParameters)
@@ -702,9 +709,9 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         {
             case ReturnTypeKind.Bool:
                 sb.AppendLine($"        var result = {methodCall};");
-                sb.AppendLine("        return Task.FromResult(result");
-                sb.AppendLine("            ? AssertionResult.Passed");
-                sb.AppendLine("            : AssertionResult.Failed($\"found {value}\"));");
+                sb.AppendLine("        return result");
+                sb.AppendLine("            ? _passedTask");
+                sb.AppendLine("            : Task.FromResult(AssertionResult.Failed($\"found {value}\"));");
                 break;
 
             case ReturnTypeKind.AssertionResult:
