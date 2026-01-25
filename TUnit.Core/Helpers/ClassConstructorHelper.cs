@@ -43,7 +43,7 @@ public static class ClassConstructorHelper
         TestBuilderContext testBuilderContext,
         string testSessionId)
     {
-        var classConstructorAttribute = attributes.OfType<ClassConstructorAttribute>().FirstOrDefault();
+        var classConstructorAttribute = GetClassConstructorAttribute(attributes);
 
         if (classConstructorAttribute == null)
         {
@@ -78,6 +78,21 @@ public static class ClassConstructorHelper
     /// </summary>
     public static ClassConstructorAttribute? GetClassConstructorAttribute(Attribute[] attributes)
     {
-        return attributes.OfType<ClassConstructorAttribute>().FirstOrDefault();
+        return GetClassConstructorAttribute((IReadOnlyList<ClassConstructorAttribute>)attributes);
+    }
+
+    private static ClassConstructorAttribute? GetClassConstructorAttribute(IReadOnlyList<Attribute> attributes)
+    {
+        ClassConstructorAttribute? classConstructorAttribute = null;
+        foreach (Attribute attribute in attributes)
+        {
+            if (attribute is ClassConstructorAttribute classAttribute)
+            {
+                classConstructorAttribute = classAttribute;
+                break;
+            }
+        }
+
+        return classConstructorAttribute;
     }
 }
