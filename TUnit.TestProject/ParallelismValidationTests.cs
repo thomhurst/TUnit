@@ -12,7 +12,7 @@ public class UnconstrainedParallelTests
         private static readonly ConcurrentBag<(string TestName, DateTimeOffset Start, DateTimeOffset End)> _executionTimes = [];
         private static int _concurrentCount = 0;
         private static int _maxConcurrent = 0;
-        private static readonly object _lock = new();
+        private static readonly Lock _lock = new();
 
         [After(Test)]
         public async Task RecordExecution()
@@ -114,7 +114,7 @@ public class LimitedParallelTests
         private static int _concurrentCount = 0;
         private static int _maxConcurrent = 0;
         private static int _exceededLimit = 0;
-        private static readonly object _lock = new();
+        private static readonly Lock _lock = new();
 
         [After(Test)]
         public async Task RecordExecution()
@@ -225,7 +225,7 @@ public class StrictlySerialTests
         private static int _concurrentCount = 0;
         private static int _maxConcurrent = 0;
         private static int _exceededLimit = 0;
-        private static readonly object _lock = new();
+        private static readonly Lock _lock = new();
 
         [After(Test)]
         public async Task RecordExecution()
@@ -333,7 +333,7 @@ public class HighParallelismTests
         private static readonly ConcurrentBag<(string TestName, DateTimeOffset Start, DateTimeOffset End)> _executionTimes = [];
         private static int _concurrentCount = 0;
         private static int _maxConcurrent = 0;
-        private static readonly object _lock = new();
+        private static readonly Lock _lock = new();
 
         [After(Test)]
         public async Task RecordExecution()

@@ -189,7 +189,7 @@ public class NestedAsyncInitializerOrderTests
 public static class DeepNestingInitializationTracker
 {
     private static readonly List<string> _initializationOrder = [];
-    private static readonly object _lock = new();
+    private static readonly Lock _lock = new();
 
     public static void RecordInitialization(string name)
     {
