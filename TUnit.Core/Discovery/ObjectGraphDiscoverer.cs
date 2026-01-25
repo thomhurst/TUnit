@@ -110,7 +110,7 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
                 return false;
             }
 
-            AddToDepth(objectsByDepth, depth, obj);
+            TryAddToHashSet(objectsByDepth, depth, obj);
 
             return true;
         }
@@ -133,7 +133,7 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
 
         if (visitedObjects.Add(rootObject))
         {
-            AddToDepth(objectsByDepth, 0, rootObject);
+            TryAddToHashSet(objectsByDepth, 0, rootObject);
 
             DiscoverNestedObjects(rootObject, objectsByDepth, visitedObjects, currentDepth: 1, cancellationToken);
         }
@@ -148,7 +148,7 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
     /// <param name="testContext">The test context to discover objects from.</param>
     /// <param name="cancellationToken">Cancellation token for the operation.</param>
     /// <returns>The tracked objects dictionary (same as testContext.TrackedObjects).</returns>
-    public ConcurrentDictionary<int, HashSet<object>> DiscoverAndTrackObjects(TestContext testContext, CancellationToken cancellationToken = default)
+    public Dictionary<int, HashSet<object>> DiscoverAndTrackObjects(TestContext testContext, CancellationToken cancellationToken = default)
     {
         var visitedObjects = testContext.TrackedObjects;
 
@@ -188,7 +188,7 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
                 return false;
             }
 
-            AddToDepth(objectsByDepth, depth, value);
+            TryAddToHashSet(objectsByDepth, depth, value);
 
             return true;
         }
@@ -212,7 +212,7 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
     /// </summary>
     private void DiscoverNestedObjectsForTracking(
         object obj,
-        ConcurrentDictionary<int, HashSet<object>> visitedObjects,
+        Dictionary<int, HashSet<object>> visitedObjects,
         int currentDepth,
         CancellationToken cancellationToken)
     {
@@ -262,24 +262,12 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
     }
 
     /// <summary>
-    /// Adds an object to the specified depth level.
-     /// </summary>
-    private static void AddToDepth(Dictionary<int, HashSet<object>> objectsByDepth, int depth, object obj)
-    {
-        var hashSet = objectsByDepth.GetOrAdd(depth, _ => new HashSet<object>(ReferenceComparer));
-        hashSet.Add(obj);
-    }
-
-    /// <summary>
-    /// Thread-safe add to HashSet at specified depth. Returns true if added (not duplicate).
+    /// Add to HashSet at specified depth. Returns true if added (not duplicate).
     /// </summary>
-    private static bool TryAddToHashSet(ConcurrentDictionary<int, HashSet<object>> dict, int depth, object obj)
+    private static bool TryAddToHashSet(Dictionary<int, HashSet<object>> dict, int depth, object obj)
     {
         var hashSet = dict.GetOrAdd(depth, _ => new HashSet<object>(ReferenceComparer));
-        lock (hashSet)
-        {
-            return hashSet.Add(obj);
-        }
+        return hashSet.Add(obj);
     }
 
     #region Consolidated Traversal Methods (DRY)

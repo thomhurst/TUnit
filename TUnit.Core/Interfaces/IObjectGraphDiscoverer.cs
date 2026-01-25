@@ -64,7 +64,7 @@ internal interface IObjectGraphDiscoverer
     /// This method modifies testContext.TrackedObjects directly. For pure query operations,
     /// use <see cref="DiscoverObjectGraph"/> instead.
     /// </remarks>
-    ConcurrentDictionary<int, HashSet<object>> DiscoverAndTrackObjects(TestContext testContext, CancellationToken cancellationToken = default);
+    Dictionary<int, HashSet<object>> DiscoverAndTrackObjects(TestContext testContext, CancellationToken cancellationToken = default);
 }
 
 /// <summary>
