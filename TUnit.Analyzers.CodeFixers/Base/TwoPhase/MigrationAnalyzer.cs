@@ -521,10 +521,17 @@ public abstract class MigrationAnalyzer
 
             try
             {
+                var returnTypeText = method.ReturnType.ToString();
+
+                // Determine what return type change is needed
+                var (changeReturnTypeToTask, wrapReturnTypeInTask, originalReturnType) = AnalyzeReturnTypeForAsync(returnTypeText);
+
                 var change = new MethodSignatureChange
                 {
                     AddAsync = true,
-                    ChangeReturnTypeToTask = method.ReturnType.ToString() == "void",
+                    ChangeReturnTypeToTask = changeReturnTypeToTask,
+                    WrapReturnTypeInTask = wrapReturnTypeInTask,
+                    OriginalReturnType = originalReturnType,
                     OriginalText = $"{method.ReturnType} {method.Identifier}"
                 };
 
@@ -546,6 +553,44 @@ public abstract class MigrationAnalyzer
         }
 
         return currentRoot;
+    }
+
+    /// <summary>
+    /// Analyzes the return type to determine what changes are needed for async conversion.
+    /// </summary>
+    /// <returns>
+    /// A tuple of (changeReturnTypeToTask, wrapReturnTypeInTask, originalReturnType):
+    /// - changeReturnTypeToTask: true if return type is void and should become Task
+    /// - wrapReturnTypeInTask: true if return type is non-void, non-Task and should become Task&lt;T&gt;
+    /// - originalReturnType: the original return type to wrap (only set when wrapReturnTypeInTask is true)
+    /// </returns>
+    private static (bool changeReturnTypeToTask, bool wrapReturnTypeInTask, string? originalReturnType) AnalyzeReturnTypeForAsync(string returnTypeText)
+    {
+        // void → Task
+        if (returnTypeText == "void")
+        {
+            return (true, false, null);
+        }
+
+        // Already Task or Task<T> → no change needed
+        if (returnTypeText == "Task" ||
+            returnTypeText.StartsWith("Task<") ||
+            returnTypeText.StartsWith("System.Threading.Tasks.Task"))
+        {
+            return (false, false, null);
+        }
+
+        // Already ValueTask or ValueTask<T> → no change needed (async already works with ValueTask)
+        if (returnTypeText == "ValueTask" ||
+            returnTypeText.StartsWith("ValueTask<") ||
+            returnTypeText.StartsWith("System.Threading.Tasks.ValueTask"))
+        {
+            return (false, false, null);
+        }
+
+        // Non-void, non-Task return type → wrap in Task<T>
+        // e.g., object → Task<object>, int → Task<int>
+        return (false, true, returnTypeText);
     }
 
     /// <summary>

@@ -384,6 +384,7 @@ public abstract class BaseMigrationCodeFixProvider : CodeFixProvider
     /// <summary>
     /// Removes excessive blank lines at the start of class members (after opening brace).
     /// This can occur after removing members like ITestOutputHelper fields/properties.
+    /// Preserves preprocessor directives (#region, #if, #endif, etc.) and associated comments.
     /// </summary>
     protected static CompilationUnitSyntax CleanupClassMemberLeadingTrivia(CompilationUnitSyntax root)
     {
@@ -398,12 +399,63 @@ public abstract class BaseMigrationCodeFixProvider : CodeFixProvider
             var firstMember = classToFix.Members.First();
             var leadingTrivia = firstMember.GetLeadingTrivia();
 
-            // Keep only indentation (whitespace), remove all newlines
-            var triviaToKeep = leadingTrivia
-                .Where(t => !t.IsKind(SyntaxKind.EndOfLineTrivia))
-                .Where(t => t.IsKind(SyntaxKind.WhitespaceTrivia) ||
-                            (!t.IsKind(SyntaxKind.WhitespaceTrivia) && !t.IsKind(SyntaxKind.EndOfLineTrivia)))
-                .ToList();
+            // Build the new trivia list, preserving preprocessor directives and their context
+            var triviaToKeep = new List<SyntaxTrivia>();
+            var consecutiveNewlines = 0;
+            var lastWasPreprocessorOrComment = false;
+
+            foreach (var trivia in leadingTrivia)
+            {
+                // Always preserve preprocessor directives
+                if (IsPreprocessorDirective(trivia))
+                {
+                    triviaToKeep.Add(trivia);
+                    consecutiveNewlines = 0;
+                    lastWasPreprocessorOrComment = true;
+                    continue;
+                }
+
+                // Always preserve comments
+                if (trivia.IsKind(SyntaxKind.SingleLineCommentTrivia) ||
+                    trivia.IsKind(SyntaxKind.MultiLineCommentTrivia) ||
+                    trivia.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia) ||
+                    trivia.IsKind(SyntaxKind.MultiLineDocumentationCommentTrivia))
+                {
+                    triviaToKeep.Add(trivia);
+                    consecutiveNewlines = 0;
+                    lastWasPreprocessorOrComment = true;
+                    continue;
+                }
+
+                // Preserve whitespace (indentation)
+                if (trivia.IsKind(SyntaxKind.WhitespaceTrivia))
+                {
+                    triviaToKeep.Add(trivia);
+                    continue;
+                }
+
+                // Handle newlines: allow one newline after preprocessor/comment, remove excessive newlines
+                if (trivia.IsKind(SyntaxKind.EndOfLineTrivia))
+                {
+                    consecutiveNewlines++;
+
+                    // Keep the first newline after a preprocessor directive or comment
+                    // This ensures proper formatting like:
+                    //   #region Test
+                    //   [Test]
+                    if (lastWasPreprocessorOrComment && consecutiveNewlines == 1)
+                    {
+                        triviaToKeep.Add(trivia);
+                    }
+                    // Otherwise skip excessive newlines at the start
+                    lastWasPreprocessorOrComment = false;
+                    continue;
+                }
+
+                // Preserve any other trivia (structured trivia, etc.)
+                triviaToKeep.Add(trivia);
+                lastWasPreprocessorOrComment = false;
+            }
 
             var newFirstMember = firstMember.WithLeadingTrivia(triviaToKeep);
             var updatedClass = classToFix.ReplaceNode(firstMember, newFirstMember);
@@ -414,8 +466,28 @@ public abstract class BaseMigrationCodeFixProvider : CodeFixProvider
     }
 
     /// <summary>
+    /// Checks if a trivia is a preprocessor directive.
+    /// </summary>
+    private static bool IsPreprocessorDirective(SyntaxTrivia trivia)
+    {
+        return trivia.IsKind(SyntaxKind.RegionDirectiveTrivia) ||
+               trivia.IsKind(SyntaxKind.EndRegionDirectiveTrivia) ||
+               trivia.IsKind(SyntaxKind.IfDirectiveTrivia) ||
+               trivia.IsKind(SyntaxKind.ElseDirectiveTrivia) ||
+               trivia.IsKind(SyntaxKind.ElifDirectiveTrivia) ||
+               trivia.IsKind(SyntaxKind.EndIfDirectiveTrivia) ||
+               trivia.IsKind(SyntaxKind.DefineDirectiveTrivia) ||
+               trivia.IsKind(SyntaxKind.UndefDirectiveTrivia) ||
+               trivia.IsKind(SyntaxKind.PragmaWarningDirectiveTrivia) ||
+               trivia.IsKind(SyntaxKind.PragmaChecksumDirectiveTrivia) ||
+               trivia.IsKind(SyntaxKind.NullableDirectiveTrivia);
+    }
+
+    /// <summary>
     /// Finds a class with excessive leading trivia on its first member.
     /// Returns null if no such class exists.
+    /// Only considers trivia "excessive" if there are multiple consecutive newlines
+    /// without preprocessor directives or comments between them.
     /// </summary>
     private static ClassDeclarationSyntax? FindClassWithExcessiveLeadingTrivia(CompilationUnitSyntax root)
     {
@@ -425,7 +497,27 @@ public abstract class BaseMigrationCodeFixProvider : CodeFixProvider
             .FirstOrDefault(c =>
             {
                 var leadingTrivia = c.Members.First().GetLeadingTrivia();
-                return leadingTrivia.Any(t => t.IsKind(SyntaxKind.EndOfLineTrivia));
+
+                // Check for excessive newlines (more than one consecutive newline without meaningful trivia)
+                var consecutiveNewlines = 0;
+                foreach (var trivia in leadingTrivia)
+                {
+                    if (trivia.IsKind(SyntaxKind.EndOfLineTrivia))
+                    {
+                        consecutiveNewlines++;
+                        if (consecutiveNewlines > 1)
+                        {
+                            return true; // Excessive newlines found
+                        }
+                    }
+                    else if (!trivia.IsKind(SyntaxKind.WhitespaceTrivia))
+                    {
+                        // Non-whitespace, non-newline trivia resets the counter
+                        consecutiveNewlines = 0;
+                    }
+                }
+
+                return false;
             });
     }
 

@@ -345,6 +345,17 @@ public class MethodSignatureChange : ConversionTarget
     /// Whether to make the method public (for lifecycle methods)
     /// </summary>
     public bool MakePublic { get; init; }
+
+    /// <summary>
+    /// Whether to wrap the return type in Task&lt;T&gt; (for non-void, non-Task return types)
+    /// </summary>
+    public bool WrapReturnTypeInTask { get; init; }
+
+    /// <summary>
+    /// The original return type to wrap (e.g., "object", "int")
+    /// Only set when WrapReturnTypeInTask is true.
+    /// </summary>
+    public string? OriginalReturnType { get; init; }
 }
 
 /// <summary>

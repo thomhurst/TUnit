@@ -37,14 +37,15 @@ public class NUnitTwoPhaseAnalyzer : MigrationAnalyzer
         "Parallelizable", "NonParallelizable",
         "Repeat", "Values", "Range", "ValueSource",
         "Sequential", "Combinatorial", "Platform",
-        "ExpectedException"
+        "ExpectedException", "FixtureLifeCycle"
     };
 
     private static readonly HashSet<string> NUnitRemovableAttributeNames = new()
     {
         "TestFixture", // TestFixture is implicit in TUnit
         "Combinatorial", // TUnit's default behavior is combinatorial
-        "Sequential" // No direct equivalent - TUnit uses Matrix which is combinatorial by default
+        "Sequential", // No direct equivalent - TUnit uses Matrix which is combinatorial by default
+        "FixtureLifeCycle" // TUnit creates new instances by default (like InstancePerTestCase)
     };
 
     private static readonly HashSet<string> NUnitConditionallyRemovableAttributes = new()
@@ -1411,7 +1412,8 @@ public class NUnitTwoPhaseAnalyzer : MigrationAnalyzer
             "Platform" => ConvertPlatformAttribute(node),
             "Apartment" => ConvertApartmentAttribute(node),
             "ExpectedException" => (null, null), // Handled separately
-            "Sequential" => (null, null), // No direct equivalent - TODO needed
+            "Sequential" => (null, null), // No direct equivalent - removed
+            "FixtureLifeCycle" => (null, null), // TUnit uses instance-per-test by default - removed
             _ => (null, null)
         };
 

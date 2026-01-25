@@ -418,6 +418,19 @@ public class MigrationTransformer
                     newMethod = newMethod.WithReturnType(taskType);
                 }
 
+                // Wrap return type in Task<T> if needed (non-void, non-Task return type)
+                if (change.WrapReturnTypeInTask && !string.IsNullOrEmpty(change.OriginalReturnType))
+                {
+                    // Build Task<OriginalReturnType>
+                    var taskGenericType = SyntaxFactory.GenericName(
+                        SyntaxFactory.Identifier("Task"),
+                        SyntaxFactory.TypeArgumentList(
+                            SyntaxFactory.SingletonSeparatedList(
+                                SyntaxFactory.ParseTypeName(change.OriginalReturnType))))
+                        .WithTrailingTrivia(SyntaxFactory.Space);
+                    newMethod = newMethod.WithReturnType(taskGenericType);
+                }
+
                 // Change ValueTask to Task if needed (for IAsyncLifetime.InitializeAsync → IAsyncInitializer)
                 if (change.ChangeValueTaskToTask && method.ReturnType.ToString() == "ValueTask")
                 {
