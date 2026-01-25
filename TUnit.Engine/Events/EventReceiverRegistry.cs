@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using TUnit.Core.Interfaces;
 
@@ -26,7 +27,7 @@ internal sealed class EventReceiverRegistry
 
     private volatile EventTypes _registeredEvents = EventTypes.None;
     private readonly Dictionary<Type, object[]> _receiversByType = new();
-    private readonly Dictionary<Type, Array> _cachedTypedReceivers = new();
+    private readonly ConcurrentDictionary<Type, Array> _cachedTypedReceivers = new();
     private readonly object _lock = new();
 
     /// <summary>
