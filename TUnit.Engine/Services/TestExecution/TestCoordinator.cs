@@ -125,7 +125,7 @@ internal sealed class TestCoordinator : ITestCoordinator
                         : null;
 
                     await TimeoutHelper.ExecuteWithTimeoutAsync(
-                        ct => ExecuteTestLifecycleAsync(test, ct),
+                        ct => ExecuteTestLifecycleAsync(test, ct).AsTask(),
                         testTimeout,
                         cancellationToken,
                         timeoutMessage).ConfigureAwait(false);
@@ -148,7 +148,7 @@ internal sealed class TestCoordinator : ITestCoordinator
         }
         finally
         {
-            var cleanupExceptions = new List<Exception>();
+            List<Exception>? cleanupExceptions = null;
 
             // Flush console interceptors to ensure all buffered output is captured
             // This is critical for output from Console.Write() without newline
@@ -162,7 +162,7 @@ internal sealed class TestCoordinator : ITestCoordinator
                 await _logger.LogErrorAsync($"Error flushing console output for {test.TestId}: {flushEx}").ConfigureAwait(false);
             }
 
-            await _objectTracker.UntrackObjects(test.Context, cleanupExceptions).ConfigureAwait(false);
+            await _objectTracker.UntrackObjects(test.Context, cleanupExceptions ??= []).ConfigureAwait(false);
 
             var testClass = test.Metadata.TestClassType;
             var testAssembly = testClass.Assembly;
@@ -174,7 +174,7 @@ internal sealed class TestCoordinator : ITestCoordinator
                 {
                     await _logger.LogErrorAsync($"Error executing After hooks for {test.TestId}: {ex}").ConfigureAwait(false);
                 }
-                cleanupExceptions.AddRange(hookExceptions);
+                (cleanupExceptions ??= []).AddRange(hookExceptions);
             }
 
             // Invoke Last event receivers for class and assembly
@@ -188,7 +188,7 @@ internal sealed class TestCoordinator : ITestCoordinator
             catch (Exception ex)
             {
                 await _logger.LogErrorAsync($"Error in last test in class event receiver for {test.TestId}: {ex}").ConfigureAwait(false);
-                cleanupExceptions.Add(ex);
+                (cleanupExceptions ??= []).Add(ex);
             }
 
             try
@@ -201,7 +201,7 @@ internal sealed class TestCoordinator : ITestCoordinator
             catch (Exception ex)
             {
                 await _logger.LogErrorAsync($"Error in last test in assembly event receiver for {test.TestId}: {ex}").ConfigureAwait(false);
-                cleanupExceptions.Add(ex);
+                (cleanupExceptions ??= []).Add(ex);
             }
 
             try
@@ -214,11 +214,11 @@ internal sealed class TestCoordinator : ITestCoordinator
             catch (Exception ex)
             {
                 await _logger.LogErrorAsync($"Error in last test in session event receiver for {test.TestId}: {ex}").ConfigureAwait(false);
-                cleanupExceptions.Add(ex);
+                (cleanupExceptions ??= []).Add(ex);
             }
 
             // If any cleanup exceptions occurred, mark the test as failed
-            if (cleanupExceptions.Count > 0)
+            if (cleanupExceptions is { Count: > 0 })
             {
                 var aggregatedException = cleanupExceptions.Count == 1
                     ? cleanupExceptions[0]
@@ -279,7 +279,7 @@ internal sealed class TestCoordinator : ITestCoordinator
     /// Core test lifecycle execution: instance creation, initialization, execution, and disposal.
     /// Extracted to allow bypassing retry/timeout wrappers when not needed.
     /// </summary>
-    private async Task ExecuteTestLifecycleAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    private async ValueTask ExecuteTestLifecycleAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         test.Context.Metadata.TestDetails.ClassInstance = await test.CreateInstanceAsync().ConfigureAwait(false);
 

@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using TUnit.Core.Interfaces;
 
@@ -26,25 +27,20 @@ internal sealed class EventReceiverRegistry
 
     private volatile EventTypes _registeredEvents = EventTypes.None;
     private readonly Dictionary<Type, object[]> _receiversByType = new();
-    private readonly Dictionary<Type, Array> _cachedTypedReceivers = new();
-    private readonly ReaderWriterLockSlim _lock = new();
+    private readonly ConcurrentDictionary<Type, Array> _cachedTypedReceivers = new();
+    private readonly object _lock = new();
 
     /// <summary>
     /// Register event receivers from a collection of objects
     /// </summary>
     public void RegisterReceivers(ReadOnlySpan<object> objects)
     {
-        _lock.EnterWriteLock();
-        try
+        lock (_lock)
         {
             foreach (var obj in objects)
             {
                 RegisterReceiverInternal(obj);
             }
-        }
-        finally
-        {
-            _lock.ExitWriteLock();
         }
     }
 
@@ -53,14 +49,9 @@ internal sealed class EventReceiverRegistry
     /// </summary>
     public void RegisterReceiver(object receiver)
     {
-        _lock.EnterWriteLock();
-        try
+        lock (_lock)
         {
             RegisterReceiverInternal(receiver);
-        }
-        finally
-        {
-            _lock.ExitWriteLock();
         }
     }
 
@@ -143,27 +134,22 @@ internal sealed class EventReceiverRegistry
     {
         var typeKey = typeof(T);
 
-        _lock.EnterReadLock();
-        try
+        // Lock-free fast path for cache hit (common case)
+        if (_cachedTypedReceivers.TryGetValue(typeKey, out var cached))
         {
-            if (_cachedTypedReceivers.TryGetValue(typeKey, out var cached))
-            {
-                return (T[])cached;
-            }
-        }
-        finally
-        {
-            _lock.ExitReadLock();
+            return (T[])cached;
         }
 
-        _lock.EnterUpgradeableReadLock();
-        try
+        // Simple lock for cache miss (rare, happens once per type)
+        lock (_lock)
         {
-            if (_cachedTypedReceivers.TryGetValue(typeKey, out var cached))
+            // Double-check after acquiring lock
+            if (_cachedTypedReceivers.TryGetValue(typeKey, out cached))
             {
                 return (T[])cached;
             }
 
+            // Build and cache
             if (_receiversByType.TryGetValue(typeKey, out var receivers))
             {
                 var typedArray = new T[receivers.Length];
@@ -171,35 +157,13 @@ internal sealed class EventReceiverRegistry
                 {
                     typedArray[i] = (T)receivers[i];
                 }
-
-                _lock.EnterWriteLock();
-                try
-                {
-                    _cachedTypedReceivers[typeKey] = typedArray;
-                }
-                finally
-                {
-                    _lock.ExitWriteLock();
-                }
-
+                _cachedTypedReceivers[typeKey] = typedArray;
                 return typedArray;
             }
 
             T[] emptyArray = [];
-            _lock.EnterWriteLock();
-            try
-            {
-                _cachedTypedReceivers[typeKey] = emptyArray;
-            }
-            finally
-            {
-                _lock.ExitWriteLock();
-            }
+            _cachedTypedReceivers[typeKey] = emptyArray;
             return emptyArray;
-        }
-        finally
-        {
-            _lock.ExitUpgradeableReadLock();
         }
     }
 
@@ -247,9 +211,4 @@ internal sealed class EventReceiverRegistry
         }
     }
 
-
-    public void Dispose()
-    {
-        _lock?.Dispose();
-    }
 }
