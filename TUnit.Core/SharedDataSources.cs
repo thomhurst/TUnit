@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
@@ -105,7 +106,13 @@ public static class SharedDataSources
     /// Thrown when <paramref name="key"/> is null/empty and <paramref name="sharedType"/> is <see cref="SharedType.Keyed"/>.
     /// </exception>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="sharedType"/> is not a valid value.</exception>
-    public static object? GetOrCreate(SharedType sharedType, Type type, DataGeneratorMetadata dataGeneratorMetadata, string? key, Func<object?> factory)
+    public static object? GetOrCreate(
+        SharedType sharedType,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
+        Type type,
+        DataGeneratorMetadata dataGeneratorMetadata,
+        string? key,
+        Func<object?> factory)
     {
         var testClassType = TestClassTypeHelper.GetTestClassType(dataGeneratorMetadata);
         return GetOrCreate(sharedType, type, testClassType, key, factory);
@@ -125,7 +132,13 @@ public static class SharedDataSources
     /// or when <paramref name="key"/> is null/empty and <paramref name="sharedType"/> is <see cref="SharedType.Keyed"/>.
     /// </exception>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="sharedType"/> is not a valid value.</exception>
-    public static object? GetOrCreate(SharedType sharedType, Type type, Type? testClassType, string? key, Func<object?> factory)
+    public static object? GetOrCreate(
+        SharedType sharedType,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
+        Type type,
+        Type? testClassType,
+        string? key,
+        Func<object?> factory)
     {
         _ = type ?? throw new ArgumentNullException(nameof(type));
         _ = factory ?? throw new ArgumentNullException(nameof(factory));
