@@ -22,7 +22,7 @@ public static class SharedDataSources
     /// Thrown when <paramref name="key"/> is null/empty and <paramref name="sharedType"/> is <see cref="SharedType.Keyed"/>.
     /// </exception>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="sharedType"/> is not a valid value.</exception>
-    public static T GetOrCreate<T>(SharedType sharedType, DataGeneratorMetadata dataGeneratorMetadata, string? key) where T : new()
+    public static T GetOrCreate<T>(SharedType sharedType, DataGeneratorMetadata dataGeneratorMetadata, string? key = null) where T : new()
     {
         return GetOrCreate(sharedType, dataGeneratorMetadata, key, static () => new T());
     }
@@ -40,7 +40,7 @@ public static class SharedDataSources
     /// or when <paramref name="key"/> is null/empty and <paramref name="sharedType"/> is <see cref="SharedType.Keyed"/>.
     /// </exception>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="sharedType"/> is not a valid value.</exception>
-    public static T GetOrCreate<T>(SharedType sharedType, Type? testClassType, string? key) where T : new()
+    public static T GetOrCreate<T>(SharedType sharedType, Type? testClassType = null, string? key = null) where T : new()
     {
         return GetOrCreate(sharedType, testClassType, key, static () => new T());
     }
