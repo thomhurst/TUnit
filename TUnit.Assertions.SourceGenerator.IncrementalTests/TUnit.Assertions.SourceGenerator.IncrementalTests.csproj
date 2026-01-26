@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="coverlet.collector"/>
+        <PackageReference Include="Microsoft.NET.Test.Sdk"/>
+        <PackageReference Include="Verify" />
+        <PackageReference Include="Verify.TUnit" />
+        <PackageReference Include="xunit" />
+        <PackageReference Include="xunit.runner.visualstudio"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces"  VersionOverride="4.7.0" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+        <PackageReference Include="Microsoft.CodeAnalysis.Common" />
+        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="Xunit"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\TUnit.Assertions.SourceGenerator\TUnit.Assertions.SourceGenerator.csproj" />
+      <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />
+    </ItemGroup>
+</Project>
