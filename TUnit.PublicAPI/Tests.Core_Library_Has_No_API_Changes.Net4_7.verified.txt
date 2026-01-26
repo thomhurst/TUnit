@@ -1156,6 +1156,17 @@ namespace
         public string Key { get; init; }
         public  Type { get; init; }
     }
+    public static class SharedDataSources
+    {
+        public static object? GetOrCreate(.SharedType sharedType,  type, ? testClassType, string? key, <object?> factory) { }
+        public static object? GetOrCreate(.SharedType sharedType,  type, .DataGeneratorMetadata dataGeneratorMetadata, string? key, <object?> factory) { }
+        public static T GetOrCreate<T>(.SharedType sharedType, ? testClassType, string? key)
+            where T : new() { }
+        public static T GetOrCreate<T>(.SharedType sharedType, .DataGeneratorMetadata dataGeneratorMetadata, string? key)
+            where T : new() { }
+        public static T GetOrCreate<T>(.SharedType sharedType, ? testClassType, string? key, <T> factory) { }
+        public static T GetOrCreate<T>(.SharedType sharedType, .DataGeneratorMetadata dataGeneratorMetadata, string? key, <T> factory) { }
+    }
     public enum SharedType
     {
         None = 0,
