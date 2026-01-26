@@ -60,7 +60,7 @@ public static class SharedDataSources
     /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="sharedType"/> is not a valid value.</exception>
     public static T GetOrCreate<T>(SharedType sharedType, Type? testClassType, string? key, Func<T> factory)
     {
-        ArgumentNullException.ThrowIfNull(factory);
+        _ = factory ?? throw new ArgumentNullException(nameof(factory));
 
         return sharedType switch
         {
@@ -127,13 +127,13 @@ public static class SharedDataSources
     /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="sharedType"/> is not a valid value.</exception>
     public static object? GetOrCreate(SharedType sharedType, Type type, Type? testClassType, string? key, Func<object?> factory)
     {
-        ArgumentNullException.ThrowIfNull(type);
-        ArgumentNullException.ThrowIfNull(factory);
+        _ = type ?? throw new ArgumentNullException(nameof(type));
+        _ = factory ?? throw new ArgumentNullException(nameof(factory));
 
         return sharedType switch
         {
             SharedType.None => factory(),
-            SharedType.PerTestSession => TestDataContainer.GetGlobalInstance(type, _ => factory()),
+            SharedType.PerTestSession => TestDataContainer.GetGlobalInstance(type, _ => factory()!),
             SharedType.PerClass => GetForClass(type, testClassType, factory),
             SharedType.Keyed => GetForKey(type, key, factory),
             SharedType.PerAssembly => GetForAssembly(type, testClassType, factory),
@@ -158,7 +158,7 @@ public static class SharedDataSources
             throw new ArgumentNullException(nameof(testClassType), "testClassType is required when SharedType is PerClass.");
         }
 
-        return TestDataContainer.GetInstanceForClass(testClassType, type, _ => factory());
+        return TestDataContainer.GetInstanceForClass(testClassType, type, _ => factory()!);
     }
 
     private static T GetForKey<T>(string? key, Func<T> factory)
@@ -168,7 +168,7 @@ public static class SharedDataSources
             throw new ArgumentNullException(nameof(key), "key is required when SharedType is Keyed.");
         }
 
-        return (T)TestDataContainer.GetInstanceForKey(key, typeof(T), _ => factory()!)!;
+        return (T)TestDataContainer.GetInstanceForKey(key!, typeof(T), _ => factory()!)!;
     }
 
     private static object? GetForKey(Type type, string? key, Func<object?> factory)
@@ -178,7 +178,7 @@ public static class SharedDataSources
             throw new ArgumentNullException(nameof(key), "key is required when SharedType is Keyed.");
         }
 
-        return TestDataContainer.GetInstanceForKey(key, type, _ => factory());
+        return TestDataContainer.GetInstanceForKey(key!, type, _ => factory()!);
     }
 
     private static T GetForAssembly<T>(Type? testClassType, Func<T> factory)
@@ -198,6 +198,6 @@ public static class SharedDataSources
             throw new ArgumentNullException(nameof(testClassType), "testClassType is required when SharedType is PerAssembly.");
         }
 
-        return TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, type, _ => factory());
+        return TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, type, _ => factory()!);
     }
 }
