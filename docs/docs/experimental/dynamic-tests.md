@@ -16,22 +16,20 @@ For simple tests, there is not much point using this feature. But it may be help
 Here's an example:
 
 ```csharp
-namespace TUnit.TestProject.DynamicTests;
-
 public class Basic
 {
     public void SomeMethod(string name)
     {
-        Console.WriteLine(@$"Hello, {name}!");
+        Console.WriteLine($"Hello, {name}!");
     }
-    
+
     [DynamicTestBuilder]
     public void BuildTests(DynamicTestBuilderContext context)
     {
         context.AddTest(new DynamicTest<Basic>
         {
-            TestMethod = @class => @class.SomeMethod(DynamicTest.Argument<string>()),
-            TestMethodArguments = [ "Tom" ],
+            TestMethod = @class => @class.SomeMethod(DynamicTestHelper.Argument<string>()),
+            TestMethodArguments = ["Tom"],
             Attributes = [new RepeatAttribute(5)]
         });
     }
@@ -41,30 +39,29 @@ public class Basic
 The test method body is used as an `Expression` - Not as a `delegate`. This means that arguments passed to it within the lambda will be ignored. And if the method is async, it does not need to be awaited.
 Arguments must be provided via the `TestMethodArguments` property.
 
-To make this clearer, it's recommended to use the `DynamicTest.Argument<T>()` helper.
+To make this clearer, it's recommended to use the `DynamicTestHelper.Argument<T>()` helper.
 
 It is also possible to build a test from within another test:
 
 ```csharp
-[RunOnDiscovery]
 [Arguments(1, 2, 3)]
 [Arguments(101, 202, 303)]
 public class Runtime(int a, int b, int c)
 {
     public void SomeMethod(int arg1, int arg2, int arg3)
     {
-        Console.WriteLine(@"SomeMethod called with:");
-        Console.WriteLine($@"Class args: {a}, {b}, {c}");
-        Console.WriteLine($@"Method args: {arg1}, {arg2}, {arg3}");
+        Console.WriteLine("SomeMethod called with:");
+        Console.WriteLine($"Class args: {a}, {b}, {c}");
+        Console.WriteLine($"Method args: {arg1}, {arg2}, {arg3}");
     }
-    
+
     [Test]
     [Arguments(4, 5, 6)]
     [Arguments(404, 505, 606)]
     public async Task BuildTests(int d, int e, int f)
     {
         var context = TestContext.Current!;
-        
+
         await context.AddDynamicTest(new DynamicTest<Runtime>
         {
             TestMethod = @class => @class.SomeMethod(0, 0, 0),
