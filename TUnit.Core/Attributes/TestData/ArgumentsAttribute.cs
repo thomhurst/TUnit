@@ -62,9 +62,13 @@ public sealed class ArgumentsAttribute : Attribute, IDataSourceAttribute, ITestR
 
     public ArgumentsAttribute(params object?[]? values)
     {
-        if (values == null || values.Length == 0)
+        if (values == null)
         {
             Values = [null];
+        }
+        else if (values.Length == 0)
+        {
+            Values = [];
         }
         else
         {

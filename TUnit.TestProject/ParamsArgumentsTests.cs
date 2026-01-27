@@ -45,6 +45,17 @@ public class ParamsArgumentsTests
     }
 
     [Test]
+    [Arguments]
+    [Arguments("a")]
+    [Arguments("a", "b")]
+    [Arguments("a", "b", "c")]
+    public async Task ParamsOnlyWithEmptyArguments(params string[] args)
+    {
+        // When [Arguments] has no values, params should be an empty array, not null
+        await Assert.That(args).IsNotNull();
+    }
+
+    [Test]
     [Arguments(1, "single")]
     public async Task SingleStringInParamsArray(int id, params string[] values)
     {
