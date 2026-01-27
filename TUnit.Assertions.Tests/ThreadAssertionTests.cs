@@ -1,5 +1,4 @@
 using TUnit.Assertions.Extensions;
-using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.Tests;
 
@@ -15,17 +14,17 @@ public class ThreadAssertionTests
     [Test]
     public async Task Test_Thread_IsAlive_NewThread()
     {
-        var signal = new ManualResetEventSlim(false);
-        Thread? thread = null;
+        var startSignal = new ManualResetEventSlim(false);
+        var completeSignal = new ManualResetEventSlim(false);
 
-        thread = new Thread(() =>
+        var thread = new Thread(() =>
         {
-            signal.Set();
-            Thread.Sleep(100);
+            startSignal.Set();
+            completeSignal.Wait();
         });
 
         thread.Start();
-        signal.Wait();
+        startSignal.Wait();
 
         try
         {
@@ -33,6 +32,7 @@ public class ThreadAssertionTests
         }
         finally
         {
+            completeSignal.Set();
             thread.Join();
         }
     }
@@ -61,12 +61,20 @@ public class ThreadAssertionTests
     [Test]
     public async Task Test_Thread_IsBackground_Started()
     {
-        var thread = new Thread(() => Thread.Sleep(100))
+        var startSignal = new ManualResetEventSlim(false);
+        var completeSignal = new ManualResetEventSlim(false);
+
+        var thread = new Thread(() =>
+        {
+            startSignal.Set();
+            completeSignal.Wait();
+        })
         {
             IsBackground = true
         };
 
         thread.Start();
+        startSignal.Wait();
 
         try
         {
@@ -74,6 +82,7 @@ public class ThreadAssertionTests
         }
         finally
         {
+            completeSignal.Set();
             thread.Join();
         }
     }
@@ -129,8 +138,17 @@ public class ThreadAssertionTests
     [Test]
     public async Task Test_Thread_IsNotThreadPoolThread_NewThread()
     {
-        var thread = new Thread(() => Thread.Sleep(50));
+        var startSignal = new ManualResetEventSlim(false);
+        var completeSignal = new ManualResetEventSlim(false);
+
+        var thread = new Thread(() =>
+        {
+            startSignal.Set();
+            completeSignal.Wait();
+        });
+
         thread.Start();
+        startSignal.Wait();
 
         try
         {
@@ -138,6 +156,7 @@ public class ThreadAssertionTests
         }
         finally
         {
+            completeSignal.Set();
             thread.Join();
         }
     }
