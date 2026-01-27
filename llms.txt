@@ -87,6 +87,7 @@ This file contains links to documentation sections following the llmstxt.org sta
 - [Parallel Groups](https://tunit.dev/docs/parallelism/parallel-groups): Parallel Groups are an alternative parallel mechanism to [NotInParallel].
 - [Parallel Limiter](https://tunit.dev/docs/parallelism/parallel-limiter): TUnit allows the user to control the parallel limit on a test, class or assembly level.
 - [Command Line Flags](https://tunit.dev/docs/reference/command-line-flags): :::info
+- [Environment Variables](https://tunit.dev/docs/reference/environment-variables): TUnit supports configuration through environment variables, allowing you to set defaults without modifying command-line arguments. This is particul...
 - [Test Configuration](https://tunit.dev/docs/reference/test-configuration): TUnit supports having a `testconfig.json` file within your test project.
 - [AOT Compatibility and Generic Tests](https://tunit.dev/docs/test-authoring/aot-compatibility): TUnit's source generation mode provides compile-time safety and performance benefits, but requires specific patterns for advanced scenarios like ge...
 - [Data Driven Tests](https://tunit.dev/docs/test-authoring/arguments): It's common to want to repeat tests but pass in different values on each execution.
