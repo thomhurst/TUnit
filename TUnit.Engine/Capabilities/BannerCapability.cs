@@ -23,6 +23,7 @@ internal class BannerCapability(IPlatformInformation platformInformation, IComma
     public Task<string?> GetBannerMessageAsync()
     {
         if (commandLineOptions.IsOptionSet(DisableLogoCommandProvider.DisableLogo)
+            || Environment.GetEnvironmentVariable("TUNIT_DISABLE_LOGO") is not null
             || loggerFactory.CreateLogger(nameof(BannerCapability)).IsEnabled(LogLevel.Information))
         {
             return Task.FromResult<string?>(GetRuntimeDetails());
