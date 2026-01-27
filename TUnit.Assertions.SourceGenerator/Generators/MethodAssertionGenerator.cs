@@ -1,13 +1,10 @@
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using TUnit.Assertions.SourceGenerator.Models;
 
 namespace TUnit.Assertions.SourceGenerator.Generators;
 
@@ -20,6 +17,8 @@ namespace TUnit.Assertions.SourceGenerator.Generators;
 [Generator]
 public sealed class MethodAssertionGenerator : IIncrementalGenerator
 {
+    public static string BuildAssertion = "MethodAssertionData";
+
     private static readonly DiagnosticDescriptor MethodMustBeStaticRule = new DiagnosticDescriptor(
         id: "TUNITGEN001",
         title: "Method must be static",
@@ -68,7 +67,8 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         // Split into methods and diagnostics
         var methods = assertionMethodsOrDiagnostics
             .Where(x => x.Data != null)
-            .Select((x, _) => x.Data!);
+            .Select((x, _) => x.Data!)
+            .WithTrackingName(BuildAssertion);
 
         var diagnostics = assertionMethodsOrDiagnostics
             .Where(x => x.Diagnostic != null)
@@ -132,11 +132,15 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
 
         // First parameter is the target type (what becomes IAssertionSource<T>)
         var targetType = methodSymbol.Parameters[0].Type;
-        var additionalParameters = methodSymbol.Parameters.Skip(1).ToImmutableArray();
-
-        // Check if it's an extension method
-        var isExtensionMethod = methodSymbol.IsExtensionMethod ||
-                               (methodSymbol.Parameters.Length > 0 && methodSymbol.Parameters[0].IsThis);
+        var additionalParameters = methodSymbol.Parameters.Skip(1).Select(p => new ParameterData()
+        {
+            Name = p.Name,
+            Type = p.Type.ToDisplayString(),
+            IsRefStruct = IsRefStruct(p.Type),
+            IsParams = p.IsParams,
+            IsInterpolatedStringHandler = IsInterpolatedStringHandler(p.Type),
+            SimpleTypeName = GetSimpleTypeName(p.Type),
+        }).ToImmutableEquatableArray();
 
         // Extract custom expectation message and inlining preference if provided
         string? customExpectation = null;
@@ -272,33 +276,66 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         // Ref structs cannot be stored as class fields, so we need to inline the method body
         foreach (var param in additionalParameters)
         {
-            if (IsRefStruct(param.Type) && string.IsNullOrEmpty(methodBody))
+            if (param.IsRefStruct && string.IsNullOrEmpty(methodBody))
             {
                 var diagnostic = Diagnostic.Create(
                     RefStructRequiresInliningRule,
                     location,
                     methodSymbol.Name,
                     param.Name,
-                    param.Type.ToDisplayString());
+                    param.Type);
                 return (null, diagnostic);
             }
         }
 
+
+        ContainingTypeData? containingTypeData = null;
+
+        if (methodSymbol.ContainingSymbol != null)
+        {
+            containingTypeData = new ContainingTypeData(
+                methodSymbol.ContainingType.Name,
+                methodSymbol.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                methodSymbol.ContainingType.ContainingNamespace.ToDisplayString()
+            );
+        }
+
+        var methodData = new MethodData()
+        {
+            Name = methodSymbol.Name,
+            FirstParamName = methodSymbol.Parameters[0].Name,
+            GenericTypeParameters = GetGenericTypeParameters(targetType, methodSymbol),
+            GenericConstraints = CollectGenericConstraints(methodSymbol),
+            MethodCallExpression = BuildMethodCallExpression(methodSymbol, additionalParameters),
+            ContainingType = containingTypeData,
+        };
+
+        var targetTypeData = new TargetTypeData()
+        {
+            TypeName = targetType.ToDisplayString(),
+            SimpleTypeName = GetSimpleTypeName(targetType),
+            IsNullable = targetType.IsReferenceType ||
+                         targetType.NullableAnnotation == NullableAnnotation.Annotated,
+        };
+
         var data = new AssertionMethodData(
-            methodSymbol,
-            targetType,
+            methodData,
+            targetTypeData,
             additionalParameters,
             returnTypeInfo.Value,
-            isExtensionMethod,
             customExpectation,
             isFileScoped,
             methodBody,
-            suppressionAttributesForCheckAsync.ToImmutableArray(),
-            diagnosticAttributesForExtensionMethod.ToImmutableArray()
+            suppressionAttributesForCheckAsync.ToImmutableEquatableArray(),
+            diagnosticAttributesForExtensionMethod.ToImmutableEquatableArray()
         );
 
         return (data, null);
     }
+
+    private static bool IsExtensionMethod(IMethodSymbol methodSymbol) =>
+        methodSymbol.IsExtensionMethod ||
+        (methodSymbol.Parameters.Length > 0 && methodSymbol.Parameters[0].IsThis);
 
     /// <summary>
     /// Checks if a type is file-scoped (has 'file' accessibility)
@@ -423,14 +460,14 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
                     // Task<bool>
                     if (innerType.SpecialType == SpecialType.System_Boolean)
                     {
-                        return new ReturnTypeInfo(ReturnTypeKind.TaskBool, innerType);
+                        return new ReturnTypeInfo(ReturnTypeKind.TaskBool);
                     }
 
                     // Task<AssertionResult>
                     if (innerType.Name == "AssertionResult" &&
                         innerType.ContainingNamespace?.ToDisplayString() == "TUnit.Assertions.Core")
                     {
-                        return new ReturnTypeInfo(ReturnTypeKind.TaskAssertionResult, innerType);
+                        return new ReturnTypeInfo(ReturnTypeKind.TaskAssertionResult);
                     }
                 }
             }
@@ -439,14 +476,14 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             if (namedType.Name == "AssertionResult" &&
                 namedType.ContainingNamespace?.ToDisplayString() == "TUnit.Assertions.Core")
             {
-                return new ReturnTypeInfo(ReturnTypeKind.AssertionResult, namedType);
+                return new ReturnTypeInfo(ReturnTypeKind.AssertionResult);
             }
         }
 
         // bool
         if (returnType.SpecialType == SpecialType.System_Boolean)
         {
-            return new ReturnTypeInfo(ReturnTypeKind.Bool, returnType);
+            return new ReturnTypeInfo(ReturnTypeKind.Bool);
         }
 
         return null;
@@ -462,9 +499,9 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         }
 
         // Group by containing class to generate one file per class
-        foreach (var methodGroup in methods.GroupBy(m => m.Method.ContainingType, SymbolEqualityComparer.Default))
+        foreach (var methodGroup in methods.GroupBy(m => m.Method.ContainingType?.FullContainingType))
         {
-            var containingType = methodGroup.Key as INamedTypeSymbol;
+            var containingType = methodGroup.First().Method.ContainingType;
             if (containingType == null)
             {
                 continue;
@@ -476,7 +513,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             var namespaceName = "TUnit.Assertions.Extensions";
 
             // Get the original namespace where the helper methods are defined
-            var originalNamespace = containingType.ContainingNamespace?.ToDisplayString();
+            var originalNamespace = containingType.ContainingNamespace;
 
             // File header
             sourceBuilder.AppendLine("#nullable enable");
@@ -537,13 +574,13 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
     private static void GenerateAssertionClass(StringBuilder sb, AssertionMethodData data)
     {
         var className = GenerateClassName(data);
-        var targetTypeName = data.TargetType.ToDisplayString();
-        var genericParams = GetGenericTypeParameters(data.TargetType, data.Method);
-        var genericDeclaration = genericParams.Length > 0 ? $"<{string.Join(", ", genericParams)}>" : "";
-        var isNullable = data.TargetType.IsReferenceType || data.TargetType.NullableAnnotation == NullableAnnotation.Annotated;
+        var targetTypeName = data.TargetType.TypeName;
+        var genericParams = data.Method.GenericTypeParameters;
+        var genericDeclaration = genericParams.Count > 0 ? $"<{string.Join(", ", genericParams)}>" : "";
+        var isNullable = data.TargetType.IsNullable;
 
         // Collect generic constraints from the method
-        var genericConstraints = CollectGenericConstraints(data.Method);
+        var genericConstraints = data.Method.GenericConstraints;
 
         // Class declaration
         sb.AppendLine($"/// <summary>");
@@ -551,7 +588,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         sb.AppendLine($"/// </summary>");
 
         // Add suppression for generic types to avoid trimming warnings
-        if (genericParams.Length > 0)
+        if (genericParams.Count > 0)
         {
             sb.AppendLine($"[System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(\"Trimming\", \"IL2091\", Justification = \"Generic type parameter is only used for property access, not instantiation\")]");
         }
@@ -580,11 +617,11 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         // Note: Ref struct types (like DefaultInterpolatedStringHandler) are stored as string
         foreach (var param in data.AdditionalParameters)
         {
-            var fieldType = IsRefStruct(param.Type) ? "string" : param.Type.ToDisplayString();
+            var fieldType = param.IsRefStruct ? "string" : param.Type;
             sb.AppendLine($"    private readonly {fieldType} _{param.Name};");
         }
 
-        if (data.AdditionalParameters.Length > 0)
+        if (data.AdditionalParameters.Count > 0)
         {
             sb.AppendLine();
         }
@@ -594,7 +631,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         sb.Append($"    public {className}(AssertionContext<{targetTypeName}> context");
         foreach (var param in data.AdditionalParameters)
         {
-            var paramType = IsRefStruct(param.Type) ? "string" : param.Type.ToDisplayString();
+            var paramType = param.IsRefStruct ? "string" : param.Type;
             sb.Append($", {paramType} {param.Name}");
         }
         sb.AppendLine(")");
@@ -608,12 +645,11 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         sb.AppendLine();
 
         // CheckAsync method - only async if we need await
-        var needsAsync = data.ReturnTypeInfo.Kind == ReturnTypeKind.TaskBool ||
-                        data.ReturnTypeInfo.Kind == ReturnTypeKind.TaskAssertionResult;
+        var needsAsync = data.ReturnTypeInfo.Kind is ReturnTypeKind.TaskBool or ReturnTypeKind.TaskAssertionResult;
         var asyncKeyword = needsAsync ? "async " : "";
 
         // Add suppression attributes to CheckAsync method when method body is inlined
-        if (!string.IsNullOrEmpty(data.MethodBody) && data.SuppressionAttributesForCheckAsync.Length > 0)
+        if (!string.IsNullOrEmpty(data.MethodBody) && data.SuppressionAttributesForCheckAsync.Count > 0)
         {
             foreach (var suppressionAttr in data.SuppressionAttributesForCheckAsync)
             {
@@ -657,7 +693,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             // Use custom expectation message
             // Replace parameter placeholders like {param} with {_param} (field references)
             var expectation = data.CustomExpectation;
-            if (data.AdditionalParameters.Length > 0)
+            if (data.AdditionalParameters.Count > 0)
             {
                 // Replace each parameter placeholder {paramName} with {_paramName}
                 foreach (var param in data.AdditionalParameters)
@@ -680,7 +716,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         else
         {
             // Use default expectation message
-            if (data.AdditionalParameters.Length > 0)
+            if (data.AdditionalParameters.Count > 0)
             {
                 var paramList = string.Join(", ", data.AdditionalParameters.Select(p => $"{{_{p.Name}}}"));
                 sb.AppendLine($"        return $\"to satisfy {data.Method.Name}({paramList})\";");
@@ -703,7 +739,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         var shouldInline = !string.IsNullOrEmpty(data.MethodBody);
         var methodCall = shouldInline
             ? BuildInlinedExpression(data)
-            : BuildMethodCallExpression(data);
+            : data.Method.MethodCallExpression;
 
         switch (data.ReturnTypeInfo.Kind)
         {
@@ -740,13 +776,13 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         if (string.IsNullOrEmpty(data.MethodBody))
         {
             // Fallback to method call if body is not available
-            return BuildMethodCallExpression(data);
+            return data.Method.MethodCallExpression;
         }
 
         var inlinedBody = data.MethodBody;
 
         // Replace first parameter name with "value" (already named value in our context)
-        var firstParamName = data.Method.Parameters[0].Name;
+        var firstParamName = data.Method.FirstParamName;
         if (firstParamName != "value")
         {
             // Use word boundary replacement to avoid partial matches
@@ -770,7 +806,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         // remove calls to .ToStringAndClear() and .ToString() since the value is already a string
         foreach (var param in data.AdditionalParameters)
         {
-            if (IsRefStruct(param.Type))
+            if (param.IsRefStruct)
             {
                 var fieldName = $"_{param.Name}";
                 // Remove .ToStringAndClear() - the value is already a string
@@ -788,7 +824,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
 
         // Add null-forgiving operator for reference types if not already present
         // This is safe because we've already checked for null above
-        var isNullable = data.TargetType.IsReferenceType || data.TargetType.NullableAnnotation == NullableAnnotation.Annotated;
+        var isNullable = data.TargetType.IsNullable;
         if (isNullable && !string.IsNullOrEmpty(inlinedBody) && !inlinedBody.StartsWith("value!"))
         {
             // Replace null-conditional operators with null-forgiving + regular operators
@@ -820,31 +856,31 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         return inlinedBody ?? string.Empty;
     }
 
-    private static string BuildMethodCallExpression(AssertionMethodData data)
+    private static string BuildMethodCallExpression(IMethodSymbol method, ImmutableEquatableArray<ParameterData> additionalParameters)
     {
-        var containingType = data.Method.ContainingType.ToDisplayString();
-        var methodName = data.Method.Name;
+        var containingType = method.ContainingType.ToDisplayString();
+        var methodName = method.Name;
 
         // Build type arguments if the method is generic
         var typeArguments = "";
-        if (data.Method.IsGenericMethod && data.Method.TypeParameters.Length > 0)
+        if (method is { IsGenericMethod: true, TypeParameters.Length: > 0 })
         {
-            var typeParams = string.Join(", ", data.Method.TypeParameters.Select(tp => tp.Name));
+            var typeParams = string.Join(", ", method.TypeParameters.Select(tp => tp.Name));
             typeArguments = $"<{typeParams}>";
         }
 
-        if (data.IsExtensionMethod)
+        if (IsExtensionMethod(method))
         {
             // Extension method syntax: value!.MethodName<T1, T2>(params)
             // Use null-forgiving operator since we've already checked for null above
-            var paramList = string.Join(", ", data.AdditionalParameters.Select(p => $"_{p.Name}"));
+            var paramList = string.Join(", ", additionalParameters.Select(p => $"_{p.Name}"));
             return $"value!.{methodName}{typeArguments}({paramList})";
         }
         else
         {
             // Static method syntax: ContainingType.MethodName<T1, T2>(value, params)
             var allParams = new List<string> { "value" };
-            allParams.AddRange(data.AdditionalParameters.Select(p => $"_{p.Name}"));
+            allParams.AddRange(additionalParameters.Select(p => $"_{p.Name}"));
             var paramList = string.Join(", ", allParams);
             return $"{containingType}.{methodName}{typeArguments}({paramList})";
         }
@@ -853,13 +889,13 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
     private static void GenerateExtensionMethod(StringBuilder sb, AssertionMethodData data)
     {
         var className = GenerateClassName(data);
-        var targetTypeName = data.TargetType.ToDisplayString();
+        var targetTypeName = data.TargetType.TypeName;
         var methodName = data.Method.Name;
-        var genericParams = GetGenericTypeParameters(data.TargetType, data.Method);
-        var genericDeclaration = genericParams.Length > 0 ? $"<{string.Join(", ", genericParams)}>" : "";
+        var genericParams = data.Method.GenericTypeParameters;
+        var genericDeclaration = genericParams.Count > 0 ? $"<{string.Join(", ", genericParams)}>" : "";
 
         // Collect generic constraints from the method
-        var genericConstraints = CollectGenericConstraints(data.Method);
+        var genericConstraints = data.Method.GenericConstraints;
 
         // XML documentation
         sb.AppendLine("    /// <summary>");
@@ -867,13 +903,13 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         sb.AppendLine("    /// </summary>");
 
         // Add suppression for generic types to avoid trimming warnings
-        if (genericParams.Length > 0)
+        if (genericParams.Count > 0)
         {
             sb.AppendLine($"    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(\"Trimming\", \"IL2091\", Justification = \"Generic type parameter is only used for property access, not instantiation\")]");
         }
 
         // Add diagnostic attributes (RequiresUnreferencedCode, RequiresDynamicCode) to extension method
-        if (data.DiagnosticAttributesForExtensionMethod.Length > 0)
+        if (data.DiagnosticAttributesForExtensionMethod.Count > 0)
         {
             foreach (var diagnosticAttr in data.DiagnosticAttributesForExtensionMethod)
             {
@@ -889,11 +925,11 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         foreach (var param in data.AdditionalParameters)
         {
             var paramsModifier = param.IsParams ? "params " : "";
-            sb.Append($", {paramsModifier}{param.Type.ToDisplayString()} {param.Name}");
+            sb.Append($", {paramsModifier}{param.Type} {param.Name}");
         }
 
         // CallerArgumentExpression parameters (skip for params since params must be last)
-        for (int i = 0; i < data.AdditionalParameters.Length; i++)
+        for (int i = 0; i < data.AdditionalParameters.Count; i++)
         {
             var param = data.AdditionalParameters[i];
             if (!param.IsParams)
@@ -916,7 +952,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         sb.AppendLine("    {");
 
         // Build expression string
-        if (data.AdditionalParameters.Length > 0)
+        if (data.AdditionalParameters.Count > 0)
         {
             // For params parameters, use parameter name directly (no Expression suffix since we didn't generate it)
             var exprList = string.Join(", ", data.AdditionalParameters.Select(p =>
@@ -933,11 +969,11 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         sb.Append($"        return new {className}{genericDeclaration}(source.Context");
         foreach (var param in data.AdditionalParameters)
         {
-            if (IsRefStruct(param.Type))
+            if (param.IsRefStruct)
             {
                 // Convert ref struct to string - use ToStringAndClear for interpolated string handlers
                 // or ToString() for other ref structs
-                var conversion = IsInterpolatedStringHandler(param.Type)
+                var conversion = param.IsInterpolatedStringHandler
                     ? $"{param.Name}.ToStringAndClear()"
                     : $"{param.Name}.ToString()";
                 sb.Append($", {conversion}");
@@ -955,25 +991,25 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
     private static string GenerateClassName(AssertionMethodData data)
     {
         var methodName = data.Method.Name;
-        var targetTypeName = GetSimpleTypeName(data.TargetType);
+        var targetTypeName =data.TargetType.SimpleTypeName;
 
-        if (data.AdditionalParameters.Length == 0)
+        if (data.AdditionalParameters.Count == 0)
         {
             return $"{targetTypeName}_{methodName}_Assertion";
         }
 
         // Include parameter types to distinguish overloads
-        var paramTypes = string.Join("_", data.AdditionalParameters.Select(p => GetSimpleTypeName(p.Type)));
+        var paramTypes = string.Join("_", data.AdditionalParameters.Select(p => p.SimpleTypeName));
         return $"{targetTypeName}_{methodName}_{paramTypes}_Assertion";
     }
 
-    private static string[] GetGenericTypeParameters(ITypeSymbol type, IMethodSymbol method)
+    private static ImmutableEquatableArray<string> GetGenericTypeParameters(ITypeSymbol type, IMethodSymbol method)
     {
         // For extension methods, if the method has generic parameters, those define ALL the type parameters
         // (including any used in the target type like Lazy<T> or T[])
         if (method != null && method.IsGenericMethod)
         {
-            return method.TypeParameters.Select(t => t.Name).ToArray();
+            return method.TypeParameters.Select(t => t.Name).ToImmutableEquatableArray();
         }
 
         // If the method is not generic, check if the type itself has unbound generic parameters
@@ -982,10 +1018,10 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             return namedType.TypeArguments
                 .OfType<ITypeParameterSymbol>()
                 .Select(t => t.Name)
-                .ToArray();
+                .ToImmutableEquatableArray();
         }
 
-        return Array.Empty<string>();
+        return ImmutableEquatableArray.Empty<string>();
     }
 
     private static string GetSimpleTypeName(ITypeSymbol type)
@@ -1027,13 +1063,13 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
     /// Collects generic constraints from method type parameters.
     /// Returns a list of constraint strings in the format "where T : constraint1, constraint2"
     /// </summary>
-    private static List<string> CollectGenericConstraints(IMethodSymbol method)
+    private static ImmutableEquatableArray<string> CollectGenericConstraints(IMethodSymbol method)
     {
         var constraints = new List<string>();
 
         if (!method.IsGenericMethod || method.TypeParameters.Length == 0)
         {
-            return constraints;
+            return constraints.ToImmutableEquatableArray();
         }
 
         foreach (var typeParameter in method.TypeParameters)
@@ -1067,7 +1103,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             }
         }
 
-        return constraints;
+        return constraints.ToImmutableEquatableArray();
     }
 
     /// <summary>
@@ -1133,18 +1169,43 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         TaskAssertionResult
     }
 
-    private readonly record struct ReturnTypeInfo(ReturnTypeKind Kind, ITypeSymbol Type);
+    private readonly record struct ReturnTypeInfo(ReturnTypeKind Kind);
 
     private record AssertionMethodData(
-        IMethodSymbol Method,
-        ITypeSymbol TargetType,
-        ImmutableArray<IParameterSymbol> AdditionalParameters,
+        MethodData Method,
+        TargetTypeData TargetType,
+        ImmutableEquatableArray<ParameterData> AdditionalParameters,
         ReturnTypeInfo ReturnTypeInfo,
-        bool IsExtensionMethod,
         string? CustomExpectation,
         bool IsFileScoped,
         string? MethodBody,
-        ImmutableArray<string> SuppressionAttributesForCheckAsync,
-        ImmutableArray<string> DiagnosticAttributesForExtensionMethod
+        ImmutableEquatableArray<string> SuppressionAttributesForCheckAsync,
+        ImmutableEquatableArray<string> DiagnosticAttributesForExtensionMethod
+    );
+
+     private record ContainingTypeData(
+        string Name,
+        string FullContainingType,
+        string ContainingNamespace
+    );
+
+    private record struct TargetTypeData(string TypeName, string SimpleTypeName, bool IsNullable);
+
+    private record struct MethodData(
+        string Name,
+        ContainingTypeData? ContainingType,
+        string FirstParamName,
+        string MethodCallExpression,
+        ImmutableEquatableArray<string> GenericConstraints,
+        ImmutableEquatableArray<string> GenericTypeParameters
+    );
+
+    private record struct ParameterData(
+        string Name,
+        string Type,
+        bool IsRefStruct,
+        bool IsParams,
+        bool IsInterpolatedStringHandler,
+        string SimpleTypeName
     );
 }
