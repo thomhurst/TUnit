@@ -75,7 +75,8 @@ Please note that for the coverage and trx report, you need to install [additiona
         XML code coverage settings
 
     --disable-logo
-        Disables the TUnit logo when starting a test session
+        Disables the TUnit logo when starting a test session.
+        Can also be set via TUNIT_DISABLE_LOGO environment variable.
 
     --fail-fast
         Cancel the test run after the first test failure

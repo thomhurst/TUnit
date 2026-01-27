@@ -279,6 +279,7 @@ const sidebars: SidebarsConfig = {
       collapsed: true,
       items: [
         'reference/command-line-flags',
+        'reference/environment-variables',
         'reference/test-configuration',
         'comparison/attributes',
       ],
