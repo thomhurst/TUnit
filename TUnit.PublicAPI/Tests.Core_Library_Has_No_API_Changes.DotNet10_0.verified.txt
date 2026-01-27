@@ -1198,6 +1198,17 @@ namespace
         public string Key { get; init; }
         public  Type { get; init; }
     }
+    public static class SharedDataSources
+    {
+        public static object? GetOrCreate(.SharedType sharedType, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors)]  type, ? testClassType, string? key, <object?> factory) { }
+        public static object? GetOrCreate(.SharedType sharedType, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors)]  type, .DataGeneratorMetadata dataGeneratorMetadata, string? key, <object?> factory) { }
+        public static T GetOrCreate<T>(.SharedType sharedType, ? testClassType = null, string? key = null)
+            where T : new() { }
+        public static T GetOrCreate<T>(.SharedType sharedType, .DataGeneratorMetadata dataGeneratorMetadata, string? key = null)
+            where T : new() { }
+        public static T GetOrCreate<T>(.SharedType sharedType, ? testClassType, string? key, <T> factory) { }
+        public static T GetOrCreate<T>(.SharedType sharedType, .DataGeneratorMetadata dataGeneratorMetadata, string? key, <T> factory) { }
+    }
     public enum SharedType
     {
         None = 0,
