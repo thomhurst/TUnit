@@ -233,9 +233,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 return;
             }
 
-            // Get compilation from semantic model instead of parameter
-            var compilation = testMethod.Context.Value.SemanticModel.Compilation;
-
             var writer = new CodeWriter();
             GenerateFileHeader(writer);
             GenerateTestMetadata(writer, testMethod);
@@ -274,10 +271,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static void GenerateTestMetadata(CodeWriter writer, TestMethodMetadata testMethod)
     {
-        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
-
         var className = testMethod.TypeSymbol.GloballyQualified();
-        var methodName = testMethod.MethodSymbol.Name;
 
         // Generate unique class name using same pattern as filename (without .g.cs extension)
         var uniqueClassName = FileNameHelper.GetDeterministicFileNameForMethod(testMethod.TypeSymbol, testMethod.MethodSymbol)
@@ -319,7 +313,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             var hasMethodDataSourceForGenericType = testMethod is { IsGenericType: true, IsGenericMethod: false } && testMethod.MethodAttributes
                 .Any(a => a.AttributeClass?.Name == "MethodDataSourceAttribute" &&
-                          InferClassTypesFromMethodDataSource(compilation, testMethod, a) != null);
+                          InferClassTypesFromMethodDataSource(testMethod, a) != null);
 
             // Check for class-level data sources that could help resolve generic type arguments
             var hasClassDataSources = testMethod.IsGenericType && testMethod.TypeSymbol.GetAttributesIncludingBaseTypes()
@@ -363,7 +357,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         string combinationGuid,
         ImmutableArray<ITypeSymbol> typeArguments)
     {
-        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
         var methodName = testMethod.MethodSymbol.Name;
         var typeArgsString = string.Join(", ", typeArguments.Select(t => t.GloballyQualified()));
         var instantiatedMethodName = $"{methodName}<{typeArgsString}>";
@@ -585,8 +578,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
         var methodSymbol = testMethod.MethodSymbol;
 
-
-        GenerateDependencies(writer, compilation, methodSymbol);
+        GenerateDependencies(writer, methodSymbol);
 
         writer.AppendLine("AttributeFactory = static () =>");
         writer.AppendLine("[");
@@ -631,8 +623,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
         var methodSymbol = testMethod.MethodSymbol;
 
-
-        GenerateDependencies(writer, compilation, methodSymbol);
+        GenerateDependencies(writer, methodSymbol);
 
         writer.AppendLine("AttributeFactory = static () =>");
         writer.AppendLine("[");
@@ -674,9 +665,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Method metadata
         writer.Append("MethodMetadata = ");
         SourceInformationWriter.GenerateMethodInformation(writer, compilation, testMethod.TypeSymbol, testMethod.MethodSymbol, null, ',');
-
     }
-
 
     private static void GenerateDataSources(CodeWriter writer, TestMethodMetadata testMethod)
     {
@@ -2475,7 +2464,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
     }
 
-    private static void GenerateDependencies(CodeWriter writer, Compilation compilation, IMethodSymbol methodSymbol)
+    private static void GenerateDependencies(CodeWriter writer, IMethodSymbol methodSymbol)
     {
         var dependsOnAttributes = methodSymbol.GetAttributes()
             .Concat(methodSymbol.ContainingType.GetAttributes())
@@ -2538,7 +2527,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             if (arg.Type?.Name == "String")
             {
                 var testName = arg.Value?.ToString() ?? "";
-                
+
                 if (genericTypeArgument != null)
                 {
                     // DependsOnAttribute<T>(string testName) - dependency on specific test in class T
@@ -2575,7 +2564,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             if (firstArg.Type?.Name == "String" && secondArg.Type is IArrayTypeSymbol)
             {
                 var testName = firstArg.Value?.ToString() ?? "";
-                
+
                 if (genericTypeArgument != null)
                 {
                     // DependsOnAttribute<T>(string testName, Type[] parameterTypes) - dependency on specific test with parameters in class T
@@ -3488,7 +3477,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             foreach (var mdsAttr in methodDataSourceAttributes)
             {
                 // Try to infer types from the method data source
-                var inferredTypes = InferClassTypesFromMethodDataSource(compilation, testMethod, mdsAttr);
+                var inferredTypes = InferClassTypesFromMethodDataSource(testMethod, mdsAttr);
                 if (inferredTypes is { Length: > 0 })
                 {
                     var typeKey = BuildTypeKey(inferredTypes);
@@ -3542,7 +3531,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             foreach (var mdsAttr in methodDataSourceAttributes)
             {
                 // Try to infer types from the method data source
-                var inferredTypes = InferTypesFromMethodDataSource(compilation, testMethod, mdsAttr);
+                var inferredTypes = InferTypesFromMethodDataSource(testMethod, mdsAttr);
                 if (inferredTypes is { Length: > 0 })
                 {
                     var typeKey = BuildTypeKey(inferredTypes);
@@ -4490,7 +4479,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return null;
     }
 
-    private static ITypeSymbol[]? InferTypesFromMethodDataSource(Compilation compilation, TestMethodMetadata testMethod, AttributeData mdsAttr)
+    private static ITypeSymbol[]? InferTypesFromMethodDataSource(TestMethodMetadata testMethod, AttributeData mdsAttr)
     {
         if (mdsAttr.ConstructorArguments.Length == 0)
         {
@@ -4569,7 +4558,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return inferredTypes;
     }
 
-    private static ITypeSymbol[]? InferClassTypesFromMethodDataSource(Compilation compilation, TestMethodMetadata testMethod, AttributeData mdsAttr)
+    private static ITypeSymbol[]? InferClassTypesFromMethodDataSource(TestMethodMetadata testMethod, AttributeData mdsAttr)
     {
         if (mdsAttr.ConstructorArguments.Length == 0)
         {
@@ -4788,7 +4777,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         ITypeSymbol[] typeArguments,
         AttributeData? specificArgumentsAttribute = null)
     {
-        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
         var methodName = testMethod.MethodSymbol.Name;
 
         // Separate class type arguments from method type arguments
@@ -5025,7 +5013,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
-        GenerateDependencies(writer, compilation, methodSymbol);
+        GenerateDependencies(writer, methodSymbol);
 
         // Generate attribute factory with filtered attributes
         var filteredAttributes = new List<AttributeData>();
@@ -5372,7 +5360,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Generate metadata
 
-        GenerateDependencies(writer, compilation, testMethod.MethodSymbol);
+        GenerateDependencies(writer, testMethod.MethodSymbol);
 
         // Generate attribute factory
         writer.AppendLine("AttributeFactory = static () =>");
