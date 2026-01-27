@@ -155,6 +155,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.FsCheck", "TUnit.FsCh
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Example.FsCheck.TestProject", "TUnit.Example.FsCheck.TestProject\TUnit.Example.FsCheck.TestProject.csproj", "{3428D7AD-B362-4647-B1B0-72674CF3BC7C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.SourceGenerator.Benchmarks", "TUnit.SourceGenerator.Benchmarks\TUnit.SourceGenerator.Benchmarks.csproj", "{F686AD4B-FC90-48B9-84C9-C7B16C2E13E5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -897,6 +899,18 @@ Global
 		{3428D7AD-B362-4647-B1B0-72674CF3BC7C}.Release|x64.Build.0 = Release|Any CPU
 		{3428D7AD-B362-4647-B1B0-72674CF3BC7C}.Release|x86.ActiveCfg = Release|Any CPU
 		{3428D7AD-B362-4647-B1B0-72674CF3BC7C}.Release|x86.Build.0 = Release|Any CPU
+		{F686AD4B-FC90-48B9-84C9-C7B16C2E13E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F686AD4B-FC90-48B9-84C9-C7B16C2E13E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F686AD4B-FC90-48B9-84C9-C7B16C2E13E5}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F686AD4B-FC90-48B9-84C9-C7B16C2E13E5}.Debug|x64.Build.0 = Debug|Any CPU
+		{F686AD4B-FC90-48B9-84C9-C7B16C2E13E5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F686AD4B-FC90-48B9-84C9-C7B16C2E13E5}.Debug|x86.Build.0 = Debug|Any CPU
+		{F686AD4B-FC90-48B9-84C9-C7B16C2E13E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F686AD4B-FC90-48B9-84C9-C7B16C2E13E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F686AD4B-FC90-48B9-84C9-C7B16C2E13E5}.Release|x64.ActiveCfg = Release|Any CPU
+		{F686AD4B-FC90-48B9-84C9-C7B16C2E13E5}.Release|x64.Build.0 = Release|Any CPU
+		{F686AD4B-FC90-48B9-84C9-C7B16C2E13E5}.Release|x86.ActiveCfg = Release|Any CPU
+		{F686AD4B-FC90-48B9-84C9-C7B16C2E13E5}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
