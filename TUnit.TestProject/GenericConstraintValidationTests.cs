@@ -114,15 +114,17 @@ public class GenericConstraintValidationTests
     }
 }
 
-// Generic class with IComparable constraint
-[EngineTest(ExpectedResult.Pass)]
+// Generic class with IComparable constraint - uses the type inside method body, not as parameter
+// This pattern matches ChildTest4431 which works correctly
+[GenerateGenericTest(typeof(int))]
 public class GenericClassWithComparableConstraint<T> where T : IComparable<T>
 {
     [Test]
-    [Arguments(42)]        // int implements IComparable<int> - should work
-    [Arguments("hello")]   // string implements IComparable<string> - should work
-    public async Task TestComparable(T value)
+    [EngineTest(ExpectedResult.Pass)]
+    public async Task TestComparable()
     {
+        // Create test value inside the method - T is int
+        T value = (T)(object)42;
         await Assert.That(value).IsNotEqualTo(default(T));
         // This should compile because T has IComparable<T> constraint
         var comparison = value.CompareTo(value);
@@ -130,46 +132,78 @@ public class GenericClassWithComparableConstraint<T> where T : IComparable<T>
     }
 }
 
+// Separate test class for string IComparable
+[GenerateGenericTest(typeof(string))]
+public class GenericClassWithComparableConstraintString<T> where T : IComparable<T>
+{
+    [Test]
+    [EngineTest(ExpectedResult.Pass)]
+    public async Task TestComparable()
+    {
+        // Create test value inside the method - T is string
+        T value = (T)(object)"hello";
+        await Assert.That(value).IsNotEqualTo(default(T));
+        var comparison = value.CompareTo(value);
+        await Assert.That(comparison).IsEqualTo(0);
+    }
+}
+
 // Generic class with struct constraint
-[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
 public class GenericClassWithStructConstraint<T> where T : struct
 {
     [Test]
-    [Arguments(42)]        // int is a struct - should work
-    [Arguments(3.14)]      // double is a struct - should work
-    public async Task TestStruct(T value)
+    [EngineTest(ExpectedResult.Pass)]
+    public async Task TestStruct()
     {
+        // Create test value inside the method - T is int
+        T value = (T)(object)42;
         await Assert.That(value).IsNotEqualTo(default(T));
-        // This should compile because T has struct constraint
+        T defaultValue = default;
+        await Assert.That(value).IsNotEqualTo(defaultValue);
+    }
+}
+
+// Separate test class for double struct
+[GenerateGenericTest(typeof(double))]
+public class GenericClassWithStructConstraintDouble<T> where T : struct
+{
+    [Test]
+    [EngineTest(ExpectedResult.Pass)]
+    public async Task TestStruct()
+    {
+        // Create test value inside the method - T is double
+        T value = (T)(object)3.14;
+        await Assert.That(value).IsNotEqualTo(default(T));
         T defaultValue = default;
         await Assert.That(value).IsNotEqualTo(defaultValue);
     }
 }
 
 // Generic class with class constraint
-[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(string))]
 public class GenericClassWithClassConstraint<T> where T : class
 {
     [Test]
-    [Arguments("hello")]     // string is a class - should work
-    public async Task TestClass(T? value)
+    [EngineTest(ExpectedResult.Pass)]
+    public async Task TestClass()
     {
-        // This should compile because T has class constraint
-        if (value != null)
-        {
-            await Assert.That(value).IsNotEqualTo(default(T));
-        }
+        // Create test value inside the method - T is string
+        T value = (T)(object)"hello";
+        await Assert.That(value).IsNotEqualTo(default(T));
     }
 }
 
 // Generic class with interface constraint
-[EngineTest(ExpectedResult.Pass)]
-public class GenericClassWithInterfaceConstraint<T> where T : ITestInterface
+[GenerateGenericTest(typeof(TestClass))]
+public class GenericClassWithInterfaceConstraint<T> where T : ITestInterface, new()
 {
     [Test]
-    [TestClassDataSource]  // TestClass implements ITestInterface - should work
-    public async Task TestInterface(T value)
+    [EngineTest(ExpectedResult.Pass)]
+    public async Task TestInterface()
     {
+        // Create test value inside the method using new() constraint
+        T value = new T();
         await Assert.That(value).IsNotEqualTo(default(T));
         value.TestMethod(); // This should compile because T has ITestInterface constraint
     }

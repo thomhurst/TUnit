@@ -3919,29 +3919,32 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // Check specific type constraints
             foreach (var constraintType in typeParam.ConstraintTypes)
             {
+                // Substitute type parameters in the constraint type with the actual type arguments
+                var substitutedConstraint = SubstituteTypeParameters(constraintType, typeParams, typeArguments);
+
                 // For interface constraints, check if the type implements the interface
-                if (constraintType.TypeKind == TypeKind.Interface)
+                if (substitutedConstraint.TypeKind == TypeKind.Interface)
                 {
-                    if (!typeArg.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, constraintType)))
+                    if (!TypeImplementsInterface(typeArg, substitutedConstraint))
                     {
                         return false;
                     }
                 }
                 // For base class constraints, check if the type derives from the class
-                else if (constraintType.TypeKind == TypeKind.Class)
+                else if (substitutedConstraint.TypeKind == TypeKind.Class)
                 {
                     var baseType = typeArg.BaseType;
                     var found = false;
                     while (baseType != null)
                     {
-                        if (SymbolEqualityComparer.Default.Equals(baseType, constraintType))
+                        if (SymbolEqualityComparer.Default.Equals(baseType, substitutedConstraint))
                         {
                             found = true;
                             break;
                         }
                         baseType = baseType.BaseType;
                     }
-                    if (!found && !SymbolEqualityComparer.Default.Equals(typeArg, constraintType))
+                    if (!found && !SymbolEqualityComparer.Default.Equals(typeArg, substitutedConstraint))
                     {
                         return false;
                     }
@@ -3950,6 +3953,67 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         return true;
+    }
+
+    private static ITypeSymbol SubstituteTypeParameters(ITypeSymbol type, ImmutableArray<ITypeParameterSymbol> typeParams, ITypeSymbol[] typeArguments)
+    {
+        // If the type is a type parameter, substitute it with the corresponding type argument
+        if (type is ITypeParameterSymbol typeParam)
+        {
+            for (var i = 0; i < typeParams.Length; i++)
+            {
+                if (SymbolEqualityComparer.Default.Equals(typeParams[i], typeParam))
+                {
+                    return typeArguments[i];
+                }
+            }
+            return type;
+        }
+
+        // If the type is a named type with type arguments (e.g., IComparable<T>), substitute recursively
+        if (type is INamedTypeSymbol { IsGenericType: true } namedType)
+        {
+            var originalTypeArgs = namedType.TypeArguments;
+            var newTypeArgs = new ITypeSymbol[originalTypeArgs.Length];
+            var anyChanged = false;
+
+            for (var i = 0; i < originalTypeArgs.Length; i++)
+            {
+                newTypeArgs[i] = SubstituteTypeParameters(originalTypeArgs[i], typeParams, typeArguments);
+                if (!SymbolEqualityComparer.Default.Equals(newTypeArgs[i], originalTypeArgs[i]))
+                {
+                    anyChanged = true;
+                }
+            }
+
+            if (anyChanged)
+            {
+                return namedType.OriginalDefinition.Construct(newTypeArgs);
+            }
+        }
+
+        return type;
+    }
+
+    private static bool TypeImplementsInterface(ITypeSymbol type, ITypeSymbol interfaceType)
+    {
+        // Check if the type directly implements the interface
+        if (type.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, interfaceType)))
+        {
+            return true;
+        }
+
+        // For generic interfaces, also check if the type implements a constructed version
+        if (interfaceType is INamedTypeSymbol { IsGenericType: true } genericInterface)
+        {
+            var originalDef = genericInterface.OriginalDefinition;
+            return type.AllInterfaces.Any(i =>
+                i.IsGenericType &&
+                SymbolEqualityComparer.Default.Equals(i.OriginalDefinition, originalDef) &&
+                ((IEnumerable<ITypeSymbol>)i.TypeArguments).SequenceEqual(genericInterface.TypeArguments, SymbolEqualityComparer.Default));
+        }
+
+        return false;
     }
 
     private static ITypeSymbol[]? InferClassTypesFromMethodArguments(INamedTypeSymbol classSymbol, IMethodSymbol methodSymbol, AttributeData argAttr, Compilation compilation)
@@ -4710,6 +4774,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private static bool ValidateTypeParameterConstraints(IEnumerable<ITypeParameterSymbol> typeParams, ITypeSymbol[] typeArguments)
     {
         var typeParamsList = typeParams.ToList();
+        var typeParamsArray = typeParamsList.ToImmutableArray();
 
         for (var i = 0; i < typeParamsList.Count; i++)
         {
@@ -4737,22 +4802,25 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // Check interface constraints
             foreach (var constraintType in typeParam.ConstraintTypes)
             {
-                if (constraintType.TypeKind == TypeKind.Interface)
+                // Substitute type parameters in the constraint type with the actual type arguments
+                var substitutedConstraint = SubstituteTypeParameters(constraintType, typeParamsArray, typeArguments);
+
+                if (substitutedConstraint.TypeKind == TypeKind.Interface)
                 {
                     // Check if the type argument implements the interface
-                    if (!typeArg.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, constraintType)))
+                    if (!TypeImplementsInterface(typeArg, substitutedConstraint))
                     {
                         return false;
                     }
                 }
-                else if (constraintType.TypeKind == TypeKind.Class)
+                else if (substitutedConstraint.TypeKind == TypeKind.Class)
                 {
                     // Check if the type argument derives from the base class
                     var baseType = typeArg.BaseType;
                     var found = false;
                     while (baseType != null)
                     {
-                        if (SymbolEqualityComparer.Default.Equals(baseType, constraintType))
+                        if (SymbolEqualityComparer.Default.Equals(baseType, substitutedConstraint))
                         {
                             found = true;
                             break;
