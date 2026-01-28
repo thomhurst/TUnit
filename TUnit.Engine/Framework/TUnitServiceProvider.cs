@@ -226,8 +226,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
                 testInitializer,
                 objectTracker,
                 Logger,
-                EventReceiverOrchestrator,
-                hashSetPool));
+                EventReceiverOrchestrator));
 
         // Create the HookOrchestratingTestExecutorAdapter
         // Note: We'll need to update this to handle dynamic dependencies properly

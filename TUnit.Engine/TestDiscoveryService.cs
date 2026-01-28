@@ -108,6 +108,13 @@ internal sealed class TestDiscoveryService : IDataProducer
             _dependencyResolver.TryResolveDependencies(test);
         }
 
+        // Now that dependencies are resolved, invoke event receivers
+        // This ensures ITestRegisteredEventReceiver can access dependency information
+        foreach (var test in allTests)
+        {
+            await _testBuilderPipeline.InvokePostResolutionEventsAsync(test).ConfigureAwait(false);
+        }
+
         var filteredTests = isForExecution ? _testFilterService.FilterTests(filter, allTests) : allTests;
 
         if (isForExecution)
@@ -181,6 +188,13 @@ internal sealed class TestDiscoveryService : IDataProducer
         foreach (var test in allTests)
         {
             _dependencyResolver.TryResolveDependencies(test);
+        }
+
+        // Now that dependencies are resolved, invoke event receivers
+        // This ensures ITestRegisteredEventReceiver can access dependency information
+        foreach (var test in allTests)
+        {
+            await _testBuilderPipeline.InvokePostResolutionEventsAsync(test).ConfigureAwait(false);
         }
 
         var independentTests = new List<AbstractExecutableTest>();

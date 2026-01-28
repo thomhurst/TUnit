@@ -46,8 +46,11 @@ internal sealed class AotTestDataCollector : ITestDataCollector
 
         if (filterHints.HasHints)
         {
-            // Pre-filter test sources by type based on class name hint
-            testSourcesByType = testSourcesByType.Where(kvp => filterHints.CouldTypeMatch(kvp.Key));
+            // Pre-filter test sources by type based on filter hints
+            var matchingSources = testSourcesByType.Where(kvp => filterHints.CouldTypeMatch(kvp.Key)).ToList();
+
+            // Expand to include sources for dependency classes
+            testSourcesByType = ExpandSourcesForDependencies(matchingSources, Sources.TestSources);
         }
 
         var testSourcesList = testSourcesByType.SelectMany(kvp => kvp.Value).ToList();
@@ -78,6 +81,103 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         }
 
         return [..standardTestMetadatas, ..dynamicTestMetadatas];
+    }
+
+    /// <summary>
+    /// Expands the pre-filtered sources to include sources for dependency classes.
+    /// This ensures cross-class dependencies are included in two-phase discovery.
+    /// </summary>
+    private static IEnumerable<KeyValuePair<Type, ConcurrentQueue<ITestSource>>> ExpandSourcesForDependencies(
+        List<KeyValuePair<Type, ConcurrentQueue<ITestSource>>> matchingSources,
+        ConcurrentDictionary<Type, ConcurrentQueue<ITestSource>> allSources)
+    {
+        // Build index of all sources by class name for dependency lookup
+        var sourcesByClassName = new Dictionary<string, KeyValuePair<Type, ConcurrentQueue<ITestSource>>>();
+        foreach (var kvp in allSources)
+        {
+            sourcesByClassName[kvp.Key.Name] = kvp;
+            // Also index without generic suffix (e.g., "MyClass`1" -> "MyClass")
+            var backtickIndex = kvp.Key.Name.IndexOf('`');
+            if (backtickIndex > 0)
+            {
+                sourcesByClassName[kvp.Key.Name.Substring(0, backtickIndex)] = kvp;
+            }
+        }
+
+        // Collect all dependency class names from matching sources
+        var dependencyClassNames = new HashSet<string>();
+        foreach (var kvp in matchingSources)
+        {
+            foreach (var source in kvp.Value)
+            {
+                if (source is ITestDescriptorSource descriptorSource)
+                {
+                    foreach (var descriptor in descriptorSource.EnumerateTestDescriptors())
+                    {
+                        foreach (var dependency in descriptor.DependsOn)
+                        {
+                            // Parse dependency format: "ClassName:MethodName"
+                            var separatorIndex = dependency.IndexOf(':');
+                            if (separatorIndex > 0) // Cross-class dependency (not same-class ":MethodName")
+                            {
+                                var depClassName = dependency.Substring(0, separatorIndex);
+                                dependencyClassNames.Add(depClassName);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Build result set starting with matching sources
+        var resultSet = new Dictionary<Type, KeyValuePair<Type, ConcurrentQueue<ITestSource>>>();
+        foreach (var kvp in matchingSources)
+        {
+            resultSet[kvp.Key] = kvp;
+        }
+
+        // Expand dependencies transitively
+        var queue = new Queue<string>(dependencyClassNames);
+        var processedClasses = new HashSet<string>();
+
+        while (queue.Count > 0)
+        {
+            var className = queue.Dequeue();
+            if (!processedClasses.Add(className))
+            {
+                continue;
+            }
+
+            if (sourcesByClassName.TryGetValue(className, out var depSource) && !resultSet.ContainsKey(depSource.Key))
+            {
+                resultSet[depSource.Key] = depSource;
+
+                // Check for transitive dependencies
+                foreach (var source in depSource.Value)
+                {
+                    if (source is ITestDescriptorSource descriptorSource)
+                    {
+                        foreach (var descriptor in descriptorSource.EnumerateTestDescriptors())
+                        {
+                            foreach (var dependency in descriptor.DependsOn)
+                            {
+                                var separatorIndex = dependency.IndexOf(':');
+                                if (separatorIndex > 0)
+                                {
+                                    var transDepClassName = dependency.Substring(0, separatorIndex);
+                                    if (!processedClasses.Contains(transDepClassName))
+                                    {
+                                        queue.Enqueue(transDepClassName);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return resultSet.Values;
     }
 
     /// <summary>

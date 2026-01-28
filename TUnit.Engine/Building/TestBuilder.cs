@@ -918,27 +918,83 @@ internal sealed class TestBuilder : ITestBuilder
         // Set InternalExecutableTest so it's available during registration for error handling
         context.InternalExecutableTest = test;
 
-        // Invoke test registered event receivers BEFORE discovery event receivers
-        // This is critical for allowing attributes to set custom hook executors
+        // Register test arguments for property injection and reference counting
+        // Note: ITestRegisteredEventReceiver and ITestDiscoveryEventReceiver are invoked later
+        // in InvokePostResolutionEventsAsync after dependencies are resolved
         try
         {
-            await InvokeTestRegisteredEventReceiversAsync(context);
+            await RegisterTestArgumentsAsync(context);
         }
         catch (Exception ex)
         {
-            // Property registration or other registration logic failed
-            // Mark the test as failed immediately, as the old code did
+            // Property registration failed - mark the test as failed immediately
             test.SetResult(TestState.Failed, ex);
         }
 
+        return test;
+    }
+
+    /// <summary>
+    /// Invokes event receivers after dependencies have been resolved.
+    /// This is called from TestDiscoveryService after all tests are built and dependencies resolved.
+    /// </summary>
+#if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+#endif
+    public async ValueTask InvokePostResolutionEventsAsync(AbstractExecutableTest test)
+    {
+        var context = test.Context;
+
+        // Populate TestContext._dependencies from resolved test.Dependencies
+        // This makes dependencies available to ITestRegisteredEventReceiver
+        PopulateDependencies(test, context._dependencies);
+
+        // Invoke test registered event receivers
+        try
+        {
+            await InvokeTestRegisteredReceiversAsync(context);
+        }
+        catch (Exception ex)
+        {
+            // Registration logic failed - mark the test as failed
+            test.SetResult(TestState.Failed, ex);
+        }
+
+        // Invoke discovery event receivers
         await InvokeDiscoveryEventReceiversAsync(context);
 
         // Clear the cached display name after discovery events
         // This ensures that ArgumentDisplayFormatterAttribute and similar attributes
         // have a chance to register their formatters before the display name is finalized
         context.InvalidateDisplayNameCache();
+    }
 
-        return test;
+    private static void PopulateDependencies(AbstractExecutableTest test, List<TestDetails> dependencies)
+    {
+        var collected = new HashSet<TestDetails>();
+        var visited = new HashSet<AbstractExecutableTest>();
+        CollectAllDependencies(test, collected, visited);
+
+        foreach (var dependency in collected)
+        {
+            dependencies.Add(dependency);
+        }
+    }
+
+    private static void CollectAllDependencies(AbstractExecutableTest test, HashSet<TestDetails> collected, HashSet<AbstractExecutableTest> visited)
+    {
+        if (!visited.Add(test))
+        {
+            return;
+        }
+
+        foreach (var dependency in test.Dependencies)
+        {
+            if (collected.Add(dependency.Test.Context.Metadata.TestDetails))
+            {
+                CollectAllDependencies(dependency.Test, collected, visited);
+            }
+        }
     }
 
     /// <summary>
@@ -1016,25 +1072,37 @@ internal sealed class TestBuilder : ITestBuilder
         return context;
     }
 
-#if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
-#endif
-    private async Task InvokeTestRegisteredEventReceiversAsync(TestContext context)
+    /// <summary>
+    /// Registers test arguments for property injection and reference counting.
+    /// Called during test building, before dependencies are resolved.
+    /// </summary>
+    private async Task RegisterTestArgumentsAsync(TestContext context)
     {
         var discoveredTest = new DiscoveredTest<object>
         {
             TestContext = context
         };
 
-        var registeredContext = new TestRegisteredContext(context)
-        {
-            DiscoveredTest = discoveredTest
-        };
-
         context.InternalDiscoveredTest = discoveredTest;
 
-        // First, invoke the global test argument registration service to register shared instances
+        // Invoke the global test argument registration service to register shared instances
         await _testArgumentRegistrationService.RegisterTestArgumentsAsync(context);
+    }
+
+    /// <summary>
+    /// Invokes ITestRegisteredEventReceiver receivers.
+    /// Called after dependencies are resolved so receivers can access dependency information.
+    /// </summary>
+#if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+#endif
+    private async Task InvokeTestRegisteredReceiversAsync(TestContext context)
+    {
+        var registeredContext = new TestRegisteredContext(context)
+        {
+            // InternalDiscoveredTest is set in RegisterTestArgumentsAsync during building
+            DiscoveredTest = context.InternalDiscoveredTest!
+        };
 
         // Use pre-computed receivers (already filtered, sorted, and scoped-attribute filtered)
         foreach (var receiver in context.GetTestRegisteredReceivers())
