@@ -92,7 +92,9 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
 
         // If the target type is abstract or interface, we can't create an instance of it.
         // Fall back to the test class type which should be concrete.
-        if (targetType != null && (targetType.IsAbstract || targetType.IsInterface))
+        // BUT: Don't override if ClassProvidingDataSource was explicitly provided, even if it's a static class
+        // (static classes are abstract in IL but contain static members we can invoke)
+        if (ClassProvidingDataSource == null && targetType != null && (targetType.IsAbstract || targetType.IsInterface))
         {
             var testClassType = TestClassTypeHelper.GetTestClassType(dataGeneratorMetadata);
             if (testClassType != null && !testClassType.IsAbstract && !testClassType.IsInterface)
