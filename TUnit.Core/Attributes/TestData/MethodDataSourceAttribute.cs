@@ -121,13 +121,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             object? instance = null;
             if (!methodInfo.IsStatic)
             {
-                // Skip PlaceholderInstance as it's a sentinel value, not a real instance
-                var testClassInstance = dataGeneratorMetadata.TestClassInstance;
-                if (testClassInstance is PlaceholderInstance)
-                {
-                    testClassInstance = null;
-                }
-                instance = testClassInstance ?? Activator.CreateInstance(targetType);
+                instance = await GetOrCreateInstanceAsync(dataGeneratorMetadata, targetType);
             }
 
             methodResult = methodInfo.Invoke(instance, Arguments);
@@ -144,13 +138,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
                 object? instance = null;
                 if (propertyInfo.GetMethod?.IsStatic != true)
                 {
-                    // Skip PlaceholderInstance as it's a sentinel value, not a real instance
-                    var testClassInstance = dataGeneratorMetadata.TestClassInstance;
-                    if (testClassInstance is PlaceholderInstance)
-                    {
-                        testClassInstance = null;
-                    }
-                    instance = testClassInstance ?? Activator.CreateInstance(targetType);
+                    instance = await GetOrCreateInstanceAsync(dataGeneratorMetadata, targetType);
                 }
 
                 methodResult = propertyInfo.GetValue(instance);
@@ -161,13 +149,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
                 object? instance = null;
                 if (!fieldInfo.IsStatic)
                 {
-                    // Skip PlaceholderInstance as it's a sentinel value, not a real instance
-                    var testClassInstance = dataGeneratorMetadata.TestClassInstance;
-                    if (testClassInstance is PlaceholderInstance)
-                    {
-                        testClassInstance = null;
-                    }
-                    instance = testClassInstance ?? Activator.CreateInstance(targetType);
+                    instance = await GetOrCreateInstanceAsync(dataGeneratorMetadata, targetType);
                 }
 
                 methodResult = fieldInfo.GetValue(instance);
@@ -385,5 +367,37 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Gets an existing test class instance or creates a new one.
+    /// Uses InstanceFactory if available (which can perform property injection),
+    /// otherwise falls back to Activator.CreateInstance.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection usage is documented. AOT-safe path available via Factory property")]
+    [UnconditionalSuppressMessage("Trimming", "IL2067", Justification = "Reflection usage is documented. AOT-safe path available via Factory property")]
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Dynamic code usage is documented. AOT-safe path available via Factory property")]
+    private static async Task<object?> GetOrCreateInstanceAsync(DataGeneratorMetadata metadata, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type targetType)
+    {
+        // First check if we have a valid test class instance
+        var testClassInstance = metadata.TestClassInstance;
+        if (testClassInstance is PlaceholderInstance)
+        {
+            testClassInstance = null;
+        }
+
+        if (testClassInstance != null)
+        {
+            return testClassInstance;
+        }
+
+        // Try to use the InstanceFactory if available (which can perform property injection)
+        if (metadata.InstanceFactory != null)
+        {
+            return await metadata.InstanceFactory(targetType);
+        }
+
+        // Fall back to creating a bare instance
+        return Activator.CreateInstance(targetType);
     }
 }

@@ -13,7 +13,8 @@ internal static class DataGeneratorMetadataCreator
         DataGeneratorType generatorType,
         object? testClassInstance,
         object?[]? classInstanceArguments,
-        TestBuilderContextAccessor contextAccessor)
+        TestBuilderContextAccessor contextAccessor,
+        Func<Type, Task<object?>>? instanceFactory = null)
     {
         // Determine which parameters we're generating for
         var parametersToGenerate = generatorType == DataGeneratorType.ClassParameters
@@ -69,7 +70,8 @@ internal static class DataGeneratorMetadataCreator
             Type = generatorType,
             TestSessionId = testSessionId,
             TestClassInstance = testClassInstance,
-            ClassInstanceArguments = classInstanceArguments
+            ClassInstanceArguments = classInstanceArguments,
+            InstanceFactory = instanceFactory
         };
     }
 
@@ -112,9 +114,14 @@ internal static class DataGeneratorMetadataCreator
     /// Creates minimal DataGeneratorMetadata for discovery phase when inferring generic types.
     /// This is used when we need to get data from sources to determine generic type arguments.
     /// </summary>
+    /// <param name="dataSource">The data source attribute.</param>
+    /// <param name="existingMethodMetadata">Optional method metadata if available.</param>
+    /// <param name="instanceFactory">Optional factory for creating instances with property injection.
+    /// Used in reflection mode when instance data sources depend on property injection.</param>
     public static DataGeneratorMetadata CreateForGenericTypeDiscovery(
         IDataSourceAttribute dataSource,
-        MethodMetadata? existingMethodMetadata = null)
+        MethodMetadata? existingMethodMetadata = null,
+        Func<Type, Task<object?>>? instanceFactory = null)
     {
         var dummyParameter = new ParameterMetadata(typeof(object))
         {
@@ -159,7 +166,8 @@ internal static class DataGeneratorMetadataCreator
             Type = DataGeneratorType.ClassParameters,
             TestSessionId = "discovery",
             TestClassInstance = null,
-            ClassInstanceArguments = null
+            ClassInstanceArguments = null,
+            InstanceFactory = instanceFactory
         };
     }
 

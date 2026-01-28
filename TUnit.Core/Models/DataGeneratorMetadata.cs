@@ -11,4 +11,11 @@ public record DataGeneratorMetadata
     public required string TestSessionId { get; init; }
     public required object? TestClassInstance { get; init; }
     public required object?[]? ClassInstanceArguments { get; init; }
+
+    /// <summary>
+    /// Optional factory for creating and initializing test class instances.
+    /// Used in reflection mode when instance data sources depend on property injection.
+    /// The factory should create an instance and perform property injection before returning it.
+    /// </summary>
+    public Func<Type, Task<object?>>? InstanceFactory { get; init; }
 }

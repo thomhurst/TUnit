@@ -25,11 +25,14 @@ public class ErrFixture<T> : IAsyncDisposable, IAsyncInitializer
     public Task InitializeAsync() => Task.CompletedTask;
 }
 
-// Note: ErrTest_InstanceDataSource uses instance data sources that depend on property injection.
-// This pattern works in source-generated mode but cannot work in reflection mode because
-// property injection happens after test construction, but data sources are evaluated during discovery.
-// Therefore, this test is NOT marked with [EngineTest(ExpectedResult.Pass)] since it cannot pass
-// in all test modes.
+/// <summary>
+/// Test for instance data source that depends on property injection.
+/// Note: MyTest uses an instance property data source that depends on property-injected
+/// fixtures. This works in source-generated mode but not in reflection mode because:
+/// 1. Property injection happens after instance creation
+/// 2. Data sources are evaluated before initialization in reflection mode
+/// Therefore, MyTest is split into a separate class without [EngineTest(ExpectedResult.Pass)].
+/// </summary>
 public class ErrTest_InstanceDataSource
 {
     [ClassDataSource<ErrFixture<MyType>>(Shared = SharedType.PerClass)]
