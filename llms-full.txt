@@ -31482,16 +31482,19 @@ public static IEnumerable<User> GetUsers()
 ```csharp
 // ❌ Explosive combination
 [Test]
-[Arguments(1, 2, 3, 4, 5)]
-[Arguments("a", "b", "c", "d", "e")]
-[Arguments(true, false)]
+[MatrixDataSource]
+public void Test(
+    [Matrix(1, 2, 3, 4, 5)] int x,
+    [Matrix("a", "b", "c", "d", "e")] string y,
+    [Matrix(true, false)] bool z)
 // Creates 5 × 5 × 2 = 50 combinations!
 
-// ✅ Use specific combinations
+// ✅ Use specific combinations instead
 [Test]
 [Arguments(1, "a", true)]
 [Arguments(2, "b", false)]
 [Arguments(3, "c", true)]
+public void Test(int x, string y, bool z)
 // Only 3 specific test cases
 ```
 
