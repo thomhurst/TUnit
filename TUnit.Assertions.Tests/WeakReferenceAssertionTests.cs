@@ -10,6 +10,7 @@ public class WeakReferenceAssertionTests
         var target = new object();
         var weakRef = new WeakReference(target);
         await Assert.That(weakRef).IsAlive();
+        GC.KeepAlive(target);
     }
 
     [Test]
@@ -28,6 +29,7 @@ public class WeakReferenceAssertionTests
         var target = new object();
         var weakRef = new WeakReference(target, trackResurrection: false);
         await Assert.That(weakRef).DoesNotTrackResurrection();
+        GC.KeepAlive(target);
     }
 
     [Test]
@@ -36,6 +38,7 @@ public class WeakReferenceAssertionTests
         var target = new object();
         var weakRef = new WeakReference(target, trackResurrection: true);
         await Assert.That(weakRef).TrackResurrection();
+        GC.KeepAlive(target);
     }
 
     private static WeakReference CreateWeakReferenceToCollectedObject()
