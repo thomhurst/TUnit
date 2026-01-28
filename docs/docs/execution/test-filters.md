@@ -23,7 +23,7 @@ TUnit supports several operators for building complex filters:
 - **Equality:** Use `=` for exact match (e.g., `[Category=Unit]`)
 - **Negation:** Use `!=` for excluding values (e.g., `[Category!=Performance]`)
 - **AND operator:** Use `&` to combine conditions (e.g., `[Category=Unit]&[Priority=High]`)
-- **OR operator:** Use `|` to match either condition - requires parentheses (e.g., `(/*/*/Class1/*)|(/*/*/Class2/*)`)
+- **OR operator:** Use `|` to match either condition within a single path segment - requires parentheses (e.g., `/*/*/(Class1)|(Class2)/*`)
 
 For full information on the treenode filters, see [Microsoft's documentation](https://github.com/microsoft/testfx/blob/main/docs/mstest-runner-graphqueryfiltering/graph-query-filtering.md)
 
