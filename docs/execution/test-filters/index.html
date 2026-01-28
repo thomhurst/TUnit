@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.9.2">
 <title data-rh="true">Test Filters | TUnit</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://tunit.dev/img/docusaurus-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://tunit.dev/img/docusaurus-social-card.jpg"><meta data-rh="true" property="og:url" content="https://tunit.dev/docs/execution/test-filters"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Test Filters | TUnit"><meta data-rh="true" name="description" content="Running TUnit via dotnet run supports test filters."><meta data-rh="true" property="og:description" content="Running TUnit via dotnet run supports test filters."><link data-rh="true" rel="icon" href="/img/tunit-favicon.svg"><link data-rh="true" rel="canonical" href="https://tunit.dev/docs/execution/test-filters"><link data-rh="true" rel="alternate" href="https://tunit.dev/docs/execution/test-filters" hreflang="en"><link data-rh="true" rel="alternate" href="https://tunit.dev/docs/execution/test-filters" hreflang="x-default"><link data-rh="true" rel="preconnect" href="https://RLNKZO4OTO-dsn.algolia.net" crossorigin="anonymous"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Test Filters","item":"https://tunit.dev/docs/execution/test-filters"}]}</script><link rel="search" type="application/opensearchdescription+xml" title="TUnit" href="/opensearch.xml"><link rel="stylesheet" href="/assets/css/styles.48bd1522.css">
-<script src="/assets/js/runtime~main.14d4298b.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.3d96cab3.js" defer="defer"></script>
 <script src="/assets/js/main.9b5a7122.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -30,7 +30,7 @@
 <li class=""><strong>Equality:</strong> Use <code>=</code> for exact match (e.g., <code>[Category=Unit]</code>)</li>
 <li class=""><strong>Negation:</strong> Use <code>!=</code> for excluding values (e.g., <code>[Category!=Performance]</code>)</li>
 <li class=""><strong>AND operator:</strong> Use <code>&amp;</code> to combine conditions (e.g., <code>[Category=Unit]&amp;[Priority=High]</code>)</li>
-<li class=""><strong>OR operator:</strong> Use <code>|</code> to match either condition - requires parentheses (e.g., <code>(/*/*/Class1/*)|(/*/*/Class2/*)</code>)</li>
+<li class=""><strong>OR operator:</strong> Use <code>|</code> to match either condition within a single path segment - requires parentheses (e.g., <code>/*/*/(Class1)|(Class2)/*</code>)</li>
 </ul>
 <p>For full information on the treenode filters, see <a href="https://github.com/microsoft/testfx/blob/main/docs/mstest-runner-graphqueryfiltering/graph-query-filtering.md" target="_blank" rel="noopener noreferrer" class="">Microsoft&#x27;s documentation</a></p>
 <p>So an example could be:</p>
