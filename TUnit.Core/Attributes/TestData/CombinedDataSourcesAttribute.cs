@@ -175,7 +175,8 @@ public sealed class CombinedDataSourcesAttribute : AsyncUntypedDataSourceGenerat
                 Type = dataGeneratorMetadata.Type,
                 TestSessionId = dataGeneratorMetadata.TestSessionId,
                 TestClassInstance = dataGeneratorMetadata.TestClassInstance,
-                ClassInstanceArguments = dataGeneratorMetadata.ClassInstanceArguments
+                ClassInstanceArguments = dataGeneratorMetadata.ClassInstanceArguments,
+                InstanceFactory = dataGeneratorMetadata.InstanceFactory
             };
 
             // Get data rows from this data source (need to await async enumerable)
