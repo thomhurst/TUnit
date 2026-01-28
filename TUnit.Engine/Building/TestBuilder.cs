@@ -930,6 +930,13 @@ internal sealed class TestBuilder : ITestBuilder
             // Property registration failed - mark the test as failed immediately
             test.SetResult(TestState.Failed, ex);
         }
+        finally
+        {
+            // Clear TestContext.Current so subsequent build operations use TestBuildContext.Current
+            // for output capture. This ensures console output during data source evaluation
+            // goes to the shared build context, not a previous test's context.
+            TestContext.Current = null;
+        }
 
         return test;
     }
@@ -944,6 +951,10 @@ internal sealed class TestBuilder : ITestBuilder
     public async ValueTask InvokePostResolutionEventsAsync(AbstractExecutableTest test)
     {
         var context = test.Context;
+
+        // Set TestContext.Current so output capture works via AsyncLocal
+        // This ensures any console output during event receiver invocation is captured
+        TestContext.Current = context;
 
         // Populate TestContext._dependencies from resolved test.Dependencies
         // This makes dependencies available to ITestRegisteredEventReceiver
