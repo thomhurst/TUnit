@@ -2821,7 +2821,7 @@ public async Task Complex_Expression_Broken_Down()
 {
     var user = GetUser();
 
-    await using (Assert.Multiple())
+    using (Assert.Multiple())
     {
         await Assert.That(user.IsActive).IsTrue();
         await Assert.That(user.IsBanned).IsFalse();
@@ -3018,7 +3018,7 @@ public async Task Multiple_Validations()
         Age = 25
     };
 
-    await using (Assert.Multiple())
+    using (Assert.Multiple())
     {
         await Assert.That(form.IsEmailValid()).IsTrue();
         await Assert.That(form.IsPasswordStrong()).IsTrue();
@@ -3929,7 +3929,7 @@ public async Task Validate_Each_Item()
 {
     var users = GetUsers();
 
-    await using (Assert.Multiple())
+    using (Assert.Multiple())
     {
         foreach (var user in users)
         {
@@ -4790,7 +4790,7 @@ public async Task Configuration_Has_Required_Keys()
 {
     var config = LoadConfiguration();
 
-    await using (Assert.Multiple())
+    using (Assert.Multiple())
     {
         await Assert.That(config).ContainsKey("DatabaseConnection");
         await Assert.That(config).ContainsKey("ApiKey");
@@ -5100,7 +5100,7 @@ public async Task All_Required_Keys_Present_Multiple()
     var config = LoadConfiguration();
     var requiredKeys = new[] { "ApiKey", "Database", "Environment" };
 
-    await using (Assert.Multiple())
+    using (Assert.Multiple())
     {
         foreach (var key in requiredKeys)
         {
@@ -6077,7 +6077,7 @@ public async Task Custom_Exception_With_Properties()
 [Test]
 public async Task Multiple_Exception_Scenarios()
 {
-    await using (Assert.Multiple())
+    using (Assert.Multiple())
     {
         await Assert.That(() => int.Parse("abc"))
             .Throws<FormatException>();
@@ -7422,7 +7422,7 @@ await Assert.That(statusCode)
 Group related assertions together so all failures are reported:
 
 ```csharp
-await using (Assert.Multiple())
+using (Assert.Multiple())
 {
     await Assert.That(user.FirstName).IsEqualTo("John");
     await Assert.That(user.LastName).IsEqualTo("Doe");
@@ -7669,7 +7669,7 @@ await Assert.That(user.Age).IsGreaterThan(18);
   <TabItem value="good" label="✅ Good - Assert.Multiple">
 
 ```csharp
-await using (Assert.Multiple())
+using (Assert.Multiple())
 {
     await Assert.That(user.FirstName).IsEqualTo("John");
     await Assert.That(user.LastName).IsEqualTo("Doe");
@@ -8131,7 +8131,7 @@ public async Task Validate_All_Required_Fields()
 {
     var user = CreateUser();
 
-    await using (Assert.Multiple())
+    using (Assert.Multiple())
     {
         await Assert.That(user).IsNotNull();
         await Assert.That(user.FirstName).IsNotNull();
