@@ -87,11 +87,11 @@
     <PackageVersion Include="TUnit.Assertions.FSharp" Version="0.75.38-PullRequest3485.0" />
     <PackageVersion Include="Verify" Version="31.10.0" />
     <PackageVersion Include="Verify.NUnit" Version="31.10.0" />
-    <PackageVersion Include="TUnit" Version="1.12.90" />
-    <PackageVersion Include="TUnit.AspNetCore" Version="1.12.90" />
-    <PackageVersion Include="TUnit.Core" Version="1.12.90" />
-    <PackageVersion Include="TUnit.Engine" Version="1.12.90" />
-    <PackageVersion Include="TUnit.Assertions" Version="1.12.90" />
+    <PackageVersion Include="TUnit" Version="1.12.93" />
+    <PackageVersion Include="TUnit.AspNetCore" Version="1.12.93" />
+    <PackageVersion Include="TUnit.Core" Version="1.12.93" />
+    <PackageVersion Include="TUnit.Engine" Version="1.12.93" />
+    <PackageVersion Include="TUnit.Assertions" Version="1.12.93" />
     <PackageVersion Include="Verify.TUnit" Version="31.10.0" />
     <PackageVersion Include="Vogen" Version="8.0.4" />
     <PackageVersion Include="xunit" Version="2.9.3" />
