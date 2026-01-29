@@ -9,57 +9,6 @@ namespace TUnit.Core.SourceGenerator.Helpers;
 internal static class FileNameHelper
 {
     /// <summary>
-    /// Generates a deterministic filename for a test class.
-    /// Format: {Namespace}_{ClassName}_{GenericArgs}.g.cs
-    /// </summary>
-    /// <param name="typeSymbol">The type symbol for the test class</param>
-    /// <returns>A deterministic filename like "MyNamespace_MyClass_T.g.cs"</returns>
-    public static string GetDeterministicFileName(INamedTypeSymbol typeSymbol)
-    {
-        var sb = new StringBuilder();
-
-        // Add namespace
-        if (!typeSymbol.ContainingNamespace.IsGlobalNamespace)
-        {
-            sb.Append(SanitizeForFileName(typeSymbol.ContainingNamespace.ToDisplayString()));
-            sb.Append('_');
-        }
-
-        // Add all containing types (outer classes first, then inner classes)
-        var containingTypes = new List<string>();
-        var currentType = typeSymbol;
-        while (currentType != null)
-        {
-            containingTypes.Add(SanitizeForFileName(currentType.Name));
-            currentType = currentType.ContainingType;
-        }
-
-        // Reverse to get outer-to-inner order
-        containingTypes.Reverse();
-
-        // Append containing types from outer to inner
-        for (int i = 0; i < containingTypes.Count; i++)
-        {
-            if (i > 0) sb.Append('_');
-            sb.Append(containingTypes[i]);
-        }
-
-        // Add generic type arguments if any (for the innermost type)
-        if (typeSymbol.TypeArguments.Length > 0)
-        {
-            sb.Append('_');
-            for (int i = 0; i < typeSymbol.TypeArguments.Length; i++)
-            {
-                if (i > 0) sb.Append('_');
-                sb.Append(SanitizeForFileName(typeSymbol.TypeArguments[i].Name));
-            }
-        }
-
-        sb.Append(".g.cs");
-        return sb.ToString();
-    }
-
-    /// <summary>
     /// Generates a deterministic filename for a test method.
     /// Format: {Namespace}_{ClassName}_{MethodName}__{ParameterTypes}.g.cs
     /// </summary>
@@ -132,24 +81,26 @@ internal static class FileNameHelper
     /// </summary>
     private static string SanitizeForFileName(string input)
     {
-        var sb = new StringBuilder(input.Length);
-
-        foreach (var c in input)
+        return string.Create(input.Length, input, (span, input) =>
         {
-            // Replace invalid filename characters and special type characters with underscore
-            if (c == '<' || c == '>' || c == ':' || c == '"' || c == '/' || c == '\\' ||
-                c == '|' || c == '?' || c == '*' || c == '.' || c == ',' || c == ' ' ||
-                c == '(' || c == ')' || c == '[' || c == ']' || c == '{' || c == '}')
+            var index = 0;
+            foreach (var c in input)
             {
-                sb.Append('_');
-            }
-            else
-            {
-                sb.Append(c);
-            }
-        }
+                // Replace invalid filename characters and special type characters with underscore
+                if (c == '<' || c == '>' || c == ':' || c == '"' || c == '/' || c == '\\' ||
+                    c == '|' || c == '?' || c == '*' || c == '.' || c == ',' || c == ' ' ||
+                    c == '(' || c == ')' || c == '[' || c == ']' || c == '{' || c == '}')
+                {
+                    span[index] = '_';
+                }
+                else
+                {
+                    span[index] = c;
+                }
 
-        return sb.ToString();
+                index++;
+            }
+        });
     }
 
 }
