@@ -241,4 +241,60 @@ public class AbstractTestClassWithDataSourcesAnalyzerTests
                     .WithArguments("Tests")
             );
     }
+
+    [Test]
+    public async Task Warning_When_Multiple_Concrete_Classes_Exist_But_None_Have_InheritsTests()
+    {
+        // When there are multiple subclasses but none have [InheritsTests], warn
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                public class Tests1 : Tests { }
+                public class Tests2 : Tests { }
+                public class Tests3 : Tests { }
+
+                public abstract class {|#0:Tests|}
+                {
+                    [Test]
+                    [Arguments(true)]
+                    [Arguments(false)]
+                    public void TestName(bool flag) { }
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.AbstractTestClassWithDataSources)
+                    .WithLocation(0)
+                    .WithArguments("Tests")
+            );
+    }
+
+    [Test]
+    public async Task No_Warning_When_At_Least_One_Concrete_Class_Has_InheritsTests()
+    {
+        // When at least one subclass has [InheritsTests], no warning
+        // (even if other subclasses don't have it)
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                public class Tests1 : Tests { }
+
+                [InheritsTests]
+                public class Tests2 : Tests { }
+
+                public class Tests3 : Tests { }
+
+                public abstract class Tests
+                {
+                    [Test]
+                    [Arguments(true)]
+                    [Arguments(false)]
+                    public void TestName(bool flag) { }
+                }
+                """
+            );
+    }
 }
