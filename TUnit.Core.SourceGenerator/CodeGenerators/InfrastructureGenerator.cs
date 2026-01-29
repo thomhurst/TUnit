@@ -187,8 +187,8 @@ public class InfrastructureGenerator : IIncrementalGenerator
             return false;
         }
 
-        // Only load assemblies with physical locations
-        if (!HasPhysicalLocation(assembly, compilation))
+        // Only load assemblies that will be available at runtime
+        if (!IsLoadableAtRuntime(assembly, compilation))
         {
             return false;
         }
@@ -223,12 +223,24 @@ public class InfrastructureGenerator : IIncrementalGenerator
                name.StartsWith("TUnit.Assertions.", StringComparison.Ordinal);
     }
 
-    private static bool HasPhysicalLocation(IAssemblySymbol assembly, Compilation compilation)
+    /// <summary>
+    /// Determines if an assembly will be loadable at runtime via Assembly.Load().
+    /// Any assembly that has a corresponding reference in the compilation will be available
+    /// at runtime because it will either be:
+    /// - A compiled DLL in the output directory (for project references)
+    /// - A NuGet package assembly in the probing paths (for package references)
+    /// </summary>
+    private static bool IsLoadableAtRuntime(IAssemblySymbol assembly, Compilation compilation)
     {
+        // Find the MetadataReference that corresponds to this assembly symbol
         var correspondingReference = compilation.References.FirstOrDefault(r =>
             SymbolEqualityComparer.Default.Equals(compilation.GetAssemblyOrModuleSymbol(r), assembly));
 
-        return correspondingReference is PortableExecutableReference { FilePath: not null and not "" };
+        // If there's a corresponding reference, the assembly will be available at runtime.
+        // This includes:
+        // - PortableExecutableReference: compiled DLLs (NuGet packages, project outputs)
+        // - CompilationReference: project-to-project references (will be compiled to DLLs)
+        return correspondingReference != null;
     }
 
     private static string GetAssemblyFullName(IAssemblySymbol assemblySymbol)
