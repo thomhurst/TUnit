@@ -122,7 +122,13 @@ public class MSTestTwoPhaseAnalyzer : MigrationAnalyzer
             if (symbolInfo.Symbol is IMethodSymbol methodSymbol)
             {
                 var containingNamespace = methodSymbol.ContainingType?.ContainingNamespace?.ToDisplayString();
-                return containingNamespace?.StartsWith("Microsoft.VisualStudio.TestTools.UnitTesting") == true;
+                // Only return false if we positively know it's NOT MSTest
+                if (containingNamespace != null && !containingNamespace.StartsWith("Microsoft.VisualStudio.TestTools.UnitTesting"))
+                {
+                    return false;
+                }
+                // Namespace matches or is null (resolution failed) - assume it's MSTest
+                return true;
             }
         }
         catch
