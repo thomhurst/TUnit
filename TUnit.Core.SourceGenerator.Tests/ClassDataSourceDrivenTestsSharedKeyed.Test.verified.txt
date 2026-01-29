@@ -72,7 +72,7 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTestsSharedKeyed_Da
                     {
                         case 1:
                             {
-                                instance.DataSource_Class(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>(args[0]));
+                                instance.DataSource_Class(global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>(args[0]));
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:
@@ -194,7 +194,7 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTestsSharedKeyed_Da
                     {
                         case 1:
                             {
-                                instance.DataSource_Class_Generic(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>(args[0]));
+                                instance.DataSource_Class_Generic(global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>(args[0]));
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:

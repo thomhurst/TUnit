@@ -1659,7 +1659,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                                 writer.AppendLine("if (value == null)");
                                 writer.AppendLine("{");
                                 writer.Indent();
-                                writer.AppendLine($"value = System.Activator.CreateInstance<{fullyQualifiedType}>();");
+                                writer.AppendLine($"value = global::System.Activator.CreateInstance<{fullyQualifiedType}>();");
                                 writer.Unindent();
                                 writer.AppendLine("}");
                                 writer.AppendLine($"var backingField = instance.GetType().GetField(\"<{property.Name}>k__BackingField\", ");
@@ -1826,7 +1826,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             // Build tuple reconstruction with proper casting
             var tupleElements = singleTupleParam.TupleElements.Select((elem, i) =>
-                $"TUnit.Core.Helpers.CastHelper.Cast<{elem.Type.GloballyQualified()}>(args[{i}])").ToList();
+                $"global::TUnit.Core.Helpers.CastHelper.Cast<{elem.Type.GloballyQualified()}>(args[{i}])").ToList();
             var tupleConstruction = $"({string.Join(", ", tupleElements)})";
 
             var methodCallReconstructed = hasCancellationToken
@@ -1840,8 +1840,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.Indent();
             writer.AppendLine("// Rare case: tuple is wrapped as a single argument");
             var methodCallDirect = hasCancellationToken
-                ? $"instance.{methodName}(TUnit.Core.Helpers.CastHelper.Cast<{singleTupleParam.GloballyQualified()}>(args[0]), cancellationToken)"
-                : $"instance.{methodName}(TUnit.Core.Helpers.CastHelper.Cast<{singleTupleParam.GloballyQualified()}>(args[0]))";
+                ? $"instance.{methodName}(global::TUnit.Core.Helpers.CastHelper.Cast<{singleTupleParam.GloballyQualified()}>(args[0]), cancellationToken)"
+                : $"instance.{methodName}(global::TUnit.Core.Helpers.CastHelper.Cast<{singleTupleParam.GloballyQualified()}>(args[0]))";
             GenerateReturnHandling(writer, methodCallDirect, returnPattern);
             writer.Unindent();
             writer.AppendLine("}");
@@ -1891,7 +1891,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 // Add CancellationToken if present
                 if (hasCancellationToken)
                 {
-                    argsToPass.Add("context?.Execution.CancellationToken ?? System.Threading.CancellationToken.None");
+                    argsToPass.Add("context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None");
                 }
 
                 var typedMethodCall = $"instance.{methodName}({string.Join(", ", argsToPass)})";

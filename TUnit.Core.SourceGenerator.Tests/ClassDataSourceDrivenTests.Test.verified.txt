@@ -71,7 +71,7 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Cl
                     {
                         case 1:
                             {
-                                instance.DataSource_Class(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>(args[0]));
+                                instance.DataSource_Class(global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>(args[0]));
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:
@@ -192,7 +192,7 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Cl
                     {
                         case 1:
                             {
-                                instance.DataSource_Class_Generic(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>(args[0]));
+                                instance.DataSource_Class_Generic(global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>(args[0]));
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:
@@ -313,7 +313,7 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
                     {
                         case 1:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.IsInitialized_With_1_ClassDataSource(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(args[0])));
+                                return new global::System.Threading.Tasks.ValueTask(instance.IsInitialized_With_1_ClassDataSource(global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(args[0])));
                             }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -440,7 +440,7 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
                     {
                         case 2:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.IsInitialized_With_2_ClassDataSources(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(args[1])));
+                                return new global::System.Threading.Tasks.ValueTask(instance.IsInitialized_With_2_ClassDataSources(global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(args[1])));
                             }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
@@ -574,7 +574,7 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
                     {
                         case 3:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.IsInitialized_With_3_ClassDataSources(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(args[2])));
+                                return new global::System.Threading.Tasks.ValueTask(instance.IsInitialized_With_3_ClassDataSources(global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(args[2])));
                             }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
@@ -715,7 +715,7 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
                     {
                         case 4:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.IsInitialized_With_4_ClassDataSources(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(args[3])));
+                                return new global::System.Threading.Tasks.ValueTask(instance.IsInitialized_With_4_ClassDataSources(global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(args[3])));
                             }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 4 arguments, but got {args.Length}");
@@ -863,7 +863,7 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
                     {
                         case 5:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.IsInitialized_With_5_ClassDataSources(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(args[4])));
+                                return new global::System.Threading.Tasks.ValueTask(instance.IsInitialized_With_5_ClassDataSources(global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.InitializableClass>(args[4])));
                             }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 5 arguments, but got {args.Length}");
