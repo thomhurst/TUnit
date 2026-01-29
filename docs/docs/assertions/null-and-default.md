@@ -269,7 +269,7 @@ public async Task Validate_All_Required_Fields()
 {
     var user = CreateUser();
 
-    await using (Assert.Multiple())
+    using (Assert.Multiple())
     {
         await Assert.That(user).IsNotNull();
         await Assert.That(user.FirstName).IsNotNull();

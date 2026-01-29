@@ -422,7 +422,7 @@ public async Task Custom_Exception_With_Properties()
 [Test]
 public async Task Multiple_Exception_Scenarios()
 {
-    await using (Assert.Multiple())
+    using (Assert.Multiple())
     {
         await Assert.That(() => int.Parse("abc"))
             .Throws<FormatException>();

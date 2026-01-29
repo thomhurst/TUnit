@@ -117,7 +117,7 @@ await Assert.That(statusCode)
 Group related assertions together so all failures are reported:
 
 ```csharp
-await using (Assert.Multiple())
+using (Assert.Multiple())
 {
     await Assert.That(user.FirstName).IsEqualTo("John");
     await Assert.That(user.LastName).IsEqualTo("Doe");
@@ -364,7 +364,7 @@ await Assert.That(user.Age).IsGreaterThan(18);
   <TabItem value="good" label="✅ Good - Assert.Multiple">
 
 ```csharp
-await using (Assert.Multiple())
+using (Assert.Multiple())
 {
     await Assert.That(user.FirstName).IsEqualTo("John");
     await Assert.That(user.LastName).IsEqualTo("Doe");
