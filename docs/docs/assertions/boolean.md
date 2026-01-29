@@ -248,7 +248,7 @@ public async Task Complex_Expression_Broken_Down()
 {
     var user = GetUser();
 
-    await using (Assert.Multiple())
+    using (Assert.Multiple())
     {
         await Assert.That(user.IsActive).IsTrue();
         await Assert.That(user.IsBanned).IsFalse();
@@ -445,7 +445,7 @@ public async Task Multiple_Validations()
         Age = 25
     };
 
-    await using (Assert.Multiple())
+    using (Assert.Multiple())
     {
         await Assert.That(form.IsEmailValid()).IsTrue();
         await Assert.That(form.IsPasswordStrong()).IsTrue();

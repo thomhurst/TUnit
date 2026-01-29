@@ -893,7 +893,7 @@ public async Task Validate_Each_Item()
 {
     var users = GetUsers();
 
-    await using (Assert.Multiple())
+    using (Assert.Multiple())
     {
         foreach (var user in users)
         {

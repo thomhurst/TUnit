@@ -182,7 +182,7 @@ public async Task Configuration_Has_Required_Keys()
 {
     var config = LoadConfiguration();
 
-    await using (Assert.Multiple())
+    using (Assert.Multiple())
     {
         await Assert.That(config).ContainsKey("DatabaseConnection");
         await Assert.That(config).ContainsKey("ApiKey");
@@ -492,7 +492,7 @@ public async Task All_Required_Keys_Present_Multiple()
     var config = LoadConfiguration();
     var requiredKeys = new[] { "ApiKey", "Database", "Environment" };
 
-    await using (Assert.Multiple())
+    using (Assert.Multiple())
     {
         foreach (var key in requiredKeys)
         {
