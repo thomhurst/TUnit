@@ -6,9 +6,11 @@ using TUnit.Core.SourceGenerator.Extensions;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 
-public class AttributeWriter
+public class AttributeWriter(Compilation compilation)
 {
-    public static void WriteAttributes(ICodeWriter sourceCodeWriter, Compilation compilation,
+    private readonly Dictionary<AttributeData, string> _attributeObjectInitializerCache = new();
+
+    public void WriteAttributes(ICodeWriter sourceCodeWriter,
         ImmutableArray<AttributeData> attributeDatas)
     {
         var attributesToWrite = new List<AttributeData>();
@@ -49,7 +51,7 @@ public class AttributeWriter
         {
             var attributeData = attributesToWrite[index];
 
-            WriteAttribute(sourceCodeWriter, compilation, attributeData);
+            WriteAttribute(sourceCodeWriter, attributeData);
 
             if (index != attributesToWrite.Count - 1)
             {
@@ -58,8 +60,7 @@ public class AttributeWriter
         }
     }
 
-    public static void WriteAttribute(ICodeWriter sourceCodeWriter, Compilation compilation,
-        AttributeData attributeData)
+    public void WriteAttribute(ICodeWriter sourceCodeWriter, AttributeData attributeData)
     {
         if (attributeData.ApplicationSyntaxReference is null)
         {
@@ -70,12 +71,23 @@ public class AttributeWriter
         else
         {
             // For attributes from the current compilation, use the syntax-based approach
-            sourceCodeWriter.Append(GetAttributeObjectInitializer(compilation, attributeData));
+            sourceCodeWriter.Append(GetAttributeObjectInitializer(attributeData));
         }
     }
 
-    public static string GetAttributeObjectInitializer(Compilation compilation,
-        AttributeData attributeData)
+    public string GetAttributeObjectInitializer(AttributeData attributeData)
+    {
+        if (_attributeObjectInitializerCache.TryGetValue(attributeData, out var initializer))
+        {
+            return initializer;
+        }
+
+        initializer = GetAttributeObjectInitializerInner(compilation, attributeData);
+        _attributeObjectInitializerCache.Add(attributeData, initializer);
+        return initializer;
+    }
+
+    private static string GetAttributeObjectInitializerInner(Compilation compilation, AttributeData attributeData)
     {
         var sourceCodeWriter = new CodeWriter("", includeHeader: false);
 
@@ -122,7 +134,6 @@ public class AttributeWriter
 
         return sourceCodeWriter.ToString();
     }
-
 
     private static string FormatConstructorArgument(Compilation compilation, AttributeArgumentSyntax attributeArgumentSyntax)
     {

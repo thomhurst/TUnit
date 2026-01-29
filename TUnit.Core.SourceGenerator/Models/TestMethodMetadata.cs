@@ -1,8 +1,12 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 
 namespace TUnit.Core.SourceGenerator.Models;
+
+public record CompilationContext(CSharpCompilation Compilation, AttributeWriter AttributeWriter);
 
 /// <summary>
 /// Contains all the metadata about a test method discovered by the source generator.
@@ -15,6 +19,7 @@ public class TestMethodMetadata : IEquatable<TestMethodMetadata>
     public required int LineNumber { get; init; }
     public required AttributeData TestAttribute { get; init; }
     public GeneratorAttributeSyntaxContext? Context { get; init; }
+    public required CompilationContext CompilationContext { get; init; }
     public required MethodDeclarationSyntax? MethodSyntax { get; init; }
     public bool IsGenericType { get; init; }
     public bool IsGenericMethod { get; init; }
@@ -23,7 +28,7 @@ public class TestMethodMetadata : IEquatable<TestMethodMetadata>
     /// All attributes on the method, stored for later use during data combination generation
     /// </summary>
     public ImmutableArray<AttributeData> MethodAttributes { get; init; } = ImmutableArray<AttributeData>.Empty;
-    
+
     /// <summary>
     /// The inheritance depth of this test method.
     /// 0 = method is declared directly in the test class

@@ -28,11 +28,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 return !string.Equals(value, "false", StringComparison.OrdinalIgnoreCase);
             });
 
+        var compilationContext = context
+            .CompilationProvider
+            .Select(static (c, _) =>
+                new CompilationContext(
+                    (CSharpCompilation)c,
+                    new AttributeWriter(c)
+                    ));
+
         var testMethodsProvider = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "TUnit.Core.TestAttribute",
                 predicate: static (node, _) => node is MethodDeclarationSyntax,
-                transform: static (ctx, _) => GetTestMethodMetadata(ctx))
+                transform: static (ctx, _) => ctx)
+            .Combine(compilationContext)
+            .Select(static (ctx, _) => GetTestMethodMetadata(ctx.Left, ctx.Right))
             .Where(static m => m is not null)
             .Combine(enabledProvider);
 
@@ -40,7 +50,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             .ForAttributeWithMetadataName(
                 "TUnit.Core.InheritsTestsAttribute",
                 predicate: static (node, _) => node is ClassDeclarationSyntax,
-                transform: static (ctx, _) => GetInheritsTestsClassMetadata(ctx))
+                transform: static (ctx, _) => ctx)
+            .Combine(compilationContext)
+            .Select(static (ctx, _) => GetInheritsTestsClassMetadata(ctx.Left, ctx.Right))
             .Where(static m => m is not null)
             .Combine(enabledProvider);
 
@@ -67,7 +79,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             });
     }
 
-    private static InheritsTestsClassMetadata? GetInheritsTestsClassMetadata(GeneratorAttributeSyntaxContext context)
+    private static InheritsTestsClassMetadata? GetInheritsTestsClassMetadata(GeneratorAttributeSyntaxContext context, CompilationContext compilationContext)
     {
         var classSyntax = (ClassDeclarationSyntax)context.TargetNode;
 
@@ -85,11 +97,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             TypeSymbol = classSymbol,
             ClassSyntax = classSyntax,
-            Context = context
+            Context = context,
+            CompilationContext = compilationContext
         };
     }
 
-    private static TestMethodMetadata? GetTestMethodMetadata(GeneratorAttributeSyntaxContext context)
+    private static TestMethodMetadata? GetTestMethodMetadata(GeneratorAttributeSyntaxContext context, CompilationContext compilationContext)
     {
         var methodSyntax = (MethodDeclarationSyntax)context.TargetNode;
         var methodSymbol = context.TargetSymbol as IMethodSymbol;
@@ -121,6 +134,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             LineNumber = lineNumber,
             TestAttribute = context.Attributes.First(),
             Context = context,
+            CompilationContext = compilationContext,
             MethodSyntax = methodSyntax,
             IsGenericType = isGenericType,
             IsGenericMethod = isGenericMethod,
@@ -186,6 +200,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 LineNumber = lineNumber,
                 TestAttribute = testAttribute,
                 Context = classInfo.Context, // Use class context to access Compilation
+                CompilationContext = classInfo.CompilationContext,
                 MethodSyntax = null, // No syntax for inherited methods
                 IsGenericType = typeForMetadata.IsGenericType,
                 IsGenericMethod = (concreteMethod ?? method).IsGenericMethod,
@@ -458,7 +473,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             .Concat(testMethod.TypeSymbol.ContainingAssembly.GetAttributes())
             .ToImmutableArray();
 
-        AttributeWriter.WriteAttributes(writer, compilation, attributes);
+        testMethod.CompilationContext.AttributeWriter.WriteAttributes(writer, attributes);
 
         writer.Unindent();
         writer.AppendLine("],");
@@ -504,7 +519,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             .Concat(testMethod.TypeSymbol.ContainingAssembly.GetAttributes())
             .ToImmutableArray();
 
-        AttributeWriter.WriteAttributes(writer, compilation, attributes);
+        testMethod.CompilationContext.AttributeWriter.WriteAttributes(writer, attributes);
 
         writer.Unindent();
         writer.AppendLine("],");
@@ -564,7 +579,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             foreach (var attr in methodDataSources)
             {
-                GenerateDataSourceAttribute(writer, compilation, attr, methodSymbol, typeSymbol);
+                GenerateDataSourceAttribute(writer, testMethod.CompilationContext, attr, methodSymbol, typeSymbol);
             }
 
             writer.Unindent();
@@ -584,7 +599,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             foreach (var attr in classDataSources)
             {
-                GenerateDataSourceAttribute(writer, compilation, attr, methodSymbol, typeSymbol);
+                GenerateDataSourceAttribute(writer, testMethod.CompilationContext, attr, methodSymbol, typeSymbol);
             }
 
             writer.Unindent();
@@ -595,7 +610,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         GeneratePropertyDataSources(writer, testMethod);
     }
 
-    private static void GenerateDataSourceAttribute(CodeWriter writer, Compilation compilation, AttributeData attr, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
+    private static void GenerateDataSourceAttribute(CodeWriter writer, CompilationContext compilationContext, AttributeData attr, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
     {
         var attrClass = attr.AttributeClass;
         if (attrClass == null)
@@ -613,18 +628,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             try
             {
-                GenerateArgumentsAttributeWithParameterTypes(writer, compilation, attr, methodSymbol);
+                GenerateArgumentsAttributeWithParameterTypes(writer, compilationContext.Compilation, attr, methodSymbol);
             }
             catch
             {
                 // Fall back to default behavior if parameter type matching fails
-                AttributeWriter.WriteAttribute(writer, compilation, attr);
+                compilationContext.AttributeWriter.WriteAttribute(writer, attr);
                 writer.AppendLine(",");
             }
         }
         else
         {
-            AttributeWriter.WriteAttribute(writer, compilation, attr);
+            compilationContext.AttributeWriter.WriteAttribute(writer, attr);
             writer.AppendLine(",");
         }
     }
@@ -1535,7 +1550,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                             writer.AppendLine($"PropertyName = \"{property.Name}\",");
                             writer.AppendLine($"PropertyType = typeof({property.Type.GloballyQualified()}),");
                             writer.Append("DataSource = ");
-                            GenerateDataSourceAttribute(writer, compilation, dataSourceAttr, testMethod.MethodSymbol, typeSymbol);
+                            GenerateDataSourceAttribute(writer, testMethod.CompilationContext, dataSourceAttr, testMethod.MethodSymbol, typeSymbol);
                             writer.Unindent();
                             writer.AppendLine("},");
                         }
@@ -4805,7 +4820,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("AttributeFactory = static () =>");
         writer.AppendLine("[");
         writer.Indent();
-        AttributeWriter.WriteAttributes(writer, compilation, filteredAttributes.ToImmutableArray());
+        testMethod.CompilationContext.AttributeWriter.WriteAttributes(writer, filteredAttributes.ToImmutableArray());
         writer.Unindent();
         writer.AppendLine("],");
 
@@ -4866,7 +4881,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             foreach (var attr in methodDataSources)
             {
-                GenerateDataSourceAttribute(writer, compilation, attr, methodSymbol, concreteTypeSymbol);
+                GenerateDataSourceAttribute(writer, testMethod.CompilationContext, attr, methodSymbol, concreteTypeSymbol);
             }
 
             writer.Unindent();
@@ -4886,7 +4901,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             foreach (var attr in classDataSources)
             {
-                GenerateDataSourceAttribute(writer, compilation, attr, methodSymbol, concreteTypeSymbol);
+                GenerateDataSourceAttribute(writer, testMethod.CompilationContext, attr, methodSymbol, concreteTypeSymbol);
             }
 
             writer.Unindent();
@@ -5133,7 +5148,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             .Concat(testMethod.TypeSymbol.ContainingAssembly.GetAttributes())
             .ToImmutableArray();
 
-        AttributeWriter.WriteAttributes(writer, compilation, attributes);
+        testMethod.CompilationContext.AttributeWriter.WriteAttributes(writer, attributes);
 
         writer.Unindent();
         writer.AppendLine("],");
@@ -5154,7 +5169,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("DataSources = new global::TUnit.Core.IDataSourceAttribute[]");
             writer.AppendLine("{");
             writer.Indent();
-            GenerateDataSourceAttribute(writer, compilation, methodDataSourceAttribute, testMethod.MethodSymbol, testMethod.TypeSymbol);
+            GenerateDataSourceAttribute(writer, testMethod.CompilationContext, methodDataSourceAttribute, testMethod.MethodSymbol, testMethod.TypeSymbol);
             writer.Unindent();
             writer.AppendLine("},");
         }
@@ -5169,7 +5184,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]");
             writer.AppendLine("{");
             writer.Indent();
-            GenerateDataSourceAttribute(writer, compilation, classDataSourceAttribute, testMethod.MethodSymbol, testMethod.TypeSymbol);
+            GenerateDataSourceAttribute(writer, testMethod.CompilationContext, classDataSourceAttribute, testMethod.MethodSymbol, testMethod.TypeSymbol);
             writer.Unindent();
             writer.AppendLine("},");
         }
@@ -5282,5 +5297,6 @@ public class InheritsTestsClassMetadata
     public required INamedTypeSymbol TypeSymbol { get; init; }
     public required ClassDeclarationSyntax ClassSyntax { get; init; }
     public GeneratorAttributeSyntaxContext Context { get; init; }
+    public required CompilationContext CompilationContext { get; init; }
 }
 
