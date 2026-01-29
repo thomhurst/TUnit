@@ -957,7 +957,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         try
         {
             // Use the centralized factory for generic type discovery
-            var metadata = DataGeneratorMetadataCreator.CreateForGenericTypeDiscovery(dataSource, methodMetadata);
+            // Provide an instance factory for reflection mode that can handle property injection
+            var metadata = DataGeneratorMetadataCreator.CreateForGenericTypeDiscovery(
+                dataSource,
+                methodMetadata,
+                ReflectionInstanceFactory.CreateInstanceWithPropertyInjectionAsync);
 
             // Get data rows from the source
             await foreach (var rowFactory in dataSource.GetDataRowsAsync(metadata))

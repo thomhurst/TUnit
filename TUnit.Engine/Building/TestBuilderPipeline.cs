@@ -564,4 +564,12 @@ internal sealed class TestBuilderPipeline
         await _eventReceiverOrchestrator.InvokeTestDiscoveryEventReceiversAsync(context, discoveredContext, CancellationToken.None).ConfigureAwait(false);
     }
 
+    /// <summary>
+    /// Invokes event receivers after dependencies have been resolved.
+    /// Delegates to TestBuilder.InvokePostResolutionEventsAsync.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
+    public ValueTask InvokePostResolutionEventsAsync(AbstractExecutableTest test)
+        => _testBuilder.InvokePostResolutionEventsAsync(test);
+
 }

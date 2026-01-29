@@ -42,4 +42,15 @@ internal interface ITestBuilder
     IAsyncEnumerable<AbstractExecutableTest> BuildTestsStreamingAsync(
         TestMetadata metadata,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Invokes event receivers after dependencies have been resolved.
+    /// This populates TestContext._dependencies and fires ITestRegisteredEventReceiver
+    /// and ITestDiscoveryEventReceiver events.
+    /// </summary>
+    /// <param name="test">The test with resolved dependencies</param>
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+#endif
+    ValueTask InvokePostResolutionEventsAsync(AbstractExecutableTest test);
 }

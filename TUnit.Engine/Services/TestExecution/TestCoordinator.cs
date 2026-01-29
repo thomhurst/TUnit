@@ -24,7 +24,6 @@ internal sealed class TestCoordinator : ITestCoordinator
     private readonly ObjectTracker _objectTracker;
     private readonly TUnitFrameworkLogger _logger;
     private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
-    private readonly HashSetPool _hashSetPool;
 
     public TestCoordinator(
         TestExecutionGuard executionGuard,
@@ -35,8 +34,7 @@ internal sealed class TestCoordinator : ITestCoordinator
         TestInitializer testInitializer,
         ObjectTracker objectTracker,
         TUnitFrameworkLogger logger,
-        EventReceiverOrchestrator eventReceiverOrchestrator,
-        HashSetPool hashSetPool)
+        EventReceiverOrchestrator eventReceiverOrchestrator)
     {
         _executionGuard = executionGuard;
         _stateManager = stateManager;
@@ -47,7 +45,6 @@ internal sealed class TestCoordinator : ITestCoordinator
         _objectTracker = objectTracker;
         _logger = logger;
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
-        _hashSetPool = hashSetPool;
     }
 
     public async ValueTask ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
@@ -84,22 +81,8 @@ internal sealed class TestCoordinator : ITestCoordinator
 
             TestContext.Current = test.Context;
 
-            var allDependencies = _hashSetPool.Rent<TestDetails>();
-            var visited = _hashSetPool.Rent<AbstractExecutableTest>();
-            try
-            {
-                CollectAllDependencies(test, allDependencies, visited);
-
-                foreach (var dependency in allDependencies)
-                {
-                    test.Context._dependencies.Add(dependency);
-                }
-            }
-            finally
-            {
-                _hashSetPool.Return(allDependencies);
-                _hashSetPool.Return(visited);
-            }
+            // Note: test.Context._dependencies is already populated during discovery
+            // in TestBuilder.InvokePostResolutionEventsAsync after dependencies are resolved
 
             // Ensure TestSession hooks run before creating test instances
             await _testExecutor.EnsureTestSessionHooksExecutedAsync(cancellationToken).ConfigureAwait(false);
@@ -256,22 +239,6 @@ internal sealed class TestCoordinator : ITestCoordinator
                     throw new ArgumentOutOfRangeException();
             }
 
-        }
-    }
-
-    private void CollectAllDependencies(AbstractExecutableTest test, HashSet<TestDetails> collected, HashSet<AbstractExecutableTest> visited)
-    {
-        if (!visited.Add(test))
-        {
-            return;
-        }
-
-        foreach (var dependency in test.Dependencies)
-        {
-            if (collected.Add(dependency.Test.Context.Metadata.TestDetails))
-            {
-                CollectAllDependencies(dependency.Test, collected, visited);
-            }
         }
     }
 

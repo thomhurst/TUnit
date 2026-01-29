@@ -444,6 +444,7 @@ namespace
     {
         public DataGeneratorMetadata() { }
         public required object?[]? ClassInstanceArguments { get; init; }
+        public <, .<object?>>? InstanceFactory { get; init; }
         public required .IMemberMetadata[] MembersToGenerate { get; init; }
         public required .TestBuilderContextAccessor TestBuilderContext { get; init; }
         public required object? TestClassInstance { get; init; }
