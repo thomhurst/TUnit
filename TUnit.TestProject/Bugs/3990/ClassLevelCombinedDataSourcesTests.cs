@@ -52,6 +52,7 @@ public class ClassLevelDataProviders
 
 [EngineTest(ExpectedResult.Pass)]
 [CombinedDataSources]
+[DynamicCodeOnly]
 public class ClassLevelCombinedDataSources_WithStaticMethodDataSource(
     [MethodDataSource<ClassLevelDataProviders>(nameof(ClassLevelDataProviders.GetNumbers))] int number,
     [MethodDataSource<ClassLevelDataProviders>(nameof(ClassLevelDataProviders.GetStrings))] string text)
@@ -97,6 +98,7 @@ public class ClassLevelCombinedDataSources_MixedWithMethodLevel(
 
 [EngineTest(ExpectedResult.Pass)]
 [CombinedDataSources]
+[DynamicCodeOnly]
 public class ClassLevelCombinedDataSources_MixedDataSourceTypes(
     [Arguments(1, 2)] int number,
     [MethodDataSource<ClassLevelDataProviders>(nameof(ClassLevelDataProviders.GetColors))] string color)
