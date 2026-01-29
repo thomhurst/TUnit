@@ -1652,6 +1652,8 @@ public class NUnitTwoPhaseAnalyzer : MigrationAnalyzer
     {
         // [Platform(Include = "Win")] -> [RunOn(OS.Windows)]
         // [Platform(Exclude = "Linux")] -> [ExcludeOn(OS.Linux)]
+        // Note: Unsupported platforms like "Mono", "Net", "NetCore" have no direct TUnit equivalent
+        // and will be left unconverted (returning null)
         if (node.ArgumentList?.Arguments.Count > 0)
         {
             foreach (var arg in node.ArgumentList.Arguments)
@@ -1662,11 +1664,21 @@ public class NUnitTwoPhaseAnalyzer : MigrationAnalyzer
                 if (nameText == "Include")
                 {
                     var os = MapPlatformToOS(valueText);
+                    if (os == null)
+                    {
+                        // Unsupported platform - don't convert
+                        return (null, null);
+                    }
                     return ("RunOn", $"({os})");
                 }
                 if (nameText == "Exclude")
                 {
                     var os = MapPlatformToOS(valueText);
+                    if (os == null)
+                    {
+                        // Unsupported platform - don't convert
+                        return (null, null);
+                    }
                     return ("ExcludeOn", $"({os})");
                 }
             }
@@ -1674,28 +1686,38 @@ public class NUnitTwoPhaseAnalyzer : MigrationAnalyzer
         return (null, null);
     }
 
-    private static string MapPlatformToOS(string platform)
+    private static string? MapPlatformToOS(string platform)
     {
         // Handle multiple platforms separated by comma: "Win,Linux" -> "OS.Windows | OS.Linux"
         if (platform.Contains(","))
         {
-            var platforms = platform.Split(',')
-                .Select(p => MapSinglePlatformToOS(p.Trim()))
-                .ToArray();
-            return string.Join(" | ", platforms);
+            var mappedPlatforms = new List<string>();
+            foreach (var p in platform.Split(','))
+            {
+                var mapped = MapSinglePlatformToOS(p.Trim());
+                if (mapped == null)
+                {
+                    // If any platform is unsupported, return null
+                    return null;
+                }
+                mappedPlatforms.Add(mapped);
+            }
+            return string.Join(" | ", mappedPlatforms);
         }
 
         return MapSinglePlatformToOS(platform);
     }
 
-    private static string MapSinglePlatformToOS(string platform)
+    private static string? MapSinglePlatformToOS(string platform)
     {
         return platform.ToLowerInvariant() switch
         {
             "win" or "windows" or "win32" or "win64" => "OS.Windows",
             "linux" or "unix" => "OS.Linux",
-            "macos" or "osx" or "macosx" => "OS.MacOS",
-            _ => $"OS.{platform}"
+            "macos" or "osx" or "macosx" => "OS.MacOs",
+            "browser" or "wasm" or "webassembly" => "OS.Browser",
+            // Unsupported platforms - return null to indicate no direct equivalent
+            _ => null
         };
     }
 

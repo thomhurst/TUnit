@@ -5294,6 +5294,172 @@ public class NUnitMigrationAnalyzerTests
         );
     }
 
+    [Test]
+    public async Task NUnit_Platform_MacOS_Converted_To_RunOn_With_Correct_Casing()
+    {
+        // Issue #4489: MacOS should be converted to OS.MacOs (not OS.MacOS)
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                public class MyClass
+                {
+                    {|#0:[Test]|}
+                    [Platform(Include = "MacOS")]
+                    public void TestMethod()
+                    {
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+
+                public class MyClass
+                {
+                    [Test]
+                    [RunOn(OS.MacOs)]
+                    public void TestMethod()
+                    {
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_Platform_OSX_Converted_To_RunOn_MacOs()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                public class MyClass
+                {
+                    {|#0:[Test]|}
+                    [Platform(Include = "OSX")]
+                    public void TestMethod()
+                    {
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+
+                public class MyClass
+                {
+                    [Test]
+                    [RunOn(OS.MacOs)]
+                    public void TestMethod()
+                    {
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_Platform_Unsupported_Mono_Not_Converted()
+    {
+        // Issue #4489: Unsupported platforms like Mono should NOT be converted
+        // because TUnit doesn't have an equivalent OS value
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                public class MyClass
+                {
+                    {|#0:[Test]|}
+                    [Platform(Exclude = "Mono")]
+                    public void TestMethod()
+                    {
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+
+                public class MyClass
+                {
+                    [Test]
+                    [Platform(Exclude = "Mono")]
+                    public void TestMethod()
+                    {
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_Platform_Unsupported_Net_Not_Converted()
+    {
+        // Issue #4489: Unsupported platforms like Net should NOT be converted
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                public class MyClass
+                {
+                    {|#0:[Test]|}
+                    [Platform(Exclude = "Net")]
+                    public void TestMethod()
+                    {
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+
+                public class MyClass
+                {
+                    [Test]
+                    [Platform(Exclude = "Net")]
+                    public void TestMethod()
+                    {
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_Platform_Mixed_Supported_And_Unsupported_Not_Converted()
+    {
+        // Issue #4489: If any platform in a comma-separated list is unsupported,
+        // the whole attribute should not be converted
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                public class MyClass
+                {
+                    {|#0:[Test]|}
+                    [Platform(Include = "Win,Mono")]
+                    public void TestMethod()
+                    {
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+
+                public class MyClass
+                {
+                    [Test]
+                    [Platform(Include = "Win,Mono")]
+                    public void TestMethod()
+                    {
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
     private static void ConfigureNUnitTest(Verifier.Test test)
     {
         test.TestState.AdditionalReferences.Add(typeof(NUnit.Framework.TestAttribute).Assembly);
