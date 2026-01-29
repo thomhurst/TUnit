@@ -27,6 +27,7 @@ public class ClassLevelCombinedDataSources_WithStaticArguments(
 
 #region Test 2: Class-level CombinedDataSources with static MethodDataSource
 
+[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods)]
 public class ClassLevelDataProviders
 {
     public static IEnumerable<int> GetNumbers()
