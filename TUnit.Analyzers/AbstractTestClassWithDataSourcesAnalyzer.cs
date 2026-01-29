@@ -83,10 +83,12 @@ public class AbstractTestClassWithDataSourcesAnalyzer : ConcurrentDiagnosticAnal
         if (hasDataSourceAttributes)
         {
             // Check if there are any concrete classes that inherit from this abstract class with [InheritsTests]
-            var hasInheritingClasses = HasConcreteInheritingClassesWithInheritsTests(context, namedTypeSymbol);
+            var hasInheritingClassesWithAttribute = HasConcreteInheritingClassesWithInheritsTests(context, namedTypeSymbol, out var hasAnyConcreteSubclasses);
 
-            // Only report the diagnostic if no inheriting classes are found
-            if (!hasInheritingClasses)
+            // Only report the diagnostic if:
+            // 1. There ARE concrete subclasses in the source (if none exist, this is likely a library class meant to be subclassed externally)
+            // 2. None of those subclasses have [InheritsTests]
+            if (hasAnyConcreteSubclasses && !hasInheritingClassesWithAttribute)
             {
                 context.ReportDiagnostic(Diagnostic.Create(
                     Rules.AbstractTestClassWithDataSources,
@@ -97,8 +99,10 @@ public class AbstractTestClassWithDataSourcesAnalyzer : ConcurrentDiagnosticAnal
         }
     }
 
-    private static bool HasConcreteInheritingClassesWithInheritsTests(SymbolAnalysisContext context, INamedTypeSymbol abstractClass)
+    private static bool HasConcreteInheritingClassesWithInheritsTests(SymbolAnalysisContext context, INamedTypeSymbol abstractClass, out bool hasAnyConcreteSubclasses)
     {
+        hasAnyConcreteSubclasses = false;
+
         // Get all named types in the compilation (including referenced assemblies)
         var allTypes = GetAllNamedTypes(context.Compilation.GlobalNamespace);
 
@@ -111,12 +115,21 @@ public class AbstractTestClassWithDataSourcesAnalyzer : ConcurrentDiagnosticAnal
                 continue;
             }
 
+            // Only consider types that are defined in source (not from referenced assemblies)
+            if (!type.Locations.Any(l => l.IsInSource))
+            {
+                continue;
+            }
+
             // Check if this type inherits from our abstract class
             var baseType = type.BaseType;
             while (baseType != null)
             {
                 if (SymbolEqualityComparer.Default.Equals(baseType, abstractClass))
                 {
+                    // Found a concrete subclass in the source
+                    hasAnyConcreteSubclasses = true;
+
                     // Check if this type has [InheritsTests] attribute
                     var hasInheritsTests = type.GetAttributes().Any(attr =>
                         attr.AttributeClass?.GloballyQualified() ==

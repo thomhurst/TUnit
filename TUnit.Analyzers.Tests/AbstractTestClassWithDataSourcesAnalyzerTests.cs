@@ -65,15 +65,17 @@ public class AbstractTestClassWithDataSourcesAnalyzerTests
     }
 
     [Test]
-    public async Task Warning_For_Abstract_Class_With_MethodDataSource()
+    public async Task No_Warning_For_Abstract_Class_With_MethodDataSource_When_No_Subclasses()
     {
+        // No warning when there are no subclasses - the abstract class may be in a library
+        // meant to be subclassed by consuming assemblies
         await Verifier
             .VerifyAnalyzerAsync(
                 """
                 using TUnit.Core;
                 using System.Collections.Generic;
 
-                public abstract class {|#0:AbstractTestBase|}
+                public abstract class AbstractTestBase
                 {
                     public static IEnumerable<int> TestData() => new[] { 1, 2, 3 };
 
@@ -83,24 +85,22 @@ public class AbstractTestClassWithDataSourcesAnalyzerTests
                     {
                     }
                 }
-                """,
-
-                Verifier.Diagnostic(Rules.AbstractTestClassWithDataSources)
-                    .WithLocation(0)
-                    .WithArguments("AbstractTestBase")
+                """
             );
     }
 
     [Test]
-    public async Task Warning_For_Abstract_Class_With_InstanceMethodDataSource()
+    public async Task No_Warning_For_Abstract_Class_With_InstanceMethodDataSource_When_No_Subclasses()
     {
+        // No warning when there are no subclasses - the abstract class may be in a library
+        // meant to be subclassed by consuming assemblies
         await Verifier
             .VerifyAnalyzerAsync(
                 """
                 using TUnit.Core;
                 using System.Collections.Generic;
 
-                public abstract class {|#0:ServiceCollectionTest|}
+                public abstract class ServiceCollectionTest
                 {
                     public IEnumerable<int> SingletonServices() => new[] { 1, 2, 3 };
 
@@ -110,23 +110,21 @@ public class AbstractTestClassWithDataSourcesAnalyzerTests
                     {
                     }
                 }
-                """,
-
-                Verifier.Diagnostic(Rules.AbstractTestClassWithDataSources)
-                    .WithLocation(0)
-                    .WithArguments("ServiceCollectionTest")
+                """
             );
     }
 
     [Test]
-    public async Task Warning_For_Abstract_Class_With_Arguments()
+    public async Task No_Warning_For_Abstract_Class_With_Arguments_When_No_Subclasses()
     {
+        // No warning when there are no subclasses - the abstract class may be in a library
+        // meant to be subclassed by consuming assemblies
         await Verifier
             .VerifyAnalyzerAsync(
                 """
                 using TUnit.Core;
 
-                public abstract class {|#0:AbstractTestBase|}
+                public abstract class AbstractTestBase
                 {
                     [Test]
                     [Arguments(1)]
@@ -135,17 +133,15 @@ public class AbstractTestClassWithDataSourcesAnalyzerTests
                     {
                     }
                 }
-                """,
-
-                Verifier.Diagnostic(Rules.AbstractTestClassWithDataSources)
-                    .WithLocation(0)
-                    .WithArguments("AbstractTestBase")
+                """
             );
     }
 
     [Test]
-    public async Task Warning_For_Abstract_Class_With_ClassDataSource()
+    public async Task No_Warning_For_Abstract_Class_With_ClassDataSource_When_No_Subclasses()
     {
+        // No warning when there are no subclasses - the abstract class may be in a library
+        // meant to be subclassed by consuming assemblies
         await Verifier
             .VerifyAnalyzerAsync(
                 """
@@ -155,7 +151,7 @@ public class AbstractTestClassWithDataSourcesAnalyzerTests
                 {
                 }
 
-                public abstract class {|#0:AbstractTestBase|}
+                public abstract class AbstractTestBase
                 {
                     [Test]
                     [ClassDataSource<TestData>]
@@ -163,11 +159,7 @@ public class AbstractTestClassWithDataSourcesAnalyzerTests
                     {
                     }
                 }
-                """,
-
-                Verifier.Diagnostic(Rules.AbstractTestClassWithDataSources)
-                    .WithLocation(0)
-                    .WithArguments("AbstractTestBase")
+                """
             );
     }
 
