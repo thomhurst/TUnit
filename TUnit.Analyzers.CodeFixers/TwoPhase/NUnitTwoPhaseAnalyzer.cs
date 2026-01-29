@@ -109,7 +109,13 @@ public class NUnitTwoPhaseAnalyzer : MigrationAnalyzer
             if (symbolInfo.Symbol is IMethodSymbol methodSymbol)
             {
                 var containingNamespace = methodSymbol.ContainingType?.ContainingNamespace?.ToDisplayString();
-                return containingNamespace?.StartsWith("NUnit.Framework") == true;
+                // Only return false if we positively know it's NOT NUnit
+                if (containingNamespace != null && !containingNamespace.StartsWith("NUnit.Framework"))
+                {
+                    return false;
+                }
+                // Namespace matches or is null (resolution failed) - assume it's NUnit
+                return true;
             }
         }
         catch

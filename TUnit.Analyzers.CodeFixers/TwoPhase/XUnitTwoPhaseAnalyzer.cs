@@ -103,12 +103,28 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
                 if (XUnitAssertMethods.Contains(methodName))
                 {
                     // Semantic check to confirm it's xUnit
-                    var symbolInfo = SemanticModel.GetSymbolInfo(invocation);
-                    if (symbolInfo.Symbol is IMethodSymbol methodSymbol)
+                    try
                     {
-                        var containingType = methodSymbol.ContainingType?.ToDisplayString();
-                        return containingType?.StartsWith("Xunit.Assert") == true;
+                        var symbolInfo = SemanticModel.GetSymbolInfo(invocation);
+                        if (symbolInfo.Symbol is IMethodSymbol methodSymbol)
+                        {
+                            var containingType = methodSymbol.ContainingType?.ToDisplayString();
+                            // Only return false if we positively know it's NOT xUnit
+                            if (containingType != null && !containingType.StartsWith("Xunit.Assert"))
+                            {
+                                return false;
+                            }
+                            // Namespace matches or is null (resolution failed) - assume it's xUnit
+                            return true;
+                        }
                     }
+                    catch
+                    {
+                        // Fall back to syntax-based detection
+                    }
+
+                    // Semantic check failed or symbol not found - assume it's xUnit if syntax matches
+                    return true;
                 }
             }
         }
