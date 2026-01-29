@@ -108,6 +108,10 @@ internal sealed class TestDiscoveryService : IDataProducer
             _dependencyResolver.TryResolveDependencies(test);
         }
 
+        // Populate TestContext._dependencies for ALL tests before After(TestDiscovery) hooks run.
+        // This ensures hooks can access dependency information on any TestContext (including focused tests).
+        _testBuilderPipeline.PopulateAllDependencies(allTests);
+
         // Add tests to context and run After(TestDiscovery) hooks before event receivers
         // This marks the end of the discovery phase, before registration begins
         contextProvider.TestDiscoveryContext.AddTests(allTests.Select(static t => t.Context));
@@ -190,6 +194,10 @@ internal sealed class TestDiscoveryService : IDataProducer
         {
             _dependencyResolver.TryResolveDependencies(test);
         }
+
+        // Populate TestContext._dependencies for ALL tests before After(TestDiscovery) hooks run.
+        // This ensures hooks can access dependency information on any TestContext (including focused tests).
+        _testBuilderPipeline.PopulateAllDependencies(allTests);
 
         // Add tests to context and run After(TestDiscovery) hooks before event receivers
         // This marks the end of the discovery phase, before registration begins

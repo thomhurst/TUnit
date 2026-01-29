@@ -53,4 +53,12 @@ internal interface ITestBuilder
     [RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
 #endif
     ValueTask InvokePostResolutionEventsAsync(AbstractExecutableTest test);
+
+    /// <summary>
+    /// Populates TestContext._dependencies from resolved test.Dependencies without invoking event receivers.
+    /// This should be called for all tests before After(TestDiscovery) hooks run, so that hooks
+    /// can access dependency information on any TestContext.
+    /// </summary>
+    /// <param name="test">The test with resolved dependencies</param>
+    void PopulateDependenciesOnly(AbstractExecutableTest test);
 }
