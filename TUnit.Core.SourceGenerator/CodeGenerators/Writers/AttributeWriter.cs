@@ -74,57 +74,6 @@ public class AttributeWriter
         }
     }
 
-    public static void WriteAttributeMetadata(ICodeWriter sourceCodeWriter, Compilation compilation,
-        AttributeData attributeData, string targetElement, string? targetMemberName, string? targetTypeName, bool includeClassMetadata = false)
-    {
-        sourceCodeWriter.Append("new global::TUnit.Core.AttributeMetadata");
-        sourceCodeWriter.Append(" { ");
-        sourceCodeWriter.Append($"Instance = {GetAttributeObjectInitializer(compilation, attributeData)}, ");
-        sourceCodeWriter.Append($"TargetElement = global::TUnit.Core.TestAttributeTarget.{targetElement}, ");
-
-        if (targetMemberName != null)
-        {
-            sourceCodeWriter.Append($"TargetMemberName = \"{targetMemberName}\", ");
-        }
-
-        if (targetTypeName != null)
-        {
-            sourceCodeWriter.Append($"TargetType = typeof({targetTypeName}), ");
-        }
-
-        // Add ClassMetadata if requested and not a system attribute
-        if (includeClassMetadata && attributeData.AttributeClass?.ContainingNamespace?.ToDisplayString()?.StartsWith("System") != true)
-        {
-            sourceCodeWriter.Append("ClassMetadata = ");
-            SourceInformationWriter.GenerateClassInformation(sourceCodeWriter, compilation, attributeData.AttributeClass!);
-            sourceCodeWriter.Append(", ");
-        }
-
-        if (attributeData.ConstructorArguments.Length > 0)
-        {
-            sourceCodeWriter.Append("ConstructorArguments = new object?[] { ");
-
-            foreach (var typedConstant in attributeData.ConstructorArguments)
-            {
-                sourceCodeWriter.Append($"{TypedConstantParser.GetRawTypedConstantValue(typedConstant)}, ");
-            }
-
-            sourceCodeWriter.Append("}, ");
-        }
-
-        if (attributeData.NamedArguments.Length > 0)
-        {
-            sourceCodeWriter.Append("NamedArguments = new global::System.Collections.Generic.Dictionary<string, object?>() { ");
-            foreach (var namedArg in attributeData.NamedArguments)
-            {
-                sourceCodeWriter.Append($"[\"{namedArg.Key}\"] = {TypedConstantParser.GetRawTypedConstantValue(namedArg.Value)}, ");
-            }
-            sourceCodeWriter.Append("}, ");
-        }
-
-        sourceCodeWriter.Append("}");
-    }
-
     public static string GetAttributeObjectInitializer(Compilation compilation,
         AttributeData attributeData)
     {
@@ -195,8 +144,8 @@ public class AttributeWriter
         var attributeName = attributeData.AttributeClass!.GloballyQualified();
 
         // Skip if any constructor arguments contain compiler-generated types
-        if (attributeData.ConstructorArguments.Any(arg => 
-            arg is { Kind: TypedConstantKind.Type, Value: ITypeSymbol typeSymbol } && 
+        if (attributeData.ConstructorArguments.Any(arg =>
+            arg is { Kind: TypedConstantKind.Type, Value: ITypeSymbol typeSymbol } &&
             typeSymbol.IsCompilerGeneratedType()))
         {
             return;
