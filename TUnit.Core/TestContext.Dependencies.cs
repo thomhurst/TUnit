@@ -7,6 +7,7 @@ namespace TUnit.Core;
 public partial class TestContext
 {
     internal readonly List<TestDetails> _dependencies = [];
+    internal bool _dependenciesPopulated;
     internal string? ParentTestId { get; set; }
     internal TestRelationship Relationship { get; set; } = TestRelationship.None;
 

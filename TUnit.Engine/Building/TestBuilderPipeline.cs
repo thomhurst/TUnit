@@ -572,4 +572,18 @@ internal sealed class TestBuilderPipeline
     public ValueTask InvokePostResolutionEventsAsync(AbstractExecutableTest test)
         => _testBuilder.InvokePostResolutionEventsAsync(test);
 
+    /// <summary>
+    /// Populates dependencies for all tests without invoking event receivers.
+    /// This should be called before After(TestDiscovery) hooks run, so that hooks
+    /// can access dependency information on any TestContext.
+    /// </summary>
+    /// <param name="tests">All tests that have had their dependencies resolved</param>
+    public void PopulateAllDependencies(IEnumerable<AbstractExecutableTest> tests)
+    {
+        foreach (var test in tests)
+        {
+            _testBuilder.PopulateDependenciesOnly(test);
+        }
+    }
+
 }

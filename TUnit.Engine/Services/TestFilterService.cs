@@ -97,6 +97,10 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
             }
         }
 
+        // Clear the cached display name after registration events
+        // This ensures that ArgumentDisplayFormatterAttribute and similar attributes
+        // have a chance to register their formatters before the display name is finalized
+        test.Context.InvalidateDisplayNameCache();
     }
 
     public async Task RegisterTestsAsync(IEnumerable<AbstractExecutableTest> tests)

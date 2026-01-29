@@ -957,27 +957,29 @@ internal sealed class TestBuilder : ITestBuilder
         TestContext.Current = context;
 
         // Populate TestContext._dependencies from resolved test.Dependencies
-        // This makes dependencies available to event receivers
-        PopulateDependencies(test, context._dependencies);
+        // This makes dependencies available to event receivers and hooks
+        PopulateDependenciesOnly(test);
 
-        // Invoke discovery event receivers first (discovery phase)
+        // Invoke discovery event receivers (for all tests during discovery phase)
+        // Note: ITestRegisteredEventReceiver.OnTestRegistered is NOT called here.
+        // Registration events fire later in TestFilterService.RegisterTest for filtered tests only.
+        // This ensures OnTestRegistered is called exactly once per test that will actually run.
         await InvokeDiscoveryEventReceiversAsync(context);
+    }
 
-        // Invoke test registered event receivers (registration phase)
-        try
+    /// <inheritdoc />
+    public void PopulateDependenciesOnly(AbstractExecutableTest test)
+    {
+        var context = test.Context;
+
+        // Skip if already populated to make this idempotent
+        if (context._dependenciesPopulated)
         {
-            await InvokeTestRegisteredReceiversAsync(context);
-        }
-        catch (Exception ex)
-        {
-            // Registration logic failed - mark the test as failed
-            test.SetResult(TestState.Failed, ex);
+            return;
         }
 
-        // Clear the cached display name after registration events
-        // This ensures that ArgumentDisplayFormatterAttribute and similar attributes
-        // have a chance to register their formatters before the display name is finalized
-        context.InvalidateDisplayNameCache();
+        PopulateDependencies(test, context._dependencies);
+        context._dependenciesPopulated = true;
     }
 
     private static void PopulateDependencies(AbstractExecutableTest test, List<TestDetails> dependencies)
@@ -1098,28 +1100,6 @@ internal sealed class TestBuilder : ITestBuilder
 
         // Invoke the global test argument registration service to register shared instances
         await _testArgumentRegistrationService.RegisterTestArgumentsAsync(context);
-    }
-
-    /// <summary>
-    /// Invokes ITestRegisteredEventReceiver receivers.
-    /// Called after dependencies are resolved so receivers can access dependency information.
-    /// </summary>
-#if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
-#endif
-    private async Task InvokeTestRegisteredReceiversAsync(TestContext context)
-    {
-        var registeredContext = new TestRegisteredContext(context)
-        {
-            // InternalDiscoveredTest is set in RegisterTestArgumentsAsync during building
-            DiscoveredTest = context.InternalDiscoveredTest!
-        };
-
-        // Use pre-computed receivers (already filtered, sorted, and scoped-attribute filtered)
-        foreach (var receiver in context.GetTestRegisteredReceivers())
-        {
-            await receiver.OnTestRegistered(registeredContext);
-        }
     }
 
 #if NET6_0_OR_GREATER
