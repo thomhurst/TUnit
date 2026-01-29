@@ -318,21 +318,21 @@ internal sealed class TUnit_TestProject_MatrixTests_MatrixTest_Enum__int_TestEnu
                         Name = "i",
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Enum", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::TUnit.TestProject.TestEnum), typeof(global::TUnit.TestProject.TestEnum?) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Enum", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(TestEnum), typeof(TestEnum?) }, null)!.GetParameters()[0]
                     },
-                    new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.TestEnum))
+                    new global::TUnit.Core.ParameterMetadata(typeof(TestEnum))
                     {
                         Name = "testEnum",
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TestEnum)),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(TestEnum)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Enum", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::TUnit.TestProject.TestEnum), typeof(global::TUnit.TestProject.TestEnum?) }, null)!.GetParameters()[1]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Enum", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(TestEnum), typeof(TestEnum?) }, null)!.GetParameters()[1]
                     },
-                    new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.TestEnum?))
+                    new global::TUnit.Core.ParameterMetadata(typeof(TestEnum?))
                     {
                         Name = "testEnum2",
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TestEnum?)),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(TestEnum?)),
                         IsNullable = true,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Enum", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::TUnit.TestProject.TestEnum), typeof(global::TUnit.TestProject.TestEnum?) }, null)!.GetParameters()[2]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Enum", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(TestEnum), typeof(TestEnum?) }, null)!.GetParameters()[2]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MatrixTests", static () => 
@@ -360,7 +360,7 @@ internal sealed class TUnit_TestProject_MatrixTests_MatrixTest_Enum__int_TestEnu
                     {
                         case 3:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.MatrixTest_Enum(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.TestEnum>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.TestEnum?>(args[2])));
+                                return new global::System.Threading.Tasks.ValueTask(instance.MatrixTest_Enum(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<TestEnum>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<TestEnum?>(args[2])));
                             }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
@@ -701,19 +701,19 @@ internal sealed class TUnit_TestProject_MatrixTests_ImplicitConversion__OneOf_Te
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
-                    new global::TUnit.Core.ParameterMetadata(typeof(OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>))
+                    new global::TUnit.Core.ParameterMetadata(typeof(OneOf<TestEnum, TestEnum2>))
                     {
                         Name = "enum",
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>)),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(OneOf<TestEnum, TestEnum2>)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("ImplicitConversion", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>), typeof(bool) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("ImplicitConversion", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(OneOf<TestEnum, TestEnum2>), typeof(bool) }, null)!.GetParameters()[0]
                     },
                     new global::TUnit.Core.ParameterMetadata(typeof(bool))
                     {
                         Name = "boolean",
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("ImplicitConversion", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>), typeof(bool) }, null)!.GetParameters()[1]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("ImplicitConversion", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(OneOf<TestEnum, TestEnum2>), typeof(bool) }, null)!.GetParameters()[1]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MatrixTests", static () => 
@@ -741,7 +741,7 @@ internal sealed class TUnit_TestProject_MatrixTests_ImplicitConversion__OneOf_Te
                     {
                         case 2:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.ImplicitConversion(global::TUnit.Core.Helpers.CastHelper.Cast<OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<bool>(args[1])));
+                                return new global::System.Threading.Tasks.ValueTask(instance.ImplicitConversion(global::TUnit.Core.Helpers.CastHelper.Cast<OneOf<TestEnum, TestEnum2>>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<bool>(args[1])));
                             }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");

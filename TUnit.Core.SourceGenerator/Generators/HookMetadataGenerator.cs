@@ -681,7 +681,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            writer.AppendLine("methodArgs = System.Array.Empty<object>();");
+            writer.AppendLine("methodArgs = global::System.Array.Empty<object>();");
         }
 
         writer.AppendLine($"var result = method.Invoke({(hook.IsStatic ? "null" : "instance")}, methodArgs);");

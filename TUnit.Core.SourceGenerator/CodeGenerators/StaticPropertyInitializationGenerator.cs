@@ -190,8 +190,8 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         writer.AppendLine($"Namespace = \"{propertyData.Property.ContainingType.ContainingNamespace?.ToDisplayString() ?? string.Empty}\",");
         writer.AppendLine($"TypeInfo = new global::TUnit.Core.ConcreteType(typeof({typeName})),");
         writer.AppendLine($"Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd(\"{propertyData.Property.ContainingType.ContainingAssembly.Name}\", () => new global::TUnit.Core.AssemblyMetadata {{ Name = \"{propertyData.Property.ContainingType.ContainingAssembly.Name}\" }}),");
-        writer.AppendLine("Properties = System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),");
-        writer.AppendLine("Parameters = System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),");
+        writer.AppendLine("Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),");
+        writer.AppendLine("Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),");
         writer.AppendLine("Parent = null");
         writer.Unindent();
         writer.AppendLine("};");

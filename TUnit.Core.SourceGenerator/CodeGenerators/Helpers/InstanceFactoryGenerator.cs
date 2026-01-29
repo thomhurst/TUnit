@@ -176,7 +176,7 @@ public static class InstanceFactoryGenerator
                 var argAccess = $"args[{i}]";
                 
                 // Use CastHelper which now has AOT converter registry support
-                writer.Append($"TUnit.Core.Helpers.CastHelper.Cast<{parameterType.GloballyQualified()}>({argAccess})");
+                writer.Append($"global::TUnit.Core.Helpers.CastHelper.Cast<{parameterType.GloballyQualified()}>({argAccess})");
             }
 
             writer.Append(")");

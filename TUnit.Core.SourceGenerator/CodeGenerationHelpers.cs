@@ -20,7 +20,7 @@ internal static class CodeGenerationHelpers
     {
         if (method.Parameters.Length == 0)
         {
-            return "System.Array.Empty<global::TUnit.Core.ParameterMetadata>()";
+            return "global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>()";
         }
 
         using var writer = new CodeWriter("", includeHeader: false);
@@ -344,7 +344,7 @@ internal static class CodeGenerationHelpers
 
         if (properties.Count == 0)
         {
-            return "System.Array.Empty<global::TUnit.Core.PropertyMetadata>()";
+            return "global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>()";
         }
 
         using var writer = new CodeWriter("", includeHeader: false);
@@ -384,7 +384,7 @@ internal static class CodeGenerationHelpers
 
         if (dataSourceAttributes.Count == 0)
         {
-            return "System.Array.Empty<global::TUnit.Core.TestDataSource>()";
+            return "global::System.Array.Empty<global::TUnit.Core.TestDataSource>()";
         }
 
         using var writer = new CodeWriter("", includeHeader: false);
@@ -420,7 +420,7 @@ internal static class CodeGenerationHelpers
 
         if (dataSourceAttributes.Count == 0)
         {
-            return "System.Array.Empty<global::TUnit.Core.TestDataSource>()";
+            return "global::System.Array.Empty<global::TUnit.Core.TestDataSource>()";
         }
 
         using var writer = new CodeWriter("", includeHeader: false);
@@ -515,7 +515,7 @@ internal static class CodeGenerationHelpers
     {
         if (method.Parameters.Length == 0)
         {
-            return "System.Type.EmptyTypes";
+            return "global::System.Type.EmptyTypes";
         }
 
         if (method.Parameters.Any(p => ContainsTypeParameter(p.Type)))
@@ -527,7 +527,7 @@ internal static class CodeGenerationHelpers
             .Select(p => $"typeof({p.Type.GloballyQualified()})")
             .ToArray();
 
-        return $"new System.Type[] {{ {string.Join(", ", parameterTypes)} }}";
+        return $"new global::System.Type[] {{ {string.Join(", ", parameterTypes)} }}";
     }
 
 
@@ -574,7 +574,7 @@ internal static class CodeGenerationHelpers
 
         if (allAttributes.Count == 0)
         {
-            return "new System.Collections.Generic.Dictionary<System.Type, System.Collections.Generic.IReadOnlyList<System.Attribute>>().AsReadOnly()";
+            return "new global::System.Collections.Generic.Dictionary<global::System.Type, global::System.Collections.Generic.IReadOnlyList<global::System.Attribute>>().AsReadOnly()";
         }
 
         // Group attributes by type
@@ -585,7 +585,7 @@ internal static class CodeGenerationHelpers
         using var writer = new CodeWriter("", includeHeader: false);
 
         // Generate dictionary initializer
-        writer.Append("new System.Collections.Generic.Dictionary<System.Type, System.Collections.Generic.IReadOnlyList<System.Attribute>>()");
+        writer.Append("new global::System.Collections.Generic.Dictionary<global::System.Type, global::System.Collections.Generic.IReadOnlyList<global::System.Attribute>>()");
         writer.AppendLine();
         writer.AppendLine("{");
         writer.Indent();
@@ -595,7 +595,7 @@ internal static class CodeGenerationHelpers
             var typeString = group.Key;
             var attrs = group.ToList();
 
-            writer.Append($"[typeof({typeString})] = new System.Attribute[] {{ ");
+            writer.Append($"[typeof({typeString})] = new global::System.Attribute[] {{ ");
 
             var attributeStrings = new List<string>();
             foreach (var attr in attrs)

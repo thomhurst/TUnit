@@ -174,7 +174,7 @@ internal sealed class TUnit_TestProject_Bugs__1889_DerivedTest_Test2__bool_TestS
                     {
                         case 1:
                             {
-                                instance.Test2(TUnit.Core.Helpers.CastHelper.Cast<bool>(args[0]));
+                                instance.Test2(global::TUnit.Core.Helpers.CastHelper.Cast<bool>(args[0]));
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:
@@ -297,7 +297,7 @@ internal sealed class TUnit_TestProject_Bugs__1889_DerivedTest_Test3__bool_TestS
                     {
                         case 1:
                             {
-                                instance.Test3(TUnit.Core.Helpers.CastHelper.Cast<bool>(args[0]));
+                                instance.Test3(global::TUnit.Core.Helpers.CastHelper.Cast<bool>(args[0]));
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:
