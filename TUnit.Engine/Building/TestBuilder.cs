@@ -957,10 +957,13 @@ internal sealed class TestBuilder : ITestBuilder
         TestContext.Current = context;
 
         // Populate TestContext._dependencies from resolved test.Dependencies
-        // This makes dependencies available to ITestRegisteredEventReceiver
+        // This makes dependencies available to event receivers
         PopulateDependencies(test, context._dependencies);
 
-        // Invoke test registered event receivers
+        // Invoke discovery event receivers first (discovery phase)
+        await InvokeDiscoveryEventReceiversAsync(context);
+
+        // Invoke test registered event receivers (registration phase)
         try
         {
             await InvokeTestRegisteredReceiversAsync(context);
@@ -971,10 +974,7 @@ internal sealed class TestBuilder : ITestBuilder
             test.SetResult(TestState.Failed, ex);
         }
 
-        // Invoke discovery event receivers
-        await InvokeDiscoveryEventReceiversAsync(context);
-
-        // Clear the cached display name after discovery events
+        // Clear the cached display name after registration events
         // This ensures that ArgumentDisplayFormatterAttribute and similar attributes
         // have a chance to register their formatters before the display name is finalized
         context.InvalidateDisplayNameCache();

@@ -108,8 +108,14 @@ internal sealed class TestDiscoveryService : IDataProducer
             _dependencyResolver.TryResolveDependencies(test);
         }
 
-        // Now that dependencies are resolved, invoke event receivers
-        // This ensures ITestRegisteredEventReceiver can access dependency information
+        // Add tests to context and run After(TestDiscovery) hooks before event receivers
+        // This marks the end of the discovery phase, before registration begins
+        contextProvider.TestDiscoveryContext.AddTests(allTests.Select(static t => t.Context));
+        await _testExecutor.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
+        contextProvider.TestDiscoveryContext.RestoreExecutionContext();
+
+        // Now invoke event receivers (registration phase)
+        // ITestRegisteredEventReceiver can access dependency information and any state set by After(TestDiscovery) hooks
         foreach (var test in allTests)
         {
             await _testBuilderPipeline.InvokePostResolutionEventsAsync(test).ConfigureAwait(false);
@@ -137,11 +143,6 @@ internal sealed class TestDiscoveryService : IDataProducer
 
             filteredTests = [.. testsToInclude];
         }
-
-        contextProvider.TestDiscoveryContext.AddTests(allTests.Select(static t => t.Context));
-
-        await _testExecutor.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
-        contextProvider.TestDiscoveryContext.RestoreExecutionContext();
 
         await _testFilterService.RegisterTestsAsync(filteredTests).ConfigureAwait(false);
 
@@ -190,8 +191,15 @@ internal sealed class TestDiscoveryService : IDataProducer
             _dependencyResolver.TryResolveDependencies(test);
         }
 
-        // Now that dependencies are resolved, invoke event receivers
-        // This ensures ITestRegisteredEventReceiver can access dependency information
+        // Add tests to context and run After(TestDiscovery) hooks before event receivers
+        // This marks the end of the discovery phase, before registration begins
+        var contextProvider = _testExecutor.GetContextProvider();
+        contextProvider.TestDiscoveryContext.AddTests(allTests.Select(static t => t.Context));
+        await _testExecutor.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
+        contextProvider.TestDiscoveryContext.RestoreExecutionContext();
+
+        // Now invoke event receivers (registration phase)
+        // ITestRegisteredEventReceiver can access dependency information and any state set by After(TestDiscovery) hooks
         foreach (var test in allTests)
         {
             await _testBuilderPipeline.InvokePostResolutionEventsAsync(test).ConfigureAwait(false);
