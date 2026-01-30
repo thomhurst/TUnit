@@ -122,14 +122,21 @@ public bool MyProperty(int value)
 
 ## Custom Generators
 
-You can provide custom `Arbitrary` implementations for generating test data:
+You can provide custom `Arbitrary` implementations for generating test data. FsCheck 3.x uses `ArbMap.Default` to access default arbitraries:
 
 ```csharp
+using FsCheck;
+using FsCheck.Fluent;
+
 public class PositiveIntArbitrary
 {
     public static Arbitrary<int> PositiveInt()
     {
-        return Arb.Default.Int32().Filter(x => x > 0);
+        // Use ArbMap.Default to get a generator for a type,
+        // then filter with Where() and convert to Arbitrary
+        return ArbMap.Default.GeneratorFor<int>()
+            .Where(x => x > 0)
+            .ToArbitrary();
     }
 }
 
@@ -137,6 +144,44 @@ public class PositiveIntArbitrary
 public bool PositiveNumbersArePositive(int value)
 {
     return value > 0;
+}
+```
+
+### Alternative: Using Gen.Choose
+
+For simple ranges, use `Gen.Choose` directly:
+
+```csharp
+public class PositiveIntArbitrary
+{
+    public static Arbitrary<int> PositiveInt()
+    {
+        // Generate integers in a specific range
+        return Gen.Choose(1, int.MaxValue).ToArbitrary();
+    }
+}
+```
+
+### Custom types
+
+For custom types, compose generators using LINQ:
+
+```csharp
+public class Person
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+}
+
+public class PersonArbitrary
+{
+    public static Arbitrary<Person> Person()
+    {
+        var gen = from name in ArbMap.Default.GeneratorFor<string>()
+                  from age in Gen.Choose(0, 120)
+                  select new Person { Name = name, Age = age };
+        return gen.ToArbitrary();
+    }
 }
 ```
 
