@@ -4,6 +4,19 @@ using TUnit.FsCheck;
 
 namespace TUnit.Example.FsCheck.TestProject;
 
+/// <summary>
+/// Custom arbitrary that generates positive integers only.
+/// </summary>
+public class PositiveIntArbitrary
+{
+    public static Arbitrary<int> PositiveInt()
+    {
+        return ArbMap.Default.GeneratorFor<int>()
+            .Where(x => x > 0)
+            .ToArbitrary();
+    }
+}
+
 public class PropertyTests
 {
     [Test, FsCheckProperty]
@@ -88,4 +101,9 @@ public class PropertyTests
         });
     }
 
+    [Test, FsCheckProperty(Arbitrary = new[] { typeof(PositiveIntArbitrary) })]
+    public bool PositiveNumbersArePositive(int value)
+    {
+        return value > 0;
+    }
 }
