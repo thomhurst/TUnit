@@ -13,30 +13,30 @@ public static class SourceInformationWriter
         var parent = namedTypeSymbol.ContainingType;
         var parentExpression = parent != null ? MetadataGenerationHelper.GenerateClassMetadataGetOrAdd(parent, null, sourceCodeWriter.IndentLevel) : null;
         var classMetadata = MetadataGenerationHelper.GenerateClassMetadataGetOrAdd(namedTypeSymbol, parentExpression, sourceCodeWriter.IndentLevel);
-        
+
         // Handle multi-line class metadata similar to method metadata
         var lines = classMetadata.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
-        
+
         if (lines.Length > 0)
         {
             sourceCodeWriter.Append(lines[0].TrimStart());
-            
+
             if (lines.Length > 1)
             {
                 var secondLine = lines[1];
                 var baseIndentSpaces = secondLine.Length - secondLine.TrimStart().Length;
-                
+
                 for (var i = 1; i < lines.Length; i++)
                 {
                     if (!string.IsNullOrWhiteSpace(lines[i]) || i < lines.Length - 1)
                     {
                         sourceCodeWriter.AppendLine();
-                        
+
                         var line = lines[i];
                         var lineIndentSpaces = line.Length - line.TrimStart().Length;
                         var relativeIndent = Math.Max(0, lineIndentSpaces - baseIndentSpaces);
                         var extraIndentLevels = relativeIndent / 4;
-                        
+
                         var trimmedLine = line.TrimStart();
                         for (var j = 0; j < extraIndentLevels; j++)
                         {
@@ -47,14 +47,7 @@ public static class SourceInformationWriter
                 }
             }
         }
-        
-        sourceCodeWriter.Append(",");
-    }
 
-    private static void GenerateAssemblyInformation(ICodeWriter sourceCodeWriter, Compilation compilation, IAssemblySymbol assembly)
-    {
-        var assemblyMetadata = MetadataGenerationHelper.GenerateAssemblyMetadataGetOrAdd(assembly);
-        sourceCodeWriter.Append(assemblyMetadata);
         sourceCodeWriter.Append(",");
     }
 

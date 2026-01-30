@@ -365,44 +365,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         GenerateModuleInitializer(writer, testMethod, uniqueClassName);
     }
 
-    private static ITypeSymbol ReplaceTypeParametersWithConcreteTypes(
-        ITypeSymbol type,
-        ImmutableArray<ITypeParameterSymbol> typeParameters,
-        ImmutableArray<ITypeSymbol> typeArguments)
-    {
-        if (type is ITypeParameterSymbol typeParam)
-        {
-            // Find the index of this type parameter
-            var index = -1;
-            for (var j = 0; j < typeParameters.Length; j++)
-            {
-                if (typeParameters[j].Name == typeParam.Name)
-                {
-                    index = j;
-                    break;
-                }
-            }
-
-            if (index >= 0 && index < typeArguments.Length)
-            {
-                return typeArguments[index];
-            }
-            return type;
-        }
-
-        if (type is INamedTypeSymbol { IsGenericType: true } namedType)
-        {
-            // Replace type arguments in generic types like IEnumerable<T>, Func<T1, T2>, etc.
-            var newTypeArgs = namedType.TypeArguments
-                .Select(ta => ReplaceTypeParametersWithConcreteTypes(ta, typeParameters, typeArguments))
-                .ToImmutableArray();
-
-            return namedType.ConstructedFrom.Construct(newTypeArgs.ToArray());
-        }
-
-        return type;
-    }
-
     private static void GenerateTestMetadataInstance(CodeWriter writer, TestMethodMetadata testMethod, string className, string combinationGuid)
     {
         var methodName = testMethod.MethodSymbol.Name;

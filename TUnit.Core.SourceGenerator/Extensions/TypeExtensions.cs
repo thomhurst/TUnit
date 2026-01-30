@@ -145,91 +145,6 @@ public static class TypeExtensions
         return false;
     }
 
-    public static string GloballyQualifiedOrFallback(this ITypeSymbol? typeSymbol, TypedConstant? typedConstant = null)
-    {
-        if (typeSymbol is not null and not ITypeParameterSymbol)
-        {
-            return typeSymbol.GloballyQualified();
-        }
-
-        if (typedConstant is not null)
-        {
-            return TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(typedConstant.Value);
-        }
-
-        return "var";
-    }
-
-    public static bool EnumerableGenericTypeIs(this ITypeSymbol enumerable, GeneratorAttributeSyntaxContext context,
-        ImmutableArray<ITypeSymbol> parameterTypes, [NotNullWhen(true)] out ITypeSymbol? enumerableInnerType)
-    {
-        if (parameterTypes.IsDefaultOrEmpty)
-        {
-            enumerableInnerType = null;
-            return false;
-        }
-
-        var genericEnumerableType =
-            context.SemanticModel.Compilation.GetSpecialType(SpecialType.System_Collections_Generic_IEnumerable_T).ConstructUnboundGenericType();
-
-        if (enumerable is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol && namedTypeSymbol
-                .ConstructUnboundGenericType().Equals(genericEnumerableType, SymbolEqualityComparer.Default))
-        {
-            enumerableInnerType = namedTypeSymbol.TypeArguments.First();
-        }
-        else
-        {
-            var enumerableInterface = enumerable.AllInterfaces.FirstOrDefault(x =>
-                x.IsGenericType && x.ConstructUnboundGenericType()
-                    .Equals(genericEnumerableType, SymbolEqualityComparer.Default));
-
-            enumerableInnerType = enumerableInterface?.TypeArguments.FirstOrDefault();
-        }
-
-        if (enumerableInnerType is null)
-        {
-            enumerableInnerType = null;
-            return false;
-        }
-
-        var firstParameterType = parameterTypes.FirstOrDefault();
-
-        if (context.SemanticModel.Compilation.HasImplicitConversionOrGenericParameter(enumerableInnerType, firstParameterType))
-        {
-            return true;
-        }
-
-        if (!enumerableInnerType.IsTupleType && firstParameterType is INamedTypeSymbol { IsGenericType: true })
-        {
-            return true;
-        }
-
-        if (enumerableInnerType.IsTupleType && enumerableInnerType is INamedTypeSymbol namedInnerType)
-        {
-            var tupleTypes = namedInnerType.TupleElements.Select(x => x.Type).ToImmutableArray();
-
-            for (var index = 0; index < tupleTypes.Length; index++)
-            {
-                var tupleType = tupleTypes.ElementAtOrDefault(index);
-                var parameterType = parameterTypes.ElementAtOrDefault(index);
-
-                if (parameterType?.IsGenericDefinition() == true)
-                {
-                    continue;
-                }
-
-                if (!context.SemanticModel.Compilation.HasImplicitConversionOrGenericParameter(tupleType, parameterType))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
     public static string GloballyQualified(this ISymbol typeSymbol)
     {
         // Handle open generic types where type arguments are type parameters
@@ -252,7 +167,7 @@ public static class TypeExtensions
                 {
                     return "global::System.Nullable<>";
                 }
-                
+
                 // General case for other open generic types
                 var typeBuilder = new StringBuilder(typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix));
                 typeBuilder.Append('<');
@@ -265,7 +180,7 @@ public static class TypeExtensions
 
         return typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
     }
-    
+
     /// <summary>
     /// Determines if a type is compiler-generated (e.g., async state machines, lambda closures).
     /// These types typically contain angle brackets in their names and cannot be represented in source code.
@@ -276,12 +191,12 @@ public static class TypeExtensions
         {
             return false;
         }
-        
+
         // Check the type name directly, not the display string
         // Compiler-generated types have names that start with '<' or contain '<>'
         // Examples: <BaseAsyncTest>d__0, <>c__DisplayClass0_0, <>f__AnonymousType0
         var typeName = typeSymbol.Name;
-        
+
         // Compiler-generated types typically:
         // 1. Start with '<' (like <MethodName>d__0 for async state machines)
         // 2. Contain '<>' (like <>c for compiler-generated classes)

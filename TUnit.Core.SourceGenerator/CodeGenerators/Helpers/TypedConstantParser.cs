@@ -9,41 +9,6 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 public static class TypedConstantParser
 {
     private static readonly TypedConstantFormatter _formatter = new();
-    
-    public static string GetTypedConstantValue(SemanticModel semanticModel,
-        (TypedConstant typedConstant, AttributeArgumentSyntax a) element, ITypeSymbol? parameterType)
-    {
-        // For constant values, use the formatter which handles type conversions properly
-        if (element.typedConstant.Kind == TypedConstantKind.Primitive)
-        {
-            return _formatter.FormatForCode(element.typedConstant, parameterType);
-        }
-
-        var argumentExpression = element.a.Expression;
-
-        var newExpression = argumentExpression.Accept(new FullyQualifiedWithGlobalPrefixRewriter(semanticModel))!;
-
-        if (parameterType?.TypeKind == TypeKind.Enum &&
-            (newExpression.IsKind(SyntaxKind.UnaryMinusExpression) || newExpression.IsKind(SyntaxKind.UnaryPlusExpression)))
-        {
-            return $"({parameterType.GloballyQualified()})({newExpression})";
-        }
-
-        if (parameterType?.SpecialType == SpecialType.System_Decimal)
-        {
-            return $"{newExpression.ToString().TrimEnd('d')}m";
-        }
-
-        if (parameterType is not null
-            && element.typedConstant.Type is not null
-            && semanticModel.Compilation.ClassifyConversion(element.typedConstant.Type, parameterType) is
-            { IsExplicit: true, IsImplicit: false })
-        {
-            return $"({parameterType.GloballyQualified()})({newExpression})";
-        }
-
-        return newExpression.ToString();
-    }
 
     public static string GetFullyQualifiedTypeNameFromTypedConstantValue(TypedConstant typedConstant)
     {
@@ -70,11 +35,6 @@ public static class TypedConstantParser
     {
         // Use the formatter for consistent handling
         return _formatter.FormatForCode(typedConstant, targetType);
-    }
-
-    private static string FormatPrimitive(TypedConstant typedConstant)
-    {
-        return FormatPrimitive(typedConstant.Value);
     }
 
     public static string FormatPrimitive(object? value)

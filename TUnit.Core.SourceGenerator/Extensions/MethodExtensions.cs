@@ -33,47 +33,4 @@ public static class MethodExtensions
     {
         return methodSymbol.GetAttributes().Any(x => x.IsNonGlobalHook(compilation) || x.IsGlobalHook(compilation));
     }
-
-    public static AttributeData[] GetAttributesIncludingClass(this IMethodSymbol methodSymbol, INamedTypeSymbol namedTypeSymbol)
-    {
-        return GetAttributesIncludingClassEnumerable(methodSymbol, namedTypeSymbol).ToArray();
-    }
-
-    public static IEnumerable<AttributeData> GetAttributesIncludingClassEnumerable(this IMethodSymbol methodSymbol, INamedTypeSymbol namedTypeSymbol)
-    {
-        foreach (var attributeData in methodSymbol.GetAttributes())
-        {
-            yield return attributeData;
-        }
-
-        var type = namedTypeSymbol;
-
-        while (type != null)
-        {
-            foreach (var attributeData in type.GetAttributes())
-            {
-                yield return attributeData;
-            }
-
-            type = type.BaseType;
-        }
-    }
-
-    public static IEnumerable<IParameterSymbol> ParametersWithoutTimeoutCancellationToken(
-        this IMethodSymbol methodSymbol)
-    {
-        if (methodSymbol.Parameters.IsDefaultOrEmpty)
-        {
-            return [];
-        }
-
-        if (methodSymbol.Parameters.Last().Type
-                .GloballyQualifiedNonGeneric() ==
-            WellKnownFullyQualifiedClassNames.CancellationToken.WithGlobalPrefix)
-        {
-            return methodSymbol.Parameters.Take(methodSymbol.Parameters.Length - 1);
-        }
-
-        return methodSymbol.Parameters;
-    }
 }

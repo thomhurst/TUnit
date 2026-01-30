@@ -26,24 +26,6 @@ public static class RequiredPropertyHelper
         return requiredProperties;
     }
 
-    /// <summary>
-    /// Gets required properties that have data source attributes
-    /// </summary>
-    public static IEnumerable<IPropertySymbol> GetRequiredPropertiesWithDataSource(ITypeSymbol typeSymbol)
-    {
-        return GetAllRequiredProperties(typeSymbol)
-            .Where(p => HasDataSourceAttribute(p));
-    }
-
-    /// <summary>
-    /// Gets required properties that don't have data source attributes
-    /// </summary>
-    public static IEnumerable<IPropertySymbol> GetRequiredPropertiesWithoutDataSource(ITypeSymbol typeSymbol)
-    {
-        return GetAllRequiredProperties(typeSymbol)
-            .Where(p => !HasDataSourceAttribute(p));
-    }
-
     private static bool HasDataSourceAttribute(IPropertySymbol property)
     {
         return property.GetAttributes().Any(attr =>

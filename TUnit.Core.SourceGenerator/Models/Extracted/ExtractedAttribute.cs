@@ -98,14 +98,6 @@ public sealed class ExtractedAttribute : IEquatable<ExtractedAttribute>
     }
 
     /// <summary>
-    /// Gets a named argument value by name, or null if not found.
-    /// </summary>
-    public TypedConstantModel? GetNamedArgument(string name)
-    {
-        return NamedArguments.FirstOrDefault(a => a.Name == name)?.Value;
-    }
-
-    /// <summary>
     /// Gets a constructor argument by index, or null if index is out of range.
     /// </summary>
     public TypedConstantModel? GetConstructorArgument(int index)
