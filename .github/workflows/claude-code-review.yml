@@ -26,10 +26,12 @@ jobs:
 
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      pull-requests: read
-      issues: read
-      id-token: write
+      contents: write        # Allows pushing fixes/commits
+      pull-requests: write   # Allows posting review comments
+      issues: write          # Allows creating/updating issues
+      checks: write          # Allows creating check runs
+      statuses: write        # Allows updating commit statuses
+      id-token: write        # Required for OIDC authentication
 
     steps:
       - name: Checkout repository
