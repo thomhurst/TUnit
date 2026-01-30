@@ -6,7 +6,7 @@ using TUnit.Core.SourceGenerator.Extensions;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 
-public class AttributeWriter(Compilation compilation)
+public class AttributeWriter(Compilation compilation, TUnit.Core.SourceGenerator.Helpers.WellKnownTypes wellKnownTypes)
 {
     private readonly Dictionary<AttributeData, string> _attributeObjectInitializerCache = new();
 
@@ -30,7 +30,7 @@ public class AttributeWriter(Compilation compilation)
 
                 // Skip framework-specific attributes when targeting older frameworks
                 // We determine this by checking if we can compile the attribute
-                if (ShouldSkipFrameworkSpecificAttribute(compilation, attributeData))
+                if (ShouldSkipFrameworkSpecificAttribute(attributeData))
                 {
                     continue;
                 }
@@ -190,7 +190,7 @@ public class AttributeWriter(Compilation compilation)
     }
 
 
-    private static bool ShouldSkipFrameworkSpecificAttribute(Compilation compilation, AttributeData attributeData)
+    private bool ShouldSkipFrameworkSpecificAttribute(AttributeData attributeData)
     {
         if (attributeData.AttributeClass == null)
         {
@@ -199,14 +199,14 @@ public class AttributeWriter(Compilation compilation)
 
         // Generic approach: Check if the attribute type is actually available in the target compilation
         // This works by seeing if we can resolve the type from the compilation's references
-        var fullyQualifiedName = attributeData.AttributeClass.ToDisplayString();
+        var fullyQualifiedName = wellKnownTypes.GetDisplayString(attributeData.AttributeClass);
 
         // Check if this is a system/runtime attribute that might not exist on all frameworks
         if (fullyQualifiedName.StartsWith("System.") || fullyQualifiedName.StartsWith("Microsoft."))
         {
             // Try to get the type from the compilation
             // If it doesn't exist in the compilation's references, we should skip it
-            var typeSymbol = compilation.GetTypeByMetadataName(fullyQualifiedName);
+            var typeSymbol = wellKnownTypes.TryGet(fullyQualifiedName);
 
             // If the type doesn't exist in the compilation, skip it
             if (typeSymbol == null)
@@ -240,14 +240,14 @@ public class AttributeWriter(Compilation compilation)
                fullyQualifiedName.Contains("NullablePublicOnlyAttribute");
     }
 
-    private static bool ShouldSkipCompilerInternalAttribute(AttributeData attributeData)
+    private bool ShouldSkipCompilerInternalAttribute(AttributeData attributeData)
     {
         if (attributeData.AttributeClass == null)
         {
             return false;
         }
 
-        var fullyQualifiedName = attributeData.AttributeClass.ToDisplayString();
+        var fullyQualifiedName = wellKnownTypes.GetDisplayString(attributeData.AttributeClass);
 
         // Skip compiler-internal attributes that should never be re-emitted
         // System.Runtime.CompilerServices contains compiler-generated and structural metadata attributes
