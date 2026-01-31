@@ -327,20 +327,16 @@ public class InfrastructureGenerator : IIncrementalGenerator
             sourceBuilder.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
             using (sourceBuilder.BeginBlock("public static void Initialize()"))
             {
-                // Force TUnit.Core to load before accessing any of its types
-                // This prevents TypeInitializationException in third-party packages
-                // If this fails, we want to fail fast with a clear error
-                sourceBuilder.AppendLine("_ = typeof(global::TUnit.Core.GlobalContext);");
-                sourceBuilder.AppendLine();
-
-                // Defensive logging - wrap in try-catch for safety
+                // Try to load TUnit.Core early, but don't crash if it's not available
+                // This handles cases like Verify.TUnit build where TUnit.Core DLL might not be present yet
                 sourceBuilder.AppendLine("try");
                 sourceBuilder.AppendLine("{");
                 sourceBuilder.Indent();
+                sourceBuilder.AppendLine("_ = typeof(global::TUnit.Core.GlobalContext);");
                 sourceBuilder.AppendLine($"global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer:{model.AssemblyName}] TUnit infrastructure initializing...\");");
                 sourceBuilder.Unindent();
                 sourceBuilder.AppendLine("}");
-                sourceBuilder.AppendLine("catch { /* Logging failed - continue initialization */ }");
+                sourceBuilder.AppendLine("catch { /* TUnit.Core not available or logging failed - continue initialization */ }");
                 sourceBuilder.AppendLine();
 
                 // Disable reflection scanner for source-generated assemblies
