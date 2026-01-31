@@ -20,7 +20,7 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTestsSharedKeyed_Da
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
-                new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>()
+                new global::TUnit.Core.ClassDataSourceAttribute<SomeAsyncDisposableClass>()
 {Shared = global::TUnit.Core.SharedType.Keyed,Key = "🔑",},
             },
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
@@ -39,12 +39,12 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTestsSharedKeyed_Da
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
-                    new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass))
+                    new global::TUnit.Core.ParameterMetadata(typeof(SomeAsyncDisposableClass))
                     {
                         Name = "value",
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass)),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(SomeAsyncDisposableClass)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed).GetMethod("DataSource_Class", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed).GetMethod("DataSource_Class", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(SomeAsyncDisposableClass) }, null)!.GetParameters()[0]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed", static () => 
@@ -72,7 +72,7 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTestsSharedKeyed_Da
                     {
                         case 1:
                             {
-                                instance.DataSource_Class(global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>(args[0]));
+                                instance.DataSource_Class(global::TUnit.Core.Helpers.CastHelper.Cast<SomeAsyncDisposableClass>(args[0]));
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:
@@ -142,7 +142,7 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTestsSharedKeyed_Da
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
-                new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>()
+                new global::TUnit.Core.ClassDataSourceAttribute<SomeAsyncDisposableClass>()
 {Shared = global::TUnit.Core.SharedType.Keyed,Key = "🔑",},
             },
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
@@ -161,12 +161,12 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTestsSharedKeyed_Da
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
-                    new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass))
+                    new global::TUnit.Core.ParameterMetadata(typeof(SomeAsyncDisposableClass))
                     {
                         Name = "value",
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass)),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(SomeAsyncDisposableClass)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed).GetMethod("DataSource_Class_Generic", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed).GetMethod("DataSource_Class_Generic", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(SomeAsyncDisposableClass) }, null)!.GetParameters()[0]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed", static () => 
@@ -194,7 +194,7 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTestsSharedKeyed_Da
                     {
                         case 1:
                             {
-                                instance.DataSource_Class_Generic(global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>(args[0]));
+                                instance.DataSource_Class_Generic(global::TUnit.Core.Helpers.CastHelper.Cast<SomeAsyncDisposableClass>(args[0]));
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:

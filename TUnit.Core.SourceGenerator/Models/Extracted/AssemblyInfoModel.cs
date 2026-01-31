@@ -7,9 +7,9 @@ namespace TUnit.Core.SourceGenerator.Models.Extracted;
 public sealed class AssemblyInfoModel : IEquatable<AssemblyInfoModel>
 {
     /// <summary>
-    /// Assembly names to pre-load at module initialization.
+    /// Fully qualified type names to reference, which loads their assemblies and triggers hook discovery.
     /// </summary>
-    public required EquatableArray<string> AssembliesToLoad { get; init; }
+    public required EquatableArray<string> TypesToReference { get; init; }
 
     public bool Equals(AssemblyInfoModel? other)
     {
@@ -23,7 +23,7 @@ public sealed class AssemblyInfoModel : IEquatable<AssemblyInfoModel>
             return true;
         }
 
-        return AssembliesToLoad.Equals(other.AssembliesToLoad);
+        return TypesToReference.Equals(other.TypesToReference);
     }
 
     public override bool Equals(object? obj)
@@ -33,6 +33,6 @@ public sealed class AssemblyInfoModel : IEquatable<AssemblyInfoModel>
 
     public override int GetHashCode()
     {
-        return AssembliesToLoad.GetHashCode();
+        return TypesToReference.GetHashCode();
     }
 }
