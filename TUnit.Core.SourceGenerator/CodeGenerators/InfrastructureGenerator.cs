@@ -314,25 +314,40 @@ public class InfrastructureGenerator : IIncrementalGenerator
             sourceBuilder.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
             using (sourceBuilder.BeginBlock("public static void Initialize()"))
             {
+                // Log module initializer start
+                sourceBuilder.AppendLine("global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer] TUnit infrastructure initializing...\");");
+                sourceBuilder.AppendLine();
+
                 // Disable reflection scanner for source-generated assemblies
                 sourceBuilder.AppendLine("global::TUnit.Core.SourceRegistrar.IsEnabled = true;");
+                sourceBuilder.AppendLine("global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer] Source generation mode enabled\");");
+                sourceBuilder.AppendLine();
 
                 // Reference types from assemblies to trigger their module constructors
+                if (model.TypesToReference.Length > 0)
+                {
+                    sourceBuilder.AppendLine($"global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer] Loading {model.TypesToReference.Length} assembly reference(s)...\");");
+                }
+
                 foreach (var typeName in model.TypesToReference)
                 {
                     sourceBuilder.AppendLine("try");
                     sourceBuilder.AppendLine("{");
                     sourceBuilder.Indent();
+                    sourceBuilder.AppendLine($"global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer] Loading assembly containing: {typeName.Replace("\"", "\\\"")}\");");
                     sourceBuilder.AppendLine($"_ = typeof({typeName});");
                     sourceBuilder.Unindent();
                     sourceBuilder.AppendLine("}");
-                    sourceBuilder.AppendLine("catch (global::System.Exception)");
+                    sourceBuilder.AppendLine("catch (global::System.Exception ex)");
                     sourceBuilder.AppendLine("{");
                     sourceBuilder.Indent();
-                    sourceBuilder.AppendLine("// Type reference failed - continue");
+                    sourceBuilder.AppendLine($"global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer] Failed to load {typeName.Replace("\"", "\\\"")}: \" + ex.Message);");
                     sourceBuilder.Unindent();
                     sourceBuilder.AppendLine("}");
                 }
+
+                sourceBuilder.AppendLine();
+                sourceBuilder.AppendLine("global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer] TUnit infrastructure initialized\");");
             }
         }
 
