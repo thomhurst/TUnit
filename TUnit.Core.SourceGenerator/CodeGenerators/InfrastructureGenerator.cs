@@ -93,18 +93,22 @@ public class InfrastructureGenerator : IIncrementalGenerator
             ? FindAssembliesReferencingTUnitCore(visitedAssemblies, tunitCoreAssembly)
             : visitedAssemblies;
 
-        // Extract assembly names as primitives
+        // Extract a public type from each assembly to reference
         foreach (var assembly in assembliesReferencingTUnit)
         {
             if (ShouldLoadAssembly(assembly, compilation))
             {
-                assembliesToLoad.Add(GetAssemblyFullName(assembly));
+                var publicType = GetFirstPublicType(assembly);
+                if (publicType != null)
+                {
+                    assembliesToLoad.Add(publicType);
+                }
             }
         }
 
         return new AssemblyInfoModel
         {
-            AssembliesToLoad = new EquatableArray<string>([.. assembliesToLoad])
+            TypesToReference = new EquatableArray<string>([.. assembliesToLoad])
         };
     }
 
@@ -243,15 +247,30 @@ public class InfrastructureGenerator : IIncrementalGenerator
         return correspondingReference != null;
     }
 
-    private static string GetAssemblyFullName(IAssemblySymbol assemblySymbol)
+    private static string? GetFirstPublicType(IAssemblySymbol assembly)
     {
-        var identity = assemblySymbol.Identity;
-        var culture = string.IsNullOrEmpty(identity.CultureName) ? "neutral" : identity.CultureName;
-        var publicKeyToken = identity.PublicKeyToken.Length > 0
-            ? BitConverter.ToString(identity.PublicKeyToken.ToArray()).Replace("-", "").ToLowerInvariant()
-            : "null";
+        // Find the first accessible public type in the assembly
+        var publicType = GetPublicTypesRecursive(assembly.GlobalNamespace).FirstOrDefault();
+        return publicType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+    }
 
-        return $"{identity.Name}, Version={identity.Version}, Culture={culture}, PublicKeyToken={publicKeyToken}";
+    private static IEnumerable<INamedTypeSymbol> GetPublicTypesRecursive(INamespaceSymbol namespaceSymbol)
+    {
+        foreach (var type in namespaceSymbol.GetTypeMembers())
+        {
+            if (type.DeclaredAccessibility == Accessibility.Public)
+            {
+                yield return type;
+            }
+        }
+
+        foreach (var childNamespace in namespaceSymbol.GetNamespaceMembers())
+        {
+            foreach (var type in GetPublicTypesRecursive(childNamespace))
+            {
+                yield return type;
+            }
+        }
     }
 
     private static void GenerateCode(SourceProductionContext context, AssemblyInfoModel model)
@@ -267,23 +286,22 @@ public class InfrastructureGenerator : IIncrementalGenerator
             sourceBuilder.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
             using (sourceBuilder.BeginBlock("public static void Initialize()"))
             {
-                // Disable reflection scanner - source generation is active
+                // Disable reflection scanner for source-generated assemblies
                 sourceBuilder.AppendLine("global::TUnit.Core.SourceRegistrar.IsEnabled = true;");
 
-                // Pre-load assemblies that may contain hooks or tests
-                // Loading the assemblies triggers their ModuleInitializers, which register hooks
-                foreach (var assemblyName in model.AssembliesToLoad)
+                // Reference types from assemblies to trigger their module constructors
+                foreach (var typeName in model.TypesToReference)
                 {
                     sourceBuilder.AppendLine("try");
                     sourceBuilder.AppendLine("{");
                     sourceBuilder.Indent();
-                    sourceBuilder.AppendLine($"_ = global::System.Reflection.Assembly.Load(\"{assemblyName}\");");
+                    sourceBuilder.AppendLine($"_ = typeof({typeName});");
                     sourceBuilder.Unindent();
                     sourceBuilder.AppendLine("}");
                     sourceBuilder.AppendLine("catch (global::System.Exception)");
                     sourceBuilder.AppendLine("{");
                     sourceBuilder.Indent();
-                    sourceBuilder.AppendLine("// Assembly load failed - continue with remaining assemblies");
+                    sourceBuilder.AppendLine("// Type reference failed - continue");
                     sourceBuilder.Unindent();
                     sourceBuilder.AppendLine("}");
                 }
