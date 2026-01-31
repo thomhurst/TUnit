@@ -22,7 +22,7 @@ internal sealed class TestBuilder : ITestBuilder
     private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
     private readonly IContextProvider _contextProvider;
     private readonly ObjectLifecycleService _objectLifecycleService;
-    private readonly Discovery.IHookDiscoveryService _hookDiscoveryService;
+    private readonly Discovery.IHookRegistrar _hookDiscoveryService;
     private readonly TestArgumentRegistrationService _testArgumentRegistrationService;
     private readonly IMetadataFilterMatcher _filterMatcher;
 
@@ -31,7 +31,7 @@ internal sealed class TestBuilder : ITestBuilder
         EventReceiverOrchestrator eventReceiverOrchestrator,
         IContextProvider contextProvider,
         ObjectLifecycleService objectLifecycleService,
-        Discovery.IHookDiscoveryService hookDiscoveryService,
+        Discovery.IHookRegistrar hookDiscoveryService,
         TestArgumentRegistrationService testArgumentRegistrationService,
         IMetadataFilterMatcher filterMatcher)
     {

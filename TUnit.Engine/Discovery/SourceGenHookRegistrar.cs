@@ -1,11 +1,11 @@
 namespace TUnit.Engine.Discovery;
 
 /// <summary>
-/// Hook discovery service for source generation mode.
-/// In this mode, hooks are discovered at compile time via source generators, so no runtime discovery is needed.
+/// Hook registrar for source generation mode.
+/// In this mode, hooks are registered at compile time via source generators, so no runtime registration is needed.
 /// This implementation is AOT-compatible and does not use reflection.
 /// </summary>
-internal sealed class SourceGenHookDiscoveryService : IHookDiscoveryService
+internal sealed class SourceGenHookRegistrar : IHookRegistrar
 {
     /// <summary>
     /// No-op implementation. Hooks are already registered via source generation.

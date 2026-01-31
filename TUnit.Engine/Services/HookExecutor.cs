@@ -15,12 +15,12 @@ namespace TUnit.Engine.Services;
 /// </summary>
 internal sealed class HookExecutor
 {
-    private readonly IHookCollectionService _hookCollectionService;
+    private readonly IHookDelegateBuilder _hookCollectionService;
     private readonly IContextProvider _contextProvider;
     private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
 
     public HookExecutor(
-        IHookCollectionService hookCollectionService,
+        IHookDelegateBuilder hookCollectionService,
         IContextProvider contextProvider,
         EventReceiverOrchestrator eventReceiverOrchestrator)
     {

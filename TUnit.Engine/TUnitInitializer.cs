@@ -8,7 +8,7 @@ using TUnit.Engine.Exceptions;
 
 namespace TUnit.Engine;
 
-internal class TUnitInitializer(ICommandLineOptions commandLineOptions, IHookDiscoveryService hookDiscoveryService)
+internal class TUnitInitializer(ICommandLineOptions commandLineOptions, IHookRegistrar hookDiscoveryService)
 {
     public void Initialize(ExecuteRequestContext context)
     {

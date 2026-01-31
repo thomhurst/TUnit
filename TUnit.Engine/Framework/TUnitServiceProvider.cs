@@ -48,7 +48,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public TUnitMessageBus MessageBus { get; }
     public EngineCancellationToken CancellationToken { get; }
     public TestFilterService TestFilterService { get; }
-    public IHookCollectionService HookCollectionService { get; }
+    public IHookDelegateBuilder HookDelegateBuilder { get; }
     public TestExecutor TestExecutor { get; }
     public EventReceiverOrchestrator EventReceiverOrchestrator { get; }
     public ITestFinder TestFinder { get; }
@@ -87,15 +87,15 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         // Determine execution mode early to create appropriate services
         var useSourceGeneration = SourceRegistrar.IsEnabled = ExecutionModeHelper.IsSourceGenerationMode(CommandLineOptions);
 
-        // Create and register mode-specific hook discovery service
-        IHookDiscoveryService hookDiscoveryService;
+        // Create and register mode-specific hook registrar service
+        IHookRegistrar hookDiscoveryService;
         if (useSourceGeneration)
         {
-            hookDiscoveryService = Register<IHookDiscoveryService>(new SourceGenHookDiscoveryService());
+            hookDiscoveryService = Register<IHookRegistrar>(new SourceGenHookRegistrar());
         }
         else
         {
-            hookDiscoveryService = Register<IHookDiscoveryService>(new ReflectionBasedHookDiscoveryService());
+            hookDiscoveryService = Register<IHookRegistrar>(new ReflectionHookRegistrar());
         }
 
         Initializer = new TUnitInitializer(CommandLineOptions, hookDiscoveryService);
@@ -161,13 +161,13 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         CancellationToken = Register(new EngineCancellationToken());
 
         EventReceiverOrchestrator = Register(new EventReceiverOrchestrator(Logger));
-        HookCollectionService = Register<IHookCollectionService>(new HookCollectionService(EventReceiverOrchestrator));
+        HookDelegateBuilder = Register<IHookDelegateBuilder>(new HookDelegateBuilder(EventReceiverOrchestrator, Logger));
 
         ParallelLimitLockProvider = Register(new ParallelLimitLockProvider());
 
         ContextProvider = Register(new ContextProvider(this, TestSessionId, Filter?.ToString()));
 
-        var hookExecutor = Register(new HookExecutor(HookCollectionService, ContextProvider, EventReceiverOrchestrator));
+        var hookExecutor = Register(new HookExecutor(HookDelegateBuilder, ContextProvider, EventReceiverOrchestrator));
         var lifecycleCoordinator = Register(new TestLifecycleCoordinator());
         var beforeHookTaskCache = Register(new BeforeHookTaskCache());
         var afterHookPairTracker = Register(new AfterHookPairTracker());

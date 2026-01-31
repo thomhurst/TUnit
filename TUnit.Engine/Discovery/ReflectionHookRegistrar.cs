@@ -3,14 +3,14 @@ using System.Diagnostics.CodeAnalysis;
 namespace TUnit.Engine.Discovery;
 
 /// <summary>
-/// Hook discovery service for reflection mode.
-/// Uses reflection to scan assemblies and discover hooks at runtime.
+/// Hook registrar for reflection mode.
+/// Uses reflection to scan assemblies and register hooks into Sources at runtime.
 /// This implementation requires reflection and is NOT AOT-compatible.
 /// </summary>
 #if NET6_0_OR_GREATER
-[RequiresUnreferencedCode("Hook discovery uses reflection to scan assemblies and types")]
+[RequiresUnreferencedCode("Hook registration uses reflection to scan assemblies and types")]
 #endif
-internal sealed class ReflectionBasedHookDiscoveryService : IHookDiscoveryService
+internal sealed class ReflectionHookRegistrar : IHookRegistrar
 {
     /// <summary>
     /// Discovers hooks using reflection by scanning all loaded assemblies.
