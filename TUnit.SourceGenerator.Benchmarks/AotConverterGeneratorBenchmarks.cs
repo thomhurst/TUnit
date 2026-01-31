@@ -2,13 +2,12 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
 using TUnit.Core.SourceGenerator.Generators;
-using TUnit.SourceGenerator.Benchmarks;
 
 namespace TUnit.SourceGenerator.Benchmarks;
 
 [MemoryDiagnoser]
 [InProcess]
-public class TestMetadataGeneratorBenchmarks
+public class AotConverterGeneratorBenchmarks
 {
     private const string SampleProjectPath = "../TUnit.TestProject/TUnit.TestProject.csproj";
 
@@ -19,7 +18,7 @@ public class TestMetadataGeneratorBenchmarks
     [GlobalSetup(Target = nameof(RunGenerator))]
     public void SetupRunGenerator() =>
         (_sampleCompilation, _sampleDriver, _workspace) =
-        WorkspaceHelper.SetupAsync<TestMetadataGenerator>(SampleProjectPath)
+        WorkspaceHelper.SetupAsync<AotConverterGenerator>(SampleProjectPath)
             .GetAwaiter()
             .GetResult();
 

@@ -11,4 +11,5 @@ if (args is { Length: > 0 })
 else
 {
     BenchmarkRunner.Run<TestMetadataGeneratorBenchmarks>();
+    // BenchmarkRunner.Run<AotConverterGeneratorBenchmarks>();
 }
