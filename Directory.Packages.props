@@ -2,6 +2,10 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
+  <PropertyGroup>
+    <!-- Configure MinVer to recognize tags with 'v' prefix (v1.12.102) -->
+    <MinVerTagPrefix>v</MinVerTagPrefix>
+  </PropertyGroup>
   <ItemGroup>
     <GlobalPackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.102" />
     <GlobalPackageReference Include="MinVer" Version="6.0.0">

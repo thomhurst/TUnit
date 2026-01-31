@@ -1,4 +1,13 @@
 <Project>
     <Import
         Project="$(MSBuildThisFileDirectory)Polyfill.targets" />
+
+    <!-- Set AssemblyVersion to match MinVer calculated version before assembly info generation -->
+    <Target Name="SetAssemblyVersionFromMinVer" BeforeTargets="GetAssemblyVersion;GenerateAssemblyInfo" Condition="'$(MinVerVersion)' != ''">
+        <PropertyGroup>
+            <AssemblyVersion>$(MinVerMajor).$(MinVerMinor).$(MinVerPatch).0</AssemblyVersion>
+            <FileVersion>$(MinVerMajor).$(MinVerMinor).$(MinVerPatch).0</FileVersion>
+        </PropertyGroup>
+        <Message Importance="high" Text="Setting AssemblyVersion to $(AssemblyVersion)" />
+    </Target>
 </Project>
