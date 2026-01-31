@@ -329,22 +329,42 @@ public class InfrastructureGenerator : IIncrementalGenerator
             {
                 // Force TUnit.Core to load before accessing any of its types
                 // This prevents TypeInitializationException in third-party packages
+                // If this fails, we want to fail fast with a clear error
                 sourceBuilder.AppendLine("_ = typeof(global::TUnit.Core.GlobalContext);");
                 sourceBuilder.AppendLine();
 
-                // Log module initializer start (buffered until logger is ready)
+                // Defensive logging - wrap in try-catch for safety
+                sourceBuilder.AppendLine("try");
+                sourceBuilder.AppendLine("{");
+                sourceBuilder.Indent();
                 sourceBuilder.AppendLine($"global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer:{model.AssemblyName}] TUnit infrastructure initializing...\");");
+                sourceBuilder.Unindent();
+                sourceBuilder.AppendLine("}");
+                sourceBuilder.AppendLine("catch { /* Logging failed - continue initialization */ }");
                 sourceBuilder.AppendLine();
 
                 // Disable reflection scanner for source-generated assemblies
                 sourceBuilder.AppendLine("global::TUnit.Core.SourceRegistrar.IsEnabled = true;");
+                sourceBuilder.AppendLine();
+                sourceBuilder.AppendLine("try");
+                sourceBuilder.AppendLine("{");
+                sourceBuilder.Indent();
                 sourceBuilder.AppendLine($"global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer:{model.AssemblyName}] Source generation mode enabled\");");
+                sourceBuilder.Unindent();
+                sourceBuilder.AppendLine("}");
+                sourceBuilder.AppendLine("catch { /* Logging failed - continue initialization */ }");
                 sourceBuilder.AppendLine();
 
                 // Reference types from assemblies to trigger their module constructors
                 if (model.TypesToReference.Length > 0)
                 {
+                    sourceBuilder.AppendLine("try");
+                    sourceBuilder.AppendLine("{");
+                    sourceBuilder.Indent();
                     sourceBuilder.AppendLine($"global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer:{model.AssemblyName}] Loading {model.TypesToReference.Length} assembly reference(s)...\");");
+                    sourceBuilder.Unindent();
+                    sourceBuilder.AppendLine("}");
+                    sourceBuilder.AppendLine("catch { /* Logging failed - continue initialization */ }");
                 }
 
                 for (var i = 0; i < model.TypesToReference.Length; i++)
@@ -353,24 +373,48 @@ public class InfrastructureGenerator : IIncrementalGenerator
                     sourceBuilder.AppendLine("try");
                     sourceBuilder.AppendLine("{");
                     sourceBuilder.Indent();
+                    sourceBuilder.AppendLine("try");
+                    sourceBuilder.AppendLine("{");
+                    sourceBuilder.Indent();
                     sourceBuilder.AppendLine($"global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer:{model.AssemblyName}] Loading assembly containing: {typeName.Replace("\"", "\\\"")}\");");
+                    sourceBuilder.Unindent();
+                    sourceBuilder.AppendLine("}");
+                    sourceBuilder.AppendLine("catch { /* Logging failed - continue initialization */ }");
                     sourceBuilder.AppendLine($"var type_{i} = typeof({typeName});");
                     sourceBuilder.AppendLine("// Force module initializer to complete before proceeding");
                     sourceBuilder.AppendLine("// RunClassConstructor triggers static constructor, which can only run AFTER module initializer completes");
                     sourceBuilder.AppendLine($"global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(type_{i}.TypeHandle);");
+                    sourceBuilder.AppendLine("try");
+                    sourceBuilder.AppendLine("{");
+                    sourceBuilder.Indent();
                     sourceBuilder.AppendLine($"global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer:{model.AssemblyName}] Assembly initialized: {typeName.Replace("\"", "\\\"")}\");");
+                    sourceBuilder.Unindent();
+                    sourceBuilder.AppendLine("}");
+                    sourceBuilder.AppendLine("catch { /* Logging failed - continue initialization */ }");
                     sourceBuilder.Unindent();
                     sourceBuilder.AppendLine("}");
                     sourceBuilder.AppendLine("catch (global::System.Exception ex)");
                     sourceBuilder.AppendLine("{");
                     sourceBuilder.Indent();
+                    sourceBuilder.AppendLine("try");
+                    sourceBuilder.AppendLine("{");
+                    sourceBuilder.Indent();
                     sourceBuilder.AppendLine($"global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer:{model.AssemblyName}] Failed to load {typeName.Replace("\"", "\\\"")}: \" + ex.Message);");
+                    sourceBuilder.Unindent();
+                    sourceBuilder.AppendLine("}");
+                    sourceBuilder.AppendLine("catch { /* Logging failed - continue initialization */ }");
                     sourceBuilder.Unindent();
                     sourceBuilder.AppendLine("}");
                 }
 
                 sourceBuilder.AppendLine();
+                sourceBuilder.AppendLine("try");
+                sourceBuilder.AppendLine("{");
+                sourceBuilder.Indent();
                 sourceBuilder.AppendLine($"global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer:{model.AssemblyName}] TUnit infrastructure initialized\");");
+                sourceBuilder.Unindent();
+                sourceBuilder.AppendLine("}");
+                sourceBuilder.AppendLine("catch { /* Logging failed - continue initialization */ }");
             }
         }
 
