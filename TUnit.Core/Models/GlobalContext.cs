@@ -20,7 +20,22 @@ public class GlobalContext : Context
     {
     }
 
-    internal ILogger GlobalLogger { get; set; } = new NullLogger();
+    private ILogger _globalLogger = new Logging.EarlyBufferLogger();
+
+    internal ILogger GlobalLogger
+    {
+        get => _globalLogger;
+        set
+        {
+            // Flush buffered logs to the new logger
+            if (_globalLogger is Logging.EarlyBufferLogger bufferLogger)
+            {
+                bufferLogger.FlushTo(value);
+            }
+
+            _globalLogger = value;
+        }
+    }
 
     public string? TestFilter { get; internal set; }
     public TextWriter OriginalConsoleOut { get; set; } = Console.Out;

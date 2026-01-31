@@ -314,7 +314,7 @@ public class InfrastructureGenerator : IIncrementalGenerator
             sourceBuilder.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
             using (sourceBuilder.BeginBlock("public static void Initialize()"))
             {
-                // Log module initializer start
+                // Log module initializer start (buffered until logger is ready)
                 sourceBuilder.AppendLine("global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer] TUnit infrastructure initializing...\");");
                 sourceBuilder.AppendLine();
 
