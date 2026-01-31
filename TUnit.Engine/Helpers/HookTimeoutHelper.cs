@@ -131,7 +131,7 @@ internal static class HookTimeoutHelper
     /// <summary>
     /// Creates a timeout-aware action wrapper for a hook delegate that returns ValueTask
     /// This overload is used for instance hooks (InstanceHookMethod)
-    /// Custom executor handling for instance hooks is done in HookCollectionService.CreateInstanceHookDelegateAsync
+    /// Custom executor handling for instance hooks is done in HookDelegateBuilder.CreateInstanceHookDelegateAsync
     /// </summary>
     public static Func<Task> CreateTimeoutHookAction<T>(
         Func<T, CancellationToken, ValueTask> hookDelegate,

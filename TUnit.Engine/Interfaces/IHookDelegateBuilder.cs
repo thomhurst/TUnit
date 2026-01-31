@@ -3,8 +3,17 @@ using TUnit.Core;
 
 namespace TUnit.Engine.Interfaces;
 
-internal interface IHookCollectionService
+/// <summary>
+/// Builds executable hook delegates from Sources collections.
+/// Responsible for converting hook metadata into Func delegates ready for execution.
+/// </summary>
+internal interface IHookDelegateBuilder
 {
+    /// <summary>
+    /// Eagerly initializes all global hook delegates at startup.
+    /// </summary>
+    ValueTask InitializeAsync();
+
     ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> CollectBeforeTestHooksAsync(Type testClassType);
     ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> CollectAfterTestHooksAsync(Type testClassType);
     ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> CollectBeforeEveryTestHooksAsync(Type testClassType);

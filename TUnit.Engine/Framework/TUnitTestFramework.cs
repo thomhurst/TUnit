@@ -55,11 +55,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
             serviceProvider.Initializer.Initialize(context);
 
-            // Initialize hook collection service to pre-compute global hooks
-            if (serviceProvider.HookCollectionService is HookCollectionService hookCollectionService)
-            {
-                await hookCollectionService.InitializeAsync();
-            }
+            await serviceProvider.HookDelegateBuilder.InitializeAsync();
 
             GlobalContext.Current = serviceProvider.ContextProvider.GlobalContext;
             GlobalContext.Current.GlobalLogger = serviceProvider.Logger;
