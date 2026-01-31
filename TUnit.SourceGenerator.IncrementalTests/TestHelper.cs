@@ -23,9 +23,9 @@ internal static class TestHelper
         return driver.RunGenerators(compilation);
     }
 
-    internal static CSharpCompilation ReplaceMemberDeclaration(
+    internal static CSharpCompilation ReplaceTypeDeclaration(
         CSharpCompilation compilation,
-        string memberName,
+        string typeName,
         string newMember
     )
     {
@@ -34,7 +34,7 @@ internal static class TestHelper
             .GetCompilationUnitRoot()
             .DescendantNodes()
             .OfType<TypeDeclarationSyntax>()
-            .Single(x => x.Identifier.Text == memberName);
+            .Single(x => x.Identifier.Text == typeName);
         var updatedMemberDeclaration = SyntaxFactory.ParseMemberDeclaration(newMember)!;
 
         var newRoot = syntaxTree.GetCompilationUnitRoot().ReplaceNode(memberDeclaration, updatedMemberDeclaration);
