@@ -31,10 +31,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var compilationContext = context
             .CompilationProvider
             .Select(static (c, _) =>
-                new CompilationContext(
+            {
+                var wellKnownTypes = new WellKnownTypes(c);
+                return new CompilationContext(
                     (CSharpCompilation)c,
-                    new AttributeWriter(c)
-                    ));
+                    new AttributeWriter(c, wellKnownTypes),
+                    wellKnownTypes
+                );
+            });
 
         var testMethodsProvider = context.SyntaxProvider
             .ForAttributeWithMetadataName(

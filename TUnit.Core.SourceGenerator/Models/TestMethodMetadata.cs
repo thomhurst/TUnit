@@ -3,10 +3,11 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
+using TUnit.Core.SourceGenerator.Helpers;
 
 namespace TUnit.Core.SourceGenerator.Models;
 
-public record CompilationContext(CSharpCompilation Compilation, AttributeWriter AttributeWriter);
+public record CompilationContext(CSharpCompilation Compilation, AttributeWriter AttributeWriter, WellKnownTypes WellKnownTypes);
 
 /// <summary>
 /// Contains all the metadata about a test method discovered by the source generator.
