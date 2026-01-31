@@ -10,47 +10,6 @@ namespace TUnit.Core.SourceGenerator.Helpers;
 /// </summary>
 internal static class GenericTypeInference
 {
-    /// <summary>
-    /// Infers generic type arguments for a test method based on its data source attributes
-    /// </summary>
-    public static ImmutableArray<ITypeSymbol>? InferGenericTypes(IMethodSymbol method, ImmutableArray<AttributeData> attributes)
-    {
-        if (!method.IsGenericMethod || method.TypeParameters.Length == 0)
-        {
-            return null;
-        }
-
-        // Try to infer from typed data sources first
-        var inferredTypes = TryInferFromTypedDataSources(method, attributes);
-        if (inferredTypes != null)
-        {
-            return inferredTypes;
-        }
-
-        // Try to infer from Arguments attributes
-        inferredTypes = TryInferFromArguments(method, attributes);
-        if (inferredTypes != null)
-        {
-            return inferredTypes;
-        }
-
-        // Try to infer from parameter attributes that implement IInfersType<T>
-        inferredTypes = TryInferFromTypeInferringAttributes(method);
-        if (inferredTypes != null)
-        {
-            return inferredTypes;
-        }
-
-        // Try to infer from MethodDataSource
-        inferredTypes = TryInferFromMethodDataSource(method, attributes);
-        if (inferredTypes != null)
-        {
-            return inferredTypes;
-        }
-
-        return null;
-    }
-
     private static ImmutableArray<ITypeSymbol>? TryInferFromTypedDataSources(IMethodSymbol method, ImmutableArray<AttributeData> attributes)
     {
         foreach (var attribute in attributes)
@@ -90,7 +49,7 @@ internal static class GenericTypeInference
             if (current.IsGenericType)
             {
                 var name = current.Name;
-                if (name.Contains("DataSourceGeneratorAttribute") || 
+                if (name.Contains("DataSourceGeneratorAttribute") ||
                     name.Contains("AsyncDataSourceGeneratorAttribute"))
                 {
                     return current;
@@ -101,52 +60,6 @@ internal static class GenericTypeInference
         }
 
         return null;
-    }
-
-    private static ImmutableArray<ITypeSymbol>? TryInferFromArguments(IMethodSymbol method, ImmutableArray<AttributeData> attributes)
-    {
-        var argumentsAttributes = attributes
-            .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
-            .ToList();
-
-        if (argumentsAttributes.Count == 0)
-        {
-            return null;
-        }
-
-        // Get the first Arguments attribute to infer types
-        var firstArgs = argumentsAttributes[0];
-        if (firstArgs.ConstructorArguments.Length == 0)
-        {
-            return null;
-        }
-
-        var inferredTypes = new List<ITypeSymbol>();
-
-        // Match type parameters with method parameters
-        for (var i = 0; i < method.TypeParameters.Length && i < method.Parameters.Length; i++)
-        {
-            var parameter = method.Parameters[i];
-            
-            if (parameter.Type is ITypeParameterSymbol typeParam)
-            {
-                // Get the corresponding argument value from the attribute
-                if (i < firstArgs.ConstructorArguments.Length)
-                {
-                    var argValue = firstArgs.ConstructorArguments[i];
-                    var inferredType = InferTypeFromValue(argValue);
-                    
-                    if (inferredType != null)
-                    {
-                        inferredTypes.Add(inferredType);
-                    }
-                }
-            }
-        }
-
-        return inferredTypes.Count == method.TypeParameters.Length 
-            ? inferredTypes.ToImmutableArray() 
-            : null;
     }
 
     private static ImmutableArray<ITypeSymbol>? TryInferFromTypeInferringAttributes(IMethodSymbol method)
@@ -165,15 +78,15 @@ internal static class GenericTypeInference
                     {
                         // Look for IInfersType<T> in the attribute's interfaces
                         var infersTypeInterface = attr.AttributeClass.AllInterfaces
-                            .FirstOrDefault(i => i.GloballyQualifiedNonGeneric() == "global::TUnit.Core.Interfaces.IInfersType" && 
-                                                 i.IsGenericType && 
+                            .FirstOrDefault(i => i.GloballyQualifiedNonGeneric() == "global::TUnit.Core.Interfaces.IInfersType" &&
+                                                 i.IsGenericType &&
                                                  i.TypeArguments.Length == 1);
-                        
+
                         if (infersTypeInterface != null)
                         {
                             // Get the type argument from IInfersType<T>
                             var inferredType = infersTypeInterface.TypeArguments[0];
-                            
+
                             // Find the index of this type parameter
                             var typeParamIndex = -1;
                             for (var i = 0; i < method.TypeParameters.Length; i++)
@@ -202,9 +115,9 @@ internal static class GenericTypeInference
 
         // Remove any null entries and check if we have all types
         inferredTypes.RemoveAll(t => t == null);
-        
-        return inferredTypes.Count == method.TypeParameters.Length 
-            ? inferredTypes.ToImmutableArray() 
+
+        return inferredTypes.Count == method.TypeParameters.Length
+            ? inferredTypes.ToImmutableArray()
             : null;
     }
 
@@ -350,7 +263,7 @@ internal static class GenericTypeInference
     /// Gets all unique generic type combinations for a method based on its data sources
     /// </summary>
     public static ImmutableArray<ImmutableArray<ITypeSymbol>> GetAllGenericTypeCombinations(
-        IMethodSymbol method, 
+        IMethodSymbol method,
         ImmutableArray<AttributeData> attributes)
     {
         var combinations = new List<ImmutableArray<ITypeSymbol>>();
@@ -405,14 +318,14 @@ internal static class GenericTypeInference
         for (var i = 0; i < method.TypeParameters.Length && i < method.Parameters.Length; i++)
         {
             var parameter = method.Parameters[i];
-            
+
             if (parameter.Type is ITypeParameterSymbol)
             {
                 if (i < args.ConstructorArguments.Length)
                 {
                     var argValue = args.ConstructorArguments[i];
                     var inferredType = InferTypeFromValue(argValue);
-                    
+
                     if (inferredType != null)
                     {
                         inferredTypes.Add(inferredType);
@@ -421,8 +334,8 @@ internal static class GenericTypeInference
             }
         }
 
-        return inferredTypes.Count == method.TypeParameters.Length 
-            ? inferredTypes.ToImmutableArray() 
+        return inferredTypes.Count == method.TypeParameters.Length
+            ? inferredTypes.ToImmutableArray()
             : null;
     }
 

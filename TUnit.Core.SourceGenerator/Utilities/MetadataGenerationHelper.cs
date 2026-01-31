@@ -11,53 +11,6 @@ namespace TUnit.Core.SourceGenerator.Utilities;
 internal static class MetadataGenerationHelper
 {
     /// <summary>
-    /// Writes a multi-line string with proper indentation
-    /// </summary>
-    private static void WriteIndentedString(ICodeWriter writer, string multiLineString, bool firstLineIsInline = true)
-    {
-        var lines = multiLineString.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
-
-        // Find the base indentation level from the content (skip first line as it's usually inline)
-        var baseIndent = 0;
-        if (lines.Length > 1)
-        {
-            // Find first non-empty line after the first to determine base indentation
-            for (var i = 1; i < lines.Length; i++)
-            {
-                if (!string.IsNullOrWhiteSpace(lines[i]))
-                {
-                    baseIndent = lines[i].Length - lines[i].TrimStart().Length;
-                    break;
-                }
-            }
-        }
-
-        for (var i = 0; i < lines.Length; i++)
-        {
-            if (i > 0)
-            {
-                writer.AppendLine();
-            }
-
-            var line = lines[i];
-            if (!string.IsNullOrWhiteSpace(line))
-            {
-                // Calculate how much indentation this line has beyond the base
-                var currentIndent = line.Length - line.TrimStart().Length;
-                var relativeIndent = Math.Max(0, currentIndent - baseIndent);
-
-                // Add relative indentation
-                for (var j = 0; j < relativeIndent; j++)
-                {
-                    writer.Append(" ");
-                }
-
-                writer.Append(line.TrimStart());
-            }
-        }
-    }
-
-    /// <summary>
     /// Writes code for creating a MethodMetadata instance
     /// </summary>
     public static void WriteMethodMetadata(ICodeWriter writer, IMethodSymbol methodSymbol, INamedTypeSymbol namedTypeSymbol)
