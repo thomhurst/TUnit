@@ -26,22 +26,6 @@ public static class RequiredPropertyHelper
         return requiredProperties;
     }
 
-    private static bool HasDataSourceAttribute(IPropertySymbol property)
-    {
-        return property.GetAttributes().Any(attr =>
-        {
-            var attrClass = attr.AttributeClass;
-
-            if (attrClass == null)
-            {
-                return false;
-            }
-
-            // Check if the attribute implements IDataSourceAttribute
-            return attrClass.AllInterfaces.Any(i => i.GloballyQualified() == WellKnownFullyQualifiedClassNames.IDataSourceAttribute.WithGlobalPrefix);
-        });
-    }
-
     /// <summary>
     /// Generates a default value expression for a type
     /// </summary>
