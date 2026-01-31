@@ -813,6 +813,7 @@ namespace
     }
     public class GlobalContext : .Context
     {
+        public . GlobalLogger { get; }
         public .TextWriter OriginalConsoleError { get; set; }
         public .TextWriter OriginalConsoleOut { get; set; }
         public string? TestFilter { get; }
