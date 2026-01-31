@@ -2,8 +2,10 @@ using System.Collections.Concurrent;
 using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Hooks;
+using TUnit.Core.Logging;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Interfaces;
+using TUnit.Engine.Logging;
 
 namespace TUnit.Engine.Services;
 
@@ -14,6 +16,7 @@ namespace TUnit.Engine.Services;
 internal sealed class HookDelegateBuilder : IHookDelegateBuilder
 {
     private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
+    private readonly TUnitFrameworkLogger _logger;
     private readonly ConcurrentDictionary<Type, IReadOnlyList<Func<TestContext, CancellationToken, Task>>> _beforeTestHooksCache = new();
     private readonly ConcurrentDictionary<Type, IReadOnlyList<Func<TestContext, CancellationToken, Task>>> _afterTestHooksCache = new();
     private readonly ConcurrentDictionary<Type, IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>> _beforeClassHooksCache = new();
@@ -39,9 +42,10 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
     // Cache for processed hooks to avoid re-processing event receivers
     private readonly ConcurrentDictionary<object, bool> _processedHooks = new();
 
-    public HookDelegateBuilder(EventReceiverOrchestrator eventReceiverOrchestrator)
+    public HookDelegateBuilder(EventReceiverOrchestrator eventReceiverOrchestrator, TUnitFrameworkLogger logger)
     {
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
+        _logger = logger;
     }
 
     private static Type GetCachedGenericTypeDefinition(Type type)
@@ -51,6 +55,8 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
 
     public async ValueTask InitializeAsync()
     {
+        await _logger.LogDebugAsync("Building global hook delegates...").ConfigureAwait(false);
+
         // Pre-compute all global hooks that don't depend on specific types/assemblies
         _beforeEveryTestHooks = await BuildGlobalBeforeEveryTestHooksAsync();
         _afterEveryTestHooks = await BuildGlobalAfterEveryTestHooksAsync();
@@ -62,6 +68,14 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
         _afterEveryClassHooks = await BuildGlobalAfterEveryClassHooksAsync();
         _beforeEveryAssemblyHooks = await BuildGlobalBeforeEveryAssemblyHooksAsync();
         _afterEveryAssemblyHooks = await BuildGlobalAfterEveryAssemblyHooksAsync();
+
+        var totalHooks = _beforeEveryTestHooks.Count + _afterEveryTestHooks.Count +
+                         _beforeTestSessionHooks.Count + _afterTestSessionHooks.Count +
+                         _beforeTestDiscoveryHooks.Count + _afterTestDiscoveryHooks.Count +
+                         _beforeEveryClassHooks.Count + _afterEveryClassHooks.Count +
+                         _beforeEveryAssemblyHooks.Count + _afterEveryAssemblyHooks.Count;
+
+        await _logger.LogDebugAsync($"Built {totalHooks} global hook delegates").ConfigureAwait(false);
     }
 
     /// <summary>
@@ -70,7 +84,8 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
     /// </summary>
     private async Task<IReadOnlyList<Func<TContext, CancellationToken, Task>>> BuildGlobalHooksAsync<THookMethod, TContext>(
         IEnumerable<THookMethod> sourceHooks,
-        Func<THookMethod, Task<Func<TContext, CancellationToken, Task>>> createDelegate)
+        Func<THookMethod, Task<Func<TContext, CancellationToken, Task>>> createDelegate,
+        string hookTypeName)
         where THookMethod : HookMethod
     {
         // Pre-size list if possible for better performance
@@ -79,8 +94,14 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
 
         foreach (var hook in sourceHooks)
         {
+            await _logger.LogDebugAsync($"Creating delegate for {hookTypeName} hook: {hook.Name}").ConfigureAwait(false);
             var hookFunc = await createDelegate(hook);
             hooks.Add((hook.Order, hook.RegistrationIndex, hookFunc));
+        }
+
+        if (hooks.Count > 0)
+        {
+            await _logger.LogDebugAsync($"Built {hooks.Count} {hookTypeName} hook delegate(s)").ConfigureAwait(false);
         }
 
         return hooks
@@ -91,34 +112,34 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
     }
 
     private Task<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> BuildGlobalBeforeEveryTestHooksAsync()
-        => BuildGlobalHooksAsync(Sources.BeforeEveryTestHooks, CreateStaticHookDelegateAsync);
+        => BuildGlobalHooksAsync(Sources.BeforeEveryTestHooks, CreateStaticHookDelegateAsync, "BeforeEveryTest");
 
     private Task<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> BuildGlobalAfterEveryTestHooksAsync()
-        => BuildGlobalHooksAsync(Sources.AfterEveryTestHooks, CreateStaticHookDelegateAsync);
+        => BuildGlobalHooksAsync(Sources.AfterEveryTestHooks, CreateStaticHookDelegateAsync, "AfterEveryTest");
 
     private Task<IReadOnlyList<Func<TestSessionContext, CancellationToken, Task>>> BuildGlobalBeforeTestSessionHooksAsync()
-        => BuildGlobalHooksAsync(Sources.BeforeTestSessionHooks, CreateTestSessionHookDelegateAsync);
+        => BuildGlobalHooksAsync(Sources.BeforeTestSessionHooks, CreateTestSessionHookDelegateAsync, "BeforeTestSession");
 
     private Task<IReadOnlyList<Func<TestSessionContext, CancellationToken, Task>>> BuildGlobalAfterTestSessionHooksAsync()
-        => BuildGlobalHooksAsync(Sources.AfterTestSessionHooks, CreateTestSessionHookDelegateAsync);
+        => BuildGlobalHooksAsync(Sources.AfterTestSessionHooks, CreateTestSessionHookDelegateAsync, "AfterTestSession");
 
     private Task<IReadOnlyList<Func<BeforeTestDiscoveryContext, CancellationToken, Task>>> BuildGlobalBeforeTestDiscoveryHooksAsync()
-        => BuildGlobalHooksAsync(Sources.BeforeTestDiscoveryHooks, CreateBeforeTestDiscoveryHookDelegateAsync);
+        => BuildGlobalHooksAsync(Sources.BeforeTestDiscoveryHooks, CreateBeforeTestDiscoveryHookDelegateAsync, "BeforeTestDiscovery");
 
     private Task<IReadOnlyList<Func<TestDiscoveryContext, CancellationToken, Task>>> BuildGlobalAfterTestDiscoveryHooksAsync()
-        => BuildGlobalHooksAsync(Sources.AfterTestDiscoveryHooks, CreateTestDiscoveryHookDelegateAsync);
+        => BuildGlobalHooksAsync(Sources.AfterTestDiscoveryHooks, CreateTestDiscoveryHookDelegateAsync, "AfterTestDiscovery");
 
     private Task<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>> BuildGlobalBeforeEveryClassHooksAsync()
-        => BuildGlobalHooksAsync(Sources.BeforeEveryClassHooks, CreateClassHookDelegateAsync);
+        => BuildGlobalHooksAsync(Sources.BeforeEveryClassHooks, CreateClassHookDelegateAsync, "BeforeEveryClass");
 
     private Task<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>> BuildGlobalAfterEveryClassHooksAsync()
-        => BuildGlobalHooksAsync(Sources.AfterEveryClassHooks, CreateClassHookDelegateAsync);
+        => BuildGlobalHooksAsync(Sources.AfterEveryClassHooks, CreateClassHookDelegateAsync, "AfterEveryClass");
 
     private Task<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>> BuildGlobalBeforeEveryAssemblyHooksAsync()
-        => BuildGlobalHooksAsync(Sources.BeforeEveryAssemblyHooks, CreateAssemblyHookDelegateAsync);
+        => BuildGlobalHooksAsync(Sources.BeforeEveryAssemblyHooks, CreateAssemblyHookDelegateAsync, "BeforeEveryAssembly");
 
     private Task<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>> BuildGlobalAfterEveryAssemblyHooksAsync()
-        => BuildGlobalHooksAsync(Sources.AfterEveryAssemblyHooks, CreateAssemblyHookDelegateAsync);
+        => BuildGlobalHooksAsync(Sources.AfterEveryAssemblyHooks, CreateAssemblyHookDelegateAsync, "AfterEveryAssembly");
 
     private static void SortAndAddHooks<TDelegate>(
         List<Func<TestContext, CancellationToken, Task>> target,

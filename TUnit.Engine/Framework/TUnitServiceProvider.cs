@@ -161,7 +161,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         CancellationToken = Register(new EngineCancellationToken());
 
         EventReceiverOrchestrator = Register(new EventReceiverOrchestrator(Logger));
-        HookDelegateBuilder = Register<IHookDelegateBuilder>(new HookDelegateBuilder(EventReceiverOrchestrator));
+        HookDelegateBuilder = Register<IHookDelegateBuilder>(new HookDelegateBuilder(EventReceiverOrchestrator, Logger));
 
         ParallelLimitLockProvider = Register(new ParallelLimitLockProvider());
 
