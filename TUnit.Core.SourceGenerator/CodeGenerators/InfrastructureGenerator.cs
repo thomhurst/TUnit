@@ -59,8 +59,6 @@ public class InfrastructureGenerator : IIncrementalGenerator
     /// </summary>
     private static AssemblyInfoModel ExtractAssemblyInfo(Compilation compilation)
     {
-        var assembliesToLoad = new List<string>();
-
         // Find TUnit.Core assembly - only assemblies referencing this can contain tests
         var tunitCoreAssembly = FindTUnitCoreAssembly(compilation);
 
@@ -93,22 +91,39 @@ public class InfrastructureGenerator : IIncrementalGenerator
             ? FindAssembliesReferencingTUnitCore(visitedAssemblies, tunitCoreAssembly)
             : visitedAssemblies;
 
-        // Extract a public type from each assembly to reference
+        // Also include dependencies of assemblies that reference TUnit.Core
+        // This ensures library assemblies (like base test classes) are loaded
+        // even if they don't directly reference TUnit.Core
+        var assembliesToLoad = new HashSet<IAssemblySymbol>(assembliesReferencingTUnit, SymbolEqualityComparer.Default);
         foreach (var assembly in assembliesReferencingTUnit)
+        {
+            foreach (var referenced in assembly.Modules.SelectMany(m => m.ReferencedAssemblySymbols))
+            {
+                if (visitedAssemblies.Contains(referenced))
+                {
+                    assembliesToLoad.Add(referenced);
+                }
+            }
+        }
+
+        var assemblyTypesToLoad = new List<string>();
+
+        // Extract a public type from each assembly to reference
+        foreach (var assembly in assembliesToLoad)
         {
             if (ShouldLoadAssembly(assembly, compilation))
             {
                 var publicType = GetFirstPublicType(assembly);
                 if (publicType != null)
                 {
-                    assembliesToLoad.Add(publicType);
+                    assemblyTypesToLoad.Add(publicType);
                 }
             }
         }
 
         return new AssemblyInfoModel
         {
-            TypesToReference = new EquatableArray<string>([.. assembliesToLoad])
+            TypesToReference = new EquatableArray<string>([.. assemblyTypesToLoad])
         };
     }
 
