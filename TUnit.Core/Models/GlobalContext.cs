@@ -22,10 +22,10 @@ public class GlobalContext : Context
 
     private ILogger _globalLogger = new Logging.EarlyBufferLogger();
 
-    internal ILogger GlobalLogger
+    public ILogger GlobalLogger
     {
         get => _globalLogger;
-        set
+        internal set
         {
             // Flush buffered logs to the new logger
             if (_globalLogger is Logging.EarlyBufferLogger bufferLogger)

@@ -305,6 +305,10 @@ public class InfrastructureGenerator : IIncrementalGenerator
     {
         var sourceBuilder = new CodeWriter();
 
+        // Add using directive for LogDebug extension method
+        sourceBuilder.AppendLine("using TUnit.Core.Logging;");
+        sourceBuilder.AppendLine();
+
         sourceBuilder.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]");
         sourceBuilder.AppendLine($"[global::System.CodeDom.Compiler.GeneratedCode(\"TUnit\", \"{typeof(InfrastructureGenerator).Assembly.GetName().Version}\")]");
 
