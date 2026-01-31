@@ -3,7 +3,10 @@
         Project="$(MSBuildThisFileDirectory)Polyfill.targets" />
 
     <!-- Set AssemblyVersion to match MinVer calculated version before assembly info generation -->
-    <Target Name="SetAssemblyVersionFromMinVer" BeforeTargets="GetAssemblyVersion;GenerateAssemblyInfo" Condition="'$(MinVerVersion)' != ''">
+    <!-- Skip during pack operations to avoid interfering with NuGet versioning (IsPackTarget=true) -->
+    <Target Name="SetAssemblyVersionFromMinVer"
+            BeforeTargets="GetAssemblyVersion;GenerateAssemblyInfo"
+            Condition="'$(MinVerVersion)' != '' and '$(IsPackTarget)' != 'true'">
         <PropertyGroup>
             <AssemblyVersion>$(MinVerMajor).$(MinVerMinor).$(MinVerPatch).0</AssemblyVersion>
             <FileVersion>$(MinVerMajor).$(MinVerMinor).$(MinVerPatch).0</FileVersion>
