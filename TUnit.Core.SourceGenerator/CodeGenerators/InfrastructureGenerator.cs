@@ -9,9 +9,17 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators;
 /// Consolidated infrastructure generator that handles:
 /// 1. Disabling reflection scanner (sets SourceRegistrar.IsEnabled = true)
 /// 2. Pre-loading assemblies that reference TUnit.Core
+/// 3. Forcing library module initializers to complete synchronously
 ///
 /// This combines DisableReflectionScannerGenerator and AssemblyLoaderGenerator
 /// into a single generator for efficiency.
+///
+/// Assembly Loading Strategy:
+/// Uses RuntimeHelpers.RunClassConstructor to force library module initializers
+/// to complete before the test assembly's module initializer finishes. This ensures
+/// hooks registered by library assemblies are available when HookDelegateBuilder
+/// collects them. Static constructors can only run AFTER module initializers complete,
+/// so calling RunClassConstructor blocks until initialization is done.
 /// </summary>
 [Generator]
 public class InfrastructureGenerator : IIncrementalGenerator
@@ -333,13 +341,18 @@ public class InfrastructureGenerator : IIncrementalGenerator
                     sourceBuilder.AppendLine($"global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer] Loading {model.TypesToReference.Length} assembly reference(s)...\");");
                 }
 
-                foreach (var typeName in model.TypesToReference)
+                for (var i = 0; i < model.TypesToReference.Length; i++)
                 {
+                    var typeName = model.TypesToReference[i];
                     sourceBuilder.AppendLine("try");
                     sourceBuilder.AppendLine("{");
                     sourceBuilder.Indent();
                     sourceBuilder.AppendLine($"global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer] Loading assembly containing: {typeName.Replace("\"", "\\\"")}\");");
-                    sourceBuilder.AppendLine($"_ = typeof({typeName});");
+                    sourceBuilder.AppendLine($"var type_{i} = typeof({typeName});");
+                    sourceBuilder.AppendLine("// Force module initializer to complete before proceeding");
+                    sourceBuilder.AppendLine("// RunClassConstructor triggers static constructor, which can only run AFTER module initializer completes");
+                    sourceBuilder.AppendLine($"global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(type_{i}.TypeHandle);");
+                    sourceBuilder.AppendLine($"global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer] Assembly initialized: {typeName.Replace("\"", "\\\"")}\");");
                     sourceBuilder.Unindent();
                     sourceBuilder.AppendLine("}");
                     sourceBuilder.AppendLine("catch (global::System.Exception ex)");
