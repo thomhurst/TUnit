@@ -327,6 +327,11 @@ public class InfrastructureGenerator : IIncrementalGenerator
             sourceBuilder.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
             using (sourceBuilder.BeginBlock("public static void Initialize()"))
             {
+                // Force TUnit.Core to load before accessing any of its types
+                // This prevents TypeInitializationException in third-party packages
+                sourceBuilder.AppendLine("_ = typeof(global::TUnit.Core.GlobalContext);");
+                sourceBuilder.AppendLine();
+
                 // Log module initializer start (buffered until logger is ready)
                 sourceBuilder.AppendLine($"global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer:{model.AssemblyName}] TUnit infrastructure initializing...\");");
                 sourceBuilder.AppendLine();
