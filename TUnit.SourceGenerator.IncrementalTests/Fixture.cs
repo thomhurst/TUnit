@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Assertions.Attributes;
+using TUnit.Core;
 
 namespace TUnit.Assertions.SourceGenerator.IncrementalTests;
 
@@ -15,6 +16,7 @@ public static class Fixture
         typeof(GenerateAssertionAttribute).Assembly,
         typeof(MulticastDelegate).Assembly,
         typeof(IServiceProvider).Assembly,
+        typeof(TestAttribute).Assembly,
     };
 
     public static Assembly[] AssemblyReferencesForCodegen =>

@@ -22,7 +22,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\TUnit.Assertions.SourceGenerator\TUnit.Assertions.SourceGenerator.csproj" />
-      <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />
+        <ProjectReference Include="..\TUnit.Assertions.SourceGenerator\TUnit.Assertions.SourceGenerator.csproj" />
+        <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />
+        <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />
+        <ProjectReference Include="..\TUnit.Core.SourceGenerator.Roslyn47\TUnit.Core.SourceGenerator.Roslyn47.csproj" />
     </ItemGroup>
 </Project>

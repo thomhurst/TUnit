@@ -673,9 +673,9 @@ public class AotConverterGenerator : IIncrementalGenerator
         return new TypeMetadata(globallyQualified, type.ToDisplayString(), patternTypeName);
     }
 
-    private record TypeMetadata(string GloballyQualified, string DisplayString, string PatternTypeName);
+    public record TypeMetadata(string GloballyQualified, string DisplayString, string PatternTypeName);
 
-    private record ConversionMetadata
+    public record ConversionMetadata
     {
         public required TypeMetadata SourceType { get; init; }
         public required TypeMetadata TargetType { get; init; }
