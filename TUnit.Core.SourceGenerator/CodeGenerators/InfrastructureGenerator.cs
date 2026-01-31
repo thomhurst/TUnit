@@ -249,9 +249,37 @@ public class InfrastructureGenerator : IIncrementalGenerator
 
     private static string? GetFirstPublicType(IAssemblySymbol assembly)
     {
-        // Find the first accessible public type in the assembly
-        var publicType = GetPublicTypesRecursive(assembly.GlobalNamespace).FirstOrDefault();
-        return publicType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var publicTypes = GetPublicTypesRecursive(assembly.GlobalNamespace);
+
+        // Prefer non-generic types to avoid typeof() formatting complexity
+        var publicType = publicTypes.FirstOrDefault(t => !t.IsGenericType)
+                      ?? publicTypes.FirstOrDefault();
+
+        if (publicType == null)
+        {
+            return null;
+        }
+
+        var typeName = publicType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+
+        // For generic types (fallback case), use open generic syntax for typeof()
+        // Example: global::Foo<T> -> global::Foo<>
+        // Example: global::Foo<T1, T2> -> global::Foo<,>
+        if (publicType.IsGenericType)
+        {
+            var openGenericSuffix = publicType.Arity == 1
+                ? "<>"
+                : $"<{new string(',', publicType.Arity - 1)}>";
+
+            // Remove everything from < to the end and append the open generic suffix
+            var genericStart = typeName.LastIndexOf('<');
+            if (genericStart > 0)
+            {
+                typeName = typeName.Substring(0, genericStart) + openGenericSuffix;
+            }
+        }
+
+        return typeName;
     }
 
     private static IEnumerable<INamedTypeSymbol> GetPublicTypesRecursive(INamespaceSymbol namespaceSymbol)
