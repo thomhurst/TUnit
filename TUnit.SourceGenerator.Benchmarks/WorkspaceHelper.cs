@@ -34,6 +34,7 @@ public static class WorkspaceHelper
         {
             ConsoleLogger.Default.WriteLine("Loading project\n");
             project = await workspace.OpenProjectAsync(projectFile);
+            project = project.WithAnalyzerReferences([]);
             ConsoleLogger.Default.WriteLine("\nLoaded project");
         }
         catch (Exception ex)
