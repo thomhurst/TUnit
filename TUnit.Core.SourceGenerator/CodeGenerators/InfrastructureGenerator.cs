@@ -9,9 +9,17 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators;
 /// Consolidated infrastructure generator that handles:
 /// 1. Disabling reflection scanner (sets SourceRegistrar.IsEnabled = true)
 /// 2. Pre-loading assemblies that reference TUnit.Core
+/// 3. Forcing library module initializers to complete synchronously
 ///
 /// This combines DisableReflectionScannerGenerator and AssemblyLoaderGenerator
 /// into a single generator for efficiency.
+///
+/// Assembly Loading Strategy:
+/// Uses RuntimeHelpers.RunClassConstructor to force library module initializers
+/// to complete before the test assembly's module initializer finishes. This ensures
+/// hooks registered by library assemblies are available when HookDelegateBuilder
+/// collects them. Static constructors can only run AFTER module initializers complete,
+/// so calling RunClassConstructor blocks until initialization is done.
 /// </summary>
 [Generator]
 public class InfrastructureGenerator : IIncrementalGenerator
@@ -108,6 +116,7 @@ public class InfrastructureGenerator : IIncrementalGenerator
 
         return new AssemblyInfoModel
         {
+            AssemblyName = compilation.Assembly.Name,
             TypesToReference = new EquatableArray<string>([.. assembliesToLoad])
         };
     }
@@ -318,40 +327,87 @@ public class InfrastructureGenerator : IIncrementalGenerator
             sourceBuilder.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
             using (sourceBuilder.BeginBlock("public static void Initialize()"))
             {
-                // Log module initializer start (buffered until logger is ready)
-                sourceBuilder.AppendLine("global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer] TUnit infrastructure initializing...\");");
+                // Set source registrar FIRST - this is critical and must run even if logging fails
+                // Wrap in try-catch to handle cases where TUnit.Core isn't available
+                sourceBuilder.AppendLine("try");
+                sourceBuilder.AppendLine("{");
+                sourceBuilder.Indent();
+                sourceBuilder.AppendLine("global::TUnit.Core.SourceRegistrar.IsEnabled = true;");
+                sourceBuilder.Unindent();
+                sourceBuilder.AppendLine("}");
+                sourceBuilder.AppendLine("catch { /* TUnit.Core not available - skip source registrar */ }");
                 sourceBuilder.AppendLine();
 
-                // Disable reflection scanner for source-generated assemblies
-                sourceBuilder.AppendLine("global::TUnit.Core.SourceRegistrar.IsEnabled = true;");
-                sourceBuilder.AppendLine("global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer] Source generation mode enabled\");");
+                // Logging is optional - wrap separately so it doesn't prevent other work
+                sourceBuilder.AppendLine("try");
+                sourceBuilder.AppendLine("{");
+                sourceBuilder.Indent();
+                sourceBuilder.AppendLine($"global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer:{model.AssemblyName}] TUnit infrastructure initializing...\");");
+                sourceBuilder.Unindent();
+                sourceBuilder.AppendLine("}");
+                sourceBuilder.AppendLine("catch { /* TUnit.Core not available - skip logging */ }");
                 sourceBuilder.AppendLine();
 
                 // Reference types from assemblies to trigger their module constructors
                 if (model.TypesToReference.Length > 0)
                 {
-                    sourceBuilder.AppendLine($"global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer] Loading {model.TypesToReference.Length} assembly reference(s)...\");");
-                }
-
-                foreach (var typeName in model.TypesToReference)
-                {
                     sourceBuilder.AppendLine("try");
                     sourceBuilder.AppendLine("{");
                     sourceBuilder.Indent();
-                    sourceBuilder.AppendLine($"global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer] Loading assembly containing: {typeName.Replace("\"", "\\\"")}\");");
-                    sourceBuilder.AppendLine($"_ = typeof({typeName});");
+                    sourceBuilder.AppendLine($"global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer:{model.AssemblyName}] Loading {model.TypesToReference.Length} assembly reference(s)...\");");
+                    sourceBuilder.Unindent();
+                    sourceBuilder.AppendLine("}");
+                    sourceBuilder.AppendLine("catch { /* TUnit.Core not available - skip logging */ }");
+                }
+
+                for (var i = 0; i < model.TypesToReference.Length; i++)
+                {
+                    var typeName = model.TypesToReference[i];
+                    sourceBuilder.AppendLine("try");
+                    sourceBuilder.AppendLine("{");
+                    sourceBuilder.Indent();
+                    sourceBuilder.AppendLine("try");
+                    sourceBuilder.AppendLine("{");
+                    sourceBuilder.Indent();
+                    sourceBuilder.AppendLine($"global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer:{model.AssemblyName}] Loading assembly containing: {typeName.Replace("\"", "\\\"")}\");");
+                    sourceBuilder.Unindent();
+                    sourceBuilder.AppendLine("}");
+                    sourceBuilder.AppendLine("catch { /* TUnit.Core not available - skip logging */ }");
+                    sourceBuilder.AppendLine($"var type_{i} = typeof({typeName});");
+                    sourceBuilder.AppendLine("// Force module initializer to complete before proceeding");
+                    sourceBuilder.AppendLine("// RunClassConstructor triggers static constructor, which can only run AFTER module initializer completes");
+                    sourceBuilder.AppendLine($"global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(type_{i}.TypeHandle);");
+                    sourceBuilder.AppendLine("try");
+                    sourceBuilder.AppendLine("{");
+                    sourceBuilder.Indent();
+                    sourceBuilder.AppendLine($"global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer:{model.AssemblyName}] Assembly initialized: {typeName.Replace("\"", "\\\"")}\");");
+                    sourceBuilder.Unindent();
+                    sourceBuilder.AppendLine("}");
+                    sourceBuilder.AppendLine("catch { /* TUnit.Core not available - skip logging */ }");
                     sourceBuilder.Unindent();
                     sourceBuilder.AppendLine("}");
                     sourceBuilder.AppendLine("catch (global::System.Exception ex)");
                     sourceBuilder.AppendLine("{");
                     sourceBuilder.Indent();
-                    sourceBuilder.AppendLine($"global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer] Failed to load {typeName.Replace("\"", "\\\"")}: \" + ex.Message);");
+                    sourceBuilder.AppendLine("try");
+                    sourceBuilder.AppendLine("{");
+                    sourceBuilder.Indent();
+                    sourceBuilder.AppendLine($"global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer:{model.AssemblyName}] Failed to load {typeName.Replace("\"", "\\\"")}: \" + ex.Message);");
+                    sourceBuilder.Unindent();
+                    sourceBuilder.AppendLine("}");
+                    sourceBuilder.AppendLine("catch { /* TUnit.Core not available - skip logging */ }");
                     sourceBuilder.Unindent();
                     sourceBuilder.AppendLine("}");
                 }
 
                 sourceBuilder.AppendLine();
-                sourceBuilder.AppendLine("global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer] TUnit infrastructure initialized\");");
+                sourceBuilder.AppendLine("try");
+                sourceBuilder.AppendLine("{");
+                sourceBuilder.Indent();
+                sourceBuilder.AppendLine($"global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer:{model.AssemblyName}] TUnit infrastructure initialized\");");
+                sourceBuilder.Unindent();
+                sourceBuilder.AppendLine("}");
+                sourceBuilder.AppendLine("catch { /* TUnit.Core not available - skip logging */ }");
             }
         }
 

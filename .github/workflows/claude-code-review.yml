@@ -46,7 +46,19 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
           plugins: 'code-review@claude-code-plugins'
-          prompt: '/code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number || inputs.pr_number }}'
+          prompt: |
+            /code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number || inputs.pr_number }}
+
+            Additional instructions:
+            - ALWAYS post a review comment, even if no issues are found. If the code is good, acknowledge it.
+            - When you find issues, ALWAYS suggest better approaches or architectural improvements, not just minor optimizations.
+            - Focus on:
+              * Design patterns that could be improved
+              * Alternative approaches that are more maintainable or scalable
+              * Architectural concerns or anti-patterns
+              * Better abstractions or simplifications
+            - Skip minor style/formatting issues unless they impact readability significantly.
+            - Always explain WHY the suggested approach is better, not just WHAT to change.
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://code.claude.com/docs/en/cli-reference for available options
 
