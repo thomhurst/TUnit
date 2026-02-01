@@ -12,4 +12,5 @@ else
 {
     BenchmarkRunner.Run<TestMetadataGeneratorBenchmarks>();
     // BenchmarkRunner.Run<AotConverterGeneratorBenchmarks>();
+    // BenchmarkRunner.Run<StaticPropertyInitializationGeneratorBenchmarks>();
 }
