@@ -24,6 +24,32 @@ dotnet publish -c Release -p:PublishAot=true --use-current-runtime
 
 ---
 
+## Performance Testing
+
+Run benchmarks when changing hot paths (test discovery, execution, data generation).
+
+```bash
+# Core performance benchmarks (BenchmarkDotNet)
+cd TUnit.Performance.Tests
+dotnet run -c Release
+
+# Source generator benchmarks
+cd TUnit.SourceGenerator.Benchmarks
+dotnet run -c Release
+
+# Large-scale performance validation
+cd TUnit.PerformanceBenchmarks
+./run-benchmarks.sh  # or run-benchmarks.ps1 on Windows
+```
+
+**When to run**:
+- Before/after changes to test discovery
+- Before/after changes to test execution
+- Before/after changes to argument expansion
+- Before/after caching or reflection changes
+
+---
+
 ## TUnit.TestProject Filters
 
 Many tests in `TUnit.TestProject` are designed to fail (testing error scenarios). Always use filters.

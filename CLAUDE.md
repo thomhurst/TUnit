@@ -1,5 +1,9 @@
 # TUnit Development Guide
 
+## Environment Requirements
+
+- .NET SDK 8.0+ (latest version recommended for modern C# features)
+
 ## CRITICAL RULES
 
 1. **Dual-Mode** - Changes to core engine metadata collection MUST work in both source-gen (`TUnit.Core.SourceGenerator`) AND reflection (`TUnit.Engine`) modes.
@@ -18,6 +22,7 @@ See `.claude/docs/mandatory-rules.md` for full details.
 
 **NEVER run `TUnit.TestProject` without filters.** Many tests are designed to fail.
 ```bash
+cd TUnit.TestProject
 dotnet run -- --treenode-filter "/*/*/SpecificClass/*"
 ```
 See `.claude/docs/workflows.md` for filter syntax and details.
@@ -26,6 +31,8 @@ See `.claude/docs/workflows.md` for filter syntax and details.
 
 ```bash
 # Review changes, then accept if intentional:
+# (Run from test project directory, e.g., TUnit.Core.SourceGenerator.Tests)
+
 # Linux/macOS:
 for f in *.received.txt; do mv "$f" "${f%.received.txt}.verified.txt"; done
 
