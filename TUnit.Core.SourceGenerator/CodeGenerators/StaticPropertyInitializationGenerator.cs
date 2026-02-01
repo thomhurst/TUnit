@@ -13,6 +13,8 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators;
 [Generator]
 public class StaticPropertyInitializationGenerator : IIncrementalGenerator
 {
+    public const string ParseStaticProperties = "ParseStaticProperties";
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var enabledProvider = context.AnalyzerConfigOptionsProvider
@@ -25,58 +27,45 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         var testClasses = context.SyntaxProvider
             .CreateSyntaxProvider(
                 predicate: static (s, _) => s is ClassDeclarationSyntax,
-                transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx))
-            .Where(static t => t is not null)
+                transform: static (ctx, _) => ctx)
             .Collect()
-            .Combine(enabledProvider);
+            .Combine(enabledProvider)
+            .Select((classesProviderPair, _) =>
+                ParseStaticPropertyInitializers(classesProviderPair.Left, classesProviderPair.Right))
+            .WithTrackingName(ParseStaticProperties);
 
-        context.RegisterSourceOutput(testClasses, (sourceProductionContext, data) =>
-        {
-            var (classes, isEnabled) = data;
-            if (!isEnabled)
-            {
-                return;
-            }
-
-            GenerateStaticPropertyInitialization(sourceProductionContext, classes.Where(t => t != null).ToImmutableArray()!);
-        });
+        context.RegisterSourceOutput(testClasses, GenerateStaticPropertyInitialization);
     }
 
-    private static INamedTypeSymbol? GetSemanticTargetForGeneration(GeneratorSyntaxContext context)
+    private static EquatableArray<PropertyWithDataSourceModel> ParseStaticPropertyInitializers(ImmutableArray<GeneratorSyntaxContext> classesContext, bool enabledProvider)
     {
-        if (context.SemanticModel.GetDeclaredSymbol(context.Node) is not INamedTypeSymbol typeSymbol)
+        if (!enabledProvider)
         {
-            return null;
-        }
-
-        // Skip open generic types - we can't generate code for types with unbound type parameters
-        // The initialization will happen in the consuming assembly that provides concrete type arguments
-        if (typeSymbol.IsGenericType && typeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter))
-        {
-            return null;
-        }
-
-        // Check if this type has any static properties with data source attributes
-        var hasStaticPropertiesWithDataSources = GetStaticPropertyDataSources(typeSymbol).Any();
-
-        return hasStaticPropertiesWithDataSources ? typeSymbol : null;
-    }
-
-    private static void GenerateStaticPropertyInitialization(SourceProductionContext context, ImmutableArray<INamedTypeSymbol> testClasses)
-    {
-        if (testClasses.IsEmpty)
-        {
-            return;
+            return EquatableArray<PropertyWithDataSourceModel>.Empty;
         }
 
         // Use a dictionary to deduplicate static properties by their declaring type and name
         // This prevents duplicate initialization when derived classes inherit static properties
         var uniqueStaticProperties = new Dictionary<(INamedTypeSymbol DeclaringType, string Name), PropertyWithDataSource>(SymbolEqualityComparer.Default.ToTupleComparer());
+        var visitedTypes = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
+        var properties = new List<PropertyWithDataSource>();
 
-        foreach (var testClass in testClasses)
+        foreach (var context in classesContext)
         {
-            var properties = GetStaticPropertyDataSources(testClass);
-            foreach (var prop in properties)
+            if (context.SemanticModel.GetDeclaredSymbol(context.Node) is not INamedTypeSymbol typeSymbol)
+            {
+                continue;
+            }
+
+            // Skip open generic types - we can't generate code for types with unbound type parameters
+            // The initialization will happen in the consuming assembly that provides concrete type arguments
+            if (typeSymbol.IsGenericType && typeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter))
+            {
+                continue;
+            }
+
+            // Check if this type has any static properties with data source attributes
+            foreach (var prop in GetStaticPropertyDataSources(typeSymbol, visitedTypes, properties))
             {
                 // Static properties belong to their declaring type, not derived types
                 // Only add if we haven't seen this exact property before
@@ -88,18 +77,117 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
             }
         }
 
-        var allStaticProperties = uniqueStaticProperties.Values.ToImmutableArray();
+        return uniqueStaticProperties.Values.Select(ToPropertyWithDataSourceModel).ToEquatableArray();
+    }
 
-        if (allStaticProperties.IsEmpty)
+    private static List<PropertyWithDataSource> GetStaticPropertyDataSources(
+        INamedTypeSymbol typeSymbol,
+        HashSet<INamedTypeSymbol> visitedType,
+        List<PropertyWithDataSource> properties
+        )
+    {
+        properties.Clear();
+
+        // Walk inheritance hierarchy to include base class static properties
+        var currentType = typeSymbol;
+        while (currentType != null)
+        {
+            if (!visitedType.Add(currentType))
+            {
+                break;
+            }
+
+            foreach (var member in currentType.GetMembers())
+            {
+                if (member is IPropertySymbol { DeclaredAccessibility: Accessibility.Public, SetMethod.DeclaredAccessibility: Accessibility.Public, IsStatic: true } property) // Only static properties for session initialization
+                {
+                    var dataSourceAttr = property.GetAttributes()
+                        .FirstOrDefault(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass));
+
+                    if (dataSourceAttr != null)
+                    {
+                        // Check if we already have this property (in case of overrides)
+                        bool newProperty = true;
+                        foreach (var p in properties)
+                        {
+                            if (p.Property.Name == property.Name)
+                            {
+                                newProperty = false;
+                                break;
+                            }
+                        }
+
+                        if (newProperty)
+                        {
+                            properties.Add(new PropertyWithDataSource
+                            {
+                                Property = property,
+                                DataSourceAttribute = dataSourceAttr
+                            });
+                        }
+                    }
+                }
+            }
+            currentType = currentType.BaseType;
+        }
+
+        return properties;
+    }
+
+    private static PropertyWithDataSourceModel ToPropertyWithDataSourceModel(PropertyWithDataSource staticProperty)
+    {
+        var containingType = new ContainingType(
+            staticProperty.Property.ContainingType.GloballyQualified(),
+            staticProperty.Property.ContainingType.Name,
+            staticProperty.Property.ContainingType.ContainingNamespace?.ToDisplayString() ?? string.Empty,
+            staticProperty.Property.ContainingType.ContainingAssembly.Name
+        );
+
+        var property = new PropertyType(
+            staticProperty.Property.Type.GloballyQualified(),
+            staticProperty.Property.Name,
+            containingType
+        );
+
+        var attr = staticProperty.DataSourceAttribute;
+        var attributeClassName = attr.AttributeClass?.Name;
+
+        DataSourceAttribute sourceAttribute;
+
+        // Generate data source logic based on attribute type
+        if (attributeClassName == "ArgumentsAttribute")
+        {
+            sourceAttribute = ParseArgumentsDataSourceWithAssignment(attr);;
+        }
+        else if (attributeClassName == "MethodDataSourceAttribute")
+        {
+            sourceAttribute = ParseMethodDataSourceWithAssignment(attr, staticProperty.Property.ContainingType);
+        }
+        else if (attr.AttributeClass?.IsOrInherits("global::TUnit.Core.AsyncDataSourceGeneratorAttribute") == true ||
+                 attr.AttributeClass?.IsOrInherits("global::TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute") == true)
+        {
+            sourceAttribute = new DataSourceAttribute.AsyncDataSource(CodeGenerationHelpers.GenerateAttributeInstantiation(attr));
+        }
+        else
+        {
+            sourceAttribute = new DataSourceAttribute.Fallback();
+        }
+
+        return new PropertyWithDataSourceModel(property, sourceAttribute);
+    }
+
+    private static void GenerateStaticPropertyInitialization(SourceProductionContext context, EquatableArray<PropertyWithDataSourceModel> testClasses)
+    {
+        if (testClasses.Length == 0)
         {
             return;
         }
 
-        var code = GenerateInitializationCode(allStaticProperties);
+        var code = GenerateInitializationCode(testClasses);
         context.AddSource("StaticPropertyInitializer.g.cs", SourceText.From(code, Encoding.UTF8));
     }
 
-    private static string GenerateInitializationCode(ImmutableArray<PropertyWithDataSource> staticProperties)
+    private static string GenerateInitializationCode(EquatableArray<PropertyWithDataSourceModel> staticProperties)
     {
         using var writer = new CodeWriter();
         writer.AppendLine("using System;");
@@ -128,14 +216,14 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         // Register each property with metadata
         foreach (var propertyData in staticProperties)
         {
-            var typeName = propertyData.Property.ContainingType.GloballyQualified();
+            var typeName = propertyData.Property.ContainingType.GloballyQualified;
             var methodName = $"Initialize_{propertyData.Property.ContainingType.Name}_{propertyData.Property.Name}";
 
             writer.AppendLine("global::TUnit.Core.StaticProperties.StaticPropertyRegistry.Register(new global::TUnit.Core.StaticProperties.StaticPropertyMetadata");
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendLine($"PropertyName = \"{propertyData.Property.Name}\",");
-            writer.AppendLine($"PropertyType = typeof({propertyData.Property.Type.GloballyQualified()}),");
+            writer.AppendLine($"PropertyType = typeof({propertyData.Property.GloballyQualifiedType}),");
             writer.AppendLine($"DeclaringType = typeof({typeName}),");
             writer.AppendLine($"InitializerAsync = {methodName}");
             writer.Unindent();
@@ -166,10 +254,10 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         return writer.ToString();
     }
 
-    private static void GenerateIndividualPropertyInitializer(CodeWriter writer, PropertyWithDataSource propertyData)
+    private static void GenerateIndividualPropertyInitializer(CodeWriter writer, PropertyWithDataSourceModel propertyData)
     {
         var propertyName = propertyData.Property.Name;
-        var typeName = propertyData.Property.ContainingType.GloballyQualified();
+        var typeName = propertyData.Property.ContainingType.GloballyQualified;
         var methodName = $"Initialize_{propertyData.Property.ContainingType.Name}_{propertyName}";
 
         writer.AppendLine();
@@ -187,9 +275,9 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         writer.Indent();
         writer.AppendLine($"Name = \"{propertyData.Property.ContainingType.Name}\",");
         writer.AppendLine($"Type = typeof({typeName}),");
-        writer.AppendLine($"Namespace = \"{propertyData.Property.ContainingType.ContainingNamespace?.ToDisplayString() ?? string.Empty}\",");
+        writer.AppendLine($"Namespace = \"{propertyData.Property.ContainingType.ContainingNamespace}\",");
         writer.AppendLine($"TypeInfo = new global::TUnit.Core.ConcreteType(typeof({typeName})),");
-        writer.AppendLine($"Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd(\"{propertyData.Property.ContainingType.ContainingAssembly.Name}\", () => new global::TUnit.Core.AssemblyMetadata {{ Name = \"{propertyData.Property.ContainingType.ContainingAssembly.Name}\" }}),");
+        writer.AppendLine($"Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd(\"{propertyData.Property.ContainingType.ContainingAssemblyName}\", () => new global::TUnit.Core.AssemblyMetadata {{ Name = \"{propertyData.Property.ContainingType.ContainingAssemblyName}\" }}),");
         writer.AppendLine("Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),");
         writer.AppendLine("Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),");
         writer.AppendLine("Parent = null");
@@ -201,7 +289,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
         writer.AppendLine($"Name = \"{propertyName}\",");
-        writer.AppendLine($"Type = typeof({propertyData.Property.Type.GloballyQualified()}),");
+        writer.AppendLine($"Type = typeof({propertyData.Property.GloballyQualifiedType}),");
         writer.AppendLine($"IsStatic = true,");
         writer.AppendLine($"ReflectionInfo = typeof({typeName}).GetProperty(\"{propertyName}\", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static),");
         writer.AppendLine($"Getter = _ => {typeName}.{propertyName},");
@@ -212,25 +300,30 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         writer.AppendLine();
 
         var attr = propertyData.DataSourceAttribute;
-        var attributeClassName = attr.AttributeClass?.Name;
 
         // Generate data source logic and capture the value
         writer.AppendLine("object? value = null;");
         writer.AppendLine();
 
         // Generate data source logic based on attribute type
-        if (attributeClassName == "ArgumentsAttribute")
+        if (attr is DataSourceAttribute.ArgumentsDataSource argumentsDataSource)
         {
-            GenerateArgumentsDataSourceWithAssignment(writer, attr);
+            if (argumentsDataSource.FormattedValue is not null)
+            {
+                writer.AppendLine($"value = {argumentsDataSource.FormattedValue};");
+            }
         }
-        else if (attributeClassName == "MethodDataSourceAttribute")
+        else if (attr is DataSourceAttribute.MethodDataSource methodDataSource)
         {
-            GenerateMethodDataSourceWithAssignment(writer, attr, propertyData.Property.ContainingType);
+            if (methodDataSource.Data is not null)
+            {
+                writer.AppendLine($"var data = {methodDataSource.Data}();");
+                writer.AppendLine("value = await global::TUnit.Core.Helpers.DataSourceHelpers.ProcessDataSourceResultGeneric(data);");
+            }
         }
-        else if (attr.AttributeClass?.IsOrInherits("global::TUnit.Core.AsyncDataSourceGeneratorAttribute") == true ||
-                 attr.AttributeClass?.IsOrInherits("global::TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute") == true)
+        else if (attr is DataSourceAttribute.AsyncDataSource asyncDataSource)
         {
-            GenerateAsyncDataSourceGeneratorWithPropertyWithAssignment(writer, attr);
+            GenerateAsyncDataSourceGeneratorWithPropertyWithAssignment(writer, asyncDataSource);
         }
         else
         {
@@ -242,7 +335,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         writer.AppendLine("if (value != null)");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine($"{typeName}.{propertyName} = ({propertyData.Property.Type.GloballyQualified()})value;");
+        writer.AppendLine($"{typeName}.{propertyName} = ({propertyData.Property.GloballyQualifiedType})value;");
         writer.Unindent();
         writer.AppendLine("}");
         writer.AppendLine();
@@ -254,7 +347,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
 
     private static readonly TypedConstantFormatter _formatter = new();
 
-    private static void GenerateArgumentsDataSourceWithAssignment(CodeWriter writer, AttributeData attr)
+    private static DataSourceAttribute ParseArgumentsDataSourceWithAssignment(AttributeData attr)
     {
         if (attr.ConstructorArguments.Length > 0)
         {
@@ -266,16 +359,18 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
                 // For static property injection, we only use the first value from the array
                 var firstValue = argValue.Values[0];
                 var formattedValue = _formatter.FormatForCode(firstValue);
-                writer.AppendLine($"value = {formattedValue};");
+                return new DataSourceAttribute.ArgumentsDataSource(formattedValue);
             }
         }
+
+        return new DataSourceAttribute.ArgumentsDataSource(null);
     }
 
-    private static void GenerateMethodDataSourceWithAssignment(CodeWriter writer, AttributeData attr, INamedTypeSymbol containingType)
+    private static DataSourceAttribute ParseMethodDataSourceWithAssignment(AttributeData attr, INamedTypeSymbol containingType)
     {
         if (attr.ConstructorArguments.Length < 1)
         {
-            return;
+            return new DataSourceAttribute.MethodDataSource(null);
         }
 
         string? methodName = null;
@@ -297,19 +392,16 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
 
         if (string.IsNullOrEmpty(methodName) || targetType == null)
         {
-            return;
+            return new DataSourceAttribute.MethodDataSource(null);
         }
 
         var fullyQualifiedType = targetType.GloballyQualified();
-        writer.AppendLine($"var data = {fullyQualifiedType}.{methodName}();");
-        writer.AppendLine("value = await global::TUnit.Core.Helpers.DataSourceHelpers.ProcessDataSourceResultGeneric(data);");
+        return new DataSourceAttribute.MethodDataSource($"{fullyQualifiedType}.{methodName}");
     }
 
-
-    private static void GenerateAsyncDataSourceGeneratorWithPropertyWithAssignment(CodeWriter writer, AttributeData attr)
+    private static void GenerateAsyncDataSourceGeneratorWithPropertyWithAssignment(CodeWriter writer, DataSourceAttribute.AsyncDataSource attr)
     {
-        var generatorCode = CodeGenerationHelpers.GenerateAttributeInstantiation(attr);
-        writer.AppendLine($"var generator = {generatorCode};");
+        writer.AppendLine($"var generator = {attr.GeneratedCode};");
         writer.AppendLine("// Use the global static property context for disposal tracking");
         writer.AppendLine("var globalContext = global::TUnit.Core.TestSessionContext.GlobalStaticPropertyContext;");
         writer.AppendLine("var metadata = new global::TUnit.Core.DataGeneratorMetadata");
@@ -339,40 +431,4 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("}");
     }
-
-    private static ImmutableArray<PropertyWithDataSource> GetStaticPropertyDataSources(INamedTypeSymbol typeSymbol)
-    {
-        var properties = new List<PropertyWithDataSource>();
-
-        // Walk inheritance hierarchy to include base class static properties
-        var currentType = typeSymbol;
-        while (currentType != null)
-        {
-            foreach (var member in currentType.GetMembers())
-            {
-                if (member is IPropertySymbol { DeclaredAccessibility: Accessibility.Public, SetMethod.DeclaredAccessibility: Accessibility.Public, IsStatic: true } property) // Only static properties for session initialization
-                {
-                    var dataSourceAttr = property.GetAttributes()
-                        .FirstOrDefault(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass));
-
-                    if (dataSourceAttr != null)
-                    {
-                        // Check if we already have this property (in case of overrides)
-                        if (!properties.Any(p => p.Property.Name == property.Name))
-                        {
-                            properties.Add(new PropertyWithDataSource
-                            {
-                                Property = property,
-                                DataSourceAttribute = dataSourceAttr
-                            });
-                        }
-                    }
-                }
-            }
-            currentType = currentType.BaseType;
-        }
-
-        return properties.ToImmutableArray();
-    }
-
 }
