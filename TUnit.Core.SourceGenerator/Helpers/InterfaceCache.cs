@@ -7,9 +7,9 @@ namespace TUnit.Core.SourceGenerator.Helpers;
 /// <summary>
 /// Caches interface implementation checks to avoid repeated AllInterfaces traversals
 /// </summary>
-internal static class InterfaceCache
+public static class InterfaceCache
 {
-    private static readonly ConcurrentDictionary<(ITypeSymbol Type, string InterfaceName), bool> _implementsCache = new(TypeStringTupleComparer.Default);
+    public static readonly ConcurrentDictionary<(ITypeSymbol Type, string InterfaceName), bool> _implementsCache = new(TypeStringTupleComparer.Default);
     private static readonly ConcurrentDictionary<(ITypeSymbol Type, string GenericInterfacePattern), INamedTypeSymbol?> _genericInterfaceCache = new(TypeStringTupleComparer.Default);
 
     /// <summary>

@@ -1,5 +1,6 @@
 ﻿using BenchmarkDotNet.Attributes;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.MSBuild;
 using TUnit.Core.SourceGenerator.Generators;
 using TUnit.SourceGenerator.Benchmarks;
@@ -23,8 +24,25 @@ public class TestMetadataGeneratorBenchmarks
             .GetAwaiter()
             .GetResult();
 
+    // [IterationSetup(Target = nameof(RunGenerator))]
+    // public void Setup()
+    // {
+    //     _sampleCompilation = _sampleCompilation!.AddSyntaxTrees([CSharpSyntaxTree.ParseText($"struct MyValue{Random.Shared.Next()} {{}}", options: (CSharpParseOptions)_sampleCompilation.SyntaxTrees.First().Options)]);
+    //
+    // }
+
+    // [Benchmark]
+    // public GeneratorDriver RunGenerator() => _sampleDriver!.RunGeneratorsAndUpdateCompilation(_sampleCompilation!, out _, out _);
+
     [Benchmark]
-    public GeneratorDriver RunGenerator() => _sampleDriver!.RunGeneratorsAndUpdateCompilation(_sampleCompilation!, out _, out _);
+    public GeneratorDriver RunGenerator()
+    {
+        var driver = _sampleDriver!.RunGeneratorsAndUpdateCompilation(_sampleCompilation!, out _, out _);
+
+        // add a random type to create a new compilation.
+        _sampleCompilation = _sampleCompilation.AddSyntaxTrees([CSharpSyntaxTree.ParseText($"struct MyValue{Random.Shared.Next()} {{}}", options: (CSharpParseOptions)_sampleCompilation.SyntaxTrees.First().Options)]);
+        return driver;
+    }
 
     [GlobalCleanup]
     public void Cleanup()
