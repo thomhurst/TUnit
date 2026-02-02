@@ -78,7 +78,7 @@ public sealed class TestRunner
             {
                 await ExecuteTestAsync(dependency.Test, cancellationToken).ConfigureAwait(false);
 
-                if (dependency.Test.State == TestState.Failed && !dependency.ProceedOnFailure)
+                if (dependency.Test.State != TestState.Passed && !dependency.ProceedOnFailure)
                 {
                     _testStateManager.MarkSkipped(test, "Skipped due to failed dependencies");
                     await _tunitMessageBus.Skipped(test.Context, "Skipped due to failed dependencies").ConfigureAwait(false);
