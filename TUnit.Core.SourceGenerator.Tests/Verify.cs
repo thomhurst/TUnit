@@ -70,7 +70,7 @@ public sealed class VerifySettingsTask
     {
         // Scrub Windows-style paths (e.g., C:\Users\... or D:\git\TUnit\)
         ScrubLinesWithReplace(line => System.Text.RegularExpressions.Regex.Replace(line,
-            @"[A-Za-z]:\\\\[^""\s,)]+",
+            @"[A-Za-z]:\\[^""\s,)]+",
             "PATH_SCRUBBED"));
 
         // Scrub Unix-style paths (e.g., /home/user/... or /var/lib/...)
