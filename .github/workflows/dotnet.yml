@@ -100,6 +100,12 @@ jobs:
         run: npx playwright install
         if: steps.playwright-cache.outputs.cache-hit == 'true'
 
+      - name: Enable Long Paths on Windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
+        shell: pwsh
+
       - name: Build
         run: dotnet build -c Release
 
