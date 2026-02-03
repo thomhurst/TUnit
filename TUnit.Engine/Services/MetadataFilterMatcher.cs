@@ -213,6 +213,7 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
     private static bool CouldMatchUidFilter(TestNodeUidListFilter filter, TestMetadata metadata)
     {
         var classMetadata = metadata.MethodMetadata.Class;
+        var namespaceName = classMetadata.Namespace ?? "";
         var className = metadata.TestClassType.Name;
         var methodName = metadata.TestMethodName;
 
@@ -224,14 +225,27 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
             classNameForMatching = className.Substring(0, backtickIndex);
         }
 
+        // Build expected prefix: {Namespace}.{ClassName}. or just {ClassName}. for empty namespace
+        // This ensures we match the exact class in the exact namespace
+        var expectedClassPrefix = string.IsNullOrEmpty(namespaceName)
+            ? $"{classNameForMatching}."
+            : $"{namespaceName}.{classNameForMatching}.";
+
+        // Also handle generic class names in UIDs (e.g., Namespace.MyClass<System.Int32>.0.0...)
+        var expectedGenericClassPrefix = string.IsNullOrEmpty(namespaceName)
+            ? $"{classNameForMatching}<"
+            : $"{namespaceName}.{classNameForMatching}<";
+
         foreach (var uid in filter.TestNodeUids)
         {
             var uidValue = uid.Value;
 
-            // Check for class name with word boundaries to avoid substring false positives
-            // e.g., "ABCV" should not match "ABCVC"
-            // Class names in TestIds are bounded by: '.' (namespace/indices), '<' (generics), '+' (nested)
-            if (!HasClassNameMatch(uidValue, classNameForMatching))
+            // Check for exact namespace.classname prefix to avoid matching
+            // same class name in different namespaces
+            var hasClassPrefix = uidValue.StartsWith(expectedClassPrefix, StringComparison.Ordinal) ||
+                                 uidValue.StartsWith(expectedGenericClassPrefix, StringComparison.Ordinal);
+
+            if (!hasClassPrefix)
             {
                 continue;
             }
@@ -244,38 +258,6 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
             }
 
             return true;
-        }
-
-        return false;
-    }
-
-    private static bool HasClassNameMatch(string uidValue, string className)
-    {
-        // Class name patterns with proper boundaries:
-        // .{ClassName}. (most common: namespace.class.index)
-        // .{ClassName}< (generic: namespace.class<T>.index)
-        // .{ClassName}+ (nested: outer+inner)
-        // Also handle start of string for edge cases
-        ReadOnlySpan<char> validSuffixes = ['.', '<', '+'];
-
-        var searchStart = 0;
-        int index;
-        while ((index = uidValue.IndexOf(className, searchStart, StringComparison.Ordinal)) >= 0)
-        {
-            // Check prefix boundary: must be preceded by '.' or be at start
-            var prefixOk = index == 0 || uidValue[index - 1] == '.';
-
-            // Check suffix boundary: must be followed by '.', '<', or '+'
-            var suffixIndex = index + className.Length;
-            var suffixOk = suffixIndex < uidValue.Length &&
-                           validSuffixes.Contains(uidValue[suffixIndex]);
-
-            if (prefixOk && suffixOk)
-            {
-                return true;
-            }
-
-            searchStart = index + 1;
         }
 
         return false;
