@@ -213,19 +213,100 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
     private static bool CouldMatchUidFilter(TestNodeUidListFilter filter, TestMetadata metadata)
     {
         var classMetadata = metadata.MethodMetadata.Class;
-        var namespaceName = classMetadata.Namespace ?? "";
         var className = metadata.TestClassType.Name;
         var methodName = metadata.TestMethodName;
+
+        // Handle generic types: Type`1 -> need to match Type< in the UID
+        var classNameForMatching = className;
+        var backtickIndex = className.IndexOf('`');
+        if (backtickIndex > 0)
+        {
+            classNameForMatching = className.Substring(0, backtickIndex);
+        }
 
         foreach (var uid in filter.TestNodeUids)
         {
             var uidValue = uid.Value;
-            if (uidValue.Contains(namespaceName) &&
-                uidValue.Contains(className) &&
-                uidValue.Contains(methodName))
+
+            // Check for class name with word boundaries to avoid substring false positives
+            // e.g., "ABCV" should not match "ABCVC"
+            // Class names in TestIds are bounded by: '.' (namespace/indices), '<' (generics), '+' (nested)
+            if (!HasClassNameMatch(uidValue, classNameForMatching))
+            {
+                continue;
+            }
+
+            // Check for method name with word boundaries
+            // Method names are preceded by '.' and followed by '.', '<', or '('
+            if (!HasMethodNameMatch(uidValue, methodName))
+            {
+                continue;
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private static bool HasClassNameMatch(string uidValue, string className)
+    {
+        // Class name patterns with proper boundaries:
+        // .{ClassName}. (most common: namespace.class.index)
+        // .{ClassName}< (generic: namespace.class<T>.index)
+        // .{ClassName}+ (nested: outer+inner)
+        // Also handle start of string for edge cases
+        ReadOnlySpan<char> validSuffixes = ['.', '<', '+'];
+
+        var searchStart = 0;
+        int index;
+        while ((index = uidValue.IndexOf(className, searchStart, StringComparison.Ordinal)) >= 0)
+        {
+            // Check prefix boundary: must be preceded by '.' or be at start
+            var prefixOk = index == 0 || uidValue[index - 1] == '.';
+
+            // Check suffix boundary: must be followed by '.', '<', or '+'
+            var suffixIndex = index + className.Length;
+            var suffixOk = suffixIndex < uidValue.Length &&
+                           validSuffixes.Contains(uidValue[suffixIndex]);
+
+            if (prefixOk && suffixOk)
             {
                 return true;
             }
+
+            searchStart = index + 1;
+        }
+
+        return false;
+    }
+
+    private static bool HasMethodNameMatch(string uidValue, string methodName)
+    {
+        // Method name patterns with proper boundaries:
+        // .{MethodName}. (most common: after class indices)
+        // .{MethodName}< (generic method)
+        // .{MethodName}( (method with parameter types in signature)
+        ReadOnlySpan<char> validSuffixes = ['.', '<', '('];
+
+        var searchStart = 0;
+        int index;
+        while ((index = uidValue.IndexOf(methodName, searchStart, StringComparison.Ordinal)) >= 0)
+        {
+            // Method name must be preceded by '.'
+            var prefixOk = index > 0 && uidValue[index - 1] == '.';
+
+            // Check suffix boundary
+            var suffixIndex = index + methodName.Length;
+            var suffixOk = suffixIndex < uidValue.Length &&
+                           validSuffixes.Contains(uidValue[suffixIndex]);
+
+            if (prefixOk && suffixOk)
+            {
+                return true;
+            }
+
+            searchStart = index + 1;
         }
 
         return false;
