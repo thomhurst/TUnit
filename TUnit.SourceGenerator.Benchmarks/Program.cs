@@ -11,6 +11,10 @@ if (args is { Length: > 0 })
 else
 {
     BenchmarkRunner.Run<TestMetadataGeneratorBenchmarks>();
-    // BenchmarkRunner.Run<AotConverterGeneratorBenchmarks>();
+    // BenchmarkRunner.Run<DynamicTestsGeneratorBenchmarks>();
+    // BenchmarkRunner.Run<InfrastructureGeneratorBenchmarks>();
     // BenchmarkRunner.Run<StaticPropertyInitializationGeneratorBenchmarks>();
+    // BenchmarkRunner.Run<AotConverterGeneratorBenchmarks>();
+    // BenchmarkRunner.Run<HookMetadataGeneratorBenchmarks>();
+    // BenchmarkRunner.Run<PropertyInjectionSourceGeneratorBenchmarks>();
 }

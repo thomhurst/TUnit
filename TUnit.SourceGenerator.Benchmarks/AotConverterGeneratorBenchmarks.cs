@@ -12,18 +12,18 @@ public class AotConverterGeneratorBenchmarks
     private const string SampleProjectPath = "../TUnit.TestProject/TUnit.TestProject.csproj";
 
     private MSBuildWorkspace? _workspace;
-    private GeneratorDriver? _sampleDriver;
-    private Compilation? _sampleCompilation;
+    private GeneratorDriver? _driver;
+    private Compilation? _compilation;
 
     [GlobalSetup(Target = nameof(RunGenerator))]
     public void SetupRunGenerator() =>
-        (_sampleCompilation, _sampleDriver, _workspace) =
+        (_compilation, _driver, _workspace) =
         WorkspaceHelper.SetupAsync<AotConverterGenerator>(SampleProjectPath)
             .GetAwaiter()
             .GetResult();
 
     [Benchmark]
-    public GeneratorDriver RunGenerator() => _sampleDriver!.RunGeneratorsAndUpdateCompilation(_sampleCompilation!, out _, out _);
+    public GeneratorDriver RunGenerator() => _driver!.RunGeneratorsAndUpdateCompilation(_compilation!, out _, out _);
 
     [GlobalCleanup]
     public void Cleanup()
