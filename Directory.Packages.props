@@ -60,9 +60,9 @@
     <PackageVersion Include="ModularPipelines.DotNet" Version="3.1.6" />
     <PackageVersion Include="ModularPipelines.Git" Version="3.1.6" />
     <PackageVersion Include="ModularPipelines.GitHub" Version="3.1.6" />
-    <PackageVersion Include="MSTest" Version="4.0.2" />
-    <PackageVersion Include="MSTest.TestAdapter" Version="4.0.2" />
-    <PackageVersion Include="MSTest.TestFramework" Version="4.0.2" />
+    <PackageVersion Include="MSTest" Version="4.1.0" />
+    <PackageVersion Include="MSTest.TestAdapter" Version="4.1.0" />
+    <PackageVersion Include="MSTest.TestFramework" Version="4.1.0" />
     <PackageVersion Include="Npgsql" Version="10.0.1" />
     <PackageVersion Include="NSubstitute" Version="5.3.0" />
     <PackageVersion Include="NuGet.Protocol" Version="7.0.1" />
