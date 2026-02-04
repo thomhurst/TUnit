@@ -217,15 +217,78 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
         var className = metadata.TestClassType.Name;
         var methodName = metadata.TestMethodName;
 
+        // Handle generic types: Type`1 -> need to match Type< in the UID
+        var classNameForMatching = className;
+        var backtickIndex = className.IndexOf('`');
+        if (backtickIndex > 0)
+        {
+            classNameForMatching = className.Substring(0, backtickIndex);
+        }
+
+        // Build expected prefix: {Namespace}.{ClassName}. or just {ClassName}. for empty namespace
+        // This ensures we match the exact class in the exact namespace
+        var expectedClassPrefix = string.IsNullOrEmpty(namespaceName)
+            ? $"{classNameForMatching}."
+            : $"{namespaceName}.{classNameForMatching}.";
+
+        // Also handle generic class names in UIDs (e.g., Namespace.MyClass<System.Int32>.0.0...)
+        var expectedGenericClassPrefix = string.IsNullOrEmpty(namespaceName)
+            ? $"{classNameForMatching}<"
+            : $"{namespaceName}.{classNameForMatching}<";
+
         foreach (var uid in filter.TestNodeUids)
         {
             var uidValue = uid.Value;
-            if (uidValue.Contains(namespaceName) &&
-                uidValue.Contains(className) &&
-                uidValue.Contains(methodName))
+
+            // Check for exact namespace.classname prefix to avoid matching
+            // same class name in different namespaces
+            var hasClassPrefix = uidValue.StartsWith(expectedClassPrefix, StringComparison.Ordinal) ||
+                                 uidValue.StartsWith(expectedGenericClassPrefix, StringComparison.Ordinal);
+
+            if (!hasClassPrefix)
+            {
+                continue;
+            }
+
+            // Check for method name with word boundaries
+            // Method names are preceded by '.' and followed by '.', '<', or '('
+            if (!HasMethodNameMatch(uidValue, methodName))
+            {
+                continue;
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private static bool HasMethodNameMatch(string uidValue, string methodName)
+    {
+        // Method name patterns with proper boundaries:
+        // .{MethodName}. (most common: after class indices)
+        // .{MethodName}< (generic method)
+        // .{MethodName}( (method with parameter types in signature)
+        ReadOnlySpan<char> validSuffixes = ['.', '<', '('];
+
+        var searchStart = 0;
+        int index;
+        while ((index = uidValue.IndexOf(methodName, searchStart, StringComparison.Ordinal)) >= 0)
+        {
+            // Method name must be preceded by '.'
+            var prefixOk = index > 0 && uidValue[index - 1] == '.';
+
+            // Check suffix boundary
+            var suffixIndex = index + methodName.Length;
+            var suffixOk = suffixIndex < uidValue.Length &&
+                           validSuffixes.Contains(uidValue[suffixIndex]);
+
+            if (prefixOk && suffixOk)
             {
                 return true;
             }
+
+            searchStart = index + 1;
         }
 
         return false;
