@@ -106,7 +106,7 @@ public class InfrastructureGenerator : IIncrementalGenerator
         {
             if (ShouldLoadAssembly(assembly, compilation))
             {
-                var publicType = GetFirstPublicType(assembly);
+                var publicType = GetFirstUniquePublicType(assembly, compilation);
                 if (publicType != null)
                 {
                     assembliesToLoad.Add(publicType);
@@ -256,39 +256,85 @@ public class InfrastructureGenerator : IIncrementalGenerator
         return correspondingReference != null;
     }
 
-    private static string? GetFirstPublicType(IAssemblySymbol assembly)
+    /// <summary>
+    /// Gets the first public type from an assembly that can be uniquely resolved by the compilation.
+    /// This avoids CS0433 errors when multiple assemblies define types with the same fully-qualified name.
+    /// </summary>
+    private static string? GetFirstUniquePublicType(IAssemblySymbol assembly, Compilation compilation)
     {
-        var publicTypes = GetPublicTypesRecursive(assembly.GlobalNamespace);
-
-        // Prefer non-generic types to avoid typeof() formatting complexity
-        var publicType = publicTypes.FirstOrDefault(t => !t.IsGenericType)
-                      ?? publicTypes.FirstOrDefault();
-
-        if (publicType == null)
+        foreach (var type in GetPublicTypesRecursive(assembly.GlobalNamespace))
         {
-            return null;
+            // Skip generic types to avoid typeof() formatting complexity
+            if (type.IsGenericType)
+            {
+                continue;
+            }
+
+            var metadataName = GetFullMetadataName(type);
+            var resolvedType = compilation.GetTypeByMetadataName(metadataName);
+
+            // If Roslyn resolves to the same type, it's unambiguous - use it
+            // GetTypeByMetadataName returns null when the type name is ambiguous
+            if (SymbolEqualityComparer.Default.Equals(resolvedType, type))
+            {
+                return type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            }
+
+            // null or different type = ambiguous, try next type
         }
 
-        var typeName = publicType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-
-        // For generic types (fallback case), use open generic syntax for typeof()
-        // Example: global::Foo<T> -> global::Foo<>
-        // Example: global::Foo<T1, T2> -> global::Foo<,>
-        if (publicType.IsGenericType)
+        // Fallback: try generic types if no non-generic unique type was found
+        foreach (var type in GetPublicTypesRecursive(assembly.GlobalNamespace))
         {
-            var openGenericSuffix = publicType.Arity == 1
-                ? "<>"
-                : $"<{new string(',', publicType.Arity - 1)}>";
-
-            // Remove everything from < to the end and append the open generic suffix
-            var genericStart = typeName.LastIndexOf('<');
-            if (genericStart > 0)
+            if (!type.IsGenericType)
             {
-                typeName = typeName.Substring(0, genericStart) + openGenericSuffix;
+                continue;
+            }
+
+            var metadataName = GetFullMetadataName(type);
+            var resolvedType = compilation.GetTypeByMetadataName(metadataName);
+
+            if (SymbolEqualityComparer.Default.Equals(resolvedType, type))
+            {
+                var typeName = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+
+                // Use open generic syntax for typeof()
+                // Example: global::Foo<T> -> global::Foo<>
+                // Example: global::Foo<T1, T2> -> global::Foo<,>
+                var openGenericSuffix = type.Arity == 1
+                    ? "<>"
+                    : $"<{new string(',', type.Arity - 1)}>";
+
+                var genericStart = typeName.LastIndexOf('<');
+                if (genericStart > 0)
+                {
+                    typeName = typeName.Substring(0, genericStart) + openGenericSuffix;
+                }
+
+                return typeName;
             }
         }
 
-        return typeName;
+        return null; // No unique type found, skip this assembly
+    }
+
+    /// <summary>
+    /// Gets the full metadata name for a type (e.g., "Namespace.OuterClass+NestedClass").
+    /// This is the format expected by Compilation.GetTypeByMetadataName().
+    /// </summary>
+    private static string GetFullMetadataName(INamedTypeSymbol type)
+    {
+        if (type.ContainingType != null)
+        {
+            return $"{GetFullMetadataName(type.ContainingType)}+{type.MetadataName}";
+        }
+
+        if (type.ContainingNamespace.IsGlobalNamespace)
+        {
+            return type.MetadataName;
+        }
+
+        return $"{type.ContainingNamespace.ToDisplayString()}.{type.MetadataName}";
     }
 
     private static IEnumerable<INamedTypeSymbol> GetPublicTypesRecursive(INamespaceSymbol namespaceSymbol)
