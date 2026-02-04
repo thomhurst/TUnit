@@ -159,7 +159,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
         var isOpenGeneric = typeSymbol.IsGenericType && typeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter);
 
         // Pre-generate method info expression
-        var methodInfoExpression = GenerateMethodInfoExpression(context.SemanticModel.Compilation, typeSymbol, methodSymbol);
+        var methodInfoExpression = GenerateMethodInfoExpression(typeSymbol, methodSymbol);
 
         // Extract parameters using the existing static method
         var parameters = ParameterModel.ExtractAll(methodSymbol);
@@ -200,7 +200,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
         };
     }
 
-    private static string GenerateMethodInfoExpression(Compilation compilation, INamedTypeSymbol typeSymbol, IMethodSymbol methodSymbol)
+    private static string GenerateMethodInfoExpression(INamedTypeSymbol typeSymbol, IMethodSymbol methodSymbol)
     {
         // Generate the MethodMetadata expression as a string - no header since this is inline
         using var writer = new CodeWriter(includeHeader: false);
@@ -632,11 +632,11 @@ public class HookMetadataGenerator : IIncrementalGenerator
             {
                 if (hook.ClassIsOpenGeneric)
                 {
-                    GenerateReflectionBasedInvocation(writer, hook, true);
+                    GenerateReflectionBasedInvocation(writer, hook);
                 }
                 else
                 {
-                    GenerateDirectInvocation(writer, hook, true);
+                    GenerateDirectInvocation(writer, hook);
                 }
             }
         }
@@ -644,7 +644,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
         {
             using (writer.BeginBlock($"private static async ValueTask {delegateKey}_Body({contextType} context, CancellationToken cancellationToken)"))
             {
-                if (hook.ClassIsOpenGeneric && hook.IsStatic)
+                if (hook is { ClassIsOpenGeneric: true, IsStatic: true })
                 {
                     GenerateOpenGenericStaticInvocation(writer, hook);
                 }
@@ -658,7 +658,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
         writer.AppendLine();
     }
 
-    private static void GenerateReflectionBasedInvocation(CodeWriter writer, HookModel hook, bool isInstance)
+    private static void GenerateReflectionBasedInvocation(CodeWriter writer, HookModel hook)
     {
         writer.AppendLine("var instanceType = instance.GetType();");
         writer.AppendLine($"var method = instanceType.GetMethod(\"{hook.MethodName}\", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance{(hook.IsStatic ? " | global::System.Reflection.BindingFlags.Static" : "")});");
@@ -700,7 +700,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("}");
     }
 
-    private static void GenerateDirectInvocation(CodeWriter writer, HookModel hook, bool isInstance)
+    private static void GenerateDirectInvocation(CodeWriter writer, HookModel hook)
     {
         var className = hook.FullyQualifiedTypeName;
         writer.AppendLine($"var typedInstance = ({className})instance;");

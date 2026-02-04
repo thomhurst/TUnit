@@ -109,7 +109,7 @@ internal static class CodeGenerationHelpers
                 var arg = attr.ConstructorArguments[i];
 
                 // Check if this is a params array parameter
-                if (i == attr.ConstructorArguments.Length - 1 && IsParamsArrayArgument(attr, i))
+                if (i == attr.ConstructorArguments.Length - 1 && IsParamsArrayArgument(attr))
                 {
                     if (arg.Kind == TypedConstantKind.Array)
                     {
@@ -282,16 +282,11 @@ internal static class CodeGenerationHelpers
     /// <summary>
     /// Determines if an argument is for a params array parameter.
     /// </summary>
-    private static bool IsParamsArrayArgument(AttributeData attr, int argumentIndex)
+    private static bool IsParamsArrayArgument(AttributeData attr)
     {
         var typeName = attr.AttributeClass!.GloballyQualified();
 
-        if (typeName is "global::TUnit.Core.ArgumentsAttribute" or "global::TUnit.Core.InlineDataAttribute")
-        {
-            return true;
-        }
-
-        return false;
+        return typeName is "global::TUnit.Core.ArgumentsAttribute" or "global::TUnit.Core.InlineDataAttribute";
     }
 
 

@@ -72,7 +72,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         // Use a dictionary to deduplicate static properties by their declaring type and name
         // This prevents duplicate initialization when derived classes inherit static properties
         var uniqueStaticProperties = new Dictionary<(INamedTypeSymbol DeclaringType, string Name), PropertyWithDataSource>(SymbolEqualityComparer.Default.ToTupleComparer());
-        
+
         foreach (var testClass in testClasses)
         {
             var properties = GetStaticPropertyDataSources(testClass);
@@ -87,7 +87,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
                 }
             }
         }
-        
+
         var allStaticProperties = uniqueStaticProperties.Values.ToImmutableArray();
 
         if (allStaticProperties.IsEmpty)
@@ -109,14 +109,14 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         writer.AppendLine("namespace TUnit.Core.Generated");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         writer.AppendLine("/// <summary>");
         writer.AppendLine("/// Auto-generated static property initializer");
         writer.AppendLine("/// </summary>");
         writer.AppendLine("internal static class StaticPropertyInitializer");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         writer.AppendLine("/// <summary>");
         writer.AppendLine("/// Module initializer that registers static property metadata");
         writer.AppendLine("/// </summary>");
@@ -179,7 +179,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         writer.AppendLine($"private static async global::System.Threading.Tasks.Task<object?> {methodName}()");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         // Create PropertyMetadata with containing type information
         writer.AppendLine($"// Create PropertyMetadata for {propertyName}");
         writer.AppendLine("var containingTypeMetadata = new global::TUnit.Core.ClassMetadata");
@@ -196,7 +196,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("};");
         writer.AppendLine();
-        
+
         writer.AppendLine("var propertyMetadata = new global::TUnit.Core.PropertyMetadata");
         writer.AppendLine("{");
         writer.Indent();
@@ -210,7 +210,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("};");
         writer.AppendLine();
-        
+
         var attr = propertyData.DataSourceAttribute;
         var attributeClassName = attr.AttributeClass?.Name;
 
@@ -230,7 +230,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         else if (attr.AttributeClass?.IsOrInherits("global::TUnit.Core.AsyncDataSourceGeneratorAttribute") == true ||
                  attr.AttributeClass?.IsOrInherits("global::TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute") == true)
         {
-            GenerateAsyncDataSourceGeneratorWithPropertyWithAssignment(writer, attr, propertyData.Property.ContainingType);
+            GenerateAsyncDataSourceGeneratorWithPropertyWithAssignment(writer, attr);
         }
         else
         {
@@ -306,7 +306,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
     }
 
 
-    private static void GenerateAsyncDataSourceGeneratorWithPropertyWithAssignment(CodeWriter writer, AttributeData attr, INamedTypeSymbol containingType)
+    private static void GenerateAsyncDataSourceGeneratorWithPropertyWithAssignment(CodeWriter writer, AttributeData attr)
     {
         var generatorCode = CodeGenerationHelpers.GenerateAttributeInstantiation(attr);
         writer.AppendLine($"var generator = {generatorCode};");

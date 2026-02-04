@@ -81,7 +81,7 @@ public static class InstanceFactoryGenerator
             var constructor = GetPrimaryConstructor(typeSymbol);
             if (constructor != null)
             {
-                GenerateTypedConstructorCall(writer, className, constructor, testMethod);
+                GenerateTypedConstructorCall(writer, className, constructor);
             }
             else
             {
@@ -145,7 +145,7 @@ public static class InstanceFactoryGenerator
         return publicConstructors.Length == 1 ? publicConstructors[0] : publicConstructors.FirstOrDefault();
     }
 
-    private static void GenerateTypedConstructorCall(CodeWriter writer, string className, IMethodSymbol constructor, TestMethodMetadata? testMethod)
+    private static void GenerateTypedConstructorCall(CodeWriter writer, string className, IMethodSymbol constructor)
     {
         writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
         writer.AppendLine("{");
@@ -164,17 +164,17 @@ public static class InstanceFactoryGenerator
 
             // Generate constructor arguments
             var parameterTypes = constructor.Parameters.Select(p => p.Type).ToList();
-            
+
             for (var i = 0; i < parameterTypes.Count; i++)
             {
                 if (i > 0)
                 {
                     writer.Append(", ");
                 }
-                
+
                 var parameterType = parameterTypes[i];
                 var argAccess = $"args[{i}]";
-                
+
                 // Use CastHelper which now has AOT converter registry support
                 writer.Append($"global::TUnit.Core.Helpers.CastHelper.Cast<{parameterType.GloballyQualified()}>({argAccess})");
             }
@@ -214,11 +214,11 @@ public static class InstanceFactoryGenerator
         // Get the open generic type
         writer.AppendLine($"var openGenericType = typeof({genericType.OriginalDefinition.GloballyQualified()});");
         writer.AppendLine();
-        
+
         // Create the closed generic type
         writer.AppendLine("var closedGenericType = global::TUnit.Core.Helpers.GenericTypeHelper.MakeGenericTypeSafe(openGenericType, typeArgs);");
         writer.AppendLine();
-        
+
         // Check for constructor parameters
         var constructor = GetPrimaryConstructor(genericType);
         if (constructor is { Parameters.Length: > 0 })
@@ -230,7 +230,7 @@ public static class InstanceFactoryGenerator
         {
             writer.AppendLine("// Create instance with parameterless constructor");
             writer.AppendLine("var instance = global::System.Activator.CreateInstance(closedGenericType);");
-            
+
             // Check for required properties
             var requiredProperties = RequiredPropertyHelper.GetAllRequiredProperties(genericType);
             if (requiredProperties.Any())
@@ -243,7 +243,7 @@ public static class InstanceFactoryGenerator
                     writer.AppendLine($"closedGenericType.GetProperty(\"{property.Name}\")?.SetValue(instance, {defaultValue});");
                 }
             }
-            
+
             writer.AppendLine("return instance!;");
         }
 
