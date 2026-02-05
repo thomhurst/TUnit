@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
+using TUnit.Core.Helpers;
 
 namespace TUnit.Engine.Services;
 
@@ -214,27 +215,20 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
     {
         var classMetadata = metadata.MethodMetadata.Class;
         var namespaceName = classMetadata.Namespace ?? "";
-        var className = metadata.TestClassType.Name;
         var methodName = metadata.TestMethodName;
 
-        // Handle generic types: Type`1 -> need to match Type< in the UID
-        var classNameForMatching = className;
-        var backtickIndex = className.IndexOf('`');
-        if (backtickIndex > 0)
-        {
-            classNameForMatching = className.Substring(0, backtickIndex);
-        }
+        // Build the full class name including nested type hierarchy (e.g., Outer+Inner)
+        // This matches the format used by TestIdentifierService.WriteTypeNameWithGenerics
+        var classNameForMatching = BuildClassNameForMatching(metadata.TestClassType);
 
-        // Build expected prefix: {Namespace}.{ClassName}. or just {ClassName}. for empty namespace
-        // This ensures we match the exact class in the exact namespace
+        // Build expected prefix: {Namespace}.{ClassName} or just {ClassName} for empty namespace
+        // The class name may be followed by '.', '<', or '(' depending on:
+        // - '.' for regular classes (e.g., MyClass.0.0.Method)
+        // - '<' for generic classes (e.g., MyClass<System.Int32>.0.0.Method)
+        // - '(' for classes with constructor parameters (e.g., MyClass(System.String).0.0.Method)
         var expectedClassPrefix = string.IsNullOrEmpty(namespaceName)
-            ? $"{classNameForMatching}."
-            : $"{namespaceName}.{classNameForMatching}.";
-
-        // Also handle generic class names in UIDs (e.g., Namespace.MyClass<System.Int32>.0.0...)
-        var expectedGenericClassPrefix = string.IsNullOrEmpty(namespaceName)
-            ? $"{classNameForMatching}<"
-            : $"{namespaceName}.{classNameForMatching}<";
+            ? classNameForMatching
+            : $"{namespaceName}.{classNameForMatching}";
 
         foreach (var uid in filter.TestNodeUids)
         {
@@ -242,12 +236,22 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
 
             // Check for exact namespace.classname prefix to avoid matching
             // same class name in different namespaces
-            var hasClassPrefix = uidValue.StartsWith(expectedClassPrefix, StringComparison.Ordinal) ||
-                                 uidValue.StartsWith(expectedGenericClassPrefix, StringComparison.Ordinal);
-
-            if (!hasClassPrefix)
+            if (!uidValue.StartsWith(expectedClassPrefix, StringComparison.Ordinal))
             {
                 continue;
+            }
+
+            // Verify the character after the class name is a valid boundary: '.', '<', or '('
+            var indexAfterPrefix = expectedClassPrefix.Length;
+            if (indexAfterPrefix < uidValue.Length)
+            {
+                var charAfterPrefix = uidValue[indexAfterPrefix];
+                if (charAfterPrefix != '.' && charAfterPrefix != '<' && charAfterPrefix != '(')
+                {
+                    // Not a valid boundary - this could be a substring match
+                    // e.g., "ABCV" matching "ABCVC"
+                    continue;
+                }
             }
 
             // Check for method name with word boundaries
@@ -261,6 +265,93 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Builds the class name for matching as it appears in UIDs.
+    /// Handles nested types (Outer+Inner) and generic types with their type arguments.
+    /// This matches the format used by TestIdentifierService.WriteTypeNameWithGenerics.
+    /// </summary>
+    private static string BuildClassNameForMatching(Type type)
+    {
+        // Fast path: non-nested, non-generic types
+        if (type.DeclaringType == null && !type.IsGenericType)
+        {
+            return type.Name;
+        }
+
+        // Build the full nested type hierarchy with '+' separators
+        // This matches TestIdentifierService.WriteTypeNameWithGenerics
+        var typeHierarchy = new ValueListBuilder<string>([null, null, null, null]);
+        var typeVsb = new ValueStringBuilder(stackalloc char[128]);
+        try
+        {
+            var currentType = type;
+
+            while (currentType != null)
+            {
+                if (currentType.IsGenericType)
+                {
+                    var name = currentType.Name;
+
+                    var backtickIndex = name.IndexOf('`');
+                    if (backtickIndex > 0)
+                    {
+                        typeVsb.Append(name.AsSpan(0, backtickIndex));
+                    }
+                    else
+                    {
+                        typeVsb.Append(name);
+                    }
+
+                    // Add the generic type arguments (same format as TestIdentifierService)
+                    var genericArgs = currentType.GetGenericArguments();
+                    typeVsb.Append('<');
+                    for (var i = 0; i < genericArgs.Length; i++)
+                    {
+                        if (i > 0)
+                        {
+                            typeVsb.Append(", ");
+                        }
+                        typeVsb.Append(genericArgs[i].FullName ?? genericArgs[i].Name);
+                    }
+                    typeVsb.Append('>');
+
+                    typeHierarchy.Append(typeVsb.AsSpan().ToString());
+                    typeVsb.Length = 0;
+                }
+                else
+                {
+                    typeHierarchy.Append(currentType.Name);
+                }
+
+                currentType = currentType.DeclaringType;
+            }
+
+            // Build result: reverse to get outer-to-inner order and join with '+'
+            var resultVsb = new ValueStringBuilder(stackalloc char[256]);
+            try
+            {
+                for (var i = typeHierarchy.Length - 1; i >= 0; i--)
+                {
+                    if (i < typeHierarchy.Length - 1)
+                    {
+                        resultVsb.Append('+');
+                    }
+                    resultVsb.Append(typeHierarchy[i]);
+                }
+                return resultVsb.ToString();
+            }
+            finally
+            {
+                resultVsb.Dispose();
+            }
+        }
+        finally
+        {
+            typeHierarchy.Dispose();
+            typeVsb.Dispose();
+        }
     }
 
     private static bool HasMethodNameMatch(string uidValue, string methodName)

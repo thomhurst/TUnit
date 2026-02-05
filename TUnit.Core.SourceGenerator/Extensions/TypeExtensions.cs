@@ -149,7 +149,7 @@ public static class TypeExtensions
     {
         // Handle open generic types where type arguments are type parameters
         // This prevents invalid C# like List<T>, Dictionary<TKey, TValue>, T? where type parameters are undefined
-        if (typeSymbol is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol)
+        if (typeSymbol is INamedTypeSymbol { IsGenericType: true, Arity: > 0 } namedTypeSymbol)
         {
             // Check if this is an unbound generic type or has type parameter arguments
             // Use multiple detection methods for robustness across Roslyn versions

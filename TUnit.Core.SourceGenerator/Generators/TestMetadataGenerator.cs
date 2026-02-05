@@ -125,6 +125,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return null;
         }
 
+        // Skip types nested inside open generic containing types
+        // These can't be instantiated without knowing the outer type's type arguments
+        if (HasOpenGenericContainingType(containingType))
+        {
+            return null;
+        }
+
         var isGenericType = containingType is { IsGenericType: true, TypeParameters.Length: > 0 };
         var isGenericMethod = methodSymbol is { IsGenericMethod: true };
 
@@ -144,6 +151,20 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             IsGenericMethod = isGenericMethod,
             MethodAttributes = methodSymbol.GetAttributes()
         };
+    }
+
+    private static bool HasOpenGenericContainingType(INamedTypeSymbol type)
+    {
+        var current = type.ContainingType;
+        while (current != null)
+        {
+            if (current is { IsGenericType: true, TypeParameters.Length: > 0 })
+            {
+                return true;
+            }
+            current = current.ContainingType;
+        }
+        return false;
     }
 
     private static void GenerateInheritedTestSources(SourceProductionContext context, InheritsTestsClassMetadata? classInfo)
