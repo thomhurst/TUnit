@@ -64,7 +64,6 @@ public class SourceRegistrar
         Sources.DynamicTestSources.Enqueue(testSource);
     }
 
-
     /// <summary>
     /// Registers a global initializer.
     /// </summary>
