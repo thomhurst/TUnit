@@ -108,7 +108,7 @@ internal static class MetadataGenerationHelper
         if (constructor != null && constructorParams.Length > 0)
         {
             writer.Append("Parameters = ");
-            WriteParameterMetadataArrayForConstructor(writer, constructor, typeSymbol);
+            WriteParameterMetadataArrayForConstructor(writer, constructor);
             writer.AppendLine(",");
         }
         else
@@ -177,7 +177,7 @@ internal static class MetadataGenerationHelper
         var constructorParams = constructor?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty;
         if (constructor != null && constructorParams.Length > 0)
         {
-            writer.AppendLine($"Parameters = {GenerateParameterMetadataArrayForConstructor(constructor, typeSymbol, writer.IndentLevel)},");
+            writer.AppendLine($"Parameters = {GenerateParameterMetadataArrayForConstructor(constructor, writer.IndentLevel)},");
         }
         else
         {
@@ -453,7 +453,7 @@ internal static class MetadataGenerationHelper
     /// <summary>
     /// Writes an array of ParameterMetadata objects for constructor parameters with proper reflection info
     /// </summary>
-    private static void WriteParameterMetadataArrayForConstructor(ICodeWriter writer, IMethodSymbol constructor, INamedTypeSymbol containingType)
+    private static void WriteParameterMetadataArrayForConstructor(ICodeWriter writer, IMethodSymbol constructor)
     {
         if (constructor.Parameters.Length == 0)
         {
@@ -488,7 +488,7 @@ internal static class MetadataGenerationHelper
     /// <summary>
     /// Generates an array of ParameterMetadata objects for constructor parameters with proper reflection info
     /// </summary>
-    private static string GenerateParameterMetadataArrayForConstructor(IMethodSymbol constructor, INamedTypeSymbol containingType, int currentIndentLevel = 0)
+    private static string GenerateParameterMetadataArrayForConstructor(IMethodSymbol constructor, int currentIndentLevel = 0)
     {
         if (constructor.Parameters.Length == 0)
         {

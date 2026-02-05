@@ -11,7 +11,7 @@ public class AttributeWriter(Compilation compilation, TUnit.Core.SourceGenerator
     private readonly Dictionary<AttributeData, string> _attributeObjectInitializerCache = new();
 
     public void WriteAttributes(ICodeWriter sourceCodeWriter,
-        ImmutableArray<AttributeData> attributeDatas)
+        IEnumerable<AttributeData> attributeDatas)
     {
         var attributesToWrite = new List<AttributeData>();
 

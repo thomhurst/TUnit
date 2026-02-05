@@ -300,7 +300,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
 
-        GenerateReflectionFieldAccessors(writer, testMethod.TypeSymbol, className);
+        GenerateReflectionFieldAccessors(writer, testMethod.TypeSymbol);
 
         writer.AppendLine("public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)");
         writer.AppendLine("{");
@@ -346,12 +346,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             {
                 // For generic classes with no way to resolve type arguments, this will generate
                 // GenericTestMetadata that the engine will fail with a clear error message
-                GenerateTestMetadataInstance(writer, testMethod, className, uniqueClassName);
+                GenerateTestMetadataInstance(writer, testMethod, className);
             }
         }
         else
         {
-            GenerateTestMetadataInstance(writer, testMethod, className, uniqueClassName);
+            GenerateTestMetadataInstance(writer, testMethod, className);
         }
 
         writer.AppendLine("yield break;");
@@ -361,7 +361,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine();
 
         // Generate EnumerateTestDescriptors method for fast filtering
-        GenerateEnumerateTestDescriptors(writer, testMethod, className);
+        GenerateEnumerateTestDescriptors(writer, testMethod);
 
         writer.Unindent();
         writer.AppendLine("}");
@@ -369,7 +369,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         GenerateModuleInitializer(writer, testMethod, uniqueClassName);
     }
 
-    private static void GenerateTestMetadataInstance(CodeWriter writer, TestMethodMetadata testMethod, string className, string combinationGuid)
+    private static void GenerateTestMetadataInstance(CodeWriter writer, TestMethodMetadata testMethod, string className)
     {
         var methodName = testMethod.MethodSymbol.Name;
 
@@ -436,8 +436,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var attributes = methodSymbol.GetAttributes()
             .Where(a => !DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
             .Concat(testMethod.TypeSymbol.GetAttributesIncludingBaseTypes())
-            .Concat(testMethod.TypeSymbol.ContainingAssembly.GetAttributes())
-            .ToImmutableArray();
+            .Concat(testMethod.TypeSymbol.ContainingAssembly.GetAttributes());
 
         testMethod.CompilationContext.AttributeWriter.WriteAttributes(writer, attributes);
 
@@ -482,8 +481,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var attributes = methodSymbol.GetAttributes()
             .Where(a => !DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
             .Concat(testMethod.TypeSymbol.GetAttributesIncludingBaseTypes())
-            .Concat(testMethod.TypeSymbol.ContainingAssembly.GetAttributes())
-            .ToImmutableArray();
+            .Concat(testMethod.TypeSymbol.ContainingAssembly.GetAttributes());
 
         testMethod.CompilationContext.AttributeWriter.WriteAttributes(writer, attributes);
 
@@ -518,22 +516,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static void GenerateDataSources(CodeWriter writer, TestMethodMetadata testMethod)
     {
-        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
         var methodSymbol = testMethod.MethodSymbol;
         var typeSymbol = testMethod.TypeSymbol;
 
         // Extract data source attributes from method
         var methodDataSources = methodSymbol.GetAttributes()
             .Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
-            .ToList();
+            .ToArray();
 
         // Extract data source attributes from class
         var classDataSources = typeSymbol.GetAttributesIncludingBaseTypes()
             .Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
-            .ToList();
+            .ToArray();
 
         // Generate method data sources
-        if (methodDataSources.Count == 0)
+        if (methodDataSources.Length == 0)
         {
             writer.AppendLine("DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),");
         }
@@ -553,7 +550,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         // Generate class data sources
-        if (classDataSources.Count == 0)
+        if (classDataSources.Length == 0)
         {
             writer.AppendLine("ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),");
         }
@@ -588,7 +585,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         if (attrName == "global::TUnit.Core.MethodDataSourceAttribute")
         {
-            GenerateMethodDataSourceAttribute(writer, attr, methodSymbol, typeSymbol);
+            GenerateMethodDataSourceAttribute(writer, attr, typeSymbol);
         }
         else if (attrName == "global::TUnit.Core.ArgumentsAttribute")
         {
@@ -669,9 +666,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Append($"new {attrTypeName}(");
 
         // Only process positional arguments (exclude named arguments)
-        var positionalArgs = argumentList.Arguments.Where(a => a.NameEquals == null).ToList();
+        var positionalArgs = argumentList.Arguments.Where(a => a.NameEquals == null).ToArray();
 
-        for (var i = 0; i < positionalArgs.Count; i++)
+        for (var i = 0; i < positionalArgs.Length; i++)
         {
             var argumentSyntax = positionalArgs[i];
             var expression = argumentSyntax.Expression;
@@ -697,7 +694,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.Append(fullyQualifiedExpression.ToFullString());
             }
 
-            if (i < positionalArgs.Count - 1)
+            if (i < positionalArgs.Length - 1)
             {
                 writer.Append(", ");
             }
@@ -706,21 +703,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Append(")");
 
         // Handle named arguments (like Skip property)
-        var namedArgs = argumentList.Arguments.Where(a => a.NameEquals != null).ToList();
-        if (namedArgs.Count > 0)
+        var namedArgs = argumentList.Arguments.Where(a => a.NameEquals != null).ToArray();
+        if (namedArgs.Length > 0)
         {
             writer.AppendLine();
             writer.AppendLine("{");
             writer.Indent();
 
-            for (var i = 0; i < namedArgs.Count; i++)
+            for (var i = 0; i < namedArgs.Length; i++)
             {
                 var namedArg = namedArgs[i];
                 var propertyName = namedArg.NameEquals!.Name.ToString();
                 var fullyQualifiedExpression = namedArg.Expression.Accept(new FullyQualifiedWithGlobalPrefixRewriter(semanticModel))!;
                 writer.Append($"{propertyName} = {fullyQualifiedExpression.ToFullString()}");
 
-                if (i < namedArgs.Count - 1)
+                if (i < namedArgs.Length - 1)
                 {
                     writer.AppendLine(",");
                 }
@@ -736,7 +733,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
     }
 
-    private static void GenerateMethodDataSourceAttribute(CodeWriter writer, AttributeData attr, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
+    private static void GenerateMethodDataSourceAttribute(CodeWriter writer, AttributeData attr, INamedTypeSymbol typeSymbol)
     {
         // Extract method name and target type
         string? methodName = null;
@@ -843,11 +840,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Generate the factory implementation
         if (dataSourceMethod != null)
         {
-            GenerateMethodDataSourceFactory(writer, dataSourceMethod, targetType, methodSymbol, attr, hasArguments);
+            GenerateMethodDataSourceFactory(writer, dataSourceMethod, targetType, hasArguments);
         }
         else if (dataSourceProperty != null)
         {
-            GeneratePropertyDataSourceFactory(writer, dataSourceProperty, targetType, methodSymbol, attr);
+            GeneratePropertyDataSourceFactory(writer, dataSourceProperty, targetType);
         }
 
         writer.Unindent();
@@ -857,7 +854,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("},");
     }
 
-    private static void GenerateMethodDataSourceFactory(CodeWriter writer, IMethodSymbol dataSourceMethod, ITypeSymbol targetType, IMethodSymbol testMethod, AttributeData attr, bool hasArguments)
+    private static void GenerateMethodDataSourceFactory(CodeWriter writer, IMethodSymbol dataSourceMethod, ITypeSymbol targetType, bool hasArguments)
     {
         var isStatic = dataSourceMethod.IsStatic;
         var returnType = dataSourceMethod.ReturnType;
@@ -1041,7 +1038,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("return Factory();");
     }
 
-    private static void GeneratePropertyDataSourceFactory(CodeWriter writer, IPropertySymbol dataSourceProperty, ITypeSymbol targetType, IMethodSymbol testMethod, AttributeData attr)
+    private static void GeneratePropertyDataSourceFactory(CodeWriter writer, IPropertySymbol dataSourceProperty, ITypeSymbol targetType)
     {
         var isStatic = dataSourceProperty.IsStatic;
         var returnType = dataSourceProperty.Type;
@@ -1538,7 +1535,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("NestedPropertyInjections = new global::TUnit.Core.PropertyInjectionData[]");
             writer.AppendLine("{");
             writer.Indent();
-            GeneratePropertyInjectionsForType(writer, propertyType, processedProperties, isNested: true);
+            GeneratePropertyInjectionsForType(writer, propertyType, processedProperties);
             writer.Unindent();
             writer.AppendLine("},");
         }
@@ -1595,7 +1592,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 .Any(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass)));
     }
 
-    private static void GeneratePropertyInjectionsForType(CodeWriter writer, ITypeSymbol typeSymbol, HashSet<string> processedProperties, bool isNested)
+    private static void GeneratePropertyInjectionsForType(CodeWriter writer, ITypeSymbol typeSymbol, HashSet<string> processedProperties)
     {
         var currentType = typeSymbol;
         var nestedProcessedProperties = new HashSet<string>(processedProperties);
@@ -1768,12 +1765,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var returnPattern = GetReturnPattern(testMethod.MethodSymbol);
         if (testMethod is { IsGenericType: false, IsGenericMethod: false })
         {
-            GenerateConcreteTestInvoker(writer, testMethod, className, methodName, returnPattern, hasCancellationToken, parametersFromArgs);
+            GenerateConcreteTestInvoker(writer, methodName, returnPattern, hasCancellationToken, parametersFromArgs);
         }
     }
 
-
-    private static void GenerateConcreteTestInvoker(CodeWriter writer, TestMethodMetadata testMethod, string className, string methodName, TestReturnPattern returnPattern, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs)
+    private static void GenerateConcreteTestInvoker(CodeWriter writer, string methodName, TestReturnPattern returnPattern, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs)
     {
         // Generate InvokeTypedTest which is required by CreateExecutableTestFactory
         writer.AppendLine("InvokeTypedTest = static (instance, args, cancellationToken) =>");
@@ -1807,7 +1803,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             // Build tuple reconstruction with proper casting
             var tupleElements = singleTupleParam.TupleElements.Select((elem, i) =>
-                $"global::TUnit.Core.Helpers.CastHelper.Cast<{elem.Type.GloballyQualified()}>(args[{i}])").ToList();
+                $"global::TUnit.Core.Helpers.CastHelper.Cast<{elem.Type.GloballyQualified()}>(args[{i}])");
             var tupleConstruction = $"({string.Join(", ", tupleElements)})";
 
             var methodCallReconstructed = hasCancellationToken
@@ -1911,7 +1907,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("},");
     }
 
-    private static void GenerateEnumerateTestDescriptors(CodeWriter writer, TestMethodMetadata testMethod, string className)
+    private static void GenerateEnumerateTestDescriptors(CodeWriter writer, TestMethodMetadata testMethod)
     {
         var methodName = testMethod.MethodSymbol.Name;
         var namespaceName = testMethod.TypeSymbol.ContainingNamespace?.ToDisplayString() ?? "";
@@ -1922,7 +1918,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Extract categories from CategoryAttribute at compile time
         var categories = ExtractCategories(testMethod);
-        var categoriesArray = categories.Length == 0
+        var categoriesArray = categories.Count == 0
             ? "global::System.Array.Empty<string>()"
             : $"new string[] {{ {string.Join(", ", categories.Select(c => $"\"{EscapeString(c)}\""))} }}";
 
@@ -1972,9 +1968,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("}");
     }
 
-    private static string[] ExtractCategories(TestMethodMetadata testMethod)
+    private static HashSet<string> ExtractCategories(TestMethodMetadata testMethod)
     {
-        var categories = new List<string>();
+        var categories = new HashSet<string>();
 
         // Check method attributes
         foreach (var attr in testMethod.MethodAttributes)
@@ -2009,7 +2005,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
-        return categories.Distinct().ToArray();
+        return categories;
     }
 
     private static string[] ExtractProperties(TestMethodMetadata testMethod)
@@ -2020,8 +2016,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         foreach (var attr in testMethod.MethodAttributes)
         {
             if (attr.AttributeClass?.Name == "PropertyAttribute" &&
-                attr.ConstructorArguments.Length >= 2 &&
-                attr.ConstructorArguments[0].Value is string key &&
+                attr.ConstructorArguments is [{ Value: string key } _, _, ..] &&
                 attr.ConstructorArguments[1].Value is string value)
             {
                 properties.Add($"{key}={value}");
@@ -2301,7 +2296,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             .Concat(methodSymbol.ContainingType.GetAttributes())
             .Where(attr => attr.AttributeClass?.Name == "DependsOnAttribute" &&
                           attr.AttributeClass.ContainingNamespace?.ToDisplayString() == "TUnit.Core")
-            .ToList();
+            .ToArray();
 
         if (!dependsOnAttributes.Any())
         {
@@ -2313,12 +2308,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
 
-        for (var i = 0; i < dependsOnAttributes.Count; i++)
+        for (var i = 0; i < dependsOnAttributes.Length; i++)
         {
             var attr = dependsOnAttributes[i];
             GenerateTestDependency(writer, attr);
 
-            if (i < dependsOnAttributes.Count - 1)
+            if (i < dependsOnAttributes.Length - 1)
             {
                 writer.AppendLine(",");
             }
@@ -2549,12 +2544,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var allTestMethods = derivedClass.GetMembersIncludingBase()
             .OfType<IMethodSymbol>()
             .Where(m => m.GetAttributes().Any(attr => attr.IsTestAttribute()))
-            .ToList();
+            .ToArray();
 
         // Find methods declared directly on the derived class
         var derivedClassMethods = allTestMethods
             .Where(m => SymbolEqualityComparer.Default.Equals(m.ContainingType.OriginalDefinition, derivedClass.OriginalDefinition))
-            .ToList();
+            .ToArray();
 
         // Filter out base methods that are hidden by derived class methods or declared directly on derived class
         var result = new List<IMethodSymbol>();
@@ -2706,7 +2701,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return (derivedFilePath, derivedLineNumber);
     }
 
-    private static void GenerateReflectionFieldAccessors(CodeWriter writer, INamedTypeSymbol typeSymbol, string className)
+    private static void GenerateReflectionFieldAccessors(CodeWriter writer, INamedTypeSymbol typeSymbol)
     {
         // Find all init-only properties with data source attributes
         var initOnlyPropertiesWithDataSources = new List<IPropertySymbol>();
@@ -2734,7 +2729,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Skip for generic types since UnsafeAccessor doesn't work with open generic types
         var nonGenericProperties = initOnlyPropertiesWithDataSources
             .Where(p => !p.ContainingType.IsGenericType)
-            .ToList();
+            .ToArray();
 
         if (nonGenericProperties.Any())
         {
@@ -2898,7 +2893,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         // Generate interface constraints
-        var interfaceConstraints = typeParam.ConstraintTypes.Where(c => c.TypeKind == TypeKind.Interface).ToArray();
+        var interfaceConstraints = typeParam.ConstraintTypes.Where(c => c.TypeKind == TypeKind.Interface);
         writer.AppendLine("InterfaceConstraints = new global::System.Type[]");
         writer.AppendLine("{");
         writer.Indent();
@@ -2912,26 +2907,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         writer.Unindent();
         writer.AppendLine("},");
-    }
-
-    private static bool ContainsGenericTypeParameter(ITypeSymbol type)
-    {
-        if (type.TypeKind == TypeKind.TypeParameter)
-        {
-            return true;
-        }
-
-        if (type is INamedTypeSymbol namedType)
-        {
-            return namedType.TypeArguments.Any(ContainsGenericTypeParameter);
-        }
-
-        if (type is IArrayTypeSymbol arrayType)
-        {
-            return ContainsGenericTypeParameter(arrayType.ElementType);
-        }
-
-        return false;
     }
 
     private static void GenerateGenericTestWithConcreteTypes(
@@ -3000,20 +2975,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         var methodArgumentsAttributes = testMethod.MethodAttributes
             .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
-            .ToList();
+            .ToArray();
 
-        var classArgumentsAttributes = new List<AttributeData>();
+        var classArgumentsAttributes = Array.Empty<AttributeData>();
 
         // For generic classes, collect class-level Arguments attributes separately
         if (testMethod.IsGenericType)
         {
             classArgumentsAttributes = testMethod.TypeSymbol.GetAttributes()
                 .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
-                .ToList();
+                .ToArray();
         }
 
         var processedTypeCombinations = new HashSet<string>();
-
 
         // Handle the combination of class and method Arguments attributes
         if (testMethod is { IsGenericType: true, IsGenericMethod: true } && classArgumentsAttributes.Any() && methodArgumentsAttributes.Any())
@@ -3131,7 +3105,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Handle generic classes with non-generic methods that have method-level Arguments
         // These were skipped in the main loop and need special processing
-        if (testMethod is { IsGenericType: true, IsGenericMethod: false } && methodArgumentsAttributes.Count > 0)
+        if (testMethod is { IsGenericType: true, IsGenericMethod: false } && methodArgumentsAttributes.Length > 0)
         {
             foreach (var methodArgAttr in methodArgumentsAttributes)
             {
@@ -3164,8 +3138,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Process typed data source attributes
         var dataSourceAttributes = testMethod.MethodAttributes
-            .Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
-            .ToList();
+            .Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass));
 
         foreach (var dataSourceAttr in dataSourceAttributes)
         {
@@ -3232,8 +3205,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (testMethod is { IsGenericType: true, IsGenericMethod: false })
         {
             var methodDataSourceAttributes = testMethod.MethodAttributes
-                .Where(a => a.AttributeClass?.Name == "MethodDataSourceAttribute")
-                .ToList();
+                .Where(a => a.AttributeClass?.Name == "MethodDataSourceAttribute");
 
             foreach (var mdsAttr in methodDataSourceAttributes)
             {
@@ -3286,8 +3258,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (testMethod.IsGenericMethod)
         {
             var methodDataSourceAttributes = testMethod.MethodAttributes
-                .Where(a => a.AttributeClass?.Name == "MethodDataSourceAttribute")
-                .ToList();
+                .Where(a => a.AttributeClass?.Name == "MethodDataSourceAttribute");
 
             foreach (var mdsAttr in methodDataSourceAttributes)
             {
@@ -3317,9 +3288,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (testMethod.IsGenericType)
         {
             var argumentsAttributes = testMethod.TypeSymbol.GetAttributes()
-                .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
-                .ToList();
-
+                .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute");
 
             foreach (var argAttr in argumentsAttributes)
             {
@@ -3332,8 +3301,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     {
                         // Get method-level Arguments attributes to infer method type parameters
                         var methodLevelArgumentsAttributes = testMethod.MethodAttributes
-                            .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
-                            .ToList();
+                            .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute");
 
                         foreach (var methodArgAttr in methodLevelArgumentsAttributes)
                         {
@@ -3387,17 +3355,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             var nonGenericClassArguments = testMethod.TypeSymbol.GetAttributes()
                 .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
-                .ToList();
+                .ToArray();
 
             var nonGenericMethodArguments = testMethod.MethodAttributes
                 .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
-                .ToList();
+                .ToArray();
 
             // Also get class-level data source generators for non-generic classes
             var nonGenericClassDataSourceGenerators = testMethod.TypeSymbol.GetAttributes()
                 .Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass) &&
                            a.AttributeClass?.Name != "ArgumentsAttribute")
-                .ToList();
+                .ToArray();
 
             if (nonGenericClassArguments.Any() && nonGenericMethodArguments.Any())
             {
@@ -3450,14 +3418,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Process GenerateGenericTest attributes from both class and method levels
         // When both class and method are generic, we need to generate cartesian products
         var methodGenerateGenericTestAttributes = testMethod.MethodAttributes
-            .Where(a => a.AttributeClass?.Name == "GenerateGenericTestAttribute")
-            .ToList();
+            .Where(a => a.AttributeClass?.Name == "GenerateGenericTestAttribute");
 
         var classLevelAttributes = testMethod.IsGenericType
             ? testMethod.TypeSymbol.GetAttributes()
                 .Where(a => a.AttributeClass?.Name == "GenerateGenericTestAttribute")
-                .ToList()
-            : new List<AttributeData>();
+            : Array.Empty<AttributeData>();
 
         // Extract type arguments from class-level attributes
         var classTypeArgSets = ExtractTypeArgumentSets(classLevelAttributes);
@@ -3536,7 +3502,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("yield return genericMetadata;");
     }
 
-    private static List<ITypeSymbol[]> ExtractTypeArgumentSets(List<AttributeData> attributes)
+    private static List<ITypeSymbol[]> ExtractTypeArgumentSets(IEnumerable<AttributeData> attributes)
     {
         var result = new List<ITypeSymbol[]>();
 
@@ -3769,7 +3735,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 // Extract the concrete type and map it to the type parameter
                 if (argValue.Type != null)
                 {
-                    MapGenericTypeArguments(methodParam.Type, argValue.Type, classSymbol, inferredTypes);
+                    MapGenericTypeArguments(methodParam.Type, argValue.Type, inferredTypes);
                 }
             }
         }
@@ -3814,7 +3780,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return false;
     }
 
-    private static void MapGenericTypeArguments(ITypeSymbol paramType, ITypeSymbol argType, INamedTypeSymbol classSymbol, Dictionary<string, ITypeSymbol> inferredTypes)
+    private static void MapGenericTypeArguments(ITypeSymbol paramType, ITypeSymbol argType, Dictionary<string, ITypeSymbol> inferredTypes)
     {
         if (paramType is ITypeParameterSymbol { DeclaringMethod: null } typeParam)
         {
@@ -3830,64 +3796,27 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // Map type arguments recursively
             for (var i = 0; i < paramNamedType.TypeArguments.Length && i < argNamedType.TypeArguments.Length; i++)
             {
-                MapGenericTypeArguments(paramNamedType.TypeArguments[i], argNamedType.TypeArguments[i], classSymbol, inferredTypes);
+                MapGenericTypeArguments(paramNamedType.TypeArguments[i], argNamedType.TypeArguments[i], inferredTypes);
             }
         }
     }
 
     private static ITypeSymbol? InferTypeFromValue(object value, Compilation compilation)
     {
-        if (value is int)
+        return value switch
         {
-            return compilation?.GetSpecialType(SpecialType.System_Int32);
-        }
-
-        if (value is string)
-        {
-            return compilation?.GetSpecialType(SpecialType.System_String);
-        }
-
-        if (value is bool)
-        {
-            return compilation?.GetSpecialType(SpecialType.System_Boolean);
-        }
-
-        if (value is double)
-        {
-            return compilation?.GetSpecialType(SpecialType.System_Double);
-        }
-
-        if (value is float)
-        {
-            return compilation?.GetSpecialType(SpecialType.System_Single);
-        }
-
-        if (value is long)
-        {
-            return compilation?.GetSpecialType(SpecialType.System_Int64);
-        }
-
-        if (value is byte)
-        {
-            return compilation?.GetSpecialType(SpecialType.System_Byte);
-        }
-
-        if (value is char)
-        {
-            return compilation?.GetSpecialType(SpecialType.System_Char);
-        }
-
-        if (value is decimal)
-        {
-            return compilation?.GetSpecialType(SpecialType.System_Decimal);
-        }
-
-        if (value is ITypeSymbol)
-        {
-            return compilation?.GetTypeByMetadataName("System.Type");
-        }
-
-        return null;
+            int => compilation?.GetSpecialType(SpecialType.System_Int32),
+            string => compilation?.GetSpecialType(SpecialType.System_String),
+            bool => compilation?.GetSpecialType(SpecialType.System_Boolean),
+            double => compilation?.GetSpecialType(SpecialType.System_Double),
+            float => compilation?.GetSpecialType(SpecialType.System_Single),
+            long => compilation?.GetSpecialType(SpecialType.System_Int64),
+            byte => compilation?.GetSpecialType(SpecialType.System_Byte),
+            char => compilation?.GetSpecialType(SpecialType.System_Char),
+            decimal => compilation?.GetSpecialType(SpecialType.System_Decimal),
+            ITypeSymbol => compilation?.GetTypeByMetadataName("System.Type"),
+            _ => null
+        };
     }
 
     private static ITypeSymbol[]? InferTypesFromClassArgumentsAttribute(INamedTypeSymbol classSymbol, AttributeData argAttr, Compilation compilation)
@@ -3943,42 +3872,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     // For literal values, infer type from the value
                     var value = argValue.Value;
 
-                    if (value is int)
+                    argType = value switch
                     {
-                        argType = compilation?.GetSpecialType(SpecialType.System_Int32);
-                    }
-                    else if (value is string)
-                    {
-                        argType = compilation?.GetSpecialType(SpecialType.System_String);
-                    }
-                    else if (value is bool)
-                    {
-                        argType = compilation?.GetSpecialType(SpecialType.System_Boolean);
-                    }
-                    else if (value is double)
-                    {
-                        argType = compilation?.GetSpecialType(SpecialType.System_Double);
-                    }
-                    else if (value is float)
-                    {
-                        argType = compilation?.GetSpecialType(SpecialType.System_Single);
-                    }
-                    else if (value is long)
-                    {
-                        argType = compilation?.GetSpecialType(SpecialType.System_Int64);
-                    }
-                    else if (value is char)
-                    {
-                        argType = compilation?.GetSpecialType(SpecialType.System_Char);
-                    }
-                    else if (value is byte)
-                    {
-                        argType = compilation?.GetSpecialType(SpecialType.System_Byte);
-                    }
-                    else if (value is decimal)
-                    {
-                        argType = compilation?.GetSpecialType(SpecialType.System_Decimal);
-                    }
+                        int => compilation?.GetSpecialType(SpecialType.System_Int32),
+                        string => compilation?.GetSpecialType(SpecialType.System_String),
+                        bool => compilation?.GetSpecialType(SpecialType.System_Boolean),
+                        double => compilation?.GetSpecialType(SpecialType.System_Double),
+                        float => compilation?.GetSpecialType(SpecialType.System_Single),
+                        long => compilation?.GetSpecialType(SpecialType.System_Int64),
+                        char => compilation?.GetSpecialType(SpecialType.System_Char),
+                        byte => compilation?.GetSpecialType(SpecialType.System_Byte),
+                        decimal => compilation?.GetSpecialType(SpecialType.System_Decimal),
+                        _ => argType
+                    };
                 }
 
                 if (argType != null)
@@ -4056,42 +3962,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     // For literal values, infer type from the value
                     var value = argValue.Value;
 
-                    if (value is int)
+                    argType = value switch
                     {
-                        argType = compilation?.GetSpecialType(SpecialType.System_Int32);
-                    }
-                    else if (value is string)
-                    {
-                        argType = compilation?.GetSpecialType(SpecialType.System_String);
-                    }
-                    else if (value is bool)
-                    {
-                        argType = compilation?.GetSpecialType(SpecialType.System_Boolean);
-                    }
-                    else if (value is double)
-                    {
-                        argType = compilation?.GetSpecialType(SpecialType.System_Double);
-                    }
-                    else if (value is float)
-                    {
-                        argType = compilation?.GetSpecialType(SpecialType.System_Single);
-                    }
-                    else if (value is long)
-                    {
-                        argType = compilation?.GetSpecialType(SpecialType.System_Int64);
-                    }
-                    else if (value is char)
-                    {
-                        argType = compilation?.GetSpecialType(SpecialType.System_Char);
-                    }
-                    else if (value is byte)
-                    {
-                        argType = compilation?.GetSpecialType(SpecialType.System_Byte);
-                    }
-                    else if (value is decimal)
-                    {
-                        argType = compilation?.GetSpecialType(SpecialType.System_Decimal);
-                    }
+                        int => compilation?.GetSpecialType(SpecialType.System_Int32),
+                        string => compilation?.GetSpecialType(SpecialType.System_String),
+                        bool => compilation?.GetSpecialType(SpecialType.System_Boolean),
+                        double => compilation?.GetSpecialType(SpecialType.System_Double),
+                        float => compilation?.GetSpecialType(SpecialType.System_Single),
+                        long => compilation?.GetSpecialType(SpecialType.System_Int64),
+                        char => compilation?.GetSpecialType(SpecialType.System_Char),
+                        byte => compilation?.GetSpecialType(SpecialType.System_Byte),
+                        decimal => compilation?.GetSpecialType(SpecialType.System_Decimal),
+                        _ => argType
+                    };
                 }
 
                 if (argType != null)
@@ -4445,14 +4328,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return ValidateTypeParameterConstraints(methodTypeParams, typeArguments);
     }
 
-    private static bool ValidateTypeParameterConstraints(IEnumerable<ITypeParameterSymbol> typeParams, ITypeSymbol[] typeArguments)
+    private static bool ValidateTypeParameterConstraints(ImmutableArray<ITypeParameterSymbol> typeParams, ITypeSymbol[] typeArguments)
     {
-        var typeParamsList = typeParams.ToList();
-        var typeParamsArray = typeParamsList.ToImmutableArray();
-
-        for (var i = 0; i < typeParamsList.Count; i++)
+        for (var i = 0; i < typeParams.Length; i++)
         {
-            var typeParam = typeParamsList[i];
+            var typeParam = typeParams[i];
             var typeArg = typeArguments[i];
 
             // Check struct constraint
@@ -4477,7 +4357,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             foreach (var constraintType in typeParam.ConstraintTypes)
             {
                 // Substitute type parameters in the constraint type with the actual type arguments
-                var substitutedConstraint = SubstituteTypeParameters(constraintType, typeParamsArray, typeArguments);
+                var substitutedConstraint = SubstituteTypeParameters(constraintType, typeParams, typeArguments);
 
                 if (substitutedConstraint.TypeKind == TypeKind.Interface)
                 {
@@ -4786,7 +4666,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("AttributeFactory = static () =>");
         writer.AppendLine("[");
         writer.Indent();
-        testMethod.CompilationContext.AttributeWriter.WriteAttributes(writer, filteredAttributes.ToImmutableArray());
+        testMethod.CompilationContext.AttributeWriter.WriteAttributes(writer, filteredAttributes);
         writer.Unindent();
         writer.AppendLine("],");
 
@@ -4799,7 +4679,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Filter data sources based on the specific attribute
         List<AttributeData> methodDataSources;
-        List<AttributeData> classDataSources;
+        AttributeData[] classDataSources;
 
         if (specificArgumentsAttribute != null)
         {
@@ -4813,14 +4693,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             if (testMethod is { IsGenericType: true, IsGenericMethod: true })
             {
                 var additionalMethodDataSources = methodSymbol.GetAttributes()
-                    .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute" && !AreSameAttribute(a, specificArgumentsAttribute))
-                    .ToList();
+                    .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute" &&
+                                !AreSameAttribute(a, specificArgumentsAttribute));
                 methodDataSources.AddRange(additionalMethodDataSources);
             }
 
             classDataSources = typeSymbol.GetAttributesIncludingBaseTypes()
                 .Where(a => AreSameAttribute(a, specificArgumentsAttribute))
-                .ToList();
+                .ToArray();
         }
         else
         {
@@ -4831,7 +4711,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             classDataSources = typeSymbol.GetAttributesIncludingBaseTypes()
                 .Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
-                .ToList();
+                .ToArray();
         }
 
         // Generate method data sources
@@ -4855,7 +4735,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         // Generate class data sources
-        if (classDataSources.Count == 0)
+        if (classDataSources.Length == 0)
         {
             writer.AppendLine("ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),");
         }
@@ -5265,4 +5145,3 @@ public class InheritsTestsClassMetadata
     public GeneratorAttributeSyntaxContext Context { get; init; }
     public required CompilationContext CompilationContext { get; init; }
 }
-
