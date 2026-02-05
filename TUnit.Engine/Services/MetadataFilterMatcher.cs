@@ -214,27 +214,20 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
     {
         var classMetadata = metadata.MethodMetadata.Class;
         var namespaceName = classMetadata.Namespace ?? "";
-        var className = metadata.TestClassType.Name;
         var methodName = metadata.TestMethodName;
 
-        // Handle generic types: Type`1 -> need to match Type< in the UID
-        var classNameForMatching = className;
-        var backtickIndex = className.IndexOf('`');
-        if (backtickIndex > 0)
-        {
-            classNameForMatching = className.Substring(0, backtickIndex);
-        }
+        // Build the full class name including nested type hierarchy (e.g., Outer+Inner)
+        // This matches the format used by TestIdentifierService.WriteTypeNameWithGenerics
+        var classNameForMatching = BuildClassNameForMatching(metadata.TestClassType);
 
-        // Build expected prefix: {Namespace}.{ClassName}. or just {ClassName}. for empty namespace
-        // This ensures we match the exact class in the exact namespace
+        // Build expected prefix: {Namespace}.{ClassName} or just {ClassName} for empty namespace
+        // The class name may be followed by '.', '<', or '(' depending on:
+        // - '.' for regular classes (e.g., MyClass.0.0.Method)
+        // - '<' for generic classes (e.g., MyClass<System.Int32>.0.0.Method)
+        // - '(' for classes with constructor parameters (e.g., MyClass(System.String).0.0.Method)
         var expectedClassPrefix = string.IsNullOrEmpty(namespaceName)
-            ? $"{classNameForMatching}."
-            : $"{namespaceName}.{classNameForMatching}.";
-
-        // Also handle generic class names in UIDs (e.g., Namespace.MyClass<System.Int32>.0.0...)
-        var expectedGenericClassPrefix = string.IsNullOrEmpty(namespaceName)
-            ? $"{classNameForMatching}<"
-            : $"{namespaceName}.{classNameForMatching}<";
+            ? classNameForMatching
+            : $"{namespaceName}.{classNameForMatching}";
 
         foreach (var uid in filter.TestNodeUids)
         {
@@ -242,12 +235,22 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
 
             // Check for exact namespace.classname prefix to avoid matching
             // same class name in different namespaces
-            var hasClassPrefix = uidValue.StartsWith(expectedClassPrefix, StringComparison.Ordinal) ||
-                                 uidValue.StartsWith(expectedGenericClassPrefix, StringComparison.Ordinal);
-
-            if (!hasClassPrefix)
+            if (!uidValue.StartsWith(expectedClassPrefix, StringComparison.Ordinal))
             {
                 continue;
+            }
+
+            // Verify the character after the class name is a valid boundary: '.', '<', or '('
+            var indexAfterPrefix = expectedClassPrefix.Length;
+            if (indexAfterPrefix < uidValue.Length)
+            {
+                var charAfterPrefix = uidValue[indexAfterPrefix];
+                if (charAfterPrefix != '.' && charAfterPrefix != '<' && charAfterPrefix != '(')
+                {
+                    // Not a valid boundary - this could be a substring match
+                    // e.g., "ABCV" matching "ABCVC"
+                    continue;
+                }
             }
 
             // Check for method name with word boundaries
@@ -261,6 +264,46 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Builds the class name for matching as it appears in UIDs.
+    /// Handles nested types (Outer+Inner) and generic types (without the `N suffix).
+    /// </summary>
+    private static string BuildClassNameForMatching(Type type)
+    {
+        // Fast path: non-nested, non-generic types
+        if (type.DeclaringType == null && !type.IsGenericType)
+        {
+            return type.Name;
+        }
+
+        // Build the full nested type hierarchy with '+' separators
+        // This matches TestIdentifierService.WriteTypeNameWithGenerics
+        var parts = new List<string>();
+        var currentType = type;
+
+        while (currentType != null)
+        {
+            var name = currentType.Name;
+
+            // Handle generic types: remove the `N suffix
+            if (currentType.IsGenericType)
+            {
+                var backtickIndex = name.IndexOf('`');
+                if (backtickIndex > 0)
+                {
+                    name = name.Substring(0, backtickIndex);
+                }
+            }
+
+            parts.Add(name);
+            currentType = currentType.DeclaringType;
+        }
+
+        // Reverse to get outer-to-inner order and join with '+'
+        parts.Reverse();
+        return string.Join("+", parts);
     }
 
     private static bool HasMethodNameMatch(string uidValue, string methodName)
