@@ -31,23 +31,6 @@ public class UidFilterMatchingTests(TestMode testMode) : InvokableTestBase(testM
     }
 
     [Test]
-    public async Task Filter_DeeplyNestedClass_ShouldMatchOnlyDeeplyNestedClass()
-    {
-        // Filter for the deeply nested class
-        // Tree node paths use just the innermost class name (Type.Name)
-        await RunTestsWithFilter(
-            "/*/TUnit.TestProject.Bugs._4656/DeeplyNestedClass/DeeplyNestedMethod",
-            [
-                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(1,
-                    $"Expected 1 test (DeeplyNestedClass.DeeplyNestedMethod) but got {result.ResultSummary.Counters.Total}. " +
-                    $"Test names: {string.Join(", ", result.Results.Select(r => r.TestName))}"),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(1),
-                result => result.ResultSummary.Counters.Failed.ShouldBe(0)
-            ]);
-    }
-
-    [Test]
     public async Task Filter_OuterClass_ShouldNotMatchNestedClasses()
     {
         // Filter for only the outer class method

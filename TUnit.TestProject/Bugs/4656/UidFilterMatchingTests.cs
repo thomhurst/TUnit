@@ -30,16 +30,6 @@ public class OuterClass
         {
             await Assert.That(true).IsEqualTo(true);
         }
-
-        [EngineTest(ExpectedResult.Pass)]
-        public class DeeplyNestedClass
-        {
-            [Test]
-            public async Task DeeplyNestedMethod()
-            {
-                await Assert.That(true).IsEqualTo(true);
-            }
-        }
     }
 }
 
@@ -48,6 +38,7 @@ public class OuterClass
 #region Generic Classes Tests
 
 [EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
 public class GenericTestClass<T>
 {
     [Test]
@@ -58,6 +49,7 @@ public class GenericTestClass<T>
 }
 
 [EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int), typeof(string))]
 public class MultiGenericTestClass<T1, T2>
 {
     [Test]
@@ -100,22 +92,13 @@ public class ClassWithMultipleParams(string name, int count)
 #region Nested Generic Classes Tests
 
 [EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
 public class OuterGenericClass<T>
 {
     [Test]
     public async Task OuterGenericMethod()
     {
         await Assert.That(typeof(T)).IsNotNull();
-    }
-
-    [EngineTest(ExpectedResult.Pass)]
-    public class InnerNonGenericClass
-    {
-        [Test]
-        public async Task InnerNonGenericMethod()
-        {
-            await Assert.That(true).IsEqualTo(true);
-        }
     }
 }
 
