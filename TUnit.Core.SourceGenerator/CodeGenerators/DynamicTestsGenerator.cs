@@ -1,6 +1,4 @@
 using Microsoft.CodeAnalysis;
-using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
-using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Models.Extracted;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators;
@@ -152,15 +150,15 @@ public class DynamicTestsGenerator : IIncrementalGenerator
         sourceBuilder.AppendLine(
             $$"""
               return new global::System.Collections.Generic.List<global::TUnit.Core.AbstractDynamicTest>
-              {
-                  new global::TUnit.Core.FailedDynamicTest<{{model.FullyQualifiedTypeName}}>
-                  {
-                      MethodName = "{{model.MethodName}}",
-                      TestFilePath = @"{{model.FilePath}}",
-                      TestLineNumber = {{model.LineNumber}},
-                      Exception = exception
-                  }
-              };
+                          {
+                              new global::TUnit.Core.FailedDynamicTest<{{model.FullyQualifiedTypeName}}>
+                              {
+                                  MethodName = "{{model.MethodName}}",
+                                  TestFilePath = @"{{model.FilePath}}",
+                                  TestLineNumber = {{model.LineNumber}},
+                                  Exception = exception
+                              }
+                          };
               """);
     }
 }
