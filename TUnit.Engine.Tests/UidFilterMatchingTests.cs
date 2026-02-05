@@ -16,13 +16,14 @@ public class UidFilterMatchingTests(TestMode testMode) : InvokableTestBase(testM
     public async Task Filter_NestedClass_ShouldMatchOnlyNestedClass()
     {
         // Filter for the nested class InnerClass
-        // Should only run tests from OuterClass+InnerClass, not OuterClass
+        // Tree node paths use just the innermost class name (Type.Name)
+        // Should only run tests from InnerClass, not OuterClass
         await RunTestsWithFilter(
-            "/*/TUnit.TestProject.Bugs._4656/OuterClass+InnerClass/InnerMethod",
+            "/*/TUnit.TestProject.Bugs._4656/InnerClass/InnerMethod",
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
                 result => result.ResultSummary.Counters.Total.ShouldBe(1,
-                    $"Expected 1 test (OuterClass+InnerClass.InnerMethod) but got {result.ResultSummary.Counters.Total}. " +
+                    $"Expected 1 test (InnerClass.InnerMethod) but got {result.ResultSummary.Counters.Total}. " +
                     $"Test names: {string.Join(", ", result.Results.Select(r => r.TestName))}"),
                 result => result.ResultSummary.Counters.Passed.ShouldBe(1),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0)
@@ -33,8 +34,9 @@ public class UidFilterMatchingTests(TestMode testMode) : InvokableTestBase(testM
     public async Task Filter_DeeplyNestedClass_ShouldMatchOnlyDeeplyNestedClass()
     {
         // Filter for the deeply nested class
+        // Tree node paths use just the innermost class name (Type.Name)
         await RunTestsWithFilter(
-            "/*/TUnit.TestProject.Bugs._4656/OuterClass+InnerClass+DeeplyNestedClass/DeeplyNestedMethod",
+            "/*/TUnit.TestProject.Bugs._4656/DeeplyNestedClass/DeeplyNestedMethod",
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
                 result => result.ResultSummary.Counters.Total.ShouldBe(1,

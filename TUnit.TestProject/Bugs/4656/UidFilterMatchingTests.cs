@@ -73,10 +73,10 @@ public class MultiGenericTestClass<T1, T2>
 #region Classes With Constructor Parameters Tests
 
 [EngineTest(ExpectedResult.Pass)]
+[Arguments("test-value")]
 public class ClassWithStringParam(string value)
 {
     [Test]
-    [Arguments("test-value")]
     public async Task MethodWithParam()
     {
         await Assert.That(value).IsNotNull();
@@ -84,10 +84,10 @@ public class ClassWithStringParam(string value)
 }
 
 [EngineTest(ExpectedResult.Pass)]
+[Arguments("test", 42)]
 public class ClassWithMultipleParams(string name, int count)
 {
     [Test]
-    [Arguments("test", 42)]
     public async Task MethodWithMultipleParams()
     {
         await Assert.That(name).IsNotNull();
