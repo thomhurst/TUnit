@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
+using TUnit.Core.Helpers;
 
 namespace TUnit.Engine.Services;
 
@@ -268,7 +269,8 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
 
     /// <summary>
     /// Builds the class name for matching as it appears in UIDs.
-    /// Handles nested types (Outer+Inner) and generic types (without the `N suffix).
+    /// Handles nested types (Outer+Inner) and generic types with their type arguments.
+    /// This matches the format used by TestIdentifierService.WriteTypeNameWithGenerics.
     /// </summary>
     private static string BuildClassNameForMatching(Type type)
     {
@@ -280,30 +282,76 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
 
         // Build the full nested type hierarchy with '+' separators
         // This matches TestIdentifierService.WriteTypeNameWithGenerics
-        var parts = new List<string>();
-        var currentType = type;
-
-        while (currentType != null)
+        var typeHierarchy = new ValueListBuilder<string>([null, null, null, null]);
+        var typeVsb = new ValueStringBuilder(stackalloc char[128]);
+        try
         {
-            var name = currentType.Name;
+            var currentType = type;
 
-            // Handle generic types: remove the `N suffix
-            if (currentType.IsGenericType)
+            while (currentType != null)
             {
-                var backtickIndex = name.IndexOf('`');
-                if (backtickIndex > 0)
+                if (currentType.IsGenericType)
                 {
-                    name = name.Substring(0, backtickIndex);
+                    var name = currentType.Name;
+
+                    var backtickIndex = name.IndexOf('`');
+                    if (backtickIndex > 0)
+                    {
+                        typeVsb.Append(name.AsSpan(0, backtickIndex));
+                    }
+                    else
+                    {
+                        typeVsb.Append(name);
+                    }
+
+                    // Add the generic type arguments (same format as TestIdentifierService)
+                    var genericArgs = currentType.GetGenericArguments();
+                    typeVsb.Append('<');
+                    for (var i = 0; i < genericArgs.Length; i++)
+                    {
+                        if (i > 0)
+                        {
+                            typeVsb.Append(", ");
+                        }
+                        typeVsb.Append(genericArgs[i].FullName ?? genericArgs[i].Name);
+                    }
+                    typeVsb.Append('>');
+
+                    typeHierarchy.Append(typeVsb.AsSpan().ToString());
+                    typeVsb.Length = 0;
                 }
+                else
+                {
+                    typeHierarchy.Append(currentType.Name);
+                }
+
+                currentType = currentType.DeclaringType;
             }
 
-            parts.Add(name);
-            currentType = currentType.DeclaringType;
+            // Build result: reverse to get outer-to-inner order and join with '+'
+            var resultVsb = new ValueStringBuilder(stackalloc char[256]);
+            try
+            {
+                for (var i = typeHierarchy.Length - 1; i >= 0; i--)
+                {
+                    if (i < typeHierarchy.Length - 1)
+                    {
+                        resultVsb.Append('+');
+                    }
+                    resultVsb.Append(typeHierarchy[i]);
+                }
+                return resultVsb.ToString();
+            }
+            finally
+            {
+                resultVsb.Dispose();
+            }
         }
-
-        // Reverse to get outer-to-inner order and join with '+'
-        parts.Reverse();
-        return string.Join("+", parts);
+        finally
+        {
+            typeHierarchy.Dispose();
+            typeVsb.Dispose();
+        }
     }
 
     private static bool HasMethodNameMatch(string uidValue, string methodName)
