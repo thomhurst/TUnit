@@ -41,35 +41,34 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         // Extract hints from filter for pre-filtering test sources by type
         var filterHints = MetadataFilterMatcher.ExtractFilterHints(filter);
 
-        // Get test sources, optionally pre-filtered by type
-        IEnumerable<KeyValuePair<Type, ConcurrentQueue<ITestSource>>> testSourcesByType = Sources.TestSources;
-
-        if (filterHints.HasHints)
-        {
-            // Pre-filter test sources by type based on filter hints
-            var matchingSources = testSourcesByType.Where(kvp => filterHints.CouldTypeMatch(kvp.Key)).ToList();
-
-            // Expand to include sources for dependency classes
-            testSourcesByType = ExpandSourcesForDependencies(matchingSources, Sources.TestSources);
-        }
-
-        var testSourcesList = testSourcesByType.SelectMany(kvp => kvp.Value).ToList();
-
-        // Try two-phase discovery for sources that support it (with specific filter hints)
-        // This avoids creating full TestMetadata for tests that won't pass filtering
+        // Try two-phase discovery with single-pass filtering when all sources support descriptors.
+        // This avoids double-enumeration: previously ExpandSourcesForDependencies enumerated
+        // descriptors to find dependencies, then CollectTestsWithTwoPhaseDiscoveryAsync enumerated
+        // them again. Now we pass ALL sources and do type-level + descriptor-level filtering
+        // in a single pass, while indexing everything for dependency resolution.
         IEnumerable<TestMetadata> standardTestMetadatas;
 
-        if (filterHints.HasHints && testSourcesList.All(static s => s is ITestDescriptorSource))
+        if (filterHints.HasHints && Sources.TestSources.All(static kvp => kvp.Value.All(static s => s is ITestDescriptorSource)))
         {
-            // Two-phase discovery: enumerate descriptors, filter, then materialize only matching
+            // Single-pass two-phase discovery: enumerate all descriptors once,
+            // apply type and descriptor filters during enumeration, expand dependencies from index
             standardTestMetadatas = await CollectTestsWithTwoPhaseDiscoveryAsync(
-                testSourcesList.Cast<ITestDescriptorSource>(),
+                Sources.TestSources,
                 testSessionId,
                 filterHints).ConfigureAwait(false);
         }
         else
         {
             // Fallback: Use traditional collection (for legacy sources or no filter hints)
+            // Apply type-level pre-filtering when hints are available
+            IEnumerable<KeyValuePair<Type, ConcurrentQueue<ITestSource>>> testSourcesByType = Sources.TestSources;
+
+            if (filterHints.HasHints)
+            {
+                testSourcesByType = testSourcesByType.Where(kvp => filterHints.CouldTypeMatch(kvp.Key));
+            }
+
+            var testSourcesList = testSourcesByType.SelectMany(kvp => kvp.Value).ToList();
             standardTestMetadatas = await CollectTestsTraditionalAsync(testSourcesList, testSessionId).ConfigureAwait(false);
         }
 
@@ -84,149 +83,70 @@ internal sealed class AotTestDataCollector : ITestDataCollector
     }
 
     /// <summary>
-    /// Expands the pre-filtered sources to include sources for dependency classes.
-    /// This ensures cross-class dependencies are included in two-phase discovery.
-    /// </summary>
-    private static IEnumerable<KeyValuePair<Type, ConcurrentQueue<ITestSource>>> ExpandSourcesForDependencies(
-        List<KeyValuePair<Type, ConcurrentQueue<ITestSource>>> matchingSources,
-        ConcurrentDictionary<Type, ConcurrentQueue<ITestSource>> allSources)
-    {
-        // Build index of all sources by class name for dependency lookup
-        var sourcesByClassName = new Dictionary<string, KeyValuePair<Type, ConcurrentQueue<ITestSource>>>();
-        foreach (var kvp in allSources)
-        {
-            sourcesByClassName[kvp.Key.Name] = kvp;
-            // Also index without generic suffix (e.g., "MyClass`1" -> "MyClass")
-            var backtickIndex = kvp.Key.Name.IndexOf('`');
-            if (backtickIndex > 0)
-            {
-                sourcesByClassName[kvp.Key.Name.Substring(0, backtickIndex)] = kvp;
-            }
-        }
-
-        // Collect all dependency class names from matching sources
-        var dependencyClassNames = new HashSet<string>();
-        foreach (var kvp in matchingSources)
-        {
-            foreach (var source in kvp.Value)
-            {
-                if (source is ITestDescriptorSource descriptorSource)
-                {
-                    foreach (var descriptor in descriptorSource.EnumerateTestDescriptors())
-                    {
-                        foreach (var dependency in descriptor.DependsOn)
-                        {
-                            // Parse dependency format: "ClassName:MethodName"
-                            var separatorIndex = dependency.IndexOf(':');
-                            if (separatorIndex > 0) // Cross-class dependency (not same-class ":MethodName")
-                            {
-                                var depClassName = dependency.Substring(0, separatorIndex);
-                                dependencyClassNames.Add(depClassName);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // Build result set starting with matching sources
-        var resultSet = new Dictionary<Type, KeyValuePair<Type, ConcurrentQueue<ITestSource>>>();
-        foreach (var kvp in matchingSources)
-        {
-            resultSet[kvp.Key] = kvp;
-        }
-
-        // Expand dependencies transitively
-        var queue = new Queue<string>(dependencyClassNames);
-        var processedClasses = new HashSet<string>();
-
-        while (queue.Count > 0)
-        {
-            var className = queue.Dequeue();
-            if (!processedClasses.Add(className))
-            {
-                continue;
-            }
-
-            if (sourcesByClassName.TryGetValue(className, out var depSource) && !resultSet.ContainsKey(depSource.Key))
-            {
-                resultSet[depSource.Key] = depSource;
-
-                // Check for transitive dependencies
-                foreach (var source in depSource.Value)
-                {
-                    if (source is ITestDescriptorSource descriptorSource)
-                    {
-                        foreach (var descriptor in descriptorSource.EnumerateTestDescriptors())
-                        {
-                            foreach (var dependency in descriptor.DependsOn)
-                            {
-                                var separatorIndex = dependency.IndexOf(':');
-                                if (separatorIndex > 0)
-                                {
-                                    var transDepClassName = dependency.Substring(0, separatorIndex);
-                                    if (!processedClasses.Contains(transDepClassName))
-                                    {
-                                        queue.Enqueue(transDepClassName);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return resultSet.Values;
-    }
-
-    /// <summary>
-    /// Two-phase discovery: enumerate lightweight descriptors, apply filter hints, materialize only matching.
-    /// This is more efficient when filters are present as it avoids creating full TestMetadata for non-matching tests.
+    /// Two-phase discovery with single-pass filtering and dependency resolution.
+    /// Accepts ALL test sources (with their associated types) and performs type-level
+    /// and descriptor-level filtering in a single enumeration pass, while indexing
+    /// all descriptors for dependency resolution.
+    ///
+    /// This avoids the previous double-enumeration where ExpandSourcesForDependencies
+    /// enumerated descriptors to find dependencies, and then this method enumerated
+    /// them again for filtering and materialization.
     /// </summary>
     private async Task<IEnumerable<TestMetadata>> CollectTestsWithTwoPhaseDiscoveryAsync(
-        IEnumerable<ITestDescriptorSource> descriptorSources,
+        IEnumerable<KeyValuePair<Type, ConcurrentQueue<ITestSource>>> allSourcesByType,
         string testSessionId,
         FilterHints filterHints)
     {
-        // Phase 1: Single-pass enumeration with filtering
-        // - Index all descriptors for dependency resolution
-        // - Immediately identify matching descriptors (no separate iteration)
+        // Phase 1: Single-pass enumeration over ALL sources with combined filtering
+        // - Index ALL descriptors (from all types) for dependency resolution
+        // - Apply type-level filter (assembly, namespace, class) per source group
+        // - Apply descriptor-level filter (class name, method name) per descriptor
+        // - Only descriptors passing BOTH filters are added to matchingDescriptors
         // - Track if any matching descriptor has dependencies
         var descriptorsByClassAndMethod = new Dictionary<(string ClassName, string MethodName), TestDescriptor>();
         var descriptorsByClass = new Dictionary<string, List<TestDescriptor>>();
         var matchingDescriptors = new List<TestDescriptor>();
         var hasDependencies = false;
 
-        foreach (var source in descriptorSources)
+        foreach (var kvp in allSourcesByType)
         {
-            foreach (var descriptor in source.EnumerateTestDescriptors())
+            // Check type-level filter once per source group (covers assembly, namespace, class name)
+            var typeMatches = filterHints.CouldTypeMatch(kvp.Key);
+
+            foreach (var source in kvp.Value)
             {
-                // Index by class + method for specific dependency lookups
-                var key = (descriptor.ClassName, descriptor.MethodName);
-                descriptorsByClassAndMethod[key] = descriptor;
+                var descriptorSource = (ITestDescriptorSource)source;
 
-                // Index by class for class-level dependency lookups
-                if (!descriptorsByClass.TryGetValue(descriptor.ClassName, out var classDescriptors))
+                foreach (var descriptor in descriptorSource.EnumerateTestDescriptors())
                 {
-                    classDescriptors = [];
-                    descriptorsByClass[descriptor.ClassName] = classDescriptors;
-                }
-                classDescriptors.Add(descriptor);
+                    // Always index for dependency resolution regardless of filter match
+                    var key = (descriptor.ClassName, descriptor.MethodName);
+                    descriptorsByClassAndMethod[key] = descriptor;
 
-                // Filter during enumeration - no separate pass needed
-                if (filterHints.CouldDescriptorMatch(descriptor))
-                {
-                    matchingDescriptors.Add(descriptor);
-                    if (descriptor.DependsOn.Length > 0)
+                    if (!descriptorsByClass.TryGetValue(descriptor.ClassName, out var classDescriptors))
                     {
-                        hasDependencies = true;
+                        classDescriptors = [];
+                        descriptorsByClass[descriptor.ClassName] = classDescriptors;
+                    }
+                    classDescriptors.Add(descriptor);
+
+                    // Only add to matching set if both type-level and descriptor-level filters pass
+                    if (typeMatches && filterHints.CouldDescriptorMatch(descriptor))
+                    {
+                        matchingDescriptors.Add(descriptor);
+                        if (descriptor.DependsOn.Length > 0)
+                        {
+                            hasDependencies = true;
+                        }
                     }
                 }
             }
         }
 
-        // Phase 2: Expand dependencies only if any matching descriptor has them
+        // Phase 2: Expand dependencies only if any matching descriptor has them.
+        // Because all descriptors are indexed (not just filtered ones), cross-class
+        // and transitive dependencies are resolved correctly even when the dependency
+        // target was filtered out by type/descriptor hints.
         HashSet<TestDescriptor>? expandedSet = null;
         if (hasDependencies)
         {
