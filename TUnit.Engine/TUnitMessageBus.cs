@@ -111,7 +111,9 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
 
     public ValueTask Cancelled(TestContext testContext, DateTimeOffset start)
     {
+#pragma warning disable CS0618 // CancelledTestNodeStateProperty is obsolete - TUnit still needs to report cancelled state for its own reporters
         var testNode = testContext.ToTestNode(new CancelledTestNodeStateProperty());
+#pragma warning restore CS0618
 
         return new ValueTask(context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
             sessionUid: _sessionSessionUid,

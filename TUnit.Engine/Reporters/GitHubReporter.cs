@@ -113,8 +113,10 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             x.Value.TestNode.Properties.AsEnumerable()
                 .Any(p => p is FailedTestNodeStateProperty or ErrorTestNodeStateProperty)).ToArray();
 
+#pragma warning disable CS0618 // CancelledTestNodeStateProperty is obsolete
         var cancelled = last.Where(x =>
             x.Value.TestNode.Properties.AsEnumerable().Any(p => p is CancelledTestNodeStateProperty)).ToArray();
+#pragma warning restore CS0618
 
         var timeout = last
             .Where(x => x.Value.TestNode.Properties.AsEnumerable().Any(p => p is TimeoutTestNodeStateProperty))
@@ -284,10 +286,12 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
     private string GetDetails(IProperty? stateProperty, PropertyBag properties)
     {
+#pragma warning disable CS0618 // CancelledTestNodeStateProperty is obsolete
         if (stateProperty is FailedTestNodeStateProperty
             or ErrorTestNodeStateProperty
             or TimeoutTestNodeStateProperty
             or CancelledTestNodeStateProperty)
+#pragma warning restore CS0618
         {
             return $"<pre>{GetError(stateProperty)}</pre>";
         }
@@ -316,7 +320,9 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             ErrorTestNodeStateProperty errorTestNodeStateProperty =>
                 errorTestNodeStateProperty.Exception?.ToString() ?? "Test failed",
             TimeoutTestNodeStateProperty timeoutTestNodeStateProperty => timeoutTestNodeStateProperty.Explanation,
+#pragma warning disable CS0618 // CancelledTestNodeStateProperty is obsolete
             CancelledTestNodeStateProperty => "Test was cancelled",
+#pragma warning restore CS0618
             _ => null
         };
     }
@@ -325,7 +331,9 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
     {
         return stateProperty switch
         {
+#pragma warning disable CS0618 // CancelledTestNodeStateProperty is obsolete
             CancelledTestNodeStateProperty => "Cancelled",
+#pragma warning restore CS0618
             ErrorTestNodeStateProperty => "Failed",
             FailedTestNodeStateProperty => "Failed",
             InProgressTestNodeStateProperty => "In Progress (never finished)",
