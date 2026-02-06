@@ -54,7 +54,7 @@ internal sealed class TestBuilderPipeline
         };
 
         // Check for ClassConstructor attribute and set it early if present
-        var attributes = metadata.AttributeFactory();
+        var attributes = metadata.GetOrCreateAttributes();
 
         // Look for any attribute that inherits from ClassConstructorAttribute
         // This handles both ClassConstructorAttribute and ClassConstructorAttribute<T>
@@ -246,7 +246,7 @@ internal sealed class TestBuilderPipeline
                 : baseDisplayName;
 
             // Get attributes first
-            var attributes = metadata.AttributeFactory();
+            var attributes = metadata.GetOrCreateAttributes();
 
             // Create TestDetails for dynamic tests
             var testDetails = new TestDetails(attributes)
@@ -345,7 +345,7 @@ internal sealed class TestBuilderPipeline
                 var repeatCount = resolvedMetadata.RepeatCount ?? 0;
 
                 // Get attributes for test details
-                var attributes = resolvedMetadata.AttributeFactory?.Invoke() ?? [];
+                var attributes = resolvedMetadata.GetOrCreateAttributes();
 
                 // Dynamic tests need to honor attributes like RepeatCount, RetryCount, etc.
                 // We'll create multiple test instances based on RepeatCount

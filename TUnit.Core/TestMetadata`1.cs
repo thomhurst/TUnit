@@ -86,7 +86,7 @@ public class TestMetadata<
                             return await context.TestClassInstanceFactory();
                         }
 
-                        var attributes = metadata.AttributeFactory();
+                        var attributes = metadata.GetOrCreateAttributes();
                         var instance = await ClassConstructorHelper.TryCreateInstanceWithClassConstructor(
                             attributes,
                             TestClassType,

@@ -66,7 +66,7 @@ public sealed class GenericTestMetadata : TestMetadata
                 Func<TestContext, Task<object>> createInstance = async (testContext) =>
                 {
                     // Try to create instance with ClassConstructor attribute
-                    var attributes = metadata.AttributeFactory();
+                    var attributes = metadata.GetOrCreateAttributes();
                     var classInstance = await ClassConstructorHelper.TryCreateInstanceWithClassConstructor(
                         attributes,
                         TestClassType,

@@ -49,6 +49,17 @@ public abstract class TestMetadata
 
     public required Func<Attribute[]> AttributeFactory { get; init; }
 
+    private Attribute[]? _cachedAttributes;
+
+    /// <summary>
+    /// Returns the cached attributes array, creating it from <see cref="AttributeFactory"/> on first call.
+    /// Subsequent calls return the same array without re-invoking the factory.
+    /// </summary>
+    internal Attribute[] GetOrCreateAttributes()
+    {
+        return _cachedAttributes ??= AttributeFactory();
+    }
+
     /// <summary>
     /// Pre-extracted repeat count from RepeatAttribute.
     /// Null if no repeat attribute is present (defaults to 0 at usage site).
