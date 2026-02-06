@@ -120,10 +120,7 @@ internal sealed class TestDiscoveryService : IDataProducer
 
         // Now invoke event receivers (registration phase)
         // ITestRegisteredEventReceiver can access dependency information and any state set by After(TestDiscovery) hooks
-        foreach (var test in allTests)
-        {
-            await _testBuilderPipeline.InvokePostResolutionEventsAsync(test).ConfigureAwait(false);
-        }
+        await InvokePostResolutionEventsInParallelAsync(allTests).ConfigureAwait(false);
 
         var filteredTests = isForExecution ? _testFilterService.FilterTests(filter, allTests) : allTests;
 
@@ -208,10 +205,7 @@ internal sealed class TestDiscoveryService : IDataProducer
 
         // Now invoke event receivers (registration phase)
         // ITestRegisteredEventReceiver can access dependency information and any state set by After(TestDiscovery) hooks
-        foreach (var test in allTests)
-        {
-            await _testBuilderPipeline.InvokePostResolutionEventsAsync(test).ConfigureAwait(false);
-        }
+        await InvokePostResolutionEventsInParallelAsync(allTests).ConfigureAwait(false);
 
         var independentTests = new List<AbstractExecutableTest>();
         var dependentTests = new List<AbstractExecutableTest>();
@@ -290,6 +284,36 @@ internal sealed class TestDiscoveryService : IDataProducer
     }
 
 
+
+    private async Task InvokePostResolutionEventsInParallelAsync(List<AbstractExecutableTest> allTests)
+    {
+        if (allTests.Count < Building.ParallelThresholds.MinItemsForParallel)
+        {
+            foreach (var test in allTests)
+            {
+                await _testBuilderPipeline.InvokePostResolutionEventsAsync(test).ConfigureAwait(false);
+            }
+            return;
+        }
+
+#if NET6_0_OR_GREATER
+        await Parallel.ForEachAsync(
+            allTests,
+            new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount },
+            async (test, _) =>
+            {
+                await _testBuilderPipeline.InvokePostResolutionEventsAsync(test).ConfigureAwait(false);
+            }
+        ).ConfigureAwait(false);
+#else
+        var tasks = new Task[allTests.Count];
+        for (var i = 0; i < allTests.Count; i++)
+        {
+            tasks[i] = _testBuilderPipeline.InvokePostResolutionEventsAsync(allTests[i]).AsTask();
+        }
+        await Task.WhenAll(tasks).ConfigureAwait(false);
+#endif
+    }
 
     public IEnumerable<TestContext> GetCachedTestContexts()
     {
