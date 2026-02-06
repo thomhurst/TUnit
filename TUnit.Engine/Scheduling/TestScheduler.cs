@@ -169,38 +169,47 @@ internal sealed class TestScheduler : ITestScheduler
             await ExecuteTestsAsync(groupedTests.Parallel, cancellationToken).ConfigureAwait(false);
         }
 
-        foreach (var group in groupedTests.ParallelGroups)
+        if (groupedTests.ParallelGroups.Count > 0)
         {
-            var orderedTests = new List<AbstractExecutableTest>();
-            foreach (var kvp in group.Value.OrderBy(t => t.Key))
+            var parallelGroupTasks = new Task[groupedTests.ParallelGroups.Count];
+            var index = 0;
+            foreach (var group in groupedTests.ParallelGroups)
             {
-                orderedTests.AddRange(kvp.Value);
-            }
-            var orderedTestsArray = orderedTests.ToArray();
+                var orderedTests = new List<AbstractExecutableTest>();
+                foreach (var kvp in group.Value.OrderBy(t => t.Key))
+                {
+                    orderedTests.AddRange(kvp.Value);
+                }
+                var orderedTestsArray = orderedTests.ToArray();
 
-            if (_logger.IsDebugEnabled)
-                await _logger.LogDebugAsync($"Starting parallel group '{group.Key}' with {orderedTestsArray.Length} orders").ConfigureAwait(false);
-            await ExecuteTestsAsync(orderedTestsArray, cancellationToken).ConfigureAwait(false);
+                if (_logger.IsDebugEnabled)
+                    await _logger.LogDebugAsync($"Starting parallel group '{group.Key}' with {orderedTestsArray.Length} orders").ConfigureAwait(false);
+                parallelGroupTasks[index++] = ExecuteTestsAsync(orderedTestsArray, cancellationToken);
+            }
+            await WaitForTasksWithFailFastHandling(parallelGroupTasks, cancellationToken).ConfigureAwait(false);
         }
 
-        foreach (var kvp in groupedTests.ConstrainedParallelGroups)
+        if (groupedTests.ConstrainedParallelGroups.Count > 0)
         {
-            var constrainedTests = kvp.Value;
-            if (_logger.IsDebugEnabled)
-                await _logger.LogDebugAsync($"Starting constrained parallel group '{kvp.Key}' with {constrainedTests.UnconstrainedTests.Length} unconstrained and {constrainedTests.KeyedTests.Length} keyed tests").ConfigureAwait(false);
+            var constrainedGroupTasks = new List<Task>();
+            foreach (var kvp in groupedTests.ConstrainedParallelGroups)
+            {
+                var constrainedTests = kvp.Value;
+                if (_logger.IsDebugEnabled)
+                    await _logger.LogDebugAsync($"Starting constrained parallel group '{kvp.Key}' with {constrainedTests.UnconstrainedTests.Length} unconstrained and {constrainedTests.KeyedTests.Length} keyed tests").ConfigureAwait(false);
 
-            var tasks = new List<Task>();
-            if (constrainedTests.UnconstrainedTests.Length > 0)
-            {
-                tasks.Add(ExecuteTestsAsync(constrainedTests.UnconstrainedTests, cancellationToken));
+                if (constrainedTests.UnconstrainedTests.Length > 0)
+                {
+                    constrainedGroupTasks.Add(ExecuteTestsAsync(constrainedTests.UnconstrainedTests, cancellationToken));
+                }
+                if (constrainedTests.KeyedTests.Length > 0)
+                {
+                    constrainedGroupTasks.Add(_constraintKeyScheduler.ExecuteTestsWithConstraintsAsync(constrainedTests.KeyedTests, cancellationToken).AsTask());
+                }
             }
-            if (constrainedTests.KeyedTests.Length > 0)
+            if (constrainedGroupTasks.Count > 0)
             {
-                tasks.Add(_constraintKeyScheduler.ExecuteTestsWithConstraintsAsync(constrainedTests.KeyedTests, cancellationToken).AsTask());
-            }
-            if (tasks.Count > 0)
-            {
-                await WaitForTasksWithFailFastHandling(tasks.ToArray(), cancellationToken).ConfigureAwait(false);
+                await WaitForTasksWithFailFastHandling(constrainedGroupTasks.ToArray(), cancellationToken).ConfigureAwait(false);
             }
         }
 
