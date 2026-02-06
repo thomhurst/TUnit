@@ -247,27 +247,29 @@ public class CollectionAllSatisfyHelper<TCollection, TItem>
     /// Asserts that all items satisfy the given assertion.
     /// Example: .All().Satisfy(item => item.IsNotNull())
     /// </summary>
-    public CollectionAllSatisfyAssertion<TCollection, TItem> Satisfy(
-        Func<IAssertionSource<TItem>, Assertion<TItem>?> assertion,
+    public CollectionAllSatisfyAssertion<TCollection, TItem> Satisfy<TAssertion>(
+        Func<IAssertionSource<TItem>, TAssertion?> assertion,
         [CallerArgumentExpression(nameof(assertion))] string? expression = null)
+        where TAssertion : IAssertion
     {
         _context.ExpressionBuilder.Append($".Satisfy({expression})");
-        return new CollectionAllSatisfyAssertion<TCollection, TItem>(_context, assertion, expression ?? "assertion");
+        return new CollectionAllSatisfyAssertion<TCollection, TItem>(_context, x => assertion(x), expression ?? "assertion");
     }
 
     /// <summary>
     /// Asserts that all items, when mapped, satisfy the given assertion.
     /// Example: .All().Satisfy(model => model.Value, assert => assert.IsNotNull())
     /// </summary>
-    public CollectionAllSatisfyMappedAssertion<TCollection, TItem, TMapped> Satisfy<TMapped>(
+    public CollectionAllSatisfyMappedAssertion<TCollection, TItem, TMapped> Satisfy<TMapped, TAssertion>(
         Func<TItem, TMapped> mapper,
-        Func<IAssertionSource<TMapped>, Assertion<TMapped>?> assertion,
+        Func<IAssertionSource<TMapped>, TAssertion?> assertion,
         [CallerArgumentExpression(nameof(mapper))] string? mapperExpression = null,
         [CallerArgumentExpression(nameof(assertion))] string? assertionExpression = null)
+        where TAssertion : IAssertion
     {
         _context.ExpressionBuilder.Append($".Satisfy({mapperExpression}, {assertionExpression})");
         return new CollectionAllSatisfyMappedAssertion<TCollection, TItem, TMapped>(
-            _context, mapper, assertion, mapperExpression ?? "mapper", assertionExpression ?? "assertion");
+            _context, mapper, x => assertion(x), mapperExpression ?? "mapper", assertionExpression ?? "assertion");
     }
 }
 
@@ -474,12 +476,12 @@ public class CollectionContainsPredicateAssertion<TCollection, TItem> : Sources.
 public class CollectionAllSatisfyAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
-    private readonly Func<IAssertionSource<TItem>, Assertion<TItem>?> _assertion;
+    private readonly Func<IAssertionSource<TItem>, IAssertion?> _assertion;
     private readonly string _assertionDescription;
 
     public CollectionAllSatisfyAssertion(
         AssertionContext<TCollection> context,
-        Func<IAssertionSource<TItem>, Assertion<TItem>?> assertion,
+        Func<IAssertionSource<TItem>, IAssertion?> assertion,
         string assertionDescription)
         : base(context)
     {
@@ -535,14 +537,14 @@ public class CollectionAllSatisfyMappedAssertion<TCollection, TItem, TMapped> : 
     where TCollection : IEnumerable<TItem>
 {
     private readonly Func<TItem, TMapped> _mapper;
-    private readonly Func<IAssertionSource<TMapped>, Assertion<TMapped>?> _assertion;
+    private readonly Func<IAssertionSource<TMapped>, IAssertion?> _assertion;
     private readonly string _mapperDescription;
     private readonly string _assertionDescription;
 
     public CollectionAllSatisfyMappedAssertion(
         AssertionContext<TCollection> context,
         Func<TItem, TMapped> mapper,
-        Func<IAssertionSource<TMapped>, Assertion<TMapped>?> assertion,
+        Func<IAssertionSource<TMapped>, IAssertion?> assertion,
         string mapperDescription,
         string assertionDescription)
         : base(context)

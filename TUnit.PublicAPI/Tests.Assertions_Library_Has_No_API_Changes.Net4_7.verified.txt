@@ -576,7 +576,7 @@ namespace .Conditions
     public class CollectionAllSatisfyAssertion<TCollection, TItem> : .<TCollection, TItem>
         where TCollection : .<TItem>
     {
-        public CollectionAllSatisfyAssertion(.<TCollection> context, <.<TItem>, .<TItem>?> assertion, string assertionDescription) { }
+        public CollectionAllSatisfyAssertion(.<TCollection> context, <.<TItem>, .?> assertion, string assertionDescription) { }
         protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
     }
@@ -584,13 +584,15 @@ namespace .Conditions
         where TCollection : .<TItem>
     {
         public CollectionAllSatisfyHelper(.<TCollection> context) { }
-        public .<TCollection, TItem> Satisfy(<.<TItem>, .<TItem>?> assertion, [.("assertion")] string? expression = null) { }
-        public .<TCollection, TItem, TMapped> Satisfy<TMapped>(<TItem, TMapped> mapper, <.<TMapped>, .<TMapped>?> assertion, [.("mapper")] string? mapperExpression = null, [.("assertion")] string? assertionExpression = null) { }
+        public .<TCollection, TItem> Satisfy<TAssertion>(<.<TItem>, TAssertion?> assertion, [.("assertion")] string? expression = null)
+            where TAssertion : . { }
+        public .<TCollection, TItem, TMapped> Satisfy<TMapped, TAssertion>(<TItem, TMapped> mapper, <.<TMapped>, TAssertion?> assertion, [.("mapper")] string? mapperExpression = null, [.("assertion")] string? assertionExpression = null)
+            where TAssertion : . { }
     }
     public class CollectionAllSatisfyMappedAssertion<TCollection, TItem, TMapped> : .<TCollection, TItem>
         where TCollection : .<TItem>
     {
-        public CollectionAllSatisfyMappedAssertion(.<TCollection> context, <TItem, TMapped> mapper, <.<TMapped>, .<TMapped>?> assertion, string mapperDescription, string assertionDescription) { }
+        public CollectionAllSatisfyMappedAssertion(.<TCollection> context, <TItem, TMapped> mapper, <.<TMapped>, .?> assertion, string mapperDescription, string assertionDescription) { }
         protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
     }

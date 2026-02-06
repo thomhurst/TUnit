@@ -46,6 +46,11 @@ public class NotNullAssertion<TValue> : Assertion<TValue>
 
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
     {
+        if (metadata.Exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed("value is null"));
+        }
+
         var value = metadata.Value;
 
         if (value != null)

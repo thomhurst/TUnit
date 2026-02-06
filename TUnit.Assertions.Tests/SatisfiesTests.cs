@@ -326,6 +326,55 @@ public class SatisfiesTests
                                                            """);
     }
 
+    [Test]
+    public async Task All_Satisfy_Mapped_NullableDouble_IsNotNull()
+    {
+        var items = new[]
+        {
+            new ItemWithNullablePrice { Price = 1.0 },
+            new ItemWithNullablePrice { Price = 2.5 }
+        };
+
+        await Assert.That(items).All().Satisfy(x => x.Price, c => c.IsNotNull());
+    }
+
+    [Test]
+    public async Task All_Satisfy_Mapped_NullableDouble_IsNotNull_Throws()
+    {
+        var items = new[]
+        {
+            new ItemWithNullablePrice { Price = 1.0 },
+            new ItemWithNullablePrice { Price = null }
+        };
+
+        await Assert.That(async () =>
+            await Assert.That(items).All().Satisfy(x => x.Price, c => c.IsNotNull())
+        ).Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task All_Satisfy_DirectValue_NullableDouble()
+    {
+        var items = new double?[] { 1.0, 2.5, 3.0 };
+
+        await Assert.That(items).All().Satisfy(c => c.IsNotNull());
+    }
+
+    [Test]
+    public async Task All_Satisfy_DirectValue_NullableDouble_Throws()
+    {
+        var items = new double?[] { 1.0, null, 3.0 };
+
+        await Assert.That(async () =>
+            await Assert.That(items).All().Satisfy(c => c.IsNotNull())
+        ).Throws<AssertionException>();
+    }
+
+    public class ItemWithNullablePrice
+    {
+        public double? Price { get; init; }
+    }
+
     public class User
     {
         public string Name { get; init; } = string.Empty;
