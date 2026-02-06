@@ -103,10 +103,9 @@ internal sealed class TestDiscoveryService : IDataProducer
             _dependencyResolver.RegisterTest(test);
         }
 
-        foreach (var test in allTests.Where(t => t.Metadata.Dependencies.Length > 0))
-        {
-            _dependencyResolver.TryResolveDependencies(test);
-        }
+        // Resolve dependencies in parallel — registration is complete so lookup dictionaries
+        // are effectively read-only, and each test's Dependencies are written independently.
+        _dependencyResolver.BatchResolveDependencies(allTests);
 
         // Populate TestContext._dependencies for ALL tests before After(TestDiscovery) hooks run.
         // This ensures hooks can access dependency information on any TestContext (including focused tests).
@@ -187,10 +186,9 @@ internal sealed class TestDiscoveryService : IDataProducer
             allTests.Add(test);
         }
 
-        foreach (var test in allTests)
-        {
-            _dependencyResolver.TryResolveDependencies(test);
-        }
+        // Resolve dependencies in parallel — registration is complete so lookup dictionaries
+        // are effectively read-only, and each test's Dependencies are written independently.
+        _dependencyResolver.BatchResolveDependencies(allTests);
 
         // Populate TestContext._dependencies for ALL tests before After(TestDiscovery) hooks run.
         // This ensures hooks can access dependency information on any TestContext (including focused tests).

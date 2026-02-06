@@ -183,6 +183,83 @@ internal sealed class TestDependencyResolver
         }
     }
 
+    /// <summary>
+    /// Resolves dependencies for a batch of tests in parallel.
+    /// This must only be called after all tests have been registered via <see cref="RegisterTest"/>,
+    /// since registration is complete the internal dictionaries are effectively read-only,
+    /// and each test's Dependencies are written independently, making this safe to parallelize.
+    /// </summary>
+    public void BatchResolveDependencies(List<AbstractExecutableTest> tests)
+    {
+        var testsWithDependencies = tests.Where(t => t.Metadata.Dependencies.Length > 0).ToList();
+
+        if (testsWithDependencies.Count == 0)
+        {
+            return;
+        }
+
+        Parallel.ForEach(testsWithDependencies, test =>
+        {
+            ResolveDependenciesForTestLockFree(test);
+        });
+    }
+
+    /// <summary>
+    /// Lock-free resolution for the batch path. Safe to call concurrently because:
+    /// - The lookup dictionaries (_testsByType, _testsByMethodName, _allTests) are read-only after registration.
+    /// - Each test's Dependencies field is only written by its own resolution (no cross-test writes).
+    /// </summary>
+    private void ResolveDependenciesForTestLockFree(AbstractExecutableTest test)
+    {
+        if (test.Dependencies.Length > 0)
+        {
+            return;
+        }
+
+        var resolvedDependencies = new List<ResolvedDependency>();
+        var allResolved = true;
+
+        foreach (var dependencyMetadata in test.Metadata.Dependencies)
+        {
+            var matchingTests = FindMatchingTests(dependencyMetadata, test);
+
+            if (matchingTests.Count == 0)
+            {
+                allResolved = false;
+            }
+            else
+            {
+                foreach (var matchingTest in matchingTests)
+                {
+                    resolvedDependencies.Add(new ResolvedDependency
+                    {
+                        Test = matchingTest,
+                        Metadata = dependencyMetadata
+                    });
+                }
+            }
+        }
+
+        if (allResolved)
+        {
+            var uniqueDependencies = new Dictionary<AbstractExecutableTest, ResolvedDependency>(capacity: 8);
+            foreach (var dep in resolvedDependencies)
+            {
+                if (dep.Test == test)
+                {
+                    continue;
+                }
+
+                if (!uniqueDependencies.ContainsKey(dep.Test))
+                {
+                    uniqueDependencies[dep.Test] = dep;
+                }
+            }
+
+            test.Dependencies = uniqueDependencies.Values.ToArray();
+        }
+    }
+
     public void ResolveAllDependencies()
     {
         lock (_resolutionLock)
