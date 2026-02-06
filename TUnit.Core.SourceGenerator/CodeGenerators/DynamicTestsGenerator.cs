@@ -6,6 +6,8 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators;
 [Generator]
 public class DynamicTestsGenerator : IIncrementalGenerator
 {
+    public const string ParseDynamicTests = "ParseDynamicTests";
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var enabledProvider = context.AnalyzerConfigOptionsProvider
@@ -21,7 +23,8 @@ public class DynamicTestsGenerator : IIncrementalGenerator
                 predicate: static (_, _) => true,
                 transform: static (ctx, _) => ExtractDynamicTestModel(ctx))
             .Where(static m => m is not null)
-            .Combine(enabledProvider);
+            .Combine(enabledProvider)
+            .WithTrackingName(ParseDynamicTests);
 
         context.RegisterSourceOutput(standardTests, (sourceContext, data) =>
         {
