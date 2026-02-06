@@ -24,4 +24,12 @@
     <PackageReference Include="Microsoft.CodeAnalysis.Common" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="CodeGenerators\Writers\Hooks\ClassHooksWriter.cs" />
+    <Compile Remove="Extensions\CompilationExtensions.cs" />
+    <Compile Remove="Helpers\GenericTypeInference.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="CodeGenerators\Writers\Hooks\" />
+  </ItemGroup>
 </Project>

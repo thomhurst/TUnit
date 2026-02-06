@@ -1,5 +1,3 @@
-using TUnit.Core.SourceGenerator.Models;
-
 namespace TUnit.Core.SourceGenerator.Models.Extracted;
 
 /// <summary>
