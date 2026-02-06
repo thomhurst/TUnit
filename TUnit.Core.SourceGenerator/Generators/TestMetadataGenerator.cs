@@ -317,6 +317,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var uniqueClassName = FileNameHelper.GetDeterministicFileNameForMethod(testMethod.TypeSymbol, testMethod.MethodSymbol)
             .Replace(".g.cs", "_TestSource");
 
+        writer.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]");
+        writer.AppendLine($"[global::System.CodeDom.Compiler.GeneratedCode(\"TUnit\", \"{typeof(TestMetadataGenerator).Assembly.GetName().Version}\")]");
         writer.AppendLine($"internal sealed class {uniqueClassName} : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource");
         writer.AppendLine("{");
         writer.Indent();
