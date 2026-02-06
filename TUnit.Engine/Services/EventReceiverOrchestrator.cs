@@ -25,6 +25,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     // Track remaining test counts for "last" events
     private readonly ConcurrentDictionary<string, Counter> _assemblyTestCounts = new();
     private readonly ConcurrentDictionary<Type, Counter> _classTestCounts = new();
+
+    // Accessed from multiple threads via Interlocked to ensure atomic updates
+    // and correct visibility across threads (prevents data races on the "last test" check).
     private int _sessionTestCount;
 
     // Track which objects have already been initialized to avoid duplicates
@@ -524,7 +527,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     public void InitializeTestCounts(IEnumerable<TestContext> allTestContexts)
     {
         var contexts = allTestContexts as IList<TestContext> ?? allTestContexts.ToList();
-        _sessionTestCount = contexts.Count;
+        Interlocked.Exchange(ref _sessionTestCount, contexts.Count);
 
         // Clear first-event tracking to ensure clean state for each test execution
         _firstTestInAssemblyTasks = new ThreadSafeDictionary<string, Task>();
