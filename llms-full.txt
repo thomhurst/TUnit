@@ -16517,15 +16517,15 @@ set TUNIT_EXECUTION_MODE=reflection
 export TUNIT_EXECUTION_MODE=reflection
 ```
 
-Alternatively, you can configure this in a `.runsettings` file:
-```xml
-<RunSettings>
-  <RunConfiguration>
-    <EnvironmentVariables>
-      <TUNIT_EXECUTION_MODE>reflection</TUNIT_EXECUTION_MODE>
-    </EnvironmentVariables>
-  </RunConfiguration>
-</RunSettings>
+Alternatively, you can configure this in a `testconfig.json` file:
+```json
+{
+  "testingPlatform": {
+    "environmentVariables": {
+      "TUNIT_EXECUTION_MODE": "reflection"
+    }
+  }
+}
 ```
 
 ### Optimizing Build Performance in Reflection Mode
@@ -17082,36 +17082,29 @@ See the migration guides for detailed instructions:
 
 #### Advanced Configuration
 
-You can customize coverage with a `.runsettings` file:
+You can customize coverage with a `testconfig.json` file:
 
-**coverage.runsettings:**
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<RunSettings>
-  <DataCollectionRunSettings>
-    <DataCollectors>
-      <DataCollector friendlyName="Code Coverage">
-        <Configuration>
-          <CodeCoverage>
-            <ModulePaths>
-              <Include>
-                <ModulePath>.*\.dll$</ModulePath>
-              </Include>
-              <Exclude>
-                <ModulePath>.*tests\.dll$</ModulePath>
-              </Exclude>
-            </ModulePaths>
-          </CodeCoverage>
-        </Configuration>
-      </DataCollector>
-    </DataCollectors>
-  </DataCollectionRunSettings>
-</RunSettings>
+**testconfig.json:**
+```json
+{
+  "codeCoverage": {
+    "Configuration": {
+      "CodeCoverage": {
+        "ModulePaths": {
+          "Include": [".*\\.dll$"],
+          "Exclude": [".*tests\\.dll$"]
+        }
+      }
+    }
+  }
+}
 ```
 
-**Use it:**
+Place the `testconfig.json` file in the same directory as your test project. It will be picked up automatically when running tests.
+
+**Alternatively, you can use an XML coverage settings file:**
 ```bash
-dotnet run --configuration Release --coverage --coverage-settings coverage.runsettings
+dotnet run --configuration Release --coverage --coverage-settings coverage.config
 ```
 
 **📚 More Resources:**
@@ -20618,36 +20611,29 @@ You can view these with:
 
 ### Advanced Coverage Configuration
 
-You can customize coverage behavior with a `.runsettings` file (same format as MSTest):
+You can customize coverage behavior with a `testconfig.json` file:
 
-**coverage.runsettings:**
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<RunSettings>
-  <DataCollectionRunSettings>
-    <DataCollectors>
-      <DataCollector friendlyName="Code Coverage">
-        <Configuration>
-          <CodeCoverage>
-            <ModulePaths>
-              <Include>
-                <ModulePath>.*\.dll$</ModulePath>
-              </Include>
-              <Exclude>
-                <ModulePath>.*tests\.dll$</ModulePath>
-              </Exclude>
-            </ModulePaths>
-          </CodeCoverage>
-        </Configuration>
-      </DataCollector>
-    </DataCollectors>
-  </DataCollectionRunSettings>
-</RunSettings>
+**testconfig.json:**
+```json
+{
+  "codeCoverage": {
+    "Configuration": {
+      "CodeCoverage": {
+        "ModulePaths": {
+          "Include": [".*\\.dll$"],
+          "Exclude": [".*tests\\.dll$"]
+        }
+      }
+    }
+  }
+}
 ```
 
-**Use it:**
+Place the `testconfig.json` file in the same directory as your test project. It will be picked up automatically when running tests.
+
+**Alternatively, you can use an XML coverage settings file:**
 ```bash
-dotnet run --configuration Release --coverage --coverage-settings coverage.runsettings
+dotnet run --configuration Release --coverage --coverage-settings coverage.config
 ```
 
 ### Troubleshooting
@@ -20657,8 +20643,8 @@ dotnet run --configuration Release --coverage --coverage-settings coverage.runse
 - Verify you have a recent .NET SDK installed
 
 **Missing coverage for some assemblies?**
-- Use a `.runsettings` file to explicitly include/exclude modules
-- See [Microsoft's documentation](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-code-coverage)
+- Use a `testconfig.json` file to explicitly include/exclude modules
+- See [Microsoft's documentation](https://github.com/microsoft/codecoverage/blob/main/docs/configuration.md)
 
 **Need help?**
 - See [TUnit Code Coverage Documentation](../extensions/extensions.md#code-coverage)
@@ -21627,36 +21613,29 @@ You can view these with:
 
 ### Advanced Coverage Configuration
 
-You can customize coverage behavior with a `.runsettings` file:
+You can customize coverage behavior with a `testconfig.json` file:
 
-**coverage.runsettings:**
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<RunSettings>
-  <DataCollectionRunSettings>
-    <DataCollectors>
-      <DataCollector friendlyName="Code Coverage">
-        <Configuration>
-          <CodeCoverage>
-            <ModulePaths>
-              <Include>
-                <ModulePath>.*\.dll$</ModulePath>
-              </Include>
-              <Exclude>
-                <ModulePath>.*tests\.dll$</ModulePath>
-              </Exclude>
-            </ModulePaths>
-          </CodeCoverage>
-        </Configuration>
-      </DataCollector>
-    </DataCollectors>
-  </DataCollectionRunSettings>
-</RunSettings>
+**testconfig.json:**
+```json
+{
+  "codeCoverage": {
+    "Configuration": {
+      "CodeCoverage": {
+        "ModulePaths": {
+          "Include": [".*\\.dll$"],
+          "Exclude": [".*tests\\.dll$"]
+        }
+      }
+    }
+  }
+}
 ```
 
-**Use it:**
+Place the `testconfig.json` file in the same directory as your test project. It will be picked up automatically when running tests.
+
+**Alternatively, you can use an XML coverage settings file:**
 ```bash
-dotnet run --configuration Release --coverage --coverage-settings coverage.runsettings
+dotnet run --configuration Release --coverage --coverage-settings coverage.config
 ```
 
 ### Troubleshooting
@@ -21666,8 +21645,8 @@ dotnet run --configuration Release --coverage --coverage-settings coverage.runse
 - Verify you have a recent .NET SDK installed
 
 **Missing coverage for some assemblies?**
-- Use a `.runsettings` file to explicitly include/exclude modules
-- See [Microsoft's documentation](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-code-coverage)
+- Use a `testconfig.json` file to explicitly include/exclude modules
+- See [Microsoft's documentation](https://github.com/microsoft/codecoverage/blob/main/docs/configuration.md)
 
 **Need help?**
 - See [TUnit Code Coverage Documentation](../extensions/extensions.md#code-coverage)
@@ -23401,36 +23380,29 @@ You can view these with:
 
 ### Advanced Coverage Configuration
 
-You can customize coverage behavior with a `.runsettings` file:
+You can customize coverage behavior with a `testconfig.json` file:
 
-**coverage.runsettings:**
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<RunSettings>
-  <DataCollectionRunSettings>
-    <DataCollectors>
-      <DataCollector friendlyName="Code Coverage">
-        <Configuration>
-          <CodeCoverage>
-            <ModulePaths>
-              <Include>
-                <ModulePath>.*\.dll$</ModulePath>
-              </Include>
-              <Exclude>
-                <ModulePath>.*tests\.dll$</ModulePath>
-              </Exclude>
-            </ModulePaths>
-          </CodeCoverage>
-        </Configuration>
-      </DataCollector>
-    </DataCollectors>
-  </DataCollectionRunSettings>
-</RunSettings>
+**testconfig.json:**
+```json
+{
+  "codeCoverage": {
+    "Configuration": {
+      "CodeCoverage": {
+        "ModulePaths": {
+          "Include": [".*\\.dll$"],
+          "Exclude": [".*tests\\.dll$"]
+        }
+      }
+    }
+  }
+}
 ```
 
-**Use it:**
+Place the `testconfig.json` file in the same directory as your test project. It will be picked up automatically when running tests.
+
+**Alternatively, you can use an XML coverage settings file:**
 ```bash
-dotnet run --configuration Release --coverage --coverage-settings coverage.runsettings
+dotnet run --configuration Release --coverage --coverage-settings coverage.config
 ```
 
 ### Troubleshooting
@@ -23440,8 +23412,8 @@ dotnet run --configuration Release --coverage --coverage-settings coverage.runse
 - Verify you have a recent .NET SDK installed
 
 **Missing coverage for some assemblies?**
-- Use a `.runsettings` file to explicitly include/exclude modules
-- See [Microsoft's documentation](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-code-coverage)
+- Use a `testconfig.json` file to explicitly include/exclude modules
+- See [Microsoft's documentation](https://github.com/microsoft/codecoverage/blob/main/docs/configuration.md)
 
 **Need help?**
 - See [TUnit Code Coverage Documentation](../extensions/extensions.md#code-coverage)
@@ -30321,7 +30293,7 @@ dotnet run -- --report-trx --report-trx-filename results.trx
 
 **New (TUnit configuration):**
 
-TUnit uses command-line flags or programmatic configuration instead of `.runsettings`:
+TUnit uses command-line flags, `testconfig.json`, or programmatic configuration instead of `.runsettings`:
 
 ```bash
 # Parallel execution
@@ -31857,37 +31829,26 @@ dotnet run --configuration Release --coverage
 
 **Solutions:**
 
-#### 1. Create a `.runsettings` File
-```xml
-<!-- coverage.runsettings -->
-<?xml version="1.0" encoding="utf-8"?>
-<RunSettings>
-  <DataCollectionRunSettings>
-    <DataCollectors>
-      <DataCollector friendlyName="Code Coverage">
-        <Configuration>
-          <CodeCoverage>
-            <ModulePaths>
-              <Include>
-                <ModulePath>.*\.dll$</ModulePath>
-                <ModulePath>.*MyProject\.dll$</ModulePath>
-              </Include>
-              <Exclude>
-                <ModulePath>.*tests?\.dll$</ModulePath>
-                <ModulePath>.*TestHelpers\.dll$</ModulePath>
-              </Exclude>
-            </ModulePaths>
-          </CodeCoverage>
-        </Configuration>
-      </DataCollector>
-    </DataCollectors>
-  </DataCollectionRunSettings>
-</RunSettings>
+#### 1. Create a `testconfig.json` File
+```json
+{
+  "codeCoverage": {
+    "Configuration": {
+      "CodeCoverage": {
+        "ModulePaths": {
+          "Include": [".*\\.dll$", ".*MyProject\\.dll$"],
+          "Exclude": [".*tests?\\.dll$", ".*TestHelpers\\.dll$"]
+        }
+      }
+    }
+  }
+}
 ```
 
-#### 2. Use the Settings File
+#### 2. Place the File in Your Test Project Directory
+The `testconfig.json` file is picked up automatically. Alternatively, you can use an XML coverage settings file:
 ```bash
-dotnet run --configuration Release --coverage --coverage-settings coverage.runsettings
+dotnet run --configuration Release --coverage --coverage-settings coverage.config
 ```
 
 ### Coverage Format Not Recognized by CI/CD
@@ -31959,36 +31920,55 @@ ls TestResults/
 **Solutions:**
 
 #### 1. Exclude Test Projects
-```xml
-<!-- coverage.runsettings -->
-<ModulePaths>
-  <Exclude>
-    <ModulePath>.*tests?\.dll$</ModulePath>
-    <ModulePath>.*\.Tests\.dll$</ModulePath>
-  </Exclude>
-</ModulePaths>
+
+In your `testconfig.json`:
+```json
+{
+  "codeCoverage": {
+    "Configuration": {
+      "CodeCoverage": {
+        "ModulePaths": {
+          "Exclude": [".*tests?\\.dll$", ".*\\.Tests\\.dll$"]
+        }
+      }
+    }
+  }
+}
 ```
 
 #### 2. Exclude Generated Code
-```xml
-<ModulePaths>
-  <Exclude>
-    <ModulePath>.*\.g\.cs$</ModulePath>
-    <ModulePath>.*\.Designer\.cs$</ModulePath>
-  </Exclude>
-</ModulePaths>
+
+In your `testconfig.json`:
+```json
+{
+  "codeCoverage": {
+    "Configuration": {
+      "CodeCoverage": {
+        "Sources": {
+          "Exclude": [".*\\.g\\.cs$", ".*\\.Designer\\.cs$"]
+        }
+      }
+    }
+  }
+}
 ```
 
 #### 3. Include Only Production Code
-```xml
-<ModulePaths>
-  <Include>
-    <ModulePath>.*MyCompany\.MyProduct\..*\.dll$</ModulePath>
-  </Include>
-  <Exclude>
-    <ModulePath>.*tests?\.dll$</ModulePath>
-  </Exclude>
-</ModulePaths>
+
+In your `testconfig.json`:
+```json
+{
+  "codeCoverage": {
+    "Configuration": {
+      "CodeCoverage": {
+        "ModulePaths": {
+          "Include": [".*MyCompany\\.MyProduct\\..*\\.dll$"],
+          "Exclude": [".*tests?\\.dll$"]
+        }
+      }
+    }
+  }
+}
 ```
 
 ## Debugging Tips
