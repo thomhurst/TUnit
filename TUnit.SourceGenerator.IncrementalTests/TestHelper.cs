@@ -85,6 +85,27 @@ internal static class TestHelper
         return compilation.ReplaceSyntaxTree(compilation.SyntaxTrees.First(), newTree);
     }
 
+    internal static CSharpCompilation ReplacePropertyDeclaration(
+        CSharpCompilation compilation,
+        string propertyName,
+        string newDeclaration
+    )
+    {
+        var syntaxTree = compilation.SyntaxTrees.Single();
+
+        var memberDeclaration = syntaxTree
+            .GetCompilationUnitRoot()
+            .DescendantNodes()
+            .OfType<PropertyDeclarationSyntax>()
+            .First(x => x.Identifier.Text == propertyName);
+        var updatedMemberDeclaration = SyntaxFactory.ParseMemberDeclaration(newDeclaration)!;
+
+        var newRoot = syntaxTree.GetCompilationUnitRoot().ReplaceNode(memberDeclaration, updatedMemberDeclaration);
+        var newTree = syntaxTree.WithRootAndOptions(newRoot, syntaxTree.Options);
+
+        return compilation.ReplaceSyntaxTree(compilation.SyntaxTrees.First(), newTree);
+    }
+
     public static void AssertRunReason(
         GeneratorRunResult runResult,
         string stepName,
@@ -119,6 +140,11 @@ internal record IncrementalGeneratorRunReasons(
     public static readonly IncrementalGeneratorRunReasons Cached = new(
         // compilation step should always be modified as each time a new compilation is passed
         IncrementalStepRunReason.Cached,
+        IncrementalStepRunReason.Cached
+    );
+
+    public static readonly IncrementalGeneratorRunReasons Unchanged = new(
+        IncrementalStepRunReason.Unchanged,
         IncrementalStepRunReason.Cached
     );
 

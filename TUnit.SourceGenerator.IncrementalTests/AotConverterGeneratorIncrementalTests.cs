@@ -111,7 +111,7 @@ public class AotConverterGeneratorIncrementalTests
         var runResult = driver.GetRunResult().Results[0];
         var runValue = runResult.TrackedSteps[AotConverterGenerator.ParseAotConverter][0].Outputs[0].Value;
         var runState = (ValueTuple<EquatableArray<AotConverterGenerator.ConversionMetadata>, bool>)runValue;
-        Assert.That(runState.Item1.Length == conversionMetadataLength);
+        Xunit.Assert.Equal(conversionMetadataLength, runState.Item1.Length);
 
         TestHelper.AssertRunReason(runResult, AotConverterGenerator.ParseAotConverter, reasons.BuildStep, outputIndex);
     }
