@@ -1,41 +1,10 @@
 using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.Extensions;
-using TUnit.Core.SourceGenerator.Models;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
 public static class TupleArgumentHelper
 {
-    public static List<string> GenerateArgumentAccess(ITypeSymbol parameterType, string argumentsArrayName, int baseIndex)
-    {
-        var argumentExpressions = new List<string>();
-        
-        // For method parameters, tuples are NOT supported - the data source
-        // must return already unpacked values matching the method signature
-        var castExpression = $"global::TUnit.Core.Helpers.CastHelper.Cast<{parameterType.GloballyQualified()}>({argumentsArrayName}[{baseIndex}])";
-        argumentExpressions.Add(castExpression);
-        
-        return argumentExpressions;
-    }
-
-    /// <param name="parameterTypes">The types of all constructor parameters</param>
-    /// <param name="argumentsArrayName">The name of the arguments array (e.g., "args")</param>
-    /// <returns>A list of argument access expressions for the constructor</returns>
-    public static List<string> GenerateConstructorArgumentAccess(IList<ITypeSymbol> parameterTypes, string argumentsArrayName)
-    {
-        var argumentExpressions = new List<string>();
-        
-        // Data sources already provide unwrapped arguments, so we just access by index
-        for (var i = 0; i < parameterTypes.Count; i++)
-        {
-            var parameterType = parameterTypes[i];
-            var castExpression = $"global::TUnit.Core.Helpers.CastHelper.Cast<{parameterType.GloballyQualified()}>({argumentsArrayName}[{i}])";
-            argumentExpressions.Add(castExpression);
-        }
-        
-        return argumentExpressions;
-    }
-
     /// <summary>
     /// Generates method invocation arguments.
     /// </summary>
@@ -45,17 +14,17 @@ public static class TupleArgumentHelper
     public static string GenerateMethodInvocationArguments(IList<IParameterSymbol> parameters, string argumentsArrayName)
     {
         var allArguments = new List<string>();
-        
+
         for (var i = 0; i < parameters.Count; i++)
         {
             var parameter = parameters[i];
             var castExpression = $"global::TUnit.Core.Helpers.CastHelper.Cast<{parameter.Type.GloballyQualified()}>({argumentsArrayName}[{i}])";
             allArguments.Add(castExpression);
         }
-        
+
         return string.Join(", ", allArguments);
     }
-    
+
     /// <summary>
     /// Generates argument access for a method with possible params array, given a specific argument count.
     /// </summary>
@@ -83,10 +52,10 @@ public static class TupleArgumentHelper
         {
             throw new ArgumentException("argumentCount must be int or string");
         }
-        
+
         // Check if last parameter is params array
         var hasParams = parameters.Count > 0 && parameters[parameters.Count - 1].IsParams;
-        
+
         if (!hasParams)
         {
             // No params array - just cast each argument
@@ -114,7 +83,7 @@ public static class TupleArgumentHelper
         {
             // Has params array
             var regularParamCount = parameters.Count - 1;
-            
+
             // Handle regular parameters
             if (argCountExpression != null)
             {
@@ -135,7 +104,7 @@ public static class TupleArgumentHelper
                     argumentExpressions.Add(castExpression);
                 }
             }
-            
+
             // Handle params array parameter
             var paramsParam = parameters[parameters.Count - 1];
             var elementType = (paramsParam.Type as IArrayTypeSymbol)?.ElementType;
@@ -187,7 +156,7 @@ public static class TupleArgumentHelper
                 argumentExpressions.Add(castExpression);
             }
         }
-        
+
         return argumentExpressions;
     }
 }

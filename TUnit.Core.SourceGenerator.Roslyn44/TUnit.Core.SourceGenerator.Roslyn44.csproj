@@ -4,6 +4,12 @@
         <RoslynVersion>4.4</RoslynVersion>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Folder Include="..\TUnit.Core.SourceGenerator\CodeGenerators\Writers\Hooks\">
+        <Link>CodeGenerators\Writers\Hooks</Link>
+      </Folder>
+    </ItemGroup>
+
     <Import Project="..\SourceGenerator.props" />
 
 </Project>
