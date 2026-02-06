@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using TUnit.Core;
 using TUnit.Core.Logging;
 using TUnit.Engine.Logging;
@@ -41,14 +40,14 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
         var lockedKeys = new HashSet<string>();
         var lockObject = new object();
 
-        // Queue for tests waiting for their constraint keys to become available
-        var waitingTests = new ConcurrentQueue<(AbstractExecutableTest Test, IReadOnlyList<string> ConstraintKeys, TaskCompletionSource<bool> StartSignal)>();
+        // Indexed structure for tests waiting for their constraint keys to become available
+        var waitingTestIndex = new WaitingTestIndex();
 
         // Active test tasks
         var activeTasks = new List<Task>();
 
         // Process each test
-        foreach (var (test, constraintKeys, _) in sortedTests)
+        foreach (var (test, constraintKeys, priority) in sortedTests)
         {
             var startSignal = new TaskCompletionSource<bool>();
 
@@ -75,6 +74,17 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
                         lockedKeys.Add(constraintKeys[i]);
                     }
                 }
+                else
+                {
+                    // Add to the indexed waiting structure while still under lock
+                    waitingTestIndex.Add(new WaitingTest
+                    {
+                        TestId = test.TestId,
+                        ConstraintKeys = constraintKeys,
+                        StartSignal = startSignal,
+                        Priority = priority
+                    });
+                }
             }
 
             if (canStart)
@@ -84,18 +94,17 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
                     await _logger.LogDebugAsync($"Starting test {test.TestId} with constraint keys: {string.Join(", ", constraintKeys)}").ConfigureAwait(false);
                 startSignal.SetResult(true);
 
-                var testTask = ExecuteTestAndReleaseKeysAsync(test, constraintKeys, lockedKeys, lockObject, waitingTests, cancellationToken);
+                var testTask = ExecuteTestAndReleaseKeysAsync(test, constraintKeys, lockedKeys, lockObject, waitingTestIndex, cancellationToken);
                 test.ExecutionTask = testTask;
                 activeTasks.Add(testTask);
             }
             else
             {
-                // Queue the test to wait for its keys
+                // Test was already added to the waiting index inside the lock above
                 if (_logger.IsDebugEnabled)
                     await _logger.LogDebugAsync($"Queueing test {test.TestId} waiting for constraint keys: {string.Join(", ", constraintKeys)}").ConfigureAwait(false);
-                waitingTests.Enqueue((test, constraintKeys, startSignal));
 
-                var testTask = WaitAndExecuteTestAsync(test, constraintKeys, startSignal, lockedKeys, lockObject, waitingTests, cancellationToken);
+                var testTask = WaitAndExecuteTestAsync(test, constraintKeys, startSignal, lockedKeys, lockObject, waitingTestIndex, cancellationToken);
                 test.ExecutionTask = testTask;
                 activeTasks.Add(testTask);
             }
@@ -114,7 +123,7 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
         TaskCompletionSource<bool> startSignal,
         HashSet<string> lockedKeys,
         object lockObject,
-        ConcurrentQueue<(AbstractExecutableTest Test, IReadOnlyList<string> ConstraintKeys, TaskCompletionSource<bool> StartSignal)> waitingTests,
+        WaitingTestIndex waitingTestIndex,
         CancellationToken cancellationToken)
     {
         // Wait for signal to start
@@ -123,7 +132,7 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
         if (_logger.IsDebugEnabled)
             await _logger.LogDebugAsync($"Starting previously queued test {test.TestId} with constraint keys: {string.Join(", ", constraintKeys)}").ConfigureAwait(false);
 
-        await ExecuteTestAndReleaseKeysAsync(test, constraintKeys, lockedKeys, lockObject, waitingTests, cancellationToken).ConfigureAwait(false);
+        await ExecuteTestAndReleaseKeysAsync(test, constraintKeys, lockedKeys, lockObject, waitingTestIndex, cancellationToken).ConfigureAwait(false);
     }
 
     #if NET6_0_OR_GREATER
@@ -134,7 +143,7 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
         IReadOnlyList<string> constraintKeys,
         HashSet<string> lockedKeys,
         object lockObject,
-        ConcurrentQueue<(AbstractExecutableTest Test, IReadOnlyList<string> ConstraintKeys, TaskCompletionSource<bool> StartSignal)> waitingTests,
+        WaitingTestIndex waitingTestIndex,
         CancellationToken cancellationToken)
     {
         SemaphoreSlim? parallelLimiterSemaphore = null;
@@ -158,9 +167,7 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
             parallelLimiterSemaphore?.Release();
 
             // Release the constraint keys and check if any waiting tests can now run
-            // Pre-allocate lists outside the lock to minimize lock duration
-            var testsToStart = new List<(AbstractExecutableTest Test, IReadOnlyList<string> ConstraintKeys, TaskCompletionSource<bool> StartSignal)>();
-            var testsToRequeue = new List<(AbstractExecutableTest Test, IReadOnlyList<string> ConstraintKeys, TaskCompletionSource<bool> StartSignal)>();
+            var testsToStart = new List<WaitingTest>();
 
             lock (lockObject)
             {
@@ -170,16 +177,23 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
                     lockedKeys.Remove(key);
                 }
 
-                // Check waiting tests to see if any can now run
+                // Only examine tests that are waiting on the keys we just released (O(k) lookup)
+                var candidates = waitingTestIndex.GetCandidatesForReleasedKeys(constraintKeys);
 
-                while (waitingTests.TryDequeue(out var waitingTest))
+                // Sort candidates by priority to respect ordering
+                // Use a simple list + sort rather than a SortedSet to avoid per-element allocation
+                var sortedCandidates = new List<WaitingTest>(candidates.Count);
+                sortedCandidates.AddRange(candidates);
+                sortedCandidates.Sort(static (a, b) => a.Priority.CompareTo(b.Priority));
+
+                foreach (var candidate in sortedCandidates)
                 {
-                    // Check if all constraint keys are available for this waiting test - manual loop avoids LINQ allocation
+                    // Check if all constraint keys are available for this candidate
                     var canStart = true;
-                    var waitingKeyCount = waitingTest.ConstraintKeys.Count;
+                    var waitingKeyCount = candidate.ConstraintKeys.Count;
                     for (var i = 0; i < waitingKeyCount; i++)
                     {
-                        if (lockedKeys.Contains(waitingTest.ConstraintKeys[i]))
+                        if (lockedKeys.Contains(candidate.ConstraintKeys[i]))
                         {
                             canStart = false;
                             break;
@@ -191,23 +205,14 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
                         // Lock the keys for this test
                         for (var i = 0; i < waitingKeyCount; i++)
                         {
-                            lockedKeys.Add(waitingTest.ConstraintKeys[i]);
+                            lockedKeys.Add(candidate.ConstraintKeys[i]);
                         }
 
-                        // Mark test to start after we exit the lock
-                        testsToStart.Add(waitingTest);
+                        // Remove from the index and mark for starting
+                        waitingTestIndex.Remove(candidate);
+                        testsToStart.Add(candidate);
                     }
-                    else
-                    {
-                        // Still can't run, keep it in the queue
-                        testsToRequeue.Add(waitingTest);
-                    }
-                }
-
-                // Re-add tests that still can't run
-                foreach (var waitingTestItem in testsToRequeue)
-                {
-                    waitingTests.Enqueue(waitingTestItem);
+                    // If can't start, leave it in the index for future key releases
                 }
             }
 
@@ -218,7 +223,7 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
             foreach (var testToStart in testsToStart)
             {
                 if (_logger.IsDebugEnabled)
-                    await _logger.LogDebugAsync($"Unblocking waiting test {testToStart.Test.TestId} with constraint keys: {string.Join(", ", testToStart.ConstraintKeys)}").ConfigureAwait(false);
+                    await _logger.LogDebugAsync($"Unblocking waiting test {testToStart.TestId} with constraint keys: {string.Join(", ", testToStart.ConstraintKeys)}").ConfigureAwait(false);
                 testToStart.StartSignal.SetResult(true);
             }
         }
