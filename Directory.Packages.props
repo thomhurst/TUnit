@@ -49,13 +49,13 @@
     <PackageVersion Include="Microsoft.Playwright" Version="1.58.0" />
     <PackageVersion Include="Microsoft.TemplateEngine.Authoring.TemplateVerifier" Version="10.0.102" />
     <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.4.1" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.CrashDump" Version="2.0.2" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.HangDump" Version="2.0.2" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.Telemetry" Version="2.0.2" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="2.0.2" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" Version="2.0.2" />
-    <PackageVersion Include="Microsoft.Testing.Platform" Version="2.0.2" />
-    <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="2.0.2" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.CrashDump" Version="2.1.0" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.HangDump" Version="2.1.0" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.Telemetry" Version="2.1.0" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="2.1.0" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" Version="2.1.0" />
+    <PackageVersion Include="Microsoft.Testing.Platform" Version="2.1.0" />
+    <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="2.1.0" />
     <PackageVersion Include="System.Threading.Channels" Version="9.0.0" />
     <PackageVersion Include="ModularPipelines.DotNet" Version="3.1.6" />
     <PackageVersion Include="ModularPipelines.Git" Version="3.1.6" />
