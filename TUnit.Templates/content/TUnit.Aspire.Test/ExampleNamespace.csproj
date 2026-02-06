@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.Testing" Version="13.1.0" />
-    <PackageReference Include="TUnit" Version="1.12.147" />
+    <PackageReference Include="TUnit" Version="1.13.0" />
   </ItemGroup>
 
   <ItemGroup>
