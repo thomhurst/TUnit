@@ -93,6 +93,8 @@ public class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDevi
         return logLevel >= _minimumLogLevel;
     }
 
+    public bool IsDebugEnabled => _minimumLogLevel <= LogLevel.Debug;
+
     public async Task LogErrorAsync(string message)
     {
         await LogAsync(LogLevel.Error, message, null, (s, _) => s);

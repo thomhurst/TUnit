@@ -80,7 +80,8 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
             if (canStart)
             {
                 // Start the test immediately
-                await _logger.LogDebugAsync($"Starting test {test.TestId} with constraint keys: {string.Join(", ", constraintKeys)}").ConfigureAwait(false);
+                if (_logger.IsDebugEnabled)
+                    await _logger.LogDebugAsync($"Starting test {test.TestId} with constraint keys: {string.Join(", ", constraintKeys)}").ConfigureAwait(false);
                 startSignal.SetResult(true);
 
                 var testTask = ExecuteTestAndReleaseKeysAsync(test, constraintKeys, lockedKeys, lockObject, waitingTests, cancellationToken);
@@ -90,7 +91,8 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
             else
             {
                 // Queue the test to wait for its keys
-                await _logger.LogDebugAsync($"Queueing test {test.TestId} waiting for constraint keys: {string.Join(", ", constraintKeys)}").ConfigureAwait(false);
+                if (_logger.IsDebugEnabled)
+                    await _logger.LogDebugAsync($"Queueing test {test.TestId} waiting for constraint keys: {string.Join(", ", constraintKeys)}").ConfigureAwait(false);
                 waitingTests.Enqueue((test, constraintKeys, startSignal));
 
                 var testTask = WaitAndExecuteTestAsync(test, constraintKeys, startSignal, lockedKeys, lockObject, waitingTests, cancellationToken);
@@ -118,7 +120,8 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
         // Wait for signal to start
         await startSignal.Task.ConfigureAwait(false);
 
-        await _logger.LogDebugAsync($"Starting previously queued test {test.TestId} with constraint keys: {string.Join(", ", constraintKeys)}").ConfigureAwait(false);
+        if (_logger.IsDebugEnabled)
+            await _logger.LogDebugAsync($"Starting previously queued test {test.TestId} with constraint keys: {string.Join(", ", constraintKeys)}").ConfigureAwait(false);
 
         await ExecuteTestAndReleaseKeysAsync(test, constraintKeys, lockedKeys, lockObject, waitingTests, cancellationToken).ConfigureAwait(false);
     }
@@ -209,11 +212,13 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
             }
 
             // Log and signal tests to start outside the lock
-            await _logger.LogDebugAsync($"Released constraint keys for test {test.TestId}: {string.Join(", ", constraintKeys)}").ConfigureAwait(false);
+            if (_logger.IsDebugEnabled)
+                await _logger.LogDebugAsync($"Released constraint keys for test {test.TestId}: {string.Join(", ", constraintKeys)}").ConfigureAwait(false);
 
             foreach (var testToStart in testsToStart)
             {
-                await _logger.LogDebugAsync($"Unblocking waiting test {testToStart.Test.TestId} with constraint keys: {string.Join(", ", testToStart.ConstraintKeys)}").ConfigureAwait(false);
+                if (_logger.IsDebugEnabled)
+                    await _logger.LogDebugAsync($"Unblocking waiting test {testToStart.Test.TestId} with constraint keys: {string.Join(", ", testToStart.ConstraintKeys)}").ConfigureAwait(false);
                 testToStart.StartSignal.SetResult(true);
             }
         }
