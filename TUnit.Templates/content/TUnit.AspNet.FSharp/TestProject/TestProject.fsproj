@@ -10,8 +10,8 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.2" />
-		<PackageReference Include="TUnit" Version="1.12.147" />
-		<PackageReference Include="TUnit.Assertions.FSharp" Version="1.12.147" />	
+		<PackageReference Include="TUnit" Version="1.13.0" />
+		<PackageReference Include="TUnit.Assertions.FSharp" Version="1.13.0" />	
 	</ItemGroup>
 
 	<ItemGroup>
