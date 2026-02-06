@@ -73,7 +73,7 @@ internal sealed class TestBuilder : ITestBuilder
 
         // First try to create instance with ClassConstructor attribute
         // Use attributes from context if available
-        var attributes = builderContext.InitializedAttributes ?? metadata.AttributeFactory();
+        var attributes = builderContext.InitializedAttributes ?? metadata.GetOrCreateAttributes();
 
         var instance = await ClassConstructorHelper.TryCreateInstanceWithClassConstructor(
             attributes,
@@ -154,7 +154,7 @@ internal sealed class TestBuilder : ITestBuilder
             var repeatCount = metadata.RepeatCount ?? 0;
 
             // Create and initialize attributes ONCE
-            var attributes = await InitializeAttributesAsync(metadata.AttributeFactory.Invoke());
+            var attributes = await InitializeAttributesAsync(metadata.GetOrCreateAttributes());
 
             if (metadata.ClassDataSources.Any(ds => ds is IAccessesInstanceData))
             {
@@ -1017,7 +1017,7 @@ internal sealed class TestBuilder : ITestBuilder
     /// </summary>
     private static string? GetBasicSkipReason(TestMetadata metadata, Attribute[]? cachedAttributes = null)
     {
-        var attributes = cachedAttributes ?? metadata.AttributeFactory();
+        var attributes = cachedAttributes ?? metadata.GetOrCreateAttributes();
 
         SkipAttribute? firstSkipAttribute = null;
 
@@ -1047,7 +1047,7 @@ internal sealed class TestBuilder : ITestBuilder
     private async ValueTask<TestContext> CreateTestContextAsync(string testId, TestMetadata metadata, TestData testData, TestBuilderContext testBuilderContext)
     {
         // Use attributes from context if available, or create new ones
-        var attributes = testBuilderContext.InitializedAttributes ?? await InitializeAttributesAsync(metadata.AttributeFactory.Invoke());
+        var attributes = testBuilderContext.InitializedAttributes ?? await InitializeAttributesAsync(metadata.GetOrCreateAttributes());
 
         if (testBuilderContext.DataSourceAttribute != null && testBuilderContext.DataSourceAttribute is not NoDataSource)
         {
@@ -1138,7 +1138,7 @@ internal sealed class TestBuilder : ITestBuilder
 
     private async Task<TestDetails> CreateFailedTestDetails(TestMetadata metadata, string testId)
     {
-        var attributes = (await InitializeAttributesAsync(metadata.AttributeFactory.Invoke()));
+        var attributes = (await InitializeAttributesAsync(metadata.GetOrCreateAttributes()));
         return new TestDetails(attributes)
         {
             TestId = testId,
@@ -1524,7 +1524,7 @@ internal sealed class TestBuilder : ITestBuilder
         var repeatCount = metadata.RepeatCount ?? 0;
 
         // Initialize attributes
-        var attributes = await InitializeAttributesAsync(metadata.AttributeFactory.Invoke());
+        var attributes = await InitializeAttributesAsync(metadata.GetOrCreateAttributes());
 
         // Create base context with ClassConstructor if present
         // StateBag and Events are lazy-initialized for performance
