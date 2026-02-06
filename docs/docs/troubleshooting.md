@@ -709,7 +709,7 @@ dotnet run -- --report-trx --report-trx-filename results.trx
 
 **New (TUnit configuration):**
 
-TUnit uses command-line flags or programmatic configuration instead of `.runsettings`:
+TUnit uses command-line flags, `testconfig.json`, or programmatic configuration instead of `.runsettings`:
 
 ```bash
 # Parallel execution
@@ -2245,37 +2245,26 @@ dotnet run --configuration Release --coverage
 
 **Solutions:**
 
-#### 1. Create a `.runsettings` File
-```xml
-<!-- coverage.runsettings -->
-<?xml version="1.0" encoding="utf-8"?>
-<RunSettings>
-  <DataCollectionRunSettings>
-    <DataCollectors>
-      <DataCollector friendlyName="Code Coverage">
-        <Configuration>
-          <CodeCoverage>
-            <ModulePaths>
-              <Include>
-                <ModulePath>.*\.dll$</ModulePath>
-                <ModulePath>.*MyProject\.dll$</ModulePath>
-              </Include>
-              <Exclude>
-                <ModulePath>.*tests?\.dll$</ModulePath>
-                <ModulePath>.*TestHelpers\.dll$</ModulePath>
-              </Exclude>
-            </ModulePaths>
-          </CodeCoverage>
-        </Configuration>
-      </DataCollector>
-    </DataCollectors>
-  </DataCollectionRunSettings>
-</RunSettings>
+#### 1. Create a `testconfig.json` File
+```json
+{
+  "codeCoverage": {
+    "Configuration": {
+      "CodeCoverage": {
+        "ModulePaths": {
+          "Include": [".*\\.dll$", ".*MyProject\\.dll$"],
+          "Exclude": [".*tests?\\.dll$", ".*TestHelpers\\.dll$"]
+        }
+      }
+    }
+  }
+}
 ```
 
-#### 2. Use the Settings File
+#### 2. Place the File in Your Test Project Directory
+The `testconfig.json` file is picked up automatically. Alternatively, you can use an XML coverage settings file:
 ```bash
-dotnet run --configuration Release --coverage --coverage-settings coverage.runsettings
+dotnet run --configuration Release --coverage --coverage-settings coverage.config
 ```
 
 ### Coverage Format Not Recognized by CI/CD
@@ -2347,36 +2336,55 @@ ls TestResults/
 **Solutions:**
 
 #### 1. Exclude Test Projects
-```xml
-<!-- coverage.runsettings -->
-<ModulePaths>
-  <Exclude>
-    <ModulePath>.*tests?\.dll$</ModulePath>
-    <ModulePath>.*\.Tests\.dll$</ModulePath>
-  </Exclude>
-</ModulePaths>
+
+In your `testconfig.json`:
+```json
+{
+  "codeCoverage": {
+    "Configuration": {
+      "CodeCoverage": {
+        "ModulePaths": {
+          "Exclude": [".*tests?\\.dll$", ".*\\.Tests\\.dll$"]
+        }
+      }
+    }
+  }
+}
 ```
 
 #### 2. Exclude Generated Code
-```xml
-<ModulePaths>
-  <Exclude>
-    <ModulePath>.*\.g\.cs$</ModulePath>
-    <ModulePath>.*\.Designer\.cs$</ModulePath>
-  </Exclude>
-</ModulePaths>
+
+In your `testconfig.json`:
+```json
+{
+  "codeCoverage": {
+    "Configuration": {
+      "CodeCoverage": {
+        "Sources": {
+          "Exclude": [".*\\.g\\.cs$", ".*\\.Designer\\.cs$"]
+        }
+      }
+    }
+  }
+}
 ```
 
 #### 3. Include Only Production Code
-```xml
-<ModulePaths>
-  <Include>
-    <ModulePath>.*MyCompany\.MyProduct\..*\.dll$</ModulePath>
-  </Include>
-  <Exclude>
-    <ModulePath>.*tests?\.dll$</ModulePath>
-  </Exclude>
-</ModulePaths>
+
+In your `testconfig.json`:
+```json
+{
+  "codeCoverage": {
+    "Configuration": {
+      "CodeCoverage": {
+        "ModulePaths": {
+          "Include": [".*MyCompany\\.MyProduct\\..*\\.dll$"],
+          "Exclude": [".*tests?\\.dll$"]
+        }
+      }
+    }
+  }
+}
 ```
 
 ## Debugging Tips

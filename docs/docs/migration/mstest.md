@@ -1242,36 +1242,29 @@ You can view these with:
 
 ### Advanced Coverage Configuration
 
-You can customize coverage behavior with a `.runsettings` file (same format as MSTest):
+You can customize coverage behavior with a `testconfig.json` file:
 
-**coverage.runsettings:**
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<RunSettings>
-  <DataCollectionRunSettings>
-    <DataCollectors>
-      <DataCollector friendlyName="Code Coverage">
-        <Configuration>
-          <CodeCoverage>
-            <ModulePaths>
-              <Include>
-                <ModulePath>.*\.dll$</ModulePath>
-              </Include>
-              <Exclude>
-                <ModulePath>.*tests\.dll$</ModulePath>
-              </Exclude>
-            </ModulePaths>
-          </CodeCoverage>
-        </Configuration>
-      </DataCollector>
-    </DataCollectors>
-  </DataCollectionRunSettings>
-</RunSettings>
+**testconfig.json:**
+```json
+{
+  "codeCoverage": {
+    "Configuration": {
+      "CodeCoverage": {
+        "ModulePaths": {
+          "Include": [".*\\.dll$"],
+          "Exclude": [".*tests\\.dll$"]
+        }
+      }
+    }
+  }
+}
 ```
 
-**Use it:**
+Place the `testconfig.json` file in the same directory as your test project. It will be picked up automatically when running tests.
+
+**Alternatively, you can use an XML coverage settings file:**
 ```bash
-dotnet run --configuration Release --coverage --coverage-settings coverage.runsettings
+dotnet run --configuration Release --coverage --coverage-settings coverage.config
 ```
 
 ### Troubleshooting
@@ -1281,8 +1274,8 @@ dotnet run --configuration Release --coverage --coverage-settings coverage.runse
 - Verify you have a recent .NET SDK installed
 
 **Missing coverage for some assemblies?**
-- Use a `.runsettings` file to explicitly include/exclude modules
-- See [Microsoft's documentation](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-code-coverage)
+- Use a `testconfig.json` file to explicitly include/exclude modules
+- See [Microsoft's documentation](https://github.com/microsoft/codecoverage/blob/main/docs/configuration.md)
 
 **Need help?**
 - See [TUnit Code Coverage Documentation](../extensions/extensions.md#code-coverage)

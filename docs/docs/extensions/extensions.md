@@ -70,36 +70,29 @@ See the migration guides for detailed instructions:
 
 #### Advanced Configuration
 
-You can customize coverage with a `.runsettings` file:
+You can customize coverage with a `testconfig.json` file:
 
-**coverage.runsettings:**
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<RunSettings>
-  <DataCollectionRunSettings>
-    <DataCollectors>
-      <DataCollector friendlyName="Code Coverage">
-        <Configuration>
-          <CodeCoverage>
-            <ModulePaths>
-              <Include>
-                <ModulePath>.*\.dll$</ModulePath>
-              </Include>
-              <Exclude>
-                <ModulePath>.*tests\.dll$</ModulePath>
-              </Exclude>
-            </ModulePaths>
-          </CodeCoverage>
-        </Configuration>
-      </DataCollector>
-    </DataCollectors>
-  </DataCollectionRunSettings>
-</RunSettings>
+**testconfig.json:**
+```json
+{
+  "codeCoverage": {
+    "Configuration": {
+      "CodeCoverage": {
+        "ModulePaths": {
+          "Include": [".*\\.dll$"],
+          "Exclude": [".*tests\\.dll$"]
+        }
+      }
+    }
+  }
+}
 ```
 
-**Use it:**
+Place the `testconfig.json` file in the same directory as your test project. It will be picked up automatically when running tests.
+
+**Alternatively, you can use an XML coverage settings file:**
 ```bash
-dotnet run --configuration Release --coverage --coverage-settings coverage.runsettings
+dotnet run --configuration Release --coverage --coverage-settings coverage.config
 ```
 
 **📚 More Resources:**

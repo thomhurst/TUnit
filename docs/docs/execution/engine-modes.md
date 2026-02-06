@@ -80,15 +80,15 @@ set TUNIT_EXECUTION_MODE=reflection
 export TUNIT_EXECUTION_MODE=reflection
 ```
 
-Alternatively, you can configure this in a `.runsettings` file:
-```xml
-<RunSettings>
-  <RunConfiguration>
-    <EnvironmentVariables>
-      <TUNIT_EXECUTION_MODE>reflection</TUNIT_EXECUTION_MODE>
-    </EnvironmentVariables>
-  </RunConfiguration>
-</RunSettings>
+Alternatively, you can configure this in a `testconfig.json` file:
+```json
+{
+  "testingPlatform": {
+    "environmentVariables": {
+      "TUNIT_EXECUTION_MODE": "reflection"
+    }
+  }
+}
 ```
 
 ### Optimizing Build Performance in Reflection Mode
