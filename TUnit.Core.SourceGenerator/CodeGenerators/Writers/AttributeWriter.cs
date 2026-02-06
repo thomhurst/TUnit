@@ -12,50 +12,46 @@ public class AttributeWriter(Compilation compilation, TUnit.Core.SourceGenerator
     public void WriteAttributes(ICodeWriter sourceCodeWriter,
         IEnumerable<AttributeData> attributeDatas)
     {
-        var attributesToWrite = new List<AttributeData>();
+        var first = true;
 
         // Filter out attributes that we can write
         foreach (var attributeData in attributeDatas)
         {
             // Include attributes with syntax reference (from current compilation)
             // Include attributes without syntax reference (from other assemblies) as long as they have an AttributeClass
-            if (attributeData.ApplicationSyntaxReference is not null || attributeData.AttributeClass is not null)
+            if (attributeData.ApplicationSyntaxReference is null && attributeData.AttributeClass is null)
             {
-                // Skip compiler-internal and assembly-level attributes
-                if (ShouldSkipCompilerInternalAttribute(attributeData))
-                {
-                    continue;
-                }
+                continue;
+            }
 
-                // Skip framework-specific attributes when targeting older frameworks
-                // We determine this by checking if we can compile the attribute
-                if (ShouldSkipFrameworkSpecificAttribute(attributeData))
-                {
-                    continue;
-                }
+            // Skip compiler-internal and assembly-level attributes
+            if (ShouldSkipCompilerInternalAttribute(attributeData))
+            {
+                continue;
+            }
 
-                // Skip attributes with compiler-generated type arguments
-                if (attributeData.ConstructorArguments.Any(arg =>
+            // Skip framework-specific attributes when targeting older frameworks
+            // We determine this by checking if we can compile the attribute
+            if (ShouldSkipFrameworkSpecificAttribute(attributeData))
+            {
+                continue;
+            }
+
+            // Skip attributes with compiler-generated type arguments
+            if (attributeData.ConstructorArguments.Any(arg =>
                     arg is { Kind: TypedConstantKind.Type, Value: ITypeSymbol typeSymbol } &&
                     typeSymbol.IsCompilerGeneratedType()))
-                {
-                    continue;
-                }
-
-                attributesToWrite.Add(attributeData);
+            {
+                continue;
             }
-        }
 
-        for (var index = 0; index < attributesToWrite.Count; index++)
-        {
-            var attributeData = attributesToWrite[index];
-
-            WriteAttribute(sourceCodeWriter, attributeData);
-
-            if (index != attributesToWrite.Count - 1)
+            if (!first)
             {
                 sourceCodeWriter.AppendLine(",");
             }
+
+            WriteAttribute(sourceCodeWriter, attributeData);
+            first = false;
         }
     }
 
