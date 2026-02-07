@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 
 namespace TUnit.Assertions.Conditions.Helpers;
 
@@ -78,6 +79,8 @@ internal static class TypeHelper
             || type == typeof(DateTimeOffset)
             || type == typeof(TimeSpan)
             || type == typeof(Guid)
+            || typeof(Type).IsAssignableFrom(type)
+            || typeof(MemberInfo).IsAssignableFrom(type)
 #if NET6_0_OR_GREATER
             || type == typeof(DateOnly)
             || type == typeof(TimeOnly)
