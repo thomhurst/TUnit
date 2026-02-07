@@ -1934,7 +1934,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         var methodName = testMethod.MethodSymbol.Name;
         var namespaceName = testMethod.TypeSymbol.ContainingNamespace?.ToDisplayString() ?? "";
-        var simpleClassName = testMethod.TypeSymbol.Name;
+        var simpleClassName = testMethod.TypeSymbol.GetNestedClassName();
         var fullyQualifiedName = string.IsNullOrEmpty(namespaceName)
             ? $"{simpleClassName}.{methodName}"
             : $"{namespaceName}.{simpleClassName}.{methodName}";

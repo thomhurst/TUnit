@@ -837,20 +837,7 @@ internal sealed class ReflectionHookDiscoveryService
         {
             Name = method.Name,
             Type = type,
-            Class = new ClassMetadata
-            {
-                Name = type.Name,
-                Type = type,
-                TypeInfo = new ConcreteType(type),
-                Namespace = type.Namespace ?? string.Empty,
-                Assembly = new AssemblyMetadata
-                {
-                    Name = type.Assembly.GetName().Name ?? "Unknown"
-                },
-                Parameters = [],
-                Properties = [],
-                Parent = null
-            },
+            Class = CreateClassMetadata(type),
             Parameters = method.GetParameters().Select(p => new ParameterMetadata(p.ParameterType)
             {
                 Name = p.Name ?? string.Empty,
@@ -863,6 +850,24 @@ internal sealed class ReflectionHookDiscoveryService
             ReturnType = method.ReturnType,
             TypeInfo = new ConcreteType(type)
         };
+    }
+
+    private static ClassMetadata CreateClassMetadata(Type type)
+    {
+        return ClassMetadata.GetOrAdd(type.FullName ?? type.Name, () => new ClassMetadata
+        {
+            Name = type.Name,
+            Type = type,
+            TypeInfo = new ConcreteType(type),
+            Namespace = type.Namespace ?? string.Empty,
+            Assembly = AssemblyMetadata.GetOrAdd(type.Assembly.GetName().Name ?? "Unknown", () => new AssemblyMetadata
+            {
+                Name = type.Assembly.GetName().Name ?? "Unknown"
+            }),
+            Parameters = [],
+            Properties = [],
+            Parent = type.DeclaringType != null ? CreateClassMetadata(type.DeclaringType) : null
+        });
     }
 
     private static Func<object, TestContext, CancellationToken, ValueTask> CreateInstanceHookDelegate(Type type, MethodInfo method)

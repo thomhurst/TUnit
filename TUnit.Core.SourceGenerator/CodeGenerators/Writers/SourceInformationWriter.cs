@@ -9,8 +9,7 @@ public static class SourceInformationWriter
 {
     public static void GenerateClassInformation(ICodeWriter sourceCodeWriter, Compilation compilation, INamedTypeSymbol namedTypeSymbol)
     {
-        var parent = namedTypeSymbol.ContainingType;
-        var parentExpression = parent != null ? MetadataGenerationHelper.GenerateClassMetadataGetOrAdd(parent, null, sourceCodeWriter.IndentLevel) : null;
+        var parentExpression = GenerateParentClassMetadataExpression(namedTypeSymbol, sourceCodeWriter.IndentLevel);
         var classMetadata = MetadataGenerationHelper.GenerateClassMetadataGetOrAdd(namedTypeSymbol, parentExpression, sourceCodeWriter.IndentLevel);
 
         // Handle multi-line class metadata similar to method metadata
@@ -97,5 +96,21 @@ public static class SourceInformationWriter
         // For now, use the generic version since it's what the existing code was doing
         MetadataGenerationHelper.WriteParameterMetadataGeneric(sourceCodeWriter, parameter);
         sourceCodeWriter.Append(",");
+    }
+
+    /// <summary>
+    /// Recursively generates parent ClassMetadata expression for nested types.
+    /// Returns null if the type has no containing type.
+    /// </summary>
+    private static string? GenerateParentClassMetadataExpression(INamedTypeSymbol typeSymbol, int indentLevel)
+    {
+        var parent = typeSymbol.ContainingType;
+        if (parent == null)
+        {
+            return null;
+        }
+
+        var grandparentExpression = GenerateParentClassMetadataExpression(parent, indentLevel);
+        return MetadataGenerationHelper.GenerateClassMetadataGetOrAdd(parent, grandparentExpression, indentLevel);
     }
 }

@@ -2497,10 +2497,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     var capturedType = type;
                     var capturedMethod = method;
 
+                    var nestedClassName = TUnit.Core.Extensions.TestContextExtensions.GetNestedTypeName(type);
                     yield return new TestDescriptor
                     {
                         TestId = $"{type.FullName}.{method.Name}",
-                        ClassName = type.Name,
+                        ClassName = nestedClassName,
                         MethodName = method.Name,
                         FullyQualifiedName = $"{type.FullName}.{method.Name}",
                         FilePath = ExtractFilePath(method) ?? "Unknown",

@@ -65,8 +65,15 @@ internal readonly struct FilterHints
         // Check class name hint
         if (ClassName != null)
         {
-            // Handle generic types (e.g., MyClass`1)
-            if (type.Name != ClassName && !type.Name.StartsWith(ClassName + "`"))
+            // The filter ClassName may be "OuterClass+InnerClass" or just "InnerClass"
+            // type.Name is just the innermost name
+            var nestedName = TUnit.Core.Extensions.TestContextExtensions.GetNestedTypeName(type);
+            if (nestedName != ClassName
+                && !nestedName.StartsWith(ClassName + "`")
+                && !nestedName.EndsWith("+" + ClassName)
+                && !nestedName.StartsWith(ClassName + "+")
+                && type.Name != ClassName
+                && !type.Name.StartsWith(ClassName + "`"))
             {
                 return false;
             }
@@ -91,8 +98,12 @@ internal readonly struct FilterHints
         // Check class name hint
         if (ClassName != null)
         {
-            // Handle generic types (e.g., MyClass`1)
-            if (descriptor.ClassName != ClassName && !descriptor.ClassName.StartsWith(ClassName + "`"))
+            // The filter ClassName may be "OuterClass+InnerClass" or just "InnerClass"
+            // The descriptor ClassName now includes nested hierarchy (e.g., "OuterClass+InnerClass")
+            if (descriptor.ClassName != ClassName
+                && !descriptor.ClassName.StartsWith(ClassName + "`")
+                && !descriptor.ClassName.EndsWith("+" + ClassName)
+                && !descriptor.ClassName.StartsWith(ClassName + "+"))
             {
                 return false;
             }
@@ -425,7 +436,7 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
         var classMetadata = metadata.MethodMetadata.Class;
         var assemblyName = classMetadata.Assembly.Name ?? metadata.TestClassType.Assembly.GetName().Name ?? "*";
         var namespaceName = classMetadata.Namespace ?? "*";
-        var className = classMetadata.Name;
+        var className = TestFilterService.GetNestedClassName(classMetadata);
         var methodName = metadata.TestMethodName;
 
         return $"/{assemblyName}/{namespaceName}/{className}/{methodName}";

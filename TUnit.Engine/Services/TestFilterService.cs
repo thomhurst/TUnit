@@ -140,7 +140,7 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
         var classMetadata = test.Context.Metadata.TestDetails.MethodMetadata.Class;
         var assemblyName = classMetadata.Assembly.Name ?? metadata.TestClassType.Assembly.GetName().Name ?? "*";
         var namespaceName = classMetadata.Namespace ?? "*";
-        var classTypeName = classMetadata.Name;
+        var classTypeName = GetNestedClassName(classMetadata);
 
         var path = $"/{assemblyName}/{namespaceName}/{classTypeName}/{metadata.TestMethodName}";
 
@@ -242,5 +242,28 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
         }
 
         return filteredTests;
+    }
+
+    /// <summary>
+    /// Builds the nested class name from ClassMetadata by walking the Parent chain.
+    /// Returns names joined with '+' (e.g., "OuterClass+InnerClass").
+    /// </summary>
+    internal static string GetNestedClassName(ClassMetadata classMetadata)
+    {
+        if (classMetadata.Parent == null)
+        {
+            return classMetadata.Name;
+        }
+
+        var hierarchy = new List<string>();
+        var current = classMetadata;
+        while (current != null)
+        {
+            hierarchy.Add(current.Name);
+            current = current.Parent;
+        }
+
+        hierarchy.Reverse();
+        return string.Join("+", hierarchy);
     }
 }

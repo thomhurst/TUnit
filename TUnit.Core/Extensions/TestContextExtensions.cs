@@ -8,18 +8,29 @@ public static class TestContextExtensions
 {
     public static string GetClassTypeName(this TestContext context)
     {
+        var type = context.Metadata.TestDetails.ClassType;
         var parameters = context.Metadata.TestDetails.MethodMetadata.Class.Parameters;
+
+        var nestedPrefix = GetNestedTypePrefix(type);
 
         if (parameters.Length == 0)
         {
-            return context.Metadata.TestDetails.ClassType.Name;
+            return nestedPrefix != null
+                ? $"{nestedPrefix}+{type.Name}"
+                : type.Name;
         }
 
         var args = context.Metadata.TestDetails.TestClassArguments;
         var sb = StringBuilderPool.Get();
         try
         {
-            sb.Append(context.Metadata.TestDetails.ClassType.Name);
+            if (nestedPrefix != null)
+            {
+                sb.Append(nestedPrefix);
+                sb.Append('+');
+            }
+
+            sb.Append(type.Name);
             sb.Append('(');
 
             for (var i = 0; i < args.Length; i++)
@@ -38,6 +49,40 @@ public static class TestContextExtensions
         {
             StringBuilderPool.Return(sb);
         }
+    }
+
+    /// <summary>
+    /// Gets the nested type prefix (outer class names joined by '+') for a type, or null if not nested.
+    /// For example, for OuterClass+MiddleClass+InnerClass, returns "OuterClass+MiddleClass".
+    /// </summary>
+    internal static string? GetNestedTypePrefix(Type type)
+    {
+        if (type.DeclaringType == null)
+        {
+            return null;
+        }
+
+        // Walk the declaring type chain and build the hierarchy
+        var hierarchy = new List<string>();
+        var current = type.DeclaringType;
+        while (current != null)
+        {
+            hierarchy.Add(current.Name);
+            current = current.DeclaringType;
+        }
+
+        hierarchy.Reverse();
+        return string.Join("+", hierarchy);
+    }
+
+    /// <summary>
+    /// Gets the full nested type name with '+' separator (matching .NET Type.FullName convention for nested types).
+    /// For example: OuterClass+InnerClass
+    /// </summary>
+    internal static string GetNestedTypeName(Type type)
+    {
+        var prefix = GetNestedTypePrefix(type);
+        return prefix != null ? $"{prefix}+{type.Name}" : type.Name;
     }
 
     #if NET6_0_OR_GREATER

@@ -167,7 +167,7 @@ internal static class ReflectionInstanceFactory
             }),
             Properties = [],
             Parameters = [],
-            Parent = null
+            Parent = type.DeclaringType != null ? CreateClassMetadata(type.DeclaringType) : null
         });
     }
 

@@ -90,7 +90,7 @@ internal static class ReflectionMetadataBuilder
                 }),
                 Parameters = constructorParameters,
                 Properties = [],
-                Parent = null
+                Parent = type.DeclaringType != null ? CreateClassMetadata(type.DeclaringType) : null
             };
         });
     }

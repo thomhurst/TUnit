@@ -15,11 +15,11 @@ public class UidFilterMatchingTests(TestMode testMode) : InvokableTestBase(testM
     [Test]
     public async Task Filter_NestedClass_ShouldMatchOnlyNestedClass()
     {
-        // Filter for the nested class InnerClass
-        // Tree node paths use just the innermost class name (Type.Name)
+        // Filter for the nested class InnerClass using full nested path
+        // Tree node paths now use OuterClass+InnerClass format for nested types
         // Should only run tests from InnerClass, not OuterClass
         await RunTestsWithFilter(
-            "/*/TUnit.TestProject.Bugs._4656/InnerClass/InnerMethod",
+            "/*/TUnit.TestProject.Bugs._4656/OuterClass+InnerClass/InnerMethod",
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
                 result => result.ResultSummary.Counters.Total.ShouldBe(1,
