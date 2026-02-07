@@ -34,7 +34,7 @@ internal static class MetadataGenerationHelper
         WriteParameterMetadataArrayForMethod(writer, methodSymbol);
         writer.AppendLine(",");
         writer.Append("Class = ");
-        WriteClassMetadataGetOrAdd(writer, namedTypeSymbol);
+        WriteClassMetadataGetOrAddWithParent(writer, namedTypeSymbol);
 
         // Manually restore indent level
         writer.SetIndentLevel(currentIndent);
@@ -145,6 +145,24 @@ internal static class MetadataGenerationHelper
         writer.SetIndentLevel(currentIndent);
         writer.AppendLine();
         writer.Append("})");
+    }
+
+    /// <summary>
+    /// Writes ClassMetadata with recursive parent generation for nested types
+    /// </summary>
+    private static void WriteClassMetadataGetOrAddWithParent(ICodeWriter writer, INamedTypeSymbol typeSymbol)
+    {
+        if (typeSymbol.ContainingType != null)
+        {
+            // Generate the parent expression as a string, then pass it
+            var parentWriter = new CodeWriter("", includeHeader: false).SetIndentLevel(writer.IndentLevel);
+            WriteClassMetadataGetOrAddWithParent(parentWriter, typeSymbol.ContainingType);
+            WriteClassMetadataGetOrAdd(writer, typeSymbol, parentWriter.ToString());
+        }
+        else
+        {
+            WriteClassMetadataGetOrAdd(writer, typeSymbol);
+        }
     }
 
     /// <summary>
