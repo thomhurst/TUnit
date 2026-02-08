@@ -45,7 +45,7 @@ This file contains links to documentation sections following the llmstxt.org sta
 - [MatrixTests](https://tunit.dev/docs/benchmarks/MatrixTests): Performance benchmark results for MatrixTests
 - [ScaleTests](https://tunit.dev/docs/benchmarks/ScaleTests): Performance benchmark results for ScaleTests
 - [SetupTeardownTests](https://tunit.dev/docs/benchmarks/SetupTeardownTests): Performance benchmark results for SetupTeardownTests
-- [Performance Benchmarks](https://tunit.dev/docs/benchmarks): Real-world performance comparisons between TUnit and other .NET testing frameworks
+- [Performance Benchmarks](https://tunit.dev/docs/benchmarks/): Real-world performance comparisons between TUnit and other .NET testing frameworks
 - [Benchmark Methodology](https://tunit.dev/docs/benchmarks/methodology): How TUnit's performance benchmarks are measured and compared
 - [Attributes](https://tunit.dev/docs/comparison/attributes): Here are TUnit's equivalent attributes to other test frameworks.
 - [Framework Differences](https://tunit.dev/docs/comparison/framework-differences): TUnit is inspired by NUnit and xUnit, and first and foremost I want to say that these are amazing frameworks and no hate to them.
