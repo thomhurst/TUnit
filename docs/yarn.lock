@@ -4571,10 +4571,10 @@ dns-packet@^5.2.2:
   dependencies:
     "@leichtgewicht/ip-codec" "^2.0.1"
 
-docusaurus-plugin-llms@^0.2.2:
-  version "0.2.2"
-  resolved "https://registry.npmjs.org/docusaurus-plugin-llms/-/docusaurus-plugin-llms-0.2.2.tgz"
-  integrity sha512-DZlZ6cv9p5poFE00Qg78aurBNWhLa4o0VhH4kI33DUT0y4ydlFEJJbf8Bks9BuuGPFbY/Guebn+hRc2QymMImg==
+docusaurus-plugin-llms@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/docusaurus-plugin-llms/-/docusaurus-plugin-llms-0.3.0.tgz#de4dc96c1cfd460eb92eb5f1a09a63df94e43804"
+  integrity sha512-JuADAJA2fjTv1U4XQUoIu1LyjISDzxFhRK5HbCZiHum4HlmdPwyx8NBXsi+LfdUyjK9acbZgazGsHPhdwEZs0g==
   dependencies:
     gray-matter "^4.0.3"
     minimatch "^9.0.3"
