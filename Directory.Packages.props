@@ -9,7 +9,7 @@
     <MinVerSkip Condition="'$(IsPackTarget)' == 'true'">true</MinVerSkip>
   </PropertyGroup>
   <ItemGroup>
-    <GlobalPackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.102" />
+    <GlobalPackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.103" />
     <GlobalPackageReference Include="MinVer" Version="7.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
