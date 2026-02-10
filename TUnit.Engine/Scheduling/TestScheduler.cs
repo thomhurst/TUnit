@@ -140,7 +140,7 @@ internal sealed class TestScheduler : ITestScheduler
         await ExecuteGroupedTestsAsync(groupedTests, cancellationToken).ConfigureAwait(false);
 
         var sessionHookExceptions = await _afterHookPairTracker.GetOrCreateAfterTestSessionTask(
-            () => new ValueTask<List<Exception>>(_hookExecutor.ExecuteAfterTestSessionHooksAsync(cancellationToken).AsTask())).ConfigureAwait(false) ?? [];
+            () => _hookExecutor.ExecuteAfterTestSessionHooksAsync(cancellationToken)).ConfigureAwait(false) ?? [];
 
         await _staticPropertyHandler.DisposeStaticPropertiesAsync(sessionHookExceptions).ConfigureAwait(false);
 
