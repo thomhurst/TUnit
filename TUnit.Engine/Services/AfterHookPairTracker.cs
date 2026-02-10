@@ -20,17 +20,30 @@ internal sealed class AfterHookPairTracker
     private readonly Lock _testSessionLock = new();
     private readonly Lock _classLock = new();
 
+    // Ensure only the first call to RegisterAfterTestSessionHook registers a callback.
+    // Subsequent calls (e.g. from per-test timeout tokens) are ignored so that
+    // a test timeout cannot prematurely trigger session-level After hooks.
+    private volatile bool _sessionHookRegistered;
+
     // Track cancellation registrations for cleanup
     private readonly ConcurrentBag<CancellationTokenRegistration> _registrations = [];
 
     /// <summary>
     /// Registers Session After hooks to run on cancellation or normal completion.
-    /// Ensures After hooks run exactly once even if called both ways.
+    /// Only the first call registers a callback; subsequent calls are no-ops.
+    /// This prevents per-test timeout tokens from prematurely firing session hooks.
     /// </summary>
     public void RegisterAfterTestSessionHook(
         CancellationToken cancellationToken,
         Func<ValueTask<List<Exception>>> afterHookExecutor)
     {
+        if (_sessionHookRegistered)
+        {
+            return;
+        }
+
+        _sessionHookRegistered = true;
+
         // Register callback to run After hook on cancellation
         var registration = cancellationToken.Register(() =>
         {
