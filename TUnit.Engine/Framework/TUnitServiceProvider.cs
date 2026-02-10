@@ -267,6 +267,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             circularDependencyDetector,
             constraintKeyScheduler,
             hookExecutor,
+            afterHookPairTracker,
             staticPropertyHandler,
             dynamicTestQueue));
 

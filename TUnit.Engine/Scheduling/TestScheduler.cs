@@ -23,6 +23,7 @@ internal sealed class TestScheduler : ITestScheduler
     private readonly CircularDependencyDetector _circularDependencyDetector;
     private readonly IConstraintKeyScheduler _constraintKeyScheduler;
     private readonly HookExecutor _hookExecutor;
+    private readonly AfterHookPairTracker _afterHookPairTracker;
     private readonly StaticPropertyHandler _staticPropertyHandler;
     private readonly IDynamicTestQueue _dynamicTestQueue;
     private readonly int _maxParallelism;
@@ -39,6 +40,7 @@ internal sealed class TestScheduler : ITestScheduler
         CircularDependencyDetector circularDependencyDetector,
         IConstraintKeyScheduler constraintKeyScheduler,
         HookExecutor hookExecutor,
+        AfterHookPairTracker afterHookPairTracker,
         StaticPropertyHandler staticPropertyHandler,
         IDynamicTestQueue dynamicTestQueue)
     {
@@ -51,6 +53,7 @@ internal sealed class TestScheduler : ITestScheduler
         _circularDependencyDetector = circularDependencyDetector;
         _constraintKeyScheduler = constraintKeyScheduler;
         _hookExecutor = hookExecutor;
+        _afterHookPairTracker = afterHookPairTracker;
         _staticPropertyHandler = staticPropertyHandler;
         _dynamicTestQueue = dynamicTestQueue;
 
@@ -136,7 +139,8 @@ internal sealed class TestScheduler : ITestScheduler
         // Execute tests according to their grouping
         await ExecuteGroupedTestsAsync(groupedTests, cancellationToken).ConfigureAwait(false);
 
-        var sessionHookExceptions = await _hookExecutor.ExecuteAfterTestSessionHooksAsync(cancellationToken).ConfigureAwait(false) ?? [];
+        var sessionHookExceptions = await _afterHookPairTracker.GetOrCreateAfterTestSessionTask(
+            () => _hookExecutor.ExecuteAfterTestSessionHooksAsync(cancellationToken)).ConfigureAwait(false) ?? [];
 
         await _staticPropertyHandler.DisposeStaticPropertiesAsync(sessionHookExceptions).ConfigureAwait(false);
 
