@@ -22,7 +22,8 @@ internal interface IObjectRegistry
         object instance,
         ConcurrentDictionary<string, object?> objectBag,
         MethodMetadata? methodMetadata,
-        TestContextEvents events);
+        TestContextEvents events,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Registers multiple argument objects during the registration phase.
@@ -31,5 +32,6 @@ internal interface IObjectRegistry
         object?[] arguments,
         ConcurrentDictionary<string, object?> objectBag,
         MethodMetadata? methodMetadata,
-        TestContextEvents events);
+        TestContextEvents events,
+        CancellationToken cancellationToken = default);
 }

@@ -117,7 +117,7 @@ internal sealed class TestBuilder : ITestBuilder
 #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Test building in reflection mode uses generic type resolution which requires unreferenced code")]
 #endif
-    public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsFromMetadataAsync(TestMetadata metadata, TestBuildingContext buildingContext)
+    public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsFromMetadataAsync(TestMetadata metadata, TestBuildingContext buildingContext, CancellationToken cancellationToken = default)
     {
         // OPTIMIZATION: Pre-filter in execution mode to skip building tests that cannot match the filter
         if (buildingContext.IsForExecution && buildingContext.Filter != null)
@@ -143,7 +143,7 @@ internal sealed class TestBuilder : ITestBuilder
                 // Build tests from each concrete instantiation
                 foreach (var concreteMetadata in genericMetadata.ConcreteInstantiations.Values)
                 {
-                    var concreteTests = await BuildTestsFromMetadataAsync(concreteMetadata, buildingContext);
+                    var concreteTests = await BuildTestsFromMetadataAsync(concreteMetadata, buildingContext, cancellationToken);
                     tests.AddRange(concreteTests);
                 }
                 return tests;
@@ -154,7 +154,7 @@ internal sealed class TestBuilder : ITestBuilder
             var repeatCount = metadata.RepeatCount ?? 0;
 
             // Create and initialize attributes ONCE
-            var attributes = await InitializeAttributesAsync(metadata.GetOrCreateAttributes());
+            var attributes = await InitializeAttributesAsync(metadata.GetOrCreateAttributes(), cancellationToken);
 
             if (metadata.ClassDataSources.Any(ds => ds is IAccessesInstanceData))
             {
@@ -185,7 +185,7 @@ internal sealed class TestBuilder : ITestBuilder
             var contextAccessor = new TestBuilderContextAccessor(testBuilderContext);
 
             var classDataAttributeIndex = 0;
-            foreach (var classDataSource in await GetDataSourcesAsync(metadata.ClassDataSources))
+            foreach (var classDataSource in await GetDataSourcesAsync(metadata.ClassDataSources, cancellationToken))
             {
                 classDataAttributeIndex++;
 
@@ -201,7 +201,8 @@ internal sealed class TestBuilder : ITestBuilder
                                        testClassInstance: null, // Never pass instance for class data sources (circular dependency)
                                        classInstanceArguments: null,
                                        contextAccessor
-                                   )))
+                                   ),
+                                   cancellationToken))
                 {
                     hasAnyClassData = true;
                     classDataLoopIndex++;
@@ -271,7 +272,8 @@ internal sealed class TestBuilder : ITestBuilder
                                     instanceForMethodDataSources,
                                     tempObjectBag,
                                     metadata.MethodMetadata,
-                                    tempEvents);
+                                    tempEvents,
+                                    cancellationToken);
 
                                 // Discovery: only IAsyncDiscoveryInitializer is initialized
                                 await ObjectInitializer.InitializeForDiscoveryAsync(instanceForMethodDataSources);
@@ -286,7 +288,7 @@ internal sealed class TestBuilder : ITestBuilder
                     }
 
                     var methodDataAttributeIndex = 0;
-                    foreach (var methodDataSource in await GetDataSourcesAsync(metadata.DataSources))
+                    foreach (var methodDataSource in await GetDataSourcesAsync(metadata.DataSources, cancellationToken))
                     {
                         methodDataAttributeIndex++;
 
@@ -302,7 +304,8 @@ internal sealed class TestBuilder : ITestBuilder
                                                testClassInstance: methodDataSource is IAccessesInstanceData ? instanceForMethodDataSources : null,
                                                classInstanceArguments: classData,
                                                contextAccessor
-                                           )))
+                                           ),
+                                           cancellationToken))
                         {
                             hasAnyMethodData = true;
                             methodDataLoopIndex++;
@@ -453,7 +456,7 @@ internal sealed class TestBuilder : ITestBuilder
                                     InitializedAttributes = attributes
                                 };
 
-                                var test = await BuildTestAsync(metadata, testData, testSpecificContext, isReusingDiscoveryInstance);
+                                var test = await BuildTestAsync(metadata, testData, testSpecificContext, isReusingDiscoveryInstance, cancellationToken);
 
                                 // If we have a basic skip reason, set it immediately
                                 if (!string.IsNullOrEmpty(basicSkipReason))
@@ -517,7 +520,7 @@ internal sealed class TestBuilder : ITestBuilder
                                     InitializedAttributes = attributes
                                 };
 
-                                var test = await BuildTestAsync(metadata, testData, testSpecificContext);
+                                var test = await BuildTestAsync(metadata, testData, testSpecificContext, cancellationToken: cancellationToken);
                                 test.Context.SkipReason = skipReason;
                                 tests.Add(test);
                             }
@@ -576,7 +579,7 @@ internal sealed class TestBuilder : ITestBuilder
                             InitializedAttributes = attributes
                         };
 
-                        var test = await BuildTestAsync(metadata, testData, testSpecificContext);
+                        var test = await BuildTestAsync(metadata, testData, testSpecificContext, cancellationToken: cancellationToken);
                         test.Context.SkipReason = skipReason;
                         tests.Add(test);
                     }
@@ -814,7 +817,7 @@ internal sealed class TestBuilder : ITestBuilder
 
     private static readonly IDataSourceAttribute[] _dataSourceArray = [NoDataSource.Instance];
 
-    private async Task<IDataSourceAttribute[]> GetDataSourcesAsync(IDataSourceAttribute[] dataSources)
+    private async Task<IDataSourceAttribute[]> GetDataSourcesAsync(IDataSourceAttribute[] dataSources, CancellationToken cancellationToken = default)
     {
         if (dataSources.Length == 0)
         {
@@ -824,7 +827,7 @@ internal sealed class TestBuilder : ITestBuilder
         // Inject properties into data sources during discovery (IAsyncInitializer deferred to execution)
         foreach (var dataSource in dataSources)
         {
-            await _objectLifecycleService.InjectPropertiesAsync(dataSource);
+            await _objectLifecycleService.InjectPropertiesAsync(dataSource, cancellationToken: cancellationToken);
         }
 
         return dataSources;
@@ -836,14 +839,16 @@ internal sealed class TestBuilder : ITestBuilder
     /// </summary>
     private async IAsyncEnumerable<Func<Task<object?[]?>>> GetInitializedDataRowsAsync(
         IDataSourceAttribute dataSource,
-        DataGeneratorMetadata dataGeneratorMetadata)
+        DataGeneratorMetadata dataGeneratorMetadata,
+        [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         // Inject properties into data source during discovery (IAsyncInitializer deferred to execution)
         var propertyInjectedDataSource = await _objectLifecycleService.InjectPropertiesAsync(
             dataSource,
             dataGeneratorMetadata.TestBuilderContext.Current.StateBag,
             dataGeneratorMetadata.TestInformation,
-            dataGeneratorMetadata.TestBuilderContext.Current.Events);
+            dataGeneratorMetadata.TestBuilderContext.Current.Events,
+            cancellationToken);
 
         // Now get data rows from the property-injected data source
         await foreach (var dataRow in propertyInjectedDataSource.GetDataRowsAsync(dataGeneratorMetadata))
@@ -854,7 +859,7 @@ internal sealed class TestBuilder : ITestBuilder
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Hook discovery service handles mode-specific logic; reflection calls suppressed in AOT mode")]
     [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Hook discovery service handles mode-specific logic; dynamic code suppressed in AOT mode")]
-    public async Task<AbstractExecutableTest> BuildTestAsync(TestMetadata metadata, TestData testData, TestBuilderContext testBuilderContext, bool isReusingDiscoveryInstance = false)
+    public async Task<AbstractExecutableTest> BuildTestAsync(TestMetadata metadata, TestData testData, TestBuilderContext testBuilderContext, bool isReusingDiscoveryInstance = false, CancellationToken cancellationToken = default)
     {
         // Discover instance hooks for closed generic types (no-op in source gen mode)
         if (metadata.TestClassType is { IsGenericType: true, IsGenericTypeDefinition: false })
@@ -864,7 +869,7 @@ internal sealed class TestBuilder : ITestBuilder
 
         var testId = TestIdentifierService.GenerateTestId(metadata, testData);
 
-        var context = await CreateTestContextAsync(testId, metadata, testData, testBuilderContext);
+        var context = await CreateTestContextAsync(testId, metadata, testData, testBuilderContext, cancellationToken);
 
         // Mark if this test is reusing the discovery instance (already initialized)
         context.IsDiscoveryInstanceReused = isReusingDiscoveryInstance;
@@ -923,7 +928,7 @@ internal sealed class TestBuilder : ITestBuilder
         // in InvokePostResolutionEventsAsync after dependencies are resolved
         try
         {
-            await RegisterTestArgumentsAsync(context);
+            await RegisterTestArgumentsAsync(context, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -1044,10 +1049,10 @@ internal sealed class TestBuilder : ITestBuilder
         return firstSkipAttribute?.Reason;
     }
 
-    private async ValueTask<TestContext> CreateTestContextAsync(string testId, TestMetadata metadata, TestData testData, TestBuilderContext testBuilderContext)
+    private async ValueTask<TestContext> CreateTestContextAsync(string testId, TestMetadata metadata, TestData testData, TestBuilderContext testBuilderContext, CancellationToken cancellationToken = default)
     {
         // Use attributes from context if available, or create new ones
-        var attributes = testBuilderContext.InitializedAttributes ?? await InitializeAttributesAsync(metadata.GetOrCreateAttributes());
+        var attributes = testBuilderContext.InitializedAttributes ?? await InitializeAttributesAsync(metadata.GetOrCreateAttributes(), cancellationToken);
 
         if (testBuilderContext.DataSourceAttribute != null && testBuilderContext.DataSourceAttribute is not NoDataSource)
         {
@@ -1089,7 +1094,7 @@ internal sealed class TestBuilder : ITestBuilder
     /// Registers test arguments for property injection and reference counting.
     /// Called during test building, before dependencies are resolved.
     /// </summary>
-    private async Task RegisterTestArgumentsAsync(TestContext context)
+    private async Task RegisterTestArgumentsAsync(TestContext context, CancellationToken cancellationToken = default)
     {
         var discoveredTest = new DiscoveredTest<object>
         {
@@ -1099,7 +1104,7 @@ internal sealed class TestBuilder : ITestBuilder
         context.InternalDiscoveredTest = discoveredTest;
 
         // Invoke the global test argument registration service to register shared instances
-        await _testArgumentRegistrationService.RegisterTestArgumentsAsync(context);
+        await _testArgumentRegistrationService.RegisterTestArgumentsAsync(context, cancellationToken);
     }
 
 #if NET6_0_OR_GREATER
@@ -1167,7 +1172,7 @@ internal sealed class TestBuilder : ITestBuilder
         };
     }
 
-    private async Task<Attribute[]> InitializeAttributesAsync(Attribute[] attributes)
+    private async Task<Attribute[]> InitializeAttributesAsync(Attribute[] attributes, CancellationToken cancellationToken = default)
     {
         // Inject properties into data source attributes during discovery
         // IAsyncInitializer.InitializeAsync is deferred to execution time
@@ -1175,7 +1180,7 @@ internal sealed class TestBuilder : ITestBuilder
         {
             if (attribute is IDataSourceAttribute dataSource)
             {
-                await _objectLifecycleService.InjectPropertiesAsync(dataSource);
+                await _objectLifecycleService.InjectPropertiesAsync(dataSource, cancellationToken: cancellationToken);
             }
         }
 
@@ -1533,7 +1538,7 @@ internal sealed class TestBuilder : ITestBuilder
         var repeatCount = metadata.RepeatCount ?? 0;
 
         // Initialize attributes
-        var attributes = await InitializeAttributesAsync(metadata.GetOrCreateAttributes());
+        var attributes = await InitializeAttributesAsync(metadata.GetOrCreateAttributes(), cancellationToken);
 
         // Create base context with ClassConstructor if present
         // StateBag and Events are lazy-initialized for performance
@@ -1571,7 +1576,7 @@ internal sealed class TestBuilder : ITestBuilder
 
         // Stream through all data source combinations
         var classDataAttributeIndex = 0;
-        foreach (var classDataSource in await GetDataSourcesAsync(metadata.ClassDataSources))
+        foreach (var classDataSource in await GetDataSourcesAsync(metadata.ClassDataSources, cancellationToken))
         {
             classDataAttributeIndex++;
             var classDataLoopIndex = 0;
@@ -1584,7 +1589,8 @@ internal sealed class TestBuilder : ITestBuilder
                                    generatorType: DataGeneratorType.ClassParameters,
                                    testClassInstance: null,
                                    classInstanceArguments: null,
-                                   contextAccessor)).WithCancellation(cancellationToken))
+                                   contextAccessor),
+                               cancellationToken).WithCancellation(cancellationToken))
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 classDataLoopIndex++;
@@ -1621,7 +1627,8 @@ internal sealed class TestBuilder : ITestBuilder
                         instanceForMethodDataSources,
                         tempObjectBag,
                         metadata.MethodMetadata,
-                        tempEvents);
+                        tempEvents,
+                        cancellationToken);
 
                     // Discovery: only IAsyncDiscoveryInitializer is initialized
                     await ObjectInitializer.InitializeForDiscoveryAsync(instanceForMethodDataSources);
@@ -1629,7 +1636,7 @@ internal sealed class TestBuilder : ITestBuilder
 
                 // Stream through method data sources
                 var methodDataAttributeIndex = 0;
-                foreach (var methodDataSource in await GetDataSourcesAsync(metadata.DataSources))
+                foreach (var methodDataSource in await GetDataSourcesAsync(metadata.DataSources, cancellationToken))
                 {
                     methodDataAttributeIndex++;
                     var methodDataLoopIndex = 0;
@@ -1642,7 +1649,8 @@ internal sealed class TestBuilder : ITestBuilder
                             generatorType: DataGeneratorType.TestParameters,
                             testClassInstance: methodDataSource is IAccessesInstanceData ? instanceForMethodDataSources : null,
                             classInstanceArguments: classData,
-                            contextAccessor)))
+                            contextAccessor),
+                        cancellationToken))
                     {
                         cancellationToken.ThrowIfCancellationRequested();
                         methodDataLoopIndex++;
@@ -1658,7 +1666,8 @@ internal sealed class TestBuilder : ITestBuilder
                                 classDataAttributeIndex, classDataLoopIndex,
                                 methodDataAttributeIndex, methodDataLoopIndex,
                                 i, contextAccessor,
-                                classDataSource, methodDataSource);
+                                classDataSource, methodDataSource,
+                                cancellationToken);
 
                             if (test != null)
                             {
@@ -1730,7 +1739,8 @@ internal sealed class TestBuilder : ITestBuilder
         int repeatIndex,
         TestBuilderContextAccessor contextAccessor,
         IDataSourceAttribute? classDataSource = null,
-        IDataSourceAttribute? methodDataSource = null)
+        IDataSourceAttribute? methodDataSource = null,
+        CancellationToken cancellationToken = default)
     {
         try
         {
@@ -1849,7 +1859,7 @@ internal sealed class TestBuilder : ITestBuilder
                 InitializedAttributes = attributes
             };
 
-            var test = await BuildTestAsync(metadata, testData, testSpecificContext);
+            var test = await BuildTestAsync(metadata, testData, testSpecificContext, cancellationToken: cancellationToken);
 
             if (!string.IsNullOrEmpty(basicSkipReason))
             {
