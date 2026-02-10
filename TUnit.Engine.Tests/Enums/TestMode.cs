@@ -5,5 +5,4 @@ public enum TestMode
     SourceGenerated,
     Reflection,
     AOT,
-    SingleFileApplication,
 }

@@ -19,7 +19,6 @@ public abstract class InvokableTestBase(TestMode testMode)
         if (!EnvironmentVariables.IsNetFramework)
         {
             yield return TestMode.AOT;
-            yield return TestMode.SingleFileApplication;
         }
     }
 
@@ -43,7 +42,6 @@ public abstract class InvokableTestBase(TestMode testMode)
             TestMode.SourceGenerated => RunWithoutAot(filter, assertions, runOptions, assertionExpression),
             TestMode.Reflection => RunWithoutAot(filter, assertions, runOptions.WithArgument("--reflection"), assertionExpression),
             TestMode.AOT => RunWithAot(filter, assertions, runOptions, assertionExpression),
-            TestMode.SingleFileApplication => RunWithSingleFile(filter, assertions, runOptions, assertionExpression),
             _ => throw new ArgumentOutOfRangeException(nameof(testMode), testMode, null)
         };
     }
@@ -52,15 +50,17 @@ public abstract class InvokableTestBase(TestMode testMode)
         List<Action<TestRun>> assertions, RunOptions runOptions, string assertionExpression)
     {
         var testProject = Sourcy.DotNet.Projects.TUnit_TestProject;
+        var projectName = Path.GetFileNameWithoutExtension(testProject.Name);
+        var binDir = new DirectoryInfo(Path.Combine(testProject.DirectoryName!, "bin", "Release", GetEnvironmentVariable));
+
+        var executable = binDir.EnumerateFiles(projectName).FirstOrDefault()
+                      ?? binDir.EnumerateFiles(projectName + ".exe").First();
+
         var guid = Guid.NewGuid().ToString("N");
         var trxFilename = guid + ".trx";
-        var command = Cli.Wrap("dotnet")
+        var command = Cli.Wrap(executable.FullName)
             .WithArguments(
                 [
-                    "run",
-                    "--no-build",
-                    "-f", GetEnvironmentVariable,
-                    "--configuration", "Release",
                     "--treenode-filter", filter,
                     "--report-trx", "--report-trx-filename", trxFilename,
                     "--diagnostic-verbosity", "Debug",
@@ -101,40 +101,6 @@ public abstract class InvokableTestBase(TestMode testMode)
                     "--report-trx", "--report-trx-filename", trxFilename,
                     "--diagnostic-verbosity", "Debug",
                     "--diagnostic", "--diagnostic-file-prefix", $"log_{GetType().Name}_AOT_",
-                    "--timeout", "5m",
-                    ..runOptions.AdditionalArguments
-                ]
-            )
-            .WithValidation(CommandResultValidation.None);
-
-        await RunWithFailureLogging(command, runOptions, trxFilename, assertions, assertionExpression);
-    }
-
-    private async Task RunWithSingleFile(string filter,
-        List<Action<TestRun>> assertions, RunOptions runOptions, string assertionExpression)
-    {
-        if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") != "true")
-        {
-            return;
-        }
-
-        var files = FindFolder(x => x.Name == "TESTPROJECT_SINGLEFILE")!
-            .EnumerateFiles("*", SearchOption.AllDirectories)
-            .ToArray();
-
-        var aotApp = files.FirstOrDefault(x => x.Name == "TUnit.TestProject")
-                     ?? files.First(x => x.Name == "TUnit.TestProject.exe");
-
-        var guid = Guid.NewGuid().ToString("N");
-        var trxFilename = guid + ".trx";
-
-        var command = Cli.Wrap(aotApp.FullName)
-            .WithArguments(
-                [
-                    "--treenode-filter", filter,
-                    "--report-trx", "--report-trx-filename", trxFilename,
-                    "--diagnostic-verbosity", "Debug",
-                    "--diagnostic", "--diagnostic-file-prefix", $"log_{GetType().Name}_SINGLEFILE_",
                     "--timeout", "5m",
                     ..runOptions.AdditionalArguments
                 ]
