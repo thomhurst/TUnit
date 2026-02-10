@@ -73,13 +73,12 @@ public class ExternalCancellationTests(TestMode testMode) : InvokableTestBase(te
                 .WithWorkingDirectory(testProject.DirectoryName!)
                 .WithValidation(CommandResultValidation.None),
 
-            // Skip AOT and SingleFile modes for external cancellation (only test in CI)
+            // Skip AOT mode for external cancellation (only test in CI)
             TestMode.AOT => null,
-            TestMode.SingleFileApplication => null,
             _ => throw new ArgumentOutOfRangeException(nameof(testMode), testMode, null)
         };
 
-        // Skip AOT and SingleFile modes
+        // Skip AOT mode
         if (command == null)
         {
             return;
