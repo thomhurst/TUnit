@@ -21,7 +21,7 @@ internal sealed class TestArgumentRegistrationService
     /// for proper reference counting and disposal tracking.
     /// Property values are resolved lazily during test execution (not during discovery).
     /// </summary>
-    public async ValueTask RegisterTestArgumentsAsync(TestContext testContext)
+    public async ValueTask RegisterTestArgumentsAsync(TestContext testContext, CancellationToken cancellationToken = default)
     {
         TestContext.Current = testContext;
 
@@ -33,16 +33,18 @@ internal sealed class TestArgumentRegistrationService
             classArguments,
             testContext.StateBag.Items,
             testContext.Metadata.TestDetails.MethodMetadata,
-            testContext.InternalEvents);
+            testContext.InternalEvents,
+            cancellationToken);
 
         // Register method arguments
         await _objectLifecycleService.RegisterArgumentsAsync(
             methodArguments,
             testContext.StateBag.Items,
             testContext.Metadata.TestDetails.MethodMetadata,
-            testContext.InternalEvents);
+            testContext.InternalEvents,
+            cancellationToken);
 
         // Register the test for tracking (inject properties and track objects for disposal)
-        await _objectLifecycleService.RegisterTestAsync(testContext);
+        await _objectLifecycleService.RegisterTestAsync(testContext, cancellationToken);
     }
 }

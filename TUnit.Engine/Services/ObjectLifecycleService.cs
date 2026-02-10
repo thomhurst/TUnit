@@ -52,7 +52,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     /// Tracks the resolved objects so reference counting works correctly across all tests.
     /// Does NOT call IAsyncInitializer (deferred to execution).
     /// </summary>
-    public async Task RegisterTestAsync(TestContext testContext)
+    public async Task RegisterTestAsync(TestContext testContext, CancellationToken cancellationToken = default)
     {
         var objectBag = testContext.StateBag.Items;
         var methodMetadata = testContext.Metadata.TestDetails.MethodMetadata;
@@ -61,7 +61,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
 
         // Resolve property values (creating shared objects) and cache them WITHOUT setting on placeholder instance
         // This ensures shared objects are created once and tracked with the correct reference count
-        await PropertyInjector.ResolveAndCachePropertiesAsync(testClassType, objectBag, methodMetadata, events, testContext);
+        await PropertyInjector.ResolveAndCachePropertiesAsync(testClassType, objectBag, methodMetadata, events, testContext, cancellationToken);
 
         // Track the cached objects so they get the correct reference count
         _objectTracker.TrackObjects(testContext);
@@ -75,7 +75,8 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
         object instance,
         ConcurrentDictionary<string, object?> objectBag,
         MethodMetadata? methodMetadata,
-        TestContextEvents events)
+        TestContextEvents events,
+        CancellationToken cancellationToken = default)
     {
         if (instance == null)
         {
@@ -83,7 +84,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
         }
 
         // Inject properties during registration
-        return PropertyInjector.InjectPropertiesAsync(instance, objectBag, methodMetadata, events);
+        return PropertyInjector.InjectPropertiesAsync(instance, objectBag, methodMetadata, events, cancellationToken);
     }
 
     /// <summary>
@@ -93,7 +94,8 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
         object?[] arguments,
         ConcurrentDictionary<string, object?> objectBag,
         MethodMetadata? methodMetadata,
-        TestContextEvents events)
+        TestContextEvents events,
+        CancellationToken cancellationToken = default)
     {
         if (arguments == null || arguments.Length == 0)
         {
@@ -106,7 +108,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
         {
             if (argument != null)
             {
-                tasks.Append(RegisterObjectAsync(argument, objectBag, methodMetadata, events));
+                tasks.Append(RegisterObjectAsync(argument, objectBag, methodMetadata, events, cancellationToken));
             }
         }
 
@@ -290,7 +292,8 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
         T obj,
         ConcurrentDictionary<string, object?>? objectBag = null,
         MethodMetadata? methodMetadata = null,
-        TestContextEvents? events = null) where T : notnull
+        TestContextEvents? events = null,
+        CancellationToken cancellationToken = default) where T : notnull
     {
         if (obj == null)
         {
@@ -301,7 +304,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
         events ??= new TestContextEvents();
 
         // Only inject properties, do not call IAsyncInitializer
-        await PropertyInjector.InjectPropertiesAsync(obj, objectBag, methodMetadata, events);
+        await PropertyInjector.InjectPropertiesAsync(obj, objectBag, methodMetadata, events, cancellationToken);
 
         return obj;
     }
@@ -391,7 +394,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
         // This aligns with ObjectInitializer behavior and provides cleaner stack traces
 
         // Step 1: Inject properties
-        await PropertyInjector.InjectPropertiesAsync(obj, objectBag, methodMetadata, events);
+        await PropertyInjector.InjectPropertiesAsync(obj, objectBag, methodMetadata, events, cancellationToken);
 
         // Step 2: Initialize nested objects depth-first (discovery-only)
         await InitializeNestedObjectsForDiscoveryAsync(obj, cancellationToken);

@@ -126,7 +126,7 @@ internal sealed class TestBuilderPipeline
         }
 
         return await collectedMetadata
-            .SelectManyAsync(metadata => BuildTestsFromSingleMetadataAsync(metadata, buildingContext), cancellationToken: cancellationToken)
+            .SelectManyAsync(metadata => BuildTestsFromSingleMetadataAsync(metadata, buildingContext, cancellationToken), cancellationToken: cancellationToken)
             .ProcessInParallel(cancellationToken: cancellationToken);
     }
 
@@ -170,7 +170,7 @@ internal sealed class TestBuilderPipeline
                     }
                     else
                     {
-                        results.Add(await _testBuilder.BuildTestsFromMetadataAsync(metadata, buildingContext).ConfigureAwait(false));
+                        results.Add(await _testBuilder.BuildTestsFromMetadataAsync(metadata, buildingContext, cancellationToken).ConfigureAwait(false));
                     }
                 }
                 catch (Exception ex)
@@ -194,7 +194,7 @@ internal sealed class TestBuilderPipeline
                             return await GenerateDynamicTests(metadata).ConfigureAwait(false);
                         }
 
-                        return await _testBuilder.BuildTestsFromMetadataAsync(metadata, buildingContext).ConfigureAwait(false);
+                        return await _testBuilder.BuildTestsFromMetadataAsync(metadata, buildingContext, cancellationToken).ConfigureAwait(false);
                     }
                     catch (Exception ex)
                     {
@@ -308,7 +308,7 @@ internal sealed class TestBuilderPipeline
 #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Test building in reflection mode uses generic type resolution which requires unreferenced code")]
 #endif
-    private async IAsyncEnumerable<AbstractExecutableTest> BuildTestsFromSingleMetadataAsync(TestMetadata metadata, TestBuildingContext buildingContext)
+    private async IAsyncEnumerable<AbstractExecutableTest> BuildTestsFromSingleMetadataAsync(TestMetadata metadata, TestBuildingContext buildingContext, [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         TestMetadata resolvedMetadata;
         Exception? resolutionError = null;
@@ -430,7 +430,7 @@ internal sealed class TestBuilderPipeline
             else
             {
                 // Normal test metadata goes through the standard test builder
-                var testsFromMetadata = await _testBuilder.BuildTestsFromMetadataAsync(resolvedMetadata, buildingContext).ConfigureAwait(false);
+                var testsFromMetadata = await _testBuilder.BuildTestsFromMetadataAsync(resolvedMetadata, buildingContext, cancellationToken).ConfigureAwait(false);
                 testsToYield = new List<AbstractExecutableTest>(testsFromMetadata);
             }
         }

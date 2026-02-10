@@ -42,7 +42,8 @@ internal sealed class PropertyInjector
         ConcurrentDictionary<string, object?> objectBag,
         MethodMetadata? methodMetadata,
         TestContextEvents events,
-        TestContext testContext)
+        TestContext testContext,
+        CancellationToken cancellationToken = default)
     {
         // Skip property resolution if this test is reusing the discovery instance (already initialized)
         if (testContext.IsDiscoveryInstanceReused)
@@ -59,25 +60,25 @@ internal sealed class PropertyInjector
 
         if (plan.SourceGeneratedProperties.Length > 0 || plan.ReflectionProperties.Length > 0)
         {
-            return ResolveAndCachePropertiesCoreAsync(objectBag, methodMetadata, events, testContext, plan);
+            return ResolveAndCachePropertiesCoreAsync(objectBag, methodMetadata, events, testContext, plan, cancellationToken);
         }
 
         return Task.CompletedTask;
     }
 
     private async Task ResolveAndCachePropertiesCoreAsync(ConcurrentDictionary<string, object?> objectBag, MethodMetadata? methodMetadata,
-        TestContextEvents events, TestContext testContext, PropertyInjectionPlan plan)
+        TestContextEvents events, TestContext testContext, PropertyInjectionPlan plan, CancellationToken cancellationToken)
     {
         // Resolve properties based on what's available in the plan
         if (plan.SourceGeneratedProperties.Length > 0)
         {
             await ResolveAndCacheSourceGeneratedPropertiesAsync(
-                plan.SourceGeneratedProperties, objectBag, methodMetadata, events, testContext);
+                plan.SourceGeneratedProperties, objectBag, methodMetadata, events, testContext, cancellationToken);
         }
         else if (plan.ReflectionProperties.Length > 0)
         {
             await ResolveAndCacheReflectionPropertiesAsync(
-                plan.ReflectionProperties, objectBag, methodMetadata, events, testContext);
+                plan.ReflectionProperties, objectBag, methodMetadata, events, testContext, cancellationToken);
         }
     }
 
@@ -88,7 +89,8 @@ internal sealed class PropertyInjector
         object instance,
         ConcurrentDictionary<string, object?> objectBag,
         MethodMetadata? methodMetadata,
-        TestContextEvents events)
+        TestContextEvents events,
+        CancellationToken cancellationToken = default)
     {
         if (instance == null)
         {
@@ -117,7 +119,7 @@ internal sealed class PropertyInjector
 
         try
         {
-            await InjectPropertiesRecursiveAsync(instance, objectBag, methodMetadata, events, visitedObjects);
+            await InjectPropertiesRecursiveAsync(instance, objectBag, methodMetadata, events, visitedObjects, cancellationToken);
         }
         finally
         {
@@ -133,7 +135,8 @@ internal sealed class PropertyInjector
         object?[] arguments,
         ConcurrentDictionary<string, object?> objectBag,
         MethodMetadata methodMetadata,
-        TestContextEvents events)
+        TestContextEvents events,
+        CancellationToken cancellationToken = default)
     {
         if (arguments.Length == 0)
         {
@@ -159,7 +162,7 @@ internal sealed class PropertyInjector
         var tasks = new List<Task>(injectableArgs.Count);
         foreach (var arg in injectableArgs)
         {
-            tasks.Add(InjectPropertiesAsync(arg, objectBag, methodMetadata, events));
+            tasks.Add(InjectPropertiesAsync(arg, objectBag, methodMetadata, events, cancellationToken));
         }
 
         await Task.WhenAll(tasks);
@@ -170,7 +173,8 @@ internal sealed class PropertyInjector
         ConcurrentDictionary<string, object?> objectBag,
         MethodMetadata? methodMetadata,
         TestContextEvents events,
-        ConcurrentDictionary<object, byte> visitedObjects)
+        ConcurrentDictionary<object, byte> visitedObjects,
+        CancellationToken cancellationToken)
     {
         if (instance == null)
         {
@@ -193,17 +197,17 @@ internal sealed class PropertyInjector
                 if (plan.SourceGeneratedProperties.Length > 0)
                 {
                     await InjectSourceGeneratedPropertiesAsync(
-                        instance, plan.SourceGeneratedProperties, objectBag, methodMetadata, events, visitedObjects);
+                        instance, plan.SourceGeneratedProperties, objectBag, methodMetadata, events, visitedObjects, cancellationToken);
                 }
                 else if (plan.ReflectionProperties.Length > 0)
                 {
                     await InjectReflectionPropertiesAsync(
-                        instance, plan.ReflectionProperties, objectBag, methodMetadata, events, visitedObjects);
+                        instance, plan.ReflectionProperties, objectBag, methodMetadata, events, visitedObjects, cancellationToken);
                 }
             }
 
             // Recurse into nested properties
-            await RecurseIntoNestedPropertiesAsync(instance, plan, objectBag, methodMetadata, events, visitedObjects);
+            await RecurseIntoNestedPropertiesAsync(instance, plan, objectBag, methodMetadata, events, visitedObjects, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -218,10 +222,11 @@ internal sealed class PropertyInjector
         ConcurrentDictionary<string, object?> objectBag,
         MethodMetadata? methodMetadata,
         TestContextEvents events,
-        ConcurrentDictionary<object, byte> visitedObjects)
+        ConcurrentDictionary<object, byte> visitedObjects,
+        CancellationToken cancellationToken)
     {
         return ParallelTaskHelper.ForEachAsync(properties,
-            prop => InjectSourceGeneratedPropertyAsync(instance, prop, objectBag, methodMetadata, events, visitedObjects));
+            prop => InjectSourceGeneratedPropertyAsync(instance, prop, objectBag, methodMetadata, events, visitedObjects, cancellationToken));
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Source-gen properties are AOT-safe")]
@@ -231,7 +236,8 @@ internal sealed class PropertyInjector
         ConcurrentDictionary<string, object?> objectBag,
         MethodMetadata? methodMetadata,
         TestContextEvents events,
-        ConcurrentDictionary<object, byte> visitedObjects)
+        ConcurrentDictionary<object, byte> visitedObjects,
+        CancellationToken cancellationToken)
     {
         // First check if the property already has a value - skip if it does
         // This handles nested objects that were already constructed with their properties set
@@ -274,7 +280,8 @@ internal sealed class PropertyInjector
                     VisitedObjects = visitedObjects,
                     TestContext = testContext,
                     IsNestedProperty = false
-                });
+                },
+                cancellationToken);
 
             if (resolvedValue == null)
             {
@@ -300,10 +307,11 @@ internal sealed class PropertyInjector
         ConcurrentDictionary<string, object?> objectBag,
         MethodMetadata? methodMetadata,
         TestContextEvents events,
-        ConcurrentDictionary<object, byte> visitedObjects)
+        ConcurrentDictionary<object, byte> visitedObjects,
+        CancellationToken cancellationToken)
     {
         return ParallelTaskHelper.ForEachAsync(properties,
-            pair => InjectReflectionPropertyAsync(instance, pair.Property, pair.DataSource, objectBag, methodMetadata, events, visitedObjects));
+            pair => InjectReflectionPropertyAsync(instance, pair.Property, pair.DataSource, objectBag, methodMetadata, events, visitedObjects, cancellationToken));
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT")]
@@ -314,7 +322,8 @@ internal sealed class PropertyInjector
         ConcurrentDictionary<string, object?> objectBag,
         MethodMetadata? methodMetadata,
         TestContextEvents events,
-        ConcurrentDictionary<object, byte> visitedObjects)
+        ConcurrentDictionary<object, byte> visitedObjects,
+        CancellationToken cancellationToken)
     {
         var testContext = TestContext.Current;
         var propertySetter = PropertySetterFactory.CreateSetter(property);
@@ -334,7 +343,8 @@ internal sealed class PropertyInjector
                 VisitedObjects = visitedObjects,
                 TestContext = testContext,
                 IsNestedProperty = false
-            });
+            },
+            cancellationToken);
 
         if (resolvedValue == null)
         {
@@ -350,7 +360,8 @@ internal sealed class PropertyInjector
         ConcurrentDictionary<string, object?> objectBag,
         MethodMetadata? methodMetadata,
         TestContextEvents events,
-        ConcurrentDictionary<object, byte> visitedObjects)
+        ConcurrentDictionary<object, byte> visitedObjects,
+        CancellationToken cancellationToken)
     {
         if (!plan.HasProperties)
         {
@@ -359,7 +370,7 @@ internal sealed class PropertyInjector
 
         if (plan.SourceGeneratedProperties.Length > 0 || plan.ReflectionProperties.Length > 0)
         {
-            return RecurseIntoNestedPropertiesCoreAsync(instance, plan, objectBag, methodMetadata, events, visitedObjects);
+            return RecurseIntoNestedPropertiesCoreAsync(instance, plan, objectBag, methodMetadata, events, visitedObjects, cancellationToken);
         }
 
         return Task.CompletedTask;
@@ -367,7 +378,7 @@ internal sealed class PropertyInjector
 
     private async Task RecurseIntoNestedPropertiesCoreAsync(object instance, PropertyInjectionPlan plan,
         ConcurrentDictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events,
-        ConcurrentDictionary<object, byte> visitedObjects)
+        ConcurrentDictionary<object, byte> visitedObjects, CancellationToken cancellationToken)
     {
         if (plan.SourceGeneratedProperties.Length > 0)
         {
@@ -387,7 +398,7 @@ internal sealed class PropertyInjector
 
                 if (PropertyInjectionCache.HasInjectableProperties(propertyValue.GetType()))
                 {
-                    await InjectPropertiesRecursiveAsync(propertyValue, objectBag, methodMetadata, events, visitedObjects);
+                    await InjectPropertiesRecursiveAsync(propertyValue, objectBag, methodMetadata, events, visitedObjects, cancellationToken);
                 }
             }
         }
@@ -403,7 +414,7 @@ internal sealed class PropertyInjector
 
                 if (PropertyInjectionCache.HasInjectableProperties(propertyValue.GetType()))
                 {
-                    await InjectPropertiesRecursiveAsync(propertyValue, objectBag, methodMetadata, events, visitedObjects);
+                    await InjectPropertiesRecursiveAsync(propertyValue, objectBag, methodMetadata, events, visitedObjects, cancellationToken);
                 }
             }
         }
@@ -414,10 +425,11 @@ internal sealed class PropertyInjector
         ConcurrentDictionary<string, object?> objectBag,
         MethodMetadata? methodMetadata,
         TestContextEvents events,
-        TestContext testContext)
+        TestContext testContext,
+        CancellationToken cancellationToken)
     {
         return ParallelTaskHelper.ForEachAsync(properties,
-            prop => ResolveAndCacheSourceGeneratedPropertyAsync(prop, objectBag, methodMetadata, events, testContext));
+            prop => ResolveAndCacheSourceGeneratedPropertyAsync(prop, objectBag, methodMetadata, events, testContext, cancellationToken));
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Source-gen properties are AOT-safe")]
@@ -426,7 +438,8 @@ internal sealed class PropertyInjector
         ConcurrentDictionary<string, object?> objectBag,
         MethodMetadata? methodMetadata,
         TestContextEvents events,
-        TestContext testContext)
+        TestContext testContext,
+        CancellationToken cancellationToken)
     {
         var cacheKey = PropertyCacheKeyGenerator.GetCacheKey(metadata);
 
@@ -451,7 +464,8 @@ internal sealed class PropertyInjector
                 VisitedObjects = new ConcurrentDictionary<object, byte>(),  // Empty dictionary for cycle detection
                 TestContext = testContext,
                 IsNestedProperty = false
-            });
+            },
+            cancellationToken);
 
         if (resolvedValue != null)
         {
@@ -467,10 +481,11 @@ internal sealed class PropertyInjector
         ConcurrentDictionary<string, object?> objectBag,
         MethodMetadata? methodMetadata,
         TestContextEvents events,
-        TestContext testContext)
+        TestContext testContext,
+        CancellationToken cancellationToken)
     {
         return ParallelTaskHelper.ForEachAsync(properties,
-            pair => ResolveAndCacheReflectionPropertyAsync(pair.Property, pair.DataSource, objectBag, methodMetadata, events, testContext));
+            pair => ResolveAndCacheReflectionPropertyAsync(pair.Property, pair.DataSource, objectBag, methodMetadata, events, testContext, cancellationToken));
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT")]
@@ -480,7 +495,8 @@ internal sealed class PropertyInjector
         ConcurrentDictionary<string, object?> objectBag,
         MethodMetadata? methodMetadata,
         TestContextEvents events,
-        TestContext testContext)
+        TestContext testContext,
+        CancellationToken cancellationToken)
     {
         var cacheKey = PropertyCacheKeyGenerator.GetCacheKey(property);
 
@@ -507,7 +523,8 @@ internal sealed class PropertyInjector
                 VisitedObjects = new ConcurrentDictionary<object, byte>(),  // Empty dictionary for cycle detection
                 TestContext = testContext,
                 IsNestedProperty = false
-            });
+            },
+            cancellationToken);
 
         if (resolvedValue != null)
         {
@@ -522,9 +539,9 @@ internal sealed class PropertyInjector
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Property data resolution handles both modes")]
     [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "PropertyType is properly preserved through source generation")]
-    private async Task<object?> ResolvePropertyDataAsync(PropertyInitializationContext context)
+    private async Task<object?> ResolvePropertyDataAsync(PropertyInitializationContext context, CancellationToken cancellationToken = default)
     {
-        var dataSource = await GetInitializedDataSourceAsync(context);
+        var dataSource = await GetInitializedDataSourceAsync(context, cancellationToken);
         if (dataSource == null)
         {
             return null;
@@ -551,7 +568,8 @@ internal sealed class PropertyInjector
                     value,
                     context.ObjectBag,
                     context.MethodMetadata,
-                    context.Events);
+                    context.Events,
+                    cancellationToken);
 
                 return value;
             }
@@ -560,7 +578,7 @@ internal sealed class PropertyInjector
         return null;
     }
 
-    private async Task<IDataSourceAttribute?> GetInitializedDataSourceAsync(PropertyInitializationContext context)
+    private async Task<IDataSourceAttribute?> GetInitializedDataSourceAsync(PropertyInitializationContext context, CancellationToken cancellationToken = default)
     {
         IDataSourceAttribute? dataSource = null;
 
@@ -583,7 +601,8 @@ internal sealed class PropertyInjector
             dataSource,
             context.ObjectBag,
             context.MethodMetadata,
-            context.Events);
+            context.Events,
+            cancellationToken);
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Metadata creation handles both modes")]
