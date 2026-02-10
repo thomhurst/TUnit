@@ -78,6 +78,7 @@ internal sealed class TestCoordinator : ITestCoordinator
             test.Context.Execution.Result = null;
             test.Context.TestStart = null;
             test.Context.Execution.TestEnd = null;
+            test.Context.Timings.Clear();
 
             TestContext.Current = test.Context;
 
