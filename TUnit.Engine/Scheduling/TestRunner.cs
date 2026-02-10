@@ -119,7 +119,7 @@ public sealed class TestRunner
         }
         finally
         {
-            test.EndTime = DateTimeOffset.UtcNow;
+            test.EndTime ??= DateTimeOffset.UtcNow;
         }
     }
 

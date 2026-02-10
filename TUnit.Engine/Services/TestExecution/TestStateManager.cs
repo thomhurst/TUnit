@@ -31,7 +31,7 @@ internal sealed class TestStateManager
         };
 
         test.State = test.Result.State;
-        test.EndTime = now;
+        test.EndTime ??= now;
     }
 
     public void MarkFailed(AbstractExecutableTest test, Exception exception)
@@ -45,7 +45,7 @@ internal sealed class TestStateManager
         else
         {
             test.State = TestState.Failed;
-            test.EndTime = DateTimeOffset.UtcNow;
+            test.EndTime ??= DateTimeOffset.UtcNow;
             test.Result = new TestResult
             {
                 State = TestState.Failed,

@@ -6,6 +6,7 @@ using TUnit.Core.Enums;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Services;
+using TUnit.Engine.Helpers;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine;
@@ -123,7 +124,8 @@ internal class TestExecutor
 
             executableTest.Context.RestoreExecutionContext();
 
-            await _hookExecutor.ExecuteBeforeTestHooksAsync(executableTest, cancellationToken).ConfigureAwait(false);
+            await Timings.Record("BeforeTest", executableTest.Context,
+                () => _hookExecutor.ExecuteBeforeTestHooksAsync(executableTest, cancellationToken)).ConfigureAwait(false);
 
             // Late stage test start receivers run after instance-level hooks (default behavior)
             await _eventReceiverOrchestrator.InvokeTestStartEventReceiversAsync(executableTest.Context, cancellationToken, EventReceiverStage.Late).ConfigureAwait(false);
@@ -131,7 +133,14 @@ internal class TestExecutor
             executableTest.Context.RestoreExecutionContext();
 
             // Timeout is now enforced at TestCoordinator level (wrapping entire lifecycle)
-            await ExecuteTestAsync(executableTest, cancellationToken).ConfigureAwait(false);
+            try
+            {
+                await ExecuteTestAsync(executableTest, cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                executableTest.Context.Execution.TestEnd ??= DateTimeOffset.UtcNow;
+            }
 
             executableTest.SetResult(TestState.Passed);
         }
@@ -153,7 +162,11 @@ internal class TestExecutor
             // Early stage test end receivers run before instance-level hooks
             var earlyStageExceptions = await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(executableTest.Context, CancellationToken.None, EventReceiverStage.Early).ConfigureAwait(false);
 
-            var hookExceptions = await _hookExecutor.ExecuteAfterTestHooksAsync(executableTest, CancellationToken.None).ConfigureAwait(false);
+            IReadOnlyList<Exception> hookExceptions = [];
+            await Timings.Record("AfterTest", executableTest.Context, (Func<Task>)(async () =>
+            {
+                hookExceptions = await _hookExecutor.ExecuteAfterTestHooksAsync(executableTest, CancellationToken.None).ConfigureAwait(false);
+            })).ConfigureAwait(false);
 
             // Late stage test end receivers run after instance-level hooks (default behavior)
             var lateStageExceptions = await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(executableTest.Context, CancellationToken.None, EventReceiverStage.Late).ConfigureAwait(false);
