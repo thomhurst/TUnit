@@ -158,7 +158,7 @@ internal sealed class TestDiscoveryService : IDataProducer
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         cts.CancelAfter(TimeSpan.FromMinutes(5));
 
-        var tests = await _testBuilderPipeline.BuildTestsStreamingAsync(testSessionId, buildingContext, metadataFilter: null, cancellationToken).ConfigureAwait(false);
+        var tests = await _testBuilderPipeline.BuildTestsStreamingAsync(testSessionId, buildingContext, metadataFilter: null, cts.Token).ConfigureAwait(false);
 
         foreach (var test in tests)
         {
