@@ -158,7 +158,7 @@ internal sealed class TestBuilder : ITestBuilder
 
             if (metadata.ClassDataSources.Any(ds => ds is IAccessesInstanceData))
             {
-                var failedTest = await CreateFailedTestForClassDataSourceCircularDependency(metadata);
+                var failedTest = CreateFailedTestForClassDataSourceCircularDependency(metadata);
                 tests.Add(failedTest);
                 return tests;
             }
@@ -279,7 +279,7 @@ internal sealed class TestBuilder : ITestBuilder
                         }
                         catch (Exception ex)
                         {
-                            var failedTest = await CreateFailedTestForInstanceDataSourceError(metadata, ex);
+                            var failedTest = CreateFailedTestForInstanceDataSourceError(metadata, ex);
                             tests.Add(failedTest);
                             continue;
                         }
@@ -382,7 +382,7 @@ internal sealed class TestBuilder : ITestBuilder
                                     catch (Exception innerEx)
                                     {
                                         // If we still can't resolve, create a failed test
-                                        var failedTest = await CreateFailedTestForDataGenerationError(metadata, innerEx);
+                                        var failedTest = CreateFailedTestForDataGenerationError(metadata, innerEx);
                                         tests.Add(failedTest);
                                         continue;
                                     }
@@ -390,7 +390,7 @@ internal sealed class TestBuilder : ITestBuilder
                                 catch (Exception ex)
                                 {
                                     // If generic resolution fails, create a failed test
-                                    var failedTest = await CreateFailedTestForDataGenerationError(metadata, ex);
+                                    var failedTest = CreateFailedTestForDataGenerationError(metadata, ex);
                                     tests.Add(failedTest);
                                     continue;
                                 }
@@ -488,7 +488,7 @@ internal sealed class TestBuilder : ITestBuilder
                             // If generic type inference failed, create a failed test instead of skipped
                             if (genericResolutionException != null)
                             {
-                                var failedTest = await CreateFailedTestForDataGenerationError(metadata, genericResolutionException);
+                                var failedTest = CreateFailedTestForDataGenerationError(metadata, genericResolutionException);
                                 tests.Add(failedTest);
                             }
                             else
@@ -547,7 +547,7 @@ internal sealed class TestBuilder : ITestBuilder
                     // If generic type inference failed, create a failed test instead of skipped
                     if (genericResolutionException != null)
                     {
-                        var failedTest = await CreateFailedTestForDataGenerationError(metadata, genericResolutionException);
+                        var failedTest = CreateFailedTestForDataGenerationError(metadata, genericResolutionException);
                         tests.Add(failedTest);
                     }
                     else
@@ -597,7 +597,7 @@ internal sealed class TestBuilder : ITestBuilder
         }
         catch (Exception ex)
         {
-            var failedTest = await CreateFailedTestForDataGenerationError(metadata, ex);
+            var failedTest = CreateFailedTestForDataGenerationError(metadata, ex);
             tests.Add(failedTest);
             return tests;
         }
@@ -1114,16 +1114,16 @@ internal sealed class TestBuilder : ITestBuilder
         return _eventReceiverOrchestrator.InvokeTestDiscoveryEventReceiversAsync(context, discoveredContext, CancellationToken.None);
     }
 
-    private async Task<AbstractExecutableTest> CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception)
+    private AbstractExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception)
     {
-        return await CreateFailedTestForDataGenerationError(metadata, exception, new TestDataCombination());
+        return CreateFailedTestForDataGenerationError(metadata, exception, new TestDataCombination());
     }
 
-    private async Task<AbstractExecutableTest> CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception, TestDataCombination combination)
+    private AbstractExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception, TestDataCombination combination)
     {
         var testId = TestIdentifierService.GenerateFailedTestId(metadata, combination);
 
-        var testDetails = await CreateFailedTestDetails(metadata, testId);
+        var testDetails = CreateFailedTestDetails(metadata, testId);
         var context = CreateFailedTestContext(metadata, testDetails);
 
         return new FailedExecutableTest(exception)
@@ -1132,14 +1132,24 @@ internal sealed class TestBuilder : ITestBuilder
             Metadata = metadata,
             Arguments = [],
             ClassArguments = [],
-            Context = context
+            Context = context,
+            State = TestState.Failed,
+            Result = new TestResult
+            {
+                State = TestState.Failed,
+                Start = DateTimeOffset.UtcNow,
+                End = DateTimeOffset.UtcNow,
+                Duration = TimeSpan.Zero,
+                Exception = exception,
+                ComputerName = EnvironmentHelper.MachineName,
+                TestContext = context
+            }
         };
     }
 
-    private async Task<TestDetails> CreateFailedTestDetails(TestMetadata metadata, string testId)
+    private TestDetails CreateFailedTestDetails(TestMetadata metadata, string testId)
     {
-        var attributes = (await InitializeAttributesAsync(metadata.GetOrCreateAttributes()));
-        return new TestDetails(attributes)
+        return new TestDetails([])
         {
             TestId = testId,
             TestName = metadata.TestName,
@@ -1152,8 +1162,8 @@ internal sealed class TestBuilder : ITestBuilder
             TestLineNumber = metadata.LineNumber,
             ReturnType = typeof(Task),
             MethodMetadata = metadata.MethodMetadata,
-            AttributesByType = attributes.ToAttributeDictionary(),
-            Timeout = TimeSpan.FromMinutes(30) // Default 30-minute timeout (can be overridden by TimeoutAttribute)
+            AttributesByType = AttributeDictionaryHelper.Empty,
+            Timeout = TimeSpan.FromMinutes(30)
         };
     }
 
@@ -1190,13 +1200,12 @@ internal sealed class TestBuilder : ITestBuilder
 
 
 
-    private async Task<AbstractExecutableTest> CreateFailedTestForInstanceDataSourceError(TestMetadata metadata, Exception exception)
+    private AbstractExecutableTest CreateFailedTestForInstanceDataSourceError(TestMetadata metadata, Exception exception)
     {
-        var message = $"Failed to create instance for method data source expansion: {exception.Message}";
-        return await CreateFailedTestForDataGenerationError(metadata, exception);
+        return CreateFailedTestForDataGenerationError(metadata, exception);
     }
 
-    private async Task<AbstractExecutableTest> CreateFailedTestForClassDataSourceCircularDependency(TestMetadata metadata)
+    private AbstractExecutableTest CreateFailedTestForClassDataSourceCircularDependency(TestMetadata metadata)
     {
         var instanceClassDataSources = metadata.ClassDataSources
             .Where(ds => ds is IAccessesInstanceData)
@@ -1211,7 +1220,7 @@ internal sealed class TestBuilder : ITestBuilder
                       "Consider using static method data sources for class constructor arguments instead.";
 
         var exception = new InvalidOperationException(message);
-        return await CreateFailedTestForDataGenerationError(metadata, exception);
+        return CreateFailedTestForDataGenerationError(metadata, exception);
     }
 
     private static bool IsDataCompatibleWithExpectedTypes(TestMetadata metadata, object?[] methodData)
@@ -1556,7 +1565,7 @@ internal sealed class TestBuilder : ITestBuilder
         // Check for circular dependency
         if (metadata.ClassDataSources.Any(ds => ds is IAccessesInstanceData))
         {
-            yield return await CreateFailedTestForClassDataSourceCircularDependency(metadata);
+            yield return CreateFailedTestForClassDataSourceCircularDependency(metadata);
             yield break;
         }
 
@@ -1597,7 +1606,7 @@ internal sealed class TestBuilder : ITestBuilder
                     if (!instanceResult.Success)
                     {
                         // Yield a failed test instead of silently skipping
-                        yield return await CreateFailedTestForInstanceDataSourceError(metadata, instanceResult.Exception!);
+                        yield return CreateFailedTestForInstanceDataSourceError(metadata, instanceResult.Exception!);
                         continue;
                     }
 
@@ -1782,12 +1791,12 @@ internal sealed class TestBuilder : ITestBuilder
                 }
                 catch (Exception ex)
                 {
-                    return await CreateFailedTestForDataGenerationError(metadata, ex);
+                    return CreateFailedTestForDataGenerationError(metadata, ex);
                 }
             }
             catch (Exception ex)
             {
-                return await CreateFailedTestForDataGenerationError(metadata, ex);
+                return CreateFailedTestForDataGenerationError(metadata, ex);
             }
 
             if (metadata.TestClassType.IsGenericTypeDefinition && resolvedClassGenericArgs.Length == 0)
@@ -1851,7 +1860,7 @@ internal sealed class TestBuilder : ITestBuilder
         }
         catch (Exception ex)
         {
-            return await CreateFailedTestForDataGenerationError(metadata, ex);
+            return CreateFailedTestForDataGenerationError(metadata, ex);
         }
     }
 
