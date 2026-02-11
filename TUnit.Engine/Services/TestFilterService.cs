@@ -72,18 +72,11 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
 
         test.Context.InternalDiscoveredTest = discoveredTest;
 
-        try
-        {
-            await testArgumentRegistrationService.RegisterTestArgumentsAsync(test.Context);
-        }
-        catch (Exception ex)
-        {
-            // Mark the test as failed and skip further event receiver processing
-            test.SetResult(TestState.Failed, ex);
-            return;
-        }
-
-        // Use pre-computed receivers (already filtered, sorted, and scoped-attribute filtered)
+        // Invoke event receivers BEFORE argument registration so that SkipAttribute
+        // and other ITestRegisteredEventReceiver implementations can set SkipReason
+        // before any potentially expensive data source initialization occurs.
+        // This is critical for derived SkipAttribute subclasses (e.g., skip-in-CI attributes)
+        // that need to prevent ClassDataSource initialization when the test should be skipped.
         foreach (var receiver in test.Context.GetTestRegisteredReceivers())
         {
             try
@@ -95,6 +88,25 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
                 await logger.LogErrorAsync($"Error in test registered event receiver: {ex.Message}");
                 throw;
             }
+        }
+
+        // If the test was marked as skipped by an event receiver, skip argument registration entirely.
+        // This avoids initializing expensive shared data sources (e.g., WebApplicationFactory)
+        // for tests that will never execute.
+        if (!string.IsNullOrEmpty(test.Context.SkipReason))
+        {
+            test.Context.InvalidateDisplayNameCache();
+            return;
+        }
+
+        try
+        {
+            await testArgumentRegistrationService.RegisterTestArgumentsAsync(test.Context);
+        }
+        catch (Exception ex)
+        {
+            // Mark the test as failed - event receivers have already run above
+            test.SetResult(TestState.Failed, ex);
         }
 
         // Clear the cached display name after registration events

@@ -63,6 +63,17 @@ internal sealed class TestCoordinator : ITestCoordinator
 
             _contextRestorer.RestoreContext(test);
 
+            // Check if test was already marked as skipped during registration
+            // (e.g., by a derived SkipAttribute evaluated in OnTestRegistered).
+            // This must be checked before any instance creation or retry/timeout logic.
+            if (!string.IsNullOrEmpty(test.Context.SkipReason))
+            {
+                _stateManager.MarkSkipped(test, test.Context.SkipReason!);
+                await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
+                await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
+                return;
+            }
+
             // Check if test was already marked as failed during registration (e.g., property injection failure)
             // If so, skip execution and report the failure immediately
             var existingResult = test.Context.Execution.Result;
@@ -249,12 +260,29 @@ internal sealed class TestCoordinator : ITestCoordinator
     /// </summary>
     private async ValueTask ExecuteTestLifecycleAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
+        // Check if this test should be skipped before creating the class instance.
+        // Derived SkipAttribute subclasses set SkipReason during OnTestRegistered (registration phase),
+        // and creating the instance can trigger expensive data source initialization (e.g., starting a
+        // WebApplicationFactory) that would fail or waste resources for tests that should be skipped.
+        if (!string.IsNullOrEmpty(test.Context.SkipReason))
+        {
+            _stateManager.MarkSkipped(test, test.Context.SkipReason!);
+
+            await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
+
+            await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
+
+            return;
+        }
+
         test.Context.Metadata.TestDetails.ClassInstance = await test.CreateInstanceAsync().ConfigureAwait(false);
 
         // Invalidate cached eligible event objects since ClassInstance changed
         test.Context.CachedEligibleEventObjects = null;
 
-        // Check if this test should be skipped (after creating instance)
+        // Check if this test should be skipped (after creating instance).
+        // This handles basic [Skip] attributes that use SkippedTestInstance as a sentinel,
+        // and any SkipReason set during instance creation.
         if (test.Context.Metadata.TestDetails.ClassInstance is SkippedTestInstance ||
             !string.IsNullOrEmpty(test.Context.SkipReason))
         {
