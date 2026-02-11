@@ -162,9 +162,9 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                         }
                     }
                     
-                    // Also check if we have IDataSourceAttribute interface
+                    // Also check if we have IDataSourceAttribute interface (use AllInterfaces to catch indirect implementations)
                     if (dataSourceInterface != null && 
-                        currentType.Interfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, dataSourceInterface)))
+                        currentType.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, dataSourceInterface)))
                     {
                         return true;
                     }
@@ -189,6 +189,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                     context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.Arguments.WithoutGlobalPrefix)))
             {
                 CheckArguments(context, attribute, parameters, propertySymbol);
+                continue;
             }
 
             if (SymbolEqualityComparer.Default.Equals(attribute.AttributeClass,
@@ -200,6 +201,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                     : parameters.Select(p => p.Type).ToImmutableArray().WithoutCancellationTokenParameter();
 
                 CheckMethodDataSource(context, attribute, testClassType, typesToValidate, propertySymbol);
+                continue;
             }
 
             if (attribute.AttributeClass?.IsGenericType is true
@@ -211,50 +213,19 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                     ? ImmutableArray.Create(propertySymbol.Type)
                     : parameters.Select(p => p.Type).ToImmutableArray().WithoutCancellationTokenParameter();
                 CheckMethodDataSource(context, attribute, testClassType, typesToValidate, propertySymbol);
+                continue;
             }
             
-            // Check for ClassDataSourceAttribute<T> by fully qualified name
-            if (attribute.AttributeClass?.ToDisplayString()?.StartsWith("TUnit.Core.ClassDataSourceAttribute<") == true)
+            // For all other IDataSourceAttribute implementations, check type arguments
+            if (attribute.AttributeClass != null && 
+                dataSourceInterface != null &&
+                attribute.AttributeClass.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, dataSourceInterface)))
             {
                 var typesToValidate = propertySymbol != null 
                     ? ImmutableArray.Create(propertySymbol.Type)
                     : types;
                 CheckDataGenerator(context, attribute, typesToValidate);
             }
-            
-            // Check for any custom data source generators that inherit from known base classes
-            // (excluding ClassDataSourceAttribute which is handled above)
-            if (attribute.AttributeClass != null && 
-                !attribute.AttributeClass.ToDisplayString()?.StartsWith("TUnit.Core.ClassDataSourceAttribute<") == true)
-            {
-                var isDataSourceGenerator = false;
-                var selfAndBaseTypes = attribute.AttributeClass.GetSelfAndBaseTypes();
-                
-                foreach (var type in selfAndBaseTypes)
-                {
-                    if (type.IsGenericType && type.TypeArguments.Length > 0)
-                    {
-                        var originalDef = type.OriginalDefinition;
-                        var metadataName = originalDef?.ToDisplayString();
-                        
-                        if (metadataName?.Contains("DataSourceGeneratorAttribute") == true ||
-                            metadataName?.Contains("AsyncDataSourceGeneratorAttribute") == true)
-                        {
-                            isDataSourceGenerator = true;
-                            break;
-                        }
-                    }
-                }
-                
-                if (isDataSourceGenerator)
-                {
-                    var typesToValidate = propertySymbol != null 
-                        ? ImmutableArray.Create(propertySymbol.Type)
-                        : types;
-                    CheckDataGenerator(context, attribute, typesToValidate);
-                }
-            }
-
         }
     }
 
@@ -902,7 +873,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         // First, try the same approach as the source generator: look for ITypedDataSourceAttribute<T> interface
         var typedInterface = attribute.AttributeClass?.AllInterfaces
             .FirstOrDefault(i => i.IsGenericType && 
-                i.ConstructedFrom.GloballyQualified() == WellKnown.AttributeFullyQualifiedClasses.ITypedDataSourceAttribute.WithGlobalPrefix + "`1");
+                i.ConstructedFrom.GloballyQualifiedNonGeneric() == WellKnown.AttributeFullyQualifiedClasses.ITypedDataSourceAttribute.WithGlobalPrefix);
                 
         if (typedInterface != null)
         {
