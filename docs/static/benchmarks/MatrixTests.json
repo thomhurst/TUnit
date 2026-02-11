@@ -1,51 +1,51 @@
 {
-  "timestamp": "2026-02-10T00:41:21.337Z",
+  "timestamp": "2026-02-11T00:41:10.639Z",
   "category": "MatrixTests",
   "environment": {
     "benchmarkDotNetVersion": "BenchmarkDotNet v0.15.8, Linux Ubuntu 24.04.3 LTS (Noble Numbat)",
-    "sdk": ".NET SDK 10.0.102",
-    "host": ".NET 10.0.2 (10.0.2, 10.0.225.61305), X64 RyuJIT x86-64-v4"
+    "sdk": ".NET SDK 10.0.103",
+    "host": ".NET 10.0.3 (10.0.3, 10.0.326.7603), X64 RyuJIT x86-64-v3"
   },
   "results": [
     {
       "Method": "TUnit",
-      "Version": "1.13.11",
-      "Mean": "507.42 ms",
-      "Error": "1.657 ms",
-      "StdDev": "1.469 ms",
-      "Median": "507.47 ms"
+      "Version": "1.13.40",
+      "Mean": "514.50 ms",
+      "Error": "3.617 ms",
+      "StdDev": "3.207 ms",
+      "Median": "514.24 ms"
     },
     {
       "Method": "NUnit",
       "Version": "4.4.0",
-      "Mean": "1,580.83 ms",
-      "Error": "7.686 ms",
-      "StdDev": "6.814 ms",
-      "Median": "1,577.73 ms"
+      "Mean": "1,573.33 ms",
+      "Error": "10.506 ms",
+      "StdDev": "9.827 ms",
+      "Median": "1,573.19 ms"
     },
     {
       "Method": "MSTest",
       "Version": "4.1.0",
-      "Mean": "1,509.58 ms",
-      "Error": "7.651 ms",
-      "StdDev": "7.157 ms",
-      "Median": "1,506.75 ms"
+      "Mean": "1,506.39 ms",
+      "Error": "8.486 ms",
+      "StdDev": "7.938 ms",
+      "Median": "1,506.86 ms"
     },
     {
       "Method": "xUnit3",
       "Version": "3.2.2",
-      "Mean": "1,632.98 ms",
-      "Error": "5.652 ms",
-      "StdDev": "5.286 ms",
-      "Median": "1,633.88 ms"
+      "Mean": "1,630.99 ms",
+      "Error": "9.158 ms",
+      "StdDev": "8.118 ms",
+      "Median": "1,626.89 ms"
     },
     {
       "Method": "TUnit_AOT",
-      "Version": "1.13.11",
-      "Mean": "74.38 ms",
-      "Error": "0.252 ms",
-      "StdDev": "0.236 ms",
-      "Median": "74.47 ms"
+      "Version": "1.13.40",
+      "Mean": "76.37 ms",
+      "Error": "0.921 ms",
+      "StdDev": "0.861 ms",
+      "Median": "76.23 ms"
     }
   ]
 }
