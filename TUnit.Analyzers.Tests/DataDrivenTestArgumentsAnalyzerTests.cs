@@ -237,4 +237,76 @@ public class DataDrivenTestArgumentsAnalyzerTests
                     .WithLocation(0)
             );
     }
+
+    [Test]
+    public async Task TypedDataSource_Is_Flagged_When_Does_Not_Match_Parameter_Types()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Test]
+                    [{|#0:CustomData|}]
+                    public void MyTest(string asdf, int notExistingParameter)
+                    {
+                    }
+                }
+
+                [AttributeUsage(AttributeTargets.Method)]
+                public class CustomData : TypedDataSourceAttribute<string>
+                {
+                    public override async IAsyncEnumerable<Func<Task<string>>> GetTypedDataRowsAsync(
+                        DataGeneratorMetadata dataGeneratorMetadata)
+                    {
+                        await Task.Yield();
+                        yield return () => Task.FromResult("one");
+                    }
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                    .WithLocation(0)
+                    .WithArguments("string", "string, int")
+            );
+    }
+
+    [Test]
+    public async Task TypedDataSource_Is_Not_Flagged_When_Matches_Parameter_Type()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Test]
+                    [CustomData]
+                    public void MyTest(string value)
+                    {
+                    }
+                }
+
+                [AttributeUsage(AttributeTargets.Method)]
+                public class CustomData : TypedDataSourceAttribute<string>
+                {
+                    public override async IAsyncEnumerable<Func<Task<string>>> GetTypedDataRowsAsync(
+                        DataGeneratorMetadata dataGeneratorMetadata)
+                    {
+                        await Task.Yield();
+                        yield return () => Task.FromResult("one");
+                    }
+                }
+                """
+            );
+    }
 }
