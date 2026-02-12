@@ -2102,6 +2102,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         foreach (var attr in testMethod.MethodAttributes)
         {
             if (attr.AttributeClass?.Name == "RepeatAttribute" &&
+                attr.AttributeClass.ContainingNamespace?.ToDisplayString() == "TUnit.Core" &&
                 attr.ConstructorArguments.Length > 0 &&
                 attr.ConstructorArguments[0].Value is int count)
             {
@@ -2113,6 +2114,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         foreach (var attr in testMethod.TypeSymbol.GetAttributes())
         {
             if (attr.AttributeClass?.Name == "RepeatAttribute" &&
+                attr.AttributeClass.ContainingNamespace?.ToDisplayString() == "TUnit.Core" &&
+                attr.ConstructorArguments.Length > 0 &&
+                attr.ConstructorArguments[0].Value is int count)
+            {
+                return count;
+            }
+        }
+
+        // Check assembly attributes
+        foreach (var attr in testMethod.TypeSymbol.ContainingAssembly.GetAttributes())
+        {
+            if (attr.AttributeClass?.Name == "RepeatAttribute" &&
+                attr.AttributeClass.ContainingNamespace?.ToDisplayString() == "TUnit.Core" &&
                 attr.ConstructorArguments.Length > 0 &&
                 attr.ConstructorArguments[0].Value is int count)
             {
@@ -5138,7 +5152,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         // Check method-level RepeatAttribute first
         var repeatAttribute = methodSymbol.GetAttributes()
-            .FirstOrDefault(a => a.AttributeClass?.Name == "RepeatAttribute");
+            .FirstOrDefault(a => a.AttributeClass?.Name == "RepeatAttribute" &&
+                                 a.AttributeClass.ContainingNamespace?.ToDisplayString() == "TUnit.Core");
 
         if (repeatAttribute?.ConstructorArguments.Length > 0
             && repeatAttribute.ConstructorArguments[0].Value is int methodCount)
@@ -5148,12 +5163,24 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Check class-level RepeatAttribute (can be inherited)
         var classRepeatAttr = typeSymbol.GetAttributesIncludingBaseTypes()
-            .FirstOrDefault(a => a.AttributeClass?.Name == "RepeatAttribute");
+            .FirstOrDefault(a => a.AttributeClass?.Name == "RepeatAttribute" &&
+                                 a.AttributeClass.ContainingNamespace?.ToDisplayString() == "TUnit.Core");
 
         if (classRepeatAttr?.ConstructorArguments.Length > 0
             && classRepeatAttr.ConstructorArguments[0].Value is int classCount)
         {
             return classCount;
+        }
+
+        // Check assembly-level RepeatAttribute
+        var assemblyRepeatAttr = typeSymbol.ContainingAssembly.GetAttributes()
+            .FirstOrDefault(a => a.AttributeClass?.Name == "RepeatAttribute" &&
+                                 a.AttributeClass.ContainingNamespace?.ToDisplayString() == "TUnit.Core");
+
+        if (assemblyRepeatAttr?.ConstructorArguments.Length > 0
+            && assemblyRepeatAttr.ConstructorArguments[0].Value is int assemblyCount)
+        {
+            return assemblyCount;
         }
 
         // No repeat attribute found
