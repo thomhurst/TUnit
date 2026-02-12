@@ -43,7 +43,11 @@ TUnit automatically registers these sinks based on your execution context:
 |------|-----------------|---------|
 | **TestOutputSink** | Always | Captures output for test results shown after execution |
 | **ConsoleOutputSink** | `--output Detailed` | Writes real-time output to the console |
-| **RealTimeOutputSink** | IDE clients (VS, Rider) | Streams output to IDE test explorers |
+| **RealTimeOutputSink** | IDE clients + `TUNIT_ENABLE_IDE_STREAMING=1` | Streams output to IDE test explorers |
+
+:::note
+The RealTimeOutputSink (IDE streaming) is disabled by default due to compatibility issues with the Microsoft Testing Platform that can cause crashes in some IDEs. Set the `TUNIT_ENABLE_IDE_STREAMING=1` environment variable to opt in. See [Environment Variables](/docs/reference/environment-variables) for details.
+:::
 
 ### Creating Custom Log Sinks
 

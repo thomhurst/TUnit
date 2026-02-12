@@ -85,6 +85,27 @@ export TUNIT_MAX_PARALLEL_TESTS=0    # Unlimited parallelism
 
 **Note:** Command-line arguments take precedence over environment variables.
 
+### TUNIT_ENABLE_IDE_STREAMING
+
+Enables real-time output streaming to IDE test explorers (Rider, VS Code, Visual Studio).
+
+```bash
+# Bash/Linux/macOS
+export TUNIT_ENABLE_IDE_STREAMING=1
+
+# PowerShell
+$env:TUNIT_ENABLE_IDE_STREAMING = "1"
+
+# Windows Command Prompt
+set TUNIT_ENABLE_IDE_STREAMING=1
+```
+
+**Default:** Disabled
+
+**Use case:** When running tests in an IDE, this enables real-time streaming of test output (e.g. `Console.WriteLine`) to the test explorer while tests are still running. Without this, output is shown after each test completes.
+
+**Note:** This feature is disabled by default due to known compatibility issues with the Microsoft Testing Platform that can cause test runner crashes in some IDEs. Enable it only if you want real-time output streaming and are not experiencing issues.
+
 ## Microsoft Testing Platform Environment Variables
 
 These environment variables are provided by the underlying Microsoft Testing Platform:
@@ -196,3 +217,4 @@ When the same setting is configured in multiple places, TUnit follows this prior
 | `TUNIT_ENABLE_JUNIT_REPORTER` | - | Enables JUnit reporter |
 | `JUNIT_XML_OUTPUT_PATH` | - | JUnit output path |
 | `TUNIT_MAX_PARALLEL_TESTS` | `--maximum-parallel-tests` | Max parallel tests |
+| `TUNIT_ENABLE_IDE_STREAMING` | - | Enable real-time IDE output streaming |
