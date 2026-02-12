@@ -123,9 +123,10 @@ internal static class ObjectInitializer
         }
         catch
         {
-            // Remove failed initialization from cache to allow retry
-            // This is important for transient failures that may succeed on retry
-            InitializationTasks.TryRemove(obj, out _);
+            // Do NOT remove from cache - the faulted Lazy<Task> stays so subsequent
+            // callers get the same error immediately via .WaitAsync() on the faulted task.
+            // Removing and retrying can cause hangs when InitializeAsync partially initialized
+            // resources (e.g. started ports/processes) that block re-initialization (#4715).
             throw;
         }
     }
