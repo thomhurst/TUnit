@@ -9,8 +9,8 @@
 
     <ItemGroup>
         <PackageReference Include="BenchmarkDotNet" />
-        <PackageReference Include="Microsoft.Build" VersionOverride="18.0.2" ExcludeAssets="runtime" PrivateAssets="all" />
-        <PackageReference Include="Microsoft.Build.Framework" VersionOverride="18.0.2" ExcludeAssets="runtime" PrivateAssets="all" />
+        <PackageReference Include="Microsoft.Build" VersionOverride="18.3.3" ExcludeAssets="runtime" PrivateAssets="all" />
+        <PackageReference Include="Microsoft.Build.Framework" VersionOverride="18.3.3" ExcludeAssets="runtime" PrivateAssets="all" />
         <PackageReference Include="Microsoft.Build.Locator" VersionOverride="1.11.2" />
         <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" VersionOverride="5.0.0" />
         <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" VersionOverride="5.0.0" />
