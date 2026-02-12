@@ -329,7 +329,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
         // Fast path: already processed by this service
         if (_initializationTasks.TryGetValue(obj, out var existingTcs) && existingTcs.Task.IsCompleted)
         {
-            if (existingTcs.Task.IsFaulted)
+            if (existingTcs.Task.IsFaulted || existingTcs.Task.IsCanceled)
             {
                 await existingTcs.Task.ConfigureAwait(false);
             }
@@ -353,16 +353,17 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
             }
             catch (OperationCanceledException)
             {
-                // Propagate cancellation without caching failure - allows retry after cancel
-                _initializationTasks.TryRemove(obj, out _);
+                // Do NOT remove from cache - the cancelled TCS stays so subsequent
+                // callers get the cancellation immediately. Retrying can cause hangs
+                // when InitializeAsync partially initialized resources (#4715).
                 tcs.SetCanceled();
                 throw;
             }
             catch (Exception ex)
             {
-                // Remove failed initialization from cache to allow retry
-                // This is important for transient failures that may succeed on retry
-                _initializationTasks.TryRemove(obj, out _);
+                // Do NOT remove from cache - the faulted TCS stays so subsequent
+                // callers get the same error immediately. Retrying can cause hangs
+                // when InitializeAsync partially initialized resources (#4715).
                 tcs.SetException(ex);
                 throw;
             }

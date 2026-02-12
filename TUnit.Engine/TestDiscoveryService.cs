@@ -81,11 +81,15 @@ internal sealed class TestDiscoveryService : IDataProducer
             var metadataToInclude = _dependencyExpander.ExpandToIncludeDependencies(allMetadataList, filter);
 
             // Build tests directly from the pre-collected metadata (avoid re-collecting)
+            // Apply 5-minute discovery timeout matching the streaming path (#4715)
+            using var filterCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            filterCts.CancelAfter(TimeSpan.FromMinutes(5));
+
             var buildingContext = new Building.TestBuildingContext(isForExecution, Filter: null);
             var tests = await _testBuilderPipeline.BuildTestsFromMetadataAsync(
                 metadataToInclude,
                 buildingContext,
-                cancellationToken).ConfigureAwait(false);
+                filterCts.Token).ConfigureAwait(false);
 
             var testsList = tests.ToList();
 
