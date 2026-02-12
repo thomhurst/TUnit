@@ -153,7 +153,11 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         }
 
         // IdeStreamingSink: For IDE clients - real-time output streaming
-        if (VerbosityService.IsIdeClient)
+        // Disabled by default due to compatibility issues with Microsoft Testing Platform
+        // (duplicate TestNodeUid in TestApplicationResult.ConsumeAsync causes crashes in Rider/VS Code).
+        // Enable via TUNIT_ENABLE_IDE_STREAMING=1 environment variable.
+        if (VerbosityService.IsIdeClient &&
+            Environment.GetEnvironmentVariable("TUNIT_ENABLE_IDE_STREAMING") == "1")
         {
             TUnitLoggerFactory.AddSink(new IdeStreamingSink(MessageBus));
         }
