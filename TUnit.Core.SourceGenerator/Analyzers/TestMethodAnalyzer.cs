@@ -116,7 +116,8 @@ public class TestMethodAnalyzer : ITestAnalyzer
     private static int ExtractRepeatCount(IMethodSymbol methodSymbol)
     {
         var repeatAttribute = methodSymbol.GetAttributes()
-            .FirstOrDefault(a => a.AttributeClass?.Name == "RepeatAttribute");
+            .FirstOrDefault(a => a.AttributeClass?.Name == "RepeatAttribute" &&
+                                 a.AttributeClass.ContainingNamespace?.ToDisplayString() == "TUnit.Core");
 
         if (repeatAttribute is { ConstructorArguments.Length: > 0 })
         {
