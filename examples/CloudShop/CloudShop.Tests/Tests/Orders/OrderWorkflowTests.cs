@@ -13,8 +13,10 @@ namespace CloudShop.Tests.Tests.Orders;
 ///
 /// Showcases:
 /// - [DependsOn] for test dependency chains: Create → Pay → Verify Fulfillment
+/// - TestContext.StateBag for passing data between dependent tests (no static fields)
 /// - [NotInParallel] to prevent interference with other order tests
 /// - [Timeout] for async worker verification
+/// - WaitsFor() polling assertion for eventually-consistent state
 /// - Multiple [ClassDataSource] properties accessing different fixtures
 /// - Database fixture for direct DB verification alongside API checks
 /// </summary>
@@ -27,8 +29,6 @@ public class OrderWorkflowTests
 
     [ClassDataSource<DatabaseFixture>(Shared = SharedType.PerTestSession)]
     public required DatabaseFixture Database { get; init; }
-
-    private static int _orderId;
 
     [Test]
     public async Task Step1_Place_Order()
@@ -46,56 +46,65 @@ public class OrderWorkflowTests
         await Assert.That(order!.Status).IsEqualTo(OrderStatus.Pending);
         await Assert.That(order.Items.Count).IsEqualTo(2);
 
-        _orderId = order.Id;
+        // Store the order ID in the StateBag so dependent tests can access it
+        TestContext.Current!.StateBag.Items["OrderId"] = order.Id;
     }
 
     [Test, DependsOn(nameof(Step1_Place_Order))]
     public async Task Step2_Process_Payment()
     {
+        // Retrieve the order ID from the dependency's StateBag
+        var orderId = (int)TestContext.Current!.Dependencies
+            .GetTests(nameof(Step1_Place_Order))[0].StateBag.Items["OrderId"]!;
+
         var response = await Customer.Client.PostAsJsonAsync(
-            $"/api/orders/{_orderId}/pay",
+            $"/api/orders/{orderId}/pay",
             new ProcessPaymentRequest("credit_card", "tok_test_123"));
 
         await Assert.That(response.IsSuccessStatusCode).IsTrue();
 
         // Verify via API
         var orderResponse = await Customer.Client.GetFromJsonAsync<OrderResponse>(
-            $"/api/orders/{_orderId}");
+            $"/api/orders/{orderId}");
         await Assert.That(orderResponse!.Status).IsEqualTo(OrderStatus.PaymentProcessed);
+
+        // Pass the order ID forward for downstream tests
+        TestContext.Current.StateBag.Items["OrderId"] = orderId;
     }
 
     [Test, DependsOn(nameof(Step2_Process_Payment)), Timeout(30_000)]
     public async Task Step3_Worker_Fulfills_Order(CancellationToken cancellationToken)
     {
+        var orderId = (int)TestContext.Current!.Dependencies
+            .GetTests(nameof(Step2_Process_Payment))[0].StateBag.Items["OrderId"]!;
+
         // The Worker service listens for PaymentProcessed events on RabbitMQ
         // and updates the order status to Fulfilled.
-        // We poll the API until it shows Fulfilled or timeout.
-        OrderResponse? order = null;
-        var deadline = DateTime.UtcNow.AddSeconds(25);
-
-        while (DateTime.UtcNow < deadline)
-        {
-            order = await Customer.Client.GetFromJsonAsync<OrderResponse>(
-                $"/api/orders/{_orderId}");
-
-            if (order?.Status == OrderStatus.Fulfilled)
-                break;
-
-            await Task.Delay(500);
-        }
+        // WaitsFor polls repeatedly until the assertion passes or the timeout expires.
+        var order = await Assert.That(async () =>
+                await Customer.Client.GetFromJsonAsync<OrderResponse>($"/api/orders/{orderId}"))
+            .WaitsFor(
+                assert => assert.Satisfies(o => o?.Status == OrderStatus.Fulfilled),
+                timeout: TimeSpan.FromSeconds(25),
+                pollingInterval: TimeSpan.FromMilliseconds(500));
 
         await Assert.That(order).IsNotNull();
-        await Assert.That(order!.Status).IsEqualTo(OrderStatus.Fulfilled);
-        await Assert.That(order.FulfilledAt).IsNotNull();
+        await Assert.That(order!.FulfilledAt).IsNotNull();
+
+        // Pass the order ID forward for the final verification step
+        TestContext.Current.StateBag.Items["OrderId"] = orderId;
     }
 
     [Test, DependsOn(nameof(Step3_Worker_Fulfills_Order))]
     public async Task Step4_Verify_In_Database()
     {
+        var orderId = (int)TestContext.Current!.Dependencies
+            .GetTests(nameof(Step3_Worker_Fulfills_Order))[0].StateBag.Items["OrderId"]!;
+
         // Direct database verification using the DatabaseFixture
         var status = await Database.QuerySingleAsync<int>(
             "SELECT \"Status\" FROM \"Orders\" WHERE \"Id\" = @id",
-            ("id", _orderId));
+            ("id", orderId));
 
         // OrderStatus.Fulfilled = 2
         await Assert.That(status).IsEqualTo((int)OrderStatus.Fulfilled);

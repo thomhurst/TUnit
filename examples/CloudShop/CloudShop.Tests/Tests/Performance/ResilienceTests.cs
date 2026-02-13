@@ -33,23 +33,15 @@ public class ResilienceTests
             $"/api/orders/{order!.Id}/pay",
             new ProcessPaymentRequest("credit_card", "tok_test"));
 
-        // Poll for fulfillment (worker processes asynchronously)
-        var deadline = DateTime.UtcNow.AddSeconds(15);
-        OrderResponse? latestOrder = null;
-
-        while (DateTime.UtcNow < deadline)
-        {
-            latestOrder = await Customer.Client.GetFromJsonAsync<OrderResponse>(
-                $"/api/orders/{order.Id}");
-
-            if (latestOrder?.Status == CloudShop.Shared.Models.OrderStatus.Fulfilled)
-                break;
-
-            await Task.Delay(500);
-        }
+        // WaitsFor polls for fulfillment (worker processes asynchronously)
+        var latestOrder = await Assert.That(async () =>
+                await Customer.Client.GetFromJsonAsync<OrderResponse>($"/api/orders/{order.Id}"))
+            .WaitsFor(
+                assert => assert.Satisfies(o => o?.Status == CloudShop.Shared.Models.OrderStatus.Fulfilled),
+                timeout: TimeSpan.FromSeconds(15),
+                pollingInterval: TimeSpan.FromMilliseconds(500));
 
         await Assert.That(latestOrder).IsNotNull();
-        await Assert.That(latestOrder!.Status).IsEqualTo(CloudShop.Shared.Models.OrderStatus.Fulfilled);
     }
 
     [Test, Timeout(5_000)]

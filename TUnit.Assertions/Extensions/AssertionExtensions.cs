@@ -1408,6 +1408,30 @@ public static class AssertionExtensions
         return new WaitsForAssertion<TValue>(source.Context, assertionBuilder, timeout, pollingInterval);
     }
 
+    /// <summary>
+    /// Alias for <see cref="WaitsFor{TValue}"/> — asserts that an assertion passes within the specified timeout by polling repeatedly.
+    /// Reads more naturally for integration tests with eventually-consistent state.
+    /// Example: await Assert.That(getValue).Eventually(assert => assert.IsEqualTo(expected), timeout: TimeSpan.FromSeconds(10));
+    /// </summary>
+    /// <typeparam name="TValue">The type of value being asserted</typeparam>
+    /// <param name="source">The assertion source</param>
+    /// <param name="assertionBuilder">A function that builds the assertion to be evaluated on each poll</param>
+    /// <param name="timeout">The maximum time to wait for the assertion to pass</param>
+    /// <param name="pollingInterval">The interval between polling attempts (defaults to 10ms if not specified)</param>
+    /// <param name="timeoutExpression">Captured expression for the timeout parameter</param>
+    /// <param name="pollingIntervalExpression">Captured expression for the polling interval parameter</param>
+    /// <returns>An assertion that can be awaited or chained with And/Or</returns>
+    public static WaitsForAssertion<TValue> Eventually<TValue>(
+        this IAssertionSource<TValue> source,
+        Func<IAssertionSource<TValue>, Assertion<TValue>> assertionBuilder,
+        TimeSpan timeout,
+        TimeSpan? pollingInterval = null,
+        [CallerArgumentExpression(nameof(timeout))] string? timeoutExpression = null,
+        [CallerArgumentExpression(nameof(pollingInterval))] string? pollingIntervalExpression = null)
+    {
+        return source.WaitsFor(assertionBuilder, timeout, pollingInterval, timeoutExpression, pollingIntervalExpression);
+    }
+
     private static Action GetActionFromDelegate(DelegateAssertion source)
     {
         return source.Action;
