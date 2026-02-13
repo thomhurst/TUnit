@@ -62,7 +62,7 @@ TUnit0033 | Usage | Error | Circular or conflicting test dependencies detected
 Rule ID | Category | Severity | Notes                                          
 --------|----------|----------|------------------------------------------------
 TUnit0015 | Usage | Error | Methods with [Timeout] must have a CancellationToken parameter
-TUnit0031 | Usage | Error | Async void methods not allowed - return Task instead
+TUnit0031 | Usage | Error | Async void methods and lambdas not allowed - return Task instead
 
 #### AOT Compatibility Rules
 Rule ID | Category | Severity | Notes                                          

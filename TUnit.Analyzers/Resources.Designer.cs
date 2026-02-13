@@ -867,7 +867,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Async void methods are not allowed..
+        ///   Looks up a localized string similar to Async void methods and lambdas are not allowed..
         /// </summary>
         internal static string TUnit0031Description {
             get {
@@ -876,7 +876,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Async void methods are not allowed.
+        ///   Looks up a localized string similar to Async void methods and lambdas are not allowed.
         /// </summary>
         internal static string TUnit0031MessageFormat {
             get {
@@ -885,7 +885,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Async void methods are not allowed.
+        ///   Looks up a localized string similar to Async void methods and lambdas are not allowed.
         /// </summary>
         internal static string TUnit0031Title {
             get {
