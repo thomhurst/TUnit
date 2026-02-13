@@ -1,3 +1,4 @@
+using System.Net;
 using CloudShop.Shared.Contracts;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -32,7 +33,7 @@ app.MapGet("/products", async (IHttpClientFactory httpClientFactory) =>
     {
         foreach (var p in products.Items)
         {
-            html += $"<li><strong>{p.Name}</strong> ({p.Category}) - ${p.Price:F2}</li>";
+            html += $"<li><strong>{WebUtility.HtmlEncode(p.Name)}</strong> ({WebUtility.HtmlEncode(p.Category)}) - ${p.Price:F2}</li>";
         }
     }
     html += "</ul><a href=\"/\">Home</a></body></html>";
