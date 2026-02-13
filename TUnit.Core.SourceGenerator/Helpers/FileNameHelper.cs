@@ -15,6 +15,10 @@ internal static class FileNameHelper
     /// <param name="typeSymbol">The type symbol for the test class</param>
     /// <param name="methodSymbol">The method symbol for the test method</param>
     /// <returns>A deterministic filename like "MyNamespace_MyClass_MyMethod__Int32_String.g.cs"</returns>
+    // Conservative limit to avoid PathTooLongException on Windows with net472,
+    // which enforces the legacy 260-character MAX_PATH limit in Roslyn's AddSource.
+    private const int MaxHintNameLength = 200;
+
     public static string GetDeterministicFileNameForMethod(INamedTypeSymbol typeSymbol, IMethodSymbol methodSymbol)
     {
         var sb = new StringBuilder();
@@ -71,8 +75,36 @@ internal static class FileNameHelper
             }
         }
 
-        sb.Append(".g.cs");
-        return sb.ToString();
+        var baseName = sb.ToString();
+
+        // Truncate and append a hash if the name would exceed the limit
+        const int suffixLength = 5; // ".g.cs"
+        if (baseName.Length + suffixLength > MaxHintNameLength)
+        {
+            var hashSuffix = $"_{GetStableHashCode(baseName):X8}";
+            var maxBaseLength = MaxHintNameLength - suffixLength - hashSuffix.Length;
+            baseName = baseName.Substring(0, maxBaseLength) + hashSuffix;
+        }
+
+        return baseName + ".g.cs";
+    }
+
+    /// <summary>
+    /// Computes a deterministic hash code for a string (FNV-1a).
+    /// Unlike string.GetHashCode(), this is stable across processes and platforms.
+    /// </summary>
+    private static uint GetStableHashCode(string str)
+    {
+        unchecked
+        {
+            uint hash = 2166136261;
+            foreach (var c in str)
+            {
+                hash ^= c;
+                hash *= 16777619;
+            }
+            return hash;
+        }
     }
 
     /// <summary>
