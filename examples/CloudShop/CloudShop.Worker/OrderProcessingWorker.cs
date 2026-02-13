@@ -15,14 +15,17 @@ public class OrderProcessingWorker(
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var channel = rabbitConnection.CreateModel();
+        var channel = await rabbitConnection.CreateChannelAsync(cancellationToken: stoppingToken);
 
-        channel.ExchangeDeclare("order-events", ExchangeType.Topic, durable: true);
-        var queueDeclare = channel.QueueDeclare("order-processing", durable: true, exclusive: false, autoDelete: false);
-        channel.QueueBind(queueDeclare.QueueName, "order-events", "order.payment-processed");
+        await channel.ExchangeDeclareAsync("order-events", ExchangeType.Topic, durable: true,
+            cancellationToken: stoppingToken);
+        var queueDeclare = await channel.QueueDeclareAsync("order-processing", durable: true, exclusive: false,
+            autoDelete: false, cancellationToken: stoppingToken);
+        await channel.QueueBindAsync(queueDeclare.QueueName, "order-events", "order.payment-processed",
+            cancellationToken: stoppingToken);
 
-        var consumer = new EventingBasicConsumer(channel);
-        consumer.Received += async (_, ea) =>
+        var consumer = new AsyncEventingBasicConsumer(channel);
+        consumer.ReceivedAsync += async (_, ea) =>
         {
             try
             {
@@ -35,16 +38,17 @@ public class OrderProcessingWorker(
                     logger.LogInformation("Fulfilled order {OrderId}", paymentEvent.OrderId);
                 }
 
-                channel.BasicAck(ea.DeliveryTag, multiple: false);
+                await channel.BasicAckAsync(ea.DeliveryTag, multiple: false);
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error processing message");
-                channel.BasicNack(ea.DeliveryTag, multiple: false, requeue: true);
+                await channel.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: true);
             }
         };
 
-        channel.BasicConsume(queueDeclare.QueueName, autoAck: false, consumer: consumer);
+        await channel.BasicConsumeAsync(queueDeclare.QueueName, autoAck: false, consumer: consumer,
+            cancellationToken: stoppingToken);
 
         // Keep the worker alive
         await Task.Delay(Timeout.Infinite, stoppingToken);

@@ -19,13 +19,12 @@ public class OrderEventPublisher(IConnection rabbitConnection)
 
     private async Task PublishAsync<T>(string exchange, string routingKey, T message)
     {
-        using var channel = rabbitConnection.CreateModel();
-        channel.ExchangeDeclare(exchange, ExchangeType.Topic, durable: true);
+        await using var channel = await rabbitConnection.CreateChannelAsync();
+        await channel.ExchangeDeclareAsync(exchange, ExchangeType.Topic, durable: true);
 
         var json = JsonSerializer.Serialize(message);
         var body = Encoding.UTF8.GetBytes(json);
 
-        channel.BasicPublish(exchange, routingKey, null, body);
-        await Task.CompletedTask;
+        await channel.BasicPublishAsync(exchange, routingKey, body);
     }
 }
