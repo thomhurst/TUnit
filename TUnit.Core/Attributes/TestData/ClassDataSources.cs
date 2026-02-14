@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using TUnit.Core.Data;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
@@ -46,7 +47,7 @@ internal class ClassDataSources
             SharedType.None => Create<T>(),
             SharedType.PerTestSession => (T) TestDataContainer.GetGlobalInstance(typeof(T), _ => Create(typeof(T)))!,
             SharedType.PerClass => (T) TestDataContainer.GetInstanceForClass(testClassType, typeof(T), _ => Create(typeof(T)))!,
-            SharedType.Keyed => (T) TestDataContainer.GetInstanceForKey(key, typeof(T), _ => Create(typeof(T)))!,
+            SharedType.Keyed => (T) TestDataContainer.GetInstanceForKey(key, typeof(T), _ => CreateWithKey(typeof(T), key))!,
             SharedType.PerAssembly => (T) TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, typeof(T), _ => Create(typeof(T)))!,
             _ => throw new ArgumentOutOfRangeException()
         };
@@ -59,10 +60,22 @@ internal class ClassDataSources
             SharedType.None => Create(type),
             SharedType.PerTestSession => TestDataContainer.GetGlobalInstance(type, _ => Create(type)),
             SharedType.PerClass => TestDataContainer.GetInstanceForClass(testClassType, type, _ => Create(type)),
-            SharedType.Keyed => TestDataContainer.GetInstanceForKey(key!, type, _ => Create(type)),
+            SharedType.Keyed => TestDataContainer.GetInstanceForKey(key!, type, _ => CreateWithKey(type, key!)),
             SharedType.PerAssembly => TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, type, _ => Create(type)),
             _ => throw new ArgumentOutOfRangeException()
         };
+    }
+
+    private static object CreateWithKey([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] Type type, string key)
+    {
+        var instance = Create(type);
+
+        if (instance is IKeyedDataSource keyed)
+        {
+            keyed.Key = key;
+        }
+
+        return instance;
     }
 
     [return: NotNull]
