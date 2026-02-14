@@ -19,13 +19,45 @@ internal sealed class TestOutputSink : ILogSink
             return;
         }
 
+        // During non-test phases (e.g. data source initialization), write directly to console
+        // since the output isn't associated with any specific test
+        if (context is GlobalContext globalContext)
+        {
+            var consoleWriter = level >= LogLevel.Error
+                ? globalContext.OriginalConsoleError
+                : globalContext.OriginalConsoleOut;
+            consoleWriter.WriteLine(message);
+            return;
+        }
+
         var writer = level >= LogLevel.Error ? context.ErrorOutputWriter : context.OutputWriter;
         writer.WriteLine(message);
     }
 
     public ValueTask LogAsync(LogLevel level, string message, Exception? exception, Context? context)
     {
-        Log(level, message, exception, context);
+        if (context == null)
+        {
+            return ValueTask.CompletedTask;
+        }
+
+        // During non-test phases (e.g. data source initialization), write directly to console
+        // since the output isn't associated with any specific test
+        if (context is GlobalContext globalContext)
+        {
+            var consoleWriter = level >= LogLevel.Error
+                ? globalContext.OriginalConsoleError
+                : globalContext.OriginalConsoleOut;
+            return WriteLineAsync(consoleWriter, message);
+        }
+
+        var writer = level >= LogLevel.Error ? context.ErrorOutputWriter : context.OutputWriter;
+        writer.WriteLine(message);
         return ValueTask.CompletedTask;
+    }
+
+    private static async ValueTask WriteLineAsync(TextWriter writer, string message)
+    {
+        await writer.WriteLineAsync(message).ConfigureAwait(false);
     }
 }

@@ -63,7 +63,7 @@ internal class TestExecutor
     /// Creates a test executor delegate that wraps the provided executor with hook orchestration.
     /// Uses focused services that follow SRP to manage lifecycle and execution.
     /// </summary>
-    public async ValueTask ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken)
+    public async ValueTask ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, bool skipInitialization = false)
     {
 
         var testClass = executableTest.Metadata.TestClassType;
@@ -113,9 +113,12 @@ internal class TestExecutor
 
             executableTest.Context.ClassContext.RestoreExecutionContext();
 
-            // Initialize test objects (IAsyncInitializer) AFTER BeforeClass hooks
-            // This ensures resources like Docker containers are not started until needed
-            await testInitializer.InitializeTestObjectsAsync(executableTest, cancellationToken).ConfigureAwait(false);
+            if (!skipInitialization)
+            {
+                // Initialize test objects (IAsyncInitializer) AFTER BeforeClass hooks
+                // This ensures resources like Docker containers are not started until needed
+                await testInitializer.InitializeTestObjectsAsync(executableTest, cancellationToken).ConfigureAwait(false);
+            }
 
             executableTest.Context.RestoreExecutionContext();
 
