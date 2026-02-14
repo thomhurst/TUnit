@@ -1050,7 +1050,39 @@ namespace .Conditions
     }
     [.<.>("IsSuccessStatusCode", CustomName="IsNotSuccessStatusCode", ExpectationMessage="have a success status code", NegateLogic=true)]
     [.<.>("IsSuccessStatusCode", ExpectationMessage="have a success status code")]
-    public static class HttpResponseMessageAssertionExtensions { }
+    public static class HttpResponseMessageAssertionExtensions
+    {
+        [.(ExpectationMessage="have content type {contentType}", InlineMethodBody=true)]
+        public static bool HasContentType(this . response, string contentType) { }
+        [.(ExpectationMessage="have header \'{headerName}\'")]
+        public static bool HasHeader(this . response, string headerName) { }
+        [.(ExpectationMessage="have JSON content type", InlineMethodBody=true)]
+        public static bool HasJsonContent(this . response) { }
+        [.(ExpectationMessage="have status code {statusCode}", InlineMethodBody=true)]
+        public static bool HasStatusCode(this . response, .HttpStatusCode statusCode) { }
+        [.(ExpectationMessage="have status code 400 Bad Request", InlineMethodBody=true)]
+        public static bool IsBadRequest(this . response) { }
+        [.(ExpectationMessage="have a client error status code (4xx)", InlineMethodBody=true)]
+        public static bool IsClientErrorStatusCode(this . response) { }
+        [.(ExpectationMessage="have status code 409 Conflict", InlineMethodBody=true)]
+        public static bool IsConflict(this . response) { }
+        [.(ExpectationMessage="have status code 201 Created", InlineMethodBody=true)]
+        public static bool IsCreated(this . response) { }
+        [.(ExpectationMessage="have status code 403 Forbidden", InlineMethodBody=true)]
+        public static bool IsForbidden(this . response) { }
+        [.(ExpectationMessage="have status code 204 No Content", InlineMethodBody=true)]
+        public static bool IsNoContent(this . response) { }
+        [.(ExpectationMessage="have status code 404 Not Found", InlineMethodBody=true)]
+        public static bool IsNotFound(this . response) { }
+        [.(ExpectationMessage="have status code 200 OK", InlineMethodBody=true)]
+        public static bool IsOk(this . response) { }
+        [.(ExpectationMessage="have a redirection status code (3xx)", InlineMethodBody=true)]
+        public static bool IsRedirectStatusCode(this . response) { }
+        [.(ExpectationMessage="have a server error status code (5xx)", InlineMethodBody=true)]
+        public static bool IsServerErrorStatusCode(this . response) { }
+        [.(ExpectationMessage="have status code 401 Unauthorized", InlineMethodBody=true)]
+        public static bool IsUnauthorized(this . response) { }
+    }
     [.<.IPAddress>("IsIPv4MappedToIPv6", CustomName="IsNotIPv4MappedToIPv6", ExpectationMessage="be an IPv4-mapped IPv6 address", NegateLogic=true)]
     [.<.IPAddress>("IsIPv4MappedToIPv6", ExpectationMessage="be an IPv4-mapped IPv6 address")]
     [.<.IPAddress>("IsIPv6LinkLocal", CustomName="IsNotIPv6LinkLocal", ExpectationMessage="be an IPv6 link-local address", NegateLogic=true)]
@@ -3354,12 +3386,117 @@ namespace .Extensions
     }
     public static class HttpResponseMessageAssertionExtensions
     {
+        public static ._HasContentType_String_Assertion HasContentType(this .<.> source, string contentType, [.("contentType")] string? contentTypeExpression = null) { }
+        public static ._HasHeader_String_Assertion HasHeader(this .<.> source, string headerName, [.("headerName")] string? headerNameExpression = null) { }
+        public static ._HasJsonContent_Assertion HasJsonContent(this .<.> source) { }
+        public static ._HasStatusCode_HttpStatusCode_Assertion HasStatusCode(this .<.> source, .HttpStatusCode statusCode, [.("statusCode")] string? statusCodeExpression = null) { }
+        public static ._IsBadRequest_Assertion IsBadRequest(this .<.> source) { }
+        public static ._IsClientErrorStatusCode_Assertion IsClientErrorStatusCode(this .<.> source) { }
+        public static ._IsConflict_Assertion IsConflict(this .<.> source) { }
+        public static ._IsCreated_Assertion IsCreated(this .<.> source) { }
+        public static ._IsForbidden_Assertion IsForbidden(this .<.> source) { }
+        public static ._IsNoContent_Assertion IsNoContent(this .<.> source) { }
+        public static ._IsNotFound_Assertion IsNotFound(this .<.> source) { }
         public static . IsNotSuccessStatusCode(this .<.> source) { }
+        public static ._IsOk_Assertion IsOk(this .<.> source) { }
+        public static ._IsRedirectStatusCode_Assertion IsRedirectStatusCode(this .<.> source) { }
+        public static ._IsServerErrorStatusCode_Assertion IsServerErrorStatusCode(this .<.> source) { }
         public static . IsSuccessStatusCode(this .<.> source) { }
+        public static ._IsUnauthorized_Assertion IsUnauthorized(this .<.> source) { }
     }
     public class HttpResponseMessageIsSuccessStatusCodeAssertion : .<.>
     {
         public HttpResponseMessageIsSuccessStatusCodeAssertion(.<.> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class HttpResponseMessage_HasContentType_String_Assertion : .<.>
+    {
+        public HttpResponseMessage_HasContentType_String_Assertion(.<.> context, string contentType) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class HttpResponseMessage_HasHeader_String_Assertion : .<.>
+    {
+        public HttpResponseMessage_HasHeader_String_Assertion(.<.> context, string headerName) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class HttpResponseMessage_HasJsonContent_Assertion : .<.>
+    {
+        public HttpResponseMessage_HasJsonContent_Assertion(.<.> context) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class HttpResponseMessage_HasStatusCode_HttpStatusCode_Assertion : .<.>
+    {
+        public HttpResponseMessage_HasStatusCode_HttpStatusCode_Assertion(.<.> context, .HttpStatusCode statusCode) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class HttpResponseMessage_IsBadRequest_Assertion : .<.>
+    {
+        public HttpResponseMessage_IsBadRequest_Assertion(.<.> context) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class HttpResponseMessage_IsClientErrorStatusCode_Assertion : .<.>
+    {
+        public HttpResponseMessage_IsClientErrorStatusCode_Assertion(.<.> context) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class HttpResponseMessage_IsConflict_Assertion : .<.>
+    {
+        public HttpResponseMessage_IsConflict_Assertion(.<.> context) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class HttpResponseMessage_IsCreated_Assertion : .<.>
+    {
+        public HttpResponseMessage_IsCreated_Assertion(.<.> context) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class HttpResponseMessage_IsForbidden_Assertion : .<.>
+    {
+        public HttpResponseMessage_IsForbidden_Assertion(.<.> context) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class HttpResponseMessage_IsNoContent_Assertion : .<.>
+    {
+        public HttpResponseMessage_IsNoContent_Assertion(.<.> context) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class HttpResponseMessage_IsNotFound_Assertion : .<.>
+    {
+        public HttpResponseMessage_IsNotFound_Assertion(.<.> context) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class HttpResponseMessage_IsOk_Assertion : .<.>
+    {
+        public HttpResponseMessage_IsOk_Assertion(.<.> context) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class HttpResponseMessage_IsRedirectStatusCode_Assertion : .<.>
+    {
+        public HttpResponseMessage_IsRedirectStatusCode_Assertion(.<.> context) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class HttpResponseMessage_IsServerErrorStatusCode_Assertion : .<.>
+    {
+        public HttpResponseMessage_IsServerErrorStatusCode_Assertion(.<.> context) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class HttpResponseMessage_IsUnauthorized_Assertion : .<.>
+    {
+        public HttpResponseMessage_IsUnauthorized_Assertion(.<.> context) { }
         protected override .<.> CheckAsync(.<.> metadata) { }
         protected override string GetExpectation() { }
     }
