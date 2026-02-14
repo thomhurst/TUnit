@@ -59,6 +59,7 @@ jobs:
               * Better abstractions or simplifications
             - Skip minor style/formatting issues unless they impact readability significantly.
             - Always explain WHY the suggested approach is better, not just WHAT to change.
+          claude_args: "--allowedTools Bash,Read,Glob,Grep,WebFetch,WebSearch"
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://code.claude.com/docs/en/cli-reference for available options
 
