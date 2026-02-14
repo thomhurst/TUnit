@@ -561,10 +561,10 @@ internal sealed class TestScheduler : ITestScheduler
             }
         }
 
-        // Default: 8x CPU cores (empirically optimized for async/IO-bound workloads)
+        // Default: 4x CPU cores (empirically optimized for async/IO-bound workloads)
         // Users can override via --maximum-parallel-tests or TUNIT_MAX_PARALLEL_TESTS
-        var defaultLimit = Environment.ProcessorCount * 8;
-        logger.LogDebug($"Maximum parallel tests limit defaulting to {defaultLimit} ({Environment.ProcessorCount} processors * 8)");
+        var defaultLimit = Environment.ProcessorCount * 4;
+        logger.LogDebug($"Maximum parallel tests limit defaulting to {defaultLimit} ({Environment.ProcessorCount} processors * 4)");
         return defaultLimit;
     }
 }
