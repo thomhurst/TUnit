@@ -1,6 +1,5 @@
 using System.Net.Http.Json;
 using CloudShop.Shared.Contracts;
-using CloudShop.Tests.Assertions;
 using CloudShop.Tests.Infrastructure;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
@@ -29,7 +28,7 @@ public class LoadTests
     {
         var response = await Customer.Client.GetAsync("/api/products?pageSize=10");
 
-        await Assert.That(response.IsSuccessStatusCode).IsTrue();
+        await Assert.That(response).IsSuccessStatusCode();
 
         var result = await response.Content.ReadFromJsonAsync<PagedResult<ProductResponse>>();
         await Assert.That(result).IsNotNull();
@@ -44,7 +43,7 @@ public class LoadTests
         var response = await Customer.Client.GetAsync(
             $"/api/products?category={category}&pageSize=5");
 
-        await Assert.That(response.IsSuccessStatusCode).IsTrue();
+        await Assert.That(response).IsSuccessStatusCode();
     }
 
     [Test, Repeat(30), ParallelLimiter<TenConcurrentLimit>]
@@ -52,7 +51,7 @@ public class LoadTests
     {
         var response = await Customer.Client.GetAsync("/api/orders/mine?pageSize=5");
 
-        await Assert.That(response.IsSuccessStatusCode).IsTrue();
+        await Assert.That(response).IsSuccessStatusCode();
     }
 }
 

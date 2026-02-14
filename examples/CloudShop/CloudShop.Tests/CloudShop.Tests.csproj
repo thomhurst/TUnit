@@ -3,6 +3,14 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <OutputType>Exe</OutputType>
+    <IsTestProject>true</IsTestProject>
+    <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+    <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
+    <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
+    <GenerateProgramFile>false</GenerateProgramFile>
+    <UseTestingPlatformProtocol>true</UseTestingPlatformProtocol>
+    <IsTestingPlatformEnabled>true</IsTestingPlatformEnabled>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,11 +19,20 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="TUnit" Version="1.13.70" />
+    <ProjectReference Include="..\..\..\TUnit\TUnit.csproj" />
+    <ProjectReference Include="..\..\..\TUnit.Assertions.SourceGenerator\TUnit.Assertions.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <PackageReference Include="Microsoft.Testing.Platform.MSBuild" Version="1.7.3" />
     <PackageReference Include="Aspire.Hosting.Testing" Version="13.1.1" />
     <PackageReference Include="Npgsql" Version="9.0.3" />
     <PackageReference Include="StackExchange.Redis" Version="2.9.32" />
     <PackageReference Include="RabbitMQ.Client" Version="7.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TestingPlatformBuilderHook Include="6ADF853A-6945-4A06-9A4B-D99BC1DC1094">
+      <DisplayName>TUnit</DisplayName>
+      <TypeFullName>TUnit.Engine.Framework.TestingPlatformBuilderHook</TypeFullName>
+    </TestingPlatformBuilderHook>
   </ItemGroup>
 
 </Project>
