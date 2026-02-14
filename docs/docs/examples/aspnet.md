@@ -241,6 +241,10 @@ protected override void ConfigureWebHostBuilder(IWebHostBuilder builder)
 
 ## Test Isolation Helpers
 
+:::tip Available on All Tests
+The isolation helpers (`UniqueId`, `GetIsolatedName`, `GetIsolatedPrefix`) are also available on `TestContext.Current!.Isolation` for any test — not just ASP.NET Core tests. Use `TestContext.Current!.Isolation.GetIsolatedName("resource")` when you don't inherit from `WebApplicationTest`. Both share the same counter, so IDs are unique across all test types.
+:::
+
 ### GetIsolatedName
 
 Creates a unique name for resources like database tables:

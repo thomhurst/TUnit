@@ -10,8 +10,6 @@ namespace TUnit.AspNetCore;
 
 public abstract class WebApplicationTest
 {
-    internal static int _idCounter;
-
     /// <summary>
     /// Gets a unique identifier for this test instance.
     /// Useful for creating isolated resources (tables, topics, keys) per test.
@@ -20,7 +18,7 @@ public abstract class WebApplicationTest
 
     internal WebApplicationTest()
     {
-        UniqueId = Interlocked.Increment(ref _idCounter);
+        UniqueId = Interlocked.Increment(ref TestContext._isolationIdCounter);
     }
 
     /// <summary>

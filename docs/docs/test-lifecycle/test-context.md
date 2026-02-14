@@ -57,6 +57,29 @@ Artifacts are particularly useful for debugging test failures, especially in int
 
 For complete information about working with test artifacts, including session-level artifacts, best practices, and common use cases, see the [Test Artifacts](./artifacts.md) guide.
 
+## Test Isolation
+
+The `TestContext` provides built-in helpers for creating isolated resource names, ensuring parallel tests don't interfere with each other. Access them via `TestContext.Current!.Isolation`:
+
+```csharp
+// Get a unique ID for this test instance
+var id = TestContext.Current!.Isolation.UniqueId;  // e.g. 42
+
+// Create isolated resource names
+var tableName = TestContext.Current!.Isolation.GetIsolatedName("todos");  // "Test_42_todos"
+var topicName = TestContext.Current!.Isolation.GetIsolatedName("orders"); // "Test_42_orders"
+
+// Create isolated key prefixes
+var prefix = TestContext.Current!.Isolation.GetIsolatedPrefix();       // "test_42_"
+var dotPrefix = TestContext.Current!.Isolation.GetIsolatedPrefix("."); // "test.42."
+```
+
+These are useful for any test that needs unique resource names — database tables, message queue topics, cache keys, blob storage paths, etc. — without requiring a specific base class.
+
+:::tip ASP.NET Core Tests
+If you're using `TUnit.AspNetCore`, the `WebApplicationTest` base class provides the same helpers as `protected` methods (`GetIsolatedName`, `GetIsolatedPrefix`). Both share the same underlying counter, so IDs are unique across all test types.
+:::
+
 ## Dependency Injection
 
 **Note**: `TestContext` does NOT provide direct access to dependency injection services. The internal service provider in `TestContext` is exclusively for TUnit framework services and is not meant for user-provided dependencies.
