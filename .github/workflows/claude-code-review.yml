@@ -51,6 +51,7 @@ jobs:
 
             Additional instructions:
             - ALWAYS post a review comment, even if no issues are found. If the code is good, acknowledge it.
+            - You MUST post your review as a PR comment using `gh pr review` or `gh pr comment` before finishing. Do not just output the review - actually post it to the PR.
             - When you find issues, ALWAYS suggest better approaches or architectural improvements, not just minor optimizations.
             - Focus on:
               * Design patterns that could be improved
