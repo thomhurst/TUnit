@@ -1,7 +1,5 @@
-using System.Net;
 using System.Net.Http.Json;
 using CloudShop.Shared.Contracts;
-using CloudShop.Tests.Assertions;
 using CloudShop.Tests.DataSources;
 using CloudShop.Tests.Infrastructure;
 using TUnit.Core;
@@ -18,7 +16,7 @@ namespace CloudShop.Tests.Tests.Products;
 /// - [ClassDataSource] with SharedType.PerTestSession for fixture sharing
 /// - [MethodDataSource] for parameterized test data
 /// - [Category] for test filtering
-/// - Custom [GenerateAssertion] assertions
+/// - Built-in HTTP response assertions
 /// </summary>
 [Category("Integration"), Category("Products")]
 public class ProductCrudTests
@@ -64,7 +62,7 @@ public class ProductCrudTests
         // Fetch it
         var response = await Customer.Client.GetAsync($"/api/products/{created!.Id}");
 
-        await Assert.That(response.IsSuccessStatusCode).IsTrue();
+        await Assert.That(response).IsSuccessStatusCode();
         var product = await response.Content.ReadFromJsonAsync<ProductResponse>();
         await Assert.That(product!.Name).IsEqualTo("GetById Test Product");
     }
@@ -81,7 +79,7 @@ public class ProductCrudTests
         // Update it
         var response = await Admin.Client.PutAsJsonAsync($"/api/products/{created!.Id}", update);
 
-        await Assert.That(response.IsSuccessStatusCode).IsTrue();
+        await Assert.That(response).IsSuccessStatusCode();
         var updated = await response.Content.ReadFromJsonAsync<ProductResponse>();
         await Assert.That(updated).IsNotNull();
 
@@ -102,7 +100,7 @@ public class ProductCrudTests
 
         // Delete it
         var deleteResponse = await Admin.Client.DeleteAsync($"/api/products/{created!.Id}");
-        await Assert.That(deleteResponse.StatusCode).IsEqualTo(HttpStatusCode.NoContent);
+        await Assert.That(deleteResponse).IsNoContent();
 
         // Verify it's gone
         var getResponse = await Customer.Client.GetAsync($"/api/products/{created.Id}");

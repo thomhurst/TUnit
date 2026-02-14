@@ -1,7 +1,6 @@
 using System.Net.Http.Json;
 using CloudShop.Shared.Contracts;
 using CloudShop.Shared.Models;
-using CloudShop.Tests.Assertions;
 using CloudShop.Tests.DataSources;
 using CloudShop.Tests.Infrastructure;
 using TUnit.Core;

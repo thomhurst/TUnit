@@ -1,7 +1,5 @@
-using System.Net;
 using System.Net.Http.Json;
 using CloudShop.Shared.Contracts;
-using CloudShop.Tests.Assertions;
 using CloudShop.Tests.DataSources;
 using CloudShop.Tests.Infrastructure;
 using TUnit.Core;
@@ -30,7 +28,7 @@ public class AuthenticationTests
         var response = await Api.Client.PostAsJsonAsync("/api/auth/login",
             new LoginRequest("admin@cloudshop.test", "Admin123!"));
 
-        await Assert.That(response.IsSuccessStatusCode).IsTrue();
+        await Assert.That(response).IsSuccessStatusCode();
 
         var token = await response.Content.ReadFromJsonAsync<TokenResponse>();
         await Assert.That(token).IsNotNull();
@@ -46,7 +44,7 @@ public class AuthenticationTests
     {
         var response = await Api.Client.PostAsJsonAsync("/api/auth/login", credentials);
 
-        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
+        await Assert.That(response).IsUnauthorized();
     }
 
     [Test]
@@ -55,7 +53,7 @@ public class AuthenticationTests
     {
         var response = await Api.Client.PostAsJsonAsync("/api/auth/register", registration);
 
-        await Assert.That(response.IsSuccessStatusCode).IsTrue();
+        await Assert.That(response).IsSuccessStatusCode();
 
         var token = await response.Content.ReadFromJsonAsync<TokenResponse>();
         await Assert.That(token).IsNotNull();
@@ -70,6 +68,6 @@ public class AuthenticationTests
         var response = await Api.Client.PostAsJsonAsync("/api/auth/register",
             new RegisterRequest("admin@cloudshop.test", "NewPassword123!", "Duplicate User"));
 
-        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.Conflict);
+        await Assert.That(response).IsConflict();
     }
 }
