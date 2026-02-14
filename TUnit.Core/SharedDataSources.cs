@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Core.Helpers;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
@@ -181,7 +182,17 @@ public static class SharedDataSources
             throw new ArgumentNullException(nameof(key), "key is required when SharedType is Keyed.");
         }
 
-        return (T)TestDataContainer.GetInstanceForKey(key!, typeof(T), _ => factory()!)!;
+        return (T)TestDataContainer.GetInstanceForKey(key!, typeof(T), _ =>
+        {
+            var instance = factory()!;
+
+            if (instance is IKeyedDataSource keyed)
+            {
+                keyed.Key = key!;
+            }
+
+            return instance;
+        })!;
     }
 
     private static object? GetForKey(Type type, string? key, Func<object?> factory)
@@ -191,7 +202,17 @@ public static class SharedDataSources
             throw new ArgumentNullException(nameof(key), "key is required when SharedType is Keyed.");
         }
 
-        return TestDataContainer.GetInstanceForKey(key!, type, _ => factory()!);
+        return TestDataContainer.GetInstanceForKey(key!, type, _ =>
+        {
+            var instance = factory()!;
+
+            if (instance is IKeyedDataSource keyed)
+            {
+                keyed.Key = key!;
+            }
+
+            return instance;
+        });
     }
 
     private static T GetForAssembly<T>(Type? testClassType, Func<T> factory)
