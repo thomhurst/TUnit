@@ -144,13 +144,12 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         // TestOutputSink: Always registered - accumulates to Context.OutputWriter/ErrorOutputWriter for test results
         TUnitLoggerFactory.AddSink(new TestOutputSink());
 
-        // ConsoleOutputSink: For --output Detailed mode - real-time console output
-        if (VerbosityService.IsDetailedOutput)
-        {
-            TUnitLoggerFactory.AddSink(new ConsoleOutputSink(
-                StandardOutConsoleInterceptor.DefaultOut,
-                StandardErrorConsoleInterceptor.DefaultError));
-        }
+        // ConsoleOutputSink: Always registered - writes non-test output (hooks, data source
+        // initialization) to the real console. In --output Detailed mode, also writes test output.
+        TUnitLoggerFactory.AddSink(new ConsoleOutputSink(
+            StandardOutConsoleInterceptor.DefaultOut,
+            StandardErrorConsoleInterceptor.DefaultError,
+            VerbosityService.IsDetailedOutput));
 
         // IdeStreamingSink: For IDE clients - real-time output streaming
         // Disabled by default due to compatibility issues with Microsoft Testing Platform

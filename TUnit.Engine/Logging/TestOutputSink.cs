@@ -7,6 +7,8 @@ namespace TUnit.Engine.Logging;
 /// A log sink that accumulates output to the test context's output writers.
 /// Routes to OutputWriter for non-error levels and ErrorOutputWriter for error levels.
 /// This captured output is included in test results.
+/// Only captures output for TestContext — non-test contexts (hooks, data source
+/// initialization, GlobalContext) are handled by ConsoleOutputSink when registered.
 /// </summary>
 internal sealed class TestOutputSink : ILogSink
 {
@@ -16,19 +18,6 @@ internal sealed class TestOutputSink : ILogSink
     {
         if (context is not TestContext)
         {
-            // Only capture output for test contexts (included in test results).
-            // For non-test contexts (e.g. data source initialization, hooks, GlobalContext),
-            // write directly to the real console via the pre-interception writers
-            // to avoid recursion through the console interceptor and to ensure
-            // the output is visible rather than captured in an unread buffer.
-            if (context is not null)
-            {
-                var consoleWriter = level >= LogLevel.Error
-                    ? StandardErrorConsoleInterceptor.DefaultError
-                    : StandardOutConsoleInterceptor.DefaultOut;
-                consoleWriter.WriteLine(message);
-            }
-
             return;
         }
 
@@ -40,14 +29,6 @@ internal sealed class TestOutputSink : ILogSink
     {
         if (context is not TestContext)
         {
-            if (context is not null)
-            {
-                var consoleWriter = level >= LogLevel.Error
-                    ? StandardErrorConsoleInterceptor.DefaultError
-                    : StandardOutConsoleInterceptor.DefaultOut;
-                consoleWriter.WriteLine(message);
-            }
-
             return ValueTask.CompletedTask;
         }
 
