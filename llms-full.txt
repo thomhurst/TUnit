@@ -26632,45 +26632,6 @@ public class ProductApiTests
 }
 ```
 
-## Combining with Method Data Sources
-
-You can combine nested data sources with parameterized tests using method data sources:
-
-```csharp
-public class UserPermissionTests
-{
-    [Test]
-    [ClassDataSource<TestApplication>(Shared = SharedType.PerClass)]
-    [MethodDataSource(nameof(UserScenarios))]
-    public async Task User_Should_Have_Correct_Permissions(
-        TestApplication app,
-        string userEmail,
-        string role,
-        string[] expectedPermissions)
-    {
-        // Create user through API
-        var createResponse = await app.Client.PostAsJsonAsync("/api/users",
-            new { Email = userEmail, Role = role });
-        createResponse.EnsureSuccessStatusCode();
-
-        // Verify permissions
-        var permissionsResponse = await app.Client.GetAsync($"/api/users/{userEmail}/permissions");
-        var permissions = await permissionsResponse.Content.ReadFromJsonAsync<string[]>();
-
-        await Assert.That(permissions).IsEquivalentTo(expectedPermissions);
-    }
-
-    private static IEnumerable<(string Email, string Role, string[] Permissions)> UserScenarios()
-    {
-        yield return ("admin@test.com", "Admin", new[] { "read", "write", "delete" });
-        yield return ("user@test.com", "User", new[] { "read" });
-        yield return ("guest@test.com", "Guest", Array.Empty<string>());
-    }
-}
-```
-
-For more complex scenarios where you need to query the initialized application during data generation, you can access it through the test context metadata.
-
 ## How It Works
 
 1. TUnit detects properties marked with data source attributes (like `[ClassDataSource<T>]`)
