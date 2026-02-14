@@ -112,61 +112,12 @@ internal sealed class TestCoordinator : ITestCoordinator
             }
             else
             {
-                // Slow path: use retry and timeout wrappers
-                // Data source initialization runs OUTSIDE the timeout so it doesn't
-                // count against the test's timeout (fixes #4772)
+                // Slow path: use retry wrapper
+                // Timeout is handled inside TestExecutor.ExecuteAsync, wrapping only the test body
+                // (not hooks or data source initialization) — fixes #4772
                 await RetryHelper.ExecuteWithRetry(test.Context, async () =>
                 {
-                    // Phase 1: Instance creation and initialization OUTSIDE timeout
-                    var shouldExecute = await PrepareAndInitializeOutsideTimeoutAsync(test, cancellationToken).ConfigureAwait(false);
-
-                    if (!shouldExecute)
-                    {
-                        return;
-                    }
-
-                    // Phase 2: Test execution INSIDE timeout
-                    try
-                    {
-                        var timeoutMessage = testTimeout.HasValue
-                            ? $"Test '{test.Context.Metadata.TestDetails.TestName}' timed out after {testTimeout.Value}"
-                            : null;
-
-                        await TimeoutHelper.ExecuteWithTimeoutAsync(
-                            ct => _testExecutor.ExecuteAsync(test, _testInitializer, ct, skipInitialization: true).AsTask(),
-                            testTimeout,
-                            cancellationToken,
-                            timeoutMessage).ConfigureAwait(false);
-                    }
-                    finally
-                    {
-                        // Dispose test instance and fire OnDispose after each attempt
-                        // This ensures each retry gets a fresh instance
-                        var onDispose = test.Context.InternalEvents.OnDispose;
-                        if (onDispose?.InvocationList != null)
-                        {
-                            foreach (var invocation in onDispose.InvocationList)
-                            {
-                                try
-                                {
-                                    await invocation.InvokeAsync(test.Context, test.Context).ConfigureAwait(false);
-                                }
-                                catch (Exception disposeEx)
-                                {
-                                    await _logger.LogErrorAsync($"Error during OnDispose for {test.TestId}: {disposeEx}").ConfigureAwait(false);
-                                }
-                            }
-                        }
-
-                        try
-                        {
-                            await TestExecutor.DisposeTestInstance(test).ConfigureAwait(false);
-                        }
-                        catch (Exception disposeEx)
-                        {
-                            await _logger.LogErrorAsync($"Error disposing test instance for {test.TestId}: {disposeEx}").ConfigureAwait(false);
-                        }
-                    }
+                    await ExecuteTestLifecycleAsync(test, cancellationToken).ConfigureAwait(false);
                 }).ConfigureAwait(false);
             }
 
@@ -298,57 +249,9 @@ internal sealed class TestCoordinator : ITestCoordinator
     }
 
     /// <summary>
-    /// Phase 1 of the slow path: creates the test instance, checks for skip, prepares and
-    /// initializes data sources. Runs OUTSIDE the timeout wrapper so data source initialization
-    /// does not count against the test's timeout (fixes #4772).
-    /// Console output during initialization goes to GlobalContext (real console) instead of
-    /// being captured in the test's output buffer.
-    /// </summary>
-    /// <returns>true if the test should proceed to execution; false if it was skipped.</returns>
-    private async ValueTask<bool> PrepareAndInitializeOutsideTimeoutAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
-    {
-        test.Context.Metadata.TestDetails.ClassInstance = await test.CreateInstanceAsync().ConfigureAwait(false);
-
-        // Invalidate cached eligible event objects since ClassInstance changed
-        test.Context.CachedEligibleEventObjects = null;
-
-        // Check if this test should be skipped (after creating instance)
-        if (test.Context.Metadata.TestDetails.ClassInstance is SkippedTestInstance ||
-            !string.IsNullOrEmpty(test.Context.SkipReason))
-        {
-            _stateManager.MarkSkipped(test, test.Context.SkipReason ?? "Test was skipped");
-
-            await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
-
-            await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
-
-            return false;
-        }
-
-        _testInitializer.PrepareTest(test, cancellationToken);
-
-        // Initialize data sources outside the timeout scope.
-        // Clear TestContext.Current so console output during initialization is not
-        // captured in the test's output buffer. TestOutputSink routes non-TestContext
-        // output to the real console.
-        TestContext.Current = null;
-        try
-        {
-            await _testInitializer.InitializeTestObjectsAsync(test, cancellationToken).ConfigureAwait(false);
-        }
-        finally
-        {
-            TestContext.Current = test.Context;
-        }
-
-        test.Context.RestoreExecutionContext();
-
-        return true;
-    }
-
-    /// <summary>
     /// Core test lifecycle execution: instance creation, initialization, execution, and disposal.
-    /// Used by the fast path (no retry, no timeout) where timeout is not a concern.
+    /// Timeout is passed through to TestExecutor.ExecuteAsync, which applies it only to the test
+    /// body — hooks and data source initialization run outside the timeout scope (fixes #4772).
     /// </summary>
     private async ValueTask ExecuteTestLifecycleAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
@@ -391,7 +294,8 @@ internal sealed class TestCoordinator : ITestCoordinator
         {
             _testInitializer.PrepareTest(test, cancellationToken);
             test.Context.RestoreExecutionContext();
-            await _testExecutor.ExecuteAsync(test, _testInitializer, cancellationToken).ConfigureAwait(false);
+            var testTimeout = test.Context.Metadata.TestDetails.Timeout;
+            await _testExecutor.ExecuteAsync(test, _testInitializer, cancellationToken, testTimeout).ConfigureAwait(false);
         }
         finally
         {
