@@ -19,13 +19,15 @@ internal sealed class TestOutputSink : ILogSink
             return;
         }
 
-        // During non-test phases (e.g. data source initialization), write directly to console
-        // since the output isn't associated with any specific test
-        if (context is GlobalContext globalContext)
+        // During non-test phases (e.g. data source initialization), write directly to the
+        // real console since the output isn't associated with any specific test.
+        // Use StandardOut/ErrorConsoleInterceptor.DefaultOut/DefaultError (backed by
+        // Console.OpenStandardOutput/Error) to avoid recursion through the interceptor.
+        if (context is GlobalContext)
         {
             var consoleWriter = level >= LogLevel.Error
-                ? globalContext.OriginalConsoleError
-                : globalContext.OriginalConsoleOut;
+                ? StandardErrorConsoleInterceptor.DefaultError
+                : StandardOutConsoleInterceptor.DefaultOut;
             consoleWriter.WriteLine(message);
             return;
         }
@@ -41,23 +43,19 @@ internal sealed class TestOutputSink : ILogSink
             return ValueTask.CompletedTask;
         }
 
-        // During non-test phases (e.g. data source initialization), write directly to console
-        // since the output isn't associated with any specific test
-        if (context is GlobalContext globalContext)
+        // During non-test phases (e.g. data source initialization), write directly to the
+        // real console since the output isn't associated with any specific test.
+        if (context is GlobalContext)
         {
             var consoleWriter = level >= LogLevel.Error
-                ? globalContext.OriginalConsoleError
-                : globalContext.OriginalConsoleOut;
-            return WriteLineAsync(consoleWriter, message);
+                ? StandardErrorConsoleInterceptor.DefaultError
+                : StandardOutConsoleInterceptor.DefaultOut;
+            consoleWriter.WriteLine(message);
+            return ValueTask.CompletedTask;
         }
 
         var writer = level >= LogLevel.Error ? context.ErrorOutputWriter : context.OutputWriter;
         writer.WriteLine(message);
         return ValueTask.CompletedTask;
-    }
-
-    private static async ValueTask WriteLineAsync(TextWriter writer, string message)
-    {
-        await writer.WriteLineAsync(message).ConfigureAwait(false);
     }
 }
