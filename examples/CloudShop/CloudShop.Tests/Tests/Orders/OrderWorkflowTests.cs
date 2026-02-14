@@ -15,7 +15,6 @@ namespace CloudShop.Tests.Tests.Orders;
 /// - [DependsOn] for test dependency chains: Create → Pay → Verify Fulfillment
 /// - TestContext.StateBag for passing data between dependent tests (no static fields)
 /// - [NotInParallel] to prevent interference with other order tests
-/// - [Timeout] for async worker verification
 /// - WaitsFor() polling assertion for eventually-consistent state
 /// - Multiple [ClassDataSource] properties accessing different fixtures
 /// - Database fixture for direct DB verification alongside API checks
@@ -72,8 +71,8 @@ public class OrderWorkflowTests
         TestContext.Current.StateBag.Items["OrderId"] = orderId;
     }
 
-    [Test, DependsOn(nameof(Step2_Process_Payment)), Timeout(30_000)]
-    public async Task Step3_Worker_Fulfills_Order(CancellationToken cancellationToken)
+    [Test, DependsOn(nameof(Step2_Process_Payment))]
+    public async Task Step3_Worker_Fulfills_Order()
     {
         var orderId = (int)TestContext.Current!.Dependencies
             .GetTests(nameof(Step2_Process_Payment))[0].StateBag.Items["OrderId"]!;

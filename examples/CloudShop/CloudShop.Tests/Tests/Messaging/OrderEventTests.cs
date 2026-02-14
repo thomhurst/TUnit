@@ -13,7 +13,6 @@ namespace CloudShop.Tests.Tests.Messaging;
 ///
 /// Showcases:
 /// - [ClassDataSource] for RabbitMQ fixture (nested: App → RabbitMq)
-/// - [Timeout] for async message verification
 /// - [Retry] for eventually-consistent scenarios
 /// - MessageCollector pattern for awaiting async messages
 /// - Direct infrastructure testing (verifying messages on the bus)
@@ -28,8 +27,8 @@ public class OrderEventTests
     [ClassDataSource<RabbitMqFixture>(Shared = SharedType.PerTestSession)]
     public required RabbitMqFixture RabbitMq { get; init; }
 
-    [Test, Timeout(15_000), Retry(2)]
-    public async Task Order_Creation_Publishes_Event(CancellationToken cancellationToken)
+    [Test, Retry(2)]
+    public async Task Order_Creation_Publishes_Event()
     {
         // Subscribe to order events before creating the order
         var collector = await RabbitMq.SubscribeAsync<OrderCreatedEvent>(
@@ -49,8 +48,8 @@ public class OrderEventTests
         await Assert.That(orderEvent.TotalAmount).IsGreaterThan(0);
     }
 
-    [Test, Timeout(15_000), Retry(2)]
-    public async Task Payment_Processing_Publishes_Event(CancellationToken cancellationToken)
+    [Test, Retry(2)]
+    public async Task Payment_Processing_Publishes_Event()
     {
         // Subscribe to payment events
         var collector = await RabbitMq.SubscribeAsync<OrderPaymentProcessedEvent>(

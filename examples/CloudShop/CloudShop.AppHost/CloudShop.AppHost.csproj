@@ -6,9 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="9.3.1" />
-    <PackageReference Include="Aspire.Hosting.Redis" Version="9.3.1" />
-    <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="9.3.1" />
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="13.1.1" />
+    <PackageReference Include="Aspire.Hosting.Redis" Version="13.1.1" />
+    <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="13.1.1" />
   </ItemGroup>
 
   <ItemGroup>

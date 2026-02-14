@@ -12,9 +12,9 @@
 
   <ItemGroup>
     <PackageReference Include="TUnit" Version="1.13.60" />
-    <PackageReference Include="Aspire.Hosting.Testing" Version="9.3.1" />
+    <PackageReference Include="Aspire.Hosting.Testing" Version="13.1.1" />
     <PackageReference Include="Npgsql" Version="9.0.3" />
-    <PackageReference Include="StackExchange.Redis" Version="2.8.41" />
+    <PackageReference Include="StackExchange.Redis" Version="2.9.32" />
     <PackageReference Include="RabbitMQ.Client" Version="7.1.2" />
   </ItemGroup>
 

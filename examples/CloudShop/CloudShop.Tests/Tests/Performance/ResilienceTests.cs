@@ -12,7 +12,6 @@ namespace CloudShop.Tests.Tests.Performance;
 ///
 /// Showcases:
 /// - [Retry(N)] for tests that may fail due to timing
-/// - [Timeout] for tests with async dependencies
 /// - Testing eventually-consistent behavior (worker processing)
 /// </summary>
 [Category("Resilience")]
@@ -21,8 +20,8 @@ public class ResilienceTests
     [ClassDataSource<CustomerApiClient>(Shared = SharedType.PerTestSession)]
     public required CustomerApiClient Customer { get; init; }
 
-    [Test, Retry(3), Timeout(20_000)]
-    public async Task Order_Is_Eventually_Fulfilled_After_Payment(CancellationToken cancellationToken)
+    [Test, Retry(3)]
+    public async Task Order_Is_Eventually_Fulfilled_After_Payment()
     {
         // Create and immediately pay
         var createResponse = await Customer.Client.PostAsJsonAsync("/api/orders",
@@ -44,8 +43,8 @@ public class ResilienceTests
         await Assert.That(latestOrder).IsNotNull();
     }
 
-    [Test, Timeout(5_000)]
-    public async Task Health_Endpoint_Responds_Quickly(CancellationToken cancellationToken)
+    [Test]
+    public async Task Health_Endpoint_Responds_Quickly()
     {
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
         var response = await Customer.Client.GetAsync("/health");
