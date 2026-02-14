@@ -136,20 +136,15 @@ internal class TestExecutor
             // initialization run outside the timeout scope (fixes #4772)
             try
             {
-                if (testTimeout.HasValue)
-                {
-                    var timeoutMessage = $"Test '{executableTest.Context.Metadata.TestDetails.TestName}' timed out after {testTimeout.Value}";
+                var timeoutMessage = testTimeout.HasValue
+                    ? $"Test '{executableTest.Context.Metadata.TestDetails.TestName}' timed out after {testTimeout.Value}"
+                    : null;
 
-                    await TimeoutHelper.ExecuteWithTimeoutAsync(
-                        ct => ExecuteTestAsync(executableTest, ct).AsTask(),
-                        testTimeout,
-                        cancellationToken,
-                        timeoutMessage).ConfigureAwait(false);
-                }
-                else
-                {
-                    await ExecuteTestAsync(executableTest, cancellationToken).ConfigureAwait(false);
-                }
+                await TimeoutHelper.ExecuteWithTimeoutAsync(
+                    ct => ExecuteTestAsync(executableTest, ct),
+                    testTimeout,
+                    cancellationToken,
+                    timeoutMessage).ConfigureAwait(false);
             }
             finally
             {

@@ -11,6 +11,43 @@ internal static class TimeoutHelper
     private static readonly TimeSpan GracePeriod = TimeSpan.FromSeconds(1);
 
     /// <summary>
+    /// Executes a ValueTask-returning operation with an optional timeout.
+    /// On the fast path (no timeout), returns the ValueTask directly without Task allocation.
+    /// </summary>
+    public static ValueTask ExecuteWithTimeoutAsync(
+        Func<CancellationToken, ValueTask> valueTaskFactory,
+        TimeSpan? timeout,
+        CancellationToken cancellationToken,
+        string? timeoutMessage = null)
+    {
+        // Fast path: no timeout - return ValueTask directly (zero allocation, no state machine)
+        if (!timeout.HasValue)
+        {
+            return valueTaskFactory(cancellationToken);
+        }
+
+        // Timeout path: convert to Task for WhenAny support
+        return new ValueTask(ExecuteWithTimeoutCoreAsync(valueTaskFactory, timeout.Value, cancellationToken, timeoutMessage));
+    }
+
+    private static async Task ExecuteWithTimeoutCoreAsync(
+        Func<CancellationToken, ValueTask> valueTaskFactory,
+        TimeSpan timeout,
+        CancellationToken cancellationToken,
+        string? timeoutMessage)
+    {
+        await ExecuteWithTimeoutAsync<bool>(
+            async ct =>
+            {
+                await valueTaskFactory(ct).ConfigureAwait(false);
+                return true;
+            },
+            timeout,
+            cancellationToken,
+            timeoutMessage).ConfigureAwait(false);
+    }
+
+    /// <summary>
     /// Executes a task with an optional timeout. If the timeout elapses before the task completes,
     /// control is returned to the caller immediately with a TimeoutException.
     /// </summary>
