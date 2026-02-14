@@ -63,7 +63,7 @@ internal class TestExecutor
     /// Creates a test executor delegate that wraps the provided executor with hook orchestration.
     /// Uses focused services that follow SRP to manage lifecycle and execution.
     /// </summary>
-    public async ValueTask ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken)
+    public async ValueTask ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, TimeSpan? testTimeout = null)
     {
 
         var testClass = executableTest.Metadata.TestClassType;
@@ -132,10 +132,19 @@ internal class TestExecutor
 
             executableTest.Context.RestoreExecutionContext();
 
-            // Timeout is now enforced at TestCoordinator level (wrapping entire lifecycle)
+            // Only the test body is subject to the [Timeout] — hooks and data source
+            // initialization run outside the timeout scope (fixes #4772)
             try
             {
-                await ExecuteTestAsync(executableTest, cancellationToken).ConfigureAwait(false);
+                var timeoutMessage = testTimeout.HasValue
+                    ? $"Test '{executableTest.Context.Metadata.TestDetails.TestName}' timed out after {testTimeout.Value}"
+                    : null;
+
+                await TimeoutHelper.ExecuteWithTimeoutAsync(
+                    ct => ExecuteTestAsync(executableTest, ct),
+                    testTimeout,
+                    cancellationToken,
+                    timeoutMessage).ConfigureAwait(false);
             }
             finally
             {

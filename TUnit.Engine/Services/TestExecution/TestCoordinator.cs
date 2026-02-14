@@ -112,18 +112,12 @@ internal sealed class TestCoordinator : ITestCoordinator
             }
             else
             {
-                // Slow path: use retry and timeout wrappers
+                // Slow path: use retry wrapper
+                // Timeout is handled inside TestExecutor.ExecuteAsync, wrapping only the test body
+                // (not hooks or data source initialization) — fixes #4772
                 await RetryHelper.ExecuteWithRetry(test.Context, async () =>
                 {
-                    var timeoutMessage = testTimeout.HasValue
-                        ? $"Test '{test.Context.Metadata.TestDetails.TestName}' timed out after {testTimeout.Value}"
-                        : null;
-
-                    await TimeoutHelper.ExecuteWithTimeoutAsync(
-                        ct => ExecuteTestLifecycleAsync(test, ct).AsTask(),
-                        testTimeout,
-                        cancellationToken,
-                        timeoutMessage).ConfigureAwait(false);
+                    await ExecuteTestLifecycleAsync(test, cancellationToken).ConfigureAwait(false);
                 }).ConfigureAwait(false);
             }
 
@@ -256,7 +250,8 @@ internal sealed class TestCoordinator : ITestCoordinator
 
     /// <summary>
     /// Core test lifecycle execution: instance creation, initialization, execution, and disposal.
-    /// Extracted to allow bypassing retry/timeout wrappers when not needed.
+    /// Timeout is passed through to TestExecutor.ExecuteAsync, which applies it only to the test
+    /// body — hooks and data source initialization run outside the timeout scope (fixes #4772).
     /// </summary>
     private async ValueTask ExecuteTestLifecycleAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
@@ -299,7 +294,8 @@ internal sealed class TestCoordinator : ITestCoordinator
         {
             _testInitializer.PrepareTest(test, cancellationToken);
             test.Context.RestoreExecutionContext();
-            await _testExecutor.ExecuteAsync(test, _testInitializer, cancellationToken).ConfigureAwait(false);
+            var testTimeout = test.Context.Metadata.TestDetails.Timeout;
+            await _testExecutor.ExecuteAsync(test, _testInitializer, cancellationToken, testTimeout).ConfigureAwait(false);
         }
         finally
         {
