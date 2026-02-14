@@ -80,7 +80,7 @@ internal class DataUnwrapper
         if (values.Length == 1 &&
             expectedParameters.Length == 1 &&
             DataSourceHelpers.IsTuple(values[0]) &&
-            IsTupleType(expectedParameters[0].Type))
+            TupleHelper.IsTupleType(expectedParameters[0].Type))
         {
             return values;
         }
@@ -98,31 +98,5 @@ internal class DataUnwrapper
         }
 
         return values;
-    }
-
-    private static bool IsTupleType(Type type)
-    {
-        if (!type.IsGenericType)
-        {
-            return false;
-        }
-
-        var genericType = type.GetGenericTypeDefinition();
-        return genericType == typeof(ValueTuple<>) ||
-            genericType == typeof(ValueTuple<,>) ||
-            genericType == typeof(ValueTuple<,,>) ||
-            genericType == typeof(ValueTuple<,,,>) ||
-            genericType == typeof(ValueTuple<,,,,>) ||
-            genericType == typeof(ValueTuple<,,,,,>) ||
-            genericType == typeof(ValueTuple<,,,,,,>) ||
-            genericType == typeof(ValueTuple<,,,,,,,>) ||
-            genericType == typeof(Tuple<>) ||
-            genericType == typeof(Tuple<,>) ||
-            genericType == typeof(Tuple<,,>) ||
-            genericType == typeof(Tuple<,,,>) ||
-            genericType == typeof(Tuple<,,,,>) ||
-            genericType == typeof(Tuple<,,,,,>) ||
-            genericType == typeof(Tuple<,,,,,,>) ||
-            genericType == typeof(Tuple<,,,,,,,>);
     }
 }

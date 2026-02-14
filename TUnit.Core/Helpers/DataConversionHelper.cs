@@ -153,6 +153,25 @@ public static class DataConversionHelper
         }
     }
 
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP
+    /// <summary>
+    /// Converts IAsyncEnumerable of any tuple type to IAsyncEnumerable<object?[]> using ITuple
+    /// </summary>
+    public static async IAsyncEnumerable<object?[]> ConvertAsyncEnumerableTupleToObjectArrays<T>(
+        IAsyncEnumerable<T> source,
+        [EnumeratorCancellation] CancellationToken ct = default) where T : ITuple
+    {
+        await foreach (var tuple in source.WithCancellation(ct))
+        {
+            var items = new object?[tuple.Length];
+            for (var i = 0; i < tuple.Length; i++)
+            {
+                items[i] = tuple[i];
+            }
+            yield return items;
+        }
+    }
+#else
     /// <summary>
     /// Converts IAsyncEnumerable<(T1, T2)> to IAsyncEnumerable<object?[]>
     /// </summary>
@@ -204,6 +223,7 @@ public static class DataConversionHelper
             yield return [item1, item2, item3, item4, item5];
         }
     }
+#endif
 
     /// <summary>
     /// Wraps a Task<IEnumerable<T>> to ensure it returns object arrays
@@ -232,8 +252,7 @@ public static class DataConversionHelper
         }
         return result;
     }
-#endif
-
+#else
     /// <summary>
     /// Unwraps a ValueTuple<T1, T2> to an object?[] array (optimized for 2-tuples)
     /// </summary>
@@ -305,4 +324,5 @@ public static class DataConversionHelper
     {
         return [tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5, tuple.Item6, tuple.Item7, tuple.Item8, tuple.Item9, tuple.Item10];
     }
+#endif
 }

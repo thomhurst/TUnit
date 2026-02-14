@@ -141,6 +141,7 @@ public static class DataSourceHelpers
         }
     }
 
+#if !NETSTANDARD2_1_OR_GREATER && !NETCOREAPP
     /// <summary>
     /// Generic tuple unwrapping for when types are known at compile time
     /// </summary>
@@ -164,6 +165,7 @@ public static class DataSourceHelpers
 
     public static object?[] UnwrapTuple<T1, T2, T3, T4, T5, T6, T7>(ValueTuple<T1, T2, T3, T4, T5, T6, T7> tuple)
         => [tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5, tuple.Item6, tuple.Item7];
+#endif
 
     /// <summary>
     /// AOT-compatible data source processor for when the return type is known at compile time
@@ -378,7 +380,7 @@ public static class DataSourceHelpers
             {
                 // Special case: If there's a single parameter that expects a tuple type,
                 // and the item is a tuple, don't unwrap
-                if (expectedTypes.Length == 1 && IsTupleType(expectedTypes[0]))
+                if (expectedTypes.Length == 1 && TupleHelper.IsTupleType(expectedTypes[0]))
                 {
                     return [item];
                 }
@@ -417,7 +419,7 @@ public static class DataSourceHelpers
                 var expectedType = expectedTypes[typeIndex];
 
                 // Check if the expected type is a tuple type
-                if (IsTupleType(expectedType) && IsTuple(element))
+                if (TupleHelper.IsTupleType(expectedType) && IsTuple(element))
                 {
                     // Keep nested tuple as-is
                     result.Add(element);
@@ -439,34 +441,6 @@ public static class DataSourceHelpers
         return UnwrapTupleAot(value);
     }
 
-    /// <summary>
-    /// Checks if a Type represents a tuple type.
-    /// </summary>
-    private static bool IsTupleType(Type type)
-    {
-        if (!type.IsGenericType)
-        {
-            return false;
-        }
-
-        var genericType = type.GetGenericTypeDefinition();
-        return genericType == typeof(ValueTuple<>) ||
-            genericType == typeof(ValueTuple<,>) ||
-            genericType == typeof(ValueTuple<,,>) ||
-            genericType == typeof(ValueTuple<,,,>) ||
-            genericType == typeof(ValueTuple<,,,,>) ||
-            genericType == typeof(ValueTuple<,,,,,>) ||
-            genericType == typeof(ValueTuple<,,,,,,>) ||
-            genericType == typeof(ValueTuple<,,,,,,,>) ||
-            genericType == typeof(Tuple<>) ||
-            genericType == typeof(Tuple<,>) ||
-            genericType == typeof(Tuple<,,>) ||
-            genericType == typeof(Tuple<,,,>) ||
-            genericType == typeof(Tuple<,,,,>) ||
-            genericType == typeof(Tuple<,,,,,>) ||
-            genericType == typeof(Tuple<,,,,,,>) ||
-            genericType == typeof(Tuple<,,,,,,,>);
-    }
 
     public static bool IsTuple(object? obj)
     {
