@@ -328,8 +328,9 @@ internal sealed class TestCoordinator : ITestCoordinator
         _testInitializer.PrepareTest(test, cancellationToken);
 
         // Initialize data sources outside the timeout scope.
-        // Clear TestContext.Current so console output during initialization goes to
-        // GlobalContext (real console) instead of being captured in the test's output buffer.
+        // Clear TestContext.Current so console output during initialization is not
+        // captured in the test's output buffer. TestOutputSink routes non-TestContext
+        // output to the real console.
         TestContext.Current = null;
         try
         {

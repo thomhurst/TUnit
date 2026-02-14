@@ -14,21 +14,21 @@ internal sealed class TestOutputSink : ILogSink
 
     public void Log(LogLevel level, string message, Exception? exception, Context? context)
     {
-        if (context == null)
+        if (context is not TestContext)
         {
-            return;
-        }
+            // Only capture output for test contexts (included in test results).
+            // For non-test contexts (e.g. data source initialization, hooks, GlobalContext),
+            // write directly to the real console via the pre-interception writers
+            // to avoid recursion through the console interceptor and to ensure
+            // the output is visible rather than captured in an unread buffer.
+            if (context is not null)
+            {
+                var consoleWriter = level >= LogLevel.Error
+                    ? StandardErrorConsoleInterceptor.DefaultError
+                    : StandardOutConsoleInterceptor.DefaultOut;
+                consoleWriter.WriteLine(message);
+            }
 
-        // During non-test phases (e.g. data source initialization), write directly to the
-        // real console since the output isn't associated with any specific test.
-        // Use StandardOut/ErrorConsoleInterceptor.DefaultOut/DefaultError (backed by
-        // Console.OpenStandardOutput/Error) to avoid recursion through the interceptor.
-        if (context is GlobalContext)
-        {
-            var consoleWriter = level >= LogLevel.Error
-                ? StandardErrorConsoleInterceptor.DefaultError
-                : StandardOutConsoleInterceptor.DefaultOut;
-            consoleWriter.WriteLine(message);
             return;
         }
 
@@ -38,19 +38,16 @@ internal sealed class TestOutputSink : ILogSink
 
     public ValueTask LogAsync(LogLevel level, string message, Exception? exception, Context? context)
     {
-        if (context == null)
+        if (context is not TestContext)
         {
-            return ValueTask.CompletedTask;
-        }
+            if (context is not null)
+            {
+                var consoleWriter = level >= LogLevel.Error
+                    ? StandardErrorConsoleInterceptor.DefaultError
+                    : StandardOutConsoleInterceptor.DefaultOut;
+                consoleWriter.WriteLine(message);
+            }
 
-        // During non-test phases (e.g. data source initialization), write directly to the
-        // real console since the output isn't associated with any specific test.
-        if (context is GlobalContext)
-        {
-            var consoleWriter = level >= LogLevel.Error
-                ? StandardErrorConsoleInterceptor.DefaultError
-                : StandardOutConsoleInterceptor.DefaultOut;
-            consoleWriter.WriteLine(message);
             return ValueTask.CompletedTask;
         }
 
