@@ -98,7 +98,17 @@ This allows the code fixer to distinguish between `NUnit.Framework.Assert` and `
 dotnet build
 ```
 
-This restores packages and loads the TUnit analyzers. You should see `TUNU0001` warnings in your build output for NUnit code that can be converted.
+This restores packages and loads the TUnit analyzers. 
+
+:::note Optional: Verify analyzer is working
+The `TUNU0001` diagnostic is information-level and won't appear in standard build output. If you want to verify the analyzer is detecting NUnit code before applying changes, run:
+
+```bash
+dotnet format analyzers --severity info --diagnostics TUNU0001 --verify-no-changes
+```
+
+This command checks for `TUNU0001` diagnostics without modifying any files. If NUnit code is detected, you'll see messages like "Would fix N files" or specific file paths that would be changed.
+:::
 
 **4. Run the automated code fixer**
 

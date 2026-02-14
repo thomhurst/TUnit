@@ -110,7 +110,17 @@ This allows the code fixer to distinguish between `Microsoft.VisualStudio.TestTo
 dotnet build
 ```
 
-This restores packages and loads the TUnit analyzers. You should see `TUMS0001` warnings in your build output for MSTest code that can be converted.
+This restores packages and loads the TUnit analyzers. 
+
+:::note Optional: Verify analyzer is working
+The `TUMS0001` diagnostic is information-level and won't appear in standard build output. If you want to verify the analyzer is detecting MSTest code before applying changes, run:
+
+```bash
+dotnet format analyzers --severity info --diagnostics TUMS0001 --verify-no-changes
+```
+
+This command checks for `TUMS0001` diagnostics without modifying any files. If MSTest code is detected, you'll see messages like "Would fix N files" or specific file paths that would be changed.
+:::
 
 **4. Run the automated code fixer**
 
