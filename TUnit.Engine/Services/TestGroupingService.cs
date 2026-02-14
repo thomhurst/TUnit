@@ -97,26 +97,26 @@ internal sealed class TestGroupingService : ITestGroupingService
             if (parallelGroup != null && notInParallel != null)
             {
                 // Test has both ParallelGroup and NotInParallel constraints
-                await _logger.LogDebugAsync($"Test '{test.TestId}': → ConstrainedParallelGroup '{parallelGroup.Group}' + NotInParallel{parallelLimiterInfo}").ConfigureAwait(false);
+                await _logger.LogTraceAsync($"Test '{test.TestId}': → ConstrainedParallelGroup '{parallelGroup.Group}' + NotInParallel{parallelLimiterInfo}").ConfigureAwait(false);
                 ProcessCombinedConstraints(test, sortKey.ClassFullName, parallelGroup, notInParallel, constrainedParallelGroups);
             }
             else if (parallelGroup != null)
             {
                 // Only ParallelGroup constraint
-                await _logger.LogDebugAsync($"Test '{test.TestId}': → ParallelGroup '{parallelGroup.Group}'{parallelLimiterInfo}").ConfigureAwait(false);
+                await _logger.LogTraceAsync($"Test '{test.TestId}': → ParallelGroup '{parallelGroup.Group}'{parallelLimiterInfo}").ConfigureAwait(false);
                 ProcessParallelGroupConstraint(test, parallelGroup, parallelGroups);
             }
             else if (notInParallel != null)
             {
                 // Only NotInParallel constraint
                 var keys = notInParallel.NotInParallelConstraintKeys.Count > 0 ? $" (keys: {string.Join(", ", notInParallel.NotInParallelConstraintKeys)})" : "";
-                await _logger.LogDebugAsync($"Test '{test.TestId}': → NotInParallel{keys}{parallelLimiterInfo}").ConfigureAwait(false);
+                await _logger.LogTraceAsync($"Test '{test.TestId}': → NotInParallel{keys}{parallelLimiterInfo}").ConfigureAwait(false);
                 ProcessNotInParallelConstraint(test, sortKey.ClassFullName, notInParallel, notInParallelList, keyedNotInParallelList);
             }
             else
             {
                 // No constraints - can run in parallel
-                await _logger.LogDebugAsync($"Test '{test.TestId}': → Parallel (no constraints){parallelLimiterInfo}").ConfigureAwait(false);
+                await _logger.LogTraceAsync($"Test '{test.TestId}': → Parallel (no constraints){parallelLimiterInfo}").ConfigureAwait(false);
                 parallelTests.Add(test);
             }
         }
