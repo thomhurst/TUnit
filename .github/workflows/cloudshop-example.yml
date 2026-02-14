@@ -10,6 +10,8 @@ on:
 jobs:
   integration-tests:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     timeout-minutes: 10
 
     steps:
