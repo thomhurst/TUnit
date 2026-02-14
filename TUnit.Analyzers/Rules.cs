@@ -40,7 +40,7 @@ public static class Rules
         CreateDescriptor("TUnit0014", UsageCategory, DiagnosticSeverity.Warning);
 
     public static readonly DiagnosticDescriptor MissingTimeoutCancellationTokenAttributes =
-        CreateDescriptor("TUnit0015", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor("TUnit0015", UsageCategory, DiagnosticSeverity.Warning);
 
     public static readonly DiagnosticDescriptor MethodMustNotBeStatic =
         CreateDescriptor("TUnit0016", UsageCategory, DiagnosticSeverity.Error);
