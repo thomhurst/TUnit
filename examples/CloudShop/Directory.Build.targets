@@ -1,0 +1,3 @@
+<Project>
+  <!-- Override parent Directory.Build.targets - not needed for example project -->
+</Project>

@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CloudShop.ServiceDefaults\CloudShop.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\CloudShop.Shared\CloudShop.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

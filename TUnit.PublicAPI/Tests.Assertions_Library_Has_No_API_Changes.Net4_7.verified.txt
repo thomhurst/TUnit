@@ -2186,6 +2186,7 @@ namespace .Extensions
         public static ..DoesNotHaveSameValueAsAssertion<TEnum> DoesNotHaveSameValueAs<TEnum>(this .<TEnum> source,  otherEnumValue, [.("otherEnumValue")] string? expression = null)
             where TEnum :  struct,  { }
         public static .<TValue> EqualTo<TValue>(this .<TValue> source, TValue? expected, [.("expected")] string? expression = null) { }
+        public static .<TValue> Eventually<TValue>(this .<TValue> source, <.<TValue>, .<TValue>> assertionBuilder,  timeout, ? pollingInterval = default, [.("timeout")] string? timeoutExpression = null, [.("pollingInterval")] string? pollingIntervalExpression = null) { }
         public static ..HasFlagAssertion<TEnum> HasFlag<TEnum>(this .<TEnum> source, TEnum expectedFlag, [.("expectedFlag")] string? expression = null)
             where TEnum :  struct,  { }
         [("Use Length() instead, which provides all numeric assertion methods. Example: Asse" +

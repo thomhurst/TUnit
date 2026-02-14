@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CloudShop.ServiceDefaults\CloudShop.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\CloudShop.Shared\CloudShop.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.1.1" />
+    <PackageReference Include="Aspire.RabbitMQ.Client.v7" Version="9.5.2" />
+  </ItemGroup>
+
+</Project>

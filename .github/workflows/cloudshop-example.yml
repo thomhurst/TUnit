@@ -1,0 +1,38 @@
+name: CloudShop Example Tests
+
+on:
+  pull_request:
+    branches: ["main"]
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  integration-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v5
+        continue-on-error: true
+        with:
+          path: ~/.nuget/packages
+          key: nuget-cloudshop-${{ hashFiles('examples/CloudShop/**/*.csproj') }}
+          restore-keys: |
+            nuget-cloudshop-
+
+      - name: Build
+        run: dotnet build examples/CloudShop/CloudShop.Tests/CloudShop.Tests.csproj -c Release
+
+      - name: Run integration tests
+        run: dotnet run --project examples/CloudShop/CloudShop.Tests/CloudShop.Tests.csproj -c Release --no-build
