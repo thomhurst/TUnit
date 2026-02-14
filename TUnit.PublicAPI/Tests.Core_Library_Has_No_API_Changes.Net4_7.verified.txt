@@ -2314,6 +2314,10 @@ namespace .Interfaces
         . OnHookRegistered(.HookRegisteredContext context);
     }
     public interface IInfersType<T> { }
+    public interface IKeyedDataSource
+    {
+        string Key { get; set; }
+    }
     public interface ILastTestInAssemblyEventReceiver : .
     {
         . OnLastTestInAssembly(.AssemblyHookContext context, .TestContext testContext);
