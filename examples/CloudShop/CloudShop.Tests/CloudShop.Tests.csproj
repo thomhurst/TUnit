@@ -21,7 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\TUnit\TUnit.csproj" />
     <ProjectReference Include="..\..\..\TUnit.Assertions.SourceGenerator\TUnit.Assertions.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    <PackageReference Include="Microsoft.Testing.Platform.MSBuild" Version="1.9.1" />
+    <PackageReference Include="Microsoft.Testing.Platform.MSBuild" Version="2.1.0" />
     <PackageReference Include="Aspire.Hosting.Testing" Version="13.1.1" />
     <PackageReference Include="Npgsql" Version="9.0.3" />
     <PackageReference Include="StackExchange.Redis" Version="2.9.32" />
