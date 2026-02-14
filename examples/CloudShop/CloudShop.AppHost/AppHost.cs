@@ -19,7 +19,8 @@ var apiService = builder.AddProject<Projects.CloudShop_ApiService>("apiservice")
     .WaitFor(postgres)
     .WaitFor(redis)
     .WaitFor(rabbitmq)
-    .WithHttpHealthCheck("/health");
+    .WithHttpHealthCheck("/health")
+    .WithoutHttpsCertificate();
 
 // Worker Service
 builder.AddProject<Projects.CloudShop_Worker>("worker")
@@ -27,13 +28,15 @@ builder.AddProject<Projects.CloudShop_Worker>("worker")
     .WithReference(rabbitmq)
     .WaitFor(postgres)
     .WaitFor(rabbitmq)
-    .WaitFor(apiService);
+    .WaitFor(apiService)
+    .WithoutHttpsCertificate();
 
 // Web Frontend
 builder.AddProject<Projects.CloudShop_Web>("webfrontend")
     .WithExternalHttpEndpoints()
     .WithReference(apiService)
     .WaitFor(apiService)
-    .WithHttpHealthCheck("/health");
+    .WithHttpHealthCheck("/health")
+    .WithoutHttpsCertificate();
 
 builder.Build().Run();

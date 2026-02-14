@@ -16,6 +16,7 @@ namespace CloudShop.Tests.Tests.Messaging;
 /// - [Retry] for eventually-consistent scenarios
 /// - MessageCollector pattern for awaiting async messages
 /// - Direct infrastructure testing (verifying messages on the bus)
+/// - Test isolation: each test creates its own products and uses exclusive queues
 /// </summary>
 [Category("Integration"), Category("Messaging")]
 [NotInParallel("MessagingTests")]
@@ -24,19 +25,25 @@ public class OrderEventTests
     [ClassDataSource<CustomerApiClient>(Shared = SharedType.PerTestSession)]
     public required CustomerApiClient Customer { get; init; }
 
+    [ClassDataSource<AdminApiClient>(Shared = SharedType.PerTestSession)]
+    public required AdminApiClient Admin { get; init; }
+
     [ClassDataSource<RabbitMqFixture>(Shared = SharedType.PerTestSession)]
     public required RabbitMqFixture RabbitMq { get; init; }
 
     [Test, Retry(2)]
     public async Task Order_Creation_Publishes_Event()
     {
-        // Subscribe to order events before creating the order
+        // Create an isolated product for this test
+        var product = await Admin.Client.CreateTestProductAsync();
+
+        // Subscribe to order events before creating the order (exclusive queue = isolated)
         var collector = await RabbitMq.SubscribeAsync<OrderCreatedEvent>(
             "order-events", "order.created");
 
-        // Create an order
+        // Create an order using our isolated product
         var response = await Customer.Client.PostAsJsonAsync("/api/orders",
-            new CreateOrderRequest([new OrderItemRequest(1, 1)]));
+            new CreateOrderRequest([new OrderItemRequest(product.Id, 1)]));
         var order = await response.Content.ReadFromJsonAsync<OrderResponse>();
 
         // Wait for the event
@@ -51,13 +58,16 @@ public class OrderEventTests
     [Test, Retry(2)]
     public async Task Payment_Processing_Publishes_Event()
     {
-        // Subscribe to payment events
+        // Create an isolated product for this test
+        var product = await Admin.Client.CreateTestProductAsync();
+
+        // Subscribe to payment events (exclusive queue = isolated)
         var collector = await RabbitMq.SubscribeAsync<OrderPaymentProcessedEvent>(
             "order-events", "order.payment-processed");
 
-        // Create and pay an order
+        // Create and pay an order using our isolated product
         var createResponse = await Customer.Client.PostAsJsonAsync("/api/orders",
-            new CreateOrderRequest([new OrderItemRequest(2, 1)]));
+            new CreateOrderRequest([new OrderItemRequest(product.Id, 1)]));
         var order = await createResponse.Content.ReadFromJsonAsync<OrderResponse>();
 
         await Customer.Client.PostAsJsonAsync(

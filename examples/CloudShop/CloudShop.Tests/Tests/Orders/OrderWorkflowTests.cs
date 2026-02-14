@@ -18,6 +18,7 @@ namespace CloudShop.Tests.Tests.Orders;
 /// - WaitsFor() polling assertion for eventually-consistent state
 /// - Multiple [ClassDataSource] properties accessing different fixtures
 /// - Database fixture for direct DB verification alongside API checks
+/// - Test isolation: creates its own products so it never conflicts with other tests
 /// </summary>
 [Category("E2E"), Category("Orders")]
 [NotInParallel("OrderWorkflow")]
@@ -26,15 +27,22 @@ public class OrderWorkflowTests
     [ClassDataSource<CustomerApiClient>(Shared = SharedType.PerTestSession)]
     public required CustomerApiClient Customer { get; init; }
 
+    [ClassDataSource<AdminApiClient>(Shared = SharedType.PerTestSession)]
+    public required AdminApiClient Admin { get; init; }
+
     [ClassDataSource<DatabaseFixture>(Shared = SharedType.PerTestSession)]
     public required DatabaseFixture Database { get; init; }
 
     [Test]
     public async Task Step1_Place_Order()
     {
+        // Create isolated products for this workflow
+        var product1 = await Admin.Client.CreateTestProductAsync(price: 79.99m);
+        var product2 = await Admin.Client.CreateTestProductAsync(price: 49.99m);
+
         var response = await Customer.Client.PostAsJsonAsync("/api/orders",
             new CreateOrderRequest(
-                [new OrderItemRequest(1, 2), new OrderItemRequest(2, 1)],
+                [new OrderItemRequest(product1.Id, 2), new OrderItemRequest(product2.Id, 1)],
                 "credit_card",
                 "express"));
 

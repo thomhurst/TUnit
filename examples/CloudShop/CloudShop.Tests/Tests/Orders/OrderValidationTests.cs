@@ -15,6 +15,7 @@ namespace CloudShop.Tests.Tests.Orders;
 /// - Multiple targeted assertions on responses
 /// - Testing error responses and status codes
 /// - Negative/edge case testing
+/// - Test isolation: each test creates its own products and orders
 /// </summary>
 [Category("Integration"), Category("Orders")]
 public class OrderValidationTests
@@ -22,12 +23,17 @@ public class OrderValidationTests
     [ClassDataSource<CustomerApiClient>(Shared = SharedType.PerTestSession)]
     public required CustomerApiClient Customer { get; init; }
 
+    [ClassDataSource<AdminApiClient>(Shared = SharedType.PerTestSession)]
+    public required AdminApiClient Admin { get; init; }
+
     [Test]
     public async Task Cannot_Pay_For_Already_Paid_Order()
     {
-        // Create and pay an order
+        // Create an isolated product and order
+        var product = await Admin.Client.CreateTestProductAsync();
+
         var createResponse = await Customer.Client.PostAsJsonAsync("/api/orders",
-            new CreateOrderRequest([new OrderItemRequest(1, 1)]));
+            new CreateOrderRequest([new OrderItemRequest(product.Id, 1)]));
         var order = await createResponse.Content.ReadFromJsonAsync<OrderResponse>();
 
         await Customer.Client.PostAsJsonAsync(
@@ -55,10 +61,11 @@ public class OrderValidationTests
     [Test]
     public async Task Customer_Can_Only_See_Own_Orders()
     {
-        // Place an order as customer
-        var createResponse = await Customer.Client.PostAsJsonAsync("/api/orders",
-            new CreateOrderRequest([new OrderItemRequest(1, 1)]));
-        var order = await createResponse.Content.ReadFromJsonAsync<OrderResponse>();
+        // Create an isolated product and place an order
+        var product = await Admin.Client.CreateTestProductAsync();
+
+        await Customer.Client.PostAsJsonAsync("/api/orders",
+            new CreateOrderRequest([new OrderItemRequest(product.Id, 1)]));
 
         // Verify it appears in their order list
         var listResponse = await Customer.Client.GetFromJsonAsync<PagedResult<OrderResponse>>(
@@ -71,9 +78,12 @@ public class OrderValidationTests
     [Test]
     public async Task Order_Total_Is_Calculated_Correctly()
     {
+        // Create an isolated product with a known price
+        var product = await Admin.Client.CreateTestProductAsync(price: 79.99m);
+
         var response = await Customer.Client.PostAsJsonAsync("/api/orders",
             new CreateOrderRequest(
-                [new OrderItemRequest(1, 3)], // 3x product 1
+                [new OrderItemRequest(product.Id, 3)], // 3x our product
                 "credit_card", "standard"));
 
         var order = await response.Content.ReadFromJsonAsync<OrderResponse>();

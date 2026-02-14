@@ -13,6 +13,7 @@ namespace CloudShop.Tests.Tests.Performance;
 /// Showcases:
 /// - [Retry(N)] for tests that may fail due to timing
 /// - Testing eventually-consistent behavior (worker processing)
+/// - Test isolation: each retry creates a fresh product and order
 /// </summary>
 [Category("Resilience")]
 public class ResilienceTests
@@ -20,12 +21,18 @@ public class ResilienceTests
     [ClassDataSource<CustomerApiClient>(Shared = SharedType.PerTestSession)]
     public required CustomerApiClient Customer { get; init; }
 
+    [ClassDataSource<AdminApiClient>(Shared = SharedType.PerTestSession)]
+    public required AdminApiClient Admin { get; init; }
+
     [Test, Retry(3)]
     public async Task Order_Is_Eventually_Fulfilled_After_Payment()
     {
+        // Create an isolated product for this test
+        var product = await Admin.Client.CreateTestProductAsync();
+
         // Create and immediately pay
         var createResponse = await Customer.Client.PostAsJsonAsync("/api/orders",
-            new CreateOrderRequest([new OrderItemRequest(1, 1)]));
+            new CreateOrderRequest([new OrderItemRequest(product.Id, 1)]));
         var order = await createResponse.Content.ReadFromJsonAsync<OrderResponse>();
 
         await Customer.Client.PostAsJsonAsync(

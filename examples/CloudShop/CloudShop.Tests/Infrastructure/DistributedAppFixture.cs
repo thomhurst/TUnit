@@ -1,7 +1,6 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
-using Microsoft.Extensions.DependencyInjection;
 using TUnit.Core.Interfaces;
 
 namespace CloudShop.Tests.Infrastructure;
@@ -18,23 +17,23 @@ public class DistributedAppFixture : IAsyncInitializer, IAsyncDisposable
 
     public async Task InitializeAsync()
     {
+        // Allow HTTP transport so DCP doesn't require trusted dev certificates.
+        // This is necessary in CI/test environments where certificates may not be trusted.
+        Environment.SetEnvironmentVariable("ASPIRE_ALLOW_UNSECURED_TRANSPORT", "true");
+
         var builder = await DistributedApplicationTestingBuilder
             .CreateAsync<Projects.CloudShop_AppHost>();
-
-        builder.Services.ConfigureHttpClientDefaults(http =>
-        {
-            http.AddStandardResilienceHandler();
-        });
 
         _app = await builder.BuildAsync();
 
         await _app.StartAsync();
 
-        // Wait for all resources to become healthy with timeout
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
-        await _app.ResourceNotifications.WaitForResourceAsync("postgresdb", KnownResourceStates.Running, cts.Token);
-        await _app.ResourceNotifications.WaitForResourceAsync("redis", KnownResourceStates.Running, cts.Token);
-        await _app.ResourceNotifications.WaitForResourceAsync("rabbitmq", KnownResourceStates.Running, cts.Token);
+        // The AppHost defines WaitFor dependencies:
+        //   apiservice waits for postgres, redis, rabbitmq
+        //   worker waits for postgres, rabbitmq, apiservice
+        // So waiting for the leaf services ensures all infrastructure is ready too.
+        using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
+
         await _app.ResourceNotifications.WaitForResourceAsync("apiservice", KnownResourceStates.Running, cts.Token);
         await _app.ResourceNotifications.WaitForResourceAsync("worker", KnownResourceStates.Running, cts.Token);
     }

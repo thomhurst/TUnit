@@ -46,7 +46,7 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-// Apply migrations on startup
+// Create database schema and seed data on startup
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();

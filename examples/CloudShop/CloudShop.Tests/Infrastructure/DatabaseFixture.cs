@@ -21,7 +21,11 @@ public class DatabaseFixture : IAsyncInitializer, IAsyncDisposable
     public async Task InitializeAsync()
     {
         var connectionString = await App.GetConnectionStringAsync("postgresdb");
-        _dataSource = NpgsqlDataSource.Create(connectionString);
+        var builder = new NpgsqlConnectionStringBuilder(connectionString)
+        {
+            MaxPoolSize = 5 // Limit test connections to avoid exhausting PostgreSQL's max_connections
+        };
+        _dataSource = NpgsqlDataSource.Create(builder.ConnectionString);
 
         // Verify connectivity
         await using var connection = await _dataSource.OpenConnectionAsync();
