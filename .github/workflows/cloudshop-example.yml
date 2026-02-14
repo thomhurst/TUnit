@@ -3,12 +3,8 @@ name: CloudShop Example Tests
 on:
   pull_request:
     branches: ["main"]
-    paths:
-      - 'examples/CloudShop/**'
   push:
     branches: ["main"]
-    paths:
-      - 'examples/CloudShop/**'
   workflow_dispatch:
 
 jobs:
