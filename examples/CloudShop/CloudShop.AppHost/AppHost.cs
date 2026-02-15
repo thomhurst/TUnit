@@ -6,7 +6,8 @@ var postgres = builder.AddPostgres("postgres")
     .AddDatabase("postgresdb");
 
 var redis = builder.AddRedis("redis")
-    .WithRedisInsight();
+    .WithRedisInsight()
+    .WithoutHttpsCertificate();
 
 var rabbitmq = builder.AddRabbitMQ("rabbitmq")
     .WithManagementPlugin();
