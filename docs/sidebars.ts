@@ -194,6 +194,7 @@ const sidebars: SidebarsConfig = {
           collapsed: false,
           items: [
             'examples/aspnet',
+            'examples/aspire',
             'examples/playwright',
             'examples/fscheck',
             'examples/complex-test-infrastructure',

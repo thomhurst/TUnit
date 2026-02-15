@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
       - uses: actions/checkout@v6
@@ -36,3 +36,5 @@ jobs:
 
       - name: Run integration tests
         run: dotnet run --project examples/CloudShop/CloudShop.Tests/CloudShop.Tests.csproj -c Release --no-build
+        env:
+          ASPIRE_ALLOW_UNSECURED_TRANSPORT: "true"

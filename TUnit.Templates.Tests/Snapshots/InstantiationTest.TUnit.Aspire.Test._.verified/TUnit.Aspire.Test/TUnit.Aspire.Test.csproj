@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -9,8 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.Testing" Version="1.0.0" />
-    <PackageReference Include="TUnit" Version="1.0.0" />
+    <PackageReference Include="TUnit.Aspire" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
