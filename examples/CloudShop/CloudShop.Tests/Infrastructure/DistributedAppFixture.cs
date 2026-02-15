@@ -12,7 +12,7 @@ namespace CloudShop.Tests.Infrastructure;
 /// </summary>
 public class DistributedAppFixture : AspireFixture<Projects.CloudShop_AppHost>
 {
-    protected override TimeSpan ResourceTimeout => TimeSpan.FromMinutes(2);
+    protected override TimeSpan ResourceTimeout => TimeSpan.FromMinutes(5);
 
     protected override void ConfigureBuilder(IDistributedApplicationTestingBuilder builder)
     {

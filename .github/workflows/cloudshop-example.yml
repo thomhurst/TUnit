@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
       - uses: actions/checkout@v6
@@ -21,6 +21,15 @@ jobs:
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 10.0.x
+
+      - name: Pre-pull Docker images
+        run: |
+          docker pull postgres:latest &
+          docker pull redis:latest &
+          docker pull rabbitmq:4-management &
+          docker pull dpage/pgadmin4:latest &
+          docker pull redis/redisinsight:latest &
+          wait
 
       - name: Cache NuGet packages
         uses: actions/cache@v5
