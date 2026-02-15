@@ -121,22 +121,27 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         switch (WaitBehavior)
         {
             case ResourceWaitBehavior.AllHealthy:
+            {
                 var model = app.Services.GetRequiredService<DistributedApplicationModel>();
-                await Task.WhenAll(model.Resources.Select(r =>
-                    notificationService.WaitForResourceHealthyAsync(r.Name, cancellationToken)));
+                var names = model.Resources.Select(r => r.Name).ToList();
+                await WaitForResourcesWithFailFastAsync(notificationService, names, waitForHealthy: true, cancellationToken);
                 break;
+            }
 
             case ResourceWaitBehavior.AllRunning:
-                var runModel = app.Services.GetRequiredService<DistributedApplicationModel>();
-                await Task.WhenAll(runModel.Resources.Select(r =>
-                    notificationService.WaitForResourceAsync(r.Name,
-                        KnownResourceStates.Running, cancellationToken)));
+            {
+                var model = app.Services.GetRequiredService<DistributedApplicationModel>();
+                var names = model.Resources.Select(r => r.Name).ToList();
+                await WaitForResourcesWithFailFastAsync(notificationService, names, waitForHealthy: false, cancellationToken);
                 break;
+            }
 
             case ResourceWaitBehavior.Named:
-                await Task.WhenAll(ResourcesToWaitFor().Select(name =>
-                    notificationService.WaitForResourceHealthyAsync(name, cancellationToken)));
+            {
+                var names = ResourcesToWaitFor().ToList();
+                await WaitForResourcesWithFailFastAsync(notificationService, names, waitForHealthy: true, cancellationToken);
                 break;
+            }
 
             case ResourceWaitBehavior.None:
                 break;
@@ -155,7 +160,22 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         await _app.StartAsync();
 
         using var cts = new CancellationTokenSource(ResourceTimeout);
-        await WaitForResourcesAsync(_app, cts.Token);
+
+        try
+        {
+            await WaitForResourcesAsync(_app, cts.Token);
+        }
+        catch (OperationCanceledException) when (cts.IsCancellationRequested)
+        {
+            var model = _app.Services.GetRequiredService<DistributedApplicationModel>();
+            var resourceNames = string.Join(", ", model.Resources.Select(r => $"'{r.Name}'"));
+
+            throw new TimeoutException(
+                $"Timed out after {ResourceTimeout.TotalSeconds:0}s waiting for Aspire resources to be ready. " +
+                $"Resources: [{resourceNames}]. " +
+                $"Wait behavior: {WaitBehavior}. " +
+                $"Consider increasing ResourceTimeout, checking resource health, or using WatchResourceLogs() to diagnose startup issues.");
+        }
     }
 
     /// <inheritdoc />
@@ -169,6 +189,56 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         }
 
         GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Waits for all named resources to reach the desired state, while simultaneously
+    /// watching for any resource entering FailedToStart. If a resource fails, throws
+    /// immediately instead of waiting for the full timeout.
+    /// </summary>
+    private static async Task WaitForResourcesWithFailFastAsync(
+        ResourceNotificationService notificationService,
+        List<string> resourceNames,
+        bool waitForHealthy,
+        CancellationToken cancellationToken)
+    {
+        if (resourceNames.Count == 0)
+        {
+            return;
+        }
+
+        // Linked CTS lets us cancel the failure watchers once all resources are ready
+        using var failureCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+
+        // Success path: wait for all resources to reach the desired state
+        var readyTask = Task.WhenAll(resourceNames.Select(name =>
+            waitForHealthy
+                ? notificationService.WaitForResourceHealthyAsync(name, cancellationToken)
+                : notificationService.WaitForResourceAsync(name, KnownResourceStates.Running, cancellationToken)));
+
+        // Fail-fast path: complete as soon as ANY resource enters FailedToStart
+        var failureTasks = resourceNames.Select(async name =>
+        {
+            await notificationService.WaitForResourceAsync(name, KnownResourceStates.FailedToStart, failureCts.Token);
+            return name;
+        }).ToList();
+        var anyFailureTask = Task.WhenAny(failureTasks);
+
+        // Race: all resources ready vs. any resource failed
+        var completed = await Task.WhenAny(readyTask, anyFailureTask);
+
+        if (completed == anyFailureTask)
+        {
+            failureCts.Cancel();
+            var failedName = await await anyFailureTask;
+            throw new InvalidOperationException(
+                $"Resource '{failedName}' failed to start. " +
+                $"Use WatchResourceLogs(\"{failedName}\") or check the Aspire dashboard for details.");
+        }
+
+        // All resources are ready - cancel the failure watchers and propagate any exceptions
+        failureCts.Cancel();
+        await readyTask;
     }
 
     private sealed class ResourceLogWatcher(CancellationTokenSource cts) : IAsyncDisposable
