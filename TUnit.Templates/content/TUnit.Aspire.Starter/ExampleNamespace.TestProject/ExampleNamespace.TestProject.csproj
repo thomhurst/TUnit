@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -8,12 +8,9 @@
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
-
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.Testing" Version="13.1.1" />
-    <PackageReference Include="TUnit" Version="1.14.0" />
+    <PackageReference Include="TUnit.Aspire" Version="1.14.0" />
   </ItemGroup>
-
 
   <ItemGroup>
     <ProjectReference Include="..\ExampleNamespace.AppHost\ExampleNamespace.AppHost.csproj" />

@@ -1,17 +1,16 @@
-﻿using System.Text.Json;
-using ExampleNamespace.TestProject.Data;
+using System.Text.Json;
 using ExampleNamespace.TestProject.Models;
 
 namespace ExampleNamespace.TestProject.Tests;
 
-[ClassDataSource<HttpClientDataClass>]
-public class ApiTests(HttpClientDataClass httpClientData)
+[ClassDataSource<AppFixture>(Shared = SharedType.PerTestSession)]
+public class ApiTests(AppFixture fixture)
 {
     [Test]
     public async Task GetWeatherForecastReturnsOkStatusCode()
     {
         // Arrange
-        var httpClient = httpClientData.HttpClient;
+        var httpClient = fixture.CreateHttpClient("apiservice");
         // Act
         var response = await httpClient.GetAsync("/weatherforecast");
         // Assert
@@ -25,7 +24,7 @@ public class ApiTests(HttpClientDataClass httpClientData)
     )
     {
         // Arrange
-        var httpClient = httpClientData.HttpClient;
+        var httpClient = fixture.CreateHttpClient("apiservice");
         // Act
         var response = await httpClient.GetAsync("/weatherforecast");
         var content = await response.Content.ReadAsStringAsync();
