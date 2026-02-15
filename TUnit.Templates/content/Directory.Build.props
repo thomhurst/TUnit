@@ -4,4 +4,21 @@
         <Using Include="TUnit.Core.HookType" Static="True" />
         <Using Include="TUnit.Core" />
     </ItemGroup>
+
+    <!-- During solution builds, swap TUnit.Aspire NuGet package for local project reference
+         (TUnit.Aspire is not yet published to NuGet). This file is excluded from the template package.
+         We also add implicit usings that would normally come from TUnit's NuGet props/targets. -->
+    <ItemGroup Condition="$(MSBuildProjectDirectory.Contains('TUnit.Aspire.Test'))">
+        <PackageReference Remove="TUnit.Aspire" />
+        <ProjectReference Include="$(MSBuildThisFileDirectory)..\..\TUnit.Aspire\TUnit.Aspire.csproj" />
+        <Using Include="TUnit.Assertions" />
+        <Using Include="TUnit.Assertions.Extensions" />
+    </ItemGroup>
+
+    <ItemGroup Condition="$(MSBuildProjectName) == 'ExampleNamespace.TestProject' And $(MSBuildProjectDirectory.Contains('TUnit.Aspire.Starter'))">
+        <PackageReference Remove="TUnit.Aspire" />
+        <ProjectReference Include="$(MSBuildThisFileDirectory)..\..\TUnit.Aspire\TUnit.Aspire.csproj" />
+        <Using Include="TUnit.Assertions" />
+        <Using Include="TUnit.Assertions.Extensions" />
+    </ItemGroup>
 </Project>
