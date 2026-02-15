@@ -46,3 +46,5 @@ jobs:
 
       - name: Run integration tests
         run: dotnet run --project examples/CloudShop/CloudShop.Tests/CloudShop.Tests.csproj -c Release --no-build
+        env:
+          ASPIRE_ALLOW_UNSECURED_TRANSPORT: "true"

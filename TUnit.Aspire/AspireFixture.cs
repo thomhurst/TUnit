@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Text;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
@@ -170,19 +171,35 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
     /// <inheritdoc />
     public async Task InitializeAsync()
     {
+        var sw = Stopwatch.StartNew();
+
         LogProgress($"Creating distributed application builder for {typeof(TAppHost).Name}...");
         var builder = await DistributedApplicationTestingBuilder.CreateAsync<TAppHost>();
         ConfigureBuilder(builder);
+        LogProgress($"Builder created in {sw.Elapsed.TotalSeconds:0.0}s");
 
         LogProgress("Building application...");
         _app = await builder.BuildAsync();
+        LogProgress($"Application built in {sw.Elapsed.TotalSeconds:0.0}s");
 
         var model = _app.Services.GetRequiredService<DistributedApplicationModel>();
         var resourceList = string.Join(", ", model.Resources.Select(r => r.Name));
         LogProgress($"Starting application with resources: [{resourceList}]");
-        await _app.StartAsync();
 
-        LogProgress($"Application started. Waiting for resources (timeout: {ResourceTimeout.TotalSeconds:0}s, behavior: {WaitBehavior})...");
+        using var startCts = new CancellationTokenSource(ResourceTimeout);
+        try
+        {
+            await _app.StartAsync(startCts.Token);
+        }
+        catch (OperationCanceledException) when (startCts.IsCancellationRequested)
+        {
+            throw new TimeoutException(
+                $"Timed out after {ResourceTimeout.TotalSeconds:0}s waiting for the Aspire application to start. " +
+                $"This usually means Docker containers are still being pulled or started. " +
+                $"Consider increasing ResourceTimeout or pre-pulling Docker images.");
+        }
+
+        LogProgress($"Application started in {sw.Elapsed.TotalSeconds:0.0}s. Waiting for resources (timeout: {ResourceTimeout.TotalSeconds:0}s, behavior: {WaitBehavior})...");
         using var cts = new CancellationTokenSource(ResourceTimeout);
 
         try
