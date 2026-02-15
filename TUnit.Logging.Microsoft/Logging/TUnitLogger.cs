@@ -5,7 +5,9 @@ namespace TUnit.Logging.Microsoft;
 
 /// <summary>
 /// A logger that writes log messages to TUnit's test output.
-/// Messages are written directly to the test context's output writers.
+/// Sets <see cref="TestContext.Current"/> and writes via <see cref="Console"/> so
+/// the console interceptor and all registered log sinks (test output, IDE real-time, console)
+/// naturally pick up and route the output.
 /// </summary>
 public sealed class TUnitLogger : ILogger
 {
@@ -39,6 +41,10 @@ public sealed class TUnitLogger : ILogger
             return;
         }
 
+        // Set the current test context so the console interceptor routes output
+        // to the correct test's sinks (test output, IDE real-time, console)
+        TestContext.Current = _context;
+
         var message = formatter(state, exception);
 
         if (exception is not null)
@@ -50,11 +56,11 @@ public sealed class TUnitLogger : ILogger
 
         if (logLevel >= LogLevel.Error)
         {
-            _context.Output.WriteError(formattedMessage);
+            Console.Error.WriteLine(formattedMessage);
         }
         else
         {
-            _context.Output.WriteLine(formattedMessage);
+            Console.WriteLine(formattedMessage);
         }
     }
 }

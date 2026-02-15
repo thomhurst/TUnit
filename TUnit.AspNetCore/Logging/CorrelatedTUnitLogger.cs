@@ -7,6 +7,8 @@ namespace TUnit.AspNetCore.Logging;
 
 /// <summary>
 /// A logger that resolves the current test context per log call, supporting shared web application scenarios.
+/// Sets <see cref="TestContext.Current"/> and writes via <see cref="Console"/> so the console interceptor
+/// and all registered log sinks naturally route the output to the correct test.
 /// The resolution chain is:
 /// <list type="number">
 ///   <item>Test context from <see cref="HttpContext.Items"/> (set by <see cref="TUnitTestContextMiddleware"/>)</item>
@@ -53,6 +55,10 @@ public sealed class CorrelatedTUnitLogger : ILogger
             return;
         }
 
+        // Set the current test context so the console interceptor routes output
+        // to the correct test's sinks (test output, IDE real-time, console)
+        TestContext.Current = testContext;
+
         var message = formatter(state, exception);
 
         if (exception is not null)
@@ -64,11 +70,11 @@ public sealed class CorrelatedTUnitLogger : ILogger
 
         if (logLevel >= LogLevel.Error)
         {
-            testContext.Output.WriteError(formattedMessage);
+            Console.Error.WriteLine(formattedMessage);
         }
         else
         {
-            testContext.Output.WriteLine(formattedMessage);
+            Console.WriteLine(formattedMessage);
         }
     }
 
