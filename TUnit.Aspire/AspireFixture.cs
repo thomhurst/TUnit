@@ -186,6 +186,12 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         var resourceList = string.Join(", ", model.Resources.Select(r => r.Name));
         LogProgress($"Starting application with resources: [{resourceList}]");
 
+        // Monitor resource state changes in the background during startup.
+        // This provides real-time visibility into container health check failures,
+        // SSL errors, etc. that would otherwise be invisible during StartAsync().
+        using var monitorCts = new CancellationTokenSource();
+        var monitorTask = MonitorResourceEventsAsync(_app, monitorCts.Token);
+
         using var startCts = new CancellationTokenSource(ResourceTimeout);
         try
         {
@@ -193,11 +199,18 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         }
         catch (OperationCanceledException) when (startCts.IsCancellationRequested)
         {
-            throw new TimeoutException(
-                $"Timed out after {ResourceTimeout.TotalSeconds:0}s waiting for the Aspire application to start. " +
-                $"This usually means Docker containers are still being pulled or started. " +
-                $"Consider increasing ResourceTimeout or pre-pulling Docker images.");
+            await StopMonitorAsync(monitorCts, monitorTask);
+
+            // Collect resource logs so the timeout error shows WHY startup hung
+            var sb = new StringBuilder();
+            sb.Append($"Timed out after {ResourceTimeout.TotalSeconds:0}s waiting for the Aspire application to start.");
+
+            await AppendResourceLogsAsync(sb, _app, model.Resources.Select(r => r.Name));
+
+            throw new TimeoutException(sb.ToString());
         }
+
+        await StopMonitorAsync(monitorCts, monitorTask);
 
         LogProgress($"Application started in {sw.Elapsed.TotalSeconds:0.0}s. Waiting for resources (timeout: {ResourceTimeout.TotalSeconds:0}s, behavior: {WaitBehavior})...");
         using var cts = new CancellationTokenSource(ResourceTimeout);
@@ -236,6 +249,81 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         }
 
         GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Monitors resource notification events during startup, logging state transitions
+    /// in real time. This provides immediate visibility into issues like health check
+    /// failures, SSL errors, or containers stuck in a restart loop — problems that would
+    /// otherwise be invisible until a timeout fires.
+    /// </summary>
+    private async Task MonitorResourceEventsAsync(DistributedApplication app, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var notificationService = app.Services.GetRequiredService<ResourceNotificationService>();
+            var trackedStates = new ConcurrentDictionary<string, string>();
+
+            await foreach (var evt in notificationService.WatchAsync(cancellationToken))
+            {
+                var name = evt.Resource.Name;
+                var state = evt.Snapshot.State?.Text;
+
+                if (state is null)
+                {
+                    continue;
+                }
+
+                // Only log when state actually changes
+                var previousState = trackedStates.GetValueOrDefault(name);
+                if (state != previousState)
+                {
+                    trackedStates[name] = state;
+                    LogProgress($"  [{name}] {previousState ?? "unknown"} -> {state}");
+                }
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Expected when monitoring is stopped
+        }
+        catch (Exception ex)
+        {
+            // Don't let monitoring failures break startup
+            LogProgress($"  (resource monitoring stopped: {ex.Message})");
+        }
+    }
+
+    private static async Task StopMonitorAsync(CancellationTokenSource monitorCts, Task monitorTask)
+    {
+        await monitorCts.CancelAsync();
+
+        try
+        {
+            await monitorTask;
+        }
+        catch (OperationCanceledException)
+        {
+            // Expected
+        }
+    }
+
+    /// <summary>
+    /// Appends resource logs for the given resource names to a <see cref="StringBuilder"/>.
+    /// Only includes resources that have logs available.
+    /// </summary>
+    private async Task AppendResourceLogsAsync(StringBuilder sb, DistributedApplication app, IEnumerable<string> resourceNames)
+    {
+        foreach (var name in resourceNames)
+        {
+            var logs = await CollectResourceLogsAsync(app, name);
+            if (logs != "  (no logs available)")
+            {
+                sb.AppendLine().AppendLine();
+                sb.AppendLine($"--- {name} logs ---");
+                sb.Append(logs);
+            }
+        }
     }
 
     /// <summary>
