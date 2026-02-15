@@ -24,6 +24,7 @@ public sealed class TUnitLoggerProvider : ILoggerProvider
     {
         _testContext = testContext;
         _minLogLevel = minLogLevel;
+        TUnitLoggingRegistry.PerTestLoggingActive[testContext.Id] = true;
     }
 
     public ILogger CreateLogger(string categoryName)
@@ -43,5 +44,6 @@ public sealed class TUnitLoggerProvider : ILoggerProvider
 
         _disposed = true;
         _loggers.Clear();
+        TUnitLoggingRegistry.PerTestLoggingActive.TryRemove(_testContext.Id, out _);
     }
 }

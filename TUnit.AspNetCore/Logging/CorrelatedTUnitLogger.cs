@@ -55,6 +55,13 @@ public sealed class CorrelatedTUnitLogger : ILogger
             return;
         }
 
+        // Skip if a per-test logger is active for this test context
+        // (avoids duplicate output when isolated factories inherit correlated logging)
+        if (TUnitLoggingRegistry.PerTestLoggingActive.ContainsKey(testContext.Id))
+        {
+            return;
+        }
+
         // Set the current test context so the console interceptor routes output
         // to the correct test's sinks (test output, IDE real-time, console)
         TestContext.Current = testContext;
