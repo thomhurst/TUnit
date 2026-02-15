@@ -2096,6 +2096,42 @@ public class XUnitMigrationAnalyzerTests
         );
     }
 
+    [Test]
+    public async Task XUnit_Assert_Contains_Predicate_Overload_Converted()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using Xunit;
+
+                public class MyClass
+                {
+                    [Fact]
+                    public void MyTest()
+                    {
+                        var numbers = new[] { 22, 75, 19 };
+                        Assert.Contains(numbers, x => x == 22);
+                    }
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task MyTest()
+                    {
+                        var numbers = new[] { 22, 75, 19 };
+                        await Assert.That(numbers).Contains(x => x == 22);
+                    }
+                }
+                """,
+                ConfigureXUnitTest
+            );
+    }
+
     private static void ConfigureXUnitTest(Verifier.Test test)
     {
         var globalUsings = ("GlobalUsings.cs", SourceText.From("global using Xunit;"));
