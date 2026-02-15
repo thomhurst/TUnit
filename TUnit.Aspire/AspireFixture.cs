@@ -91,6 +91,16 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
     // --- Configuration hooks (virtual) ---
 
     /// <summary>
+    /// Logs progress messages during initialization. Override to route to a custom logger.
+    /// Default implementation writes to <see cref="Console.Error"/> for immediate CI visibility.
+    /// </summary>
+    /// <param name="message">The progress message.</param>
+    protected virtual void LogProgress(string message)
+    {
+        Console.Error.WriteLine($"[Aspire] {message}");
+    }
+
+    /// <summary>
     /// Override to customize the builder before building the application.
     /// </summary>
     /// <param name="builder">The distributed application testing builder.</param>
@@ -155,24 +165,31 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
     /// <inheritdoc />
     public async Task InitializeAsync()
     {
+        LogProgress($"Creating distributed application builder for {typeof(TAppHost).Name}...");
         var builder = await DistributedApplicationTestingBuilder.CreateAsync<TAppHost>();
         ConfigureBuilder(builder);
 
+        LogProgress("Building application...");
         _app = await builder.BuildAsync();
+
+        var model = _app.Services.GetRequiredService<DistributedApplicationModel>();
+        var resourceList = string.Join(", ", model.Resources.Select(r => r.Name));
+        LogProgress($"Starting application with resources: [{resourceList}]");
         await _app.StartAsync();
 
+        LogProgress($"Application started. Waiting for resources (timeout: {ResourceTimeout.TotalSeconds:0}s, behavior: {WaitBehavior})...");
         using var cts = new CancellationTokenSource(ResourceTimeout);
 
         try
         {
             await WaitForResourcesAsync(_app, cts.Token);
+            LogProgress("All resources ready.");
         }
         catch (OperationCanceledException) when (cts.IsCancellationRequested)
         {
             // Fallback for custom WaitForResourcesAsync overrides that don't use the
             // default fail-fast helper. The default implementation throws its own
             // TimeoutException with resource logs before this catch is reached.
-            var model = _app.Services.GetRequiredService<DistributedApplicationModel>();
             var resourceNames = string.Join(", ", model.Resources.Select(r => $"'{r.Name}'"));
 
             throw new TimeoutException(
@@ -202,7 +219,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
     /// immediately with its recent logs. On timeout, reports which resources are still
     /// pending and includes their logs.
     /// </summary>
-    private static async Task WaitForResourcesWithFailFastAsync(
+    private async Task WaitForResourcesWithFailFastAsync(
         DistributedApplication app,
         ResourceNotificationService notificationService,
         List<string> resourceNames,
@@ -220,6 +237,9 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         // Linked CTS lets us cancel the failure watchers once all resources are ready
         using var failureCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
+        var targetState = waitForHealthy ? "healthy" : "running";
+        LogProgress($"Waiting for {resourceNames.Count} resource(s) to become {targetState}: [{string.Join(", ", resourceNames)}]");
+
         // Success path: wait for all resources to reach the desired state
         var readyTask = Task.WhenAll(resourceNames.Select(async name =>
         {
@@ -233,6 +253,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
             }
 
             readyResources.Add(name);
+            LogProgress($"  Resource '{name}' is {targetState} ({readyResources.Count}/{resourceNames.Count})");
         }));
 
         // Fail-fast path: complete as soon as ANY resource enters FailedToStart
@@ -302,7 +323,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
     /// Returns the last <paramref name="maxLines"/> lines, or "(no logs available)" if none.
     /// Uses a short timeout to avoid hanging if the log service is unresponsive.
     /// </summary>
-    private static async Task<string> CollectResourceLogsAsync(
+    private async Task<string> CollectResourceLogsAsync(
         DistributedApplication app,
         string resourceName,
         int maxLines = 20)
