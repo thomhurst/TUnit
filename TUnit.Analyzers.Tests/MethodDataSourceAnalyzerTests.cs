@@ -513,6 +513,35 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
     }
 
     [Test]
+    public async Task Method_Data_Source_Is_Not_Flagged_When_Does_Match_Field()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using System;
+                using System.Collections.Generic;
+
+                public class MyClass
+                {
+                    private static readonly IEnumerable<Func<int>> TestData = new List<Func<int>>
+                    {
+                        () => 1,
+                        () => 2,
+                        () => 3
+                    };
+
+                    [MethodDataSource(nameof(TestData))]
+                    [Test]
+                    public void MyTest(int value)
+                    {
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
     public async Task Arguments_Are_Flagged_When_Does_Not_Match_Parameter_Type()
     {
         await Verifier
@@ -893,116 +922,6 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                     {
                         yield return () => new(new MyData("test1"), DisplayName: "First");
                         yield return () => new(new MyData("test2"), DisplayName: "Second");
-                    }
-                }
-                """
-            );
-    }
-
-    [Test]
-    public async Task InstanceMethodDataSource_Is_Not_Flagged_When_Method_Found()
-    {
-        await Verifier
-            .VerifyAnalyzerAsync(
-                """
-                using TUnit.Core;
-                using System;
-                using System.Collections.Generic;
-
-                public class MyClass
-                {
-                    [InstanceMethodDataSource(nameof(GetData))]
-                    [Test]
-                    public void MyTest(int value)
-                    {
-                    }
-
-                    public IEnumerable<Func<int>> GetData()
-                    {
-                        yield return () => 1;
-                        yield return () => 2;
-                        yield return () => 3;
-                    }
-                }
-                """
-            );
-    }
-
-    [Test]
-    public async Task InstanceMethodDataSource_Is_Flagged_When_Method_Not_Found()
-    {
-        await Verifier
-            .VerifyAnalyzerAsync(
-                """
-                using TUnit.Core;
-                using System;
-
-                public class MyClass
-                {
-                    [{|#0:InstanceMethodDataSource("NonExistentMethod")|}]
-                    [Test]
-                    public void MyTest(int value)
-                    {
-                    }
-                }
-                """,
-                Verifier.Diagnostic(Rules.NoMethodFound)
-                    .WithLocation(0)
-            );
-    }
-
-    [Test]
-    public async Task MethodDataSource_With_Field_Is_Not_Flagged()
-    {
-        await Verifier
-            .VerifyAnalyzerAsync(
-                """
-                using TUnit.Core;
-                using System;
-                using System.Collections.Generic;
-
-                public class MyClass
-                {
-                    private static readonly IEnumerable<Func<int>> TestData = new List<Func<int>>
-                    {
-                        () => 1,
-                        () => 2,
-                        () => 3
-                    };
-
-                    [MethodDataSource(nameof(TestData))]
-                    [Test]
-                    public void MyTest(int value)
-                    {
-                    }
-                }
-                """
-            );
-    }
-
-    [Test]
-    public async Task InstanceMethodDataSource_With_Field_Is_Not_Flagged()
-    {
-        await Verifier
-            .VerifyAnalyzerAsync(
-                """
-                using TUnit.Core;
-                using System;
-                using System.Collections.Generic;
-
-                public class MyClass
-                {
-                    private readonly IEnumerable<Func<int>> TestData = new List<Func<int>>
-                    {
-                        () => 1,
-                        () => 2,
-                        () => 3
-                    };
-
-                    [InstanceMethodDataSource(nameof(TestData))]
-                    [Test]
-                    public void MyTest(int value)
-                    {
                     }
                 }
                 """

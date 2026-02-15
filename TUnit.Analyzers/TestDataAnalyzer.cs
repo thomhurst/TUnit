@@ -193,9 +193,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             }
 
             if (SymbolEqualityComparer.Default.Equals(attribute.AttributeClass,
-                    context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.MethodDataSource.WithoutGlobalPrefix)) ||
-                SymbolEqualityComparer.Default.Equals(attribute.AttributeClass,
-                    context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.InstanceMethodDataSource.WithoutGlobalPrefix)))
+                    context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.MethodDataSource.WithoutGlobalPrefix)))
             {
                 // For property injection, only validate against the property type, not method parameters
                 var typesToValidate = propertySymbol != null
