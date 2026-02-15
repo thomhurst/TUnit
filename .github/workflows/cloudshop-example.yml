@@ -24,11 +24,12 @@ jobs:
 
       - name: Pre-pull Docker images
         run: |
-          docker pull postgres:latest &
-          docker pull redis:latest &
-          docker pull rabbitmq:4-management &
-          docker pull dpage/pgadmin4:latest &
-          docker pull redis/redisinsight:latest &
+          # Exact image tags used by Aspire.Hosting 13.1.1
+          docker pull postgres:17.6 &
+          docker pull redis:8.2 &
+          docker pull rabbitmq:4.2-management &
+          docker pull dpage/pgadmin4:9.9.0 &
+          docker pull redis/redisinsight:2.70 &
           wait
 
       - name: Cache NuGet packages
