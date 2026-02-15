@@ -168,8 +168,18 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
 
     // --- Lifecycle ---
 
-    /// <inheritdoc />
-    public async Task InitializeAsync()
+    /// <summary>
+    /// Initializes the Aspire distributed application. Override to add post-start
+    /// logic such as database migrations or data seeding:
+    /// <code>
+    /// public override async Task InitializeAsync()
+    /// {
+    ///     await base.InitializeAsync();
+    ///     await RunMigrationsAsync();
+    /// }
+    /// </code>
+    /// </summary>
+    public virtual async Task InitializeAsync()
     {
         var sw = Stopwatch.StartNew();
 
@@ -235,8 +245,17 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         }
     }
 
-    /// <inheritdoc />
-    public async ValueTask DisposeAsync()
+    /// <summary>
+    /// Disposes the Aspire distributed application. Override to add custom cleanup:
+    /// <code>
+    /// public override async ValueTask DisposeAsync()
+    /// {
+    ///     // Custom cleanup before app stops
+    ///     await base.DisposeAsync();
+    /// }
+    /// </code>
+    /// </summary>
+    public virtual async ValueTask DisposeAsync()
     {
         if (_app is not null)
         {

@@ -194,12 +194,40 @@ When a timeout occurs, the error includes:
 
 | Method | Default | Description |
 |--------|---------|-------------|
+| `InitializeAsync()` | Full lifecycle | Override to add post-start logic (migrations, seeding) |
+| `DisposeAsync()` | Stop and dispose app | Override to add custom cleanup |
 | `ConfigureBuilder(builder)` | No-op | Customize the builder before building |
 | `ResourceTimeout` | 60 seconds | How long to wait for startup and resources |
 | `WaitBehavior` | `AllHealthy` | Which resources to wait for |
 | `ResourcesToWaitFor()` | Empty | Resource names when `WaitBehavior` is `Named` |
 | `WaitForResourcesAsync(app, ct)` | Waits per `WaitBehavior` | Full control over resource waiting |
 | `LogProgress(message)` | Writes to stderr | Override to route progress logs elsewhere |
+
+### Overriding the Lifecycle
+
+`InitializeAsync` and `DisposeAsync` are virtual, so you can add post-start or pre-dispose logic:
+
+```csharp
+public class AppFixture : AspireFixture<Projects.MyAppHost>
+{
+    public override async Task InitializeAsync()
+    {
+        await base.InitializeAsync(); // Build, start, wait for resources
+
+        // Post-start: run migrations, seed data, warm caches, etc.
+        var connectionString = await GetConnectionStringAsync("postgresdb");
+        await RunMigrationsAsync(connectionString!);
+        await SeedTestDataAsync(connectionString!);
+    }
+
+    public override async ValueTask DisposeAsync()
+    {
+        // Pre-dispose: dump diagnostics on failure, clean up external state, etc.
+        LogProgress("Cleaning up test data...");
+        await base.DisposeAsync();
+    }
+}
+```
 
 ## Watching Resource Logs
 
