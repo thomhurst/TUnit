@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using TUnit.Core;
+using TUnit.Logging.Microsoft;
 
 namespace TUnit.AspNetCore.Extensions;
 
@@ -114,7 +115,7 @@ public static class ServiceCollectionExtensions
         TestContext context,
         LogLevel minLogLevel = LogLevel.Information)
     {
-        services.AddLogging(builder => LoggingExtensions.AddTUnit(builder, context, minLogLevel));
+        services.AddLogging(builder => builder.AddProvider(new TUnitLoggerProvider(context, minLogLevel)));
         return services;
     }
 }

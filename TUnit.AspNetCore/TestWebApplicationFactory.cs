@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TUnit.AspNetCore.Extensions;
 using TUnit.AspNetCore.Interception;
+using TUnit.AspNetCore.Logging;
 using TUnit.Core;
 
 namespace TUnit.AspNetCore;
@@ -41,6 +42,7 @@ public abstract class TestWebApplicationFactory<TEntryPoint> : WebApplicationFac
                 {
                     configureIsolatedServices(services);
                     services.AddSingleton(testContext);
+                    services.AddTUnitLogging(testContext);
                 });
 
             if (options.EnableHttpExchangeCapture)
@@ -62,6 +64,12 @@ public abstract class TestWebApplicationFactory<TEntryPoint> : WebApplicationFac
 
         hostBuilder?.ConfigureHostConfiguration(ConfigureStartupConfiguration);
 
+        hostBuilder?.ConfigureServices(services =>
+        {
+            services.AddCorrelatedTUnitLogging();
+        });
+
         return hostBuilder;
     }
+
 }

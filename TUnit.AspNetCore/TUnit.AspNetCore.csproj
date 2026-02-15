@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TUnit\TUnit.csproj" />
+    <ProjectReference Include="..\TUnit.Logging.Microsoft\TUnit.Logging.Microsoft.csproj" />
   </ItemGroup>
 
   <!-- Framework-specific package versions for Microsoft.AspNetCore.Mvc.Testing -->

@@ -205,6 +205,43 @@ public class SeqLogSink : ILogSink, IDisposable
 }
 ```
 
+## Microsoft.Extensions.Logging Integration
+
+If your application uses `Microsoft.Extensions.Logging.ILogger`, TUnit can capture that output and route it to the correct test.
+
+### ASP.NET Core
+
+When using `TUnit.AspNetCore` with `TestWebApplicationFactory`, logging is fully automatic. See the [ASP.NET Core Integration Testing](/docs/examples/aspnet#tunit-logging-integration) docs for details.
+
+### Standalone (No ASP.NET Core)
+
+For `IHost`-based apps or generic DI scenarios, install the `TUnit.Logging.Microsoft` package:
+
+```bash
+dotnet add package TUnit.Logging.Microsoft
+```
+
+Then register TUnit as a logging provider:
+
+```csharp
+using TUnit.Logging.Microsoft;
+
+var host = Host.CreateDefaultBuilder()
+    .ConfigureLogging(logging =>
+    {
+        logging.AddTUnit(TestContext.Current!);
+    })
+    .Build();
+```
+
+Or via `IServiceCollection`:
+
+```csharp
+services.AddTUnitLogging(TestContext.Current!);
+```
+
+All `ILogger` output is routed through TUnit's console interceptor and sink pipeline, appearing in test output, IDE test explorers, and the console.
+
 ## Log Levels
 
 TUnit uses the same log level as provided to the Microsoft.Testing.Platform via command line:
