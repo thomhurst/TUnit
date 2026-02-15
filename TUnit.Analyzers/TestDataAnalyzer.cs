@@ -910,15 +910,13 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 }
             }
             
-            // Final fallback: if no specific data source generator base type found, use the attribute's own type arguments
-            if (typeArguments.IsEmpty && attribute.AttributeClass?.TypeArguments.IsEmpty == false)
-            {
-                typeArguments = attribute.AttributeClass.TypeArguments;
-            }
+            // Don't fall back to the attribute's own type arguments - for custom generic attributes
+            // implementing IDataSourceAttribute, the generic parameters may not correspond to the
+            // test parameter types (they could be used for other purposes in the implementation)
         }
 
-        // If still no type arguments (like ArgumentsAttribute which returns object?[]?),
-        // skip compile-time type checking as it will be validated at runtime
+        // If no type arguments found (like ArgumentsAttribute which returns object?[]?, or custom
+        // generic data source attributes), skip compile-time type checking as it will be validated at runtime
         if (typeArguments.IsEmpty)
         {
             return;
