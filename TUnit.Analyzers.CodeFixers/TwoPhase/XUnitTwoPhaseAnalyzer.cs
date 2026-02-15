@@ -149,7 +149,7 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
 
         var (kind, replacementCode, introducesAwait, todoComment) = methodName switch
         {
-            "Equal" => ConvertEqual(arguments),
+            "Equal" => ConvertEqual(memberAccess, arguments),
             "NotEqual" => ConvertNotEqual(arguments),
             "True" => ConvertTrue(arguments),
             "False" => ConvertFalse(arguments),
@@ -203,12 +203,43 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
 
     #region Assertion Conversions
 
-    private (AssertionConversionKind, string?, bool, string?) ConvertEqual(SeparatedSyntaxList<ArgumentSyntax> args)
+    private (AssertionConversionKind, string?, bool, string?) ConvertEqual(MemberAccessExpressionSyntax memberAccess, SeparatedSyntaxList<ArgumentSyntax> args)
     {
         if (args.Count < 2) return (AssertionConversionKind.Equal, null, false, null);
 
         var expected = args[0].Expression.ToString();
         var actual = args[1].Expression.ToString();
+
+        // Check if there's a third argument (tolerance/precision)
+        if (args.Count >= 3)
+        {
+            // Check the actual method signature to see if it's a tolerance/precision parameter
+            var symbolInfo = SemanticModel.GetSymbolInfo(memberAccess);
+            if (symbolInfo.Symbol is IMethodSymbol { Parameters.Length: >= 3 } methodSymbol)
+            {
+                var thirdParam = methodSymbol.Parameters[2];
+
+                if (thirdParam is
+                    { Name: "tolerance" } or
+                    { Name: "precision", Type.Name: "TimeSpan" })
+                {
+                    var thirdArgText = args[2].Expression.ToString();
+                    return (AssertionConversionKind.Equal, $"await Assert.That({actual}).IsEqualTo({expected}).Within({thirdArgText})", true, null);
+                }
+
+                // Third argument and beyond exist but are not convertible (e.g., int precision for rounding)
+                var extraArgs = new List<string>();
+                for (int i = 2; i < args.Count && i < methodSymbol.Parameters.Length; i++)
+                {
+                    var param = methodSymbol.Parameters[i];
+                    var argText = args[i].Expression.ToString();
+                    extraArgs.Add($"{param.Name}: {argText}");
+                }
+
+                var todoComment = $"// TODO: TUnit migration - xUnit Assert.Equal had additional argument(s) ({string.Join(", ", extraArgs)}) that could not be converted.";
+                return (AssertionConversionKind.Equal, $"await Assert.That({actual}).IsEqualTo({expected})", true, todoComment);
+            }
+        }
 
         return (AssertionConversionKind.Equal, $"await Assert.That({actual}).IsEqualTo({expected})", true, null);
     }
