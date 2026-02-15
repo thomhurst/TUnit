@@ -425,12 +425,12 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                                                    MatchesParameters(context, argumentForMethodCallTypes, methodSymbol))
                                            ?? methodSymbols.FirstOrDefault(x => x.Name == methodName);
 
-            // If no method found, check for properties
+            // If no method found, check for properties or fields
             if (dataSourceMethod is null)
             {
                 var propertySymbols = (type as INamedTypeSymbol)?.GetSelfAndBaseTypes()
                     .SelectMany(x => x.GetMembers())
-                    .OfType<IPropertySymbol>()
+                    .Where(x => x is IPropertySymbol or IFieldSymbol)
                     .ToArray() ?? Array.Empty<IPropertySymbol>();
 
                 var dataSourceProperty = propertySymbols.FirstOrDefault(x => x.Name == methodName);

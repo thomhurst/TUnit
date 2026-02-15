@@ -513,6 +513,35 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
     }
 
     [Test]
+    public async Task Method_Data_Source_Is_Not_Flagged_When_Does_Match_Field()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using System;
+                using System.Collections.Generic;
+
+                public class MyClass
+                {
+                    private static readonly IEnumerable<Func<int>> TestData = new List<Func<int>>
+                    {
+                        () => 1,
+                        () => 2,
+                        () => 3
+                    };
+
+                    [MethodDataSource(nameof(TestData))]
+                    [Test]
+                    public void MyTest(int value)
+                    {
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
     public async Task Arguments_Are_Flagged_When_Does_Not_Match_Parameter_Type()
     {
         await Verifier
