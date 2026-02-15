@@ -90,14 +90,19 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
 
     // --- Configuration hooks (virtual) ---
 
+    private static readonly Stream StdErr = Console.OpenStandardError();
+
     /// <summary>
     /// Logs progress messages during initialization. Override to route to a custom logger.
-    /// Default implementation writes to <see cref="Console.Error"/> for immediate CI visibility.
+    /// Default implementation writes directly to the standard error stream, bypassing any
+    /// interceptors or buffering, for immediate CI visibility.
     /// </summary>
     /// <param name="message">The progress message.</param>
     protected virtual void LogProgress(string message)
     {
-        Console.Error.WriteLine($"[Aspire] {message}");
+        var bytes = Encoding.UTF8.GetBytes($"[Aspire] {message}{Environment.NewLine}");
+        StdErr.Write(bytes, 0, bytes.Length);
+        StdErr.Flush();
     }
 
     /// <summary>
@@ -205,9 +210,12 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
     {
         if (_app is not null)
         {
+            LogProgress("Stopping application...");
             await _app.StopAsync();
+            LogProgress("Disposing application...");
             await _app.DisposeAsync();
             _app = null;
+            LogProgress("Application disposed.");
         }
 
         GC.SuppressFinalize(this);
