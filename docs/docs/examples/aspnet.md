@@ -392,16 +392,96 @@ await Assert.That(last.Response.Body).Contains("\"id\"");
 
 ## TUnit Logging Integration
 
-Server logs are automatically correlated with TUnit test output:
+### Per-Test Logging (Isolated Factory)
+
+When using `WebApplicationTest` with per-test factories, add TUnit logging via `ConfigureTestServices` to see your app's `ILogger` output in the test results:
 
 ```csharp
-protected override WebApplicationTestOptions Options => new()
+using TUnit.AspNetCore.Extensions;
+
+public class MyTests : TestsBase
 {
-    AddTUnitLogging = true  // Default is true
-};
+    protected override void ConfigureTestServices(IServiceCollection services)
+    {
+        services.AddTUnitLogging(TestContext.Current!);
+    }
+
+    [Test]
+    public async Task GetTodos_LogsAppear()
+    {
+        var client = Factory.CreateClient();
+        var response = await client.GetAsync("/todos");
+
+        // App-level ILogger output appears in the test output
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+    }
+}
 ```
 
-Logs from your ASP.NET Core app will appear in the test output, making debugging easier.
+### Standalone Logging (No ASP.NET Core)
+
+For `IHost`-based apps or generic DI scenarios without ASP.NET Core, use the `TUnit.Logging.Microsoft` package:
+
+```bash
+dotnet add package TUnit.Logging.Microsoft
+```
+
+```csharp
+using TUnit.Logging.Microsoft;
+
+// Via ILoggingBuilder
+builder.Logging.AddTUnit(TestContext.Current!);
+
+// Or via IServiceCollection
+services.AddTUnitLogging(TestContext.Current!);
+```
+
+Logs write directly to `TestContext.Output` — error-level messages go to `WriteError()`, everything else to `WriteLine()`.
+
+### Shared Web App Logging
+
+When a single `WebApplicationFactory` is shared across all tests (e.g., via `[ClassDataSource(Shared = SharedType.PerTestSession)]`), server-side logs need to be correlated with the originating test. TUnit provides a header-based propagation mechanism:
+
+**Server side** — register correlated logging in your factory:
+
+```csharp
+public class SharedFactory : TestWebApplicationFactory<Program>
+{
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        builder.ConfigureTestServices(services =>
+        {
+            services.AddCorrelatedTUnitLogging();
+        });
+    }
+}
+```
+
+**Client side** — use `CreateClientWithTestContext()` to propagate the test ID:
+
+```csharp
+public class SharedAppTests
+{
+    [ClassDataSource<SharedFactory>(Shared = SharedType.PerTestSession)]
+    public SharedFactory Factory { get; set; } = null!;
+
+    [Test]
+    public async Task GetTodos_LogsRouteToThisTest()
+    {
+        var client = Factory.CreateClientWithTestContext();
+
+        var response = await client.GetAsync("/todos");
+
+        // Server-side logs appear in THIS test's output
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+    }
+}
+```
+
+**How it works:**
+1. `TUnitTestIdHandler` adds an `X-TUnit-TestId` header to outgoing requests
+2. `TUnitTestContextMiddleware` extracts the header and resolves the `TestContext` via `TestContext.GetById()`
+3. `CorrelatedTUnitLoggerProvider` routes each log entry to the correct test's output
 
 ## Best Practices
 
@@ -914,4 +994,26 @@ public class WebApplicationFactory : TestWebApplicationFactory<Program>
 | `ReplaceService<T>(factory)` | Replace service with factory |
 | `ReplaceService<TService, TImpl>()` | Replace service with implementation |
 | `RemoveService<T>()` | Remove service registration |
-| `AddTUnitLogging(context)` | Add TUnit logging provider |
+| `AddTUnitLogging(context)` | Add TUnit logging provider for a specific test |
+| `AddCorrelatedTUnitLogging()` | Add correlated logging for shared web app scenarios |
+
+### Logging Extensions (TUnit.Logging.Microsoft)
+
+| Method | Description |
+|--------|-------------|
+| `ILoggingBuilder.AddTUnit(context)` | Add TUnit logger provider to logging builder |
+| `IServiceCollection.AddTUnitLogging(context)` | Add TUnit logging via service collection |
+
+### Shared Web App Types (TUnit.AspNetCore)
+
+| Type | Description |
+|------|-------------|
+| `TUnitTestIdHandler` | `DelegatingHandler` that propagates test context ID via HTTP header |
+| `TUnitTestContextMiddleware` | Middleware that resolves test context from request header |
+| `CorrelatedTUnitLoggerProvider` | Logger provider that resolves test context per log call |
+
+### WebApplicationFactory Extensions
+
+| Method | Description |
+|--------|-------------|
+| `CreateClientWithTestContext()` | Creates an `HttpClient` that propagates the current test context ID |
