@@ -161,8 +161,8 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
             "Empty" => ConvertEmpty(arguments),
             "NotEmpty" => ConvertNotEmpty(arguments),
             "Single" => ConvertSingle(arguments),
-            "Contains" => ConvertContains(arguments),
-            "DoesNotContain" => ConvertDoesNotContain(arguments),
+            "Contains" => ConvertContains(memberAccess, arguments),
+            "DoesNotContain" => ConvertDoesNotContain(memberAccess, arguments),
             "Throws" => ConvertThrows(memberAccess, arguments),
             "ThrowsAsync" => ConvertThrowsAsync(memberAccess, arguments),
             "ThrowsAny" => ConvertThrowsAny(memberAccess, arguments),
@@ -352,22 +352,42 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
         return (AssertionConversionKind.Single, $"await Assert.That({collection}).HasSingleItem()", true, null);
     }
 
-    private (AssertionConversionKind, string?, bool, string?) ConvertContains(SeparatedSyntaxList<ArgumentSyntax> args)
+    private (AssertionConversionKind, string?, bool, string?) ConvertContains(MemberAccessExpressionSyntax memberAccess, SeparatedSyntaxList<ArgumentSyntax> args)
     {
         if (args.Count < 2) return (AssertionConversionKind.Contains, null, false, null);
 
         var expected = args[0].Expression.ToString();
-        var collection = args[1].Expression.ToString();
+        var actual = args[1].Expression.ToString();
 
-        return (AssertionConversionKind.Contains, $"await Assert.That({collection}).Contains({expected})", true, null);
+        var symbol = SemanticModel.GetSymbolInfo(memberAccess).Symbol;
+
+        if (symbol is IMethodSymbol { Parameters.Length: 2 } methodSymbol &&
+            methodSymbol.Parameters[0].Type.Name == "IEnumerable" &&
+            methodSymbol.Parameters[1].Type.Name == "Predicate")
+        {
+            // Swap them - This overload is the other way around to the other ones.
+            (actual, expected) = (expected, actual);
+        }
+
+        return (AssertionConversionKind.Contains, $"await Assert.That({actual}).Contains({expected})", true, null);
     }
 
-    private (AssertionConversionKind, string?, bool, string?) ConvertDoesNotContain(SeparatedSyntaxList<ArgumentSyntax> args)
+    private (AssertionConversionKind, string?, bool, string?) ConvertDoesNotContain(MemberAccessExpressionSyntax memberAccess, SeparatedSyntaxList<ArgumentSyntax> args)
     {
         if (args.Count < 2) return (AssertionConversionKind.DoesNotContain, null, false, null);
 
         var expected = args[0].Expression.ToString();
         var collection = args[1].Expression.ToString();
+
+        var symbol = SemanticModel.GetSymbolInfo(memberAccess).Symbol;
+
+        if (symbol is IMethodSymbol { Parameters.Length: 2 } methodSymbol &&
+            methodSymbol.Parameters[0].Type.Name == "IEnumerable" &&
+            methodSymbol.Parameters[1].Type.Name == "Predicate")
+        {
+            // Swap them - This overload is the other way around to the other ones.
+            (collection, expected) = (expected, collection);
+        }
 
         return (AssertionConversionKind.DoesNotContain, $"await Assert.That({collection}).DoesNotContain({expected})", true, null);
     }
