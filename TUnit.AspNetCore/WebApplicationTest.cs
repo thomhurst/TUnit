@@ -10,17 +10,15 @@ namespace TUnit.AspNetCore;
 
 public abstract class WebApplicationTest
 {
-    internal static int _idCounter;
-
     /// <summary>
     /// Gets a unique identifier for this test instance.
-    /// Useful for creating isolated resources (tables, topics, keys) per test.
+    /// Delegates to <see cref="TestContext.Isolation"/> to ensure consistency
+    /// regardless of whether accessed via this property or the TestContext API.
     /// </summary>
-    public int UniqueId { get; }
+    public int UniqueId => TestContext.Current!.Isolation.UniqueId;
 
     internal WebApplicationTest()
     {
-        UniqueId = Interlocked.Increment(ref _idCounter);
     }
 
     /// <summary>
@@ -36,7 +34,7 @@ public abstract class WebApplicationTest
     /// var topicName = GetIsolatedName("orders"); // Returns "Test_42_orders"
     /// </code>
     /// </example>
-    protected string GetIsolatedName(string baseName) => $"Test_{UniqueId}_{baseName}";
+    protected string GetIsolatedName(string baseName) => TestContext.Current!.Isolation.GetIsolatedName(baseName);
 
     /// <summary>
     /// Creates an isolated prefix using the test's unique identifier.
@@ -51,7 +49,7 @@ public abstract class WebApplicationTest
     /// var dotPrefix = GetIsolatedPrefix("."); // Returns "test.42."
     /// </code>
     /// </example>
-    protected string GetIsolatedPrefix(string separator = "_") => $"test{separator}{UniqueId}{separator}";
+    protected string GetIsolatedPrefix(string separator = "_") => TestContext.Current!.Isolation.GetIsolatedPrefix(separator);
 }
 
 /// <summary>

@@ -1281,7 +1281,7 @@ namespace
         public TestConstructorAttribute() { }
     }
     [.DebuggerDisplay("{.Name}.{GetDisplayName(),nq}")]
-    public class TestContext : .Context, ., ., ., ., ., ., .
+    public class TestContext : .Context, ., ., ., ., ., ., ., .
     {
         public TestContext(string testName,  serviceProvider, .ClassHookContext classContext, .TestBuilderContext testBuilderContext, .CancellationToken cancellationToken) { }
         public .ClassHookContext ClassContext { get; }
@@ -1289,6 +1289,7 @@ namespace
         public . Events { get; }
         public . Execution { get; }
         public string Id { get; }
+        public . Isolation { get; }
         public object Lock { get; }
         public . Metadata { get; }
         public . Output { get; }
@@ -2430,6 +2431,12 @@ namespace .Interfaces
         string MethodName { get; }
         string TestId { get; }
         string TestName { get; }
+    }
+    public interface ITestIsolation
+    {
+        int UniqueId { get; }
+        string GetIsolatedName(string baseName);
+        string GetIsolatedPrefix(string separator = "_");
     }
     public interface ITestLocation
     {

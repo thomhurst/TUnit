@@ -15,7 +15,7 @@ namespace TUnit.Core;
 /// </summary>
 [DebuggerDisplay("{TestDetails.ClassType.Name}.{GetDisplayName(),nq}")]
 public partial class TestContext : Context,
-    ITestExecution, ITestParallelization, ITestOutput, ITestMetadata, ITestDependencies, ITestStateBag, ITestEvents
+    ITestExecution, ITestParallelization, ITestOutput, ITestMetadata, ITestDependencies, ITestStateBag, ITestEvents, ITestIsolation
 {
     private static readonly ConcurrentDictionary<string, TestContext> _testContextsById = new();
     private readonly TestBuilderContext _testBuilderContext;
@@ -30,6 +30,7 @@ public partial class TestContext : Context,
 
         // Generate unique ID for this test instance
         Id = Guid.NewGuid().ToString();
+        IsolationUniqueId = Interlocked.Increment(ref _isolationIdCounter);
 
         _testContextsById[Id] = this;
     }
@@ -44,6 +45,7 @@ public partial class TestContext : Context,
     public ITestDependencies Dependencies => this;
     public ITestStateBag StateBag => this;
     public ITestEvents Events => this;
+    public ITestIsolation Isolation => this;
 
     internal IServiceProvider Services => ServiceProvider;
 
