@@ -1,19 +1,19 @@
-using Microsoft.Extensions.Logging;
+using global::Microsoft.Extensions.Logging;
 using TUnit.Core;
-using TUnit.Logging.Microsoft;
 
-namespace TUnit.AspNetCore.Extensions;
+namespace TUnit.Logging.Microsoft;
 
 /// <summary>
 /// Extension methods for <see cref="ILoggingBuilder"/> to add TUnit logging.
 /// </summary>
-public static class LoggingExtensions
+public static class LoggingBuilderExtensions
 {
     /// <summary>
-    /// Adds the TUnit logger provider to the logging builder with a specific context provider.
+    /// Adds the TUnit logger provider to the logging builder.
+    /// Logs will be written to the specified test context's output.
     /// </summary>
     /// <param name="builder">The logging builder.</param>
-    /// <param name="context">The test context.</param>
+    /// <param name="context">The test context to write logs to.</param>
     /// <param name="minLogLevel">The minimum log level to capture. Defaults to Information.</param>
     /// <returns>The logging builder for chaining.</returns>
     public static ILoggingBuilder AddTUnit(

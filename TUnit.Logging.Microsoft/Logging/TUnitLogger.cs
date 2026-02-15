@@ -1,19 +1,19 @@
-using Microsoft.Extensions.Logging;
+using global::Microsoft.Extensions.Logging;
 using TUnit.Core;
 
-namespace TUnit.AspNetCore.Logging;
+namespace TUnit.Logging.Microsoft;
 
 /// <summary>
 /// A logger that writes log messages to TUnit's test output.
-/// Messages are associated with the current test context for proper output capture.
+/// Messages are written directly to the test context's output writers.
 /// </summary>
-public sealed class TUnitAspNetLogger : ILogger
+public sealed class TUnitLogger : ILogger
 {
     private readonly string _categoryName;
     private readonly TestContext _context;
     private readonly LogLevel _minLogLevel;
 
-    internal TUnitAspNetLogger(string categoryName, TestContext context, LogLevel minLogLevel)
+    internal TUnitLogger(string categoryName, TestContext context, LogLevel minLogLevel)
     {
         _categoryName = categoryName;
         _context = context;
@@ -39,9 +39,6 @@ public sealed class TUnitAspNetLogger : ILogger
             return;
         }
 
-        // Set the current test context for proper output association
-        TestContext.Current = _context;
-
         var message = formatter(state, exception);
 
         if (exception is not null)
@@ -49,6 +46,15 @@ public sealed class TUnitAspNetLogger : ILogger
             message = $"{message}{Environment.NewLine}{exception}";
         }
 
-        Console.WriteLine($"[{logLevel}] {_categoryName}: {message}");
+        var formattedMessage = $"[{logLevel}] {_categoryName}: {message}";
+
+        if (logLevel >= LogLevel.Error)
+        {
+            _context.Output.WriteError(formattedMessage);
+        }
+        else
+        {
+            _context.Output.WriteLine(formattedMessage);
+        }
     }
 }

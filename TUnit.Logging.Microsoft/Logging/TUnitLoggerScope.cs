@@ -1,4 +1,4 @@
-namespace TUnit.AspNetCore.Logging;
+namespace TUnit.Logging.Microsoft;
 
 /// <summary>
 /// Manages logging scope state using AsyncLocal for proper async flow.
