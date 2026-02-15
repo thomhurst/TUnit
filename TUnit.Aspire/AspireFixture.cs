@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+using System.Text;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
@@ -124,7 +126,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
             {
                 var model = app.Services.GetRequiredService<DistributedApplicationModel>();
                 var names = model.Resources.Select(r => r.Name).ToList();
-                await WaitForResourcesWithFailFastAsync(notificationService, names, waitForHealthy: true, cancellationToken);
+                await WaitForResourcesWithFailFastAsync(app, notificationService, names, waitForHealthy: true, cancellationToken);
                 break;
             }
 
@@ -132,14 +134,14 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
             {
                 var model = app.Services.GetRequiredService<DistributedApplicationModel>();
                 var names = model.Resources.Select(r => r.Name).ToList();
-                await WaitForResourcesWithFailFastAsync(notificationService, names, waitForHealthy: false, cancellationToken);
+                await WaitForResourcesWithFailFastAsync(app, notificationService, names, waitForHealthy: false, cancellationToken);
                 break;
             }
 
             case ResourceWaitBehavior.Named:
             {
                 var names = ResourcesToWaitFor().ToList();
-                await WaitForResourcesWithFailFastAsync(notificationService, names, waitForHealthy: true, cancellationToken);
+                await WaitForResourcesWithFailFastAsync(app, notificationService, names, waitForHealthy: true, cancellationToken);
                 break;
             }
 
@@ -167,6 +169,9 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         }
         catch (OperationCanceledException) when (cts.IsCancellationRequested)
         {
+            // Fallback for custom WaitForResourcesAsync overrides that don't use the
+            // default fail-fast helper. The default implementation throws its own
+            // TimeoutException with resource logs before this catch is reached.
             var model = _app.Services.GetRequiredService<DistributedApplicationModel>();
             var resourceNames = string.Join(", ", model.Resources.Select(r => $"'{r.Name}'"));
 
@@ -194,9 +199,11 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
     /// <summary>
     /// Waits for all named resources to reach the desired state, while simultaneously
     /// watching for any resource entering FailedToStart. If a resource fails, throws
-    /// immediately instead of waiting for the full timeout.
+    /// immediately with its recent logs. On timeout, reports which resources are still
+    /// pending and includes their logs.
     /// </summary>
     private static async Task WaitForResourcesWithFailFastAsync(
+        DistributedApplication app,
         ResourceNotificationService notificationService,
         List<string> resourceNames,
         bool waitForHealthy,
@@ -207,14 +214,26 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
             return;
         }
 
+        // Track which resources have become ready (for timeout reporting)
+        var readyResources = new ConcurrentBag<string>();
+
         // Linked CTS lets us cancel the failure watchers once all resources are ready
         using var failureCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
         // Success path: wait for all resources to reach the desired state
-        var readyTask = Task.WhenAll(resourceNames.Select(name =>
-            waitForHealthy
-                ? notificationService.WaitForResourceHealthyAsync(name, cancellationToken)
-                : notificationService.WaitForResourceAsync(name, KnownResourceStates.Running, cancellationToken)));
+        var readyTask = Task.WhenAll(resourceNames.Select(async name =>
+        {
+            if (waitForHealthy)
+            {
+                await notificationService.WaitForResourceHealthyAsync(name, cancellationToken);
+            }
+            else
+            {
+                await notificationService.WaitForResourceAsync(name, KnownResourceStates.Running, cancellationToken);
+            }
+
+            readyResources.Add(name);
+        }));
 
         // Fail-fast path: complete as soon as ANY resource enters FailedToStart
         var failureTasks = resourceNames.Select(async name =>
@@ -224,21 +243,103 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         }).ToList();
         var anyFailureTask = Task.WhenAny(failureTasks);
 
-        // Race: all resources ready vs. any resource failed
-        var completed = await Task.WhenAny(readyTask, anyFailureTask);
-
-        if (completed == anyFailureTask)
+        try
         {
+            // Race: all resources ready vs. any resource failed
+            var completed = await Task.WhenAny(readyTask, anyFailureTask);
+
+            if (completed == anyFailureTask)
+            {
+                failureCts.Cancel();
+                var failedName = await await anyFailureTask;
+                var logs = await CollectResourceLogsAsync(app, failedName);
+
+                throw new InvalidOperationException(
+                    $"Resource '{failedName}' failed to start." +
+                    $"{Environment.NewLine}{Environment.NewLine}" +
+                    $"--- {failedName} logs ---{Environment.NewLine}" +
+                    logs);
+            }
+
+            // All resources are ready - cancel the failure watchers
             failureCts.Cancel();
-            var failedName = await await anyFailureTask;
-            throw new InvalidOperationException(
-                $"Resource '{failedName}' failed to start. " +
-                $"Use WatchResourceLogs(\"{failedName}\") or check the Aspire dashboard for details.");
+            await readyTask;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // Timeout - report which resources are ready vs. still pending, with logs
+            failureCts.Cancel();
+
+            var readySet = new HashSet<string>(readyResources);
+            var pending = resourceNames.Where(n => !readySet.Contains(n)).ToList();
+
+            var sb = new StringBuilder();
+            sb.Append("Resources not ready: [");
+            sb.Append(string.Join(", ", pending.Select(n => $"'{n}'")));
+            sb.Append(']');
+
+            if (readySet.Count > 0)
+            {
+                sb.Append(". Resources ready: [");
+                sb.Append(string.Join(", ", readySet.Select(n => $"'{n}'")));
+                sb.Append(']');
+            }
+
+            foreach (var name in pending)
+            {
+                var logs = await CollectResourceLogsAsync(app, name);
+                sb.AppendLine().AppendLine();
+                sb.AppendLine($"--- {name} logs ---");
+                sb.Append(logs);
+            }
+
+            throw new TimeoutException(sb.ToString());
+        }
+    }
+
+    /// <summary>
+    /// Collects recent log lines from a resource via the <see cref="ResourceLoggerService"/>.
+    /// Returns the last <paramref name="maxLines"/> lines, or "(no logs available)" if none.
+    /// Uses a short timeout to avoid hanging if the log service is unresponsive.
+    /// </summary>
+    private static async Task<string> CollectResourceLogsAsync(
+        DistributedApplication app,
+        string resourceName,
+        int maxLines = 20)
+    {
+        var loggerService = app.Services.GetRequiredService<ResourceLoggerService>();
+        var lines = new List<string>();
+
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+
+        try
+        {
+            await foreach (var batch in loggerService.WatchAsync(resourceName)
+                .WithCancellation(cts.Token))
+            {
+                foreach (var line in batch)
+                {
+                    lines.Add($"  {line}");
+                }
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Expected - we use a short timeout to collect buffered logs
         }
 
-        // All resources are ready - cancel the failure watchers and propagate any exceptions
-        failureCts.Cancel();
-        await readyTask;
+        if (lines.Count == 0)
+        {
+            return "  (no logs available)";
+        }
+
+        if (lines.Count > maxLines)
+        {
+            return $"  ... ({lines.Count - maxLines} earlier lines omitted){Environment.NewLine}" +
+                   string.Join(Environment.NewLine, lines.Skip(lines.Count - maxLines));
+        }
+
+        return string.Join(Environment.NewLine, lines);
     }
 
     private sealed class ResourceLogWatcher(CancellationTokenSource cts) : IAsyncDisposable
