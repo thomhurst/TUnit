@@ -12,7 +12,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 """
                 using TUnit.Core;
                 using System;
-
+                
                 public class MyClass
                 {
                     [{|#0:MethodDataSource(nameof(Data))|}]
@@ -42,7 +42,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 """
                 using TUnit.Core;
                 using System;
-
+                
                 public class MyClass
                 {
                     [MethodDataSource(nameof(Data))]
@@ -50,7 +50,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                     public void MyTest(int value)
                     {
                     }
-
+                                
                     public static Func<int> Data()
                     {
                         return () => 1;
@@ -77,7 +77,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                     public void MyTest(int value)
                     {
                     }
-
+                                
                     public static IEnumerable<Func<int>> Data()
                     {
                         yield return () => 1;
@@ -106,7 +106,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                     public void MyTest(int value)
                     {
                     }
-
+                                
                     public static List<Func<int>> Data() =>
                     [
                         () => 1,
@@ -126,7 +126,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 """
                 using TUnit.Core;
                 using System;
-
+                
                 public class MyClass
                 {
                     [MethodDataSource(nameof(Data))]
@@ -134,7 +134,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                     public void MyTest(int value)
                     {
                     }
-
+                                
                     public static Func<int> Data()
                     {
                         return () => 1;
@@ -152,7 +152,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 """
                 using TUnit.Core;
                 using System;
-
+                
                 public static class MyData
                 {
                     public static Func<int> One()
@@ -181,7 +181,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 """
                 using TUnit.Core;
                 using System;
-
+                
                 public class MyData
                 {
                     public static Func<int> One()
@@ -210,7 +210,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 """
                 using TUnit.Core;
                 using System;
-
+                
                 public class MyData
                 {
                     public static Func<int> One()
@@ -242,7 +242,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 using System.Threading;
                 using TUnit.Core;
                 using System;
-
+                
                 public static class MyData
                 {
                     public static Func<int> One()
@@ -281,7 +281,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 {
                     return () => (1, "Hello", true);
                 }
-
+                                  
                 {{GetTimeoutAttribute(includeTimeoutToken)}}
                 [MethodDataSource(nameof(Tuple))]
                 [Test]
@@ -310,7 +310,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 {
                     return () => (1, "Hello", true);
                 }
-
+                         
                 {{GetTimeoutAttribute(includeTimeoutToken)}}
                 [{|#0:MethodDataSource(nameof(Tuple))|}]
                 [Test]
@@ -343,7 +343,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 {
                     return () => (1, "Hello", true);
                 }
-
+                                
                 {{GetTimeoutAttribute(includeTimeoutToken)}}
                 [{|#0:MethodDataSource(nameof(Tuple))|}]
                 [Test]
@@ -367,17 +367,17 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 """
                 using TUnit.Core;
                 using System;
-
+                
                 public class MyClass
                 {
                     [{|#0:MethodDataSource(nameof(Data))|}]
                     public required string MyProperty { get; init; }
-
+                                
                     [Test]
                     public void MyTest()
                     {
                     }
-
+                            
                     public static Func<int> Data()
                     {
                         return () => 1;
@@ -399,17 +399,17 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 """
                 using TUnit.Core;
                 using System;
-
+                
                 public class MyClass
                 {
                     [{|#0:MethodDataSource(nameof(Data))|}]
                     public required int MyProperty { get; init; }
-
+                                
                     [Test]
                     public void MyTest()
                     {
                     }
-
+                            
                     public static Func<int> Data()
                     {
                         return () => 1;
@@ -433,12 +433,12 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 {
                     [{|#0:MethodDataSource(nameof(Data))|}]
                     public required int MyProperty { get; init; }
-
+                                
                     [Test]
                     public void MyTest()
                     {
                     }
-
+                            
                     public static IEnumerable<Func<int>> {|#1:Data|}()
                     {
                         return [() => 1];
@@ -460,17 +460,17 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 """
                 using TUnit.Core;
                 using System;
-
+                
                 public class MyClass
                 {
                     [{|#0:MethodDataSource(nameof(Data))|}]
                     public required (string, string) MyProperty { get; init; }
-
+                                
                     [Test]
                     public void MyTest()
                     {
                     }
-
+                            
                     public static Func<(string, int)> Data()
                     {
                         return () => ("Hello", 1);
@@ -492,17 +492,17 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 """
                 using TUnit.Core;
                 using System;
-
+                
                 public class MyClass
                 {
                     [MethodDataSource(nameof(Data))]
                     public required (string, int) MyProperty { get; init; }
-
+                                
                     [Test]
                     public void MyTest()
                     {
                     }
-
+                            
                     public static Func<(string, int)> Data()
                     {
                         return () => ("Hello", 1);
@@ -520,7 +520,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 """
                 using TUnit.Core;
                 using System;
-
+                
                 public class MyClass
                 {
                     [{|#0:MethodDataSource(nameof(Data), Arguments = [ "Hi" ])|}]
@@ -528,7 +528,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                     public void MyTest(int value)
                     {
                     }
-
+                            
                     public static Func<int> Data(bool flag)
                     {
                         return () => 1;
@@ -550,7 +550,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 """
                 using TUnit.Core;
                 using System;
-
+                
                 public class MyClass
                 {
                     [{|#0:MethodDataSource(nameof(Data), Arguments = [ true ])|}]
@@ -558,7 +558,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                     public void MyTest(int value)
                     {
                     }
-
+                            
                     public static Func<int> Data(bool flag)
                     {
                         return () => 1;
@@ -577,7 +577,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 using System.Collections.Generic;
                 using TUnit.Core;
                 using System;
-
+                
                 public class MyClass
                 {
                     [MethodDataSource(nameof(Data), Arguments = [ new[] { 1, 2 } ])]
@@ -585,7 +585,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                     public void MyTest(int value)
                     {
                     }
-
+                            
                     public static Func<int> Data(IEnumerable<int> values)
                     {
                         return () => 1;
@@ -606,13 +606,13 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
 
             public class MyClass
             {
-
+            
                 [MethodDataSource(nameof(Data), Arguments = [ new[] { 1, 2 } ])]
                 [Test]
                 public void MyTest(int value)
                 {
                 }
-
+                            
                 public static Func<int> Data<T>(IEnumerable<T> values)
                 {
                     return () => 1;
@@ -631,7 +631,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                                            using System.Threading;
                                            using TUnit.Core;
                                            using System.Diagnostics.CodeAnalysis;
-
+                                           
                                            [UnconditionalSuppressMessage("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")]
                                            public class MethodDataSourceDrivenWithCancellationTokenTests
                                            {
@@ -646,17 +646,17 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                                                {
                                                    Console.WriteLine(value);
                                                }
-
+                                               
                                                public static int T() => 1;
-
+                                           
                                                public static Func<int> FuncT() => () => 1;
-
+                                           
                                                public static IEnumerable<int> EnumerableT() => [1];
-
+                                           
                                                public static IEnumerable<Func<int>> EnumerableFuncT() => [() => 1];
-
+                                           
                                                public static int[] ArrayT() => [1];
-
+                                           
                                                public static Func<int>[] ArrayFuncT() => [() => 1];
                                            }
                                            """);
@@ -681,7 +681,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                         string? expectedT0, string? expectedT1, string? expectedT2, string? expectedT3, string? expectedT4, string? expectedT5)
                     {
                     }
-
+                    
                     public static
                         IEnumerable<(bool success, string? expectedError, string? expectedT0, string? expectedT1, string? expectedT2,
                             string? expectedT3, string? expectedT4, string? expectedT5)>
@@ -690,7 +690,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                         yield return (true, null, "This is a success", null, null, null, null, null);
                         yield return (false, "This is a failure", null, null, null, null, null, null);
                     }
-                }
+                } 
                 """
             );
     }
