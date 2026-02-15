@@ -661,6 +661,218 @@ public class XUnitMigrationAnalyzerTests
     }
 
     [Test]
+    public async Task Assert_Equal_DateTime_With_Precision_Can_Be_Converted()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using System;
+                using Xunit;
+
+                public class MyClass
+                {
+                    [Fact]
+                    public void MyTest()
+                    {
+                        Assert.Equal(DateTime.Now, DateTime.Now, TimeSpan.FromSeconds(1));
+                    }
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+                using System;
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task MyTest()
+                    {
+                        await Assert.That(DateTime.Now).IsEqualTo(DateTime.Now).Within(TimeSpan.FromSeconds(1));
+                    }
+                }
+                """,
+                ConfigureXUnitTest
+            );
+    }
+
+    [Test]
+    public async Task Assert_Equal_DateTimeOffset_With_Precision_Can_Be_Converted()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using System;
+                using Xunit;
+
+                public class MyClass
+                {
+                    [Fact]
+                    public void MyTest()
+                    {
+                        Assert.Equal(DateTimeOffset.Now, DateTimeOffset.Now, TimeSpan.FromMilliseconds(100));
+                    }
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+                using System;
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task MyTest()
+                    {
+                        await Assert.That(DateTimeOffset.Now).IsEqualTo(DateTimeOffset.Now).Within(TimeSpan.FromMilliseconds(100));
+                    }
+                }
+                """,
+                ConfigureXUnitTest
+            );
+    }
+
+    [Test]
+    public async Task Assert_Equal_Double_With_Tolerance_Can_Be_Converted()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using Xunit;
+
+                public class MyClass
+                {
+                    [Fact]
+                    public void MyTest()
+                    {
+                        Assert.Equal(1.5, 1.50001, 0.001);
+                    }
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task MyTest()
+                    {
+                        await Assert.That(1.50001).IsEqualTo(1.5).Within(0.001);
+                    }
+                }
+                """,
+                ConfigureXUnitTest
+            );
+    }
+
+    [Test]
+    public async Task Assert_Equal_Float_With_Tolerance_Can_Be_Converted()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using Xunit;
+
+                public class MyClass
+                {
+                    [Fact]
+                    public void MyTest()
+                    {
+                        Assert.Equal(1.5f, 1.50001f, 0.001f);
+                    }
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task MyTest()
+                    {
+                        await Assert.That(1.50001f).IsEqualTo(1.5f).Within(0.001f);
+                    }
+                }
+                """,
+                ConfigureXUnitTest
+            );
+    }
+
+    [Test]
+    public async Task Assert_Equal_Double_With_Precision_Not_Converted()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using Xunit;
+
+                public class MyClass
+                {
+                    [Fact]
+                    public void MyTest()
+                    {
+                        Assert.Equal(1.12345, 1.12346, 3);
+                    }
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task MyTest()
+                    {
+                        // TODO: TUnit migration - xUnit Assert.Equal had additional argument(s) (precision: 3) that could not be converted.
+                        await Assert.That(1.12346).IsEqualTo(1.12345);
+                    }
+                }
+                """,
+                ConfigureXUnitTest
+            );
+    }
+
+    [Test]
+    public async Task Assert_Equal_Float_With_Precision_And_Rounding_Not_Converted()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using System;
+                using Xunit;
+
+                public class MyClass
+                {
+                    [Fact]
+                    public void MyTest()
+                    {
+                        Assert.Equal(1.5f, 1.6f, 0, MidpointRounding.ToEven);
+                    }
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+                using System;
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task MyTest()
+                    {
+                        // TODO: TUnit migration - xUnit Assert.Equal had additional argument(s) (precision: 0, rounding: MidpointRounding.ToEven) that could not be converted.
+                        await Assert.That(1.6f).IsEqualTo(1.5f);
+                    }
+                }
+                """,
+                ConfigureXUnitTest
+            );
+    }
+
+    [Test]
     public async Task Assert_Matches_Can_Be_Converted()
     {
         await CodeFixer
