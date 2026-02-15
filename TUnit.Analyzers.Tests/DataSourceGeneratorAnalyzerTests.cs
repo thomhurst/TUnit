@@ -118,4 +118,45 @@ public class DataSourceGeneratorAnalyzerTests
                     .WithArguments("string", "int")
             );
     }
+
+    [Test]
+    public async Task Custom_Generic_DataSource_With_IDataSourceAttribute_No_Error()
+    {
+        // This test reproduces the issue from GitHub issue #4812
+        // Custom generic attribute implementing IDataSourceAttribute where the generic parameter
+        // doesn't directly match test parameter types, but the implementation returns compatible types
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                namespace TUnit.Core;
+
+                // Custom data source where T doesn't match test parameter types directly
+                [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+                public class CustomDataAttribute<T> : Attribute, IDataSourceAttribute
+                {
+                    public bool SkipIfEmpty { get; set; }
+
+                    public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
+                    {
+                        // Returns Foo instances as the test expects, not T
+                        yield return () => Task.FromResult<object?[]?>([new Foo()]);
+                    }
+                }
+
+                public class Foo { }
+
+                public class Tests
+                {
+                    [Test]
+                    [CustomData<string>] // T is string, but method expects Foo - should not error
+                    public void TestMethod(Foo data) { }
+                }
+                """
+            );
+    }
 }
