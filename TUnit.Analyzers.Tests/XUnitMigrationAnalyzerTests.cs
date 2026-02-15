@@ -973,7 +973,7 @@ public class XUnitMigrationAnalyzerTests
                     public async Task MyTest()
                     {
                         var items = new[] { 1, 2, 3 };
-                        // TODO: TUnit migration - Assert.Collection had element inspectors. Manually add assertions for each element.
+                        // TODO: TUnit migration - Assert.Collection element inspectors were dropped and need manual conversion: [0]: x => Assert.Equal(1, x); [1]: x => Assert.Equal(2, x); [2]: x => Assert.Equal(3, x)
                         await Assert.That(items).HasCount(3);
                     }
                 }

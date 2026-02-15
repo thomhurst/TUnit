@@ -593,6 +593,13 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
         // Try to extract predicate from Assert.True/False patterns
         var predicate = TryConvertActionToPredicate(actionExpression);
 
+        // If the lambda body can't be converted to a simple predicate,
+        // skip conversion to avoid producing invalid code
+        if (predicate == null)
+        {
+            return (AssertionConversionKind.All, null, false, null);
+        }
+
         return (AssertionConversionKind.All, $"await Assert.That({collection}).All({predicate})", true, null);
     }
 
@@ -601,14 +608,27 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
         if (args.Count < 1) return (AssertionConversionKind.Collection, null, false, null);
 
         var collection = args[0].Expression.ToString();
-        // Count the element inspectors (args after the first one)
         var inspectorCount = args.Count - 1;
 
-        var todoComment = "// TODO: TUnit migration - Assert.Collection had element inspectors. Manually add assertions for each element.";
+        if (inspectorCount == 0)
+        {
+            return (AssertionConversionKind.Collection, $"await Assert.That({collection}).IsEmpty()", true, null);
+        }
+
+        // Preserve element inspector code in the TODO comment so nothing is silently lost
+        var inspectors = new List<string>();
+        for (var i = 1; i < args.Count; i++)
+        {
+            var inspectorText = args[i].Expression.ToFullString().Replace("\r", "").Replace("\n", " ").Trim();
+            inspectors.Add($"[{i - 1}]: {inspectorText}");
+        }
+
+        var inspectorSummary = string.Join("; ", inspectors);
+        var todoComment = $"// TODO: TUnit migration - Assert.Collection element inspectors were dropped and need manual conversion: {inspectorSummary}";
         return (AssertionConversionKind.Collection, $"await Assert.That({collection}).HasCount({inspectorCount})", true, todoComment);
     }
 
-    private string TryConvertActionToPredicate(ExpressionSyntax actionExpression)
+    private string? TryConvertActionToPredicate(ExpressionSyntax actionExpression)
     {
         // Try to convert xUnit action patterns to TUnit predicates
         // Pattern: item => Assert.True(item > 0) -> item => item > 0
@@ -619,7 +639,7 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
             var parameter = simpleLambda.Parameter.Identifier.Text;
             var body = simpleLambda.Body;
 
-            // Check if body is an xUnit assertion invocation
+            // Check if body is a single xUnit assertion invocation (not a block)
             if (body is InvocationExpressionSyntax invocation &&
                 invocation.Expression is MemberAccessExpressionSyntax memberAccess &&
                 memberAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Assert" })
@@ -671,8 +691,8 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
             }
         }
 
-        // Fallback: return the action as-is (may not work, but better than nothing)
-        return actionExpression.ToString();
+        // Can't convert to a simple predicate (e.g., block body with multiple assertions)
+        return null;
     }
 
     private (AssertionConversionKind, string?, bool, string?) ConvertDoesNotMatch(SeparatedSyntaxList<ArgumentSyntax> args)
