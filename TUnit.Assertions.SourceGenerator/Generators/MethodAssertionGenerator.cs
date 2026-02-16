@@ -993,12 +993,12 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         // Construct and return assertion
         // Note: Ref struct parameters (like interpolated string handlers) are converted to string
         // For covariant types, map the context to convert from TActual to the target type
-        // For nullable target types, use explicit type parameter to preserve nullability
-        var isNullableTarget = targetTypeName.EndsWith("?");
-        var castTypeName = isNullableTarget ? targetTypeName : $"{targetTypeName}?";
-        var mapTypeArg = isNullableTarget ? $"<{targetTypeName}>" : "";
+        // The cast always needs to be nullable (TNew?) because Map's mapper signature is Func<TValue?, TNew?>
+        var nullableCastTypeName = targetTypeName.EndsWith("?") ? targetTypeName : $"{targetTypeName}?";
+        // For nullable target types, use explicit Map type parameter to preserve nullability in the return type
+        var mapTypeArg = targetTypeName.EndsWith("?") ? $"<{targetTypeName}>" : "";
         var contextExpr = isCovariant
-            ? $"source.Context.Map{mapTypeArg}(value => ({castTypeName})(object?)value)"
+            ? $"source.Context.Map{mapTypeArg}(value => ({nullableCastTypeName})(object?)value)"
             : "source.Context";
         sb.Append($"        return new {className}{genericDeclaration}({contextExpr}");
         foreach (var param in data.AdditionalParameters)
