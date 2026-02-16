@@ -140,6 +140,8 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             IsParams = p.IsParams,
             IsInterpolatedStringHandler = IsInterpolatedStringHandler(p.Type),
             SimpleTypeName = GetSimpleTypeName(p.Type),
+            HasExplicitDefaultValue = p.HasExplicitDefaultValue,
+            DefaultValueExpression = p.HasExplicitDefaultValue ? FormatDefaultValue(p.ExplicitDefaultValue, p.Type) : null,
         }).ToImmutableEquatableArray();
 
         // Extract custom expectation message and inlining preference if provided
@@ -926,6 +928,10 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         {
             var paramsModifier = param.IsParams ? "params " : "";
             sb.Append($", {paramsModifier}{param.Type} {param.Name}");
+            if (param.HasExplicitDefaultValue)
+            {
+                sb.Append($" = {param.DefaultValueExpression}");
+            }
         }
 
         // CallerArgumentExpression parameters (skip for params since params must be last)
@@ -1063,6 +1069,46 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         }
 
         return simpleName;
+    }
+
+    private static string FormatDefaultValue(object? defaultValue, ITypeSymbol type)
+    {
+        if (defaultValue == null)
+        {
+            return "null";
+        }
+
+        if (type.TypeKind == TypeKind.Enum && type is INamedTypeSymbol enumType)
+        {
+            foreach (var member in enumType.GetMembers())
+            {
+                if (member is IFieldSymbol { HasConstantValue: true } field &&
+                    field.ConstantValue != null &&
+                    field.ConstantValue.Equals(defaultValue))
+                {
+                    return $"{enumType.ToDisplayString()}.{field.Name}";
+                }
+            }
+
+            return $"({enumType.ToDisplayString()})({defaultValue})";
+        }
+
+        if (defaultValue is string str)
+        {
+            return $"\"{str.Replace("\"", "\\\"")}\"";
+        }
+
+        if (defaultValue is bool b)
+        {
+            return b ? "true" : "false";
+        }
+
+        if (defaultValue is char c)
+        {
+            return $"'{c}'";
+        }
+
+        return defaultValue.ToString() ?? "null";
     }
 
     /// <summary>
@@ -1212,6 +1258,8 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         bool IsRefStruct,
         bool IsParams,
         bool IsInterpolatedStringHandler,
-        string SimpleTypeName
+        string SimpleTypeName,
+        bool HasExplicitDefaultValue,
+        string? DefaultValueExpression
     );
 }
