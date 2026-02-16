@@ -349,6 +349,13 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
         if (args.Count < 1) return (AssertionConversionKind.Single, null, false, null);
 
         var collection = args[0].Expression.ToString();
+
+        if (args.Count >= 2)
+        {
+            var predicate = args[1].Expression.ToString();
+            return (AssertionConversionKind.Single, $"await Assert.That({collection}).HasSingleItem({predicate})", true, null);
+        }
+
         return (AssertionConversionKind.Single, $"await Assert.That({collection}).HasSingleItem()", true, null);
     }
 

@@ -204,6 +204,30 @@ public class ListAssertionTests
     }
 
     [Test]
+    public async Task Test_List_HasSingleItem_WithPredicate()
+    {
+        IList<int> list = new List<int> { 1, 2, 3, 4, 5 };
+        var item = await Assert.That(list).HasSingleItem(x => x == 3);
+        await Assert.That(item).IsEqualTo(3);
+    }
+
+    [Test]
+    public async Task Test_List_HasSingleItem_WithPredicate_Fails_WhenNoneMatch()
+    {
+        IList<int> list = new List<int> { 1, 2, 3 };
+        var action = async () => await Assert.That(list).HasSingleItem(x => x > 10);
+        await Assert.That(action).ThrowsException();
+    }
+
+    [Test]
+    public async Task Test_List_HasSingleItem_WithPredicate_Fails_WhenMultipleMatch()
+    {
+        IList<int> list = new List<int> { 1, 2, 3, 4, 5 };
+        var action = async () => await Assert.That(list).HasSingleItem(x => x > 3);
+        await Assert.That(action).ThrowsException();
+    }
+
+    [Test]
     public async Task Test_List_IsInOrder()
     {
         IList<int> list = new List<int> { 1, 2, 3, 4, 5 };

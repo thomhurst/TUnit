@@ -188,7 +188,9 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
 
             // "All" is handled separately in ConvertAssertionAsync
 
-            "Single" => SyntaxFactory.ParseExpression($"Assert.That({actual}).HasSingleItem()"),
+            "Single" => argumentListArguments.Count >= 2
+                ? SyntaxFactory.ParseExpression($"Assert.That({argumentListArguments[0]}).HasSingleItem({argumentListArguments[1]})")
+                : SyntaxFactory.ParseExpression($"Assert.That({argumentListArguments[0]}).HasSingleItem()"),
 
             "IsType" => isGeneric
                 ? SyntaxFactory.ParseExpression($"Assert.That({actual}).IsTypeOf<{genericArgs}>()")

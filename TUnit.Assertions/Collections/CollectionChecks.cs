@@ -175,6 +175,39 @@ public static class CollectionChecks
     }
 
     /// <summary>
+    /// Checks if exactly one item in the collection matches the predicate.
+    /// Returns the matching item via out parameter.
+    /// </summary>
+    public static AssertionResult CheckHasSingleItemPredicate<TItem>(
+        ICollectionAdapter<TItem> adapter,
+        Func<TItem, bool> predicate,
+        out TItem? matchingItem)
+    {
+        matchingItem = default;
+        var matchCount = 0;
+
+        foreach (var item in adapter.AsEnumerable())
+        {
+            if (predicate(item))
+            {
+                matchCount++;
+                if (matchCount == 1)
+                {
+                    matchingItem = item;
+                }
+            }
+        }
+
+        if (matchCount == 1)
+        {
+            return AssertionResult.Passed;
+        }
+
+        matchingItem = default;
+        return AssertionResult.Failed($"{matchCount} item(s) matched the predicate");
+    }
+
+    /// <summary>
     /// Checks if all items satisfy the predicate.
     /// </summary>
     public static AssertionResult CheckAll<TItem>(

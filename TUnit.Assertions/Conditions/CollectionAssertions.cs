@@ -414,6 +414,65 @@ public class HasSingleItemAssertion<TCollection, TItem> : Sources.CollectionAsse
 }
 
 /// <summary>
+/// Asserts that a collection contains exactly one item matching the predicate.
+/// When awaited, returns the matching item for further assertions.
+/// Delegates to CollectionChecks for the actual logic.
+/// </summary>
+[AssertionExtension("HasSingleItem")]
+public class HasSingleItemPredicateAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+    where TCollection : IEnumerable<TItem>
+{
+    private readonly Func<TItem, bool> _predicate;
+    private readonly string _predicateDescription;
+    private TItem? _singleItem;
+
+    public HasSingleItemPredicateAssertion(
+        AssertionContext<TCollection> context,
+        Func<TItem, bool> predicate,
+        string predicateDescription)
+        : base(context)
+    {
+        _predicate = predicate ?? throw new ArgumentNullException(nameof(predicate));
+        _predicateDescription = predicateDescription;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
+    {
+        if (metadata.Exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+        }
+
+        if (metadata.Value == null)
+        {
+            return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
+
+        var adapter = new EnumerableAdapter<TItem>(metadata.Value);
+        var result = CollectionChecks.CheckHasSingleItemPredicate(adapter, _predicate, out _singleItem);
+        return Task.FromResult(result);
+    }
+
+    protected override string GetExpectation() => $"to have exactly one item matching {_predicateDescription}";
+
+    /// <summary>
+    /// Enables await syntax that returns the matching item.
+    /// This allows both chaining (.And) and item capture (await).
+    /// </summary>
+    public new System.Runtime.CompilerServices.TaskAwaiter<TItem> GetAwaiter()
+    {
+        return ExecuteAndReturnItemAsync().GetAwaiter();
+    }
+
+    private async Task<TItem> ExecuteAndReturnItemAsync()
+    {
+        await AssertAsync();
+
+        return _singleItem!;
+    }
+}
+
+/// <summary>
 /// Asserts that a collection contains an item matching the predicate.
 /// When awaited, returns the found item for further assertions.
 /// Delegates to CollectionChecks for the actual logic.
