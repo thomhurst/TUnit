@@ -310,12 +310,17 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             ContainingType = containingTypeData,
         };
 
+        var isCovariant = (targetType.TypeKind == TypeKind.Interface ||
+                          (targetType.TypeKind == TypeKind.Class && !targetType.IsSealed)) &&
+                         !ContainsMethodTypeParameters(targetType, methodSymbol);
+
         var targetTypeData = new TargetTypeData()
         {
             TypeName = targetType.ToDisplayString(),
             SimpleTypeName = GetSimpleTypeName(targetType),
             IsNullable = targetType.IsReferenceType ||
                          targetType.NullableAnnotation == NullableAnnotation.Annotated,
+            IsCovariant = isCovariant,
         };
 
         var data = new AssertionMethodData(
@@ -893,6 +898,12 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         var methodName = data.Method.Name;
         var genericParams = data.Method.GenericTypeParameters;
         var genericDeclaration = genericParams.Count > 0 ? $"<{string.Join(", ", genericParams)}>" : "";
+        var isCovariant = data.TargetType.IsCovariant;
+
+        // For covariant extension methods, add TActual type parameter
+        var methodGenericDeclaration = isCovariant
+            ? (genericParams.Count > 0 ? $"<{string.Join(", ", genericParams)}, TActual>" : "<TActual>")
+            : genericDeclaration;
 
         // Collect generic constraints from the method
         var genericConstraints = data.Method.GenericConstraints;
@@ -903,7 +914,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         sb.AppendLine("    /// </summary>");
 
         // Add suppression for generic types to avoid trimming warnings
-        if (genericParams.Count > 0)
+        if (genericParams.Count > 0 || isCovariant)
         {
             sb.AppendLine($"    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(\"Trimming\", \"IL2091\", Justification = \"Generic type parameter is only used for property access, not instantiation\")]");
         }
@@ -918,8 +929,16 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         }
 
         // Method signature
-        sb.Append($"    public static {className}{genericDeclaration} {methodName}{genericDeclaration}(");
-        sb.Append($"this IAssertionSource<{targetTypeName}> source");
+        sb.Append($"    public static {className}{genericDeclaration} {methodName}{methodGenericDeclaration}(");
+
+        if (isCovariant)
+        {
+            sb.Append($"this IAssertionSource<TActual> source");
+        }
+        else
+        {
+            sb.Append($"this IAssertionSource<{targetTypeName}> source");
+        }
 
         // Additional parameters
         foreach (var param in data.AdditionalParameters)
@@ -949,6 +968,13 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             }
         }
 
+        // Add covariant type constraint (strip nullable annotation for constraint)
+        if (isCovariant)
+        {
+            var constraintTypeName = targetTypeName.EndsWith("?") ? targetTypeName.Substring(0, targetTypeName.Length - 1) : targetTypeName;
+            sb.AppendLine($"    where TActual : {constraintTypeName}");
+        }
+
         sb.AppendLine("    {");
 
         // Build expression string
@@ -966,7 +992,15 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
 
         // Construct and return assertion
         // Note: Ref struct parameters (like interpolated string handlers) are converted to string
-        sb.Append($"        return new {className}{genericDeclaration}(source.Context");
+        // For covariant types, map the context to convert from TActual to the target type
+        // For nullable target types, use explicit type parameter to preserve nullability
+        var isNullableTarget = targetTypeName.EndsWith("?");
+        var castTypeName = isNullableTarget ? targetTypeName : $"{targetTypeName}?";
+        var mapTypeArg = isNullableTarget ? $"<{targetTypeName}>" : "";
+        var contextExpr = isCovariant
+            ? $"source.Context.Map{mapTypeArg}(value => ({castTypeName})(object?)value)"
+            : "source.Context";
+        sb.Append($"        return new {className}{genericDeclaration}({contextExpr}");
         foreach (var param in data.AdditionalParameters)
         {
             if (param.IsRefStruct)
@@ -1107,6 +1141,37 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
     }
 
     /// <summary>
+    /// Checks if a type contains any of the method's generic type parameters.
+    /// Used to determine if covariant extension methods can be generated.
+    /// When the target type contains method type parameters (e.g., Result&lt;TValue&gt;),
+    /// adding an extra TActual parameter would break type inference.
+    /// </summary>
+    private static bool ContainsMethodTypeParameters(ITypeSymbol type, IMethodSymbol method)
+    {
+        if (!method.IsGenericMethod)
+        {
+            return false;
+        }
+
+        if (type is ITypeParameterSymbol typeParam)
+        {
+            return method.TypeParameters.Any(tp => SymbolEqualityComparer.Default.Equals(tp, typeParam));
+        }
+
+        if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
+        {
+            return namedType.TypeArguments.Any(arg => ContainsMethodTypeParameters(arg, method));
+        }
+
+        if (type is IArrayTypeSymbol arrayType)
+        {
+            return ContainsMethodTypeParameters(arrayType.ElementType, method);
+        }
+
+        return false;
+    }
+
+    /// <summary>
     /// Checks if a type is a ref struct (ref-like type).
     /// Ref structs cannot be stored as fields in classes.
     /// </summary>
@@ -1189,7 +1254,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         string ContainingNamespace
     );
 
-    private record struct TargetTypeData(string TypeName, string SimpleTypeName, bool IsNullable);
+    private record struct TargetTypeData(string TypeName, string SimpleTypeName, bool IsNullable, bool IsCovariant);
 
     private record struct MethodData(
         string Name,

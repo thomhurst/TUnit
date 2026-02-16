@@ -234,4 +234,28 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             await Assert.That(mainFile).Contains("value!.Contains(_message)");
         });
 #endif
+
+    [Test]
+    public Task InterfaceTargetAssertion() => RunTest(
+        Path.Combine(Sourcy.Git.RootDirectory.FullName,
+            "TUnit.Assertions.SourceGenerator.Tests",
+            "TestData",
+            "InterfaceTargetAssertion.cs"),
+        async generatedFiles =>
+        {
+            await Assert.That(generatedFiles).HasCount(1);
+
+            var mainFile = generatedFiles.FirstOrDefault(f => f.Contains("HasFoo"));
+            await Assert.That(mainFile).IsNotNull();
+
+            // Verify covariant extension method with TActual type parameter
+            await Assert.That(mainFile!).Contains("HasFoo<TActual>(this IAssertionSource<TActual> source");
+            await Assert.That(mainFile!).Contains("where TActual : TUnit.Assertions.Tests.TestData.ITestInterface");
+
+            // Verify the context is mapped for type conversion
+            await Assert.That(mainFile!).Contains("source.Context.Map(value => (TUnit.Assertions.Tests.TestData.ITestInterface?)(object?)value)");
+
+            // Verify parameter-less method also gets covariant treatment
+            await Assert.That(mainFile!).Contains("IsNotNull<TActual>(this IAssertionSource<TActual> source)");
+        });
 }

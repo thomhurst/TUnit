@@ -1,0 +1,119 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Tests.TestData;
+
+namespace TUnit.Assertions.Extensions;
+
+/// <summary>
+/// Generated assertion for HasFoo
+/// </summary>
+public sealed class ITestInterface_HasFoo_String_Assertion : Assertion<TUnit.Assertions.Tests.TestData.ITestInterface>
+{
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
+    private readonly string _expected;
+
+    public ITestInterface_HasFoo_String_Assertion(AssertionContext<TUnit.Assertions.Tests.TestData.ITestInterface> context, string expected)
+        : base(context)
+    {
+        _expected = expected;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TUnit.Assertions.Tests.TestData.ITestInterface> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value!.HasFoo(_expected);
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"to have foo '{_expected}'";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsNotNull
+/// </summary>
+public sealed class ITestInterface_IsNotNull_Assertion : Assertion<TUnit.Assertions.Tests.TestData.ITestInterface>
+{
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
+    public ITestInterface_IsNotNull_Assertion(AssertionContext<TUnit.Assertions.Tests.TestData.ITestInterface> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TUnit.Assertions.Tests.TestData.ITestInterface> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value!.IsNotNull();
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to satisfy IsNotNull";
+    }
+}
+
+public static partial class InterfaceTargetAssertionExtensions
+{
+    /// <summary>
+    /// Generated extension method for HasFoo
+    /// </summary>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
+    public static ITestInterface_HasFoo_String_Assertion HasFoo<TActual>(this IAssertionSource<TActual> source, string expected, [CallerArgumentExpression(nameof(expected))] string? expectedExpression = null)
+    where TActual : TUnit.Assertions.Tests.TestData.ITestInterface
+    {
+        source.Context.ExpressionBuilder.Append($".HasFoo({expectedExpression})");
+        return new ITestInterface_HasFoo_String_Assertion(source.Context.Map(value => (TUnit.Assertions.Tests.TestData.ITestInterface?)(object?)value), expected);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsNotNull
+    /// </summary>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
+    public static ITestInterface_IsNotNull_Assertion IsNotNull<TActual>(this IAssertionSource<TActual> source)
+    where TActual : TUnit.Assertions.Tests.TestData.ITestInterface
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotNull()");
+        return new ITestInterface_IsNotNull_Assertion(source.Context.Map(value => (TUnit.Assertions.Tests.TestData.ITestInterface?)(object?)value));
+    }
+
+}
+
+]
