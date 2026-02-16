@@ -1026,6 +1026,12 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
 
     private static string GetSimpleTypeName(ITypeSymbol type)
     {
+        // Handle array types: string[] becomes StringArray
+        if (type is IArrayTypeSymbol arrayType)
+        {
+            return $"{GetSimpleTypeName(arrayType.ElementType)}Array";
+        }
+
         // Handle special types first
         var simpleName = type.SpecialType switch
         {

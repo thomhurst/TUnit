@@ -249,6 +249,6 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             await Assert.That(mainFile).IsNotNull();
             // Verify extension method targets IAssertionSource<string[]>
             await Assert.That(mainFile!).Contains("IAssertionSource<string[]>");
-            await Assert.That(mainFile!).Contains("StringArray_ContainsMessage_String_Boolean_Assertion");
+            await Assert.That(mainFile!).Contains("StringArray_ContainsMessage_String_Bool_Assertion");
         });
 }
