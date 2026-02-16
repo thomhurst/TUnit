@@ -234,4 +234,21 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             await Assert.That(mainFile).Contains("value!.Contains(_message)");
         });
 #endif
+
+    [Test]
+    public Task ArrayTargetType() => RunTest(
+        Path.Combine(Sourcy.Git.RootDirectory.FullName,
+            "TUnit.Assertions.SourceGenerator.Tests",
+            "TestData",
+            "ArrayTargetAssertion.cs"),
+        async generatedFiles =>
+        {
+            await Assert.That(generatedFiles).HasCount(1);
+
+            var mainFile = generatedFiles.FirstOrDefault(f => f.Contains("ContainsMessage"));
+            await Assert.That(mainFile).IsNotNull();
+            // Verify extension method targets IAssertionSource<string[]>
+            await Assert.That(mainFile!).Contains("IAssertionSource<string[]>");
+            await Assert.That(mainFile!).Contains("StringArray_ContainsMessage_String_Boolean_Assertion");
+        });
 }
