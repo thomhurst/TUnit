@@ -4886,6 +4886,10 @@ namespace .Sources
         public .<.<TItem>, TExpected> IsNotTypeOf<TExpected>() { }
         public .<.<TItem>, TExpected> IsTypeOf<TExpected>() { }
     }
+    public class ArrayAssertion<TItem> : .<TItem[], TItem>
+    {
+        public ArrayAssertion(TItem[]? value, string? expression) { }
+    }
     public class AsyncEnumerableAssertion<TItem> : .<TItem>
     {
         public AsyncEnumerableAssertion(.<TItem> value, string? expression) { }
