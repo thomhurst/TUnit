@@ -1,0 +1,67 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Tests.TestData;
+
+namespace TUnit.Assertions.Extensions;
+
+/// <summary>
+/// Generated assertion for ContainsMessage
+/// </summary>
+public sealed class _ContainsMessage_String_Bool_Assertion : Assertion<string[]>
+{
+    private readonly string _needle;
+    private readonly bool _exact;
+
+    public _ContainsMessage_String_Bool_Assertion(AssertionContext<string[]> context, string needle, bool exact)
+        : base(context)
+    {
+        _needle = needle;
+        _exact = exact;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string[]> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value!.ContainsMessage(_needle, _exact);
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"to contain message '{_needle}'";
+    }
+}
+
+public static partial class MethodWithDefaultValuesExtensions
+{
+    /// <summary>
+    /// Generated extension method for ContainsMessage
+    /// </summary>
+    public static _ContainsMessage_String_Bool_Assertion ContainsMessage(this IAssertionSource<string[]> source, string needle, bool exact = true, [CallerArgumentExpression(nameof(needle))] string? needleExpression = null, [CallerArgumentExpression(nameof(exact))] string? exactExpression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".ContainsMessage({needleExpression}, {exactExpression})");
+        return new _ContainsMessage_String_Bool_Assertion(source.Context, needle, exact);
+    }
+
+}
+
+]
