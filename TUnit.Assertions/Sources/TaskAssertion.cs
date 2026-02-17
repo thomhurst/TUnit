@@ -85,6 +85,18 @@ public class TaskAssertion<TValue> : IAssertionSource<TValue>, IDelegateAssertio
         return new IsNotAssignableToAssertion<TTarget, TValue>(Context);
     }
 
+    public IsAssignableFromAssertion<TTarget, TValue> IsAssignableFrom<TTarget>()
+    {
+        Context.ExpressionBuilder.Append($".IsAssignableFrom<{typeof(TTarget).Name}>()");
+        return new IsAssignableFromAssertion<TTarget, TValue>(Context);
+    }
+
+    public IsNotAssignableFromAssertion<TTarget, TValue> IsNotAssignableFrom<TTarget>()
+    {
+        Context.ExpressionBuilder.Append($".IsNotAssignableFrom<{typeof(TTarget).Name}>()");
+        return new IsNotAssignableFromAssertion<TTarget, TValue>(Context);
+    }
+
     /// <summary>
     /// Explicit interface implementation for Task&lt;TValue?&gt; assignability checking.
     /// Asserts that the task itself is assignable to the specified type.
@@ -103,6 +115,26 @@ public class TaskAssertion<TValue> : IAssertionSource<TValue>, IDelegateAssertio
     {
         TaskContext.ExpressionBuilder.Append($".IsNotAssignableTo<{typeof(TTarget).Name}>()");
         return new IsNotAssignableToAssertion<TTarget, Task<TValue?>>(TaskContext);
+    }
+
+    /// <summary>
+    /// Explicit interface implementation for Task&lt;TValue?&gt; assignability checking.
+    /// Asserts that the task itself is assignable from the specified type.
+    /// </summary>
+    IsAssignableFromAssertion<TTarget, Task<TValue?>> IAssertionSource<Task<TValue?>>.IsAssignableFrom<TTarget>()
+    {
+        TaskContext.ExpressionBuilder.Append($".IsAssignableFrom<{typeof(TTarget).Name}>()");
+        return new IsAssignableFromAssertion<TTarget, Task<TValue?>>(TaskContext);
+    }
+
+    /// <summary>
+    /// Explicit interface implementation for Task&lt;TValue?&gt; assignability checking.
+    /// Asserts that the task itself is not assignable from the specified type.
+    /// </summary>
+    IsNotAssignableFromAssertion<TTarget, Task<TValue?>> IAssertionSource<Task<TValue?>>.IsNotAssignableFrom<TTarget>()
+    {
+        TaskContext.ExpressionBuilder.Append($".IsNotAssignableFrom<{typeof(TTarget).Name}>()");
+        return new IsNotAssignableFromAssertion<TTarget, Task<TValue?>>(TaskContext);
     }
 
     /// <summary>

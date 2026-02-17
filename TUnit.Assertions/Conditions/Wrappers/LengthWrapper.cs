@@ -51,6 +51,26 @@ public class LengthWrapper : IAssertionSource<string>
     }
 
     /// <summary>
+    /// Not supported on LengthWrapper - use IsAssignableFrom on the assertion source before calling HasLength().
+    /// </summary>
+    IsAssignableFromAssertion<TTarget, string> IAssertionSource<string>.IsAssignableFrom<TTarget>()
+    {
+        throw new NotSupportedException(
+            "IsAssignableFrom is not supported after HasLength(). " +
+            "Use: Assert.That(value).IsAssignableFrom<string>().HasLength().EqualTo(5)");
+    }
+
+    /// <summary>
+    /// Not supported on LengthWrapper - use IsNotAssignableFrom on the assertion source before calling HasLength().
+    /// </summary>
+    IsNotAssignableFromAssertion<TTarget, string> IAssertionSource<string>.IsNotAssignableFrom<TTarget>()
+    {
+        throw new NotSupportedException(
+            "IsNotAssignableFrom is not supported after HasLength(). " +
+            "Use: Assert.That(value).IsNotAssignableFrom<string>().HasLength().EqualTo(5)");
+    }
+
+    /// <summary>
     /// Not supported on LengthWrapper - use IsNotTypeOf on the assertion source before calling HasLength().
     /// </summary>
     IsNotTypeOfAssertion<string, TExpected> IAssertionSource<string>.IsNotTypeOf<TExpected>()

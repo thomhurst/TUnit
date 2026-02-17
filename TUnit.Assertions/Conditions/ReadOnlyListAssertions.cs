@@ -160,6 +160,20 @@ public class ReadOnlyListItemAtSource<TList, TItem> : IAssertionSource<TItem>
         Context.ExpressionBuilder.Append($".IsNotAssignableTo<{typeof(TExpected).Name}>()");
         return new IsNotAssignableToAssertion<TExpected, TItem>(Context);
     }
+
+    /// <inheritdoc />
+    public IsAssignableFromAssertion<TExpected, TItem> IsAssignableFrom<TExpected>()
+    {
+        Context.ExpressionBuilder.Append($".IsAssignableFrom<{typeof(TExpected).Name}>()");
+        return new IsAssignableFromAssertion<TExpected, TItem>(Context);
+    }
+
+    /// <inheritdoc />
+    public IsNotAssignableFromAssertion<TExpected, TItem> IsNotAssignableFrom<TExpected>()
+    {
+        Context.ExpressionBuilder.Append($".IsNotAssignableFrom<{typeof(TExpected).Name}>()");
+        return new IsNotAssignableFromAssertion<TExpected, TItem>(Context);
+    }
 }
 
 /// <summary>
@@ -260,6 +274,20 @@ public class ReadOnlyListLastItemSource<TList, TItem> : IAssertionSource<TItem>
     {
         Context.ExpressionBuilder.Append($".IsNotAssignableTo<{typeof(TExpected).Name}>()");
         return new IsNotAssignableToAssertion<TExpected, TItem>(Context);
+    }
+
+    /// <inheritdoc />
+    public IsAssignableFromAssertion<TExpected, TItem> IsAssignableFrom<TExpected>()
+    {
+        Context.ExpressionBuilder.Append($".IsAssignableFrom<{typeof(TExpected).Name}>()");
+        return new IsAssignableFromAssertion<TExpected, TItem>(Context);
+    }
+
+    /// <inheritdoc />
+    public IsNotAssignableFromAssertion<TExpected, TItem> IsNotAssignableFrom<TExpected>()
+    {
+        Context.ExpressionBuilder.Append($".IsNotAssignableFrom<{typeof(TExpected).Name}>()");
+        return new IsNotAssignableFromAssertion<TExpected, TItem>(Context);
     }
 }
 

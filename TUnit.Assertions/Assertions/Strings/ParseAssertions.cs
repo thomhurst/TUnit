@@ -265,6 +265,18 @@ public class WhenParsedIntoAssertion<[DynamicallyAccessedMembers(DynamicallyAcce
         return new IsNotAssignableToAssertion<TTarget, T>(Context);
     }
 
+    public IsAssignableFromAssertion<TTarget, T> IsAssignableFrom<TTarget>()
+    {
+        Context.ExpressionBuilder.Append($".IsAssignableFrom<{typeof(TTarget).Name}>()");
+        return new IsAssignableFromAssertion<TTarget, T>(Context);
+    }
+
+    public IsNotAssignableFromAssertion<TTarget, T> IsNotAssignableFrom<TTarget>()
+    {
+        Context.ExpressionBuilder.Append($".IsNotAssignableFrom<{typeof(TTarget).Name}>()");
+        return new IsNotAssignableFromAssertion<TTarget, T>(Context);
+    }
+
     /// <summary>
     /// Asserts that the parsed value is NOT of the specified type.
     /// Example: await Assert.That("123").WhenParsedInto<object>().IsNotTypeOf<string>();

@@ -133,6 +133,18 @@ public class PropertyAssertionResult<TObject> : IAssertionSource<TObject>
         return new IsNotAssignableToAssertion<TTarget, TObject>(Context);
     }
 
+    public IsAssignableFromAssertion<TTarget, TObject> IsAssignableFrom<TTarget>()
+    {
+        Context.ExpressionBuilder.Append($".IsAssignableFrom<{typeof(TTarget).Name}>()");
+        return new IsAssignableFromAssertion<TTarget, TObject>(Context);
+    }
+
+    public IsNotAssignableFromAssertion<TTarget, TObject> IsNotAssignableFrom<TTarget>()
+    {
+        Context.ExpressionBuilder.Append($".IsNotAssignableFrom<{typeof(TTarget).Name}>()");
+        return new IsNotAssignableFromAssertion<TTarget, TObject>(Context);
+    }
+
     /// <summary>
     /// Asserts that the parent object is NOT of the specified type.
     /// Example: await Assert.That(obj).HasProperty(x => x.Name).IsEqualTo("test").IsNotTypeOf<BaseClass>();

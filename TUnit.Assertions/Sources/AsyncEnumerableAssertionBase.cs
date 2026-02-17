@@ -173,6 +173,20 @@ public abstract class AsyncEnumerableAssertionBase<TItem> : Assertion<IAsyncEnum
         return new IsNotAssignableToAssertion<TExpected, IAsyncEnumerable<TItem>>(Context);
     }
 
+    /// <inheritdoc />
+    public IsAssignableFromAssertion<TExpected, IAsyncEnumerable<TItem>> IsAssignableFrom<TExpected>()
+    {
+        Context.ExpressionBuilder.Append($".IsAssignableFrom<{typeof(TExpected).Name}>()");
+        return new IsAssignableFromAssertion<TExpected, IAsyncEnumerable<TItem>>(Context);
+    }
+
+    /// <inheritdoc />
+    public IsNotAssignableFromAssertion<TExpected, IAsyncEnumerable<TItem>> IsNotAssignableFrom<TExpected>()
+    {
+        Context.ExpressionBuilder.Append($".IsNotAssignableFrom<{typeof(TExpected).Name}>()");
+        return new IsNotAssignableFromAssertion<TExpected, IAsyncEnumerable<TItem>>(Context);
+    }
+
     // CheckAsync is not overridden here - it's abstract in Assertion<T>
     // Each concrete assertion class will implement it
 }

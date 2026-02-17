@@ -153,6 +153,18 @@ public class AsyncDelegateAssertion : IAssertionSource<object?>, IDelegateAssert
         return new IsNotAssignableToAssertion<TTarget, object?>(Context);
     }
 
+    public IsAssignableFromAssertion<TTarget, object?> IsAssignableFrom<TTarget>()
+    {
+        Context.ExpressionBuilder.Append($".IsAssignableFrom<{typeof(TTarget).Name}>()");
+        return new IsAssignableFromAssertion<TTarget, object?>(Context);
+    }
+
+    public IsNotAssignableFromAssertion<TTarget, object?> IsNotAssignableFrom<TTarget>()
+    {
+        Context.ExpressionBuilder.Append($".IsNotAssignableFrom<{typeof(TTarget).Name}>()");
+        return new IsNotAssignableFromAssertion<TTarget, object?>(Context);
+    }
+
     /// <summary>
     /// Explicit interface implementation for Task assignability checking.
     /// Asserts that the task itself is assignable to the specified type.
@@ -171,6 +183,26 @@ public class AsyncDelegateAssertion : IAssertionSource<object?>, IDelegateAssert
     {
         TaskContext.ExpressionBuilder.Append($".IsNotAssignableTo<{typeof(TTarget).Name}>()");
         return new IsNotAssignableToAssertion<TTarget, Task>(TaskContext);
+    }
+
+    /// <summary>
+    /// Explicit interface implementation for Task assignability checking.
+    /// Asserts that the task itself is assignable from the specified type.
+    /// </summary>
+    IsAssignableFromAssertion<TTarget, Task> IAssertionSource<Task>.IsAssignableFrom<TTarget>()
+    {
+        TaskContext.ExpressionBuilder.Append($".IsAssignableFrom<{typeof(TTarget).Name}>()");
+        return new IsAssignableFromAssertion<TTarget, Task>(TaskContext);
+    }
+
+    /// <summary>
+    /// Explicit interface implementation for Task assignability checking.
+    /// Asserts that the task itself is not assignable from the specified type.
+    /// </summary>
+    IsNotAssignableFromAssertion<TTarget, Task> IAssertionSource<Task>.IsNotAssignableFrom<TTarget>()
+    {
+        TaskContext.ExpressionBuilder.Append($".IsNotAssignableFrom<{typeof(TTarget).Name}>()");
+        return new IsNotAssignableFromAssertion<TTarget, Task>(TaskContext);
     }
 
     /// <summary>
