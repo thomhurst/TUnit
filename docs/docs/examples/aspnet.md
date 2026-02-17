@@ -341,10 +341,16 @@ For EF Core Code First applications, use per-test PostgreSQL schemas instead of 
 // 1. DbContext with dynamic schema support
 public class TodoDbContext : DbContext
 {
-    public string SchemaName { get; set; } = "public";
+    public string SchemaName { get; set; }
     public DbSet<Todo> Todos => Set<Todo>();
 
-    public TodoDbContext(DbContextOptions<TodoDbContext> options) : base(options) { }
+    // IConfiguration is optional: resolved via DI in the app, absent when
+    // constructing standalone (e.g. in SetupAsync for EnsureCreatedAsync).
+    public TodoDbContext(DbContextOptions<TodoDbContext> options, IConfiguration? config = null)
+        : base(options)
+    {
+        SchemaName = config?["Database:Schema"] ?? "public";
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

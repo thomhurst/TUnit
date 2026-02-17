@@ -205,13 +205,18 @@ public class InMemoryPostgreSqlDatabase : IAsyncInitializer, IAsyncDisposable
 For EF Core Code First applications, use per-test PostgreSQL schemas instead of per-test table names. This avoids fighting EF Core's table naming conventions:
 
 ```csharp
-// DbContext with dynamic schema support
+// DbContext with dynamic schema support — reads schema from IConfiguration when
+// resolved via DI, falls back to "public" when constructed standalone.
 public class TodoDbContext : DbContext
 {
-    public string SchemaName { get; set; } = "public";
+    public string SchemaName { get; set; }
     public DbSet<Todo> Todos => Set<Todo>();
 
-    public TodoDbContext(DbContextOptions<TodoDbContext> options) : base(options) { }
+    public TodoDbContext(DbContextOptions<TodoDbContext> options, IConfiguration? config = null)
+        : base(options)
+    {
+        SchemaName = config?["Database:Schema"] ?? "public";
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
