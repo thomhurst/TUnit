@@ -200,6 +200,86 @@ public class InMemoryPostgreSqlDatabase : IAsyncInitializer, IAsyncDisposable
 }
 ```
 
+### EF Core Code First with Per-Test Schema Isolation
+
+For EF Core Code First applications, use per-test PostgreSQL schemas instead of per-test table names. This avoids fighting EF Core's table naming conventions:
+
+```csharp
+// DbContext with dynamic schema support
+public class TodoDbContext : DbContext
+{
+    public string SchemaName { get; set; } = "public";
+    public DbSet<Todo> Todos => Set<Todo>();
+
+    public TodoDbContext(DbContextOptions<TodoDbContext> options) : base(options) { }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.HasDefaultSchema(SchemaName);
+        // ... entity configuration
+    }
+}
+
+// IModelCacheKeyFactory ensures different schemas get different model caches
+public class SchemaModelCacheKeyFactory : IModelCacheKeyFactory
+{
+    public object Create(DbContext context, bool designTime)
+        => context is TodoDbContext tc
+            ? (context.GetType(), tc.SchemaName, designTime)
+            : (object)(context.GetType(), designTime);
+}
+
+// Test base: creates schema + tables in SetupAsync, drops in cleanup
+public abstract class EfCoreTodoTestBase
+    : WebApplicationTest<EfCoreWebApplicationFactory, Program>
+{
+    [ClassDataSource<InMemoryPostgreSqlDatabase>(Shared = SharedType.PerTestSession)]
+    public InMemoryPostgreSqlDatabase PostgreSql { get; init; } = null!;
+
+    protected string SchemaName { get; private set; } = null!;
+
+    protected override async Task SetupAsync()
+    {
+        SchemaName = GetIsolatedName("schema"); // e.g. "Test_42_schema"
+
+        // Create schema, then let EF Core create tables
+        await using var conn = new NpgsqlConnection(
+            PostgreSql.Container.GetConnectionString());
+        await conn.OpenAsync();
+        await using var cmd = conn.CreateCommand();
+        cmd.CommandText = $"CREATE SCHEMA IF NOT EXISTS \"{SchemaName}\"";
+        await cmd.ExecuteNonQueryAsync();
+
+        var options = new DbContextOptionsBuilder<TodoDbContext>()
+            .UseNpgsql(PostgreSql.Container.GetConnectionString())
+            .ReplaceService<IModelCacheKeyFactory, SchemaModelCacheKeyFactory>()
+            .Options;
+        await using var db = new TodoDbContext(options) { SchemaName = SchemaName };
+        await db.Database.EnsureCreatedAsync();
+    }
+
+    protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
+    {
+        config.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            { "Database:Schema", SchemaName }
+        });
+    }
+
+    [After(HookType.Test)]
+    public async Task CleanupSchema()
+    {
+        await using var conn = new NpgsqlConnection(
+            PostgreSql.Container.GetConnectionString());
+        await conn.OpenAsync();
+        await using var cmd = conn.CreateCommand();
+        cmd.CommandText = $"DROP SCHEMA IF EXISTS \"{SchemaName}\" CASCADE";
+        await cmd.ExecuteNonQueryAsync();
+    }
+}
+```
+
+See the full working example in `TUnit.Example.Asp.Net.TestProject/EfCore/`.
 
 ## Comparison with Other Frameworks
 

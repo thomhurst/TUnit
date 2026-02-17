@@ -333,6 +333,100 @@ public abstract class TodoTestBase : TestsBase
 }
 ```
 
+### Per-Test Schema Isolation with EF Core
+
+For EF Core Code First applications, use per-test PostgreSQL schemas instead of per-test table names. This works with EF Core's model conventions and provides complete isolation:
+
+```csharp
+// 1. DbContext with dynamic schema support
+public class TodoDbContext : DbContext
+{
+    public string SchemaName { get; set; } = "public";
+    public DbSet<Todo> Todos => Set<Todo>();
+
+    public TodoDbContext(DbContextOptions<TodoDbContext> options) : base(options) { }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.HasDefaultSchema(SchemaName);
+        modelBuilder.Entity<Todo>(entity =>
+        {
+            entity.HasKey(t => t.Id);
+            entity.Property(t => t.Title).IsRequired().HasMaxLength(200);
+        });
+    }
+}
+
+// 2. Model cache key factory (required for multiple schemas)
+public class SchemaModelCacheKeyFactory : IModelCacheKeyFactory
+{
+    public object Create(DbContext context, bool designTime)
+    {
+        return context is TodoDbContext todoContext
+            ? (context.GetType(), todoContext.SchemaName, designTime)
+            : (object)(context.GetType(), designTime);
+    }
+}
+
+// 3. Test base class with schema-per-test isolation
+public abstract class EfCoreTodoTestBase : WebApplicationTest<EfCoreWebApplicationFactory, Program>
+{
+    [ClassDataSource<InMemoryDatabase>(Shared = SharedType.PerTestSession)]
+    public InMemoryDatabase Database { get; init; } = null!;
+
+    protected string SchemaName { get; private set; } = null!;
+
+    protected override async Task SetupAsync()
+    {
+        SchemaName = GetIsolatedName("schema");
+
+        // Create schema via raw SQL
+        await using var connection = new NpgsqlConnection(
+            Database.Container.GetConnectionString());
+        await connection.OpenAsync();
+        await using var cmd = connection.CreateCommand();
+        cmd.CommandText = $"CREATE SCHEMA IF NOT EXISTS \"{SchemaName}\"";
+        await cmd.ExecuteNonQueryAsync();
+
+        // Create tables via EF Core
+        var options = new DbContextOptionsBuilder<TodoDbContext>()
+            .UseNpgsql(Database.Container.GetConnectionString())
+            .ReplaceService<IModelCacheKeyFactory, SchemaModelCacheKeyFactory>()
+            .Options;
+
+        await using var dbContext = new TodoDbContext(options) { SchemaName = SchemaName };
+        await dbContext.Database.EnsureCreatedAsync();
+    }
+
+    protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
+    {
+        config.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            { "Database:Schema", SchemaName }
+        });
+    }
+
+    [After(HookType.Test)]
+    public async Task CleanupSchema()
+    {
+        await using var connection = new NpgsqlConnection(
+            Database.Container.GetConnectionString());
+        await connection.OpenAsync();
+        await using var cmd = connection.CreateCommand();
+        cmd.CommandText = $"DROP SCHEMA IF EXISTS \"{SchemaName}\" CASCADE";
+        await cmd.ExecuteNonQueryAsync();
+    }
+}
+```
+
+**Key differences from raw SQL approach:**
+- Uses `EnsureCreatedAsync()` instead of manual `CREATE TABLE` statements
+- Isolation is at the **schema level** rather than the table name level
+- `IModelCacheKeyFactory` ensures EF Core caches a separate model per schema
+- Cleanup uses `DROP SCHEMA ... CASCADE` to remove all tables at once
+
+See the full working example in `TUnit.Example.Asp.Net.TestProject/EfCore/`.
+
 ## HTTP Exchange Capture
 
 Capture and inspect HTTP requests/responses for assertions:
