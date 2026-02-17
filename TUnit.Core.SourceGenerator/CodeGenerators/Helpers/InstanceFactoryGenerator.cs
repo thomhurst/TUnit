@@ -7,6 +7,37 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 public static class InstanceFactoryGenerator
 {
     /// <summary>
+    /// Checks if the given type has a ClassConstructor attribute on the class/base types OR at the assembly level.
+    /// </summary>
+    public static bool HasClassConstructorAttribute(INamedTypeSymbol namedTypeSymbol)
+    {
+        var hasOnClass = namedTypeSymbol.GetAttributesIncludingBaseTypes()
+            .Any(a => a.AttributeClass?.GloballyQualifiedNonGeneric() == WellKnownFullyQualifiedClassNames.ClassConstructorAttribute.WithGlobalPrefix);
+
+        if (hasOnClass)
+        {
+            return true;
+        }
+
+        return namedTypeSymbol.ContainingAssembly.GetAttributes()
+            .Any(a => a.AttributeClass?.GloballyQualifiedNonGeneric() == WellKnownFullyQualifiedClassNames.ClassConstructorAttribute.WithGlobalPrefix);
+    }
+
+    /// <summary>
+    /// Generates the ClassConstructor throw-stub InstanceFactory.
+    /// </summary>
+    public static void GenerateClassConstructorStub(CodeWriter writer)
+    {
+        writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("// ClassConstructor attribute is present - instance creation handled at runtime");
+        writer.AppendLine("throw new global::System.NotSupportedException(\"Instance creation for classes with ClassConstructor attribute is handled at runtime\");");
+        writer.Unindent();
+        writer.AppendLine("},");
+    }
+
+    /// <summary>
     /// Generates code to create an instance of a type with proper required property handling.
     /// This handles required properties that don't have data sources by initializing them with defaults.
     /// </summary>
@@ -46,26 +77,11 @@ public static class InstanceFactoryGenerator
     {
         var className = typeSymbol.GloballyQualified();
 
-        // Check if the class has a ClassConstructor attribute first, before any other checks
-        if (typeSymbol is INamedTypeSymbol namedTypeSymbol)
+        // Check if the class has a ClassConstructor attribute first (class, base types, or assembly level)
+        if (typeSymbol is INamedTypeSymbol namedTypeSymbol && HasClassConstructorAttribute(namedTypeSymbol))
         {
-            var hasClassConstructor = namedTypeSymbol.GetAttributesIncludingBaseTypes()
-                .Any(a => a.AttributeClass?.GloballyQualifiedNonGeneric() == WellKnownFullyQualifiedClassNames.ClassConstructorAttribute.WithGlobalPrefix);
-
-            if (hasClassConstructor)
-            {
-                // If class has ClassConstructor attribute, generate a factory that throws
-                // The actual instance creation will be handled by ClassConstructorHelper at runtime
-                // This applies to both generic and non-generic classes
-                writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
-                writer.AppendLine("{");
-                writer.Indent();
-                writer.AppendLine("// ClassConstructor attribute is present - instance creation handled at runtime");
-                writer.AppendLine("throw new global::System.NotSupportedException(\"Instance creation for classes with ClassConstructor attribute is handled at runtime\");");
-                writer.Unindent();
-                writer.AppendLine("},");
-                return;
-            }
+            GenerateClassConstructorStub(writer);
+            return;
         }
 
         // Check if this is a generic type definition

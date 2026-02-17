@@ -2979,31 +2979,38 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         GenerateMetadataForConcreteInstantiation(writer, testMethod);
 
         // Generate instance factory that works with generic types
-        writer.AppendLine("InstanceFactory = static (typeArgs, args) =>");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        if (testMethod.IsGenericType)
+        if (InstanceFactoryGenerator.HasClassConstructorAttribute(testMethod.TypeSymbol))
         {
-            // For generic classes, we need to use runtime type construction
-            var openGenericTypeName = GetOpenGenericTypeName(testMethod.TypeSymbol);
-            writer.AppendLine($"var genericType = typeof({openGenericTypeName});");
-            writer.AppendLine("if (typeArgs.Length > 0)");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("var closedType = genericType.MakeGenericType(typeArgs);");
-            writer.AppendLine("return global::System.Activator.CreateInstance(closedType, args)!;");
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.AppendLine("throw new global::System.InvalidOperationException(\"No type arguments provided for generic class\");");
+            InstanceFactoryGenerator.GenerateClassConstructorStub(writer);
         }
         else
         {
-            writer.AppendLine($"return new {className}();");
-        }
+            writer.AppendLine("InstanceFactory = static (typeArgs, args) =>");
+            writer.AppendLine("{");
+            writer.Indent();
 
-        writer.Unindent();
-        writer.AppendLine("},");
+            if (testMethod.IsGenericType)
+            {
+                // For generic classes, we need to use runtime type construction
+                var openGenericTypeName = GetOpenGenericTypeName(testMethod.TypeSymbol);
+                writer.AppendLine($"var genericType = typeof({openGenericTypeName});");
+                writer.AppendLine("if (typeArgs.Length > 0)");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine("var closedType = genericType.MakeGenericType(typeArgs);");
+                writer.AppendLine("return global::System.Activator.CreateInstance(closedType, args)!;");
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.AppendLine("throw new global::System.InvalidOperationException(\"No type arguments provided for generic class\");");
+            }
+            else
+            {
+                writer.AppendLine($"return new {className}();");
+            }
+
+            writer.Unindent();
+            writer.AppendLine("},");
+        }
 
         // Generate concrete instantiations dictionary
         writer.AppendLine("ConcreteInstantiations = new global::System.Collections.Generic.Dictionary<string, global::TUnit.Core.TestMetadata>");
@@ -4490,53 +4497,60 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         GenerateConcreteMetadataWithFilteredDataSources(writer, testMethod, specificArgumentsAttribute, typeArguments);
 
         // Generate instance factory
-        writer.AppendLine("InstanceFactory = static (typeArgs, args) =>");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        // Check if the class has a constructor that requires arguments
-        var hasParameterizedConstructor = false;
-        var constructorParamCount = 0;
-
-        if (testMethod.IsGenericType)
+        if (InstanceFactoryGenerator.HasClassConstructorAttribute(testMethod.TypeSymbol))
         {
-            // Find the primary constructor or first public constructor
-            var constructor = testMethod.TypeSymbol.Constructors
-                .Where(c => !c.IsStatic && c.DeclaredAccessibility == Accessibility.Public)
-                .OrderByDescending(c => c.Parameters.Length)
-                .FirstOrDefault();
-
-            if (constructor is { Parameters.Length: > 0 })
-            {
-                hasParameterizedConstructor = true;
-                constructorParamCount = constructor.Parameters.Length;
-            }
-        }
-
-        if (hasParameterizedConstructor)
-        {
-            // For classes with constructor parameters, use the specific constructor arguments from the Arguments attribute
-            if (specificArgumentsAttribute is { ConstructorArguments.Length: > 0 } &&
-                specificArgumentsAttribute.ConstructorArguments[0].Kind == TypedConstantKind.Array)
-            {
-                var argumentValues = specificArgumentsAttribute.ConstructorArguments[0].Values;
-                var constructorArgs = string.Join(", ", argumentValues.Select(arg => TypedConstantParser.GetRawTypedConstantValue(arg)));
-
-                writer.AppendLine($"return ({concreteClassName})global::System.Activator.CreateInstance(typeof({concreteClassName}), new object[] {{ {constructorArgs} }})!;");
-            }
-            else
-            {
-                // Fallback to using args if no specific Arguments attribute
-                writer.AppendLine($"return ({concreteClassName})global::System.Activator.CreateInstance(typeof({concreteClassName}), args)!;");
-            }
+            InstanceFactoryGenerator.GenerateClassConstructorStub(writer);
         }
         else
         {
-            writer.AppendLine($"return new {concreteClassName}();");
-        }
+            writer.AppendLine("InstanceFactory = static (typeArgs, args) =>");
+            writer.AppendLine("{");
+            writer.Indent();
 
-        writer.Unindent();
-        writer.AppendLine("},");
+            // Check if the class has a constructor that requires arguments
+            var hasParameterizedConstructor = false;
+            var constructorParamCount = 0;
+
+            if (testMethod.IsGenericType)
+            {
+                // Find the primary constructor or first public constructor
+                var constructor = testMethod.TypeSymbol.Constructors
+                    .Where(c => !c.IsStatic && c.DeclaredAccessibility == Accessibility.Public)
+                    .OrderByDescending(c => c.Parameters.Length)
+                    .FirstOrDefault();
+
+                if (constructor is { Parameters.Length: > 0 })
+                {
+                    hasParameterizedConstructor = true;
+                    constructorParamCount = constructor.Parameters.Length;
+                }
+            }
+
+            if (hasParameterizedConstructor)
+            {
+                // For classes with constructor parameters, use the specific constructor arguments from the Arguments attribute
+                if (specificArgumentsAttribute is { ConstructorArguments.Length: > 0 } &&
+                    specificArgumentsAttribute.ConstructorArguments[0].Kind == TypedConstantKind.Array)
+                {
+                    var argumentValues = specificArgumentsAttribute.ConstructorArguments[0].Values;
+                    var constructorArgs = string.Join(", ", argumentValues.Select(arg => TypedConstantParser.GetRawTypedConstantValue(arg)));
+
+                    writer.AppendLine($"return ({concreteClassName})global::System.Activator.CreateInstance(typeof({concreteClassName}), new object[] {{ {constructorArgs} }})!;");
+                }
+                else
+                {
+                    // Fallback to using args if no specific Arguments attribute
+                    writer.AppendLine($"return ({concreteClassName})global::System.Activator.CreateInstance(typeof({concreteClassName}), args)!;");
+                }
+            }
+            else
+            {
+                writer.AppendLine($"return new {concreteClassName}();");
+            }
+
+            writer.Unindent();
+            writer.AppendLine("},");
+        }
 
         // Generate strongly-typed test invoker
         writer.AppendLine("InvokeTypedTest = static (instance, args, cancellationToken) =>");
@@ -5082,59 +5096,66 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         SourceInformationWriter.GenerateMethodInformation(writer, compilation, testMethod.TypeSymbol, testMethod.MethodSymbol, null, ',');
 
         // Generate instance factory
-        writer.AppendLine("InstanceFactory = static (typeArgs, args) =>");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        // Check if the class has a constructor that requires arguments
-        var hasParameterizedConstructor = false;
-        var constructorParamCount = 0;
-
-        // Find the primary constructor or first public constructor
-        var constructor = testMethod.TypeSymbol.Constructors
-            .Where(c => !c.IsStatic && c.DeclaredAccessibility == Accessibility.Public)
-            .OrderByDescending(c => c.Parameters.Length)
-            .FirstOrDefault();
-
-        if (constructor is { Parameters.Length: > 0 })
+        if (InstanceFactoryGenerator.HasClassConstructorAttribute(testMethod.TypeSymbol))
         {
-            hasParameterizedConstructor = true;
-            constructorParamCount = constructor.Parameters.Length;
-        }
-
-        if (hasParameterizedConstructor)
-        {
-            // For classes with constructor parameters, check if we have Arguments attribute
-            var isArgumentsAttribute = classDataSourceAttribute?.AttributeClass?.Name == "ArgumentsAttribute";
-
-            if (isArgumentsAttribute && classDataSourceAttribute is { ConstructorArguments.Length: > 0 } &&
-                classDataSourceAttribute.ConstructorArguments[0].Kind == TypedConstantKind.Array)
-            {
-                var argumentValues = classDataSourceAttribute.ConstructorArguments[0].Values;
-                var constructorArgs = string.Join(", ", argumentValues.Select(arg => TypedConstantParser.GetRawTypedConstantValue(arg)));
-
-                writer.AppendLine($"return new {className}({constructorArgs});");
-            }
-            else
-            {
-                // Use the args parameter if no specific arguments are provided
-                writer.AppendLine($"if (args.Length >= {constructorParamCount})");
-                writer.AppendLine("{");
-                writer.Indent();
-                writer.AppendLine($"return new {className}({string.Join(", ", Enumerable.Range(0, constructorParamCount).Select(i => $"args[{i}]"))});");
-                writer.Unindent();
-                writer.AppendLine("}");
-                writer.AppendLine("throw new global::System.InvalidOperationException(\"Not enough arguments provided for class constructor\");");
-            }
+            InstanceFactoryGenerator.GenerateClassConstructorStub(writer);
         }
         else
         {
-            // No constructor parameters needed
-            writer.AppendLine($"return new {className}();");
-        }
+            writer.AppendLine("InstanceFactory = static (typeArgs, args) =>");
+            writer.AppendLine("{");
+            writer.Indent();
 
-        writer.Unindent();
-        writer.AppendLine("},");
+            // Check if the class has a constructor that requires arguments
+            var hasParameterizedConstructor = false;
+            var constructorParamCount = 0;
+
+            // Find the primary constructor or first public constructor
+            var constructor = testMethod.TypeSymbol.Constructors
+                .Where(c => !c.IsStatic && c.DeclaredAccessibility == Accessibility.Public)
+                .OrderByDescending(c => c.Parameters.Length)
+                .FirstOrDefault();
+
+            if (constructor is { Parameters.Length: > 0 })
+            {
+                hasParameterizedConstructor = true;
+                constructorParamCount = constructor.Parameters.Length;
+            }
+
+            if (hasParameterizedConstructor)
+            {
+                // For classes with constructor parameters, check if we have Arguments attribute
+                var isArgumentsAttribute = classDataSourceAttribute?.AttributeClass?.Name == "ArgumentsAttribute";
+
+                if (isArgumentsAttribute && classDataSourceAttribute is { ConstructorArguments.Length: > 0 } &&
+                    classDataSourceAttribute.ConstructorArguments[0].Kind == TypedConstantKind.Array)
+                {
+                    var argumentValues = classDataSourceAttribute.ConstructorArguments[0].Values;
+                    var constructorArgs = string.Join(", ", argumentValues.Select(arg => TypedConstantParser.GetRawTypedConstantValue(arg)));
+
+                    writer.AppendLine($"return new {className}({constructorArgs});");
+                }
+                else
+                {
+                    // Use the args parameter if no specific arguments are provided
+                    writer.AppendLine($"if (args.Length >= {constructorParamCount})");
+                    writer.AppendLine("{");
+                    writer.Indent();
+                    writer.AppendLine($"return new {className}({string.Join(", ", Enumerable.Range(0, constructorParamCount).Select(i => $"args[{i}]"))});");
+                    writer.Unindent();
+                    writer.AppendLine("}");
+                    writer.AppendLine("throw new global::System.InvalidOperationException(\"Not enough arguments provided for class constructor\");");
+                }
+            }
+            else
+            {
+                // No constructor parameters needed
+                writer.AppendLine($"return new {className}();");
+            }
+
+            writer.Unindent();
+            writer.AppendLine("},");
+        }
 
         // Generate typed invoker
         GenerateTypedInvokers(writer, testMethod, className);

@@ -221,69 +221,34 @@ internal sealed class TestBuilder : ITestBuilder
 
                     if (needsInstanceForMethodDataSources)
                     {
-                        try
+                        var instanceResult = await CreateInstanceForMethodDataSources(
+                            metadata, classDataAttributeIndex, classDataLoopIndex, classData, testBuilderContext);
+
+                        if (!instanceResult.Success)
                         {
-                            // Try to resolve class generic types using class data for early instance creation
-                            if (metadata.TestClassType.IsGenericTypeDefinition)
-                            {
-                                var tempTestData = new TestData
-                                {
-                                    TestClassInstanceFactory = () => Task.FromResult<object>(null!),
-                                    ClassDataSourceAttributeIndex = classDataAttributeIndex,
-                                    ClassDataLoopIndex = classDataLoopIndex,
-                                    ClassData = classData,
-                                    MethodDataSourceAttributeIndex = 0,
-                                    MethodDataLoopIndex = 0,
-                                    MethodData = [],
-                                    RepeatIndex = 0,
-                                    InheritanceDepth = metadata.InheritanceDepth
-                                };
-
-                                try
-                                {
-                                    var resolution = TestGenericTypeResolver.Resolve(metadata, tempTestData);
-                                    instanceForMethodDataSources = metadata.InstanceFactory(resolution.ResolvedClassGenericArguments, classData);
-                                }
-                                catch (GenericTypeResolutionException) when (classData.Length == 0)
-                                {
-                                    // If we can't resolve from constructor args, try to infer from data sources
-                                    var resolvedTypes = TryInferClassGenericsFromDataSources(metadata);
-                                    instanceForMethodDataSources = metadata.InstanceFactory(resolvedTypes, classData);
-                                }
-                            }
-                            else
-                            {
-                                // Non-generic class
-                                instanceForMethodDataSources = metadata.InstanceFactory([], classData);
-                            }
-
-                            // Initialize property data sources on the early instance so that
-                            // method data sources can access fully-initialized properties.
-                            // This is critical for scenarios like:
-                            //   [ClassDataSource<ErrFixture<T>>] public required ErrFixture<T> Fixture { get; init; }
-                            //   public IEnumerable<Func<T>> TestExecutions => [() => Fixture.Value];
-                            //   [MethodDataSource("TestExecutions")] [Test] public void MyTest(T value) { }
-                            if (instanceForMethodDataSources != null)
-                            {
-                                var tempObjectBag = new ConcurrentDictionary<string, object?>();
-                                var tempEvents = new TestContextEvents();
-
-                                await _objectLifecycleService.RegisterObjectAsync(
-                                    instanceForMethodDataSources,
-                                    tempObjectBag,
-                                    metadata.MethodMetadata,
-                                    tempEvents,
-                                    cancellationToken);
-
-                                // Discovery: only IAsyncDiscoveryInitializer is initialized
-                                await ObjectInitializer.InitializeForDiscoveryAsync(instanceForMethodDataSources);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            var failedTest = CreateFailedTestForInstanceDataSourceError(metadata, ex);
+                            var failedTest = CreateFailedTestForInstanceDataSourceError(metadata, instanceResult.Exception!);
                             tests.Add(failedTest);
                             continue;
+                        }
+
+                        instanceForMethodDataSources = instanceResult.Instance;
+
+                        // Initialize property data sources on the early instance so that
+                        // method data sources can access fully-initialized properties.
+                        if (instanceForMethodDataSources != null)
+                        {
+                            var tempObjectBag = new ConcurrentDictionary<string, object?>();
+                            var tempEvents = new TestContextEvents();
+
+                            await _objectLifecycleService.RegisterObjectAsync(
+                                instanceForMethodDataSources,
+                                tempObjectBag,
+                                metadata.MethodMetadata,
+                                tempEvents,
+                                cancellationToken);
+
+                            // Discovery: only IAsyncDiscoveryInitializer is initialized
+                            await ObjectInitializer.InitializeForDiscoveryAsync(instanceForMethodDataSources);
                         }
                     }
 
@@ -1607,7 +1572,7 @@ internal sealed class TestBuilder : ITestBuilder
                 if (needsInstanceForMethodDataSources)
                 {
                     var instanceResult = await CreateInstanceForMethodDataSources(
-                        metadata, classDataAttributeIndex, classDataLoopIndex, classData);
+                        metadata, classDataAttributeIndex, classDataLoopIndex, classData, contextAccessor.Current);
 
                     if (!instanceResult.Success)
                     {
@@ -1683,11 +1648,25 @@ internal sealed class TestBuilder : ITestBuilder
 #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Generic type resolution for instance creation uses reflection")]
 #endif
-    private Task<InstanceCreationResult> CreateInstanceForMethodDataSources(
-        TestMetadata metadata, int classDataAttributeIndex, int classDataLoopIndex, object?[] classData)
+    private async Task<InstanceCreationResult> CreateInstanceForMethodDataSources(
+        TestMetadata metadata, int classDataAttributeIndex, int classDataLoopIndex, object?[] classData, TestBuilderContext testBuilderContext)
     {
         try
         {
+            // Try ClassConstructor first - if one is configured, it handles instance creation
+            var attributes = testBuilderContext.InitializedAttributes ?? metadata.GetOrCreateAttributes();
+            var instance = await ClassConstructorHelper.TryCreateInstanceWithClassConstructor(
+                attributes,
+                metadata.TestClassType,
+                testBuilderContext,
+                metadata.TestSessionId);
+
+            if (instance != null)
+            {
+                return InstanceCreationResult.CreateSuccess(instance);
+            }
+
+            // Fall back to InstanceFactory
             if (metadata.TestClassType.IsGenericTypeDefinition)
             {
                 var tempTestData = new TestData
@@ -1706,22 +1685,22 @@ internal sealed class TestBuilder : ITestBuilder
                 try
                 {
                     var resolution = TestGenericTypeResolver.Resolve(metadata, tempTestData);
-                    return Task.FromResult(InstanceCreationResult.CreateSuccess(metadata.InstanceFactory(resolution.ResolvedClassGenericArguments, classData)));
+                    return InstanceCreationResult.CreateSuccess(metadata.InstanceFactory(resolution.ResolvedClassGenericArguments, classData));
                 }
                 catch (GenericTypeResolutionException) when (classData.Length == 0)
                 {
                     var resolvedTypes = TryInferClassGenericsFromDataSources(metadata);
-                    return Task.FromResult(InstanceCreationResult.CreateSuccess(metadata.InstanceFactory(resolvedTypes, classData)));
+                    return InstanceCreationResult.CreateSuccess(metadata.InstanceFactory(resolvedTypes, classData));
                 }
             }
             else
             {
-                return Task.FromResult(InstanceCreationResult.CreateSuccess(metadata.InstanceFactory([], classData)));
+                return InstanceCreationResult.CreateSuccess(metadata.InstanceFactory([], classData));
             }
         }
         catch (Exception ex)
         {
-            return Task.FromResult(InstanceCreationResult.CreateFailure(ex));
+            return InstanceCreationResult.CreateFailure(ex);
         }
     }
 
