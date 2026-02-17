@@ -191,6 +191,106 @@ public class IsNotAssignableToAssertion<TTarget, TValue> : Assertion<TValue>
 }
 
 /// <summary>
+/// Asserts that a value's type is assignable from a specific type (the value's type is a base type or same as TTarget).
+/// Works with both direct value assertions and exception assertions (via .And after Throws).
+/// </summary>
+public class IsAssignableFromAssertion<TTarget, TValue> : Assertion<TValue>
+{
+    private readonly Type _targetType;
+
+    public IsAssignableFromAssertion(
+        AssertionContext<TValue> context)
+        : base(context)
+    {
+        _targetType = typeof(TTarget);
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        object? objectToCheck = null;
+
+        // If we have an exception (from Throws/ThrowsExactly), check that
+        if (exception != null)
+        {
+            objectToCheck = exception;
+        }
+        // Otherwise check the value
+        else if (value != null)
+        {
+            objectToCheck = value;
+        }
+        else
+        {
+            return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
+
+        var actualType = objectToCheck.GetType();
+
+        if (actualType.IsAssignableFrom(_targetType))
+        {
+            return AssertionResult._passedTask;
+        }
+
+        return Task.FromResult(AssertionResult.Failed($"type {actualType.Name} is not assignable from {_targetType.Name}"));
+    }
+
+    protected override string GetExpectation() => $"to be assignable from {_targetType.Name}";
+}
+
+/// <summary>
+/// Asserts that a value's type is NOT assignable from a specific type.
+/// Works with both direct value assertions and exception assertions (via .And after Throws).
+/// </summary>
+public class IsNotAssignableFromAssertion<TTarget, TValue> : Assertion<TValue>
+{
+    private readonly Type _targetType;
+
+    public IsNotAssignableFromAssertion(
+        AssertionContext<TValue> context)
+        : base(context)
+    {
+        _targetType = typeof(TTarget);
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        object? objectToCheck = null;
+
+        // If we have an exception (from Throws/ThrowsExactly), check that
+        if (exception != null)
+        {
+            objectToCheck = exception;
+        }
+        // Otherwise check the value
+        else if (value != null)
+        {
+            objectToCheck = value;
+        }
+        else
+        {
+            return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
+
+        var actualType = objectToCheck.GetType();
+
+        if (!actualType.IsAssignableFrom(_targetType))
+        {
+            return AssertionResult._passedTask;
+        }
+
+        return Task.FromResult(AssertionResult.Failed($"type {actualType.Name} is assignable from {_targetType.Name}"));
+    }
+
+    protected override string GetExpectation() => $"to not be assignable from {_targetType.Name}";
+}
+
+/// <summary>
 /// Asserts that a value is exactly of the specified type (using runtime Type parameter).
 /// </summary>
 public class IsTypeOfRuntimeAssertion<TValue> : Assertion<TValue>

@@ -79,6 +79,28 @@ public class ValueAssertion<TValue> : IAssertionSource<TValue>
     }
 
     /// <summary>
+    /// Asserts that the value's type is assignable from the specified type.
+    /// This instance method allows single type parameter usage without needing to specify the source type.
+    /// Example: await Assert.That(myObject).IsAssignableFrom&lt;DerivedClass&gt;();
+    /// </summary>
+    public IsAssignableFromAssertion<TTarget, TValue> IsAssignableFrom<TTarget>()
+    {
+        Context.ExpressionBuilder.Append($".IsAssignableFrom<{typeof(TTarget).Name}>()");
+        return new IsAssignableFromAssertion<TTarget, TValue>(Context);
+    }
+
+    /// <summary>
+    /// Asserts that the value's type is NOT assignable from the specified type.
+    /// This instance method allows single type parameter usage without needing to specify the source type.
+    /// Example: await Assert.That(myObject).IsNotAssignableFrom&lt;DerivedClass&gt;();
+    /// </summary>
+    public IsNotAssignableFromAssertion<TTarget, TValue> IsNotAssignableFrom<TTarget>()
+    {
+        Context.ExpressionBuilder.Append($".IsNotAssignableFrom<{typeof(TTarget).Name}>()");
+        return new IsNotAssignableFromAssertion<TTarget, TValue>(Context);
+    }
+
+    /// <summary>
     /// Asserts that the value is NOT of the specified type.
     /// This instance method allows single type parameter usage without needing to specify the source type.
     /// Example: await Assert.That(myObject).IsNotTypeOf<string>();

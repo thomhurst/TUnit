@@ -54,6 +54,26 @@ public class CountWrapper<TCollection, TItem> : IAssertionSource<TCollection>
     }
 
     /// <summary>
+    /// Not supported on CountWrapper - use IsAssignableFrom on the assertion source before calling HasCount().
+    /// </summary>
+    IsAssignableFromAssertion<TTarget, TCollection> IAssertionSource<TCollection>.IsAssignableFrom<TTarget>()
+    {
+        throw new NotSupportedException(
+            "IsAssignableFrom is not supported after HasCount(). " +
+            "Use: Assert.That(value).IsAssignableFrom<IList<int>>().HasCount().EqualTo(5)");
+    }
+
+    /// <summary>
+    /// Not supported on CountWrapper - use IsNotAssignableFrom on the assertion source before calling HasCount().
+    /// </summary>
+    IsNotAssignableFromAssertion<TTarget, TCollection> IAssertionSource<TCollection>.IsNotAssignableFrom<TTarget>()
+    {
+        throw new NotSupportedException(
+            "IsNotAssignableFrom is not supported after HasCount(). " +
+            "Use: Assert.That(value).IsNotAssignableFrom<IList<int>>().HasCount().EqualTo(5)");
+    }
+
+    /// <summary>
     /// Not supported on CountWrapper - use IsNotTypeOf on the assertion source before calling HasCount().
     /// </summary>
     IsNotTypeOfAssertion<TCollection, TExpected> IAssertionSource<TCollection>.IsNotTypeOf<TExpected>()

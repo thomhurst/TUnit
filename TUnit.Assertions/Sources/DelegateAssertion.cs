@@ -58,6 +58,18 @@ public class DelegateAssertion : IAssertionSource<object?>, IDelegateAssertionSo
         return new IsNotAssignableToAssertion<TTarget, object?>(Context);
     }
 
+    public IsAssignableFromAssertion<TTarget, object?> IsAssignableFrom<TTarget>()
+    {
+        Context.ExpressionBuilder.Append($".IsAssignableFrom<{typeof(TTarget).Name}>()");
+        return new IsAssignableFromAssertion<TTarget, object?>(Context);
+    }
+
+    public IsNotAssignableFromAssertion<TTarget, object?> IsNotAssignableFrom<TTarget>()
+    {
+        Context.ExpressionBuilder.Append($".IsNotAssignableFrom<{typeof(TTarget).Name}>()");
+        return new IsNotAssignableFromAssertion<TTarget, object?>(Context);
+    }
+
     /// <summary>
     /// Asserts that the value is NOT of the specified type.
     /// Example: await Assert.That(() => SomeMethod()).IsNotTypeOf<int>();
