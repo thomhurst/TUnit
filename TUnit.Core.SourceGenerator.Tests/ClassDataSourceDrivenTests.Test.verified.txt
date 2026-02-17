@@ -251,7 +251,7 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Cl
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
-internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_1_ClassDataSource__InitializableClass_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_1_ClassDataSource__Ini_01E5B4B7_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -354,12 +354,12 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
         };
     }
 }
-internal static class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_1_ClassDataSource__InitializableClass_ModuleInitializer
+internal static class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_1_ClassDataSource__Ini_01E5B4B7_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), new TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_1_ClassDataSource__InitializableClass_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), new TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_1_ClassDataSource__Ini_01E5B4B7_TestSource());
     }
 }
 
@@ -373,7 +373,7 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
-internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_2_ClassDataSources__InitializableClass_InitializableClass_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_2_ClassDataSources__In_52B92153_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -483,12 +483,12 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
         };
     }
 }
-internal static class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_2_ClassDataSources__InitializableClass_InitializableClass_ModuleInitializer
+internal static class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_2_ClassDataSources__In_52B92153_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), new TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_2_ClassDataSources__InitializableClass_InitializableClass_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), new TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_2_ClassDataSources__In_52B92153_TestSource());
     }
 }
 
@@ -502,7 +502,7 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
-internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_3_ClassDataSources__InitializableClass_InitializableClass_InitializableClass_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_3_ClassDataSources__In_8432A34C_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -619,12 +619,12 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
         };
     }
 }
-internal static class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_3_ClassDataSources__InitializableClass_InitializableClass_InitializableClass_ModuleInitializer
+internal static class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_3_ClassDataSources__In_8432A34C_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), new TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_3_ClassDataSources__InitializableClass_InitializableClass_InitializableClass_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), new TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_3_ClassDataSources__In_8432A34C_TestSource());
     }
 }
 
@@ -638,7 +638,7 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
-internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_4_ClassDataSources__InitializableClass_InitializableClass_InitializableClass_InitializableClass_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_4_ClassDataSources__In_159CD9D1_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -762,12 +762,12 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
         };
     }
 }
-internal static class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_4_ClassDataSources__InitializableClass_InitializableClass_InitializableClass_InitializableClass_ModuleInitializer
+internal static class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_4_ClassDataSources__In_159CD9D1_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), new TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_4_ClassDataSources__InitializableClass_InitializableClass_InitializableClass_InitializableClass_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), new TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_4_ClassDataSources__In_159CD9D1_TestSource());
     }
 }
 
@@ -781,7 +781,7 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
-internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_5_ClassDataSources__InitializableClass_InitializableClass_InitializableClass_InitializableClass_InitializableClass_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_5_ClassDataSources__In_CB437346_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -912,11 +912,11 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
         };
     }
 }
-internal static class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_5_ClassDataSources__InitializableClass_InitializableClass_InitializableClass_InitializableClass_InitializableClass_ModuleInitializer
+internal static class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_5_ClassDataSources__In_CB437346_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), new TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_5_ClassDataSources__InitializableClass_InitializableClass_InitializableClass_InitializableClass_InitializableClass_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), new TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_5_ClassDataSources__In_CB437346_TestSource());
     }
 }
