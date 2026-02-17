@@ -18,6 +18,7 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing"/>
         <PackageReference Include="Npgsql" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
         <PackageReference Include="Testcontainers.Kafka" />
         <PackageReference Include="Testcontainers.PostgreSql" />
         <PackageReference Include="Testcontainers.Redis" />
