@@ -5,12 +5,14 @@ namespace TUnit.Example.Asp.Net.EfCore;
 
 public class TodoDbContext : DbContext
 {
-    public string SchemaName { get; set; } = "public";
+    public string SchemaName { get; set; }
 
     public DbSet<Todo> Todos => Set<Todo>();
 
-    public TodoDbContext(DbContextOptions<TodoDbContext> options) : base(options)
+    public TodoDbContext(DbContextOptions<TodoDbContext> options, IConfiguration? config = null)
+        : base(options)
     {
+        SchemaName = config?["Database:Schema"] ?? "public";
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

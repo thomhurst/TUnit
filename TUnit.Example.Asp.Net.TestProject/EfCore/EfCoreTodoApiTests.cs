@@ -47,7 +47,7 @@ public class EfCoreTodoApiTests : EfCoreTodoTestBase
         await client.PostAsJsonAsync("/ef/todos", new { Title = "Verify via EF" });
 
         // Verify directly via EF Core DbContext
-        await using var dbContext = CreateDbContext();
+        await using var scope = CreateDbScope(out var dbContext);
         var todo = await dbContext.Todos.SingleAsync();
         await Assert.That(todo.Title).IsEqualTo("Verify via EF");
     }
@@ -106,7 +106,7 @@ public class EfCoreTodoApiTests : EfCoreTodoTestBase
     public async Task ParallelTests_AreIsolated()
     {
         // Each repeat gets its own schema - no data leaks between parallel tests
-        await using var dbContext = CreateDbContext();
+        await using var scope = CreateDbScope(out var dbContext);
         var count = await dbContext.Todos.CountAsync();
         await Assert.That(count).IsEqualTo(0);
     }

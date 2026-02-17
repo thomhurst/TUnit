@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.Extensions.Options;
 using TUnit.Example.Asp.Net.Configuration;
 using TUnit.Example.Asp.Net.EfCore;
 using TUnit.Example.Asp.Net.Models;
@@ -21,12 +20,11 @@ builder.Services.Configure<KafkaOptions>(builder.Configuration.GetSection(KafkaO
 builder.Services.AddScoped<ITodoRepository, TodoRepository>();
 builder.Services.AddScoped<ICacheService, RedisCacheService>();
 
-// EF Core DbContext - connection string and schema provided by test infrastructure
+// EF Core DbContext - reads connection string and schema from configuration.
+// The DbContext constructor reads Database:Schema from IConfiguration directly.
 builder.Services.AddDbContext<TodoDbContext>(options =>
     options.UseNpgsql(builder.Configuration["Database:ConnectionString"] ?? "")
         .ReplaceService<IModelCacheKeyFactory, SchemaModelCacheKeyFactory>());
-builder.Services.Configure<EfCoreDatabaseOptions>(
-    o => o.Schema = builder.Configuration["Database:Schema"] ?? "public");
 
 var app = builder.Build();
 
@@ -87,33 +85,27 @@ app.MapDelete("/cache/{key}", async (string key, ICacheService cache) =>
         ? Results.NoContent()
         : Results.NotFound());
 
-// EF Core Todo endpoints (Code First approach alongside raw SQL)
-app.MapGet("/ef/todos", async (TodoDbContext db, IOptions<EfCoreDatabaseOptions> options) =>
-{
-    db.SchemaName = options.Value.Schema;
-    return await db.Todos.OrderByDescending(t => t.CreatedAt).ToListAsync();
-});
+// EF Core Todo endpoints (Code First approach alongside raw SQL above)
+// TodoDbContext reads Database:Schema from IConfiguration in its constructor,
+// so no manual schema wiring is needed in each endpoint.
+app.MapGet("/ef/todos", async (TodoDbContext db) =>
+    await db.Todos.OrderByDescending(t => t.CreatedAt).ToListAsync());
 
-app.MapGet("/ef/todos/{id:int}", async (int id, TodoDbContext db, IOptions<EfCoreDatabaseOptions> options) =>
-{
-    db.SchemaName = options.Value.Schema;
-    return await db.Todos.FindAsync(id) is { } todo
+app.MapGet("/ef/todos/{id:int}", async (int id, TodoDbContext db) =>
+    await db.Todos.FindAsync(id) is { } todo
         ? Results.Ok(todo)
-        : Results.NotFound();
-});
+        : Results.NotFound());
 
-app.MapPost("/ef/todos", async (CreateTodoRequest request, TodoDbContext db, IOptions<EfCoreDatabaseOptions> options) =>
+app.MapPost("/ef/todos", async (CreateTodoRequest request, TodoDbContext db) =>
 {
-    db.SchemaName = options.Value.Schema;
     var todo = new Todo { Title = request.Title };
     db.Todos.Add(todo);
     await db.SaveChangesAsync();
     return Results.Created($"/ef/todos/{todo.Id}", todo);
 });
 
-app.MapPut("/ef/todos/{id:int}", async (int id, UpdateTodoRequest request, TodoDbContext db, IOptions<EfCoreDatabaseOptions> options) =>
+app.MapPut("/ef/todos/{id:int}", async (int id, UpdateTodoRequest request, TodoDbContext db) =>
 {
-    db.SchemaName = options.Value.Schema;
     var todo = await db.Todos.FindAsync(id);
     if (todo is null)
     {
@@ -126,9 +118,8 @@ app.MapPut("/ef/todos/{id:int}", async (int id, UpdateTodoRequest request, TodoD
     return Results.Ok(todo);
 });
 
-app.MapDelete("/ef/todos/{id:int}", async (int id, TodoDbContext db, IOptions<EfCoreDatabaseOptions> options) =>
+app.MapDelete("/ef/todos/{id:int}", async (int id, TodoDbContext db) =>
 {
-    db.SchemaName = options.Value.Schema;
     var todo = await db.Todos.FindAsync(id);
     if (todo is null)
     {

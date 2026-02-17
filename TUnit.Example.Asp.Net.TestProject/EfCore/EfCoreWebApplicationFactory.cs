@@ -24,18 +24,17 @@ public class EfCoreWebApplicationFactory : TestWebApplicationFactory<Program>
     {
         builder.ConfigureServices(services =>
         {
-            // Remove any existing DbContext registration from the app
+            // Remove the app's default DbContext registration (which has an empty connection string)
             services.RemoveAll<DbContextOptions<TodoDbContext>>();
 
-            // Register with the container's connection string and schema-aware caching
+            // Re-register with the container's real connection string
             services.AddDbContext<TodoDbContext>(options =>
                 options.UseNpgsql(PostgreSql.Container.GetConnectionString())
                     .ReplaceService<IModelCacheKeyFactory, SchemaModelCacheKeyFactory>());
         });
     }
 
-    protected override void ConfigureStartupConfiguration(
-        Microsoft.Extensions.Configuration.IConfigurationBuilder configurationBuilder)
+    protected override void ConfigureStartupConfiguration(IConfigurationBuilder configurationBuilder)
     {
         configurationBuilder.AddInMemoryCollection(new Dictionary<string, string?>
         {
