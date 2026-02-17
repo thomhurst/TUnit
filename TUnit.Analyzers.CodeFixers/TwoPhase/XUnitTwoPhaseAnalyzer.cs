@@ -160,7 +160,7 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
             "StrictEqual" => ConvertStrictEqual(arguments),
             "Empty" => ConvertEmpty(arguments),
             "NotEmpty" => ConvertNotEmpty(arguments),
-            "Single" => ConvertSingle(arguments),
+            "Single" => ConvertSingle(memberAccess, arguments),
             "Contains" => ConvertContains(memberAccess, arguments),
             "DoesNotContain" => ConvertDoesNotContain(memberAccess, arguments),
             "Throws" => ConvertThrows(memberAccess, arguments),
@@ -344,7 +344,7 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
         return (AssertionConversionKind.NotEmpty, $"await Assert.That({collection}).IsNotEmpty()", true, null);
     }
 
-    private (AssertionConversionKind, string?, bool, string?) ConvertSingle(SeparatedSyntaxList<ArgumentSyntax> args)
+    private (AssertionConversionKind, string?, bool, string?) ConvertSingle(MemberAccessExpressionSyntax memberAccess, SeparatedSyntaxList<ArgumentSyntax> args)
     {
         if (args.Count < 1) return (AssertionConversionKind.Single, null, false, null);
 
@@ -352,8 +352,21 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
 
         if (args.Count >= 2)
         {
-            var predicate = args[1].Expression.ToString();
-            return (AssertionConversionKind.Single, $"await Assert.That({collection}).HasSingleItem({predicate})", true, null);
+            // xUnit has two overloads with a second parameter:
+            //   Assert.Single<T>(IEnumerable<T>, Predicate<T>) - predicate overload
+            //   Assert.Single(IEnumerable, object?) - expected value overload
+            // Only convert the predicate overload to HasSingleItem(predicate).
+            var symbol = SemanticModel.GetSymbolInfo(memberAccess).Symbol;
+            if (symbol is IMethodSymbol { Parameters.Length: 2 } methodSymbol &&
+                methodSymbol.Parameters[1].Type is INamedTypeSymbol { DelegateInvokeMethod: not null })
+            {
+                var predicate = args[1].Expression.ToString();
+                return (AssertionConversionKind.Single, $"await Assert.That({collection}).HasSingleItem({predicate})", true, null);
+            }
+
+            // For the expected value overload, fall back to HasSingleItem() without predicate
+            return (AssertionConversionKind.Single, $"await Assert.That({collection}).HasSingleItem()", true,
+                "// TODO: xUnit Assert.Single(collection, expected) matched by value - verify conversion");
         }
 
         return (AssertionConversionKind.Single, $"await Assert.That({collection}).HasSingleItem()", true, null);

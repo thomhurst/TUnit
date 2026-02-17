@@ -188,9 +188,7 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
 
             // "All" is handled separately in ConvertAssertionAsync
 
-            "Single" => argumentListArguments.Count >= 2
-                ? SyntaxFactory.ParseExpression($"Assert.That({argumentListArguments[0]}).HasSingleItem({argumentListArguments[1]})")
-                : SyntaxFactory.ParseExpression($"Assert.That({argumentListArguments[0]}).HasSingleItem()"),
+            "Single" => await Single(context, memberAccessExpressionSyntax, argumentListArguments),
 
             "IsType" => isGeneric
                 ? SyntaxFactory.ParseExpression($"Assert.That({actual}).IsTypeOf<{genericArgs}>()")
@@ -331,6 +329,32 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
         }
 
         return SyntaxFactory.ParseExpression($"Assert.That({condition}).{assertionMethod}()");
+    }
+
+    private static async Task<ExpressionSyntax> Single(CodeFixContext context,
+        MemberAccessExpressionSyntax memberAccessExpressionSyntax,
+        SeparatedSyntaxList<ArgumentSyntax> argumentListArguments)
+    {
+        if (argumentListArguments.Count >= 2)
+        {
+            // xUnit has two overloads with a second parameter:
+            //   Assert.Single<T>(IEnumerable<T>, Predicate<T>) - predicate overload
+            //   Assert.Single(IEnumerable, object?) - expected value overload
+            // Only convert the predicate overload to HasSingleItem(predicate).
+            var semanticModel = await context.Document.GetSemanticModelAsync();
+            var symbol = semanticModel?.GetSymbolInfo(memberAccessExpressionSyntax).Symbol;
+
+            if (symbol is IMethodSymbol { Parameters.Length: 2 } methodSymbol &&
+                methodSymbol.Parameters[1].Type is INamedTypeSymbol { DelegateInvokeMethod: not null })
+            {
+                return SyntaxFactory.ParseExpression($"Assert.That({argumentListArguments[0]}).HasSingleItem({argumentListArguments[1]})");
+            }
+
+            // For the expected value overload, fall back to HasSingleItem() without predicate
+            return SyntaxFactory.ParseExpression($"Assert.That({argumentListArguments[0]}).HasSingleItem()");
+        }
+
+        return SyntaxFactory.ParseExpression($"Assert.That({argumentListArguments[0]}).HasSingleItem()");
     }
 
     private static async Task<ExpressionSyntax> Contains(CodeFixContext context,
