@@ -202,6 +202,23 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             await Assert.That(generatedFiles.Count).IsGreaterThanOrEqualTo(1);
         });
 
+    [Test]
+    public Task MethodWithDefaultValues() => RunTest(
+        Path.Combine(Sourcy.Git.RootDirectory.FullName,
+            "TUnit.Assertions.SourceGenerator.Tests",
+            "TestData",
+            "MethodWithDefaultValues.cs"),
+        async generatedFiles =>
+        {
+            await Assert.That(generatedFiles).HasCount(1);
+
+            var mainFile = generatedFiles.First();
+            await Assert.That(mainFile).IsNotNull();
+
+            // Verify that the default value is preserved in the extension method
+            await Assert.That(mainFile).Contains("bool exact = true");
+        });
+
 #if NET6_0_OR_GREATER
     [Test]
     public Task RefStructParameter() => RunTest(
