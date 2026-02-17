@@ -2407,17 +2407,17 @@ namespace .Extensions
     public static class ArrayAssertionExtensions
     {
         [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
-        public static .Extensions._IsEmpty_Assertion<T> IsEmpty<T>(this .<T[]> source) { }
+        public static ._IsEmpty_Assertion<T> IsEmpty<T>(this .<T[]> source) { }
         [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
-        public static .Extensions._IsNotEmpty_Assertion<T> IsNotEmpty<T>(this .<T[]> source) { }
+        public static ._IsNotEmpty_Assertion<T> IsNotEmpty<T>(this .<T[]> source) { }
         [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
         public static ._IsNotSingleElement_Assertion<T> IsNotSingleElement<T>(this .<.<T>> source) { }
         [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
-        public static .Extensions._IsNotSingleElement_Assertion<T> IsNotSingleElement<T>(this .<T[]> source) { }
+        public static ._IsNotSingleElement_Assertion<T> IsNotSingleElement<T>(this .<T[]> source) { }
         [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
         public static ._IsSingleElement_Assertion<T> IsSingleElement<T>(this .<.<T>> source) { }
         [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
-        public static .Extensions._IsSingleElement_Assertion<T> IsSingleElement<T>(this .<T[]> source) { }
+        public static ._IsSingleElement_Assertion<T> IsSingleElement<T>(this .<T[]> source) { }
     }
     public static class AssemblyAssertionExtensions
     {
@@ -3769,11 +3769,11 @@ namespace .Extensions
     public static class GenericAssertions
     {
         [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
-        public static .Extensions.T_IsIn__Assertion<T> IsIn<T>(this .<T> source, params T[] collection) { }
+        public static .Extensions.T_IsIn_TArray_Assertion<T> IsIn<T>(this .<T> source, params T[] collection) { }
         [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
         public static .Extensions.T_IsIn_IEnumerableT_Assertion<T> IsIn<T>(this .<T> source, .<T> collection, [.("collection")] string? collectionExpression = null) { }
         [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
-        public static .Extensions.T_IsNotIn__Assertion<T> IsNotIn<T>(this .<T> source, params T[] collection) { }
+        public static .Extensions.T_IsNotIn_TArray_Assertion<T> IsNotIn<T>(this .<T> source, params T[] collection) { }
         [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
         public static .Extensions.T_IsNotIn_IEnumerableT_Assertion<T> IsNotIn<T>(this .<T> source, .<T> collection, [.("collection")] string? collectionExpression = null) { }
     }
@@ -4855,6 +4855,34 @@ namespace .Extensions
         protected override string GetExpectation() { }
     }
     [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+    public sealed class TArray_IsEmpty_Assertion<T> : .<T[]>
+    {
+        public TArray_IsEmpty_Assertion(.<T[]> context) { }
+        protected override .<.> CheckAsync(.<T[]> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+    public sealed class TArray_IsNotEmpty_Assertion<T> : .<T[]>
+    {
+        public TArray_IsNotEmpty_Assertion(.<T[]> context) { }
+        protected override .<.> CheckAsync(.<T[]> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+    public sealed class TArray_IsNotSingleElement_Assertion<T> : .<T[]>
+    {
+        public TArray_IsNotSingleElement_Assertion(.<T[]> context) { }
+        protected override .<.> CheckAsync(.<T[]> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+    public sealed class TArray_IsSingleElement_Assertion<T> : .<T[]>
+    {
+        public TArray_IsSingleElement_Assertion(.<T[]> context) { }
+        protected override .<.> CheckAsync(.<T[]> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
     public sealed class T_IsIn_IEnumerableT_Assertion<T> : .<T>
     {
         public T_IsIn_IEnumerableT_Assertion(.<T> context, .<T> collection) { }
@@ -4862,9 +4890,9 @@ namespace .Extensions
         protected override string GetExpectation() { }
     }
     [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
-    public sealed class T_IsIn__Assertion<T> : .<T>
+    public sealed class T_IsIn_TArray_Assertion<T> : .<T>
     {
-        public T_IsIn__Assertion(.<T> context, T[] collection) { }
+        public T_IsIn_TArray_Assertion(.<T> context, T[] collection) { }
         protected override .<.> CheckAsync(.<T> metadata) { }
         protected override string GetExpectation() { }
     }
@@ -4876,9 +4904,9 @@ namespace .Extensions
         protected override string GetExpectation() { }
     }
     [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
-    public sealed class T_IsNotIn__Assertion<T> : .<T>
+    public sealed class T_IsNotIn_TArray_Assertion<T> : .<T>
     {
-        public T_IsNotIn__Assertion(.<T> context, T[] collection) { }
+        public T_IsNotIn_TArray_Assertion(.<T> context, T[] collection) { }
         protected override .<.> CheckAsync(.<T> metadata) { }
         protected override string GetExpectation() { }
     }
@@ -5526,37 +5554,13 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
-    [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
-    public sealed class _IsEmpty_Assertion<T> : .<T[]>
-    {
-        public _IsEmpty_Assertion(.<T[]> context) { }
-        protected override .<.> CheckAsync(.<T[]> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
-    public sealed class _IsNotEmpty_Assertion<T> : .<T[]>
-    {
-        public _IsNotEmpty_Assertion(.<T[]> context) { }
-        protected override .<.> CheckAsync(.<T[]> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
-    public sealed class _IsNotSingleElement_Assertion<T> : .<T[]>
-    {
-        public _IsNotSingleElement_Assertion(.<T[]> context) { }
-        protected override .<.> CheckAsync(.<T[]> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
-    public sealed class _IsSingleElement_Assertion<T> : .<T[]>
-    {
-        public _IsSingleElement_Assertion(.<T[]> context) { }
-        protected override .<.> CheckAsync(.<T[]> metadata) { }
-        protected override string GetExpectation() { }
-    }
 }
 namespace .Sources
 {
+    public class ArrayAssertion<TItem> : .<TItem[], TItem>
+    {
+        public ArrayAssertion(TItem[]? value, string? expression) { }
+    }
     public class AsyncDelegateAssertion : ., .<object?>, .<.>, .<object?>
     {
         public AsyncDelegateAssertion(<.> action, string? expression) { }

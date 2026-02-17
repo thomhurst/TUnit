@@ -190,15 +190,16 @@ public static class Assert
 
     /// <summary>
     /// Creates an assertion for an array value.
-    /// Arrays are routed to CollectionAssertion to preserve array-specific generated assertions.
+    /// Returns ArrayAssertion which implements IAssertionSource&lt;TItem[]&gt;,
+    /// enabling generated assertions that target concrete array types (e.g., string[]).
     /// Example: await Assert.That(array).IsSingleElement();
     /// </summary>
     [OverloadResolutionPriority(5)]
-    public static CollectionAssertion<TItem> That<TItem>(
+    public static ArrayAssertion<TItem> That<TItem>(
         TItem[]? value,
         [CallerArgumentExpression(nameof(value))] string? expression = null)
     {
-        return new CollectionAssertion<TItem>(value!, expression);
+        return new ArrayAssertion<TItem>(value, expression);
     }
 
     /// <summary>
