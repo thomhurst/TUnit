@@ -5,7 +5,7 @@
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
-internal sealed class TUnit_TestProject_ClassDataSourceDrivenTestsSharedKeyed_DataSource_Class__SomeAsyncDisposableClass_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal sealed class TUnit_TestProject_ClassDataSourceDrivenTestsSharedKeyed_DataSource_Class__SomeAsyncDis_82F9A818_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -110,12 +110,12 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTestsSharedKeyed_Da
         };
     }
 }
-internal static class TUnit_TestProject_ClassDataSourceDrivenTestsSharedKeyed_DataSource_Class__SomeAsyncDisposableClass_ModuleInitializer
+internal static class TUnit_TestProject_ClassDataSourceDrivenTestsSharedKeyed_DataSource_Class__SomeAsyncDis_82F9A818_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed), new TUnit_TestProject_ClassDataSourceDrivenTestsSharedKeyed_DataSource_Class__SomeAsyncDisposableClass_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed), new TUnit_TestProject_ClassDataSourceDrivenTestsSharedKeyed_DataSource_Class__SomeAsyncDis_82F9A818_TestSource());
     }
 }
 
@@ -129,7 +129,7 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTestsSharedKeyed_Da
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
-internal sealed class TUnit_TestProject_ClassDataSourceDrivenTestsSharedKeyed_DataSource_Class_Generic__SomeAsyncDisposableClass_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal sealed class TUnit_TestProject_ClassDataSourceDrivenTestsSharedKeyed_DataSource_Class_Generic__Some_7FC73642_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -234,11 +234,11 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTestsSharedKeyed_Da
         };
     }
 }
-internal static class TUnit_TestProject_ClassDataSourceDrivenTestsSharedKeyed_DataSource_Class_Generic__SomeAsyncDisposableClass_ModuleInitializer
+internal static class TUnit_TestProject_ClassDataSourceDrivenTestsSharedKeyed_DataSource_Class_Generic__Some_7FC73642_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed), new TUnit_TestProject_ClassDataSourceDrivenTestsSharedKeyed_DataSource_Class_Generic__SomeAsyncDisposableClass_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed), new TUnit_TestProject_ClassDataSourceDrivenTestsSharedKeyed_DataSource_Class_Generic__Some_7FC73642_TestSource());
     }
 }

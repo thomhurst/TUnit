@@ -1556,7 +1556,7 @@ internal static class TUnit_TestProject_MatrixTests_Exclusion__int_int_ModuleIni
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
-internal sealed class TUnit_TestProject_MatrixTests_MatrixMethod_WithEnumParameter_UsesOnlyMethodValues__bool_CountToTenEnum_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal sealed class TUnit_TestProject_MatrixTests_MatrixMethod_WithEnumParameter_UsesOnlyMethodValues__boo_38BEEE8F_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -1666,11 +1666,11 @@ internal sealed class TUnit_TestProject_MatrixTests_MatrixMethod_WithEnumParamet
         };
     }
 }
-internal static class TUnit_TestProject_MatrixTests_MatrixMethod_WithEnumParameter_UsesOnlyMethodValues__bool_CountToTenEnum_ModuleInitializer
+internal static class TUnit_TestProject_MatrixTests_MatrixMethod_WithEnumParameter_UsesOnlyMethodValues__boo_38BEEE8F_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_MatrixMethod_WithEnumParameter_UsesOnlyMethodValues__bool_CountToTenEnum_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_MatrixMethod_WithEnumParameter_UsesOnlyMethodValues__boo_38BEEE8F_TestSource());
     }
 }

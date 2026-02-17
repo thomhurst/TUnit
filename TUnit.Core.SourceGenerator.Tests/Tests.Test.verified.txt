@@ -5,7 +5,7 @@
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
-internal sealed class TUnit_TestProject_Bugs__1304_Tests_TryParse_InvalidString_ReturnsFailure__string__CancellationToken_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal sealed class TUnit_TestProject_Bugs__1304_Tests_TryParse_InvalidString_ReturnsFailure__string__Canc_9F7FA274_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -120,12 +120,12 @@ internal sealed class TUnit_TestProject_Bugs__1304_Tests_TryParse_InvalidString_
         };
     }
 }
-internal static class TUnit_TestProject_Bugs__1304_Tests_TryParse_InvalidString_ReturnsFailure__string__CancellationToken_ModuleInitializer
+internal static class TUnit_TestProject_Bugs__1304_Tests_TryParse_InvalidString_ReturnsFailure__string__Canc_9F7FA274_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._1304.Tests), new TUnit_TestProject_Bugs__1304_Tests_TryParse_InvalidString_ReturnsFailure__string__CancellationToken_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._1304.Tests), new TUnit_TestProject_Bugs__1304_Tests_TryParse_InvalidString_ReturnsFailure__string__Canc_9F7FA274_TestSource());
     }
 }
 

@@ -856,7 +856,7 @@ internal static class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMet
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
-internal sealed class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMethodAndDataSource_GenericMethod_With_DataSource__string_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal sealed class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMethodAndDataSource_GenericMeth_0AB5EDCD_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -1146,12 +1146,12 @@ internal sealed class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMet
         };
     }
 }
-internal static class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMethodAndDataSource_GenericMethod_With_DataSource__string_ModuleInitializer
+internal static class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMethodAndDataSource_GenericMeth_0AB5EDCD_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource), new TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMethodAndDataSource_GenericMethod_With_DataSource__string_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource), new TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMethodAndDataSource_GenericMeth_0AB5EDCD_TestSource());
     }
 }
 
@@ -1781,7 +1781,7 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithConstructor_T
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
-internal sealed class TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_Should_Handle_Multiple_Type_Parameters_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal sealed class TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_Should_Handle_Multiple_Type__8C0B02C5_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -1998,12 +1998,12 @@ internal sealed class TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_
         };
     }
 }
-internal static class TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_Should_Handle_Multiple_Type_Parameters_ModuleInitializer
+internal static class TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_Should_Handle_Multiple_Type__8C0B02C5_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._4431.MultipleTypeParameters<,>), new TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_Should_Handle_Multiple_Type_Parameters_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._4431.MultipleTypeParameters<,>), new TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_Should_Handle_Multiple_Type__8C0B02C5_TestSource());
     }
 }
 
@@ -2621,7 +2621,7 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithClassDataSour
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
-internal sealed class TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWithDataSources_TClass_FullyGeneric_With_DataSources__bool_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal sealed class TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWithDataSources_TClass_FullyGene_0A3B401E_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -3347,11 +3347,11 @@ internal sealed class TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWith
         };
     }
 }
-internal static class TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWithDataSources_TClass_FullyGeneric_With_DataSources__bool_ModuleInitializer
+internal static class TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWithDataSources_TClass_FullyGene_0A3B401E_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>), new TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWithDataSources_TClass_FullyGeneric_With_DataSources__bool_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>), new TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWithDataSources_TClass_FullyGene_0A3B401E_TestSource());
     }
 }

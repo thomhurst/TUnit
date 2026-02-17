@@ -485,6 +485,7 @@ namespace .Collections
         public static . CheckDoesNotOverlap<TItem>(.<TItem> adapter, .<TItem> other) { }
         public static . CheckHasDistinctItems<TItem>(.<TItem> adapter, .<TItem>? comparer = null) { }
         public static . CheckHasSingleItem<TItem>(.<TItem> adapter) { }
+        public static . CheckHasSingleItemPredicate<TItem>(.<TItem> adapter, <TItem, bool> predicate, out TItem? matchingItem) { }
         public static . CheckIsEmpty<TItem>(.<TItem> adapter) { }
         public static . CheckIsInDescendingOrder<TItem>(.<TItem> adapter, .<TItem>? comparer = null) { }
         public static . CheckIsInOrder<TItem>(.<TItem> adapter, .<TItem>? comparer = null) { }
@@ -1195,6 +1196,15 @@ namespace .Conditions
         where TCollection : .<TItem>
     {
         public HasSingleItemAssertion(.<TCollection> context) { }
+        protected override .<.> CheckAsync(.<TCollection> metadata) { }
+        public .<TItem> GetAwaiter() { }
+        protected override string GetExpectation() { }
+    }
+    [.("HasSingleItem")]
+    public class HasSingleItemPredicateAssertion<TCollection, TItem> : .<TCollection, TItem>
+        where TCollection : .<TItem>
+    {
+        public HasSingleItemPredicateAssertion(.<TCollection> context, <TItem, bool> predicate, string predicateDescription) { }
         protected override .<.> CheckAsync(.<TCollection> metadata) { }
         public .<TItem> GetAwaiter() { }
         protected override string GetExpectation() { }
@@ -3775,6 +3785,11 @@ namespace .Extensions
         public static .<TCollection, TItem> HasSingleItem<TCollection, TItem>(this .<TCollection> source)
             where TCollection : .<TItem> { }
     }
+    public static class HasSingleItemPredicateAssertionExtensions
+    {
+        public static .<TCollection, TItem> HasSingleItem<TCollection, TItem>(this .<TCollection> source, <TItem, bool> predicate, string predicateDescription, [.("predicate")] string? predicateExpression = null, [.("predicateDescription")] string? predicateDescriptionExpression = null)
+            where TCollection : .<TItem> { }
+    }
     public static class HttpResponseMessageAssertionExtensions
     {
         public static ._HasContentType_String_Assertion HasContentType(this .<.> source, string contentType, [.("contentType")] string? contentTypeExpression = null) { }
@@ -5602,6 +5617,7 @@ namespace .Sources
         public .<TCollection, TItem> HasCount(int expectedCount, [.("expectedCount")] string? expression = null) { }
         public .<TCollection, TItem> HasDistinctItems() { }
         public .<TCollection, TItem> HasSingleItem() { }
+        public .<TCollection, TItem> HasSingleItem(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
         public .<TTarget, TCollection> IsAssignableTo<TTarget>() { }
         public .<TCollection, TItem> IsEmpty() { }
         public .<TCollection, TItem> IsInDescendingOrder() { }

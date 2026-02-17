@@ -261,6 +261,19 @@ public abstract class CollectionAssertionBase<TCollection, TItem> : Assertion<TC
     }
 
     /// <summary>
+    /// Asserts that the collection contains exactly one item matching the predicate.
+    /// This instance method enables calling HasSingleItem with proper type inference.
+    /// Example: await Assert.That(list).HasSingleItem(x => x > 5);
+    /// </summary>
+    public HasSingleItemPredicateAssertion<TCollection, TItem> HasSingleItem(
+        Func<TItem, bool> predicate,
+        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
+    {
+        Context.ExpressionBuilder.Append($".HasSingleItem({expression})");
+        return new HasSingleItemPredicateAssertion<TCollection, TItem>(Context, predicate, expression ?? "predicate");
+    }
+
+    /// <summary>
     /// Asserts that the collection contains only distinct (unique) items.
     /// This instance method enables calling HasDistinctItems with proper type inference.
     /// Example: await Assert.That(list).HasDistinctItems();

@@ -17,7 +17,9 @@ internal static class FileNameHelper
     /// <returns>A deterministic filename like "MyNamespace_MyClass_MyMethod__Int32_String.g.cs"</returns>
     // Conservative limit to avoid PathTooLongException on Windows with net472,
     // which enforces the legacy 260-character MAX_PATH limit in Roslyn's AddSource.
-    private const int MaxHintNameLength = 200;
+    // The CI runner directory prefix (e.g. D:\a\TUnit\TUnit\...\obj\Debug\net472\generated\...\)
+    // can be ~140 chars, so hint name must be well under 120 chars to stay within 260.
+    private const int MaxHintNameLength = 100;
 
     public static string GetDeterministicFileNameForMethod(INamedTypeSymbol typeSymbol, IMethodSymbol methodSymbol)
     {

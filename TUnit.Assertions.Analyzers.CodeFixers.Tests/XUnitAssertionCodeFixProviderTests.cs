@@ -419,4 +419,94 @@ public class XUnitAssertionCodeFixProviderTests
                 """
             );
     }
+
+    [Test]
+    public async Task Xunit_Single_With_Predicate_Preserves_Lambda()
+    {
+        await Verifier
+            .VerifyCodeFixAsync(
+                """
+                using System.Threading.Tasks;
+                using System.Collections.Generic;
+
+                public class MyClass
+                {
+                    public void MyTest()
+                    {
+                        var properties = new List<Property>
+                        {
+                            new Property { Prop = "myKey" }
+                        };
+
+                        {|#0:Xunit.Assert.Single(properties, p => p.Prop == "myKey")|};
+                    }
+                }
+
+                public class Property
+                {
+                    public string Prop { get; set; }
+                }
+                """,
+                Verifier.Diagnostic(Rules.XUnitAssertion)
+                    .WithLocation(0),
+                """
+                using System.Threading.Tasks;
+                using System.Collections.Generic;
+
+                public class MyClass
+                {
+                    public void MyTest()
+                    {
+                        var properties = new List<Property>
+                        {
+                            new Property { Prop = "myKey" }
+                        };
+
+                        Assert.That(properties).HasSingleItem(p => p.Prop == "myKey");
+                    }
+                }
+
+                public class Property
+                {
+                    public string Prop { get; set; }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Xunit_Single_Without_Predicate()
+    {
+        await Verifier
+            .VerifyCodeFixAsync(
+                """
+                using System.Threading.Tasks;
+                using System.Collections.Generic;
+
+                public class MyClass
+                {
+                    public void MyTest()
+                    {
+                        var items = new List<int> { 42 };
+                        {|#0:Xunit.Assert.Single(items)|};
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.XUnitAssertion)
+                    .WithLocation(0),
+                """
+                using System.Threading.Tasks;
+                using System.Collections.Generic;
+
+                public class MyClass
+                {
+                    public void MyTest()
+                    {
+                        var items = new List<int> { 42 };
+                        Assert.That(items).HasSingleItem();
+                    }
+                }
+                """
+            );
+    }
 }
