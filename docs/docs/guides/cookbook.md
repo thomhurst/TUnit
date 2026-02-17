@@ -630,7 +630,7 @@ For a complete integration testing setup with EF Core Code First, TestContainers
 - **Dynamic schema support**: Custom `IModelCacheKeyFactory` ensures correct model caching per schema
 - **Clean teardown**: `DROP SCHEMA ... CASCADE` removes all tables after each test
 
-See the [ASP.NET Core Integration Testing](/examples/aspnet#per-test-schema-isolation-with-ef-core) docs for the full pattern.
+See the [ASP.NET Core Integration Testing](/docs/examples/aspnet#per-test-schema-isolation-with-ef-core) docs for the full pattern.
 
 ### Testing with Test Containers (Docker)
 
