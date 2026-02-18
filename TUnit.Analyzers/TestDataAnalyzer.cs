@@ -558,7 +558,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 out var isTuples);
             
 
-            if (!isFunc && unwrappedTypes.Any(x => x.SpecialType != SpecialType.System_String && x.IsReferenceType))
+            if (!isFunc && unwrappedTypes.Any(x => x.HasVisibleMutability()))
             {
                 context.ReportDiagnostic(Diagnostic.Create(Rules.ReturnFunc,
                     dataSourceMethod.Locations.FirstOrDefault()));

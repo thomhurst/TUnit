@@ -328,13 +328,13 @@
         <value>Too many data attributes</value>
     </data>
     <data name="TUnit0046Description" xml:space="preserve">
-        <value>When a data source method provides reference types (other than string) as test parameters, it should return Func&lt;T&gt; to defer object creation until the test runs. This prevents shared state between tests and ensures proper test isolation.</value>
+        <value>When a data source method provides mutable reference types as test parameters, it should return Func&lt;T&gt; to defer object creation until the test runs. This prevents shared state between tests and ensures proper test isolation. Immutable types (records with no mutable properties, classes with only get/init properties) are exempt.</value>
     </data>
     <data name="TUnit0046MessageFormat" xml:space="preserve">
-        <value>Data source method should return Func&lt;T&gt; for reference type parameters (other than string) to ensure proper test isolation</value>
+        <value>Data source method should return Func&lt;T&gt; for mutable reference type parameters to ensure proper test isolation</value>
     </data>
     <data name="TUnit0046Title" xml:space="preserve">
-        <value>Data source should return Func&lt;T&gt; for reference types</value>
+        <value>Data source should return Func&lt;T&gt; for mutable reference types</value>
     </data>
     <data name="TUnit0047Description" xml:space="preserve">
         <value>For AsyncLocal values set in before hooks, you must call `context.AddAsyncLocalValues` to access them within tests.</value>
