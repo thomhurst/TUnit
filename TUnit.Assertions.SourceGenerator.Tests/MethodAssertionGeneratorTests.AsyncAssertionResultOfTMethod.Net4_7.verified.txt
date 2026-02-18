@@ -1,0 +1,81 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Tests.TestData;
+
+namespace TUnit.Assertions.Extensions;
+
+/// <summary>
+/// Generated assertion for ContainsMatchAsync
+/// </summary>
+public sealed class IEnumerableString_ContainsMatchAsync_String_Assertion : Assertion<System.Collections.Generic.IEnumerable<string>>
+{
+    private readonly string _needle;
+    private string? _result;
+
+    public IEnumerableString_ContainsMatchAsync_String_Assertion(AssertionContext<System.Collections.Generic.IEnumerable<string>> context, string needle)
+        : base(context)
+    {
+        _needle = needle;
+    }
+
+    protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Collections.Generic.IEnumerable<string>> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return AssertionResult.Failed($"threw {exception.GetType().FullName}");
+        }
+
+        if (value is null)
+        {
+            return AssertionResult.Failed("Actual value is null");
+        }
+
+        var typedResult = await value!.ContainsMatchAsync(_needle);
+        if (typedResult.IsPassed)
+        {
+            _result = typedResult.Value;
+        }
+        return typedResult.IsPassed
+            ? AssertionResult.Passed
+            : AssertionResult.Failed(typedResult.Message);
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"to contain '{_needle}'";
+    }
+
+    public new System.Runtime.CompilerServices.TaskAwaiter<string> GetAwaiter()
+    {
+        return ExecuteAndReturnResultAsync().GetAwaiter();
+    }
+
+    private async Task<string> ExecuteAndReturnResultAsync()
+    {
+        await AssertAsync();
+        return _result!;
+    }
+}
+
+public static partial class AsyncAssertionResultOfTMethodExtensions
+{
+    /// <summary>
+    /// Generated extension method for ContainsMatchAsync
+    /// </summary>
+    public static IEnumerableString_ContainsMatchAsync_String_Assertion ContainsMatchAsync(this IAssertionSource<System.Collections.Generic.IEnumerable<string>> source, string needle, [CallerArgumentExpression(nameof(needle))] string? needleExpression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".ContainsMatchAsync({needleExpression})");
+        return new IEnumerableString_ContainsMatchAsync_String_Assertion(source.Context, needle);
+    }
+
+}
+
+]

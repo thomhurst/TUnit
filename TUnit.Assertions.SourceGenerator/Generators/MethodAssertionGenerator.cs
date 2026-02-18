@@ -40,7 +40,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
     private static readonly DiagnosticDescriptor UnsupportedReturnTypeRule = new DiagnosticDescriptor(
         id: "TUNITGEN003",
         title: "Unsupported return type",
-        messageFormat: "Method '{0}' decorated with [GenerateAssertion] has unsupported return type '{1}'. Supported types are: bool, AssertionResult, Task<bool>, Task<AssertionResult>",
+        messageFormat: "Method '{0}' decorated with [GenerateAssertion] has unsupported return type '{1}'. Supported types are: bool, AssertionResult, AssertionResult<T>, Task<bool>, Task<AssertionResult>, Task<AssertionResult<T>>",
         category: "TUnit.Assertions.SourceGenerator",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
@@ -465,18 +465,39 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
                         return new ReturnTypeInfo(ReturnTypeKind.TaskBool);
                     }
 
-                    // Task<AssertionResult>
+                    // Task<AssertionResult> (non-generic)
                     if (innerType.Name == "AssertionResult" &&
-                        innerType.ContainingNamespace?.ToDisplayString() == "TUnit.Assertions.Core")
+                        innerType.ContainingNamespace?.ToDisplayString() == "TUnit.Assertions.Core" &&
+                        innerType is INamedTypeSymbol { TypeArguments.Length: 0 })
                     {
                         return new ReturnTypeInfo(ReturnTypeKind.TaskAssertionResult);
+                    }
+
+                    // Task<AssertionResult<T>>
+                    if (innerType is INamedTypeSymbol innerNamed &&
+                        innerNamed.Name == "AssertionResult" &&
+                        innerNamed.ContainingNamespace?.ToDisplayString() == "TUnit.Assertions.Core" &&
+                        innerNamed.TypeArguments.Length == 1)
+                    {
+                        var resultType = innerNamed.TypeArguments[0].ToDisplayString();
+                        return new ReturnTypeInfo(ReturnTypeKind.TaskAssertionResultOfT, resultType);
                     }
                 }
             }
 
-            // AssertionResult
+            // AssertionResult<T> (generic)
             if (namedType.Name == "AssertionResult" &&
-                namedType.ContainingNamespace?.ToDisplayString() == "TUnit.Assertions.Core")
+                namedType.ContainingNamespace?.ToDisplayString() == "TUnit.Assertions.Core" &&
+                namedType.TypeArguments.Length == 1)
+            {
+                var resultType = namedType.TypeArguments[0].ToDisplayString();
+                return new ReturnTypeInfo(ReturnTypeKind.AssertionResultOfT, resultType);
+            }
+
+            // AssertionResult (non-generic)
+            if (namedType.Name == "AssertionResult" &&
+                namedType.ContainingNamespace?.ToDisplayString() == "TUnit.Assertions.Core" &&
+                namedType.TypeArguments.Length == 0)
             {
                 return new ReturnTypeInfo(ReturnTypeKind.AssertionResult);
             }
@@ -623,7 +644,15 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             sb.AppendLine($"    private readonly {fieldType} _{param.Name};");
         }
 
-        if (data.AdditionalParameters.Count > 0)
+        // For terminal assertions (AssertionResult<T>), add field to capture the result value
+        var isTerminal = data.ReturnTypeInfo.Kind is ReturnTypeKind.AssertionResultOfT or ReturnTypeKind.TaskAssertionResultOfT;
+        if (isTerminal)
+        {
+            var resultType = data.ReturnTypeInfo.ResultTypeFullName!;
+            sb.AppendLine($"    private {resultType}? _result;");
+        }
+
+        if (data.AdditionalParameters.Count > 0 || isTerminal)
         {
             sb.AppendLine();
         }
@@ -647,7 +676,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         sb.AppendLine();
 
         // CheckAsync method - only async if we need await
-        var needsAsync = data.ReturnTypeInfo.Kind is ReturnTypeKind.TaskBool or ReturnTypeKind.TaskAssertionResult;
+        var needsAsync = data.ReturnTypeInfo.Kind is ReturnTypeKind.TaskBool or ReturnTypeKind.TaskAssertionResult or ReturnTypeKind.TaskAssertionResultOfT;
         var asyncKeyword = needsAsync ? "async " : "";
 
         // Add suppression attributes to CheckAsync method when method body is inlined
@@ -731,6 +760,23 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
 
         sb.AppendLine("    }");
 
+        // For terminal assertions, generate GetAwaiter override and helper method
+        if (isTerminal)
+        {
+            var resultType = data.ReturnTypeInfo.ResultTypeFullName!;
+            sb.AppendLine();
+            sb.AppendLine($"    public new System.Runtime.CompilerServices.TaskAwaiter<{resultType}> GetAwaiter()");
+            sb.AppendLine("    {");
+            sb.AppendLine("        return ExecuteAndReturnResultAsync().GetAwaiter();");
+            sb.AppendLine("    }");
+            sb.AppendLine();
+            sb.AppendLine($"    private async Task<{resultType}> ExecuteAndReturnResultAsync()");
+            sb.AppendLine("    {");
+            sb.AppendLine("        await AssertAsync();");
+            sb.AppendLine("        return _result!;");
+            sb.AppendLine("    }");
+        }
+
         sb.AppendLine("}");
     }
 
@@ -765,6 +811,28 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
 
             case ReturnTypeKind.TaskAssertionResult:
                 sb.AppendLine($"        return await {methodCall};");
+                break;
+
+            case ReturnTypeKind.AssertionResultOfT:
+                sb.AppendLine($"        var typedResult = {methodCall};");
+                sb.AppendLine("        if (typedResult.IsPassed)");
+                sb.AppendLine("        {");
+                sb.AppendLine("            _result = typedResult.Value;");
+                sb.AppendLine("        }");
+                sb.AppendLine("        return Task.FromResult(typedResult.IsPassed");
+                sb.AppendLine("            ? AssertionResult.Passed");
+                sb.AppendLine("            : AssertionResult.Failed(typedResult.Message));");
+                break;
+
+            case ReturnTypeKind.TaskAssertionResultOfT:
+                sb.AppendLine($"        var typedResult = await {methodCall};");
+                sb.AppendLine("        if (typedResult.IsPassed)");
+                sb.AppendLine("        {");
+                sb.AppendLine("            _result = typedResult.Value;");
+                sb.AppendLine("        }");
+                sb.AppendLine("        return typedResult.IsPassed");
+                sb.AppendLine("            ? AssertionResult.Passed");
+                sb.AppendLine("            : AssertionResult.Failed(typedResult.Message);");
                 break;
         }
     }
@@ -1218,10 +1286,12 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         Bool,
         AssertionResult,
         TaskBool,
-        TaskAssertionResult
+        TaskAssertionResult,
+        AssertionResultOfT,
+        TaskAssertionResultOfT
     }
 
-    private readonly record struct ReturnTypeInfo(ReturnTypeKind Kind);
+    private readonly record struct ReturnTypeInfo(ReturnTypeKind Kind, string? ResultTypeFullName = null);
 
     private record AssertionMethodData(
         MethodData Method,

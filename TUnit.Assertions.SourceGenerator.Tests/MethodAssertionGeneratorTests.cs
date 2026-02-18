@@ -253,6 +253,48 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
 #endif
 
     [Test]
+    public Task AssertionResultOfTMethod() => RunTest(
+        Path.Combine(Sourcy.Git.RootDirectory.FullName,
+            "TUnit.Assertions.SourceGenerator.Tests",
+            "TestData",
+            "AssertionResultOfTMethodAssertion.cs"),
+        async generatedFiles =>
+        {
+            await Assert.That(generatedFiles).HasCount(1);
+
+            var mainFile = generatedFiles.First();
+            await Assert.That(mainFile).Contains("IEnumerableString_ContainsMatch_String_Assertion");
+            // Terminal assertion: should have _result field
+            await Assert.That(mainFile).Contains("private string? _result;");
+            // Terminal assertion: should have new GetAwaiter
+            await Assert.That(mainFile).Contains("public new System.Runtime.CompilerServices.TaskAwaiter<string> GetAwaiter()");
+            // Should unwrap AssertionResult<T> to AssertionResult
+            await Assert.That(mainFile).Contains("var typedResult =");
+            await Assert.That(mainFile).Contains("_result = typedResult.Value;");
+        });
+
+    [Test]
+    public Task AsyncAssertionResultOfTMethod() => RunTest(
+        Path.Combine(Sourcy.Git.RootDirectory.FullName,
+            "TUnit.Assertions.SourceGenerator.Tests",
+            "TestData",
+            "AsyncAssertionResultOfTAssertion.cs"),
+        async generatedFiles =>
+        {
+            await Assert.That(generatedFiles).HasCount(1);
+
+            var mainFile = generatedFiles.First();
+            await Assert.That(mainFile).Contains("IEnumerableString_ContainsMatchAsync_String_Assertion");
+            // Terminal assertion: should have _result field
+            await Assert.That(mainFile).Contains("private string? _result;");
+            // Terminal assertion: should have new GetAwaiter
+            await Assert.That(mainFile).Contains("public new System.Runtime.CompilerServices.TaskAwaiter<string> GetAwaiter()");
+            // Async: should await the method call
+            await Assert.That(mainFile).Contains("var typedResult = await");
+            await Assert.That(mainFile).Contains("_result = typedResult.Value;");
+        });
+
+    [Test]
     public Task ArrayTargetType() => RunTest(
         Path.Combine(Sourcy.Git.RootDirectory.FullName,
             "TUnit.Assertions.SourceGenerator.Tests",
