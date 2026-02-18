@@ -1924,6 +1924,33 @@ public class MSTestMigrationAnalyzerTests
     // NOTE: MSTest lifecycle visibility changes and DoNotParallelize conversion are not implemented
     // These features exist in NUnit migration but not MSTest migration
 
+    [Test]
+    public async Task MSTest_Global_Using_Flagged()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+                {|#0:global using Microsoft.VisualStudio.TestTools.UnitTesting;|}
+                """,
+            ConfigureMSTestTest,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0)
+        );
+    }
+
+    [Test]
+    public async Task MSTest_Global_Using_Can_Be_Removed()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                {|#0:global using Microsoft.VisualStudio.TestTools.UnitTesting;|}
+                """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
+            """
+
+                """,
+            ConfigureMSTestTest
+        );
+    }
+
     private static void ConfigureMSTestTest(Verifier.Test test)
     {
         test.TestState.AdditionalReferences.Add(typeof(TestMethodAttribute).Assembly);
