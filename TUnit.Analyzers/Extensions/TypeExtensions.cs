@@ -112,6 +112,77 @@ public static class TypeExtensions
         return false;
     }
 
+    public static bool HasVisibleMutability(this ITypeSymbol type)
+    {
+        // Value types and string are safe — no shared-state concern
+        if (type.IsValueType || type.SpecialType == SpecialType.System_String)
+        {
+            return false;
+        }
+
+        // Arrays are always mutable (elements can be reassigned)
+        if (type is IArrayTypeSymbol)
+        {
+            return true;
+        }
+
+        // Delegates are immutable
+        if (type.TypeKind == TypeKind.Delegate)
+        {
+            return false;
+        }
+
+        // Generic type parameters and interfaces — we can't know the concrete type, be conservative
+        if (type is ITypeParameterSymbol || type.TypeKind == TypeKind.Interface)
+        {
+            return true;
+        }
+
+        // Walk the named type hierarchy looking for mutability evidence
+        if (type is INamedTypeSymbol namedType)
+        {
+            foreach (var t in namedType.GetSelfAndBaseTypes())
+            {
+                foreach (var member in t.GetMembers())
+                {
+                    // Property with a non-init setter (any accessibility)
+                    if (member is IPropertySymbol { SetMethod: { } setter } && !setter.IsInitOnly)
+                    {
+                        return true;
+                    }
+
+                    // Non-readonly, non-const, non-compiler-generated field
+                    if (member is IFieldSymbol { IsReadOnly: false, IsConst: false, IsImplicitlyDeclared: false } field
+                        && field.DeclaredAccessibility == Accessibility.Public)
+                    {
+                        return true;
+                    }
+
+                    // Lazy<T> field or property (any accessibility) — deferred mutation
+                    if (member is IFieldSymbol lazyField
+                        && lazyField.Type is INamedTypeSymbol { IsGenericType: true } lazyFieldType
+                        && lazyFieldType.ConstructedFrom.ToDisplayString() == "System.Lazy<T>")
+                    {
+                        return true;
+                    }
+
+                    if (member is IPropertySymbol lazyProp
+                        && lazyProp.Type is INamedTypeSymbol { IsGenericType: true } lazyPropType
+                        && lazyPropType.ConstructedFrom.ToDisplayString() == "System.Lazy<T>")
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            // No mutability evidence found
+            return false;
+        }
+
+        // Unknown kind — be conservative
+        return true;
+    }
+
     public static bool IsDisposable(this ITypeSymbol type)
     {
         return type.AllInterfaces

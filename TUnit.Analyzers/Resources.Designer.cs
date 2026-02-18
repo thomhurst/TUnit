@@ -1272,25 +1272,25 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Return a `Func&lt;T&gt;` rather than a `&lt;T&gt;`..
+        ///   Looks up a localized string similar to When a data source method provides mutable reference types as test parameters, it should return Func&lt;T&gt;....
         /// </summary>
         internal static string TUnit0046Description {
             get {
                 return ResourceManager.GetString("TUnit0046Description", resourceCulture);
             }
         }
-        
+
         /// <summary>
-        ///   Looks up a localized string similar to Return a `Func&lt;T&gt;` rather than a `&lt;T&gt;`..
+        ///   Looks up a localized string similar to Data source method should return Func&lt;T&gt; for mutable reference type parameters to ensure proper test isolation.
         /// </summary>
         internal static string TUnit0046MessageFormat {
             get {
                 return ResourceManager.GetString("TUnit0046MessageFormat", resourceCulture);
             }
         }
-        
+
         /// <summary>
-        ///   Looks up a localized string similar to Return a `Func&lt;T&gt;` rather than a `&lt;T&gt;`.
+        ///   Looks up a localized string similar to Data source should return Func&lt;T&gt; for mutable reference types.
         /// </summary>
         internal static string TUnit0046Title {
             get {

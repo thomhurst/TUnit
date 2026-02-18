@@ -927,4 +927,339 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 """
             );
     }
+
+    [Test]
+    public async Task No_Warning_For_Immutable_Record()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                public record MyRecord(string Name, int Value);
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public void MyTest(MyRecord value)
+                    {
+                    }
+
+                    public static MyRecord Data() => new("Hello", 1);
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task No_Warning_For_Class_With_GetOnly_Properties()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                public class Immutable
+                {
+                    public string Name { get; }
+                    public Immutable(string name) => Name = name;
+                }
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public void MyTest(Immutable value)
+                    {
+                    }
+
+                    public static Immutable Data() => new("Hello");
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task No_Warning_For_Class_With_InitOnly_Setters()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                public class InitOnly
+                {
+                    public string? Name { get; init; }
+                }
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public void MyTest(InitOnly value)
+                    {
+                    }
+
+                    public static InitOnly Data() => new() { Name = "Hello" };
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task No_Warning_For_Delegate_Type()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using System;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public void MyTest(Action value)
+                    {
+                    }
+
+                    public static Action Data() => () => { };
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task No_Warning_For_String_Type()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public void MyTest(string value)
+                    {
+                    }
+
+                    public static string Data() => "Hello";
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Warning_For_Class_With_Settable_Property()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                public class Mutable
+                {
+                    public string? Name { get; set; }
+                }
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public void MyTest(Mutable value)
+                    {
+                    }
+
+                    public static Mutable {|#0:Data|}() => new() { Name = "Hello" };
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.ReturnFunc)
+                    .WithLocation(0)
+            );
+    }
+
+    [Test]
+    public async Task Warning_For_Class_With_Private_Setter()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                public class MutablePrivate
+                {
+                    public string? Name { get; private set; }
+                    public MutablePrivate(string name) => Name = name;
+                }
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public void MyTest(MutablePrivate value)
+                    {
+                    }
+
+                    public static MutablePrivate {|#0:Data|}() => new("Hello");
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.ReturnFunc)
+                    .WithLocation(0)
+            );
+    }
+
+    [Test]
+    public async Task Warning_For_Class_With_Public_NonReadonly_Field()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                public class MutableField
+                {
+                    public string? Name;
+                }
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public void MyTest(MutableField value)
+                    {
+                    }
+
+                    public static MutableField {|#0:Data|}() => new() { Name = "Hello" };
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.ReturnFunc)
+                    .WithLocation(0)
+            );
+    }
+
+    [Test]
+    public async Task Warning_For_Array_Type()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public void MyTest(int[] value)
+                    {
+                    }
+
+                    public static int[] {|#0:Data|}() => new[] { 1, 2, 3 };
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.ReturnFunc)
+                    .WithLocation(0)
+            );
+    }
+
+    [Test]
+    public async Task Warning_For_Class_With_Lazy_Property()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using System;
+
+                public class HasLazy
+                {
+                    public Lazy<string> Name { get; } = new(() => "Hello");
+                }
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public void MyTest(HasLazy value)
+                    {
+                    }
+
+                    public static HasLazy {|#0:Data|}() => new();
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.ReturnFunc)
+                    .WithLocation(0)
+            );
+    }
+
+    [Test]
+    public async Task Warning_For_Derived_Class_From_Mutable_Base()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                public class MutableBase
+                {
+                    public string? Name { get; set; }
+                }
+
+                public class Derived : MutableBase
+                {
+                }
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public void MyTest(Derived value)
+                    {
+                    }
+
+                    public static Derived {|#0:Data|}() => new() { Name = "Hello" };
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.ReturnFunc)
+                    .WithLocation(0)
+            );
+    }
+
+    [Test]
+    public async Task Warning_For_Interface_Type()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                public interface IMyInterface
+                {
+                    string Name { get; }
+                }
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public void MyTest(IMyInterface value)
+                    {
+                    }
+
+                    public static IMyInterface {|#0:Data|}() => null!;
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.ReturnFunc)
+                    .WithLocation(0)
+            );
+    }
 }
