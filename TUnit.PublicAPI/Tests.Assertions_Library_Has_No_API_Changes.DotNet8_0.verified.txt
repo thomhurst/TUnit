@@ -2260,6 +2260,14 @@ namespace .Core
         public static . FailIf(bool condition, string message) { }
         public static . Failed(string message) { }
     }
+    public readonly struct AssertionResult<T>
+    {
+        public bool IsPassed { get; }
+        public string Message { get; }
+        public T Value { get; }
+        public static .<T> Passed(T value) { }
+        public static .<T> op_Implicit(. result) { }
+    }
     public abstract class Assertion<TValue> : .
     {
         protected readonly .<TValue> Context;
