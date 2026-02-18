@@ -14,6 +14,8 @@ namespace TUnit.Assertions.Extensions;
 /// </summary>
 public sealed class Exception_HasInnerException_Assertion : Assertion<System.Exception>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public Exception_HasInnerException_Assertion(AssertionContext<System.Exception> context)
         : base(context)
     {
@@ -35,9 +37,9 @@ public sealed class Exception_HasInnerException_Assertion : Assertion<System.Exc
         }
 
         var result = value!.InnerException != null;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -51,6 +53,8 @@ public sealed class Exception_HasInnerException_Assertion : Assertion<System.Exc
 /// </summary>
 public sealed class Exception_HasNoInnerException_Assertion : Assertion<System.Exception>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public Exception_HasNoInnerException_Assertion(AssertionContext<System.Exception> context)
         : base(context)
     {
@@ -72,9 +76,9 @@ public sealed class Exception_HasNoInnerException_Assertion : Assertion<System.E
         }
 
         var result = value!.InnerException == null;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -88,6 +92,8 @@ public sealed class Exception_HasNoInnerException_Assertion : Assertion<System.E
 /// </summary>
 public sealed class Exception_HasStackTrace_Assertion : Assertion<System.Exception>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public Exception_HasStackTrace_Assertion(AssertionContext<System.Exception> context)
         : base(context)
     {
@@ -109,9 +115,9 @@ public sealed class Exception_HasStackTrace_Assertion : Assertion<System.Excepti
         }
 
         var result = !string.IsNullOrWhiteSpace(value!.StackTrace);
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -125,6 +131,8 @@ public sealed class Exception_HasStackTrace_Assertion : Assertion<System.Excepti
 /// </summary>
 public sealed class Exception_HasNoData_Assertion : Assertion<System.Exception>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public Exception_HasNoData_Assertion(AssertionContext<System.Exception> context)
         : base(context)
     {
@@ -146,9 +154,9 @@ public sealed class Exception_HasNoData_Assertion : Assertion<System.Exception>
         }
 
         var result = value!.Data.Count == 0;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -162,6 +170,8 @@ public sealed class Exception_HasNoData_Assertion : Assertion<System.Exception>
 /// </summary>
 public sealed class Exception_HasHelpLink_Assertion : Assertion<System.Exception>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public Exception_HasHelpLink_Assertion(AssertionContext<System.Exception> context)
         : base(context)
     {
@@ -183,9 +193,9 @@ public sealed class Exception_HasHelpLink_Assertion : Assertion<System.Exception
         }
 
         var result = !string.IsNullOrWhiteSpace(value!.HelpLink);
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -199,6 +209,8 @@ public sealed class Exception_HasHelpLink_Assertion : Assertion<System.Exception
 /// </summary>
 public sealed class Exception_HasNoHelpLink_Assertion : Assertion<System.Exception>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public Exception_HasNoHelpLink_Assertion(AssertionContext<System.Exception> context)
         : base(context)
     {
@@ -220,9 +232,9 @@ public sealed class Exception_HasNoHelpLink_Assertion : Assertion<System.Excepti
         }
 
         var result = string.IsNullOrWhiteSpace(value!.HelpLink);
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -236,6 +248,8 @@ public sealed class Exception_HasNoHelpLink_Assertion : Assertion<System.Excepti
 /// </summary>
 public sealed class Exception_HasSource_Assertion : Assertion<System.Exception>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public Exception_HasSource_Assertion(AssertionContext<System.Exception> context)
         : base(context)
     {
@@ -257,9 +271,9 @@ public sealed class Exception_HasSource_Assertion : Assertion<System.Exception>
         }
 
         var result = !string.IsNullOrWhiteSpace(value!.Source);
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -273,6 +287,8 @@ public sealed class Exception_HasSource_Assertion : Assertion<System.Exception>
 /// </summary>
 public sealed class Exception_HasNoSource_Assertion : Assertion<System.Exception>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public Exception_HasNoSource_Assertion(AssertionContext<System.Exception> context)
         : base(context)
     {
@@ -294,9 +310,9 @@ public sealed class Exception_HasNoSource_Assertion : Assertion<System.Exception
         }
 
         var result = string.IsNullOrWhiteSpace(value!.Source);
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -310,6 +326,8 @@ public sealed class Exception_HasNoSource_Assertion : Assertion<System.Exception
 /// </summary>
 public sealed class Exception_HasTargetSite_Assertion : Assertion<System.Exception>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public Exception_HasTargetSite_Assertion(AssertionContext<System.Exception> context)
         : base(context)
     {
@@ -331,9 +349,9 @@ public sealed class Exception_HasTargetSite_Assertion : Assertion<System.Excepti
         }
 
         var result = value!.TargetSite != null;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -347,6 +365,8 @@ public sealed class Exception_HasTargetSite_Assertion : Assertion<System.Excepti
 /// </summary>
 public sealed class Exception_HasNoTargetSite_Assertion : Assertion<System.Exception>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public Exception_HasNoTargetSite_Assertion(AssertionContext<System.Exception> context)
         : base(context)
     {
@@ -368,9 +388,9 @@ public sealed class Exception_HasNoTargetSite_Assertion : Assertion<System.Excep
         }
 
         var result = value!.TargetSite == null;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()

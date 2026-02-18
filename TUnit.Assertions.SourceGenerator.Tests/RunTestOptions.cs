@@ -8,4 +8,5 @@ public record RunTestOptions
     public Dictionary<string, string>? BuildProperties { get; set; }
     public string[] AdditionalSyntaxes { get; set; } = [];
     public PackageIdentity[] AdditionalPackages { get; set; } = [];
+    public string[]? PreprocessorSymbols { get; set; }
 }

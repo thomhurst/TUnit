@@ -20,8 +20,9 @@ public static class EqualsAssertionExtensions
     /// </summary>
     public static EqualsAssertion<TValue> IsEqualTo<TValue>(this IAssertionSource<TValue> source, TValue expected, [CallerArgumentExpression(nameof(expected))] string? expectedExpression = null)
     {
-        source.Context.ExpressionBuilder.Append(".IsEqualTo("
-            + string.Join(", ", new[] { expectedExpression }.Where(e => e != null)) + ")");
+        source.Context.ExpressionBuilder.Append(".IsEqualTo(");
+        source.Context.ExpressionBuilder.Append(expectedExpression);
+        source.Context.ExpressionBuilder.Append(")");
         return new EqualsAssertion<TValue>(source.Context, expected);
     }
 
@@ -30,8 +31,21 @@ public static class EqualsAssertionExtensions
     /// </summary>
     public static EqualsAssertion<TValue> IsEqualTo<TValue>(this IAssertionSource<TValue> source, TValue expected, System.Collections.Generic.IEqualityComparer<TValue> comparer, [CallerArgumentExpression(nameof(expected))] string? expectedExpression = null, [CallerArgumentExpression(nameof(comparer))] string? comparerExpression = null)
     {
-        source.Context.ExpressionBuilder.Append(".IsEqualTo("
-            + string.Join(", ", new[] { expectedExpression, comparerExpression }.Where(e => e != null)) + ")");
+        source.Context.ExpressionBuilder.Append(".IsEqualTo(");
+        var added = false;
+        if (expectedExpression != null)
+        {
+            source.Context.ExpressionBuilder.Append(added ? ", " : "");
+            source.Context.ExpressionBuilder.Append(expectedExpression);
+            added = true;
+        }
+        if (comparerExpression != null)
+        {
+            source.Context.ExpressionBuilder.Append(added ? ", " : "");
+            source.Context.ExpressionBuilder.Append(comparerExpression);
+            added = true;
+        }
+        source.Context.ExpressionBuilder.Append(")");
         return new EqualsAssertion<TValue>(source.Context, expected, comparer);
     }
 }

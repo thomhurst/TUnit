@@ -16,6 +16,8 @@ namespace TUnit.Assertions.Extensions;
 public sealed class String_HasProperty_T_Assertion<T> : Assertion<string>
     where T : class, System.IComparable<T>, new()
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     private readonly T _value;
 
     public String_HasProperty_T_Assertion(AssertionContext<string> context, T value)
@@ -40,9 +42,9 @@ public sealed class String_HasProperty_T_Assertion<T> : Assertion<string>
         }
 
         var result = value!.HasProperty<T>(_value);
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()

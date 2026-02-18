@@ -12,12 +12,14 @@ namespace TUnit.Assertions.Extensions;
 /// <summary>
 /// Generated assertion for ContainsMessage
 /// </summary>
-public sealed class _ContainsMessage_String_Bool_Assertion : Assertion<string[]>
+public sealed class StringArray_ContainsMessage_String_Bool_Assertion : Assertion<string[]>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     private readonly string _needle;
     private readonly bool _exact;
 
-    public _ContainsMessage_String_Bool_Assertion(AssertionContext<string[]> context, string needle, bool exact)
+    public StringArray_ContainsMessage_String_Bool_Assertion(AssertionContext<string[]> context, string needle, bool exact)
         : base(context)
     {
         _needle = needle;
@@ -40,9 +42,9 @@ public sealed class _ContainsMessage_String_Bool_Assertion : Assertion<string[]>
         }
 
         var result = value!.ContainsMessage(_needle, _exact);
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -56,10 +58,10 @@ public static partial class MethodWithDefaultValuesExtensions
     /// <summary>
     /// Generated extension method for ContainsMessage
     /// </summary>
-    public static _ContainsMessage_String_Bool_Assertion ContainsMessage(this IAssertionSource<string[]> source, string needle, bool exact = true, [CallerArgumentExpression(nameof(needle))] string? needleExpression = null, [CallerArgumentExpression(nameof(exact))] string? exactExpression = null)
+    public static StringArray_ContainsMessage_String_Bool_Assertion ContainsMessage(this IAssertionSource<string[]> source, string needle, bool exact = true, [CallerArgumentExpression(nameof(needle))] string? needleExpression = null, [CallerArgumentExpression(nameof(exact))] string? exactExpression = null)
     {
         source.Context.ExpressionBuilder.Append($".ContainsMessage({needleExpression}, {exactExpression})");
-        return new _ContainsMessage_String_Bool_Assertion(source.Context, needle, exact);
+        return new StringArray_ContainsMessage_String_Bool_Assertion(source.Context, needle, exact);
     }
 
 }

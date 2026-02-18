@@ -16,6 +16,8 @@ namespace TUnit.Assertions.Extensions;
 public sealed class ResultTValue_IsErrorOfType_Assertion<TValue, TError> : Assertion<TUnit.Assertions.Tests.TestData.Result<TValue>>
     where TError : System.Exception
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public ResultTValue_IsErrorOfType_Assertion(AssertionContext<TUnit.Assertions.Tests.TestData.Result<TValue>> context)
         : base(context)
     {
@@ -37,9 +39,9 @@ public sealed class ResultTValue_IsErrorOfType_Assertion<TValue, TError> : Asser
         }
 
         var result = value!.IsErrorOfType<TValue, TError>();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()

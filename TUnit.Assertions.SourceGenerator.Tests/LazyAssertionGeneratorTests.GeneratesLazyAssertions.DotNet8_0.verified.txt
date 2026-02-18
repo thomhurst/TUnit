@@ -15,6 +15,8 @@ namespace TUnit.Assertions.Extensions;
 [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
 public sealed class LazyT_IsValueCreated_Assertion<T> : Assertion<System.Lazy<T>>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public LazyT_IsValueCreated_Assertion(AssertionContext<System.Lazy<T>> context)
         : base(context)
     {
@@ -36,9 +38,9 @@ public sealed class LazyT_IsValueCreated_Assertion<T> : Assertion<System.Lazy<T>
         }
 
         var result = value!.IsValueCreated == true;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -53,6 +55,8 @@ public sealed class LazyT_IsValueCreated_Assertion<T> : Assertion<System.Lazy<T>
 [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
 public sealed class LazyT_IsValueNotCreated_Assertion<T> : Assertion<System.Lazy<T>>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public LazyT_IsValueNotCreated_Assertion(AssertionContext<System.Lazy<T>> context)
         : base(context)
     {
@@ -74,9 +78,9 @@ public sealed class LazyT_IsValueNotCreated_Assertion<T> : Assertion<System.Lazy
         }
 
         var result = value!.IsValueCreated == false;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()

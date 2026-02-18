@@ -14,6 +14,8 @@ namespace TUnit.Assertions.Extensions;
 /// </summary>
 public sealed class DateTimeOffset_IsToday_Assertion : Assertion<System.DateTimeOffset>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public DateTimeOffset_IsToday_Assertion(AssertionContext<System.DateTimeOffset> context)
         : base(context)
     {
@@ -30,9 +32,9 @@ public sealed class DateTimeOffset_IsToday_Assertion : Assertion<System.DateTime
         }
 
         var result = value.Date == global::System.DateTimeOffset.Now.Date;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -46,6 +48,8 @@ public sealed class DateTimeOffset_IsToday_Assertion : Assertion<System.DateTime
 /// </summary>
 public sealed class DateTimeOffset_IsNotToday_Assertion : Assertion<System.DateTimeOffset>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public DateTimeOffset_IsNotToday_Assertion(AssertionContext<System.DateTimeOffset> context)
         : base(context)
     {
@@ -62,9 +66,9 @@ public sealed class DateTimeOffset_IsNotToday_Assertion : Assertion<System.DateT
         }
 
         var result = value.Date != global::System.DateTimeOffset.Now.Date;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -78,6 +82,8 @@ public sealed class DateTimeOffset_IsNotToday_Assertion : Assertion<System.DateT
 /// </summary>
 public sealed class DateTimeOffset_IsUtc_Assertion : Assertion<System.DateTimeOffset>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public DateTimeOffset_IsUtc_Assertion(AssertionContext<System.DateTimeOffset> context)
         : base(context)
     {
@@ -94,9 +100,9 @@ public sealed class DateTimeOffset_IsUtc_Assertion : Assertion<System.DateTimeOf
         }
 
         var result = value.Offset == global::System.TimeSpan.Zero;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -110,6 +116,8 @@ public sealed class DateTimeOffset_IsUtc_Assertion : Assertion<System.DateTimeOf
 /// </summary>
 public sealed class DateTimeOffset_IsNotUtc_Assertion : Assertion<System.DateTimeOffset>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public DateTimeOffset_IsNotUtc_Assertion(AssertionContext<System.DateTimeOffset> context)
         : base(context)
     {
@@ -126,9 +134,9 @@ public sealed class DateTimeOffset_IsNotUtc_Assertion : Assertion<System.DateTim
         }
 
         var result = value.Offset != global::System.TimeSpan.Zero;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -142,6 +150,8 @@ public sealed class DateTimeOffset_IsNotUtc_Assertion : Assertion<System.DateTim
 /// </summary>
 public sealed class DateTimeOffset_IsLeapYear_Assertion : Assertion<System.DateTimeOffset>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public DateTimeOffset_IsLeapYear_Assertion(AssertionContext<System.DateTimeOffset> context)
         : base(context)
     {
@@ -158,9 +168,9 @@ public sealed class DateTimeOffset_IsLeapYear_Assertion : Assertion<System.DateT
         }
 
         var result = global::System.DateTime.IsLeapYear(value.Year);
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -174,6 +184,8 @@ public sealed class DateTimeOffset_IsLeapYear_Assertion : Assertion<System.DateT
 /// </summary>
 public sealed class DateTimeOffset_IsNotLeapYear_Assertion : Assertion<System.DateTimeOffset>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public DateTimeOffset_IsNotLeapYear_Assertion(AssertionContext<System.DateTimeOffset> context)
         : base(context)
     {
@@ -190,9 +202,9 @@ public sealed class DateTimeOffset_IsNotLeapYear_Assertion : Assertion<System.Da
         }
 
         var result = !global::System.DateTime.IsLeapYear(value.Year);
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -206,6 +218,8 @@ public sealed class DateTimeOffset_IsNotLeapYear_Assertion : Assertion<System.Da
 /// </summary>
 public sealed class DateTimeOffset_IsInFuture_Assertion : Assertion<System.DateTimeOffset>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public DateTimeOffset_IsInFuture_Assertion(AssertionContext<System.DateTimeOffset> context)
         : base(context)
     {
@@ -222,9 +236,9 @@ public sealed class DateTimeOffset_IsInFuture_Assertion : Assertion<System.DateT
         }
 
         var result = value > global::System.DateTimeOffset.Now;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -238,6 +252,8 @@ public sealed class DateTimeOffset_IsInFuture_Assertion : Assertion<System.DateT
 /// </summary>
 public sealed class DateTimeOffset_IsInPast_Assertion : Assertion<System.DateTimeOffset>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public DateTimeOffset_IsInPast_Assertion(AssertionContext<System.DateTimeOffset> context)
         : base(context)
     {
@@ -254,9 +270,9 @@ public sealed class DateTimeOffset_IsInPast_Assertion : Assertion<System.DateTim
         }
 
         var result = value < global::System.DateTimeOffset.Now;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -270,6 +286,8 @@ public sealed class DateTimeOffset_IsInPast_Assertion : Assertion<System.DateTim
 /// </summary>
 public sealed class DateTimeOffset_IsInFutureUtc_Assertion : Assertion<System.DateTimeOffset>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public DateTimeOffset_IsInFutureUtc_Assertion(AssertionContext<System.DateTimeOffset> context)
         : base(context)
     {
@@ -286,9 +304,9 @@ public sealed class DateTimeOffset_IsInFutureUtc_Assertion : Assertion<System.Da
         }
 
         var result = value > global::System.DateTimeOffset.UtcNow;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -302,6 +320,8 @@ public sealed class DateTimeOffset_IsInFutureUtc_Assertion : Assertion<System.Da
 /// </summary>
 public sealed class DateTimeOffset_IsInPastUtc_Assertion : Assertion<System.DateTimeOffset>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public DateTimeOffset_IsInPastUtc_Assertion(AssertionContext<System.DateTimeOffset> context)
         : base(context)
     {
@@ -318,9 +338,9 @@ public sealed class DateTimeOffset_IsInPastUtc_Assertion : Assertion<System.Date
         }
 
         var result = value < global::System.DateTimeOffset.UtcNow;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -334,6 +354,8 @@ public sealed class DateTimeOffset_IsInPastUtc_Assertion : Assertion<System.Date
 /// </summary>
 public sealed class DateTimeOffset_IsOnWeekend_Assertion : Assertion<System.DateTimeOffset>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public DateTimeOffset_IsOnWeekend_Assertion(AssertionContext<System.DateTimeOffset> context)
         : base(context)
     {
@@ -350,9 +372,9 @@ public sealed class DateTimeOffset_IsOnWeekend_Assertion : Assertion<System.Date
         }
 
         var result = value.DayOfWeek == global::System.DayOfWeek.Saturday || value.DayOfWeek == global::System.DayOfWeek.Sunday;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -366,6 +388,8 @@ public sealed class DateTimeOffset_IsOnWeekend_Assertion : Assertion<System.Date
 /// </summary>
 public sealed class DateTimeOffset_IsOnWeekday_Assertion : Assertion<System.DateTimeOffset>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public DateTimeOffset_IsOnWeekday_Assertion(AssertionContext<System.DateTimeOffset> context)
         : base(context)
     {
@@ -382,9 +406,9 @@ public sealed class DateTimeOffset_IsOnWeekday_Assertion : Assertion<System.Date
         }
 
         var result = value.DayOfWeek != global::System.DayOfWeek.Saturday && value.DayOfWeek != global::System.DayOfWeek.Sunday;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()

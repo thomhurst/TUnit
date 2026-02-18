@@ -20,7 +20,7 @@ public static class IsAssignableToAssertionExtensions
     /// </summary>
     public static IsAssignableToAssertion<TValue, TTarget> IsAssignableTo<TValue, TTarget>(this IAssertionSource<TValue> source)
     {
-        source.Context.ExpressionBuilder.Append(".IsAssignableTo(" + ")");
+        source.Context.ExpressionBuilder.Append(".IsAssignableTo(");        source.Context.ExpressionBuilder.Append(")");
         return new IsAssignableToAssertion<TValue, TTarget>(source.Context);
     }
 }

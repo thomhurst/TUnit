@@ -16,6 +16,8 @@ namespace TUnit.Assertions.Extensions;
 public sealed class Int_IsGreaterThan_T_Assertion<T> : Assertion<int>
     where T : System.IComparable<T>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     private readonly T _other;
 
     public Int_IsGreaterThan_T_Assertion(AssertionContext<int> context, T other)
@@ -35,9 +37,9 @@ public sealed class Int_IsGreaterThan_T_Assertion<T> : Assertion<int>
         }
 
         var result = value!.IsGreaterThan<T>(_other);
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -53,6 +55,8 @@ public sealed class Int_IsGreaterThan_T_Assertion<T> : Assertion<int>
 public sealed class Int_IsBetween_T_T_Assertion<T> : Assertion<int>
     where T : System.IComparable<T>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     private readonly T _min;
     private readonly T _max;
 
@@ -74,9 +78,9 @@ public sealed class Int_IsBetween_T_T_Assertion<T> : Assertion<int>
         }
 
         var result = value!.IsBetween<T>(_min, _max);
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()

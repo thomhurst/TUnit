@@ -14,6 +14,8 @@ namespace TUnit.Assertions.Extensions;
 /// </summary>
 public sealed class Bool_IsTrue_Assertion : Assertion<bool>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public Bool_IsTrue_Assertion(AssertionContext<bool> context)
         : base(context)
     {
@@ -30,9 +32,9 @@ public sealed class Bool_IsTrue_Assertion : Assertion<bool>
         }
 
         var result = value == true;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -46,6 +48,8 @@ public sealed class Bool_IsTrue_Assertion : Assertion<bool>
 /// </summary>
 public sealed class Bool_IsFalse_Assertion : Assertion<bool>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public Bool_IsFalse_Assertion(AssertionContext<bool> context)
         : base(context)
     {
@@ -62,9 +66,9 @@ public sealed class Bool_IsFalse_Assertion : Assertion<bool>
         }
 
         var result = value == false;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -111,6 +115,8 @@ namespace TUnit.Assertions.Extensions;
 /// </summary>
 public sealed class Int_IsPositive_Assertion : Assertion<int>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public Int_IsPositive_Assertion(AssertionContext<int> context)
         : base(context)
     {
@@ -127,9 +133,9 @@ public sealed class Int_IsPositive_Assertion : Assertion<int>
         }
 
         var result = value > 0;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -143,6 +149,8 @@ public sealed class Int_IsPositive_Assertion : Assertion<int>
 /// </summary>
 public sealed class Int_IsGreaterThan_Int_Assertion : Assertion<int>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     private readonly int _threshold;
 
     public Int_IsGreaterThan_Int_Assertion(AssertionContext<int> context, int threshold)
@@ -162,9 +170,9 @@ public sealed class Int_IsGreaterThan_Int_Assertion : Assertion<int>
         }
 
         var result = value > _threshold;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()

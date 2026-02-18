@@ -13,9 +13,11 @@ namespace TUnit.Assertions.Extensions;
 /// Generated assertion for IsEmpty
 /// </summary>
 [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
-public sealed class _IsEmpty_Assertion<T> : Assertion<T[]>
+public sealed class TArray_IsEmpty_Assertion<T> : Assertion<T[]>
 {
-    public _IsEmpty_Assertion(AssertionContext<T[]> context)
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
+    public TArray_IsEmpty_Assertion(AssertionContext<T[]> context)
         : base(context)
     {
     }
@@ -36,9 +38,9 @@ public sealed class _IsEmpty_Assertion<T> : Assertion<T[]>
         }
 
         var result = value!.Length == 0;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -51,9 +53,11 @@ public sealed class _IsEmpty_Assertion<T> : Assertion<T[]>
 /// Generated assertion for IsNotEmpty
 /// </summary>
 [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
-public sealed class _IsNotEmpty_Assertion<T> : Assertion<T[]>
+public sealed class TArray_IsNotEmpty_Assertion<T> : Assertion<T[]>
 {
-    public _IsNotEmpty_Assertion(AssertionContext<T[]> context)
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
+    public TArray_IsNotEmpty_Assertion(AssertionContext<T[]> context)
         : base(context)
     {
     }
@@ -74,9 +78,9 @@ public sealed class _IsNotEmpty_Assertion<T> : Assertion<T[]>
         }
 
         var result = value != null && value!.Length > 0;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -89,9 +93,11 @@ public sealed class _IsNotEmpty_Assertion<T> : Assertion<T[]>
 /// Generated assertion for IsSingleElement
 /// </summary>
 [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
-public sealed class _IsSingleElement_Assertion<T> : Assertion<T[]>
+public sealed class TArray_IsSingleElement_Assertion<T> : Assertion<T[]>
 {
-    public _IsSingleElement_Assertion(AssertionContext<T[]> context)
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
+    public TArray_IsSingleElement_Assertion(AssertionContext<T[]> context)
         : base(context)
     {
     }
@@ -112,9 +118,9 @@ public sealed class _IsSingleElement_Assertion<T> : Assertion<T[]>
         }
 
         var result = value!.Length == 1;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -127,9 +133,11 @@ public sealed class _IsSingleElement_Assertion<T> : Assertion<T[]>
 /// Generated assertion for IsNotSingleElement
 /// </summary>
 [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
-public sealed class _IsNotSingleElement_Assertion<T> : Assertion<T[]>
+public sealed class TArray_IsNotSingleElement_Assertion<T> : Assertion<T[]>
 {
-    public _IsNotSingleElement_Assertion(AssertionContext<T[]> context)
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
+    public TArray_IsNotSingleElement_Assertion(AssertionContext<T[]> context)
         : base(context)
     {
     }
@@ -150,9 +158,9 @@ public sealed class _IsNotSingleElement_Assertion<T> : Assertion<T[]>
         }
 
         var result = value!.Length != 1;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -167,6 +175,8 @@ public sealed class _IsNotSingleElement_Assertion<T> : Assertion<T[]>
 [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
 public sealed class IEnumerableT_IsSingleElement_Assertion<T> : Assertion<System.Collections.Generic.IEnumerable<T>>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public IEnumerableT_IsSingleElement_Assertion(AssertionContext<System.Collections.Generic.IEnumerable<T>> context)
         : base(context)
     {
@@ -188,9 +198,9 @@ public sealed class IEnumerableT_IsSingleElement_Assertion<T> : Assertion<System
         }
 
         var result = value != null && value!.Skip(1).Take(1).Any() == false && value!.Any();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -205,6 +215,8 @@ public sealed class IEnumerableT_IsSingleElement_Assertion<T> : Assertion<System
 [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
 public sealed class IEnumerableT_IsNotSingleElement_Assertion<T> : Assertion<System.Collections.Generic.IEnumerable<T>>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public IEnumerableT_IsNotSingleElement_Assertion(AssertionContext<System.Collections.Generic.IEnumerable<T>> context)
         : base(context)
     {
@@ -226,9 +238,9 @@ public sealed class IEnumerableT_IsNotSingleElement_Assertion<T> : Assertion<Sys
         }
 
         var result = value == null || value!.Skip(1).Take(1).Any() || !value!.Any();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -243,40 +255,40 @@ public static partial class ArrayAssertionExtensions
     /// Generated extension method for IsEmpty
     /// </summary>
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
-    public static _IsEmpty_Assertion<T> IsEmpty<T>(this IAssertionSource<T[]> source)
+    public static TArray_IsEmpty_Assertion<T> IsEmpty<T>(this IAssertionSource<T[]> source)
     {
         source.Context.ExpressionBuilder.Append(".IsEmpty()");
-        return new _IsEmpty_Assertion<T>(source.Context);
+        return new TArray_IsEmpty_Assertion<T>(source.Context);
     }
 
     /// <summary>
     /// Generated extension method for IsNotEmpty
     /// </summary>
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
-    public static _IsNotEmpty_Assertion<T> IsNotEmpty<T>(this IAssertionSource<T[]> source)
+    public static TArray_IsNotEmpty_Assertion<T> IsNotEmpty<T>(this IAssertionSource<T[]> source)
     {
         source.Context.ExpressionBuilder.Append(".IsNotEmpty()");
-        return new _IsNotEmpty_Assertion<T>(source.Context);
+        return new TArray_IsNotEmpty_Assertion<T>(source.Context);
     }
 
     /// <summary>
     /// Generated extension method for IsSingleElement
     /// </summary>
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
-    public static _IsSingleElement_Assertion<T> IsSingleElement<T>(this IAssertionSource<T[]> source)
+    public static TArray_IsSingleElement_Assertion<T> IsSingleElement<T>(this IAssertionSource<T[]> source)
     {
         source.Context.ExpressionBuilder.Append(".IsSingleElement()");
-        return new _IsSingleElement_Assertion<T>(source.Context);
+        return new TArray_IsSingleElement_Assertion<T>(source.Context);
     }
 
     /// <summary>
     /// Generated extension method for IsNotSingleElement
     /// </summary>
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
-    public static _IsNotSingleElement_Assertion<T> IsNotSingleElement<T>(this IAssertionSource<T[]> source)
+    public static TArray_IsNotSingleElement_Assertion<T> IsNotSingleElement<T>(this IAssertionSource<T[]> source)
     {
         source.Context.ExpressionBuilder.Append(".IsNotSingleElement()");
-        return new _IsNotSingleElement_Assertion<T>(source.Context);
+        return new TArray_IsNotSingleElement_Assertion<T>(source.Context);
     }
 
     /// <summary>

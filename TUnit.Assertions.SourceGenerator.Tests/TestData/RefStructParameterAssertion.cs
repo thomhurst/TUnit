@@ -15,10 +15,7 @@ public static class RefStructParameterAssertions
     /// </summary>
     [GenerateAssertion(ExpectationMessage = "to contain {message}", InlineMethodBody = true)]
     public static bool ContainsMessage(this string value, ref DefaultInterpolatedStringHandler message)
-    {
-        var stringMessage = message.ToStringAndClear();
-        return value.Contains(stringMessage);
-    }
+        => value.Contains(message.ToStringAndClear());
 
     /// <summary>
     /// Test with a simpler expression body

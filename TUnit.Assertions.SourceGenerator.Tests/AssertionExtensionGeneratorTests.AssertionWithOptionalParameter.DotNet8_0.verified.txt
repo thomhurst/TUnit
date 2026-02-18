@@ -20,8 +20,21 @@ public static class NotEqualsAssertionExtensions
     /// </summary>
     public static NotEqualsAssertion<TValue> IsNotEqualTo<TValue>(this IAssertionSource<TValue> source, TValue notExpected, System.Collections.Generic.IEqualityComparer<TValue>? comparer = null, [CallerArgumentExpression(nameof(notExpected))] string? notExpectedExpression = null, [CallerArgumentExpression(nameof(comparer))] string? comparerExpression = null)
     {
-        source.Context.ExpressionBuilder.Append(".IsNotEqualTo("
-            + string.Join(", ", new[] { notExpectedExpression, comparerExpression }.Where(e => e != null)) + ")");
+        source.Context.ExpressionBuilder.Append(".IsNotEqualTo(");
+        var added = false;
+        if (notExpectedExpression != null)
+        {
+            source.Context.ExpressionBuilder.Append(added ? ", " : "");
+            source.Context.ExpressionBuilder.Append(notExpectedExpression);
+            added = true;
+        }
+        if (comparerExpression != null)
+        {
+            source.Context.ExpressionBuilder.Append(added ? ", " : "");
+            source.Context.ExpressionBuilder.Append(comparerExpression);
+            added = true;
+        }
+        source.Context.ExpressionBuilder.Append(")");
         return new NotEqualsAssertion<TValue>(source.Context, notExpected, comparer);
     }
 }

@@ -14,6 +14,8 @@ namespace TUnit.Assertions.Extensions;
 /// </summary>
 public sealed class StringBuilder_IsEmpty_Assertion : Assertion<System.Text.StringBuilder>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public StringBuilder_IsEmpty_Assertion(AssertionContext<System.Text.StringBuilder> context)
         : base(context)
     {
@@ -35,9 +37,9 @@ public sealed class StringBuilder_IsEmpty_Assertion : Assertion<System.Text.Stri
         }
 
         var result = value!.Length == 0;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -51,6 +53,8 @@ public sealed class StringBuilder_IsEmpty_Assertion : Assertion<System.Text.Stri
 /// </summary>
 public sealed class StringBuilder_IsNotEmpty_Assertion : Assertion<System.Text.StringBuilder>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public StringBuilder_IsNotEmpty_Assertion(AssertionContext<System.Text.StringBuilder> context)
         : base(context)
     {
@@ -72,9 +76,9 @@ public sealed class StringBuilder_IsNotEmpty_Assertion : Assertion<System.Text.S
         }
 
         var result = value!.Length > 0;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -88,6 +92,8 @@ public sealed class StringBuilder_IsNotEmpty_Assertion : Assertion<System.Text.S
 /// </summary>
 public sealed class StringBuilder_HasExcessCapacity_Assertion : Assertion<System.Text.StringBuilder>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public StringBuilder_HasExcessCapacity_Assertion(AssertionContext<System.Text.StringBuilder> context)
         : base(context)
     {
@@ -109,9 +115,9 @@ public sealed class StringBuilder_HasExcessCapacity_Assertion : Assertion<System
         }
 
         var result = value != null && value!.Capacity > value!.Length;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()

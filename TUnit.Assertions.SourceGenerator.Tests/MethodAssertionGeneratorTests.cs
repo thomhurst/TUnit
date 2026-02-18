@@ -226,6 +226,7 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             "TUnit.Assertions.SourceGenerator.Tests",
             "TestData",
             "RefStructParameterAssertion.cs"),
+        new RunTestOptions { PreprocessorSymbols = ["NET6_0_OR_GREATER"] },
         async generatedFiles =>
         {
             await Assert.That(generatedFiles).HasCount(1);

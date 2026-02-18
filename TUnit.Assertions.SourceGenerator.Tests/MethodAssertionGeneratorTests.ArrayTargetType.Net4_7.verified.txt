@@ -58,7 +58,7 @@ public static partial class ArrayTargetAssertionExtensions
     /// <summary>
     /// Generated extension method for ContainsMessage
     /// </summary>
-    public static StringArray_ContainsMessage_String_Bool_Assertion ContainsMessage(this IAssertionSource<string[]> source, string needle, bool exact, [CallerArgumentExpression(nameof(needle))] string? needleExpression = null, [CallerArgumentExpression(nameof(exact))] string? exactExpression = null)
+    public static StringArray_ContainsMessage_String_Bool_Assertion ContainsMessage(this IAssertionSource<string[]> source, string needle, bool exact = true, [CallerArgumentExpression(nameof(needle))] string? needleExpression = null, [CallerArgumentExpression(nameof(exact))] string? exactExpression = null)
     {
         source.Context.ExpressionBuilder.Append($".ContainsMessage({needleExpression}, {exactExpression})");
         return new StringArray_ContainsMessage_String_Bool_Assertion(source.Context, needle, exact);

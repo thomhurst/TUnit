@@ -103,10 +103,14 @@ public class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, new
 
         // To run generators, we can use an empty compilation.
 
+        var parseOptions = runTestOptions.PreprocessorSymbols is { Length: > 0 }
+            ? CSharpParseOptions.Default.WithPreprocessorSymbols(runTestOptions.PreprocessorSymbols)
+            : CSharpParseOptions.Default;
+
         var compilation = CSharpCompilation.Create(
                 GetType().Name,
                 [
-                    CSharpSyntaxTree.ParseText(source)
+                    CSharpSyntaxTree.ParseText(source, parseOptions)
                 ],
                 options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
             )

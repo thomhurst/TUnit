@@ -21,8 +21,21 @@ public static class BetweenAssertionExtensions
     public static BetweenAssertion<TValue> IsBetween<TValue>(this IAssertionSource<TValue> source, TValue lowerBound, TValue upperBound, [CallerArgumentExpression(nameof(lowerBound))] string? lowerBoundExpression = null, [CallerArgumentExpression(nameof(upperBound))] string? upperBoundExpression = null)
         where TValue : System.IComparable<TValue>
     {
-        source.Context.ExpressionBuilder.Append(".IsBetween("
-            + string.Join(", ", new[] { lowerBoundExpression, upperBoundExpression }.Where(e => e != null)) + ")");
+        source.Context.ExpressionBuilder.Append(".IsBetween(");
+        var added = false;
+        if (lowerBoundExpression != null)
+        {
+            source.Context.ExpressionBuilder.Append(added ? ", " : "");
+            source.Context.ExpressionBuilder.Append(lowerBoundExpression);
+            added = true;
+        }
+        if (upperBoundExpression != null)
+        {
+            source.Context.ExpressionBuilder.Append(added ? ", " : "");
+            source.Context.ExpressionBuilder.Append(upperBoundExpression);
+            added = true;
+        }
+        source.Context.ExpressionBuilder.Append(")");
         return new BetweenAssertion<TValue>(source.Context, lowerBound, upperBound);
     }
 }

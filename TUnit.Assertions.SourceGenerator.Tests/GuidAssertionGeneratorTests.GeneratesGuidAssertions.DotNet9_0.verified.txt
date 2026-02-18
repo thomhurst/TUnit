@@ -14,6 +14,8 @@ namespace TUnit.Assertions.Extensions;
 /// </summary>
 public sealed class Guid_IsEmptyGuid_Assertion : Assertion<System.Guid>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public Guid_IsEmptyGuid_Assertion(AssertionContext<System.Guid> context)
         : base(context)
     {
@@ -30,9 +32,9 @@ public sealed class Guid_IsEmptyGuid_Assertion : Assertion<System.Guid>
         }
 
         var result = value == global::System.Guid.Empty;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -46,6 +48,8 @@ public sealed class Guid_IsEmptyGuid_Assertion : Assertion<System.Guid>
 /// </summary>
 public sealed class Guid_IsNotEmptyGuid_Assertion : Assertion<System.Guid>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public Guid_IsNotEmptyGuid_Assertion(AssertionContext<System.Guid> context)
         : base(context)
     {
@@ -62,9 +66,9 @@ public sealed class Guid_IsNotEmptyGuid_Assertion : Assertion<System.Guid>
         }
 
         var result = value != global::System.Guid.Empty;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
