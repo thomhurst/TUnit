@@ -20,7 +20,7 @@ public static class NullAssertionExtensions
     /// </summary>
     public static NullAssertion<TValue> IsNull<TValue>(this IAssertionSource<TValue> source)
     {
-        source.Context.ExpressionBuilder.Append(".IsNull(" + ")");
+        source.Context.ExpressionBuilder.Append(".IsNull(");        source.Context.ExpressionBuilder.Append(")");
         return new NullAssertion<TValue>(source.Context);
     }
 }

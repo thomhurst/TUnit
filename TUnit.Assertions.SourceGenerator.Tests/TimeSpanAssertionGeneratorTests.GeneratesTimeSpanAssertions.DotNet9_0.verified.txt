@@ -14,6 +14,8 @@ namespace TUnit.Assertions.Extensions;
 /// </summary>
 public sealed class TimeSpan_IsZero_Assertion : Assertion<System.TimeSpan>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public TimeSpan_IsZero_Assertion(AssertionContext<System.TimeSpan> context)
         : base(context)
     {
@@ -30,9 +32,9 @@ public sealed class TimeSpan_IsZero_Assertion : Assertion<System.TimeSpan>
         }
 
         var result = value == global::System.TimeSpan.Zero;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -46,6 +48,8 @@ public sealed class TimeSpan_IsZero_Assertion : Assertion<System.TimeSpan>
 /// </summary>
 public sealed class TimeSpan_IsNotZero_Assertion : Assertion<System.TimeSpan>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public TimeSpan_IsNotZero_Assertion(AssertionContext<System.TimeSpan> context)
         : base(context)
     {
@@ -62,9 +66,9 @@ public sealed class TimeSpan_IsNotZero_Assertion : Assertion<System.TimeSpan>
         }
 
         var result = value != global::System.TimeSpan.Zero;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -78,6 +82,8 @@ public sealed class TimeSpan_IsNotZero_Assertion : Assertion<System.TimeSpan>
 /// </summary>
 public sealed class TimeSpan_IsPositive_Assertion : Assertion<System.TimeSpan>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public TimeSpan_IsPositive_Assertion(AssertionContext<System.TimeSpan> context)
         : base(context)
     {
@@ -94,9 +100,9 @@ public sealed class TimeSpan_IsPositive_Assertion : Assertion<System.TimeSpan>
         }
 
         var result = value > global::System.TimeSpan.Zero;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -110,6 +116,8 @@ public sealed class TimeSpan_IsPositive_Assertion : Assertion<System.TimeSpan>
 /// </summary>
 public sealed class TimeSpan_IsNegative_Assertion : Assertion<System.TimeSpan>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public TimeSpan_IsNegative_Assertion(AssertionContext<System.TimeSpan> context)
         : base(context)
     {
@@ -126,9 +134,9 @@ public sealed class TimeSpan_IsNegative_Assertion : Assertion<System.TimeSpan>
         }
 
         var result = value < global::System.TimeSpan.Zero;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -142,6 +150,8 @@ public sealed class TimeSpan_IsNegative_Assertion : Assertion<System.TimeSpan>
 /// </summary>
 public sealed class TimeSpan_IsNonNegative_Assertion : Assertion<System.TimeSpan>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public TimeSpan_IsNonNegative_Assertion(AssertionContext<System.TimeSpan> context)
         : base(context)
     {
@@ -158,9 +168,9 @@ public sealed class TimeSpan_IsNonNegative_Assertion : Assertion<System.TimeSpan
         }
 
         var result = value >= global::System.TimeSpan.Zero;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -174,6 +184,8 @@ public sealed class TimeSpan_IsNonNegative_Assertion : Assertion<System.TimeSpan
 /// </summary>
 public sealed class TimeSpan_IsNonPositive_Assertion : Assertion<System.TimeSpan>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public TimeSpan_IsNonPositive_Assertion(AssertionContext<System.TimeSpan> context)
         : base(context)
     {
@@ -190,9 +202,9 @@ public sealed class TimeSpan_IsNonPositive_Assertion : Assertion<System.TimeSpan
         }
 
         var result = value <= global::System.TimeSpan.Zero;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()

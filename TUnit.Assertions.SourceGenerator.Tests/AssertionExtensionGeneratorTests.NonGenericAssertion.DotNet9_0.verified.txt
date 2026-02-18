@@ -20,7 +20,7 @@ public static class StringIsEmptyAssertionExtensions
     /// </summary>
     public static StringIsEmptyAssertion IsEmpty(this IAssertionSource<string> source)
     {
-        source.Context.ExpressionBuilder.Append(".IsEmpty(" + ")");
+        source.Context.ExpressionBuilder.Append(".IsEmpty(");        source.Context.ExpressionBuilder.Append(")");
         return new StringIsEmptyAssertion(source.Context);
     }
 }

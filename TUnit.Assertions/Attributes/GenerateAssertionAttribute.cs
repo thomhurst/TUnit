@@ -11,8 +11,10 @@ namespace TUnit.Assertions.Attributes;
 /// The decorated method must be static and return one of:
 /// - bool
 /// - AssertionResult
+/// - AssertionResult&lt;T&gt; (terminal assertion — returns T when awaited)
 /// - Task&lt;bool&gt;
 /// - Task&lt;AssertionResult&gt;
+/// - Task&lt;AssertionResult&lt;T&gt;&gt; (terminal assertion — returns T when awaited)
 /// </para>
 /// <para>
 /// The first parameter determines the target type (what becomes IAssertionSource&lt;T&gt;).
@@ -70,6 +72,21 @@ namespace TUnit.Assertions.Attributes;
 ///
 /// // Usage:
 /// await Assert.That(17).IsPrime();
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// [GenerateAssertion(ExpectationMessage = "to contain message '{needle}'")]
+/// public static AssertionResult&lt;string&gt; ContainsMessage(this IEnumerable&lt;string&gt; strings, string needle)
+/// {
+///     var result = strings.FirstOrDefault(x =&gt; x.Contains(needle));
+///     if (result is not null)
+///         return AssertionResult&lt;string&gt;.Passed(result);
+///     return AssertionResult.Failed($"{needle} not found");
+/// }
+///
+/// // Usage (terminal assertion — returns the matched item):
+/// string matched = await Assert.That(items).ContainsMessage("foo");
 /// </code>
 /// </example>
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]

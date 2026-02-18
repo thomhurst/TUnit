@@ -14,6 +14,8 @@ namespace TUnit.Assertions.Extensions;
 /// </summary>
 public sealed class Version_IsMajorVersion_Assertion : Assertion<System.Version>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public Version_IsMajorVersion_Assertion(AssertionContext<System.Version> context)
         : base(context)
     {
@@ -35,9 +37,9 @@ public sealed class Version_IsMajorVersion_Assertion : Assertion<System.Version>
         }
 
         var result = value != null && value!.Minor == 0 && (value!.Build <= 0 || value!.Build == -1) && (value!.Revision <= 0 || value!.Revision == -1);
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -51,6 +53,8 @@ public sealed class Version_IsMajorVersion_Assertion : Assertion<System.Version>
 /// </summary>
 public sealed class Version_IsNotMajorVersion_Assertion : Assertion<System.Version>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public Version_IsNotMajorVersion_Assertion(AssertionContext<System.Version> context)
         : base(context)
     {
@@ -72,9 +76,9 @@ public sealed class Version_IsNotMajorVersion_Assertion : Assertion<System.Versi
         }
 
         var result = value != null && (value!.Minor != 0 || (value!.Build > 0 && value!.Build != -1) || (value!.Revision > 0 && value!.Revision != -1));
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -88,6 +92,8 @@ public sealed class Version_IsNotMajorVersion_Assertion : Assertion<System.Versi
 /// </summary>
 public sealed class Version_HasBuildNumber_Assertion : Assertion<System.Version>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public Version_HasBuildNumber_Assertion(AssertionContext<System.Version> context)
         : base(context)
     {
@@ -109,9 +115,9 @@ public sealed class Version_HasBuildNumber_Assertion : Assertion<System.Version>
         }
 
         var result = value!.Build >= 0;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -125,6 +131,8 @@ public sealed class Version_HasBuildNumber_Assertion : Assertion<System.Version>
 /// </summary>
 public sealed class Version_HasNoBuildNumber_Assertion : Assertion<System.Version>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public Version_HasNoBuildNumber_Assertion(AssertionContext<System.Version> context)
         : base(context)
     {
@@ -146,9 +154,9 @@ public sealed class Version_HasNoBuildNumber_Assertion : Assertion<System.Versio
         }
 
         var result = value!.Build == -1;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -162,6 +170,8 @@ public sealed class Version_HasNoBuildNumber_Assertion : Assertion<System.Versio
 /// </summary>
 public sealed class Version_HasRevisionNumber_Assertion : Assertion<System.Version>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public Version_HasRevisionNumber_Assertion(AssertionContext<System.Version> context)
         : base(context)
     {
@@ -183,9 +193,9 @@ public sealed class Version_HasRevisionNumber_Assertion : Assertion<System.Versi
         }
 
         var result = value!.Revision >= 0;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -199,6 +209,8 @@ public sealed class Version_HasRevisionNumber_Assertion : Assertion<System.Versi
 /// </summary>
 public sealed class Version_HasNoRevisionNumber_Assertion : Assertion<System.Version>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public Version_HasNoRevisionNumber_Assertion(AssertionContext<System.Version> context)
         : base(context)
     {
@@ -220,9 +232,9 @@ public sealed class Version_HasNoRevisionNumber_Assertion : Assertion<System.Ver
         }
 
         var result = value!.Revision == -1;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()

@@ -1,0 +1,118 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Tests.TestData;
+
+namespace TUnit.Assertions.Extensions;
+
+/// <summary>
+/// Generated assertion for ContainsMessage
+/// </summary>
+public sealed class String_ContainsMessage_DefaultInterpolatedStringHandler_Assertion : Assertion<string>
+{
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
+    private readonly string _message;
+
+    public String_ContainsMessage_DefaultInterpolatedStringHandler_Assertion(AssertionContext<string> context, string message)
+        : base(context)
+    {
+        _message = message;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value!.Contains(_message);
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"to contain {_message}";
+    }
+}
+
+/// <summary>
+/// Generated assertion for EndsWithMessage
+/// </summary>
+public sealed class String_EndsWithMessage_DefaultInterpolatedStringHandler_Assertion : Assertion<string>
+{
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
+    private readonly string _suffix;
+
+    public String_EndsWithMessage_DefaultInterpolatedStringHandler_Assertion(AssertionContext<string> context, string suffix)
+        : base(context)
+    {
+        _suffix = suffix;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value!.EndsWith(_suffix);
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"to end with {_suffix}";
+    }
+}
+
+public static partial class RefStructParameterAssertions
+{
+    /// <summary>
+    /// Generated extension method for ContainsMessage
+    /// </summary>
+    public static String_ContainsMessage_DefaultInterpolatedStringHandler_Assertion ContainsMessage(this IAssertionSource<string> source, System.Runtime.CompilerServices.DefaultInterpolatedStringHandler message, [CallerArgumentExpression(nameof(message))] string? messageExpression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".ContainsMessage({messageExpression})");
+        return new String_ContainsMessage_DefaultInterpolatedStringHandler_Assertion(source.Context, message.ToStringAndClear());
+    }
+
+    /// <summary>
+    /// Generated extension method for EndsWithMessage
+    /// </summary>
+    public static String_EndsWithMessage_DefaultInterpolatedStringHandler_Assertion EndsWithMessage(this IAssertionSource<string> source, System.Runtime.CompilerServices.DefaultInterpolatedStringHandler suffix, [CallerArgumentExpression(nameof(suffix))] string? suffixExpression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".EndsWithMessage({suffixExpression})");
+        return new String_EndsWithMessage_DefaultInterpolatedStringHandler_Assertion(source.Context, suffix.ToStringAndClear());
+    }
+
+}
+
+]

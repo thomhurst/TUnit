@@ -16,6 +16,8 @@ namespace TUnit.Assertions.Extensions;
 public sealed class String_IsNullOrDefault_T_Assertion<T> : Assertion<string>
     where T : class
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     private readonly T _obj;
 
     public String_IsNullOrDefault_T_Assertion(AssertionContext<string> context, T obj)
@@ -40,9 +42,9 @@ public sealed class String_IsNullOrDefault_T_Assertion<T> : Assertion<string>
         }
 
         var result = value!.IsNullOrDefault<T>(_obj);
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()

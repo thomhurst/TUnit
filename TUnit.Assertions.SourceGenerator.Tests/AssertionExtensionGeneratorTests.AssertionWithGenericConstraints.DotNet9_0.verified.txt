@@ -21,8 +21,9 @@ public static class GreaterThanAssertionExtensions
     public static GreaterThanAssertion<TValue> IsGreaterThan<TValue>(this IAssertionSource<TValue> source, TValue expected, [CallerArgumentExpression(nameof(expected))] string? expectedExpression = null)
         where TValue : System.IComparable<TValue>
     {
-        source.Context.ExpressionBuilder.Append(".IsGreaterThan("
-            + string.Join(", ", new[] { expectedExpression }.Where(e => e != null)) + ")");
+        source.Context.ExpressionBuilder.Append(".IsGreaterThan(");
+        source.Context.ExpressionBuilder.Append(expectedExpression);
+        source.Context.ExpressionBuilder.Append(")");
         return new GreaterThanAssertion<TValue>(source.Context, expected);
     }
 }

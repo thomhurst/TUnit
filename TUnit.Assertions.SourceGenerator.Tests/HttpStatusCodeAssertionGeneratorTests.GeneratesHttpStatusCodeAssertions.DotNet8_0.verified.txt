@@ -14,6 +14,8 @@ namespace TUnit.Assertions.Extensions;
 /// </summary>
 public sealed class HttpStatusCode_IsSuccess_Assertion : Assertion<HttpStatusCode>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public HttpStatusCode_IsSuccess_Assertion(AssertionContext<HttpStatusCode> context)
         : base(context)
     {
@@ -35,9 +37,9 @@ public sealed class HttpStatusCode_IsSuccess_Assertion : Assertion<HttpStatusCod
         }
 
         var result = (int)value! is >= 200 and < 300;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -51,6 +53,8 @@ public sealed class HttpStatusCode_IsSuccess_Assertion : Assertion<HttpStatusCod
 /// </summary>
 public sealed class HttpStatusCode_IsNotSuccess_Assertion : Assertion<HttpStatusCode>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public HttpStatusCode_IsNotSuccess_Assertion(AssertionContext<HttpStatusCode> context)
         : base(context)
     {
@@ -72,9 +76,9 @@ public sealed class HttpStatusCode_IsNotSuccess_Assertion : Assertion<HttpStatus
         }
 
         var result = (int)value! is < 200 or >= 300;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -88,6 +92,8 @@ public sealed class HttpStatusCode_IsNotSuccess_Assertion : Assertion<HttpStatus
 /// </summary>
 public sealed class HttpStatusCode_IsClientError_Assertion : Assertion<HttpStatusCode>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public HttpStatusCode_IsClientError_Assertion(AssertionContext<HttpStatusCode> context)
         : base(context)
     {
@@ -109,9 +115,9 @@ public sealed class HttpStatusCode_IsClientError_Assertion : Assertion<HttpStatu
         }
 
         var result = (int)value! is >= 400 and < 500;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -125,6 +131,8 @@ public sealed class HttpStatusCode_IsClientError_Assertion : Assertion<HttpStatu
 /// </summary>
 public sealed class HttpStatusCode_IsServerError_Assertion : Assertion<HttpStatusCode>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public HttpStatusCode_IsServerError_Assertion(AssertionContext<HttpStatusCode> context)
         : base(context)
     {
@@ -146,9 +154,9 @@ public sealed class HttpStatusCode_IsServerError_Assertion : Assertion<HttpStatu
         }
 
         var result = (int)value! is >= 500 and < 600;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -162,6 +170,8 @@ public sealed class HttpStatusCode_IsServerError_Assertion : Assertion<HttpStatu
 /// </summary>
 public sealed class HttpStatusCode_IsRedirection_Assertion : Assertion<HttpStatusCode>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public HttpStatusCode_IsRedirection_Assertion(AssertionContext<HttpStatusCode> context)
         : base(context)
     {
@@ -183,9 +193,9 @@ public sealed class HttpStatusCode_IsRedirection_Assertion : Assertion<HttpStatu
         }
 
         var result = (int)value! is >= 300 and < 400;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -199,6 +209,8 @@ public sealed class HttpStatusCode_IsRedirection_Assertion : Assertion<HttpStatu
 /// </summary>
 public sealed class HttpStatusCode_IsInformational_Assertion : Assertion<HttpStatusCode>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public HttpStatusCode_IsInformational_Assertion(AssertionContext<HttpStatusCode> context)
         : base(context)
     {
@@ -220,9 +232,9 @@ public sealed class HttpStatusCode_IsInformational_Assertion : Assertion<HttpSta
         }
 
         var result = (int)value! is >= 100 and < 200;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -236,6 +248,8 @@ public sealed class HttpStatusCode_IsInformational_Assertion : Assertion<HttpSta
 /// </summary>
 public sealed class HttpStatusCode_IsError_Assertion : Assertion<HttpStatusCode>
 {
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
     public HttpStatusCode_IsError_Assertion(AssertionContext<HttpStatusCode> context)
         : base(context)
     {
@@ -257,9 +271,9 @@ public sealed class HttpStatusCode_IsError_Assertion : Assertion<HttpStatusCode>
         }
 
         var result = (int)value! is >= 400 and < 600;
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()

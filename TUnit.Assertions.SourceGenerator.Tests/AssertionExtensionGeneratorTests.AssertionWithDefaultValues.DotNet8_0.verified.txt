@@ -20,8 +20,27 @@ public static class DefaultValuesAssertionExtensions
     /// </summary>
     public static DefaultValuesAssertion<TValue> HasDefaultValues<TValue>(this IAssertionSource<TValue> source, bool boolValue = true, int intValue = 0, string stringValue = "default", [CallerArgumentExpression(nameof(boolValue))] string? boolValueExpression = null, [CallerArgumentExpression(nameof(intValue))] string? intValueExpression = null, [CallerArgumentExpression(nameof(stringValue))] string? stringValueExpression = null)
     {
-        source.Context.ExpressionBuilder.Append(".HasDefaultValues("
-            + string.Join(", ", new[] { boolValueExpression, intValueExpression, stringValueExpression }.Where(e => e != null)) + ")");
+        source.Context.ExpressionBuilder.Append(".HasDefaultValues(");
+        var added = false;
+        if (boolValueExpression != null)
+        {
+            source.Context.ExpressionBuilder.Append(added ? ", " : "");
+            source.Context.ExpressionBuilder.Append(boolValueExpression);
+            added = true;
+        }
+        if (intValueExpression != null)
+        {
+            source.Context.ExpressionBuilder.Append(added ? ", " : "");
+            source.Context.ExpressionBuilder.Append(intValueExpression);
+            added = true;
+        }
+        if (stringValueExpression != null)
+        {
+            source.Context.ExpressionBuilder.Append(added ? ", " : "");
+            source.Context.ExpressionBuilder.Append(stringValueExpression);
+            added = true;
+        }
+        source.Context.ExpressionBuilder.Append(")");
         return new DefaultValuesAssertion<TValue>(source.Context, boolValue, intValue, stringValue);
     }
 }

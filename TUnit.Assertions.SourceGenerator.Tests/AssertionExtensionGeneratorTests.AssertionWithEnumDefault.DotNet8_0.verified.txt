@@ -20,8 +20,21 @@ public static class StringComparisonAssertionExtensions
     /// </summary>
     public static StringComparisonAssertion IsEqualToWithComparison(this IAssertionSource<string> source, string expected, System.StringComparison comparison = StringComparison.Ordinal, [CallerArgumentExpression(nameof(expected))] string? expectedExpression = null, [CallerArgumentExpression(nameof(comparison))] string? comparisonExpression = null)
     {
-        source.Context.ExpressionBuilder.Append(".IsEqualToWithComparison("
-            + string.Join(", ", new[] { expectedExpression, comparisonExpression }.Where(e => e != null)) + ")");
+        source.Context.ExpressionBuilder.Append(".IsEqualToWithComparison(");
+        var added = false;
+        if (expectedExpression != null)
+        {
+            source.Context.ExpressionBuilder.Append(added ? ", " : "");
+            source.Context.ExpressionBuilder.Append(expectedExpression);
+            added = true;
+        }
+        if (comparisonExpression != null)
+        {
+            source.Context.ExpressionBuilder.Append(added ? ", " : "");
+            source.Context.ExpressionBuilder.Append(comparisonExpression);
+            added = true;
+        }
+        source.Context.ExpressionBuilder.Append(")");
         return new StringComparisonAssertion(source.Context, expected, comparison);
     }
 }
