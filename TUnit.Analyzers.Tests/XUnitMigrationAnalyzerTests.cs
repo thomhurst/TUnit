@@ -2380,6 +2380,56 @@ public class XUnitMigrationAnalyzerTests
             );
     }
 
+    [Test]
+    public async Task XUnit_Global_Using_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                {|#0:global using Xunit;|}
+                """,
+                ConfigureXUnitGlobalUsingTest,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0)
+            );
+    }
+
+    [Test]
+    public async Task XUnit_Global_Using_Can_Be_Removed()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:global using Xunit;|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+
+                """,
+                ConfigureXUnitGlobalUsingTest
+            );
+    }
+
+    private static void ConfigureXUnitGlobalUsingTest(Verifier.Test test)
+    {
+        test.TestState.AdditionalReferences.Add(typeof(Xunit.FactAttribute).Assembly);
+        test.TestState.AdditionalReferences.Add(typeof(Xunit.Assert).Assembly);
+    }
+
+    private static void ConfigureXUnitGlobalUsingTest(CodeFixer.Test test)
+    {
+        test.TestState.AdditionalReferences.Add(typeof(Xunit.FactAttribute).Assembly);
+        test.TestState.AdditionalReferences.Add(typeof(Xunit.Assert).Assembly);
+
+        test.FixedState.InheritanceMode = StateInheritanceMode.Explicit;
+        test.FixedState.AdditionalReferences.Add(typeof(TUnit.Core.TestAttribute).Assembly);
+        test.FixedState.AdditionalReferences.Add(typeof(TUnit.Assertions.Assert).Assembly);
+
+        test.FixedState.AnalyzerConfigFiles.Add(("/.editorconfig", SourceText.From("""
+            is_global = true
+            end_of_line = lf
+            """)));
+    }
+
     private static void ConfigureXUnitTest(Verifier.Test test)
     {
         var globalUsings = ("GlobalUsings.cs", SourceText.From("global using Xunit;"));
@@ -2387,6 +2437,10 @@ public class XUnitMigrationAnalyzerTests
         test.TestState.Sources.Add(globalUsings);
         test.TestState.AdditionalReferences.Add(typeof(Xunit.FactAttribute).Assembly);
         test.TestState.AdditionalReferences.Add(typeof(Xunit.Assert).Assembly);
+
+        // The global using file will also be flagged by the analyzer
+        test.TestState.ExpectedDiagnostics.Add(
+            new DiagnosticResult(Rules.XunitMigration).WithSpan("GlobalUsings.cs", 1, 1, 1, 20));
     }
 
     private static void ConfigureXUnitTest(CodeFixer.Test test)

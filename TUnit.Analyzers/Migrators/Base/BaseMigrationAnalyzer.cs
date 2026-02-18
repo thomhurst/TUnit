@@ -13,8 +13,8 @@ public abstract class BaseMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     protected abstract string TargetFrameworkNamespace { get; }
     protected abstract DiagnosticDescriptor DiagnosticRule { get; }
-    
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => 
+
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
         ImmutableArray.Create(DiagnosticRule);
 
     protected override void InitializeInternal(AnalysisContext context)
@@ -118,11 +118,30 @@ public abstract class BaseMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
         }
+
+        // Check for global usings at the compilation unit level
+        // This handles files like GlobalUsings.cs that have no classes
+        foreach (var usingDirective in compilationUnitSyntax.Usings)
+        {
+            if (!usingDirective.GlobalKeyword.IsKind(SyntaxKind.GlobalKeyword))
+            {
+                continue;
+            }
+
+            var nameString = usingDirective.Name?.ToString() ?? "";
+            if (!IsFrameworkUsing(nameString))
+            {
+                continue;
+            }
+
+            Flag(context, usingDirective.GetLocation());
+            return;
+        }
     }
 
     protected virtual bool HasFrameworkInterfaces(INamedTypeSymbol symbol)
     {
-        return symbol.AllInterfaces.Any(i => 
+        return symbol.AllInterfaces.Any(i =>
             i.ContainingNamespace?.Name.StartsWith(TargetFrameworkNamespace) is true ||
             IsFrameworkNamespace(i.ContainingNamespace?.ToDisplayString()));
     }

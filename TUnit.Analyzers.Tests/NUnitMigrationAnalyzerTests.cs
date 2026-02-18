@@ -5460,6 +5460,33 @@ public class NUnitMigrationAnalyzerTests
         );
     }
 
+    [Test]
+    public async Task NUnit_Global_Using_Flagged()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+                {|#0:global using NUnit.Framework;|}
+                """,
+            ConfigureNUnitTest,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0)
+        );
+    }
+
+    [Test]
+    public async Task NUnit_Global_Using_Can_Be_Removed()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                {|#0:global using NUnit.Framework;|}
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
     private static void ConfigureNUnitTest(Verifier.Test test)
     {
         test.TestState.AdditionalReferences.Add(typeof(NUnit.Framework.TestAttribute).Assembly);

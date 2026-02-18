@@ -91,6 +91,28 @@ public class XUnitMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
         }
+
+        // Check for global usings at the compilation unit level
+        // This handles files like GlobalUsings.cs that have no classes
+        foreach (var usingDirective in compilationUnitSyntax.Usings)
+        {
+            if (!usingDirective.GlobalKeyword.IsKind(SyntaxKind.GlobalKeyword)
+                || usingDirective.Name is not (
+                    QualifiedNameSyntax
+                    {
+                        Left: IdentifierNameSyntax {Identifier.Text: "Xunit"}
+                    }
+                    or IdentifierNameSyntax
+                    {
+                        Identifier.Text: "Xunit"
+                    }))
+            {
+                continue;
+            }
+
+            Flag(context);
+            return;
+        }
     }
 
     private bool AnalyzeAttributes(SyntaxNodeAnalysisContext context, ISymbol symbol)
