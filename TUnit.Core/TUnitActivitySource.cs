@@ -17,11 +17,8 @@ internal static class TUnitActivitySource
         ActivityContext parentContext = default,
         IEnumerable<KeyValuePair<string, object?>>? tags = null)
     {
-        if (!Source.HasListeners())
-        {
-            return null;
-        }
-
+        // StartActivity returns null when no listener is sampling this source,
+        // so the HasListeners() check is implicit. We rely on the framework behavior.
         return Source.StartActivity(name, kind, parentContext, tags);
     }
 
@@ -40,6 +37,7 @@ internal static class TUnitActivitySource
         };
 
         activity.AddEvent(new ActivityEvent("exception", tags: tagsCollection));
+        activity.SetTag("error.type", exception.GetType().FullName);
         activity.SetStatus(ActivityStatusCode.Error, exception.Message);
     }
 

@@ -35,7 +35,7 @@ internal sealed class HookExecutor
 
 #if NET
         sessionContext.Activity = TUnitActivitySource.StartActivity(
-            "tunit.session",
+            "test session",
             System.Diagnostics.ActivityKind.Internal,
             default,
             [
@@ -125,9 +125,11 @@ internal sealed class HookExecutor
         }
 
         activity.SetTag("tunit.test.count", sessionContext.AllTests.Count);
-        activity.SetStatus(hasErrors
-            ? System.Diagnostics.ActivityStatusCode.Error
-            : System.Diagnostics.ActivityStatusCode.Ok);
+
+        if (hasErrors)
+        {
+            activity.SetStatus(System.Diagnostics.ActivityStatusCode.Error);
+        }
 
         TUnitActivitySource.StopActivity(activity);
         sessionContext.Activity = null;
@@ -141,7 +143,7 @@ internal sealed class HookExecutor
 #if NET
         var sessionActivity = _contextProvider.TestSessionContext.Activity;
         assemblyContext.Activity = TUnitActivitySource.StartActivity(
-            "tunit.assembly",
+            "test assembly",
             System.Diagnostics.ActivityKind.Internal,
             sessionActivity?.Context ?? default,
             [
@@ -232,9 +234,11 @@ internal sealed class HookExecutor
         }
 
         activity.SetTag("tunit.test.count", assemblyContext.TestCount);
-        activity.SetStatus(hasErrors
-            ? System.Diagnostics.ActivityStatusCode.Error
-            : System.Diagnostics.ActivityStatusCode.Ok);
+
+        if (hasErrors)
+        {
+            activity.SetStatus(System.Diagnostics.ActivityStatusCode.Error);
+        }
 
         TUnitActivitySource.StopActivity(activity);
         assemblyContext.Activity = null;
@@ -250,11 +254,11 @@ internal sealed class HookExecutor
 #if NET
         var assemblyActivity = classContext.AssemblyContext.Activity;
         classContext.Activity = TUnitActivitySource.StartActivity(
-            "tunit.class",
+            "test suite",
             System.Diagnostics.ActivityKind.Internal,
             assemblyActivity?.Context ?? default,
             [
-                new("tunit.class.name", testClass.Name),
+                new("test.suite.name", testClass.Name),
                 new("tunit.class.namespace", testClass.Namespace)
             ]);
 #endif
@@ -346,9 +350,11 @@ internal sealed class HookExecutor
         }
 
         activity.SetTag("tunit.test.count", classContext.TestCount);
-        activity.SetStatus(hasErrors
-            ? System.Diagnostics.ActivityStatusCode.Error
-            : System.Diagnostics.ActivityStatusCode.Ok);
+
+        if (hasErrors)
+        {
+            activity.SetStatus(System.Diagnostics.ActivityStatusCode.Error);
+        }
 
         TUnitActivitySource.StopActivity(activity);
         classContext.Activity = null;

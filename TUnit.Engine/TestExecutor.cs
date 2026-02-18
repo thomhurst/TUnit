@@ -120,15 +120,15 @@ internal class TestExecutor
             var classActivity = executableTest.Context.ClassContext.Activity;
             var testDetails = executableTest.Context.Metadata.TestDetails;
             executableTest.Context.Activity = TUnitActivitySource.StartActivity(
-                "tunit.test",
+                "test case",
                 ActivityKind.Internal,
                 classActivity?.Context ?? default,
                 [
-                    new("tunit.test.name", testDetails.TestName),
+                    new("test.case.name", testDetails.TestName),
                     new("tunit.test.class", testDetails.ClassType.FullName),
                     new("tunit.test.method", testDetails.MethodName),
                     new("tunit.test.id", executableTest.Context.Id),
-                    new("tunit.test.categories", string.Join(",", testDetails.Categories))
+                    new("tunit.test.categories", testDetails.Categories.ToArray())
                 ]);
 #endif
 
@@ -251,7 +251,15 @@ internal class TestExecutor
 
         var result = executableTest.Context.Execution.Result;
 
-        activity.SetTag("tunit.test.result", result?.State.ToString() ?? "Unknown");
+        // Use OTel test semantic convention values: pass, fail, skipped
+        var statusValue = result?.State switch
+        {
+            TestState.Passed => "pass",
+            TestState.Failed => "fail",
+            TestState.Skipped => "skipped",
+            _ => "unknown"
+        };
+        activity.SetTag("test.case.result.status", statusValue);
 
         if (executableTest.Context.CurrentRetryAttempt > 0)
         {
@@ -260,17 +268,15 @@ internal class TestExecutor
 
         if (capturedException is SkipTestException skipEx)
         {
-            activity.SetStatus(ActivityStatusCode.Ok);
+            // Skipped tests are not errors — leave status as Unset
             activity.SetTag("tunit.test.skip_reason", skipEx.Reason);
         }
         else if (capturedException is not null)
         {
+            // RecordException sets Error status and error.type tag
             TUnitActivitySource.RecordException(activity, capturedException);
         }
-        else
-        {
-            activity.SetStatus(ActivityStatusCode.Ok);
-        }
+        // Success: leave status as Unset per OTel instrumentation library conventions
 
         TUnitActivitySource.StopActivity(activity);
         executableTest.Context.Activity = null;
