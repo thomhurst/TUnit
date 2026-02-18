@@ -110,7 +110,7 @@ public class XUnitMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
                 continue;
             }
 
-            Flag(context);
+            context.ReportDiagnostic(Diagnostic.Create(Rules.XunitMigration, usingDirective.GetLocation()));
             return;
         }
     }
