@@ -31,6 +31,22 @@ internal sealed class HookExecutor
 
     public async ValueTask ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)
     {
+        var sessionContext = _contextProvider.TestSessionContext;
+
+#if NET
+        if (TUnitActivitySource.Source.HasListeners())
+        {
+            sessionContext.Activity = TUnitActivitySource.StartActivity(
+                "test session",
+                System.Diagnostics.ActivityKind.Internal,
+                default,
+                [
+                    new("tunit.session.id", sessionContext.Id),
+                    new("tunit.filter", sessionContext.TestFilter)
+                ]);
+        }
+#endif
+
         var hooks = await _hookCollectionService.CollectBeforeTestSessionHooksAsync().ConfigureAwait(false);
 
         if (hooks.Count == 0)
@@ -68,6 +84,9 @@ internal sealed class HookExecutor
 
         if (hooks.Count == 0)
         {
+#if NET
+            FinishSessionActivity(hasErrors: false);
+#endif
             return [];
         }
 
@@ -90,11 +109,54 @@ internal sealed class HookExecutor
             }
         }
 
+#if NET
+        FinishSessionActivity(hasErrors: exceptions is { Count: > 0 });
+#endif
+
         return exceptions ?? [];
     }
 
+#if NET
+    private void FinishSessionActivity(bool hasErrors)
+    {
+        var sessionContext = _contextProvider.TestSessionContext;
+        var activity = sessionContext.Activity;
+
+        if (activity is null)
+        {
+            return;
+        }
+
+        activity.SetTag("tunit.test.count", sessionContext.AllTests.Count);
+
+        if (hasErrors)
+        {
+            activity.SetStatus(System.Diagnostics.ActivityStatusCode.Error);
+        }
+
+        TUnitActivitySource.StopActivity(activity);
+        sessionContext.Activity = null;
+    }
+#endif
+
     public async ValueTask ExecuteBeforeAssemblyHooksAsync(Assembly assembly, CancellationToken cancellationToken)
     {
+        var assemblyContext = _contextProvider.GetOrCreateAssemblyContext(assembly);
+
+#if NET
+        if (TUnitActivitySource.Source.HasListeners())
+        {
+            var sessionActivity = _contextProvider.TestSessionContext.Activity;
+            assemblyContext.Activity = TUnitActivitySource.StartActivity(
+                "test assembly",
+                System.Diagnostics.ActivityKind.Internal,
+                sessionActivity?.Context ?? default,
+                [
+                    new("tunit.assembly.name", assembly.GetName().Name)
+                ]);
+        }
+#endif
+
         var hooks = await _hookCollectionService.CollectBeforeAssemblyHooksAsync(assembly).ConfigureAwait(false);
 
         if (hooks.Count == 0)
@@ -133,6 +195,9 @@ internal sealed class HookExecutor
 
         if (hooks.Count == 0)
         {
+#if NET
+            FinishAssemblyActivity(assembly, hasErrors: false);
+#endif
             return [];
         }
 
@@ -156,13 +221,57 @@ internal sealed class HookExecutor
             }
         }
 
+#if NET
+        FinishAssemblyActivity(assembly, hasErrors: exceptions is { Count: > 0 });
+#endif
+
         return exceptions ?? [];
     }
+
+#if NET
+    private void FinishAssemblyActivity(Assembly assembly, bool hasErrors)
+    {
+        var assemblyContext = _contextProvider.GetOrCreateAssemblyContext(assembly);
+        var activity = assemblyContext.Activity;
+
+        if (activity is null)
+        {
+            return;
+        }
+
+        activity.SetTag("tunit.test.count", assemblyContext.TestCount);
+
+        if (hasErrors)
+        {
+            activity.SetStatus(System.Diagnostics.ActivityStatusCode.Error);
+        }
+
+        TUnitActivitySource.StopActivity(activity);
+        assemblyContext.Activity = null;
+    }
+#endif
 
     public async ValueTask ExecuteBeforeClassHooksAsync(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type testClass, CancellationToken cancellationToken)
     {
+        var classContext = _contextProvider.GetOrCreateClassContext(testClass);
+
+#if NET
+        if (TUnitActivitySource.Source.HasListeners())
+        {
+            var assemblyActivity = classContext.AssemblyContext.Activity;
+            classContext.Activity = TUnitActivitySource.StartActivity(
+                "test suite",
+                System.Diagnostics.ActivityKind.Internal,
+                assemblyActivity?.Context ?? default,
+                [
+                    new("test.suite.name", testClass.Name),
+                    new("tunit.class.namespace", testClass.Namespace)
+                ]);
+        }
+#endif
+
         var hooks = await _hookCollectionService.CollectBeforeClassHooksAsync(testClass).ConfigureAwait(false);
 
         if (hooks.Count == 0)
@@ -203,6 +312,9 @@ internal sealed class HookExecutor
 
         if (hooks.Count == 0)
         {
+#if NET
+            FinishClassActivity(testClass, hasErrors: false);
+#endif
             return [];
         }
 
@@ -226,8 +338,37 @@ internal sealed class HookExecutor
             }
         }
 
+#if NET
+        FinishClassActivity(testClass, hasErrors: exceptions is { Count: > 0 });
+#endif
+
         return exceptions ?? [];
     }
+
+#if NET
+    private void FinishClassActivity(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
+        Type testClass, bool hasErrors)
+    {
+        var classContext = _contextProvider.GetOrCreateClassContext(testClass);
+        var activity = classContext.Activity;
+
+        if (activity is null)
+        {
+            return;
+        }
+
+        activity.SetTag("tunit.test.count", classContext.TestCount);
+
+        if (hasErrors)
+        {
+            activity.SetStatus(System.Diagnostics.ActivityStatusCode.Error);
+        }
+
+        TUnitActivitySource.StopActivity(activity);
+        classContext.Activity = null;
+    }
+#endif
 
     public async ValueTask ExecuteBeforeTestHooksAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {

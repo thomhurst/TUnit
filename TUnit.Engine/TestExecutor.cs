@@ -8,6 +8,9 @@ using TUnit.Core.Interfaces;
 using TUnit.Core.Services;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Services;
+#if NET
+using System.Diagnostics;
+#endif
 
 namespace TUnit.Engine;
 
@@ -113,6 +116,25 @@ internal class TestExecutor
 
             executableTest.Context.ClassContext.RestoreExecutionContext();
 
+#if NET
+            if (TUnitActivitySource.Source.HasListeners())
+            {
+                var classActivity = executableTest.Context.ClassContext.Activity;
+                var testDetails = executableTest.Context.Metadata.TestDetails;
+                executableTest.Context.Activity = TUnitActivitySource.StartActivity(
+                    "test case",
+                    ActivityKind.Internal,
+                    classActivity?.Context ?? default,
+                    [
+                        new("test.case.name", testDetails.TestName),
+                        new("tunit.test.class", testDetails.ClassType.FullName),
+                        new("tunit.test.method", testDetails.MethodName),
+                        new("tunit.test.id", executableTest.Context.Id),
+                        new("tunit.test.categories", testDetails.Categories.ToArray())
+                    ]);
+            }
+#endif
+
             // Initialize test objects (IAsyncInitializer) AFTER BeforeClass hooks
             // This ensures resources like Docker containers are not started until needed
             await testInitializer.InitializeTestObjectsAsync(executableTest, cancellationToken).ConfigureAwait(false);
@@ -189,6 +211,10 @@ internal class TestExecutor
             {
                 hookException = new TestExecutionException(null, hookExceptions, eventReceiverExceptions);
             }
+
+#if NET
+            FinishTestActivity(executableTest, capturedException);
+#endif
         }
 
         if (capturedException is SkipTestException)
@@ -215,6 +241,50 @@ internal class TestExecutor
             ExceptionDispatchInfo.Capture(hookException).Throw();
         }
     }
+
+#if NET
+    private static void FinishTestActivity(AbstractExecutableTest executableTest, Exception? capturedException)
+    {
+        var activity = executableTest.Context.Activity;
+
+        if (activity is null)
+        {
+            return;
+        }
+
+        var result = executableTest.Context.Execution.Result;
+
+        // Use OTel test semantic convention values: pass, fail, skipped
+        var statusValue = result?.State switch
+        {
+            TestState.Passed => "pass",
+            TestState.Failed => "fail",
+            TestState.Skipped => "skipped",
+            _ => "unknown"
+        };
+        activity.SetTag("test.case.result.status", statusValue);
+
+        if (executableTest.Context.CurrentRetryAttempt > 0)
+        {
+            activity.SetTag("tunit.test.retry_attempt", executableTest.Context.CurrentRetryAttempt);
+        }
+
+        if (capturedException is SkipTestException skipEx)
+        {
+            // Skipped tests are not errors — leave status as Unset
+            activity.SetTag("tunit.test.skip_reason", skipEx.Reason);
+        }
+        else if (capturedException is not null)
+        {
+            // RecordException sets Error status and error.type tag
+            TUnitActivitySource.RecordException(activity, capturedException);
+        }
+        // Success: leave status as Unset per OTel instrumentation library conventions
+
+        TUnitActivitySource.StopActivity(activity);
+        executableTest.Context.Activity = null;
+    }
+#endif
 
     private static async ValueTask ExecuteTestAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)
     {

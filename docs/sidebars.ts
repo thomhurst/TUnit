@@ -196,6 +196,7 @@ const sidebars: SidebarsConfig = {
             'examples/aspnet',
             'examples/aspire',
             'examples/playwright',
+            'examples/opentelemetry',
             'examples/fscheck',
             'examples/complex-test-infrastructure',
           ],
