@@ -26,6 +26,19 @@ internal static class RetryHelper
 
                 if (await ShouldRetry(testContext, ex, attempt))
                 {
+#if NET
+                    // Stop the failed attempt's activity before retrying
+                    var activity = testContext.Activity;
+                    if (activity is not null)
+                    {
+                        activity.SetTag("tunit.test.result", "Failed");
+                        activity.SetTag("tunit.test.retry_attempt", attempt);
+                        TUnitActivitySource.RecordException(activity, ex);
+                        TUnitActivitySource.StopActivity(activity);
+                        testContext.Activity = null;
+                    }
+#endif
+
                     // Clear the previous result before retrying
                     testContext.Execution.Result = null;
                     testContext.TestStart = null;

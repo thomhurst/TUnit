@@ -58,6 +58,7 @@ public abstract class Context : IContext, IDisposable
     }
 
 #if NET
+    internal System.Diagnostics.Activity? Activity { get; set; }
     internal ExecutionContext? ExecutionContext { get; private set; }
 #endif
 
@@ -133,6 +134,8 @@ public abstract class Context : IContext, IDisposable
     public void Dispose()
     {
 #if NET
+        TUnitActivitySource.StopActivity(Activity);
+        Activity = null;
         ExecutionContext?.Dispose();
 #endif
         _outputLock?.Dispose();
