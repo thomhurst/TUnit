@@ -117,19 +117,22 @@ internal class TestExecutor
             executableTest.Context.ClassContext.RestoreExecutionContext();
 
 #if NET
-            var classActivity = executableTest.Context.ClassContext.Activity;
-            var testDetails = executableTest.Context.Metadata.TestDetails;
-            executableTest.Context.Activity = TUnitActivitySource.StartActivity(
-                "test case",
-                ActivityKind.Internal,
-                classActivity?.Context ?? default,
-                [
-                    new("test.case.name", testDetails.TestName),
-                    new("tunit.test.class", testDetails.ClassType.FullName),
-                    new("tunit.test.method", testDetails.MethodName),
-                    new("tunit.test.id", executableTest.Context.Id),
-                    new("tunit.test.categories", testDetails.Categories.ToArray())
-                ]);
+            if (TUnitActivitySource.Source.HasListeners())
+            {
+                var classActivity = executableTest.Context.ClassContext.Activity;
+                var testDetails = executableTest.Context.Metadata.TestDetails;
+                executableTest.Context.Activity = TUnitActivitySource.StartActivity(
+                    "test case",
+                    ActivityKind.Internal,
+                    classActivity?.Context ?? default,
+                    [
+                        new("test.case.name", testDetails.TestName),
+                        new("tunit.test.class", testDetails.ClassType.FullName),
+                        new("tunit.test.method", testDetails.MethodName),
+                        new("tunit.test.id", executableTest.Context.Id),
+                        new("tunit.test.categories", testDetails.Categories.ToArray())
+                    ]);
+            }
 #endif
 
             // Initialize test objects (IAsyncInitializer) AFTER BeforeClass hooks

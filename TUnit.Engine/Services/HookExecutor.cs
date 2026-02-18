@@ -34,14 +34,17 @@ internal sealed class HookExecutor
         var sessionContext = _contextProvider.TestSessionContext;
 
 #if NET
-        sessionContext.Activity = TUnitActivitySource.StartActivity(
-            "test session",
-            System.Diagnostics.ActivityKind.Internal,
-            default,
-            [
-                new("tunit.session.id", sessionContext.Id),
-                new("tunit.filter", sessionContext.TestFilter)
-            ]);
+        if (TUnitActivitySource.Source.HasListeners())
+        {
+            sessionContext.Activity = TUnitActivitySource.StartActivity(
+                "test session",
+                System.Diagnostics.ActivityKind.Internal,
+                default,
+                [
+                    new("tunit.session.id", sessionContext.Id),
+                    new("tunit.filter", sessionContext.TestFilter)
+                ]);
+        }
 #endif
 
         var hooks = await _hookCollectionService.CollectBeforeTestSessionHooksAsync().ConfigureAwait(false);
@@ -141,14 +144,17 @@ internal sealed class HookExecutor
         var assemblyContext = _contextProvider.GetOrCreateAssemblyContext(assembly);
 
 #if NET
-        var sessionActivity = _contextProvider.TestSessionContext.Activity;
-        assemblyContext.Activity = TUnitActivitySource.StartActivity(
-            "test assembly",
-            System.Diagnostics.ActivityKind.Internal,
-            sessionActivity?.Context ?? default,
-            [
-                new("tunit.assembly.name", assembly.GetName().Name)
-            ]);
+        if (TUnitActivitySource.Source.HasListeners())
+        {
+            var sessionActivity = _contextProvider.TestSessionContext.Activity;
+            assemblyContext.Activity = TUnitActivitySource.StartActivity(
+                "test assembly",
+                System.Diagnostics.ActivityKind.Internal,
+                sessionActivity?.Context ?? default,
+                [
+                    new("tunit.assembly.name", assembly.GetName().Name)
+                ]);
+        }
 #endif
 
         var hooks = await _hookCollectionService.CollectBeforeAssemblyHooksAsync(assembly).ConfigureAwait(false);
@@ -252,15 +258,18 @@ internal sealed class HookExecutor
         var classContext = _contextProvider.GetOrCreateClassContext(testClass);
 
 #if NET
-        var assemblyActivity = classContext.AssemblyContext.Activity;
-        classContext.Activity = TUnitActivitySource.StartActivity(
-            "test suite",
-            System.Diagnostics.ActivityKind.Internal,
-            assemblyActivity?.Context ?? default,
-            [
-                new("test.suite.name", testClass.Name),
-                new("tunit.class.namespace", testClass.Namespace)
-            ]);
+        if (TUnitActivitySource.Source.HasListeners())
+        {
+            var assemblyActivity = classContext.AssemblyContext.Activity;
+            classContext.Activity = TUnitActivitySource.StartActivity(
+                "test suite",
+                System.Diagnostics.ActivityKind.Internal,
+                assemblyActivity?.Context ?? default,
+                [
+                    new("test.suite.name", testClass.Name),
+                    new("tunit.class.namespace", testClass.Namespace)
+                ]);
+        }
 #endif
 
         var hooks = await _hookCollectionService.CollectBeforeClassHooksAsync(testClass).ConfigureAwait(false);
