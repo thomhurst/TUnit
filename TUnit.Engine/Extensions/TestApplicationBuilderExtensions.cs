@@ -24,6 +24,9 @@ public static class TestApplicationBuilderExtensions
         var junitReporter = new JUnitReporter(extension);
         var junitReporterCommandProvider = new JUnitReporterCommandProvider(extension);
 
+        var htmlReporter = new HtmlReporter(extension);
+        var htmlReporterCommandProvider = new HtmlReporterCommandProvider(extension);
+
         testApplicationBuilder.RegisterTestFramework(
             serviceProvider => new TestFrameworkCapabilities(CreateCapabilities(serviceProvider)),
             (capabilities, serviceProvider) => new TUnitTestFramework(extension, serviceProvider, capabilities));
@@ -52,6 +55,9 @@ public static class TestApplicationBuilderExtensions
         // JUnit reporter configuration
         testApplicationBuilder.CommandLine.AddProvider(() => junitReporterCommandProvider);
 
+        // HTML reporter configuration
+        testApplicationBuilder.CommandLine.AddProvider(() => htmlReporterCommandProvider);
+
         testApplicationBuilder.TestHost.AddDataConsumer(serviceProvider =>
         {
             // Apply command-line configuration if provided
@@ -76,6 +82,26 @@ public static class TestApplicationBuilderExtensions
             return junitReporter;
         });
         testApplicationBuilder.TestHost.AddTestHostApplicationLifetime(_ => junitReporter);
+
+        testApplicationBuilder.TestHost.AddDataConsumer(serviceProvider =>
+        {
+            var commandLineOptions = serviceProvider.GetRequiredService<ICommandLineOptions>();
+
+            // Enable if --report-html flag is set or --report-html-filename is provided
+            if (commandLineOptions.IsOptionSet(HtmlReporterCommandProvider.ReportHtml)
+                || commandLineOptions.TryGetOptionArgumentList(HtmlReporterCommandProvider.ReportHtmlFilename, out _))
+            {
+                htmlReporter.Enable();
+            }
+
+            if (commandLineOptions.TryGetOptionArgumentList(HtmlReporterCommandProvider.ReportHtmlFilename, out var pathArgs))
+            {
+                htmlReporter.SetOutputPath(pathArgs[0]);
+            }
+
+            return htmlReporter;
+        });
+        testApplicationBuilder.TestHost.AddTestHostApplicationLifetime(_ => htmlReporter);
     }
 
     private static IReadOnlyCollection<ITestFrameworkCapability> CreateCapabilities(IServiceProvider serviceProvider)
