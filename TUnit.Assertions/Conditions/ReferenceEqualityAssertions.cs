@@ -35,7 +35,7 @@ public class SameReferenceAssertion<TValue> : Assertion<TValue>
             return AssertionResult._passedTask;
         }
 
-        return Task.FromResult(AssertionResult.Failed("references are different"));
+        return Task.FromResult(AssertionResult.Failed("received different references"));
     }
 
     protected override string GetExpectation() => "to be the same reference";
@@ -72,7 +72,7 @@ public class NotSameReferenceAssertion<TValue> : Assertion<TValue>
             return AssertionResult._passedTask;
         }
 
-        return Task.FromResult(AssertionResult.Failed("references are the same"));
+        return Task.FromResult(AssertionResult.Failed("received the same reference"));
     }
 
     protected override string GetExpectation() => "to not be the same reference";

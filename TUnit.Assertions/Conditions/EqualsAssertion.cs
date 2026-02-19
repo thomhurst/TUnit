@@ -78,7 +78,7 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
         }
 
         // Deep comparison with ignored types
@@ -92,7 +92,7 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
                 return AssertionResult._passedTask;
             }
 
-            return Task.FromResult(AssertionResult.Failed(result.Message ?? $"found {value}"));
+            return Task.FromResult(AssertionResult.Failed(result.Message ?? $"received {value}"));
         }
 
         // Standard equality comparison
@@ -103,7 +103,7 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
             return AssertionResult._passedTask;
         }
 
-        return Task.FromResult(AssertionResult.Failed($"found {value}"));
+        return Task.FromResult(AssertionResult.Failed($"received {value}"));
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Deep comparison requires reflection access to all public properties and fields of runtime types")]

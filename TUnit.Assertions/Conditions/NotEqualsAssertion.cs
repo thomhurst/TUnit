@@ -67,7 +67,7 @@ public class NotEqualsAssertion<TValue> : Assertion<TValue>
                 return AssertionResult._passedTask;
             }
 
-            return Task.FromResult(AssertionResult.Failed($"both values are equivalent"));
+            return Task.FromResult(AssertionResult.Failed("received equivalent values"));
         }
 
         var comparer = _comparer ?? EqualityComparer<TValue>.Default;
@@ -77,7 +77,7 @@ public class NotEqualsAssertion<TValue> : Assertion<TValue>
             return AssertionResult._passedTask;
         }
 
-        return Task.FromResult(AssertionResult.Failed($"both values are {value}"));
+        return Task.FromResult(AssertionResult.Failed($"received {value}"));
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Deep comparison requires reflection access to all public properties and fields of runtime types")]

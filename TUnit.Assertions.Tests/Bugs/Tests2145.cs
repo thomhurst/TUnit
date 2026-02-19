@@ -16,12 +16,12 @@ public class Tests2145
 
         var expectedMessage = """
                 Expected to be equal to "world"
-                but found "hello"
+                but received "hello"
 
                 at Assert.That(val).IsEqualTo("world")
 
                 Expected to be equal to "World"
-                but found "hello"
+                but received "hello"
 
                 at Assert.That(val).IsEqualTo("World")
                 """;

@@ -232,7 +232,7 @@ public class CollectionCountEqualsAssertion<TCollection, TItem> : CollectionAsse
             return AssertionResult.Passed;
         }
 
-        return AssertionResult.Failed($"found {_actualCount}");
+        return AssertionResult.Failed($"received {_actualCount}");
     }
 
     protected override string GetExpectation()

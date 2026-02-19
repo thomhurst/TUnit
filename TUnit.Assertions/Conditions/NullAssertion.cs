@@ -27,7 +27,7 @@ public class NullAssertion<TValue> : Assertion<TValue>
             return AssertionResult._passedTask;
         }
 
-        return Task.FromResult(AssertionResult.Failed($"found {value}"));
+        return Task.FromResult(AssertionResult.Failed($"received {value}"));
     }
 
     protected override string GetExpectation() => "to be null";
@@ -48,7 +48,7 @@ public class NotNullAssertion<TValue> : Assertion<TValue>
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed("value is null"));
+            return Task.FromResult(AssertionResult.Failed("received null"));
         }
 
         var value = metadata.Value;
@@ -58,7 +58,7 @@ public class NotNullAssertion<TValue> : Assertion<TValue>
             return AssertionResult._passedTask;
         }
 
-        return Task.FromResult(AssertionResult.Failed("value is null"));
+        return Task.FromResult(AssertionResult.Failed("received null"));
     }
 
     protected override string GetExpectation() => "to not be null";
@@ -103,7 +103,7 @@ public class IsDefaultAssertion<TValue> : Assertion<TValue> where TValue : struc
             return AssertionResult._passedTask;
         }
 
-        return Task.FromResult(AssertionResult.Failed($"value is {value}"));
+        return Task.FromResult(AssertionResult.Failed($"received {value}"));
     }
 
     protected override string GetExpectation() => $"to be default({typeof(TValue).Name})";
@@ -136,7 +136,7 @@ public class IsNotDefaultAssertion<TValue> : Assertion<TValue> where TValue : st
             return AssertionResult._passedTask;
         }
 
-        return Task.FromResult(AssertionResult.Failed($"value is default({typeof(TValue).Name})"));
+        return Task.FromResult(AssertionResult.Failed($"received default({typeof(TValue).Name})"));
     }
 
     protected override string GetExpectation() => $"to not be default({typeof(TValue).Name})";
@@ -170,7 +170,7 @@ public class IsDefaultNullableAssertion<TValue> : Assertion<TValue?> where TValu
             return AssertionResult._passedTask;
         }
 
-        return Task.FromResult(AssertionResult.Failed($"value is {value}"));
+        return Task.FromResult(AssertionResult.Failed($"received {value}"));
     }
 
     protected override string GetExpectation() => $"to be default({typeof(TValue).Name}?)";
@@ -204,7 +204,7 @@ public class IsNotDefaultNullableAssertion<TValue> : Assertion<TValue?> where TV
             return AssertionResult._passedTask;
         }
 
-        return Task.FromResult(AssertionResult.Failed($"value is default({typeof(TValue).Name}?)"));
+        return Task.FromResult(AssertionResult.Failed($"received default({typeof(TValue).Name}?)"));
     }
 
     protected override string GetExpectation() => $"to not be default({typeof(TValue).Name}?)";
@@ -238,7 +238,7 @@ public class IsDefaultReferenceAssertion<TValue> : Assertion<TValue> where TValu
             return AssertionResult._passedTask;
         }
 
-        return Task.FromResult(AssertionResult.Failed($"value is {value}"));
+        return Task.FromResult(AssertionResult.Failed($"received {value}"));
     }
 
     protected override string GetExpectation() => $"to be default({typeof(TValue).Name})";
@@ -272,7 +272,7 @@ public class IsNotDefaultReferenceAssertion<TValue> : Assertion<TValue> where TV
             return AssertionResult._passedTask;
         }
 
-        return Task.FromResult(AssertionResult.Failed($"value is default({typeof(TValue).Name})"));
+        return Task.FromResult(AssertionResult.Failed($"received default({typeof(TValue).Name})"));
     }
 
     protected override string GetExpectation() => $"to not be default({typeof(TValue).Name})";

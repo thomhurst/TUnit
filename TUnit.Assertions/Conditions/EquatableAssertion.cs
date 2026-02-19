@@ -29,7 +29,7 @@ public class EquatableAssertion<TActual, TExpected> : Assertion<TActual>
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
         }
 
         if (value == null)
@@ -43,7 +43,7 @@ public class EquatableAssertion<TActual, TExpected> : Assertion<TActual>
             return AssertionResult._passedTask;
         }
 
-        return Task.FromResult(AssertionResult.Failed($"found {value}"));
+        return Task.FromResult(AssertionResult.Failed($"received {value}"));
     }
 
     protected override string GetExpectation() => $"to be equal to {_expected}";
@@ -74,7 +74,7 @@ public class NullableEquatableAssertion<TActual, TExpected> : Assertion<TActual?
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
         }
 
         if (!value.HasValue)
@@ -88,7 +88,7 @@ public class NullableEquatableAssertion<TActual, TExpected> : Assertion<TActual?
             return AssertionResult._passedTask;
         }
 
-        return Task.FromResult(AssertionResult.Failed($"found {value.Value}"));
+        return Task.FromResult(AssertionResult.Failed($"received {value.Value}"));
     }
 
     protected override string GetExpectation() => $"to be equal to {_expected}";

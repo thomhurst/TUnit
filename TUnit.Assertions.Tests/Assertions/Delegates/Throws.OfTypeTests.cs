@@ -10,7 +10,7 @@ public partial class Throws
         {
             var expectedMessage = """
                                   Expected to throw CustomException
-                                  but threw TUnit.Assertions.Tests.Assertions.Delegates.Throws+OtherException
+                                  but threw OtherException
 
                                   at Assert.That(action).Throws<CustomException>()
                                   """.NormalizeLineEndings();
@@ -29,7 +29,7 @@ public partial class Throws
         {
             var expectedMessage = """
                                   Expected to throw SubCustomException
-                                  but threw TUnit.Assertions.Tests.Assertions.Delegates.Throws+CustomException
+                                  but threw CustomException
 
                                   at Assert.That(action).Throws<SubCustomException>()
                                   """.NormalizeLineEndings();

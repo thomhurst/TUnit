@@ -92,7 +92,7 @@ public class SatisfiesTests
             ).Throws<AssertionException>()
             .WithMessageMatching("""
                                  *to satisfy*
-                                 *found "Hello"*
+                                 *received "Hello"*
                                  """);
     }
 
@@ -125,7 +125,7 @@ public class SatisfiesTests
             .WithMessageMatching(
                 """
                 *to satisfy*
-                *found "Baz"*
+                *received "Baz"*
                 """
                 );
     }
@@ -144,7 +144,7 @@ public class SatisfiesTests
             ).Throws<AssertionException>()
             .WithMessageMatching("""
                                  *to satisfy*
-                                 *found "Hello"*
+                                 *received "Hello"*
                                  """);
     }
 
@@ -176,7 +176,7 @@ public class SatisfiesTests
             ).Throws<AssertionException>()
             .WithMessageMatching(
                 """
-                *found "Blah"*
+                *received "Blah"*
                 """
                 );
     }

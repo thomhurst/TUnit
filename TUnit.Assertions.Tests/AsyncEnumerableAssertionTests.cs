@@ -54,7 +54,7 @@ public class AsyncEnumerableAssertionTests
         var action = async () => await Assert.That(items).HasCount(5);
 
         var exception = await Assert.That(action).Throws<AssertionException>();
-        await Assert.That(exception.Message).Contains("found 3 items");
+        await Assert.That(exception.Message).Contains("received 3 items");
     }
 
     // Contains tests
@@ -72,7 +72,7 @@ public class AsyncEnumerableAssertionTests
         var action = async () => await Assert.That(items).Contains(99);
 
         var exception = await Assert.That(action).Throws<AssertionException>();
-        await Assert.That(exception.Message).Contains("item 99 was not found");
+        await Assert.That(exception.Message).Contains("99 was not found in the collection");
     }
 
     // DoesNotContain tests
@@ -90,7 +90,7 @@ public class AsyncEnumerableAssertionTests
         var action = async () => await Assert.That(items).DoesNotContain(5);
 
         var exception = await Assert.That(action).Throws<AssertionException>();
-        await Assert.That(exception.Message).Contains("item 5 was found");
+        await Assert.That(exception.Message).Contains("5 was found in the collection");
     }
 
     // All tests
@@ -157,7 +157,7 @@ public class AsyncEnumerableAssertionTests
         var action = async () => await Assert.That(items!).IsEmpty();
 
         var exception = await Assert.That(action).Throws<AssertionException>();
-        await Assert.That(exception.Message).Contains("was null");
+        await Assert.That(exception.Message).Contains("received null");
     }
 
     // String async enumerable

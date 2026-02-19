@@ -7,7 +7,7 @@ public class ThrowInDelegateValueAssertionTests
     {
         var expectedContains = """
                          Expected to be equal to True
-                         but threw System.Exception
+                         but threw Exception
                          """.NormalizeLineEndings();
         var assertion = async () => await Assert.That(() =>
         {
@@ -31,7 +31,7 @@ public class ThrowInDelegateValueAssertionTests
 
         await Assert.That(assertion)
             .Throws<AssertionException>()
-            .WithMessageContaining("SYSTEM.EXCEPTION", StringComparison.OrdinalIgnoreCase);
+            .WithMessageContaining("EXCEPTION", StringComparison.OrdinalIgnoreCase);
     }
 
     [Test]

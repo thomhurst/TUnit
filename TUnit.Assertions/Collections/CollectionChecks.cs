@@ -34,7 +34,7 @@ public static class CollectionChecks
             return AssertionResult.Passed;
         }
 
-        return AssertionResult.Failed("it was empty");
+        return AssertionResult.Failed("received empty collection");
     }
 
     /// <summary>
@@ -117,7 +117,7 @@ public static class CollectionChecks
         {
             if (predicate(item))
             {
-                return AssertionResult.Failed("found item matching predicate");
+                return AssertionResult.Failed("received item matching predicate");
             }
         }
 
@@ -157,7 +157,7 @@ public static class CollectionChecks
             return AssertionResult.Passed;
         }
 
-        return AssertionResult.Failed($"found {actual}");
+        return AssertionResult.Failed($"received {actual}");
     }
 
     /// <summary>
@@ -171,7 +171,7 @@ public static class CollectionChecks
             return AssertionResult.Passed;
         }
 
-        return AssertionResult.Failed($"it had {count} item(s)");
+        return AssertionResult.Failed($"received {count} item(s)");
     }
 
     /// <summary>
@@ -622,6 +622,6 @@ public static class CollectionChecks
             return AssertionResult.Passed;
         }
 
-        return AssertionResult.Failed("the set does not equal the specified collection");
+        return AssertionResult.Failed("received set does not equal the specified collection");
     }
 }

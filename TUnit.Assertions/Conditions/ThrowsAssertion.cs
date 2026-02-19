@@ -38,7 +38,7 @@ public abstract class BaseThrowsAssertion<TException, TSelf> : Assertion<TExcept
         // If there was an evaluation exception, something went wrong during evaluation
         if (evaluationException != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {evaluationException.GetType().FullName}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {evaluationException.GetType().Name}"));
         }
 
         // The exception should be in the value field after MapException

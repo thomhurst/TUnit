@@ -29,7 +29,7 @@ public class GreaterThanAssertion<TValue> : Assertion<TValue>
 
         if (value == null)
         {
-            return Task.FromResult(AssertionResult.Failed("value is null"));
+            return Task.FromResult(AssertionResult.Failed("received null"));
         }
 
         if (value.CompareTo(_minimum) > 0)
@@ -37,7 +37,7 @@ public class GreaterThanAssertion<TValue> : Assertion<TValue>
             return AssertionResult._passedTask;
         }
 
-        return Task.FromResult(AssertionResult.Failed($"found {value}"));
+        return Task.FromResult(AssertionResult.Failed($"received {value}"));
     }
 
     protected override string GetExpectation() => $"to be greater than {_minimum}";
@@ -67,7 +67,7 @@ public class GreaterThanOrEqualAssertion<TValue> : Assertion<TValue>
 
         if (value == null)
         {
-            return Task.FromResult(AssertionResult.Failed("value is null"));
+            return Task.FromResult(AssertionResult.Failed("received null"));
         }
 
         if (value.CompareTo(_minimum) >= 0)
@@ -75,7 +75,7 @@ public class GreaterThanOrEqualAssertion<TValue> : Assertion<TValue>
             return AssertionResult._passedTask;
         }
 
-        return Task.FromResult(AssertionResult.Failed($"found {value}"));
+        return Task.FromResult(AssertionResult.Failed($"received {value}"));
     }
 
     protected override string GetExpectation() => $"to be greater than or equal to {_minimum}";
