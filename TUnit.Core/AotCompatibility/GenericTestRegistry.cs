@@ -12,6 +12,7 @@ public static class GenericTestRegistry
     private static readonly ConcurrentDictionary<GenericMethodKey, MethodInfo> _compiledMethods = new();
     private static readonly ConcurrentDictionary<Type, HashSet<Type[]>> _registeredCombinations = new();
     private static readonly ConcurrentDictionary<GenericMethodKey, Delegate> _directInvocationDelegates = new();
+    private static readonly object _combinationsLock = new();
 
     /// <summary>
     /// Registers a pre-compiled generic method instance.
@@ -22,9 +23,12 @@ public static class GenericTestRegistry
         var key = new GenericMethodKey(declaringType, methodName, typeArguments);
         _compiledMethods[key] = compiledMethod;
 
-        // Track registered combinations
+        // Track registered combinations - lock protects the inner HashSet from concurrent modification
         var combinations = _registeredCombinations.GetOrAdd(declaringType, static _ => new HashSet<Type[]>(new TypeArrayComparer()));
-        combinations.Add(typeArguments);
+        lock (_combinationsLock)
+        {
+            combinations.Add(typeArguments);
+        }
     }
 
     /// <summary>
@@ -77,9 +81,16 @@ public static class GenericTestRegistry
     /// </summary>
     public static IEnumerable<Type[]> GetRegisteredCombinations(Type declaringType)
     {
-        return _registeredCombinations.TryGetValue(declaringType, out var combinations)
-            ? combinations
-            : Array.Empty<Type[]>();
+        if (!_registeredCombinations.TryGetValue(declaringType, out var combinations))
+        {
+            return Array.Empty<Type[]>();
+        }
+
+        // Return a snapshot to avoid enumeration during concurrent modification
+        lock (_combinationsLock)
+        {
+            return combinations.ToArray();
+        }
     }
 
     /// <summary>
@@ -88,17 +99,17 @@ public static class GenericTestRegistry
     public static void MarkAsAotCompatible(MethodInfo method)
     {
         // This information can be used by the analyzer to suppress warnings
-        AotCompatibleMethods.Add(method);
+        AotCompatibleMethods.TryAdd(method, 0);
     }
 
-    private static readonly HashSet<MethodInfo> AotCompatibleMethods = [];
+    private static readonly ConcurrentDictionary<MethodInfo, byte> AotCompatibleMethods = new();
 
     /// <summary>
     /// Checks if a method has been marked as AOT-compatible.
     /// </summary>
     public static bool IsMarkedAotCompatible(MethodInfo method)
     {
-        return AotCompatibleMethods.Contains(method);
+        return AotCompatibleMethods.ContainsKey(method);
     }
 
     /// <summary>
