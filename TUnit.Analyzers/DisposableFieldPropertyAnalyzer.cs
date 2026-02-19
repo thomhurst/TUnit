@@ -163,7 +163,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
     private static void CheckSetUps(SyntaxNodeAnalysisContext context, IMethodSymbol methodSymbol, ConcurrentDictionary<ISymbol, HookLevel?> createdObjects)
     {
         var syntaxNodes = methodSymbol.DeclaringSyntaxReferences
-            .SelectMany(x => x.GetSyntax().DescendantNodesAndSelf()).ToArray();
+            .SelectMany(x => x.GetSyntax().DescendantNodesAndSelf());
 
         var isHookMethod = methodSymbol.IsHookMethod(context.Compilation, out _, out var level, out _);
 
@@ -227,7 +227,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
     private static void CheckTeardowns(SyntaxNodeAnalysisContext context, IMethodSymbol methodSymbol, ConcurrentDictionary<ISymbol, HookLevel?> createdObjects)
     {
         var syntaxNodes = methodSymbol.DeclaringSyntaxReferences
-            .SelectMany(x => x.GetSyntax().DescendantNodesAndSelf()).ToArray();
+            .SelectMany(x => x.GetSyntax().DescendantNodesAndSelf());
 
         foreach (var assignment in syntaxNodes
                      .Where(x => x.IsKind(SyntaxKind.InvocationExpression)))
