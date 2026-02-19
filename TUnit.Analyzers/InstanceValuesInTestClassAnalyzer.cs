@@ -56,7 +56,7 @@ public class InstanceValuesInTestClassAnalyzer : ConcurrentDiagnosticAnalyzer
 
             if (!SymbolEqualityComparer.Default.Equals(targetSymbol?.ContainingType, testClass))
             {
-                return;
+                continue;
             }
 
             if (SymbolEqualityComparer.Default.Equals(targetSymbol, fieldOrProperty))
