@@ -4454,16 +4454,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Build the concrete class name if it's a generic class
         string concreteClassName;
-        string openGenericTypeName;
         if (testMethod.IsGenericType)
         {
-            openGenericTypeName = GetOpenGenericTypeName(testMethod.TypeSymbol);
             var baseClassName = className.Contains("<") ? className.Substring(0, className.IndexOf('<')) : className;
             concreteClassName = $"{baseClassName}<{string.Join(", ", classTypeArgs.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)))}>";
         }
         else
         {
-            openGenericTypeName = className;
             concreteClassName = className;
         }
 
@@ -4509,7 +4506,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             // Check if the class has a constructor that requires arguments
             var hasParameterizedConstructor = false;
-            var constructorParamCount = 0;
 
             if (testMethod.IsGenericType)
             {
@@ -4522,7 +4518,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 if (constructor is { Parameters.Length: > 0 })
                 {
                     hasParameterizedConstructor = true;
-                    constructorParamCount = constructor.Parameters.Length;
                 }
             }
 
