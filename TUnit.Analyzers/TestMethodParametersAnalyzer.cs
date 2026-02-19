@@ -37,7 +37,8 @@ public class TestMethodParametersAnalyzer : ConcurrentDiagnosticAnalyzer
 
         if (!methodSymbol.HasDataDrivenAttributes())
         {
-            context.ReportDiagnostic(Diagnostic.Create(Rules.NoDataSourceProvided, methodSymbol.Locations.FirstOrDefault()));
+            context.ReportDiagnostic(Diagnostic.Create(Rules.NoDataSourceProvided,
+                parameters[0].Locations.FirstOrDefault() ?? methodSymbol.Locations.FirstOrDefault()));
         }
     }
 }

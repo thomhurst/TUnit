@@ -64,8 +64,9 @@ public class ClassHooksAnalyzer : ConcurrentDiagnosticAnalyzer
 
         if (!IsClassHookContextParameter(methodSymbol))
         {
+            var firstBadParam = FindFirstUnknownParameter(methodSymbol);
             context.ReportDiagnostic(Diagnostic.Create(Rules.UnknownParameters,
-                context.Symbol.Locations.FirstOrDefault(),
+                firstBadParam?.Locations.FirstOrDefault() ?? context.Symbol.Locations.FirstOrDefault(),
                 "empty or only contain `ClassHookContext`")
             );
         }
@@ -96,5 +97,21 @@ public class ClassHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         return true;
+    }
+
+    private static IParameterSymbol? FindFirstUnknownParameter(IMethodSymbol methodSymbol)
+    {
+        foreach (var parameter in methodSymbol.Parameters)
+        {
+            if (parameter.Type.GloballyQualified() !=
+                WellKnown.AttributeFullyQualifiedClasses.ClassHookContext.WithGlobalPrefix &&
+                parameter.Type.GloballyQualified() !=
+                WellKnown.AttributeFullyQualifiedClasses.CancellationToken.WithGlobalPrefix)
+            {
+                return parameter;
+            }
+        }
+
+        return null;
     }
 }

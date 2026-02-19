@@ -70,7 +70,7 @@ public class TimeoutCancellationTokenAnalyzer : ConcurrentDiagnosticAnalyzer
             // CancellationToken is not present at all
             context.ReportDiagnostic(
                 Diagnostic.Create(Rules.MissingTimeoutCancellationTokenAttributes,
-                    context.Symbol.Locations.FirstOrDefault())
+                    lastParameter.Locations.FirstOrDefault() ?? context.Symbol.Locations.FirstOrDefault())
             );
         }
         else if (cancellationTokenIndex != parameters.Length - 1)

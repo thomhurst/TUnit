@@ -95,7 +95,7 @@ public class MatrixAnalyzer : ConcurrentDiagnosticAnalyzer
                 if (!conversion.Exists)
                 {
                     context.ReportDiagnostic(Diagnostic.Create(Rules.WrongArgumentTypeTestData,
-                        context.Symbol.Locations.FirstOrDefault(),
+                        parameterSymbol.Locations.FirstOrDefault() ?? context.Symbol.Locations.FirstOrDefault(),
                         arrayItem.Type,
                         parameterSymbol.Type));
 

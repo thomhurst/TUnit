@@ -110,9 +110,10 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
                             HookLevel.Assembly => "AssemblyHookContext",
                             _ => "context"
                         };
+                        var firstBadParam = FindFirstUnknownParameter(methodSymbol, contextType!);
                         context.ReportDiagnostic(Diagnostic.Create(
-                            Rules.HookUnknownParameters, 
-                            methodSymbol.Locations.FirstOrDefault(),
+                            Rules.HookUnknownParameters,
+                            firstBadParam?.Locations.FirstOrDefault() ?? methodSymbol.Locations.FirstOrDefault(),
                             expectedContextTypeName));
                         break;
                 }
@@ -186,5 +187,20 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         
         // Anything else is unknown/invalid
         return HookParameterStatus.UnknownParameters;
+    }
+
+    private static IParameterSymbol? FindFirstUnknownParameter(IMethodSymbol methodSymbol, string contextType)
+    {
+        foreach (var parameter in methodSymbol.Parameters)
+        {
+            var paramType = parameter.Type.GloballyQualifiedNonGeneric();
+            if (paramType != contextType &&
+                paramType != "global::System.Threading.CancellationToken")
+            {
+                return parameter;
+            }
+        }
+
+        return null;
     }
 }
