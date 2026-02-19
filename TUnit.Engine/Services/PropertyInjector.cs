@@ -230,6 +230,7 @@ internal sealed class PropertyInjector
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Source-gen properties are AOT-safe")]
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "ContainingType is annotated with DynamicallyAccessedMembers in PropertyInjectionMetadata")]
     private async Task InjectSourceGeneratedPropertyAsync(
         object instance,
         PropertyInjectionMetadata metadata,
@@ -376,6 +377,7 @@ internal sealed class PropertyInjector
         return Task.CompletedTask;
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "ContainingType is annotated with DynamicallyAccessedMembers in PropertyInjectionMetadata")]
     private async Task RecurseIntoNestedPropertiesCoreAsync(object instance, PropertyInjectionPlan plan,
         ConcurrentDictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events,
         ConcurrentDictionary<object, byte> visitedObjects, CancellationToken cancellationToken)
