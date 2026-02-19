@@ -51,6 +51,13 @@ internal class JsonLogReporterCommandProvider(IExtension extension) : ICommandLi
     public Task<ValidationResult> ValidateCommandLineOptionsAsync(
         ICommandLineOptions commandLineOptions)
     {
+        if (commandLineOptions.IsOptionSet(ReportJsonLogFilename) &&
+            !commandLineOptions.IsOptionSet(ReportJsonLog))
+        {
+            return ValidationResult.InvalidTask(
+                $"--{ReportJsonLogFilename} requires --{ReportJsonLog} to be specified");
+        }
+
         return ValidationResult.ValidTask;
     }
 }
