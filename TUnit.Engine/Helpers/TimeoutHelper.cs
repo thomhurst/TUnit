@@ -156,7 +156,9 @@ internal static class TimeoutHelper
             }
 
             // Even if task completed during grace period, timeout already elapsed so we throw
-            throw new TimeoutException(timeoutMessage ?? $"Operation timed out after {timeout.Value}");
+            var baseMessage = timeoutMessage ?? $"Operation timed out after {timeout.Value}";
+            var diagnosticMessage = TimeoutDiagnostics.BuildTimeoutDiagnosticsMessage(baseMessage, executionTask);
+            throw new TimeoutException(diagnosticMessage);
         }
 
         return await executionTask.ConfigureAwait(false);
