@@ -583,6 +583,7 @@ namespace
         public void SetDisplayName(string displayName) { }
         public void SetDisplayNameFormatter( formatterType) { }
         public void SetPriority(. priority) { }
+        public void SetRetryBackoff(int backoffMs, double backoffMultiplier) { }
         public void SetRetryLimit(int retryLimit) { }
         public void SetRetryLimit(int retryCount, <.TestContext, , int, .<bool>> shouldRetry) { }
     }
@@ -1179,7 +1180,10 @@ namespace
     public class RetryAttribute : .TUnitAttribute, .IScopedAttribute, ., .
     {
         public RetryAttribute(int times) { }
+        public int BackoffMs { get; set; }
+        public double BackoffMultiplier { get; set; }
         public int Order { get; }
+        public []? RetryOnExceptionTypes { get; set; }
         public  ScopeType { get; }
         public int Times { get; }
         public . OnTestDiscovered(.DiscoveredTestContext context) { }
@@ -1454,6 +1458,8 @@ namespace
         public [] MethodGenericArguments { get; set; }
         public required .MethodMetadata MethodMetadata { get; set; }
         public required string MethodName { get; init; }
+        public int RetryBackoffMs { get; set; }
+        public double RetryBackoffMultiplier { get; set; }
         public int RetryLimit { get; set; }
         public required  ReturnType { get; set; }
         public required object?[] TestClassArguments { get; set; }
@@ -2408,6 +2414,8 @@ namespace .Interfaces
     }
     public interface ITestConfiguration
     {
+        int RetryBackoffMs { get; }
+        double RetryBackoffMultiplier { get; }
         int RetryLimit { get; }
         ? Timeout { get; }
     }

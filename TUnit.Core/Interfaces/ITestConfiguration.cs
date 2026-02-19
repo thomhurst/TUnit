@@ -15,4 +15,14 @@ public interface ITestConfiguration
     /// Gets the maximum number of retry attempts for this test.
     /// </summary>
     int RetryLimit { get; }
+
+    /// <summary>
+    /// Gets the initial delay in milliseconds before the first retry.
+    /// </summary>
+    int RetryBackoffMs { get; }
+
+    /// <summary>
+    /// Gets the multiplier for exponential backoff between retries.
+    /// </summary>
+    double RetryBackoffMultiplier { get; }
 }
