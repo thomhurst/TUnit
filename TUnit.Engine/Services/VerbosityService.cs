@@ -93,9 +93,10 @@ public sealed class VerbosityService
             var clientInfo = serviceProvider.GetClientInfo();
             return clientInfo.Id.Contains("console", StringComparison.InvariantCultureIgnoreCase);
         }
-        catch
+        catch (Exception ex)
         {
             // If we can't determine, default to console behavior
+            System.Diagnostics.Debug.WriteLine($"Failed to determine console environment: {ex}");
             return true;
         }
     }
