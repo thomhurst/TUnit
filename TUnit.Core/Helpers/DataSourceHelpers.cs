@@ -495,7 +495,7 @@ public static class DataSourceHelpers
         return (true, createdInstance);
     }
 
-    private static readonly Dictionary<Type, Func<MethodMetadata, string, Task<object>>> TypeCreators = new();
+    private static readonly ConcurrentDictionary<Type, Func<MethodMetadata, string, Task<object>>> TypeCreators = new();
 
     /// <summary>
     /// Registers a type creator function for types with init-only data source properties.

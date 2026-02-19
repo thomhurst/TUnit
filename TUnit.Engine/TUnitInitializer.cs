@@ -43,13 +43,7 @@ internal class TUnitInitializer(ICommandLineOptions commandLineOptions, IHookReg
             var key = split[0];
             var value = split[1];
 
-            if (!TestContext.InternalParametersDictionary.TryGetValue(key, out var list))
-            {
-                list =
-                [
-                ];
-                TestContext.InternalParametersDictionary[key] = list;
-            }
+            var list = TestContext.InternalParametersDictionary.GetOrAdd(key, static _ => []);
             list.Add(value);
         }
     }
