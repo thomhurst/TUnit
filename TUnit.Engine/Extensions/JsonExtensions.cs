@@ -65,7 +65,7 @@ internal static class JsonExtensions
             classParamTypeNames = new string[classParameterTypes.Length];
             for (var i = 0; i < classParameterTypes.Length; i++)
             {
-                classParamTypeNames[i] = classParameterTypes[i].FullName ?? "Unknown";
+                classParamTypeNames[i] = classParameterTypes[i]?.FullName ?? classParameterTypes[i]?.Name ?? "Unknown";
             }
         }
         else
@@ -77,7 +77,7 @@ internal static class JsonExtensions
         var methodParamTypeNames = new string[methodParameters.Length];
         for (var i = 0; i < methodParameters.Length; i++)
         {
-            methodParamTypeNames[i] = methodParameters[i].Type.FullName ?? "Unknown";
+            methodParamTypeNames[i] = methodParameters[i].Type?.FullName ?? methodParameters[i].Type?.Name ?? "Unknown";
         }
 
         return new TestJson
