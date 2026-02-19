@@ -2,6 +2,7 @@
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.Helpers;
 using Microsoft.Testing.Platform.Services;
+using TUnit.Core;
 using TUnit.Engine.Capabilities;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Framework;
@@ -23,6 +24,9 @@ public static class TestApplicationBuilderExtensions
 
         var junitReporter = new JUnitReporter(extension);
         var junitReporterCommandProvider = new JUnitReporterCommandProvider(extension);
+
+        var timingReporter = new TimingReporter(extension);
+        var timingReporterCommandProvider = new TimingReporterCommandProvider(extension);
 
         testApplicationBuilder.RegisterTestFramework(
             serviceProvider => new TestFrameworkCapabilities(CreateCapabilities(serviceProvider)),
@@ -52,6 +56,10 @@ public static class TestApplicationBuilderExtensions
         // JUnit reporter configuration
         testApplicationBuilder.CommandLine.AddProvider(() => junitReporterCommandProvider);
 
+        // Performance baseline and timing reporter command providers
+        testApplicationBuilder.CommandLine.AddProvider(() => new PerformanceBaselineCommandProvider(extension));
+        testApplicationBuilder.CommandLine.AddProvider(() => timingReporterCommandProvider);
+
         testApplicationBuilder.TestHost.AddDataConsumer(serviceProvider =>
         {
             // Apply command-line configuration if provided
@@ -76,6 +84,34 @@ public static class TestApplicationBuilderExtensions
             return junitReporter;
         });
         testApplicationBuilder.TestHost.AddTestHostApplicationLifetime(_ => junitReporter);
+
+        // Timing reporter configuration (enabled via --report-timing)
+        testApplicationBuilder.TestHost.AddDataConsumer(serviceProvider =>
+        {
+            var commandLineOptions = serviceProvider.GetRequiredService<ICommandLineOptions>();
+
+            // Configure performance baseline fail mode
+            if (commandLineOptions.IsOptionSet(PerformanceBaselineCommandProvider.PerformanceBaselineFail))
+            {
+                PerformanceBaselineAttribute.FailOnViolation = true;
+            }
+
+            // Enable timing reporter when --report-timing is specified
+            if (commandLineOptions.IsOptionSet(TimingReporterCommandProvider.ReportTiming))
+            {
+                timingReporter.Enable();
+            }
+
+            // Configure timing reporter output path
+            if (commandLineOptions.TryGetOptionArgumentList(TimingReporterCommandProvider.ReportTimingOutputPath, out var pathArgs))
+            {
+                timingReporter.SetOutputPath(pathArgs[0]);
+                timingReporter.Enable(); // Specifying a path implies enabling
+            }
+
+            return timingReporter;
+        });
+        testApplicationBuilder.TestHost.AddTestHostApplicationLifetime(_ => timingReporter);
     }
 
     private static IReadOnlyCollection<ITestFrameworkCapability> CreateCapabilities(IServiceProvider serviceProvider)
