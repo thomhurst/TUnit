@@ -40,6 +40,16 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Check for .received.txt files
+        shell: bash
+        run: |
+          if find . -name "*.received.txt" -not -path "./node_modules/*" | grep -q .; then
+            echo "ERROR: .received.txt files found. These should not be committed."
+            echo "Please replace them with .verified.txt files or remove them."
+            find . -name "*.received.txt" -not -path "./node_modules/*"
+            exit 1
+          fi
+
       - name: Setup .NET Framework
         if: matrix.os == 'windows-latest'
         uses: microsoft/setup-msbuild@v2
