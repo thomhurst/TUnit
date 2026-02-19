@@ -153,7 +153,7 @@ public class StringEqualsAssertionTests
         var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2));
 
         var expectedMessage = $"Expected to be equal to \"Lorem ipsum dolor sit amet diam duo amet sea rebum.  Et voluptua ex voluptua no praesent diam eu se…\"{Environment.NewLine}" +
-                              $"but found \"Lorem ipsum dolor sit amet diam duo amet sea rebum.  Et voluptua ex voluptua no praesent diam eu se…\" which differs at index 556:{Environment.NewLine}" +
+                              $"but received \"Lorem ipsum dolor sit amet diam duo amet sea rebum.  Et voluptua ex voluptua no praesent diam eu se…\" which differs at index 556:{Environment.NewLine}" +
                               $"                            ↓{Environment.NewLine}" +
                               $"   \"Consequat odio ea veniam. Amet enim in gubergren s…\"{Environment.NewLine}" +
                               $"   \"Consequat odio ea veniam! Amet enim in gubergren s…\"{Environment.NewLine}" +

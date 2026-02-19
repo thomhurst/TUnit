@@ -7,7 +7,7 @@ public class StringDifferenceTests
     {
         var expectedMessage = """
                               Expected to be equal to "some text"
-                              but found ""
+                              but received ""
 
                               at Assert.That(actual).IsEqualTo(expected)
                               """.NormalizeLineEndings();
@@ -26,7 +26,7 @@ public class StringDifferenceTests
     {
         var expectedMessage = """
                               Expected to be equal to ""
-                              but found "actual text"
+                              but received "actual text"
 
                               at Assert.That(actual).IsEqualTo(expected)
                               """.NormalizeLineEndings();
@@ -45,7 +45,7 @@ public class StringDifferenceTests
     {
         var expectedMessage = """
                               Expected to be equal to "some text"
-                              but found "some"
+                              but received "some"
 
                               at Assert.That(actual).IsEqualTo(expected)
                               """.NormalizeLineEndings();
@@ -64,7 +64,7 @@ public class StringDifferenceTests
     {
         var expectedMessage = """
                               Expected to be equal to "some"
-                              but found "some text"
+                              but received "some text"
 
                               at Assert.That(actual).IsEqualTo(expected)
                               """.NormalizeLineEndings();

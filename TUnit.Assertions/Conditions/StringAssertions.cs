@@ -98,7 +98,7 @@ public class StringContainsAssertion : Assertion<string>
             return AssertionResult._passedTask;
         }
 
-        return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
+        return Task.FromResult(AssertionResult.Failed($"received \"{value}\""));
     }
 
     private static string RemoveWhitespace(string input)
@@ -202,7 +202,7 @@ public class StringDoesNotContainAssertion : Assertion<string>
             return AssertionResult._passedTask;
         }
 
-        return Task.FromResult(AssertionResult.Failed($"found \"{_expected}\" in \"{value}\""));
+        return Task.FromResult(AssertionResult.Failed($"received \"{value}\" which contains \"{_expected}\""));
     }
 
     protected override string GetExpectation() => $"to not contain \"{_expected}\"";
@@ -269,7 +269,7 @@ public class StringStartsWithAssertion : Assertion<string>
             return AssertionResult._passedTask;
         }
 
-        return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
+        return Task.FromResult(AssertionResult.Failed($"received \"{value}\""));
     }
 
     protected override string GetExpectation() => $"to start with \"{_expected}\"";
@@ -336,7 +336,7 @@ public class StringEndsWithAssertion : Assertion<string>
             return AssertionResult._passedTask;
         }
 
-        return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
+        return Task.FromResult(AssertionResult.Failed($"received \"{value}\""));
     }
 
     protected override string GetExpectation() => $"to end with \"{_expected}\"";
@@ -403,7 +403,7 @@ public class StringDoesNotStartWithAssertion : Assertion<string>
             return AssertionResult._passedTask;
         }
 
-        return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
+        return Task.FromResult(AssertionResult.Failed($"received \"{value}\""));
     }
 
     protected override string GetExpectation() => $"to not start with \"{_expected}\"";
@@ -470,7 +470,7 @@ public class StringDoesNotEndWithAssertion : Assertion<string>
             return AssertionResult._passedTask;
         }
 
-        return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
+        return Task.FromResult(AssertionResult.Failed($"received \"{value}\""));
     }
 
     protected override string GetExpectation() => $"to not end with \"{_expected}\"";
@@ -508,7 +508,7 @@ public class StringIsNotEmptyAssertion : Assertion<string>
             return AssertionResult._passedTask;
         }
 
-        return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
+        return Task.FromResult(AssertionResult.Failed($"received \"{value}\""));
     }
 
     protected override string GetExpectation() => "to not be null or empty";
@@ -546,7 +546,7 @@ public class StringIsEmptyAssertion : Assertion<string>
             return AssertionResult._passedTask;
         }
 
-        return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
+        return Task.FromResult(AssertionResult.Failed($"received \"{value}\""));
     }
 
     protected override string GetExpectation() => "to be empty";
@@ -587,7 +587,7 @@ public class StringLengthAssertion : Assertion<string>
             return AssertionResult._passedTask;
         }
 
-        return Task.FromResult(AssertionResult.Failed($"found length {value.Length}"));
+        return Task.FromResult(AssertionResult.Failed($"received string with length {value.Length}"));
     }
 
     protected override string GetExpectation() => $"to have length {_expectedLength}";
@@ -703,9 +703,9 @@ public class StringMatchesAssertion : Assertion<RegexMatchCollection>
         var expression = Context.ExpressionBuilder.ToString();
         if (expression.Contains(".Matches(regex)") || expression.Contains(".Matches(Matches_"))
         {
-            return "text match regex";
+            return "to match regex";
         }
-        return "text match pattern";
+        return "to match pattern";
     }
 }
 
@@ -779,7 +779,7 @@ public class StringDoesNotMatchAssertion : Assertion<string>
             return AssertionResult._passedTask;
         }
 
-        return Task.FromResult(AssertionResult.Failed($"The regex \"{_pattern}\" matches with \"{value}\""));
+        return Task.FromResult(AssertionResult.Failed($"received \"{value}\" which matches the pattern \"{_pattern}\""));
     }
 
     protected override string GetExpectation()
@@ -788,8 +788,8 @@ public class StringDoesNotMatchAssertion : Assertion<string>
         var expression = Context.ExpressionBuilder.ToString();
         if (expression.Contains(".DoesNotMatch(regex)") || expression.Contains(".DoesNotMatch(DoesNotMatch_") || expression.Contains(".DoesNotMatch(FindNumber"))
         {
-            return "text to not match with regex";
+            return "to not match regex";
         }
-        return "text to not match with pattern";
+        return "to not match pattern";
     }
 }

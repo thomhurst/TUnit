@@ -84,7 +84,7 @@ public class IsNotTypeOfAssertion<TValue, TExpected> : Assertion<TValue>
             return AssertionResult._passedTask;
         }
 
-        return Task.FromResult(AssertionResult.Failed($"type was {actualType.Name}"));
+        return Task.FromResult(AssertionResult.Failed($"received type {actualType.Name}"));
     }
 
     protected override string GetExpectation() => $"to not be of type {_expectedType.Name}";
@@ -227,7 +227,7 @@ public class IsTypeOfRuntimeAssertion<TValue> : Assertion<TValue>
             return AssertionResult._passedTask;
         }
 
-        return Task.FromResult(AssertionResult.Failed($"type was {actualType.Name}"));
+        return Task.FromResult(AssertionResult.Failed($"received type {actualType.Name}"));
     }
 
     protected override string GetExpectation() => $"to be of type {_expectedType.Name}";

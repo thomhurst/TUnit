@@ -58,7 +58,7 @@ public partial class StringRegexAssertionTests
 
         await TUnitAssert.That(exception!.Message.NormalizeLineEndings()).IsEqualTo(
             $"""
-             Expected text match pattern
+             Expected to match pattern
              but The regex "^\d+$" does not match with "{text}"
 
              at Assert.That(text).Matches(pattern)
@@ -83,7 +83,7 @@ public partial class StringRegexAssertionTests
 
         await TUnitAssert.That(exception!.Message.NormalizeLineEndings()).IsEqualTo(
             $"""
-             Expected text match pattern
+             Expected to match pattern
              but The regex "^\d+$" does not match with "{text}"
 
              at Assert.That(text).Matches(pattern)
@@ -112,7 +112,7 @@ public partial class StringRegexAssertionTests
         
         await TUnitAssert.That(exception!.Message.NormalizeLineEndings()).IsEqualTo(
             $"""
-             Expected text match regex
+             Expected to match regex
              but The regex "^\d+$" does not match with "Hello123World"
 
              at Assert.That(text).Matches(regex)
@@ -194,8 +194,8 @@ public partial class StringRegexAssertionTests
 
         await TUnitAssert.That(exception!.Message.NormalizeLineEndings()).IsEqualTo(
             $"""
-             Expected text to not match with pattern
-             but The regex "^\d+$" matches with "{text}"
+             Expected to not match pattern
+             but received "{text}" which matches the pattern "^\d+$"
 
              at Assert.That(text).DoesNotMatch(pattern)
              """.NormalizeLineEndings()
@@ -219,8 +219,8 @@ public partial class StringRegexAssertionTests
 
         await TUnitAssert.That(exception!.Message.NormalizeLineEndings()).IsEqualTo(
             $"""
-             Expected text to not match with pattern
-             but The regex "^\d+$" matches with "{text}"
+             Expected to not match pattern
+             but received "{text}" which matches the pattern "^\d+$"
 
              at Assert.That(text).DoesNotMatch(pattern)
              """.NormalizeLineEndings()
@@ -248,8 +248,8 @@ public partial class StringRegexAssertionTests
         
         await TUnitAssert.That(exception!.Message.NormalizeLineEndings()).IsEqualTo(
             $"""
-             Expected text to not match with regex
-             but The regex "^\d+$" matches with "{text}"
+             Expected to not match regex
+             but received "{text}" which matches the pattern "^\d+$"
 
              at Assert.That(text).DoesNotMatch(regex)
              """.NormalizeLineEndings()

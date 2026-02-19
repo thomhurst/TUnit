@@ -282,5 +282,5 @@ public class SetEqualsAssertion<TSet, TItem> : SetAssertionBase<TSet, TItem>
         return Task.FromResult(CollectionChecks.CheckSetEquals(adapter, _other));
     }
 
-    protected override string GetExpectation() => "to equal the specified collection";
+    protected override string GetExpectation() => "to be equal to the specified collection";
 }

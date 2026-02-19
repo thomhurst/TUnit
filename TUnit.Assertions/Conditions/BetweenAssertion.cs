@@ -78,7 +78,7 @@ public class BetweenAssertion<TValue> : Assertion<TValue>
 
         if (value == null)
         {
-            return Task.FromResult(AssertionResult.Failed("value is null"));
+            return Task.FromResult(AssertionResult.Failed("received null"));
         }
 
         var minComparison = value.CompareTo(_minimum);
@@ -92,7 +92,7 @@ public class BetweenAssertion<TValue> : Assertion<TValue>
             return AssertionResult._passedTask;
         }
 
-        return Task.FromResult(AssertionResult.Failed($"found {value}"));
+        return Task.FromResult(AssertionResult.Failed($"received {value}"));
     }
 
     protected override string GetExpectation()

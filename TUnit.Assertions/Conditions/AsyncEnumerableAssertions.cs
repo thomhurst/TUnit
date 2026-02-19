@@ -22,7 +22,7 @@ public abstract class AsyncEnumerableAssertionConditionBase<TItem> : AsyncEnumer
 
         if (metadata.Value == null)
         {
-            return AssertionResult.Failed("was null");
+            return AssertionResult.Failed("received null");
         }
 
         // Materialize the async enumerable
@@ -105,7 +105,7 @@ public class AsyncEnumerableHasCountAssertion<TItem> : AsyncEnumerableAssertionC
     {
         return items.Count == _expected
             ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {items.Count} items");
+            : AssertionResult.Failed($"received {items.Count} items");
     }
 
     protected override string GetExpectation() => $"to have {_expected} items";
@@ -141,12 +141,12 @@ public class AsyncEnumerableContainsAssertion<TItem> : AsyncEnumerableAssertionC
         {
             return contains
                 ? AssertionResult.Passed
-                : AssertionResult.Failed($"item {_expected} was not found");
+                : AssertionResult.Failed($"{_expected} was not found in the collection");
         }
         else
         {
             return contains
-                ? AssertionResult.Failed($"item {_expected} was found")
+                ? AssertionResult.Failed($"{_expected} was found in the collection")
                 : AssertionResult.Passed;
         }
     }

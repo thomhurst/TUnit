@@ -135,7 +135,7 @@ public class StringEqualsAssertion<TActual> : Assertion<TActual>
         if (actualValue == null || expectedValue == null ||
             (actualValue.Length <= 100 && expectedValue.Length <= 100))
         {
-            return $"found \"{originalValue}\"";
+            return $"received \"{originalValue}\"";
         }
 
         // Find the first index where the strings differ
@@ -160,12 +160,12 @@ public class StringEqualsAssertion<TActual> : Assertion<TActual>
         // If still no difference found, just show the value (shouldn't happen)
         if (diffIndex == -1)
         {
-            return $"found \"{originalValue}\"";
+            return $"received \"{originalValue}\"";
         }
 
         // Build the message with truncation and diff display
         var message = new StringBuilder();
-        message.Append($"found \"{TruncateString(originalValue, 99)}\" which differs at index {diffIndex}:");
+        message.Append($"received \"{TruncateString(originalValue, 99)}\" which differs at index {diffIndex}:");
         message.AppendLine();
 
         // Show context around the difference (about 24 chars before and 26 after)

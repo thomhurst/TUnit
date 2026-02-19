@@ -30,7 +30,7 @@ public class MemberCollectionAssertionTests
             await Assert.That(obj).Member(x => x.Tags, tags => tags.HasCount(5)));
 
         await Assert.That(exception.Message).Contains("to have count 5");
-        await Assert.That(exception.Message).Contains("but found 2");
+        await Assert.That(exception.Message).Contains("but received 2");
     }
 
     [Test]
