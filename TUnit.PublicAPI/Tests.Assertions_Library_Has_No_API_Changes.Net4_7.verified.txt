@@ -1019,6 +1019,7 @@ namespace .Conditions
         where TCollection : .<TItem>
     {
         public HasDistinctItemsAssertion(.<TCollection> context) { }
+        public HasDistinctItemsAssertion(.<TCollection> context, .<TItem> comparer) { }
         protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
     }
@@ -1687,6 +1688,7 @@ namespace .Conditions
     public class StringEqualsAssertion<TActual> : .<TActual>
     {
         public StringEqualsAssertion(.<TActual> context, string? expected) { }
+        public StringEqualsAssertion(.<TActual> context, string? expected, .<string> comparer) { }
         public StringEqualsAssertion(.<TActual> context, string? expected,  comparison) { }
         protected override .<.> CheckAsync(.<TActual> metadata) { }
         protected override string GetExpectation() { }
@@ -4194,6 +4196,7 @@ namespace .Extensions
     public static class StringEqualsAssertionExtensions
     {
         public static .<TActual> IsEqualTo<TActual>(this .<TActual> source, string? expected, [.("expected")] string? expectedExpression = null) { }
+        public static .<TActual> IsEqualTo<TActual>(this .<TActual> source, string? expected, .<string> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
         public static .<TActual> IsEqualTo<TActual>(this .<TActual> source, string? expected,  comparison, [.("expected")] string? expectedExpression = null, [.("comparison")] string? comparisonExpression = null) { }
     }
     public static class StringIsEmptyAssertionExtensions
@@ -4949,12 +4952,14 @@ namespace .Sources
         public .<TCollection, TItem> Any(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
         public .<TCollection, TItem> Contains(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
         public .<TCollection, TItem> Contains(TItem expected, [.("expected")] string? expression = null) { }
+        public .<TCollection, TItem> Contains(TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
         public .<TCollection, TItem> ContainsOnly(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
         public .<TCollection, TItem> Count() { }
         public .<TCollection, TItem> Count(<.<TItem>, .<TItem>?> itemAssertion, [.("itemAssertion")] string? expression = null) { }
         public .<TCollection, TItem> Count(<.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null) { }
         public .<TCollection, TItem> DoesNotContain(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
         public .<TCollection, TItem> DoesNotContain(TItem expected, [.("expected")] string? expression = null) { }
+        public .<TCollection, TItem> DoesNotContain(TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
         protected override string GetExpectation() { }
         [("Use Count() instead, which provides all numeric assertion methods. Example: Asser" +
             "(list).Count().IsGreaterThan(5)")]
@@ -4962,6 +4967,7 @@ namespace .Sources
         [("Use Count().IsEqualTo(expectedCount) instead.")]
         public .<TCollection, TItem> HasCount(int expectedCount, [.("expectedCount")] string? expression = null) { }
         public .<TCollection, TItem> HasDistinctItems() { }
+        public .<TCollection, TItem> HasDistinctItems(.<TItem> comparer, [.("comparer")] string? comparerExpression = null) { }
         public .<TCollection, TItem> HasSingleItem() { }
         public .<TCollection, TItem> HasSingleItem(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
         public .<TTarget, TCollection> IsAssignableTo<TTarget>() { }

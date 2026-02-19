@@ -11,10 +11,20 @@ namespace TUnit.Assertions.Conditions;
 public class HasDistinctItemsAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
+    private readonly IEqualityComparer<TItem>? _comparer;
+
     public HasDistinctItemsAssertion(
         AssertionContext<TCollection> context)
         : base(context)
     {
+    }
+
+    public HasDistinctItemsAssertion(
+        AssertionContext<TCollection> context,
+        IEqualityComparer<TItem> comparer)
+        : base(context)
+    {
+        _comparer = comparer;
     }
 
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
@@ -30,7 +40,7 @@ public class HasDistinctItemsAssertion<TCollection, TItem> : Sources.CollectionA
         }
 
         var adapter = new EnumerableAdapter<TItem>(metadata.Value);
-        return Task.FromResult(CollectionChecks.CheckHasDistinctItems(adapter));
+        return Task.FromResult(CollectionChecks.CheckHasDistinctItems(adapter, _comparer));
     }
 
     protected override string GetExpectation() => "to have distinct items";

@@ -105,6 +105,19 @@ public abstract class MemoryAssertionBase<TMemory, TItem> : Assertion<TMemory>, 
     }
 
     /// <summary>
+    /// Asserts that the memory contains the expected item using a custom equality comparer.
+    /// </summary>
+    public MemoryContainsAssertion<TMemory, TItem> Contains(
+        TItem expected,
+        IEqualityComparer<TItem> comparer,
+        [CallerArgumentExpression(nameof(expected))] string? expectedExpression = null,
+        [CallerArgumentExpression(nameof(comparer))] string? comparerExpression = null)
+    {
+        Context.ExpressionBuilder.Append($".Contains({expectedExpression}, {comparerExpression})");
+        return new MemoryContainsAssertion<TMemory, TItem>(Context, CreateAdapter, expected, comparer);
+    }
+
+    /// <summary>
     /// Asserts that the memory does not contain the expected item.
     /// </summary>
     public MemoryDoesNotContainAssertion<TMemory, TItem> DoesNotContain(
@@ -113,6 +126,19 @@ public abstract class MemoryAssertionBase<TMemory, TItem> : Assertion<TMemory>, 
     {
         Context.ExpressionBuilder.Append($".DoesNotContain({expression})");
         return new MemoryDoesNotContainAssertion<TMemory, TItem>(Context, CreateAdapter, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the memory does not contain the expected item using a custom equality comparer.
+    /// </summary>
+    public MemoryDoesNotContainAssertion<TMemory, TItem> DoesNotContain(
+        TItem expected,
+        IEqualityComparer<TItem> comparer,
+        [CallerArgumentExpression(nameof(expected))] string? expectedExpression = null,
+        [CallerArgumentExpression(nameof(comparer))] string? comparerExpression = null)
+    {
+        Context.ExpressionBuilder.Append($".DoesNotContain({expectedExpression}, {comparerExpression})");
+        return new MemoryDoesNotContainAssertion<TMemory, TItem>(Context, CreateAdapter, expected, comparer);
     }
 
     /// <summary>

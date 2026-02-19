@@ -92,6 +92,21 @@ public abstract class CollectionAssertionBase<TCollection, TItem> : Assertion<TC
     }
 
     /// <summary>
+    /// Asserts that the collection contains the expected item using a custom equality comparer.
+    /// This instance method enables calling Contains with proper type inference and a custom comparer.
+    /// Example: await Assert.That(list).Contains("value", StringComparer.OrdinalIgnoreCase);
+    /// </summary>
+    public CollectionContainsAssertion<TCollection, TItem> Contains(
+        TItem expected,
+        IEqualityComparer<TItem> comparer,
+        [CallerArgumentExpression(nameof(expected))] string? expectedExpression = null,
+        [CallerArgumentExpression(nameof(comparer))] string? comparerExpression = null)
+    {
+        Context.ExpressionBuilder.Append($".Contains({expectedExpression}, {comparerExpression})");
+        return new CollectionContainsAssertion<TCollection, TItem>(Context, expected, comparer);
+    }
+
+    /// <summary>
     /// Asserts that the collection contains an item matching the predicate.
     /// This instance method enables calling Contains with proper type inference.
     /// Example: await Assert.That(list).Contains(x => x > 5);
@@ -285,6 +300,19 @@ public abstract class CollectionAssertionBase<TCollection, TItem> : Assertion<TC
     }
 
     /// <summary>
+    /// Asserts that the collection contains only distinct (unique) items using a custom equality comparer.
+    /// This instance method enables calling HasDistinctItems with proper type inference and a custom comparer.
+    /// Example: await Assert.That(list).HasDistinctItems(StringComparer.OrdinalIgnoreCase);
+    /// </summary>
+    public HasDistinctItemsAssertion<TCollection, TItem> HasDistinctItems(
+        IEqualityComparer<TItem> comparer,
+        [CallerArgumentExpression(nameof(comparer))] string? comparerExpression = null)
+    {
+        Context.ExpressionBuilder.Append($".HasDistinctItems({comparerExpression})");
+        return new HasDistinctItemsAssertion<TCollection, TItem>(Context, comparer);
+    }
+
+    /// <summary>
     /// Asserts that the collection does not contain the specified item.
     /// This instance method enables calling DoesNotContain with proper type inference.
     /// Example: await Assert.That(list).DoesNotContain("value");
@@ -295,6 +323,21 @@ public abstract class CollectionAssertionBase<TCollection, TItem> : Assertion<TC
     {
         Context.ExpressionBuilder.Append($".DoesNotContain({expression})");
         return new CollectionDoesNotContainAssertion<TCollection, TItem>(Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the collection does not contain the specified item using a custom equality comparer.
+    /// This instance method enables calling DoesNotContain with proper type inference and a custom comparer.
+    /// Example: await Assert.That(list).DoesNotContain("value", StringComparer.OrdinalIgnoreCase);
+    /// </summary>
+    public CollectionDoesNotContainAssertion<TCollection, TItem> DoesNotContain(
+        TItem expected,
+        IEqualityComparer<TItem> comparer,
+        [CallerArgumentExpression(nameof(expected))] string? expectedExpression = null,
+        [CallerArgumentExpression(nameof(comparer))] string? comparerExpression = null)
+    {
+        Context.ExpressionBuilder.Append($".DoesNotContain({expectedExpression}, {comparerExpression})");
+        return new CollectionDoesNotContainAssertion<TCollection, TItem>(Context, expected, comparer);
     }
 
     /// <summary>

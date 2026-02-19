@@ -13,6 +13,7 @@ namespace TUnit.Assertions.Conditions;
 public class StringEqualsAssertion<TActual> : Assertion<TActual>
 {
     private readonly string? _expected;
+    private readonly IEqualityComparer<string>? _comparer;
     private StringComparison _comparison = StringComparison.Ordinal;
     private bool _trimming;
     private bool _nullAndEmptyEquality;
@@ -34,6 +35,16 @@ public class StringEqualsAssertion<TActual> : Assertion<TActual>
     {
         _expected = expected;
         _comparison = comparison;
+    }
+
+    public StringEqualsAssertion(
+        AssertionContext<TActual> context,
+        string? expected,
+        IEqualityComparer<string> comparer)
+        : base(context)
+    {
+        _expected = expected;
+        _comparer = comparer;
     }
 
     /// <summary>
@@ -110,6 +121,17 @@ public class StringEqualsAssertion<TActual> : Assertion<TActual>
         {
             actualValue = string.IsNullOrEmpty(actualValue) ? null : actualValue;
             expectedValue = string.IsNullOrEmpty(expectedValue) ? null : expectedValue;
+        }
+
+        // When a custom comparer is provided, use it directly
+        if (_comparer != null)
+        {
+            if (_comparer.Equals(actualValue!, expectedValue!))
+            {
+                return AssertionResult._passedTask;
+            }
+
+            return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
         }
 
         if (string.Equals(actualValue, expectedValue, _comparison))
