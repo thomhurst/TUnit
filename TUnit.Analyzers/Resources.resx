@@ -498,6 +498,15 @@
     <data name="TUnit0072Title" xml:space="preserve">
         <value>Conflicting data source attributes</value>
     </data>
+    <data name="TUnit0062Description" xml:space="preserve">
+        <value>CancellationToken parameter must be the last parameter in the method signature. Move it to the end of the parameter list.</value>
+    </data>
+    <data name="TUnit0062MessageFormat" xml:space="preserve">
+        <value>CancellationToken must be the last parameter</value>
+    </data>
+    <data name="TUnit0062Title" xml:space="preserve">
+        <value>CancellationToken must be the last parameter</value>
+    </data>
     <data name="TUnit0300Description" xml:space="preserve">
         <value>Generic types and methods may not be AOT-compatible when using dynamic type creation. Consider using concrete types or ensure all generic combinations are known at compile time.</value>
     </data>

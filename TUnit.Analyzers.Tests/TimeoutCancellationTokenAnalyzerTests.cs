@@ -11,7 +11,7 @@ public class TimeoutCancellationTokenAnalyzerTests
             """
             using TUnit.Core;
             using System.Threading.Tasks;
-            
+
             public class TestClass
             {
                 [Test]
@@ -35,7 +35,7 @@ public class TimeoutCancellationTokenAnalyzerTests
             using TUnit.Core;
             using System.Threading;
             using System.Threading.Tasks;
-            
+
             public class TestClass
             {
                 [Test]
@@ -56,7 +56,7 @@ public class TimeoutCancellationTokenAnalyzerTests
             """
             using TUnit.Core;
             using System.Threading.Tasks;
-            
+
             [Timeout(30_000)]
             public class TestClass
             {
@@ -80,7 +80,7 @@ public class TimeoutCancellationTokenAnalyzerTests
             using TUnit.Core;
             using System.Threading;
             using System.Threading.Tasks;
-            
+
             [Timeout(30_000)]
             public class TestClass
             {
@@ -103,12 +103,12 @@ public class TimeoutCancellationTokenAnalyzerTests
             using TUnit.Core;
             using System.Threading;
             using System.Threading.Tasks;
-            
+
             [Timeout(30_000)]
             public class TestClass
             {
                 private static HttpClient GetHttpClient() => new HttpClient();
-                
+
                 [Test]
                 public async Task TestMethod(CancellationToken cancellationToken)
                 {
@@ -128,7 +128,7 @@ public class TimeoutCancellationTokenAnalyzerTests
             using TUnit.Core;
             using System.Threading;
             using System.Threading.Tasks;
-            
+
             [Timeout(30_000)]
             public class TestClass
             {
@@ -136,7 +136,7 @@ public class TimeoutCancellationTokenAnalyzerTests
                 {
                     // Some helper logic
                 }
-                
+
                 [Test]
                 public async Task TestMethod(CancellationToken cancellationToken)
                 {
@@ -156,7 +156,7 @@ public class TimeoutCancellationTokenAnalyzerTests
             using TUnit.Core;
             using System.Threading;
             using System.Threading.Tasks;
-            
+
             [Timeout(30_000)]
             public class TestClass
             {
@@ -164,7 +164,7 @@ public class TimeoutCancellationTokenAnalyzerTests
                 {
                     await Task.Delay(100);
                 }
-                
+
                 [Test]
                 public async Task TestMethod(CancellationToken cancellationToken)
                 {
@@ -183,7 +183,7 @@ public class TimeoutCancellationTokenAnalyzerTests
             """
             using TUnit.Core;
             using System.Threading.Tasks;
-            
+
             public class TestClass
             {
                 // This shouldn't happen in practice as Timeout should only be on test/hook methods,
@@ -193,7 +193,7 @@ public class TimeoutCancellationTokenAnalyzerTests
                 {
                     await Task.Delay(100);
                 }
-                
+
                 [Test]
                 public async Task TestMethod()
                 {
@@ -201,6 +201,104 @@ public class TimeoutCancellationTokenAnalyzerTests
                 }
             }
             """
+        );
+    }
+
+    [Test]
+    public async Task Test_Method_With_CancellationToken_Not_Last_Shows_Wrong_Order_Error()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using TUnit.Core;
+            using System.Threading;
+            using System.Threading.Tasks;
+
+            public class TestClass
+            {
+                [Test]
+                [Arguments(1)]
+                [Timeout(30_000)]
+                public async Task {|#0:TestMethod|}(CancellationToken cancellationToken, int value)
+                {
+                    await Task.Delay(100, cancellationToken);
+                }
+            }
+            """,
+            Verifier.Diagnostic(Rules.CancellationTokenMustBeLastParameter)
+                .WithLocation(0)
+        );
+    }
+
+    [Test]
+    public async Task Test_Method_With_Data_And_CancellationToken_Last_Shows_No_Error()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using TUnit.Core;
+            using System.Threading;
+            using System.Threading.Tasks;
+
+            public class TestClass
+            {
+                [Test]
+                [Arguments(1)]
+                [Timeout(30_000)]
+                public async Task TestMethod(int value, CancellationToken cancellationToken)
+                {
+                    await Task.Delay(100, cancellationToken);
+                }
+            }
+            """
+        );
+    }
+
+    [Test]
+    public async Task Test_Method_With_CancellationToken_First_Of_Multiple_Shows_Wrong_Order_Error()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using TUnit.Core;
+            using System.Threading;
+            using System.Threading.Tasks;
+
+            public class TestClass
+            {
+                [Test]
+                [Arguments(1, "hello")]
+                [Timeout(30_000)]
+                public async Task {|#0:TestMethod|}(CancellationToken cancellationToken, int value, string text)
+                {
+                    await Task.Delay(100, cancellationToken);
+                }
+            }
+            """,
+            Verifier.Diagnostic(Rules.CancellationTokenMustBeLastParameter)
+                .WithLocation(0)
+        );
+    }
+
+    [Test]
+    public async Task Test_Method_With_CancellationToken_In_Middle_Shows_Wrong_Order_Error()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using TUnit.Core;
+            using System.Threading;
+            using System.Threading.Tasks;
+
+            public class TestClass
+            {
+                [Test]
+                [Arguments(1, "hello")]
+                [Timeout(30_000)]
+                public async Task {|#0:TestMethod|}(int value, CancellationToken cancellationToken, string text)
+                {
+                    await Task.Delay(100, cancellationToken);
+                }
+            }
+            """,
+            Verifier.Diagnostic(Rules.CancellationTokenMustBeLastParameter)
+                .WithLocation(0)
         );
     }
 }
