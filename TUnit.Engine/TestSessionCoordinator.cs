@@ -17,7 +17,7 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
     private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
     private readonly TUnitFrameworkLogger _logger;
     private readonly ITestScheduler _testScheduler;
-    private readonly TUnitServiceProvider _serviceProvider;
+    private readonly ITestExecutionServices _executionServices;
     private readonly IContextProvider _contextProvider;
     private readonly TestLifecycleCoordinator _lifecycleCoordinator;
     private readonly ITUnitMessageBus _messageBus;
@@ -26,7 +26,7 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
     public TestSessionCoordinator(EventReceiverOrchestrator eventReceiverOrchestrator,
         TUnitFrameworkLogger logger,
         ITestScheduler testScheduler,
-        TUnitServiceProvider serviceProvider,
+        ITestExecutionServices executionServices,
         IContextProvider contextProvider,
         TestLifecycleCoordinator lifecycleCoordinator,
         ITUnitMessageBus messageBus,
@@ -34,7 +34,7 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
     {
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
         _logger = logger;
-        _serviceProvider = serviceProvider;
+        _executionServices = executionServices;
         _contextProvider = contextProvider;
         _lifecycleCoordinator = lifecycleCoordinator;
         _messageBus = messageBus;
@@ -93,8 +93,8 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
         // - CancellationToken: Engine-level graceful shutdown (e.g., Ctrl+C)
         using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
             cancellationToken,
-            _serviceProvider.FailFastCancellationSource.Token,
-            _serviceProvider.CancellationToken.Token);
+            _executionServices.FailFastCancellationSource.Token,
+            _executionServices.CancellationToken.Token);
 
         // Schedule and execute tests (batch approach to preserve ExecutionContext)
         var success = await _testScheduler.ScheduleAndExecuteAsync(testList, linkedCts.Token);
@@ -102,7 +102,7 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
         // Track whether After(TestSession) hooks failed
         if (!success)
         {
-            _serviceProvider.AfterSessionHooksFailed = true;
+            _executionServices.AfterSessionHooksFailed = true;
         }
     }
 

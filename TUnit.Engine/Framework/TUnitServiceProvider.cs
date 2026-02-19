@@ -31,7 +31,7 @@ using TUnit.Engine.Services.TestExecution;
 
 namespace TUnit.Engine.Framework;
 
-internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
+internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable, ITestDiscoveryServices, ITestExecutionServices, ILoggingServices
 {
     public ITestExecutionFilter? Filter
     {
@@ -279,7 +279,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         TestSessionCoordinator = Register(new TestSessionCoordinator(EventReceiverOrchestrator,
             Logger,
             testScheduler,
-            serviceProvider: this,
+            executionServices: this,
             ContextProvider,
             lifecycleCoordinator,
             MessageBus,

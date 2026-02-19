@@ -1,4 +1,4 @@
-﻿using Microsoft.Testing.Platform.Extensions.Messages;
+using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
@@ -7,16 +7,16 @@ namespace TUnit.Engine.Framework;
 
 internal sealed class TestRequestHandler : IRequestHandler
 {
-    public async Task HandleRequestAsync(TestExecutionRequest request, TUnitServiceProvider serviceProvider, ExecuteRequestContext context, ITestExecutionFilter? testExecutionFilter)
+    public async Task HandleRequestAsync(TestExecutionRequest request, ITestDiscoveryServices discoveryServices, ITestExecutionServices executionServices, ILoggingServices loggingServices, ExecuteRequestContext context, ITestExecutionFilter? testExecutionFilter)
     {
         switch (request)
         {
             case DiscoverTestExecutionRequest:
-                await HandleDiscoveryRequestAsync(serviceProvider, context, testExecutionFilter);
+                await HandleDiscoveryRequestAsync(discoveryServices, loggingServices, context, testExecutionFilter);
                 break;
 
             case RunTestExecutionRequest runRequest:
-                await HandleRunRequestAsync(serviceProvider, runRequest, context, testExecutionFilter);
+                await HandleRunRequestAsync(discoveryServices, executionServices, runRequest, context, testExecutionFilter);
                 break;
 
             default:
@@ -28,11 +28,12 @@ internal sealed class TestRequestHandler : IRequestHandler
     }
 
     private async Task HandleDiscoveryRequestAsync(
-        TUnitServiceProvider serviceProvider,
+        ITestDiscoveryServices discoveryServices,
+        ILoggingServices loggingServices,
         ExecuteRequestContext context,
         ITestExecutionFilter? testExecutionFilter)
     {
-        var discoveryResult = await serviceProvider.DiscoveryService.DiscoverTests(context.Request.Session.SessionUid.Value, testExecutionFilter, context.CancellationToken, isForExecution: false);
+        var discoveryResult = await discoveryServices.DiscoveryService.DiscoverTests(context.Request.Session.SessionUid.Value, testExecutionFilter, context.CancellationToken, isForExecution: false);
 
 #if NET
         if (discoveryResult.ExecutionContext != null)
@@ -45,16 +46,17 @@ internal sealed class TestRequestHandler : IRequestHandler
         {
             context.CancellationToken.ThrowIfCancellationRequested();
 
-            await serviceProvider.MessageBus.Discovered(test.Context);
+            await loggingServices.MessageBus.Discovered(test.Context);
         }
     }
 
     private async Task HandleRunRequestAsync(
-        TUnitServiceProvider serviceProvider,
+        ITestDiscoveryServices discoveryServices,
+        ITestExecutionServices executionServices,
         RunTestExecutionRequest request,
         ExecuteRequestContext context, ITestExecutionFilter? testExecutionFilter)
     {
-        var discoveryResult = await serviceProvider.DiscoveryService.DiscoverTests(context.Request.Session.SessionUid.Value, testExecutionFilter, context.CancellationToken, isForExecution: true);
+        var discoveryResult = await discoveryServices.DiscoveryService.DiscoverTests(context.Request.Session.SessionUid.Value, testExecutionFilter, context.CancellationToken, isForExecution: true);
 
 #if NET
         if (discoveryResult.ExecutionContext != null)
@@ -68,7 +70,7 @@ internal sealed class TestRequestHandler : IRequestHandler
         // Skip sending Discovered messages during execution - they're only needed for discovery requests
         // This saves significant time and allocations when running tests
 
-        await serviceProvider.TestSessionCoordinator.ExecuteTests(
+        await executionServices.TestSessionCoordinator.ExecuteTests(
             allTests,
             request.Filter,
             context.MessageBus,
