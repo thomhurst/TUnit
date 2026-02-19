@@ -218,7 +218,7 @@ public class TimeoutCancellationTokenAnalyzerTests
                 [Test]
                 [Arguments(1)]
                 [Timeout(30_000)]
-                public async Task {|#0:TestMethod|}(CancellationToken cancellationToken, int value)
+                public async Task TestMethod(CancellationToken {|#0:cancellationToken|}, int value)
                 {
                     await Task.Delay(100, cancellationToken);
                 }
@@ -266,7 +266,7 @@ public class TimeoutCancellationTokenAnalyzerTests
                 [Test]
                 [Arguments(1, "hello")]
                 [Timeout(30_000)]
-                public async Task {|#0:TestMethod|}(CancellationToken cancellationToken, int value, string text)
+                public async Task TestMethod(CancellationToken {|#0:cancellationToken|}, int value, string text)
                 {
                     await Task.Delay(100, cancellationToken);
                 }
@@ -291,7 +291,7 @@ public class TimeoutCancellationTokenAnalyzerTests
                 [Test]
                 [Arguments(1, "hello")]
                 [Timeout(30_000)]
-                public async Task {|#0:TestMethod|}(int value, CancellationToken cancellationToken, string text)
+                public async Task TestMethod(int value, CancellationToken {|#0:cancellationToken|}, string text)
                 {
                     await Task.Delay(100, cancellationToken);
                 }
