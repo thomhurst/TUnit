@@ -78,11 +78,19 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
     {
         var state = new TestStreamingState(testContext);
 
-        state.Timer = new Timer(
-            callback: _ => OnTimerTick(testContext.TestDetails.TestId),
-            state: null,
-            dueTime: _throttleInterval,
-            period: _throttleInterval);
+        try
+        {
+            state.Timer = new Timer(
+                callback: _ => OnTimerTick(testContext.TestDetails.TestId),
+                state: null,
+                dueTime: _throttleInterval,
+                period: _throttleInterval);
+        }
+        catch
+        {
+            state.Dispose();
+            throw;
+        }
 
         return state;
     }
@@ -96,19 +104,22 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
                 return;
             }
 
-            // Passive cleanup: if test completed, mark as completed and cleanup
-            // The atomic flag ensures we never send updates after detecting completion
-            if (state.TestContext.Result is not null)
+            // If already marked completed by another path, just clean up
+            if (state.IsCompleted)
             {
-                state.TryMarkCompleted();
                 CleanupTest(testId, state);
                 return;
             }
 
-            // Double-check: if already marked completed by another path, don't proceed
-            if (state.IsCompleted)
+            // Passive cleanup: if test completed, atomically mark as completed.
+            // Only the thread that wins TryMarkCompleted performs cleanup to avoid races.
+            if (state.TestContext.Result is not null)
             {
-                CleanupTest(testId, state);
+                if (state.TryMarkCompleted())
+                {
+                    CleanupTest(testId, state);
+                }
+
                 return;
             }
 
@@ -144,8 +155,15 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
         {
             var testContext = state.TestContext;
 
-            // Don't send if test already completed - final state has been sent
-            if (state.IsCompleted || testContext.Result is not null)
+            // Don't send if test already completed - final state has been sent.
+            // Use TryMarkCompleted() as the atomic gate: if the test is done, only
+            // the thread that wins the CompareExchange performs cleanup.
+            if (state.IsCompleted)
+            {
+                return;
+            }
+
+            if (testContext.Result is not null)
             {
                 state.TryMarkCompleted();
                 return;
@@ -163,8 +181,14 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
             // Send a follow-up heartbeat (no output) to clear the "previous update"
             // This prevents Rider from concatenating this content with the next content update
             // CRITICAL: Check again that test hasn't completed - we must never send
-            // InProgressTestNodeStateProperty after the final state has been sent
-            if (state.IsCompleted || testContext.Result is not null)
+            // InProgressTestNodeStateProperty after the final state has been sent.
+            // The atomic TryMarkCompleted ensures only one thread can pass this gate.
+            if (state.IsCompleted)
+            {
+                return;
+            }
+
+            if (testContext.Result is not null)
             {
                 state.TryMarkCompleted();
                 return;
