@@ -82,9 +82,11 @@ public class EngineCancellationToken : IDisposable
         {
             CancellationTokenSource.Cancel();
 
-            // Give After hooks a brief moment to execute via registered callbacks
-            // ProcessExit has limited time, so we can only wait briefly
-            Task.Delay(TimeSpan.FromMilliseconds(500)).GetAwaiter().GetResult();
+            // Give After hooks a brief moment to execute via registered callbacks.
+            // ProcessExit has limited time (~3s on Windows), so we can only wait briefly.
+            // Thread.Sleep is appropriate here: we're on a synchronous event handler thread
+            // and just need a simple delay — no need to involve the task scheduler.
+            Thread.Sleep(500);
         }
     }
 
