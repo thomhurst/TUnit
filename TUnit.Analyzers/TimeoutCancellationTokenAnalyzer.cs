@@ -58,7 +58,7 @@ public class TimeoutCancellationTokenAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             context.ReportDiagnostic(
                 Diagnostic.Create(Rules.MissingTimeoutCancellationTokenAttributes,
-                    context.Symbol.Locations.FirstOrDefault())
+                    lastParameter.Locations.FirstOrDefault() ?? context.Symbol.Locations.FirstOrDefault())
             );
         }
     }

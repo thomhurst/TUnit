@@ -34,7 +34,7 @@ public class TestMethodParametersAnalyzerTests
                 public class MyClass
                 {
                     [Test]
-                    public void {|#0:MyTest|}(int value)
+                    public void MyTest(int {|#0:value|})
                     {
                     }
                 }

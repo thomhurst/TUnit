@@ -89,11 +89,11 @@ public class GlobalTestHooksAnalyzerTests
                 """
                 using TUnit.Core;
                 using static TUnit.Core.HookType;
-                     
+
                 public class Tests
                 {
                     [BeforeEvery(Test)]
-                    public static void {|#0:SetUp|}(string unknown)
+                    public static void SetUp(string {|#0:unknown|})
                     {
                     }
                 }
@@ -269,11 +269,11 @@ public class GlobalTestHooksAnalyzerTests
                 """
                 using TUnit.Core;
                 using static TUnit.Core.HookType;
-                     
+
                 public class Tests
                 {
                     [AfterEvery(Test)]
-                    public static void {|#0:CleanUp|}(string unknown)
+                    public static void CleanUp(string {|#0:unknown|})
                     {
                     }
                 }
@@ -292,11 +292,11 @@ public class GlobalTestHooksAnalyzerTests
                 """
                 using TUnit.Core;
                 using static TUnit.Core.HookType;
-                     
+
                 public class Tests
                 {
                     [AfterEvery(Class)]
-                    public static void {|#0:CleanUp|}(int unknown1, string unknown2)
+                    public static void CleanUp(int {|#0:unknown1|}, string unknown2)
                     {
                     }
                 }
@@ -315,11 +315,11 @@ public class GlobalTestHooksAnalyzerTests
                 """
                 using TUnit.Core;
                 using static TUnit.Core.HookType;
-                     
+
                 public class Tests
                 {
                     [AfterEvery(Assembly)]
-                    public static void {|#0:CleanUp|}(object unknown)
+                    public static void CleanUp(object {|#0:unknown|})
                     {
                     }
                 }
