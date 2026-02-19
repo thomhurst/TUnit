@@ -51,5 +51,14 @@ internal class BrowserService : IWorkerService
     }
 
     public Task ResetAsync() => Task.CompletedTask;
-    public Task DisposeAsync() => Browser.CloseAsync();
+
+    public async Task DisposeAsync()
+    {
+        var browser = Browser;
+
+        if (browser != null)
+        {
+            await browser.CloseAsync().ConfigureAwait(false);
+        }
+    }
 }

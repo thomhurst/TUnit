@@ -22,12 +22,14 @@ public class WorkerAwareTest : ITestRegisteredEventReceiver
 
     public async Task<T> RegisterService<T>(string name, Func<Task<T>> factory) where T : class, IWorkerService
     {
-        if (!_currentWorker.Services.ContainsKey(name))
+        if (!_currentWorker.Services.TryGetValue(name, out var existing))
         {
-            _currentWorker.Services[name] = await factory().ConfigureAwait(false);
+            var service = await factory().ConfigureAwait(false);
+            _currentWorker.Services[name] = service;
+            return service;
         }
 
-        return (_currentWorker.Services[name] as T)!;
+        return (existing as T)!;
     }
 
     [Before(HookType.Test, "", 0)]
@@ -44,23 +46,58 @@ public class WorkerAwareTest : ITestRegisteredEventReceiver
     [After(HookType.Test, "", 0)]
     public async Task WorkerTeardown(TestContext testContext)
     {
+        var worker = _currentWorker;
+
+        if (worker == null)
+        {
+            return;
+        }
+
         if (TestOk(testContext))
         {
-            foreach (var kv in _currentWorker.Services)
+            try
             {
-                await kv.Value.ResetAsync().ConfigureAwait(false);
-            }
+                foreach (var kv in worker.Services)
+                {
+                    await kv.Value.ResetAsync().ConfigureAwait(false);
+                }
 
-            AllWorkers.Push(_currentWorker);
+                AllWorkers.Push(worker);
+            }
+            catch
+            {
+                await DisposeAllServicesAsync(worker).ConfigureAwait(false);
+                throw;
+            }
         }
         else
         {
-            foreach (var kv in _currentWorker.Services)
+            await DisposeAllServicesAsync(worker).ConfigureAwait(false);
+        }
+    }
+
+    private static async Task DisposeAllServicesAsync(Worker worker)
+    {
+        List<Exception>? exceptions = null;
+
+        foreach (var kv in worker.Services)
+        {
+            try
             {
                 await kv.Value.DisposeAsync().ConfigureAwait(false);
             }
+            catch (Exception ex)
+            {
+                exceptions ??= [];
+                exceptions.Add(ex);
+            }
+        }
 
-            _currentWorker.Services.Clear();
+        worker.Services.Clear();
+
+        if (exceptions is { Count: > 0 })
+        {
+            throw new AggregateException("One or more worker services failed to dispose.", exceptions);
         }
     }
 
