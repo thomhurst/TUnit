@@ -209,9 +209,9 @@ public class LongIsCloseToAssertion : Assertion<long>
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
         }
 
-        var diff = Math.Abs(value - _expected);
+        var diff = Math.Abs((double)value - _expected);
 
-        if (diff <= _tolerance)
+        if (diff <= (double)_tolerance)
         {
             return AssertionResult._passedTask;
         }
