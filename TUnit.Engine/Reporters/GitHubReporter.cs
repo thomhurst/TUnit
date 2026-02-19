@@ -7,6 +7,7 @@ using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestHost;
 using TUnit.Engine.Configuration;
+using TUnit.Engine.Constants;
 using TUnit.Engine.Framework;
 
 namespace TUnit.Engine.Reporters;
@@ -19,7 +20,7 @@ public enum GitHubReporterStyle
 
 public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostApplicationLifetime, IFilterReceiver
 {
-    private const long MaxFileSizeInBytes = 1 * 1024 * 1024; // 1MB
+    private const long MaxFileSizeInBytes = EngineDefaults.GitHubSummaryMaxFileSizeBytes;
     private string _outputSummaryFilePath = null!;
     private GitHubReporterStyle _reporterStyle = GitHubReporterStyle.Collapsible;
 
@@ -248,9 +249,9 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             return;
         }
 
-        const int maxAttempts = 5;
+        const int maxAttempts = EngineDefaults.FileWriteMaxAttempts;
         var random = new Random();
-        
+
         for (int attempt = 1; attempt <= maxAttempts; attempt++)
         {
             try
@@ -264,8 +265,8 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             }
             catch (IOException ex) when (attempt < maxAttempts && IsFileLocked(ex))
             {
-                var baseDelay = 50 * Math.Pow(2, attempt - 1);
-                var jitter = random.Next(0, 50);
+                var baseDelay = EngineDefaults.BaseRetryDelayMs * Math.Pow(2, attempt - 1);
+                var jitter = random.Next(0, EngineDefaults.MaxRetryJitterMs);
                 var delay = (int)(baseDelay + jitter);
                 
                 Console.WriteLine($"GitHub Summary file is locked, retrying in {delay}ms (attempt {attempt}/{maxAttempts})");

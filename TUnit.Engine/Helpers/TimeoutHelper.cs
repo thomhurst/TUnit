@@ -1,3 +1,5 @@
+using TUnit.Engine.Constants;
+
 namespace TUnit.Engine.Helpers;
 
 /// <summary>
@@ -8,7 +10,7 @@ internal static class TimeoutHelper
     /// <summary>
     /// Grace period to allow tasks to handle cancellation before throwing timeout exception.
     /// </summary>
-    private static readonly TimeSpan GracePeriod = TimeSpan.FromSeconds(1);
+    private static readonly TimeSpan GracePeriod = EngineDefaults.TimeoutGracePeriod;
 
     /// <summary>
     /// Executes a ValueTask-returning operation with an optional timeout.

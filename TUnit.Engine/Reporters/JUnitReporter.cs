@@ -5,6 +5,7 @@ using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestHost;
 using TUnit.Engine.Configuration;
+using TUnit.Engine.Constants;
 using TUnit.Engine.Framework;
 using TUnit.Engine.Xml;
 
@@ -123,7 +124,7 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
             Directory.CreateDirectory(directory);
         }
 
-        const int maxAttempts = 5;
+        const int maxAttempts = EngineDefaults.FileWriteMaxAttempts;
 
         for (int attempt = 1; attempt <= maxAttempts; attempt++)
         {
@@ -139,8 +140,8 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
             }
             catch (IOException ex) when (attempt < maxAttempts && IsFileLocked(ex))
             {
-                var baseDelay = 50 * Math.Pow(2, attempt - 1);
-                var jitter = Random.Shared.Next(0, 50);
+                var baseDelay = EngineDefaults.BaseRetryDelayMs * Math.Pow(2, attempt - 1);
+                var jitter = Random.Shared.Next(0, EngineDefaults.MaxRetryJitterMs);
                 var delay = (int)(baseDelay + jitter);
 
                 Console.WriteLine($"JUnit XML file is locked, retrying in {delay}ms (attempt {attempt}/{maxAttempts})");
