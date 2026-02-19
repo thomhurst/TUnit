@@ -1,3 +1,4 @@
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Testing;
 using Microsoft.CodeAnalysis.Text;
 using CodeFixer = TUnit.Analyzers.Tests.Verifiers.CSharpCodeFixVerifier<TUnit.Analyzers.XUnitMigrationAnalyzer, TUnit.Analyzers.CodeFixers.XUnitMigrationCodeFixProvider>;
@@ -2377,6 +2378,53 @@ public class XUnitMigrationAnalyzerTests
                 }
                 """,
                 ConfigureXUnitTest
+            );
+    }
+
+    [Test]
+    public async Task Preprocessor_Directive_Endif_Preserved_After_Fix()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                #if DEBUG
+                {|#0:using Xunit;
+
+                public class MyClass
+                {
+                    [Fact]
+                    public void MyTest()
+                    {
+                    }
+                }
+                #endif|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+                #if DEBUG
+
+                public class MyClass
+                {
+                    [Test]
+                    public void MyTest()
+                    {
+                    }
+                }
+                #endif
+                """,
+                test =>
+                {
+                    ConfigureXUnitTest(test);
+                    // Define DEBUG preprocessor symbol so #if DEBUG code is active
+                    test.SolutionTransforms.Add((solution, projectId) =>
+                    {
+                        var project = solution.GetProject(projectId)!;
+                        var parseOptions = (CSharpParseOptions)project.ParseOptions!;
+                        return solution.WithProjectParseOptions(projectId,
+                            parseOptions.WithPreprocessorSymbols(
+                                parseOptions.PreprocessorSymbolNames.Concat(["DEBUG"])));
+                    });
+                }
             );
     }
 
