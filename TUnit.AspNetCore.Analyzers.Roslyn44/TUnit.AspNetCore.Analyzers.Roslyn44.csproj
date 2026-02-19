@@ -1,9 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <RoslynVersion>4.4</RoslynVersion>
-    </PropertyGroup>
-
-    <Import Project="$(MSBuildThisFileDirectory)..\AspNetCore.Analyzer.props" />
+    <Import Project="$(MSBuildThisFileDirectory)..\Roslyn.props" />
 
 </Project>

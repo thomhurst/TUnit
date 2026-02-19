@@ -6,4 +6,27 @@
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" VersionOverride="$(RoslynVersion).*"/>
     </ItemGroup>
 
+    <!-- Link source files from the base project (e.g. ..\TUnit.Analyzers\**\*.cs) -->
+    <ItemGroup Condition="'$(_BaseProjectName)' != ''">
+        <Compile Include="..\$(_BaseProjectName)\**\*.cs" Exclude="..\$(_BaseProjectName)\obj\**\*.cs" />
+    </ItemGroup>
+
+    <!-- Analyzer projects: include .resx embedded resources -->
+    <ItemGroup Condition="$(_BaseProjectName.EndsWith('.Analyzers'))">
+        <EmbeddedResource Include="..\$(_BaseProjectName)\**\*.resx" />
+    </ItemGroup>
+
+    <!-- AspNetCore.Analyzers: include analyzer release tracking files -->
+    <ItemGroup Condition="$(_BaseProjectName.Contains('AspNetCore.Analyzers'))">
+        <AdditionalFiles Include="..\$(_BaseProjectName)\AnalyzerReleases.Shipped.md" />
+        <AdditionalFiles Include="..\$(_BaseProjectName)\AnalyzerReleases.Unshipped.md" />
+    </ItemGroup>
+
+    <!-- SourceGenerator: include folder link for IDE navigation -->
+    <ItemGroup Condition="$(_BaseProjectName.Contains('SourceGenerator'))">
+        <Folder Include="..\$(_BaseProjectName)\CodeGenerators\Writers\Hooks\">
+            <Link>CodeGenerators\Writers\Hooks</Link>
+        </Folder>
+    </ItemGroup>
+
 </Project>

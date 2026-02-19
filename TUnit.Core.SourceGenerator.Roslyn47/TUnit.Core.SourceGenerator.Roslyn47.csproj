@@ -1,15 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <RoslynVersion>4.7</RoslynVersion>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <Folder Include="..\TUnit.Core.SourceGenerator\CodeGenerators\Writers\Hooks\">
-        <Link>CodeGenerators\Writers\Hooks</Link>
-      </Folder>
-    </ItemGroup>
-
-    <Import Project="..\SourceGenerator.props" />
+    <Import Project="..\Roslyn.props" />
 
 </Project>
