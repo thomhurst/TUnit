@@ -6,6 +6,7 @@ using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Services;
 using TUnit.Engine.CommandLineProviders;
+using TUnit.Engine.Configuration;
 using TUnit.Engine.Enums;
 #if NET
 using System.Runtime.CompilerServices;
@@ -23,7 +24,7 @@ internal class BannerCapability(IPlatformInformation platformInformation, IComma
     public Task<string?> GetBannerMessageAsync()
     {
         if (commandLineOptions.IsOptionSet(DisableLogoCommandProvider.DisableLogo)
-            || Environment.GetEnvironmentVariable("TUNIT_DISABLE_LOGO") is not null
+            || Environment.GetEnvironmentVariable(EnvironmentConstants.DisableLogo) is not null
             || loggerFactory.CreateLogger(nameof(BannerCapability)).IsEnabled(LogLevel.Information))
         {
             return Task.FromResult<string?>(GetRuntimeDetails());

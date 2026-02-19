@@ -1,6 +1,7 @@
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Services;
 using TUnit.Engine.CommandLineProviders;
+using TUnit.Engine.Configuration;
 using LogLevel = TUnit.Core.Logging.LogLevel;
 
 #pragma warning disable TPEXP
@@ -78,7 +79,7 @@ public sealed class VerbosityService
         }
 
         // Check legacy environment variable for backwards compatibility
-        if (Environment.GetEnvironmentVariable("TUNIT_DISCOVERY_DIAGNOSTICS") == "1")
+        if (Environment.GetEnvironmentVariable(EnvironmentConstants.DiscoveryDiagnostics) == "1")
         {
             return LogLevel.Debug;
         }

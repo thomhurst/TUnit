@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using Microsoft.Testing.Platform.CommandLine;
 using TUnit.Core;
 using TUnit.Engine.CommandLineProviders;
+using TUnit.Engine.Configuration;
 
 namespace TUnit.Engine.Helpers;
 
@@ -67,7 +68,7 @@ internal static class ExecutionModeHelper
         }
 
         // Check environment variable
-        var envMode = Environment.GetEnvironmentVariable("TUNIT_EXECUTION_MODE");
+        var envMode = Environment.GetEnvironmentVariable(EnvironmentConstants.ExecutionMode);
         if (!string.IsNullOrEmpty(envMode))
         {
             var mode = envMode!.ToLowerInvariant();
