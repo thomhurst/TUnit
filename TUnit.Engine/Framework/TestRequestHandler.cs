@@ -1,7 +1,12 @@
-﻿using Microsoft.Testing.Platform.Extensions.Messages;
+﻿using System.Reflection;
+using System.Text;
+using Microsoft.Testing.Platform.CommandLine;
+using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
+using TUnit.Engine.CommandLineProviders;
+using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Framework;
 
@@ -73,5 +78,64 @@ internal sealed class TestRequestHandler : IRequestHandler
             request.Filter,
             context.MessageBus,
             context.CancellationToken);
+
+        // Export dependency graph if requested via command line
+        await ExportDependencyGraphIfRequestedAsync(serviceProvider.CommandLineOptions, allTests);
+    }
+
+    private static async Task ExportDependencyGraphIfRequestedAsync(
+        ICommandLineOptions commandLineOptions,
+        AbstractExecutableTest[] allTests)
+    {
+        if (!commandLineOptions.TryGetOptionArgumentList(
+                DependencyGraphCommandProvider.ExportDependencyGraph, out var args))
+        {
+            return;
+        }
+
+        var testList = new List<AbstractExecutableTest>(allTests);
+        var mermaidContent = DependencyGraphExporter.GenerateMermaidDiagram(testList);
+
+        if (string.IsNullOrEmpty(mermaidContent))
+        {
+            Console.WriteLine("Dependency graph: no dependencies found among tests. Skipping .mmd file generation.");
+            return;
+        }
+
+        var outputPath = ResolveOutputPath(args.Length > 0 ? args[0] : null);
+
+        // Ensure directory exists
+        var directory = Path.GetDirectoryName(outputPath);
+        if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+#if NET
+        await File.WriteAllTextAsync(outputPath, mermaidContent, Encoding.UTF8);
+#else
+        File.WriteAllText(outputPath, mermaidContent, Encoding.UTF8);
+        await Task.CompletedTask;
+#endif
+
+        Console.WriteLine($"Dependency graph written to: {outputPath}");
+    }
+
+    private static string ResolveOutputPath(string? userProvidedPath)
+    {
+        if (string.IsNullOrWhiteSpace(userProvidedPath))
+        {
+            var assemblyName = Assembly.GetEntryAssembly()?.GetName().Name ?? "TestResults";
+            return Path.Combine("TestResults", $"{assemblyName}-dependencies.mmd");
+        }
+
+        var path = userProvidedPath!;
+
+        if (!path.EndsWith(".mmd", StringComparison.OrdinalIgnoreCase))
+        {
+            path += ".mmd";
+        }
+
+        return path;
     }
 }

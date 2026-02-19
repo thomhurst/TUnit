@@ -46,6 +46,9 @@ public static class TestApplicationBuilderExtensions
         // Keep detailed stacktrace option for backward compatibility
         testApplicationBuilder.CommandLine.AddProvider(() => new DetailedStacktraceCommandProvider(extension));
 
+        // Dependency graph visualization
+        testApplicationBuilder.CommandLine.AddProvider(() => new DependencyGraphCommandProvider(extension));
+
         // GitHub reporter configuration
         testApplicationBuilder.CommandLine.AddProvider(() => githubReporterCommandProvider);
 
