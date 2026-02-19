@@ -32,6 +32,9 @@ public class PublicMethodMissingTestAttributeAnalyzer : ConcurrentDiagnosticAnal
             return;
         }
 
+        // MethodKind.Ordinary excludes property accessors (PropertyGet/PropertySet),
+        // event accessors (EventAdd/EventRemove), constructors, destructors, operators,
+        // and other compiler-generated method kinds.
         foreach (var method in methods
                      .Where(x => x.MethodKind == MethodKind.Ordinary)
                      .Where(x => !x.IsAbstract)

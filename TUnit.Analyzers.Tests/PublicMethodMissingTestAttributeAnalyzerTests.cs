@@ -143,10 +143,110 @@ public class PublicMethodMissingTestAttributeAnalyzerTests
                     public void MyTest()
                     {
                     }
-                                
+
                     public ValueTask DisposeAsync()
                     {
                         return ValueTask.CompletedTask;
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Property_Getter_Setter_No_Error()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Test]
+                    public void MyTest()
+                    {
+                    }
+
+                    public string? Name { get; set; }
+
+                    public int Age
+                    {
+                        get { return 0; }
+                        set { }
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Event_Accessors_No_Error()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Test]
+                    public void MyTest()
+                    {
+                    }
+
+                    public event EventHandler MyEvent
+                    {
+                        add { }
+                        remove { }
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Override_Method_No_Error()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Test]
+                    public void MyTest()
+                    {
+                    }
+
+                    public override string ToString()
+                    {
+                        return "test";
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Static_Method_No_Error()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Test]
+                    public void MyTest()
+                    {
+                    }
+
+                    public static void StaticHelper()
+                    {
                     }
                 }
                 """
