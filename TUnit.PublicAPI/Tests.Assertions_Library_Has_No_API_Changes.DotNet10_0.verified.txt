@@ -1131,6 +1131,14 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TActual> metadata) { }
         protected override string GetExpectation() { }
     }
+    public class ExceptionInnerExceptionOfTypeAssertion<TException, TInnerException> : .<TException>
+        where TException : 
+        where TInnerException : 
+    {
+        public ExceptionInnerExceptionOfTypeAssertion(.<TException> context) { }
+        protected override .<.> CheckAsync(.<TException> metadata) { }
+        protected override string GetExpectation() { }
+    }
     public class ExceptionMessageContainsAssertion<TException> : .<TException>
         where TException : 
     {
@@ -1170,6 +1178,13 @@ namespace .Conditions
         where TException : 
     {
         public ExceptionParameterNameAssertion(.<TException> context, string expectedParameterName, bool requireExactType = false) { }
+        protected override .<.> CheckAsync(.<TException> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class ExceptionStackTraceContainsAssertion<TException> : .<TException>
+        where TException : 
+    {
+        public ExceptionStackTraceContainsAssertion(.<TException> context, string expectedSubstring,  comparison = 4) { }
         protected override .<.> CheckAsync(.<TException> metadata) { }
         protected override string GetExpectation() { }
     }
@@ -2037,6 +2052,8 @@ namespace .Conditions
         protected override bool CheckExceptionType( actualException, out string? errorMessage) { }
         public .<?> WithExceptionType( expectedExceptionType) { }
         public .<> WithInnerException() { }
+        public .<TException, TInnerException> WithInnerException<TInnerException>()
+            where TInnerException :  { }
         public .<TException> WithMessage(string expectedMessage) { }
         public .<TException> WithMessage(string expectedMessage,  comparison) { }
         public .<TException> WithMessageContaining(string expectedSubstring) { }
@@ -2046,6 +2063,8 @@ namespace .Conditions
         public .<TException> WithMessageNotContaining(string notExpectedSubstring) { }
         public .<TException> WithMessageNotContaining(string notExpectedSubstring,  comparison) { }
         public .<TException> WithParameterName(string expectedParameterName) { }
+        public .<TException> WithStackTraceContaining(string expectedSubstring) { }
+        public .<TException> WithStackTraceContaining(string expectedSubstring,  comparison) { }
     }
     public class ThrowsExactlyAssertion<TException> : .<TException, .<TException>>
         where TException : 
@@ -2053,6 +2072,8 @@ namespace .Conditions
         public ThrowsExactlyAssertion(.<TException> context) { }
         protected override bool IsExactTypeMatch { get; }
         protected override bool CheckExceptionType( actualException, out string? errorMessage) { }
+        public .<TException, TInnerException> WithInnerException<TInnerException>()
+            where TInnerException :  { }
         public .<TException> WithMessage(string expectedMessage) { }
         public .<TException> WithMessage(string expectedMessage,  comparison) { }
         public .<TException> WithMessageContaining(string expectedSubstring) { }
@@ -2062,6 +2083,8 @@ namespace .Conditions
         public .<TException> WithMessageNotContaining(string notExpectedSubstring) { }
         public .<TException> WithMessageNotContaining(string notExpectedSubstring,  comparison) { }
         public .<TException> WithParameterName(string expectedParameterName) { }
+        public .<TException> WithStackTraceContaining(string expectedSubstring) { }
+        public .<TException> WithStackTraceContaining(string expectedSubstring,  comparison) { }
     }
     public class ThrowsNothingAssertion<TValue> : .<TValue>
     {
@@ -2541,6 +2564,10 @@ namespace .Extensions
         public static ..LengthWrapper HasLength(this .<string> source) { }
         [("Use Length().IsEqualTo(expectedLength) instead.")]
         public static . HasLength(this .<string> source, int expectedLength, [.("expectedLength")] string? expression = null) { }
+        public static .<TException> HasMessage<TException>(this .<TException> source, string expectedMessage, [.("expectedMessage")] string? expression = null)
+            where TException :  { }
+        public static .<TException> HasMessage<TException>(this .<TException> source, string expectedMessage,  comparison, [.("expectedMessage")] string? expression = null)
+            where TException :  { }
         public static .<TException> HasMessageContaining<TException>(this .<TException> source, string expectedSubstring, [.("expectedSubstring")] string? expression = null)
             where TException :  { }
         public static .<TException> HasMessageContaining<TException>(this .<TException> source, string expectedSubstring,  comparison, [.("expectedSubstring")] string? expression = null)
@@ -2643,6 +2670,9 @@ namespace .Extensions
         public static .<TValue> ThrowsNothing<TValue>(this .<TValue> source) { }
         public static .<TValue> WaitsFor<TValue>(this .<TValue> source, <.<TValue>, .<TValue>> assertionBuilder,  timeout, ? pollingInterval = default, [.("timeout")] string? timeoutExpression = null, [.("pollingInterval")] string? pollingIntervalExpression = null) { }
         public static ..WhenParsedIntoAssertion<T> WhenParsedInto<[.(..None | ..PublicMethods | ..Interfaces)]  T>(this .<string> source) { }
+        public static .<TException, TInnerException> WithInnerException<TException, TInnerException>(this .<TException> source)
+            where TException : 
+            where TInnerException :  { }
         public static .<TException> WithMessage<TException>(this .<TException> source, string expectedMessage, [.("expectedMessage")] string? expression = null)
             where TException :  { }
         public static .<TException> WithMessage<TException>(this .<TException> source, string expectedMessage,  comparison, [.("expectedMessage")] string? expression = null)
@@ -2660,6 +2690,10 @@ namespace .Extensions
         public static .<TException> WithMessageNotContaining<TException>(this .<TException> source, string notExpectedSubstring,  comparison, [.("notExpectedSubstring")] string? expression = null)
             where TException :  { }
         public static .<TException> WithParameterName<TException>(this .<TException> source, string expectedParameterName, [.("expectedParameterName")] string? expression = null)
+            where TException :  { }
+        public static .<TException> WithStackTraceContaining<TException>(this .<TException> source, string expectedSubstring, [.("expectedSubstring")] string? expression = null)
+            where TException :  { }
+        public static .<TException> WithStackTraceContaining<TException>(this .<TException> source, string expectedSubstring,  comparison, [.("expectedSubstring")] string? expression = null)
             where TException :  { }
     }
     public static class BetweenAssertionExtensions

@@ -1057,6 +1057,80 @@ public static class AssertionExtensions
         return new ExceptionParameterNameAssertion<TException>(source.Context, expectedParameterName);
     }
 
+    /// <summary>
+    /// Asserts that the exception's stack trace contains the specified substring.
+    /// Works after Throws assertions.
+    /// Example: await Assert.That(() => ThrowingMethod()).Throws&lt;Exception&gt;().And.WithStackTraceContaining("MyClass.MyMethod");
+    /// </summary>
+    public static ExceptionStackTraceContainsAssertion<TException> WithStackTraceContaining<TException>(
+        this IAssertionSource<TException> source,
+        string expectedSubstring,
+        [CallerArgumentExpression(nameof(expectedSubstring))] string? expression = null)
+        where TException : Exception
+    {
+        source.Context.ExpressionBuilder.Append($".WithStackTraceContaining({expression})");
+        return new ExceptionStackTraceContainsAssertion<TException>(source.Context, expectedSubstring);
+    }
+
+    /// <summary>
+    /// Asserts that the exception's stack trace contains the specified substring using the specified comparison.
+    /// Works after Throws assertions.
+    /// Example: await Assert.That(() => ThrowingMethod()).Throws&lt;Exception&gt;().And.WithStackTraceContaining("MyClass", StringComparison.OrdinalIgnoreCase);
+    /// </summary>
+    public static ExceptionStackTraceContainsAssertion<TException> WithStackTraceContaining<TException>(
+        this IAssertionSource<TException> source,
+        string expectedSubstring,
+        StringComparison comparison,
+        [CallerArgumentExpression(nameof(expectedSubstring))] string? expression = null)
+        where TException : Exception
+    {
+        source.Context.ExpressionBuilder.Append($".WithStackTraceContaining({expression}, StringComparison.{comparison})");
+        return new ExceptionStackTraceContainsAssertion<TException>(source.Context, expectedSubstring, comparison);
+    }
+
+    /// <summary>
+    /// Asserts that the exception has an inner exception of the specified type.
+    /// Works after Throws assertions.
+    /// Example: await Assert.That(() => ThrowingMethod()).Throws&lt;Exception&gt;().And.WithInnerException&lt;InvalidOperationException&gt;();
+    /// </summary>
+    public static ExceptionInnerExceptionOfTypeAssertion<TException, TInnerException> WithInnerException<TException, TInnerException>(
+        this IAssertionSource<TException> source)
+        where TException : Exception
+        where TInnerException : Exception
+    {
+        source.Context.ExpressionBuilder.Append($".WithInnerException<{typeof(TInnerException).Name}>()");
+        return new ExceptionInnerExceptionOfTypeAssertion<TException, TInnerException>(source.Context);
+    }
+
+    /// <summary>
+    /// Alias for WithMessage - asserts that the exception message exactly equals the specified string.
+    /// Works after Throws assertions.
+    /// Example: await Assert.That(() => ThrowingMethod()).Throws&lt;Exception&gt;().And.HasMessage("exact message");
+    /// </summary>
+    public static ExceptionMessageEqualsAssertion<TException> HasMessage<TException>(
+        this IAssertionSource<TException> source,
+        string expectedMessage,
+        [CallerArgumentExpression(nameof(expectedMessage))] string? expression = null)
+        where TException : Exception
+    {
+        return source.WithMessage(expectedMessage, expression);
+    }
+
+    /// <summary>
+    /// Alias for WithMessage - asserts that the exception message exactly equals the specified string using the specified comparison.
+    /// Works after Throws assertions.
+    /// Example: await Assert.That(() => ThrowingMethod()).Throws&lt;Exception&gt;().And.HasMessage("exact message", StringComparison.OrdinalIgnoreCase);
+    /// </summary>
+    public static ExceptionMessageEqualsAssertion<TException> HasMessage<TException>(
+        this IAssertionSource<TException> source,
+        string expectedMessage,
+        StringComparison comparison,
+        [CallerArgumentExpression(nameof(expectedMessage))] string? expression = null)
+        where TException : Exception
+    {
+        return source.WithMessage(expectedMessage, comparison, expression);
+    }
+
     public static ThrowsAssertion<TException> Throws<TException>(this DelegateAssertion source) where TException : Exception
     {
         var iface = (IAssertionSource<object?>)source;
