@@ -1,6 +1,7 @@
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.CommandLine;
+using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.CommandLineProviders;
 
@@ -34,6 +35,18 @@ internal class JUnitReporterCommandProvider(IExtension extension) : ICommandLine
         CommandLineOption commandOption,
         string[] arguments)
     {
+        if (commandOption.Name == JUnitOutputPathOption && arguments.Length == 1)
+        {
+            try
+            {
+                PathValidator.ValidateAndNormalizePath(arguments[0], JUnitOutputPathOption);
+            }
+            catch (ArgumentException ex)
+            {
+                return Task.FromResult(ValidationResult.Invalid(ex.Message));
+            }
+        }
+
         return ValidationResult.ValidTask;
     }
 
