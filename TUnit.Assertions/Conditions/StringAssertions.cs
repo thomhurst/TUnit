@@ -477,7 +477,7 @@ public class StringDoesNotEndWithAssertion : Assertion<string>
 }
 
 /// <summary>
-/// Asserts that a string is not empty or whitespace.
+/// Asserts that a string is not null or empty.
 /// </summary>
 [AssertionExtension("IsNotEmpty")]
 public class StringIsNotEmptyAssertion : Assertion<string>
@@ -511,11 +511,11 @@ public class StringIsNotEmptyAssertion : Assertion<string>
         return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
     }
 
-    protected override string GetExpectation() => "to not be empty or whitespace";
+    protected override string GetExpectation() => "to not be null or empty";
 }
 
 /// <summary>
-/// Asserts that a string is empty or whitespace.
+/// Asserts that a string is empty.
 /// </summary>
 [AssertionExtension("IsEmpty")]
 public class StringIsEmptyAssertion : Assertion<string>
@@ -549,7 +549,7 @@ public class StringIsEmptyAssertion : Assertion<string>
         return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
     }
 
-    protected override string GetExpectation() => "to be empty or whitespace";
+    protected override string GetExpectation() => "to be empty";
 }
 
 /// <summary>
