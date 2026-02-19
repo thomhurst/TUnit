@@ -8,7 +8,7 @@ public static class TypeExtensions
 {
     public static string GetMetadataName(this Type type)
     {
-        return $"{type.Namespace}.{type.Name}";
+        return string.IsNullOrEmpty(type.Namespace) ? type.Name : $"{type.Namespace}.{type.Name}";
     }
 
     public static string GetFullNameWithoutGenericArity(this Type type)
