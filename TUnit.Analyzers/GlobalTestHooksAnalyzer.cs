@@ -164,15 +164,20 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
             return HookParameterStatus.Valid;
         }
         
-        // Single CancellationToken parameter is valid (though context is recommended)
-        if (parameters.Length == 1 && 
+        // Single CancellationToken parameter is valid (though context is recommended).
+        // Note: A default value is NOT required on the CancellationToken parameter because the
+        // framework always provides one. In source-gen mode, the generated hook body delegate always
+        // passes cancellationToken. In reflection mode, CreateHookDelegate/CreateInstanceHookDelegate
+        // always passes the CancellationToken via method.Invoke args.
+        if (parameters.Length == 1 &&
             parameters[0].Type.GloballyQualifiedNonGeneric() == "global::System.Threading.CancellationToken")
         {
             return HookParameterStatus.Valid;
         }
-        
-        // Context + CancellationToken is valid
-        if (parameters.Length == 2 && 
+
+        // Context + CancellationToken is valid (default value not required on CancellationToken;
+        // the framework always provides one at invocation time).
+        if (parameters.Length == 2 &&
             parameters[0].Type.GloballyQualifiedNonGeneric() == contextType &&
             parameters[1].Type.GloballyQualifiedNonGeneric() == "global::System.Threading.CancellationToken")
         {
