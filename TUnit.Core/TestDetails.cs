@@ -33,6 +33,18 @@ public partial class TestDetails : ITestIdentity, ITestClass, ITestMethod, ITest
     public TimeSpan? Timeout { get; set; }
     public int RetryLimit { get; set; }
 
+    /// <summary>
+    /// Gets or sets the initial delay in milliseconds before the first retry.
+    /// Used with <see cref="RetryBackoffMultiplier"/> for exponential backoff.
+    /// </summary>
+    public int RetryBackoffMs { get; set; }
+
+    /// <summary>
+    /// Gets or sets the multiplier for exponential backoff between retries.
+    /// Default is 2.0.
+    /// </summary>
+    public double RetryBackoffMultiplier { get; set; } = 2.0;
+
     public required MethodMetadata MethodMetadata { get; set; }
     public string TestFilePath { get; set; } = "";
     public int TestLineNumber { get; set; }

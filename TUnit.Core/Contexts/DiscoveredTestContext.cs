@@ -61,6 +61,17 @@ public class DiscoveredTestContext
     }
 
     /// <summary>
+    /// Sets the backoff configuration for retry attempts.
+    /// </summary>
+    /// <param name="backoffMs">Initial delay in milliseconds before the first retry. 0 means no delay.</param>
+    /// <param name="backoffMultiplier">Multiplier for exponential backoff (e.g. 2.0 doubles the delay each retry).</param>
+    public void SetRetryBackoff(int backoffMs, double backoffMultiplier)
+    {
+        TestContext.Metadata.TestDetails.RetryBackoffMs = backoffMs;
+        TestContext.Metadata.TestDetails.RetryBackoffMultiplier = backoffMultiplier;
+    }
+
+    /// <summary>
     /// Adds a parallel constraint to the test context.
     /// Multiple constraints can be combined (e.g., ParallelGroup + NotInParallel).
     /// </summary>

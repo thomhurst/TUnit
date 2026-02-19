@@ -39,6 +39,9 @@ internal static class RetryHelper
                     }
 #endif
 
+                    // Apply backoff delay before retrying
+                    await ApplyBackoffDelay(testContext, attempt).ConfigureAwait(false);
+
                     // Clear the previous result before retrying
                     testContext.Execution.Result = null;
                     testContext.TestStart = null;
@@ -66,5 +69,23 @@ internal static class RetryHelper
         }
 
         return await testContext.RetryFunc(testContext, ex, attempt + 1).ConfigureAwait(false);
+    }
+
+    private static async Task ApplyBackoffDelay(TestContext testContext, int attempt)
+    {
+        var backoffMs = testContext.Metadata.TestDetails.RetryBackoffMs;
+
+        if (backoffMs <= 0)
+        {
+            return;
+        }
+
+        var multiplier = testContext.Metadata.TestDetails.RetryBackoffMultiplier;
+        var delayMs = (int)(backoffMs * Math.Pow(multiplier, attempt));
+
+        if (delayMs > 0)
+        {
+            await Task.Delay(delayMs, testContext.CancellationToken).ConfigureAwait(false);
+        }
     }
 }
