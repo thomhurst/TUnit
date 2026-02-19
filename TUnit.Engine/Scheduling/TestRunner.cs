@@ -85,7 +85,7 @@ public sealed class TestRunner
                 if (dependency.Test.State != TestState.Passed && !dependency.ProceedOnFailure)
                 {
                     _testStateManager.MarkSkipped(test, "Skipped due to failed dependencies");
-                    _metricsCollector?.OnTestCompleted(passed: false, skipped: true, duration: null);
+                    _metricsCollector?.OnTestSkipped();
                     await _tunitMessageBus.Skipped(test.Context, "Skipped due to failed dependencies").ConfigureAwait(false);
                     return;
                 }

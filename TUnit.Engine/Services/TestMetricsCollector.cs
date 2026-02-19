@@ -63,7 +63,17 @@ internal sealed class TestMetricsCollector
     }
 
     /// <summary>
+    /// Called when a test is skipped without ever being started (e.g. due to a failed dependency).
+    /// Only increments the skip counter without touching the concurrency counter.
+    /// </summary>
+    public void OnTestSkipped()
+    {
+        Interlocked.Increment(ref _skippedTests);
+    }
+
+    /// <summary>
     /// Called when an individual test finishes executing.
+    /// Must only be called for tests that had a prior <see cref="OnTestStarted"/> call.
     /// </summary>
     public void OnTestCompleted(bool passed, bool skipped, TimeSpan? duration)
     {
