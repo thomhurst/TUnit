@@ -231,6 +231,117 @@ public class CollectionCountAssertion<TCollection, TItem> : Sources.CollectionAs
 }
 
 /// <summary>
+/// Asserts that a collection has at least the specified minimum number of items (count >= minCount).
+/// Delegates to CollectionChecks for the actual logic.
+/// </summary>
+public class CollectionHasAtLeastAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+    where TCollection : IEnumerable<TItem>
+{
+    private readonly int _minCount;
+
+    public CollectionHasAtLeastAssertion(
+        AssertionContext<TCollection> context,
+        int minCount)
+        : base(context)
+    {
+        _minCount = minCount;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
+    {
+        if (metadata.Exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+        }
+
+        if (metadata.Value == null)
+        {
+            return Task.FromResult(AssertionResult.Failed("collection was null"));
+        }
+
+        var adapter = new EnumerableAdapter<TItem>(metadata.Value);
+        return Task.FromResult(CollectionChecks.CheckHasAtLeast(adapter, _minCount));
+    }
+
+    protected override string GetExpectation() => $"to have at least {_minCount} item(s)";
+}
+
+/// <summary>
+/// Asserts that a collection has at most the specified maximum number of items (count <= maxCount).
+/// Delegates to CollectionChecks for the actual logic.
+/// </summary>
+public class CollectionHasAtMostAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+    where TCollection : IEnumerable<TItem>
+{
+    private readonly int _maxCount;
+
+    public CollectionHasAtMostAssertion(
+        AssertionContext<TCollection> context,
+        int maxCount)
+        : base(context)
+    {
+        _maxCount = maxCount;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
+    {
+        if (metadata.Exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+        }
+
+        if (metadata.Value == null)
+        {
+            return Task.FromResult(AssertionResult.Failed("collection was null"));
+        }
+
+        var adapter = new EnumerableAdapter<TItem>(metadata.Value);
+        return Task.FromResult(CollectionChecks.CheckHasAtMost(adapter, _maxCount));
+    }
+
+    protected override string GetExpectation() => $"to have at most {_maxCount} item(s)";
+}
+
+/// <summary>
+/// Asserts that a collection count is between the specified minimum and maximum (inclusive).
+/// Delegates to CollectionChecks for the actual logic.
+/// </summary>
+public class CollectionHasCountBetweenAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+    where TCollection : IEnumerable<TItem>
+{
+    private readonly int _min;
+    private readonly int _max;
+
+    public CollectionHasCountBetweenAssertion(
+        AssertionContext<TCollection> context,
+        int min,
+        int max)
+        : base(context)
+    {
+        _min = min;
+        _max = max;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
+    {
+        if (metadata.Exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+        }
+
+        if (metadata.Value == null)
+        {
+            return Task.FromResult(AssertionResult.Failed("collection was null"));
+        }
+
+        var adapter = new EnumerableAdapter<TItem>(metadata.Value);
+        return Task.FromResult(CollectionChecks.CheckHasCountBetween(adapter, _min, _max));
+    }
+
+    protected override string GetExpectation() => $"to have count between {_min} and {_max}";
+}
+
+/// <summary>
 /// Helper for All().Satisfy() pattern - allows custom assertions on all collection items.
 /// </summary>
 public class CollectionAllSatisfyHelper<TCollection, TItem>

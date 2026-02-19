@@ -72,6 +72,44 @@ public abstract class AsyncEnumerableAssertionBase<TItem> : Assertion<IAsyncEnum
     }
 
     /// <summary>
+    /// Asserts that the async enumerable has at least the specified minimum number of items (count >= minCount).
+    /// Example: await Assert.That(asyncEnumerable).HasAtLeast(3);
+    /// </summary>
+    public AsyncEnumerableHasAtLeastAssertion<TItem> HasAtLeast(
+        int minCount,
+        [CallerArgumentExpression(nameof(minCount))] string? expression = null)
+    {
+        Context.ExpressionBuilder.Append($".HasAtLeast({expression})");
+        return new AsyncEnumerableHasAtLeastAssertion<TItem>(Context, minCount);
+    }
+
+    /// <summary>
+    /// Asserts that the async enumerable has at most the specified maximum number of items (count <= maxCount).
+    /// Example: await Assert.That(asyncEnumerable).HasAtMost(10);
+    /// </summary>
+    public AsyncEnumerableHasAtMostAssertion<TItem> HasAtMost(
+        int maxCount,
+        [CallerArgumentExpression(nameof(maxCount))] string? expression = null)
+    {
+        Context.ExpressionBuilder.Append($".HasAtMost({expression})");
+        return new AsyncEnumerableHasAtMostAssertion<TItem>(Context, maxCount);
+    }
+
+    /// <summary>
+    /// Asserts that the async enumerable count is between the specified minimum and maximum (inclusive).
+    /// Example: await Assert.That(asyncEnumerable).HasCountBetween(2, 5);
+    /// </summary>
+    public AsyncEnumerableHasCountBetweenAssertion<TItem> HasCountBetween(
+        int min,
+        int max,
+        [CallerArgumentExpression(nameof(min))] string? minExpression = null,
+        [CallerArgumentExpression(nameof(max))] string? maxExpression = null)
+    {
+        Context.ExpressionBuilder.Append($".HasCountBetween({minExpression}, {maxExpression})");
+        return new AsyncEnumerableHasCountBetweenAssertion<TItem>(Context, min, max);
+    }
+
+    /// <summary>
     /// Asserts that the async enumerable contains the expected item.
     /// Example: await Assert.That(asyncEnumerable).Contains(5);
     /// </summary>

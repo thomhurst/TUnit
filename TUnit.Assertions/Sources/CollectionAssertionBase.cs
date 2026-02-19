@@ -274,6 +274,47 @@ public abstract class CollectionAssertionBase<TCollection, TItem> : Assertion<TC
     }
 
     /// <summary>
+    /// Asserts that the collection has at least the specified minimum number of items (count >= minCount).
+    /// This instance method enables calling HasAtLeast with proper type inference.
+    /// Example: await Assert.That(list).HasAtLeast(3);
+    /// </summary>
+    public CollectionHasAtLeastAssertion<TCollection, TItem> HasAtLeast(
+        int minCount,
+        [CallerArgumentExpression(nameof(minCount))] string? expression = null)
+    {
+        Context.ExpressionBuilder.Append($".HasAtLeast({expression})");
+        return new CollectionHasAtLeastAssertion<TCollection, TItem>(Context, minCount);
+    }
+
+    /// <summary>
+    /// Asserts that the collection has at most the specified maximum number of items (count <= maxCount).
+    /// This instance method enables calling HasAtMost with proper type inference.
+    /// Example: await Assert.That(list).HasAtMost(10);
+    /// </summary>
+    public CollectionHasAtMostAssertion<TCollection, TItem> HasAtMost(
+        int maxCount,
+        [CallerArgumentExpression(nameof(maxCount))] string? expression = null)
+    {
+        Context.ExpressionBuilder.Append($".HasAtMost({expression})");
+        return new CollectionHasAtMostAssertion<TCollection, TItem>(Context, maxCount);
+    }
+
+    /// <summary>
+    /// Asserts that the collection count is between the specified minimum and maximum (inclusive).
+    /// This instance method enables calling HasCountBetween with proper type inference.
+    /// Example: await Assert.That(list).HasCountBetween(2, 5);
+    /// </summary>
+    public CollectionHasCountBetweenAssertion<TCollection, TItem> HasCountBetween(
+        int min,
+        int max,
+        [CallerArgumentExpression(nameof(min))] string? minExpression = null,
+        [CallerArgumentExpression(nameof(max))] string? maxExpression = null)
+    {
+        Context.ExpressionBuilder.Append($".HasCountBetween({minExpression}, {maxExpression})");
+        return new CollectionHasCountBetweenAssertion<TCollection, TItem>(Context, min, max);
+    }
+
+    /// <summary>
     /// Asserts that the collection contains only distinct (unique) items.
     /// This instance method enables calling HasDistinctItems with proper type inference.
     /// Example: await Assert.That(list).HasDistinctItems();
