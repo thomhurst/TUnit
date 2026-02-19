@@ -9,6 +9,7 @@ public partial class TestDetails
 {
     // Explicit interface implementation for ITestDetailsMetadata
     List<string> ITestDetailsMetadata.Categories => Categories;
+    List<string> ITestDetailsMetadata.Tags => Tags;
     Dictionary<string, List<string>> ITestDetailsMetadata.CustomProperties => CustomProperties;
     IReadOnlyDictionary<Type, IReadOnlyList<Attribute>> ITestDetailsMetadata.AttributesByType => AttributesByType;
     bool ITestDetailsMetadata.HasAttribute<T>() => HasAttribute<T>();

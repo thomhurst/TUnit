@@ -131,7 +131,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         // Register the test argument registration service to handle object registration for shared instances
         var testArgumentRegistrationService = Register(new TestArgumentRegistrationService(ObjectLifecycleService));
 
-        TestFilterService = Register(new TestFilterService(Logger, testArgumentRegistrationService));
+        TestFilterService = Register(new TestFilterService(Logger, testArgumentRegistrationService, CommandLineOptions));
 
         MessageBus = Register(new TUnitMessageBus(
             extension,

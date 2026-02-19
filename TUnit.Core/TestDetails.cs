@@ -39,6 +39,7 @@ public partial class TestDetails : ITestIdentity, ITestClass, ITestMethod, ITest
     public required Type ReturnType { get; set; }
     public IDictionary<string, object?> TestClassInjectedPropertyArguments { get; init; } = new ConcurrentDictionary<string, object?>();
     public List<string> Categories { get; } = [];
+    public List<string> Tags { get; } = [];
     public Dictionary<string, List<string>> CustomProperties { get; } = new();
     public Type[]? TestClassParameterTypes { get; set; }
 

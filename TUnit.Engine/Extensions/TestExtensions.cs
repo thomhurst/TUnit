@@ -22,6 +22,7 @@ internal static class TestExtensions
         public required TestFileLocationProperty FileLocation { get; init; }
         public required TestMethodIdentifierProperty MethodIdentifier { get; init; }
         public TestMetadataProperty[]? CategoryProperties { get; init; }
+        public TestMetadataProperty[]? TagProperties { get; init; }
         public TestMetadataProperty[]? CustomProperties { get; init; }
         public string? TrxFullyQualifiedTypeName { get; init; }
         public TrxCategoriesProperty? TrxCategories { get; init; }
@@ -72,6 +73,16 @@ internal static class TestExtensions
                 }
             }
 
+            TestMetadataProperty[]? tagProps = null;
+            if (testDetails.Tags.Count > 0)
+            {
+                tagProps = new TestMetadataProperty[testDetails.Tags.Count];
+                for (var i = 0; i < testDetails.Tags.Count; i++)
+                {
+                    tagProps[i] = new TestMetadataProperty("Tag", testDetails.Tags[i]);
+                }
+            }
+
             TestMetadataProperty[]? customProps = null;
             if (testDetails.CustomProperties.Count > 0)
             {
@@ -105,6 +116,7 @@ internal static class TestExtensions
                 FileLocation = fileLocation,
                 MethodIdentifier = methodIdentifier,
                 CategoryProperties = categoryProps,
+                TagProperties = tagProps,
                 CustomProperties = customProps,
                 TrxFullyQualifiedTypeName = trxTypeName,
                 TrxCategories = trxCategories
@@ -134,6 +146,11 @@ internal static class TestExtensions
         if (cachedProps.CategoryProperties != null)
         {
             properties.AddRange(cachedProps.CategoryProperties);
+        }
+
+        if (cachedProps.TagProperties != null)
+        {
+            properties.AddRange(cachedProps.TagProperties);
         }
 
         if (cachedProps.CustomProperties != null)
@@ -242,6 +259,7 @@ internal static class TestExtensions
 
         count += testDetails.CustomProperties.Count;
         count += testDetails.Categories.Count;
+        count += testDetails.Tags.Count;
 
         if (isFinalState)
         {

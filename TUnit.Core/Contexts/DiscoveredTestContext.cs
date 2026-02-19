@@ -27,6 +27,14 @@ public class DiscoveredTestContext
         }
     }
 
+    public void AddTag(string tag)
+    {
+        if (!string.IsNullOrWhiteSpace(tag) && !TestContext.Metadata.TestDetails.Tags.Contains(tag))
+        {
+            TestDetails.Tags.Add(tag);
+        }
+    }
+
     public void AddProperty(string key, string value)
     {
         if (!TestDetails.CustomProperties.TryGetValue(key, out var values))

@@ -1,7 +1,7 @@
 namespace TUnit.Core.Interfaces;
 
 /// <summary>
-/// Provides access to test metadata including categories, custom properties, and attributes.
+/// Provides access to test metadata including categories, tags, custom properties, and attributes.
 /// Accessed via <see cref="TestDetails.Attributes"/>.
 /// </summary>
 public interface ITestDetailsMetadata
@@ -10,6 +10,12 @@ public interface ITestDetailsMetadata
     /// Gets the collection of categories assigned to this test.
     /// </summary>
     List<string> Categories { get; }
+
+    /// <summary>
+    /// Gets the hierarchical tags assigned to this test.
+    /// Tags use dot notation for hierarchy (e.g., "integration.database.postgres").
+    /// </summary>
+    List<string> Tags { get; }
 
     /// <summary>
     /// Gets the custom properties associated with this test.

@@ -64,6 +64,13 @@ public readonly struct TestDescriptor
     public string[] Properties { get; init; }
 
     /// <summary>
+    /// Gets the pre-extracted tag values from TagAttribute.
+    /// Tags use dot notation for hierarchy (e.g., "integration.database.postgres").
+    /// Pre-computed at compile time to avoid runtime attribute instantiation.
+    /// </summary>
+    public string[] Tags { get; init; }
+
+    /// <summary>
     /// Gets whether this test has data sources (is parameterized).
     /// When true, materialization may yield multiple TestMetadata instances.
     /// </summary>
@@ -101,6 +108,7 @@ public readonly struct TestDescriptor
     {
         Categories = [];
         Properties = [];
+        Tags = [];
         DependsOn = [];
     }
 
@@ -115,6 +123,25 @@ public readonly struct TestDescriptor
         for (var i = 0; i < categories.Length; i++)
         {
             if (string.Equals(categories[i], category, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Checks if this test matches the specified tag, including hierarchical matching.
+    /// A tag filter of "integration" matches "integration", "integration.database", etc.
+    /// </summary>
+    /// <param name="tag">The tag to match.</param>
+    /// <returns>True if the test has a matching tag.</returns>
+    public bool HasTag(string tag)
+    {
+        var tags = Tags;
+        for (var i = 0; i < tags.Length; i++)
+        {
+            if (MatchesHierarchicalTag(tags[i], tag))
             {
                 return true;
             }
@@ -150,5 +177,25 @@ public readonly struct TestDescriptor
             }
         }
         return false;
+    }
+
+    /// <summary>
+    /// Checks if a test tag matches a filter tag using hierarchical matching.
+    /// A filter of "integration" matches "integration", "integration.database", "integration.database.postgres", etc.
+    /// </summary>
+    /// <param name="testTag">The tag on the test (e.g., "integration.database.postgres").</param>
+    /// <param name="filterTag">The tag being filtered for (e.g., "integration").</param>
+    /// <returns>True if the test tag matches the filter tag.</returns>
+    internal static bool MatchesHierarchicalTag(string testTag, string filterTag)
+    {
+        if (string.Equals(testTag, filterTag, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        // Check if testTag starts with filterTag followed by a dot (hierarchical match)
+        return testTag.Length > filterTag.Length
+            && testTag[filterTag.Length] == '.'
+            && testTag.StartsWith(filterTag, StringComparison.OrdinalIgnoreCase);
     }
 }

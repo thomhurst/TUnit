@@ -38,6 +38,7 @@ public static class TestApplicationBuilderExtensions
         testApplicationBuilder.CommandLine.AddProvider(() => new ReflectionModeCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new DisableLogoCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new LogLevelCommandProvider(extension));
+        testApplicationBuilder.CommandLine.AddProvider(() => new TagCommandProvider(extension));
 
         // Adaptive parallelism command providers
         testApplicationBuilder.CommandLine.AddProvider(() => new ParallelismStrategyCommandProvider(extension));
