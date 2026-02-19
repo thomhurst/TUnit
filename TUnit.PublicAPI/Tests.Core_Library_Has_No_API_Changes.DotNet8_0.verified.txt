@@ -532,6 +532,13 @@ namespace
         public static readonly .DefaultExecutor Instance;
         protected override . ExecuteAsync(<.> action) { }
     }
+    public static class Defaults
+    {
+        public static readonly  ForcefulExitTimeout;
+        public static readonly  HookTimeout;
+        public static readonly  ProcessExitHookDelay;
+        public static readonly  TestTimeout;
+    }
     public abstract class DependencyInjectionDataSourceAttribute<TScope> : .UntypedDataSourceGeneratorAttribute
     {
         protected DependencyInjectionDataSourceAttribute() { }
