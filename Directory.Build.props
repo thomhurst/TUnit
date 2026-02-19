@@ -23,24 +23,14 @@
     <BuildPath>build/netstandard2.0</BuildPath>
   </PropertyGroup>
 
-  <PropertyGroup Condition="$(MSBuildProjectName.StartsWith('TUnit.Analyzers.Roslyn'))">
+  <!-- Shared properties for all Roslyn-versioned variant projects (e.g. TUnit.Analyzers.Roslyn44) -->
+  <PropertyGroup Condition="$(MSBuildProjectName.Contains('.Roslyn'))">
+    <_BaseProjectName>$([System.Text.RegularExpressions.Regex]::Replace($(MSBuildProjectName), '\.Roslyn\d+$', ''))</_BaseProjectName>
+    <_RoslynDigits>$([System.Text.RegularExpressions.Regex]::Match($(MSBuildProjectName), 'Roslyn(\d+)$').Groups[1].Value)</_RoslynDigits>
+    <RoslynVersion>$([System.Text.RegularExpressions.Regex]::Replace($(_RoslynDigits), '^(\d)', '$1.'))</RoslynVersion>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
-    <AssemblyName>TUnit.Analyzers</AssemblyName>
-    <RootNamespace>TUnit.Analyzers</RootNamespace>
-    <IsPackable>false</IsPackable>
-    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
-  </PropertyGroup>
-  <PropertyGroup Condition="$(MSBuildProjectName.StartsWith('TUnit.Core.SourceGenerator.Roslyn'))">
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
-    <AssemblyName>TUnit.Core.SourceGenerator</AssemblyName>
-    <RootNamespace>TUnit.Core.SourceGenerator</RootNamespace>
-    <IsPackable>false</IsPackable>
-    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
-  </PropertyGroup>
-  <PropertyGroup Condition="$(MSBuildProjectName.StartsWith('TUnit.AspNetCore.Analyzers.Roslyn'))">
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
-    <AssemblyName>TUnit.AspNetCore.Analyzers</AssemblyName>
-    <RootNamespace>TUnit.AspNetCore.Analyzers</RootNamespace>
+    <AssemblyName>$(_BaseProjectName)</AssemblyName>
+    <RootNamespace>$(_BaseProjectName)</RootNamespace>
     <IsPackable>false</IsPackable>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
   </PropertyGroup>
