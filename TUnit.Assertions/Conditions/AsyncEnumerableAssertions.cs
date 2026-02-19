@@ -112,6 +112,84 @@ public class AsyncEnumerableHasCountAssertion<TItem> : AsyncEnumerableAssertionC
 }
 
 /// <summary>
+/// Asserts that the async enumerable has at least the specified minimum number of items.
+/// </summary>
+public class AsyncEnumerableHasAtLeastAssertion<TItem> : AsyncEnumerableAssertionConditionBase<TItem>
+{
+    private readonly int _minCount;
+
+    public AsyncEnumerableHasAtLeastAssertion(
+        AssertionContext<IAsyncEnumerable<TItem>> context,
+        int minCount)
+        : base(context)
+    {
+        _minCount = minCount;
+    }
+
+    protected override AssertionResult CheckMaterialized(List<TItem> items)
+    {
+        return items.Count >= _minCount
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {items.Count} items");
+    }
+
+    protected override string GetExpectation() => $"to have at least {_minCount} item(s)";
+}
+
+/// <summary>
+/// Asserts that the async enumerable has at most the specified maximum number of items.
+/// </summary>
+public class AsyncEnumerableHasAtMostAssertion<TItem> : AsyncEnumerableAssertionConditionBase<TItem>
+{
+    private readonly int _maxCount;
+
+    public AsyncEnumerableHasAtMostAssertion(
+        AssertionContext<IAsyncEnumerable<TItem>> context,
+        int maxCount)
+        : base(context)
+    {
+        _maxCount = maxCount;
+    }
+
+    protected override AssertionResult CheckMaterialized(List<TItem> items)
+    {
+        return items.Count <= _maxCount
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {items.Count} items");
+    }
+
+    protected override string GetExpectation() => $"to have at most {_maxCount} item(s)";
+}
+
+/// <summary>
+/// Asserts that the async enumerable count is between the specified minimum and maximum (inclusive).
+/// </summary>
+public class AsyncEnumerableHasCountBetweenAssertion<TItem> : AsyncEnumerableAssertionConditionBase<TItem>
+{
+    private readonly int _min;
+    private readonly int _max;
+
+    public AsyncEnumerableHasCountBetweenAssertion(
+        AssertionContext<IAsyncEnumerable<TItem>> context,
+        int min,
+        int max)
+        : base(context)
+    {
+        _min = min;
+        _max = max;
+    }
+
+    protected override AssertionResult CheckMaterialized(List<TItem> items)
+    {
+        return items.Count >= _min && items.Count <= _max
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {items.Count} items");
+    }
+
+    protected override string GetExpectation() => $"to have count between {_min} and {_max}";
+}
+
+/// <summary>
 /// Asserts that the async enumerable contains or does not contain the expected item.
 /// </summary>
 public class AsyncEnumerableContainsAssertion<TItem> : AsyncEnumerableAssertionConditionBase<TItem>

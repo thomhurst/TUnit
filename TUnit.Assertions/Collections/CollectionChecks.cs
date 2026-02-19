@@ -161,6 +161,48 @@ public static class CollectionChecks
     }
 
     /// <summary>
+    /// Checks if the collection has at least the specified minimum number of items.
+    /// </summary>
+    public static AssertionResult CheckHasAtLeast<TItem>(ICollectionAdapter<TItem> adapter, int minCount)
+    {
+        var actual = adapter.Count;
+        if (actual >= minCount)
+        {
+            return AssertionResult.Passed;
+        }
+
+        return AssertionResult.Failed($"found {actual}");
+    }
+
+    /// <summary>
+    /// Checks if the collection has at most the specified maximum number of items.
+    /// </summary>
+    public static AssertionResult CheckHasAtMost<TItem>(ICollectionAdapter<TItem> adapter, int maxCount)
+    {
+        var actual = adapter.Count;
+        if (actual <= maxCount)
+        {
+            return AssertionResult.Passed;
+        }
+
+        return AssertionResult.Failed($"found {actual}");
+    }
+
+    /// <summary>
+    /// Checks if the collection count is between the specified minimum and maximum (inclusive).
+    /// </summary>
+    public static AssertionResult CheckHasCountBetween<TItem>(ICollectionAdapter<TItem> adapter, int min, int max)
+    {
+        var actual = adapter.Count;
+        if (actual >= min && actual <= max)
+        {
+            return AssertionResult.Passed;
+        }
+
+        return AssertionResult.Failed($"found {actual}");
+    }
+
+    /// <summary>
     /// Checks if the collection has exactly one item.
     /// </summary>
     public static AssertionResult CheckHasSingleItem<TItem>(ICollectionAdapter<TItem> adapter)
