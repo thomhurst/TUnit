@@ -2348,6 +2348,7 @@ namespace .Interfaces
         void RegisterClassFactory(string testId, <object?[], object> factory);
         void RegisterMethodInvoker(string testId, <object, object?[], .<object?>> invoker);
     }
+    public interface ITUnitPlugin : ., ., ., ., ., ., . { }
     public interface ITestClass
     {
         [] ClassGenericArguments { get; }
