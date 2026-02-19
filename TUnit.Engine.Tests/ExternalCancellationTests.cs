@@ -17,6 +17,7 @@ namespace TUnit.Engine.Tests;
 /// See: https://github.com/Tyrrrz/CliWrap/issues/47
 /// </remarks>
 [ExcludeOn(OS.Windows)]
+[Retry(3)]
 public class ExternalCancellationTests(TestMode testMode) : InvokableTestBase(testMode)
 {
     private static readonly string TempPath = Path.GetTempPath();

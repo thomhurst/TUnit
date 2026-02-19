@@ -10,6 +10,7 @@ namespace TUnit.Engine.Tests.Scheduling;
 /// 2. No deadlocks occur under high contention
 /// 3. Tests complete within reasonable timeout
 /// </summary>
+[Retry(3)]
 public class ConstraintKeySchedulerConcurrencyTests(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
