@@ -4,6 +4,7 @@ using System.Text;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestHost;
+using TUnit.Engine.Configuration;
 using TUnit.Engine.Framework;
 using TUnit.Engine.Xml;
 
@@ -17,15 +18,15 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
     public async Task<bool> IsEnabledAsync()
     {
         // Check if explicitly disabled
-        if (Environment.GetEnvironmentVariable("TUNIT_DISABLE_JUNIT_REPORTER") is not null)
+        if (Environment.GetEnvironmentVariable(EnvironmentConstants.DisableJUnitReporter) is not null)
         {
             return false;
         }
 
         // Check if explicitly enabled OR running in GitLab CI
-        var explicitlyEnabled = Environment.GetEnvironmentVariable("TUNIT_ENABLE_JUNIT_REPORTER") is not null;
-        var runningInGitLab = Environment.GetEnvironmentVariable("GITLAB_CI") is not null ||
-                              Environment.GetEnvironmentVariable("CI_SERVER") is not null;
+        var explicitlyEnabled = Environment.GetEnvironmentVariable(EnvironmentConstants.EnableJUnitReporter) is not null;
+        var runningInGitLab = Environment.GetEnvironmentVariable(EnvironmentConstants.GitLabCi) is not null ||
+                              Environment.GetEnvironmentVariable(EnvironmentConstants.CiServer) is not null;
 
         if (!explicitlyEnabled && !runningInGitLab)
         {
@@ -35,7 +36,7 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
         // Determine output path (only if not already set via command-line argument)
         if (string.IsNullOrEmpty(_outputPath))
         {
-            _outputPath = Environment.GetEnvironmentVariable("JUNIT_XML_OUTPUT_PATH")
+            _outputPath = Environment.GetEnvironmentVariable(EnvironmentConstants.JUnitXmlOutputPath)
                 ?? GetDefaultOutputPath();
         }
 

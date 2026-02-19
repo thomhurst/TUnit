@@ -15,6 +15,7 @@ using TUnit.Core.Logging;
 using TUnit.Core.Tracking;
 using TUnit.Engine.Building;
 using TUnit.Engine.Building.Collectors;
+using TUnit.Engine.Configuration;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Discovery;
@@ -157,7 +158,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         // (duplicate TestNodeUid in TestApplicationResult.ConsumeAsync causes crashes in Rider/VS Code).
         // Enable via TUNIT_ENABLE_IDE_STREAMING=1 environment variable.
         if (VerbosityService.IsIdeClient &&
-            Environment.GetEnvironmentVariable("TUNIT_ENABLE_IDE_STREAMING") == "1")
+            Environment.GetEnvironmentVariable(EnvironmentConstants.EnableIdeStreaming) == "1")
         {
             TUnitLoggerFactory.AddSink(new IdeStreamingSink(MessageBus));
         }

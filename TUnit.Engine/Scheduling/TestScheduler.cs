@@ -4,6 +4,7 @@ using TUnit.Core;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Logging;
 using TUnit.Engine.CommandLineProviders;
+using TUnit.Engine.Configuration;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Models;
@@ -545,7 +546,7 @@ internal sealed class TestScheduler : ITestScheduler
         }
 
         // Check environment variable (second priority)
-        if (Environment.GetEnvironmentVariable("TUNIT_MAX_PARALLEL_TESTS") is string envVar
+        if (Environment.GetEnvironmentVariable(EnvironmentConstants.MaxParallelTests) is string envVar
             && int.TryParse(envVar, out var envLimit))
         {
             if (envLimit == 0)
