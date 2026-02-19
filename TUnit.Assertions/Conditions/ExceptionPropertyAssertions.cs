@@ -261,6 +261,107 @@ public class ExceptionMessageMatchesAssertion<TException> : Assertion<TException
 }
 
 /// <summary>
+/// Asserts that an exception's StackTrace property contains a specific substring.
+/// Chains after a Throws assertion.
+/// Example: await Assert.That(() => ThrowingMethod()).Throws&lt;Exception&gt;().WithStackTraceContaining("MyClass.MyMethod");
+/// </summary>
+public class ExceptionStackTraceContainsAssertion<TException> : Assertion<TException>
+    where TException : Exception
+{
+    private readonly string _expectedSubstring;
+    private readonly StringComparison _comparison;
+
+    public ExceptionStackTraceContainsAssertion(
+        AssertionContext<TException> context,
+        string expectedSubstring,
+        StringComparison comparison = StringComparison.Ordinal)
+        : base(context)
+    {
+        _expectedSubstring = expectedSubstring;
+        _comparison = comparison;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TException> metadata)
+    {
+        var exception = metadata.Value;
+        var evaluationException = metadata.Exception;
+
+        if (evaluationException != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {evaluationException.GetType().FullName}"));
+        }
+
+        if (exception == null)
+        {
+            return Task.FromResult(AssertionResult.Failed("no exception was thrown"));
+        }
+
+        if (exception.StackTrace == null)
+        {
+            return Task.FromResult(AssertionResult.Failed("exception stack trace was null"));
+        }
+
+        if (exception.StackTrace.Contains(_expectedSubstring, _comparison))
+        {
+            return AssertionResult._passedTask;
+        }
+
+        return Task.FromResult(AssertionResult.Failed($"exception stack trace was \"{exception.StackTrace}\""));
+    }
+
+    protected override string GetExpectation() =>
+        $"exception stack trace to contain \"{_expectedSubstring}\"";
+}
+
+/// <summary>
+/// Asserts that an exception has an inner exception of the specified type.
+/// Chains after a Throws assertion.
+/// Example: await Assert.That(() => ThrowingMethod()).Throws&lt;Exception&gt;().WithInnerException&lt;InvalidOperationException&gt;();
+/// </summary>
+public class ExceptionInnerExceptionOfTypeAssertion<TException, TInnerException> : Assertion<TException>
+    where TException : Exception
+    where TInnerException : Exception
+{
+    public ExceptionInnerExceptionOfTypeAssertion(
+        AssertionContext<TException> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TException> metadata)
+    {
+        var exception = metadata.Value;
+        var evaluationException = metadata.Exception;
+
+        if (evaluationException != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {evaluationException.GetType().FullName}"));
+        }
+
+        if (exception == null)
+        {
+            return Task.FromResult(AssertionResult.Failed("no exception was thrown"));
+        }
+
+        if (exception.InnerException == null)
+        {
+            return Task.FromResult(AssertionResult.Failed("exception has no inner exception"));
+        }
+
+        if (exception.InnerException is not TInnerException)
+        {
+            return Task.FromResult(AssertionResult.Failed(
+                $"inner exception was {exception.InnerException.GetType().Name} instead of {typeof(TInnerException).Name}"));
+        }
+
+        return AssertionResult._passedTask;
+    }
+
+    protected override string GetExpectation() =>
+        $"exception to have inner exception of type {typeof(TInnerException).Name}";
+}
+
+/// <summary>
 /// Asserts that an ArgumentException has a specific parameter name.
 /// </summary>
 public class ExceptionParameterNameAssertion<TException> : Assertion<TException>

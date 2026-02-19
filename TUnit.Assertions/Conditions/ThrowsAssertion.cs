@@ -201,6 +201,37 @@ public class ThrowsAssertion<TException> : BaseThrowsAssertion<TException, Throw
     }
 
     /// <summary>
+    /// Asserts that the exception has an inner exception of the specified type.
+    /// Example: await Assert.That(() => ThrowingMethod()).Throws&lt;Exception&gt;().WithInnerException&lt;InvalidOperationException&gt;();
+    /// </summary>
+    public ExceptionInnerExceptionOfTypeAssertion<TException, TInnerException> WithInnerException<TInnerException>()
+        where TInnerException : Exception
+    {
+        Context.ExpressionBuilder.Append($".WithInnerException<{typeof(TInnerException).Name}>()");
+        return new ExceptionInnerExceptionOfTypeAssertion<TException, TInnerException>(Context);
+    }
+
+    /// <summary>
+    /// Asserts that the exception's stack trace contains the specified substring.
+    /// Example: await Assert.That(() => ThrowingMethod()).Throws&lt;Exception&gt;().WithStackTraceContaining("MyClass.MyMethod");
+    /// </summary>
+    public ExceptionStackTraceContainsAssertion<TException> WithStackTraceContaining(string expectedSubstring)
+    {
+        Context.ExpressionBuilder.Append($".WithStackTraceContaining(\"{expectedSubstring}\")");
+        return new ExceptionStackTraceContainsAssertion<TException>(Context, expectedSubstring);
+    }
+
+    /// <summary>
+    /// Asserts that the exception's stack trace contains the specified substring using the specified comparison.
+    /// Example: await Assert.That(() => ThrowingMethod()).Throws&lt;Exception&gt;().WithStackTraceContaining("MyClass", StringComparison.OrdinalIgnoreCase);
+    /// </summary>
+    public ExceptionStackTraceContainsAssertion<TException> WithStackTraceContaining(string expectedSubstring, StringComparison comparison)
+    {
+        Context.ExpressionBuilder.Append($".WithStackTraceContaining(\"{expectedSubstring}\", StringComparison.{comparison})");
+        return new ExceptionStackTraceContainsAssertion<TException>(Context, expectedSubstring, comparison);
+    }
+
+    /// <summary>
     /// Adds runtime Type-based exception checking for non-generic Throws scenarios.
     /// Returns a specialized assertion that validates against the provided Type.
     /// </summary>
@@ -340,6 +371,37 @@ public class ThrowsExactlyAssertion<TException> : BaseThrowsAssertion<TException
     {
         Context.ExpressionBuilder.Append($".WithParameterName(\"{expectedParameterName}\")");
         return new ExceptionParameterNameAssertion<TException>(Context, expectedParameterName, requireExactType: true);
+    }
+
+    /// <summary>
+    /// Asserts that the exception has an inner exception of the specified type.
+    /// Example: await Assert.That(() => ThrowingMethod()).ThrowsExactly&lt;Exception&gt;().WithInnerException&lt;InvalidOperationException&gt;();
+    /// </summary>
+    public ExceptionInnerExceptionOfTypeAssertion<TException, TInnerException> WithInnerException<TInnerException>()
+        where TInnerException : Exception
+    {
+        Context.ExpressionBuilder.Append($".WithInnerException<{typeof(TInnerException).Name}>()");
+        return new ExceptionInnerExceptionOfTypeAssertion<TException, TInnerException>(Context);
+    }
+
+    /// <summary>
+    /// Asserts that the exception's stack trace contains the specified substring.
+    /// Example: await Assert.That(() => ThrowingMethod()).ThrowsExactly&lt;Exception&gt;().WithStackTraceContaining("MyClass.MyMethod");
+    /// </summary>
+    public ExceptionStackTraceContainsAssertion<TException> WithStackTraceContaining(string expectedSubstring)
+    {
+        Context.ExpressionBuilder.Append($".WithStackTraceContaining(\"{expectedSubstring}\")");
+        return new ExceptionStackTraceContainsAssertion<TException>(Context, expectedSubstring);
+    }
+
+    /// <summary>
+    /// Asserts that the exception's stack trace contains the specified substring using the specified comparison.
+    /// Example: await Assert.That(() => ThrowingMethod()).ThrowsExactly&lt;Exception&gt;().WithStackTraceContaining("MyClass", StringComparison.OrdinalIgnoreCase);
+    /// </summary>
+    public ExceptionStackTraceContainsAssertion<TException> WithStackTraceContaining(string expectedSubstring, StringComparison comparison)
+    {
+        Context.ExpressionBuilder.Append($".WithStackTraceContaining(\"{expectedSubstring}\", StringComparison.{comparison})");
+        return new ExceptionStackTraceContainsAssertion<TException>(Context, expectedSubstring, comparison);
     }
 }
 
