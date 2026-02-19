@@ -111,6 +111,8 @@ public class AotConverterGenerator : IIncrementalGenerator
 
             foreach(var nodes in root.DescendantNodes())
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 if(nodes is MethodDeclarationSyntax method)
                 {
                     var methodSymbol = semanticModel.GetDeclaredSymbol(method);
