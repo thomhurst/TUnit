@@ -47,7 +47,8 @@ internal static class HookTimeoutHelper
             }
             catch (OperationCanceledException) when (cts.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
             {
-                throw new TimeoutException($"Hook '{hook.Name}' exceeded timeout of {timeoutMs}ms");
+                var baseMessage = $"Hook '{hook.Name}' exceeded timeout of {timeoutMs}ms";
+                throw new TimeoutException(TimeoutDiagnostics.BuildTimeoutDiagnosticsMessage(baseMessage, executionTask: null));
             }
         }
     }
@@ -123,7 +124,8 @@ internal static class HookTimeoutHelper
             }
             catch (OperationCanceledException) when (cts.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
             {
-                throw new TimeoutException($"Hook '{hookName}' exceeded timeout of {timeoutMs}ms");
+                var baseMessage = $"Hook '{hookName}' exceeded timeout of {timeoutMs}ms";
+                throw new TimeoutException(TimeoutDiagnostics.BuildTimeoutDiagnosticsMessage(baseMessage, executionTask: null));
             }
         };
     }
@@ -159,7 +161,8 @@ internal static class HookTimeoutHelper
             }
             catch (OperationCanceledException) when (cts.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
             {
-                throw new TimeoutException($"Hook '{hookName}' exceeded timeout of {timeoutMs}ms");
+                var baseMessage = $"Hook '{hookName}' exceeded timeout of {timeoutMs}ms";
+                throw new TimeoutException(TimeoutDiagnostics.BuildTimeoutDiagnosticsMessage(baseMessage, executionTask: null));
             }
         };
     }
