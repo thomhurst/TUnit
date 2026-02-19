@@ -25,7 +25,7 @@ namespace TUnit.Core;
 /// <example>
 /// <code>
 /// // Set a 500ms performance baseline
-/// [Test, PerformanceBaseline(MaxDurationMs = 500)]
+/// [Test, PerformanceBaseline(500)]
 /// public async Task FastOperation()
 /// {
 ///     await DoWork(); // Warning if this takes longer than 500ms
@@ -36,16 +36,26 @@ namespace TUnit.Core;
 public class PerformanceBaselineAttribute : TUnitAttribute, ITestEndEventReceiver
 {
     /// <summary>
+    /// Initializes a new instance of the <see cref="PerformanceBaselineAttribute"/> class
+    /// with the specified maximum duration.
+    /// </summary>
+    /// <param name="maxDurationMs">The maximum expected duration in milliseconds.</param>
+    public PerformanceBaselineAttribute(int maxDurationMs)
+    {
+        MaxDurationMs = maxDurationMs;
+    }
+
+    /// <summary>
     /// When set to <c>true</c>, performance baseline violations will cause the test to fail
     /// instead of emitting a warning. This is set by the engine when <c>--performance-baseline-fail</c> is specified.
     /// </summary>
     internal static bool FailOnViolation { get; set; }
 
     /// <summary>
-    /// Gets or sets the maximum expected duration in milliseconds.
+    /// Gets the maximum expected duration in milliseconds.
     /// If the test exceeds this duration, a warning or failure is produced.
     /// </summary>
-    public int MaxDurationMs { get; set; }
+    public int MaxDurationMs { get; }
 
     /// <inheritdoc />
 #if NET
