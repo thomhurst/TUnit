@@ -500,6 +500,9 @@ namespace .Collections
         public static . CheckDoesNotContainPredicate<TItem>(.<TItem> adapter, <TItem, bool> predicate) { }
         public static . CheckDoesNotContainValue<TKey, TValue>(.<TKey, TValue> adapter, TValue value, .<TValue>? comparer = null) { }
         public static . CheckDoesNotOverlap<TItem>(.<TItem> adapter, .<TItem> other) { }
+        public static . CheckHasAtLeast<TItem>(.<TItem> adapter, int minCount) { }
+        public static . CheckHasAtMost<TItem>(.<TItem> adapter, int maxCount) { }
+        public static . CheckHasCountBetween<TItem>(.<TItem> adapter, int min, int max) { }
         public static . CheckHasDistinctItems<TItem>(.<TItem> adapter, .<TItem>? comparer = null) { }
         public static . CheckHasSingleItem<TItem>(.<TItem> adapter) { }
         public static . CheckHasSingleItemPredicate<TItem>(.<TItem> adapter, <TItem, bool> predicate, out TItem? matchingItem) { }
@@ -638,9 +641,27 @@ namespace .Conditions
         protected override . CheckMaterialized(.<TItem> items) { }
         protected override string GetExpectation() { }
     }
+    public class AsyncEnumerableHasAtLeastAssertion<TItem> : .<TItem>
+    {
+        public AsyncEnumerableHasAtLeastAssertion(.<.<TItem>> context, int minCount) { }
+        protected override . CheckMaterialized(.<TItem> items) { }
+        protected override string GetExpectation() { }
+    }
+    public class AsyncEnumerableHasAtMostAssertion<TItem> : .<TItem>
+    {
+        public AsyncEnumerableHasAtMostAssertion(.<.<TItem>> context, int maxCount) { }
+        protected override . CheckMaterialized(.<TItem> items) { }
+        protected override string GetExpectation() { }
+    }
     public class AsyncEnumerableHasCountAssertion<TItem> : .<TItem>
     {
         public AsyncEnumerableHasCountAssertion(.<.<TItem>> context, int expected) { }
+        protected override . CheckMaterialized(.<TItem> items) { }
+        protected override string GetExpectation() { }
+    }
+    public class AsyncEnumerableHasCountBetweenAssertion<TItem> : .<TItem>
+    {
+        public AsyncEnumerableHasCountBetweenAssertion(.<.<TItem>> context, int min, int max) { }
         protected override . CheckMaterialized(.<TItem> items) { }
         protected override string GetExpectation() { }
     }
@@ -825,6 +846,27 @@ namespace .Conditions
         where TCollection : .<TItem>
     {
         public CollectionDoesNotContainPredicateAssertion(.<TCollection> context, <TItem, bool> predicate, string predicateDescription) { }
+        protected override .<.> CheckAsync(.<TCollection> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class CollectionHasAtLeastAssertion<TCollection, TItem> : .<TCollection, TItem>
+        where TCollection : .<TItem>
+    {
+        public CollectionHasAtLeastAssertion(.<TCollection> context, int minCount) { }
+        protected override .<.> CheckAsync(.<TCollection> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class CollectionHasAtMostAssertion<TCollection, TItem> : .<TCollection, TItem>
+        where TCollection : .<TItem>
+    {
+        public CollectionHasAtMostAssertion(.<TCollection> context, int maxCount) { }
+        protected override .<.> CheckAsync(.<TCollection> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class CollectionHasCountBetweenAssertion<TCollection, TItem> : .<TCollection, TItem>
+        where TCollection : .<TItem>
+    {
+        public CollectionHasCountBetweenAssertion(.<TCollection> context, int min, int max) { }
         protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
     }
@@ -5619,7 +5661,10 @@ namespace .Sources
         public .<TItem> Contains(TItem expected, .<TItem>? comparer = null, [.("expected")] string? expression = null) { }
         public .<TItem> DoesNotContain(TItem expected, .<TItem>? comparer = null, [.("expected")] string? expression = null) { }
         protected override string GetExpectation() { }
+        public .<TItem> HasAtLeast(int minCount, [.("minCount")] string? expression = null) { }
+        public .<TItem> HasAtMost(int maxCount, [.("maxCount")] string? expression = null) { }
         public .<TItem> HasCount(int expected, [.("expected")] string? expression = null) { }
+        public .<TItem> HasCountBetween(int min, int max, [.("min")] string? minExpression = null, [.("max")] string? maxExpression = null) { }
         public .<TExpected, .<TItem>> IsAssignableTo<TExpected>() { }
         public .<TItem> IsEmpty() { }
         public .<TExpected, .<TItem>> IsNotAssignableTo<TExpected>() { }
@@ -5671,11 +5716,14 @@ namespace .Sources
         public .<TCollection, TItem> DoesNotContain(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
         public .<TCollection, TItem> DoesNotContain(TItem expected, [.("expected")] string? expression = null) { }
         protected override string GetExpectation() { }
+        public .<TCollection, TItem> HasAtLeast(int minCount, [.("minCount")] string? expression = null) { }
+        public .<TCollection, TItem> HasAtMost(int maxCount, [.("maxCount")] string? expression = null) { }
         [("Use Count() instead, which provides all numeric assertion methods. Example: Asser" +
             "(list).Count().IsGreaterThan(5)")]
         public ..CountWrapper<TCollection, TItem> HasCount() { }
         [("Use Count().IsEqualTo(expectedCount) instead.")]
         public .<TCollection, TItem> HasCount(int expectedCount, [.("expectedCount")] string? expression = null) { }
+        public .<TCollection, TItem> HasCountBetween(int min, int max, [.("min")] string? minExpression = null, [.("max")] string? maxExpression = null) { }
         public .<TCollection, TItem> HasDistinctItems() { }
         public .<TCollection, TItem> HasSingleItem() { }
         public .<TCollection, TItem> HasSingleItem(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
