@@ -1,5 +1,9 @@
 ﻿namespace TUnit.Core;
 
+/// <summary>
+/// Specifies the scope at which a hook (<see cref="BeforeAttribute"/>, <see cref="AfterAttribute"/>,
+/// <see cref="BeforeEveryAttribute"/>, <see cref="AfterEveryAttribute"/>) runs.
+/// </summary>
 public enum HookType
 {
     /// <summary>
