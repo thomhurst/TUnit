@@ -361,7 +361,11 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
                     await tcs.Task.ConfigureAwait(false);
                 });
 
-                // This wait is safe because it's on a Task.Run thread without SynchronizationContext
+                // This blocking wait is intentional and safe from deadlocks because:
+                // 1. We verified above that the current thread is NOT the dedicated thread
+                // 2. The work is posted to the dedicated thread's queue via Post()
+                // 3. waitTask runs via Task.Run without a SynchronizationContext, so no context capture
+                // 4. SynchronizationContext.Send is synchronous by API contract — blocking is required
                 waitTask.GetAwaiter().GetResult();
             }
         }
