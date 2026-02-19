@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Net;
 using System.Reflection;
 using System.Text;
 using Microsoft.Testing.Platform.Extensions;
@@ -136,7 +137,7 @@ public class HtmlReporter(IExtension extension) : IDataConsumer, ITestHostApplic
         sb.AppendLine("<head>");
         sb.AppendLine("<meta charset=\"UTF-8\">");
         sb.AppendLine("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">");
-        sb.AppendLine($"<title>Test Report - {HtmlEncode(assemblyName)}</title>");
+        sb.AppendLine($"<title>Test Report - {WebUtility.HtmlEncode(assemblyName)}</title>");
         sb.AppendLine("<style>");
         sb.AppendLine(GetCss());
         sb.AppendLine("</style>");
@@ -145,12 +146,12 @@ public class HtmlReporter(IExtension extension) : IDataConsumer, ITestHostApplic
         sb.AppendLine("<div class=\"container\">");
 
         // Header
-        sb.AppendLine($"<h1>Test Report: {HtmlEncode(assemblyName)}</h1>");
+        sb.AppendLine($"<h1>Test Report: {WebUtility.HtmlEncode(assemblyName)}</h1>");
         sb.AppendLine($"<p class=\"timestamp\">Generated: {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC</p>");
 
         if (!string.IsNullOrEmpty(Filter))
         {
-            sb.AppendLine($"<p class=\"filter\">Filter: <code>{HtmlEncode(Filter)}</code></p>");
+            sb.AppendLine($"<p class=\"filter\">Filter: <code>{WebUtility.HtmlEncode(Filter)}</code></p>");
         }
 
         // Summary
@@ -200,10 +201,10 @@ public class HtmlReporter(IExtension extension) : IDataConsumer, ITestHostApplic
             var details = GetDetails(stateProperty);
 
             sb.AppendLine($"<tr class=\"{cssClass}\">");
-            sb.AppendLine($"<td class=\"test-name\">{HtmlEncode(name)}</td>");
-            sb.AppendLine($"<td class=\"status\"><span class=\"badge {cssClass}\">{HtmlEncode(status)}</span></td>");
-            sb.AppendLine($"<td class=\"duration\">{HtmlEncode(durationText)}</td>");
-            sb.AppendLine($"<td class=\"details\">{(string.IsNullOrEmpty(details) ? "" : $"<pre>{HtmlEncode(details)}</pre>")}</td>");
+            sb.AppendLine($"<td class=\"test-name\">{WebUtility.HtmlEncode(name)}</td>");
+            sb.AppendLine($"<td class=\"status\"><span class=\"badge {cssClass}\">{WebUtility.HtmlEncode(status)}</span></td>");
+            sb.AppendLine($"<td class=\"duration\">{WebUtility.HtmlEncode(durationText)}</td>");
+            sb.AppendLine($"<td class=\"details\">{(string.IsNullOrEmpty(details) ? "" : $"<pre>{WebUtility.HtmlEncode(details)}</pre>")}</td>");
             sb.AppendLine("</tr>");
         }
 
@@ -313,21 +314,6 @@ public class HtmlReporter(IExtension extension) : IDataConsumer, ITestHostApplic
         }
 
         return $"{duration.TotalMinutes:F1}m";
-    }
-
-    private static string HtmlEncode(string? value)
-    {
-        if (value is null || value.Length == 0)
-        {
-            return string.Empty;
-        }
-
-        return value
-            .Replace("&", "&amp;")
-            .Replace("<", "&lt;")
-            .Replace(">", "&gt;")
-            .Replace("\"", "&quot;")
-            .Replace("'", "&#39;");
     }
 
     private static string GetDefaultOutputPath()
