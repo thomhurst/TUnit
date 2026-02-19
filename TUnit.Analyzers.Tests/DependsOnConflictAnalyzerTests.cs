@@ -82,8 +82,18 @@ public class DependsOnConflictAnalyzerTests
 
             Verifier
                 .Diagnostic(Rules.DependsOnConflicts)
+                .WithMessage("DependsOn Conflicts: MyClass1.Test2 > MyClass2.Test > MyClass1.Test > MyClass2.Test2 > MyClass1.Test2")
+                .WithLocation(1),
+
+            Verifier
+                .Diagnostic(Rules.DependsOnConflicts)
                 .WithMessage("DependsOn Conflicts: MyClass2.Test > MyClass1.Test > MyClass2.Test")
-                .WithLocation(2)
+                .WithLocation(2),
+
+            Verifier
+                .Diagnostic(Rules.DependsOnConflicts)
+                .WithMessage("DependsOn Conflicts: MyClass2.Test2 > MyClass1.Test > MyClass2.Test > MyClass1.Test2 > MyClass2.Test2")
+                .WithLocation(3)
         );
     }
 
@@ -131,8 +141,18 @@ public class DependsOnConflictAnalyzerTests
 
             Verifier
                 .Diagnostic(Rules.DependsOnConflicts)
+                .WithMessage("DependsOn Conflicts: MyClass1.Test2 > MyClass2.Test > MyClass1.Test > MyClass2.Test2 > MyClass1.Test2")
+                .WithLocation(1),
+
+            Verifier
+                .Diagnostic(Rules.DependsOnConflicts)
                 .WithMessage("DependsOn Conflicts: MyClass2.Test > MyClass1.Test > MyClass2.Test")
-                .WithLocation(2)
+                .WithLocation(2),
+
+            Verifier
+                .Diagnostic(Rules.DependsOnConflicts)
+                .WithMessage("DependsOn Conflicts: MyClass2.Test2 > MyClass1.Test > MyClass2.Test > MyClass1.Test2 > MyClass2.Test2")
+                .WithLocation(3)
         );
     }
 
