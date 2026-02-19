@@ -122,30 +122,32 @@ internal static class TestExtensions
 
         var cachedProps = GetOrCreateCachedProperties(testContext);
 
-        var estimatedCount = EstimateCount(testContext, stateProperty, isTrxEnabled);
-
-        var properties = new List<IProperty>(estimatedCount)
-        {
-            stateProperty,
-            cachedProps.FileLocation,
-            cachedProps.MethodIdentifier
-        };
+        var propertyBag = new PropertyBag();
+        propertyBag.Add(stateProperty);
+        propertyBag.Add(cachedProps.FileLocation);
+        propertyBag.Add(cachedProps.MethodIdentifier);
 
         if (cachedProps.CategoryProperties != null)
         {
-            properties.AddRange(cachedProps.CategoryProperties);
+            foreach (var property in cachedProps.CategoryProperties)
+            {
+                propertyBag.Add(property);
+            }
         }
 
         if (cachedProps.CustomProperties != null)
         {
-            properties.AddRange(cachedProps.CustomProperties);
+            foreach (var property in cachedProps.CustomProperties)
+            {
+                propertyBag.Add(property);
+            }
         }
 
         if (isFinalState && testContext.Output.Artifacts.Count > 0)
         {
             foreach (var artifact in testContext.Artifacts)
             {
-                properties.Add(new FileArtifactProperty(artifact.File, artifact.DisplayName, artifact.Description));
+                propertyBag.Add(new FileArtifactProperty(artifact.File, artifact.DisplayName, artifact.Description));
             }
         }
 
@@ -159,27 +161,27 @@ internal static class TestExtensions
 
             if (!string.IsNullOrEmpty(output))
             {
-                properties.Add(new StandardOutputProperty(output));
+                propertyBag.Add(new StandardOutputProperty(output));
             }
 
             if (!string.IsNullOrEmpty(error))
             {
-                properties.Add(new StandardErrorProperty(error));
+                propertyBag.Add(new StandardErrorProperty(error));
             }
         }
 
         if (isFinalState && isTrxEnabled)
         {
-            properties.Add(new TrxFullyQualifiedTypeNameProperty(cachedProps.TrxFullyQualifiedTypeName!));
+            propertyBag.Add(new TrxFullyQualifiedTypeNameProperty(cachedProps.TrxFullyQualifiedTypeName!));
 
             if (cachedProps.TrxCategories != null)
             {
-                properties.Add(cachedProps.TrxCategories);
+                propertyBag.Add(cachedProps.TrxCategories);
             }
 
             if (GetTrxMessages(testContext, output, error).ToArray() is { Length: > 0 } trxMessages)
             {
-                properties.Add(new TrxMessagesProperty(trxMessages));
+                propertyBag.Add(new TrxMessagesProperty(trxMessages));
             }
 
             if (stateProperty is ErrorTestNodeStateProperty or FailedTestNodeStateProperty or TimeoutTestNodeStateProperty)
@@ -188,25 +190,25 @@ internal static class TestExtensions
 
                 if (exception is not null)
                 {
-                    properties.Add(new TrxExceptionProperty(exception.Message, exception.StackTrace));
+                    propertyBag.Add(new TrxExceptionProperty(exception.Message, exception.StackTrace));
                 }
                 else if (!string.IsNullOrEmpty(explanation))
                 {
-                    properties.Add(new TrxExceptionProperty(explanation, string.Empty));
+                    propertyBag.Add(new TrxExceptionProperty(explanation, string.Empty));
                 }
             }
         }
 
         if (isFinalState)
         {
-            properties.Add(GetTimingProperty(testContext, testContext.Execution.TestStart.GetValueOrDefault()));
+            propertyBag.Add(GetTimingProperty(testContext, testContext.Execution.TestStart.GetValueOrDefault()));
         }
 
         var testNode = new TestNode
         {
             Uid = new TestNodeUid(testDetails.TestId),
             DisplayName = testContext.GetDisplayName(),
-            Properties = new PropertyBag(properties)
+            Properties = propertyBag
         };
 
         return testNode;

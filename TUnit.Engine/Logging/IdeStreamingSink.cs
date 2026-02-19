@@ -207,10 +207,8 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
 
         // Build properties list with cumulative output
         // Rider replaces the displayed output with each update, so we send full snapshots.
-        var properties = new List<IProperty>(3)
-        {
-            InProgressTestNodeStateProperty.CachedInstance
-        };
+        var properties = new PropertyBag();
+        properties.Add(InProgressTestNodeStateProperty.CachedInstance);
 
         if (!string.IsNullOrEmpty(output))
         {
@@ -226,7 +224,7 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
         {
             Uid = new TestNodeUid(testId),
             DisplayName = testContext.GetDisplayName(),
-            Properties = new PropertyBag(properties)
+            Properties = properties
         };
     }
 
