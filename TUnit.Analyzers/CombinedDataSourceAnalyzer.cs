@@ -63,8 +63,7 @@ public class CombinedDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
             x.IsCombinedDataSourceAttribute(context.Compilation));
 
         var parametersWithDataSources = parameters
-            .Where(p => p.HasDataSourceAttribute(context.Compilation))
-            .ToList();
+            .Where(p => p.HasDataSourceAttribute(context.Compilation));
 
         // Rule 1: If parameters have data source attributes, CombinedDataSources must be present
         if (parametersWithDataSources.Any() && !hasCombinedDataSource)
@@ -81,8 +80,7 @@ public class CombinedDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
             // Filter out CancellationToken parameters as they're handled by the engine
             var nonCancellationTokenParams = parameters
                 .Where(p => p.Type.GloballyQualifiedNonGeneric() !=
-                           "global::System.Threading.CancellationToken")
-                .ToList();
+                           "global::System.Threading.CancellationToken");
 
             foreach (var parameter in nonCancellationTokenParams)
             {

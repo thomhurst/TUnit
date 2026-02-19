@@ -142,8 +142,7 @@ public static class ReflectionExtensions
         var filteredList = customAttributeDataList
             .Where(x => attributeType == typeof(Attribute) || (inherit
                 ? x.AttributeType.IsAssignableTo(attributeType)
-                : x.AttributeType == attributeType))
-            .ToList();
+                : x.AttributeType == attributeType));
 
         foreach (var attributeData in filteredList)
         {
