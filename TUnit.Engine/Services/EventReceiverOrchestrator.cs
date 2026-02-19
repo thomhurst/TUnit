@@ -12,7 +12,7 @@ using TUnit.Engine.Utilities;
 
 namespace TUnit.Engine.Services;
 
-internal sealed class EventReceiverOrchestrator : IDisposable
+internal sealed class EventReceiverOrchestrator
 {
     private readonly EventReceiverRegistry _registry = new();
     private readonly TUnitFrameworkLogger _logger;
@@ -547,8 +547,4 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         }
     }
 
-    public void Dispose()
-    {
-        // No longer need to dispose _registry - it no longer uses ReaderWriterLockSlim
-    }
 }

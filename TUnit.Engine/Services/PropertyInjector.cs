@@ -169,7 +169,7 @@ internal sealed class PropertyInjector
     }
 
     private async Task InjectPropertiesRecursiveAsync(
-        object instance,
+        object? instance,
         ConcurrentDictionary<string, object?> objectBag,
         MethodMetadata? methodMetadata,
         TestContextEvents events,
