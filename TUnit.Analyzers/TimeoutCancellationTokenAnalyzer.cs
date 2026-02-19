@@ -65,6 +65,8 @@ public class TimeoutCancellationTokenAnalyzer : ConcurrentDiagnosticAnalyzer
             }
         }
 
+        var lastParameter = parameters[parameters.Length - 1];
+
         if (cancellationTokenIndex == -1)
         {
             // CancellationToken is not present at all
@@ -78,7 +80,7 @@ public class TimeoutCancellationTokenAnalyzer : ConcurrentDiagnosticAnalyzer
             // CancellationToken exists but is not the last parameter
             context.ReportDiagnostic(
                 Diagnostic.Create(Rules.CancellationTokenMustBeLastParameter,
-                    context.Symbol.Locations.FirstOrDefault())
+                    parameters[cancellationTokenIndex].Locations.FirstOrDefault() ?? context.Symbol.Locations.FirstOrDefault())
             );
         }
     }
