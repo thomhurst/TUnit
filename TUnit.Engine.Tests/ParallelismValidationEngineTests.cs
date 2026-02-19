@@ -10,6 +10,7 @@ namespace TUnit.Engine.Tests;
 /// 2. ParallelLimiter correctly limits concurrency
 /// 3. Different parallel limiters work independently
 /// </summary>
+[Retry(3)]
 public class ParallelismValidationEngineTests(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]

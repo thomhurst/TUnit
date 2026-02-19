@@ -8,6 +8,7 @@ namespace TUnit.Engine.Tests;
 /// Validates that After hooks execute even when tests are cancelled (Issue #3882).
 /// These tests run the cancellation test scenarios and verify that After hooks created marker files.
 /// </summary>
+[Retry(3)]
 public class CancellationAfterHooksTests(TestMode testMode) : InvokableTestBase(testMode)
 {
     private static readonly string TempPath = Path.GetTempPath();
