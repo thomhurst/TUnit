@@ -5,12 +5,57 @@ using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
 
+/// <summary>
+/// Provides test data from a method, property, or field on the specified type <typeparamref name="T"/>.
+/// </summary>
+/// <typeparam name="T">The type containing the data source member.</typeparam>
+/// <param name="methodNameProvidingDataSource">The name of the method, property, or field that provides the test data.</param>
+/// <example>
+/// <code>
+/// [Test]
+/// [MethodDataSource&lt;TestDataProvider&gt;(nameof(TestDataProvider.GetTestCases))]
+/// public void MyTest(int input, string expected) { }
+/// </code>
+/// </example>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Parameter, AllowMultiple = true)]
 public class MethodDataSourceAttribute<
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)]
 T>(string methodNameProvidingDataSource)
     : MethodDataSourceAttribute(typeof(T), methodNameProvidingDataSource);
 
+/// <summary>
+/// Provides test data from a method, property, or field in the test class or a specified type.
+/// </summary>
+/// <remarks>
+/// <para>
+/// The data source can be a method, property, or field that returns test data.
+/// Supported return types include single values, <see cref="IEnumerable{T}"/>, <see cref="IAsyncEnumerable{T}"/>,
+/// <see cref="Task{T}"/>, tuples, and arrays.
+/// </para>
+/// <para>
+/// When no class type is specified, the data source is looked up in the test class itself.
+/// Both static and instance members are supported.
+/// </para>
+/// </remarks>
+/// <example>
+/// <code>
+/// // Using a method in the same class
+/// [Test]
+/// [MethodDataSource(nameof(GetTestData))]
+/// public void MyTest(int value, string name) { }
+///
+/// public static IEnumerable&lt;(int, string)&gt; GetTestData()
+/// {
+///     yield return (1, "one");
+///     yield return (2, "two");
+/// }
+///
+/// // Using a method in another class
+/// [Test]
+/// [MethodDataSource(typeof(SharedData), nameof(SharedData.GetValues))]
+/// public void MyTest(string value) { }
+/// </code>
+/// </example>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Parameter, AllowMultiple = true)]
 public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
 {
@@ -20,12 +65,27 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         | System.Reflection.BindingFlags.Instance
         | System.Reflection.BindingFlags.FlattenHierarchy;
 
+    /// <summary>
+    /// Gets the type containing the data source member, or <c>null</c> if the data source is in the test class itself.
+    /// </summary>
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)]
     public Type? ClassProvidingDataSource { get; }
+
+    /// <summary>
+    /// Gets the name of the method, property, or field that provides the test data.
+    /// </summary>
     public string MethodNameProvidingDataSource { get; }
 
+    /// <summary>
+    /// Gets or sets an AOT-safe factory function for providing test data programmatically.
+    /// When set, this factory is used instead of reflection-based member lookup.
+    /// </summary>
     public Func<DataGeneratorMetadata, IAsyncEnumerable<Func<Task<object?[]?>>>>? Factory { get; set; }
 
+    /// <summary>
+    /// Gets or sets the arguments to pass to the data source method.
+    /// Use this when the data source method requires parameters.
+    /// </summary>
     public object?[] Arguments { get; set; } = [];
 
     /// <inheritdoc />

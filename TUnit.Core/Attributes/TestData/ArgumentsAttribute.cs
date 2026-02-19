@@ -32,8 +32,15 @@ namespace TUnit.Core;
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Parameter, AllowMultiple = true)]
 public sealed class ArgumentsAttribute : Attribute, IDataSourceAttribute, ITestRegisteredEventReceiver
 {
+    /// <summary>
+    /// Gets the array of argument values to pass to the test method.
+    /// </summary>
     public object?[] Values { get; }
 
+    /// <summary>
+    /// Gets or sets a reason to skip this specific test case.
+    /// When set, the test case will be skipped with the given reason.
+    /// </summary>
     public string? Skip { get; set; }
 
     /// <summary>
@@ -60,6 +67,10 @@ public sealed class ArgumentsAttribute : Attribute, IDataSourceAttribute, ITestR
     /// <inheritdoc />
     public bool SkipIfEmpty { get; set; }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ArgumentsAttribute"/> class with the specified test argument values.
+    /// </summary>
+    /// <param name="values">The argument values to pass to the test method. Pass <c>null</c> for a single null argument.</param>
     public ArgumentsAttribute(params object?[]? values)
     {
         if (values == null)
@@ -112,9 +123,26 @@ public ValueTask OnTestRegistered(TestRegisteredContext context)
     public int Order => 0;
 }
 
+/// <summary>
+/// Provides a strongly-typed inline value for a parameterized test with a single parameter.
+/// </summary>
+/// <typeparam name="T">The type of the test parameter.</typeparam>
+/// <param name="value">The value to pass to the test method.</param>
+/// <example>
+/// <code>
+/// [Test]
+/// [Arguments&lt;string&gt;("hello")]
+/// [Arguments&lt;string&gt;("world")]
+/// public void TestWithString(string input) { }
+/// </code>
+/// </example>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Parameter, AllowMultiple = true)]
 public sealed class ArgumentsAttribute<T>(T value) : TypedDataSourceAttribute<T>, ITestRegisteredEventReceiver
 {
+    /// <summary>
+    /// Gets or sets a reason to skip this specific test case.
+    /// When set, the test case will be skipped with the given reason.
+    /// </summary>
     public string? Skip { get; set; }
 
     /// <summary>

@@ -5,7 +5,9 @@ using TUnit.Core.Interfaces;
 namespace TUnit.Core;
 
 /// <summary>
-/// Simplified test details for the new architecture
+/// Contains detailed metadata about a test, including its identity, class type, method information,
+/// arguments, timeout, retry settings, categories, and custom properties.
+/// Access via <see cref="TestContext.Metadata"/> and its <see cref="Interfaces.ITestMetadata.TestDetails"/> property.
 /// </summary>
 public partial class TestDetails : ITestIdentity, ITestClass, ITestMethod, ITestConfiguration, ITestLocation, ITestDetailsMetadata
 {

@@ -11,8 +11,22 @@ using TUnit.Core.Services;
 namespace TUnit.Core;
 
 /// <summary>
-/// Simplified test context for the new architecture
+/// Provides access to the current test's metadata, execution state, output, and configuration.
+/// Use <see cref="Current"/> to access the context of the currently executing test.
 /// </summary>
+/// <remarks>
+/// <para>
+/// TestContext exposes its functionality through organized interface properties:
+/// <see cref="Execution"/> for test lifecycle and result management,
+/// <see cref="Output"/> for capturing output and attaching artifacts,
+/// <see cref="Metadata"/> for test identity and details,
+/// <see cref="Parallelism"/> for parallel execution control,
+/// <see cref="Dependencies"/> for test dependency information,
+/// <see cref="StateBag"/> for storing custom state during test execution,
+/// <see cref="Events"/> for subscribing to test lifecycle events,
+/// and <see cref="Isolation"/> for creating unique resource names.
+/// </para>
+/// </remarks>
 [DebuggerDisplay("{TestDetails.ClassType.Name}.{GetDisplayName(),nq}")]
 public partial class TestContext : Context,
     ITestExecution, ITestParallelization, ITestOutput, ITestMetadata, ITestDependencies, ITestStateBag, ITestEvents, ITestIsolation
@@ -35,16 +49,49 @@ public partial class TestContext : Context,
         _testContextsById[Id] = this;
     }
 
+    /// <summary>
+    /// Gets the unique identifier for this test instance.
+    /// </summary>
     public string Id { get; }
 
-    // Zero-allocation interface properties for organized API access
+    /// <summary>
+    /// Gets access to test execution state, result management, cancellation, and retry information.
+    /// </summary>
     public ITestExecution Execution => this;
+
+    /// <summary>
+    /// Gets access to parallel execution control and priority configuration.
+    /// </summary>
     public ITestParallelization Parallelism => this;
+
+    /// <summary>
+    /// Gets access to test output capture, timing, and artifact management.
+    /// </summary>
     public ITestOutput Output => this;
+
+    /// <summary>
+    /// Gets access to test identity, details, and display name configuration.
+    /// </summary>
     public ITestMetadata Metadata => this;
+
+    /// <summary>
+    /// Gets access to test dependency information and relationship queries.
+    /// </summary>
     public ITestDependencies Dependencies => this;
+
+    /// <summary>
+    /// Gets access to a thread-safe bag for storing custom state during test execution.
+    /// </summary>
     public ITestStateBag StateBag => this;
+
+    /// <summary>
+    /// Gets access to test lifecycle events (registered, start, end, skip, retry, dispose).
+    /// </summary>
     public ITestEvents Events => this;
+
+    /// <summary>
+    /// Gets access to helpers for creating isolated resource names unique to this test instance.
+    /// </summary>
     public ITestIsolation Isolation => this;
 
     internal IServiceProvider Services => ServiceProvider;
@@ -61,6 +108,20 @@ public partial class TestContext : Context,
     private string? _buildTimeOutput;
     private string? _buildTimeErrorOutput;
 
+    /// <summary>
+    /// Gets the <see cref="TestContext"/> for the currently executing test, or <c>null</c> if no test is running.
+    /// This is an async-local property that is automatically set by the test engine.
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// [Test]
+    /// public void MyTest()
+    /// {
+    ///     var context = TestContext.Current!;
+    ///     context.Output.WriteLine("Running test: " + context.Metadata.TestName);
+    /// }
+    /// </code>
+    /// </example>
     public static new TestContext? Current
     {
         get => TestContexts.Value;
@@ -71,8 +132,16 @@ public partial class TestContext : Context,
         }
     }
 
+    /// <summary>
+    /// Gets a <see cref="TestContext"/> by its unique identifier, or <c>null</c> if not found.
+    /// </summary>
+    /// <param name="id">The unique identifier of the test context.</param>
+    /// <returns>The matching <see cref="TestContext"/>, or <c>null</c>.</returns>
     public static TestContext? GetById(string id) => _testContextsById.GetValueOrDefault(id);
 
+    /// <summary>
+    /// Gets the dictionary of test parameters indexed by parameter name.
+    /// </summary>
     public static IReadOnlyDictionary<string, List<string>> Parameters => InternalParametersDictionary;
 
     private static IConfiguration? _configuration;
@@ -91,6 +160,10 @@ public partial class TestContext : Context,
         internal set => _configuration = value;
     }
 
+    /// <summary>
+    /// Gets the output directory of the test assembly, or <c>null</c> if it cannot be determined.
+    /// This is typically the directory where the test binaries are located.
+    /// </summary>
     public static string? OutputDirectory
     {
         get
@@ -112,6 +185,9 @@ public partial class TestContext : Context,
         }
     }
 
+    /// <summary>
+    /// Gets or sets the current working directory for the test process.
+    /// </summary>
     public static string WorkingDirectory
     {
         get => Environment.CurrentDirectory;
@@ -147,7 +223,7 @@ public partial class TestContext : Context,
 
 
     /// <summary>
-    /// Will be null until initialized by TestOrchestrator
+    /// Gets the class-level hook context for this test, providing access to class-scoped hooks and state.
     /// </summary>
     public ClassHookContext ClassContext { get; }
 
@@ -176,6 +252,9 @@ public partial class TestContext : Context,
     /// </summary>
     internal bool IsDiscoveryInstanceReused { get; set; }
 
+    /// <summary>
+    /// Gets a synchronization object that can be used for thread-safe operations within this test context.
+    /// </summary>
     public object Lock { get; } = new();
 
 
