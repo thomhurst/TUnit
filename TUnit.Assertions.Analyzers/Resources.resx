@@ -141,4 +141,22 @@
     <data name="TUnitAssertions0013Title" xml:space="preserve">
         <value>[GenerateAssertion] method should be an extension method</value>
     </data>
+    <data name="TUnitAssertions0014Description" xml:space="preserve">
+        <value>Use .IsNull() instead of .IsEqualTo(null) for clearer intent and better error messages.</value>
+    </data>
+    <data name="TUnitAssertions0014MessageFormat" xml:space="preserve">
+        <value>Use .IsNull() instead of .IsEqualTo(null)</value>
+    </data>
+    <data name="TUnitAssertions0014Title" xml:space="preserve">
+        <value>Prefer IsNull() over IsEqualTo(null)</value>
+    </data>
+    <data name="TUnitAssertions0015Description" xml:space="preserve">
+        <value>Use .IsTrue() or .IsFalse() instead of .IsEqualTo(true) or .IsEqualTo(false) for clearer intent and better error messages.</value>
+    </data>
+    <data name="TUnitAssertions0015MessageFormat" xml:space="preserve">
+        <value>Use .{0}() instead of .IsEqualTo({1})</value>
+    </data>
+    <data name="TUnitAssertions0015Title" xml:space="preserve">
+        <value>Prefer IsTrue()/IsFalse() over IsEqualTo(true/false)</value>
+    </data>
 </root>

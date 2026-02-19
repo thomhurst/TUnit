@@ -45,6 +45,12 @@ internal static class Rules
     public static readonly DiagnosticDescriptor GenerateAssertionShouldBeExtensionMethod =
         CreateDescriptor("TUnitAssertions0013", UsageCategory, DiagnosticSeverity.Warning);
 
+    public static readonly DiagnosticDescriptor PreferIsNullOverIsEqualToNull =
+        CreateDescriptor("TUnitAssertions0014", UsageCategory, DiagnosticSeverity.Warning);
+
+    public static readonly DiagnosticDescriptor PreferIsTrueOrIsFalseOverIsEqualToBool =
+        CreateDescriptor("TUnitAssertions0015", UsageCategory, DiagnosticSeverity.Warning);
+
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {
         return new DiagnosticDescriptor(
