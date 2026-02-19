@@ -7,6 +7,7 @@ using Microsoft.Testing.Platform.Extensions.TestHost;
 using TUnit.Engine.Configuration;
 using TUnit.Engine.Constants;
 using TUnit.Engine.Framework;
+using TUnit.Engine.Helpers;
 using TUnit.Engine.Xml;
 
 namespace TUnit.Engine.Reporters;
@@ -37,8 +38,11 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
         // Determine output path (only if not already set via command-line argument)
         if (string.IsNullOrEmpty(_outputPath))
         {
-            _outputPath = Environment.GetEnvironmentVariable(EnvironmentConstants.JUnitXmlOutputPath)
-                ?? GetDefaultOutputPath();
+            var envPath = Environment.GetEnvironmentVariable(EnvironmentConstants.JUnitXmlOutputPath);
+
+            _outputPath = envPath is not null
+                ? PathValidator.ValidateAndNormalizePath(envPath, nameof(EnvironmentConstants.JUnitXmlOutputPath))
+                : GetDefaultOutputPath();
         }
 
         _isEnabled = true;
@@ -101,18 +105,17 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
 
     internal void SetOutputPath(string path)
     {
-        if (string.IsNullOrWhiteSpace(path))
-        {
-            throw new ArgumentException("Output path cannot be null or empty", nameof(path));
-        }
-
-        _outputPath = path;
+        _outputPath = PathValidator.ValidateAndNormalizePath(path, nameof(path));
     }
 
     private static string GetDefaultOutputPath()
     {
         var assemblyName = Assembly.GetEntryAssembly()?.GetName().Name ?? "TestResults";
-        return Path.Combine("TestResults", $"{assemblyName}-junit.xml");
+
+        // Sanitize assembly name to remove any characters that could be used for path traversal
+        var sanitizedName = string.Concat(assemblyName.Split(Path.GetInvalidFileNameChars()));
+
+        return Path.GetFullPath(Path.Combine("TestResults", $"{sanitizedName}-junit.xml"));
     }
 
     private static async Task WriteXmlFileAsync(string path, string content, CancellationToken cancellationToken)

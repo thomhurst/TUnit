@@ -9,6 +9,7 @@ using Microsoft.Testing.Platform.Extensions.TestHost;
 using TUnit.Engine.Configuration;
 using TUnit.Engine.Constants;
 using TUnit.Engine.Framework;
+using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Reporters;
 
@@ -43,7 +44,8 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             return false;
         }
 
-        _outputSummaryFilePath = fileName;
+        // Validate and normalize the path to prevent path traversal attacks
+        _outputSummaryFilePath = PathValidator.ValidateAndNormalizePath(fileName, "GITHUB_STEP_SUMMARY");
 
         // Determine reporter style from environment variable or default to collapsible
         var styleEnv = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubReporterStyle);
