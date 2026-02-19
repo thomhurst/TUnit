@@ -67,6 +67,10 @@ public class AotConverterGenerator : IIncrementalGenerator
                     var stackTrace = ex.StackTrace ?? "No stack trace";
                     throw new InvalidOperationException($"NullReferenceException in ScanTestParameters: {ex.Message}\nStack: {stackTrace}", ex);
                 }
+                catch (Exception ex) when (ex is not OperationCanceledException)
+                {
+                    throw new InvalidOperationException($"Error in AotConverterGenerator.ScanTestParameters: {ex.GetType().Name}: {ex.Message}", ex);
+                }
             })
             .Combine(enabledProvider)
             .WithTrackingName(ParseAotConverter);
@@ -88,12 +92,14 @@ public class AotConverterGenerator : IIncrementalGenerator
                     new DiagnosticDescriptor(
                         id: "TUNITGEN001",
                         title: "TUnit.AotConverterGenerator Failed",
-                        messageFormat: "Generator failed with exception: {0}",
+                        messageFormat: "AotConverterGenerator failed: {0}: {1}",
                         category: "TUnit.Generator",
                         defaultSeverity: DiagnosticSeverity.Error,
                         isEnabledByDefault: true,
                         description: e.ToString()),
-                    Location.None));
+                    Location.None,
+                    e.GetType().Name,
+                    e.Message));
             }
         });
     }
@@ -544,31 +550,37 @@ public class AotConverterGenerator : IIncrementalGenerator
             {
                 if (conversion.SourceType == null || conversion.TargetType == null)
                 {
+                    var sourceDisplay = conversion.SourceType?.DisplayString ?? "null";
+                    var targetDisplay = conversion.TargetType?.DisplayString ?? "null";
                     context.ReportDiagnostic(Diagnostic.Create(
                         new DiagnosticDescriptor(
                             id: "TUNITGEN002",
                             title: "Null type in conversion",
-                            messageFormat: "Skipping converter generation: SourceType={0}, TargetType={1}",
+                            messageFormat: "Skipping converter generation: SourceType={0}, TargetType={1}. Check test data sources that use implicit conversions between these types.",
                             category: "TUnit.Generator",
                             defaultSeverity: DiagnosticSeverity.Warning,
                             isEnabledByDefault: true),
                         Location.None,
-                        conversion.SourceType?.DisplayString ?? "null",
-                        conversion.TargetType?.DisplayString ?? "null"));
+                        sourceDisplay,
+                        targetDisplay));
                     continue;
                 }
             }
             catch (Exception ex)
             {
+                var sourceDisplay = conversion.SourceType?.DisplayString ?? "unknown";
+                var targetDisplay = conversion.TargetType?.DisplayString ?? "unknown";
                 context.ReportDiagnostic(Diagnostic.Create(
                     new DiagnosticDescriptor(
                         id: "TUNITGEN003",
                         title: "Error checking conversion types",
-                        messageFormat: "Error during null check: {0}",
+                        messageFormat: "Error checking conversion types (SourceType={0}, TargetType={1}): {2}",
                         category: "TUnit.Generator",
                         defaultSeverity: DiagnosticSeverity.Warning,
                         isEnabledByDefault: true),
                     Location.None,
+                    sourceDisplay,
+                    targetDisplay,
                     ex.ToString()));
                 continue;
             }

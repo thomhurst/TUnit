@@ -285,6 +285,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var methodName = testMethod?.MethodSymbol?.Name ?? "Unknown";
             var className = testMethod?.TypeSymbol?.Name ?? "Unknown";
 
+            var location = testMethod?.MethodSymbol?.Locations.FirstOrDefault() ?? Location.None;
+
             context.ReportDiagnostic(Diagnostic.Create(
                 new DiagnosticDescriptor(
                     "TUNIT0999",
@@ -293,7 +295,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     "TUnit",
                     DiagnosticSeverity.Error,
                     true),
-                Location.None,
+                location,
                 className,
                 methodName,
                 ex.ToString())); // Use ToString() to get full stack trace for debugging

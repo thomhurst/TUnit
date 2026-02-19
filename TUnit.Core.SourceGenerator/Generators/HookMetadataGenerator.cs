@@ -79,13 +79,13 @@ public class HookMetadataGenerator : IIncrementalGenerator
             var descriptor = new DiagnosticDescriptor(
                 "THG001",
                 "Hook metadata generation failed",
-                "Failed to generate hook metadata for {0}: {1}",
+                "Failed to generate hook metadata for {0} (at {1}:{2}): {3}",
                 "TUnit",
                 DiagnosticSeverity.Error,
                 isEnabledByDefault: true);
 
             var hookName = $"{hook.MinimalTypeName}.{hook.MethodName}";
-            context.ReportDiagnostic(Diagnostic.Create(descriptor, Location.None, hookName, ex.Message));
+            context.ReportDiagnostic(Diagnostic.Create(descriptor, Location.None, hookName, hook.FilePath, hook.LineNumber, ex.Message));
         }
     }
 
