@@ -15,12 +15,12 @@ internal static class TimeoutDiagnostics
     [
         ("Monitor.Enter", "A lock (Monitor.Enter) was being acquired. This may indicate a deadlock if another thread holds the lock."),
         ("Monitor.Wait", "Monitor.Wait was called. Ensure the corresponding Monitor.Pulse/PulseAll is reachable."),
-        ("SemaphoreSlim.Wait()", "SemaphoreSlim.Wait() (synchronous) was called. Consider using SemaphoreSlim.WaitAsync() instead."),
+        ("SemaphoreSlim.Wait", "SemaphoreSlim.Wait (synchronous) was called. Consider using SemaphoreSlim.WaitAsync() instead."),
         ("ManualResetEvent.WaitOne", "ManualResetEvent.WaitOne was called. The event may never be signaled."),
         ("AutoResetEvent.WaitOne", "AutoResetEvent.WaitOne was called. The event may never be signaled."),
-        ("Task.Wait()", "Task.Wait() (synchronous) was called inside an async context. This can cause deadlocks. Use 'await' instead."),
-        (".Result", "Task.Result was accessed synchronously. This can cause deadlocks in async contexts. Use 'await' instead."),
-        (".GetAwaiter().GetResult()", "GetAwaiter().GetResult() was called synchronously. This can cause deadlocks in async contexts. Use 'await' instead."),
+        ("Task.Wait", "Task.Wait (synchronous) was called inside an async context. This can cause deadlocks. Use 'await' instead."),
+        ("get_Result", "Task.Result was accessed synchronously. This can cause deadlocks in async contexts. Use 'await' instead."),
+        ("TaskAwaiter", "GetAwaiter().GetResult() was called synchronously. This can cause deadlocks in async contexts. Use 'await' instead."),
         ("SpinWait", "A SpinWait was active. The condition being waited on may never become true."),
         ("Thread.Sleep", "Thread.Sleep was called. Consider using Task.Delay in async code."),
         ("Mutex.WaitOne", "Mutex.WaitOne was called. The mutex may be held by another thread or process."),
@@ -91,7 +91,9 @@ internal static class TimeoutDiagnostics
 
         sb.AppendLine();
         sb.AppendLine();
-        sb.Append("--- Timeout Stack Trace ---");
+        sb.Append("--- Timeout Handler Stack Trace ---");
+        sb.AppendLine();
+        sb.Append("Note: This is the timeout handler's stack trace, not the blocked test's stack.");
         sb.AppendLine();
         sb.Append(stackTrace);
 
