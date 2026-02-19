@@ -579,6 +579,7 @@ namespace
         public void AddCategory(string category) { }
         public void AddParallelConstraint(. constraint) { }
         public void AddProperty(string key, string value) { }
+        public void AddTag(string tag) { }
         public string GetDisplayName() { }
         public void SetDisplayName(string displayName) { }
         public void SetDisplayNameFormatter( formatterType) { }
@@ -1284,6 +1285,14 @@ namespace
         public static . InitializeStaticPropertiesForType( type) { }
     }
     public class TUnitAttribute :  { }
+    [(.Assembly | .Class | .Method, AllowMultiple=true)]
+    public class TagAttribute : .TUnitAttribute, ., .
+    {
+        public TagAttribute(string tag) { }
+        public int Order { get; }
+        public string Tag { get; }
+        public . OnTestDiscovered(.DiscoveredTestContext context) { }
+    }
     [(.Method)]
     public sealed class TestAttribute : .BaseTestAttribute
     {
@@ -1431,9 +1440,11 @@ namespace
         public required string MethodName { get; init; }
         public string[] Properties { get; init; }
         public int RepeatCount { get; init; }
+        public string[] Tags { get; init; }
         public required string TestId { get; init; }
         public bool HasCategory(string category) { }
         public bool HasProperty(string key, string? value = null) { }
+        public bool HasTag(string tag) { }
     }
     public class TestDetails : ., ., ., ., ., .
     {
@@ -1456,6 +1467,7 @@ namespace
         public required string MethodName { get; init; }
         public int RetryLimit { get; set; }
         public required  ReturnType { get; set; }
+        public .<string> Tags { get; }
         public required object?[] TestClassArguments { get; set; }
         public .<string, object?> TestClassInjectedPropertyArguments { get; init; }
         public []? TestClassParameterTypes { get; set; }
@@ -2425,6 +2437,7 @@ namespace .Interfaces
         .<, .<>> AttributesByType { get; }
         .<string> Categories { get; }
         .<string, .<string>> CustomProperties { get; }
+        .<string> Tags { get; }
         .<> GetAllAttributes();
         .<T> GetAttributes<T>()
             where T : ;
