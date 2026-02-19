@@ -59,22 +59,7 @@ public class AbstractTestClassWithDataSourcesAnalyzer : ConcurrentDiagnosticAnal
                     return false;
                 }
 
-                // Check for data source attributes
-                var currentType = attributeClass;
-                while (currentType != null)
-                {
-                    var typeName = currentType.Name;
-
-                    // Check for known data source attributes
-                    if (typeName.Contains("DataSource") || typeName == "ArgumentsAttribute")
-                    {
-                        return true;
-                    }
-
-                    currentType = currentType.BaseType;
-                }
-
-                // Also check if it implements IDataSourceAttribute
+                // Check if it implements IDataSourceAttribute
                 return attributeClass.AllInterfaces.Any(i =>
                     i.GloballyQualified() == WellKnown.AttributeFullyQualifiedClasses.IDataSourceAttribute.WithGlobalPrefix);
             });
@@ -103,20 +88,14 @@ public class AbstractTestClassWithDataSourcesAnalyzer : ConcurrentDiagnosticAnal
     {
         hasAnyConcreteSubclasses = false;
 
-        // Get all named types in the compilation (including referenced assemblies)
-        var allTypes = GetAllNamedTypes(context.Compilation.GlobalNamespace);
+        // Get all named types in the source assembly only (not referenced assemblies)
+        var allTypes = GetAllNamedTypes(context.Compilation.Assembly.GlobalNamespace);
 
         // Check if any concrete class inherits from the abstract class and has [InheritsTests]
         foreach (var type in allTypes)
         {
             // Skip abstract classes
             if (type.IsAbstract)
-            {
-                continue;
-            }
-
-            // Only consider types that are defined in source (not from referenced assemblies)
-            if (!type.Locations.Any(l => l.IsInSource))
             {
                 continue;
             }
