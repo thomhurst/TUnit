@@ -6,6 +6,7 @@ using Microsoft.Testing.Platform.Services;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 using TUnit.Engine.CommandLineProviders;
+using TUnit.Engine.Enums;
 using TUnit.Engine.Exceptions;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Services;
@@ -143,19 +144,27 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
 
     private static TestNodeStateProperty GetFailureStateProperty(TestContext testContext, Exception e, TimeSpan duration)
     {
-        if (testContext.Metadata.TestDetails.Timeout != null
-            && e is TaskCanceledException or OperationCanceledException or TimeoutException
+        // Unwrap AggregateException once so all downstream logic sees the real cause
+        var unwrapped = e is AggregateException { InnerExceptions.Count: > 0 } agg
+            ? agg.InnerExceptions[0]
+            : e;
+
+        var category = FailureCategorizer.Categorize(unwrapped);
+        var categoryLabel = FailureCategorizer.GetLabel(category);
+
+        if (category == FailureCategory.Timeout
+            && testContext.Metadata.TestDetails.Timeout != null
             && duration >= testContext.Metadata.TestDetails.Timeout.Value)
         {
-            return new TimeoutTestNodeStateProperty($"Test timed out after {testContext.Metadata.TestDetails.Timeout.Value.TotalMilliseconds}ms");
+            return new TimeoutTestNodeStateProperty($"[{categoryLabel}] Test timed out after {testContext.Metadata.TestDetails.Timeout.Value.TotalMilliseconds}ms");
         }
 
-        if (e.GetType().Name.Contains("Assertion", StringComparison.InvariantCulture))
+        if (category == FailureCategory.Assertion)
         {
-            return new FailedTestNodeStateProperty(e);
+            return new FailedTestNodeStateProperty(unwrapped, $"[{categoryLabel}] {unwrapped.Message}");
         }
 
-        return new ErrorTestNodeStateProperty(e);
+        return new ErrorTestNodeStateProperty(unwrapped, $"[{categoryLabel}] {unwrapped.Message}");
     }
 
     public Task<bool> IsEnabledAsync()
