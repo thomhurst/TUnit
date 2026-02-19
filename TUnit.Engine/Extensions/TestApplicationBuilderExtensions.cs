@@ -24,6 +24,9 @@ public static class TestApplicationBuilderExtensions
         var junitReporter = new JUnitReporter(extension);
         var junitReporterCommandProvider = new JUnitReporterCommandProvider(extension);
 
+        var jsonLogReporter = new JsonLogReporter(extension);
+        var jsonLogReporterCommandProvider = new JsonLogReporterCommandProvider(extension);
+
         testApplicationBuilder.RegisterTestFramework(
             serviceProvider => new TestFrameworkCapabilities(CreateCapabilities(serviceProvider)),
             (capabilities, serviceProvider) => new TUnitTestFramework(extension, serviceProvider, capabilities));
@@ -52,6 +55,9 @@ public static class TestApplicationBuilderExtensions
         // JUnit reporter configuration
         testApplicationBuilder.CommandLine.AddProvider(() => junitReporterCommandProvider);
 
+        // JSON log reporter configuration
+        testApplicationBuilder.CommandLine.AddProvider(() => jsonLogReporterCommandProvider);
+
         testApplicationBuilder.TestHost.AddDataConsumer(serviceProvider =>
         {
             // Apply command-line configuration if provided
@@ -76,6 +82,25 @@ public static class TestApplicationBuilderExtensions
             return junitReporter;
         });
         testApplicationBuilder.TestHost.AddTestHostApplicationLifetime(_ => junitReporter);
+
+        testApplicationBuilder.TestHost.AddDataConsumer(serviceProvider =>
+        {
+            // Enable JSON log reporter if --report-json-log is specified
+            var commandLineOptions = serviceProvider.GetRequiredService<ICommandLineOptions>();
+            if (commandLineOptions.IsOptionSet(JsonLogReporterCommandProvider.ReportJsonLog))
+            {
+                string? filename = null;
+                if (commandLineOptions.TryGetOptionArgumentList(JsonLogReporterCommandProvider.ReportJsonLogFilename, out var filenameArgs))
+                {
+                    filename = filenameArgs[0];
+                }
+
+                jsonLogReporter.Enable(filename);
+            }
+
+            return jsonLogReporter;
+        });
+        testApplicationBuilder.TestHost.AddTestHostApplicationLifetime(_ => jsonLogReporter);
     }
 
     private static IReadOnlyCollection<ITestFrameworkCapability> CreateCapabilities(IServiceProvider serviceProvider)
