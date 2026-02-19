@@ -440,8 +440,8 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
 
             var objectsAtDepth = graph.GetObjectsAtDepth(depth);
 
-            // Pre-allocate task list without LINQ Select
-            var tasks = new List<Task>();
+            // Pre-allocate task list with known capacity
+            var tasks = new List<Task>(objectsAtDepth.Count);
             foreach (var obj in objectsAtDepth)
             {
                 tasks.Add(initializer(obj, cancellationToken).AsTask());

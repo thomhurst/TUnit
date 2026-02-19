@@ -115,7 +115,14 @@ internal sealed class TestDependencyResolver
                     }
                 }
 
-                test.Dependencies = uniqueDependencies.Values.ToArray();
+                var depsArray = new ResolvedDependency[uniqueDependencies.Count];
+                var i = 0;
+                foreach (var dep in uniqueDependencies.Values)
+                {
+                    depsArray[i++] = dep;
+                }
+
+                test.Dependencies = depsArray;
 
                 _testsWithPendingDependencies.Remove(test);
 
@@ -191,7 +198,14 @@ internal sealed class TestDependencyResolver
     /// </summary>
     public void BatchResolveDependencies(List<AbstractExecutableTest> tests)
     {
-        var testsWithDependencies = tests.Where(t => t.Metadata.Dependencies.Length > 0).ToList();
+        var testsWithDependencies = new List<AbstractExecutableTest>();
+        foreach (var t in tests)
+        {
+            if (t.Metadata.Dependencies.Length > 0)
+            {
+                testsWithDependencies.Add(t);
+            }
+        }
 
         if (testsWithDependencies.Count == 0)
         {
@@ -256,7 +270,14 @@ internal sealed class TestDependencyResolver
                 }
             }
 
-            test.Dependencies = uniqueDependencies.Values.ToArray();
+            var depsArray = new ResolvedDependency[uniqueDependencies.Count];
+            var i = 0;
+            foreach (var dep in uniqueDependencies.Values)
+            {
+                depsArray[i++] = dep;
+            }
+
+            test.Dependencies = depsArray;
         }
     }
 

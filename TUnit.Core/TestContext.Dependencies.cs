@@ -29,9 +29,23 @@ public partial class TestContext
             return [];
         }
 
-        var tests = testFinder.GetTests(classType).Where(predicate).ToList();
+        var allTests = testFinder.GetTests(classType);
+        var tests = new List<TestContext>();
+        var hasUnfinished = false;
 
-        if (tests.Any(x => x.Result == null))
+        foreach (var test in allTests)
+        {
+            if (predicate(test))
+            {
+                tests.Add(test);
+                if (test.Result == null)
+                {
+                    hasUnfinished = true;
+                }
+            }
+        }
+
+        if (hasUnfinished)
         {
             throw new InvalidOperationException(
                 "Cannot get unfinished tests - Did you mean to add a [DependsOn] attribute?"
@@ -47,43 +61,49 @@ public partial class TestContext
 
         var classType = TestDetails.ClassType;
 
-        var tests = testFinder.GetTestsByNameAndParameters(
+        var testsArray = testFinder.GetTestsByNameAndParameters(
             testName,
             [],
             classType,
             [],
             []
-        ).ToList();
+        );
 
-        if (tests.Any(x => x.Result == null))
+        foreach (var test in testsArray)
         {
-            throw new InvalidOperationException(
-                "Cannot get unfinished tests - Did you mean to add a [DependsOn] attribute?"
-            );
+            if (test.Result == null)
+            {
+                throw new InvalidOperationException(
+                    "Cannot get unfinished tests - Did you mean to add a [DependsOn] attribute?"
+                );
+            }
         }
 
-        return tests;
+        return new List<TestContext>(testsArray);
     }
 
     internal List<TestContext> GetTests(string testName, Type classType)
     {
         var testFinder = ServiceProvider.GetService<ITestFinder>()!;
 
-        var tests = testFinder.GetTestsByNameAndParameters(
+        var testsArray = testFinder.GetTestsByNameAndParameters(
             testName,
             [],
             classType,
             [],
             []
-        ).ToList();
+        );
 
-        if (tests.Any(x => x.Result == null))
+        foreach (var test in testsArray)
         {
-            throw new InvalidOperationException(
-                "Cannot get unfinished tests - Did you mean to add a [DependsOn] attribute?"
-            );
+            if (test.Result == null)
+            {
+                throw new InvalidOperationException(
+                    "Cannot get unfinished tests - Did you mean to add a [DependsOn] attribute?"
+                );
+            }
         }
 
-        return tests;
+        return new List<TestContext>(testsArray);
     }
 }
