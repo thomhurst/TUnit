@@ -3,6 +3,7 @@ using System.Text;
 using CliWrap;
 using CliWrap.Buffered;
 using TrxTools.TrxParser;
+using TUnit.Core;
 using TUnit.Engine.Tests.Enums;
 
 namespace TUnit.Engine.Tests;
@@ -79,10 +80,8 @@ public abstract class InvokableTestBase(TestMode testMode)
     private async Task RunWithAot(string filter, List<Action<TestRun>> assertions,
         RunOptions runOptions, string assertionExpression)
     {
-        if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") != "true")
-        {
-            return;
-        }
+        Skip.When(Environment.GetEnvironmentVariable("GITHUB_ACTIONS") != "true",
+            "AOT tests are only run in GitHub Actions CI. Set GITHUB_ACTIONS=true to run locally.");
 
         var files = FindFolder(x => x.Name == "TESTPROJECT_AOT")!
             .EnumerateFiles("*", SearchOption.AllDirectories)
