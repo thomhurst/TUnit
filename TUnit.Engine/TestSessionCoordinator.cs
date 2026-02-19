@@ -52,6 +52,8 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
 
         InitializeEventReceivers(testList, cancellationToken);
 
+        _serviceProvider.MetricsCollector?.OnExecutionStarted(testList.Count);
+
         try
         {
             await PrepareTestOrchestrator(testList, cancellationToken);
@@ -59,6 +61,11 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
         }
         finally
         {
+            if (_serviceProvider.MetricsCollector != null)
+            {
+                await _serviceProvider.MetricsCollector.OnExecutionFinishedAsync();
+            }
+
             foreach (var artifact in _contextProvider.TestSessionContext.Artifacts)
             {
                 await _messageBus.SessionArtifact(artifact);

@@ -57,6 +57,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public CancellationTokenSource FailFastCancellationSource { get; }
     public ParallelLimitLockProvider ParallelLimitLockProvider { get; }
     public ObjectLifecycleService ObjectLifecycleService { get; }
+    public TestMetricsCollector? MetricsCollector { get; }
     public bool AfterSessionHooksFailed { get; set; }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
@@ -106,6 +107,12 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             outputDevice,
             loggerFactory.CreateLogger<TUnitFrameworkLogger>(),
             logLevelProvider));
+
+        // Create metrics collector if --metrics flag is set
+        if (CommandLineOptions.IsOptionSet(CommandLineProviders.MetricsCommandProvider.Metrics))
+        {
+            MetricsCollector = Register(new TestMetricsCollector(Logger));
+        }
 
         // Create initialization services using Lazy<T> to break circular dependencies
         // No more two-phase initialization with Initialize() calls
@@ -246,7 +253,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
                 isFailFastEnabled,
                 FailFastCancellationSource,
                 Logger,
-                testStateManager));
+                testStateManager,
+                MetricsCollector));
 
         // Create scheduler configuration from command line options
         var testGroupingService = Register<ITestGroupingService>(new TestGroupingService(Logger));

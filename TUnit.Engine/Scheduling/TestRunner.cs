@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using TUnit.Core;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
+using TUnit.Engine.Services;
 using TUnit.Engine.Services.TestExecution;
 
 namespace TUnit.Engine.Scheduling;
@@ -18,6 +19,7 @@ public sealed class TestRunner
     private readonly CancellationTokenSource _failFastCancellationSource;
     private readonly TUnitFrameworkLogger _logger;
     private readonly TestStateManager _testStateManager;
+    private readonly TestMetricsCollector? _metricsCollector;
 
     internal TestRunner(
         ITestCoordinator testCoordinator,
@@ -25,7 +27,8 @@ public sealed class TestRunner
         bool isFailFastEnabled,
         CancellationTokenSource failFastCancellationSource,
         TUnitFrameworkLogger logger,
-        TestStateManager testStateManager)
+        TestStateManager testStateManager,
+        TestMetricsCollector? metricsCollector = null)
     {
         _testCoordinator = testCoordinator;
         _tunitMessageBus = tunitMessageBus;
@@ -33,6 +36,7 @@ public sealed class TestRunner
         _failFastCancellationSource = failFastCancellationSource;
         _logger = logger;
         _testStateManager = testStateManager;
+        _metricsCollector = metricsCollector;
     }
 
     private readonly ConcurrentDictionary<string, TaskCompletionSource<bool>> _executingTests = new();
@@ -81,6 +85,7 @@ public sealed class TestRunner
                 if (dependency.Test.State != TestState.Passed && !dependency.ProceedOnFailure)
                 {
                     _testStateManager.MarkSkipped(test, "Skipped due to failed dependencies");
+                    _metricsCollector?.OnTestCompleted(passed: false, skipped: true, duration: null);
                     await _tunitMessageBus.Skipped(test.Context, "Skipped due to failed dependencies").ConfigureAwait(false);
                     return;
                 }
@@ -89,8 +94,22 @@ public sealed class TestRunner
             test.State = TestState.Running;
             test.StartTime = DateTimeOffset.UtcNow;
 
-            // TestCoordinator handles sending InProgress message
-            await _testCoordinator.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
+            _metricsCollector?.OnTestStarted();
+
+            try
+            {
+                // TestCoordinator handles sending InProgress message
+                await _testCoordinator.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                var duration = test.EndTime.HasValue && test.StartTime.HasValue
+                    ? test.EndTime.Value - test.StartTime.Value
+                    : (TimeSpan?)null;
+                var passed = test.Result?.State == TestState.Passed;
+                var skipped = test.Result?.State == TestState.Skipped;
+                _metricsCollector?.OnTestCompleted(passed, skipped, duration);
+            }
 
             if (_isFailFastEnabled && test.Result?.State == TestState.Failed)
             {

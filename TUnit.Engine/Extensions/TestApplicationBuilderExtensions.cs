@@ -43,6 +43,9 @@ public static class TestApplicationBuilderExtensions
         testApplicationBuilder.CommandLine.AddProvider(() => new ParallelismStrategyCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new AdaptiveMetricsCommandProvider(extension));
 
+        // Metrics command provider
+        testApplicationBuilder.CommandLine.AddProvider(() => new MetricsCommandProvider(extension));
+
         // Keep detailed stacktrace option for backward compatibility
         testApplicationBuilder.CommandLine.AddProvider(() => new DetailedStacktraceCommandProvider(extension));
 
