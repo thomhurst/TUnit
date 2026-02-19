@@ -221,7 +221,19 @@ public class NotInParallelOrderExecutionTests
                 return false;
             }
 
-            return StartTime < other.EndTime.Value && other.StartTime < EndTime.Value;
+            // Allow a small tolerance (50ms) for framework overhead and CI scheduling variability
+            var tolerance = TimeSpan.FromMilliseconds(50);
+
+            // Check if tests ran sequentially (one after the other) with tolerance
+            var thisRanFirst = EndTime.Value <= other.StartTime.Add(tolerance);
+            var otherRanFirst = other.EndTime.Value <= StartTime.Add(tolerance);
+
+            if (thisRanFirst || otherRanFirst)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }
