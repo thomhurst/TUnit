@@ -28,7 +28,7 @@ public abstract record HookMethod
     /// Gets the timeout for this hook method. This will be set during hook registration
     /// by the event receiver infrastructure, falling back to the default 5-minute timeout.
     /// </summary>
-    public TimeSpan? Timeout { get; internal set; } = TimeSpan.FromMinutes(5);
+    public TimeSpan? Timeout { get; internal set; } = Defaults.HookTimeout;
 
     public required IHookExecutor HookExecutor { get; init; }
 

@@ -1040,7 +1040,7 @@ internal sealed class TestBuilder : ITestBuilder
             AttributesByType = attributes.ToAttributeDictionary(),
             MethodGenericArguments = testData.ResolvedMethodGenericArguments,
             ClassGenericArguments = testData.ResolvedClassGenericArguments,
-            Timeout = TimeSpan.FromMinutes(30) // Default 30-minute timeout (can be overridden by TimeoutAttribute)
+            Timeout = Core.Defaults.TestTimeout // Default timeout (can be overridden by TimeoutAttribute)
             // Don't set RetryLimit here - let discovery event receivers set it
         };
 
@@ -1133,7 +1133,7 @@ internal sealed class TestBuilder : ITestBuilder
             ReturnType = typeof(Task),
             MethodMetadata = metadata.MethodMetadata,
             AttributesByType = AttributeDictionaryHelper.Empty,
-            Timeout = TimeSpan.FromMinutes(30)
+            Timeout = Core.Defaults.TestTimeout
         };
     }
 

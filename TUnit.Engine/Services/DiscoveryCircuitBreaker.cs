@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using TUnit.Engine.Constants;
 
 namespace TUnit.Engine.Services;
 
@@ -17,11 +18,11 @@ public sealed class DiscoveryCircuitBreaker
     /// Creates a new discovery circuit breaker with intelligent limits
     /// </summary>
     public DiscoveryCircuitBreaker(
-        double maxMemoryPercentage = 0.7, // Use up to 70% of available memory
-        TimeSpan? maxGenerationTime = null) // Default 2 minutes
+        double maxMemoryPercentage = EngineDefaults.MaxMemoryPercentage,
+        TimeSpan? maxGenerationTime = null)
     {
         _maxMemoryBytes = (long)(GetAvailableMemoryBytes() * maxMemoryPercentage);
-        _maxGenerationTime = maxGenerationTime ?? TimeSpan.FromMinutes(2);
+        _maxGenerationTime = maxGenerationTime ?? EngineDefaults.MaxGenerationTime;
         _stopwatch = Stopwatch.StartNew();
         
         // Track initial memory to calculate growth
@@ -104,7 +105,7 @@ public sealed class DiscoveryCircuitBreaker
         }
 
         // Conservative fallback: assume 1GB available
-        return 1024L * 1024L * 1024L;
+        return EngineDefaults.FallbackAvailableMemoryBytes;
     }
 
     public void Dispose()

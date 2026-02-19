@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
 using TUnit.Core.Logging;
+using TUnit.Engine.Constants;
 
 #pragma warning disable TPEXP
 
@@ -33,7 +34,7 @@ internal sealed class IdeStreamingSink : ILogSink, IAsyncDisposable
 {
     private readonly TUnitMessageBus _messageBus;
     private readonly ConcurrentDictionary<string, TestStreamingState> _activeTests = new();
-    private readonly TimeSpan _throttleInterval = TimeSpan.FromSeconds(1);
+    private readonly TimeSpan _throttleInterval = EngineDefaults.IdeStreamingThrottleInterval;
 
     public IdeStreamingSink(TUnitMessageBus messageBus)
     {

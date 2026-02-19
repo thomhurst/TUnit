@@ -6,6 +6,7 @@ using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Engine.Building;
 using TUnit.Engine.Building.Interfaces;
+using TUnit.Engine.Constants;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine;
@@ -83,7 +84,7 @@ internal sealed class TestDiscoveryService : IDataProducer
             // Build tests directly from the pre-collected metadata (avoid re-collecting)
             // Apply 5-minute discovery timeout matching the streaming path (#4715)
             using var filterCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            filterCts.CancelAfter(TimeSpan.FromMinutes(5));
+            filterCts.CancelAfter(EngineDefaults.DiscoveryTimeout);
 
             var buildingContext = new Building.TestBuildingContext(isForExecution, Filter: null);
             var tests = await _testBuilderPipeline.BuildTestsFromMetadataAsync(
@@ -160,7 +161,7 @@ internal sealed class TestDiscoveryService : IDataProducer
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        cts.CancelAfter(TimeSpan.FromMinutes(5));
+        cts.CancelAfter(EngineDefaults.DiscoveryTimeout);
 
         var tests = await _testBuilderPipeline.BuildTestsStreamingAsync(testSessionId, buildingContext, metadataFilter: null, cts.Token).ConfigureAwait(false);
 

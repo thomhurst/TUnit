@@ -1,5 +1,6 @@
 using TUnit.Core;
 using TUnit.Core.Helpers;
+using TUnit.Engine.Constants;
 
 namespace TUnit.Engine.Services;
 
@@ -272,7 +273,7 @@ internal sealed class TestDependencyResolver
                 }
             }
 
-            var maxRetries = 3;
+            var maxRetries = EngineDefaults.DependencyResolutionMaxRetries;
             for (var retry = 0; retry < maxRetries && _testsWithPendingDependencies.Count > 0; retry++)
             {
                 ResolvePendingDependencies();

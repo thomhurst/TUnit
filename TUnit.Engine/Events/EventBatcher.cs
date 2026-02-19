@@ -1,4 +1,5 @@
 using System.Threading.Channels;
+using TUnit.Engine.Constants;
 
 namespace TUnit.Engine.Events;
 
@@ -14,7 +15,7 @@ internal sealed class EventBatcher<TEvent> : IAsyncDisposable, IDisposable where
     
     public EventBatcher(
         Func<IReadOnlyList<TEvent>, ValueTask> batchProcessor,
-        int batchSize = 100,
+        int batchSize = EngineDefaults.DefaultEventBatchSize,
         TimeSpan maxBatchDelay = default)
     {
         _batchProcessor = batchProcessor;
@@ -23,10 +24,10 @@ internal sealed class EventBatcher<TEvent> : IAsyncDisposable, IDisposable where
             SingleReader = true,
             SingleWriter = false
         });
-        
+
         _processingTask = ProcessBatchesAsync(
-            batchSize, 
-            maxBatchDelay == TimeSpan.Zero ? TimeSpan.FromMilliseconds(10) : maxBatchDelay,
+            batchSize,
+            maxBatchDelay == TimeSpan.Zero ? EngineDefaults.MinBatchDelay : maxBatchDelay,
             _shutdownCts.Token);
     }
     
@@ -164,10 +165,10 @@ internal sealed class EventBatcher<TEvent> : IAsyncDisposable, IDisposable where
         {
             // Properly await the task with timeout
 #if NET6_0_OR_GREATER
-            await _processingTask.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None);
+            await _processingTask.WaitAsync(EngineDefaults.ShutdownTimeout, CancellationToken.None);
 #else
             // For .NET Framework, use Task.WhenAny to implement timeout
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            using var cts = new CancellationTokenSource(EngineDefaults.ShutdownTimeout);
             var completedTask = await Task.WhenAny(_processingTask, Task.Delay(Timeout.Infinite, cts.Token)).ConfigureAwait(false);
             if (completedTask == _processingTask)
             {
