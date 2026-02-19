@@ -133,6 +133,8 @@ internal sealed class TestCoordinator : ITestCoordinator
         }
         catch (Exception ex)
         {
+            // If a [Flaky]-marked test fails, annotate the output
+            FlakyTestTracker.RecordFlakyFailure(test.Context, ex);
             _stateManager.MarkFailed(test, ex);
         }
         finally

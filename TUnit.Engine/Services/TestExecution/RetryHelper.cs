@@ -15,6 +15,13 @@ internal static class RetryHelper
             try
             {
                 await action();
+
+                // If the test passed on a retry attempt, it exhibited flaky behavior
+                if (attempt > 0)
+                {
+                    FlakyTestTracker.RecordPassedOnRetry(testContext, attempt);
+                }
+
                 return;
             }
             catch (Exception ex)
