@@ -108,7 +108,6 @@ const sidebars: SidebarsConfig = {
                 'assertions/and-conditions',
                 'assertions/or-conditions',
                 'assertions/scopes',
-                'assertions/assertion-groups',
               ],
             },
             {
