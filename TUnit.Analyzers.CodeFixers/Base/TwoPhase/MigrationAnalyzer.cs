@@ -144,7 +144,7 @@ public abstract class MigrationAnalyzer
     protected virtual CompilationUnitSyntax AnalyzeAssertions(CompilationUnitSyntax root)
     {
         // Find assertions on the ORIGINAL tree (for semantic analysis)
-        var assertionNodes = FindAssertionNodes(_originalRoot).ToList();
+        var assertionNodes = FindAssertionNodes(_originalRoot);
         var currentRoot = root;
 
         foreach (var originalNode in assertionNodes)
@@ -238,7 +238,7 @@ public abstract class MigrationAnalyzer
     /// </summary>
     protected virtual CompilationUnitSyntax AnalyzeAttributes(CompilationUnitSyntax root)
     {
-        var attributeNodes = _originalRoot.DescendantNodes().OfType<AttributeSyntax>().ToList();
+        var attributeNodes = _originalRoot.DescendantNodes().OfType<AttributeSyntax>();
         var currentRoot = root;
 
         foreach (var originalNode in attributeNodes)
@@ -311,7 +311,7 @@ public abstract class MigrationAnalyzer
     /// </summary>
     protected virtual CompilationUnitSyntax AnalyzeParameterAttributes(CompilationUnitSyntax root)
     {
-        var parameterNodes = _originalRoot.DescendantNodes().OfType<ParameterSyntax>().ToList();
+        var parameterNodes = _originalRoot.DescendantNodes().OfType<ParameterSyntax>();
         var currentRoot = root;
 
         foreach (var parameter in parameterNodes)
@@ -379,7 +379,7 @@ public abstract class MigrationAnalyzer
     /// </summary>
     protected virtual CompilationUnitSyntax AnalyzeBaseTypes(CompilationUnitSyntax root)
     {
-        var classNodes = _originalRoot.DescendantNodes().OfType<ClassDeclarationSyntax>().ToList();
+        var classNodes = _originalRoot.DescendantNodes().OfType<ClassDeclarationSyntax>();
         var currentRoot = root;
 
         foreach (var classNode in classNodes)
