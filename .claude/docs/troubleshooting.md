@@ -56,7 +56,7 @@ See `mandatory-rules.md` for annotation patterns.
 **Diagnose**:
 ```bash
 cd TUnit.Performance.Tests
-dotnet run -c Release --framework net9.0
+dotnet run -c Release
 ```
 
 **Common Causes**:
