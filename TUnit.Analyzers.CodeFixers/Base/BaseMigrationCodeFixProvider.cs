@@ -536,8 +536,7 @@ public abstract class BaseMigrationCodeFixProvider : CodeFixProvider
             if (newlineCount > 0)
             {
                 var newTrivia = trailingTrivia
-                    .Where(t => !t.IsKind(SyntaxKind.EndOfLineTrivia))
-                    .ToList();
+                    .Where(t => !t.IsKind(SyntaxKind.EndOfLineTrivia));
 
                 var newLastMember = lastMember.WithTrailingTrivia(newTrivia);
                 return compilationUnit.ReplaceNode(lastMember, newLastMember);
