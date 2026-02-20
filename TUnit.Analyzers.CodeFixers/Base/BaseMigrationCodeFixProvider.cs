@@ -524,6 +524,7 @@ public abstract class BaseMigrationCodeFixProvider : CodeFixProvider
     /// <summary>
     /// Removes trailing blank lines at end of file.
     /// Files should end immediately after the closing brace with no trailing newlines.
+    /// Preserves a newline when the EndOfFileToken has leading preprocessor directives (e.g., #endif).
     /// </summary>
     protected static CompilationUnitSyntax CleanupEndOfFileTrivia(CompilationUnitSyntax compilationUnit)
     {
@@ -535,9 +536,22 @@ public abstract class BaseMigrationCodeFixProvider : CodeFixProvider
 
             if (newlineCount > 0)
             {
+                // Check if the EndOfFileToken has leading trivia with preprocessor directives
+                // (like #endif) or other meaningful content. If so, preserve one trailing newline
+                // to separate the last member from the directive.
+                var endOfFileLeadingTrivia = compilationUnit.EndOfFileToken.LeadingTrivia;
+                var hasContentAfterLastMember = endOfFileLeadingTrivia.Any(t =>
+                    !t.IsKind(SyntaxKind.EndOfLineTrivia) &&
+                    !t.IsKind(SyntaxKind.WhitespaceTrivia));
+
                 var newTrivia = trailingTrivia
                     .Where(t => !t.IsKind(SyntaxKind.EndOfLineTrivia))
                     .ToList();
+
+                if (hasContentAfterLastMember)
+                {
+                    newTrivia.Add(SyntaxFactory.EndOfLine("\n"));
+                }
 
                 var newLastMember = lastMember.WithTrailingTrivia(newTrivia);
                 return compilationUnit.ReplaceNode(lastMember, newLastMember);
