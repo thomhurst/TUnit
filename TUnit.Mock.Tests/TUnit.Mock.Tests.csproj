@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\TestProject.props" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\TUnit.Mock\TUnit.Mock.csproj" />
+
+    <!-- Wire source generator for mock generation in test code -->
+    <ProjectReference Include="..\TUnit.Mock.SourceGenerator\TUnit.Mock.SourceGenerator.csproj"
+                      OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+
+    <!-- Wire analyzer for compile-time diagnostics -->
+    <ProjectReference Include="..\TUnit.Mock.Analyzers\TUnit.Mock.Analyzers.csproj"
+                      OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <Import Project="..\TestProject.targets" />
+
+</Project>

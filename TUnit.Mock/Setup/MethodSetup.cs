@@ -1,0 +1,49 @@
+using System.ComponentModel;
+using TUnit.Mock.Arguments;
+using TUnit.Mock.Setup.Behaviors;
+
+namespace TUnit.Mock.Setup;
+
+/// <summary>
+/// Stores setup configuration for a single method. Public for generated code access. Not intended for direct use.
+/// </summary>
+[EditorBrowsable(EditorBrowsableState.Never)]
+public sealed class MethodSetup
+{
+    private readonly IArgumentMatcher[] _matchers;
+    private readonly List<IBehavior> _behaviors = new();
+    private int _callIndex;
+
+    public int MemberId { get; }
+
+    public MethodSetup(int memberId, IArgumentMatcher[] matchers)
+    {
+        MemberId = memberId;
+        _matchers = matchers;
+    }
+
+    public void AddBehavior(IBehavior behavior) => _behaviors.Add(behavior);
+
+    public bool Matches(object?[] actualArgs)
+    {
+        if (actualArgs.Length != _matchers.Length)
+            return false;
+
+        for (int i = 0; i < _matchers.Length; i++)
+        {
+            if (!_matchers[i].Matches(actualArgs[i]))
+                return false;
+        }
+        return true;
+    }
+
+    public IBehavior? GetNextBehavior()
+    {
+        if (_behaviors.Count == 0)
+            return null;
+
+        var index = Interlocked.Increment(ref _callIndex) - 1;
+        // Clamp to last behavior (last one repeats)
+        return _behaviors[Math.Min(index, _behaviors.Count - 1)];
+    }
+}
