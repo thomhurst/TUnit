@@ -724,6 +724,47 @@ public static class AssertionExtensions
     }
 
     /// <summary>
+    /// Asserts that the string has a length greater than or equal to the specified minimum.
+    /// Example: await Assert.That(str).HasMinLength(3);
+    /// </summary>
+    public static StringMinLengthAssertion HasMinLength(
+        this IAssertionSource<string> source,
+        int minLength,
+        [CallerArgumentExpression(nameof(minLength))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".HasMinLength({expression})");
+        return new StringMinLengthAssertion(source.Context, minLength);
+    }
+
+    /// <summary>
+    /// Asserts that the string has a length less than or equal to the specified maximum.
+    /// Example: await Assert.That(str).HasMaxLength(10);
+    /// </summary>
+    public static StringMaxLengthAssertion HasMaxLength(
+        this IAssertionSource<string> source,
+        int maxLength,
+        [CallerArgumentExpression(nameof(maxLength))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".HasMaxLength({expression})");
+        return new StringMaxLengthAssertion(source.Context, maxLength);
+    }
+
+    /// <summary>
+    /// Asserts that the string has a length between the specified minimum and maximum (inclusive).
+    /// Example: await Assert.That(str).HasLengthBetween(3, 10);
+    /// </summary>
+    public static StringLengthBetweenAssertion HasLengthBetween(
+        this IAssertionSource<string> source,
+        int minLength,
+        int maxLength,
+        [CallerArgumentExpression(nameof(minLength))] string? minExpression = null,
+        [CallerArgumentExpression(nameof(maxLength))] string? maxExpression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".HasLengthBetween({minExpression}, {maxExpression})");
+        return new StringLengthBetweenAssertion(source.Context, minLength, maxLength);
+    }
+
+    /// <summary>
     /// Asserts that the value is structurally equivalent to the expected value.
     /// Performs deep comparison of properties and fields.
     /// Supports .WithPartialEquivalency() and .IgnoringMember() for advanced scenarios.

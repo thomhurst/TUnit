@@ -793,3 +793,129 @@ public class StringDoesNotMatchAssertion : Assertion<string>
         return "to not match pattern";
     }
 }
+
+/// <summary>
+/// Asserts that a string has a length greater than or equal to the specified minimum.
+/// </summary>
+public class StringMinLengthAssertion : Assertion<string>
+{
+    private readonly int _minLength;
+
+    public StringMinLengthAssertion(
+        AssertionContext<string> context,
+        int minLength)
+        : base(context)
+    {
+        _minLength = minLength;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
+
+        if (value == null)
+        {
+            return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
+
+        if (value.Length >= _minLength)
+        {
+            return AssertionResult._passedTask;
+        }
+
+        return Task.FromResult(AssertionResult.Failed($"found length {value.Length}"));
+    }
+
+    protected override string GetExpectation() => $"to have a minimum length of {_minLength}";
+}
+
+/// <summary>
+/// Asserts that a string has a length less than or equal to the specified maximum.
+/// </summary>
+public class StringMaxLengthAssertion : Assertion<string>
+{
+    private readonly int _maxLength;
+
+    public StringMaxLengthAssertion(
+        AssertionContext<string> context,
+        int maxLength)
+        : base(context)
+    {
+        _maxLength = maxLength;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
+
+        if (value == null)
+        {
+            return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
+
+        if (value.Length <= _maxLength)
+        {
+            return AssertionResult._passedTask;
+        }
+
+        return Task.FromResult(AssertionResult.Failed($"found length {value.Length}"));
+    }
+
+    protected override string GetExpectation() => $"to have a maximum length of {_maxLength}";
+}
+
+/// <summary>
+/// Asserts that a string has a length between the specified minimum and maximum (inclusive).
+/// </summary>
+public class StringLengthBetweenAssertion : Assertion<string>
+{
+    private readonly int _minLength;
+    private readonly int _maxLength;
+
+    public StringLengthBetweenAssertion(
+        AssertionContext<string> context,
+        int minLength,
+        int maxLength)
+        : base(context)
+    {
+        _minLength = minLength;
+        _maxLength = maxLength;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
+
+        if (value == null)
+        {
+            return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
+
+        if (value.Length >= _minLength && value.Length <= _maxLength)
+        {
+            return AssertionResult._passedTask;
+        }
+
+        return Task.FromResult(AssertionResult.Failed($"found length {value.Length}"));
+    }
+
+    protected override string GetExpectation() => $"to have length between {_minLength} and {_maxLength}";
+}
