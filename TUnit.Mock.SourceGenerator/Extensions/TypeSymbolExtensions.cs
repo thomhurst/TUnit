@@ -45,16 +45,16 @@ internal static class TypeSymbolExtensions
         // Task<T>
         if (returnType is INamedTypeSymbol { IsGenericType: true } namedType)
         {
-            var unbound = namedType.ConstructedFrom.GetFullyQualifiedNameWithoutGlobal();
-
-            if (unbound == "System.Threading.Tasks.Task<T>" || namedType.ConstructedFrom.Name == "Task" && namedType.TypeArguments.Length == 1)
+            if (namedType.ConstructedFrom.ContainingNamespace?.ToDisplayString() == "System.Threading.Tasks"
+                && namedType.ConstructedFrom.Name == "Task" && namedType.TypeArguments.Length == 1)
             {
                 var innerType = namedType.TypeArguments[0];
                 var innerDefault = innerType.GetSmartDefault(innerType.IsNullableAnnotated());
                 return $"global::System.Threading.Tasks.Task.FromResult<{innerType.GetFullyQualifiedName()}>({innerDefault})";
             }
 
-            if (unbound == "System.Threading.Tasks.ValueTask<T>" || namedType.ConstructedFrom.Name == "ValueTask" && namedType.TypeArguments.Length == 1)
+            if (namedType.ConstructedFrom.ContainingNamespace?.ToDisplayString() == "System.Threading.Tasks"
+                && namedType.ConstructedFrom.Name == "ValueTask" && namedType.TypeArguments.Length == 1)
             {
                 var innerType = namedType.TypeArguments[0];
                 var innerDefault = innerType.GetSmartDefault(innerType.IsNullableAnnotated());

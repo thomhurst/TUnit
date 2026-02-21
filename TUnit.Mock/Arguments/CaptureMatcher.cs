@@ -19,19 +19,20 @@ internal interface ICapturingMatcher
 internal sealed class CapturingMatcher<T> : IArgumentMatcher<T>, ICapturingMatcher
 {
     private readonly IArgumentMatcher _inner;
-    private readonly ConcurrentQueue<T?> _captured = new();
+    private ConcurrentQueue<T?>? _captured;
 
     public CapturingMatcher(IArgumentMatcher inner)
     {
         _inner = inner ?? throw new ArgumentNullException(nameof(inner));
     }
 
-    public IReadOnlyList<T?> CapturedValues => _captured.ToArray();
+    public IReadOnlyList<T?> CapturedValues => _captured?.ToArray() ?? Array.Empty<T?>();
 
     public T? Latest
     {
         get
         {
+            if (_captured is null) return default;
             var snapshot = _captured.ToArray();
             return snapshot.Length > 0 ? snapshot[snapshot.Length - 1] : default;
         }
@@ -71,6 +72,11 @@ internal sealed class CapturingMatcher<T> : IArgumentMatcher<T>, ICapturingMatch
     /// </summary>
     void ICapturingMatcher.ApplyCapture(object? value)
     {
+        if (_captured is null)
+        {
+            Interlocked.CompareExchange(ref _captured, new ConcurrentQueue<T?>(), null);
+        }
+
         if (value is T typed)
         {
             _captured.Enqueue(typed);

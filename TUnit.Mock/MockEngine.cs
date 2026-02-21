@@ -95,13 +95,13 @@ public sealed class MockEngine<T> where T : class
     /// </summary>
     public void AddSetup(MethodSetup setup)
     {
-        if (PendingRequiredState is not null)
-        {
-            setup.RequiredState = PendingRequiredState;
-        }
-
         lock (_setupLock)
         {
+            if (PendingRequiredState is not null)
+            {
+                setup.RequiredState = PendingRequiredState;
+            }
+
             if (!_setupsByMember.TryGetValue(setup.MemberId, out var list))
             {
                 _setupsByMember[setup.MemberId] = list = new();
@@ -126,12 +126,11 @@ public sealed class MockEngine<T> where T : class
 
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, args);
 
-        // Set out/ref assignments for generated code to consume
-        Setup.OutRefContext.Set(matchedSetup?.OutRefAssignments);
-
         if (behavior is not null)
         {
             behavior.Execute(args);
+            // Set out/ref assignments after Execute to avoid reentrancy overwrite from callbacks
+            Setup.OutRefContext.Set(matchedSetup?.OutRefAssignments);
             if (matchedSetup is not null)
             {
                 ApplyTransition(matchedSetup);
@@ -139,6 +138,9 @@ public sealed class MockEngine<T> where T : class
             }
             return;
         }
+
+        // Set out/ref assignments for generated code to consume
+        Setup.OutRefContext.Set(matchedSetup?.OutRefAssignments);
 
         // A matching setup with no explicit behavior means "allow this call" (e.g., void setup with no callback)
         if (setupFound)
@@ -171,12 +173,11 @@ public sealed class MockEngine<T> where T : class
 
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, args);
 
-        // Set out/ref assignments for generated code to consume
-        Setup.OutRefContext.Set(matchedSetup?.OutRefAssignments);
-
         if (behavior is not null)
         {
             var result = behavior.Execute(args);
+            // Set out/ref assignments after Execute to avoid reentrancy overwrite from callbacks
+            Setup.OutRefContext.Set(matchedSetup?.OutRefAssignments);
             if (matchedSetup is not null)
             {
                 ApplyTransition(matchedSetup);
@@ -187,6 +188,9 @@ public sealed class MockEngine<T> where T : class
             throw new InvalidOperationException(
                 $"Setup for method returning {typeof(TReturn).Name} returned incompatible type {result.GetType().Name}.");
         }
+
+        // Set out/ref assignments for generated code to consume
+        Setup.OutRefContext.Set(matchedSetup?.OutRefAssignments);
 
         // A matching setup with no explicit behavior returns the default value
         if (setupFound)
@@ -257,12 +261,11 @@ public sealed class MockEngine<T> where T : class
 
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, args);
 
-        // Set out/ref assignments for generated code to consume
-        Setup.OutRefContext.Set(matchedSetup?.OutRefAssignments);
-
         if (behavior is not null)
         {
             behavior.Execute(args);
+            // Set out/ref assignments after Execute to avoid reentrancy overwrite from callbacks
+            Setup.OutRefContext.Set(matchedSetup?.OutRefAssignments);
             if (matchedSetup is not null)
             {
                 ApplyTransition(matchedSetup);
@@ -270,6 +273,9 @@ public sealed class MockEngine<T> where T : class
             }
             return true;
         }
+
+        // Set out/ref assignments for generated code to consume
+        Setup.OutRefContext.Set(matchedSetup?.OutRefAssignments);
 
         if (setupFound && matchedSetup is not null)
         {
@@ -304,12 +310,11 @@ public sealed class MockEngine<T> where T : class
 
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, args);
 
-        // Set out/ref assignments for generated code to consume
-        Setup.OutRefContext.Set(matchedSetup?.OutRefAssignments);
-
         if (behavior is not null)
         {
             var behaviorResult = behavior.Execute(args);
+            // Set out/ref assignments after Execute to avoid reentrancy overwrite from callbacks
+            Setup.OutRefContext.Set(matchedSetup?.OutRefAssignments);
             if (matchedSetup is not null)
             {
                 ApplyTransition(matchedSetup);
@@ -321,6 +326,9 @@ public sealed class MockEngine<T> where T : class
                 $"Setup for method returning {typeof(TReturn).Name} returned incompatible type {behaviorResult.GetType().Name}.");
             return true;
         }
+
+        // Set out/ref assignments for generated code to consume
+        Setup.OutRefContext.Set(matchedSetup?.OutRefAssignments);
 
         if (setupFound)
         {
@@ -444,9 +452,6 @@ public sealed class MockEngine<T> where T : class
     }
 
     /// <summary>
-    /// Clears all setups and call history.
-    /// </summary>
-    /// <summary>
     /// Tries to get a cached auto-mock by its cache key. Used by Mock&lt;T&gt;.GetAutoMock.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
@@ -455,6 +460,9 @@ public sealed class MockEngine<T> where T : class
         return _autoMockCache.TryGetValue(cacheKey, out mock!);
     }
 
+    /// <summary>
+    /// Clears all setups and call history.
+    /// </summary>
     public void Reset()
     {
         lock (_setupLock)
