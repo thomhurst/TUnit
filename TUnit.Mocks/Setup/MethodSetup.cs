@@ -11,7 +11,7 @@ namespace TUnit.Mocks.Setup;
 public sealed class MethodSetup
 {
     private readonly IArgumentMatcher[] _matchers;
-    private readonly System.Threading.Lock _behaviorLock = new();
+    private readonly object _behaviorLock = new();
     private readonly List<IBehavior> _behaviors = new();
     private readonly List<EventRaiseInfo> _eventRaises = new();
     private Dictionary<int, object?>? _outRefAssignments;

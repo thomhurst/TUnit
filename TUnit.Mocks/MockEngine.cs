@@ -21,7 +21,7 @@ internal static class MockCallSequence
 public sealed class MockEngine<T> where T : class
 {
     private readonly Dictionary<int, List<MethodSetup>> _setupsByMember = new();
-    private readonly System.Threading.Lock _setupLock = new();
+    private readonly object _setupLock = new();
     private readonly ConcurrentQueue<CallRecord> _callHistory = new();
     private readonly ConcurrentDictionary<string, object?> _autoTrackValues = new();
     private readonly ConcurrentQueue<(string EventName, bool IsSubscribe)> _eventSubscriptions = new();
@@ -132,7 +132,7 @@ public sealed class MockEngine<T> where T : class
             Setup.OutRefContext.Set(matchedSetup?.OutRefAssignments);
             if (matchedSetup is not null)
             {
-                ApplyTransition(matchedSetup);
+
                 RaiseEventsForSetup(matchedSetup);
             }
             return;
@@ -146,7 +146,7 @@ public sealed class MockEngine<T> where T : class
         {
             if (matchedSetup is not null)
             {
-                ApplyTransition(matchedSetup);
+
                 RaiseEventsForSetup(matchedSetup);
             }
             return;
@@ -179,7 +179,7 @@ public sealed class MockEngine<T> where T : class
             Setup.OutRefContext.Set(matchedSetup?.OutRefAssignments);
             if (matchedSetup is not null)
             {
-                ApplyTransition(matchedSetup);
+
                 RaiseEventsForSetup(matchedSetup);
             }
             if (result is TReturn typed) return typed;
@@ -196,7 +196,7 @@ public sealed class MockEngine<T> where T : class
         {
             if (matchedSetup is not null)
             {
-                ApplyTransition(matchedSetup);
+
                 RaiseEventsForSetup(matchedSetup);
             }
             return defaultValue;
@@ -267,7 +267,7 @@ public sealed class MockEngine<T> where T : class
             Setup.OutRefContext.Set(matchedSetup?.OutRefAssignments);
             if (matchedSetup is not null)
             {
-                ApplyTransition(matchedSetup);
+
                 RaiseEventsForSetup(matchedSetup);
             }
             return true;
@@ -278,7 +278,7 @@ public sealed class MockEngine<T> where T : class
 
         if (setupFound && matchedSetup is not null)
         {
-            ApplyTransition(matchedSetup);
+
             RaiseEventsForSetup(matchedSetup);
         }
 
@@ -316,7 +316,7 @@ public sealed class MockEngine<T> where T : class
             Setup.OutRefContext.Set(matchedSetup?.OutRefAssignments);
             if (matchedSetup is not null)
             {
-                ApplyTransition(matchedSetup);
+
                 RaiseEventsForSetup(matchedSetup);
             }
             if (behaviorResult is TReturn typed) result = typed;
@@ -333,7 +333,7 @@ public sealed class MockEngine<T> where T : class
         {
             if (matchedSetup is not null)
             {
-                ApplyTransition(matchedSetup);
+
                 RaiseEventsForSetup(matchedSetup);
             }
             result = defaultValue;
@@ -553,13 +553,6 @@ public sealed class MockEngine<T> where T : class
         return false;
     }
 
-    private void ApplyTransition(MethodSetup setup)
-    {
-        if (setup.TransitionTarget is not null)
-        {
-            _currentState = setup.TransitionTarget;
-        }
-    }
 
     private CallRecord RecordCall(int memberId, string memberName, object?[] args)
     {
@@ -604,6 +597,11 @@ public sealed class MockEngine<T> where T : class
                 {
                     setup.IncrementInvokeCount();
                     setup.ApplyCaptures(args);
+                    // Apply state transition inside the lock to prevent data races on _currentState
+                    if (setup.TransitionTarget is not null)
+                    {
+                        _currentState = setup.TransitionTarget;
+                    }
                     return (true, setup.GetNextBehavior(), setup);
                 }
             }

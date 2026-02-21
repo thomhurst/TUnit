@@ -237,7 +237,7 @@ public static class Mock
 
     private static string GetMultiKey(params Type[] types)
     {
-        return string.Join("|", types.Select(t => t.FullName));
+        return string.Join("|", types.Select(t => t.FullName ?? t.ToString()));
     }
 
     /// <summary>

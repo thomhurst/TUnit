@@ -51,26 +51,6 @@ public class Mock<T> : IMock where T : class
     /// </summary>
     public IMockRaise<T>? Raise { get; internal set; }
 
-    /// <summary>Creates a Mock with a new engine. Used by generated code.</summary>
-    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public Mock(T mockObject, object setup, MockBehavior behavior)
-    {
-        Engine = new MockEngine<T>(behavior);
-        Object = mockObject;
-        Setup = (IMockSetup<T>)setup;
-        Verify = null!; // Set by generated factory code
-    }
-
-    /// <summary>Creates a Mock with an existing engine. Used by generated code.</summary>
-    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public Mock(T mockObject, object setup, MockEngine<T> engine)
-    {
-        Engine = engine;
-        Object = mockObject;
-        Setup = (IMockSetup<T>)setup;
-        Verify = null!; // Set by generated factory code
-    }
-
     /// <summary>Creates a Mock with an existing engine, setup, and verify surfaces. Used by generated code.</summary>
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public Mock(T mockObject, object setup, object verify, MockEngine<T> engine)
