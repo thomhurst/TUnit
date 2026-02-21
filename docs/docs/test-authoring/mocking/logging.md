@@ -11,20 +11,20 @@ dotnet add package TUnit.Mocks.Logging --prerelease
 ```
 
 :::tip No Source Generation Needed
-Unlike `TUnit.Mocks`, the logging helpers are plain classes — no source generation, no `Mock.Of<T>()`. Just create a `MockLogger` and pass it to your code.
+Unlike `TUnit.Mocks`, the logging helpers are plain classes — no source generation required. Create loggers with `Mock.Logger()` and pass them to your code.
 :::
 
 ## Getting Started
 
 ```csharp
-using TUnit.Mocks.Logging;
+using TUnit.Mocks;
 using Microsoft.Extensions.Logging;
 
 [Test]
 public async Task Service_Logs_On_Startup()
 {
     // Arrange
-    var logger = new MockLogger();
+    var logger = Mock.Logger();
     var service = new MyService(logger);
 
     // Act
@@ -39,14 +39,14 @@ public async Task Service_Logs_On_Startup()
 
 ```csharp
 // Untyped logger
-var logger = new MockLogger();
+var logger = Mock.Logger();
 ILogger iLogger = logger;
 
 // With category name
-var logger = new MockLogger("MyApp.Services");
+var logger = Mock.Logger("MyApp.Services");
 
 // Generic typed logger (implements ILogger<T>)
-var logger = new MockLogger<MyService>();
+var logger = Mock.Logger<MyService>();
 ILogger<MyService> iLogger = logger;
 ```
 
@@ -152,13 +152,13 @@ logger.Clear(); // removes all captured entries
 
 ## Dependency Injection
 
-Pass `MockLogger<T>` anywhere `ILogger<T>` is expected:
+Pass `Mock.Logger<T>()` anywhere `ILogger<T>` is expected:
 
 ```csharp
 [Test]
 public async Task OrderService_Logs_Errors()
 {
-    var logger = new MockLogger<OrderService>();
+    var logger = Mock.Logger<OrderService>();
     var service = new OrderService(logger);
 
     await service.ProcessOrder(invalidOrder);

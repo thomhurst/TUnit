@@ -72,6 +72,10 @@ public class GreeterTests
 | `Mock.OfDelegate<T>()` | Mock a delegate (`Func<>`, `Action<>`, etc.) |
 | `Mock.Wrap<T>(instance)` | Wrap a real object with selective overrides |
 | `Mock.Of<T1, T2>()` | Mock multiple interfaces on a single object |
+| `Mock.HttpHandler()` | Create a `MockHttpHandler` *(requires `TUnit.Mocks.Http`)* |
+| `Mock.HttpClient(baseAddress?)` | Create a `MockHttpHandler` + `HttpClient` pair *(requires `TUnit.Mocks.Http`)* |
+| `Mock.Logger()` | Create a `MockLogger` *(requires `TUnit.Mocks.Logging`)* |
+| `Mock.Logger<T>()` | Create a `MockLogger<T>` implementing `ILogger<T>` *(requires `TUnit.Mocks.Logging`)* |
 
 All factory methods accept an optional `MockBehavior` parameter:
 

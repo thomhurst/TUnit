@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using TUnit.Mocks;
 using TUnit.Mocks.Exceptions;
 using TUnit.Mocks.Logging;
 
@@ -9,7 +10,7 @@ public class LogVerificationTests
     [Test]
     public void VerifyLogAtLevel()
     {
-        var logger = new MockLogger();
+        var logger = Mock.Logger();
         logger.LogError("error happened");
 
         logger.VerifyLog().AtLevel(LogLevel.Error).WasCalled(Times.Once);
@@ -18,7 +19,7 @@ public class LogVerificationTests
     [Test]
     public void VerifyLogContainingMessage()
     {
-        var logger = new MockLogger();
+        var logger = Mock.Logger();
         logger.LogInformation("User 42 logged in");
         logger.LogInformation("User 99 logged out");
 
@@ -28,7 +29,7 @@ public class LogVerificationTests
     [Test]
     public void VerifyLogWithExactMessage()
     {
-        var logger = new MockLogger();
+        var logger = Mock.Logger();
         logger.LogInformation("exact match");
 
         logger.VerifyLog().WithMessage("exact match").WasCalled(Times.Once);
@@ -37,7 +38,7 @@ public class LogVerificationTests
     [Test]
     public void VerifyLogWithException()
     {
-        var logger = new MockLogger();
+        var logger = Mock.Logger();
         logger.LogError(new InvalidOperationException("oops"), "failed");
 
         logger.VerifyLog().WithException<InvalidOperationException>().WasCalled(Times.Once);
@@ -46,7 +47,7 @@ public class LogVerificationTests
     [Test]
     public void VerifyLogWithCombinedFilters()
     {
-        var logger = new MockLogger();
+        var logger = Mock.Logger();
         logger.LogError(new InvalidOperationException("oops"), "operation failed");
         logger.LogError("generic error");
         logger.LogWarning(new InvalidOperationException("oops"), "not an error");
@@ -60,7 +61,7 @@ public class LogVerificationTests
     [Test]
     public void VerifyLogThrowsOnMismatch()
     {
-        var logger = new MockLogger();
+        var logger = Mock.Logger();
         logger.LogInformation("hello");
 
         Assert.Throws<MockVerificationException>(() =>
@@ -70,7 +71,7 @@ public class LogVerificationTests
     [Test]
     public void VerifyWasNeverCalled()
     {
-        var logger = new MockLogger();
+        var logger = Mock.Logger();
         logger.LogInformation("info only");
 
         logger.VerifyLog().AtLevel(LogLevel.Error).WasNeverCalled();
@@ -79,7 +80,7 @@ public class LogVerificationTests
     [Test]
     public void VerifyWasNeverCalledThrowsWhenCalled()
     {
-        var logger = new MockLogger();
+        var logger = Mock.Logger();
         logger.LogError("error!");
 
         Assert.Throws<MockVerificationException>(() =>
@@ -89,7 +90,7 @@ public class LogVerificationTests
     [Test]
     public void ShorthandVerifyLog()
     {
-        var logger = new MockLogger();
+        var logger = Mock.Logger();
         logger.LogWarning("disk space low");
 
         logger.VerifyLog(LogLevel.Warning, "disk space");
@@ -98,7 +99,7 @@ public class LogVerificationTests
     [Test]
     public void ShorthandVerifyLogWithTimes()
     {
-        var logger = new MockLogger();
+        var logger = Mock.Logger();
         logger.LogWarning("retry attempt 1");
         logger.LogWarning("retry attempt 2");
         logger.LogWarning("retry attempt 3");
@@ -109,7 +110,7 @@ public class LogVerificationTests
     [Test]
     public void VerifyNoLog()
     {
-        var logger = new MockLogger();
+        var logger = Mock.Logger();
         logger.LogInformation("normal operation");
 
         logger.VerifyNoLog(LogLevel.Error);
@@ -118,7 +119,7 @@ public class LogVerificationTests
     [Test]
     public void VerifyNoLogs()
     {
-        var logger = new MockLogger();
+        var logger = Mock.Logger();
 
         logger.VerifyNoLogs();
     }
@@ -126,7 +127,7 @@ public class LogVerificationTests
     [Test]
     public void VerifyNoLogsThrowsWhenLogged()
     {
-        var logger = new MockLogger();
+        var logger = Mock.Logger();
         logger.LogInformation("something");
 
         Assert.Throws<MockVerificationException>(() =>
@@ -136,7 +137,7 @@ public class LogVerificationTests
     [Test]
     public async Task GetLogsByLevel()
     {
-        var logger = new MockLogger();
+        var logger = Mock.Logger();
         logger.LogInformation("info1");
         logger.LogWarning("warn1");
         logger.LogInformation("info2");
@@ -148,7 +149,7 @@ public class LogVerificationTests
     [Test]
     public async Task GetLogsByMessage()
     {
-        var logger = new MockLogger();
+        var logger = Mock.Logger();
         logger.LogInformation("user logged in");
         logger.LogInformation("user logged out");
         logger.LogWarning("system alert");
@@ -160,7 +161,7 @@ public class LogVerificationTests
     [Test]
     public async Task GetMatchingEntriesReturnsFiltered()
     {
-        var logger = new MockLogger();
+        var logger = Mock.Logger();
         logger.LogInformation("hello");
         logger.LogError("error1");
         logger.LogError("error2");
@@ -175,7 +176,7 @@ public class LogVerificationTests
     [Test]
     public void VerifyTimesExactly()
     {
-        var logger = new MockLogger();
+        var logger = Mock.Logger();
         logger.LogInformation("a");
         logger.LogInformation("b");
 
@@ -185,7 +186,7 @@ public class LogVerificationTests
     [Test]
     public void VerifyTimesAtLeast()
     {
-        var logger = new MockLogger();
+        var logger = Mock.Logger();
         logger.LogError("e1");
         logger.LogError("e2");
         logger.LogError("e3");
@@ -196,7 +197,7 @@ public class LogVerificationTests
     [Test]
     public void VerifyTimesAtMost()
     {
-        var logger = new MockLogger();
+        var logger = Mock.Logger();
         logger.LogWarning("w1");
 
         logger.VerifyLog().AtLevel(LogLevel.Warning).WasCalled(Times.AtMost(3));
@@ -205,7 +206,7 @@ public class LogVerificationTests
     [Test]
     public void VerifyTimesBetween()
     {
-        var logger = new MockLogger();
+        var logger = Mock.Logger();
         logger.LogInformation("a");
         logger.LogInformation("b");
         logger.LogInformation("c");

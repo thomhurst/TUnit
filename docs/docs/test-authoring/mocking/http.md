@@ -13,16 +13,14 @@ dotnet add package TUnit.Mocks.Http --prerelease
 ## Getting Started
 
 ```csharp
-using TUnit.Mocks.Http;
+using TUnit.Mocks;
 
 [Test]
 public async Task Fetches_Users_From_Api()
 {
-    // Arrange
-    var handler = new MockHttpHandler();
+    // Arrange — Mock.HttpClient returns both handler and client
+    var (handler, client) = Mock.HttpClient("https://example.com");
     handler.OnGet("/api/users").RespondWithJson("""[{"id": 1, "name": "Alice"}]""");
-
-    using var client = handler.CreateClient("https://example.com");
 
     // Act
     var response = await client.GetAsync("/api/users");
@@ -34,16 +32,18 @@ public async Task Fetches_Users_From_Api()
 }
 ```
 
-## Creating a Client
+## Creating a Handler or Client
 
 ```csharp
-var handler = new MockHttpHandler();
-
-// With base address
-using var client = handler.CreateClient("https://api.example.com");
+// Handler + client together (most common)
+var (handler, client) = Mock.HttpClient("https://api.example.com");
 
 // Without base address
-using var client = handler.CreateClient();
+var (handler, client) = Mock.HttpClient();
+
+// Just the handler (when you need to configure before creating a client)
+var handler = Mock.HttpHandler();
+using var client = handler.CreateClient("https://api.example.com");
 ```
 
 ## Setting Up Responses

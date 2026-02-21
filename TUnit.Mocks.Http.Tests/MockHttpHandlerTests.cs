@@ -1,4 +1,5 @@
 using System.Net;
+using TUnit.Mocks;
 using TUnit.Mocks.Exceptions;
 using TUnit.Mocks.Http;
 
@@ -9,7 +10,7 @@ public class MockHttpHandlerTests
     [Test]
     public async Task ReturnsConfiguredResponse()
     {
-        var handler = new MockHttpHandler();
+        var handler = Mock.HttpHandler();
         handler.OnGet("/api/users").RespondWithJson("""[{"id":1}]""");
 
         using var client = handler.CreateClient("http://localhost");
@@ -23,7 +24,7 @@ public class MockHttpHandlerTests
     [Test]
     public async Task ReturnsDefaultStatusForUnmatched()
     {
-        var handler = new MockHttpHandler();
+        var handler = Mock.HttpHandler();
 
         using var client = handler.CreateClient("http://localhost");
         var response = await client.GetAsync("/api/unknown");
@@ -34,7 +35,7 @@ public class MockHttpHandlerTests
     [Test]
     public async Task WithDefaultStatusOverridesDefault()
     {
-        var handler = new MockHttpHandler()
+        var handler = Mock.HttpHandler()
             .WithDefaultStatus(HttpStatusCode.ServiceUnavailable);
 
         using var client = handler.CreateClient("http://localhost");
@@ -46,7 +47,7 @@ public class MockHttpHandlerTests
     [Test]
     public async Task ThrowOnUnmatchedThrowsException()
     {
-        var handler = new MockHttpHandler().ThrowOnUnmatched();
+        var handler = Mock.HttpHandler().ThrowOnUnmatched();
 
         using var client = handler.CreateClient("http://localhost");
 
@@ -57,7 +58,7 @@ public class MockHttpHandlerTests
     [Test]
     public async Task MatchesByMethod()
     {
-        var handler = new MockHttpHandler();
+        var handler = Mock.HttpHandler();
         handler.OnPost("/api/data").Respond(HttpStatusCode.Created);
 
         using var client = handler.CreateClient("http://localhost");
@@ -71,7 +72,7 @@ public class MockHttpHandlerTests
     [Test]
     public async Task MatchesByPath()
     {
-        var handler = new MockHttpHandler();
+        var handler = Mock.HttpHandler();
         handler.OnGet("/api/v1/users").Respond(HttpStatusCode.OK);
         handler.OnGet("/api/v1/orders").Respond(HttpStatusCode.Accepted);
 
@@ -86,7 +87,7 @@ public class MockHttpHandlerTests
     [Test]
     public async Task MatchesByHeader()
     {
-        var handler = new MockHttpHandler();
+        var handler = Mock.HttpHandler();
         handler.OnRequest(r => r.Method(HttpMethod.Get)
             .Path("/api/secure")
             .Header("Authorization", "Bearer token123"))
@@ -108,7 +109,7 @@ public class MockHttpHandlerTests
     [Test]
     public async Task MatchesByPathPrefix()
     {
-        var handler = new MockHttpHandler();
+        var handler = Mock.HttpHandler();
         handler.OnRequest(r => r.Method(HttpMethod.Get).PathStartsWith("/api/v2"))
             .Respond(HttpStatusCode.OK);
 
@@ -121,7 +122,7 @@ public class MockHttpHandlerTests
     [Test]
     public async Task MatchesByBodyContent()
     {
-        var handler = new MockHttpHandler();
+        var handler = Mock.HttpHandler();
         handler.OnRequest(r => r.Method(HttpMethod.Post).Path("/api/search").BodyContains("query"))
             .RespondWithJson("""{"results": []}""");
 
@@ -135,7 +136,7 @@ public class MockHttpHandlerTests
     [Test]
     public async Task MatchesByRegexPattern()
     {
-        var handler = new MockHttpHandler();
+        var handler = Mock.HttpHandler();
         handler.OnRequest(r => r.Method(HttpMethod.Get).PathMatches(@"/api/users/\d+"))
             .RespondWithJson("""{"id": 1, "name": "Test"}""");
 
@@ -148,7 +149,7 @@ public class MockHttpHandlerTests
     [Test]
     public async Task OnAnyRequestMatchesEverything()
     {
-        var handler = new MockHttpHandler();
+        var handler = Mock.HttpHandler();
         handler.OnAnyRequest().Respond(HttpStatusCode.OK);
 
         using var client = handler.CreateClient("http://localhost");
@@ -162,7 +163,7 @@ public class MockHttpHandlerTests
     [Test]
     public async Task StringContentResponse()
     {
-        var handler = new MockHttpHandler();
+        var handler = Mock.HttpHandler();
         handler.OnGet("/api/hello").RespondWithString("Hello, World!");
 
         using var client = handler.CreateClient("http://localhost");
@@ -175,7 +176,7 @@ public class MockHttpHandlerTests
     [Test]
     public async Task ResponseWithCustomHeaders()
     {
-        var handler = new MockHttpHandler();
+        var handler = Mock.HttpHandler();
         handler.OnGet("/api/data")
             .Respond()
             .WithHeader("X-Custom", "value123");
@@ -189,7 +190,7 @@ public class MockHttpHandlerTests
     [Test]
     public async Task ResponseWithCustomStatusCode()
     {
-        var handler = new MockHttpHandler();
+        var handler = Mock.HttpHandler();
         handler.OnDelete("/api/item/1").Respond(HttpStatusCode.NoContent);
 
         using var client = handler.CreateClient("http://localhost");
@@ -201,7 +202,7 @@ public class MockHttpHandlerTests
     [Test]
     public async Task SetupThrowsException()
     {
-        var handler = new MockHttpHandler();
+        var handler = Mock.HttpHandler();
         handler.OnGet("/api/fail").Throws(new HttpRequestException("Connection refused"));
 
         using var client = handler.CreateClient("http://localhost");
@@ -213,7 +214,7 @@ public class MockHttpHandlerTests
     [Test]
     public async Task SetupThrowsWithMessage()
     {
-        var handler = new MockHttpHandler();
+        var handler = Mock.HttpHandler();
         handler.OnGet("/api/timeout").Throws("Request timed out");
 
         using var client = handler.CreateClient("http://localhost");
@@ -225,7 +226,7 @@ public class MockHttpHandlerTests
     [Test]
     public async Task SequentialResponses()
     {
-        var handler = new MockHttpHandler();
+        var handler = Mock.HttpHandler();
         var setup = handler.OnGet("/api/counter");
         setup.RespondWithString("1");
         setup.Then().RespondWithString("2");
@@ -247,7 +248,7 @@ public class MockHttpHandlerTests
     [Test]
     public async Task CapturesRequests()
     {
-        var handler = new MockHttpHandler();
+        var handler = Mock.HttpHandler();
         handler.OnAnyRequest().Respond();
 
         using var client = handler.CreateClient("http://localhost");
@@ -262,7 +263,7 @@ public class MockHttpHandlerTests
     [Test]
     public async Task CapturesRequestBody()
     {
-        var handler = new MockHttpHandler();
+        var handler = Mock.HttpHandler();
         handler.OnAnyRequest().Respond();
 
         using var client = handler.CreateClient("http://localhost");
@@ -275,7 +276,7 @@ public class MockHttpHandlerTests
     [Test]
     public async Task CapturesRequestHeaders()
     {
-        var handler = new MockHttpHandler();
+        var handler = Mock.HttpHandler();
         handler.OnAnyRequest().Respond();
 
         using var client = handler.CreateClient("http://localhost");
@@ -289,7 +290,7 @@ public class MockHttpHandlerTests
     [Test]
     public async Task TracksUnmatchedRequests()
     {
-        var handler = new MockHttpHandler();
+        var handler = Mock.HttpHandler();
         handler.OnGet("/api/known").Respond();
 
         using var client = handler.CreateClient("http://localhost");
@@ -302,7 +303,7 @@ public class MockHttpHandlerTests
     [Test]
     public async Task VerifyCallCount()
     {
-        var handler = new MockHttpHandler();
+        var handler = Mock.HttpHandler();
         handler.OnAnyRequest().Respond();
 
         using var client = handler.CreateClient("http://localhost");
@@ -315,7 +316,7 @@ public class MockHttpHandlerTests
     [Test]
     public async Task VerifyThrowsOnMismatch()
     {
-        var handler = new MockHttpHandler();
+        var handler = Mock.HttpHandler();
         handler.OnAnyRequest().Respond();
 
         using var client = handler.CreateClient("http://localhost");
@@ -328,7 +329,7 @@ public class MockHttpHandlerTests
     [Test]
     public async Task VerifyNoUnmatchedRequestsPasses()
     {
-        var handler = new MockHttpHandler();
+        var handler = Mock.HttpHandler();
         handler.OnAnyRequest().Respond();
 
         using var client = handler.CreateClient("http://localhost");
@@ -340,7 +341,7 @@ public class MockHttpHandlerTests
     [Test]
     public async Task VerifyNoUnmatchedRequestsFails()
     {
-        var handler = new MockHttpHandler();
+        var handler = Mock.HttpHandler();
 
         using var client = handler.CreateClient("http://localhost");
         await client.GetAsync("/api/unknown");
@@ -352,7 +353,7 @@ public class MockHttpHandlerTests
     [Test]
     public async Task ResetClearsSetupsAndRequests()
     {
-        var handler = new MockHttpHandler();
+        var handler = Mock.HttpHandler();
         handler.OnGet("/api/data").RespondWithString("data");
 
         using var client = handler.CreateClient("http://localhost");
@@ -370,7 +371,7 @@ public class MockHttpHandlerTests
     [Test]
     public async Task CreateClientWithBaseAddress()
     {
-        var handler = new MockHttpHandler();
+        var handler = Mock.HttpHandler();
         handler.OnGet("/api/test").Respond();
 
         using var client = handler.CreateClient("http://example.com");
@@ -382,7 +383,7 @@ public class MockHttpHandlerTests
     [Test]
     public async Task OnPutMatchesPutRequests()
     {
-        var handler = new MockHttpHandler();
+        var handler = Mock.HttpHandler();
         handler.OnPut("/api/item/1").Respond(HttpStatusCode.NoContent);
 
         using var client = handler.CreateClient("http://localhost");
@@ -394,7 +395,7 @@ public class MockHttpHandlerTests
     [Test]
     public async Task FactoryResponseUsesRequest()
     {
-        var handler = new MockHttpHandler();
+        var handler = Mock.HttpHandler();
         handler.OnAnyRequest().Respond().WithFactory(req =>
             new HttpResponseMessage(HttpStatusCode.OK)
             {
@@ -412,7 +413,7 @@ public class MockHttpHandlerTests
     [Test]
     public async Task HasHeaderMatchesPresence()
     {
-        var handler = new MockHttpHandler();
+        var handler = Mock.HttpHandler();
         handler.OnRequest(r => r.HasHeader("X-Api-Key")).Respond(HttpStatusCode.OK);
 
         using var client = handler.CreateClient("http://localhost");
@@ -431,7 +432,7 @@ public class MockHttpHandlerTests
     [Test]
     public async Task CustomPredicateMatching()
     {
-        var handler = new MockHttpHandler();
+        var handler = Mock.HttpHandler();
         handler.OnRequest(r => r.Matching(req =>
             req.RequestUri?.Query.Contains("page=1") == true))
             .RespondWithJson("""{"page": 1}""");
