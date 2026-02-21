@@ -14,6 +14,15 @@ public interface IVoidMethodSetup
     /// <summary>Execute a callback when the method is called.</summary>
     IVoidSetupChain Callback(Action callback);
 
+    /// <summary>Execute a callback with the method arguments when the method is called.</summary>
+    IVoidSetupChain Callback(Action<object?[]> callback);
+
+    /// <summary>Configure a computed exception based on method arguments to throw.</summary>
+    IVoidSetupChain Throws(Func<object?[], Exception> exceptionFactory);
+
     /// <summary>Auto-raise the named event when this method is called.</summary>
     IVoidSetupChain Raises(string eventName, object? args = null);
+
+    /// <summary>Assign a value to an out or ref parameter when this setup matches.</summary>
+    IVoidSetupChain SetsOutParameter(int paramIndex, object? value);
 }

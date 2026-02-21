@@ -48,4 +48,17 @@ public static class Arg
     public static Arg<TCollection> SequenceEquals<TCollection, TElement>(IEnumerable<TElement> expected)
         where TCollection : IEnumerable<TElement>
         => new(new SequenceEqualsMatcher<TElement>(expected));
+
+    /// <summary>Matches values within the specified inclusive range.</summary>
+    public static Arg<T> IsInRange<T>(T min, T max) where T : IComparable<T>
+        => new(new InRangeMatcher<T>(min, max));
+
+    /// <summary>Matches values that are in the specified set.</summary>
+    public static Arg<T> IsIn<T>(params T[] values) => new(new InSetMatcher<T>(values));
+
+    /// <summary>Matches values that are NOT in the specified set.</summary>
+    public static Arg<T> IsNotIn<T>(params T[] values) => new(new NotInSetMatcher<T>(values));
+
+    /// <summary>Negates the inner matcher -- matches when the inner matcher does NOT match.</summary>
+    public static Arg<T> Not<T>(Arg<T> inner) => new(new NotMatcher<T>(inner.Matcher));
 }

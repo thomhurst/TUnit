@@ -25,8 +25,8 @@ public class MockVerificationException : Exception
     /// <param name="expectedTimes">The expected call count constraint.</param>
     /// <param name="actualCount">The actual number of matching calls.</param>
     /// <param name="actualCalls">Formatted descriptions of all actual calls.</param>
-    public MockVerificationException(string expectedCall, Times expectedTimes, int actualCount, IReadOnlyList<string> actualCalls)
-        : base(FormatMessage(expectedCall, expectedTimes, actualCount, actualCalls))
+    public MockVerificationException(string expectedCall, Times expectedTimes, int actualCount, IReadOnlyList<string> actualCalls, string? customMessage = null)
+        : base(FormatMessage(expectedCall, expectedTimes, actualCount, actualCalls, customMessage))
     {
         ExpectedCall = expectedCall;
         ExpectedTimes = expectedTimes;
@@ -47,9 +47,13 @@ public class MockVerificationException : Exception
         ActualCalls = Array.Empty<string>();
     }
 
-    private static string FormatMessage(string expectedCall, Times expectedTimes, int actualCount, IReadOnlyList<string> actualCalls)
+    private static string FormatMessage(string expectedCall, Times expectedTimes, int actualCount, IReadOnlyList<string> actualCalls, string? customMessage = null)
     {
         var sb = new System.Text.StringBuilder();
+        if (!string.IsNullOrWhiteSpace(customMessage))
+        {
+            sb.AppendLine(customMessage);
+        }
         sb.AppendLine($"Mock verification failed.");
         sb.AppendLine($"  Expected: {expectedCall} to be called {expectedTimes}");
         sb.AppendLine($"  Actual:   called {actualCount} time(s)");

@@ -14,6 +14,7 @@ public sealed class MethodSetup
     private readonly System.Threading.Lock _behaviorLock = new();
     private readonly List<IBehavior> _behaviors = new();
     private readonly List<EventRaiseInfo> _eventRaises = new();
+    private Dictionary<int, object?>? _outRefAssignments;
     private int _callIndex;
 
     public int MemberId { get; }
@@ -92,6 +93,35 @@ public sealed class MethodSetup
             if (_matchers[i] is ICapturingMatcher capturing)
             {
                 capturing.ApplyCapture(args[i]);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Sets the value to assign to an out or ref parameter when this setup matches.
+    /// </summary>
+    /// <param name="paramIndex">The zero-based index of the parameter in the full method signature.</param>
+    /// <param name="value">The value to assign.</param>
+    public void SetOutRefValue(int paramIndex, object? value)
+    {
+        lock (_behaviorLock)
+        {
+            _outRefAssignments ??= new Dictionary<int, object?>();
+            _outRefAssignments[paramIndex] = value;
+        }
+    }
+
+    /// <summary>
+    /// Gets the out/ref parameter assignments, if any.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public Dictionary<int, object?>? OutRefAssignments
+    {
+        get
+        {
+            lock (_behaviorLock)
+            {
+                return _outRefAssignments;
             }
         }
     }

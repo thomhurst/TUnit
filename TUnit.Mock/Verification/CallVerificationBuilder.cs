@@ -25,7 +25,10 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
     }
 
     /// <inheritdoc />
-    public void WasCalled(Times times)
+    public void WasCalled(Times times) => WasCalled(times, null);
+
+    /// <inheritdoc />
+    public void WasCalled(Times times, string? message)
     {
         // When in ordered verification mode, record expectation and skip count checks
         if (OrderedVerification.IsCollecting)
@@ -53,7 +56,7 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
         {
             var expectedCall = FormatExpectedCall();
             var actualCallDescriptions = allCallsForMember.Select(c => c.FormatCall()).ToList();
-            throw new MockVerificationException(expectedCall, times, matchingCount, actualCallDescriptions);
+            throw new MockVerificationException(expectedCall, times, matchingCount, actualCallDescriptions, message);
         }
 
         // Mark matched calls as verified for VerifyNoOtherCalls
@@ -64,10 +67,16 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
     }
 
     /// <inheritdoc />
-    public void WasNeverCalled() => WasCalled(Times.Never);
+    public void WasNeverCalled() => WasCalled(Times.Never, null);
 
     /// <inheritdoc />
-    public void WasCalled() => WasCalled(Times.AtLeastOnce);
+    public void WasNeverCalled(string? message) => WasCalled(Times.Never, message);
+
+    /// <inheritdoc />
+    public void WasCalled() => WasCalled(Times.AtLeastOnce, null);
+
+    /// <inheritdoc />
+    public void WasCalled(string? message) => WasCalled(Times.AtLeastOnce, message);
 
     private List<CallRecord> FilterByMatchers(IReadOnlyList<CallRecord> calls)
     {

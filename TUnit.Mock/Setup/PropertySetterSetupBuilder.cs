@@ -20,6 +20,9 @@ public sealed class PropertySetterSetupBuilder : IPropertySetterSetup, IVoidSetu
     public IVoidSetupChain Throws<TException>() where TException : Exception, new() => _inner.Throws<TException>();
     public IVoidSetupChain Throws(Exception exception) => _inner.Throws(exception);
     public IVoidSetupChain Callback(Action callback) => _inner.Callback(callback);
+    public IVoidSetupChain Callback(Action<object?[]> callback) => _inner.Callback(callback);
+    public IVoidSetupChain Throws(Func<object?[], Exception> exceptionFactory) => _inner.Throws(exceptionFactory);
     public IVoidSetupChain Raises(string eventName, object? args = null) => _inner.Raises(eventName, args);
+    public IVoidSetupChain SetsOutParameter(int paramIndex, object? value) => _inner.SetsOutParameter(paramIndex, value);
     public IVoidMethodSetup Then() => _inner.Then();
 }

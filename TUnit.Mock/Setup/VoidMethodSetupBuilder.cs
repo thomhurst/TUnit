@@ -35,9 +35,27 @@ public sealed class VoidMethodSetupBuilder : IVoidMethodSetup, IVoidSetupChain
         return this;
     }
 
+    public IVoidSetupChain Callback(Action<object?[]> callback)
+    {
+        _setup.AddBehavior(new CallbackWithArgsBehavior(callback));
+        return this;
+    }
+
+    public IVoidSetupChain Throws(Func<object?[], Exception> exceptionFactory)
+    {
+        _setup.AddBehavior(new ComputedThrowBehavior(exceptionFactory));
+        return this;
+    }
+
     public IVoidSetupChain Raises(string eventName, object? args = null)
     {
         _setup.AddEventRaise(new EventRaiseInfo(eventName, args));
+        return this;
+    }
+
+    public IVoidSetupChain SetsOutParameter(int paramIndex, object? value)
+    {
+        _setup.SetOutRefValue(paramIndex, value);
         return this;
     }
 

@@ -24,6 +24,18 @@ public interface IMethodSetup<TReturn>
     /// <summary>Execute a callback when the method is called.</summary>
     ISetupChain<TReturn> Callback(Action callback);
 
+    /// <summary>Execute a callback with the method arguments when the method is called.</summary>
+    ISetupChain<TReturn> Callback(Action<object?[]> callback);
+
+    /// <summary>Configure a computed return value based on method arguments.</summary>
+    ISetupChain<TReturn> Returns(Func<object?[], TReturn> factory);
+
+    /// <summary>Configure a computed exception based on method arguments to throw.</summary>
+    ISetupChain<TReturn> Throws(Func<object?[], Exception> exceptionFactory);
+
     /// <summary>Auto-raise the named event when this method is called.</summary>
     ISetupChain<TReturn> Raises(string eventName, object? args = null);
+
+    /// <summary>Assign a value to an out or ref parameter when this setup matches.</summary>
+    ISetupChain<TReturn> SetsOutParameter(int paramIndex, object? value);
 }

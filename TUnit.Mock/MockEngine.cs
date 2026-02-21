@@ -50,6 +50,13 @@ public sealed class MockEngine<T> where T : class
     [EditorBrowsable(EditorBrowsableState.Never)]
     public bool IsWrapMock { get; set; }
 
+    /// <summary>
+    /// Gets or sets a custom default value provider for unconfigured method return types in loose mode.
+    /// When set, this provider is consulted before auto-mocking and built-in defaults.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public IDefaultValueProvider? DefaultValueProvider { get; set; }
+
     public MockBehavior Behavior { get; }
 
     public MockEngine(MockBehavior behavior)
@@ -89,6 +96,9 @@ public sealed class MockEngine<T> where T : class
 
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, args);
 
+        // Set out/ref assignments for generated code to consume
+        Setup.OutRefContext.Set(matchedSetup?.OutRefAssignments);
+
         if (behavior is not null)
         {
             behavior.Execute(args);
@@ -120,6 +130,9 @@ public sealed class MockEngine<T> where T : class
 
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, args);
 
+        // Set out/ref assignments for generated code to consume
+        Setup.OutRefContext.Set(matchedSetup?.OutRefAssignments);
+
         if (behavior is not null)
         {
             var result = behavior.Execute(args);
@@ -145,6 +158,14 @@ public sealed class MockEngine<T> where T : class
                 if (trackedValue is TReturn typed) return typed;
                 if (trackedValue is null) return default(TReturn)!;
             }
+        }
+
+        // Custom default value provider: consulted before auto-mock and built-in defaults
+        if (DefaultValueProvider is not null && DefaultValueProvider.CanProvide(typeof(TReturn)))
+        {
+            var customDefault = DefaultValueProvider.GetDefaultValue(typeof(TReturn));
+            if (customDefault is TReturn typedCustom) return typedCustom;
+            if (customDefault is null) return default(TReturn)!;
         }
 
         // Auto-mock: for interface return types in Loose mode, create a functional mock
@@ -184,6 +205,9 @@ public sealed class MockEngine<T> where T : class
 
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, args);
 
+        // Set out/ref assignments for generated code to consume
+        Setup.OutRefContext.Set(matchedSetup?.OutRefAssignments);
+
         if (behavior is not null)
         {
             behavior.Execute(args);
@@ -217,6 +241,9 @@ public sealed class MockEngine<T> where T : class
         RecordCall(memberId, memberName, args);
 
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, args);
+
+        // Set out/ref assignments for generated code to consume
+        Setup.OutRefContext.Set(matchedSetup?.OutRefAssignments);
 
         if (behavior is not null)
         {

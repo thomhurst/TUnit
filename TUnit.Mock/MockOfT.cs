@@ -27,6 +27,16 @@ public class Mock<T> : IMock where T : class
     public MockBehavior Behavior => Engine.Behavior;
 
     /// <summary>
+    /// Gets or sets the custom default value provider for unconfigured methods in loose mode.
+    /// When set, this provider is consulted before auto-mocking and built-in defaults.
+    /// </summary>
+    public IDefaultValueProvider? DefaultValueProvider
+    {
+        get => Engine.DefaultValueProvider;
+        set => Engine.DefaultValueProvider = value;
+    }
+
+    /// <summary>
     /// Generated setup surface -- extension methods provide T's members with <c>Arg{T}</c> parameters.
     /// </summary>
     public IMockSetup<T> Setup { get; }

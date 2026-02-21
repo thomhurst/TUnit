@@ -196,6 +196,7 @@ internal static class MockImplBuilder
             writer.AppendLine($"if (_engine.TryHandleCall({method.MemberId}, \"{method.Name}\", {argsArray}))");
             writer.AppendLine("{");
             writer.IncreaseIndent();
+            EmitOutRefReadback(writer, method);
             writer.AppendLine("return;");
             writer.DecreaseIndent();
             writer.AppendLine("}");
@@ -206,6 +207,7 @@ internal static class MockImplBuilder
             writer.AppendLine($"if (_engine.TryHandleCall({method.MemberId}, \"{method.Name}\", {argsArray}))");
             writer.AppendLine("{");
             writer.IncreaseIndent();
+            EmitOutRefReadback(writer, method);
             if (method.IsValueTask)
             {
                 writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
@@ -223,6 +225,7 @@ internal static class MockImplBuilder
             writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{method.UnwrappedReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.UnwrappedSmartDefault}, out var __result))");
             writer.AppendLine("{");
             writer.IncreaseIndent();
+            EmitOutRefReadback(writer, method);
             if (method.IsValueTask)
             {
                 writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask<{method.UnwrappedReturnType}>(__result);");
@@ -240,6 +243,7 @@ internal static class MockImplBuilder
             writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{method.ReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.SmartDefault}, out var __result))");
             writer.AppendLine("{");
             writer.IncreaseIndent();
+            EmitOutRefReadback(writer, method);
             writer.AppendLine("return __result;");
             writer.DecreaseIndent();
             writer.AppendLine("}");
@@ -427,6 +431,7 @@ internal static class MockImplBuilder
             writer.AppendLine($"if (_engine.TryHandleCall({method.MemberId}, \"{method.Name}\", {argsArray}))");
             writer.AppendLine("{");
             writer.IncreaseIndent();
+            EmitOutRefReadback(writer, method);
             writer.AppendLine("return;");
             writer.DecreaseIndent();
             writer.AppendLine("}");
@@ -438,6 +443,7 @@ internal static class MockImplBuilder
             writer.AppendLine($"if (_engine.TryHandleCall({method.MemberId}, \"{method.Name}\", {argsArray}))");
             writer.AppendLine("{");
             writer.IncreaseIndent();
+            EmitOutRefReadback(writer, method);
             if (method.IsValueTask)
             {
                 writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
@@ -456,6 +462,7 @@ internal static class MockImplBuilder
             writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{method.UnwrappedReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.UnwrappedSmartDefault}, out var __result))");
             writer.AppendLine("{");
             writer.IncreaseIndent();
+            EmitOutRefReadback(writer, method);
             if (method.IsValueTask)
             {
                 writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask<{method.UnwrappedReturnType}>(__result);");
@@ -474,6 +481,7 @@ internal static class MockImplBuilder
             writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{method.ReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.SmartDefault}, out var __result))");
             writer.AppendLine("{");
             writer.IncreaseIndent();
+            EmitOutRefReadback(writer, method);
             writer.AppendLine("return __result;");
             writer.DecreaseIndent();
             writer.AppendLine("}");
@@ -494,10 +502,13 @@ internal static class MockImplBuilder
 
         var argsArray = GetArgsArrayExpression(method);
 
+        var hasOutRef = HasOutRefParams(method);
+
         if (method.IsVoid && !method.IsAsync)
         {
             // Pure void method
             writer.AppendLine($"_engine.HandleCall({method.MemberId}, \"{method.Name}\", {argsArray});");
+            EmitOutRefReadback(writer, method);
         }
         else if (method.IsVoid && method.IsAsync)
         {
@@ -505,6 +516,7 @@ internal static class MockImplBuilder
             using (writer.Block("try"))
             {
                 writer.AppendLine($"_engine.HandleCall({method.MemberId}, \"{method.Name}\", {argsArray});");
+                EmitOutRefReadback(writer, method);
                 if (method.IsValueTask)
                 {
                     writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
@@ -532,6 +544,7 @@ internal static class MockImplBuilder
             using (writer.Block("try"))
             {
                 writer.AppendLine($"var __result = _engine.HandleCallWithReturn<{method.UnwrappedReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.UnwrappedSmartDefault});");
+                EmitOutRefReadback(writer, method);
                 if (method.IsValueTask)
                 {
                     writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask<{method.UnwrappedReturnType}>(__result);");
@@ -555,8 +568,17 @@ internal static class MockImplBuilder
         }
         else
         {
-            // Synchronous method with return value
-            writer.AppendLine($"return _engine.HandleCallWithReturn<{method.ReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.SmartDefault});");
+            // Synchronous method with return value — need to read back out/ref before returning
+            if (hasOutRef)
+            {
+                writer.AppendLine($"var __result = _engine.HandleCallWithReturn<{method.ReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.SmartDefault});");
+                EmitOutRefReadback(writer, method);
+                writer.AppendLine("return __result;");
+            }
+            else
+            {
+                writer.AppendLine($"return _engine.HandleCallWithReturn<{method.ReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.SmartDefault});");
+            }
         }
     }
 
@@ -796,6 +818,35 @@ internal static class MockImplBuilder
             }
         }
         return clauses.Count > 0 ? " " + string.Join(" ", clauses) : "";
+    }
+
+    /// <summary>
+    /// Returns true if the method has any out or ref parameters that need read-back.
+    /// </summary>
+    private static bool HasOutRefParams(MockMemberModel method)
+    {
+        return method.Parameters.Any(p => p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref);
+    }
+
+    /// <summary>
+    /// Emits code to read back out/ref parameter values from OutRefContext after an engine call.
+    /// </summary>
+    private static void EmitOutRefReadback(CodeWriter writer, MockMemberModel method)
+    {
+        if (!HasOutRefParams(method)) return;
+
+        writer.AppendLine("var __outRef = global::TUnit.Mock.Setup.OutRefContext.Consume();");
+        using (writer.Block("if (__outRef is not null)"))
+        {
+            for (int i = 0; i < method.Parameters.Length; i++)
+            {
+                var p = method.Parameters[i];
+                if (p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref)
+                {
+                    writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i})) {p.Name} = ({p.FullyQualifiedType})__v{i}!;");
+                }
+            }
+        }
     }
 
     private static string GetArgsArrayExpression(MockMemberModel method)

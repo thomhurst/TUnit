@@ -78,6 +78,14 @@ public static class Mock
     /// <summary>Creates a mock of T in loose mode.</summary>
     public static Mock<T> Of<T>() where T : class => Of<T>(MockBehavior.Loose);
 
+    /// <summary>Creates a mock of T with specified behavior and custom default value provider.</summary>
+    public static Mock<T> Of<T>(MockBehavior behavior, IDefaultValueProvider defaultValueProvider) where T : class
+    {
+        var mock = Of<T>(behavior);
+        mock.DefaultValueProvider = defaultValueProvider;
+        return mock;
+    }
+
     /// <summary>Creates a mock of T with specified behavior.</summary>
     public static Mock<T> Of<T>(MockBehavior behavior) where T : class
     {

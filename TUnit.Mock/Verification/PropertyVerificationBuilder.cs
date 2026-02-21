@@ -26,22 +26,31 @@ public sealed class PropertyVerificationBuilder<T> : IPropertyVerification where
     }
 
     /// <inheritdoc />
-    public void GetWasCalled(Times times)
+    public void GetWasCalled(Times times) => GetWasCalled(times, null);
+
+    /// <inheritdoc />
+    public void GetWasCalled(Times times, string? message)
     {
         var calls = _engine.GetCallsFor(_getterMemberId);
         if (!times.Matches(calls.Count))
         {
             var expectedCall = $"get_{_propertyName}";
             var actualCallDescriptions = calls.Select(c => c.FormatCall()).ToList();
-            throw new MockVerificationException(expectedCall, times, calls.Count, actualCallDescriptions);
+            throw new MockVerificationException(expectedCall, times, calls.Count, actualCallDescriptions, message);
         }
     }
 
     /// <inheritdoc />
-    public void GetWasCalled() => GetWasCalled(Times.AtLeastOnce);
+    public void GetWasCalled() => GetWasCalled(Times.AtLeastOnce, null);
 
     /// <inheritdoc />
-    public void WasSetTo(object? value)
+    public void GetWasCalled(string? message) => GetWasCalled(Times.AtLeastOnce, message);
+
+    /// <inheritdoc />
+    public void WasSetTo(object? value) => WasSetTo(value, null);
+
+    /// <inheritdoc />
+    public void WasSetTo(object? value, string? message)
     {
         var calls = _engine.GetCallsFor(_setterMemberId);
         var matcher = new ExactMatcher<object?>(value);
@@ -59,23 +68,29 @@ public sealed class PropertyVerificationBuilder<T> : IPropertyVerification where
         {
             var expectedCall = $"set_{_propertyName}({value ?? "null"})";
             var actualCallDescriptions = calls.Select(c => c.FormatCall()).ToList();
-            throw new MockVerificationException(expectedCall, Times.AtLeastOnce, matchingCount, actualCallDescriptions);
+            throw new MockVerificationException(expectedCall, Times.AtLeastOnce, matchingCount, actualCallDescriptions, message);
         }
     }
 
     /// <inheritdoc />
-    public void SetWasCalled(Times times)
+    public void SetWasCalled(Times times) => SetWasCalled(times, null);
+
+    /// <inheritdoc />
+    public void SetWasCalled(Times times, string? message)
     {
         var calls = _engine.GetCallsFor(_setterMemberId);
         if (!times.Matches(calls.Count))
         {
             var expectedCall = $"set_{_propertyName}";
             var actualCallDescriptions = calls.Select(c => c.FormatCall()).ToList();
-            throw new MockVerificationException(expectedCall, times, calls.Count, actualCallDescriptions);
+            throw new MockVerificationException(expectedCall, times, calls.Count, actualCallDescriptions, message);
         }
     }
 
     /// <inheritdoc />
-    public void SetWasCalled() => SetWasCalled(Times.AtLeastOnce);
+    public void SetWasCalled() => SetWasCalled(Times.AtLeastOnce, null);
+
+    /// <inheritdoc />
+    public void SetWasCalled(string? message) => SetWasCalled(Times.AtLeastOnce, message);
 
 }
