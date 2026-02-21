@@ -445,6 +445,7 @@ internal static class MemberDiscovery
         string raiseParameters;
         string invokeArgs;
         string eventArgsType;
+        IParameterSymbol[] raiseParams;
 
         if (invokeMethod is null || invokeMethod.Parameters.Length == 0)
         {
@@ -452,6 +453,7 @@ internal static class MemberDiscovery
             raiseParameters = "";
             invokeArgs = "";
             eventArgsType = "";
+            raiseParams = [];
         }
         else if (isEventHandlerPattern && invokeMethod.Parameters.Length >= 2)
         {
@@ -462,6 +464,7 @@ internal static class MemberDiscovery
             eventArgsType = argsParams.Length == 1
                 ? argsParams[0].Type.GetFullyQualifiedName()
                 : raiseParameters; // fallback for multi-arg EventHandler subtypes
+            raiseParams = argsParams;
         }
         else
         {
@@ -469,7 +472,17 @@ internal static class MemberDiscovery
             raiseParameters = string.Join(", ", invokeMethod.Parameters.Select(p => $"{p.Type.GetFullyQualifiedName()} {p.Name}"));
             invokeArgs = string.Join(", ", invokeMethod.Parameters.Select(p => p.Name));
             eventArgsType = raiseParameters;
+            raiseParams = invokeMethod.Parameters.ToArray();
         }
+
+        var raiseParameterList = new EquatableArray<MockParameterModel>(
+            raiseParams.Select(p => new MockParameterModel
+            {
+                Name = p.Name,
+                FullyQualifiedType = p.Type.GetFullyQualifiedName(),
+                Type = p.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat),
+                Direction = ParameterDirection.In
+            }).ToImmutableArray());
 
         return new MockEventModel
         {
@@ -478,7 +491,8 @@ internal static class MemberDiscovery
             RaiseParameters = raiseParameters,
             InvokeArgs = invokeArgs,
             EventArgsType = eventArgsType,
-            ExplicitInterfaceName = explicitInterfaceName
+            ExplicitInterfaceName = explicitInterfaceName,
+            RaiseParameterList = raiseParameterList
         };
     }
 

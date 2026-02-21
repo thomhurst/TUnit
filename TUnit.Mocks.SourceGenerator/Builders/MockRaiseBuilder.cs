@@ -50,12 +50,10 @@ internal static class MockRaiseBuilder
             ? extensionParam
             : $"{extensionParam}, {evt.RaiseParameters}";
 
-        // Build argument pass-through for the Raise_ call
-        // Extract just the parameter names from RaiseParameters (e.g., "string args" → "args")
-        var raiseArgNames = string.IsNullOrEmpty(evt.RaiseParameters)
+        // Build argument pass-through for the Raise_ call using structured parameter data
+        var raiseArgNames = evt.RaiseParameterList.Length == 0
             ? ""
-            : string.Join(", ", evt.RaiseParameters.Split(',')
-                .Select(p => p.Trim().Split(' ').Last()));
+            : string.Join(", ", evt.RaiseParameterList.Select(p => p.Name));
 
         using (writer.Block($"public static void {evt.Name}({raiseParams})"))
         {

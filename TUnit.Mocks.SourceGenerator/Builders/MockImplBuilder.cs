@@ -733,27 +733,22 @@ internal static class MockImplBuilder
                         writer.IncreaseIndent();
 
                         // Determine how to invoke: if the event handler has parameters matching EventArgs, pass args
-                        if (string.IsNullOrEmpty(evt.RaiseParameters))
+                        if (evt.RaiseParameterList.Length == 0)
                         {
                             // No-parameter event (e.g., Action)
                             writer.AppendLine($"Raise_{evt.Name}();");
                         }
-                        else if (evt.RaiseParameters.Contains(","))
+                        else if (evt.RaiseParameterList.Length > 1)
                         {
                             // Multi-parameter delegate — cast args to object[] and spread
                             writer.AppendLine("if (args is object?[] __argArray)");
                             writer.AppendLine("{");
                             writer.IncreaseIndent();
 
-                            // Parse parameter types from RaiseParameters
-                            var raiseParamParts = evt.RaiseParameters.Split(',')
-                                .Select(p => p.Trim().Split(' '))
-                                .ToList();
                             var castArgs = new List<string>();
-                            for (int i = 0; i < raiseParamParts.Count; i++)
+                            for (int i = 0; i < evt.RaiseParameterList.Length; i++)
                             {
-                                var typeName = string.Join(" ", raiseParamParts[i].Take(raiseParamParts[i].Length - 1));
-                                castArgs.Add($"({typeName})__argArray[{i}]");
+                                castArgs.Add($"({evt.RaiseParameterList[i].FullyQualifiedType})__argArray[{i}]");
                             }
                             writer.AppendLine($"Raise_{evt.Name}({string.Join(", ", castArgs)});");
                             writer.DecreaseIndent();
@@ -768,9 +763,7 @@ internal static class MockImplBuilder
                         else
                         {
                             // Single-parameter event (e.g., EventHandler<TArgs>)
-                            var paramParts = evt.RaiseParameters.Trim().Split(' ');
-                            var typeName = string.Join(" ", paramParts.Take(paramParts.Length - 1));
-                            writer.AppendLine($"Raise_{evt.Name}(({typeName})args!);");
+                            writer.AppendLine($"Raise_{evt.Name}(({evt.RaiseParameterList[0].FullyQualifiedType})args!);");
                         }
 
                         writer.AppendLine("break;");
@@ -884,6 +877,8 @@ internal static class MockImplBuilder
             .Replace("<", "_")
             .Replace(">", "_")
             .Replace(",", "_")
+            .Replace("[", "_")
+            .Replace("]", "_")
             .Replace(" ", "");
     }
 

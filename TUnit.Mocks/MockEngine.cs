@@ -28,7 +28,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     private readonly ConcurrentQueue<(string EventName, bool IsSubscribe)> _eventSubscriptions = new();
     private readonly ConcurrentDictionary<string, Action> _onSubscribeCallbacks = new();
     private readonly ConcurrentDictionary<string, Action> _onUnsubscribeCallbacks = new();
-    private readonly ConcurrentDictionary<string, IMock> _autoMockCache = new();
+    private readonly ConcurrentDictionary<string, IMock?> _autoMockCache = new();
 
     /// <summary>
     /// The current state name for state machine mocking. Null means no state (all setups match).
@@ -235,7 +235,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
             var autoMock = _autoMockCache.GetOrAdd(cacheKey, _ =>
             {
                 Mock.TryCreateAutoMock(typeof(TReturn), Behavior, out var m);
-                return m!;
+                return m;
             });
             if (autoMock is not null)
             {
@@ -459,9 +459,9 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     /// Tries to get a cached auto-mock by its cache key. Used by Mock&lt;T&gt;.GetAutoMock.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public bool TryGetAutoMock(string cacheKey, out IMock mock)
+    public bool TryGetAutoMock(string cacheKey, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out IMock? mock)
     {
-        return _autoMockCache.TryGetValue(cacheKey, out mock!);
+        return _autoMockCache.TryGetValue(cacheKey, out mock);
     }
 
     /// <summary>

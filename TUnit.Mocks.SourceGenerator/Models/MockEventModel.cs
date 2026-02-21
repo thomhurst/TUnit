@@ -27,6 +27,12 @@ internal sealed record MockEventModel : IEquatable<MockEventModel>
 
     public string? ExplicitInterfaceName { get; init; }
 
+    /// <summary>
+    /// Structured representation of raise parameters. Use this instead of parsing RaiseParameters
+    /// by comma — which breaks for generic types like Func&lt;int, string&gt;.
+    /// </summary>
+    public EquatableArray<MockParameterModel> RaiseParameterList { get; init; } = EquatableArray<MockParameterModel>.Empty;
+
     public bool Equals(MockEventModel? other)
     {
         if (other is null) return false;
@@ -35,7 +41,8 @@ internal sealed record MockEventModel : IEquatable<MockEventModel>
             && RaiseParameters == other.RaiseParameters
             && InvokeArgs == other.InvokeArgs
             && EventArgsType == other.EventArgsType
-            && ExplicitInterfaceName == other.ExplicitInterfaceName;
+            && ExplicitInterfaceName == other.ExplicitInterfaceName
+            && RaiseParameterList == other.RaiseParameterList;
     }
 
     public override int GetHashCode()
