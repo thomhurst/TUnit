@@ -199,7 +199,7 @@ internal static class CodeGenerationHelpers
                 }
             }
 
-            writer.Append(string.Join(", ", argStrings));
+            writer.AppendJoin(", ", argStrings);
         }
 
         writer.Append(")");
@@ -208,7 +208,7 @@ internal static class CodeGenerationHelpers
         {
             writer.Append(" { ");
             var namedArgs = attr.NamedArguments.Select(na => $"{na.Key} = {TypedConstantParser.GetRawTypedConstantValue(na.Value)}");
-            writer.Append(string.Join(", ", namedArgs));
+            writer.AppendJoin(", ", namedArgs);
             writer.Append(" }");
         }
 
@@ -311,7 +311,7 @@ internal static class CodeGenerationHelpers
                 attributeStrings.Add(GenerateAttributeInstantiation(attr));
             }
 
-            writer.Append(string.Join(", ", attributeStrings));
+            writer.AppendJoin(", ", attributeStrings);
             writer.AppendLine(" },");
         }
 
