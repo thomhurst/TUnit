@@ -15,17 +15,27 @@ internal static class MockSetupBuilder
 
         using (writer.Block("namespace TUnit.Mock.Generated"))
         {
-            using (writer.Block($"public sealed class {safeName}_MockSetup"))
+            // Data holder class implementing marker interface
+            using (writer.Block($"public sealed class {safeName}_MockSetup : global::TUnit.Mock.IMockSetup<{model.FullyQualifiedName}>"))
             {
-                writer.AppendLine($"private readonly global::TUnit.Mock.MockEngine<{model.FullyQualifiedName}> _engine;");
+                writer.AppendLine($"internal readonly global::TUnit.Mock.MockEngine<{model.FullyQualifiedName}> Engine;");
                 writer.AppendLine();
-                writer.AppendLine($"internal {safeName}_MockSetup(global::TUnit.Mock.MockEngine<{model.FullyQualifiedName}> engine) => _engine = engine;");
+                writer.AppendLine($"internal {safeName}_MockSetup(global::TUnit.Mock.MockEngine<{model.FullyQualifiedName}> engine) => Engine = engine;");
+            }
+
+            writer.AppendLine();
+
+            // Extension methods class
+            using (writer.Block($"public static class {safeName}_MockSetupExtensions"))
+            {
+                bool firstMember = true;
 
                 // Methods
                 foreach (var method in model.Methods)
                 {
-                    writer.AppendLine();
-                    GenerateSetupMethod(writer, method);
+                    if (!firstMember) writer.AppendLine();
+                    firstMember = false;
+                    GenerateSetupMethod(writer, method, model, safeName);
                 }
 
                 // Properties
@@ -33,8 +43,9 @@ internal static class MockSetupBuilder
                 {
                     if (prop.IsIndexer) continue;
                     if (!prop.HasGetter && !prop.HasSetter) continue;
-                    writer.AppendLine();
-                    GenerateSetupProperty(writer, prop);
+                    if (!firstMember) writer.AppendLine();
+                    firstMember = false;
+                    GenerateSetupProperty(writer, prop, model, safeName);
                 }
             }
         }
@@ -42,7 +53,7 @@ internal static class MockSetupBuilder
         return writer.ToString();
     }
 
-    private static void GenerateSetupMethod(CodeWriter writer, MockMemberModel method)
+    private static void GenerateSetupMethod(CodeWriter writer, MockMemberModel method, MockTypeModel model, string safeName)
     {
         // For async methods (Task<T>/ValueTask<T>), unwrap the return type so users write .Returns(5) not .Returns(Task.FromResult(5))
         // For void-async methods (Task/ValueTask), IsVoid is already true
@@ -58,8 +69,13 @@ internal static class MockSetupBuilder
         var typeParams = GetTypeParameterList(method);
         var constraints = GetConstraintClauses(method);
 
-        using (writer.Block($"public {returnType} {method.Name}{typeParams}({paramList}){constraints}"))
+        var extensionParam = $"this global::TUnit.Mock.IMockSetup<{model.FullyQualifiedName}> setup";
+        var fullParamList = string.IsNullOrEmpty(paramList) ? extensionParam : $"{extensionParam}, {paramList}";
+
+        using (writer.Block($"public static {returnType} {method.Name}{typeParams}({fullParamList}){constraints}"))
         {
+            writer.AppendLine($"var s = ({safeName}_MockSetup)setup;");
+
             // Build matchers array
             var nonOutParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out).ToList();
 
@@ -73,44 +89,49 @@ internal static class MockSetupBuilder
                 writer.AppendLine($"var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] {{ {matcherArgs} }};");
             }
 
-            writer.AppendLine($"var setup = new global::TUnit.Mock.Setup.MethodSetup({method.MemberId}, matchers);");
-            writer.AppendLine("_engine.AddSetup(setup);");
+            writer.AppendLine($"var methodSetup = new global::TUnit.Mock.Setup.MethodSetup({method.MemberId}, matchers);");
+            writer.AppendLine("s.Engine.AddSetup(methodSetup);");
 
             if (method.IsVoid)
             {
-                writer.AppendLine("return new global::TUnit.Mock.Setup.VoidMethodSetupBuilder(setup);");
+                writer.AppendLine("return new global::TUnit.Mock.Setup.VoidMethodSetupBuilder(methodSetup);");
             }
             else
             {
-                writer.AppendLine($"return new global::TUnit.Mock.Setup.MethodSetupBuilder<{setupReturnType}>(setup);");
+                writer.AppendLine($"return new global::TUnit.Mock.Setup.MethodSetupBuilder<{setupReturnType}>(methodSetup);");
             }
         }
     }
 
-    private static void GenerateSetupProperty(CodeWriter writer, MockMemberModel prop)
+    private static void GenerateSetupProperty(CodeWriter writer, MockMemberModel prop, MockTypeModel model, string safeName)
     {
+        var extensionParam = $"this global::TUnit.Mock.IMockSetup<{model.FullyQualifiedName}> setup";
+
         // Property getter setup returns IPropertySetup<T>
         if (prop.HasGetter)
         {
-            using (writer.Block($"public global::TUnit.Mock.Setup.IPropertySetup<{prop.ReturnType}> {prop.Name}_Get()"))
+            using (writer.Block($"public static global::TUnit.Mock.Setup.IPropertySetup<{prop.ReturnType}> {prop.Name}_Get({extensionParam})"))
             {
+                writer.AppendLine($"var s = ({safeName}_MockSetup)setup;");
                 writer.AppendLine("var matchers = global::System.Array.Empty<global::TUnit.Mock.Arguments.IArgumentMatcher>();");
-                writer.AppendLine($"var setup = new global::TUnit.Mock.Setup.MethodSetup({prop.MemberId}, matchers);");
-                writer.AppendLine("_engine.AddSetup(setup);");
-                writer.AppendLine($"return new global::TUnit.Mock.Setup.PropertySetupBuilder<{prop.ReturnType}>(setup);");
+                writer.AppendLine($"var methodSetup = new global::TUnit.Mock.Setup.MethodSetup({prop.MemberId}, matchers);");
+                writer.AppendLine("s.Engine.AddSetup(methodSetup);");
+                writer.AppendLine($"return new global::TUnit.Mock.Setup.PropertySetupBuilder<{prop.ReturnType}>(methodSetup);");
             }
         }
 
         // Property setter setup returns IPropertySetterSetup
         if (prop.HasSetter)
         {
+            if (prop.HasGetter) writer.AppendLine();
             var setterMemberId = prop.MemberId + 10000;
-            using (writer.Block($"public global::TUnit.Mock.Setup.IPropertySetterSetup {prop.Name}_Set(global::TUnit.Mock.Arguments.Arg<{prop.ReturnType}> value)"))
+            using (writer.Block($"public static global::TUnit.Mock.Setup.IPropertySetterSetup {prop.Name}_Set({extensionParam}, global::TUnit.Mock.Arguments.Arg<{prop.ReturnType}> value)"))
             {
+                writer.AppendLine($"var s = ({safeName}_MockSetup)setup;");
                 writer.AppendLine("var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { value.Matcher };");
-                writer.AppendLine($"var setup = new global::TUnit.Mock.Setup.MethodSetup({setterMemberId}, matchers);");
-                writer.AppendLine("_engine.AddSetup(setup);");
-                writer.AppendLine("return new global::TUnit.Mock.Setup.PropertySetterSetupBuilder(setup);");
+                writer.AppendLine($"var methodSetup = new global::TUnit.Mock.Setup.MethodSetup({setterMemberId}, matchers);");
+                writer.AppendLine("s.Engine.AddSetup(methodSetup);");
+                writer.AppendLine("return new global::TUnit.Mock.Setup.PropertySetterSetupBuilder(methodSetup);");
             }
         }
     }

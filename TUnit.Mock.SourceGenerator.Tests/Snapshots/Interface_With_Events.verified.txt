@@ -70,15 +70,19 @@ namespace TUnit.Mock.Generated
 
 namespace TUnit.Mock.Generated
 {
-    public sealed class INotifier_MockRaise
+    public sealed class INotifier_MockRaise : global::TUnit.Mock.IMockRaise<global::INotifier>
     {
-        private readonly INotifier_MockImpl _impl;
+        internal readonly INotifier_MockImpl Impl;
 
-        internal INotifier_MockRaise(INotifier_MockImpl impl) => _impl = impl;
+        internal INotifier_MockRaise(INotifier_MockImpl impl) => Impl = impl;
+    }
 
-        public void ItemAdded(string args)
+    public static class INotifier_MockRaiseExtensions
+    {
+        public static void ItemAdded(this global::TUnit.Mock.IMockRaise<global::INotifier> raise, string args)
         {
-            _impl.Raise_ItemAdded(args);
+            var r = (INotifier_MockRaise)raise;
+            r.Impl.Raise_ItemAdded(args);
         }
     }
 }
@@ -91,18 +95,22 @@ namespace TUnit.Mock.Generated
 
 namespace TUnit.Mock.Generated
 {
-    public sealed class INotifier_MockSetup
+    public sealed class INotifier_MockSetup : global::TUnit.Mock.IMockSetup<global::INotifier>
     {
-        private readonly global::TUnit.Mock.MockEngine<global::INotifier> _engine;
+        internal readonly global::TUnit.Mock.MockEngine<global::INotifier> Engine;
 
-        internal INotifier_MockSetup(global::TUnit.Mock.MockEngine<global::INotifier> engine) => _engine = engine;
+        internal INotifier_MockSetup(global::TUnit.Mock.MockEngine<global::INotifier> engine) => Engine = engine;
+    }
 
-        public global::TUnit.Mock.Setup.IVoidMethodSetup Notify(global::TUnit.Mock.Arguments.Arg<string> message)
+    public static class INotifier_MockSetupExtensions
+    {
+        public static global::TUnit.Mock.Setup.IVoidMethodSetup Notify(this global::TUnit.Mock.IMockSetup<global::INotifier> setup, global::TUnit.Mock.Arguments.Arg<string> message)
         {
+            var s = (INotifier_MockSetup)setup;
             var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { message.Matcher };
-            var setup = new global::TUnit.Mock.Setup.MethodSetup(0, matchers);
-            _engine.AddSetup(setup);
-            return new global::TUnit.Mock.Setup.VoidMethodSetupBuilder(setup);
+            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(0, matchers);
+            s.Engine.AddSetup(methodSetup);
+            return new global::TUnit.Mock.Setup.VoidMethodSetupBuilder(methodSetup);
         }
     }
 }
@@ -115,16 +123,20 @@ namespace TUnit.Mock.Generated
 
 namespace TUnit.Mock.Generated
 {
-    public sealed class INotifier_MockVerify
+    public sealed class INotifier_MockVerify : global::TUnit.Mock.IMockVerify<global::INotifier>
     {
-        private readonly global::TUnit.Mock.MockEngine<global::INotifier> _engine;
+        internal readonly global::TUnit.Mock.MockEngine<global::INotifier> Engine;
 
-        internal INotifier_MockVerify(global::TUnit.Mock.MockEngine<global::INotifier> engine) => _engine = engine;
+        internal INotifier_MockVerify(global::TUnit.Mock.MockEngine<global::INotifier> engine) => Engine = engine;
+    }
 
-        public global::TUnit.Mock.Verification.ICallVerification Notify(global::TUnit.Mock.Arguments.Arg<string> message)
+    public static class INotifier_MockVerifyExtensions
+    {
+        public static global::TUnit.Mock.Verification.ICallVerification Notify(this global::TUnit.Mock.IMockVerify<global::INotifier> verify, global::TUnit.Mock.Arguments.Arg<string> message)
         {
+            var v = (INotifier_MockVerify)verify;
             var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { message.Matcher };
-            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::INotifier>(_engine, 0, "Notify", matchers);
+            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::INotifier>(v.Engine, 0, "Notify", matchers);
         }
     }
 }

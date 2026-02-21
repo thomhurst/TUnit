@@ -65,34 +65,40 @@ namespace TUnit.Mock.Generated
 
 namespace TUnit.Mock.Generated
 {
-    public sealed class ICalculator_MockSetup
+    public sealed class ICalculator_MockSetup : global::TUnit.Mock.IMockSetup<global::ICalculator>
     {
-        private readonly global::TUnit.Mock.MockEngine<global::ICalculator> _engine;
+        internal readonly global::TUnit.Mock.MockEngine<global::ICalculator> Engine;
 
-        internal ICalculator_MockSetup(global::TUnit.Mock.MockEngine<global::ICalculator> engine) => _engine = engine;
+        internal ICalculator_MockSetup(global::TUnit.Mock.MockEngine<global::ICalculator> engine) => Engine = engine;
+    }
 
-        public global::TUnit.Mock.Setup.IMethodSetup<int> Add(global::TUnit.Mock.Arguments.Arg<int> a, global::TUnit.Mock.Arguments.Arg<int> b)
+    public static class ICalculator_MockSetupExtensions
+    {
+        public static global::TUnit.Mock.Setup.IMethodSetup<int> Add(this global::TUnit.Mock.IMockSetup<global::ICalculator> setup, global::TUnit.Mock.Arguments.Arg<int> a, global::TUnit.Mock.Arguments.Arg<int> b)
         {
+            var s = (ICalculator_MockSetup)setup;
             var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { a.Matcher, b.Matcher };
-            var setup = new global::TUnit.Mock.Setup.MethodSetup(0, matchers);
-            _engine.AddSetup(setup);
-            return new global::TUnit.Mock.Setup.MethodSetupBuilder<int>(setup);
+            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(0, matchers);
+            s.Engine.AddSetup(methodSetup);
+            return new global::TUnit.Mock.Setup.MethodSetupBuilder<int>(methodSetup);
         }
 
-        public global::TUnit.Mock.Setup.IMethodSetup<int> Subtract(global::TUnit.Mock.Arguments.Arg<int> a, global::TUnit.Mock.Arguments.Arg<int> b)
+        public static global::TUnit.Mock.Setup.IMethodSetup<int> Subtract(this global::TUnit.Mock.IMockSetup<global::ICalculator> setup, global::TUnit.Mock.Arguments.Arg<int> a, global::TUnit.Mock.Arguments.Arg<int> b)
         {
+            var s = (ICalculator_MockSetup)setup;
             var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { a.Matcher, b.Matcher };
-            var setup = new global::TUnit.Mock.Setup.MethodSetup(1, matchers);
-            _engine.AddSetup(setup);
-            return new global::TUnit.Mock.Setup.MethodSetupBuilder<int>(setup);
+            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(1, matchers);
+            s.Engine.AddSetup(methodSetup);
+            return new global::TUnit.Mock.Setup.MethodSetupBuilder<int>(methodSetup);
         }
 
-        public global::TUnit.Mock.Setup.IVoidMethodSetup Reset()
+        public static global::TUnit.Mock.Setup.IVoidMethodSetup Reset(this global::TUnit.Mock.IMockSetup<global::ICalculator> setup)
         {
+            var s = (ICalculator_MockSetup)setup;
             var matchers = global::System.Array.Empty<global::TUnit.Mock.Arguments.IArgumentMatcher>();
-            var setup = new global::TUnit.Mock.Setup.MethodSetup(2, matchers);
-            _engine.AddSetup(setup);
-            return new global::TUnit.Mock.Setup.VoidMethodSetupBuilder(setup);
+            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(2, matchers);
+            s.Engine.AddSetup(methodSetup);
+            return new global::TUnit.Mock.Setup.VoidMethodSetupBuilder(methodSetup);
         }
     }
 }
@@ -105,28 +111,34 @@ namespace TUnit.Mock.Generated
 
 namespace TUnit.Mock.Generated
 {
-    public sealed class ICalculator_MockVerify
+    public sealed class ICalculator_MockVerify : global::TUnit.Mock.IMockVerify<global::ICalculator>
     {
-        private readonly global::TUnit.Mock.MockEngine<global::ICalculator> _engine;
+        internal readonly global::TUnit.Mock.MockEngine<global::ICalculator> Engine;
 
-        internal ICalculator_MockVerify(global::TUnit.Mock.MockEngine<global::ICalculator> engine) => _engine = engine;
+        internal ICalculator_MockVerify(global::TUnit.Mock.MockEngine<global::ICalculator> engine) => Engine = engine;
+    }
 
-        public global::TUnit.Mock.Verification.ICallVerification Add(global::TUnit.Mock.Arguments.Arg<int> a, global::TUnit.Mock.Arguments.Arg<int> b)
+    public static class ICalculator_MockVerifyExtensions
+    {
+        public static global::TUnit.Mock.Verification.ICallVerification Add(this global::TUnit.Mock.IMockVerify<global::ICalculator> verify, global::TUnit.Mock.Arguments.Arg<int> a, global::TUnit.Mock.Arguments.Arg<int> b)
         {
+            var v = (ICalculator_MockVerify)verify;
             var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { a.Matcher, b.Matcher };
-            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::ICalculator>(_engine, 0, "Add", matchers);
+            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::ICalculator>(v.Engine, 0, "Add", matchers);
         }
 
-        public global::TUnit.Mock.Verification.ICallVerification Subtract(global::TUnit.Mock.Arguments.Arg<int> a, global::TUnit.Mock.Arguments.Arg<int> b)
+        public static global::TUnit.Mock.Verification.ICallVerification Subtract(this global::TUnit.Mock.IMockVerify<global::ICalculator> verify, global::TUnit.Mock.Arguments.Arg<int> a, global::TUnit.Mock.Arguments.Arg<int> b)
         {
+            var v = (ICalculator_MockVerify)verify;
             var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { a.Matcher, b.Matcher };
-            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::ICalculator>(_engine, 1, "Subtract", matchers);
+            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::ICalculator>(v.Engine, 1, "Subtract", matchers);
         }
 
-        public global::TUnit.Mock.Verification.ICallVerification Reset()
+        public static global::TUnit.Mock.Verification.ICallVerification Reset(this global::TUnit.Mock.IMockVerify<global::ICalculator> verify)
         {
+            var v = (ICalculator_MockVerify)verify;
             var matchers = global::System.Array.Empty<global::TUnit.Mock.Arguments.IArgumentMatcher>();
-            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::ICalculator>(_engine, 2, "Reset", matchers);
+            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::ICalculator>(v.Engine, 2, "Reset", matchers);
         }
     }
 }

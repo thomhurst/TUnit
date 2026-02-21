@@ -14,6 +14,8 @@
                       OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
+  <Import Project="..\TUnit.Mock\TUnit.Mock.props" />
+  <Import Project="..\TUnit.Mock\TUnit.Mock.targets" />
   <Import Project="..\TestProject.targets" />
 
 </Project>

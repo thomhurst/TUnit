@@ -15,17 +15,27 @@ internal static class MockVerifyBuilder
 
         using (writer.Block("namespace TUnit.Mock.Generated"))
         {
-            using (writer.Block($"public sealed class {safeName}_MockVerify"))
+            // Data holder class implementing marker interface
+            using (writer.Block($"public sealed class {safeName}_MockVerify : global::TUnit.Mock.IMockVerify<{model.FullyQualifiedName}>"))
             {
-                writer.AppendLine($"private readonly global::TUnit.Mock.MockEngine<{model.FullyQualifiedName}> _engine;");
+                writer.AppendLine($"internal readonly global::TUnit.Mock.MockEngine<{model.FullyQualifiedName}> Engine;");
                 writer.AppendLine();
-                writer.AppendLine($"internal {safeName}_MockVerify(global::TUnit.Mock.MockEngine<{model.FullyQualifiedName}> engine) => _engine = engine;");
+                writer.AppendLine($"internal {safeName}_MockVerify(global::TUnit.Mock.MockEngine<{model.FullyQualifiedName}> engine) => Engine = engine;");
+            }
+
+            writer.AppendLine();
+
+            // Extension methods class
+            using (writer.Block($"public static class {safeName}_MockVerifyExtensions"))
+            {
+                bool firstMember = true;
 
                 // Methods
                 foreach (var method in model.Methods)
                 {
-                    writer.AppendLine();
-                    GenerateVerifyMethod(writer, method, model);
+                    if (!firstMember) writer.AppendLine();
+                    firstMember = false;
+                    GenerateVerifyMethod(writer, method, model, safeName);
                 }
 
                 // Properties
@@ -33,8 +43,9 @@ internal static class MockVerifyBuilder
                 {
                     if (prop.IsIndexer) continue;
                     if (!prop.HasGetter && !prop.HasSetter) continue;
-                    writer.AppendLine();
-                    GenerateVerifyProperty(writer, prop, model);
+                    if (!firstMember) writer.AppendLine();
+                    firstMember = false;
+                    GenerateVerifyProperty(writer, prop, model, safeName);
                 }
             }
         }
@@ -42,14 +53,19 @@ internal static class MockVerifyBuilder
         return writer.ToString();
     }
 
-    private static void GenerateVerifyMethod(CodeWriter writer, MockMemberModel method, MockTypeModel model)
+    private static void GenerateVerifyMethod(CodeWriter writer, MockMemberModel method, MockTypeModel model, string safeName)
     {
         var paramList = GetArgParameterList(method);
         var typeParams = GetTypeParameterList(method);
         var constraints = GetConstraintClauses(method);
 
-        using (writer.Block($"public global::TUnit.Mock.Verification.ICallVerification {method.Name}{typeParams}({paramList}){constraints}"))
+        var extensionParam = $"this global::TUnit.Mock.IMockVerify<{model.FullyQualifiedName}> verify";
+        var fullParamList = string.IsNullOrEmpty(paramList) ? extensionParam : $"{extensionParam}, {paramList}";
+
+        using (writer.Block($"public static global::TUnit.Mock.Verification.ICallVerification {method.Name}{typeParams}({fullParamList}){constraints}"))
         {
+            writer.AppendLine($"var v = ({safeName}_MockVerify)verify;");
+
             // Build matchers array
             var nonOutParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out).ToList();
 
@@ -63,37 +79,45 @@ internal static class MockVerifyBuilder
                 writer.AppendLine($"var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] {{ {matcherArgs} }};");
             }
 
-            writer.AppendLine($"return new global::TUnit.Mock.Verification.CallVerificationBuilder<{model.FullyQualifiedName}>(_engine, {method.MemberId}, \"{method.Name}\", matchers);");
+            writer.AppendLine($"return new global::TUnit.Mock.Verification.CallVerificationBuilder<{model.FullyQualifiedName}>(v.Engine, {method.MemberId}, \"{method.Name}\", matchers);");
         }
     }
 
-    private static void GenerateVerifyProperty(CodeWriter writer, MockMemberModel prop, MockTypeModel model)
+    private static void GenerateVerifyProperty(CodeWriter writer, MockMemberModel prop, MockTypeModel model, string safeName)
     {
+        var extensionParam = $"this global::TUnit.Mock.IMockVerify<{model.FullyQualifiedName}> verify";
+
         // Getter verification
         if (prop.HasGetter)
         {
-            using (writer.Block($"public global::TUnit.Mock.Verification.ICallVerification {prop.Name}_Get()"))
+            using (writer.Block($"public static global::TUnit.Mock.Verification.ICallVerification {prop.Name}_Get({extensionParam})"))
             {
+                writer.AppendLine($"var v = ({safeName}_MockVerify)verify;");
                 writer.AppendLine("var matchers = global::System.Array.Empty<global::TUnit.Mock.Arguments.IArgumentMatcher>();");
-                writer.AppendLine($"return new global::TUnit.Mock.Verification.CallVerificationBuilder<{model.FullyQualifiedName}>(_engine, {prop.MemberId}, \"get_{prop.Name}\", matchers);");
+                writer.AppendLine($"return new global::TUnit.Mock.Verification.CallVerificationBuilder<{model.FullyQualifiedName}>(v.Engine, {prop.MemberId}, \"get_{prop.Name}\", matchers);");
             }
         }
 
         // Setter verification — accepts Arg<T> to match the set value
         if (prop.HasSetter)
         {
+            if (prop.HasGetter) writer.AppendLine();
             var setterMemberId = prop.MemberId + 10000;
 
-            using (writer.Block($"public global::TUnit.Mock.Verification.ICallVerification {prop.Name}_Set(global::TUnit.Mock.Arguments.Arg<{prop.ReturnType}> value)"))
+            using (writer.Block($"public static global::TUnit.Mock.Verification.ICallVerification {prop.Name}_Set({extensionParam}, global::TUnit.Mock.Arguments.Arg<{prop.ReturnType}> value)"))
             {
+                writer.AppendLine($"var v = ({safeName}_MockVerify)verify;");
                 writer.AppendLine("var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { value.Matcher };");
-                writer.AppendLine($"return new global::TUnit.Mock.Verification.CallVerificationBuilder<{model.FullyQualifiedName}>(_engine, {setterMemberId}, \"set_{prop.Name}\", matchers);");
+                writer.AppendLine($"return new global::TUnit.Mock.Verification.CallVerificationBuilder<{model.FullyQualifiedName}>(v.Engine, {setterMemberId}, \"set_{prop.Name}\", matchers);");
             }
 
+            writer.AppendLine();
+
             // Overload without value argument — matches any set call
-            using (writer.Block($"public global::TUnit.Mock.Verification.ICallVerification {prop.Name}_Set()"))
+            using (writer.Block($"public static global::TUnit.Mock.Verification.ICallVerification {prop.Name}_Set({extensionParam})"))
             {
-                writer.AppendLine($"return new global::TUnit.Mock.Verification.CallVerificationBuilder<{model.FullyQualifiedName}>(_engine, {setterMemberId}, \"set_{prop.Name}\", global::System.Array.Empty<global::TUnit.Mock.Arguments.IArgumentMatcher>());");
+                writer.AppendLine($"var v = ({safeName}_MockVerify)verify;");
+                writer.AppendLine($"return new global::TUnit.Mock.Verification.CallVerificationBuilder<{model.FullyQualifiedName}>(v.Engine, {setterMemberId}, \"set_{prop.Name}\", global::System.Array.Empty<global::TUnit.Mock.Arguments.IArgumentMatcher>());");
             }
         }
     }

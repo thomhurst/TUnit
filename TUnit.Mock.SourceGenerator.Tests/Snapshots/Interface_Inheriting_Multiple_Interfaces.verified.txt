@@ -65,34 +65,40 @@ namespace TUnit.Mock.Generated
 
 namespace TUnit.Mock.Generated
 {
-    public sealed class IReadWriter_MockSetup
+    public sealed class IReadWriter_MockSetup : global::TUnit.Mock.IMockSetup<global::IReadWriter>
     {
-        private readonly global::TUnit.Mock.MockEngine<global::IReadWriter> _engine;
+        internal readonly global::TUnit.Mock.MockEngine<global::IReadWriter> Engine;
 
-        internal IReadWriter_MockSetup(global::TUnit.Mock.MockEngine<global::IReadWriter> engine) => _engine = engine;
+        internal IReadWriter_MockSetup(global::TUnit.Mock.MockEngine<global::IReadWriter> engine) => Engine = engine;
+    }
 
-        public global::TUnit.Mock.Setup.IVoidMethodSetup Flush()
+    public static class IReadWriter_MockSetupExtensions
+    {
+        public static global::TUnit.Mock.Setup.IVoidMethodSetup Flush(this global::TUnit.Mock.IMockSetup<global::IReadWriter> setup)
         {
+            var s = (IReadWriter_MockSetup)setup;
             var matchers = global::System.Array.Empty<global::TUnit.Mock.Arguments.IArgumentMatcher>();
-            var setup = new global::TUnit.Mock.Setup.MethodSetup(0, matchers);
-            _engine.AddSetup(setup);
-            return new global::TUnit.Mock.Setup.VoidMethodSetupBuilder(setup);
+            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(0, matchers);
+            s.Engine.AddSetup(methodSetup);
+            return new global::TUnit.Mock.Setup.VoidMethodSetupBuilder(methodSetup);
         }
 
-        public global::TUnit.Mock.Setup.IMethodSetup<string> Read()
+        public static global::TUnit.Mock.Setup.IMethodSetup<string> Read(this global::TUnit.Mock.IMockSetup<global::IReadWriter> setup)
         {
+            var s = (IReadWriter_MockSetup)setup;
             var matchers = global::System.Array.Empty<global::TUnit.Mock.Arguments.IArgumentMatcher>();
-            var setup = new global::TUnit.Mock.Setup.MethodSetup(1, matchers);
-            _engine.AddSetup(setup);
-            return new global::TUnit.Mock.Setup.MethodSetupBuilder<string>(setup);
+            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(1, matchers);
+            s.Engine.AddSetup(methodSetup);
+            return new global::TUnit.Mock.Setup.MethodSetupBuilder<string>(methodSetup);
         }
 
-        public global::TUnit.Mock.Setup.IVoidMethodSetup Write(global::TUnit.Mock.Arguments.Arg<string> data)
+        public static global::TUnit.Mock.Setup.IVoidMethodSetup Write(this global::TUnit.Mock.IMockSetup<global::IReadWriter> setup, global::TUnit.Mock.Arguments.Arg<string> data)
         {
+            var s = (IReadWriter_MockSetup)setup;
             var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { data.Matcher };
-            var setup = new global::TUnit.Mock.Setup.MethodSetup(2, matchers);
-            _engine.AddSetup(setup);
-            return new global::TUnit.Mock.Setup.VoidMethodSetupBuilder(setup);
+            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(2, matchers);
+            s.Engine.AddSetup(methodSetup);
+            return new global::TUnit.Mock.Setup.VoidMethodSetupBuilder(methodSetup);
         }
     }
 }
@@ -105,28 +111,34 @@ namespace TUnit.Mock.Generated
 
 namespace TUnit.Mock.Generated
 {
-    public sealed class IReadWriter_MockVerify
+    public sealed class IReadWriter_MockVerify : global::TUnit.Mock.IMockVerify<global::IReadWriter>
     {
-        private readonly global::TUnit.Mock.MockEngine<global::IReadWriter> _engine;
+        internal readonly global::TUnit.Mock.MockEngine<global::IReadWriter> Engine;
 
-        internal IReadWriter_MockVerify(global::TUnit.Mock.MockEngine<global::IReadWriter> engine) => _engine = engine;
+        internal IReadWriter_MockVerify(global::TUnit.Mock.MockEngine<global::IReadWriter> engine) => Engine = engine;
+    }
 
-        public global::TUnit.Mock.Verification.ICallVerification Flush()
+    public static class IReadWriter_MockVerifyExtensions
+    {
+        public static global::TUnit.Mock.Verification.ICallVerification Flush(this global::TUnit.Mock.IMockVerify<global::IReadWriter> verify)
         {
+            var v = (IReadWriter_MockVerify)verify;
             var matchers = global::System.Array.Empty<global::TUnit.Mock.Arguments.IArgumentMatcher>();
-            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::IReadWriter>(_engine, 0, "Flush", matchers);
+            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::IReadWriter>(v.Engine, 0, "Flush", matchers);
         }
 
-        public global::TUnit.Mock.Verification.ICallVerification Read()
+        public static global::TUnit.Mock.Verification.ICallVerification Read(this global::TUnit.Mock.IMockVerify<global::IReadWriter> verify)
         {
+            var v = (IReadWriter_MockVerify)verify;
             var matchers = global::System.Array.Empty<global::TUnit.Mock.Arguments.IArgumentMatcher>();
-            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::IReadWriter>(_engine, 1, "Read", matchers);
+            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::IReadWriter>(v.Engine, 1, "Read", matchers);
         }
 
-        public global::TUnit.Mock.Verification.ICallVerification Write(global::TUnit.Mock.Arguments.Arg<string> data)
+        public static global::TUnit.Mock.Verification.ICallVerification Write(this global::TUnit.Mock.IMockVerify<global::IReadWriter> verify, global::TUnit.Mock.Arguments.Arg<string> data)
         {
+            var v = (IReadWriter_MockVerify)verify;
             var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { data.Matcher };
-            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::IReadWriter>(_engine, 2, "Write", matchers);
+            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::IReadWriter>(v.Engine, 2, "Write", matchers);
         }
     }
 }

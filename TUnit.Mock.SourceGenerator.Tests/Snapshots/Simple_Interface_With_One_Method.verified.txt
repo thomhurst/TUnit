@@ -55,18 +55,22 @@ namespace TUnit.Mock.Generated
 
 namespace TUnit.Mock.Generated
 {
-    public sealed class IGreeter_MockSetup
+    public sealed class IGreeter_MockSetup : global::TUnit.Mock.IMockSetup<global::IGreeter>
     {
-        private readonly global::TUnit.Mock.MockEngine<global::IGreeter> _engine;
+        internal readonly global::TUnit.Mock.MockEngine<global::IGreeter> Engine;
 
-        internal IGreeter_MockSetup(global::TUnit.Mock.MockEngine<global::IGreeter> engine) => _engine = engine;
+        internal IGreeter_MockSetup(global::TUnit.Mock.MockEngine<global::IGreeter> engine) => Engine = engine;
+    }
 
-        public global::TUnit.Mock.Setup.IMethodSetup<string> Greet(global::TUnit.Mock.Arguments.Arg<string> name)
+    public static class IGreeter_MockSetupExtensions
+    {
+        public static global::TUnit.Mock.Setup.IMethodSetup<string> Greet(this global::TUnit.Mock.IMockSetup<global::IGreeter> setup, global::TUnit.Mock.Arguments.Arg<string> name)
         {
+            var s = (IGreeter_MockSetup)setup;
             var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { name.Matcher };
-            var setup = new global::TUnit.Mock.Setup.MethodSetup(0, matchers);
-            _engine.AddSetup(setup);
-            return new global::TUnit.Mock.Setup.MethodSetupBuilder<string>(setup);
+            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(0, matchers);
+            s.Engine.AddSetup(methodSetup);
+            return new global::TUnit.Mock.Setup.MethodSetupBuilder<string>(methodSetup);
         }
     }
 }
@@ -79,16 +83,20 @@ namespace TUnit.Mock.Generated
 
 namespace TUnit.Mock.Generated
 {
-    public sealed class IGreeter_MockVerify
+    public sealed class IGreeter_MockVerify : global::TUnit.Mock.IMockVerify<global::IGreeter>
     {
-        private readonly global::TUnit.Mock.MockEngine<global::IGreeter> _engine;
+        internal readonly global::TUnit.Mock.MockEngine<global::IGreeter> Engine;
 
-        internal IGreeter_MockVerify(global::TUnit.Mock.MockEngine<global::IGreeter> engine) => _engine = engine;
+        internal IGreeter_MockVerify(global::TUnit.Mock.MockEngine<global::IGreeter> engine) => Engine = engine;
+    }
 
-        public global::TUnit.Mock.Verification.ICallVerification Greet(global::TUnit.Mock.Arguments.Arg<string> name)
+    public static class IGreeter_MockVerifyExtensions
+    {
+        public static global::TUnit.Mock.Verification.ICallVerification Greet(this global::TUnit.Mock.IMockVerify<global::IGreeter> verify, global::TUnit.Mock.Arguments.Arg<string> name)
         {
+            var v = (IGreeter_MockVerify)verify;
             var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { name.Matcher };
-            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::IGreeter>(_engine, 0, "Greet", matchers);
+            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::IGreeter>(v.Engine, 0, "Greet", matchers);
         }
     }
 }

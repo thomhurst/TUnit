@@ -66,41 +66,49 @@ namespace TUnit.Mock.Generated
 
 namespace TUnit.Mock.Generated
 {
-    public sealed class IRepository_MockSetup
+    public sealed class IRepository_MockSetup : global::TUnit.Mock.IMockSetup<global::IRepository>
     {
-        private readonly global::TUnit.Mock.MockEngine<global::IRepository> _engine;
+        internal readonly global::TUnit.Mock.MockEngine<global::IRepository> Engine;
 
-        internal IRepository_MockSetup(global::TUnit.Mock.MockEngine<global::IRepository> engine) => _engine = engine;
+        internal IRepository_MockSetup(global::TUnit.Mock.MockEngine<global::IRepository> engine) => Engine = engine;
+    }
 
-        public global::TUnit.Mock.Setup.IPropertySetup<string> Name_Get()
+    public static class IRepository_MockSetupExtensions
+    {
+        public static global::TUnit.Mock.Setup.IPropertySetup<string> Name_Get(this global::TUnit.Mock.IMockSetup<global::IRepository> setup)
         {
+            var s = (IRepository_MockSetup)setup;
             var matchers = global::System.Array.Empty<global::TUnit.Mock.Arguments.IArgumentMatcher>();
-            var setup = new global::TUnit.Mock.Setup.MethodSetup(0, matchers);
-            _engine.AddSetup(setup);
-            return new global::TUnit.Mock.Setup.PropertySetupBuilder<string>(setup);
-        }
-        public global::TUnit.Mock.Setup.IPropertySetterSetup Name_Set(global::TUnit.Mock.Arguments.Arg<string> value)
-        {
-            var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { value.Matcher };
-            var setup = new global::TUnit.Mock.Setup.MethodSetup(10000, matchers);
-            _engine.AddSetup(setup);
-            return new global::TUnit.Mock.Setup.PropertySetterSetupBuilder(setup);
+            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(0, matchers);
+            s.Engine.AddSetup(methodSetup);
+            return new global::TUnit.Mock.Setup.PropertySetupBuilder<string>(methodSetup);
         }
 
-        public global::TUnit.Mock.Setup.IPropertySetup<int> Count_Get()
+        public static global::TUnit.Mock.Setup.IPropertySetterSetup Name_Set(this global::TUnit.Mock.IMockSetup<global::IRepository> setup, global::TUnit.Mock.Arguments.Arg<string> value)
         {
+            var s = (IRepository_MockSetup)setup;
+            var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { value.Matcher };
+            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(10000, matchers);
+            s.Engine.AddSetup(methodSetup);
+            return new global::TUnit.Mock.Setup.PropertySetterSetupBuilder(methodSetup);
+        }
+
+        public static global::TUnit.Mock.Setup.IPropertySetup<int> Count_Get(this global::TUnit.Mock.IMockSetup<global::IRepository> setup)
+        {
+            var s = (IRepository_MockSetup)setup;
             var matchers = global::System.Array.Empty<global::TUnit.Mock.Arguments.IArgumentMatcher>();
-            var setup = new global::TUnit.Mock.Setup.MethodSetup(1, matchers);
-            _engine.AddSetup(setup);
-            return new global::TUnit.Mock.Setup.PropertySetupBuilder<int>(setup);
+            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(1, matchers);
+            s.Engine.AddSetup(methodSetup);
+            return new global::TUnit.Mock.Setup.PropertySetupBuilder<int>(methodSetup);
         }
 
-        public global::TUnit.Mock.Setup.IPropertySetterSetup IsOpen_Set(global::TUnit.Mock.Arguments.Arg<bool> value)
+        public static global::TUnit.Mock.Setup.IPropertySetterSetup IsOpen_Set(this global::TUnit.Mock.IMockSetup<global::IRepository> setup, global::TUnit.Mock.Arguments.Arg<bool> value)
         {
+            var s = (IRepository_MockSetup)setup;
             var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { value.Matcher };
-            var setup = new global::TUnit.Mock.Setup.MethodSetup(10002, matchers);
-            _engine.AddSetup(setup);
-            return new global::TUnit.Mock.Setup.PropertySetterSetupBuilder(setup);
+            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(10002, matchers);
+            s.Engine.AddSetup(methodSetup);
+            return new global::TUnit.Mock.Setup.PropertySetterSetupBuilder(methodSetup);
         }
     }
 }
@@ -113,41 +121,53 @@ namespace TUnit.Mock.Generated
 
 namespace TUnit.Mock.Generated
 {
-    public sealed class IRepository_MockVerify
+    public sealed class IRepository_MockVerify : global::TUnit.Mock.IMockVerify<global::IRepository>
     {
-        private readonly global::TUnit.Mock.MockEngine<global::IRepository> _engine;
+        internal readonly global::TUnit.Mock.MockEngine<global::IRepository> Engine;
 
-        internal IRepository_MockVerify(global::TUnit.Mock.MockEngine<global::IRepository> engine) => _engine = engine;
+        internal IRepository_MockVerify(global::TUnit.Mock.MockEngine<global::IRepository> engine) => Engine = engine;
+    }
 
-        public global::TUnit.Mock.Verification.ICallVerification Name_Get()
+    public static class IRepository_MockVerifyExtensions
+    {
+        public static global::TUnit.Mock.Verification.ICallVerification Name_Get(this global::TUnit.Mock.IMockVerify<global::IRepository> verify)
         {
+            var v = (IRepository_MockVerify)verify;
             var matchers = global::System.Array.Empty<global::TUnit.Mock.Arguments.IArgumentMatcher>();
-            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::IRepository>(_engine, 0, "get_Name", matchers);
-        }
-        public global::TUnit.Mock.Verification.ICallVerification Name_Set(global::TUnit.Mock.Arguments.Arg<string> value)
-        {
-            var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { value.Matcher };
-            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::IRepository>(_engine, 10000, "set_Name", matchers);
-        }
-        public global::TUnit.Mock.Verification.ICallVerification Name_Set()
-        {
-            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::IRepository>(_engine, 10000, "set_Name", global::System.Array.Empty<global::TUnit.Mock.Arguments.IArgumentMatcher>());
+            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::IRepository>(v.Engine, 0, "get_Name", matchers);
         }
 
-        public global::TUnit.Mock.Verification.ICallVerification Count_Get()
+        public static global::TUnit.Mock.Verification.ICallVerification Name_Set(this global::TUnit.Mock.IMockVerify<global::IRepository> verify, global::TUnit.Mock.Arguments.Arg<string> value)
         {
+            var v = (IRepository_MockVerify)verify;
+            var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { value.Matcher };
+            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::IRepository>(v.Engine, 10000, "set_Name", matchers);
+        }
+
+        public static global::TUnit.Mock.Verification.ICallVerification Name_Set(this global::TUnit.Mock.IMockVerify<global::IRepository> verify)
+        {
+            var v = (IRepository_MockVerify)verify;
+            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::IRepository>(v.Engine, 10000, "set_Name", global::System.Array.Empty<global::TUnit.Mock.Arguments.IArgumentMatcher>());
+        }
+
+        public static global::TUnit.Mock.Verification.ICallVerification Count_Get(this global::TUnit.Mock.IMockVerify<global::IRepository> verify)
+        {
+            var v = (IRepository_MockVerify)verify;
             var matchers = global::System.Array.Empty<global::TUnit.Mock.Arguments.IArgumentMatcher>();
-            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::IRepository>(_engine, 1, "get_Count", matchers);
+            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::IRepository>(v.Engine, 1, "get_Count", matchers);
         }
 
-        public global::TUnit.Mock.Verification.ICallVerification IsOpen_Set(global::TUnit.Mock.Arguments.Arg<bool> value)
+        public static global::TUnit.Mock.Verification.ICallVerification IsOpen_Set(this global::TUnit.Mock.IMockVerify<global::IRepository> verify, global::TUnit.Mock.Arguments.Arg<bool> value)
         {
+            var v = (IRepository_MockVerify)verify;
             var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { value.Matcher };
-            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::IRepository>(_engine, 10002, "set_IsOpen", matchers);
+            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::IRepository>(v.Engine, 10002, "set_IsOpen", matchers);
         }
-        public global::TUnit.Mock.Verification.ICallVerification IsOpen_Set()
+
+        public static global::TUnit.Mock.Verification.ICallVerification IsOpen_Set(this global::TUnit.Mock.IMockVerify<global::IRepository> verify)
         {
-            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::IRepository>(_engine, 10002, "set_IsOpen", global::System.Array.Empty<global::TUnit.Mock.Arguments.IArgumentMatcher>());
+            var v = (IRepository_MockVerify)verify;
+            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::IRepository>(v.Engine, 10002, "set_IsOpen", global::System.Array.Empty<global::TUnit.Mock.Arguments.IArgumentMatcher>());
         }
     }
 }

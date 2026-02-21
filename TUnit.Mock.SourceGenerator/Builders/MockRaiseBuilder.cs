@@ -15,16 +15,25 @@ internal static class MockRaiseBuilder
 
         using (writer.Block("namespace TUnit.Mock.Generated"))
         {
-            using (writer.Block($"public sealed class {safeName}_MockRaise"))
+            // Data holder class implementing marker interface
+            using (writer.Block($"public sealed class {safeName}_MockRaise : global::TUnit.Mock.IMockRaise<{model.FullyQualifiedName}>"))
             {
-                writer.AppendLine($"private readonly {safeName}_MockImpl _impl;");
+                writer.AppendLine($"internal readonly {safeName}_MockImpl Impl;");
                 writer.AppendLine();
-                writer.AppendLine($"internal {safeName}_MockRaise({safeName}_MockImpl impl) => _impl = impl;");
+                writer.AppendLine($"internal {safeName}_MockRaise({safeName}_MockImpl impl) => Impl = impl;");
+            }
 
+            writer.AppendLine();
+
+            // Extension methods class
+            using (writer.Block($"public static class {safeName}_MockRaiseExtensions"))
+            {
+                bool firstMember = true;
                 foreach (var evt in model.Events)
                 {
-                    writer.AppendLine();
-                    GenerateRaiseMethod(writer, evt);
+                    if (!firstMember) writer.AppendLine();
+                    firstMember = false;
+                    GenerateRaiseMethod(writer, evt, model, safeName);
                 }
             }
         }
@@ -32,11 +41,14 @@ internal static class MockRaiseBuilder
         return writer.ToString();
     }
 
-    private static void GenerateRaiseMethod(CodeWriter writer, MockEventModel evt)
+    private static void GenerateRaiseMethod(CodeWriter writer, MockEventModel evt, MockTypeModel model, string safeName)
     {
-        using (writer.Block($"public void {evt.Name}({evt.EventArgsType} args)"))
+        var extensionParam = $"this global::TUnit.Mock.IMockRaise<{model.FullyQualifiedName}> raise";
+
+        using (writer.Block($"public static void {evt.Name}({extensionParam}, {evt.EventArgsType} args)"))
         {
-            writer.AppendLine($"_impl.Raise_{evt.Name}(args);");
+            writer.AppendLine($"var r = ({safeName}_MockRaise)raise;");
+            writer.AppendLine($"r.Impl.Raise_{evt.Name}(args);");
         }
     }
 }
