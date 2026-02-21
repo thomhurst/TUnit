@@ -9,12 +9,6 @@ on:
     #   - "src/**/*.tsx"
     #   - "src/**/*.js"
     #   - "src/**/*.jsx"
-  workflow_dispatch:
-    inputs:
-      pr_number:
-        description: 'Pull request number to review'
-        required: true
-        type: number
 
 jobs:
   claude-review:
@@ -26,16 +20,14 @@ jobs:
 
     runs-on: ubuntu-latest
     permissions:
-      contents: write        # Allows pushing fixes/commits
-      pull-requests: write   # Allows posting review comments
-      issues: write          # Allows creating/updating issues
-      checks: write          # Allows creating check runs
-      statuses: write        # Allows updating commit statuses
-      id-token: write        # Required for OIDC authentication
+      contents: read
+      pull-requests: read
+      issues: read
+      id-token: write
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
@@ -46,21 +38,7 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
           plugins: 'code-review@claude-code-plugins'
-          prompt: |
-            /code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number || inputs.pr_number }}
-
-            Additional instructions:
-            - ALWAYS post a review comment, even if no issues are found. If the code is good, acknowledge it.
-            - You MUST post your review as a PR comment using `gh pr review` or `gh pr comment` before finishing. Do not just output the review - actually post it to the PR.
-            - When you find issues, ALWAYS suggest better approaches or architectural improvements, not just minor optimizations.
-            - Focus on:
-              * Design patterns that could be improved
-              * Alternative approaches that are more maintainable or scalable
-              * Architectural concerns or anti-patterns
-              * Better abstractions or simplifications
-            - Skip minor style/formatting issues unless they impact readability significantly.
-            - Always explain WHY the suggested approach is better, not just WHAT to change.
-          claude_args: "--allowedTools Bash,Read,Glob,Grep,WebFetch,WebSearch"
+          prompt: '/code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}'
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://code.claude.com/docs/en/cli-reference for available options
 
