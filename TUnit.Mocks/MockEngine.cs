@@ -21,7 +21,7 @@ internal static class MockCallSequence
 public sealed class MockEngine<T> where T : class
 {
     private readonly Dictionary<int, List<MethodSetup>> _setupsByMember = new();
-    private readonly object _setupLock = new();
+    private readonly System.Threading.Lock _setupLock = new();
     private readonly ConcurrentQueue<CallRecord> _callHistory = new();
     private readonly ConcurrentDictionary<string, object?> _autoTrackValues = new();
     private readonly ConcurrentQueue<(string EventName, bool IsSubscribe)> _eventSubscriptions = new();
