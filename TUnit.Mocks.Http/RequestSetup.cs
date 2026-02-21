@@ -8,6 +8,7 @@ namespace TUnit.Mocks.Http;
 public sealed class RequestSetup
 {
     private readonly List<ResponseBuilder> _responses = new();
+    private readonly System.Threading.Lock _responseLock = new();
     private int _responseIndex;
 
     internal RequestMatcher Matcher { get; }
@@ -68,10 +69,13 @@ public sealed class RequestSetup
 
     internal ResponseBuilder? GetNextResponse()
     {
-        if (_responses.Count == 0) return null;
-        MatchCount++;
-        var index = _responseIndex < _responses.Count ? _responseIndex : _responses.Count - 1;
-        if (_responseIndex < _responses.Count) _responseIndex++;
-        return _responses[index];
+        lock (_responseLock)
+        {
+            if (_responses.Count == 0) return null;
+            MatchCount++;
+            var index = _responseIndex < _responses.Count ? _responseIndex : _responses.Count - 1;
+            if (_responseIndex < _responses.Count) _responseIndex++;
+            return _responses[index];
+        }
     }
 }

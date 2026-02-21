@@ -150,6 +150,8 @@ public class MockGenerator : IIncrementalGenerator
             .Replace("<", "_")
             .Replace(">", "_")
             .Replace(",", "_")
+            .Replace("[", "_")
+            .Replace("]", "_")
             .Replace(" ", "");
     }
 }
