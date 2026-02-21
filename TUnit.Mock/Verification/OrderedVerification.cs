@@ -9,14 +9,13 @@ namespace TUnit.Mock.Verification;
 /// </summary>
 public static class OrderedVerification
 {
-    [ThreadStatic]
-    private static List<OrderedCallExpectation>? _expectations;
+    private static readonly AsyncLocal<List<OrderedCallExpectation>?> _expectations = new();
 
     /// <summary>
     /// Returns true when an ordered verification is currently being collected.
     /// Used by <see cref="CallVerificationBuilder{T}"/> to switch into recording mode.
     /// </summary>
-    internal static bool IsCollecting => _expectations is not null;
+    internal static bool IsCollecting => _expectations.Value is not null;
 
     /// <summary>
     /// Records an expectation during ordered verification collection.
@@ -24,7 +23,7 @@ public static class OrderedVerification
     /// </summary>
     internal static void RecordExpectation(int memberId, string memberName, IArgumentMatcher[] matchers, Times times, IReadOnlyList<CallRecord> allCalls)
     {
-        _expectations?.Add(new OrderedCallExpectation(memberId, memberName, matchers, times, allCalls));
+        _expectations.Value?.Add(new OrderedCallExpectation(memberId, memberName, matchers, times, allCalls));
     }
 
     /// <summary>
@@ -33,7 +32,7 @@ public static class OrderedVerification
     /// </summary>
     public static void Verify(Action verificationActions)
     {
-        _expectations = new List<OrderedCallExpectation>();
+        _expectations.Value = new List<OrderedCallExpectation>();
         try
         {
             verificationActions();
@@ -41,13 +40,13 @@ public static class OrderedVerification
         }
         finally
         {
-            _expectations = null;
+            _expectations.Value = null;
         }
     }
 
     private static void ValidateOrder()
     {
-        var expectations = _expectations!;
+        var expectations = _expectations.Value!;
 
         if (expectations.Count == 0)
         {

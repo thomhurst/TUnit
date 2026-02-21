@@ -7,7 +7,7 @@ internal static class MockDelegateFactoryBuilder
     public static string Build(MockTypeModel model)
     {
         var writer = new CodeWriter();
-        var safeName = MockImplBuilder.GetSafeName(model.FullyQualifiedName);
+        var safeName = MockImplBuilder.GetCompositeSafeName(model);
 
         // The delegate has exactly one method: Invoke
         var invokeMethod = model.Methods[0];

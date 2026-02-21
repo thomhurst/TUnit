@@ -21,20 +21,37 @@ public readonly struct Times : IEquatable<Times>
 
     /// <summary>Expects the member to be called exactly <paramref name="n"/> times.</summary>
     /// <param name="n">The exact number of expected calls.</param>
-    public static Times Exactly(int n) => new(n, n);
+    public static Times Exactly(int n)
+    {
+        if (n < 0) throw new ArgumentOutOfRangeException(nameof(n), n, "Value must be non-negative.");
+        return new(n, n);
+    }
 
     /// <summary>Expects the member to be called at least <paramref name="n"/> times.</summary>
     /// <param name="n">The minimum number of expected calls.</param>
-    public static Times AtLeast(int n) => new(n, int.MaxValue);
+    public static Times AtLeast(int n)
+    {
+        if (n < 0) throw new ArgumentOutOfRangeException(nameof(n), n, "Value must be non-negative.");
+        return new(n, int.MaxValue);
+    }
 
     /// <summary>Expects the member to be called at most <paramref name="n"/> times.</summary>
     /// <param name="n">The maximum number of expected calls.</param>
-    public static Times AtMost(int n) => new(0, n);
+    public static Times AtMost(int n)
+    {
+        if (n < 0) throw new ArgumentOutOfRangeException(nameof(n), n, "Value must be non-negative.");
+        return new(0, n);
+    }
 
     /// <summary>Expects the member to be called between <paramref name="min"/> and <paramref name="max"/> times (inclusive).</summary>
     /// <param name="min">The minimum number of expected calls.</param>
     /// <param name="max">The maximum number of expected calls.</param>
-    public static Times Between(int min, int max) => new(min, max);
+    public static Times Between(int min, int max)
+    {
+        if (min < 0) throw new ArgumentOutOfRangeException(nameof(min), min, "Value must be non-negative.");
+        if (max < min) throw new ArgumentOutOfRangeException(nameof(max), max, "max must be >= min.");
+        return new(min, max);
+    }
 
     // Internal method used by verification engine
     internal bool Matches(int actualCount) => actualCount >= _min && actualCount <= _max;
