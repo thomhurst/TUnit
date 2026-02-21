@@ -40,14 +40,15 @@ internal static class MockSetupBuilder
                     GenerateSetupMethod(writer, method, model, safeName);
                 }
 
-                // Properties
-                foreach (var prop in model.Properties)
+                // Properties — extension properties via C# 14 extension blocks
+                var setupProps = model.Properties
+                    .Where(p => !p.IsIndexer && (p.HasGetter || p.HasSetter))
+                    .ToList();
+                if (setupProps.Count > 0)
                 {
-                    if (prop.IsIndexer) continue;
-                    if (!prop.HasGetter && !prop.HasSetter) continue;
                     if (!firstMember) writer.AppendLine();
                     firstMember = false;
-                    GenerateSetupProperty(writer, prop, model, safeName);
+                    GenerateSetupPropertyExtensionBlock(writer, setupProps, model, safeName);
                 }
             }
 
@@ -314,35 +315,23 @@ internal static class MockSetupBuilder
         }
     }
 
-    private static void GenerateSetupProperty(CodeWriter writer, MockMemberModel prop, MockTypeModel model, string safeName)
+    private static void GenerateSetupPropertyExtensionBlock(CodeWriter writer, List<MockMemberModel> props, MockTypeModel model, string safeName)
     {
-        var extensionParam = $"this global::TUnit.Mocks.IMockSetup<{model.FullyQualifiedName}> setup";
-
-        // Property getter setup returns IPropertySetup<T>
-        if (prop.HasGetter)
+        using (writer.Block($"extension(global::TUnit.Mocks.IMockSetup<{model.FullyQualifiedName}> setup)"))
         {
-            using (writer.Block($"public static global::TUnit.Mocks.Setup.IPropertySetup<{prop.ReturnType}> {prop.Name}_Get({extensionParam})"))
+            bool first = true;
+            foreach (var prop in props)
             {
-                writer.AppendLine($"var s = ({safeName}_MockSetup)setup;");
-                writer.AppendLine("var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();");
-                writer.AppendLine($"var methodSetup = new global::TUnit.Mocks.Setup.MethodSetup({prop.MemberId}, matchers, \"{prop.Name} (get)\");");
-                writer.AppendLine("s.Engine.AddSetup(methodSetup);");
-                writer.AppendLine($"return new global::TUnit.Mocks.Setup.PropertySetupBuilder<{prop.ReturnType}>(methodSetup);");
-            }
-        }
+                if (!first) writer.AppendLine();
+                first = false;
 
-        // Property setter setup returns IPropertySetterSetup
-        if (prop.HasSetter)
-        {
-            if (prop.HasGetter) writer.AppendLine();
-            var setterMemberId = prop.SetterMemberId;
-            using (writer.Block($"public static global::TUnit.Mocks.Setup.IPropertySetterSetup {prop.Name}_Set({extensionParam}, global::TUnit.Mocks.Arguments.Arg<{prop.ReturnType}> value)"))
-            {
-                writer.AppendLine($"var s = ({safeName}_MockSetup)setup;");
-                writer.AppendLine("var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { value.Matcher };");
-                writer.AppendLine($"var methodSetup = new global::TUnit.Mocks.Setup.MethodSetup({setterMemberId}, matchers, \"{prop.Name} (set)\");");
-                writer.AppendLine("s.Engine.AddSetup(methodSetup);");
-                writer.AppendLine("return new global::TUnit.Mocks.Setup.PropertySetterSetupBuilder(methodSetup);");
+                var getterMemberId = prop.HasGetter ? prop.MemberId.ToString() : "0";
+                var setterMemberId = prop.HasSetter ? prop.SetterMemberId.ToString() : "0";
+                var hasGetter = prop.HasGetter ? "true" : "false";
+                var hasSetter = prop.HasSetter ? "true" : "false";
+
+                writer.AppendLine($"public global::TUnit.Mocks.Setup.PropertySetupAccessor<{prop.ReturnType}> {prop.Name}");
+                writer.AppendLine($"    => new((({safeName}_MockSetup)setup).Engine, {getterMemberId}, {setterMemberId}, \"{prop.Name}\", {hasGetter}, {hasSetter});");
             }
         }
     }

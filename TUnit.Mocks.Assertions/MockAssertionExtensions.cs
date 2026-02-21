@@ -23,6 +23,20 @@ public static class MockAssertionExtensions
     }
 
     /// <summary>
+    /// Asserts that the mock member was called the specified number of times.
+    /// Generic overload for types implementing <see cref="ICallVerification"/> (e.g. PropertyVerifyAccessor).
+    /// </summary>
+    public static WasCalledAssertion WasCalled<T>(
+        this IAssertionSource<T> source,
+        Times times,
+        [CallerArgumentExpression(nameof(times))] string? expression = null) where T : ICallVerification
+    {
+        source.Context.ExpressionBuilder.Append($".WasCalled({expression})");
+        var mappedContext = source.Context.Map<ICallVerification>(v => v);
+        return new WasCalledAssertion(mappedContext, times);
+    }
+
+    /// <summary>
     /// Asserts that the mock member was never called.
     /// </summary>
     public static WasNeverCalledAssertion WasNeverCalled(
@@ -30,5 +44,17 @@ public static class MockAssertionExtensions
     {
         source.Context.ExpressionBuilder.Append(".WasNeverCalled()");
         return new WasNeverCalledAssertion(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that the mock member was never called.
+    /// Generic overload for types implementing <see cref="ICallVerification"/> (e.g. PropertyVerifyAccessor).
+    /// </summary>
+    public static WasNeverCalledAssertion WasNeverCalled<T>(
+        this IAssertionSource<T> source) where T : ICallVerification
+    {
+        source.Context.ExpressionBuilder.Append(".WasNeverCalled()");
+        var mappedContext = source.Context.Map<ICallVerification>(v => v);
+        return new WasNeverCalledAssertion(mappedContext);
     }
 }

@@ -30,4 +30,14 @@ public static class Rules
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true
     );
+
+    public static readonly DiagnosticDescriptor TM004_RequiresCSharp14 = new(
+        id: "TM004",
+        title: "TUnit.Mocks requires C# 14 or later",
+        messageFormat: "TUnit.Mocks requires C# 14 or later (LangVersion 14 or preview). Current language version is '{0}'.",
+        category: "TUnit.Mocks",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true,
+        customTags: new[] { WellKnownDiagnosticTags.CompilationEnd }
+    );
 }

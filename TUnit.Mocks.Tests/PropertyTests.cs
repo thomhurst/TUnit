@@ -41,7 +41,7 @@ public class PropertyTests
     {
         // Arrange
         var mock = Mock.Of<IPropertyService>();
-        mock.Setup.Name_Get().Returns("TestName");
+        mock.Setup.Name.Returns("TestName");
 
         // Act
         IPropertyService svc = mock.Object;
@@ -56,7 +56,7 @@ public class PropertyTests
     {
         // Arrange
         var mock = Mock.Of<IPropertyService>();
-        mock.Setup.Count_Get().Returns(42);
+        mock.Setup.Count.Returns(42);
 
         // Act
         IPropertyService svc = mock.Object;
@@ -77,7 +77,7 @@ public class PropertyTests
         svc.Count = 10;
 
         // Assert — verify setter was called
-        mock.Verify.Count_Set(10).WasCalled(Times.Once);
+        mock.Verify.Count.Set(10).WasCalled(Times.Once);
         await Assert.That(true).IsTrue();
     }
 
@@ -94,7 +94,7 @@ public class PropertyTests
         svc.Count = 15;
 
         // Assert — verify setter was called 3 times with any value
-        mock.Verify.Count_Set().WasCalled(Times.Exactly(3));
+        mock.Verify.Count.Setter.WasCalled(Times.Exactly(3));
         await Assert.That(true).IsTrue();
     }
 
@@ -110,8 +110,8 @@ public class PropertyTests
         svc.Count = 10;
 
         // Assert — only one call with value 10
-        mock.Verify.Count_Set(10).WasCalled(Times.Once);
-        mock.Verify.Count_Set(5).WasCalled(Times.Once);
+        mock.Verify.Count.Set(10).WasCalled(Times.Once);
+        mock.Verify.Count.Set(5).WasCalled(Times.Once);
         await Assert.That(true).IsTrue();
     }
 
@@ -124,7 +124,7 @@ public class PropertyTests
         // Act — don't set anything
 
         // Assert
-        mock.Verify.Count_Set().WasNeverCalled();
+        mock.Verify.Count.Setter.WasNeverCalled();
         await Assert.That(true).IsTrue();
     }
 
@@ -140,7 +140,7 @@ public class PropertyTests
         _ = svc.Name;
 
         // Assert — getter was called twice
-        mock.Verify.Name_Get().WasCalled(Times.Exactly(2));
+        mock.Verify.Name.WasCalled(Times.Exactly(2));
         await Assert.That(true).IsTrue();
     }
 
@@ -153,7 +153,7 @@ public class PropertyTests
         // Act — don't access the property
 
         // Assert
-        mock.Verify.Name_Get().WasNeverCalled();
+        mock.Verify.Name.WasNeverCalled();
         await Assert.That(true).IsTrue();
     }
 
@@ -176,8 +176,8 @@ public class PropertyTests
     {
         // Arrange
         var mock = Mock.Of<IPropertyService>();
-        mock.Setup.Name_Get().Returns("First");
-        mock.Setup.Name_Get().Returns("Second");
+        mock.Setup.Name.Returns("First");
+        mock.Setup.Name.Returns("Second");
 
         // Act
         IPropertyService svc = mock.Object;
@@ -194,7 +194,7 @@ public class PropertyTests
         var mock = Mock.Of<IPropertyService>();
         var callbackCalled = false;
         Action callback = () => callbackCalled = true;
-        mock.Setup.Count_Set(Arg.Any<int>()).Callback(callback);
+        mock.Setup.Count.Set(Arg.Any<int>()).Callback(callback);
 
         // Act
         IPropertyService svc = mock.Object;

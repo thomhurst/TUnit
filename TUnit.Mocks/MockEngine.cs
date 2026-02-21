@@ -1,3 +1,4 @@
+using TUnit.Mocks.Arguments;
 using TUnit.Mocks.Exceptions;
 using TUnit.Mocks.Setup;
 using TUnit.Mocks.Setup.Behaviors;
@@ -18,7 +19,7 @@ internal static class MockCallSequence
 }
 
 [EditorBrowsable(EditorBrowsableState.Never)]
-public sealed class MockEngine<T> where T : class
+public sealed class MockEngine<T> : IMockEngineAccess where T : class
 {
     private readonly Dictionary<int, List<MethodSetup>> _setupsByMember = new();
     private readonly System.Threading.Lock _setupLock = new();
@@ -109,6 +110,10 @@ public sealed class MockEngine<T> where T : class
             list.Add(setup);
         }
     }
+
+    /// <inheritdoc />
+    ICallVerification IMockEngineAccess.CreateVerification(int memberId, string memberName, IArgumentMatcher[] matchers)
+        => new CallVerificationBuilder<T>(this, memberId, memberName, matchers);
 
     /// <summary>
     /// Handles a void method call. Records the call and executes matching setup behavior.

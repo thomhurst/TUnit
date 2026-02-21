@@ -309,16 +309,16 @@ public class InterfaceInheritanceTests
 
         // Setup properties from all three levels of inheritance
         // IEntity
-        mock.Setup.Id_Get().Returns(42);
-        mock.Setup.CreatedAt_Get().Returns(now);
+        mock.Setup.Id.Returns(42);
+        mock.Setup.CreatedAt.Returns(now);
         // IAuditable
-        mock.Setup.CreatedBy_Get().Returns("admin");
-        mock.Setup.ModifiedAt_Get().Returns(now.AddHours(1));
-        mock.Setup.ModifiedBy_Get().Returns("editor");
+        mock.Setup.CreatedBy.Returns("admin");
+        mock.Setup.ModifiedAt.Returns(now.AddHours(1));
+        mock.Setup.ModifiedBy.Returns("editor");
         // ISoftDeletable
-        mock.Setup.IsDeleted_Get().Returns(false);
-        mock.Setup.DeletedAt_Get().Returns((DateTime?)null);
-        mock.Setup.DeletedBy_Get().Returns((string?)null);
+        mock.Setup.IsDeleted.Returns(false);
+        mock.Setup.DeletedAt.Returns((DateTime?)null);
+        mock.Setup.DeletedBy.Returns((string?)null);
 
         // Act
         ISoftDeletable entity = mock.Object;
@@ -339,9 +339,9 @@ public class InterfaceInheritanceTests
     {
         // Arrange — create a mock ISoftDeletable to use as the return value
         var entityMock = Mock.Of<ISoftDeletable>();
-        entityMock.Setup.Id_Get().Returns(1);
-        entityMock.Setup.CreatedBy_Get().Returns("system");
-        entityMock.Setup.IsDeleted_Get().Returns(false);
+        entityMock.Setup.Id.Returns(1);
+        entityMock.Setup.CreatedBy.Returns("system");
+        entityMock.Setup.IsDeleted.Returns(false);
 
         var repoMock = Mock.Of<IAuditRepository>();
         repoMock.Setup.GetByIdAsync(1).Returns(entityMock.Object);

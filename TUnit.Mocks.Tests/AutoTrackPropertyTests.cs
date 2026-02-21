@@ -69,7 +69,7 @@ public class AutoTrackPropertyTests
         // Arrange
         var mock = Mock.Of<IAutoTrackEntity>();
         mock.SetupAllProperties();
-        mock.Setup.Name_Get().Returns("Configured");
+        mock.Setup.Name.Returns("Configured");
 
         // Act — set a tracked value, but explicit setup should win
         mock.Object.Name = "Tracked";
@@ -125,8 +125,8 @@ public class AutoTrackPropertyTests
     {
         // Arrange — strict mode requires explicit SetupAllProperties
         var mock = Mock.Of<IAutoTrackEntity>(MockBehavior.Strict);
-        mock.Setup.Name_Set(Arg.Any<string>());
-        mock.Setup.Name_Get().Returns("");
+        mock.Setup.Name.Set(Arg.Any<string>());
+        mock.Setup.Name.Returns("");
 
         // Act
         mock.Object.Name = "Alice";
@@ -141,8 +141,8 @@ public class AutoTrackPropertyTests
         // Arrange — strict mode with explicit opt-in
         var mock = Mock.Of<IAutoTrackEntity>(MockBehavior.Strict);
         mock.SetupAllProperties();
-        mock.Setup.Name_Set(Arg.Any<string>());
-        mock.Setup.Name_Get().Returns("");
+        mock.Setup.Name.Set(Arg.Any<string>());
+        mock.Setup.Name.Returns("");
 
         // Act
         mock.Object.Name = "Alice";

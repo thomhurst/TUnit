@@ -88,13 +88,13 @@ public class AsyncVerificationTests
     public async Task Property_Getter_WasCalled_Via_Assert()
     {
         var mock = Mock.Of<IPropertyService>();
-        mock.Setup.Name_Get().Returns("Calculator");
+        mock.Setup.Name.Returns("Calculator");
 
         IPropertyService svc = mock.Object;
         _ = svc.Name;
         _ = svc.Name;
 
-        await Assert.That(mock.Verify.Name_Get())
+        await Assert.That(mock.Verify.Name)
             .WasCalled(Times.Exactly(2));
     }
 
@@ -106,7 +106,7 @@ public class AsyncVerificationTests
         IPropertyService svc = mock.Object;
         svc.Count = 10;
 
-        await Assert.That(mock.Verify.Count_Set())
+        await Assert.That(mock.Verify.Count.Setter)
             .WasCalled(Times.Once);
     }
 
@@ -115,7 +115,7 @@ public class AsyncVerificationTests
     {
         var mock = Mock.Of<IPropertyService>();
 
-        await Assert.That(mock.Verify.Name_Get())
+        await Assert.That(mock.Verify.Name)
             .WasNeverCalled();
     }
 
