@@ -4,11 +4,19 @@ using TUnit.Mock.Arguments;
 namespace TUnit.Mock.Arguments;
 
 /// <summary>
+/// Non-generic interface for deferred capture after full setup match confirmation.
+/// </summary>
+internal interface ICapturingMatcher
+{
+    void ApplyCapture(object? value);
+}
+
+/// <summary>
 /// A decorator matcher that delegates to an inner matcher and captures
 /// argument values when the inner matcher returns <see langword="true"/>.
 /// Every <see cref="Arg{T}"/> wraps its matcher in this decorator automatically.
 /// </summary>
-internal sealed class CapturingMatcher<T> : IArgumentMatcher<T>
+internal sealed class CapturingMatcher<T> : IArgumentMatcher<T>, ICapturingMatcher
 {
     private readonly IArgumentMatcher _inner;
     private readonly ConcurrentQueue<T?> _captured = new();
@@ -31,23 +39,15 @@ internal sealed class CapturingMatcher<T> : IArgumentMatcher<T>
 
     public bool Matches(T? value)
     {
-        // Delegate to inner if it's typed
-        bool result;
+        // Only test the inner matcher — do NOT capture here.
+        // Capture is deferred until ApplyCapture() is called after
+        // the full setup match is confirmed (all matchers passed).
         if (_inner is IArgumentMatcher<T> typed)
         {
-            result = typed.Matches(value);
-        }
-        else
-        {
-            result = _inner.Matches(value);
+            return typed.Matches(value);
         }
 
-        if (result)
-        {
-            _captured.Enqueue(value);
-        }
-
-        return result;
+        return _inner.Matches(value);
     }
 
     public bool Matches(object? value)
@@ -59,16 +59,26 @@ internal sealed class CapturingMatcher<T> : IArgumentMatcher<T>
 
         if (value is null)
         {
-            // For reference types / nullable value types, delegate null
-            var result = _inner.Matches(null);
-            if (result)
-            {
-                _captured.Enqueue(default);
-            }
-            return result;
+            return _inner.Matches(null);
         }
 
         return _inner.Matches(value);
+    }
+
+    /// <summary>
+    /// Captures the value after the full setup match has been confirmed.
+    /// Called by <see cref="Setup.MethodSetup.ApplyCaptures"/>.
+    /// </summary>
+    void ICapturingMatcher.ApplyCapture(object? value)
+    {
+        if (value is T typed)
+        {
+            _captured.Enqueue(typed);
+        }
+        else
+        {
+            _captured.Enqueue(default);
+        }
     }
 
     public string Describe() => _inner.Describe();

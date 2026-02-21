@@ -35,12 +35,21 @@ internal static class MockDelegateFactoryBuilder
                     var paramList = BuildLambdaParameterList(invokeMethod);
                     var argsArray = BuildArgsArray(invokeMethod);
 
+                    var hasOutParams = invokeMethod.Parameters.Any(p => p.Direction == ParameterDirection.Out);
+
                     if (invokeMethod.IsVoid)
                     {
                         // void delegate (Action<...>)
                         writer.AppendLine($"{model.FullyQualifiedName} del = ({paramList}) =>");
                         writer.AppendLine("{");
                         writer.IncreaseIndent();
+                        if (hasOutParams)
+                        {
+                            foreach (var p in invokeMethod.Parameters.Where(p => p.Direction == ParameterDirection.Out))
+                            {
+                                writer.AppendLine($"{p.Name} = default!;");
+                            }
+                        }
                         writer.AppendLine($"engine.HandleCall({invokeMethod.MemberId}, \"Invoke\", {argsArray});");
                         writer.DecreaseIndent();
                         writer.AppendLine("};");
@@ -51,6 +60,13 @@ internal static class MockDelegateFactoryBuilder
                         writer.AppendLine($"{model.FullyQualifiedName} del = ({paramList}) =>");
                         writer.AppendLine("{");
                         writer.IncreaseIndent();
+                        if (hasOutParams)
+                        {
+                            foreach (var p in invokeMethod.Parameters.Where(p => p.Direction == ParameterDirection.Out))
+                            {
+                                writer.AppendLine($"{p.Name} = default!;");
+                            }
+                        }
                         writer.AppendLine($"return engine.HandleCallWithReturn<{invokeMethod.ReturnType}>({invokeMethod.MemberId}, \"Invoke\", {argsArray}, {invokeMethod.SmartDefault});");
                         writer.DecreaseIndent();
                         writer.AppendLine("};");
@@ -70,7 +86,17 @@ internal static class MockDelegateFactoryBuilder
     private static string BuildLambdaParameterList(MockMemberModel method)
     {
         if (method.Parameters.Length == 0) return "";
-        return string.Join(", ", method.Parameters.Select(p => $"{p.FullyQualifiedType} {p.Name}"));
+        return string.Join(", ", method.Parameters.Select(p =>
+        {
+            var direction = p.Direction switch
+            {
+                ParameterDirection.Out => "out ",
+                ParameterDirection.Ref => "ref ",
+                ParameterDirection.In_Readonly => "in ",
+                _ => ""
+            };
+            return $"{direction}{p.FullyQualifiedType} {p.Name}";
+        }));
     }
 
     private static string BuildArgsArray(MockMemberModel method)

@@ -422,6 +422,7 @@ public sealed class MockEngine<T> where T : class
                 if (setup.MemberId == memberId && setup.Matches(args))
                 {
                     setup.IncrementInvokeCount();
+                    setup.ApplyCaptures(args);
                     return (true, setup.GetNextBehavior(), setup);
                 }
             }

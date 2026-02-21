@@ -48,7 +48,7 @@ public sealed class PropertyVerificationBuilder<T> : IPropertyVerification where
         var matchingCount = 0;
         foreach (var call in calls)
         {
-            if (call.Arguments.Length == 1 && Equals(call.Arguments[0], value))
+            if (call.Arguments.Length == 1 && matcher.Matches(call.Arguments[0]))
             {
                 matchingCount++;
             }

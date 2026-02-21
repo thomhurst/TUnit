@@ -80,6 +80,22 @@ public sealed class MethodSetup
         }
     }
 
+    /// <summary>
+    /// Applies deferred captures to all CapturingMatcher instances after a full match is confirmed.
+    /// Called by <see cref="MockEngine{T}"/> after all matchers have passed.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public void ApplyCaptures(object?[] args)
+    {
+        for (int i = 0; i < _matchers.Length && i < args.Length; i++)
+        {
+            if (_matchers[i] is ICapturingMatcher capturing)
+            {
+                capturing.ApplyCapture(args[i]);
+            }
+        }
+    }
+
     public IBehavior? GetNextBehavior()
     {
         lock (_behaviorLock)
