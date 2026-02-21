@@ -159,6 +159,62 @@ public class StateMachineTests
     }
 
     [Test]
+    public async Task Nested_InState_Restores_Previous_State_Scope()
+    {
+        // Regression test: nested InState calls must save/restore PendingRequiredState
+        var mock = Mock.Of<IConnection>();
+        mock.SetState("outer");
+
+        mock.InState("outer", outerSetup =>
+        {
+            outerSetup.GetStatus().Returns("OUTER");
+
+            // Nested InState should temporarily switch to "inner" scope
+            mock.InState("inner", innerSetup =>
+            {
+                innerSetup.Connect();
+            });
+
+            // After inner InState returns, we should be back in "outer" scope
+            outerSetup.Disconnect();
+        });
+
+        IConnection conn = mock.Object;
+
+        // In "outer" state, GetStatus and Disconnect should work
+        await Assert.That(conn.GetStatus()).IsEqualTo("OUTER");
+        conn.Disconnect(); // should not throw (setup registered in outer scope)
+
+        // In "inner" state, Connect should work (it was set up in inner scope)
+        mock.SetState("inner");
+        conn.Connect(); // should not throw
+    }
+
+    [Test]
+    public async Task SetState_Null_Clears_State()
+    {
+        var mock = Mock.Of<IConnection>();
+
+        // Global (no-state) setup — added first
+        mock.Setup.GetStatus().Returns("NO_STATE");
+
+        // State-scoped setup — added second, wins when in "connected" state
+        mock.InState("connected", setup =>
+        {
+            setup.GetStatus().Returns("ONLINE");
+        });
+
+        mock.SetState("connected");
+
+        IConnection conn = mock.Object;
+        await Assert.That(conn.GetStatus()).IsEqualTo("ONLINE");
+
+        // Clear state — scoped setup no longer matches, global setup wins
+        mock.SetState(null);
+        await Assert.That(conn.GetStatus()).IsEqualTo("NO_STATE");
+    }
+
+    [Test]
     public async Task Reset_Clears_State()
     {
         var mock = Mock.Of<IConnection>();

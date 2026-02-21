@@ -24,6 +24,12 @@ public interface IMultiSerializable
     void Deserialize(string data);
 }
 
+public interface IMultiCloneable
+{
+    object Clone();
+    bool CanClone { get; }
+}
+
 /// <summary>
 /// US13 Tests: Multiple interface mocking (Mock.Of&lt;T1, T2&gt;()).
 /// </summary>
@@ -109,5 +115,81 @@ public class MultipleInterfaceTests
 
         // Assert — all calls recorded in invocations
         await Assert.That(mock.Invocations).Count().IsEqualTo(2);
+    }
+
+    [Test]
+    public async Task Mock_Of_Four_Interfaces()
+    {
+        // Arrange
+        var mock = Mock.Of<IMultiLogger, IMultiDisposable, IMultiSerializable, IMultiCloneable>();
+
+        // Assert — implements all four
+        await Assert.That(mock.Object is IMultiLogger).IsTrue();
+        await Assert.That(mock.Object is IMultiDisposable).IsTrue();
+        await Assert.That(mock.Object is IMultiSerializable).IsTrue();
+        await Assert.That(mock.Object is IMultiCloneable).IsTrue();
+    }
+
+    [Test]
+    public async Task Mock_Of_Four_Interfaces_Can_Use_Primary()
+    {
+        // Arrange
+        var mock = Mock.Of<IMultiLogger, IMultiDisposable, IMultiSerializable, IMultiCloneable>();
+        mock.Setup.Log(Arg.Any<string>());
+
+        // Act
+        mock.Object.Log("hello from four-interface mock");
+
+        // Assert
+        mock.Verify.Log("hello from four-interface mock").WasCalled(Times.Once);
+        await Assert.That(true).IsTrue();
+    }
+
+    [Test]
+    public async Task Mock_Of_Four_Interfaces_Can_Cast_To_All()
+    {
+        // Arrange
+        var mock = Mock.Of<IMultiLogger, IMultiDisposable, IMultiSerializable, IMultiCloneable>();
+
+        // Act — cast to each secondary interface and call methods
+        var disposable = (IMultiDisposable)mock.Object;
+        disposable.Dispose();
+
+        var serializable = (IMultiSerializable)mock.Object;
+        var serialized = serializable.Serialize();
+
+        var cloneable = (IMultiCloneable)mock.Object;
+        var canClone = cloneable.CanClone;
+
+        // Assert — all operations succeeded
+        await Assert.That(disposable).IsNotNull();
+        await Assert.That(serialized).IsEmpty(); // default string
+        await Assert.That(canClone).IsFalse(); // default bool
+    }
+
+    [Test]
+    public async Task Mock_Of_Four_Interfaces_Tracks_All_Calls()
+    {
+        // Arrange
+        var mock = Mock.Of<IMultiLogger, IMultiDisposable, IMultiSerializable, IMultiCloneable>();
+
+        // Act — call methods from all interfaces
+        mock.Object.Log("msg");
+        ((IMultiDisposable)mock.Object).Dispose();
+        ((IMultiSerializable)mock.Object).Serialize();
+        ((IMultiCloneable)mock.Object).Clone();
+
+        // Assert — all 4 calls tracked
+        await Assert.That(mock.Invocations).Count().IsEqualTo(4);
+    }
+
+    [Test]
+    public async Task Mock_Of_Two_Interfaces_With_Strict_Behavior()
+    {
+        // Arrange
+        var mock = Mock.Of<IMultiLogger, IMultiDisposable>(MockBehavior.Strict);
+
+        // Assert — strict behavior inherited
+        await Assert.That(mock.Behavior).IsEqualTo(MockBehavior.Strict);
     }
 }

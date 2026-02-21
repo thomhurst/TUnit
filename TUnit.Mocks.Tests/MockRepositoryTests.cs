@@ -184,4 +184,103 @@ public class MockRepositoryTests
         repo.VerifyNoOtherCalls();
         repo.Reset();
     }
+
+    [Test]
+    public async Task Repository_OfPartial_Creates_And_Tracks_Partial_Mock()
+    {
+        // Arrange
+        var repo = new MockRepository();
+
+        // Act
+        var mock = repo.OfPartial<ConcreteService>();
+
+        // Assert — tracked
+        await Assert.That(repo.Mocks).Count().IsEqualTo(1);
+        await Assert.That(mock.Object).IsNotNull();
+    }
+
+    [Test]
+    public async Task Repository_OfPartial_Base_Method_Works()
+    {
+        // Arrange
+        var repo = new MockRepository();
+        var mock = repo.OfPartial<ConcreteService>();
+
+        // Act — unconfigured, calls base implementation
+        var result = mock.Object.Add(3, 4);
+
+        // Assert
+        await Assert.That(result).IsEqualTo(7);
+    }
+
+    [Test]
+    public async Task Repository_OfPartial_Configured_Method_Returns_Mock_Value()
+    {
+        // Arrange
+        var repo = new MockRepository();
+        var mock = repo.OfPartial<ConcreteService>();
+        mock.Setup.Greet(Arg.Any<string>()).Returns("Mocked!");
+
+        // Act
+        var result = mock.Object.Greet("World");
+
+        // Assert
+        await Assert.That(result).IsEqualTo("Mocked!");
+    }
+
+    [Test]
+    public async Task Repository_OfPartial_With_Constructor_Args()
+    {
+        // Arrange
+        var repo = new MockRepository();
+        var mock = repo.OfPartial<ServiceWithConstructor>("PREFIX");
+        mock.Setup.Format(Arg.Any<string>()).Returns("formatted");
+
+        // Act — GetPrefix is virtual, unconfigured → calls base
+        var prefix = mock.Object.GetPrefix();
+
+        // Assert
+        await Assert.That(prefix).IsEqualTo("PREFIX");
+    }
+
+    [Test]
+    public async Task Repository_OfPartial_VerifyAll_Includes_Partial_Mocks()
+    {
+        // Arrange
+        var repo = new MockRepository();
+        var serviceMock = repo.Of<IRepoService>();
+        var partialMock = repo.OfPartial<ConcreteService>();
+
+        serviceMock.Setup.GetData(Arg.Any<int>()).Returns("data");
+        partialMock.Setup.Greet(Arg.Any<string>()).Returns("Hi");
+
+        // Act — invoke both setups
+        serviceMock.Object.GetData(1);
+        partialMock.Object.Greet("Alice");
+
+        // Assert — VerifyAll covers both interface mocks and partial mocks
+        repo.VerifyAll();
+    }
+
+    [Test]
+    public async Task Repository_OfPartial_With_Strict_Behavior()
+    {
+        // Arrange
+        var repo = new MockRepository(MockBehavior.Strict);
+        var mock = repo.OfPartial<ConcreteService>();
+
+        // Assert — partial mock inherits strict behavior from repository
+        await Assert.That(mock.Behavior).IsEqualTo(MockBehavior.Strict);
+    }
+
+    [Test]
+    public async Task Repository_OfPartial_Behavior_Override()
+    {
+        // Arrange — strict repository, loose partial mock
+        var repo = new MockRepository(MockBehavior.Strict);
+        var mock = repo.OfPartial<ConcreteService>(MockBehavior.Loose);
+
+        // Assert — behavior overridden
+        await Assert.That(mock.Behavior).IsEqualTo(MockBehavior.Loose);
+    }
 }

@@ -220,4 +220,128 @@ public class OrderedVerificationTests
 
         await Assert.That(exception.Message).Contains("Ordered verification failed");
     }
+
+    [Test]
+    public void VerifyInOrder_With_Times_Exactly_Multiple()
+    {
+        // Arrange — call Add(1,2) 3 times, then GetName once
+        var mock = Mock.Of<ICalculator>();
+        ICalculator calc = mock.Object;
+
+        calc.Add(1, 2);
+        calc.Add(1, 2);
+        calc.Add(1, 2);
+        calc.GetName();
+
+        // Assert — verify Add was called exactly 3 times, then GetName once
+        Mock.VerifyInOrder(() =>
+        {
+            mock.Verify.Add(1, 2).WasCalled(Times.Exactly(3));
+            mock.Verify.GetName().WasCalled(Times.Once);
+        });
+    }
+
+    [Test]
+    public async Task VerifyInOrder_With_Times_Never_Throws_InvalidOperationException()
+    {
+        // Arrange
+        var mock = Mock.Of<ICalculator>();
+        ICalculator calc = mock.Object;
+        calc.Add(1, 2);
+
+        // Assert — Times.Never is not allowed in VerifyInOrder
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+        {
+            Mock.VerifyInOrder(() =>
+            {
+                mock.Verify.Add(1, 2).WasCalled(Times.Never);
+            });
+        });
+
+        await Assert.That(exception.Message).Contains("Times.Never");
+    }
+
+    [Test]
+    public async Task VerifyInOrder_With_Times_AtMost_Throws_InvalidOperationException()
+    {
+        // Arrange
+        var mock = Mock.Of<ICalculator>();
+        ICalculator calc = mock.Object;
+        calc.Add(1, 2);
+
+        // Assert — Times.AtMost allows zero, not enforceable in ordered mode
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+        {
+            Mock.VerifyInOrder(() =>
+            {
+                mock.Verify.Add(1, 2).WasCalled(Times.AtMost(3));
+            });
+        });
+
+        await Assert.That(exception.Message).Contains("Times.AtMost");
+    }
+
+    [Test]
+    public async Task VerifyInOrder_With_Times_Between_Zero_Min_Throws_InvalidOperationException()
+    {
+        // Arrange
+        var mock = Mock.Of<ICalculator>();
+        ICalculator calc = mock.Object;
+        calc.Add(1, 2);
+
+        // Assert — Between(0, N) allows zero, not enforceable in ordered mode
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+        {
+            Mock.VerifyInOrder(() =>
+            {
+                mock.Verify.Add(1, 2).WasCalled(Times.Between(0, 3));
+            });
+        });
+
+        await Assert.That(exception.Message).Contains("Times.Between(0, N)");
+    }
+
+    [Test]
+    public void VerifyInOrder_With_Times_AtLeast_Passes()
+    {
+        // Arrange — AtLeast is allowed since min > 0
+        var mock = Mock.Of<ICalculator>();
+        ICalculator calc = mock.Object;
+
+        calc.Add(1, 2);
+        calc.Add(1, 2);
+        calc.Add(1, 2);
+        calc.GetName();
+
+        // Assert — verify Add was called at least 2 times (actual: 3), then GetName
+        Mock.VerifyInOrder(() =>
+        {
+            mock.Verify.Add(1, 2).WasCalled(Times.AtLeast(2));
+            mock.Verify.GetName().WasCalled();
+        });
+    }
+
+    [Test]
+    public void VerifyInOrder_Interleaved_Multi_Call_Correct_Group_Order()
+    {
+        // Regression test for group-based ordering:
+        // A(1), B, A(2) — verifying A(Times.Exactly(2)) then B should fail
+        // because one of A's calls is after B
+        var mock = Mock.Of<ICalculator>();
+        ICalculator calc = mock.Object;
+
+        calc.Add(1, 2); // first A
+        calc.GetName(); // B
+        calc.Add(1, 2); // second A
+
+        // This should fail because A's max sequence > B's min sequence
+        var exception = Assert.Throws<MockVerificationException>(() =>
+        {
+            Mock.VerifyInOrder(() =>
+            {
+                mock.Verify.Add(1, 2).WasCalled(Times.Exactly(2));
+                mock.Verify.GetName().WasCalled();
+            });
+        });
+    }
 }

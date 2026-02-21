@@ -8,7 +8,7 @@ public class MockRepository
 {
     private readonly MockBehavior _defaultBehavior;
     private readonly List<IMock> _mocks = new();
-    private readonly System.Threading.Lock _lock = new();
+    private readonly object _lock = new();
 
     /// <summary>Creates a repository with <see cref="MockBehavior.Loose"/> as the default behavior.</summary>
     public MockRepository() : this(MockBehavior.Loose) { }
