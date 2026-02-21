@@ -23,10 +23,10 @@ public class GetPackageProjectsModule : Module<List<File>>
             Sourcy.DotNet.Projects.TUnit_AspNetCore,
             Sourcy.DotNet.Projects.TUnit_Aspire,
             Sourcy.DotNet.Projects.TUnit_FsCheck,
-            Sourcy.DotNet.Projects.TUnit_Mock,
-            Sourcy.DotNet.Projects.TUnit_Mock_Assertions,
-            Sourcy.DotNet.Projects.TUnit_Mock_Http,
-            Sourcy.DotNet.Projects.TUnit_Mock_Logging
+            Sourcy.DotNet.Projects.TUnit_Mocks,
+            Sourcy.DotNet.Projects.TUnit_Mocks_Assertions,
+            Sourcy.DotNet.Projects.TUnit_Mocks_Http,
+            Sourcy.DotNet.Projects.TUnit_Mocks_Logging
         ];
     }
 }

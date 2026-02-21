@@ -4,9 +4,9 @@ sidebar_position: 3
 
 # Mocking Framework Comparison
 
-TUnit.Mock is a **source-generated, AOT-compatible** mocking framework built into TUnit. It is currently in **beta** — the API may change before the stable release. This page compares it against the three most popular .NET mocking libraries: [Moq](https://github.com/moq/moq4), [NSubstitute](https://nsubstitute.github.io/), and [FakeItEasy](https://fakeiteasy.github.io/).
+TUnit.Mocks is a **source-generated, AOT-compatible** mocking framework built into TUnit. It is currently in **beta** — the API may change before the stable release. This page compares it against the three most popular .NET mocking libraries: [Moq](https://github.com/moq/moq4), [NSubstitute](https://nsubstitute.github.io/), and [FakeItEasy](https://fakeiteasy.github.io/).
 
-## Why TUnit.Mock?
+## Why TUnit.Mocks?
 
 Every popular .NET mocking framework relies on **Castle DynamicProxy** to generate proxy classes at runtime via IL emission. This fundamentally conflicts with:
 
@@ -14,11 +14,11 @@ Every popular .NET mocking framework relies on **Castle DynamicProxy** to genera
 - **Trimming** — the linker can't analyze dynamically-generated types
 - **Single-file deployment** — proxy assemblies must be emitted to disk or memory
 
-TUnit.Mock solves this by generating mock implementations at **compile time** via Roslyn source generators. The generated code is ordinary C# — fully visible, debuggable, and compatible with AOT, trimming, and single-file publishing.
+TUnit.Mocks solves this by generating mock implementations at **compile time** via Roslyn source generators. The generated code is ordinary C# — fully visible, debuggable, and compatible with AOT, trimming, and single-file publishing.
 
 ## Architecture Comparison
 
-| | **TUnit.Mock** | **Moq** | **NSubstitute** | **FakeItEasy** |
+| | **TUnit.Mocks** | **Moq** | **NSubstitute** | **FakeItEasy** |
 |---|---|---|---|---|
 | Proxy mechanism | **Source generated** | Castle DynamicProxy | Castle DynamicProxy | Castle DynamicProxy |
 | AOT compatible | **Yes** | No | No | No |
@@ -32,7 +32,7 @@ TUnit.Mock solves this by generating mock implementations at **compile time** vi
 ### Creating a Mock
 
 ```csharp
-// TUnit.Mock
+// TUnit.Mocks
 var mock = Mock.Of<ICalculator>();
 ICalculator calc = mock; // implicit conversion — no .Object needed
 
@@ -50,7 +50,7 @@ var calc = A.Fake<ICalculator>();
 ### Setting Up Return Values
 
 ```csharp
-// TUnit.Mock — type-safe extension methods, async auto-unwrapped
+// TUnit.Mocks — type-safe extension methods, async auto-unwrapped
 mock.Setup.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(42);
 mock.Setup.GetValueAsync(Arg.Any<string>()).Returns("hello"); // no ReturnsAsync needed
 
@@ -70,7 +70,7 @@ A.CallTo(() => calc.GetValueAsync(A<string>._)).Returns("hello");
 ### Verification
 
 ```csharp
-// TUnit.Mock
+// TUnit.Mocks
 mock.Verify!.Add(1, 2).WasCalled(Times.Once);
 mock.Verify!.Reset().WasNeverCalled();
 
@@ -90,7 +90,7 @@ A.CallTo(() => calc.Reset()).MustNotHaveHappened();
 ### Ordered Verification
 
 ```csharp
-// TUnit.Mock — cross-mock ordered verification with global sequence tracking
+// TUnit.Mocks — cross-mock ordered verification with global sequence tracking
 Mock.VerifyInOrder(() =>
 {
     mockLogger.Verify!.Log(Arg.Any<string>()).WasCalled();
@@ -117,7 +117,7 @@ Received.InOrder(() =>
 ### Sequential Behaviors
 
 ```csharp
-// TUnit.Mock — .Then() chaining
+// TUnit.Mocks — .Then() chaining
 mock.Setup.GetValue(Arg.Any<string>())
     .Throws<InvalidOperationException>()
     .Then()
@@ -141,7 +141,7 @@ A.CallTo(() => calc.GetValue(A<string>._))
 ### Argument Capture
 
 ```csharp
-// TUnit.Mock — every Arg captures implicitly
+// TUnit.Mocks — every Arg captures implicitly
 var name = Arg.Any<string>();
 mock.Setup.Log(name);
 // ... exercise code ...
@@ -165,7 +165,7 @@ A.CallTo(() => calc.Log(captured._)).DoesNothing();
 
 ### Setup / Stubbing
 
-| Feature | TUnit.Mock | Moq | NSubstitute | FakeItEasy |
+| Feature | TUnit.Mocks | Moq | NSubstitute | FakeItEasy |
 |---|:---:|:---:|:---:|:---:|
 | Fixed returns | Yes | Yes | Yes | Yes |
 | Computed/factory returns | Yes | Yes | Yes | Yes |
@@ -184,7 +184,7 @@ A.CallTo(() => calc.Log(captured._)).DoesNothing();
 
 ### Verification
 
-| Feature | TUnit.Mock | Moq | NSubstitute | FakeItEasy |
+| Feature | TUnit.Mocks | Moq | NSubstitute | FakeItEasy |
 |---|:---:|:---:|:---:|:---:|
 | Call count (Once, Never, Exactly, AtLeast, AtMost, Between) | Yes | Yes | Yes | Yes |
 | Ordered verification | Yes | Yes | Yes | Yes |
@@ -196,7 +196,7 @@ A.CallTo(() => calc.Log(captured._)).DoesNothing();
 
 ### Argument Matching
 
-| Feature | TUnit.Mock | Moq | NSubstitute | FakeItEasy |
+| Feature | TUnit.Mocks | Moq | NSubstitute | FakeItEasy |
 |---|:---:|:---:|:---:|:---:|
 | Any | Yes | Yes | Yes | Yes |
 | Exact value | Yes | Yes | Yes | Yes |
@@ -210,7 +210,7 @@ A.CallTo(() => calc.Log(captured._)).DoesNothing();
 
 ### Mock Targets
 
-| Feature | TUnit.Mock | Moq | NSubstitute | FakeItEasy |
+| Feature | TUnit.Mocks | Moq | NSubstitute | FakeItEasy |
 |---|:---:|:---:|:---:|:---:|
 | Interfaces | Yes | Yes | Yes | Yes |
 | Abstract classes | Yes | Yes | Yes | Yes |
@@ -226,7 +226,7 @@ A.CallTo(() => calc.Log(captured._)).DoesNothing();
 
 ### Mock Behavior
 
-| Feature | TUnit.Mock | Moq | NSubstitute | FakeItEasy |
+| Feature | TUnit.Mocks | Moq | NSubstitute | FakeItEasy |
 |---|:---:|:---:|:---:|:---:|
 | Loose mode | Yes (default) | Yes (default) | Yes (only) | Yes (default) |
 | Strict mode | Yes | Yes | No | Yes |
@@ -235,7 +235,7 @@ A.CallTo(() => calc.Log(captured._)).DoesNothing();
 
 ### Events
 
-| Feature | TUnit.Mock | Moq | NSubstitute | FakeItEasy |
+| Feature | TUnit.Mocks | Moq | NSubstitute | FakeItEasy |
 |---|:---:|:---:|:---:|:---:|
 | Raise events | Yes | Yes | Yes | Yes |
 | Auto-raise on method call | **Yes** (`.Raises()`) | Yes | No | No |
@@ -244,7 +244,7 @@ A.CallTo(() => calc.Log(captured._)).DoesNothing();
 
 ### Quality of Life
 
-| Feature | TUnit.Mock | Moq | NSubstitute | FakeItEasy |
+| Feature | TUnit.Mocks | Moq | NSubstitute | FakeItEasy |
 |---|:---:|:---:|:---:|:---:|
 | Implicit `T` conversion | **Yes** | No (`.Object`) | Yes | Yes |
 | Thread safety | **Explicit** (locks + ConcurrentQueue) | Not documented | Thread-local | Known issues |
@@ -254,7 +254,7 @@ A.CallTo(() => calc.Log(captured._)).DoesNothing();
 
 ## Summary
 
-**TUnit.Mock excels at:**
+**TUnit.Mocks excels at:**
 - **Full feature parity** — matches or exceeds Moq, NSubstitute, and FakeItEasy in every category
 - AOT compatibility and trimming — the **only** source-generated option
 - Zero runtime overhead — no reflection, no dynamic proxies

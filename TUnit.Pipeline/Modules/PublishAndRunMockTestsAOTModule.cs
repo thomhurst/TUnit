@@ -28,7 +28,7 @@ public class PublishAndRunMockTestsAOTModule : Module<IReadOnlyList<CommandResul
         var testProject = context.Git()
             .RootDirectory
             .AssertExists()
-            .FindFile(x => x.Name == "TUnit.Mock.Tests.csproj")
+            .FindFile(x => x.Name == "TUnit.Mocks.Tests.csproj")
             .AssertExists();
 
         var rootDir = context.Git().RootDirectory.AssertExists().Path;
@@ -67,8 +67,8 @@ public class PublishAndRunMockTestsAOTModule : Module<IReadOnlyList<CommandResul
 
             // Run the published AOT executable
             var exeName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                ? "TUnit.Mock.Tests.exe"
-                : "TUnit.Mock.Tests";
+                ? "TUnit.Mocks.Tests.exe"
+                : "TUnit.Mocks.Tests";
             var exePath = Path.Combine(outputDir, exeName);
 
             var runResult = await context.SubModule<CommandResult>($"Run-AOT-{framework}", async () =>

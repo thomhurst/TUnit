@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\TestProject.props" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\TUnit.Mocks.SourceGenerator\TUnit.Mocks.SourceGenerator.csproj" />
+    <ProjectReference Include="..\TUnit.Mocks\TUnit.Mocks.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.SourceGenerators.Testing" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
+    <PackageReference Include="Verify" />
+    <PackageReference Include="Verify.TUnit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Copy netstandard2.0 TUnit.Mocks.dll to a ref subfolder so it can be used as compilation reference -->
+    <None Include="..\TUnit.Mocks\bin\$(Configuration)\netstandard2.0\TUnit.Mocks.dll"
+          Link="ref\TUnit.Mocks.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <Import Project="..\TestProject.targets" />
+
+</Project>

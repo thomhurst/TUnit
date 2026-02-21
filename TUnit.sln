@@ -179,33 +179,33 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Logging.Microsoft", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Aspire", "TUnit.Aspire\TUnit.Aspire.csproj", "{84BA7D6C-5B4D-493A-9A76-BD4583FD1E23}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Mock", "TUnit.Mock\TUnit.Mock.csproj", "{CAD4E8D4-244C-48BA-A0CC-0DFA23863ABB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Mocks", "TUnit.Mocks\TUnit.Mocks.csproj", "{CAD4E8D4-244C-48BA-A0CC-0DFA23863ABB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Mock.Analyzers", "TUnit.Mock.Analyzers\TUnit.Mock.Analyzers.csproj", "{977C0FFB-8205-4428-AFAA-C8942E5E551F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Mocks.Analyzers", "TUnit.Mocks.Analyzers\TUnit.Mocks.Analyzers.csproj", "{977C0FFB-8205-4428-AFAA-C8942E5E551F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Mock.SourceGenerator", "TUnit.Mock.SourceGenerator\TUnit.Mock.SourceGenerator.csproj", "{F4119AB4-2EFC-47E6-9095-AE7BB15610D8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Mocks.SourceGenerator", "TUnit.Mocks.SourceGenerator\TUnit.Mocks.SourceGenerator.csproj", "{F4119AB4-2EFC-47E6-9095-AE7BB15610D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Mock.SourceGenerator.Roslyn44", "TUnit.Mock.SourceGenerator.Roslyn44\TUnit.Mock.SourceGenerator.Roslyn44.csproj", "{E9B48B54-DE1C-451E-85DD-2A624B77BBE6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Mocks.SourceGenerator.Roslyn44", "TUnit.Mocks.SourceGenerator.Roslyn44\TUnit.Mocks.SourceGenerator.Roslyn44.csproj", "{E9B48B54-DE1C-451E-85DD-2A624B77BBE6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Mock.SourceGenerator.Roslyn47", "TUnit.Mock.SourceGenerator.Roslyn47\TUnit.Mock.SourceGenerator.Roslyn47.csproj", "{9C52E733-DA4B-473C-BABA-36DAFDC29BEA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Mocks.SourceGenerator.Roslyn47", "TUnit.Mocks.SourceGenerator.Roslyn47\TUnit.Mocks.SourceGenerator.Roslyn47.csproj", "{9C52E733-DA4B-473C-BABA-36DAFDC29BEA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Mock.SourceGenerator.Roslyn414", "TUnit.Mock.SourceGenerator.Roslyn414\TUnit.Mock.SourceGenerator.Roslyn414.csproj", "{1C3036C1-AA77-4ECF-A0B9-035284DB35EE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Mocks.SourceGenerator.Roslyn414", "TUnit.Mocks.SourceGenerator.Roslyn414\TUnit.Mocks.SourceGenerator.Roslyn414.csproj", "{1C3036C1-AA77-4ECF-A0B9-035284DB35EE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Mock.SourceGenerator.Tests", "TUnit.Mock.SourceGenerator.Tests\TUnit.Mock.SourceGenerator.Tests.csproj", "{A0F135E6-88B8-4937-A1F3-511D2914F584}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Mocks.SourceGenerator.Tests", "TUnit.Mocks.SourceGenerator.Tests\TUnit.Mocks.SourceGenerator.Tests.csproj", "{A0F135E6-88B8-4937-A1F3-511D2914F584}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Mock.Analyzers.Tests", "TUnit.Mock.Analyzers.Tests\TUnit.Mock.Analyzers.Tests.csproj", "{252E09A5-39AC-4B80-BCB2-8C97E0299CD3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Mocks.Analyzers.Tests", "TUnit.Mocks.Analyzers.Tests\TUnit.Mocks.Analyzers.Tests.csproj", "{252E09A5-39AC-4B80-BCB2-8C97E0299CD3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Mock.Tests", "TUnit.Mock.Tests\TUnit.Mock.Tests.csproj", "{14FBC772-BB90-4DB1-9F8A-D625C24CDC1A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Mocks.Tests", "TUnit.Mocks.Tests\TUnit.Mocks.Tests.csproj", "{14FBC772-BB90-4DB1-9F8A-D625C24CDC1A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Mock.Assertions", "TUnit.Mock.Assertions\TUnit.Mock.Assertions.csproj", "{BAA9664C-F538-4787-929C-732CC172630C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Mocks.Assertions", "TUnit.Mocks.Assertions\TUnit.Mocks.Assertions.csproj", "{BAA9664C-F538-4787-929C-732CC172630C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Mock.Logging", "TUnit.Mock.Logging\TUnit.Mock.Logging.csproj", "{8D4A52D8-E192-47E5-BA63-D97CED85BEEC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Mocks.Logging", "TUnit.Mocks.Logging\TUnit.Mocks.Logging.csproj", "{8D4A52D8-E192-47E5-BA63-D97CED85BEEC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Mock.Http", "TUnit.Mock.Http\TUnit.Mock.Http.csproj", "{D4CC6536-8B72-4E26-B01E-CF0C356BFD7D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Mocks.Http", "TUnit.Mocks.Http\TUnit.Mocks.Http.csproj", "{D4CC6536-8B72-4E26-B01E-CF0C356BFD7D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Mock.Logging.Tests", "TUnit.Mock.Logging.Tests\TUnit.Mock.Logging.Tests.csproj", "{152BAB30-DE64-4AA5-86E0-BA9562116789}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Mocks.Logging.Tests", "TUnit.Mocks.Logging.Tests\TUnit.Mocks.Logging.Tests.csproj", "{152BAB30-DE64-4AA5-86E0-BA9562116789}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Mock.Http.Tests", "TUnit.Mock.Http.Tests\TUnit.Mock.Http.Tests.csproj", "{24F4ACEA-280B-4FD9-A772-4E57817A6F04}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Mocks.Http.Tests", "TUnit.Mocks.Http.Tests\TUnit.Mocks.Http.Tests.csproj", "{24F4ACEA-280B-4FD9-A772-4E57817A6F04}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

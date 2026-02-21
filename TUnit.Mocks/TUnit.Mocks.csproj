@@ -1,0 +1,60 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <Import Project="..\Library.props" />
+    <Import Project="..\SourceGenerationDebug.props" />
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="TUnit.Mocks.Tests" />
+        <InternalsVisibleTo Include="TUnit.Mocks.SourceGenerator" />
+        <InternalsVisibleTo Include="TUnit.Mocks.SourceGenerator.Tests" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\TUnit.Mocks.Analyzers\TUnit.Mocks.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+
+        <None Include="$(MSBuildProjectDirectory)\..\TUnit.Mocks.Analyzers\bin\$(Configuration)\netstandard2.0\TUnit.Mocks.Analyzers.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None
+            Include="$(MSBuildProjectDirectory)\..\TUnit.Mocks.SourceGenerator.Roslyn44\bin\$(Configuration)\netstandard2.0\TUnit.Mocks.SourceGenerator.dll"
+            Pack="true" PackagePath="analyzers/dotnet/roslyn4.4/cs" Visible="false" />
+
+        <None
+            Include="$(MSBuildProjectDirectory)\..\TUnit.Mocks.SourceGenerator.Roslyn47\bin\$(Configuration)\netstandard2.0\TUnit.Mocks.SourceGenerator.dll"
+            Pack="true" PackagePath="analyzers/dotnet/roslyn4.7/cs" Visible="false" />
+
+        <None
+            Include="$(MSBuildProjectDirectory)\..\TUnit.Mocks.SourceGenerator.Roslyn414\bin\$(Configuration)\netstandard2.0\TUnit.Mocks.SourceGenerator.dll"
+            Pack="true" PackagePath="analyzers/dotnet/roslyn4.14/cs" Visible="false" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <TfmSpecificPackageFile Include="TUnit.Mocks.props">
+            <Pack>true</Pack>
+            <PackagePath>$(BuildTransitivePath)</PackagePath>
+        </TfmSpecificPackageFile>
+
+        <None Include="TUnit.Mocks.props">
+            <Pack>true</Pack>
+            <PackagePath>$(BuildPath)</PackagePath>
+        </None>
+
+        <TfmSpecificPackageFile Include="TUnit.Mocks.targets">
+            <Pack>true</Pack>
+            <PackagePath>$(BuildTransitivePath)</PackagePath>
+        </TfmSpecificPackageFile>
+
+        <None Include="TUnit.Mocks.targets">
+            <Pack>true</Pack>
+            <PackagePath>$(BuildPath)</PackagePath>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+        <PackageReference Include="System.Collections.Immutable" />
+    </ItemGroup>
+
+    <Import Project="..\Library.targets" />
+
+</Project>

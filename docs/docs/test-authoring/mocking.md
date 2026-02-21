@@ -4,7 +4,7 @@ sidebar_position: 11
 
 # Mocking
 
-TUnit includes **TUnit.Mock** (currently in **beta**), a source-generated, AOT-compatible mocking framework. Because mocks are generated at compile time, TUnit.Mock works with Native AOT, trimming, and single-file publishing — unlike traditional mocking libraries that rely on runtime proxy generation.
+TUnit includes **TUnit.Mocks** (currently in **beta**), a source-generated, AOT-compatible mocking framework. Because mocks are generated at compile time, TUnit.Mocks works with Native AOT, trimming, and single-file publishing — unlike traditional mocking libraries that rely on runtime proxy generation.
 
 ## Key Features
 

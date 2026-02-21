@@ -1,7 +1,0 @@
-<Project>
-    <ItemGroup Condition="'$(TUnitMockImplicitUsings)' == 'enable'">
-        <Using Include="TUnit.Mock" />
-        <Using Include="TUnit.Mock.Arguments" />
-        <Using Include="TUnit.Mock.Generated" />
-    </ItemGroup>
-</Project>

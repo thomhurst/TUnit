@@ -11,7 +11,7 @@ public class RunMockAnalyzersTestsModule : TestBaseModule
 {
     protected override Task<(DotNetRunOptions Options, CommandExecutionOptions? ExecutionOptions)> GetTestOptions(IModuleContext context, string framework, CancellationToken cancellationToken)
     {
-        var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.Mock.Analyzers.Tests.csproj").AssertExists();
+        var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.Mocks.Analyzers.Tests.csproj").AssertExists();
 
         return Task.FromResult<(DotNetRunOptions, CommandExecutionOptions?)>((
             new DotNetRunOptions
