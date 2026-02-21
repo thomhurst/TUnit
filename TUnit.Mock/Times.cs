@@ -59,6 +59,9 @@ public readonly struct Times : IEquatable<Times>
     // Returns true only when the constraint requires exactly zero calls (i.e. Never)
     internal bool RequiresZeroCalls => _min == 0 && _max == 0;
 
+    // Returns true when the constraint allows zero calls (min == 0), covering AtMost and Between(0, N)
+    internal bool AllowsZeroCalls => _min == 0;
+
     /// <inheritdoc />
     public override string ToString() => (_min, _max) switch
     {

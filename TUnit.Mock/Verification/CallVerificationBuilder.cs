@@ -30,11 +30,12 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
         // When in ordered verification mode, record expectation and skip count checks
         if (OrderedVerification.IsCollecting)
         {
-            if (times.RequiresZeroCalls)
+            if (times.AllowsZeroCalls)
             {
                 throw new InvalidOperationException(
-                    "Times.Never cannot be used inside VerifyInOrder. " +
-                    "Use WasNeverCalled() outside of VerifyInOrder instead.");
+                    "Times.Never, Times.AtMost, and Times.Between(0, N) cannot be used inside VerifyInOrder " +
+                    "because their ceiling semantics are not enforceable in ordered mode. " +
+                    "Use Times.Exactly(N) or Times.AtLeast(N) instead.");
             }
 
             var allCalls = _engine.GetAllCalls();
