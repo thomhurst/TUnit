@@ -450,14 +450,14 @@ public class ExceptionEdgeCaseTests
     {
         // Arrange
         var mock = Mock.Of<IExternalApi>();
-        mock.Setup.GetConfig("http-error").Throws<HttpRequestException>();
+        mock.Setup.GetConfig("arg-error").Throws<ArgumentException>();
         mock.Setup.GetConfig("timeout").Throws<TimeoutException>();
         mock.Setup.GetConfig("valid").Returns("value");
 
         // Act & Assert
         IExternalApi api = mock.Object;
 
-        var httpEx = Assert.Throws<HttpRequestException>(() => api.GetConfig("http-error"));
+        var httpEx = Assert.Throws<ArgumentException>(() => api.GetConfig("arg-error"));
         await Assert.That(httpEx).IsNotNull();
 
         var timeoutEx = Assert.Throws<TimeoutException>(() => api.GetConfig("timeout"));
