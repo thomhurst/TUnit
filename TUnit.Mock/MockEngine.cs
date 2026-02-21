@@ -20,7 +20,7 @@ internal static class MockCallSequence
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class MockEngine<T> where T : class
 {
-    private readonly List<MethodSetup> _setups = new();
+    private readonly Dictionary<int, List<MethodSetup>> _setupsByMember = new();
     private readonly System.Threading.Lock _setupLock = new();
     private readonly ConcurrentQueue<CallRecord> _callHistory = new();
     private readonly ConcurrentDictionary<string, object?> _autoTrackValues = new();
@@ -65,7 +65,12 @@ public sealed class MockEngine<T> where T : class
     {
         lock (_setupLock)
         {
-            _setups.Add(setup);
+            if (!_setupsByMember.TryGetValue(setup.MemberId, out var list))
+            {
+                _setupsByMember[setup.MemberId] = list = new();
+            }
+
+            list.Add(setup);
         }
     }
 
@@ -77,7 +82,7 @@ public sealed class MockEngine<T> where T : class
         RecordCall(memberId, memberName, args);
 
         // Auto-track property setters: store value keyed by property name
-        if (AutoTrackProperties && memberName.StartsWith("set_") && args.Length > 0)
+        if (AutoTrackProperties && memberName.StartsWith("set_", StringComparison.Ordinal) && args.Length > 0)
         {
             _autoTrackValues[memberName.Substring(4)] = args[0];
         }
@@ -133,7 +138,7 @@ public sealed class MockEngine<T> where T : class
         }
 
         // Auto-track property getters: return stored value if available
-        if (AutoTrackProperties && memberName.StartsWith("get_"))
+        if (AutoTrackProperties && memberName.StartsWith("get_", StringComparison.Ordinal))
         {
             if (_autoTrackValues.TryGetValue(memberName.Substring(4), out var trackedValue))
             {
@@ -290,7 +295,12 @@ public sealed class MockEngine<T> where T : class
     {
         lock (_setupLock)
         {
-            return _setups.ToList();
+            var all = new List<MethodSetup>();
+            foreach (var list in _setupsByMember.Values)
+            {
+                all.AddRange(list);
+            }
+            return all;
         }
     }
 
@@ -310,7 +320,7 @@ public sealed class MockEngine<T> where T : class
     {
         lock (_setupLock)
         {
-            _setups.Clear();
+            _setupsByMember.Clear();
         }
 
         // Drain the queue
@@ -416,11 +426,16 @@ public sealed class MockEngine<T> where T : class
     {
         lock (_setupLock)
         {
-            // Iterate last-added-first to implement "last wins" semantics
-            for (int i = _setups.Count - 1; i >= 0; i--)
+            if (!_setupsByMember.TryGetValue(memberId, out var setups))
             {
-                var setup = _setups[i];
-                if (setup.MemberId == memberId && setup.Matches(args))
+                return (false, null, null);
+            }
+
+            // Iterate last-added-first to implement "last wins" semantics
+            for (int i = setups.Count - 1; i >= 0; i--)
+            {
+                var setup = setups[i];
+                if (setup.Matches(args))
                 {
                     setup.IncrementInvokeCount();
                     setup.ApplyCaptures(args);

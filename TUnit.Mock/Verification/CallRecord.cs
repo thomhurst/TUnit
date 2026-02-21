@@ -14,11 +14,21 @@ public sealed record CallRecord(
 )
 {
     /// <summary>
+    /// Backing field for <see cref="IsVerified"/>. Exposed for <see cref="System.Threading.Volatile"/> access.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool IsVerifiedField;
+
+    /// <summary>
     /// Whether this call has been matched by a verification statement.
     /// Used by <see cref="Mock{T}.VerifyNoOtherCalls"/>.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public bool IsVerified { get; internal set; }
+    public bool IsVerified
+    {
+        get => Volatile.Read(ref IsVerifiedField);
+        internal set => Volatile.Write(ref IsVerifiedField, value);
+    }
 
     public string FormatCall()
     {

@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using TUnit.Mock.Arguments;
 using TUnit.Mock.Exceptions;
+using TUnit.Mock.Matchers;
 
 namespace TUnit.Mock.Verification;
 
@@ -43,7 +44,7 @@ public sealed class PropertyVerificationBuilder<T> : IPropertyVerification where
     public void WasSetTo(object? value)
     {
         var calls = _engine.GetCallsFor(_setterMemberId);
-        var matcher = new ExactValueMatcher<object?>(value);
+        var matcher = new ExactMatcher<object?>(value);
 
         var matchingCount = 0;
         foreach (var call in calls)
@@ -77,16 +78,4 @@ public sealed class PropertyVerificationBuilder<T> : IPropertyVerification where
     /// <inheritdoc />
     public void SetWasCalled() => SetWasCalled(Times.AtLeastOnce);
 
-    /// Helper matcher for exact value comparison
-    private sealed class ExactValueMatcher<TValue> : IArgumentMatcher
-    {
-        private readonly TValue _expected;
-
-        public ExactValueMatcher(TValue expected) => _expected = expected;
-
-        public bool Matches(object? argument) =>
-            argument is TValue typed ? EqualityComparer<TValue>.Default.Equals(typed, _expected) : argument is null && _expected is null;
-
-        public string Describe() => _expected?.ToString() ?? "null";
-    }
 }
