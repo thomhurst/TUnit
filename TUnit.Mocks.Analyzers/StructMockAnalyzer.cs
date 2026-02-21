@@ -61,8 +61,7 @@ public class StructMockAnalyzer : DiagnosticAnalyzer
     private static bool IsMockOfMethod(IMethodSymbol method)
     {
         return method.Name is "Of" or "OfPartial"
-               && method.ContainingType is { Name: "Mock", ContainingNamespace: { Name: "Mocks", ContainingNamespace: { Name: "TUnit", ContainingNamespace.IsGlobalNamespace: true } } }
-               && method.IsStatic
+               && method.ContainingType is { Name: "Mock" or "MockRepository", ContainingNamespace: { Name: "Mocks", ContainingNamespace: { Name: "TUnit", ContainingNamespace.IsGlobalNamespace: true } } }
                && method.IsGenericMethod;
     }
 }

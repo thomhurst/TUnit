@@ -65,25 +65,53 @@ public class MockRepository
 
     /// <summary>
     /// Calls <see cref="IMock.VerifyAll"/> on every tracked mock.
-    /// Throws on the first mock that has uninvoked setups.
+    /// Gathers failures from all mocks and throws an <see cref="AggregateException"/> if any fail.
     /// </summary>
     public void VerifyAll()
     {
+        List<Exception>? failures = null;
         foreach (var mock in GetSnapshot())
         {
-            mock.VerifyAll();
+            try
+            {
+                mock.VerifyAll();
+            }
+            catch (Exception ex)
+            {
+                failures ??= [];
+                failures.Add(ex);
+            }
+        }
+
+        if (failures is { Count: > 0 })
+        {
+            throw new AggregateException("One or more mocks have uninvoked setups.", failures);
         }
     }
 
     /// <summary>
     /// Calls <see cref="IMock.VerifyNoOtherCalls"/> on every tracked mock.
-    /// Throws on the first mock that has unverified calls.
+    /// Gathers failures from all mocks and throws an <see cref="AggregateException"/> if any fail.
     /// </summary>
     public void VerifyNoOtherCalls()
     {
+        List<Exception>? failures = null;
         foreach (var mock in GetSnapshot())
         {
-            mock.VerifyNoOtherCalls();
+            try
+            {
+                mock.VerifyNoOtherCalls();
+            }
+            catch (Exception ex)
+            {
+                failures ??= [];
+                failures.Add(ex);
+            }
+        }
+
+        if (failures is { Count: > 0 })
+        {
+            throw new AggregateException("One or more mocks have unverified calls.", failures);
         }
     }
 

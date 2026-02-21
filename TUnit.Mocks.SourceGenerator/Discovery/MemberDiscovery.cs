@@ -488,7 +488,6 @@ internal static class MemberDiscovery
         {
             Name = evt.Name,
             EventHandlerType = eventHandlerType,
-            RaiseParameters = raiseParameters,
             InvokeArgs = invokeArgs,
             EventArgsType = eventArgsType,
             ExplicitInterfaceName = explicitInterfaceName,

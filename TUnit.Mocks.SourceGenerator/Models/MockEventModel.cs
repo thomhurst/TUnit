@@ -8,20 +8,13 @@ internal sealed record MockEventModel : IEquatable<MockEventModel>
     public string EventHandlerType { get; init; } = "";
 
     /// <summary>
-    /// The parameter list for the generated Raise method signature.
-    /// E.g., "string args" for EventHandler&lt;string&gt;, or "string arg1, int arg2" for Action&lt;string, int&gt;.
-    /// </summary>
-    public string RaiseParameters { get; init; } = "";
-
-    /// <summary>
     /// The argument expression for invoking the backing delegate.
     /// E.g., "this, args" for EventHandler&lt;string&gt;, or "arg1, arg2" for Action&lt;string, int&gt;.
     /// </summary>
     public string InvokeArgs { get; init; } = "";
 
     /// <summary>
-    /// Kept for backward compat with MockRaiseBuilder extension method parameter.
-    /// Same as RaiseParameters for simple cases.
+    /// The event args type for MockRaiseBuilder extension method parameter.
     /// </summary>
     public string EventArgsType { get; init; } = "";
 
@@ -38,7 +31,6 @@ internal sealed record MockEventModel : IEquatable<MockEventModel>
         if (other is null) return false;
         return Name == other.Name
             && EventHandlerType == other.EventHandlerType
-            && RaiseParameters == other.RaiseParameters
             && InvokeArgs == other.InvokeArgs
             && EventArgsType == other.EventArgsType
             && ExplicitInterfaceName == other.ExplicitInterfaceName
@@ -52,6 +44,7 @@ internal sealed record MockEventModel : IEquatable<MockEventModel>
             int hash = 17;
             hash = hash * 31 + Name.GetHashCode();
             hash = hash * 31 + EventHandlerType.GetHashCode();
+            hash = hash * 31 + RaiseParameterList.GetHashCode();
             return hash;
         }
     }

@@ -46,9 +46,12 @@ internal static class MockRaiseBuilder
         var extensionParam = $"this global::TUnit.Mocks.IMockRaise<{model.FullyQualifiedName}> raise";
 
         // Build parameter list: extension param + raise parameters
-        var raiseParams = string.IsNullOrEmpty(evt.RaiseParameters)
+        var raiseParamStr = evt.RaiseParameterList.Length == 0
+            ? ""
+            : string.Join(", ", evt.RaiseParameterList.Select(p => $"{p.FullyQualifiedType} {p.Name}"));
+        var raiseParams = string.IsNullOrEmpty(raiseParamStr)
             ? extensionParam
-            : $"{extensionParam}, {evt.RaiseParameters}";
+            : $"{extensionParam}, {raiseParamStr}";
 
         // Build argument pass-through for the Raise_ call using structured parameter data
         var raiseArgNames = evt.RaiseParameterList.Length == 0

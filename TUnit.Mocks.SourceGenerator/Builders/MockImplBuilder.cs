@@ -668,7 +668,9 @@ internal static class MockImplBuilder
 
         // Raise method for generated code to call
         writer.AppendLine("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
-        var raiseParams = string.IsNullOrEmpty(evt.RaiseParameters) ? "" : evt.RaiseParameters;
+        var raiseParams = evt.RaiseParameterList.Length == 0
+            ? ""
+            : string.Join(", ", evt.RaiseParameterList.Select(p => $"{p.FullyQualifiedType} {p.Name}"));
         var invokeArgs = string.IsNullOrEmpty(evt.InvokeArgs) ? "" : evt.InvokeArgs;
         using (writer.Block($"internal void Raise_{evt.Name}({raiseParams})"))
         {
@@ -699,7 +701,9 @@ internal static class MockImplBuilder
 
         // Raise method for generated code to call
         writer.AppendLine("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
-        var raiseParams = string.IsNullOrEmpty(evt.RaiseParameters) ? "" : evt.RaiseParameters;
+        var raiseParams = evt.RaiseParameterList.Length == 0
+            ? ""
+            : string.Join(", ", evt.RaiseParameterList.Select(p => $"{p.FullyQualifiedType} {p.Name}"));
         var invokeArgs = string.IsNullOrEmpty(evt.InvokeArgs) ? "" : evt.InvokeArgs;
         using (writer.Block($"internal void Raise_{evt.Name}({raiseParams})"))
         {

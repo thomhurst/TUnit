@@ -10,6 +10,7 @@ namespace TUnit.Mocks.Logging;
 public class MockLogger : ILogger
 {
     private readonly ConcurrentQueue<LogEntry> _entries = new();
+    private volatile LogEntry? _latestEntry;
     private readonly string? _categoryName;
 
     /// <summary>Creates a new mock logger.</summary>
@@ -33,25 +34,16 @@ public class MockLogger : ILogger
     }
 
     /// <summary>The most recently captured log entry, or null if none.</summary>
-    public LogEntry? LatestEntry
-    {
-        get
-        {
-            LogEntry? latest = null;
-            foreach (var entry in _entries)
-            {
-                latest = entry;
-            }
-            return latest;
-        }
-    }
+    public LogEntry? LatestEntry => _latestEntry;
 
     /// <inheritdoc />
     public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
         Func<TState, Exception?, string> formatter)
     {
         var message = formatter(state, exception);
-        _entries.Enqueue(new LogEntry(logLevel, eventId, message, exception, _categoryName));
+        var entry = new LogEntry(logLevel, eventId, message, exception, _categoryName);
+        _entries.Enqueue(entry);
+        _latestEntry = entry;
     }
 
     /// <inheritdoc />
@@ -65,6 +57,7 @@ public class MockLogger : ILogger
     public void Clear()
     {
         while (_entries.TryDequeue(out _)) { }
+        _latestEntry = null;
     }
 
     private sealed class NullScope : IDisposable

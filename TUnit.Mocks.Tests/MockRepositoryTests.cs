@@ -74,8 +74,10 @@ public class MockRepositoryTests
         serviceMock.Object.GetData(1);
         // loggerMock.Object.Log("hello") is NOT called
 
-        // Assert — VerifyAll should throw for loggerMock's uninvoked setup
-        await Assert.That(() => repo.VerifyAll()).Throws<MockVerificationException>();
+        // Assert — VerifyAll should throw AggregateException wrapping MockVerificationException
+        var ex = Assert.Throws<AggregateException>(() => repo.VerifyAll());
+        await Assert.That(ex.InnerExceptions).HasSingleItem();
+        await Assert.That(ex.InnerExceptions[0]).IsTypeOf<MockVerificationException>();
     }
 
     [Test]
@@ -114,7 +116,9 @@ public class MockRepositoryTests
         serviceMock.Verify!.GetData(Arg.Is(1)).WasCalled();
 
         // Assert — loggerMock has unverified calls
-        await Assert.That(() => repo.VerifyNoOtherCalls()).Throws<MockVerificationException>();
+        var ex = Assert.Throws<AggregateException>(() => repo.VerifyNoOtherCalls());
+        await Assert.That(ex.InnerExceptions).HasSingleItem();
+        await Assert.That(ex.InnerExceptions[0]).IsTypeOf<MockVerificationException>();
     }
 
     [Test]
