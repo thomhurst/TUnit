@@ -107,8 +107,8 @@ public class CallbackTests
         // Act — first call: callback
         var result1 = greeter.Greet("Alice");
         await Assert.That(lastArgs).IsEqualTo("called");
-        // Callback behavior returns null, so for string it gets default ""
-        await Assert.That(result1).IsEqualTo("");
+        // Callback behavior returns null — null is correctly returned (not smart default)
+        await Assert.That(result1).IsNull();
 
         // Second call: returns
         var result2 = greeter.Greet("Bob");

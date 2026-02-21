@@ -199,10 +199,13 @@ internal static class MemberDiscovery
 
     private static MockMemberModel CreatePropertyModel(IPropertySymbol property, ref int memberIdCounter, string? explicitInterfaceName)
     {
+        var getterId = memberIdCounter++;
+        var setterId = property.SetMethod is not null ? memberIdCounter++ : 0;
+
         return new MockMemberModel
         {
             Name = property.Name,
-            MemberId = memberIdCounter++,
+            MemberId = getterId,
             ReturnType = property.Type.GetFullyQualifiedName(),
             UnwrappedReturnType = property.Type.GetFullyQualifiedName(),
             IsVoid = false,
@@ -210,6 +213,7 @@ internal static class MemberDiscovery
             IsProperty = true,
             HasGetter = property.GetMethod is not null,
             HasSetter = property.SetMethod is not null,
+            SetterMemberId = setterId,
             ExplicitInterfaceName = explicitInterfaceName,
             NullableAnnotation = property.Type.NullableAnnotation.ToString(),
             SmartDefault = property.Type.GetSmartDefault(property.Type.IsNullableAnnotated()),
@@ -250,10 +254,14 @@ internal static class MemberDiscovery
 
     private static MockMemberModel CreateIndexerModel(IPropertySymbol indexer, ref int memberIdCounter, string? explicitInterfaceName)
     {
+        var getterId = memberIdCounter++;
+        var setterId = indexer.SetMethod is not null ? memberIdCounter++ : 0;
+
         return new MockMemberModel
         {
             Name = "this",
-            MemberId = memberIdCounter++,
+            MemberId = getterId,
+            SetterMemberId = setterId,
             ReturnType = indexer.Type.GetFullyQualifiedName(),
             UnwrappedReturnType = indexer.Type.GetFullyQualifiedName(),
             IsVoid = false,

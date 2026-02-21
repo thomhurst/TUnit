@@ -16,7 +16,7 @@ namespace TUnit.Mock.Generated
         {
             try
             {
-                var __result = _engine.HandleCallWithReturn<string>(2, "GetAsync", new object?[] { id }, "");
+                var __result = _engine.HandleCallWithReturn<string>(3, "GetAsync", new object?[] { id }, "");
                 return global::System.Threading.Tasks.Task.FromResult<string>(__result);
             }
             catch (global::System.Exception __ex)
@@ -27,18 +27,18 @@ namespace TUnit.Mock.Generated
 
         public void Process(string data)
         {
-            _engine.HandleCall(3, "Process", new object?[] { data });
+            _engine.HandleCall(4, "Process", new object?[] { data });
         }
 
         public string Name
         {
             get => _engine.HandleCallWithReturn<string>(0, "get_Name", global::System.Array.Empty<object?>(), "");
-            set => _engine.HandleCall(10000, "set_Name", new object?[] { value });
+            set => _engine.HandleCall(1, "set_Name", new object?[] { value });
         }
 
         public int Count
         {
-            get => _engine.HandleCallWithReturn<int>(1, "get_Count", global::System.Array.Empty<object?>(), default);
+            get => _engine.HandleCallWithReturn<int>(2, "get_Count", global::System.Array.Empty<object?>(), default);
         }
 
         private global::System.EventHandler<string>? _backing_StatusChanged;
@@ -132,7 +132,7 @@ namespace TUnit.Mock.Generated
         {
             var s = (IService_MockSetup)setup;
             var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { id.Matcher };
-            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(2, matchers);
+            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(3, matchers);
             s.Engine.AddSetup(methodSetup);
             return new global::TUnit.Mock.Setup.MethodSetupBuilder<string>(methodSetup);
         }
@@ -141,7 +141,7 @@ namespace TUnit.Mock.Generated
         {
             var s = (IService_MockSetup)setup;
             var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { data.Matcher };
-            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(3, matchers);
+            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(4, matchers);
             s.Engine.AddSetup(methodSetup);
             return new global::TUnit.Mock.Setup.VoidMethodSetupBuilder(methodSetup);
         }
@@ -159,7 +159,7 @@ namespace TUnit.Mock.Generated
         {
             var s = (IService_MockSetup)setup;
             var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { value.Matcher };
-            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(10000, matchers);
+            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(1, matchers);
             s.Engine.AddSetup(methodSetup);
             return new global::TUnit.Mock.Setup.PropertySetterSetupBuilder(methodSetup);
         }
@@ -168,7 +168,7 @@ namespace TUnit.Mock.Generated
         {
             var s = (IService_MockSetup)setup;
             var matchers = global::System.Array.Empty<global::TUnit.Mock.Arguments.IArgumentMatcher>();
-            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(1, matchers);
+            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(2, matchers);
             s.Engine.AddSetup(methodSetup);
             return new global::TUnit.Mock.Setup.PropertySetupBuilder<int>(methodSetup);
         }
@@ -196,14 +196,14 @@ namespace TUnit.Mock.Generated
         {
             var v = (IService_MockVerify)verify;
             var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { id.Matcher };
-            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::IService>(v.Engine, 2, "GetAsync", matchers);
+            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::IService>(v.Engine, 3, "GetAsync", matchers);
         }
 
         public static global::TUnit.Mock.Verification.ICallVerification Process(this global::TUnit.Mock.IMockVerify<global::IService> verify, global::TUnit.Mock.Arguments.Arg<string> data)
         {
             var v = (IService_MockVerify)verify;
             var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { data.Matcher };
-            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::IService>(v.Engine, 3, "Process", matchers);
+            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::IService>(v.Engine, 4, "Process", matchers);
         }
 
         public static global::TUnit.Mock.Verification.ICallVerification Name_Get(this global::TUnit.Mock.IMockVerify<global::IService> verify)
@@ -217,20 +217,20 @@ namespace TUnit.Mock.Generated
         {
             var v = (IService_MockVerify)verify;
             var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { value.Matcher };
-            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::IService>(v.Engine, 10000, "set_Name", matchers);
+            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::IService>(v.Engine, 1, "set_Name", matchers);
         }
 
         public static global::TUnit.Mock.Verification.ICallVerification Name_Set(this global::TUnit.Mock.IMockVerify<global::IService> verify)
         {
             var v = (IService_MockVerify)verify;
-            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::IService>(v.Engine, 10000, "set_Name", global::System.Array.Empty<global::TUnit.Mock.Arguments.IArgumentMatcher>());
+            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::IService>(v.Engine, 1, "set_Name", global::System.Array.Empty<global::TUnit.Mock.Arguments.IArgumentMatcher>());
         }
 
         public static global::TUnit.Mock.Verification.ICallVerification Count_Get(this global::TUnit.Mock.IMockVerify<global::IService> verify)
         {
             var v = (IService_MockVerify)verify;
             var matchers = global::System.Array.Empty<global::TUnit.Mock.Arguments.IArgumentMatcher>();
-            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::IService>(v.Engine, 1, "get_Count", matchers);
+            return new global::TUnit.Mock.Verification.CallVerificationBuilder<global::IService>(v.Engine, 2, "get_Count", matchers);
         }
     }
 }

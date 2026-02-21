@@ -39,6 +39,9 @@ public readonly struct Times : IEquatable<Times>
     // Internal method used by verification engine
     internal bool Matches(int actualCount) => actualCount >= _min && actualCount <= _max;
 
+    // Returns true if zero calls would satisfy this constraint (e.g. Never, AtMost(n), Between(0, n))
+    internal bool MatchesZero => _min == 0;
+
     /// <inheritdoc />
     public override string ToString() => (_min, _max) switch
     {

@@ -124,7 +124,7 @@ internal static class MockSetupBuilder
         if (prop.HasSetter)
         {
             if (prop.HasGetter) writer.AppendLine();
-            var setterMemberId = prop.MemberId + 10000;
+            var setterMemberId = prop.SetterMemberId;
             using (writer.Block($"public static global::TUnit.Mock.Setup.IPropertySetterSetup {prop.Name}_Set({extensionParam}, global::TUnit.Mock.Arguments.Arg<{prop.ReturnType}> value)"))
             {
                 writer.AppendLine($"var s = ({safeName}_MockSetup)setup;");

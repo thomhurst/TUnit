@@ -102,7 +102,7 @@ internal static class MockVerifyBuilder
         if (prop.HasSetter)
         {
             if (prop.HasGetter) writer.AppendLine();
-            var setterMemberId = prop.MemberId + 10000;
+            var setterMemberId = prop.SetterMemberId;
 
             using (writer.Block($"public static global::TUnit.Mock.Verification.ICallVerification {prop.Name}_Set({extensionParam}, global::TUnit.Mock.Arguments.Arg<{prop.ReturnType}> value)"))
             {

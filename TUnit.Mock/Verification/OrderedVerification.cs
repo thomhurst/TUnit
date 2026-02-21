@@ -22,9 +22,9 @@ public static class OrderedVerification
     /// Records an expectation during ordered verification collection.
     /// Called by <see cref="CallVerificationBuilder{T}.WasCalled()"/> and overloads.
     /// </summary>
-    internal static void RecordExpectation(int memberId, string memberName, IArgumentMatcher[] matchers, IReadOnlyList<CallRecord> allCalls)
+    internal static void RecordExpectation(int memberId, string memberName, IArgumentMatcher[] matchers, Times times, IReadOnlyList<CallRecord> allCalls)
     {
-        _expectations?.Add(new OrderedCallExpectation(memberId, memberName, matchers, allCalls));
+        _expectations?.Add(new OrderedCallExpectation(memberId, memberName, matchers, times, allCalls));
     }
 
     /// <summary>
@@ -54,35 +54,47 @@ public static class OrderedVerification
             return;
         }
 
-        // For each expectation, find the earliest unassigned matching call
+        // For each expectation, find the required number of matching calls based on Times
         var assignedSequences = new HashSet<long>();
         var assignedCalls = new List<(OrderedCallExpectation Expectation, CallRecord Call)>();
 
         foreach (var expectation in expectations)
         {
             var matchingCalls = FindMatchingCalls(expectation);
+            var availableCalls = matchingCalls
+                .Where(c => !assignedSequences.Contains(c.SequenceNumber))
+                .OrderBy(c => c.SequenceNumber)
+                .ToList();
 
-            CallRecord? bestMatch = null;
-            foreach (var call in matchingCalls.OrderBy(c => c.SequenceNumber))
+            // Collect all matching calls for this expectation to validate Times
+            var assigned = new List<CallRecord>();
+            foreach (var call in availableCalls)
             {
-                if (!assignedSequences.Contains(call.SequenceNumber))
+                assigned.Add(call);
+                assignedSequences.Add(call.SequenceNumber);
+
+                // Stop if we've found enough for an exact match
+                if (expectation.Times.Matches(assigned.Count))
                 {
-                    bestMatch = call;
                     break;
                 }
             }
 
-            if (bestMatch is null)
+            if (!expectation.Times.Matches(assigned.Count))
             {
                 var expectedCallDesc = FormatExpectedCall(expectation);
                 throw new MockVerificationException(
                     $"Ordered verification failed.\n" +
-                    $"  No matching call found for: {expectedCallDesc}\n" +
+                    $"  Expected: {expectedCallDesc} to be called {expectation.Times}\n" +
+                    $"  Actual: {assigned.Count} matching call(s) found\n" +
                     $"  Expected order position: {assignedCalls.Count + 1}");
             }
 
-            assignedSequences.Add(bestMatch.SequenceNumber);
-            assignedCalls.Add((expectation, bestMatch));
+            // Use the last assigned call for ordering validation
+            foreach (var call in assigned)
+            {
+                assignedCalls.Add((expectation, call));
+            }
         }
 
         // Validate that assigned calls are in strictly increasing sequence order
@@ -171,5 +183,6 @@ internal sealed record OrderedCallExpectation(
     int MemberId,
     string MemberName,
     IArgumentMatcher[] Matchers,
+    Times Times,
     IReadOnlyList<CallRecord> AllCalls
 );

@@ -175,7 +175,7 @@ public class OrderedVerificationTests
             });
         });
 
-        await Assert.That(exception.Message).Contains("No matching call found");
+        await Assert.That(exception.Message).Contains("0 matching call(s) found");
     }
 
     [Test]

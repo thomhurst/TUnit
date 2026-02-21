@@ -88,7 +88,9 @@ public sealed class MockEngine<T> where T : class
         if (behavior is not null)
         {
             var result = behavior.Execute(args);
-            return result is TReturn typed ? typed : defaultValue;
+            if (result is TReturn typed) return typed;
+            if (result is null) return default(TReturn)!;
+            return defaultValue;
         }
 
         // A matching setup with no explicit behavior returns the default value
@@ -142,7 +144,9 @@ public sealed class MockEngine<T> where T : class
         if (behavior is not null)
         {
             var behaviorResult = behavior.Execute(args);
-            result = behaviorResult is TReturn typed ? typed : defaultValue;
+            if (behaviorResult is TReturn typed) result = typed;
+            else if (behaviorResult is null) result = default(TReturn)!;
+            else result = defaultValue;
             return true;
         }
 

@@ -335,7 +335,7 @@ internal static class MockImplBuilder
 
         if (prop.HasSetter)
         {
-            writer.AppendLine($"set => _engine.HandleCall({prop.MemberId + 10000}, \"set_{prop.Name}\", new object?[] {{ value }});");
+            writer.AppendLine($"set => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", new object?[] {{ value }});");
         }
 
         writer.CloseBrace();
@@ -372,14 +372,14 @@ internal static class MockImplBuilder
         {
             if (prop.IsAbstractMember)
             {
-                writer.AppendLine($"set => _engine.HandleCall({prop.MemberId + 10000}, \"set_{prop.Name}\", new object?[] {{ value }});");
+                writer.AppendLine($"set => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", new object?[] {{ value }});");
             }
             else
             {
                 // Virtual property setter: try engine, fall back to base
                 writer.AppendLine("set");
                 writer.OpenBrace();
-                writer.AppendLine($"if (!_engine.TryHandleCall({prop.MemberId + 10000}, \"set_{prop.Name}\", new object?[] {{ value }}))");
+                writer.AppendLine($"if (!_engine.TryHandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", new object?[] {{ value }}))");
                 writer.AppendLine("{");
                 writer.IncreaseIndent();
                 writer.AppendLine($"base.{prop.Name} = value;");

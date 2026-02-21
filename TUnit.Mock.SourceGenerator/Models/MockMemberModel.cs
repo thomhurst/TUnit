@@ -17,6 +17,7 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
     public bool IsProperty { get; init; }
     public bool HasGetter { get; init; }
     public bool HasSetter { get; init; }
+    public int SetterMemberId { get; init; }
     public bool IsIndexer { get; init; }
     public bool IsGenericMethod { get; init; }
     public EquatableArray<MockParameterModel> Parameters { get; init; } = EquatableArray<MockParameterModel>.Empty;
@@ -41,6 +42,7 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             && IsProperty == other.IsProperty
             && HasGetter == other.HasGetter
             && HasSetter == other.HasSetter
+            && SetterMemberId == other.SetterMemberId
             && IsIndexer == other.IsIndexer
             && IsGenericMethod == other.IsGenericMethod
             && Parameters.Equals(other.Parameters)

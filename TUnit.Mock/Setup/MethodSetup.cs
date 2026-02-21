@@ -11,6 +11,7 @@ namespace TUnit.Mock.Setup;
 public sealed class MethodSetup
 {
     private readonly IArgumentMatcher[] _matchers;
+    private readonly object _behaviorLock = new();
     private readonly List<IBehavior> _behaviors = new();
     private int _callIndex;
 
@@ -22,7 +23,13 @@ public sealed class MethodSetup
         _matchers = matchers;
     }
 
-    public void AddBehavior(IBehavior behavior) => _behaviors.Add(behavior);
+    public void AddBehavior(IBehavior behavior)
+    {
+        lock (_behaviorLock)
+        {
+            _behaviors.Add(behavior);
+        }
+    }
 
     public bool Matches(object?[] actualArgs)
     {
@@ -39,11 +46,14 @@ public sealed class MethodSetup
 
     public IBehavior? GetNextBehavior()
     {
-        if (_behaviors.Count == 0)
-            return null;
+        lock (_behaviorLock)
+        {
+            if (_behaviors.Count == 0)
+                return null;
 
-        var index = Interlocked.Increment(ref _callIndex) - 1;
-        // Clamp to last behavior (last one repeats)
-        return _behaviors[Math.Min(index, _behaviors.Count - 1)];
+            var index = Interlocked.Increment(ref _callIndex) - 1;
+            // Clamp to last behavior (last one repeats)
+            return _behaviors[Math.Min(index, _behaviors.Count - 1)];
+        }
     }
 }
