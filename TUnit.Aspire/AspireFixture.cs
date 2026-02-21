@@ -424,7 +424,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
             failureCts.Cancel();
 
             var readySet = new HashSet<string>(readyResources);
-            var pending = resourceNames.Where(n => !readySet.Contains(n));
+            var pending = resourceNames.Where(n => !readySet.Contains(n)).ToList();
 
             var sb = new StringBuilder();
             sb.Append("Resources not ready: [");
