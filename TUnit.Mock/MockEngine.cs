@@ -121,7 +121,8 @@ public sealed class MockEngine<T> where T : class
             if (matchedSetup is not null) RaiseEventsForSetup(matchedSetup);
             if (result is TReturn typed) return typed;
             if (result is null) return default(TReturn)!;
-            return defaultValue;
+            throw new InvalidOperationException(
+                $"Setup for method returning {typeof(TReturn).Name} returned incompatible type {result.GetType().Name}.");
         }
 
         // A matching setup with no explicit behavior returns the default value
@@ -218,7 +219,8 @@ public sealed class MockEngine<T> where T : class
             if (matchedSetup is not null) RaiseEventsForSetup(matchedSetup);
             if (behaviorResult is TReturn typed) result = typed;
             else if (behaviorResult is null) result = default(TReturn)!;
-            else result = defaultValue;
+            else throw new InvalidOperationException(
+                $"Setup for method returning {typeof(TReturn).Name} returned incompatible type {behaviorResult.GetType().Name}.");
             return true;
         }
 

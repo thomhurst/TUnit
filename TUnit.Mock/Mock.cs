@@ -109,9 +109,17 @@ public static class Mock
     }
 
     /// <summary>Creates a delegate mock of T in loose mode.</summary>
+    /// <remarks>
+    /// Delegate parameters with <c>out</c> modifiers will always receive <c>default</c> values.
+    /// Use interface mocks for full <c>out</c> parameter configuration support.
+    /// </remarks>
     public static Mock<T> OfDelegate<T>() where T : class => OfDelegate<T>(MockBehavior.Loose);
 
     /// <summary>Creates a delegate mock of T with specified behavior.</summary>
+    /// <remarks>
+    /// Delegate parameters with <c>out</c> modifiers will always receive <c>default</c> values.
+    /// Use interface mocks for full <c>out</c> parameter configuration support.
+    /// </remarks>
     public static Mock<T> OfDelegate<T>(MockBehavior behavior) where T : class
     {
         if (_delegateFactories.TryGetValue(typeof(T), out var factory))
