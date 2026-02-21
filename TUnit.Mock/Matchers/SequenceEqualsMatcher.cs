@@ -5,7 +5,7 @@ namespace TUnit.Mock.Matchers;
 /// <summary>
 /// Matches a collection with element-by-element equality.
 /// </summary>
-public sealed class SequenceEqualsMatcher<T> : IArgumentMatcher
+internal sealed class SequenceEqualsMatcher<T> : IArgumentMatcher
 {
     private readonly T[] _expected;
 

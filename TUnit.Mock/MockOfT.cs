@@ -44,7 +44,7 @@ public class Mock<T> : IMock where T : class
     /// <summary>
     /// Generated verification surface -- extension methods provide T's members with <c>Arg{T}</c> parameters.
     /// </summary>
-    public IMockVerify<T>? Verify { get; internal set; }
+    public IMockVerify<T> Verify { get; internal set; }
 
     /// <summary>
     /// Generated event-raising surface (if T has events).
@@ -58,6 +58,7 @@ public class Mock<T> : IMock where T : class
         Engine = new MockEngine<T>(behavior);
         Object = mockObject;
         Setup = (IMockSetup<T>)setup;
+        Verify = null!; // Set by generated factory code
     }
 
     /// <summary>Creates a Mock with an existing engine. Used by generated code.</summary>
@@ -67,26 +68,27 @@ public class Mock<T> : IMock where T : class
         Engine = engine;
         Object = mockObject;
         Setup = (IMockSetup<T>)setup;
+        Verify = null!; // Set by generated factory code
     }
 
     /// <summary>Creates a Mock with an existing engine, setup, and verify surfaces. Used by generated code.</summary>
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public Mock(T mockObject, object setup, object? verify, MockEngine<T> engine)
+    public Mock(T mockObject, object setup, object verify, MockEngine<T> engine)
     {
         Engine = engine;
         Object = mockObject;
         Setup = (IMockSetup<T>)setup;
-        Verify = (IMockVerify<T>?)verify;
+        Verify = (IMockVerify<T>)verify;
     }
 
     /// <summary>Creates a Mock with an existing engine, setup, verify, and raise surfaces. Used by generated code.</summary>
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public Mock(T mockObject, object setup, object? verify, object? raise, MockEngine<T> engine)
+    public Mock(T mockObject, object setup, object verify, object? raise, MockEngine<T> engine)
     {
         Engine = engine;
         Object = mockObject;
         Setup = (IMockSetup<T>)setup;
-        Verify = (IMockVerify<T>?)verify;
+        Verify = (IMockVerify<T>)verify;
         Raise = (IMockRaise<T>?)raise;
     }
 

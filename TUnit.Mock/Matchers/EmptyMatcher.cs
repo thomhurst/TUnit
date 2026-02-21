@@ -5,7 +5,7 @@ namespace TUnit.Mock.Matchers;
 /// <summary>
 /// Matches an empty collection.
 /// </summary>
-public sealed class EmptyMatcher : IArgumentMatcher
+internal sealed class EmptyMatcher : IArgumentMatcher
 {
     public bool Matches(object? value)
     {

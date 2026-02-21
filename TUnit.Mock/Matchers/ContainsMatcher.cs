@@ -5,7 +5,7 @@ namespace TUnit.Mock.Matchers;
 /// <summary>
 /// Matches a collection containing a specific item.
 /// </summary>
-public sealed class ContainsMatcher<T> : IArgumentMatcher
+internal sealed class ContainsMatcher<T> : IArgumentMatcher
 {
     private readonly T _item;
 

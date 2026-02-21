@@ -5,7 +5,7 @@ namespace TUnit.Mock.Matchers;
 /// <summary>
 /// Matches a collection with a specific number of elements.
 /// </summary>
-public sealed class CountMatcher : IArgumentMatcher
+internal sealed class CountMatcher : IArgumentMatcher
 {
     private readonly int _expectedCount;
 

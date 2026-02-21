@@ -6,7 +6,7 @@ namespace TUnit.Mock.Matchers;
 /// <summary>
 /// Matches string arguments against a regular expression pattern.
 /// </summary>
-public sealed class RegexMatcher : IArgumentMatcher<string>
+internal sealed class RegexMatcher : IArgumentMatcher<string>
 {
     private readonly Regex _regex;
 
