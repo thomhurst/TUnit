@@ -27,6 +27,9 @@ internal sealed class PropertyInjector
     // Object pool for visited dictionaries to reduce allocations
     private static readonly ConcurrentBag<ConcurrentDictionary<object, byte>> _visitedObjectsPool = new();
 
+    // Cache for PropertyInfo lookups by (ContainingType, PropertyName) to avoid repeated reflection
+    private static readonly ConcurrentDictionary<(Type, string), PropertyInfo?> _propertyInfoCache = new();
+
     public PropertyInjector(Lazy<IInitializationCallback> initializationCallback, string testSessionId)
     {
         _initializationCallback = initializationCallback;
@@ -58,28 +61,30 @@ internal sealed class PropertyInjector
             return Task.CompletedTask;
         }
 
-        if (plan.SourceGeneratedProperties.Length > 0 || plan.ReflectionProperties.Length > 0)
+        return ResolveAndCachePropertiesCoreAsync(objectBag, methodMetadata, events, testContext, plan, cancellationToken);
+    }
+
+    private Task ResolveAndCachePropertiesCoreAsync(
+        ConcurrentDictionary<string, object?> objectBag,
+        MethodMetadata? methodMetadata,
+        TestContextEvents events,
+        TestContext testContext,
+        PropertyInjectionPlan plan,
+        CancellationToken cancellationToken)
+    {
+        if (plan.SourceGeneratedProperties.Length > 0)
         {
-            return ResolveAndCachePropertiesCoreAsync(objectBag, methodMetadata, events, testContext, plan, cancellationToken);
+            return ResolveAndCacheSourceGeneratedPropertiesAsync(
+                plan.SourceGeneratedProperties, objectBag, methodMetadata, events, testContext, cancellationToken);
+        }
+
+        if (plan.ReflectionProperties.Length > 0)
+        {
+            return ResolveAndCacheReflectionPropertiesAsync(
+                plan.ReflectionProperties, objectBag, methodMetadata, events, testContext, cancellationToken);
         }
 
         return Task.CompletedTask;
-    }
-
-    private async Task ResolveAndCachePropertiesCoreAsync(ConcurrentDictionary<string, object?> objectBag, MethodMetadata? methodMetadata,
-        TestContextEvents events, TestContext testContext, PropertyInjectionPlan plan, CancellationToken cancellationToken)
-    {
-        // Resolve properties based on what's available in the plan
-        if (plan.SourceGeneratedProperties.Length > 0)
-        {
-            await ResolveAndCacheSourceGeneratedPropertiesAsync(
-                plan.SourceGeneratedProperties, objectBag, methodMetadata, events, testContext, cancellationToken);
-        }
-        else if (plan.ReflectionProperties.Length > 0)
-        {
-            await ResolveAndCacheReflectionPropertiesAsync(
-                plan.ReflectionProperties, objectBag, methodMetadata, events, testContext, cancellationToken);
-        }
     }
 
     /// <summary>
@@ -107,15 +112,7 @@ internal sealed class PropertyInjector
             throw new ArgumentNullException(nameof(events));
         }
 
-        // Rent dictionary from pool
-        if (!_visitedObjectsPool.TryTake(out var visitedObjects))
-        {
-#if NETSTANDARD2_0
-            visitedObjects = new ConcurrentDictionary<object, byte>();
-#else
-            visitedObjects = new ConcurrentDictionary<object, byte>(Core.Helpers.ReferenceEqualityComparer.Instance);
-#endif
-        }
+        var visitedObjects = RentVisitedDictionary();
 
         try
         {
@@ -123,8 +120,7 @@ internal sealed class PropertyInjector
         }
         finally
         {
-            visitedObjects.Clear();
-            _visitedObjectsPool.Add(visitedObjects);
+            ReturnVisitedDictionary(visitedObjects);
         }
     }
 
@@ -145,8 +141,9 @@ internal sealed class PropertyInjector
 
         // Build list of injectable args without LINQ
         var injectableArgs = new List<object>(arguments.Length);
-        foreach (var arg in arguments)
+        for (var i = 0; i < arguments.Length; i++)
         {
+            var arg = arguments[i];
             if (arg != null && PropertyInjectionCache.HasInjectableProperties(arg.GetType()))
             {
                 injectableArgs.Add(arg);
@@ -160,9 +157,9 @@ internal sealed class PropertyInjector
 
         // Build task list without LINQ Select
         var tasks = new List<Task>(injectableArgs.Count);
-        foreach (var arg in injectableArgs)
+        for (var i = 0; i < injectableArgs.Count; i++)
         {
-            tasks.Add(InjectPropertiesAsync(arg, objectBag, methodMetadata, events, cancellationToken));
+            tasks.Add(InjectPropertiesAsync(injectableArgs[i], objectBag, methodMetadata, events, cancellationToken));
         }
 
         await Task.WhenAll(tasks);
@@ -193,17 +190,7 @@ internal sealed class PropertyInjector
 
             if (plan.HasProperties)
             {
-                // Initialize properties based on what's available in the plan
-                if (plan.SourceGeneratedProperties.Length > 0)
-                {
-                    await InjectSourceGeneratedPropertiesAsync(
-                        instance, plan.SourceGeneratedProperties, objectBag, methodMetadata, events, visitedObjects, cancellationToken);
-                }
-                else if (plan.ReflectionProperties.Length > 0)
-                {
-                    await InjectReflectionPropertiesAsync(
-                        instance, plan.ReflectionProperties, objectBag, methodMetadata, events, visitedObjects, cancellationToken);
-                }
+                await InjectPropertiesFromPlanAsync(instance, plan, objectBag, methodMetadata, events, visitedObjects, cancellationToken);
             }
 
             // Recurse into nested properties
@@ -214,6 +201,30 @@ internal sealed class PropertyInjector
             throw new InvalidOperationException(
                 $"Failed to inject properties for type '{instance.GetType().Name}': {ex.Message}", ex);
         }
+    }
+
+    private Task InjectPropertiesFromPlanAsync(
+        object instance,
+        PropertyInjectionPlan plan,
+        ConcurrentDictionary<string, object?> objectBag,
+        MethodMetadata? methodMetadata,
+        TestContextEvents events,
+        ConcurrentDictionary<object, byte> visitedObjects,
+        CancellationToken cancellationToken)
+    {
+        if (plan.SourceGeneratedProperties.Length > 0)
+        {
+            return InjectSourceGeneratedPropertiesAsync(
+                instance, plan.SourceGeneratedProperties, objectBag, methodMetadata, events, visitedObjects, cancellationToken);
+        }
+
+        if (plan.ReflectionProperties.Length > 0)
+        {
+            return InjectReflectionPropertiesAsync(
+                instance, plan.ReflectionProperties, objectBag, methodMetadata, events, visitedObjects, cancellationToken);
+        }
+
+        return Task.CompletedTask;
     }
 
     private Task InjectSourceGeneratedPropertiesAsync(
@@ -242,7 +253,7 @@ internal sealed class PropertyInjector
     {
         // First check if the property already has a value - skip if it does
         // This handles nested objects that were already constructed with their properties set
-        var property = metadata.ContainingType.GetProperty(metadata.PropertyName);
+        var property = GetCachedPropertyInfo(metadata.ContainingType, metadata.PropertyName);
         if (property != null && property.CanRead)
         {
             var existingValue = property.GetValue(instance);
@@ -260,28 +271,12 @@ internal sealed class PropertyInjector
         var cacheKey = PropertyCacheKeyGenerator.GetCacheKey(metadata);
 
         // Check if property was pre-resolved during registration
-        if (testContext?.Metadata.TestDetails.TestClassInjectedPropertyArguments.TryGetValue(cacheKey, out resolvedValue) == true)
-        {
-            // Use pre-resolved value
-        }
-        else
+        if (testContext?.Metadata.TestDetails.TestClassInjectedPropertyArguments.TryGetValue(cacheKey, out resolvedValue) != true)
         {
             // Resolve the property value from the data source
             resolvedValue = await ResolvePropertyDataAsync(
-                new PropertyInitializationContext
-                {
-                    Instance = instance,
-                    SourceGeneratedMetadata = metadata,
-                    PropertyName = metadata.PropertyName,
-                    PropertyType = metadata.PropertyType,
-                    PropertySetter = metadata.SetProperty,
-                    ObjectBag = objectBag,
-                    MethodMetadata = methodMetadata,
-                    Events = events,
-                    VisitedObjects = visitedObjects,
-                    TestContext = testContext,
-                    IsNestedProperty = false
-                },
+                PropertyInitializationContext.ForSourceGenerated(
+                    instance, metadata, objectBag, methodMetadata, events, visitedObjects, testContext),
                 cancellationToken);
 
             if (resolvedValue == null)
@@ -330,21 +325,8 @@ internal sealed class PropertyInjector
         var propertySetter = PropertySetterFactory.CreateSetter(property);
 
         var resolvedValue = await ResolvePropertyDataAsync(
-            new PropertyInitializationContext
-            {
-                Instance = instance,
-                PropertyInfo = property,
-                DataSource = dataSource,
-                PropertyName = property.Name,
-                PropertyType = property.PropertyType,
-                PropertySetter = propertySetter,
-                ObjectBag = objectBag,
-                MethodMetadata = methodMetadata,
-                Events = events,
-                VisitedObjects = visitedObjects,
-                TestContext = testContext,
-                IsNestedProperty = false
-            },
+            PropertyInitializationContext.ForReflection(
+                instance, property, dataSource, propertySetter, objectBag, methodMetadata, events, visitedObjects, testContext),
             cancellationToken);
 
         if (resolvedValue == null)
@@ -369,57 +351,62 @@ internal sealed class PropertyInjector
             return Task.CompletedTask;
         }
 
-        if (plan.SourceGeneratedProperties.Length > 0 || plan.ReflectionProperties.Length > 0)
-        {
-            return RecurseIntoNestedPropertiesCoreAsync(instance, plan, objectBag, methodMetadata, events, visitedObjects, cancellationToken);
-        }
-
-        return Task.CompletedTask;
+        return RecurseIntoNestedPropertiesCoreAsync(instance, plan, objectBag, methodMetadata, events, visitedObjects, cancellationToken);
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "ContainingType is annotated with DynamicallyAccessedMembers in PropertyInjectionMetadata")]
-    private async Task RecurseIntoNestedPropertiesCoreAsync(object instance, PropertyInjectionPlan plan,
-        ConcurrentDictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events,
-        ConcurrentDictionary<object, byte> visitedObjects, CancellationToken cancellationToken)
+    private async Task RecurseIntoNestedPropertiesCoreAsync(
+        object instance,
+        PropertyInjectionPlan plan,
+        ConcurrentDictionary<string, object?> objectBag,
+        MethodMetadata? methodMetadata,
+        TestContextEvents events,
+        ConcurrentDictionary<object, byte> visitedObjects,
+        CancellationToken cancellationToken)
     {
         if (plan.SourceGeneratedProperties.Length > 0)
         {
-            foreach (var metadata in plan.SourceGeneratedProperties)
+            for (var i = 0; i < plan.SourceGeneratedProperties.Length; i++)
             {
-                var property = metadata.ContainingType.GetProperty(metadata.PropertyName);
+                var metadata = plan.SourceGeneratedProperties[i];
+                var property = GetCachedPropertyInfo(metadata.ContainingType, metadata.PropertyName);
                 if (property == null || !property.CanRead)
                 {
                     continue;
                 }
 
-                var propertyValue = property.GetValue(instance);
-                if (propertyValue == null)
-                {
-                    continue;
-                }
-
-                if (PropertyInjectionCache.HasInjectableProperties(propertyValue.GetType()))
-                {
-                    await InjectPropertiesRecursiveAsync(propertyValue, objectBag, methodMetadata, events, visitedObjects, cancellationToken);
-                }
+                await RecurseIntoPropertyValueAsync(property.GetValue(instance), objectBag, methodMetadata, events, visitedObjects, cancellationToken);
             }
         }
         else if (plan.ReflectionProperties.Length > 0)
         {
-            foreach (var (property, _) in plan.ReflectionProperties)
+            for (var i = 0; i < plan.ReflectionProperties.Length; i++)
             {
-                var propertyValue = property.GetValue(instance);
-                if (propertyValue == null)
-                {
-                    continue;
-                }
-
-                if (PropertyInjectionCache.HasInjectableProperties(propertyValue.GetType()))
-                {
-                    await InjectPropertiesRecursiveAsync(propertyValue, objectBag, methodMetadata, events, visitedObjects, cancellationToken);
-                }
+                var (property, _) = plan.ReflectionProperties[i];
+                await RecurseIntoPropertyValueAsync(property.GetValue(instance), objectBag, methodMetadata, events, visitedObjects, cancellationToken);
             }
         }
+    }
+
+    private Task RecurseIntoPropertyValueAsync(
+        object? propertyValue,
+        ConcurrentDictionary<string, object?> objectBag,
+        MethodMetadata? methodMetadata,
+        TestContextEvents events,
+        ConcurrentDictionary<object, byte> visitedObjects,
+        CancellationToken cancellationToken)
+    {
+        if (propertyValue == null)
+        {
+            return Task.CompletedTask;
+        }
+
+        if (!PropertyInjectionCache.HasInjectableProperties(propertyValue.GetType()))
+        {
+            return Task.CompletedTask;
+        }
+
+        return InjectPropertiesRecursiveAsync(propertyValue, objectBag, methodMetadata, events, visitedObjects, cancellationToken);
     }
 
     private Task ResolveAndCacheSourceGeneratedPropertiesAsync(
@@ -453,20 +440,7 @@ internal sealed class PropertyInjector
 
         // Resolve the property value from the data source
         var resolvedValue = await ResolvePropertyDataAsync(
-            new PropertyInitializationContext
-            {
-                Instance = PlaceholderInstance.Instance,  // Use placeholder during registration
-                SourceGeneratedMetadata = metadata,
-                PropertyName = metadata.PropertyName,
-                PropertyType = metadata.PropertyType,
-                PropertySetter = metadata.SetProperty,
-                ObjectBag = objectBag,
-                MethodMetadata = methodMetadata,
-                Events = events,
-                VisitedObjects = new ConcurrentDictionary<object, byte>(),  // Empty dictionary for cycle detection
-                TestContext = testContext,
-                IsNestedProperty = false
-            },
+            PropertyInitializationContext.ForCaching(metadata, objectBag, methodMetadata, events, testContext),
             cancellationToken);
 
         if (resolvedValue != null)
@@ -511,21 +485,7 @@ internal sealed class PropertyInjector
         var propertySetter = PropertySetterFactory.CreateSetter(property);
 
         var resolvedValue = await ResolvePropertyDataAsync(
-            new PropertyInitializationContext
-            {
-                Instance = PlaceholderInstance.Instance,  // Use placeholder during registration
-                PropertyInfo = property,
-                DataSource = dataSource,
-                PropertyName = property.Name,
-                PropertyType = property.PropertyType,
-                PropertySetter = propertySetter,
-                ObjectBag = objectBag,
-                MethodMetadata = methodMetadata,
-                Events = events,
-                VisitedObjects = new ConcurrentDictionary<object, byte>(),  // Empty dictionary for cycle detection
-                TestContext = testContext,
-                IsNestedProperty = false
-            },
+            PropertyInitializationContext.ForReflectionCaching(property, dataSource, propertySetter, objectBag, methodMetadata, events, testContext),
             cancellationToken);
 
         if (resolvedValue != null)
@@ -582,16 +542,7 @@ internal sealed class PropertyInjector
 
     private async Task<IDataSourceAttribute?> GetInitializedDataSourceAsync(PropertyInitializationContext context, CancellationToken cancellationToken = default)
     {
-        IDataSourceAttribute? dataSource = null;
-
-        if (context.DataSource != null)
-        {
-            dataSource = context.DataSource;
-        }
-        else if (context.SourceGeneratedMetadata != null)
-        {
-            dataSource = context.SourceGeneratedMetadata.CreateDataSource();
-        }
+        IDataSourceAttribute? dataSource = context.DataSource ?? context.SourceGeneratedMetadata?.CreateDataSource();
 
         if (dataSource == null)
         {
@@ -615,34 +566,10 @@ internal sealed class PropertyInjector
     {
         if (context.SourceGeneratedMetadata != null)
         {
-            if (context.SourceGeneratedMetadata.ContainingType == null)
-            {
-                throw new InvalidOperationException(
-                    $"ContainingType is null for property '{context.PropertyName}'.");
-            }
-
-            var propertyMetadata = new PropertyMetadata
-            {
-                IsStatic = false,
-                Name = context.PropertyName,
-                ClassMetadata = ClassMetadataHelper.GetOrCreateClassMetadata(context.SourceGeneratedMetadata.ContainingType),
-                Type = context.PropertyType,
-                ReflectionInfo = PropertyHelper.GetPropertyInfo(context.SourceGeneratedMetadata.ContainingType, context.PropertyName),
-                Getter = parent => PropertyHelper.GetPropertyInfo(context.SourceGeneratedMetadata.ContainingType, context.PropertyName).GetValue(parent!)!,
-                ContainingTypeMetadata = ClassMetadataHelper.GetOrCreateClassMetadata(context.SourceGeneratedMetadata.ContainingType)
-            };
-
-            return DataGeneratorMetadataCreator.CreateForPropertyInjection(
-                propertyMetadata,
-                context.MethodMetadata,
-                dataSource,
-                _testSessionId,
-                context.TestContext,
-                context.TestContext?.Metadata.TestDetails.ClassInstance,
-                context.Events,
-                context.ObjectBag);
+            return CreateSourceGeneratedDataGeneratorMetadata(context, dataSource);
         }
-        else if (context.PropertyInfo != null)
+
+        if (context.PropertyInfo != null)
         {
             return DataGeneratorMetadataCreator.CreateForPropertyInjection(
                 context.PropertyInfo,
@@ -657,5 +584,79 @@ internal sealed class PropertyInjector
         }
 
         throw new InvalidOperationException("Cannot create data generator metadata: no property information available");
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Metadata creation handles both modes")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "ContainingType and PropertyType are preserved through source generation")]
+    private DataGeneratorMetadata CreateSourceGeneratedDataGeneratorMetadata(
+        PropertyInitializationContext context,
+        IDataSourceAttribute dataSource)
+    {
+        var metadata = context.SourceGeneratedMetadata!;
+
+        if (metadata.ContainingType == null)
+        {
+            throw new InvalidOperationException(
+                $"ContainingType is null for property '{context.PropertyName}'.");
+        }
+
+        // Cache the PropertyInfo lookup to avoid repeated reflection
+        var propertyInfo = PropertyHelper.GetPropertyInfo(metadata.ContainingType, context.PropertyName);
+
+        var propertyMetadata = new PropertyMetadata
+        {
+            IsStatic = false,
+            Name = context.PropertyName,
+            ClassMetadata = ClassMetadataHelper.GetOrCreateClassMetadata(metadata.ContainingType),
+            Type = context.PropertyType,
+            ReflectionInfo = propertyInfo,
+            Getter = parent => propertyInfo.GetValue(parent!)!,
+            ContainingTypeMetadata = ClassMetadataHelper.GetOrCreateClassMetadata(metadata.ContainingType)
+        };
+
+        return DataGeneratorMetadataCreator.CreateForPropertyInjection(
+            propertyMetadata,
+            context.MethodMetadata,
+            dataSource,
+            _testSessionId,
+            context.TestContext,
+            context.TestContext?.Metadata.TestDetails.ClassInstance,
+            context.Events,
+            context.ObjectBag);
+    }
+
+    /// <summary>
+    /// Gets a cached PropertyInfo for the given type and property name, avoiding repeated reflection calls.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2080", Justification = "Source-gen properties have their types preserved at compile time")]
+    private static PropertyInfo? GetCachedPropertyInfo(Type containingType, string propertyName)
+    {
+        return _propertyInfoCache.GetOrAdd((containingType, propertyName), key => key.Item1.GetProperty(key.Item2));
+    }
+
+    /// <summary>
+    /// Rents a visited objects dictionary from the pool or creates a new one.
+    /// </summary>
+    private static ConcurrentDictionary<object, byte> RentVisitedDictionary()
+    {
+        if (_visitedObjectsPool.TryTake(out var visitedObjects))
+        {
+            return visitedObjects;
+        }
+
+#if NETSTANDARD2_0
+        return new ConcurrentDictionary<object, byte>();
+#else
+        return new ConcurrentDictionary<object, byte>(Core.Helpers.ReferenceEqualityComparer.Instance);
+#endif
+    }
+
+    /// <summary>
+    /// Returns a visited objects dictionary to the pool for reuse.
+    /// </summary>
+    private static void ReturnVisitedDictionary(ConcurrentDictionary<object, byte> visitedObjects)
+    {
+        visitedObjects.Clear();
+        _visitedObjectsPool.Add(visitedObjects);
     }
 }

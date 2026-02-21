@@ -39,7 +39,7 @@ dotnet run -c Release
 
 # Large-scale performance validation
 cd TUnit.PerformanceBenchmarks
-./run-benchmarks.sh  # or run-benchmarks.ps1 on Windows
+dotnet run -c Release
 ```
 
 **When to run**:

@@ -7,7 +7,7 @@ sidebar_position: 8
 # Build Performance Benchmark
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-02-20** from the latest CI run.
+This benchmark was automatically generated on **2026-02-21** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.103
 :::
@@ -18,10 +18,10 @@ Compilation time comparison across frameworks:
 
 | Framework | Version | Mean | Median | StdDev |
 |-----------|---------|------|--------|--------|
-| **TUnit** | 1.16.4 | 2.195 s | 2.195 s | 0.0368 s |
-| Build_NUnit | 4.5.0 | 1.783 s | 1.778 s | 0.0123 s |
-| Build_MSTest | 4.1.0 | 1.857 s | 1.859 s | 0.0154 s |
-| Build_xUnit3 | 3.2.2 | 1.753 s | 1.749 s | 0.0220 s |
+| **TUnit** | 1.16.4 | 2.220 s | 2.219 s | 0.0389 s |
+| Build_NUnit | 4.5.0 | 1.796 s | 1.800 s | 0.0220 s |
+| Build_MSTest | 4.1.0 | 1.901 s | 1.906 s | 0.0235 s |
+| Build_xUnit3 | 3.2.2 | 1.842 s | 1.841 s | 0.0099 s |
 
 ## 📈 Visual Comparison
 
@@ -60,7 +60,7 @@ xychart-beta
   title "Build Time Comparison"
   x-axis ["Build_TUnit", "Build_NUnit", "Build_MSTest", "Build_xUnit3"]
   y-axis "Time (s)" 0 --> 3
-  bar [2.195, 1.783, 1.857, 1.753]
+  bar [2.22, 1.796, 1.901, 1.842]
 ```
 
 ---
@@ -69,4 +69,4 @@ xychart-beta
 View the [benchmarks overview](/docs/benchmarks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-02-20T00:34:24.939Z*
+*Last generated: 2026-02-21T00:35:05.243Z*

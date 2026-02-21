@@ -196,15 +196,12 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
             return cachedBag;
         }
 
-        // Pre-calculate capacity: 2 properties per category + custom properties
-        var categoryCount = test.Context.Metadata.TestDetails.Categories.Count;
-        var customPropCount = test.Context.Metadata.TestDetails.CustomProperties.Sum(p => p.Value.Count);
-        var properties = new List<IProperty>(categoryCount * 2 + customPropCount);
+        var propertyBag = new PropertyBag();
 
         foreach (var category in test.Context.Metadata.TestDetails.Categories)
         {
-            properties.Add(new TestMetadataProperty(category));
-            properties.Add(new TestMetadataProperty("Category", category));
+            propertyBag.Add(new TestMetadataProperty(category));
+            propertyBag.Add(new TestMetadataProperty("Category", category));
         }
 
         // Replace LINQ with manual loop for better performance in hot path
@@ -212,11 +209,9 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
         {
             foreach (var value in propertyEntry.Value)
             {
-                properties.Add(new TestMetadataProperty(propertyEntry.Key, value));
+                propertyBag.Add(new TestMetadataProperty(propertyEntry.Key, value));
             }
         }
-
-        var propertyBag = new PropertyBag(properties);
 
         // Cache the PropertyBag for future calls
         test.CachedPropertyBag = propertyBag;

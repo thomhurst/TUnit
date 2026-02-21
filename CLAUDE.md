@@ -2,7 +2,7 @@
 
 ## Environment Requirements
 
-- .NET SDK 8.0+ (latest version recommended for modern C# features)
+- .NET SDK 10.0+ (required by `global.json`; multi-targets `net8.0;net9.0;net10.0`)
 
 ## CRITICAL RULES
 
@@ -44,7 +44,7 @@ git add *.verified.txt
 
 ## Code Principles
 
-- **Use modern C# and .NET features.** Prefer latest syntax and APIs.
+- **Use modern C# and .NET features.** `LangVersion` is `preview` — use latest syntax and APIs.
 - **Prefer `[GenerateAssertion]`** for new assertions. See `.claude/docs/patterns.md`.
 - **NEVER block on async** - No `.Result` or `.GetAwaiter().GetResult()`.
 
