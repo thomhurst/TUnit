@@ -232,6 +232,14 @@ internal static class MemberDiscovery
         }
     }
 
+    /// <summary>
+    /// Creates a MockMemberModel from a delegate type's Invoke method.
+    /// </summary>
+    public static MockMemberModel CreateDelegateInvokeModel(IMethodSymbol invokeMethod, ref int memberIdCounter)
+    {
+        return CreateMethodModel(invokeMethod, ref memberIdCounter, null);
+    }
+
     private static MockMemberModel CreateMethodModel(IMethodSymbol method, ref int memberIdCounter, string? explicitInterfaceName)
     {
         var returnType = method.ReturnType;

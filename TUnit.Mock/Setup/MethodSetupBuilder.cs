@@ -57,5 +57,11 @@ public sealed class MethodSetupBuilder<TReturn> : IMethodSetup<TReturn>, ISetupC
         return this;
     }
 
+    public ISetupChain<TReturn> Raises(string eventName, object? args = null)
+    {
+        _setup.AddEventRaise(new EventRaiseInfo(eventName, args));
+        return this;
+    }
+
     public IMethodSetup<TReturn> Then() => this;
 }

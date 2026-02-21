@@ -3,7 +3,7 @@
 
 namespace TUnit.Mock.Generated
 {
-    internal sealed class ICalculator_MockImpl : global::ICalculator
+    internal sealed class ICalculator_MockImpl : global::ICalculator, global::TUnit.Mock.IRaisable
     {
         private readonly global::TUnit.Mock.MockEngine<global::ICalculator> _engine;
 
@@ -25,6 +25,12 @@ namespace TUnit.Mock.Generated
         public void Reset()
         {
             _engine.HandleCall(2, "Reset", global::System.Array.Empty<object?>());
+        }
+
+        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+        public void RaiseEvent(string eventName, object? args)
+        {
+            throw new global::System.InvalidOperationException($"No event named '{eventName}' exists on this mock.");
         }
     }
 }
@@ -49,6 +55,7 @@ namespace TUnit.Mock.Generated
         {
             var engine = new global::TUnit.Mock.MockEngine<global::ICalculator>(behavior);
             var impl = new ICalculator_MockImpl(engine);
+            engine.Raisable = impl;
             var setup = new ICalculator_MockSetup(engine);
             var verify = new ICalculator_MockVerify(engine);
             var mock = new global::TUnit.Mock.Mock<global::ICalculator>(impl, setup, verify, engine);

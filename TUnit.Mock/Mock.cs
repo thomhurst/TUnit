@@ -19,6 +19,12 @@ public static class Mock
     // Registry for multi-interface mock factories, keyed by compound type string.
     private static readonly ConcurrentDictionary<string, Func<MockBehavior, object>> _multiFactories = new();
 
+    // Separate registry for delegate mock factories.
+    private static readonly ConcurrentDictionary<Type, Func<MockBehavior, object>> _delegateFactories = new();
+
+    // Separate registry for wrap mock factories that accept a real instance.
+    private static readonly ConcurrentDictionary<Type, Func<MockBehavior, object, object>> _wrapFactories = new();
+
     /// <summary>
     /// Registers a factory for creating mocks of type T. Called by generated code.
     /// Not intended for direct use.
@@ -47,6 +53,26 @@ public static class Mock
     public static void RegisterMultiFactory(string key, Func<MockBehavior, object> factory)
     {
         _multiFactories[key] = factory;
+    }
+
+    /// <summary>
+    /// Registers a factory for creating delegate mocks of type T. Called by generated code.
+    /// Not intended for direct use.
+    /// </summary>
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    public static void RegisterDelegateFactory<T>(Func<MockBehavior, Mock<T>> factory) where T : class
+    {
+        _delegateFactories[typeof(T)] = behavior => factory(behavior);
+    }
+
+    /// <summary>
+    /// Registers a factory for creating wrap mocks of type T. Called by generated code.
+    /// Not intended for direct use.
+    /// </summary>
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    public static void RegisterWrapFactory<T>(Func<MockBehavior, T, Mock<T>> factory) where T : class
+    {
+        _wrapFactories[typeof(T)] = (behavior, instance) => factory(behavior, (T)instance);
     }
 
     /// <summary>Creates a mock of T in loose mode.</summary>
@@ -80,6 +106,38 @@ public static class Mock
         throw new InvalidOperationException(
             $"No partial mock factory registered for type '{typeof(T).FullName}'. " +
             $"Ensure the TUnit.Mock source generator is referenced and the type is not sealed.");
+    }
+
+    /// <summary>Creates a delegate mock of T in loose mode.</summary>
+    public static Mock<T> OfDelegate<T>() where T : class => OfDelegate<T>(MockBehavior.Loose);
+
+    /// <summary>Creates a delegate mock of T with specified behavior.</summary>
+    public static Mock<T> OfDelegate<T>(MockBehavior behavior) where T : class
+    {
+        if (_delegateFactories.TryGetValue(typeof(T), out var factory))
+        {
+            return (Mock<T>)factory(behavior);
+        }
+
+        throw new InvalidOperationException(
+            $"No delegate mock factory registered for type '{typeof(T).FullName}'. " +
+            $"Ensure the TUnit.Mock source generator is referenced and the type is a delegate type.");
+    }
+
+    /// <summary>Creates a wrap mock around an existing instance of T in loose mode.</summary>
+    public static Mock<T> Wrap<T>(T instance) where T : class => Wrap(MockBehavior.Loose, instance);
+
+    /// <summary>Creates a wrap mock around an existing instance of T with specified behavior.</summary>
+    public static Mock<T> Wrap<T>(MockBehavior behavior, T instance) where T : class
+    {
+        if (_wrapFactories.TryGetValue(typeof(T), out var factory))
+        {
+            return (Mock<T>)factory(behavior, instance);
+        }
+
+        throw new InvalidOperationException(
+            $"No wrap mock factory registered for type '{typeof(T).FullName}'. " +
+            $"Ensure the TUnit.Mock source generator is referenced and the type is a non-sealed class with virtual members.");
     }
 
     /// <summary>Creates a mock implementing both T1 and T2 in loose mode.</summary>
@@ -140,6 +198,25 @@ public static class Mock
         throw new InvalidOperationException(
             $"No multi-interface mock factory registered for types '{typeof(T1).FullName}', '{typeof(T2).FullName}', '{typeof(T3).FullName}', and '{typeof(T4).FullName}'. " +
             $"Ensure the TUnit.Mock source generator is referenced in your project.");
+    }
+
+    /// <summary>
+    /// Tries to create an auto-mock for the given type. Returns the mock wrapper (IMock) and
+    /// the implementation object. Only works for types with registered factories.
+    /// Not intended for direct use.
+    /// </summary>
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    public static bool TryCreateAutoMock(Type type, MockBehavior behavior, out IMock mockWrapper)
+    {
+        if (_factories.TryGetValue(type, out var factory))
+        {
+            var mock = (IMock)factory(behavior);
+            mockWrapper = mock;
+            return true;
+        }
+
+        mockWrapper = null!;
+        return false;
     }
 
     private static string GetMultiKey(params Type[] types)

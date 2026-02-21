@@ -67,9 +67,9 @@ public class ArgumentMatcherTests
     public async Task Arg_Capture_Captures_Values()
     {
         // Arrange
-        var capture = new ArgCapture<int>();
+        var firstArg = Arg.Any<int>();
         var mock = Mock.Of<ICalculator>();
-        mock.Setup.Add(Arg.Capture(capture), Arg.Any<int>()).Returns(1);
+        mock.Setup.Add(firstArg, Arg.Any<int>()).Returns(1);
 
         // Act
         ICalculator calc = mock.Object;
@@ -78,11 +78,11 @@ public class ArgumentMatcherTests
         calc.Add(30, 0);
 
         // Assert — captured values
-        await Assert.That(capture.Values).Count().IsEqualTo(3);
-        await Assert.That(capture.Values[0]).IsEqualTo(10);
-        await Assert.That(capture.Values[1]).IsEqualTo(20);
-        await Assert.That(capture.Values[2]).IsEqualTo(30);
-        await Assert.That(capture.Latest).IsEqualTo(30);
+        await Assert.That(firstArg.Values).Count().IsEqualTo(3);
+        await Assert.That(firstArg.Values[0]).IsEqualTo(10);
+        await Assert.That(firstArg.Values[1]).IsEqualTo(20);
+        await Assert.That(firstArg.Values[2]).IsEqualTo(30);
+        await Assert.That(firstArg.Latest).IsEqualTo(30);
     }
 
     [Test]
@@ -146,9 +146,9 @@ public class ArgumentMatcherTests
     public async Task Arg_Capture_With_String_Values()
     {
         // Arrange
-        var capture = new ArgCapture<string>();
+        var nameArg = Arg.Any<string>();
         var mock = Mock.Of<IGreeter>();
-        mock.Setup.Greet(Arg.Capture(capture)).Returns("hi");
+        mock.Setup.Greet(nameArg).Returns("hi");
 
         // Act
         IGreeter greeter = mock.Object;
@@ -156,10 +156,10 @@ public class ArgumentMatcherTests
         greeter.Greet("Bob");
 
         // Assert — captured string values
-        await Assert.That(capture.Values).Count().IsEqualTo(2);
-        await Assert.That(capture.Values[0]).IsEqualTo("Alice");
-        await Assert.That(capture.Values[1]).IsEqualTo("Bob");
-        await Assert.That(capture.Latest).IsEqualTo("Bob");
+        await Assert.That(nameArg.Values).Count().IsEqualTo(2);
+        await Assert.That(nameArg.Values[0]).IsEqualTo("Alice");
+        await Assert.That(nameArg.Values[1]).IsEqualTo("Bob");
+        await Assert.That(nameArg.Latest).IsEqualTo("Bob");
     }
 
     [Test]
@@ -198,11 +198,11 @@ public class ArgumentMatcherTests
     public async Task Arg_Capture_Latest_Returns_Default_When_Empty()
     {
         // Arrange
-        var capture = new ArgCapture<int>();
+        var arg = Arg.Any<int>();
 
         // Assert — no calls yet
-        await Assert.That(capture.Values).Count().IsEqualTo(0);
-        await Assert.That(capture.Latest).IsEqualTo(0);
+        await Assert.That(arg.Values).Count().IsEqualTo(0);
+        await Assert.That(arg.Latest).IsEqualTo(0);
     }
 
     [Test]

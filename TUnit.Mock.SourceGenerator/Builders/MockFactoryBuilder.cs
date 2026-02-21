@@ -15,7 +15,11 @@ internal static class MockFactoryBuilder
 
         using (writer.Block("namespace TUnit.Mock.Generated"))
         {
-            if (model.IsPartialMock && !model.IsInterface)
+            if (model.IsWrapMock)
+            {
+                BuildWrapFactory(writer, model, safeName);
+            }
+            else if (model.IsPartialMock && !model.IsInterface)
             {
                 BuildPartialFactory(writer, model, safeName);
             }
@@ -62,6 +66,7 @@ internal static class MockFactoryBuilder
 
                 writer.AppendLine($"var engine = new global::TUnit.Mock.MockEngine<{model.FullyQualifiedName}>(behavior);");
                 writer.AppendLine($"var impl = new {safeName}_MockImpl(engine);");
+                writer.AppendLine("engine.Raisable = impl;");
                 writer.AppendLine($"var setup = new {primarySafeName}_MockSetup(engine);");
                 writer.AppendLine($"var verify = new {primarySafeName}_MockVerify(engine);");
 
@@ -70,6 +75,39 @@ internal static class MockFactoryBuilder
                 if (model.Events.Length > 0 && model.AdditionalInterfaceNames.Length == 0)
                 {
                     writer.AppendLine($"var raise = new {primarySafeName}_MockRaise(impl);");
+                    writer.AppendLine($"var mock = new global::TUnit.Mock.Mock<{model.FullyQualifiedName}>(impl, setup, verify, raise, engine);");
+                }
+                else
+                {
+                    writer.AppendLine($"var mock = new global::TUnit.Mock.Mock<{model.FullyQualifiedName}>(impl, setup, verify, engine);");
+                }
+
+                writer.AppendLine("return mock;");
+            }
+        }
+    }
+
+    private static void BuildWrapFactory(CodeWriter writer, MockTypeModel model, string safeName)
+    {
+        using (writer.Block($"internal static class {safeName}_WrapMockFactory"))
+        {
+            writer.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
+            using (writer.Block("internal static void Register()"))
+            {
+                writer.AppendLine($"global::TUnit.Mock.Mock.RegisterWrapFactory<{model.FullyQualifiedName}>(Create);");
+            }
+            writer.AppendLine();
+
+            using (writer.Block($"private static global::TUnit.Mock.Mock<{model.FullyQualifiedName}> Create(global::TUnit.Mock.MockBehavior behavior, {model.FullyQualifiedName} instance)"))
+            {
+                writer.AppendLine($"var engine = new global::TUnit.Mock.MockEngine<{model.FullyQualifiedName}>(behavior);");
+                writer.AppendLine($"var impl = new {safeName}_WrapMockImpl(engine, instance);");
+                writer.AppendLine("engine.Raisable = impl;");
+                writer.AppendLine($"var setup = new {safeName}_MockSetup(engine);");
+                writer.AppendLine($"var verify = new {safeName}_MockVerify(engine);");
+                if (model.Events.Length > 0)
+                {
+                    writer.AppendLine($"var raise = new {safeName}_MockRaise(impl);");
                     writer.AppendLine($"var mock = new global::TUnit.Mock.Mock<{model.FullyQualifiedName}>(impl, setup, verify, raise, engine);");
                 }
                 else
@@ -100,6 +138,7 @@ internal static class MockFactoryBuilder
                 // Generate constructor dispatch based on available constructors
                 GenerateConstructorDispatch(writer, model, safeName);
 
+                writer.AppendLine("engine.Raisable = impl;");
                 writer.AppendLine($"var setup = new {safeName}_MockSetup(engine);");
                 writer.AppendLine($"var verify = new {safeName}_MockVerify(engine);");
                 if (model.Events.Length > 0)

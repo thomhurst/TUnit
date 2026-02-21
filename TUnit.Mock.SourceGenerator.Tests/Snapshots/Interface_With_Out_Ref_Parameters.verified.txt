@@ -3,7 +3,7 @@
 
 namespace TUnit.Mock.Generated
 {
-    internal sealed class IDictionary_MockImpl : global::IDictionary
+    internal sealed class IDictionary_MockImpl : global::IDictionary, global::TUnit.Mock.IRaisable
     {
         private readonly global::TUnit.Mock.MockEngine<global::IDictionary> _engine;
 
@@ -21,6 +21,12 @@ namespace TUnit.Mock.Generated
         public void Swap(ref int a, ref int b)
         {
             _engine.HandleCall(1, "Swap", new object?[] { a, b });
+        }
+
+        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+        public void RaiseEvent(string eventName, object? args)
+        {
+            throw new global::System.InvalidOperationException($"No event named '{eventName}' exists on this mock.");
         }
     }
 }
@@ -45,6 +51,7 @@ namespace TUnit.Mock.Generated
         {
             var engine = new global::TUnit.Mock.MockEngine<global::IDictionary>(behavior);
             var impl = new IDictionary_MockImpl(engine);
+            engine.Raisable = impl;
             var setup = new IDictionary_MockSetup(engine);
             var verify = new IDictionary_MockVerify(engine);
             var mock = new global::TUnit.Mock.Mock<global::IDictionary>(impl, setup, verify, engine);

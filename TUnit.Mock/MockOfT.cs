@@ -20,6 +20,9 @@ public class Mock<T> : IMock where T : class
     /// <summary>The mock object that implements T.</summary>
     public T Object { get; }
 
+    /// <inheritdoc />
+    object IMock.ObjectInstance => Object;
+
     /// <summary>The mock behavior (Loose or Strict).</summary>
     public MockBehavior Behavior => Engine.Behavior;
 
@@ -93,6 +96,16 @@ public class Mock<T> : IMock where T : class
     public void Reset() => Engine.Reset();
 
     /// <summary>
+    /// Registers a callback that fires when a handler subscribes to the named event.
+    /// </summary>
+    public void OnSubscribe(string eventName, Action callback) => Engine.OnSubscribe(eventName, callback);
+
+    /// <summary>
+    /// Registers a callback that fires when a handler unsubscribes from the named event.
+    /// </summary>
+    public void OnUnsubscribe(string eventName, Action callback) => Engine.OnUnsubscribe(eventName, callback);
+
+    /// <summary>
     /// Gets the current number of subscribers for the named event.
     /// </summary>
     public int GetEventSubscriberCount(string eventName) => Engine.GetEventSubscriberCount(eventName);
@@ -139,6 +152,23 @@ public class Mock<T> : IMock where T : class
                           string.Join("\n", unverified.Select(c => $"  - {c.FormatCall()}"));
             throw new MockVerificationException(message);
         }
+    }
+
+    /// <summary>
+    /// Retrieves the auto-mock wrapper for a child interface returned by this mock.
+    /// Use this to configure auto-mocked return values.
+    /// </summary>
+    public Mock<TChild> GetAutoMock<TChild>(string memberName) where TChild : class
+    {
+        var cacheKey = memberName + "|" + typeof(TChild).FullName;
+        if (Engine.TryGetAutoMock(cacheKey, out var mock))
+        {
+            return (Mock<TChild>)mock;
+        }
+
+        throw new InvalidOperationException(
+            $"No auto-mock found for member '{memberName}' returning type '{typeof(TChild).Name}'. " +
+            $"Ensure the method was called at least once before retrieving its auto-mock.");
     }
 
     /// <summary>Implicit conversion to T -- no .Object needed.</summary>

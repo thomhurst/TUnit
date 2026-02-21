@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # Mocking Framework Comparison
 
-TUnit.Mock is a **source-generated, AOT-compatible** mocking framework built into TUnit. This page compares it against the three most popular .NET mocking libraries: [Moq](https://github.com/moq/moq4), [NSubstitute](https://nsubstitute.github.io/), and [FakeItEasy](https://fakeiteasy.github.io/).
+TUnit.Mock is a **source-generated, AOT-compatible** mocking framework built into TUnit. It is currently in **beta** — the API may change before the stable release. This page compares it against the three most popular .NET mocking libraries: [Moq](https://github.com/moq/moq4), [NSubstitute](https://nsubstitute.github.io/), and [FakeItEasy](https://fakeiteasy.github.io/).
 
 ## Why TUnit.Mock?
 
@@ -141,12 +141,12 @@ A.CallTo(() => calc.GetValue(A<string>._))
 ### Argument Capture
 
 ```csharp
-// TUnit.Mock — built-in ArgCapture<T>
-var capture = new ArgCapture<string>();
-mock.Setup.Log(Arg.Capture(capture));
+// TUnit.Mock — every Arg captures implicitly
+var name = Arg.Any<string>();
+mock.Setup.Log(name);
 // ... exercise code ...
-var allValues = capture.Values; // IReadOnlyList<string?>
-var latest = capture.Latest;
+var allValues = name.Values; // IReadOnlyList<string?>
+var latest = name.Latest;
 
 // Moq — Capture.In
 var captured = new List<string>();
@@ -178,8 +178,8 @@ A.CallTo(() => calc.Log(captured._)).DoesNothing();
 | Ref parameters | Yes | Yes | Yes | Yes |
 | Property getter/setter | Yes | Yes | Yes | Yes |
 | Auto-track all properties | **Yes** (auto in loose) | `SetupAllProperties` | Auto | No |
-| Recursive/auto mocking | No | Yes | Yes | Yes |
-| Wrap real object | No | `CallBase` | `ForPartsOf` | `Wrapping()` |
+| Recursive/auto mocking | **Yes** | Yes | Yes | Yes |
+| Wrap real object | **Yes** (`Mock.Wrap`) | `CallBase` | `ForPartsOf` | `Wrapping()` |
 | LINQ to Mocks | No | `Mock.Of<T>(x => ...)` | No | No |
 
 ### Verification
@@ -220,7 +220,7 @@ A.CallTo(() => calc.Log(captured._)).DoesNothing();
 | Generic types & methods | Yes | Yes | Yes | Yes |
 | Protected members | **Yes** (source-gen access) | **Explicit API** | Virtual only | Virtual only |
 | Internal types | Yes | Yes | Yes | Yes |
-| Delegates | No | No | Yes | Yes |
+| Delegates | **Yes** | No | Yes | Yes |
 | Multiple interfaces | **Yes** | Yes | Yes | Yes |
 | Constructor args (partial) | Yes | Yes | Yes | Yes |
 
@@ -238,9 +238,9 @@ A.CallTo(() => calc.Log(captured._)).DoesNothing();
 | Feature | TUnit.Mock | Moq | NSubstitute | FakeItEasy |
 |---|:---:|:---:|:---:|:---:|
 | Raise events | Yes | Yes | Yes | Yes |
-| Auto-raise on method call | No | Yes | No | No |
+| Auto-raise on method call | **Yes** (`.Raises()`) | Yes | No | No |
 | Non-EventHandler delegates | **Yes** | Yes | Yes | Yes |
-| Event subscription setup | No | Yes | No | Yes |
+| Event subscription setup | **Yes** | Yes | No | Yes |
 
 ### Quality of Life
 
@@ -255,25 +255,25 @@ A.CallTo(() => calc.Log(captured._)).DoesNothing();
 ## Summary
 
 **TUnit.Mock excels at:**
-- AOT compatibility and trimming — the only source-generated option
+- **Full feature parity** — matches or exceeds Moq, NSubstitute, and FakeItEasy in every category
+- AOT compatibility and trimming — the **only** source-generated option
 - Zero runtime overhead — no reflection, no dynamic proxies
 - Async ergonomics — `.Returns(value)` just works for `Task<T>` / `ValueTask<T>`
 - Implicit conversion — `T obj = mock` with no `.Object` call
+- Recursive/auto mocking — interface return types auto-mocked with full chain support
+- Delegate mocking — `Mock.OfDelegate<Func<int, string>>()`
+- Wrap real objects — `Mock.Wrap(realInstance)` with selective overrides
 - Built-in analyzers — catch misuse at compile time
 - Thread safety — designed for parallel test execution from the start
 
 **Choose Moq if you need:**
 - Expression-tree setup syntax (`x => x.Method(...)`)
 - LINQ to Mocks (`Mock.Of<T>(x => x.Prop == value)`)
-- Recursive/auto mocking
 - The largest community and ecosystem
 
 **Choose NSubstitute if you need:**
 - Minimal ceremony — the substitute IS the type (no `.Object`)
-- Delegate mocking
 - The simplest syntax with no lambdas needed
 
 **Choose FakeItEasy if you need:**
-- Delegate mocking
-- Wrapping real objects with selective overrides
 - `Captured<T>` with deep-copy support

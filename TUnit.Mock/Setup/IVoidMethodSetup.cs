@@ -13,4 +13,7 @@ public interface IVoidMethodSetup
 
     /// <summary>Execute a callback when the method is called.</summary>
     IVoidSetupChain Callback(Action callback);
+
+    /// <summary>Auto-raise the named event when this method is called.</summary>
+    IVoidSetupChain Raises(string eventName, object? args = null);
 }

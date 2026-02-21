@@ -3,7 +3,7 @@
 
 namespace TUnit.Mock.Generated
 {
-    internal sealed class IReadWriter_MockImpl : global::IReadWriter
+    internal sealed class IReadWriter_MockImpl : global::IReadWriter, global::TUnit.Mock.IRaisable
     {
         private readonly global::TUnit.Mock.MockEngine<global::IReadWriter> _engine;
 
@@ -25,6 +25,12 @@ namespace TUnit.Mock.Generated
         public void Write(string data)
         {
             _engine.HandleCall(2, "Write", new object?[] { data });
+        }
+
+        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+        public void RaiseEvent(string eventName, object? args)
+        {
+            throw new global::System.InvalidOperationException($"No event named '{eventName}' exists on this mock.");
         }
     }
 }
@@ -49,6 +55,7 @@ namespace TUnit.Mock.Generated
         {
             var engine = new global::TUnit.Mock.MockEngine<global::IReadWriter>(behavior);
             var impl = new IReadWriter_MockImpl(engine);
+            engine.Raisable = impl;
             var setup = new IReadWriter_MockSetup(engine);
             var verify = new IReadWriter_MockVerify(engine);
             var mock = new global::TUnit.Mock.Mock<global::IReadWriter>(impl, setup, verify, engine);

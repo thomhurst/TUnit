@@ -3,7 +3,7 @@
 
 namespace TUnit.Mock.Generated
 {
-    internal sealed class IRepository_MockImpl : global::IRepository
+    internal sealed class IRepository_MockImpl : global::IRepository, global::TUnit.Mock.IRaisable
     {
         private readonly global::TUnit.Mock.MockEngine<global::IRepository> _engine;
 
@@ -25,6 +25,12 @@ namespace TUnit.Mock.Generated
         public TResult Transform<TInput, TResult>(TInput input) where TInput : notnull where TResult : struct
         {
             return _engine.HandleCallWithReturn<TResult>(2, "Transform", new object?[] { input }, default);
+        }
+
+        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+        public void RaiseEvent(string eventName, object? args)
+        {
+            throw new global::System.InvalidOperationException($"No event named '{eventName}' exists on this mock.");
         }
     }
 }
@@ -49,6 +55,7 @@ namespace TUnit.Mock.Generated
         {
             var engine = new global::TUnit.Mock.MockEngine<global::IRepository>(behavior);
             var impl = new IRepository_MockImpl(engine);
+            engine.Raisable = impl;
             var setup = new IRepository_MockSetup(engine);
             var verify = new IRepository_MockVerify(engine);
             var mock = new global::TUnit.Mock.Mock<global::IRepository>(impl, setup, verify, engine);

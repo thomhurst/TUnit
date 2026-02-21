@@ -3,7 +3,7 @@
 
 namespace TUnit.Mock.Generated
 {
-    internal sealed class INotifier_MockImpl : global::INotifier
+    internal sealed class INotifier_MockImpl : global::INotifier, global::TUnit.Mock.IRaisable
     {
         private readonly global::TUnit.Mock.MockEngine<global::INotifier> _engine;
 
@@ -30,6 +30,19 @@ namespace TUnit.Mock.Generated
         {
             _backing_ItemAdded?.Invoke(this, e);
         }
+
+        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+        public void RaiseEvent(string eventName, object? args)
+        {
+            switch (eventName)
+            {
+                case "ItemAdded":
+                    Raise_ItemAdded((string)args!);
+                    break;
+                default:
+                    throw new global::System.InvalidOperationException($"No event named '{eventName}' exists on this mock.");
+            }
+        }
     }
 }
 
@@ -53,6 +66,7 @@ namespace TUnit.Mock.Generated
         {
             var engine = new global::TUnit.Mock.MockEngine<global::INotifier>(behavior);
             var impl = new INotifier_MockImpl(engine);
+            engine.Raisable = impl;
             var setup = new INotifier_MockSetup(engine);
             var verify = new INotifier_MockVerify(engine);
             var raise = new INotifier_MockRaise(impl);

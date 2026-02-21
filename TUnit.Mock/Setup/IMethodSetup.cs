@@ -23,4 +23,7 @@ public interface IMethodSetup<TReturn>
 
     /// <summary>Execute a callback when the method is called.</summary>
     ISetupChain<TReturn> Callback(Action callback);
+
+    /// <summary>Auto-raise the named event when this method is called.</summary>
+    ISetupChain<TReturn> Raises(string eventName, object? args = null);
 }

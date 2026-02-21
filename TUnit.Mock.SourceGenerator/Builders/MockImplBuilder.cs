@@ -15,7 +15,11 @@ internal static class MockImplBuilder
 
         using (writer.Block("namespace TUnit.Mock.Generated"))
         {
-            if (model.IsPartialMock && !model.IsInterface)
+            if (model.IsWrapMock)
+            {
+                BuildWrapMockImpl(writer, model, safeName);
+            }
+            else if (model.IsPartialMock && !model.IsInterface)
             {
                 BuildPartialMockImpl(writer, model, safeName);
             }
@@ -36,7 +40,7 @@ internal static class MockImplBuilder
             baseTypes += ", " + string.Join(", ", model.AdditionalInterfaceNames);
         }
 
-        using (writer.Block($"internal sealed class {safeName}_MockImpl : {baseTypes}"))
+        using (writer.Block($"internal sealed class {safeName}_MockImpl : {baseTypes}, global::TUnit.Mock.IRaisable"))
         {
             writer.AppendLine($"private readonly global::TUnit.Mock.MockEngine<{model.FullyQualifiedName}> _engine;");
             writer.AppendLine();
@@ -68,12 +72,234 @@ internal static class MockImplBuilder
                 writer.AppendLine();
                 GenerateEvent(writer, evt);
             }
+
+            // IRaisable.RaiseEvent dispatch
+            writer.AppendLine();
+            GenerateRaiseEventDispatch(writer, model);
         }
+    }
+
+    private static void BuildWrapMockImpl(CodeWriter writer, MockTypeModel model, string safeName)
+    {
+        using (writer.Block($"internal sealed class {safeName}_WrapMockImpl : {model.FullyQualifiedName}, global::TUnit.Mock.IRaisable"))
+        {
+            writer.AppendLine($"private readonly global::TUnit.Mock.MockEngine<{model.FullyQualifiedName}> _engine;");
+            writer.AppendLine($"private readonly {model.FullyQualifiedName} _wrappedInstance;");
+            writer.AppendLine();
+
+            // Generate constructors that pass through to base + accept wrapped instance
+            GenerateWrapConstructors(writer, model, safeName);
+
+            // Methods
+            foreach (var method in model.Methods)
+            {
+                writer.AppendLine();
+                GenerateWrapMethod(writer, method, model);
+            }
+
+            // Properties
+            foreach (var prop in model.Properties)
+            {
+                if (prop.IsIndexer) continue;
+                writer.AppendLine();
+                GenerateWrapProperty(writer, prop, model);
+            }
+
+            // Events
+            foreach (var evt in model.Events)
+            {
+                writer.AppendLine();
+                GeneratePartialEvent(writer, evt);
+            }
+
+            // IRaisable.RaiseEvent dispatch
+            writer.AppendLine();
+            GenerateRaiseEventDispatch(writer, model);
+        }
+    }
+
+    private static void GenerateWrapConstructors(CodeWriter writer, MockTypeModel model, string safeName)
+    {
+        if (model.Constructors.Length == 0)
+        {
+            using (writer.Block($"internal {safeName}_WrapMockImpl(global::TUnit.Mock.MockEngine<{model.FullyQualifiedName}> engine, {model.FullyQualifiedName} wrappedInstance)"))
+            {
+                writer.AppendLine("_engine = engine;");
+                writer.AppendLine("_wrappedInstance = wrappedInstance;");
+            }
+            return;
+        }
+
+        foreach (var ctor in model.Constructors)
+        {
+            if (ctor.Parameters.Length == 0)
+            {
+                using (writer.Block($"internal {safeName}_WrapMockImpl(global::TUnit.Mock.MockEngine<{model.FullyQualifiedName}> engine, {model.FullyQualifiedName} wrappedInstance) : base()"))
+                {
+                    writer.AppendLine("_engine = engine;");
+                    writer.AppendLine("_wrappedInstance = wrappedInstance;");
+                }
+            }
+            else
+            {
+                var paramList = string.Join(", ", ctor.Parameters.Select(p => $"{p.FullyQualifiedType} {p.Name}"));
+                var argList = string.Join(", ", ctor.Parameters.Select(p => p.Name));
+                using (writer.Block($"internal {safeName}_WrapMockImpl(global::TUnit.Mock.MockEngine<{model.FullyQualifiedName}> engine, {model.FullyQualifiedName} wrappedInstance, {paramList}) : base({argList})"))
+                {
+                    writer.AppendLine("_engine = engine;");
+                    writer.AppendLine("_wrappedInstance = wrappedInstance;");
+                }
+            }
+        }
+    }
+
+    private static void GenerateWrapMethod(CodeWriter writer, MockMemberModel method, MockTypeModel model)
+    {
+        var signatureReturnType = (method.IsVoid && !method.IsAsync) ? "void" : method.ReturnType;
+        var paramList = GetParameterList(method);
+        var typeParams = GetTypeParameterList(method);
+        var constraints = GetConstraintClauses(method);
+
+        var accessModifier = method.IsProtected ? "protected" : "public";
+        using (writer.Block($"{accessModifier} override {signatureReturnType} {method.Name}{typeParams}({paramList}){constraints}"))
+        {
+            if (method.IsAbstractMember)
+            {
+                // Abstract methods: dispatch through engine (wrapped instance can't have abstract methods by definition,
+                // but we still handle it for consistency)
+                GenerateEngineDispatchBody(writer, method);
+            }
+            else
+            {
+                // Virtual/override methods: try engine first, fall back to wrapped instance
+                GenerateWrapMethodBody(writer, method);
+            }
+        }
+    }
+
+    private static void GenerateWrapMethodBody(CodeWriter writer, MockMemberModel method)
+    {
+        // Initialize out parameters
+        foreach (var p in method.Parameters)
+        {
+            if (p.Direction == ParameterDirection.Out)
+            {
+                writer.AppendLine($"{p.Name} = default!;");
+            }
+        }
+
+        var argsArray = GetArgsArrayExpression(method);
+        var argPassList = GetArgPassList(method);
+
+        if (method.IsVoid && !method.IsAsync)
+        {
+            writer.AppendLine($"if (_engine.TryHandleCall({method.MemberId}, \"{method.Name}\", {argsArray}))");
+            writer.AppendLine("{");
+            writer.IncreaseIndent();
+            writer.AppendLine("return;");
+            writer.DecreaseIndent();
+            writer.AppendLine("}");
+            writer.AppendLine($"_wrappedInstance.{method.Name}({argPassList});");
+        }
+        else if (method.IsVoid && method.IsAsync)
+        {
+            writer.AppendLine($"if (_engine.TryHandleCall({method.MemberId}, \"{method.Name}\", {argsArray}))");
+            writer.AppendLine("{");
+            writer.IncreaseIndent();
+            if (method.IsValueTask)
+            {
+                writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
+            }
+            else
+            {
+                writer.AppendLine("return global::System.Threading.Tasks.Task.CompletedTask;");
+            }
+            writer.DecreaseIndent();
+            writer.AppendLine("}");
+            writer.AppendLine($"return _wrappedInstance.{method.Name}({argPassList});");
+        }
+        else if (method.IsAsync)
+        {
+            writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{method.UnwrappedReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.UnwrappedSmartDefault}, out var __result))");
+            writer.AppendLine("{");
+            writer.IncreaseIndent();
+            if (method.IsValueTask)
+            {
+                writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask<{method.UnwrappedReturnType}>(__result);");
+            }
+            else
+            {
+                writer.AppendLine($"return global::System.Threading.Tasks.Task.FromResult<{method.UnwrappedReturnType}>(__result);");
+            }
+            writer.DecreaseIndent();
+            writer.AppendLine("}");
+            writer.AppendLine($"return _wrappedInstance.{method.Name}({argPassList});");
+        }
+        else
+        {
+            writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{method.ReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.SmartDefault}, out var __result))");
+            writer.AppendLine("{");
+            writer.IncreaseIndent();
+            writer.AppendLine("return __result;");
+            writer.DecreaseIndent();
+            writer.AppendLine("}");
+            writer.AppendLine($"return _wrappedInstance.{method.Name}({argPassList});");
+        }
+    }
+
+    private static void GenerateWrapProperty(CodeWriter writer, MockMemberModel prop, MockTypeModel model)
+    {
+        var accessModifier = prop.IsProtected ? "protected" : "public";
+        writer.AppendLine($"{accessModifier} override {prop.ReturnType} {prop.Name}");
+        writer.OpenBrace();
+
+        if (prop.HasGetter)
+        {
+            if (prop.IsAbstractMember)
+            {
+                writer.AppendLine($"get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault});");
+            }
+            else
+            {
+                writer.AppendLine("get");
+                writer.OpenBrace();
+                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault}, out var __result))");
+                writer.AppendLine("{");
+                writer.IncreaseIndent();
+                writer.AppendLine("return __result;");
+                writer.DecreaseIndent();
+                writer.AppendLine("}");
+                writer.AppendLine($"return _wrappedInstance.{prop.Name};");
+                writer.CloseBrace();
+            }
+        }
+
+        if (prop.HasSetter)
+        {
+            if (prop.IsAbstractMember)
+            {
+                writer.AppendLine($"set => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", new object?[] {{ value }});");
+            }
+            else
+            {
+                writer.AppendLine("set");
+                writer.OpenBrace();
+                writer.AppendLine($"if (!_engine.TryHandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", new object?[] {{ value }}))");
+                writer.AppendLine("{");
+                writer.IncreaseIndent();
+                writer.AppendLine($"_wrappedInstance.{prop.Name} = value;");
+                writer.DecreaseIndent();
+                writer.AppendLine("}");
+                writer.CloseBrace();
+            }
+        }
+
+        writer.CloseBrace();
     }
 
     private static void BuildPartialMockImpl(CodeWriter writer, MockTypeModel model, string safeName)
     {
-        using (writer.Block($"internal sealed class {safeName}_MockImpl : {model.FullyQualifiedName}"))
+        using (writer.Block($"internal sealed class {safeName}_MockImpl : {model.FullyQualifiedName}, global::TUnit.Mock.IRaisable"))
         {
             writer.AppendLine($"private readonly global::TUnit.Mock.MockEngine<{model.FullyQualifiedName}> _engine;");
             writer.AppendLine();
@@ -102,6 +328,10 @@ internal static class MockImplBuilder
                 writer.AppendLine();
                 GeneratePartialEvent(writer, evt);
             }
+
+            // IRaisable.RaiseEvent dispatch
+            writer.AppendLine();
+            GenerateRaiseEventDispatch(writer, model);
         }
     }
 
@@ -458,6 +688,78 @@ internal static class MockImplBuilder
             else
             {
                 writer.AppendLine($"_backing_{evt.Name}?.Invoke({invokeArgs});");
+            }
+        }
+    }
+
+    private static void GenerateRaiseEventDispatch(CodeWriter writer, MockTypeModel model)
+    {
+        writer.AppendLine("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
+        using (writer.Block("public void RaiseEvent(string eventName, object? args)"))
+        {
+            if (model.Events.Length == 0)
+            {
+                writer.AppendLine("throw new global::System.InvalidOperationException($\"No event named '{eventName}' exists on this mock.\");");
+            }
+            else
+            {
+                using (writer.Block("switch (eventName)"))
+                {
+                    foreach (var evt in model.Events)
+                    {
+                        writer.AppendLine($"case \"{evt.Name}\":");
+                        writer.IncreaseIndent();
+
+                        // Determine how to invoke: if the event handler has parameters matching EventArgs, pass args
+                        if (string.IsNullOrEmpty(evt.RaiseParameters))
+                        {
+                            // No-parameter event (e.g., Action)
+                            writer.AppendLine($"Raise_{evt.Name}();");
+                        }
+                        else if (evt.RaiseParameters.Contains(","))
+                        {
+                            // Multi-parameter delegate — cast args to object[] and spread
+                            writer.AppendLine("if (args is object?[] __argArray)");
+                            writer.AppendLine("{");
+                            writer.IncreaseIndent();
+
+                            // Parse parameter types from RaiseParameters
+                            var raiseParamParts = evt.RaiseParameters.Split(',')
+                                .Select(p => p.Trim().Split(' '))
+                                .ToList();
+                            var castArgs = new List<string>();
+                            for (int i = 0; i < raiseParamParts.Count; i++)
+                            {
+                                var typeName = string.Join(" ", raiseParamParts[i].Take(raiseParamParts[i].Length - 1));
+                                castArgs.Add($"({typeName})__argArray[{i}]");
+                            }
+                            writer.AppendLine($"Raise_{evt.Name}({string.Join(", ", castArgs)});");
+                            writer.DecreaseIndent();
+                            writer.AppendLine("}");
+                            writer.AppendLine("else");
+                            writer.AppendLine("{");
+                            writer.IncreaseIndent();
+                            writer.AppendLine($"throw new global::System.ArgumentException($\"Event '{evt.Name}' requires an object[] of arguments.\");");
+                            writer.DecreaseIndent();
+                            writer.AppendLine("}");
+                        }
+                        else
+                        {
+                            // Single-parameter event (e.g., EventHandler<TArgs>)
+                            var paramParts = evt.RaiseParameters.Trim().Split(' ');
+                            var typeName = string.Join(" ", paramParts.Take(paramParts.Length - 1));
+                            writer.AppendLine($"Raise_{evt.Name}(({typeName})args!);");
+                        }
+
+                        writer.AppendLine("break;");
+                        writer.DecreaseIndent();
+                    }
+
+                    writer.AppendLine("default:");
+                    writer.IncreaseIndent();
+                    writer.AppendLine("throw new global::System.InvalidOperationException($\"No event named '{eventName}' exists on this mock.\");");
+                    writer.DecreaseIndent();
+                }
             }
         }
     }

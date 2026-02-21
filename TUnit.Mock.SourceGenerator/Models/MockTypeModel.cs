@@ -15,6 +15,8 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
     public bool IsAbstract { get; init; }
     public bool IsPartial { get; init; }
     public bool IsPartialMock { get; init; }
+    public bool IsDelegateType { get; init; }
+    public bool IsWrapMock { get; init; }
     public EquatableArray<MockMemberModel> Methods { get; init; } = EquatableArray<MockMemberModel>.Empty;
     public EquatableArray<MockMemberModel> Properties { get; init; } = EquatableArray<MockMemberModel>.Empty;
     public EquatableArray<MockEventModel> Events { get; init; } = EquatableArray<MockEventModel>.Empty;
@@ -32,6 +34,8 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
             && IsAbstract == other.IsAbstract
             && IsPartial == other.IsPartial
             && IsPartialMock == other.IsPartialMock
+            && IsDelegateType == other.IsDelegateType
+            && IsWrapMock == other.IsWrapMock
             && Methods.Equals(other.Methods)
             && Properties.Equals(other.Properties)
             && Events.Equals(other.Events)
@@ -47,6 +51,8 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
             int hash = 17;
             hash = hash * 31 + FullyQualifiedName.GetHashCode();
             hash = hash * 31 + IsPartialMock.GetHashCode();
+            hash = hash * 31 + IsDelegateType.GetHashCode();
+            hash = hash * 31 + IsWrapMock.GetHashCode();
             hash = hash * 31 + Methods.GetHashCode();
             hash = hash * 31 + Properties.GetHashCode();
             hash = hash * 31 + Events.GetHashCode();

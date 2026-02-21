@@ -540,9 +540,9 @@ public class ComplexArgumentMatchingTests
     public async Task Arg_Capture_Across_Multiple_Calls_Verifies_All()
     {
         // Arrange
-        var capture = new ArgCapture<string>();
+        var input = Arg.Any<string>();
         var mock = Mock.Of<IValidator>();
-        mock.Setup.Validate(Arg.Capture(capture)).Returns(true);
+        mock.Setup.Validate(input).Returns(true);
 
         // Act — 5 calls with different arguments
         IValidator validator = mock.Object;
@@ -553,13 +553,13 @@ public class ComplexArgumentMatchingTests
         validator.Validate("echo");
 
         // Assert — all captured
-        await Assert.That(capture.Values).Count().IsEqualTo(5);
-        await Assert.That(capture.Values[0]).IsEqualTo("alpha");
-        await Assert.That(capture.Values[1]).IsEqualTo("bravo");
-        await Assert.That(capture.Values[2]).IsEqualTo("charlie");
-        await Assert.That(capture.Values[3]).IsEqualTo("delta");
-        await Assert.That(capture.Values[4]).IsEqualTo("echo");
-        await Assert.That(capture.Latest).IsEqualTo("echo");
+        await Assert.That(input.Values).Count().IsEqualTo(5);
+        await Assert.That(input.Values[0]).IsEqualTo("alpha");
+        await Assert.That(input.Values[1]).IsEqualTo("bravo");
+        await Assert.That(input.Values[2]).IsEqualTo("charlie");
+        await Assert.That(input.Values[3]).IsEqualTo("delta");
+        await Assert.That(input.Values[4]).IsEqualTo("echo");
+        await Assert.That(input.Latest).IsEqualTo("echo");
     }
 }
 

@@ -35,5 +35,11 @@ public sealed class VoidMethodSetupBuilder : IVoidMethodSetup, IVoidSetupChain
         return this;
     }
 
+    public IVoidSetupChain Raises(string eventName, object? args = null)
+    {
+        _setup.AddEventRaise(new EventRaiseInfo(eventName, args));
+        return this;
+    }
+
     public IVoidMethodSetup Then() => this;
 }

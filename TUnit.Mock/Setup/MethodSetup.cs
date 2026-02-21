@@ -13,6 +13,7 @@ public sealed class MethodSetup
     private readonly IArgumentMatcher[] _matchers;
     private readonly System.Threading.Lock _behaviorLock = new();
     private readonly List<IBehavior> _behaviors = new();
+    private readonly List<EventRaiseInfo> _eventRaises = new();
     private int _callIndex;
 
     public int MemberId { get; }
@@ -60,6 +61,23 @@ public sealed class MethodSetup
                 return false;
         }
         return true;
+    }
+
+    public void AddEventRaise(EventRaiseInfo raiseInfo)
+    {
+        lock (_behaviorLock)
+        {
+            _eventRaises.Add(raiseInfo);
+        }
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public IReadOnlyList<EventRaiseInfo> GetEventRaises()
+    {
+        lock (_behaviorLock)
+        {
+            return _eventRaises.ToList();
+        }
     }
 
     public IBehavior? GetNextBehavior()

@@ -3,7 +3,7 @@
 
 namespace TUnit.Mock.Generated
 {
-    internal sealed class IFormatter_MockImpl : global::IFormatter
+    internal sealed class IFormatter_MockImpl : global::IFormatter, global::TUnit.Mock.IRaisable
     {
         private readonly global::TUnit.Mock.MockEngine<global::IFormatter> _engine;
 
@@ -31,6 +31,12 @@ namespace TUnit.Mock.Generated
         {
             return _engine.HandleCallWithReturn<string>(3, "Format", new object?[] { template, arg1, arg2 }, "");
         }
+
+        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+        public void RaiseEvent(string eventName, object? args)
+        {
+            throw new global::System.InvalidOperationException($"No event named '{eventName}' exists on this mock.");
+        }
     }
 }
 
@@ -54,6 +60,7 @@ namespace TUnit.Mock.Generated
         {
             var engine = new global::TUnit.Mock.MockEngine<global::IFormatter>(behavior);
             var impl = new IFormatter_MockImpl(engine);
+            engine.Raisable = impl;
             var setup = new IFormatter_MockSetup(engine);
             var verify = new IFormatter_MockVerify(engine);
             var mock = new global::TUnit.Mock.Mock<global::IFormatter>(impl, setup, verify, engine);

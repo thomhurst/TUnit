@@ -526,13 +526,13 @@ public class RealWorldScenarioTests
         var mockNotify = Mock.Of<INotificationService>();
         var mockLogger = Mock.Of<ILogger>();
 
-        var captureBody = new ArgCapture<string>();
+        var bodyArg = Arg.Any<string>();
 
         var user = new UserDto { Id = 7, Name = "Charlie", Email = "charlie@example.com" };
         mockRepo.Setup.GetByIdAsync(7).Returns(user);
         // SendEmailAsync returns Task (void-async), so use Callback to capture args
         mockNotify.Setup.SendEmailAsync(
-            Arg.Any<string>(), Arg.Any<string>(), Arg.Capture(captureBody)
+            Arg.Any<string>(), Arg.Any<string>(), bodyArg
         ).Callback((Action)(() => { }));
 
         var service = new OrderService(mockRepo.Object, mockNotify.Object, mockLogger.Object);
@@ -541,8 +541,8 @@ public class RealWorldScenarioTests
         await service.PlaceOrderAsync(7, "Gadget");
 
         // Assert — verify the captured email body content
-        await Assert.That(captureBody.Values).HasCount().EqualTo(1);
-        await Assert.That(captureBody.Latest).IsEqualTo("Your order for Gadget has been placed.");
+        await Assert.That(bodyArg.Values).HasCount().EqualTo(1);
+        await Assert.That(bodyArg.Latest).IsEqualTo("Your order for Gadget has been placed.");
     }
 
     // ───────────────────────────────────────────────────────────

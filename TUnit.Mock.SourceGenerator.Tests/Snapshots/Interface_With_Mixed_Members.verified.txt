@@ -3,7 +3,7 @@
 
 namespace TUnit.Mock.Generated
 {
-    internal sealed class IService_MockImpl : global::IService
+    internal sealed class IService_MockImpl : global::IService, global::TUnit.Mock.IRaisable
     {
         private readonly global::TUnit.Mock.MockEngine<global::IService> _engine;
 
@@ -54,6 +54,19 @@ namespace TUnit.Mock.Generated
         {
             _backing_StatusChanged?.Invoke(this, e);
         }
+
+        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+        public void RaiseEvent(string eventName, object? args)
+        {
+            switch (eventName)
+            {
+                case "StatusChanged":
+                    Raise_StatusChanged((string)args!);
+                    break;
+                default:
+                    throw new global::System.InvalidOperationException($"No event named '{eventName}' exists on this mock.");
+            }
+        }
     }
 }
 
@@ -77,6 +90,7 @@ namespace TUnit.Mock.Generated
         {
             var engine = new global::TUnit.Mock.MockEngine<global::IService>(behavior);
             var impl = new IService_MockImpl(engine);
+            engine.Raisable = impl;
             var setup = new IService_MockSetup(engine);
             var verify = new IService_MockVerify(engine);
             var raise = new IService_MockRaise(impl);

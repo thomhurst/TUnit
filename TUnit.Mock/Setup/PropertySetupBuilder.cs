@@ -24,5 +24,6 @@ public sealed class PropertySetupBuilder<TProperty> : IPropertySetup<TProperty>,
     public ISetupChain<TProperty> Throws<TException>() where TException : Exception, new() => _inner.Throws<TException>();
     public ISetupChain<TProperty> Throws(Exception exception) => _inner.Throws(exception);
     public ISetupChain<TProperty> Callback(Action callback) => _inner.Callback(callback);
+    public ISetupChain<TProperty> Raises(string eventName, object? args = null) => _inner.Raises(eventName, args);
     public IMethodSetup<TProperty> Then() => _inner.Then();
 }

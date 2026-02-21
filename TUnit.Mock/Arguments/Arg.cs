@@ -24,9 +24,6 @@ public static class Arg
     /// <summary>Matches only when the argument is not null.</summary>
     public static Arg<T> IsNotNull<T>() where T : class => new(new NotNullMatcher<T>());
 
-    /// <summary>Matches any value and captures it into the supplied <see cref="ArgCapture{T}"/>.</summary>
-    public static Arg<T> Capture<T>(ArgCapture<T> capture) => new(new CaptureMatcher<T>(capture));
-
     /// <summary>Matches a string against a regular expression pattern.</summary>
     public static Arg<string> Matches(string pattern) => new(new RegexMatcher(pattern));
 

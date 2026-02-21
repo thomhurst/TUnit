@@ -3,7 +3,7 @@
 
 namespace TUnit.Mock.Generated
 {
-    internal sealed class IGreeter_MockImpl : global::IGreeter
+    internal sealed class IGreeter_MockImpl : global::IGreeter, global::TUnit.Mock.IRaisable
     {
         private readonly global::TUnit.Mock.MockEngine<global::IGreeter> _engine;
 
@@ -15,6 +15,12 @@ namespace TUnit.Mock.Generated
         public string Greet(string name)
         {
             return _engine.HandleCallWithReturn<string>(0, "Greet", new object?[] { name }, "");
+        }
+
+        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+        public void RaiseEvent(string eventName, object? args)
+        {
+            throw new global::System.InvalidOperationException($"No event named '{eventName}' exists on this mock.");
         }
     }
 }
@@ -39,6 +45,7 @@ namespace TUnit.Mock.Generated
         {
             var engine = new global::TUnit.Mock.MockEngine<global::IGreeter>(behavior);
             var impl = new IGreeter_MockImpl(engine);
+            engine.Raisable = impl;
             var setup = new IGreeter_MockSetup(engine);
             var verify = new IGreeter_MockVerify(engine);
             var mock = new global::TUnit.Mock.Mock<global::IGreeter>(impl, setup, verify, engine);

@@ -25,7 +25,17 @@ public class MockGenerator : IIncrementalGenerator
         // Step 3: Generate source for each unique type
         context.RegisterSourceOutput(distinctTypes, (spc, model) =>
         {
-            if (model.AdditionalInterfaceNames.Length > 0)
+            if (model.IsDelegateType)
+            {
+                // Delegate mock: generate setup, verify, and delegate factory (no impl class)
+                GenerateDelegateMock(spc, model);
+            }
+            else if (model.IsWrapMock)
+            {
+                // Wrap mock: generate wrap impl, wrap factory, plus setup/verify
+                GenerateWrapMock(spc, model);
+            }
+            else if (model.AdditionalInterfaceNames.Length > 0)
             {
                 // Multi-interface mock: generate ONLY impl + factory
                 // Setup/verify/raise come from the single-type model (also emitted)
@@ -65,6 +75,52 @@ public class MockGenerator : IIncrementalGenerator
         // Generate factory
         var factorySource = MockFactoryBuilder.Build(model);
         spc.AddSource($"{fileName}_MockFactory.g.cs", factorySource);
+    }
+
+    private static void GenerateDelegateMock(SourceProductionContext spc, MockTypeModel model)
+    {
+        var fileName = GetSafeFileName(model);
+
+        // Generate setup surface (reuses standard builder — Invoke method is just a method)
+        var setupSource = MockSetupBuilder.Build(model);
+        spc.AddSource($"{fileName}_MockSetup.g.cs", setupSource);
+
+        // Generate verify surface
+        var verifySource = MockVerifyBuilder.Build(model);
+        spc.AddSource($"{fileName}_MockVerify.g.cs", verifySource);
+
+        // Generate delegate factory (creates the delegate lambda + wraps in Mock<T>)
+        var factorySource = MockDelegateFactoryBuilder.Build(model);
+        spc.AddSource($"{fileName}_MockDelegateFactory.g.cs", factorySource);
+    }
+
+    private static void GenerateWrapMock(SourceProductionContext spc, MockTypeModel model)
+    {
+        var fileName = GetSafeFileName(model);
+        var safeName = MockImplBuilder.GetCompositeSafeName(model);
+
+        // Generate wrap mock implementation (delegates to wrapped instance for unconfigured calls)
+        var implSource = MockImplBuilder.Build(model);
+        spc.AddSource($"{fileName}_WrapMockImpl.g.cs", implSource);
+
+        // Generate setup surface (reuses standard builder — same setup class as OfPartial)
+        var setupSource = MockSetupBuilder.Build(model);
+        spc.AddSource($"{fileName}_MockSetup.g.cs", setupSource);
+
+        // Generate verify surface
+        var verifySource = MockVerifyBuilder.Build(model);
+        spc.AddSource($"{fileName}_MockVerify.g.cs", verifySource);
+
+        // Generate raise surface (if type has events)
+        if (model.Events.Length > 0)
+        {
+            var raiseSource = MockRaiseBuilder.Build(model);
+            spc.AddSource($"{fileName}_MockRaise.g.cs", raiseSource);
+        }
+
+        // Generate wrap factory
+        var factorySource = MockFactoryBuilder.Build(model);
+        spc.AddSource($"{fileName}_WrapMockFactory.g.cs", factorySource);
     }
 
     private static void GenerateMultiInterfaceMock(SourceProductionContext spc, MockTypeModel model)

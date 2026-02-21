@@ -25,6 +25,9 @@ public sealed class MockEngine<T> where T : class
     private readonly ConcurrentQueue<CallRecord> _callHistory = new();
     private readonly ConcurrentDictionary<string, object?> _autoTrackValues = new();
     private readonly ConcurrentQueue<(string EventName, bool IsSubscribe)> _eventSubscriptions = new();
+    private readonly ConcurrentDictionary<string, Action> _onSubscribeCallbacks = new();
+    private readonly ConcurrentDictionary<string, Action> _onUnsubscribeCallbacks = new();
+    private readonly ConcurrentDictionary<string, IMock> _autoMockCache = new();
 
     /// <summary>
     /// When true, property setters automatically store values and getters return them,
@@ -32,6 +35,13 @@ public sealed class MockEngine<T> where T : class
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public bool AutoTrackProperties { get; set; }
+
+    /// <summary>
+    /// Reference to the mock impl as IRaisable, for auto-raising events after method calls.
+    /// Set by the generated factory code.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public IRaisable? Raisable { get; set; }
 
     public MockBehavior Behavior { get; }
 
@@ -70,17 +80,19 @@ public sealed class MockEngine<T> where T : class
             _autoTrackValues[memberName.Substring(4)] = args[0];
         }
 
-        var (setupFound, behavior) = FindMatchingSetup(memberId, args);
+        var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, args);
 
         if (behavior is not null)
         {
             behavior.Execute(args);
+            if (matchedSetup is not null) RaiseEventsForSetup(matchedSetup);
             return;
         }
 
         // A matching setup with no explicit behavior means "allow this call" (e.g., void setup with no callback)
         if (setupFound)
         {
+            if (matchedSetup is not null) RaiseEventsForSetup(matchedSetup);
             return;
         }
 
@@ -99,11 +111,12 @@ public sealed class MockEngine<T> where T : class
     {
         RecordCall(memberId, memberName, args);
 
-        var (setupFound, behavior) = FindMatchingSetup(memberId, args);
+        var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, args);
 
         if (behavior is not null)
         {
             var result = behavior.Execute(args);
+            if (matchedSetup is not null) RaiseEventsForSetup(matchedSetup);
             if (result is TReturn typed) return typed;
             if (result is null) return default(TReturn)!;
             return defaultValue;
@@ -112,6 +125,7 @@ public sealed class MockEngine<T> where T : class
         // A matching setup with no explicit behavior returns the default value
         if (setupFound)
         {
+            if (matchedSetup is not null) RaiseEventsForSetup(matchedSetup);
             return defaultValue;
         }
 
@@ -122,6 +136,22 @@ public sealed class MockEngine<T> where T : class
             {
                 if (trackedValue is TReturn typed) return typed;
                 if (trackedValue is null) return default(TReturn)!;
+            }
+        }
+
+        // Auto-mock: for interface return types in Loose mode, create a functional mock
+        if (Behavior == MockBehavior.Loose && typeof(TReturn).IsInterface)
+        {
+            var cacheKey = memberName + "|" + typeof(TReturn).FullName;
+            if (_autoMockCache.TryGetValue(cacheKey, out var cached))
+            {
+                return (TReturn)cached.ObjectInstance;
+            }
+
+            if (Mock.TryCreateAutoMock(typeof(TReturn), Behavior, out var autoMock))
+            {
+                _autoMockCache[cacheKey] = autoMock;
+                return (TReturn)autoMock.ObjectInstance;
             }
         }
 
@@ -144,12 +174,18 @@ public sealed class MockEngine<T> where T : class
     {
         RecordCall(memberId, memberName, args);
 
-        var (setupFound, behavior) = FindMatchingSetup(memberId, args);
+        var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, args);
 
         if (behavior is not null)
         {
             behavior.Execute(args);
+            if (matchedSetup is not null) RaiseEventsForSetup(matchedSetup);
             return true;
+        }
+
+        if (setupFound && matchedSetup is not null)
+        {
+            RaiseEventsForSetup(matchedSetup);
         }
 
         return setupFound;
@@ -165,11 +201,12 @@ public sealed class MockEngine<T> where T : class
     {
         RecordCall(memberId, memberName, args);
 
-        var (setupFound, behavior) = FindMatchingSetup(memberId, args);
+        var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, args);
 
         if (behavior is not null)
         {
             var behaviorResult = behavior.Execute(args);
+            if (matchedSetup is not null) RaiseEventsForSetup(matchedSetup);
             if (behaviorResult is TReturn typed) result = typed;
             else if (behaviorResult is null) result = default(TReturn)!;
             else result = defaultValue;
@@ -178,6 +215,7 @@ public sealed class MockEngine<T> where T : class
 
         if (setupFound)
         {
+            if (matchedSetup is not null) RaiseEventsForSetup(matchedSetup);
             result = defaultValue;
             return true;
         }
@@ -247,6 +285,15 @@ public sealed class MockEngine<T> where T : class
     /// <summary>
     /// Clears all setups and call history.
     /// </summary>
+    /// <summary>
+    /// Tries to get a cached auto-mock by its cache key. Used by Mock&lt;T&gt;.GetAutoMock.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool TryGetAutoMock(string cacheKey, out IMock mock)
+    {
+        return _autoMockCache.TryGetValue(cacheKey, out mock!);
+    }
+
     public void Reset()
     {
         _setupLock.EnterWriteLock();
@@ -264,6 +311,27 @@ public sealed class MockEngine<T> where T : class
 
         _autoTrackValues.Clear();
         while (_eventSubscriptions.TryDequeue(out _)) { }
+        _onSubscribeCallbacks.Clear();
+        _onUnsubscribeCallbacks.Clear();
+        _autoMockCache.Clear();
+    }
+
+    /// <summary>
+    /// Registers a callback to invoke when an event is subscribed to.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public void OnSubscribe(string eventName, Action callback)
+    {
+        _onSubscribeCallbacks[eventName] = callback;
+    }
+
+    /// <summary>
+    /// Registers a callback to invoke when an event is unsubscribed from.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public void OnUnsubscribe(string eventName, Action callback)
+    {
+        _onUnsubscribeCallbacks[eventName] = callback;
     }
 
     /// <summary>
@@ -273,6 +341,21 @@ public sealed class MockEngine<T> where T : class
     public void RecordEventSubscription(string eventName, bool isSubscribe)
     {
         _eventSubscriptions.Enqueue((eventName, isSubscribe));
+
+        if (isSubscribe)
+        {
+            if (_onSubscribeCallbacks.TryGetValue(eventName, out var callback))
+            {
+                callback();
+            }
+        }
+        else
+        {
+            if (_onUnsubscribeCallbacks.TryGetValue(eventName, out var callback))
+            {
+                callback();
+            }
+        }
     }
 
     /// <summary>
@@ -311,7 +394,18 @@ public sealed class MockEngine<T> where T : class
         _callHistory.Enqueue(new CallRecord(memberId, memberName, args, DateTime.UtcNow, seq));
     }
 
-    private (bool SetupFound, IBehavior? Behavior) FindMatchingSetup(int memberId, object?[] args)
+    private void RaiseEventsForSetup(MethodSetup setup)
+    {
+        if (Raisable is null) return;
+
+        var raises = setup.GetEventRaises();
+        foreach (var raise in raises)
+        {
+            Raisable.RaiseEvent(raise.EventName, raise.Args);
+        }
+    }
+
+    private (bool SetupFound, IBehavior? Behavior, MethodSetup? Setup) FindMatchingSetup(int memberId, object?[] args)
     {
         _setupLock.EnterReadLock();
         try
@@ -323,7 +417,7 @@ public sealed class MockEngine<T> where T : class
                 if (setup.MemberId == memberId && setup.Matches(args))
                 {
                     setup.IncrementInvokeCount();
-                    return (true, setup.GetNextBehavior());
+                    return (true, setup.GetNextBehavior(), setup);
                 }
             }
         }
@@ -332,7 +426,7 @@ public sealed class MockEngine<T> where T : class
             _setupLock.ExitReadLock();
         }
 
-        return (false, null);
+        return (false, null, null);
     }
 
     private static string FormatCall(string memberName, object?[] args)

@@ -5,6 +5,10 @@ namespace TUnit.Mock;
 /// </summary>
 public interface IMock
 {
+    /// <summary>The mock implementation object (non-generic accessor).</summary>
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    object ObjectInstance { get; }
+
     /// <summary>Verifies all registered setups were invoked at least once.</summary>
     void VerifyAll();
 
