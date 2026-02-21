@@ -397,7 +397,7 @@ public sealed class MockEngine<T> where T : class
     private void RecordCall(int memberId, string memberName, object?[] args)
     {
         var seq = MockCallSequence.Next();
-        _callHistory.Enqueue(new CallRecord(memberId, memberName, args, DateTime.UtcNow, seq));
+        _callHistory.Enqueue(new CallRecord(memberId, memberName, args, seq));
     }
 
     private void RaiseEventsForSetup(MethodSetup setup)

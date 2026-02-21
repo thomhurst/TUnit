@@ -81,6 +81,9 @@ internal static class TypeSymbolExtensions
     {
         if (!type.IsGenericType || type.TypeArguments.Length != 1) return false;
 
+        var ns = type.ConstructedFrom.ContainingNamespace?.ToDisplayString();
+        if (ns is not "System.Collections.Generic") return false;
+
         var name = type.ConstructedFrom.Name;
         return name is "IEnumerable" or "IList" or "ICollection" or "IReadOnlyList" or "IReadOnlyCollection";
     }

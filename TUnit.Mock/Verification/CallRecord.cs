@@ -10,7 +10,6 @@ public sealed record CallRecord(
     int MemberId,
     string MemberName,
     object?[] Arguments,
-    DateTime Timestamp,
     long SequenceNumber
 )
 {
