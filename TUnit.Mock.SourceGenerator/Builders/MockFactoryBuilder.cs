@@ -101,6 +101,7 @@ internal static class MockFactoryBuilder
             using (writer.Block($"private static global::TUnit.Mock.Mock<{model.FullyQualifiedName}> Create(global::TUnit.Mock.MockBehavior behavior, {model.FullyQualifiedName} instance)"))
             {
                 writer.AppendLine($"var engine = new global::TUnit.Mock.MockEngine<{model.FullyQualifiedName}>(behavior);");
+                writer.AppendLine("engine.IsWrapMock = true;");
                 writer.AppendLine($"var impl = new {safeName}_WrapMockImpl(engine, instance);");
                 writer.AppendLine("engine.Raisable = impl;");
                 writer.AppendLine($"var setup = new {safeName}_MockSetup(engine);");

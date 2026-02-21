@@ -87,7 +87,7 @@ public sealed class MethodSetup
             if (_behaviors.Count == 0)
                 return null;
 
-            var index = Interlocked.Increment(ref _callIndex) - 1;
+            var index = _callIndex++;
             // Clamp to last behavior (last one repeats)
             return _behaviors[Math.Min(index, _behaviors.Count - 1)];
         }

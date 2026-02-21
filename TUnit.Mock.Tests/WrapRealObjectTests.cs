@@ -166,17 +166,29 @@ public class WrapRealObjectTests
     }
 
     [Test]
-    public async Task Wrap_Strict_Mode_Unconfigured_Virtual_Calls_Wrapped()
+    public void Wrap_Strict_Mode_Throws_On_Unconfigured_Call()
     {
-        // Arrange — strict mode, but virtual methods should still call wrapped instance when unconfigured
+        // Arrange — strict mode: unconfigured calls throw, even for wrap mocks
         var real = new RealCalculator(10);
         var mock = Mock.Wrap(MockBehavior.Strict, real);
 
-        // Act — virtual method with no setup delegates to real
+        // Act & Assert — no setup for Add, strict mode throws
+        Assert.Throws<MockStrictBehaviorException>(() => mock.Object.Add(2, 3));
+    }
+
+    [Test]
+    public async Task Wrap_Strict_Mode_Allows_Configured_Calls()
+    {
+        // Arrange — strict mode with explicit setup
+        var real = new RealCalculator(10);
+        var mock = Mock.Wrap(MockBehavior.Strict, real);
+        mock.Setup.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(42);
+
+        // Act
         var result = mock.Object.Add(2, 3);
 
-        // Assert
-        await Assert.That(result).IsEqualTo(15); // 2 + 3 + 10
+        // Assert — returns configured value
+        await Assert.That(result).IsEqualTo(42);
     }
 
     [Test]

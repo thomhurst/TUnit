@@ -33,7 +33,7 @@ public abstract class SnapshotTestBase
 
     /// <summary>
     /// Runs the MockGenerator against the given source and returns the generated files
-    /// as an array of strings (excluding the input source).
+    /// as an array of strings, ordered by hint name for stable snapshot comparison.
     /// </summary>
     protected static string[] RunGenerator(string source)
     {
@@ -48,25 +48,19 @@ public abstract class SnapshotTestBase
         var generator = new MockGenerator();
         GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
 
-        driver.RunGeneratorsAndUpdateCompilation(compilation, out var newCompilation, out var diagnostics);
+        var runResult = driver.RunGenerators(compilation).GetRunResult();
 
         // Check for generator errors
-        var errors = diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error).ToList();
+        var errors = runResult.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error).ToList();
         if (errors.Count > 0)
         {
             var errorMessages = string.Join(Environment.NewLine, errors.Select(e => e.ToString()));
             throw new InvalidOperationException($"Generator produced errors:{Environment.NewLine}{errorMessages}");
         }
 
-        // Extract generated files (those not in the original compilation)
-        var originalTexts = new HashSet<string>(
-            compilation.SyntaxTrees.Select(t => t.GetText().ToString())
-        );
-
-        return newCompilation.SyntaxTrees
+        return runResult.GeneratedTrees
+            .OrderBy(t => t.FilePath, StringComparer.Ordinal)
             .Select(t => t.GetText().ToString())
-            .Where(text => !originalTexts.Contains(text))
-            .OrderBy(text => text, StringComparer.Ordinal) // deterministic ordering
             .ToArray();
     }
 

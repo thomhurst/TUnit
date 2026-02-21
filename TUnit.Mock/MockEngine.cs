@@ -21,7 +21,7 @@ internal static class MockCallSequence
 public sealed class MockEngine<T> where T : class
 {
     private readonly List<MethodSetup> _setups = new();
-    private readonly ReaderWriterLockSlim _setupLock = new();
+    private readonly System.Threading.Lock _setupLock = new();
     private readonly ConcurrentQueue<CallRecord> _callHistory = new();
     private readonly ConcurrentDictionary<string, object?> _autoTrackValues = new();
     private readonly ConcurrentQueue<(string EventName, bool IsSubscribe)> _eventSubscriptions = new();
@@ -43,6 +43,13 @@ public sealed class MockEngine<T> where T : class
     [EditorBrowsable(EditorBrowsableState.Never)]
     public IRaisable? Raisable { get; set; }
 
+    /// <summary>
+    /// When true, indicates this engine backs a wrap mock. In Strict mode, unconfigured calls
+    /// throw instead of falling through to the wrapped instance. Set by generated factory code.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool IsWrapMock { get; set; }
+
     public MockBehavior Behavior { get; }
 
     public MockEngine(MockBehavior behavior)
@@ -52,18 +59,13 @@ public sealed class MockEngine<T> where T : class
     }
 
     /// <summary>
-    /// Registers a new setup. Thread-safe via writer lock.
+    /// Registers a new setup. Thread-safe via lock.
     /// </summary>
     public void AddSetup(MethodSetup setup)
     {
-        _setupLock.EnterWriteLock();
-        try
+        lock (_setupLock)
         {
             _setups.Add(setup);
-        }
-        finally
-        {
-            _setupLock.ExitWriteLock();
         }
     }
 
@@ -165,9 +167,10 @@ public sealed class MockEngine<T> where T : class
     }
 
     /// <summary>
-    /// Handles a void method call for a partial mock virtual method.
+    /// Handles a void method call for a partial/wrap mock virtual method.
     /// Records the call, executes matching setup behavior if found.
     /// Returns true if a setup was found (caller should NOT call base), false otherwise (caller should call base).
+    /// In Strict mode, throws if no setup matches (no fallthrough to base).
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public bool TryHandleCall(int memberId, string memberName, object?[] args)
@@ -188,13 +191,20 @@ public sealed class MockEngine<T> where T : class
             RaiseEventsForSetup(matchedSetup);
         }
 
+        if (!setupFound && IsWrapMock && Behavior == MockBehavior.Strict)
+        {
+            var callDesc = FormatCall(memberName, args);
+            throw new MockStrictBehaviorException(callDesc);
+        }
+
         return setupFound;
     }
 
     /// <summary>
-    /// Handles a method call with a return value for a partial mock virtual method.
+    /// Handles a method call with a return value for a partial/wrap mock virtual method.
     /// Records the call, executes matching setup if found.
     /// Returns true if a setup was found (result is set), false otherwise (caller should call base).
+    /// In Strict mode, throws if no setup matches (no fallthrough to base).
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public bool TryHandleCallWithReturn<TReturn>(int memberId, string memberName, object?[] args, TReturn defaultValue, out TReturn result)
@@ -218,6 +228,12 @@ public sealed class MockEngine<T> where T : class
             if (matchedSetup is not null) RaiseEventsForSetup(matchedSetup);
             result = defaultValue;
             return true;
+        }
+
+        if (IsWrapMock && Behavior == MockBehavior.Strict)
+        {
+            var callDesc = FormatCall(memberName, args);
+            throw new MockStrictBehaviorException(callDesc);
         }
 
         result = defaultValue;
@@ -271,14 +287,9 @@ public sealed class MockEngine<T> where T : class
     [EditorBrowsable(EditorBrowsableState.Never)]
     public IReadOnlyList<MethodSetup> GetSetups()
     {
-        _setupLock.EnterReadLock();
-        try
+        lock (_setupLock)
         {
             return _setups.ToList();
-        }
-        finally
-        {
-            _setupLock.ExitReadLock();
         }
     }
 
@@ -296,14 +307,9 @@ public sealed class MockEngine<T> where T : class
 
     public void Reset()
     {
-        _setupLock.EnterWriteLock();
-        try
+        lock (_setupLock)
         {
             _setups.Clear();
-        }
-        finally
-        {
-            _setupLock.ExitWriteLock();
         }
 
         // Drain the queue
@@ -407,8 +413,7 @@ public sealed class MockEngine<T> where T : class
 
     private (bool SetupFound, IBehavior? Behavior, MethodSetup? Setup) FindMatchingSetup(int memberId, object?[] args)
     {
-        _setupLock.EnterReadLock();
-        try
+        lock (_setupLock)
         {
             // Iterate last-added-first to implement "last wins" semantics
             for (int i = _setups.Count - 1; i >= 0; i--)
@@ -420,10 +425,6 @@ public sealed class MockEngine<T> where T : class
                     return (true, setup.GetNextBehavior(), setup);
                 }
             }
-        }
-        finally
-        {
-            _setupLock.ExitReadLock();
         }
 
         return (false, null, null);

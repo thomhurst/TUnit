@@ -21,4 +21,13 @@ public static class Rules
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true
     );
+
+    public static readonly DiagnosticDescriptor TM003_OfDelegateRequiresDelegateType = new(
+        id: "TM003",
+        title: "Mock.OfDelegate<T>() requires a delegate type",
+        messageFormat: "Mock.OfDelegate<T>() requires T to be a delegate type, but '{0}' is not a delegate.",
+        category: "TUnit.Mock",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true
+    );
 }
