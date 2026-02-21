@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using TUnit.Mock.Verification;
 
 namespace TUnit.Mock;
@@ -8,10 +9,12 @@ namespace TUnit.Mock;
 public static class Mock
 {
     // The source generator registers factories via this method at module initialization time.
-    private static readonly Dictionary<Type, Func<MockBehavior, object>> _factories = new();
+    // ConcurrentDictionary is used because module initializers from multiple assemblies
+    // can run concurrently when test assemblies are loaded in parallel.
+    private static readonly ConcurrentDictionary<Type, Func<MockBehavior, object>> _factories = new();
 
     // Separate registry for partial mock factories that accept constructor args.
-    private static readonly Dictionary<Type, Func<MockBehavior, object[], object>> _partialFactories = new();
+    private static readonly ConcurrentDictionary<Type, Func<MockBehavior, object[], object>> _partialFactories = new();
 
     /// <summary>
     /// Registers a factory for creating mocks of type T. Called by generated code.

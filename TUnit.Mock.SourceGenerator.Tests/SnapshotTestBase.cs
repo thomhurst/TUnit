@@ -102,16 +102,12 @@ public abstract class SnapshotTestBase
 
         if (!File.Exists(verifiedPath))
         {
-            // Auto-accept: create the .verified.txt file on first run
-            await File.WriteAllTextAsync(verifiedPath, generatedOutput);
-
-            // Clean up any stale .received.txt
-            if (File.Exists(receivedPath))
-            {
-                File.Delete(receivedPath);
-            }
-
-            return;
+            // Write .received.txt for review and fail — never auto-accept
+            await File.WriteAllTextAsync(receivedPath, generatedOutput);
+            throw new InvalidOperationException(
+                $"No verified snapshot found for '{testName}'.\n" +
+                $"Review: {receivedPath}\n" +
+                $"Accept by renaming to '.verified.txt'.");
         }
 
         var verified = NormalizeNewlines(await File.ReadAllTextAsync(verifiedPath));
