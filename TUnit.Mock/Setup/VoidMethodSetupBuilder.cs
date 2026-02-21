@@ -59,5 +59,11 @@ public sealed class VoidMethodSetupBuilder : IVoidMethodSetup, IVoidSetupChain
         return this;
     }
 
+    public IVoidSetupChain TransitionsTo(string stateName)
+    {
+        _setup.TransitionTarget = stateName;
+        return this;
+    }
+
     public IVoidMethodSetup Then() => this;
 }

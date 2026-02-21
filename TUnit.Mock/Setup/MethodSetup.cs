@@ -20,6 +20,20 @@ public sealed class MethodSetup
     public int MemberId { get; }
 
     /// <summary>
+    /// If non-null, this setup only matches when the engine's current state equals this value.
+    /// Used for state machine mocking.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public string? RequiredState { get; set; }
+
+    /// <summary>
+    /// If non-null, the engine transitions to this state after the behavior executes.
+    /// Used for state machine mocking.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public string? TransitionTarget { get; set; }
+
+    /// <summary>
     /// The number of times this setup has been matched and invoked.
     /// Used by <see cref="Mock{T}.VerifyAll"/>.
     /// </summary>
@@ -124,6 +138,20 @@ public sealed class MethodSetup
                 return _outRefAssignments;
             }
         }
+    }
+
+    /// <summary>
+    /// Returns human-readable descriptions of all argument matchers, for diagnostics.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public string[] GetMatcherDescriptions()
+    {
+        var descriptions = new string[_matchers.Length];
+        for (int i = 0; i < _matchers.Length; i++)
+        {
+            descriptions[i] = _matchers[i].Describe();
+        }
+        return descriptions;
     }
 
     public IBehavior? GetNextBehavior()

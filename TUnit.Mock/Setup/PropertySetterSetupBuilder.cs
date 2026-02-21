@@ -24,5 +24,6 @@ public sealed class PropertySetterSetupBuilder : IPropertySetterSetup, IVoidSetu
     public IVoidSetupChain Throws(Func<object?[], Exception> exceptionFactory) => _inner.Throws(exceptionFactory);
     public IVoidSetupChain Raises(string eventName, object? args = null) => _inner.Raises(eventName, args);
     public IVoidSetupChain SetsOutParameter(int paramIndex, object? value) => _inner.SetsOutParameter(paramIndex, value);
+    public IVoidSetupChain TransitionsTo(string stateName) => _inner.TransitionsTo(stateName);
     public IVoidMethodSetup Then() => _inner.Then();
 }

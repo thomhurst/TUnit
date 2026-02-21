@@ -452,6 +452,96 @@
 
 ---
 
+## Phase 24: State Machine Mocking (US20 — Beyond Parity P1)
+
+**Goal**: Named states as first-class guards on method setups — enables testing stateful behavior (retry logic, connections, circuit breakers) without mutable closures.
+
+**Independent Test**: `mock.SetState("disconnected"); mock.InState("disconnected", s => { s.Connect().TransitionsTo("connected"); }); conn.Connect(); conn.GetStatus()` returns state-specific values.
+
+### Implementation
+
+- [X] T121 [US20] Add `RequiredState` (string?) and `TransitionTarget` (string?) properties to `MethodSetup` in `TUnit.Mock/Setup/MethodSetup.cs`
+- [X] T122 [US20] Add `_currentState` (string?) field, `PendingRequiredState` (string?) scoped property, and `TransitionTo(string?)` method to `MockEngine<T>` in `TUnit.Mock/MockEngine.cs`
+- [X] T123 [US20] Update `FindMatchingSetup` in `TUnit.Mock/MockEngine.cs` to skip setups where `RequiredState != null && RequiredState != _currentState`
+- [X] T124 [US20] Update `HandleCall`, `HandleCallWithReturn`, `TryHandleCall`, `TryHandleCallWithReturn` in `TUnit.Mock/MockEngine.cs` to apply `TransitionTarget` after behavior executes (call `TransitionTo(setup.TransitionTarget)`)
+- [X] T125 [US20] Add `TransitionsTo(string stateName)` to `ISetupChain<TReturn>` and `IVoidSetupChain` interfaces in `TUnit.Mock/Setup/ISetupChain.cs`
+- [X] T126 [US20] Implement `TransitionsTo` in `MethodSetupBuilder<TReturn>` (`TUnit.Mock/Setup/MethodSetupBuilder.cs`) and `VoidMethodSetupBuilder` (`TUnit.Mock/Setup/VoidMethodSetupBuilder.cs`) — sets `MethodSetup.TransitionTarget`
+- [X] T127 [US20] Add `SetState(string?)` and `InState(string, Action<IMockSetup<T>>)` to `Mock<T>` in `TUnit.Mock/MockOfT.cs` — `InState` sets `Engine.PendingRequiredState`, invokes action, then clears it; `AddSetup` stamps `PendingRequiredState` onto new setups
+- [X] T128 [US20] Add state machine integration tests in `TUnit.Mock.Tests/StateMachineTests.cs` — connect/disconnect cycle, state transitions, state-scoped returns, strict mode with states
+
+**Checkpoint**: State machine mocking fully functional. No generator changes required.
+
+---
+
+## Phase 25: Mock Diagnostics (US21 — Beyond Parity P1)
+
+**Goal**: `mock.GetDiagnostics()` returns structured report of unused setups, unmatched calls, and setup coverage ratio.
+
+**Independent Test**: Configure setups, exercise some, call `GetDiagnostics()` — verify `UnusedSetups`, `UnmatchedCalls`, `TotalSetups`, `ExercisedSetups` counts.
+
+### Implementation
+
+- [X] T129 [P] [US21] Create `MockDiagnostics` record in `TUnit.Mock/Diagnostics/MockDiagnostics.cs` — `sealed record MockDiagnostics(IReadOnlyList<SetupInfo> UnusedSetups, IReadOnlyList<CallRecord> UnmatchedCalls, int TotalSetups, int ExercisedSetups)`
+- [X] T130 [P] [US21] Create `SetupInfo` record in `TUnit.Mock/Diagnostics/SetupInfo.cs` — `sealed record SetupInfo(int MemberId, string MemberName, string[] MatcherDescriptions, int InvokeCount)`
+- [X] T131 [US21] Add `Describe()` method to `IArgumentMatcher` interface and all implementations (`AnyMatcher`, `ExactMatcher`, `PredicateMatcher`, `NullMatcher`, `NotNullMatcher`, `CaptureMatcher`, `RegexMatcher`, `ContainsMatcher`, `CountMatcher`, `EmptyMatcher`, `SequenceEqualsMatcher`) in `TUnit.Mock/Arguments/` — returns human-readable description for diagnostics
+- [X] T132 [US21] Track unmatched calls in `MockEngine<T>` — when `FindMatchingSetup` returns `(false, null, null)` in loose mode, mark the `CallRecord` with `IsUnmatched = true` flag in `TUnit.Mock/MockEngine.cs`
+- [X] T133 [US21] Add `GetDiagnostics()` method to `MockEngine<T>` in `TUnit.Mock/MockEngine.cs` — aggregates `GetSetups()` for unused (InvokeCount==0) and total/exercised counts, filters `_callHistory` for unmatched calls
+- [X] T134 [US21] Add `GetDiagnostics()` to `Mock<T>` in `TUnit.Mock/MockOfT.cs` — delegates to `Engine.GetDiagnostics()`
+- [X] T135 [US21] Add diagnostics integration tests in `TUnit.Mock.Tests/DiagnosticsTests.cs` — unused setup detection, unmatched call tracking, coverage ratio, reset clears diagnostics
+
+**Checkpoint**: Mock diagnostics fully functional. No generator changes required.
+
+---
+
+## Phase 26: Async Verification — TUnit.Mock.Assertions Bridge (US22 — Beyond Parity P2)
+
+**Goal**: New `TUnit.Mock.Assertions` NuGet package that bridges TUnit.Mock + TUnit.Assertions, enabling `await Assert.That(mock.Verify!.Method()).WasCalled(Times.Once)`. Zero changes to TUnit.Mock itself.
+
+**Independent Test**: `await Assert.That(mock.Verify!.Add(1, 2)).WasCalled(Times.Once)` passes; `await Assert.That(mock.Verify!.Reset()).WasNeverCalled()` passes; works inside `Assert.Multiple`.
+
+### Implementation
+
+- [X] T136 [US22] Create `TUnit.Mock.Assertions/TUnit.Mock.Assertions.csproj` — multi-target netstandard2.0;net8.0;net9.0;net10.0, references TUnit.Mock (ProjectReference) + TUnit.Assertions (ProjectReference), import Library.props/Library.targets
+- [X] T137 [US22] Create `WasCalledAssertion` class in `TUnit.Mock.Assertions/WasCalledAssertion.cs` — extends `Assertion<ICallVerification>`, wraps sync `WasCalled(Times)` in try/catch converting `MockVerificationException` to `AssertionResult.Failed`
+- [X] T138 [P] [US22] Create `WasNeverCalledAssertion` class in `TUnit.Mock.Assertions/WasNeverCalledAssertion.cs` — extends `Assertion<ICallVerification>`, wraps sync `WasNeverCalled()` in try/catch
+- [X] T139 [US22] Create `MockAssertionExtensions` static class in `TUnit.Mock.Assertions/MockAssertionExtensions.cs` — extension methods on `IAssertionSource<ICallVerification>` for `WasCalled(Times)` and `WasNeverCalled()`
+- [X] T140 [P] [US22] Skipped — PropertyAssertionExtensions not needed; generated verify surface returns ICallVerification for property getters/setters already covered by MockAssertionExtensions
+- [X] T141 [US22] Add TUnit.Mock.Assertions project to solution, add ProjectReference in TUnit.Mock.Tests.csproj, verify build passes on all TFMs
+- [X] T142 [US22] Add async verification tests in `TUnit.Mock.Tests/AsyncVerificationTests.cs` — Assert.That WasCalled, WasNeverCalled, Assert.Multiple integration, property verification assertions
+
+**Checkpoint**: Async verification bridge fully functional. TUnit.Mock has zero dependency on TUnit.Assertions.
+
+---
+
+## Phase 27: Strongly-Typed Callbacks (US23 — Beyond Parity P1)
+
+**Goal**: Source generator emits per-method wrapper structs with typed `Returns(Func<T1, T2, TReturn>)`, `Callback(Action<T1, T2>)`, and `Throws(Func<T1, T2, Exception>)` overloads for methods with 1-8 parameters.
+
+**Independent Test**: `mock.Setup.Add(Arg.Any<int>(), Arg.Any<int>()).Returns((int a, int b) => a + b)` compiles and works; `mock.Setup.Add(...).Callback((int a, int b) => log.Add(a))` calls typed lambda.
+
+### Implementation
+
+- [X] T143 [US23] Update `MockSetupBuilder.cs` in `TUnit.Mock.SourceGenerator/Builders/MockSetupBuilder.cs` — for each method with 1-8 non-out parameters, generate a readonly wrapper struct `{MethodName}_Setup` (or `{MethodName}_VoidSetup` for void) that forwards all `IMethodSetup<TReturn>` methods to inner builder and adds typed overloads: `Returns(Func<T1,...,TReturn>)`, `Callback(Action<T1,...>)`, `Throws(Func<T1,...,Exception>)` — each converting typed delegate to `object?[]`-based delegate
+- [X] T144 [US23] Update setup extension methods in `MockSetupBuilder.cs` to return the wrapper struct type instead of `IMethodSetup<TReturn>` / `IVoidMethodSetup` for methods with 1-8 parameters — wrapper struct implements the interface so existing code still works
+- [X] T145 [US23] Update snapshot `.verified.txt` files in `TUnit.Mock.SourceGenerator.Tests/Snapshots/` — regenerate all snapshots to reflect wrapper struct generation
+- [X] T146 [US23] Add strongly-typed callback/returns tests in `TUnit.Mock.Tests/TypedCallbackTests.cs` — typed Returns with computed value, typed Callback with side effect, typed Throws with argument-dependent exception, void method typed callback, chaining typed with Then()
+
+**Checkpoint**: Strongly-typed callbacks fully functional. Source generator produces wrapper structs. All existing tests still pass.
+
+---
+
+## Phase 28: Beyond-Parity Final Validation
+
+**Purpose**: Cross-cutting validation of all 4 beyond-parity features together.
+
+- [X] T147 [P] Run full TUnit.Mock.Tests suite — 396 tests pass (existing + state machine, diagnostics, async verification, typed callback tests)
+- [X] T148 [P] Run TUnit.Mock.Analyzers.Tests — 88 tests pass (22 x 4 TFMs)
+- [X] T149 [P] Run TUnit.Mock.SourceGenerator.Tests — all 40 snapshots match (including updated wrapper struct output)
+- [X] T150 Validate AOT compatibility — `dotnet build TUnit.Mock/TUnit.Mock.csproj -c Release` clean on all TFMs, no dynamic usage in new code
+- [X] T151 Build pipeline validation — `dotnet build TUnit.Pipeline/TUnit.Pipeline.csproj -c Release` succeeds
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies
@@ -467,6 +557,11 @@
 - **US6 (Phase 9)**: Depends on US1 (MockEngine)
 - **US7 (Phase 10)**: Depends on US1 (generator infrastructure)
 - **US8 (Phase 11)**: Depends on US1 (generator infrastructure)
+- **US20 (Phase 24)**: State Machine — Depends on Phases 1-23 complete (runtime-only, no generator changes)
+- **US21 (Phase 25)**: Diagnostics — Depends on Phases 1-23 complete (runtime-only, no generator changes). Independent of US20.
+- **US22 (Phase 26)**: Async Verification — Depends on Phases 1-23 complete. New project, independent of US20/US21.
+- **US23 (Phase 27)**: Typed Callbacks — Depends on Phases 1-23 complete. Generator changes, independent of US20/US21/US22.
+- **Phase 28**: Final Validation — Depends on all of US20-US23 complete
 - **US9 (Phase 12)**: Depends on US2 (verification infrastructure)
 - **Polish (Phase 13)**: Depends on all desired user stories
 - **US11 (Phase 14)**: Depends on US2 (verification) — VerifyNoOtherCalls/VerifyAll
@@ -542,6 +637,18 @@ Agent 5: US8 (Partial Mocks)
 Agent 6: US10 (Analyzers)
 ```
 
+## Parallel Example: Beyond-Parity Features (Phases 24-27)
+
+```
+# All 4 beyond-parity features are independent — can launch simultaneously:
+Agent 1: US20 (State Machine) — runtime-only changes to MockEngine + MethodSetup
+Agent 2: US21 (Diagnostics) — runtime-only, new Diagnostics/ folder + MockEngine additions
+Agent 3: US22 (Async Verification) — entirely new TUnit.Mock.Assertions project
+Agent 4: US23 (Typed Callbacks) — generator changes to MockSetupBuilder + snapshots
+
+# After all 4 complete → Phase 28 final validation
+```
+
 ---
 
 ## Implementation Strategy
@@ -563,6 +670,10 @@ Agent 6: US10 (Analyzers)
 5. US10 → Analyzers → Compile-time safety
 6. US4-US9 → Advanced features → Feature parity with NSubstitute/Moq
 7. Polish → Production ready
+8. US20 → State machine mocking → Beyond parity (no other framework has this)
+9. US21 → Mock diagnostics → Beyond parity (unused setup detection)
+10. US22 → Async verification → TUnit assertion integration (separate package)
+11. US23 → Typed callbacks → Source-gen exclusive typed lambdas
 
 ### Task Counts
 
@@ -591,7 +702,12 @@ Agent 6: US10 (Analyzers)
 | Phase 21 | US18 - Delegates (P3) | 3 | 0 |
 | Phase 22 | US19 - Recursive (P3) | 3 | 0 |
 | Phase 23 | Feature Parity Polish | 4 | 2 |
-| **Total** | | **120** | **42** |
+| Phase 24 | US20 - State Machine (P1) | 8 | 0 |
+| Phase 25 | US21 - Diagnostics (P1) | 7 | 2 |
+| Phase 26 | US22 - Async Verify (P2) | 7 | 2 |
+| Phase 27 | US23 - Typed Callbacks (P1) | 4 | 0 |
+| Phase 28 | Beyond-Parity Validation | 5 | 3 |
+| **Total** | | **151** | **49** |
 
 ---
 
@@ -605,3 +721,6 @@ Agent 6: US10 (Analyzers)
 - All file paths are relative to repository root (C:\git\TUnit\)
 - Generator builders are sequential within US1 (each builder depends on previous patterns)
 - After US1 MVP, maximum parallelism is possible (6 concurrent story streams)
+- **Beyond-parity features** (Phases 24-28): All 4 features are independent — US20-US23 can run in parallel
+- **TUnit.Mock.Assertions** (US22) is a separate project — TUnit.Mock has ZERO dependency on TUnit.Assertions
+- **Typed callbacks** (US23) is the only feature requiring generator changes — all others are runtime-only

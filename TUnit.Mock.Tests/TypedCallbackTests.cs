@@ -150,4 +150,133 @@ public class TypedCallbackTests
         await Assert.That(calc.Add(5, 6)).IsEqualTo(30);
         await Assert.That(calc.Add(7, 8)).IsEqualTo(56);
     }
+
+    // ─── Strongly-Typed Callback Tests (Beyond Parity: US23) ────────────
+
+    [Test]
+    public async Task StronglyTyped_Returns_Computes_From_Arguments()
+    {
+        var mock = Mock.Of<ICalculator>();
+        mock.Setup.Add(Arg.Any<int>(), Arg.Any<int>()).Returns((int a, int b) => a + b);
+
+        ICalculator calc = mock.Object;
+
+        await Assert.That(calc.Add(3, 7)).IsEqualTo(10);
+        await Assert.That(calc.Add(100, 200)).IsEqualTo(300);
+    }
+
+    [Test]
+    public async Task StronglyTyped_Callback_Receives_Arguments()
+    {
+        var mock = Mock.Of<ICalculator>();
+        var capturedArgs = new List<(int a, int b)>();
+
+        // Callback is a behavior — first call runs callback, second call runs Returns
+        mock.Setup.Add(Arg.Any<int>(), Arg.Any<int>())
+            .Callback((int a, int b) => capturedArgs.Add((a, b)));
+
+        ICalculator calc = mock.Object;
+        _ = calc.Add(1, 2);
+        _ = calc.Add(10, 20);
+
+        // Last behavior repeats — both calls run the callback
+        await Assert.That(capturedArgs).HasCount().EqualTo(2);
+        await Assert.That(capturedArgs[0]).IsEqualTo((1, 2));
+        await Assert.That(capturedArgs[1]).IsEqualTo((10, 20));
+    }
+
+    [Test]
+    public async Task StronglyTyped_Throws_With_Argument_Dependent_Exception()
+    {
+        var mock = Mock.Of<ICalculator>();
+        mock.Setup.Add(Arg.Any<int>(), Arg.Any<int>())
+            .Throws((int a, int b) => new ArgumentException($"Cannot add {a} and {b}"));
+
+        ICalculator calc = mock.Object;
+
+        var ex = Assert.Throws<ArgumentException>(() => { _ = calc.Add(3, 5); });
+        await Assert.That(ex.Message).Contains("Cannot add 3 and 5");
+    }
+
+    [Test]
+    public async Task StronglyTyped_Void_Callback()
+    {
+        var mock = Mock.Of<ICalculator>();
+        string? capturedMessage = null;
+
+        mock.Setup.Log(Arg.Any<string>())
+            .Callback((string msg) => capturedMessage = msg);
+
+        ICalculator calc = mock.Object;
+        calc.Log("hello world");
+
+        await Assert.That(capturedMessage).IsEqualTo("hello world");
+    }
+
+    [Test]
+    public async Task StronglyTyped_Void_Throws()
+    {
+        var mock = Mock.Of<ICalculator>();
+        mock.Setup.Log(Arg.Any<string>())
+            .Throws((string msg) => new InvalidOperationException($"Cannot log: {msg}"));
+
+        ICalculator calc = mock.Object;
+
+        var ex = Assert.Throws<InvalidOperationException>(() => calc.Log("test"));
+        await Assert.That(ex.Message).Contains("Cannot log: test");
+    }
+
+    [Test]
+    public async Task StronglyTyped_Returns_Single_Parameter()
+    {
+        var mock = Mock.Of<IGreeter>();
+        mock.Setup.Greet(Arg.Any<string>()).Returns((string name) => $"Hello, {name}!");
+
+        IGreeter greeter = mock.Object;
+
+        await Assert.That(greeter.Greet("World")).IsEqualTo("Hello, World!");
+    }
+
+    [Test]
+    public async Task StronglyTyped_With_Then_Chain()
+    {
+        var mock = Mock.Of<ICalculator>();
+        mock.Setup.Add(Arg.Any<int>(), Arg.Any<int>())
+            .Returns((int a, int b) => a + b)
+            .Then()
+            .Returns(99);
+
+        ICalculator calc = mock.Object;
+
+        await Assert.That(calc.Add(3, 4)).IsEqualTo(7);
+        await Assert.That(calc.Add(3, 4)).IsEqualTo(99);
+    }
+
+    [Test]
+    public async Task StronglyTyped_Existing_Untyped_Returns_Still_Works()
+    {
+        // Verify that existing untyped API still compiles and works
+        var mock = Mock.Of<ICalculator>();
+        mock.Setup.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(42);
+
+        ICalculator calc = mock.Object;
+
+        await Assert.That(calc.Add(1, 2)).IsEqualTo(42);
+    }
+
+    [Test]
+    public async Task StronglyTyped_Existing_Untyped_Callback_Still_Works()
+    {
+        var mock = Mock.Of<ICalculator>();
+        var called = false;
+        mock.Setup.Add(Arg.Any<int>(), Arg.Any<int>())
+            .Callback(() => called = true)
+            .Then()
+            .Returns(0);
+
+        ICalculator calc = mock.Object;
+        _ = calc.Add(1, 2);
+
+        await Assert.That(called).IsTrue();
+    }
 }

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <Import Project="..\Library.props" />
+
+    <PropertyGroup>
+        <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+        <Description>HttpClient mocking helpers for TUnit.Mock. Provides MockHttpHandler with fluent request matching and response configuration.</Description>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\TUnit.Mock\TUnit.Mock.csproj" />
+    </ItemGroup>
+
+    <Import Project="..\Library.targets" />
+
+</Project>

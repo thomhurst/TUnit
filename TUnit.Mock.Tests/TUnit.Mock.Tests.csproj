@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TUnit.Mock\TUnit.Mock.csproj" />
+    <ProjectReference Include="..\TUnit.Mock.Assertions\TUnit.Mock.Assertions.csproj" />
 
     <!-- Wire source generator for mock generation in test code -->
     <ProjectReference Include="..\TUnit.Mock.SourceGenerator\TUnit.Mock.SourceGenerator.csproj"

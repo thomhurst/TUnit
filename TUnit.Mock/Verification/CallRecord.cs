@@ -30,6 +30,13 @@ public sealed record CallRecord(
         internal set => Volatile.Write(ref IsVerifiedField, value);
     }
 
+    /// <summary>
+    /// Whether this call had no matching setup (fell through to default behavior).
+    /// Used by <see cref="Diagnostics.MockDiagnostics"/>.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool IsUnmatched { get; internal set; }
+
     public string FormatCall()
     {
         var args = string.Join(", ", Arguments.Select(a => a?.ToString() ?? "null"));

@@ -15,6 +15,9 @@ public interface ISetupChain<TReturn>
     /// <param name="paramIndex">The zero-based index of the parameter in the method signature.</param>
     /// <param name="value">The value to assign.</param>
     ISetupChain<TReturn> SetsOutParameter(int paramIndex, object? value);
+
+    /// <summary>Transition to the named state after this behavior executes.</summary>
+    ISetupChain<TReturn> TransitionsTo(string stateName);
 }
 
 /// <summary>
@@ -32,4 +35,7 @@ public interface IVoidSetupChain
     /// <param name="paramIndex">The zero-based index of the parameter in the method signature.</param>
     /// <param name="value">The value to assign.</param>
     IVoidSetupChain SetsOutParameter(int paramIndex, object? value);
+
+    /// <summary>Transition to the named state after this behavior executes.</summary>
+    IVoidSetupChain TransitionsTo(string stateName);
 }

@@ -89,22 +89,110 @@ namespace TUnit.Mock.Generated
 
     public static class IDictionary_MockSetupExtensions
     {
-        public static global::TUnit.Mock.Setup.IMethodSetup<bool> TryGetValue(this global::TUnit.Mock.IMockSetup<global::IDictionary> setup, global::TUnit.Mock.Arguments.Arg<string> key)
+        public static IDictionary_TryGetValue_M0_TypedSetup TryGetValue(this global::TUnit.Mock.IMockSetup<global::IDictionary> setup, global::TUnit.Mock.Arguments.Arg<string> key)
         {
             var s = (IDictionary_MockSetup)setup;
             var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { key.Matcher };
             var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(0, matchers, "TryGetValue");
             s.Engine.AddSetup(methodSetup);
-            return new global::TUnit.Mock.Setup.MethodSetupBuilder<bool>(methodSetup);
+            return new IDictionary_TryGetValue_M0_TypedSetup(new global::TUnit.Mock.Setup.MethodSetupBuilder<bool>(methodSetup));
         }
 
-        public static global::TUnit.Mock.Setup.IVoidMethodSetup Swap(this global::TUnit.Mock.IMockSetup<global::IDictionary> setup, global::TUnit.Mock.Arguments.Arg<int> a, global::TUnit.Mock.Arguments.Arg<int> b)
+        public static IDictionary_Swap_M1_TypedSetup Swap(this global::TUnit.Mock.IMockSetup<global::IDictionary> setup, global::TUnit.Mock.Arguments.Arg<int> a, global::TUnit.Mock.Arguments.Arg<int> b)
         {
             var s = (IDictionary_MockSetup)setup;
             var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { a.Matcher, b.Matcher };
             var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(1, matchers, "Swap");
             s.Engine.AddSetup(methodSetup);
-            return new global::TUnit.Mock.Setup.VoidMethodSetupBuilder(methodSetup);
+            return new IDictionary_Swap_M1_TypedSetup(new global::TUnit.Mock.Setup.VoidMethodSetupBuilder(methodSetup));
+        }
+    }
+
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public readonly struct IDictionary_TryGetValue_M0_TypedSetup : global::TUnit.Mock.Setup.IMethodSetup<bool>
+    {
+        private readonly global::TUnit.Mock.Setup.MethodSetupBuilder<bool> _inner;
+
+        internal IDictionary_TryGetValue_M0_TypedSetup(global::TUnit.Mock.Setup.MethodSetupBuilder<bool> inner) => _inner = inner;
+
+        /// <inheritdoc />
+        public global::TUnit.Mock.Setup.ISetupChain<bool> Returns(bool value) => _inner.Returns(value);
+        /// <inheritdoc />
+        public global::TUnit.Mock.Setup.ISetupChain<bool> Returns(global::System.Func<bool> factory) => _inner.Returns(factory);
+        /// <inheritdoc />
+        public global::TUnit.Mock.Setup.ISetupChain<bool> ReturnsSequentially(params bool[] values) => _inner.ReturnsSequentially(values);
+        /// <inheritdoc />
+        public global::TUnit.Mock.Setup.ISetupChain<bool> Throws<TException>() where TException : global::System.Exception, new() => _inner.Throws<TException>();
+        /// <inheritdoc />
+        public global::TUnit.Mock.Setup.ISetupChain<bool> Throws(global::System.Exception exception) => _inner.Throws(exception);
+        /// <inheritdoc />
+        public global::TUnit.Mock.Setup.ISetupChain<bool> Callback(global::System.Action callback) => _inner.Callback(callback);
+        /// <inheritdoc />
+        public global::TUnit.Mock.Setup.ISetupChain<bool> Callback(global::System.Action<object?[]> callback) => _inner.Callback(callback);
+        /// <inheritdoc />
+        public global::TUnit.Mock.Setup.ISetupChain<bool> Returns(global::System.Func<object?[], bool> factory) => _inner.Returns(factory);
+        /// <inheritdoc />
+        public global::TUnit.Mock.Setup.ISetupChain<bool> Throws(global::System.Func<object?[], global::System.Exception> exceptionFactory) => _inner.Throws(exceptionFactory);
+        /// <inheritdoc />
+        public global::TUnit.Mock.Setup.ISetupChain<bool> Raises(string eventName, object? args = null) => _inner.Raises(eventName, args);
+        /// <inheritdoc />
+        public global::TUnit.Mock.Setup.ISetupChain<bool> SetsOutParameter(int paramIndex, object? value) => _inner.SetsOutParameter(paramIndex, value);
+        /// <inheritdoc />
+        public global::TUnit.Mock.Setup.ISetupChain<bool> TransitionsTo(string stateName) => _inner.TransitionsTo(stateName);
+
+        /// <summary>Configure a typed computed return value using the actual method parameters.</summary>
+        public global::TUnit.Mock.Setup.ISetupChain<bool> Returns(global::System.Func<string, bool> factory)
+        {
+            return _inner.Returns(args => factory((string)args[0]!));
+        }
+
+        /// <summary>Execute a typed callback using the actual method parameters.</summary>
+        public global::TUnit.Mock.Setup.ISetupChain<bool> Callback(global::System.Action<string> callback)
+        {
+            return _inner.Callback(args => callback((string)args[0]!));
+        }
+
+        /// <summary>Configure a typed computed exception using the actual method parameters.</summary>
+        public global::TUnit.Mock.Setup.ISetupChain<bool> Throws(global::System.Func<string, global::System.Exception> exceptionFactory)
+        {
+            return _inner.Throws(args => exceptionFactory((string)args[0]!));
+        }
+    }
+
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public readonly struct IDictionary_Swap_M1_TypedSetup : global::TUnit.Mock.Setup.IVoidMethodSetup
+    {
+        private readonly global::TUnit.Mock.Setup.VoidMethodSetupBuilder _inner;
+
+        internal IDictionary_Swap_M1_TypedSetup(global::TUnit.Mock.Setup.VoidMethodSetupBuilder inner) => _inner = inner;
+
+        /// <inheritdoc />
+        public global::TUnit.Mock.Setup.IVoidSetupChain Throws<TException>() where TException : global::System.Exception, new() => _inner.Throws<TException>();
+        /// <inheritdoc />
+        public global::TUnit.Mock.Setup.IVoidSetupChain Throws(global::System.Exception exception) => _inner.Throws(exception);
+        /// <inheritdoc />
+        public global::TUnit.Mock.Setup.IVoidSetupChain Callback(global::System.Action callback) => _inner.Callback(callback);
+        /// <inheritdoc />
+        public global::TUnit.Mock.Setup.IVoidSetupChain Callback(global::System.Action<object?[]> callback) => _inner.Callback(callback);
+        /// <inheritdoc />
+        public global::TUnit.Mock.Setup.IVoidSetupChain Throws(global::System.Func<object?[], global::System.Exception> exceptionFactory) => _inner.Throws(exceptionFactory);
+        /// <inheritdoc />
+        public global::TUnit.Mock.Setup.IVoidSetupChain Raises(string eventName, object? args = null) => _inner.Raises(eventName, args);
+        /// <inheritdoc />
+        public global::TUnit.Mock.Setup.IVoidSetupChain SetsOutParameter(int paramIndex, object? value) => _inner.SetsOutParameter(paramIndex, value);
+        /// <inheritdoc />
+        public global::TUnit.Mock.Setup.IVoidSetupChain TransitionsTo(string stateName) => _inner.TransitionsTo(stateName);
+
+        /// <summary>Execute a typed callback using the actual method parameters.</summary>
+        public global::TUnit.Mock.Setup.IVoidSetupChain Callback(global::System.Action<int, int> callback)
+        {
+            return _inner.Callback(args => callback((int)args[0]!, (int)args[1]!));
+        }
+
+        /// <summary>Configure a typed computed exception using the actual method parameters.</summary>
+        public global::TUnit.Mock.Setup.IVoidSetupChain Throws(global::System.Func<int, int, global::System.Exception> exceptionFactory)
+        {
+            return _inner.Throws(args => exceptionFactory((int)args[0]!, (int)args[1]!));
         }
     }
 }

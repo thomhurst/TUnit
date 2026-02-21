@@ -181,6 +181,33 @@ public class Mock<T> : IMock where T : class
             $"Ensure the method was called at least once before retrieving its auto-mock.");
     }
 
+    /// <summary>
+    /// Returns a diagnostic report of this mock's setup coverage and call matching.
+    /// </summary>
+    public Diagnostics.MockDiagnostics GetDiagnostics() => Engine.GetDiagnostics();
+
+    /// <summary>
+    /// Sets the current state for state machine mocking. Null clears the state.
+    /// </summary>
+    public void SetState(string? stateName) => Engine.TransitionTo(stateName);
+
+    /// <summary>
+    /// Configures setups scoped to a specific state. All setups registered inside
+    /// the <paramref name="configure"/> action will only match when the engine is in the specified state.
+    /// </summary>
+    public void InState(string stateName, Action<IMockSetup<T>> configure)
+    {
+        Engine.PendingRequiredState = stateName;
+        try
+        {
+            configure(Setup);
+        }
+        finally
+        {
+            Engine.PendingRequiredState = null;
+        }
+    }
+
     /// <summary>Implicit conversion to T -- no .Object needed.</summary>
     public static implicit operator T(Mock<T> mock) => mock.Object;
 }

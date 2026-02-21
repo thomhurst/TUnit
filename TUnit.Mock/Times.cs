@@ -53,8 +53,9 @@ public readonly struct Times : IEquatable<Times>
         return new(min, max);
     }
 
-    // Internal method used by verification engine
-    internal bool Matches(int actualCount) => actualCount >= _min && actualCount <= _max;
+    /// <summary>Returns <c>true</c> if <paramref name="actualCount"/> satisfies this constraint.</summary>
+    /// <param name="actualCount">The actual number of calls observed.</param>
+    public bool Matches(int actualCount) => actualCount >= _min && actualCount <= _max;
 
     // Returns true only when the constraint requires exactly zero calls (i.e. Never)
     internal bool RequiresZeroCalls => _min == 0 && _max == 0;

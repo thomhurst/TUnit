@@ -29,5 +29,6 @@ public sealed class PropertySetupBuilder<TProperty> : IPropertySetup<TProperty>,
     public ISetupChain<TProperty> Throws(Func<object?[], Exception> exceptionFactory) => _inner.Throws(exceptionFactory);
     public ISetupChain<TProperty> Raises(string eventName, object? args = null) => _inner.Raises(eventName, args);
     public ISetupChain<TProperty> SetsOutParameter(int paramIndex, object? value) => _inner.SetsOutParameter(paramIndex, value);
+    public ISetupChain<TProperty> TransitionsTo(string stateName) => _inner.TransitionsTo(stateName);
     public IMethodSetup<TProperty> Then() => _inner.Then();
 }

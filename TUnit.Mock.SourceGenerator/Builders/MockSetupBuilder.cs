@@ -4,6 +4,8 @@ namespace TUnit.Mock.SourceGenerator.Builders;
 
 internal static class MockSetupBuilder
 {
+    private const int MaxTypedParams = 8;
+
     public static string Build(MockTypeModel model)
     {
         var writer = new CodeWriter();
@@ -48,9 +50,194 @@ internal static class MockSetupBuilder
                     GenerateSetupProperty(writer, prop, model, safeName);
                 }
             }
+
+            // Generate typed wrapper structs for qualifying methods
+            foreach (var method in model.Methods)
+            {
+                if (!ShouldGenerateTypedWrapper(method)) continue;
+                writer.AppendLine();
+                GenerateTypedWrapperStruct(writer, method, safeName);
+            }
         }
 
         return writer.ToString();
+    }
+
+    private static bool ShouldGenerateTypedWrapper(MockMemberModel method)
+    {
+        if (method.IsGenericMethod) return false;
+
+        var nonOutParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out).ToList();
+        return nonOutParams.Count >= 1 && nonOutParams.Count <= MaxTypedParams;
+    }
+
+    private static string GetWrapperName(string safeName, MockMemberModel method)
+        => $"{safeName}_{method.Name}_M{method.MemberId}_TypedSetup";
+
+    private static void GenerateTypedWrapperStruct(CodeWriter writer, MockMemberModel method, string safeName)
+    {
+        var setupReturnType = method.IsAsync && !method.IsVoid
+            ? method.UnwrappedReturnType
+            : method.ReturnType;
+
+        var wrapperName = GetWrapperName(safeName, method);
+        var nonOutParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out).ToList();
+
+        if (method.IsVoid)
+        {
+            GenerateVoidTypedWrapper(writer, wrapperName, nonOutParams);
+        }
+        else
+        {
+            GenerateReturnTypedWrapper(writer, wrapperName, nonOutParams, setupReturnType);
+        }
+    }
+
+    private static void GenerateReturnTypedWrapper(CodeWriter writer, string wrapperName,
+        List<MockParameterModel> nonOutParams, string returnType)
+    {
+        var chainType = $"global::TUnit.Mock.Setup.ISetupChain<{returnType}>";
+        var setupInterface = $"global::TUnit.Mock.Setup.IMethodSetup<{returnType}>";
+        var builderType = $"global::TUnit.Mock.Setup.MethodSetupBuilder<{returnType}>";
+
+        writer.AppendLine("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
+        using (writer.Block($"public readonly struct {wrapperName} : {setupInterface}"))
+        {
+            writer.AppendLine($"private readonly {builderType} _inner;");
+            writer.AppendLine();
+            writer.AppendLine($"internal {wrapperName}({builderType} inner) => _inner = inner;");
+            writer.AppendLine();
+
+            // Forward all IMethodSetup<TReturn> members
+            writer.AppendLine($"/// <inheritdoc />");
+            writer.AppendLine($"public {chainType} Returns({returnType} value) => _inner.Returns(value);");
+            writer.AppendLine($"/// <inheritdoc />");
+            writer.AppendLine($"public {chainType} Returns(global::System.Func<{returnType}> factory) => _inner.Returns(factory);");
+            writer.AppendLine($"/// <inheritdoc />");
+            writer.AppendLine($"public {chainType} ReturnsSequentially(params {returnType}[] values) => _inner.ReturnsSequentially(values);");
+            writer.AppendLine($"/// <inheritdoc />");
+            writer.AppendLine($"public {chainType} Throws<TException>() where TException : global::System.Exception, new() => _inner.Throws<TException>();");
+            writer.AppendLine($"/// <inheritdoc />");
+            writer.AppendLine($"public {chainType} Throws(global::System.Exception exception) => _inner.Throws(exception);");
+            writer.AppendLine($"/// <inheritdoc />");
+            writer.AppendLine($"public {chainType} Callback(global::System.Action callback) => _inner.Callback(callback);");
+            writer.AppendLine($"/// <inheritdoc />");
+            writer.AppendLine($"public {chainType} Callback(global::System.Action<object?[]> callback) => _inner.Callback(callback);");
+            writer.AppendLine($"/// <inheritdoc />");
+            writer.AppendLine($"public {chainType} Returns(global::System.Func<object?[], {returnType}> factory) => _inner.Returns(factory);");
+            writer.AppendLine($"/// <inheritdoc />");
+            writer.AppendLine($"public {chainType} Throws(global::System.Func<object?[], global::System.Exception> exceptionFactory) => _inner.Throws(exceptionFactory);");
+            writer.AppendLine($"/// <inheritdoc />");
+            writer.AppendLine($"public {chainType} Raises(string eventName, object? args = null) => _inner.Raises(eventName, args);");
+            writer.AppendLine($"/// <inheritdoc />");
+            writer.AppendLine($"public {chainType} SetsOutParameter(int paramIndex, object? value) => _inner.SetsOutParameter(paramIndex, value);");
+            writer.AppendLine($"/// <inheritdoc />");
+            writer.AppendLine($"public {chainType} TransitionsTo(string stateName) => _inner.TransitionsTo(stateName);");
+            writer.AppendLine();
+
+            // Typed overloads
+            GenerateTypedReturnsOverload(writer, nonOutParams, returnType, chainType);
+            writer.AppendLine();
+            GenerateTypedCallbackOverload(writer, nonOutParams, chainType, isVoid: false);
+            writer.AppendLine();
+            GenerateTypedThrowsOverload(writer, nonOutParams, chainType, isVoid: false);
+        }
+    }
+
+    private static void GenerateVoidTypedWrapper(CodeWriter writer, string wrapperName,
+        List<MockParameterModel> nonOutParams)
+    {
+        var chainType = "global::TUnit.Mock.Setup.IVoidSetupChain";
+        var setupInterface = "global::TUnit.Mock.Setup.IVoidMethodSetup";
+        var builderType = "global::TUnit.Mock.Setup.VoidMethodSetupBuilder";
+
+        writer.AppendLine($"[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
+        using (writer.Block($"public readonly struct {wrapperName} : {setupInterface}"))
+        {
+            writer.AppendLine($"private readonly {builderType} _inner;");
+            writer.AppendLine();
+            writer.AppendLine($"internal {wrapperName}({builderType} inner) => _inner = inner;");
+            writer.AppendLine();
+
+            // Forward all IVoidMethodSetup members
+            writer.AppendLine($"/// <inheritdoc />");
+            writer.AppendLine($"public {chainType} Throws<TException>() where TException : global::System.Exception, new() => _inner.Throws<TException>();");
+            writer.AppendLine($"/// <inheritdoc />");
+            writer.AppendLine($"public {chainType} Throws(global::System.Exception exception) => _inner.Throws(exception);");
+            writer.AppendLine($"/// <inheritdoc />");
+            writer.AppendLine($"public {chainType} Callback(global::System.Action callback) => _inner.Callback(callback);");
+            writer.AppendLine($"/// <inheritdoc />");
+            writer.AppendLine($"public {chainType} Callback(global::System.Action<object?[]> callback) => _inner.Callback(callback);");
+            writer.AppendLine($"/// <inheritdoc />");
+            writer.AppendLine($"public {chainType} Throws(global::System.Func<object?[], global::System.Exception> exceptionFactory) => _inner.Throws(exceptionFactory);");
+            writer.AppendLine($"/// <inheritdoc />");
+            writer.AppendLine($"public {chainType} Raises(string eventName, object? args = null) => _inner.Raises(eventName, args);");
+            writer.AppendLine($"/// <inheritdoc />");
+            writer.AppendLine($"public {chainType} SetsOutParameter(int paramIndex, object? value) => _inner.SetsOutParameter(paramIndex, value);");
+            writer.AppendLine($"/// <inheritdoc />");
+            writer.AppendLine($"public {chainType} TransitionsTo(string stateName) => _inner.TransitionsTo(stateName);");
+            writer.AppendLine();
+
+            // Typed overloads (no Returns for void)
+            GenerateTypedCallbackOverload(writer, nonOutParams, chainType, isVoid: true);
+            writer.AppendLine();
+            GenerateTypedThrowsOverload(writer, nonOutParams, chainType, isVoid: true);
+        }
+    }
+
+    private static void GenerateTypedReturnsOverload(CodeWriter writer, List<MockParameterModel> nonOutParams,
+        string returnType, string chainType)
+    {
+        var typeList = string.Join(", ", nonOutParams.Select(p => p.FullyQualifiedType));
+        var funcType = $"global::System.Func<{typeList}, {returnType}>";
+        var castArgs = BuildCastArgs(nonOutParams);
+
+        writer.AppendLine("/// <summary>Configure a typed computed return value using the actual method parameters.</summary>");
+        using (writer.Block($"public {chainType} Returns({funcType} factory)"))
+        {
+            writer.AppendLine($"return _inner.Returns(args => factory({castArgs}));");
+        }
+    }
+
+    private static void GenerateTypedCallbackOverload(CodeWriter writer, List<MockParameterModel> nonOutParams,
+        string chainType, bool isVoid)
+    {
+        var typeList = string.Join(", ", nonOutParams.Select(p => p.FullyQualifiedType));
+        var actionType = $"global::System.Action<{typeList}>";
+        var castArgs = BuildCastArgs(nonOutParams);
+
+        writer.AppendLine("/// <summary>Execute a typed callback using the actual method parameters.</summary>");
+        using (writer.Block($"public {chainType} Callback({actionType} callback)"))
+        {
+            if (isVoid)
+            {
+                writer.AppendLine($"return _inner.Callback(args => callback({castArgs}));");
+            }
+            else
+            {
+                writer.AppendLine($"return _inner.Callback(args => callback({castArgs}));");
+            }
+        }
+    }
+
+    private static void GenerateTypedThrowsOverload(CodeWriter writer, List<MockParameterModel> nonOutParams,
+        string chainType, bool isVoid)
+    {
+        var typeList = string.Join(", ", nonOutParams.Select(p => p.FullyQualifiedType));
+        var funcType = $"global::System.Func<{typeList}, global::System.Exception>";
+        var castArgs = BuildCastArgs(nonOutParams);
+
+        writer.AppendLine("/// <summary>Configure a typed computed exception using the actual method parameters.</summary>");
+        using (writer.Block($"public {chainType} Throws({funcType} exceptionFactory)"))
+        {
+            writer.AppendLine($"return _inner.Throws(args => exceptionFactory({castArgs}));");
+        }
+    }
+
+    private static string BuildCastArgs(List<MockParameterModel> nonOutParams)
+    {
+        return string.Join(", ", nonOutParams.Select((p, i) =>
+            $"({p.FullyQualifiedType})args[{i}]!"));
     }
 
     private static void GenerateSetupMethod(CodeWriter writer, MockMemberModel method, MockTypeModel model, string safeName)
@@ -61,9 +248,21 @@ internal static class MockSetupBuilder
             ? method.UnwrappedReturnType
             : method.ReturnType;
 
-        var returnType = method.IsVoid
-            ? "global::TUnit.Mock.Setup.IVoidMethodSetup"
-            : $"global::TUnit.Mock.Setup.IMethodSetup<{setupReturnType}>";
+        var useTypedWrapper = ShouldGenerateTypedWrapper(method);
+        string returnType;
+
+        if (useTypedWrapper)
+        {
+            returnType = GetWrapperName(safeName, method);
+        }
+        else if (method.IsVoid)
+        {
+            returnType = "global::TUnit.Mock.Setup.IVoidMethodSetup";
+        }
+        else
+        {
+            returnType = $"global::TUnit.Mock.Setup.IMethodSetup<{setupReturnType}>";
+        }
 
         var paramList = GetArgParameterList(method);
         var typeParams = GetTypeParameterList(method);
@@ -92,7 +291,19 @@ internal static class MockSetupBuilder
             writer.AppendLine($"var methodSetup = new global::TUnit.Mock.Setup.MethodSetup({method.MemberId}, matchers, \"{method.Name}\");");
             writer.AppendLine("s.Engine.AddSetup(methodSetup);");
 
-            if (method.IsVoid)
+            if (useTypedWrapper)
+            {
+                var wrapperName = GetWrapperName(safeName, method);
+                if (method.IsVoid)
+                {
+                    writer.AppendLine($"return new {wrapperName}(new global::TUnit.Mock.Setup.VoidMethodSetupBuilder(methodSetup));");
+                }
+                else
+                {
+                    writer.AppendLine($"return new {wrapperName}(new global::TUnit.Mock.Setup.MethodSetupBuilder<{setupReturnType}>(methodSetup));");
+                }
+            }
+            else if (method.IsVoid)
             {
                 writer.AppendLine("return new global::TUnit.Mock.Setup.VoidMethodSetupBuilder(methodSetup);");
             }

@@ -25,4 +25,7 @@ public interface IVoidMethodSetup
 
     /// <summary>Assign a value to an out or ref parameter when this setup matches.</summary>
     IVoidSetupChain SetsOutParameter(int paramIndex, object? value);
+
+    /// <summary>Transition to the named state after this setup's behavior executes.</summary>
+    IVoidSetupChain TransitionsTo(string stateName);
 }

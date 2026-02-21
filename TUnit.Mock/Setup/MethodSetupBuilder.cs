@@ -87,5 +87,11 @@ public sealed class MethodSetupBuilder<TReturn> : IMethodSetup<TReturn>, ISetupC
         return this;
     }
 
+    public ISetupChain<TReturn> TransitionsTo(string stateName)
+    {
+        _setup.TransitionTarget = stateName;
+        return this;
+    }
+
     public IMethodSetup<TReturn> Then() => this;
 }

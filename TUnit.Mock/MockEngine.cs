@@ -30,6 +30,18 @@ public sealed class MockEngine<T> where T : class
     private readonly ConcurrentDictionary<string, IMock> _autoMockCache = new();
 
     /// <summary>
+    /// The current state name for state machine mocking. Null means no state (all setups match).
+    /// </summary>
+    private string? _currentState;
+
+    /// <summary>
+    /// Temporary state set during <see cref="Mock{T}.InState"/> scope.
+    /// When non-null, <see cref="AddSetup"/> stamps this onto new setups' <see cref="MethodSetup.RequiredState"/>.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public string? PendingRequiredState { get; set; }
+
+    /// <summary>
     /// When true, property setters automatically store values and getters return them,
     /// acting like real auto-properties. Explicit setups take precedence.
     /// </summary>
@@ -66,10 +78,28 @@ public sealed class MockEngine<T> where T : class
     }
 
     /// <summary>
+    /// Transitions the engine to the specified state. Null clears the state.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public void TransitionTo(string? stateName) => _currentState = stateName;
+
+    /// <summary>
+    /// Gets the current state name. Null means no state.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public string? CurrentState => _currentState;
+
+    /// <summary>
     /// Registers a new setup. Thread-safe via lock.
+    /// If <see cref="PendingRequiredState"/> is set, stamps it onto the setup.
     /// </summary>
     public void AddSetup(MethodSetup setup)
     {
+        if (PendingRequiredState is not null)
+        {
+            setup.RequiredState = PendingRequiredState;
+        }
+
         lock (_setupLock)
         {
             if (!_setupsByMember.TryGetValue(setup.MemberId, out var list))
@@ -86,7 +116,7 @@ public sealed class MockEngine<T> where T : class
     /// </summary>
     public void HandleCall(int memberId, string memberName, object?[] args)
     {
-        RecordCall(memberId, memberName, args);
+        var callRecord = RecordCall(memberId, memberName, args);
 
         // Auto-track property setters: store value keyed by property name
         if (AutoTrackProperties && memberName.StartsWith("set_", StringComparison.Ordinal) && args.Length > 0)
@@ -102,16 +132,27 @@ public sealed class MockEngine<T> where T : class
         if (behavior is not null)
         {
             behavior.Execute(args);
-            if (matchedSetup is not null) RaiseEventsForSetup(matchedSetup);
+            if (matchedSetup is not null)
+            {
+                ApplyTransition(matchedSetup);
+                RaiseEventsForSetup(matchedSetup);
+            }
             return;
         }
 
         // A matching setup with no explicit behavior means "allow this call" (e.g., void setup with no callback)
         if (setupFound)
         {
-            if (matchedSetup is not null) RaiseEventsForSetup(matchedSetup);
+            if (matchedSetup is not null)
+            {
+                ApplyTransition(matchedSetup);
+                RaiseEventsForSetup(matchedSetup);
+            }
             return;
         }
+
+        // No setup matched — mark as unmatched for diagnostics
+        callRecord.IsUnmatched = true;
 
         if (Behavior == MockBehavior.Strict)
         {
@@ -126,7 +167,7 @@ public sealed class MockEngine<T> where T : class
     /// </summary>
     public TReturn HandleCallWithReturn<TReturn>(int memberId, string memberName, object?[] args, TReturn defaultValue)
     {
-        RecordCall(memberId, memberName, args);
+        var callRecord = RecordCall(memberId, memberName, args);
 
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, args);
 
@@ -136,7 +177,11 @@ public sealed class MockEngine<T> where T : class
         if (behavior is not null)
         {
             var result = behavior.Execute(args);
-            if (matchedSetup is not null) RaiseEventsForSetup(matchedSetup);
+            if (matchedSetup is not null)
+            {
+                ApplyTransition(matchedSetup);
+                RaiseEventsForSetup(matchedSetup);
+            }
             if (result is TReturn typed) return typed;
             if (result is null) return default(TReturn)!;
             throw new InvalidOperationException(
@@ -146,9 +191,16 @@ public sealed class MockEngine<T> where T : class
         // A matching setup with no explicit behavior returns the default value
         if (setupFound)
         {
-            if (matchedSetup is not null) RaiseEventsForSetup(matchedSetup);
+            if (matchedSetup is not null)
+            {
+                ApplyTransition(matchedSetup);
+                RaiseEventsForSetup(matchedSetup);
+            }
             return defaultValue;
         }
+
+        // No setup matched — mark as unmatched for diagnostics
+        callRecord.IsUnmatched = true;
 
         // Auto-track property getters: return stored value if available
         if (AutoTrackProperties && memberName.StartsWith("get_", StringComparison.Ordinal))
@@ -201,7 +253,7 @@ public sealed class MockEngine<T> where T : class
     [EditorBrowsable(EditorBrowsableState.Never)]
     public bool TryHandleCall(int memberId, string memberName, object?[] args)
     {
-        RecordCall(memberId, memberName, args);
+        var callRecord = RecordCall(memberId, memberName, args);
 
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, args);
 
@@ -211,13 +263,23 @@ public sealed class MockEngine<T> where T : class
         if (behavior is not null)
         {
             behavior.Execute(args);
-            if (matchedSetup is not null) RaiseEventsForSetup(matchedSetup);
+            if (matchedSetup is not null)
+            {
+                ApplyTransition(matchedSetup);
+                RaiseEventsForSetup(matchedSetup);
+            }
             return true;
         }
 
         if (setupFound && matchedSetup is not null)
         {
+            ApplyTransition(matchedSetup);
             RaiseEventsForSetup(matchedSetup);
+        }
+
+        if (!setupFound)
+        {
+            callRecord.IsUnmatched = true;
         }
 
         if (!setupFound && IsWrapMock && Behavior == MockBehavior.Strict)
@@ -238,7 +300,7 @@ public sealed class MockEngine<T> where T : class
     [EditorBrowsable(EditorBrowsableState.Never)]
     public bool TryHandleCallWithReturn<TReturn>(int memberId, string memberName, object?[] args, TReturn defaultValue, out TReturn result)
     {
-        RecordCall(memberId, memberName, args);
+        var callRecord = RecordCall(memberId, memberName, args);
 
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, args);
 
@@ -248,7 +310,11 @@ public sealed class MockEngine<T> where T : class
         if (behavior is not null)
         {
             var behaviorResult = behavior.Execute(args);
-            if (matchedSetup is not null) RaiseEventsForSetup(matchedSetup);
+            if (matchedSetup is not null)
+            {
+                ApplyTransition(matchedSetup);
+                RaiseEventsForSetup(matchedSetup);
+            }
             if (behaviorResult is TReturn typed) result = typed;
             else if (behaviorResult is null) result = default(TReturn)!;
             else throw new InvalidOperationException(
@@ -258,10 +324,17 @@ public sealed class MockEngine<T> where T : class
 
         if (setupFound)
         {
-            if (matchedSetup is not null) RaiseEventsForSetup(matchedSetup);
+            if (matchedSetup is not null)
+            {
+                ApplyTransition(matchedSetup);
+                RaiseEventsForSetup(matchedSetup);
+            }
             result = defaultValue;
             return true;
         }
+
+        // No setup matched
+        callRecord.IsUnmatched = true;
 
         if (IsWrapMock && Behavior == MockBehavior.Strict)
         {
@@ -332,6 +405,45 @@ public sealed class MockEngine<T> where T : class
     }
 
     /// <summary>
+    /// Returns a diagnostic report of this mock's setup coverage and call matching.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public Diagnostics.MockDiagnostics GetDiagnostics()
+    {
+        var setups = GetSetups();
+        var unusedSetups = new List<Diagnostics.SetupInfo>();
+        var totalSetups = setups.Count;
+        var exercisedSetups = 0;
+
+        foreach (var setup in setups)
+        {
+            if (setup.InvokeCount > 0)
+            {
+                exercisedSetups++;
+            }
+            else
+            {
+                unusedSetups.Add(new Diagnostics.SetupInfo(
+                    setup.MemberId,
+                    setup.MemberName,
+                    setup.GetMatcherDescriptions(),
+                    setup.InvokeCount));
+            }
+        }
+
+        var unmatchedCalls = new List<CallRecord>();
+        foreach (var call in _callHistory)
+        {
+            if (call.IsUnmatched)
+            {
+                unmatchedCalls.Add(call);
+            }
+        }
+
+        return new Diagnostics.MockDiagnostics(unusedSetups, unmatchedCalls, totalSetups, exercisedSetups);
+    }
+
+    /// <summary>
     /// Clears all setups and call history.
     /// </summary>
     /// <summary>
@@ -358,6 +470,8 @@ public sealed class MockEngine<T> where T : class
         _onSubscribeCallbacks.Clear();
         _onUnsubscribeCallbacks.Clear();
         _autoMockCache.Clear();
+        _currentState = null;
+        PendingRequiredState = null;
     }
 
     /// <summary>
@@ -432,10 +546,20 @@ public sealed class MockEngine<T> where T : class
         return false;
     }
 
-    private void RecordCall(int memberId, string memberName, object?[] args)
+    private void ApplyTransition(MethodSetup setup)
+    {
+        if (setup.TransitionTarget is not null)
+        {
+            _currentState = setup.TransitionTarget;
+        }
+    }
+
+    private CallRecord RecordCall(int memberId, string memberName, object?[] args)
     {
         var seq = MockCallSequence.Next();
-        _callHistory.Enqueue(new CallRecord(memberId, memberName, args, seq));
+        var record = new CallRecord(memberId, memberName, args, seq);
+        _callHistory.Enqueue(record);
+        return record;
     }
 
     private void RaiseEventsForSetup(MethodSetup setup)
@@ -462,6 +586,13 @@ public sealed class MockEngine<T> where T : class
             for (int i = setups.Count - 1; i >= 0; i--)
             {
                 var setup = setups[i];
+
+                // State guard: skip setups that require a different state
+                if (setup.RequiredState is not null && setup.RequiredState != _currentState)
+                {
+                    continue;
+                }
+
                 if (setup.Matches(args))
                 {
                     setup.IncrementInvokeCount();
