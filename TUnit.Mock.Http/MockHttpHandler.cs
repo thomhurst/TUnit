@@ -11,6 +11,7 @@ namespace TUnit.Mock.Http;
 public sealed class MockHttpHandler : HttpMessageHandler
 {
     private readonly List<RequestSetup> _setups = new();
+    private readonly object _setupsLock = new();
     private readonly ConcurrentQueue<CapturedRequest> _requests = new();
     private HttpStatusCode _defaultStatusCode = HttpStatusCode.NotFound;
     private bool _throwOnUnmatched;
@@ -54,7 +55,10 @@ public sealed class MockHttpHandler : HttpMessageHandler
         var matcher = new RequestMatcher();
         configure(matcher);
         var setup = new RequestSetup(matcher);
-        _setups.Add(setup);
+        lock (_setupsLock)
+        {
+            _setups.Add(setup);
+        }
         return setup;
     }
 
@@ -163,7 +167,10 @@ public sealed class MockHttpHandler : HttpMessageHandler
     /// <summary>Clears all setups and captured requests.</summary>
     public void Reset()
     {
-        _setups.Clear();
+        lock (_setupsLock)
+        {
+            _setups.Clear();
+        }
         while (_requests.TryDequeue(out _)) { }
     }
 
@@ -182,7 +189,13 @@ public sealed class MockHttpHandler : HttpMessageHandler
         var captured = new CapturedRequest(request, bodyContent);
         _requests.Enqueue(captured);
 
-        foreach (var setup in _setups)
+        List<RequestSetup> setupsSnapshot;
+        lock (_setupsLock)
+        {
+            setupsSnapshot = new List<RequestSetup>(_setups);
+        }
+
+        foreach (var setup in setupsSnapshot)
         {
             if (setup.TryMatch(request, bodyContent))
             {

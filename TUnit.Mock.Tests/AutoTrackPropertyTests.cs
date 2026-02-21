@@ -21,8 +21,9 @@ public class AutoTrackPropertyTests
     [Test]
     public async Task AutoTrack_Set_Then_Get_Returns_Value()
     {
-        // Arrange — loose mode auto-tracks by default
+        // Arrange — opt in to auto-tracking
         var mock = Mock.Of<IAutoTrackEntity>();
+        mock.SetupAllProperties();
 
         // Act
         mock.Object.Name = "Alice";
@@ -37,6 +38,7 @@ public class AutoTrackPropertyTests
     {
         // Arrange
         var mock = Mock.Of<IAutoTrackEntity>();
+        mock.SetupAllProperties();
 
         // Act
         mock.Object.Name = "Bob";
@@ -66,6 +68,7 @@ public class AutoTrackPropertyTests
     {
         // Arrange
         var mock = Mock.Of<IAutoTrackEntity>();
+        mock.SetupAllProperties();
         mock.Setup.Name_Get().Returns("Configured");
 
         // Act — set a tracked value, but explicit setup should win
@@ -80,6 +83,7 @@ public class AutoTrackPropertyTests
     {
         // Arrange
         var mock = Mock.Of<IAutoTrackEntity>();
+        mock.SetupAllProperties();
 
         // Act — set then overwrite
         mock.Object.Name = "First";
@@ -90,29 +94,29 @@ public class AutoTrackPropertyTests
     }
 
     [Test]
-    public async Task SetupAllProperties_Is_NoOp_In_Loose_Mode()
+    public async Task Loose_Mode_Does_Not_AutoTrack_By_Default()
     {
-        // Arrange — calling SetupAllProperties on loose mock is harmless
-        var mock = Mock.Of<IAutoTrackEntity>();
-        mock.SetupAllProperties();
-
-        // Act
-        mock.Object.Name = "Test";
-
-        // Assert — still works
-        await Assert.That(mock.Object.Name).IsEqualTo("Test");
-    }
-
-    [Test]
-    public async Task Loose_Mode_AutoTracks_By_Default()
-    {
-        // Arrange — loose mode auto-tracks without explicit SetupAllProperties()
+        // Arrange — loose mode does NOT auto-track; requires explicit SetupAllProperties()
         var mock = Mock.Of<IAutoTrackEntity>();
 
         // Act
         mock.Object.Name = "Alice";
 
-        // Assert — auto-tracking is on by default in loose mode
+        // Assert — without SetupAllProperties(), getter returns smart default, not tracked value
+        await Assert.That(mock.Object.Name).IsEmpty();
+    }
+
+    [Test]
+    public async Task Loose_Mode_AutoTracks_After_SetupAllProperties()
+    {
+        // Arrange — explicit opt-in enables auto-tracking
+        var mock = Mock.Of<IAutoTrackEntity>();
+        mock.SetupAllProperties();
+
+        // Act
+        mock.Object.Name = "Alice";
+
+        // Assert — auto-tracking is now on
         await Assert.That(mock.Object.Name).IsEqualTo("Alice");
     }
 
@@ -152,6 +156,7 @@ public class AutoTrackPropertyTests
     {
         // Arrange
         var mock = Mock.Of<IAutoTrackEntity>();
+        mock.SetupAllProperties();
         mock.Object.Name = "Alice";
 
         // Act

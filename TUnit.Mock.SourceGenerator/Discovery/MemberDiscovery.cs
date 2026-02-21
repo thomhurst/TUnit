@@ -22,7 +22,7 @@ internal static class MemberDiscovery
         var events = new List<MockEventModel>();
 
         var seenMethods = new HashSet<string>();
-        var seenProperties = new HashSet<string>();
+        var seenProperties = new Dictionary<string, int>();
         var seenEvents = new HashSet<string>();
 
         int memberIdCounter = 0;
@@ -61,9 +61,15 @@ internal static class MemberDiscovery
                     case IPropertySymbol property when !property.IsIndexer:
                     {
                         var key = $"P:{property.Name}";
-                        if (!seenProperties.Add(key)) continue;
-
-                        properties.Add(CreatePropertyModel(property, ref memberIdCounter, explicitInterfaceName));
+                        if (seenProperties.TryGetValue(key, out var existingIndex))
+                        {
+                            MergePropertyAccessors(properties, existingIndex, property, ref memberIdCounter);
+                        }
+                        else
+                        {
+                            seenProperties[key] = properties.Count;
+                            properties.Add(CreatePropertyModel(property, ref memberIdCounter, explicitInterfaceName));
+                        }
                         break;
                     }
 
@@ -71,9 +77,15 @@ internal static class MemberDiscovery
                     {
                         var paramTypes = string.Join(",", indexer.Parameters.Select(p => p.Type.GetFullyQualifiedName()));
                         var key = $"I:[{paramTypes}]";
-                        if (!seenProperties.Add(key)) continue;
-
-                        properties.Add(CreateIndexerModel(indexer, ref memberIdCounter, explicitInterfaceName));
+                        if (seenProperties.TryGetValue(key, out var existingIndex))
+                        {
+                            MergePropertyAccessors(properties, existingIndex, indexer, ref memberIdCounter);
+                        }
+                        else
+                        {
+                            seenProperties[key] = properties.Count;
+                            properties.Add(CreateIndexerModel(indexer, ref memberIdCounter, explicitInterfaceName));
+                        }
                         break;
                     }
 
@@ -108,7 +120,7 @@ internal static class MemberDiscovery
         var events = new List<MockEventModel>();
 
         var seenMethods = new HashSet<string>();
-        var seenProperties = new HashSet<string>();
+        var seenProperties = new Dictionary<string, int>();
         var seenEvents = new HashSet<string>();
 
         int memberIdCounter = 0;
@@ -139,8 +151,15 @@ internal static class MemberDiscovery
                         case IPropertySymbol property when !property.IsIndexer:
                         {
                             var key = $"P:{property.Name}";
-                            if (!seenProperties.Add(key)) continue;
-                            properties.Add(CreatePropertyModel(property, ref memberIdCounter, null));
+                            if (seenProperties.TryGetValue(key, out var existingIndex))
+                            {
+                                MergePropertyAccessors(properties, existingIndex, property, ref memberIdCounter);
+                            }
+                            else
+                            {
+                                seenProperties[key] = properties.Count;
+                                properties.Add(CreatePropertyModel(property, ref memberIdCounter, null));
+                            }
                             break;
                         }
 
@@ -148,8 +167,15 @@ internal static class MemberDiscovery
                         {
                             var paramTypes = string.Join(",", indexer.Parameters.Select(p => p.Type.GetFullyQualifiedName()));
                             var key = $"I:[{paramTypes}]";
-                            if (!seenProperties.Add(key)) continue;
-                            properties.Add(CreateIndexerModel(indexer, ref memberIdCounter, null));
+                            if (seenProperties.TryGetValue(key, out var existingIndex))
+                            {
+                                MergePropertyAccessors(properties, existingIndex, indexer, ref memberIdCounter);
+                            }
+                            else
+                            {
+                                seenProperties[key] = properties.Count;
+                                properties.Add(CreateIndexerModel(indexer, ref memberIdCounter, null));
+                            }
                             break;
                         }
 
@@ -178,7 +204,7 @@ internal static class MemberDiscovery
         List<MockMemberModel> properties,
         List<MockEventModel> events,
         HashSet<string> seenMethods,
-        HashSet<string> seenProperties,
+        Dictionary<string, int> seenProperties,
         HashSet<string> seenEvents,
         ref int memberIdCounter)
     {
@@ -211,9 +237,15 @@ internal static class MemberDiscovery
                         && (property.IsAbstract || property.IsVirtual || property.IsOverride):
                     {
                         var key = $"P:{property.Name}";
-                        if (!seenProperties.Add(key)) continue;
-
-                        properties.Add(CreatePropertyModel(property, ref memberIdCounter, null));
+                        if (seenProperties.TryGetValue(key, out var existingIndex))
+                        {
+                            MergePropertyAccessors(properties, existingIndex, property, ref memberIdCounter);
+                        }
+                        else
+                        {
+                            seenProperties[key] = properties.Count;
+                            properties.Add(CreatePropertyModel(property, ref memberIdCounter, null));
+                        }
                         break;
                     }
 
@@ -285,6 +317,28 @@ internal static class MemberDiscovery
             IsVirtualMember = method.IsVirtual || method.IsOverride,
             IsProtected = method.DeclaredAccessibility == Accessibility.Protected
                        || method.DeclaredAccessibility == Accessibility.ProtectedOrInternal
+        };
+    }
+
+    /// <summary>
+    /// When a property with the same name appears from multiple interfaces, merge getter/setter
+    /// accessors so the generated class satisfies all interfaces.
+    /// </summary>
+    private static void MergePropertyAccessors(List<MockMemberModel> properties, int existingIndex,
+        IPropertySymbol newProperty, ref int memberIdCounter)
+    {
+        var existing = properties[existingIndex];
+        var needsGetter = !existing.HasGetter && newProperty.GetMethod is not null;
+        var needsSetter = !existing.HasSetter && newProperty.SetMethod is not null;
+
+        if (!needsGetter && !needsSetter) return;
+
+        properties[existingIndex] = existing with
+        {
+            HasGetter = existing.HasGetter || newProperty.GetMethod is not null,
+            HasSetter = existing.HasSetter || newProperty.SetMethod is not null,
+            SetterMemberId = existing.HasSetter ? existing.SetterMemberId
+                : newProperty.SetMethod is not null ? memberIdCounter++ : existing.SetterMemberId
         };
     }
 

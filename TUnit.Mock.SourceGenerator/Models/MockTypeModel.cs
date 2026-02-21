@@ -13,7 +13,6 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
     public string Namespace { get; init; } = "";
     public bool IsInterface { get; init; }
     public bool IsAbstract { get; init; }
-    public bool IsPartial { get; init; }
     public bool IsPartialMock { get; init; }
     public bool IsDelegateType { get; init; }
     public bool IsWrapMock { get; init; }
@@ -32,7 +31,6 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
             && Namespace == other.Namespace
             && IsInterface == other.IsInterface
             && IsAbstract == other.IsAbstract
-            && IsPartial == other.IsPartial
             && IsPartialMock == other.IsPartialMock
             && IsDelegateType == other.IsDelegateType
             && IsWrapMock == other.IsWrapMock

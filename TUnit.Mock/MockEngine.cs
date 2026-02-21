@@ -74,7 +74,6 @@ public sealed class MockEngine<T> where T : class
     public MockEngine(MockBehavior behavior)
     {
         Behavior = behavior;
-        AutoTrackProperties = behavior == MockBehavior.Loose;
     }
 
     /// <summary>
