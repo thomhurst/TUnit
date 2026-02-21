@@ -10,10 +10,9 @@ public class MockHttpHandlerTests
     [Test]
     public async Task ReturnsConfiguredResponse()
     {
-        var handler = Mock.HttpHandler();
-        handler.OnGet("/api/users").RespondWithJson("""[{"id":1}]""");
+        using var client = Mock.HttpClient("http://localhost");
+        client.Handler.OnGet("/api/users").RespondWithJson("""[{"id":1}]""");
 
-        using var client = handler.CreateClient("http://localhost");
         var response = await client.GetAsync("/api/users");
 
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
@@ -24,9 +23,8 @@ public class MockHttpHandlerTests
     [Test]
     public async Task ReturnsDefaultStatusForUnmatched()
     {
-        var handler = Mock.HttpHandler();
+        using var client = Mock.HttpClient("http://localhost");
 
-        using var client = handler.CreateClient("http://localhost");
         var response = await client.GetAsync("/api/unknown");
 
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.NotFound);
@@ -35,10 +33,9 @@ public class MockHttpHandlerTests
     [Test]
     public async Task WithDefaultStatusOverridesDefault()
     {
-        var handler = Mock.HttpHandler()
-            .WithDefaultStatus(HttpStatusCode.ServiceUnavailable);
+        using var client = Mock.HttpClient("http://localhost");
+        client.Handler.WithDefaultStatus(HttpStatusCode.ServiceUnavailable);
 
-        using var client = handler.CreateClient("http://localhost");
         var response = await client.GetAsync("/api/anything");
 
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.ServiceUnavailable);
@@ -47,9 +44,8 @@ public class MockHttpHandlerTests
     [Test]
     public async Task ThrowOnUnmatchedThrowsException()
     {
-        var handler = Mock.HttpHandler().ThrowOnUnmatched();
-
-        using var client = handler.CreateClient("http://localhost");
+        using var client = Mock.HttpClient("http://localhost");
+        client.Handler.ThrowOnUnmatched();
 
         await Assert.ThrowsAsync<HttpRequestException>(
             async () => await client.GetAsync("/api/nothing"));
@@ -58,10 +54,9 @@ public class MockHttpHandlerTests
     [Test]
     public async Task MatchesByMethod()
     {
-        var handler = Mock.HttpHandler();
-        handler.OnPost("/api/data").Respond(HttpStatusCode.Created);
+        using var client = Mock.HttpClient("http://localhost");
+        client.Handler.OnPost("/api/data").Respond(HttpStatusCode.Created);
 
-        using var client = handler.CreateClient("http://localhost");
         var getResponse = await client.GetAsync("/api/data");
         var postResponse = await client.PostAsync("/api/data", null);
 
@@ -72,11 +67,10 @@ public class MockHttpHandlerTests
     [Test]
     public async Task MatchesByPath()
     {
-        var handler = Mock.HttpHandler();
-        handler.OnGet("/api/v1/users").Respond(HttpStatusCode.OK);
-        handler.OnGet("/api/v1/orders").Respond(HttpStatusCode.Accepted);
+        using var client = Mock.HttpClient("http://localhost");
+        client.Handler.OnGet("/api/v1/users").Respond(HttpStatusCode.OK);
+        client.Handler.OnGet("/api/v1/orders").Respond(HttpStatusCode.Accepted);
 
-        using var client = handler.CreateClient("http://localhost");
         var usersResponse = await client.GetAsync("/api/v1/users");
         var ordersResponse = await client.GetAsync("/api/v1/orders");
 
@@ -87,13 +81,11 @@ public class MockHttpHandlerTests
     [Test]
     public async Task MatchesByHeader()
     {
-        var handler = Mock.HttpHandler();
-        handler.OnRequest(r => r.Method(HttpMethod.Get)
+        using var client = Mock.HttpClient("http://localhost");
+        client.Handler.OnRequest(r => r.Method(HttpMethod.Get)
             .Path("/api/secure")
             .Header("Authorization", "Bearer token123"))
             .Respond(HttpStatusCode.OK);
-
-        using var client = handler.CreateClient("http://localhost");
 
         // Without auth header → default 404
         var noAuthResponse = await client.GetAsync("/api/secure");
@@ -109,11 +101,10 @@ public class MockHttpHandlerTests
     [Test]
     public async Task MatchesByPathPrefix()
     {
-        var handler = Mock.HttpHandler();
-        handler.OnRequest(r => r.Method(HttpMethod.Get).PathStartsWith("/api/v2"))
+        using var client = Mock.HttpClient("http://localhost");
+        client.Handler.OnRequest(r => r.Method(HttpMethod.Get).PathStartsWith("/api/v2"))
             .Respond(HttpStatusCode.OK);
 
-        using var client = handler.CreateClient("http://localhost");
         var response = await client.GetAsync("/api/v2/anything/here");
 
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
@@ -122,11 +113,10 @@ public class MockHttpHandlerTests
     [Test]
     public async Task MatchesByBodyContent()
     {
-        var handler = Mock.HttpHandler();
-        handler.OnRequest(r => r.Method(HttpMethod.Post).Path("/api/search").BodyContains("query"))
+        using var client = Mock.HttpClient("http://localhost");
+        client.Handler.OnRequest(r => r.Method(HttpMethod.Post).Path("/api/search").BodyContains("query"))
             .RespondWithJson("""{"results": []}""");
 
-        using var client = handler.CreateClient("http://localhost");
         var content = new StringContent("""{"query": "test"}""", System.Text.Encoding.UTF8, "application/json");
         var response = await client.PostAsync("/api/search", content);
 
@@ -136,11 +126,10 @@ public class MockHttpHandlerTests
     [Test]
     public async Task MatchesByRegexPattern()
     {
-        var handler = Mock.HttpHandler();
-        handler.OnRequest(r => r.Method(HttpMethod.Get).PathMatches(@"/api/users/\d+"))
+        using var client = Mock.HttpClient("http://localhost");
+        client.Handler.OnRequest(r => r.Method(HttpMethod.Get).PathMatches(@"/api/users/\d+"))
             .RespondWithJson("""{"id": 1, "name": "Test"}""");
 
-        using var client = handler.CreateClient("http://localhost");
         var response = await client.GetAsync("/api/users/42");
 
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
@@ -149,10 +138,9 @@ public class MockHttpHandlerTests
     [Test]
     public async Task OnAnyRequestMatchesEverything()
     {
-        var handler = Mock.HttpHandler();
-        handler.OnAnyRequest().Respond(HttpStatusCode.OK);
+        using var client = Mock.HttpClient("http://localhost");
+        client.Handler.OnAnyRequest().Respond(HttpStatusCode.OK);
 
-        using var client = handler.CreateClient("http://localhost");
         var get = await client.GetAsync("/anything");
         var post = await client.PostAsync("/whatever", null);
 
@@ -163,10 +151,9 @@ public class MockHttpHandlerTests
     [Test]
     public async Task StringContentResponse()
     {
-        var handler = Mock.HttpHandler();
-        handler.OnGet("/api/hello").RespondWithString("Hello, World!");
+        using var client = Mock.HttpClient("http://localhost");
+        client.Handler.OnGet("/api/hello").RespondWithString("Hello, World!");
 
-        using var client = handler.CreateClient("http://localhost");
         var response = await client.GetAsync("/api/hello");
         var body = await response.Content.ReadAsStringAsync();
 
@@ -176,12 +163,11 @@ public class MockHttpHandlerTests
     [Test]
     public async Task ResponseWithCustomHeaders()
     {
-        var handler = Mock.HttpHandler();
-        handler.OnGet("/api/data")
+        using var client = Mock.HttpClient("http://localhost");
+        client.Handler.OnGet("/api/data")
             .Respond()
             .WithHeader("X-Custom", "value123");
 
-        using var client = handler.CreateClient("http://localhost");
         var response = await client.GetAsync("/api/data");
 
         await Assert.That(response.Headers.Contains("X-Custom")).IsTrue();
@@ -190,10 +176,9 @@ public class MockHttpHandlerTests
     [Test]
     public async Task ResponseWithCustomStatusCode()
     {
-        var handler = Mock.HttpHandler();
-        handler.OnDelete("/api/item/1").Respond(HttpStatusCode.NoContent);
+        using var client = Mock.HttpClient("http://localhost");
+        client.Handler.OnDelete("/api/item/1").Respond(HttpStatusCode.NoContent);
 
-        using var client = handler.CreateClient("http://localhost");
         var response = await client.DeleteAsync("/api/item/1");
 
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.NoContent);
@@ -202,10 +187,8 @@ public class MockHttpHandlerTests
     [Test]
     public async Task SetupThrowsException()
     {
-        var handler = Mock.HttpHandler();
-        handler.OnGet("/api/fail").Throws(new HttpRequestException("Connection refused"));
-
-        using var client = handler.CreateClient("http://localhost");
+        using var client = Mock.HttpClient("http://localhost");
+        client.Handler.OnGet("/api/fail").Throws(new HttpRequestException("Connection refused"));
 
         await Assert.ThrowsAsync<HttpRequestException>(
             async () => await client.GetAsync("/api/fail"));
@@ -214,10 +197,8 @@ public class MockHttpHandlerTests
     [Test]
     public async Task SetupThrowsWithMessage()
     {
-        var handler = Mock.HttpHandler();
-        handler.OnGet("/api/timeout").Throws("Request timed out");
-
-        using var client = handler.CreateClient("http://localhost");
+        using var client = Mock.HttpClient("http://localhost");
+        client.Handler.OnGet("/api/timeout").Throws("Request timed out");
 
         await Assert.ThrowsAsync<HttpRequestException>(
             async () => await client.GetAsync("/api/timeout"));
@@ -226,13 +207,12 @@ public class MockHttpHandlerTests
     [Test]
     public async Task SequentialResponses()
     {
-        var handler = Mock.HttpHandler();
-        var setup = handler.OnGet("/api/counter");
+        using var client = Mock.HttpClient("http://localhost");
+        var setup = client.Handler.OnGet("/api/counter");
         setup.RespondWithString("1");
         setup.Then().RespondWithString("2");
         setup.Then().RespondWithString("3");
 
-        using var client = handler.CreateClient("http://localhost");
         var r1 = await client.GetStringAsync("/api/counter");
         var r2 = await client.GetStringAsync("/api/counter");
         var r3 = await client.GetStringAsync("/api/counter");
@@ -248,120 +228,111 @@ public class MockHttpHandlerTests
     [Test]
     public async Task CapturesRequests()
     {
-        var handler = Mock.HttpHandler();
-        handler.OnAnyRequest().Respond();
+        using var client = Mock.HttpClient("http://localhost");
+        client.Handler.OnAnyRequest().Respond();
 
-        using var client = handler.CreateClient("http://localhost");
         await client.GetAsync("/api/users");
         await client.PostAsync("/api/users", new StringContent("{}"));
 
-        await Assert.That(handler.Requests).Count().IsEqualTo(2);
-        await Assert.That(handler.Requests[0].Method).IsEqualTo(HttpMethod.Get);
-        await Assert.That(handler.Requests[1].Method).IsEqualTo(HttpMethod.Post);
+        await Assert.That(client.Handler.Requests).Count().IsEqualTo(2);
+        await Assert.That(client.Handler.Requests[0].Method).IsEqualTo(HttpMethod.Get);
+        await Assert.That(client.Handler.Requests[1].Method).IsEqualTo(HttpMethod.Post);
     }
 
     [Test]
     public async Task CapturesRequestBody()
     {
-        var handler = Mock.HttpHandler();
-        handler.OnAnyRequest().Respond();
+        using var client = Mock.HttpClient("http://localhost");
+        client.Handler.OnAnyRequest().Respond();
 
-        using var client = handler.CreateClient("http://localhost");
         await client.PostAsync("/api/data",
             new StringContent("""{"name":"test"}""", System.Text.Encoding.UTF8, "application/json"));
 
-        await Assert.That(handler.Requests[0].Body).Contains("test");
+        await Assert.That(client.Handler.Requests[0].Body).Contains("test");
     }
 
     [Test]
     public async Task CapturesRequestHeaders()
     {
-        var handler = Mock.HttpHandler();
-        handler.OnAnyRequest().Respond();
+        using var client = Mock.HttpClient("http://localhost");
+        client.Handler.OnAnyRequest().Respond();
 
-        using var client = handler.CreateClient("http://localhost");
         var request = new HttpRequestMessage(HttpMethod.Get, "/api/data");
         request.Headers.Add("X-Correlation-Id", "abc-123");
         await client.SendAsync(request);
 
-        await Assert.That(handler.Requests[0].Headers.ContainsKey("X-Correlation-Id")).IsTrue();
+        await Assert.That(client.Handler.Requests[0].Headers.ContainsKey("X-Correlation-Id")).IsTrue();
     }
 
     [Test]
     public async Task TracksUnmatchedRequests()
     {
-        var handler = Mock.HttpHandler();
-        handler.OnGet("/api/known").Respond();
+        using var client = Mock.HttpClient("http://localhost");
+        client.Handler.OnGet("/api/known").Respond();
 
-        using var client = handler.CreateClient("http://localhost");
         await client.GetAsync("/api/known");
         await client.GetAsync("/api/unknown");
 
-        await Assert.That(handler.UnmatchedRequests).Count().IsEqualTo(1);
+        await Assert.That(client.Handler.UnmatchedRequests).Count().IsEqualTo(1);
     }
 
     [Test]
     public async Task VerifyCallCount()
     {
-        var handler = Mock.HttpHandler();
-        handler.OnAnyRequest().Respond();
+        using var client = Mock.HttpClient("http://localhost");
+        client.Handler.OnAnyRequest().Respond();
 
-        using var client = handler.CreateClient("http://localhost");
         await client.GetAsync("/api/users");
         await client.GetAsync("/api/users");
 
-        handler.Verify(r => r.Method(HttpMethod.Get).Path("/api/users"), Times.Exactly(2));
+        client.Handler.Verify(r => r.Method(HttpMethod.Get).Path("/api/users"), Times.Exactly(2));
     }
 
     [Test]
     public async Task VerifyThrowsOnMismatch()
     {
-        var handler = Mock.HttpHandler();
-        handler.OnAnyRequest().Respond();
+        using var client = Mock.HttpClient("http://localhost");
+        client.Handler.OnAnyRequest().Respond();
 
-        using var client = handler.CreateClient("http://localhost");
         await client.GetAsync("/api/users");
 
         Assert.Throws<MockVerificationException>(() =>
-            handler.Verify(r => r.Method(HttpMethod.Get).Path("/api/users"), Times.Exactly(3)));
+            client.Handler.Verify(r => r.Method(HttpMethod.Get).Path("/api/users"), Times.Exactly(3)));
     }
 
     [Test]
     public async Task VerifyNoUnmatchedRequestsPasses()
     {
-        var handler = Mock.HttpHandler();
-        handler.OnAnyRequest().Respond();
+        using var client = Mock.HttpClient("http://localhost");
+        client.Handler.OnAnyRequest().Respond();
 
-        using var client = handler.CreateClient("http://localhost");
         await client.GetAsync("/api/users");
 
-        handler.VerifyNoUnmatchedRequests();
+        client.Handler.VerifyNoUnmatchedRequests();
     }
 
     [Test]
     public async Task VerifyNoUnmatchedRequestsFails()
     {
-        var handler = Mock.HttpHandler();
+        using var client = Mock.HttpClient("http://localhost");
 
-        using var client = handler.CreateClient("http://localhost");
         await client.GetAsync("/api/unknown");
 
         Assert.Throws<MockVerificationException>(() =>
-            handler.VerifyNoUnmatchedRequests());
+            client.Handler.VerifyNoUnmatchedRequests());
     }
 
     [Test]
     public async Task ResetClearsSetupsAndRequests()
     {
-        var handler = Mock.HttpHandler();
-        handler.OnGet("/api/data").RespondWithString("data");
+        using var client = Mock.HttpClient("http://localhost");
+        client.Handler.OnGet("/api/data").RespondWithString("data");
 
-        using var client = handler.CreateClient("http://localhost");
         await client.GetAsync("/api/data");
 
-        handler.Reset();
+        client.Handler.Reset();
 
-        await Assert.That(handler.Requests).Count().IsEqualTo(0);
+        await Assert.That(client.Handler.Requests).Count().IsEqualTo(0);
 
         // After reset, no setups so should get default
         var response = await client.GetAsync("/api/data");
@@ -371,10 +342,7 @@ public class MockHttpHandlerTests
     [Test]
     public async Task CreateClientWithBaseAddress()
     {
-        var handler = Mock.HttpHandler();
-        handler.OnGet("/api/test").Respond();
-
-        using var client = handler.CreateClient("http://example.com");
+        using var client = Mock.HttpClient("http://example.com");
 
         await Assert.That(client.BaseAddress).IsNotNull();
         await Assert.That(client.BaseAddress!.Host).IsEqualTo("example.com");
@@ -383,10 +351,9 @@ public class MockHttpHandlerTests
     [Test]
     public async Task OnPutMatchesPutRequests()
     {
-        var handler = Mock.HttpHandler();
-        handler.OnPut("/api/item/1").Respond(HttpStatusCode.NoContent);
+        using var client = Mock.HttpClient("http://localhost");
+        client.Handler.OnPut("/api/item/1").Respond(HttpStatusCode.NoContent);
 
-        using var client = handler.CreateClient("http://localhost");
         var response = await client.PutAsync("/api/item/1", null);
 
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.NoContent);
@@ -395,14 +362,13 @@ public class MockHttpHandlerTests
     [Test]
     public async Task FactoryResponseUsesRequest()
     {
-        var handler = Mock.HttpHandler();
-        handler.OnAnyRequest().Respond().WithFactory(req =>
+        using var client = Mock.HttpClient("http://localhost");
+        client.Handler.OnAnyRequest().Respond().WithFactory(req =>
             new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new StringContent($"Echo: {req.Method} {req.RequestUri}")
             });
 
-        using var client = handler.CreateClient("http://localhost");
         var response = await client.GetAsync("/api/echo");
         var body = await response.Content.ReadAsStringAsync();
 
@@ -413,10 +379,8 @@ public class MockHttpHandlerTests
     [Test]
     public async Task HasHeaderMatchesPresence()
     {
-        var handler = Mock.HttpHandler();
-        handler.OnRequest(r => r.HasHeader("X-Api-Key")).Respond(HttpStatusCode.OK);
-
-        using var client = handler.CreateClient("http://localhost");
+        using var client = Mock.HttpClient("http://localhost");
+        client.Handler.OnRequest(r => r.HasHeader("X-Api-Key")).Respond(HttpStatusCode.OK);
 
         // Without header → 404
         var noHeader = await client.GetAsync("/api/data");
@@ -432,14 +396,36 @@ public class MockHttpHandlerTests
     [Test]
     public async Task CustomPredicateMatching()
     {
-        var handler = Mock.HttpHandler();
-        handler.OnRequest(r => r.Matching(req =>
+        using var client = Mock.HttpClient("http://localhost");
+        client.Handler.OnRequest(r => r.Matching(req =>
             req.RequestUri?.Query.Contains("page=1") == true))
             .RespondWithJson("""{"page": 1}""");
 
-        using var client = handler.CreateClient("http://localhost");
         var response = await client.GetAsync("/api/data?page=1&size=10");
 
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+    }
+
+    [Test]
+    public async Task MockHttpClient_IsHttpClient()
+    {
+        using var client = Mock.HttpClient("http://localhost");
+
+        // MockHttpClient IS an HttpClient — can be passed to anything expecting HttpClient
+        HttpClient httpClient = client;
+        await Assert.That(httpClient).IsNotNull();
+    }
+
+    [Test]
+    public async Task MockHttpClient_HandlerPropertyAccessible()
+    {
+        using var client = Mock.HttpClient();
+        client.Handler.OnAnyRequest().RespondWithString("hello");
+
+        // Can set base address after creation
+        client.BaseAddress = new Uri("http://localhost");
+        var response = await client.GetStringAsync("/test");
+
+        await Assert.That(response).IsEqualTo("hello");
     }
 }

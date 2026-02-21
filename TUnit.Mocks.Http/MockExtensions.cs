@@ -14,23 +14,15 @@ public static class MockExtensions
         public static Http.MockHttpHandler HttpHandler() => new();
 
         /// <summary>
-        /// Creates a new <see cref="HttpClient"/> backed by a <see cref="Http.MockHttpHandler"/>.
-        /// Returns both so the handler can be configured and the client injected.
+        /// Creates a new <see cref="Http.MockHttpClient"/> backed by a <see cref="Http.MockHttpHandler"/>.
+        /// Use <c>.Handler</c> on the returned client to configure setups and verify calls.
         /// </summary>
-        public static (Http.MockHttpHandler Handler, HttpClient Client) HttpClient()
-        {
-            var handler = new Http.MockHttpHandler();
-            return (handler, handler.CreateClient());
-        }
+        public static Http.MockHttpClient HttpClient() => new();
 
         /// <summary>
-        /// Creates a new <see cref="HttpClient"/> with a base address, backed by a <see cref="Http.MockHttpHandler"/>.
-        /// Returns both so the handler can be configured and the client injected.
+        /// Creates a new <see cref="Http.MockHttpClient"/> with a base address.
+        /// Use <c>.Handler</c> on the returned client to configure setups and verify calls.
         /// </summary>
-        public static (Http.MockHttpHandler Handler, HttpClient Client) HttpClient(string baseAddress)
-        {
-            var handler = new Http.MockHttpHandler();
-            return (handler, handler.CreateClient(baseAddress));
-        }
+        public static Http.MockHttpClient HttpClient(string baseAddress) => new(baseAddress);
     }
 }
