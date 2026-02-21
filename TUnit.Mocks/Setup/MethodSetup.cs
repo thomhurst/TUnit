@@ -161,7 +161,8 @@ public sealed class MethodSetup
             if (_behaviors.Count == 0)
                 return null;
 
-            var index = _callIndex++;
+            var index = _callIndex;
+            if (_callIndex < int.MaxValue) _callIndex++;
             // Clamp to last behavior (last one repeats)
             return _behaviors[Math.Min(index, _behaviors.Count - 1)];
         }
