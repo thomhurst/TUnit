@@ -31,11 +31,21 @@ public sealed record CallRecord(
     }
 
     /// <summary>
+    /// Backing field for <see cref="IsUnmatched"/>. Exposed for <see cref="System.Threading.Volatile"/> access.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool IsUnmatchedField;
+
+    /// <summary>
     /// Whether this call had no matching setup (fell through to default behavior).
     /// Used by <see cref="Diagnostics.MockDiagnostics"/>.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public bool IsUnmatched { get; internal set; }
+    public bool IsUnmatched
+    {
+        get => Volatile.Read(ref IsUnmatchedField);
+        internal set => Volatile.Write(ref IsUnmatchedField, value);
+    }
 
     public string FormatCall()
     {

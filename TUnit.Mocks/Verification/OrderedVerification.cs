@@ -96,24 +96,48 @@ public static class OrderedVerification
             }
         }
 
-        // Validate that assigned calls are in strictly increasing sequence order
+        // Group assigned calls by expectation and validate ordering between groups.
+        // Within each expectation, calls may be interleaved with other expectations' calls.
+        // We only require: max(expectation[i].sequences) < min(expectation[i+1].sequences)
+        var expectationGroups = new List<(OrderedCallExpectation Expectation, long MinSeq, long MaxSeq)>();
+        var currentExpectation = assignedCalls[0].Expectation;
+        long minSeq = assignedCalls[0].Call.SequenceNumber;
+        long maxSeq = assignedCalls[0].Call.SequenceNumber;
+
         for (int i = 1; i < assignedCalls.Count; i++)
         {
-            var prev = assignedCalls[i - 1];
-            var curr = assignedCalls[i];
+            if (ReferenceEquals(assignedCalls[i].Expectation, currentExpectation))
+            {
+                var seq = assignedCalls[i].Call.SequenceNumber;
+                if (seq < minSeq) minSeq = seq;
+                if (seq > maxSeq) maxSeq = seq;
+            }
+            else
+            {
+                expectationGroups.Add((currentExpectation, minSeq, maxSeq));
+                currentExpectation = assignedCalls[i].Expectation;
+                minSeq = assignedCalls[i].Call.SequenceNumber;
+                maxSeq = assignedCalls[i].Call.SequenceNumber;
+            }
+        }
+        expectationGroups.Add((currentExpectation, minSeq, maxSeq));
 
-            if (curr.Call.SequenceNumber < prev.Call.SequenceNumber)
+        for (int i = 1; i < expectationGroups.Count; i++)
+        {
+            var prev = expectationGroups[i - 1];
+            var curr = expectationGroups[i];
+
+            if (curr.MinSeq < prev.MaxSeq)
             {
                 var sb = new System.Text.StringBuilder();
                 sb.AppendLine("Ordered verification failed.");
                 sb.AppendLine("  Expected calls in this order:");
-                for (int j = 0; j < assignedCalls.Count; j++)
+                for (int j = 0; j < expectationGroups.Count; j++)
                 {
                     var marker = j == i ? " <-- out of order" : "";
-                    sb.AppendLine($"    {j + 1}. {FormatExpectedCall(assignedCalls[j].Expectation)}{marker}");
+                    sb.AppendLine($"    {j + 1}. {FormatExpectedCall(expectationGroups[j].Expectation)}{marker}");
                 }
                 sb.AppendLine("  Actual call order (by sequence):");
-                // Collect all relevant calls, sort by sequence
                 var allRelevant = assignedCalls
                     .Select(a => a.Call)
                     .OrderBy(c => c.SequenceNumber)

@@ -119,7 +119,11 @@ public class Mock<T> : IMock where T : class
         {
             if (setup.InvokeCount == 0)
             {
-                uninvoked.Add(setup.MemberName);
+                var matchers = setup.GetMatcherDescriptions();
+                var desc = matchers.Length > 0
+                    ? $"{setup.MemberName}({string.Join(", ", matchers)})"
+                    : $"{setup.MemberName}()";
+                uninvoked.Add(desc);
             }
         }
 
