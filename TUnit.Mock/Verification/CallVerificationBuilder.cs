@@ -55,6 +55,12 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
             var actualCallDescriptions = allCallsForMember.Select(c => c.FormatCall()).ToList();
             throw new MockVerificationException(expectedCall, times, matchingCount, actualCallDescriptions);
         }
+
+        // Mark matched calls as verified for VerifyNoOtherCalls
+        foreach (var call in matchingCalls)
+        {
+            call.IsVerified = true;
+        }
     }
 
     /// <inheritdoc />

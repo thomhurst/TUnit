@@ -68,7 +68,7 @@ namespace TUnit.Mock.Generated
         {
             var s = (IGreeter_MockSetup)setup;
             var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { name.Matcher };
-            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(0, matchers);
+            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(0, matchers, "Greet");
             s.Engine.AddSetup(methodSetup);
             return new global::TUnit.Mock.Setup.MethodSetupBuilder<string>(methodSetup);
         }

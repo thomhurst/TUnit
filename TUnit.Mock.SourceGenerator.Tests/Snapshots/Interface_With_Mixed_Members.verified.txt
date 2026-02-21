@@ -45,14 +45,14 @@ namespace TUnit.Mock.Generated
 
         public event global::System.EventHandler<string>? StatusChanged
         {
-            add => _backing_StatusChanged += value;
-            remove => _backing_StatusChanged -= value;
+            add { _backing_StatusChanged += value; _engine.RecordEventSubscription("StatusChanged", true); }
+            remove { _backing_StatusChanged -= value; _engine.RecordEventSubscription("StatusChanged", false); }
         }
 
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        internal void Raise_StatusChanged(string args)
+        internal void Raise_StatusChanged(string e)
         {
-            _backing_StatusChanged?.Invoke(this, args);
+            _backing_StatusChanged?.Invoke(this, e);
         }
     }
 }
@@ -103,10 +103,10 @@ namespace TUnit.Mock.Generated
 
     public static class IService_MockRaiseExtensions
     {
-        public static void StatusChanged(this global::TUnit.Mock.IMockRaise<global::IService> raise, string args)
+        public static void StatusChanged(this global::TUnit.Mock.IMockRaise<global::IService> raise, string e)
         {
             var r = (IService_MockRaise)raise;
-            r.Impl.Raise_StatusChanged(args);
+            r.Impl.Raise_StatusChanged(e);
         }
     }
 }
@@ -132,7 +132,7 @@ namespace TUnit.Mock.Generated
         {
             var s = (IService_MockSetup)setup;
             var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { id.Matcher };
-            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(3, matchers);
+            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(3, matchers, "GetAsync");
             s.Engine.AddSetup(methodSetup);
             return new global::TUnit.Mock.Setup.MethodSetupBuilder<string>(methodSetup);
         }
@@ -141,7 +141,7 @@ namespace TUnit.Mock.Generated
         {
             var s = (IService_MockSetup)setup;
             var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { data.Matcher };
-            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(4, matchers);
+            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(4, matchers, "Process");
             s.Engine.AddSetup(methodSetup);
             return new global::TUnit.Mock.Setup.VoidMethodSetupBuilder(methodSetup);
         }
@@ -150,7 +150,7 @@ namespace TUnit.Mock.Generated
         {
             var s = (IService_MockSetup)setup;
             var matchers = global::System.Array.Empty<global::TUnit.Mock.Arguments.IArgumentMatcher>();
-            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(0, matchers);
+            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(0, matchers, "Name (get)");
             s.Engine.AddSetup(methodSetup);
             return new global::TUnit.Mock.Setup.PropertySetupBuilder<string>(methodSetup);
         }
@@ -159,7 +159,7 @@ namespace TUnit.Mock.Generated
         {
             var s = (IService_MockSetup)setup;
             var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { value.Matcher };
-            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(1, matchers);
+            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(1, matchers, "Name (set)");
             s.Engine.AddSetup(methodSetup);
             return new global::TUnit.Mock.Setup.PropertySetterSetupBuilder(methodSetup);
         }
@@ -168,7 +168,7 @@ namespace TUnit.Mock.Generated
         {
             var s = (IService_MockSetup)setup;
             var matchers = global::System.Array.Empty<global::TUnit.Mock.Arguments.IArgumentMatcher>();
-            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(2, matchers);
+            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(2, matchers, "Count (get)");
             s.Engine.AddSetup(methodSetup);
             return new global::TUnit.Mock.Setup.PropertySetupBuilder<int>(methodSetup);
         }

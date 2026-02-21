@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using TUnit.Mock.Matchers;
 
 namespace TUnit.Mock.Arguments;
@@ -25,4 +26,29 @@ public static class Arg
 
     /// <summary>Matches any value and captures it into the supplied <see cref="ArgCapture{T}"/>.</summary>
     public static Arg<T> Capture<T>(ArgCapture<T> capture) => new(new CaptureMatcher<T>(capture));
+
+    /// <summary>Matches a string against a regular expression pattern.</summary>
+    public static Arg<string> Matches(string pattern) => new(new RegexMatcher(pattern));
+
+    /// <summary>Matches a string against a compiled <see cref="Regex"/>.</summary>
+    public static Arg<string> Matches(Regex regex) => new(new RegexMatcher(regex));
+
+    /// <summary>Matches using a user-defined custom matcher.</summary>
+    public static Arg<T> Matches<T>(IArgumentMatcher<T> matcher) => new(matcher);
+
+    /// <summary>Matches a collection containing the specified item.</summary>
+    public static Arg<TCollection> Contains<TCollection, TElement>(TElement item)
+        where TCollection : IEnumerable<TElement>
+        => new(new ContainsMatcher<TElement>(item));
+
+    /// <summary>Matches a collection with the specified number of elements.</summary>
+    public static Arg<T> HasCount<T>(int count) => new(new CountMatcher(count));
+
+    /// <summary>Matches an empty collection.</summary>
+    public static Arg<T> IsEmpty<T>() => new(new EmptyMatcher());
+
+    /// <summary>Matches a collection with element-by-element equality.</summary>
+    public static Arg<TCollection> SequenceEquals<TCollection, TElement>(IEnumerable<TElement> expected)
+        where TCollection : IEnumerable<TElement>
+        => new(new SequenceEqualsMatcher<TElement>(expected));
 }

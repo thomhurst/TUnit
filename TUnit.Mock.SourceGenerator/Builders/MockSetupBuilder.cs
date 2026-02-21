@@ -89,7 +89,7 @@ internal static class MockSetupBuilder
                 writer.AppendLine($"var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] {{ {matcherArgs} }};");
             }
 
-            writer.AppendLine($"var methodSetup = new global::TUnit.Mock.Setup.MethodSetup({method.MemberId}, matchers);");
+            writer.AppendLine($"var methodSetup = new global::TUnit.Mock.Setup.MethodSetup({method.MemberId}, matchers, \"{method.Name}\");");
             writer.AppendLine("s.Engine.AddSetup(methodSetup);");
 
             if (method.IsVoid)
@@ -114,7 +114,7 @@ internal static class MockSetupBuilder
             {
                 writer.AppendLine($"var s = ({safeName}_MockSetup)setup;");
                 writer.AppendLine("var matchers = global::System.Array.Empty<global::TUnit.Mock.Arguments.IArgumentMatcher>();");
-                writer.AppendLine($"var methodSetup = new global::TUnit.Mock.Setup.MethodSetup({prop.MemberId}, matchers);");
+                writer.AppendLine($"var methodSetup = new global::TUnit.Mock.Setup.MethodSetup({prop.MemberId}, matchers, \"{prop.Name} (get)\");");
                 writer.AppendLine("s.Engine.AddSetup(methodSetup);");
                 writer.AppendLine($"return new global::TUnit.Mock.Setup.PropertySetupBuilder<{prop.ReturnType}>(methodSetup);");
             }
@@ -129,7 +129,7 @@ internal static class MockSetupBuilder
             {
                 writer.AppendLine($"var s = ({safeName}_MockSetup)setup;");
                 writer.AppendLine("var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { value.Matcher };");
-                writer.AppendLine($"var methodSetup = new global::TUnit.Mock.Setup.MethodSetup({setterMemberId}, matchers);");
+                writer.AppendLine($"var methodSetup = new global::TUnit.Mock.Setup.MethodSetup({setterMemberId}, matchers, \"{prop.Name} (set)\");");
                 writer.AppendLine("s.Engine.AddSetup(methodSetup);");
                 writer.AppendLine("return new global::TUnit.Mock.Setup.PropertySetterSetupBuilder(methodSetup);");
             }

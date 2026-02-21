@@ -23,12 +23,22 @@ public sealed class MockEngine<T> where T : class
     private readonly List<MethodSetup> _setups = new();
     private readonly ReaderWriterLockSlim _setupLock = new();
     private readonly ConcurrentQueue<CallRecord> _callHistory = new();
+    private readonly ConcurrentDictionary<string, object?> _autoTrackValues = new();
+    private readonly ConcurrentQueue<(string EventName, bool IsSubscribe)> _eventSubscriptions = new();
+
+    /// <summary>
+    /// When true, property setters automatically store values and getters return them,
+    /// acting like real auto-properties. Explicit setups take precedence.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool AutoTrackProperties { get; set; }
 
     public MockBehavior Behavior { get; }
 
     public MockEngine(MockBehavior behavior)
     {
         Behavior = behavior;
+        AutoTrackProperties = behavior == MockBehavior.Loose;
     }
 
     /// <summary>
@@ -53,6 +63,12 @@ public sealed class MockEngine<T> where T : class
     public void HandleCall(int memberId, string memberName, object?[] args)
     {
         RecordCall(memberId, memberName, args);
+
+        // Auto-track property setters: store value keyed by property name
+        if (AutoTrackProperties && memberName.StartsWith("set_") && args.Length > 0)
+        {
+            _autoTrackValues[memberName.Substring(4)] = args[0];
+        }
 
         var (setupFound, behavior) = FindMatchingSetup(memberId, args);
 
@@ -97,6 +113,16 @@ public sealed class MockEngine<T> where T : class
         if (setupFound)
         {
             return defaultValue;
+        }
+
+        // Auto-track property getters: return stored value if available
+        if (AutoTrackProperties && memberName.StartsWith("get_"))
+        {
+            if (_autoTrackValues.TryGetValue(memberName.Substring(4), out var trackedValue))
+            {
+                if (trackedValue is TReturn typed) return typed;
+                if (trackedValue is null) return default(TReturn)!;
+            }
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -185,6 +211,40 @@ public sealed class MockEngine<T> where T : class
     }
 
     /// <summary>
+    /// Gets all recorded calls that have not been matched by a verification statement.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public IReadOnlyList<CallRecord> GetUnverifiedCalls()
+    {
+        var result = new List<CallRecord>();
+        foreach (var record in _callHistory)
+        {
+            if (!record.IsVerified)
+            {
+                result.Add(record);
+            }
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// Gets all registered setups.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public IReadOnlyList<MethodSetup> GetSetups()
+    {
+        _setupLock.EnterReadLock();
+        try
+        {
+            return _setups.ToList();
+        }
+        finally
+        {
+            _setupLock.ExitReadLock();
+        }
+    }
+
+    /// <summary>
     /// Clears all setups and call history.
     /// </summary>
     public void Reset()
@@ -201,6 +261,48 @@ public sealed class MockEngine<T> where T : class
 
         // Drain the queue
         while (_callHistory.TryDequeue(out _)) { }
+
+        _autoTrackValues.Clear();
+        while (_eventSubscriptions.TryDequeue(out _)) { }
+    }
+
+    /// <summary>
+    /// Records an event subscription (add) or unsubscription (remove). Called by generated event accessors.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public void RecordEventSubscription(string eventName, bool isSubscribe)
+    {
+        _eventSubscriptions.Enqueue((eventName, isSubscribe));
+    }
+
+    /// <summary>
+    /// Gets the current subscriber count for a named event (subscribes minus unsubscribes).
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public int GetEventSubscriberCount(string eventName)
+    {
+        int count = 0;
+        foreach (var (name, isSub) in _eventSubscriptions)
+        {
+            if (name == eventName)
+            {
+                count += isSub ? 1 : -1;
+            }
+        }
+        return Math.Max(0, count);
+    }
+
+    /// <summary>
+    /// Returns true if any subscription was ever recorded for the named event.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool WasEventSubscribed(string eventName)
+    {
+        foreach (var (name, isSub) in _eventSubscriptions)
+        {
+            if (name == eventName && isSub) return true;
+        }
+        return false;
     }
 
     private void RecordCall(int memberId, string memberName, object?[] args)
@@ -220,6 +322,7 @@ public sealed class MockEngine<T> where T : class
                 var setup = _setups[i];
                 if (setup.MemberId == memberId && setup.Matches(args))
                 {
+                    setup.IncrementInvokeCount();
                     return (true, setup.GetNextBehavior());
                 }
             }

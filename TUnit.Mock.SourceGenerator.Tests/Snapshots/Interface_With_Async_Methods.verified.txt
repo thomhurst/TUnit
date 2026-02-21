@@ -115,7 +115,7 @@ namespace TUnit.Mock.Generated
         {
             var s = (IAsyncService_MockSetup)setup;
             var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { key.Matcher };
-            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(0, matchers);
+            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(0, matchers, "GetValueAsync");
             s.Engine.AddSetup(methodSetup);
             return new global::TUnit.Mock.Setup.MethodSetupBuilder<string>(methodSetup);
         }
@@ -124,7 +124,7 @@ namespace TUnit.Mock.Generated
         {
             var s = (IAsyncService_MockSetup)setup;
             var matchers = global::System.Array.Empty<global::TUnit.Mock.Arguments.IArgumentMatcher>();
-            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(1, matchers);
+            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(1, matchers, "DoWorkAsync");
             s.Engine.AddSetup(methodSetup);
             return new global::TUnit.Mock.Setup.VoidMethodSetupBuilder(methodSetup);
         }
@@ -133,7 +133,7 @@ namespace TUnit.Mock.Generated
         {
             var s = (IAsyncService_MockSetup)setup;
             var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { input.Matcher };
-            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(2, matchers);
+            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(2, matchers, "ComputeAsync");
             s.Engine.AddSetup(methodSetup);
             return new global::TUnit.Mock.Setup.MethodSetupBuilder<int>(methodSetup);
         }
@@ -142,7 +142,7 @@ namespace TUnit.Mock.Generated
         {
             var s = (IAsyncService_MockSetup)setup;
             var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { ct.Matcher };
-            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(3, matchers);
+            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(3, matchers, "InitializeAsync");
             s.Engine.AddSetup(methodSetup);
             return new global::TUnit.Mock.Setup.VoidMethodSetupBuilder(methodSetup);
         }

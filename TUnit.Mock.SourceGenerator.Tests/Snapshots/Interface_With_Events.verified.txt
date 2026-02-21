@@ -21,14 +21,14 @@ namespace TUnit.Mock.Generated
 
         public event global::System.EventHandler<string>? ItemAdded
         {
-            add => _backing_ItemAdded += value;
-            remove => _backing_ItemAdded -= value;
+            add { _backing_ItemAdded += value; _engine.RecordEventSubscription("ItemAdded", true); }
+            remove { _backing_ItemAdded -= value; _engine.RecordEventSubscription("ItemAdded", false); }
         }
 
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        internal void Raise_ItemAdded(string args)
+        internal void Raise_ItemAdded(string e)
         {
-            _backing_ItemAdded?.Invoke(this, args);
+            _backing_ItemAdded?.Invoke(this, e);
         }
     }
 }
@@ -79,10 +79,10 @@ namespace TUnit.Mock.Generated
 
     public static class INotifier_MockRaiseExtensions
     {
-        public static void ItemAdded(this global::TUnit.Mock.IMockRaise<global::INotifier> raise, string args)
+        public static void ItemAdded(this global::TUnit.Mock.IMockRaise<global::INotifier> raise, string e)
         {
             var r = (INotifier_MockRaise)raise;
-            r.Impl.Raise_ItemAdded(args);
+            r.Impl.Raise_ItemAdded(e);
         }
     }
 }
@@ -108,7 +108,7 @@ namespace TUnit.Mock.Generated
         {
             var s = (INotifier_MockSetup)setup;
             var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { message.Matcher };
-            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(0, matchers);
+            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(0, matchers, "Notify");
             s.Engine.AddSetup(methodSetup);
             return new global::TUnit.Mock.Setup.VoidMethodSetupBuilder(methodSetup);
         }

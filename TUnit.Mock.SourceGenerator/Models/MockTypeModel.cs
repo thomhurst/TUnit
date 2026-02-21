@@ -19,6 +19,7 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
     public EquatableArray<MockMemberModel> Properties { get; init; } = EquatableArray<MockMemberModel>.Empty;
     public EquatableArray<MockEventModel> Events { get; init; } = EquatableArray<MockEventModel>.Empty;
     public EquatableArray<string> AllInterfaces { get; init; } = EquatableArray<string>.Empty;
+    public EquatableArray<string> AdditionalInterfaceNames { get; init; } = EquatableArray<string>.Empty;
     public EquatableArray<MockConstructorModel> Constructors { get; init; } = EquatableArray<MockConstructorModel>.Empty;
 
     public bool Equals(MockTypeModel? other)
@@ -35,6 +36,7 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
             && Properties.Equals(other.Properties)
             && Events.Equals(other.Events)
             && AllInterfaces.Equals(other.AllInterfaces)
+            && AdditionalInterfaceNames.Equals(other.AdditionalInterfaceNames)
             && Constructors.Equals(other.Constructors);
     }
 
@@ -48,6 +50,7 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
             hash = hash * 31 + Methods.GetHashCode();
             hash = hash * 31 + Properties.GetHashCode();
             hash = hash * 31 + Events.GetHashCode();
+            hash = hash * 31 + AdditionalInterfaceNames.GetHashCode();
             return hash;
         }
     }

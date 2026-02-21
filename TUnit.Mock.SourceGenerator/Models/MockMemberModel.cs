@@ -28,6 +28,7 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
     public string UnwrappedSmartDefault { get; init; } = "default!";
     public bool IsAbstractMember { get; init; }
     public bool IsVirtualMember { get; init; }
+    public bool IsProtected { get; init; }
 
     public bool Equals(MockMemberModel? other)
     {
@@ -52,7 +53,8 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             && SmartDefault == other.SmartDefault
             && UnwrappedSmartDefault == other.UnwrappedSmartDefault
             && IsAbstractMember == other.IsAbstractMember
-            && IsVirtualMember == other.IsVirtualMember;
+            && IsVirtualMember == other.IsVirtualMember
+            && IsProtected == other.IsProtected;
     }
 
     public override int GetHashCode()

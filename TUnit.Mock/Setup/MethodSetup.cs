@@ -17,11 +17,29 @@ public sealed class MethodSetup
 
     public int MemberId { get; }
 
-    public MethodSetup(int memberId, IArgumentMatcher[] matchers)
+    /// <summary>
+    /// The number of times this setup has been matched and invoked.
+    /// Used by <see cref="Mock{T}.VerifyAll"/>.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public int InvokeCount => _invokeCount;
+    private int _invokeCount;
+
+    /// <summary>
+    /// Describes the setup for error messages.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public string MemberName { get; }
+
+    public MethodSetup(int memberId, IArgumentMatcher[] matchers, string memberName = "")
     {
         MemberId = memberId;
         _matchers = matchers;
+        MemberName = memberName;
     }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public void IncrementInvokeCount() => Interlocked.Increment(ref _invokeCount);
 
     public void AddBehavior(IBehavior behavior)
     {

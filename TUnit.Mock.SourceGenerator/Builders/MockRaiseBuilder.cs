@@ -45,10 +45,22 @@ internal static class MockRaiseBuilder
     {
         var extensionParam = $"this global::TUnit.Mock.IMockRaise<{model.FullyQualifiedName}> raise";
 
-        using (writer.Block($"public static void {evt.Name}({extensionParam}, {evt.EventArgsType} args)"))
+        // Build parameter list: extension param + raise parameters
+        var raiseParams = string.IsNullOrEmpty(evt.RaiseParameters)
+            ? extensionParam
+            : $"{extensionParam}, {evt.RaiseParameters}";
+
+        // Build argument pass-through for the Raise_ call
+        // Extract just the parameter names from RaiseParameters (e.g., "string args" → "args")
+        var raiseArgNames = string.IsNullOrEmpty(evt.RaiseParameters)
+            ? ""
+            : string.Join(", ", evt.RaiseParameters.Split(',')
+                .Select(p => p.Trim().Split(' ').Last()));
+
+        using (writer.Block($"public static void {evt.Name}({raiseParams})"))
         {
             writer.AppendLine($"var r = ({safeName}_MockRaise)raise;");
-            writer.AppendLine($"r.Impl.Raise_{evt.Name}(args);");
+            writer.AppendLine($"r.Impl.Raise_{evt.Name}({raiseArgNames});");
         }
     }
 }

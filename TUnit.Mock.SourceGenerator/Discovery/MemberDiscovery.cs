@@ -96,6 +96,82 @@ internal static class MemberDiscovery
         );
     }
 
+    /// <summary>
+    /// Discovers members from multiple type symbols, merging and deduplicating across all.
+    /// Used for multi-interface mocks like Mock.Of&lt;T1, T2&gt;().
+    /// </summary>
+    public static (EquatableArray<MockMemberModel> Methods, EquatableArray<MockMemberModel> Properties, EquatableArray<MockEventModel> Events)
+        DiscoverMembersFromMultipleTypes(INamedTypeSymbol[] typeSymbols)
+    {
+        var methods = new List<MockMemberModel>();
+        var properties = new List<MockMemberModel>();
+        var events = new List<MockEventModel>();
+
+        var seenMethods = new HashSet<string>();
+        var seenProperties = new HashSet<string>();
+        var seenEvents = new HashSet<string>();
+
+        int memberIdCounter = 0;
+
+        foreach (var typeSymbol in typeSymbols)
+        {
+            // Collect all interfaces to scan (the type itself + its inherited interfaces)
+            var interfaces = typeSymbol.TypeKind == TypeKind.Interface
+                ? new[] { typeSymbol }.Concat(typeSymbol.AllInterfaces)
+                : typeSymbol.AllInterfaces.AsEnumerable();
+
+            foreach (var iface in interfaces)
+            {
+                foreach (var member in iface.GetMembers())
+                {
+                    if (member.IsStatic) continue;
+
+                    switch (member)
+                    {
+                        case IMethodSymbol method when method.MethodKind == MethodKind.Ordinary:
+                        {
+                            var key = GetMethodKey(method);
+                            if (!seenMethods.Add(key)) continue;
+                            methods.Add(CreateMethodModel(method, ref memberIdCounter, null));
+                            break;
+                        }
+
+                        case IPropertySymbol property when !property.IsIndexer:
+                        {
+                            var key = $"P:{property.Name}";
+                            if (!seenProperties.Add(key)) continue;
+                            properties.Add(CreatePropertyModel(property, ref memberIdCounter, null));
+                            break;
+                        }
+
+                        case IPropertySymbol indexer when indexer.IsIndexer:
+                        {
+                            var paramTypes = string.Join(",", indexer.Parameters.Select(p => p.Type.GetFullyQualifiedName()));
+                            var key = $"I:[{paramTypes}]";
+                            if (!seenProperties.Add(key)) continue;
+                            properties.Add(CreateIndexerModel(indexer, ref memberIdCounter, null));
+                            break;
+                        }
+
+                        case IEventSymbol evt:
+                        {
+                            var key = $"E:{evt.Name}";
+                            if (!seenEvents.Add(key)) continue;
+                            events.Add(CreateEventModel(evt, null));
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        return (
+            new EquatableArray<MockMemberModel>(methods.ToImmutableArray()),
+            new EquatableArray<MockMemberModel>(properties.ToImmutableArray()),
+            new EquatableArray<MockEventModel>(events.ToImmutableArray())
+        );
+    }
+
     private static void ProcessClassMembers(
         ITypeSymbol typeSymbol,
         List<MockMemberModel> methods,
@@ -113,6 +189,11 @@ internal static class MemberDiscovery
             foreach (var member in current.GetMembers())
             {
                 if (member.IsStatic) continue;
+
+                // Skip private members and sealed overrides (can't override them)
+                if (member.DeclaredAccessibility == Accessibility.Private) continue;
+                if (member is IMethodSymbol { IsSealed: true }) continue;
+                if (member is IPropertySymbol { IsSealed: true }) continue;
 
                 switch (member)
                 {
@@ -193,7 +274,9 @@ internal static class MemberDiscovery
             SmartDefault = isVoid ? "" : returnType.GetSmartDefault(returnType.IsNullableAnnotated()),
             UnwrappedSmartDefault = ComputeUnwrappedSmartDefault(returnType, isVoid, isAsync),
             IsAbstractMember = method.IsAbstract,
-            IsVirtualMember = method.IsVirtual || method.IsOverride
+            IsVirtualMember = method.IsVirtual || method.IsOverride,
+            IsProtected = method.DeclaredAccessibility == Accessibility.Protected
+                       || method.DeclaredAccessibility == Accessibility.ProtectedOrInternal
         };
     }
 
@@ -218,7 +301,9 @@ internal static class MemberDiscovery
             NullableAnnotation = property.Type.NullableAnnotation.ToString(),
             SmartDefault = property.Type.GetSmartDefault(property.Type.IsNullableAnnotated()),
             IsAbstractMember = property.IsAbstract,
-            IsVirtualMember = property.IsVirtual || property.IsOverride
+            IsVirtualMember = property.IsVirtual || property.IsOverride,
+            IsProtected = property.DeclaredAccessibility == Accessibility.Protected
+                       || property.DeclaredAccessibility == Accessibility.ProtectedOrInternal
         };
     }
 
@@ -287,21 +372,62 @@ internal static class MemberDiscovery
 
     private static MockEventModel CreateEventModel(IEventSymbol evt, string? explicitInterfaceName)
     {
-        var eventArgsType = "global::System.EventArgs";
+        var eventHandlerType = evt.Type.GetFullyQualifiedName();
 
-        if (evt.Type is INamedTypeSymbol { IsGenericType: true } namedType &&
-            namedType.TypeArguments.Length == 1)
+        // Determine if this is an EventHandler pattern (sender + args)
+        var isEventHandlerPattern = IsEventHandlerType(evt.Type);
+
+        // Get the delegate's Invoke method to inspect parameters
+        var invokeMethod = (evt.Type as INamedTypeSymbol)?.DelegateInvokeMethod;
+
+        string raiseParameters;
+        string invokeArgs;
+        string eventArgsType;
+
+        if (invokeMethod is null || invokeMethod.Parameters.Length == 0)
         {
-            eventArgsType = namedType.TypeArguments[0].GetFullyQualifiedName();
+            // Parameterless delegate (e.g., Action)
+            raiseParameters = "";
+            invokeArgs = "";
+            eventArgsType = "";
+        }
+        else if (isEventHandlerPattern && invokeMethod.Parameters.Length >= 2)
+        {
+            // EventHandler pattern: skip sender (first param), expose remaining as raise params
+            var argsParams = invokeMethod.Parameters.Skip(1).ToArray();
+            raiseParameters = string.Join(", ", argsParams.Select(p => $"{p.Type.GetFullyQualifiedName()} {p.Name}"));
+            invokeArgs = "this, " + string.Join(", ", argsParams.Select(p => p.Name));
+            eventArgsType = argsParams.Length == 1
+                ? argsParams[0].Type.GetFullyQualifiedName()
+                : raiseParameters; // fallback for multi-arg EventHandler subtypes
+        }
+        else
+        {
+            // Custom delegate (Action<T>, Func<T>, user-defined): expose all params
+            raiseParameters = string.Join(", ", invokeMethod.Parameters.Select(p => $"{p.Type.GetFullyQualifiedName()} {p.Name}"));
+            invokeArgs = string.Join(", ", invokeMethod.Parameters.Select(p => p.Name));
+            eventArgsType = raiseParameters;
         }
 
         return new MockEventModel
         {
             Name = evt.Name,
-            EventHandlerType = evt.Type.GetFullyQualifiedName(),
+            EventHandlerType = eventHandlerType,
+            RaiseParameters = raiseParameters,
+            InvokeArgs = invokeArgs,
             EventArgsType = eventArgsType,
             ExplicitInterfaceName = explicitInterfaceName
         };
+    }
+
+    private static bool IsEventHandlerType(ITypeSymbol type)
+    {
+        if (type is not INamedTypeSymbol namedType)
+            return false;
+
+        // Check if the type is System.EventHandler or System.EventHandler<T>
+        var fullName = namedType.ConstructedFrom.ToDisplayString();
+        return fullName == "System.EventHandler" || fullName == "System.EventHandler<TEventArgs>";
     }
 
     private static string ComputeUnwrappedSmartDefault(ITypeSymbol returnType, bool isVoid, bool isAsync)

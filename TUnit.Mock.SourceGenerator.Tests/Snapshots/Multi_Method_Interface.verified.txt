@@ -78,7 +78,7 @@ namespace TUnit.Mock.Generated
         {
             var s = (ICalculator_MockSetup)setup;
             var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { a.Matcher, b.Matcher };
-            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(0, matchers);
+            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(0, matchers, "Add");
             s.Engine.AddSetup(methodSetup);
             return new global::TUnit.Mock.Setup.MethodSetupBuilder<int>(methodSetup);
         }
@@ -87,7 +87,7 @@ namespace TUnit.Mock.Generated
         {
             var s = (ICalculator_MockSetup)setup;
             var matchers = new global::TUnit.Mock.Arguments.IArgumentMatcher[] { a.Matcher, b.Matcher };
-            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(1, matchers);
+            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(1, matchers, "Subtract");
             s.Engine.AddSetup(methodSetup);
             return new global::TUnit.Mock.Setup.MethodSetupBuilder<int>(methodSetup);
         }
@@ -96,7 +96,7 @@ namespace TUnit.Mock.Generated
         {
             var s = (ICalculator_MockSetup)setup;
             var matchers = global::System.Array.Empty<global::TUnit.Mock.Arguments.IArgumentMatcher>();
-            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(2, matchers);
+            var methodSetup = new global::TUnit.Mock.Setup.MethodSetup(2, matchers, "Reset");
             s.Engine.AddSetup(methodSetup);
             return new global::TUnit.Mock.Setup.VoidMethodSetupBuilder(methodSetup);
         }

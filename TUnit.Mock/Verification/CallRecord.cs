@@ -14,6 +14,13 @@ public sealed record CallRecord(
     long SequenceNumber
 )
 {
+    /// <summary>
+    /// Whether this call has been matched by a verification statement.
+    /// Used by <see cref="Mock{T}.VerifyNoOtherCalls"/>.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool IsVerified { get; internal set; }
+
     public string FormatCall()
     {
         var args = string.Join(", ", Arguments.Select(a => a?.ToString() ?? "null"));

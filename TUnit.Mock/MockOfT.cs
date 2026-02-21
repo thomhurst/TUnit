@@ -1,3 +1,6 @@
+using TUnit.Mock.Exceptions;
+using TUnit.Mock.Verification;
+
 namespace TUnit.Mock;
 
 /// <summary>
@@ -8,7 +11,7 @@ namespace TUnit.Mock;
 /// This approach is fully AOT-compatible — no dynamic dispatch is needed.
 /// </para>
 /// </summary>
-public class Mock<T> where T : class
+public class Mock<T> : IMock where T : class
 {
     /// <summary>The mock engine. Used by generated code. Not intended for direct use.</summary>
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
@@ -74,8 +77,69 @@ public class Mock<T> where T : class
         Raise = (IMockRaise<T>?)raise;
     }
 
+    /// <summary>All calls made to this mock, in order.</summary>
+    public IReadOnlyList<CallRecord> Invocations => Engine.GetAllCalls();
+
+    /// <summary>
+    /// Enables auto-tracking for all properties. Property setters store values and getters return them,
+    /// acting like real auto-properties. Explicit setups take precedence over auto-tracked values.
+    /// </summary>
+    public void SetupAllProperties()
+    {
+        Engine.AutoTrackProperties = true;
+    }
+
     /// <summary>Clears all setups and call history.</summary>
     public void Reset() => Engine.Reset();
+
+    /// <summary>
+    /// Gets the current number of subscribers for the named event.
+    /// </summary>
+    public int GetEventSubscriberCount(string eventName) => Engine.GetEventSubscriberCount(eventName);
+
+    /// <summary>
+    /// Returns true if the named event was ever subscribed to.
+    /// </summary>
+    public bool WasEventSubscribed(string eventName) => Engine.WasEventSubscribed(eventName);
+
+    /// <summary>
+    /// Verifies all registered setups were invoked at least once.
+    /// Throws <see cref="MockVerificationException"/> listing uninvoked setups.
+    /// </summary>
+    public void VerifyAll()
+    {
+        var setups = Engine.GetSetups();
+        var uninvoked = new List<string>();
+        foreach (var setup in setups)
+        {
+            if (setup.InvokeCount == 0)
+            {
+                uninvoked.Add(setup.MemberName);
+            }
+        }
+
+        if (uninvoked.Count > 0)
+        {
+            var message = $"VerifyAll failed. The following setups were never invoked:\n" +
+                          string.Join("\n", uninvoked.Select(s => $"  - {s}"));
+            throw new MockVerificationException(message);
+        }
+    }
+
+    /// <summary>
+    /// Fails if any recorded call was not matched by a prior verification statement.
+    /// Throws <see cref="MockVerificationException"/> listing unverified calls.
+    /// </summary>
+    public void VerifyNoOtherCalls()
+    {
+        var unverified = Engine.GetUnverifiedCalls();
+        if (unverified.Count > 0)
+        {
+            var message = $"VerifyNoOtherCalls failed. The following calls were not verified:\n" +
+                          string.Join("\n", unverified.Select(c => $"  - {c.FormatCall()}"));
+            throw new MockVerificationException(message);
+        }
+    }
 
     /// <summary>Implicit conversion to T -- no .Object needed.</summary>
     public static implicit operator T(Mock<T> mock) => mock.Object;
