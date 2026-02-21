@@ -183,6 +183,7 @@ public class Mock<T> : IMock where T : class
     /// </summary>
     public void InState(string stateName, Action<IMockSetup<T>> configure)
     {
+        var previous = Engine.PendingRequiredState;
         Engine.PendingRequiredState = stateName;
         try
         {
@@ -190,7 +191,7 @@ public class Mock<T> : IMock where T : class
         }
         finally
         {
-            Engine.PendingRequiredState = null;
+            Engine.PendingRequiredState = previous;
         }
     }
 

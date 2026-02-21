@@ -80,7 +80,7 @@ public sealed class MockEngine<T> where T : class
     /// Transitions the engine to the specified state. Null clears the state.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public void TransitionTo(string? stateName) => _currentState = stateName;
+    public void TransitionTo(string? stateName) { lock (_setupLock) { _currentState = stateName; } }
 
     /// <summary>
     /// Gets the current state name. Null means no state.
