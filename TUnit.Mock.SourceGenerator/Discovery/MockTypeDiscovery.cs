@@ -215,7 +215,7 @@ internal static class MockTypeDiscovery
             // Skip BCL/system interfaces — they have members (indexers, explicit implementations)
             // that the mock generator cannot handle, and auto-mocking them is rarely useful.
             var ns = namedReturn.ContainingNamespace?.ToDisplayString() ?? "";
-            if (ns.StartsWith("System") || ns.StartsWith("Microsoft") || ns.StartsWith("Windows"))
+            if (IsFrameworkNamespace(ns))
                 continue;
 
             var returnFqn = namedReturn.GetFullyQualifiedName();
@@ -250,6 +250,11 @@ internal static class MockTypeDiscovery
         }
         return type;
     }
+
+    private static bool IsFrameworkNamespace(string ns) =>
+        ns == "System"    || ns.StartsWith("System.") ||
+        ns == "Microsoft" || ns.StartsWith("Microsoft.") ||
+        ns == "Windows"   || ns.StartsWith("Windows.");
 
     private static MockTypeModel? BuildDelegateTypeModel(INamedTypeSymbol delegateType)
     {

@@ -145,14 +145,13 @@ public sealed class MockEngine<T> where T : class
         if (Behavior == MockBehavior.Loose && typeof(TReturn).IsInterface)
         {
             var cacheKey = memberName + "|" + typeof(TReturn).FullName;
-            if (_autoMockCache.TryGetValue(cacheKey, out var cached))
+            var autoMock = _autoMockCache.GetOrAdd(cacheKey, _ =>
             {
-                return (TReturn)cached.ObjectInstance;
-            }
-
-            if (Mock.TryCreateAutoMock(typeof(TReturn), Behavior, out var autoMock))
+                Mock.TryCreateAutoMock(typeof(TReturn), Behavior, out var m);
+                return m!;
+            });
+            if (autoMock is not null)
             {
-                _autoMockCache[cacheKey] = autoMock;
                 return (TReturn)autoMock.ObjectInstance;
             }
         }
