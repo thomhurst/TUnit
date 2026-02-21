@@ -13,6 +13,13 @@ namespace TUnit.Pipeline.Modules;
 [DependsOn<RunEngineTestsModule>]
 public class PackTUnitFilesModule : Module<List<PackedProject>>
 {
+    // Packages in beta get a "-beta" suffix appended to their version.
+    // Remove entries from this set once a package is considered stable.
+    private static readonly HashSet<string> BetaPackages =
+    [
+        "TUnit.Mock"
+    ];
+
     protected override async Task<List<PackedProject>?> ExecuteAsync(IModuleContext context,
         CancellationToken cancellationToken)
     {
@@ -21,12 +28,14 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
 
         var version = versionResult.ValueOrDefault!;
 
-        var packageVersion = version.SemVer!;
-
         var packedProjects = new List<PackedProject>();
 
         foreach (var project in projects.ValueOrDefault!)
         {
+            var packageVersion = BetaPackages.Contains(project.NameWithoutExtension)
+                ? $"{version.SemVer!}-beta"
+                : version.SemVer!;
+
             await context.DotNet()
                 .Pack(
                     new DotNetPackOptions
@@ -34,7 +43,7 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
                         ProjectSolution = project.Path,
                         Properties =
                         [
-                            new KeyValue("Version", version.SemVer!),
+                            new KeyValue("Version", packageVersion),
                             new KeyValue("PackageVersion", packageVersion),
                             new KeyValue("AssemblyFileVersion", version.SemVer!),
                             new KeyValue("IsPackTarget", "true")
@@ -52,7 +61,7 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
                         }
                     }, cancellationToken);
 
-            packedProjects.Add(new PackedProject(project.NameWithoutExtension, version.SemVer!));
+            packedProjects.Add(new PackedProject(project.NameWithoutExtension, packageVersion));
         }
 
         return packedProjects;
