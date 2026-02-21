@@ -13,6 +13,8 @@ public class SealedClassMockAnalyzerTests
             {
                 public static object Of<T>() => default!;
                 public static object Of<T>(int behavior) => default!;
+                public static object OfPartial<T>(params object[] args) => default!;
+                public static object OfPartial<T>(int behavior, params object[] args) => default!;
             }
         }
         """;
@@ -135,6 +137,28 @@ public class SealedClassMockAnalyzerTests
             Verifier.Diagnostic(Rules.TM001_CannotMockSealedType)
                 .WithLocation(0)
                 .WithArguments("string")
+        );
+    }
+
+    [Test]
+    public async Task Sealed_Class_Via_OfPartial_Reports_TM001()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            MockStub + """
+
+            public sealed class MyService { }
+
+            public class TestClass
+            {
+                public void Test()
+                {
+                    {|#0:TUnit.Mock.Mock.OfPartial<MyService>()|};
+                }
+            }
+            """,
+            Verifier.Diagnostic(Rules.TM001_CannotMockSealedType)
+                .WithLocation(0)
+                .WithArguments("MyService")
         );
     }
 }

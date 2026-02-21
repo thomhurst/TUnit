@@ -3,6 +3,12 @@
     <Import Project="..\Library.props" />
     <Import Project="..\SourceGenerationDebug.props" />
 
+    <PropertyGroup>
+        <!-- Mocking requires dynamic dispatch for ergonomic Setup/Verify API.
+             This is a test-time library, never used in AOT-published apps. -->
+        <IsAotCompatible>false</IsAotCompatible>
+    </PropertyGroup>
+
     <ItemGroup>
         <InternalsVisibleTo Include="TUnit.Mock.Tests" />
         <InternalsVisibleTo Include="TUnit.Mock.SourceGenerator" />

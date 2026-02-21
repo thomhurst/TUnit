@@ -28,9 +28,15 @@ internal sealed class CaptureMatcher<T> : IArgumentMatcher<T>
             return Matches(typed);
         }
 
-        // null case for reference types or nullable value types
-        _capture.Add(default);
-        return true;
+        if (value is null)
+        {
+            // null is a valid value for reference types and nullable value types
+            _capture.Add(default);
+            return true;
+        }
+
+        // Type mismatch — do not capture a fabricated default
+        return false;
     }
 
     public string Describe() => "Capture<" + typeof(T).Name + ">";

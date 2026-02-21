@@ -13,6 +13,8 @@ public class StructMockAnalyzerTests
             {
                 public static object Of<T>() => default!;
                 public static object Of<T>(int behavior) => default!;
+                public static object OfPartial<T>(params object[] args) => default!;
+                public static object OfPartial<T>(int behavior, params object[] args) => default!;
             }
         }
         """;
@@ -138,6 +140,28 @@ public class StructMockAnalyzerTests
             Verifier.Diagnostic(Rules.TM002_CannotMockValueType)
                 .WithLocation(0)
                 .WithArguments("MyEnum")
+        );
+    }
+
+    [Test]
+    public async Task Struct_Via_OfPartial_Reports_TM002()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            MockStub + """
+
+            public struct MyStruct { }
+
+            public class TestClass
+            {
+                public void Test()
+                {
+                    {|#0:TUnit.Mock.Mock.OfPartial<MyStruct>()|};
+                }
+            }
+            """,
+            Verifier.Diagnostic(Rules.TM002_CannotMockValueType)
+                .WithLocation(0)
+                .WithArguments("MyStruct")
         );
     }
 }
