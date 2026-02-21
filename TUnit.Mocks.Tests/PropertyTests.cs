@@ -194,7 +194,7 @@ public class PropertyTests
         var mock = Mock.Of<IPropertyService>();
         var callbackCalled = false;
         Action callback = () => callbackCalled = true;
-        ((IPropertySetterSetup)mock.Setup.Count_Set(Arg.Any<int>())).Callback(callback);
+        mock.Setup.Count_Set(Arg.Any<int>()).Callback(callback);
 
         // Act
         IPropertyService svc = mock.Object;

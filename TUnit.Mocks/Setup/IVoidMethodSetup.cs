@@ -1,3 +1,5 @@
+using System.ComponentModel;
+
 namespace TUnit.Mocks.Setup;
 
 /// <summary>
@@ -15,9 +17,11 @@ public interface IVoidMethodSetup
     IVoidSetupChain Callback(Action callback);
 
     /// <summary>Execute a callback with the method arguments when the method is called.</summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     IVoidSetupChain Callback(Action<object?[]> callback);
 
     /// <summary>Configure a computed exception based on method arguments to throw.</summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     IVoidSetupChain Throws(Func<object?[], Exception> exceptionFactory);
 
     /// <summary>Auto-raise the named event when this method is called.</summary>

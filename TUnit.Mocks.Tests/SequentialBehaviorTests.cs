@@ -69,7 +69,7 @@ public class SequentialBehaviorTests
         var callbackInvoked = false;
         var mock = Mock.Of<ICalculator>();
         mock.Setup.Log(Arg.Any<string>())
-            .Callback((Action)(() => callbackInvoked = true))
+            .Callback(() => callbackInvoked = true)
             .Then()
             .Throws<InvalidOperationException>();
 

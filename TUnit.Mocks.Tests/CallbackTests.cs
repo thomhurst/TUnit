@@ -14,9 +14,8 @@ public class CallbackTests
         // Arrange
         var callbackInvoked = false;
         var mock = Mock.Of<ICalculator>();
-        // Cast lambda to Action because Setup is dynamic
         mock.Setup.Log(Arg.Any<string>())
-            .Callback((Action)(() => callbackInvoked = true));
+            .Callback(() => callbackInvoked = true);
 
         ICalculator calc = mock.Object;
 
@@ -34,7 +33,7 @@ public class CallbackTests
         var callbackInvoked = false;
         var mock = Mock.Of<ICalculator>();
         mock.Setup.Add(Arg.Any<int>(), Arg.Any<int>())
-            .Callback((Action)(() => callbackInvoked = true))
+            .Callback(() => callbackInvoked = true)
             .Then()
             .Returns(42);
 
@@ -57,9 +56,9 @@ public class CallbackTests
         var callCount = 0;
         var mock = Mock.Of<ICalculator>();
         mock.Setup.Log(Arg.Any<string>())
-            .Callback((Action)(() => callCount++))
+            .Callback(() => callCount++)
             .Then()
-            .Callback((Action)(() => callCount += 10));
+            .Callback(() => callCount += 10);
 
         ICalculator calc = mock.Object;
 
@@ -78,7 +77,7 @@ public class CallbackTests
         var callCount = 0;
         var mock = Mock.Of<ICalculator>();
         mock.Setup.Log(Arg.Any<string>())
-            .Callback((Action)(() => callCount++));
+            .Callback(() => callCount++);
 
         ICalculator calc = mock.Object;
 
@@ -98,7 +97,7 @@ public class CallbackTests
         var lastArgs = "";
         var mock = Mock.Of<IGreeter>();
         mock.Setup.Greet(Arg.Any<string>())
-            .Callback((Action)(() => lastArgs = "called"))
+            .Callback(() => lastArgs = "called")
             .Then()
             .Returns("hello");
 
@@ -122,7 +121,7 @@ public class CallbackTests
         var counter = 0;
         var mock = Mock.Of<ICalculator>();
         mock.Setup.Add(Arg.Any<int>(), Arg.Any<int>())
-            .Returns((Func<int>)(() => ++counter));
+            .Returns(() => ++counter);
 
         ICalculator calc = mock.Object;
 

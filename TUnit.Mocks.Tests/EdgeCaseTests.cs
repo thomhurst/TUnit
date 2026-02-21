@@ -170,9 +170,9 @@ public class OverloadEdgeCaseTests
         var twoArgCalled = false;
         var mock = Mock.Of<IOverloadedService>();
         mock.Setup.Process(Arg.Any<string>())
-            .Callback((Action)(() => singleArgCalled = true));
+            .Callback(() => singleArgCalled = true);
         mock.Setup.Process(Arg.Any<string>(), Arg.Any<bool>())
-            .Callback((Action)(() => twoArgCalled = true));
+            .Callback(() => twoArgCalled = true);
 
         // Act
         IOverloadedService svc = mock.Object;

@@ -311,9 +311,9 @@ public class RealWorldScenarioTests
         var threeArgCallCount = 0;
 
         mock.Setup.Log(Arg.Any<string>(), Arg.Any<string>())
-            .Callback((Action)(() => twoArgCallCount++));
+            .Callback(() => twoArgCallCount++);
         mock.Setup.Log(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Exception?>())
-            .Callback((Action)(() => threeArgCallCount++));
+            .Callback(() => threeArgCallCount++);
 
         ILogger logger = mock.Object;
 
@@ -533,7 +533,7 @@ public class RealWorldScenarioTests
         // SendEmailAsync returns Task (void-async), so use Callback to capture args
         mockNotify.Setup.SendEmailAsync(
             Arg.Any<string>(), Arg.Any<string>(), bodyArg
-        ).Callback((Action)(() => { }));
+        ).Callback(() => { });
 
         var service = new OrderService(mockRepo.Object, mockNotify.Object, mockLogger.Object);
 
@@ -572,9 +572,9 @@ public class RealWorldScenarioTests
         var mock = Mock.Of<INullableService>();
         var callCount = 0;
         mock.Setup.Process(Arg.IsNull<string>(), Arg.Any<int?>())
-            .Callback((Action)(() => callCount++));
+            .Callback(() => callCount++);
         mock.Setup.Process(Arg.IsNotNull<string>(), Arg.Any<int?>())
-            .Callback((Action)(() => callCount += 10));
+            .Callback(() => callCount += 10);
 
         INullableService svc = mock.Object;
 
