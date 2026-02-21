@@ -206,6 +206,31 @@ public class ArgumentMatcherTests
     }
 
     [Test]
+    public async Task Arg_Capture_Does_Not_Capture_On_Partial_Match()
+    {
+        // Arrange — setup requires first arg = any (captured), second arg starts with "prefix"
+        var firstArg = Arg.Any<int>();
+        var mock = Mock.Of<ICalculator>();
+        mock.Setup.Add(firstArg, Arg.Is<int>(b => b > 100)).Returns(999);
+
+        ICalculator calc = mock.Object;
+
+        // Act — call with b=5 which does NOT satisfy the predicate matcher
+        calc.Add(42, 5);
+
+        // Assert — 42 should NOT be captured because the overall setup did not match
+        await Assert.That(firstArg.Values).Count().IsEqualTo(0);
+
+        // Act — now call with b=200 which DOES satisfy the predicate
+        var result = calc.Add(7, 200);
+
+        // Assert — only 7 is captured (from the matching call), not 42
+        await Assert.That(firstArg.Values).Count().IsEqualTo(1);
+        await Assert.That(firstArg.Values[0]).IsEqualTo(7);
+        await Assert.That(result).IsEqualTo(999);
+    }
+
+    [Test]
     public async Task Predicate_Matcher_With_String()
     {
         // Arrange
