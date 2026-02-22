@@ -428,4 +428,34 @@ public class MockHttpHandlerTests
 
         await Assert.That(response).IsEqualTo("hello");
     }
+
+    [Test]
+    public async Task Verify_WithHeaderMatcher_CountsCorrectly()
+    {
+        using var client = Mock.HttpClient("http://localhost");
+        client.Handler.OnAnyRequest().Respond();
+
+        var request = new HttpRequestMessage(HttpMethod.Get, "/api/secure");
+        request.Headers.Add("Authorization", "Bearer token123");
+        await client.SendAsync(request);
+
+        // Should match the request with the header
+        client.Handler.Verify(r => r.Header("Authorization", "Bearer token123"), Times.Once);
+    }
+
+    [Test]
+    public async Task Verify_WithHasHeader_CountsCorrectly()
+    {
+        using var client = Mock.HttpClient("http://localhost");
+        client.Handler.OnAnyRequest().Respond();
+
+        var request = new HttpRequestMessage(HttpMethod.Get, "/api/data");
+        request.Headers.Add("X-Api-Key", "secret");
+        await client.SendAsync(request);
+
+        await client.GetAsync("/api/data");
+
+        // Only one request had the header
+        client.Handler.Verify(r => r.HasHeader("X-Api-Key"), Times.Once);
+    }
 }

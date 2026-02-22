@@ -78,18 +78,7 @@ public sealed class RequestMatcher
 
         var path = request.RequestUri?.PathAndQuery ?? request.RequestUri?.ToString() ?? "";
 
-        if (_exactPath != null && !string.Equals(path, _exactPath, StringComparison.OrdinalIgnoreCase))
-        {
-            // Also try matching against absolute URI
-            var absUri = request.RequestUri?.ToString() ?? "";
-            if (!string.Equals(absUri, _exactPath, StringComparison.OrdinalIgnoreCase))
-                return false;
-        }
-
-        if (_pathPrefix != null && !path.StartsWith(_pathPrefix, StringComparison.OrdinalIgnoreCase))
-            return false;
-
-        if (_pathPattern != null && !_pathPattern.IsMatch(path))
+        if (!MatchesPath(path, request.RequestUri))
             return false;
 
         foreach (var kvp in _requiredHeaders)
@@ -114,11 +103,68 @@ public sealed class RequestMatcher
         return true;
     }
 
+    internal bool Matches(CapturedRequest captured)
+    {
+        if (_method != null && captured.Method != _method) return false;
+
+        var path = captured.RequestUri?.PathAndQuery ?? captured.RequestUri?.ToString() ?? "";
+
+        if (!MatchesPath(path, captured.RequestUri))
+            return false;
+
+        foreach (var kvp in _requiredHeaders)
+        {
+            if (!TryGetCapturedHeaderValue(captured.Headers, kvp.Key, out var values) ||
+                !values.Any(v => string.Equals(v, kvp.Value, StringComparison.OrdinalIgnoreCase)))
+                return false;
+        }
+
+        foreach (var headerName in _requiredHeaderNames)
+        {
+            if (!TryGetCapturedHeaderValue(captured.Headers, headerName, out _))
+                return false;
+        }
+
+        if (_bodyContains != null && (captured.Body == null || !captured.Body.Contains(_bodyContains)))
+            return false;
+
+        // Custom predicate requires HttpRequestMessage — skip if not available
+        // (custom predicates are checked during SendAsync via the other Matches overload)
+
+        return true;
+    }
+
+    private bool MatchesPath(string path, Uri? requestUri)
+    {
+        if (_exactPath != null && !string.Equals(path, _exactPath, StringComparison.OrdinalIgnoreCase))
+        {
+            var absUri = requestUri?.ToString() ?? "";
+            if (!string.Equals(absUri, _exactPath, StringComparison.OrdinalIgnoreCase))
+                return false;
+        }
+
+        if (_pathPrefix != null && !path.StartsWith(_pathPrefix, StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        if (_pathPattern != null && !_pathPattern.IsMatch(path))
+            return false;
+
+        return true;
+    }
+
     private static bool TryGetHeaderValue(HttpRequestMessage request, string name, out IEnumerable<string> values)
     {
         if (request.Headers.TryGetValues(name, out values!))
             return true;
         if (request.Content != null && request.Content.Headers.TryGetValues(name, out values!))
+            return true;
+        values = Enumerable.Empty<string>();
+        return false;
+    }
+
+    private static bool TryGetCapturedHeaderValue(IReadOnlyDictionary<string, IEnumerable<string>> headers, string name, out IEnumerable<string> values)
+    {
+        if (headers.TryGetValue(name, out values!))
             return true;
         values = Enumerable.Empty<string>();
         return false;

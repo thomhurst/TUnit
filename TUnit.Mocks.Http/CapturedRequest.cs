@@ -18,7 +18,12 @@ public sealed class CapturedRequest
     public IReadOnlyDictionary<string, IEnumerable<string>> Headers { get; }
 
     /// <summary>Whether this request matched a setup.</summary>
-    public bool Matched { get; internal set; }
+    public bool Matched
+    {
+        get => Volatile.Read(ref _matched);
+        internal set => Volatile.Write(ref _matched, value);
+    }
+    private bool _matched;
 
     /// <summary>The timestamp when this request was captured.</summary>
     public DateTimeOffset Timestamp { get; }

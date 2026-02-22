@@ -128,8 +128,7 @@ public sealed class MockHttpHandler : HttpMessageHandler
         var matching = 0;
         foreach (var request in _requests)
         {
-            using var msg = new HttpRequestMessage(request.Method, request.RequestUri);
-            if (matcher.Matches(msg, request.Body))
+            if (matcher.Matches(request))
             {
                 matching++;
             }
