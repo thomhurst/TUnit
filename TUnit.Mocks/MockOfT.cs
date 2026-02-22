@@ -53,23 +53,23 @@ public class Mock<T> : IMock where T : class
 
     /// <summary>Creates a Mock with an existing engine, setup, and verify surfaces. Used by generated code.</summary>
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public Mock(T mockObject, object setup, object verify, MockEngine<T> engine)
+    public Mock(T mockObject, IMockSetup<T> setup, IMockVerify<T> verify, MockEngine<T> engine)
     {
         Engine = engine;
         Object = mockObject;
-        Setup = (IMockSetup<T>)setup;
-        Verify = (IMockVerify<T>)verify;
+        Setup = setup;
+        Verify = verify;
     }
 
     /// <summary>Creates a Mock with an existing engine, setup, verify, and raise surfaces. Used by generated code.</summary>
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public Mock(T mockObject, object setup, object verify, object? raise, MockEngine<T> engine)
+    public Mock(T mockObject, IMockSetup<T> setup, IMockVerify<T> verify, IMockRaise<T>? raise, MockEngine<T> engine)
     {
         Engine = engine;
         Object = mockObject;
-        Setup = (IMockSetup<T>)setup;
-        Verify = (IMockVerify<T>)verify;
-        Raise = (IMockRaise<T>?)raise;
+        Setup = setup;
+        Verify = verify;
+        Raise = raise;
     }
 
     /// <summary>All calls made to this mock, in order.</summary>
