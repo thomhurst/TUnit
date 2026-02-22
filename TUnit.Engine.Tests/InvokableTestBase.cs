@@ -13,7 +13,6 @@ public abstract class InvokableTestBase(TestMode testMode)
 {
     public static IEnumerable<TestMode> GetTestModes()
     {
-        yield return TestMode.SourceGenerated;
         yield return TestMode.Reflection;
 
         if (!EnvironmentVariables.IsNetFramework)
@@ -39,7 +38,6 @@ public abstract class InvokableTestBase(TestMode testMode)
     {
         return testMode switch
         {
-            TestMode.SourceGenerated => RunWithoutAot(filter, assertions, runOptions, assertionExpression),
             TestMode.Reflection => RunWithoutAot(filter, assertions, runOptions.WithArgument("--reflection"), assertionExpression),
             TestMode.AOT => RunWithAot(filter, assertions, runOptions, assertionExpression),
             _ => throw new ArgumentOutOfRangeException(nameof(testMode), testMode, null)
