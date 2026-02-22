@@ -12,7 +12,6 @@ public sealed class RequestSetup
     private int _responseIndex;
 
     internal RequestMatcher Matcher { get; }
-    internal int MatchCount { get; private set; }
 
     internal RequestSetup(RequestMatcher matcher)
     {
@@ -88,7 +87,6 @@ public sealed class RequestSetup
         lock (_responseLock)
         {
             if (_responses.Count == 0) return null;
-            MatchCount++;
             var index = _responseIndex < _responses.Count ? _responseIndex : _responses.Count - 1;
             if (_responseIndex < _responses.Count) _responseIndex++;
             return _responses[index];

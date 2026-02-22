@@ -137,21 +137,5 @@ public class MockGenerator : IIncrementalGenerator
     }
 
     private static string GetSafeFileName(MockTypeModel model)
-    {
-        var name = model.FullyQualifiedName;
-        if (model.AdditionalInterfaceNames.Length > 0)
-        {
-            name += "_" + string.Join("_", model.AdditionalInterfaceNames);
-        }
-
-        return name
-            .Replace("global::", "")
-            .Replace(".", "_")
-            .Replace("<", "_")
-            .Replace(">", "_")
-            .Replace(",", "_")
-            .Replace("[", "_")
-            .Replace("]", "_")
-            .Replace(" ", "");
-    }
+        => MockImplBuilder.GetCompositeSafeName(model);
 }

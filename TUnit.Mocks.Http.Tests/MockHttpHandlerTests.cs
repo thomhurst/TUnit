@@ -526,18 +526,37 @@ public class MockHttpHandlerTests
     }
 
     [Test]
-    public async Task SetupWithoutRespondIsStillMarkedAsMatched()
+    public async Task SetupWithoutRespondIsNotMarkedAsMatched()
     {
         var handler = new MockHttpHandler();
         using var client = handler.CreateClient("http://localhost");
 
-        // Setup matches but has no Respond() configured
+        // Setup matches but has no Respond() configured — this is a test authoring error
         handler.OnGet("/api/data");
 
         await client.GetAsync("/api/data");
 
-        // Should be marked as matched — a setup existed
-        await Assert.That(handler.UnmatchedRequests).Count().IsEqualTo(0);
+        // Should NOT be marked as matched — no response was produced
+        await Assert.That(handler.UnmatchedRequests).Count().IsEqualTo(1);
         await Assert.That(handler.Requests).Count().IsEqualTo(1);
+    }
+
+    [Test]
+    public async Task FactoryDelegateSeesOriginalContentType()
+    {
+        var handler = new MockHttpHandler();
+        using var client = handler.CreateClient("http://localhost");
+        string? capturedContentType = null;
+
+        handler.OnPost("/api/data").RespondWith(req =>
+        {
+            capturedContentType = req.Content?.Headers.ContentType?.MediaType;
+            return new System.Net.Http.HttpResponseMessage(HttpStatusCode.OK);
+        });
+
+        var content = new StringContent("""{"key":"value"}""", System.Text.Encoding.UTF8, "application/json");
+        await client.PostAsync("/api/data", content);
+
+        await Assert.That(capturedContentType).IsEqualTo("application/json");
     }
 }
