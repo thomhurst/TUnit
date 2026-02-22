@@ -42,21 +42,31 @@ mock.Object.SendMessage("test");
 
 The typed raise methods are generated per-event with correct parameter types, giving you IntelliSense and compile-time safety. The string-based `.Raises(eventName, args)` overload is still available for dynamic scenarios.
 
-### Event Subscription Callbacks
+### Event Subscription Tracking
 
-React when handlers are added or removed from events:
+Query and react to event subscriptions through the strongly-typed `Events` surface:
 
 ```csharp
-var subscribed = false;
-mock.OnSubscribe(nameof(IConnection.OnMessage), () => subscribed = true);
-mock.OnUnsubscribe(nameof(IConnection.OnMessage), () => subscribed = false);
+var mock = Mock.Of<IConnection>();
+
+// Register callbacks for subscribe/unsubscribe
+mock.Events!.OnMessage.OnSubscribe(() => Console.WriteLine("subscribed"));
+mock.Events!.OnMessage.OnUnsubscribe(() => Console.WriteLine("unsubscribed"));
 
 mock.Object.OnMessage += (s, e) => { };
-// subscribed == true
+// prints "subscribed"
 
 // Query subscriber info
-var count = mock.GetEventSubscriberCount(nameof(IConnection.OnMessage));
-var wasSubscribed = mock.WasEventSubscribed(nameof(IConnection.OnMessage));
+var wasSubscribed = mock.Events!.OnMessage.WasSubscribed;   // true
+var count = mock.Events!.OnMessage.SubscriberCount;          // 1
+```
+
+String-based methods are also available on `Mock<T>` for dynamic scenarios:
+
+```csharp
+mock.OnSubscribe(nameof(IConnection.OnMessage), () => { });
+mock.GetEventSubscriberCount(nameof(IConnection.OnMessage));
+mock.WasEventSubscribed(nameof(IConnection.OnMessage));
 ```
 
 ## State Machine Mocking

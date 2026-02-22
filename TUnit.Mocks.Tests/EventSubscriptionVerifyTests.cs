@@ -15,7 +15,7 @@ public class EventSubscriptionVerifyTests
         mock.Object.OnStringAction += _ => { };
 
         // Assert
-        await Assert.That(mock.WasEventSubscribed("OnStringAction")).IsTrue();
+        await Assert.That(mock.Events!.OnStringAction.WasSubscribed).IsTrue();
     }
 
     [Test]
@@ -25,7 +25,7 @@ public class EventSubscriptionVerifyTests
         var mock = Mock.Of<ICustomEventService>();
 
         // Assert
-        await Assert.That(mock.WasEventSubscribed("OnStringAction")).IsFalse();
+        await Assert.That(mock.Events!.OnStringAction.WasSubscribed).IsFalse();
     }
 
     [Test]
@@ -39,7 +39,7 @@ public class EventSubscriptionVerifyTests
         mock.Object.OnStringAction += _ => { };
 
         // Assert
-        await Assert.That(mock.GetEventSubscriberCount("OnStringAction")).IsEqualTo(2);
+        await Assert.That(mock.Events!.OnStringAction.SubscriberCount).IsEqualTo(2);
     }
 
     [Test]
@@ -55,7 +55,7 @@ public class EventSubscriptionVerifyTests
         mock.Object.OnStringAction -= handler;
 
         // Assert — 2 subscribes, 1 unsubscribe = 1 remaining
-        await Assert.That(mock.GetEventSubscriberCount("OnStringAction")).IsEqualTo(1);
+        await Assert.That(mock.Events!.OnStringAction.SubscriberCount).IsEqualTo(1);
     }
 
     [Test]
@@ -70,9 +70,9 @@ public class EventSubscriptionVerifyTests
         mock.Object.OnSimpleAction += () => { };
 
         // Assert
-        await Assert.That(mock.GetEventSubscriberCount("OnStringAction")).IsEqualTo(1);
-        await Assert.That(mock.GetEventSubscriberCount("OnSimpleAction")).IsEqualTo(2);
-        await Assert.That(mock.WasEventSubscribed("OnMultiParamAction")).IsFalse();
+        await Assert.That(mock.Events!.OnStringAction.SubscriberCount).IsEqualTo(1);
+        await Assert.That(mock.Events!.OnSimpleAction.SubscriberCount).IsEqualTo(2);
+        await Assert.That(mock.Events!.OnMultiParamAction.WasSubscribed).IsFalse();
     }
 
     [Test]
@@ -85,7 +85,7 @@ public class EventSubscriptionVerifyTests
         // Act
         mock.Reset();
 
-        // Assert
+        // Assert — string-based API still works after reset (Events surface references same engine)
         await Assert.That(mock.WasEventSubscribed("OnStringAction")).IsFalse();
         await Assert.That(mock.GetEventSubscriberCount("OnStringAction")).IsEqualTo(0);
     }

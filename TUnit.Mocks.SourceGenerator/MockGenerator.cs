@@ -70,6 +70,9 @@ public class MockGenerator : IIncrementalGenerator
         {
             var raiseSource = MockRaiseBuilder.Build(model);
             spc.AddSource($"{fileName}_MockRaise.g.cs", raiseSource);
+
+            var eventsSource = MockEventsBuilder.Build(model);
+            spc.AddSource($"{fileName}_MockEvents.g.cs", eventsSource);
         }
 
         // Generate factory
@@ -116,6 +119,9 @@ public class MockGenerator : IIncrementalGenerator
         {
             var raiseSource = MockRaiseBuilder.Build(model);
             spc.AddSource($"{fileName}_MockRaise.g.cs", raiseSource);
+
+            var eventsSource = MockEventsBuilder.Build(model);
+            spc.AddSource($"{fileName}_MockEvents.g.cs", eventsSource);
         }
 
         // Generate wrap factory
