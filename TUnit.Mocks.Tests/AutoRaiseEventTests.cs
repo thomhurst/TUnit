@@ -19,7 +19,7 @@ public class AutoRaiseEventTests
 
         mock.Setup.Process(Arg.Any<int>())
             .Returns(true)
-            .Raises(nameof(IProcessService.StatusChanged), "completed");
+            .RaisesStatusChanged("completed");
 
         mock.Object.Process(42);
 
@@ -35,7 +35,7 @@ public class AutoRaiseEventTests
         mock.Object.StatusChanged += (sender, status) => receivedStatus = status;
 
         mock.Setup.Execute(Arg.Any<string>())
-            .Raises(nameof(IProcessService.StatusChanged), "executed");
+            .RaisesStatusChanged("executed");
 
         mock.Object.Execute("run");
 
@@ -52,8 +52,8 @@ public class AutoRaiseEventTests
 
         mock.Setup.Process(Arg.Any<int>())
             .Returns(true)
-            .Raises(nameof(IProcessService.StatusChanged), "first")
-            .Raises(nameof(IProcessService.StatusChanged), "second");
+            .RaisesStatusChanged("first")
+            .RaisesStatusChanged("second");
 
         mock.Object.Process(1);
 
@@ -69,7 +69,7 @@ public class AutoRaiseEventTests
 
         mock.Setup.Process(Arg.Any<int>())
             .Returns(true)
-            .Raises(nameof(IProcessService.StatusChanged), "ignored");
+            .RaisesStatusChanged("ignored");
 
         // No subscriber — should not throw
         var result = mock.Object.Process(1);
@@ -87,7 +87,7 @@ public class AutoRaiseEventTests
 
         mock.Setup.Process(Arg.Any<int>())
             .Returns(true)
-            .Raises(nameof(IProcessService.StatusChanged), "ping");
+            .RaisesStatusChanged("ping");
 
         mock.Object.Process(1);
         mock.Object.Process(2);

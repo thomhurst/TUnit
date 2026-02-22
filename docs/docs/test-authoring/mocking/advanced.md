@@ -30,15 +30,17 @@ mock.Raise.OnMessage("Hello!");
 
 ### Auto-Raise on Method Call
 
-Trigger an event automatically when a method is called using `.Raises()` on a setup chain:
+Trigger an event automatically when a method is called using the typed `.Raises{EventName}()` method on a setup chain:
 
 ```csharp
 mock.Setup.SendMessage(Arg.Any<string>())
-    .Raises(nameof(IConnection.OnMessage), "echo");
+    .RaisesOnMessage("echo");
 
 mock.Object.SendMessage("test");
 // OnMessage event fires with "echo"
 ```
+
+The typed raise methods are generated per-event with correct parameter types, giving you IntelliSense and compile-time safety. The string-based `.Raises(eventName, args)` overload is still available for dynamic scenarios.
 
 ### Event Subscription Callbacks
 
