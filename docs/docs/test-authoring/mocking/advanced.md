@@ -34,7 +34,7 @@ Trigger an event automatically when a method is called using `.Raises()` on a se
 
 ```csharp
 mock.Setup.SendMessage(Arg.Any<string>())
-    .Raises("OnMessage", "echo");
+    .Raises(nameof(IConnection.OnMessage), "echo");
 
 mock.Object.SendMessage("test");
 // OnMessage event fires with "echo"
@@ -46,15 +46,15 @@ React when handlers are added or removed from events:
 
 ```csharp
 var subscribed = false;
-mock.OnSubscribe("OnMessage", () => subscribed = true);
-mock.OnUnsubscribe("OnMessage", () => subscribed = false);
+mock.OnSubscribe(nameof(IConnection.OnMessage), () => subscribed = true);
+mock.OnUnsubscribe(nameof(IConnection.OnMessage), () => subscribed = false);
 
 mock.Object.OnMessage += (s, e) => { };
 // subscribed == true
 
 // Query subscriber info
-var count = mock.GetEventSubscriberCount("OnMessage");
-var wasSubscribed = mock.WasEventSubscribed("OnMessage");
+var count = mock.GetEventSubscriberCount(nameof(IConnection.OnMessage));
+var wasSubscribed = mock.WasEventSubscribed(nameof(IConnection.OnMessage));
 ```
 
 ## State Machine Mocking

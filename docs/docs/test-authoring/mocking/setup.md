@@ -215,7 +215,7 @@ Setup methods return chain objects that support additional behaviors:
 ```csharp
 mock.Setup.Process(Arg.Any<int>())
     .Returns(true)
-    .Raises("ProcessCompleted", EventArgs.Empty)   // auto-raise event
+    .Raises(nameof(IProcessor.ProcessCompleted), EventArgs.Empty)   // auto-raise event
     .TransitionsTo("processed");                    // state machine transition
 ```
 
