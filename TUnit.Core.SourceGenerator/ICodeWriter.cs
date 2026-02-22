@@ -17,6 +17,11 @@ public interface ICodeWriter : IDisposable
     ICodeWriter Append(string text);
 
     /// <summary>
+    /// Appends the string representation of each element separated by the given separator.
+    /// </summary>
+    ICodeWriter AppendJoin<T>(string separator, IEnumerable<T> values);
+
+    /// <summary>
     /// Appends multiple lines of code.
     /// </summary>
     ICodeWriter AppendLines(IEnumerable<string> lines);

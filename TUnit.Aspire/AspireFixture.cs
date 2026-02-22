@@ -428,13 +428,13 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
 
             var sb = new StringBuilder();
             sb.Append("Resources not ready: [");
-            sb.Append(string.Join(", ", pending.Select(n => $"'{n}'")));
+            sb.AppendJoin(", ", pending.Select(n => $"'{n}'"));
             sb.Append(']');
 
             if (readySet.Count > 0)
             {
                 sb.Append(". Resources ready: [");
-                sb.Append(string.Join(", ", readySet.Select(n => $"'{n}'")));
+                sb.AppendJoin(", ", readySet.Select(n => $"'{n}'"));
                 sb.Append(']');
             }
 
