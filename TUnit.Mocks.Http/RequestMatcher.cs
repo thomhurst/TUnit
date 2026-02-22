@@ -128,8 +128,12 @@ public sealed class RequestMatcher
         if (_bodyContains != null && (captured.Body == null || !captured.Body.Contains(_bodyContains)))
             return false;
 
-        // Custom predicate requires HttpRequestMessage — skip if not available
-        // (custom predicates are checked during SendAsync via the other Matches overload)
+        if (_customPredicate != null)
+        {
+            throw new InvalidOperationException(
+                "Matching() predicates cannot be used in Verify() because the original HttpRequestMessage is not available. " +
+                "Use Header(), HasHeader(), Path(), PathStartsWith(), PathMatches(), or BodyContains() instead.");
+        }
 
         return true;
     }

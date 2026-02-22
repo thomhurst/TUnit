@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using TUnit.Assertions.Core;
 using TUnit.Mocks.Exceptions;
 using TUnit.Mocks.Verification;

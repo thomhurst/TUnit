@@ -103,19 +103,11 @@ public sealed class MockHttpHandler : HttpMessageHandler
     }
 
     /// <summary>All captured requests in order.</summary>
-    public IReadOnlyList<CapturedRequest> Requests
-    {
-        get
-        {
-            var list = new List<CapturedRequest>();
-            foreach (var r in _requests) list.Add(r);
-            return list;
-        }
-    }
+    public IReadOnlyList<CapturedRequest> Requests => _requests.ToArray();
 
     /// <summary>Requests that did not match any setup.</summary>
     public IReadOnlyList<CapturedRequest> UnmatchedRequests
-        => Requests.Where(r => !r.Matched).ToList();
+        => _requests.Where(r => !r.Matched).ToList();
 
     /// <summary>
     /// Verify a matching request was made the expected number of times.
@@ -154,11 +146,8 @@ public sealed class MockHttpHandler : HttpMessageHandler
         if (unmatched.Count > 0)
         {
             throw new MockVerificationException(
-                "no unmatched requests",
-                Times.Never,
-                unmatched.Count,
-                unmatched.Select(r => r.ToString()).ToList(),
-                null);
+                $"VerifyNoUnmatchedRequests failed. {unmatched.Count} request(s) did not match any setup:\n" +
+                string.Join("\n", unmatched.Select(r => $"  - {r}")));
         }
     }
 
@@ -203,6 +192,9 @@ public sealed class MockHttpHandler : HttpMessageHandler
                     captured.Matched = true;
                     if (response.Delay.HasValue)
                         await Task.Delay(response.Delay.Value, cancellationToken).ConfigureAwait(false);
+                    // Restore content so factory delegates can re-read the body
+                    if (bodyContent != null)
+                        request.Content = new StringContent(bodyContent);
                     return response.Build(request);
                 }
             }
