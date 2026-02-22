@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace TUnit.Mocks;
 
@@ -19,8 +20,12 @@ public interface IDefaultValueProvider
     /// <summary>
     /// Gets the default value for the given type.
     /// Only called when <see cref="CanProvide"/> returns <c>true</c>.
+    /// Implementations may use reflection to construct generic types; AOT-safe implementations
+    /// should avoid <see cref="System.Reflection.MethodInfo.MakeGenericMethod"/> and <see cref="Activator.CreateInstance(Type)"/>.
     /// </summary>
     /// <param name="type">The return type of the unconfigured method.</param>
     /// <returns>A default value, or <c>null</c>.</returns>
+    [RequiresDynamicCode("Implementations may use MakeGenericMethod or Activator.CreateInstance. AOT-safe implementations can override without these.")]
+    [RequiresUnreferencedCode("Implementations may use reflection to construct types at runtime.")]
     object? GetDefaultValue(Type type);
 }

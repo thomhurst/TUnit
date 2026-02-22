@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace TUnit.Mocks;
@@ -33,8 +34,8 @@ public sealed class DefaultValueProvider : IDefaultValueProvider
     }
 
     /// <inheritdoc />
-#pragma warning disable IL2067 // Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call
-#pragma warning disable IL3050 // Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling
+    [RequiresDynamicCode("DefaultValueProvider uses MakeGenericMethod and Activator.CreateInstance for Task<T>, ValueTask<T>, and collection interfaces. Use source-generated defaults or a custom IDefaultValueProvider for AOT scenarios.")]
+    [RequiresUnreferencedCode("DefaultValueProvider uses reflection to construct generic types at runtime.")]
     public object? GetDefaultValue(Type type)
     {
         if (type == typeof(string))
@@ -92,17 +93,14 @@ public sealed class DefaultValueProvider : IDefaultValueProvider
 
         return GetDefaultForType(type);
     }
-#pragma warning restore IL3050
-#pragma warning restore IL2067
 
-    private static object? GetDefaultForType(Type type)
+    private static object? GetDefaultForType(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type type)
     {
-#pragma warning disable IL2067
         if (type.IsValueType)
         {
             return Activator.CreateInstance(type);
         }
-#pragma warning restore IL2067
 
         return null;
     }

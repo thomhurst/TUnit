@@ -220,13 +220,17 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
             }
         }
 
-        // Custom default value provider: consulted before auto-mock and built-in defaults
+        // Custom default value provider: consulted before auto-mock and built-in defaults.
+        // Suppressed: DefaultValueProvider is opt-in (null by default). Users who set it accept the AOT tradeoff.
+        // The source generator emits inline defaults for Task<T>/ValueTask<T>/collections without needing this path.
+#pragma warning disable IL3050, IL2026
         if (DefaultValueProvider is not null && DefaultValueProvider.CanProvide(typeof(TReturn)))
         {
             var customDefault = DefaultValueProvider.GetDefaultValue(typeof(TReturn));
             if (customDefault is TReturn typedCustom) return typedCustom;
             if (customDefault is null) return default(TReturn)!;
         }
+#pragma warning restore IL3050, IL2026
 
         // Auto-mock: for interface return types in Loose mode, create a functional mock
         if (Behavior == MockBehavior.Loose && typeof(TReturn).IsInterface)
