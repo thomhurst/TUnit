@@ -182,14 +182,16 @@ public sealed class MockHttpHandler : HttpMessageHandler
             setupsSnapshot = new List<RequestSetup>(_setups);
         }
 
-        foreach (var setup in setupsSnapshot)
+        // Iterate last-added-first to match MockEngine "last wins" semantics
+        for (var i = setupsSnapshot.Count - 1; i >= 0; i--)
         {
+            var setup = setupsSnapshot[i];
             if (setup.TryMatch(request, bodyContent))
             {
+                captured.Matched = true;
                 var response = setup.GetNextResponse();
                 if (response != null)
                 {
-                    captured.Matched = true;
                     if (response.Delay.HasValue)
                         await Task.Delay(response.Delay.Value, cancellationToken).ConfigureAwait(false);
                     // Restore content so factory delegates can re-read the body

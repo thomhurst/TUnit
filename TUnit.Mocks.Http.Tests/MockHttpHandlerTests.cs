@@ -508,4 +508,36 @@ public class MockHttpHandlerTests
         await Assert.That(first.StatusCode).IsEqualTo(HttpStatusCode.ServiceUnavailable);
         await Assert.That(second.StatusCode).IsEqualTo(HttpStatusCode.OK);
     }
+
+    [Test]
+    public async Task LastAddedSetupWins_MatchesMockEngineSemantics()
+    {
+        using var client = Mock.HttpClient("http://localhost");
+
+        // First setup: broad default
+        client.Handler.OnGet("/api/data").RespondWithJson("""{"version":"old"}""");
+        // Second setup: same path, should win (last-added wins)
+        client.Handler.OnGet("/api/data").RespondWithJson("""{"version":"new"}""");
+
+        var response = await client.GetAsync("/api/data");
+        var body = await response.Content.ReadAsStringAsync();
+
+        await Assert.That(body).Contains("new");
+    }
+
+    [Test]
+    public async Task SetupWithoutRespondIsStillMarkedAsMatched()
+    {
+        var handler = new MockHttpHandler();
+        using var client = handler.CreateClient("http://localhost");
+
+        // Setup matches but has no Respond() configured
+        handler.OnGet("/api/data");
+
+        await client.GetAsync("/api/data");
+
+        // Should be marked as matched — a setup existed
+        await Assert.That(handler.UnmatchedRequests).Count().IsEqualTo(0);
+        await Assert.That(handler.Requests).Count().IsEqualTo(1);
+    }
 }
