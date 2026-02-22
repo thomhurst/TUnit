@@ -107,7 +107,7 @@ public class MockLoggerTests
 
         logger.LogInformation("test");
 
-        await Assert.That(logger.Entries[0].CategoryName).IsEqualTo(nameof(MockLoggerTests));
+        await Assert.That(logger.Entries[0].CategoryName).IsEqualTo(typeof(MockLoggerTests).FullName!);
     }
 
     [Test]

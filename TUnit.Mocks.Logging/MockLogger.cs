@@ -73,7 +73,7 @@ public class MockLogger : ILogger
 public sealed class MockLogger<TCategoryName> : MockLogger, ILogger<TCategoryName>
 {
     /// <summary>Creates a new mock logger for the specified category.</summary>
-    public MockLogger() : base(typeof(TCategoryName).Name)
+    public MockLogger() : base(typeof(TCategoryName).FullName ?? typeof(TCategoryName).Name)
     {
     }
 }
