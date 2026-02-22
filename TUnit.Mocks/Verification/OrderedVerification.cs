@@ -150,6 +150,12 @@ public static class OrderedVerification
                 throw new MockVerificationException(sb.ToString());
             }
         }
+
+        // Mark all successfully ordered calls as verified for VerifyNoOtherCalls
+        foreach (var (_, call) in assignedCalls)
+        {
+            call.IsVerified = true;
+        }
     }
 
     private static List<CallRecord> FindMatchingCalls(OrderedCallExpectation expectation)

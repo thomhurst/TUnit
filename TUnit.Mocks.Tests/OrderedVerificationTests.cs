@@ -322,6 +322,56 @@ public class OrderedVerificationTests
     }
 
     [Test]
+    public void VerifyInOrder_Marks_Calls_As_Verified_For_VerifyNoOtherCalls()
+    {
+        // Arrange
+        var mock = Mock.Of<ICalculator>();
+        ICalculator calc = mock.Object;
+
+        // Act
+        calc.Add(1, 2);
+        calc.GetName();
+
+        // Assert — VerifyInOrder should mark calls as verified
+        Mock.VerifyInOrder(() =>
+        {
+            mock.Verify.Add(1, 2).WasCalled();
+            mock.Verify.GetName().WasCalled();
+        });
+
+        // This should pass because the calls above were verified in VerifyInOrder
+        mock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task VerifyInOrder_Partial_Verification_Leaves_Unverified_Calls()
+    {
+        // Arrange
+        var mock = Mock.Of<ICalculator>();
+        ICalculator calc = mock.Object;
+
+        // Act — three calls
+        calc.Add(1, 2);
+        calc.GetName();
+        calc.Log("hello");
+
+        // Assert — only verify first two in order
+        Mock.VerifyInOrder(() =>
+        {
+            mock.Verify.Add(1, 2).WasCalled();
+            mock.Verify.GetName().WasCalled();
+        });
+
+        // Log("hello") was not verified, so this should fail
+        var exception = Assert.Throws<MockVerificationException>(() =>
+        {
+            mock.VerifyNoOtherCalls();
+        });
+
+        await Assert.That(exception.Message).Contains("Log(hello)");
+    }
+
+    [Test]
     public void VerifyInOrder_Interleaved_Multi_Call_Correct_Group_Order()
     {
         // Regression test for group-based ordering:
