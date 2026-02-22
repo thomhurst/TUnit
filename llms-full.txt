@@ -18349,7 +18349,7 @@ To continue your journey with TUnit, explore these topics:
 - **[Data-Driven Testing](../test-authoring/arguments.md)** - Run tests with multiple input values
 
 **Common Tasks:**
-- **[Mocking](../test-authoring/mocking.md)** - Use mocks and fakes in your tests
+- **[Mocking](../test-authoring/mocking/index.md)** - Use mocks and fakes in your tests
 - **[Best Practices](../guides/best-practices.md)** - Write maintainable, reliable tests
 - **[Cookbook](../guides/cookbook.md)** - Common testing patterns and recipes
 
@@ -27390,12 +27390,1374 @@ EOF < /dev/null
 
 ---
 
-## Mocking
+## Advanced Features
 
 
-TUnit is a testing framework focused on test execution and does not include any built-in mocking capabilities. This gives you the freedom to choose whichever mocking library best suits your needs and preferences.
+## Events
 
-You can use any .NET mocking library with TUnit, such as NSubstitute, Moq, FakeItEasy, or any other mocking framework that works with .NET.
+### Raising Events
+
+If the mocked interface declares events, TUnit.Mocks generates a `Raise` surface:
+
+```csharp
+public interface IConnection
+{
+    event EventHandler<string>? OnMessage;
+    event Action? OnDisconnect;
+}
+
+var mock = Mock.Of<IConnection>();
+
+// Subscribe to the event
+string? received = null;
+mock.Object.OnMessage += (sender, msg) => received = msg;
+
+// Raise the event through the mock
+mock.Raise.OnMessage("Hello!");
+// received == "Hello!"
+```
+
+### Auto-Raise on Method Call
+
+Trigger an event automatically when a method is called using `.Raises()` on a setup chain:
+
+```csharp
+mock.Setup.SendMessage(Arg.Any<string>())
+    .Raises("OnMessage", "echo");
+
+mock.Object.SendMessage("test");
+// OnMessage event fires with "echo"
+```
+
+### Event Subscription Callbacks
+
+React when handlers are added or removed from events:
+
+```csharp
+var subscribed = false;
+mock.OnSubscribe("OnMessage", () => subscribed = true);
+mock.OnUnsubscribe("OnMessage", () => subscribed = false);
+
+mock.Object.OnMessage += (s, e) => { };
+// subscribed == true
+
+// Query subscriber info
+var count = mock.GetEventSubscriberCount("OnMessage");
+var wasSubscribed = mock.WasEventSubscribed("OnMessage");
+```
+
+## State Machine Mocking
+
+Model stateful behavior where method responses depend on the mock's current state:
+
+```csharp
+public interface IConnection
+{
+    string GetStatus();
+    void Connect();
+    void Disconnect();
+}
+
+var mock = Mock.Of<IConnection>();
+mock.SetState("disconnected");
+
+mock.InState("disconnected", setup =>
+{
+    setup.GetStatus().Returns("OFFLINE");
+    setup.Connect().TransitionsTo("connected");
+});
+
+mock.InState("connected", setup =>
+{
+    setup.GetStatus().Returns("ONLINE");
+    setup.Disconnect().TransitionsTo("disconnected");
+});
+
+// Start disconnected
+var status = mock.Object.GetStatus(); // "OFFLINE"
+
+mock.Object.Connect(); // transitions to "connected"
+status = mock.Object.GetStatus();     // "ONLINE"
+
+mock.Object.Disconnect(); // transitions back to "disconnected"
+status = mock.Object.GetStatus();     // "OFFLINE"
+```
+
+### State API
+
+| Method | Description |
+|---|---|
+| `mock.SetState("name")` | Set the current state |
+| `mock.SetState(null)` | Clear state (all setups match) |
+| `mock.InState("name", configure)` | Register setups scoped to a state |
+| `.TransitionsTo("name")` | Transition state after method call (on setup chain) |
+
+## Recursive / Auto-Mocking
+
+In loose mode, methods returning interface types automatically return functional mocks instead of null:
+
+```csharp
+public interface IServiceA
+{
+    IServiceB GetServiceB();
+}
+
+public interface IServiceB
+{
+    int GetValue();
+}
+
+var mock = Mock.Of<IServiceA>();
+
+// GetServiceB() automatically returns an auto-mock
+var serviceB = mock.Object.GetServiceB();
+// serviceB is not null — it's a working mock
+
+// Configure the auto-mock
+var autoMock = mock.GetAutoMock<IServiceB>("GetServiceB");
+autoMock.Setup.GetValue().Returns(42);
+
+var value = serviceB.GetValue(); // 42
+```
+
+Auto-mocks are cached — calling the same method returns the same mock instance.
+
+## MockRepository
+
+Manage multiple mocks with shared behavior and batch operations:
+
+```csharp
+var repo = new MockRepository(MockBehavior.Strict);
+
+var serviceMock = repo.Of<IService>();
+var loggerMock = repo.Of<ILogger>();
+
+// Configure each mock individually
+serviceMock.Setup.GetData(Arg.Any<int>()).Returns("result");
+loggerMock.Setup.Log(Arg.Any<string>());
+
+// Exercise code
+serviceMock.Object.GetData(1);
+loggerMock.Object.Log("hello");
+
+// Batch verification
+repo.VerifyAll();            // all setups invoked across all mocks
+repo.VerifyNoOtherCalls();   // no unverified calls on any mock
+
+// Batch reset
+repo.Reset();                // clear all mocks
+```
+
+### Repository API
+
+| Method | Description |
+|---|---|
+| `repo.Of<T>()` | Create and track a loose mock |
+| `repo.Of<T>(behavior)` | Create and track a mock with specific behavior |
+| `repo.OfPartial<T>(args)` | Create and track a partial mock |
+| `repo.Track(existingMock)` | Add an existing mock to the repository |
+| `repo.Mocks` | All tracked mocks |
+| `repo.VerifyAll()` | Verify all setups on all mocks |
+| `repo.VerifyNoOtherCalls()` | Verify no unverified calls on any mock |
+| `repo.Reset()` | Reset all mocks |
+
+## Diagnostics
+
+Get a diagnostic report of setup coverage and call matching:
+
+```csharp
+mock.Setup.GetUser(Arg.Any<int>()).Returns(new User("Alice"));
+mock.Setup.Delete(Arg.Any<int>());
+
+svc.GetUser(1);
+// Delete was never called
+
+var diag = mock.GetDiagnostics();
+diag.TotalSetups;       // 2
+diag.ExercisedSetups;   // 1
+diag.UnusedSetups;      // [Delete(Arg.Any<int>())]
+diag.UnmatchedCalls;    // [] (all calls matched a setup)
+```
+
+Useful for debugging why a mock isn't behaving as expected, or for finding dead setups.
+
+## Custom Default Value Provider
+
+Override the default return values for unconfigured methods in loose mode:
+
+```csharp
+public class TestDefaults : IDefaultValueProvider
+{
+    public bool CanProvide(Type type)
+        => type == typeof(string) || type == typeof(int);
+
+    public object? GetDefaultValue(Type type) => type switch
+    {
+        _ when type == typeof(string) => "test-default",
+        _ when type == typeof(int) => -1,
+        _ => null
+    };
+}
+
+var mock = Mock.Of<IService>();
+mock.DefaultValueProvider = new TestDefaults();
+
+var name = mock.Object.GetName();  // "test-default" (no setup needed)
+var count = mock.Object.GetCount(); // -1
+```
+
+The provider is consulted **before** auto-mocking and built-in smart defaults.
+
+## Reset
+
+Clear all setups, call history, state, and auto-tracked property values:
+
+```csharp
+mock.Setup.GetUser(Arg.Any<int>()).Returns(new User("Alice"));
+svc.GetUser(1);
+
+mock.Reset();
+
+svc.GetUser(1); // returns default (setup cleared)
+mock.Invocations.Count; // 0 (history cleared)
+```
+
+The `SetupAllProperties()` flag is preserved across resets.
+
+---
+
+## Argument Matchers
+
+
+Argument matchers control which calls a setup or verification matches. They are used in both `mock.Setup` and `mock.Verify` surfaces.
+
+## Quick Reference
+
+| Matcher | Matches |
+|---|---|
+| `Arg.Any<T>()` | Any value of type T (including null) |
+| `Arg.Is<T>(value)` | Exact equality |
+| `Arg.Is<T>(predicate)` | Values satisfying a predicate |
+| `Arg.IsNull<T>()` | Null only |
+| `Arg.IsNotNull<T>()` | Any non-null value |
+| `Arg.Matches(pattern)` | String matching a regex pattern |
+| `Arg.Matches(regex)` | String matching a compiled `Regex` |
+| `Arg.Contains<TCol, TElem>(item)` | Collection containing an element |
+| `Arg.HasCount<T>(n)` | Collection with exactly n elements |
+| `Arg.IsEmpty<T>()` | Empty collection |
+| `Arg.SequenceEquals<TCol, TElem>(expected)` | Collection matching element-by-element |
+| `Arg.IsInRange<T>(min, max)` | Value within an inclusive range |
+| `Arg.IsIn<T>(values)` | Value in a set |
+| `Arg.IsNotIn<T>(values)` | Value not in a set |
+| `Arg.Not<T>(inner)` | Negation of another matcher |
+
+## Basic Matchers
+
+### Any
+
+Matches any value, including null:
+
+```csharp
+mock.Setup.GetUser(Arg.Any<int>()).Returns(new User("Default"));
+
+svc.GetUser(1);    // matches
+svc.GetUser(999);  // matches
+```
+
+### Exact Value
+
+Match a specific value using equality:
+
+```csharp
+mock.Setup.GetUser(Arg.Is(42)).Returns(new User("Alice"));
+mock.Setup.GetUser(Arg.Is(99)).Returns(new User("Bob"));
+
+svc.GetUser(42);  // returns Alice
+svc.GetUser(99);  // returns Bob
+svc.GetUser(1);   // no match — returns default
+```
+
+:::tip Implicit Conversion
+Raw values are implicitly converted to `Arg.Is(value)`, so these are equivalent:
+```csharp
+mock.Setup.GetUser(Arg.Is(42)).Returns(new User("Alice"));
+mock.Setup.GetUser(42).Returns(new User("Alice")); // same thing
+```
+:::
+
+### Predicate
+
+Match values satisfying a condition:
+
+```csharp
+mock.Setup.GetUser(Arg.Is<int>(id => id > 0)).Returns(new User("Valid"));
+mock.Setup.GetUser(Arg.Is<int>(id => id <= 0)).Throws<ArgumentException>();
+```
+
+### Null and NotNull
+
+```csharp
+mock.Setup.Process(Arg.IsNull<string>()).Returns("was null");
+mock.Setup.Process(Arg.IsNotNull<string>()).Returns("had value");
+```
+
+## String Matchers
+
+### Regex Pattern
+
+```csharp
+// Match strings against a regex pattern
+mock.Setup.Search(Arg.Matches(@"^user_\d+$")).Returns(new[] { "found" });
+
+svc.Search("user_42");   // matches
+svc.Search("admin_1");   // no match
+```
+
+### Compiled Regex
+
+```csharp
+var pattern = new Regex(@"^user_\d+$", RegexOptions.Compiled);
+mock.Setup.Search(Arg.Matches(pattern)).Returns(new[] { "found" });
+```
+
+## Collection Matchers
+
+### Contains
+
+```csharp
+mock.Setup.ProcessItems(Arg.Contains<List<int>, int>(42)).Returns(true);
+
+svc.ProcessItems(new List<int> { 1, 42, 3 }); // matches — contains 42
+svc.ProcessItems(new List<int> { 1, 2, 3 });  // no match
+```
+
+### HasCount
+
+```csharp
+mock.Setup.ProcessItems(Arg.HasCount<List<int>>(3)).Returns(true);
+
+svc.ProcessItems(new List<int> { 1, 2, 3 }); // matches — count is 3
+svc.ProcessItems(new List<int> { 1, 2 });     // no match
+```
+
+### IsEmpty
+
+```csharp
+mock.Setup.ProcessItems(Arg.IsEmpty<List<int>>()).Returns(false);
+
+svc.ProcessItems(new List<int>());          // matches
+svc.ProcessItems(new List<int> { 1 });      // no match
+```
+
+### SequenceEquals
+
+```csharp
+mock.Setup.ProcessItems(
+    Arg.SequenceEquals<List<int>, int>(new[] { 1, 2, 3 })
+).Returns(true);
+
+svc.ProcessItems(new List<int> { 1, 2, 3 }); // matches
+svc.ProcessItems(new List<int> { 3, 2, 1 }); // no match — wrong order
+```
+
+## Range and Set Matchers
+
+### IsInRange
+
+```csharp
+mock.Setup.SetAge(Arg.IsInRange(0, 120)).Returns(true);
+
+svc.SetAge(25);   // matches
+svc.SetAge(-1);   // no match
+svc.SetAge(200);  // no match
+```
+
+### IsIn / IsNotIn
+
+```csharp
+mock.Setup.GetRole(Arg.IsIn("admin", "editor", "viewer")).Returns(true);
+mock.Setup.GetRole(Arg.IsNotIn("admin", "superadmin")).Returns(false);
+```
+
+## Negation
+
+Wrap any matcher with `Not` to invert it:
+
+```csharp
+mock.Setup.Process(Arg.Not(Arg.Is(0))).Returns("non-zero");
+// Matches any int except 0
+```
+
+## Argument Capture
+
+Every `Arg<T>` matcher automatically captures the values it sees:
+
+```csharp
+var nameArg = Arg.Any<string>();
+mock.Setup.Greet(nameArg).Returns("Hi");
+
+svc.Greet("Alice");
+svc.Greet("Bob");
+svc.Greet("Charlie");
+
+// Access captured values
+var all = nameArg.Values;   // ["Alice", "Bob", "Charlie"]
+var last = nameArg.Latest;  // "Charlie"
+
+await Assert.That(nameArg.Values).HasCount().EqualTo(3);
+```
+
+:::tip
+Capture works in both setup and verification contexts. Store the `Arg<T>` in a variable, then inspect `.Values` or `.Latest` after exercising the code.
+:::
+
+## Custom Matchers
+
+Implement `IArgumentMatcher<T>` for reusable matching logic:
+
+```csharp
+public class StringLengthMatcher : IArgumentMatcher<string>
+{
+    private readonly int _min;
+    private readonly int _max;
+
+    public StringLengthMatcher(int min, int max)
+    {
+        _min = min;
+        _max = max;
+    }
+
+    public bool Matches(string? value)
+        => value is not null && value.Length >= _min && value.Length <= _max;
+
+    public bool Matches(object? value)
+        => Matches(value as string);
+
+    public string Describe()
+        => $"string with length between {_min} and {_max}";
+}
+
+// Usage
+mock.Setup.Greet(Arg.Matches(new StringLengthMatcher(3, 50)))
+    .Returns("Valid name");
+```
+
+The `Describe()` method is used in verification failure messages to explain what was expected.
+
+---
+
+## HTTP Mocking
+
+
+`TUnit.Mocks.Http` provides `MockHttpHandler` — a drop-in `HttpMessageHandler` replacement for testing code that uses `HttpClient`.
+
+```bash
+dotnet add package TUnit.Mocks.Http --prerelease
+```
+
+## Getting Started
+
+```csharp
+using TUnit.Mocks;
+
+[Test]
+public async Task Fetches_Users_From_Api()
+{
+    // Arrange — MockHttpClient is a real HttpClient with a .Handler property
+    using var client = Mock.HttpClient("https://example.com");
+    client.Handler.OnGet("/api/users").RespondWithJson("""[{"id": 1, "name": "Alice"}]""");
+
+    // Act
+    var response = await client.GetAsync("/api/users");
+    var body = await response.Content.ReadAsStringAsync();
+
+    // Assert
+    await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+    await Assert.That(body).Contains("Alice");
+}
+```
+
+## Creating a Client
+
+`Mock.HttpClient()` returns a `MockHttpClient` — a subclass of `HttpClient` with a `.Handler` property for configuring setups and verifying calls:
+
+```csharp
+// With base address (most common)
+using var client = Mock.HttpClient("https://api.example.com");
+
+// Without base address
+using var client = Mock.HttpClient();
+client.BaseAddress = new Uri("https://api.example.com");
+
+// Just the handler (when you need more control)
+var handler = Mock.HttpHandler();
+using var client = handler.CreateClient("https://api.example.com");
+```
+
+`MockHttpClient` **is** an `HttpClient` — pass it anywhere `HttpClient` is expected. Use `.Handler` for all setup and verification:
+
+## Setting Up Responses
+
+All setup is done through `client.Handler` (or directly on a `MockHttpHandler` if you created one with `Mock.HttpHandler()`).
+
+### By HTTP Method
+
+```csharp
+client.Handler.OnGet("/api/users").RespondWithJson("""[{"id": 1}]""");
+client.Handler.OnPost("/api/users").Respond(HttpStatusCode.Created);
+client.Handler.OnPut("/api/users/1").Respond(HttpStatusCode.NoContent);
+client.Handler.OnDelete("/api/users/1").Respond(HttpStatusCode.NoContent);
+```
+
+### Any Request
+
+```csharp
+client.Handler.OnAnyRequest().Respond(HttpStatusCode.OK);
+```
+
+### Custom Matching
+
+Use `OnRequest` with a fluent matcher for complex conditions:
+
+```csharp
+// Match by path prefix
+client.Handler.OnRequest(r => r.Method(HttpMethod.Get).PathStartsWith("/api/v2"))
+    .RespondWithJson("""{"version": 2}""");
+
+// Match by regex
+client.Handler.OnRequest(r => r.PathMatches(@"/api/users/\d+"))
+    .RespondWithJson("""{"id": 1, "name": "Alice"}""");
+
+// Match by header
+client.Handler.OnRequest(r => r.HasHeader("Authorization"))
+    .RespondWithJson("""{"authenticated": true}""");
+
+client.Handler.OnRequest(r => r.Header("Authorization", "Bearer valid-token"))
+    .RespondWithJson("""{"user": "admin"}""");
+
+// Match by body content
+client.Handler.OnRequest(r => r.BodyContains("searchQuery"))
+    .RespondWithJson("""{"results": []}""");
+
+// Custom predicate
+client.Handler.OnRequest(r => r.Matching(msg => msg.RequestUri?.Port == 8080))
+    .Respond(HttpStatusCode.OK);
+```
+
+### Request Matcher Reference
+
+| Method | Matches |
+|---|---|
+| `.Method(HttpMethod)` | Specific HTTP method |
+| `.Path(string)` | Exact path |
+| `.PathStartsWith(string)` | Path prefix |
+| `.PathMatches(string)` | Regex pattern on path |
+| `.Header(name, value)` | Header with exact value |
+| `.HasHeader(name)` | Header present (any value) |
+| `.BodyContains(string)` | Request body contains text |
+| `.Matching(predicate)` | Custom `Func<HttpRequestMessage, bool>` |
+
+## Response Configuration
+
+### Basic Responses
+
+```csharp
+// Status code only
+client.Handler.OnGet("/health").Respond(HttpStatusCode.OK);
+
+// JSON body
+client.Handler.OnGet("/api/data").RespondWithJson("""{"key": "value"}""");
+
+// Plain text body
+client.Handler.OnGet("/api/version").RespondWithString("1.0.0");
+```
+
+### Response Builder
+
+For more control, use the response builder:
+
+```csharp
+client.Handler.OnGet("/api/data")
+    .Respond(HttpStatusCode.OK)
+    .WithJsonContent("""{"key": "value"}""")
+    .WithHeader("X-Request-Id", "abc123");
+```
+
+### Dynamic Responses
+
+Build responses based on the incoming request:
+
+```csharp
+client.Handler.OnPost("/api/echo")
+    .Respond()
+    .WithFactory(request =>
+    {
+        var body = request.Content?.ReadAsStringAsync().Result ?? "";
+        return new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent(body)
+        };
+    });
+```
+
+### Simulating Delays
+
+```csharp
+client.Handler.OnGet("/api/slow")
+    .Respond(HttpStatusCode.OK)
+    .WithDelay(TimeSpan.FromSeconds(2));
+```
+
+### Throwing Exceptions
+
+```csharp
+client.Handler.OnGet("/api/failing")
+    .Throws("Connection refused");
+
+client.Handler.OnGet("/api/timeout")
+    .Throws(new TaskCanceledException("Request timed out"));
+```
+
+## Sequential Responses
+
+Return different responses for successive requests to the same endpoint:
+
+```csharp
+var setup = client.Handler.OnGet("/api/status");
+setup.RespondWithString("starting");
+setup.Then().RespondWithString("running");
+setup.Then().RespondWithString("complete");
+
+// 1st call: "starting"
+// 2nd call: "running"
+// 3rd+ calls: "complete" (last response repeats)
+```
+
+## Unmatched Requests
+
+By default, unmatched requests return **404 Not Found**. You can change this:
+
+```csharp
+// Change default status code
+client.Handler.WithDefaultStatus(HttpStatusCode.ServiceUnavailable);
+
+// Or throw on unmatched requests
+client.Handler.ThrowOnUnmatched();
+```
+
+## Verification
+
+### Verify Call Count
+
+```csharp
+client.Handler.Verify(r => r.Method(HttpMethod.Get).Path("/api/users"), Times.Once);
+client.Handler.Verify(r => r.Method(HttpMethod.Delete), Times.Never);
+```
+
+### Verify No Unmatched Requests
+
+```csharp
+client.Handler.VerifyNoUnmatchedRequests();
+```
+
+### Inspect Captured Requests
+
+```csharp
+await Assert.That(client.Handler.Requests).HasCount().EqualTo(2);
+await Assert.That(client.Handler.Requests[0].Method).IsEqualTo(HttpMethod.Get);
+await Assert.That(client.Handler.Requests[0].RequestUri!.PathAndQuery).IsEqualTo("/api/users");
+
+// Check for unmatched requests
+await Assert.That(client.Handler.UnmatchedRequests).HasCount().EqualTo(0);
+```
+
+Each `CapturedRequest` provides:
+
+| Property | Description |
+|---|---|
+| `Method` | HTTP method |
+| `RequestUri` | Full request URI |
+| `Body` | Request body as string (or null) |
+| `Headers` | Request headers |
+| `Matched` | Whether a setup matched this request |
+| `Timestamp` | When the request was captured |
+
+## Reset
+
+```csharp
+client.Handler.Reset(); // clears all setups and captured requests
+```
+
+---
+
+## TUnit.Mocks
+
+
+TUnit.Mocks is a **source-generated, AOT-compatible** mocking framework built for TUnit. Because mocks are generated at compile time, it works with Native AOT, trimming, and single-file publishing — unlike traditional mocking libraries that rely on runtime proxy generation.
+
+:::note Beta
+TUnit.Mocks is currently in **beta**. The API may change before the stable release.
+:::
+
+## Installation
+
+Add the NuGet package to your test project:
+
+```bash
+dotnet add package TUnit.Mocks --prerelease
+```
+
+For HTTP mocking or logging helpers, also add:
+
+```bash
+dotnet add package TUnit.Mocks.Http --prerelease
+dotnet add package TUnit.Mocks.Logging --prerelease
+```
+
+:::warning C# 14 Required
+TUnit.Mocks requires **C# 14** or later (`LangVersion` set to `14` or `preview`). If your project targets an older version, you will see error **TM004** at compile time.
+:::
+
+## Your First Mock
+
+```csharp
+using TUnit.Mocks;
+
+public interface IGreeter
+{
+    string Greet(string name);
+}
+
+public class GreeterTests
+{
+    [Test]
+    public async Task Greet_Returns_Configured_Value()
+    {
+        // Arrange — create a mock
+        var mock = Mock.Of<IGreeter>();
+
+        // Configure — set up a return value
+        mock.Setup.Greet(Arg.Any<string>()).Returns("Hello!");
+
+        // Act — use the mock object
+        IGreeter greeter = mock.Object;
+        var result = greeter.Greet("Alice");
+
+        // Assert — verify the result and the call
+        await Assert.That(result).IsEqualTo("Hello!");
+        mock.Verify.Greet("Alice").WasCalled(Times.Once);
+    }
+}
+```
+
+## Key Concepts
+
+### Creating Mocks
+
+| Factory Method | Use Case |
+|---|---|
+| `Mock.Of<T>()` | Mock an interface or abstract class |
+| `Mock.OfPartial<T>(args)` | Mock a concrete class (calls base for unconfigured methods) |
+| `Mock.OfDelegate<T>()` | Mock a delegate (`Func<>`, `Action<>`, etc.) |
+| `Mock.Wrap<T>(instance)` | Wrap a real object with selective overrides |
+| `Mock.Of<T1, T2>()` | Mock multiple interfaces on a single object |
+| `Mock.HttpHandler()` | Create a `MockHttpHandler` *(requires `TUnit.Mocks.Http`)* |
+| `Mock.HttpClient(baseAddress?)` | Create a `MockHttpClient` — an `HttpClient` with a `.Handler` property *(requires `TUnit.Mocks.Http`)* |
+| `Mock.Logger()` | Create a `MockLogger` *(requires `TUnit.Mocks.Logging`)* |
+| `Mock.Logger<T>()` | Create a `MockLogger<T>` implementing `ILogger<T>` *(requires `TUnit.Mocks.Logging`)* |
+
+All factory methods accept an optional `MockBehavior` parameter:
+
+```csharp
+var loose = Mock.Of<IService>();                       // loose (default)
+var strict = Mock.Of<IService>(MockBehavior.Strict);   // throws on unconfigured calls
+```
+
+### The Mock Wrapper
+
+`Mock.Of<T>()` returns a `Mock<T>` wrapper with three surfaces:
+
+```csharp
+var mock = Mock.Of<IService>();
+
+mock.Setup   // configure method/property behaviors
+mock.Verify  // verify calls were made
+mock.Raise   // raise events (if T has events)
+mock.Object  // the T instance to pass to your code under test
+```
+
+### Implicit Conversion
+
+You can pass `Mock<T>` directly where `T` is expected — no `.Object` needed:
+
+```csharp
+var mock = Mock.Of<IGreeter>();
+IGreeter greeter = mock; // implicit conversion
+```
+
+### Loose vs Strict Mode
+
+| Mode | Unconfigured methods | Default |
+|---|---|---|
+| `MockBehavior.Loose` | Return smart defaults (`0`, `""`, `false`, `null`, auto-mocked interfaces) | Yes |
+| `MockBehavior.Strict` | Throw `MockStrictBehaviorException` | No |
+
+## What's Next
+
+- [Setup & Stubbing](setup) — configure return values, callbacks, exceptions, and property behaviors
+- [Verification](verification) — verify calls, ordering, and assertion integration
+- [Argument Matchers](argument-matchers) — match arguments with predicates, patterns, and capture values
+- [Advanced Features](advanced) — state machines, events, auto-mocking, diagnostics, and more
+- [HTTP Mocking](http) — mock `HttpClient` with `MockHttpHandler`
+- [Logging](logging) — capture and verify `ILogger` calls with `MockLogger`
+
+---
+
+## Logging(Mocking)
+
+
+`TUnit.Mocks.Logging` provides `MockLogger` — a simple `ILogger` implementation that captures log entries for inspection and verification.
+
+```bash
+dotnet add package TUnit.Mocks.Logging --prerelease
+```
+
+:::tip No Source Generation Needed
+Unlike `TUnit.Mocks`, the logging helpers are plain classes — no source generation required. Create loggers with `Mock.Logger()` and pass them to your code.
+:::
+
+## Getting Started
+
+```csharp
+using TUnit.Mocks;
+using Microsoft.Extensions.Logging;
+
+[Test]
+public async Task Service_Logs_On_Startup()
+{
+    // Arrange
+    var logger = Mock.Logger();
+    var service = new MyService(logger);
+
+    // Act
+    service.Start();
+
+    // Assert
+    logger.VerifyLog(LogLevel.Information, "started", Times.Once);
+}
+```
+
+## Creating a Logger
+
+```csharp
+// Untyped logger
+var logger = Mock.Logger();
+ILogger iLogger = logger;
+
+// With category name
+var logger = Mock.Logger("MyApp.Services");
+
+// Generic typed logger (implements ILogger<T>)
+var logger = Mock.Logger<MyService>();
+ILogger<MyService> iLogger = logger;
+```
+
+## Inspecting Entries
+
+```csharp
+logger.LogInformation("User {UserId} logged in", 42);
+logger.LogWarning("Disk space low");
+
+// All entries
+await Assert.That(logger.Entries).HasCount().EqualTo(2);
+await Assert.That(logger.Entries[0].LogLevel).IsEqualTo(LogLevel.Information);
+await Assert.That(logger.Entries[0].Message).Contains("42");
+
+// Most recent entry
+var latest = logger.LatestEntry;
+await Assert.That(latest!.Message).IsEqualTo("Disk space low");
+```
+
+Each `LogEntry` provides:
+
+| Property | Description |
+|---|---|
+| `LogLevel` | The log level (Trace, Debug, Information, etc.) |
+| `EventId` | The event ID |
+| `Message` | The formatted log message |
+| `Exception` | The associated exception (or null) |
+| `Timestamp` | When the entry was recorded |
+| `CategoryName` | The logger's category name |
+
+## Verification
+
+### Fluent API
+
+Build verification queries with filters:
+
+```csharp
+// By level
+logger.VerifyLog().AtLevel(LogLevel.Error).WasCalled(Times.Once);
+
+// By message content (contains)
+logger.VerifyLog().ContainingMessage("failed").WasCalled(Times.Once);
+
+// By exact message
+logger.VerifyLog().WithMessage("Operation completed").WasCalled(Times.Once);
+
+// By exception type
+logger.VerifyLog().WithException<InvalidOperationException>().WasCalled(Times.Once);
+
+// Combined filters
+logger.VerifyLog()
+    .AtLevel(LogLevel.Error)
+    .WithException<InvalidOperationException>()
+    .ContainingMessage("database")
+    .WasCalled(Times.Once);
+```
+
+### Shorthand Methods
+
+```csharp
+// Verify message at level (at least once)
+logger.VerifyLog(LogLevel.Error, "connection failed");
+
+// Verify message at level with count
+logger.VerifyLog(LogLevel.Warning, "retry", Times.Exactly(3));
+
+// Verify nothing logged at a level
+logger.VerifyNoLog(LogLevel.Error);
+
+// Verify nothing logged at all
+logger.VerifyNoLogs();
+```
+
+### Never Called
+
+```csharp
+logger.VerifyLog().AtLevel(LogLevel.Error).WasNeverCalled();
+```
+
+## Filtering Entries
+
+Retrieve entries matching specific criteria:
+
+```csharp
+// By level
+var errors = logger.GetLogs(LogLevel.Error);
+
+// By message content
+var retryLogs = logger.GetLogs("retry");
+
+// Using the fluent API
+var matching = logger.VerifyLog()
+    .AtLevel(LogLevel.Warning)
+    .ContainingMessage("timeout")
+    .GetMatchingEntries();
+```
+
+## Reset
+
+```csharp
+logger.Clear(); // removes all captured entries
+```
+
+## Dependency Injection
+
+Pass `Mock.Logger<T>()` anywhere `ILogger<T>` is expected:
+
+```csharp
+[Test]
+public async Task OrderService_Logs_Errors()
+{
+    var logger = Mock.Logger<OrderService>();
+    var service = new OrderService(logger);
+
+    await service.ProcessOrder(invalidOrder);
+
+    logger.VerifyLog()
+        .AtLevel(LogLevel.Error)
+        .ContainingMessage("validation failed")
+        .WasCalled(Times.Once);
+}
+```
+
+---
+
+## Setup & Stubbing
+
+
+The `mock.Setup` surface configures how the mock responds when its members are called.
+
+## Method Setup
+
+### Return Values
+
+```csharp
+// Fixed return value
+mock.Setup.GetUser(Arg.Any<int>()).Returns(new User("Alice"));
+
+// Computed return value
+mock.Setup.GetUser(Arg.Any<int>()).Returns(() => new User(DateTime.Now.ToString()));
+
+// Async methods — no special API needed
+mock.Setup.GetUserAsync(Arg.Any<int>()).Returns(new User("Alice"));
+// TUnit.Mocks auto-wraps the value in Task<T> or ValueTask<T>
+```
+
+### Throwing Exceptions
+
+```csharp
+// Throw a specific exception type
+mock.Setup.Delete(Arg.Any<int>()).Throws<InvalidOperationException>();
+
+// Throw a specific instance
+mock.Setup.Delete(Arg.Any<int>()).Throws(new ArgumentException("bad id"));
+```
+
+### Callbacks
+
+```csharp
+// Simple callback
+var callCount = 0;
+mock.Setup.Process(Arg.Any<string>())
+    .Callback(() => callCount++);
+
+// Callback with access to arguments
+mock.Setup.Process(Arg.Any<string>())
+    .Callback((object?[] args) => Console.WriteLine($"Called with: {args[0]}"));
+```
+
+### Sequential Behaviors
+
+Use `.Then()` to define different behaviors for successive calls:
+
+```csharp
+mock.Setup.GetValue(Arg.Any<string>())
+    .Throws<InvalidOperationException>()   // 1st call: throws
+    .Then()
+    .Returns("retry-succeeded")             // 2nd call: returns value
+    .Then()
+    .Returns("cached");                     // 3rd+ calls: returns this value
+
+// Shorthand for sequential return values
+mock.Setup.GetValue(Arg.Any<string>())
+    .ReturnsSequentially("first", "second", "third");
+// 1st: "first", 2nd: "second", 3rd+: "third" (last value repeats)
+```
+
+### Void Methods
+
+Void methods support `Callback` and `Throws` (but not `Returns`):
+
+```csharp
+mock.Setup.Log(Arg.Any<string>())
+    .Callback(() => { /* side effect */ });
+
+mock.Setup.Log(Arg.Any<string>())
+    .Throws<NotSupportedException>();
+```
+
+## Property Setup
+
+TUnit.Mocks uses C# 14 extension properties for a natural property API. The default behavior targets the **getter** (the most common case).
+
+### Getter Setup
+
+```csharp
+// These are equivalent — both configure the getter
+mock.Setup.Name.Returns("Alice");
+mock.Setup.Name.Getter.Returns("Alice");
+```
+
+All method setup operations work on getters:
+
+```csharp
+mock.Setup.Name.Throws<InvalidOperationException>();
+mock.Setup.Name.Callback(() => Console.WriteLine("Name accessed"));
+mock.Setup.Name.ReturnsSequentially("first", "second");
+```
+
+### Setter Setup
+
+```csharp
+// React to any value being set
+mock.Setup.Count.Setter.Callback(() => Console.WriteLine("Count was set"));
+
+// React to a specific value being set
+mock.Setup.Count.Set(Arg.Is(42)).Callback(() => Console.WriteLine("Count set to 42"));
+
+// Throw on setter
+mock.Setup.Name.Setter.Throws<NotSupportedException>();
+```
+
+### Auto-Tracking Properties
+
+Call `SetupAllProperties()` to make properties behave like real auto-properties — setters store values, getters return them:
+
+```csharp
+var mock = Mock.Of<IEntity>();
+mock.SetupAllProperties();
+
+mock.Object.Name = "Alice";
+var name = mock.Object.Name; // "Alice"
+
+mock.Object.Count = 10;
+var count = mock.Object.Count; // 10
+```
+
+Explicit setups take precedence over auto-tracked values.
+
+## Out and Ref Parameters
+
+**Out parameters** are excluded from setup signatures. Use `.SetsOutParameter()` to assign their values:
+
+```csharp
+mock.Setup.TryGet("key")
+    .Returns(true)
+    .SetsOutParameter(0, "found-value"); // paramIndex 0 = first out param
+
+bool found = svc.TryGet("key", out var value);
+// found == true, value == "found-value"
+```
+
+**Ref parameters** are included in setup signatures and participate in argument matching.
+
+## Partial Mocks
+
+Partial mocks wrap a real class. Unconfigured method calls execute the base implementation:
+
+```csharp
+public abstract class Calculator
+{
+    public virtual int Add(int a, int b) => a + b;
+    public abstract int Multiply(int a, int b);
+}
+
+var mock = Mock.OfPartial<Calculator>();
+mock.Setup.Multiply(Arg.Any<int>(), Arg.Any<int>()).Returns(99);
+
+mock.Object.Add(2, 3);      // 5 (base implementation)
+mock.Object.Multiply(2, 3); // 99 (mocked)
+```
+
+Pass constructor arguments for non-default constructors:
+
+```csharp
+var mock = Mock.OfPartial<MyService>("connectionString", 42);
+```
+
+## Delegate Mocking
+
+Mock any delegate type:
+
+```csharp
+var mock = Mock.OfDelegate<Func<string, int>>();
+mock.Setup.Invoke(Arg.Any<string>()).Returns(42);
+
+Func<string, int> func = mock;
+var result = func("hello"); // 42
+```
+
+Works with `Action<>`, `Func<>`, and custom delegate types.
+
+## Wrapping Real Objects
+
+Wrap a real instance to selectively override methods while delegating unconfigured calls to the real implementation:
+
+```csharp
+var realService = new ProductionService();
+var mock = Mock.Wrap(realService);
+
+// Override just one method
+mock.Setup.GetConfig().Returns(new TestConfig());
+
+// All other calls go to realService
+mock.Object.DoWork(); // calls realService.DoWork()
+```
+
+## Multi-Interface Mocks
+
+Create a single mock that implements multiple interfaces:
+
+```csharp
+var mock = Mock.Of<ILogger, IDisposable>();
+
+mock.Setup.Log(Arg.Any<string>()); // ILogger method
+mock.Object.Log("test");
+
+((IDisposable)mock.Object).Dispose(); // IDisposable method
+```
+
+Supports up to 4 interfaces: `Mock.Of<T1, T2, T3, T4>()`.
+
+## Setup Chaining
+
+Setup methods return chain objects that support additional behaviors:
+
+```csharp
+mock.Setup.Process(Arg.Any<int>())
+    .Returns(true)
+    .Raises("ProcessCompleted", EventArgs.Empty)   // auto-raise event
+    .TransitionsTo("processed");                    // state machine transition
+```
+
+See [Advanced Features](advanced) for details on events and state machines.
+
+---
+
+## Verification
+
+
+The `mock.Verify` surface checks that expected calls were made to the mock.
+
+## Basic Verification
+
+```csharp
+// Verify a method was called at least once
+mock.Verify.GetUser(42).WasCalled();
+
+// Verify exact call count
+mock.Verify.GetUser(42).WasCalled(Times.Once);
+
+// Verify never called
+mock.Verify.Delete(Arg.Any<int>()).WasNeverCalled();
+```
+
+### Times
+
+| Expression | Matches |
+|---|---|
+| `Times.Once` | Exactly 1 call |
+| `Times.Never` | Exactly 0 calls |
+| `Times.AtLeastOnce` | 1 or more calls |
+| `Times.Exactly(n)` | Exactly n calls |
+| `Times.AtLeast(n)` | n or more calls |
+| `Times.AtMost(n)` | n or fewer calls |
+| `Times.Between(min, max)` | Between min and max calls (inclusive) |
+
+### Custom Failure Messages
+
+```csharp
+mock.Verify.GetUser(42).WasCalled(Times.Once, "GetUser should be called once during initialization");
+mock.Verify.Delete(Arg.Any<int>()).WasNeverCalled("Delete should not be called in read-only mode");
+```
+
+## Property Verification
+
+Property verification mirrors the setup API — defaults to the **getter**:
+
+```csharp
+// Getter verification
+mock.Verify.Name.WasCalled(Times.Once);           // getter called once
+mock.Verify.Name.Getter.WasCalled(Times.Once);    // explicit — same as above
+mock.Verify.Name.WasNeverCalled();                 // getter never accessed
+
+// Setter verification — any value
+mock.Verify.Count.Setter.WasCalled(Times.Exactly(3));
+mock.Verify.Count.Setter.WasNeverCalled();
+
+// Setter verification — specific value
+mock.Verify.Count.Set(42).WasCalled(Times.Once);
+mock.Verify.Count.Set(Arg.Is<int>(v => v > 0)).WasCalled(Times.AtLeast(1));
+```
+
+## Argument Matching in Verification
+
+Verification uses the same `Arg<T>` matchers as setup:
+
+```csharp
+// Exact value
+mock.Verify.GetUser(42).WasCalled(Times.Once);
+
+// Any value
+mock.Verify.GetUser(Arg.Any<int>()).WasCalled(Times.Exactly(3));
+
+// Predicate
+mock.Verify.GetUser(Arg.Is<int>(id => id > 0)).WasCalled(Times.AtLeast(1));
+```
+
+See [Argument Matchers](argument-matchers) for the full list of matchers.
+
+## Ordered Verification
+
+Verify calls occurred in a specific order **across one or more mocks**:
+
+```csharp
+Mock.VerifyInOrder(() =>
+{
+    mockLogger.Verify.Log("Starting").WasCalled();
+    mockRepo.Verify.SaveAsync(Arg.Any<int>()).WasCalled();
+    mockLogger.Verify.Log("Done").WasCalled();
+});
+```
+
+If calls occurred out of order, `VerifyInOrder` throws with a message showing the actual sequence.
+
+:::tip
+`VerifyInOrder` uses a global sequence counter — it works across multiple independent mock instances, not just within a single mock.
+:::
+
+## VerifyAll
+
+Verify that **every setup** was invoked at least once:
+
+```csharp
+mock.Setup.GetUser(Arg.Any<int>()).Returns(new User("Alice"));
+mock.Setup.Delete(Arg.Any<int>());
+
+svc.GetUser(1);
+svc.Delete(2);
+
+mock.VerifyAll(); // passes — both setups were invoked
+```
+
+If any setup was never called, `VerifyAll` throws listing the uninvoked setups.
+
+## VerifyNoOtherCalls
+
+Verify that all recorded calls have been explicitly verified:
+
+```csharp
+svc.GetUser(1);
+svc.Delete(2);
+
+mock.Verify.GetUser(1).WasCalled(Times.Once);
+mock.Verify.Delete(2).WasCalled(Times.Once);
+
+mock.VerifyNoOtherCalls(); // passes — all calls accounted for
+```
+
+If there are unverified calls, `VerifyNoOtherCalls` throws listing them.
+
+## TUnit Assertion Integration
+
+Use TUnit's `Assert.That` pipeline for assertion-style verification with better error messages:
+
+```csharp
+using TUnit.Mocks.Assertions;
+
+await Assert.That(mock.Verify.GetUser(42)).WasCalled(Times.Once);
+await Assert.That(mock.Verify.Delete(Arg.Any<int>())).WasNeverCalled();
+
+// Property verification through assertions
+await Assert.That(mock.Verify.Name).WasCalled(Times.Once);
+```
+
+This integrates with TUnit's assertion engine — failures appear as assertion errors with expression trees in the output.
+
+## Inspecting Calls
+
+Access the raw call history for custom inspection:
+
+```csharp
+var calls = mock.Invocations;
+
+await Assert.That(calls).HasCount().EqualTo(3);
+await Assert.That(calls[0].MemberName).IsEqualTo("GetUser");
+```
+
+Each `CallRecord` contains the member name, arguments, and sequence number.
 
 ---
 
