@@ -23,7 +23,7 @@ public sealed class RequestSetup
     public ResponseBuilder Respond(HttpStatusCode statusCode = HttpStatusCode.OK)
     {
         var builder = new ResponseBuilder().WithStatus(statusCode);
-        _responses.Add(builder);
+        lock (_responseLock) { _responses.Add(builder); }
         return builder;
     }
 
@@ -31,7 +31,7 @@ public sealed class RequestSetup
     public ResponseBuilder RespondWithJson(string json, HttpStatusCode statusCode = HttpStatusCode.OK)
     {
         var builder = new ResponseBuilder().WithStatus(statusCode).WithJsonContent(json);
-        _responses.Add(builder);
+        lock (_responseLock) { _responses.Add(builder); }
         return builder;
     }
 
@@ -39,7 +39,7 @@ public sealed class RequestSetup
     public ResponseBuilder RespondWithString(string content, HttpStatusCode statusCode = HttpStatusCode.OK)
     {
         var builder = new ResponseBuilder().WithStatus(statusCode).WithStringContent(content);
-        _responses.Add(builder);
+        lock (_responseLock) { _responses.Add(builder); }
         return builder;
     }
 
@@ -53,7 +53,7 @@ public sealed class RequestSetup
     public void Throws(Exception exception)
     {
         var builder = new ResponseBuilder().WithFactory(_ => throw exception);
-        _responses.Add(builder);
+        lock (_responseLock) { _responses.Add(builder); }
     }
 
     /// <summary>Configure the matched request to throw an HttpRequestException.</summary>

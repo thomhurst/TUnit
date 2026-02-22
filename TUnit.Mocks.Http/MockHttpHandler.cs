@@ -128,9 +128,8 @@ public sealed class MockHttpHandler : HttpMessageHandler
         var matching = 0;
         foreach (var request in _requests)
         {
-            if (matcher.Matches(
-                new HttpRequestMessage(request.Method, request.RequestUri),
-                request.Body))
+            using var msg = new HttpRequestMessage(request.Method, request.RequestUri);
+            if (matcher.Matches(msg, request.Body))
             {
                 matching++;
             }
@@ -199,10 +198,10 @@ public sealed class MockHttpHandler : HttpMessageHandler
         {
             if (setup.TryMatch(request, bodyContent))
             {
-                captured.Matched = true;
                 var response = setup.GetNextResponse();
                 if (response != null)
                 {
+                    captured.Matched = true;
                     if (response.Delay.HasValue)
                         await Task.Delay(response.Delay.Value, cancellationToken).ConfigureAwait(false);
                     return response.Build(request);
