@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\TestProject.props" />
+
+  <PropertyGroup Condition="'$(Aot)' == 'true' and $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
+    <IsAotCompatible>true</IsAotCompatible>
+    <PublishAot>true</PublishAot>
+    <PublishTrimmed>true</PublishTrimmed>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TUnit.Mocks\TUnit.Mocks.csproj" />
+    <ProjectReference Include="..\TUnit.Mocks.Assertions\TUnit.Mocks.Assertions.csproj" />
+
+    <!-- Wire source generator for mock generation in test code -->
+    <ProjectReference Include="..\TUnit.Mocks.SourceGenerator\TUnit.Mocks.SourceGenerator.csproj"
+                      OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+
+    <!-- Wire analyzer for compile-time diagnostics -->
+    <ProjectReference Include="..\TUnit.Mocks.Analyzers\TUnit.Mocks.Analyzers.csproj"
+                      OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <Import Project="..\TUnit.Mocks\TUnit.Mocks.props" />
+  <Import Project="..\TUnit.Mocks\TUnit.Mocks.targets" />
+  <Import Project="..\TestProject.targets" />
+
+</Project>

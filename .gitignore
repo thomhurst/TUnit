@@ -421,6 +421,8 @@ requirements
 
 TESTPROJECT_AOT*
 TESTPROJECT_SINGLEFILE*
+MOCKTESTS_AOT*
+NUGETTESTER_AOT*
 
 nul
 
@@ -439,3 +441,6 @@ docs/plans/
 
 # Git worktrees
 .worktrees/
+
+# Speckit feature specs
+specs/
