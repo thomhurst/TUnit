@@ -30,31 +30,35 @@ mock.Raise.OnMessage("Hello!");
 
 ### Auto-Raise on Method Call
 
-Trigger an event automatically when a method is called using `.Raises()` on a setup chain:
+Trigger an event automatically when a method is called using the typed `.Raises{EventName}()` method on a setup chain:
 
 ```csharp
 mock.Setup.SendMessage(Arg.Any<string>())
-    .Raises("OnMessage", "echo");
+    .RaisesOnMessage("echo");
 
 mock.Object.SendMessage("test");
 // OnMessage event fires with "echo"
 ```
 
-### Event Subscription Callbacks
+The typed raise methods are generated per-event with correct parameter types, giving you IntelliSense and compile-time safety. The string-based `.Raises(eventName, args)` overload is still available for dynamic scenarios.
 
-React when handlers are added or removed from events:
+### Event Subscription Tracking
+
+Query and react to event subscriptions through the strongly-typed `Events` surface:
 
 ```csharp
-var subscribed = false;
-mock.OnSubscribe("OnMessage", () => subscribed = true);
-mock.OnUnsubscribe("OnMessage", () => subscribed = false);
+var mock = Mock.Of<IConnection>();
+
+// Register callbacks for subscribe/unsubscribe
+mock.Events.OnMessage.OnSubscribe(() => Console.WriteLine("subscribed"));
+mock.Events.OnMessage.OnUnsubscribe(() => Console.WriteLine("unsubscribed"));
 
 mock.Object.OnMessage += (s, e) => { };
-// subscribed == true
+// prints "subscribed"
 
 // Query subscriber info
-var count = mock.GetEventSubscriberCount("OnMessage");
-var wasSubscribed = mock.WasEventSubscribed("OnMessage");
+var wasSubscribed = mock.Events.OnMessage.WasSubscribed;   // true
+var count = mock.Events.OnMessage.SubscriberCount;          // 1
 ```
 
 ## State Machine Mocking

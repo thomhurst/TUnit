@@ -13,7 +13,7 @@ public class EventSubscriptionSetupTests
         var mock = Mock.Of<INotifyService>();
         var callbackFired = false;
 
-        mock.OnSubscribe("DataReady", () => callbackFired = true);
+        mock.Events.DataReady.OnSubscribe(() => callbackFired = true);
 
         mock.Object.DataReady += (sender, args) => { };
 
@@ -26,7 +26,7 @@ public class EventSubscriptionSetupTests
         var mock = Mock.Of<INotifyService>();
         var callbackFired = false;
 
-        mock.OnUnsubscribe("DataReady", () => callbackFired = true);
+        mock.Events.DataReady.OnUnsubscribe(() => callbackFired = true);
 
         EventHandler handler = (sender, args) => { };
         mock.Object.DataReady += handler;
@@ -41,7 +41,7 @@ public class EventSubscriptionSetupTests
         var mock = Mock.Of<INotifyService>();
         var callCount = 0;
 
-        mock.OnSubscribe("DataReady", () => callCount++);
+        mock.Events.DataReady.OnSubscribe(() => callCount++);
 
         mock.Object.DataReady += (sender, args) => { };
         mock.Object.DataReady += (sender, args) => { };
@@ -58,7 +58,7 @@ public class EventSubscriptionSetupTests
         // Subscribe without configuring any callback — should not throw
         mock.Object.DataReady += (sender, args) => { };
 
-        await Assert.That(mock.WasEventSubscribed("DataReady")).IsTrue();
+        await Assert.That(mock.Events.DataReady.WasSubscribed).IsTrue();
     }
 
     [Test]
@@ -68,8 +68,8 @@ public class EventSubscriptionSetupTests
         var subscribeCount = 0;
         var unsubscribeCount = 0;
 
-        mock.OnSubscribe("DataReady", () => subscribeCount++);
-        mock.OnUnsubscribe("DataReady", () => unsubscribeCount++);
+        mock.Events.DataReady.OnSubscribe(() => subscribeCount++);
+        mock.Events.DataReady.OnUnsubscribe(() => unsubscribeCount++);
 
         EventHandler handler = (sender, args) => { };
         mock.Object.DataReady += handler;
@@ -86,7 +86,7 @@ public class EventSubscriptionSetupTests
         var mock = Mock.Of<INotifyService>();
         var callbackFired = false;
 
-        mock.OnSubscribe("DataReady", () => callbackFired = true);
+        mock.Events.DataReady.OnSubscribe(() => callbackFired = true);
         mock.Reset();
 
         mock.Object.DataReady += (sender, args) => { };

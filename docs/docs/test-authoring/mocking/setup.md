@@ -215,8 +215,10 @@ Setup methods return chain objects that support additional behaviors:
 ```csharp
 mock.Setup.Process(Arg.Any<int>())
     .Returns(true)
-    .Raises("ProcessCompleted", EventArgs.Empty)   // auto-raise event
-    .TransitionsTo("processed");                    // state machine transition
+    .RaisesProcessCompleted(EventArgs.Empty)   // strongly-typed auto-raise event
+    .TransitionsTo("processed");               // state machine transition
 ```
+
+The typed `.Raises{EventName}()` methods provide IntelliSense and compile-time safety for event parameters. The string-based `.Raises(eventName, args)` overload is also available.
 
 See [Advanced Features](advanced) for details on events and state machines.

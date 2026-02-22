@@ -88,26 +88,6 @@ public class Mock<T> : IMock where T : class
     public void Reset() => Engine.Reset();
 
     /// <summary>
-    /// Registers a callback that fires when a handler subscribes to the named event.
-    /// </summary>
-    public void OnSubscribe(string eventName, Action callback) => Engine.OnSubscribe(eventName, callback);
-
-    /// <summary>
-    /// Registers a callback that fires when a handler unsubscribes from the named event.
-    /// </summary>
-    public void OnUnsubscribe(string eventName, Action callback) => Engine.OnUnsubscribe(eventName, callback);
-
-    /// <summary>
-    /// Gets the current number of subscribers for the named event.
-    /// </summary>
-    public int GetEventSubscriberCount(string eventName) => Engine.GetEventSubscriberCount(eventName);
-
-    /// <summary>
-    /// Returns true if the named event was ever subscribed to.
-    /// </summary>
-    public bool WasEventSubscribed(string eventName) => Engine.WasEventSubscribed(eventName);
-
-    /// <summary>
     /// Verifies all registered setups were invoked at least once.
     /// Throws <see cref="MockVerificationException"/> listing uninvoked setups.
     /// </summary>
