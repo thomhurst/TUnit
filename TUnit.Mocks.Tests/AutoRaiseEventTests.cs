@@ -7,6 +7,14 @@ public interface IProcessService
     void Execute(string command);
 }
 
+public interface IMultiEventService
+{
+    event Action<string, int> OnMultiParam;
+    event Action OnSimple;
+    void Trigger();
+    string Query();
+}
+
 public class AutoRaiseEventTests
 {
     [Test]
@@ -94,5 +102,61 @@ public class AutoRaiseEventTests
         mock.Object.Process(3);
 
         await Assert.That(callCount).IsEqualTo(3);
+    }
+
+    [Test]
+    public async Task Raises_Event_From_Zero_Param_Void_Method()
+    {
+        var mock = Mock.Of<IMultiEventService>();
+        var wasCalled = false;
+
+        mock.Object.OnSimple += () => wasCalled = true;
+
+        mock.Setup.Trigger()
+            .RaisesOnSimple();
+
+        mock.Object.Trigger();
+
+        await Assert.That(wasCalled).IsTrue();
+    }
+
+    [Test]
+    public async Task Raises_Event_From_Zero_Param_Return_Method()
+    {
+        var mock = Mock.Of<IMultiEventService>();
+        var wasCalled = false;
+
+        mock.Object.OnSimple += () => wasCalled = true;
+
+        mock.Setup.Query()
+            .Returns("result")
+            .RaisesOnSimple();
+
+        var result = mock.Object.Query();
+
+        await Assert.That(wasCalled).IsTrue();
+        await Assert.That(result).IsEqualTo("result");
+    }
+
+    [Test]
+    public async Task Raises_Multi_Param_Event_Unpacks_Arguments()
+    {
+        var mock = Mock.Of<IMultiEventService>();
+        string? receivedName = null;
+        int receivedCount = 0;
+
+        mock.Object.OnMultiParam += (name, count) =>
+        {
+            receivedName = name;
+            receivedCount = count;
+        };
+
+        mock.Setup.Trigger()
+            .RaisesOnMultiParam("hello", 42);
+
+        mock.Object.Trigger();
+
+        await Assert.That(receivedName).IsEqualTo("hello");
+        await Assert.That(receivedCount).IsEqualTo(42);
     }
 }

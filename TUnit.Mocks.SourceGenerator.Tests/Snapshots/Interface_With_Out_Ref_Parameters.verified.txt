@@ -109,29 +109,11 @@ namespace TUnit.Mocks.Generated
     }
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-    public readonly struct IDictionary_TryGetValue_M0_TypedSetup : global::TUnit.Mocks.Setup.IMethodSetup<bool>, global::TUnit.Mocks.Setup.ISetupChain<bool>
+    public readonly struct IDictionary_TryGetValue_M0_TypedSetup
     {
         private readonly global::TUnit.Mocks.Setup.MethodSetupBuilder<bool> _inner;
 
         internal IDictionary_TryGetValue_M0_TypedSetup(global::TUnit.Mocks.Setup.MethodSetupBuilder<bool> inner) => _inner = inner;
-
-        global::TUnit.Mocks.Setup.ISetupChain<bool> global::TUnit.Mocks.Setup.IMethodSetup<bool>.Returns(bool value) => _inner.Returns(value);
-        global::TUnit.Mocks.Setup.ISetupChain<bool> global::TUnit.Mocks.Setup.IMethodSetup<bool>.Returns(global::System.Func<bool> factory) => _inner.Returns(factory);
-        global::TUnit.Mocks.Setup.ISetupChain<bool> global::TUnit.Mocks.Setup.IMethodSetup<bool>.ReturnsSequentially(params bool[] values) => _inner.ReturnsSequentially(values);
-        global::TUnit.Mocks.Setup.ISetupChain<bool> global::TUnit.Mocks.Setup.IMethodSetup<bool>.Throws<TException>() => _inner.Throws<TException>();
-        global::TUnit.Mocks.Setup.ISetupChain<bool> global::TUnit.Mocks.Setup.IMethodSetup<bool>.Throws(global::System.Exception exception) => _inner.Throws(exception);
-        global::TUnit.Mocks.Setup.ISetupChain<bool> global::TUnit.Mocks.Setup.IMethodSetup<bool>.Callback(global::System.Action callback) => _inner.Callback(callback);
-        global::TUnit.Mocks.Setup.ISetupChain<bool> global::TUnit.Mocks.Setup.IMethodSetup<bool>.Callback(global::System.Action<object?[]> callback) => _inner.Callback(callback);
-        global::TUnit.Mocks.Setup.ISetupChain<bool> global::TUnit.Mocks.Setup.IMethodSetup<bool>.Returns(global::System.Func<object?[], bool> factory) => _inner.Returns(factory);
-        global::TUnit.Mocks.Setup.ISetupChain<bool> global::TUnit.Mocks.Setup.IMethodSetup<bool>.Throws(global::System.Func<object?[], global::System.Exception> exceptionFactory) => _inner.Throws(exceptionFactory);
-        global::TUnit.Mocks.Setup.ISetupChain<bool> global::TUnit.Mocks.Setup.IMethodSetup<bool>.Raises(string eventName, object? args) => _inner.Raises(eventName, args);
-        global::TUnit.Mocks.Setup.ISetupChain<bool> global::TUnit.Mocks.Setup.IMethodSetup<bool>.SetsOutParameter(int paramIndex, object? value) => _inner.SetsOutParameter(paramIndex, value);
-        global::TUnit.Mocks.Setup.ISetupChain<bool> global::TUnit.Mocks.Setup.IMethodSetup<bool>.TransitionsTo(string stateName) => _inner.TransitionsTo(stateName);
-
-        global::TUnit.Mocks.Setup.IMethodSetup<bool> global::TUnit.Mocks.Setup.ISetupChain<bool>.Then() => this;
-        global::TUnit.Mocks.Setup.ISetupChain<bool> global::TUnit.Mocks.Setup.ISetupChain<bool>.Raises(string eventName, object? args) => _inner.Raises(eventName, args);
-        global::TUnit.Mocks.Setup.ISetupChain<bool> global::TUnit.Mocks.Setup.ISetupChain<bool>.SetsOutParameter(int paramIndex, object? value) => _inner.SetsOutParameter(paramIndex, value);
-        global::TUnit.Mocks.Setup.ISetupChain<bool> global::TUnit.Mocks.Setup.ISetupChain<bool>.TransitionsTo(string stateName) => _inner.TransitionsTo(stateName);
 
         /// <inheritdoc />
         public IDictionary_TryGetValue_M0_TypedSetup Returns(bool value) { _inner.Returns(value); return this; }
@@ -183,25 +165,11 @@ namespace TUnit.Mocks.Generated
     }
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-    public readonly struct IDictionary_Swap_M1_TypedSetup : global::TUnit.Mocks.Setup.IVoidMethodSetup, global::TUnit.Mocks.Setup.IVoidSetupChain
+    public readonly struct IDictionary_Swap_M1_TypedSetup
     {
         private readonly global::TUnit.Mocks.Setup.VoidMethodSetupBuilder _inner;
 
         internal IDictionary_Swap_M1_TypedSetup(global::TUnit.Mocks.Setup.VoidMethodSetupBuilder inner) => _inner = inner;
-
-        global::TUnit.Mocks.Setup.IVoidSetupChain global::TUnit.Mocks.Setup.IVoidMethodSetup.Throws<TException>() => _inner.Throws<TException>();
-        global::TUnit.Mocks.Setup.IVoidSetupChain global::TUnit.Mocks.Setup.IVoidMethodSetup.Throws(global::System.Exception exception) => _inner.Throws(exception);
-        global::TUnit.Mocks.Setup.IVoidSetupChain global::TUnit.Mocks.Setup.IVoidMethodSetup.Callback(global::System.Action callback) => _inner.Callback(callback);
-        global::TUnit.Mocks.Setup.IVoidSetupChain global::TUnit.Mocks.Setup.IVoidMethodSetup.Callback(global::System.Action<object?[]> callback) => _inner.Callback(callback);
-        global::TUnit.Mocks.Setup.IVoidSetupChain global::TUnit.Mocks.Setup.IVoidMethodSetup.Throws(global::System.Func<object?[], global::System.Exception> exceptionFactory) => _inner.Throws(exceptionFactory);
-        global::TUnit.Mocks.Setup.IVoidSetupChain global::TUnit.Mocks.Setup.IVoidMethodSetup.Raises(string eventName, object? args) => _inner.Raises(eventName, args);
-        global::TUnit.Mocks.Setup.IVoidSetupChain global::TUnit.Mocks.Setup.IVoidMethodSetup.SetsOutParameter(int paramIndex, object? value) => _inner.SetsOutParameter(paramIndex, value);
-        global::TUnit.Mocks.Setup.IVoidSetupChain global::TUnit.Mocks.Setup.IVoidMethodSetup.TransitionsTo(string stateName) => _inner.TransitionsTo(stateName);
-
-        global::TUnit.Mocks.Setup.IVoidMethodSetup global::TUnit.Mocks.Setup.IVoidSetupChain.Then() => this;
-        global::TUnit.Mocks.Setup.IVoidSetupChain global::TUnit.Mocks.Setup.IVoidSetupChain.Raises(string eventName, object? args) => _inner.Raises(eventName, args);
-        global::TUnit.Mocks.Setup.IVoidSetupChain global::TUnit.Mocks.Setup.IVoidSetupChain.SetsOutParameter(int paramIndex, object? value) => _inner.SetsOutParameter(paramIndex, value);
-        global::TUnit.Mocks.Setup.IVoidSetupChain global::TUnit.Mocks.Setup.IVoidSetupChain.TransitionsTo(string stateName) => _inner.TransitionsTo(stateName);
 
         /// <inheritdoc />
         public IDictionary_Swap_M1_TypedSetup Throws<TException>() where TException : global::System.Exception, new() { _inner.Throws<TException>(); return this; }

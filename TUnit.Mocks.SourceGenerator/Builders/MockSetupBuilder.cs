@@ -104,34 +104,43 @@ internal static class MockSetupBuilder
         var setupInterface = $"global::TUnit.Mocks.Setup.IMethodSetup<{returnType}>";
         var builderType = $"global::TUnit.Mocks.Setup.MethodSetupBuilder<{returnType}>";
 
+        // Only implement both interfaces when there are events — the dual-interface pattern
+        // preserves the concrete wrapper type through the chain so RaisesX() stays accessible.
+        var interfaces = events.Length > 0 ? $" : {setupInterface}, {chainType}" : "";
+
         writer.AppendLine("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
-        using (writer.Block($"public readonly struct {wrapperName} : {setupInterface}, {chainType}"))
+        using (writer.Block($"public readonly struct {wrapperName}{interfaces}"))
         {
             writer.AppendLine($"private readonly {builderType} _inner;");
             writer.AppendLine();
             writer.AppendLine($"internal {wrapperName}({builderType} inner) => _inner = inner;");
-            writer.AppendLine();
 
-            // Explicit IMethodSetup<TReturn> implementations
-            writer.AppendLine($"{chainType} {setupInterface}.Returns({returnType} value) => _inner.Returns(value);");
-            writer.AppendLine($"{chainType} {setupInterface}.Returns(global::System.Func<{returnType}> factory) => _inner.Returns(factory);");
-            writer.AppendLine($"{chainType} {setupInterface}.ReturnsSequentially(params {returnType}[] values) => _inner.ReturnsSequentially(values);");
-            writer.AppendLine($"{chainType} {setupInterface}.Throws<TException>() => _inner.Throws<TException>();");
-            writer.AppendLine($"{chainType} {setupInterface}.Throws(global::System.Exception exception) => _inner.Throws(exception);");
-            writer.AppendLine($"{chainType} {setupInterface}.Callback(global::System.Action callback) => _inner.Callback(callback);");
-            writer.AppendLine($"{chainType} {setupInterface}.Callback(global::System.Action<object?[]> callback) => _inner.Callback(callback);");
-            writer.AppendLine($"{chainType} {setupInterface}.Returns(global::System.Func<object?[], {returnType}> factory) => _inner.Returns(factory);");
-            writer.AppendLine($"{chainType} {setupInterface}.Throws(global::System.Func<object?[], global::System.Exception> exceptionFactory) => _inner.Throws(exceptionFactory);");
-            writer.AppendLine($"{chainType} {setupInterface}.Raises(string eventName, object? args) => _inner.Raises(eventName, args);");
-            writer.AppendLine($"{chainType} {setupInterface}.SetsOutParameter(int paramIndex, object? value) => _inner.SetsOutParameter(paramIndex, value);");
-            writer.AppendLine($"{chainType} {setupInterface}.TransitionsTo(string stateName) => _inner.TransitionsTo(stateName);");
-            writer.AppendLine();
+            if (events.Length > 0)
+            {
+                writer.AppendLine();
 
-            // Explicit ISetupChain<TReturn> implementations
-            writer.AppendLine($"{setupInterface} {chainType}.Then() => this;");
-            writer.AppendLine($"{chainType} {chainType}.Raises(string eventName, object? args) => _inner.Raises(eventName, args);");
-            writer.AppendLine($"{chainType} {chainType}.SetsOutParameter(int paramIndex, object? value) => _inner.SetsOutParameter(paramIndex, value);");
-            writer.AppendLine($"{chainType} {chainType}.TransitionsTo(string stateName) => _inner.TransitionsTo(stateName);");
+                // Explicit IMethodSetup<TReturn> implementations
+                writer.AppendLine($"{chainType} {setupInterface}.Returns({returnType} value) => _inner.Returns(value);");
+                writer.AppendLine($"{chainType} {setupInterface}.Returns(global::System.Func<{returnType}> factory) => _inner.Returns(factory);");
+                writer.AppendLine($"{chainType} {setupInterface}.ReturnsSequentially(params {returnType}[] values) => _inner.ReturnsSequentially(values);");
+                writer.AppendLine($"{chainType} {setupInterface}.Throws<TException>() => _inner.Throws<TException>();");
+                writer.AppendLine($"{chainType} {setupInterface}.Throws(global::System.Exception exception) => _inner.Throws(exception);");
+                writer.AppendLine($"{chainType} {setupInterface}.Callback(global::System.Action callback) => _inner.Callback(callback);");
+                writer.AppendLine($"{chainType} {setupInterface}.Callback(global::System.Action<object?[]> callback) => _inner.Callback(callback);");
+                writer.AppendLine($"{chainType} {setupInterface}.Returns(global::System.Func<object?[], {returnType}> factory) => _inner.Returns(factory);");
+                writer.AppendLine($"{chainType} {setupInterface}.Throws(global::System.Func<object?[], global::System.Exception> exceptionFactory) => _inner.Throws(exceptionFactory);");
+                writer.AppendLine($"{chainType} {setupInterface}.Raises(string eventName, object? args) => _inner.Raises(eventName, args);");
+                writer.AppendLine($"{chainType} {setupInterface}.SetsOutParameter(int paramIndex, object? value) => _inner.SetsOutParameter(paramIndex, value);");
+                writer.AppendLine($"{chainType} {setupInterface}.TransitionsTo(string stateName) => _inner.TransitionsTo(stateName);");
+                writer.AppendLine();
+
+                // Explicit ISetupChain<TReturn> implementations
+                writer.AppendLine($"{setupInterface} {chainType}.Then() {{ _inner.Then(); return this; }}");
+                writer.AppendLine($"{chainType} {chainType}.Raises(string eventName, object? args) => _inner.Raises(eventName, args);");
+                writer.AppendLine($"{chainType} {chainType}.SetsOutParameter(int paramIndex, object? value) => _inner.SetsOutParameter(paramIndex, value);");
+                writer.AppendLine($"{chainType} {chainType}.TransitionsTo(string stateName) => _inner.TransitionsTo(stateName);");
+            }
+
             writer.AppendLine();
 
             // Public self-returning methods (preserve wrapper type through fluent chain)
@@ -189,30 +198,39 @@ internal static class MockSetupBuilder
         var setupInterface = "global::TUnit.Mocks.Setup.IVoidMethodSetup";
         var builderType = "global::TUnit.Mocks.Setup.VoidMethodSetupBuilder";
 
+        // Only implement both interfaces when there are events — the dual-interface pattern
+        // preserves the concrete wrapper type through the chain so RaisesX() stays accessible.
+        var interfaces = events.Length > 0 ? $" : {setupInterface}, {chainType}" : "";
+
         writer.AppendLine($"[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
-        using (writer.Block($"public readonly struct {wrapperName} : {setupInterface}, {chainType}"))
+        using (writer.Block($"public readonly struct {wrapperName}{interfaces}"))
         {
             writer.AppendLine($"private readonly {builderType} _inner;");
             writer.AppendLine();
             writer.AppendLine($"internal {wrapperName}({builderType} inner) => _inner = inner;");
-            writer.AppendLine();
 
-            // Explicit IVoidMethodSetup implementations
-            writer.AppendLine($"{chainType} {setupInterface}.Throws<TException>() => _inner.Throws<TException>();");
-            writer.AppendLine($"{chainType} {setupInterface}.Throws(global::System.Exception exception) => _inner.Throws(exception);");
-            writer.AppendLine($"{chainType} {setupInterface}.Callback(global::System.Action callback) => _inner.Callback(callback);");
-            writer.AppendLine($"{chainType} {setupInterface}.Callback(global::System.Action<object?[]> callback) => _inner.Callback(callback);");
-            writer.AppendLine($"{chainType} {setupInterface}.Throws(global::System.Func<object?[], global::System.Exception> exceptionFactory) => _inner.Throws(exceptionFactory);");
-            writer.AppendLine($"{chainType} {setupInterface}.Raises(string eventName, object? args) => _inner.Raises(eventName, args);");
-            writer.AppendLine($"{chainType} {setupInterface}.SetsOutParameter(int paramIndex, object? value) => _inner.SetsOutParameter(paramIndex, value);");
-            writer.AppendLine($"{chainType} {setupInterface}.TransitionsTo(string stateName) => _inner.TransitionsTo(stateName);");
-            writer.AppendLine();
+            if (events.Length > 0)
+            {
+                writer.AppendLine();
 
-            // Explicit IVoidSetupChain implementations
-            writer.AppendLine($"{setupInterface} {chainType}.Then() => this;");
-            writer.AppendLine($"{chainType} {chainType}.Raises(string eventName, object? args) => _inner.Raises(eventName, args);");
-            writer.AppendLine($"{chainType} {chainType}.SetsOutParameter(int paramIndex, object? value) => _inner.SetsOutParameter(paramIndex, value);");
-            writer.AppendLine($"{chainType} {chainType}.TransitionsTo(string stateName) => _inner.TransitionsTo(stateName);");
+                // Explicit IVoidMethodSetup implementations
+                writer.AppendLine($"{chainType} {setupInterface}.Throws<TException>() => _inner.Throws<TException>();");
+                writer.AppendLine($"{chainType} {setupInterface}.Throws(global::System.Exception exception) => _inner.Throws(exception);");
+                writer.AppendLine($"{chainType} {setupInterface}.Callback(global::System.Action callback) => _inner.Callback(callback);");
+                writer.AppendLine($"{chainType} {setupInterface}.Callback(global::System.Action<object?[]> callback) => _inner.Callback(callback);");
+                writer.AppendLine($"{chainType} {setupInterface}.Throws(global::System.Func<object?[], global::System.Exception> exceptionFactory) => _inner.Throws(exceptionFactory);");
+                writer.AppendLine($"{chainType} {setupInterface}.Raises(string eventName, object? args) => _inner.Raises(eventName, args);");
+                writer.AppendLine($"{chainType} {setupInterface}.SetsOutParameter(int paramIndex, object? value) => _inner.SetsOutParameter(paramIndex, value);");
+                writer.AppendLine($"{chainType} {setupInterface}.TransitionsTo(string stateName) => _inner.TransitionsTo(stateName);");
+                writer.AppendLine();
+
+                // Explicit IVoidSetupChain implementations
+                writer.AppendLine($"{setupInterface} {chainType}.Then() {{ _inner.Then(); return this; }}");
+                writer.AppendLine($"{chainType} {chainType}.Raises(string eventName, object? args) => _inner.Raises(eventName, args);");
+                writer.AppendLine($"{chainType} {chainType}.SetsOutParameter(int paramIndex, object? value) => _inner.SetsOutParameter(paramIndex, value);");
+                writer.AppendLine($"{chainType} {chainType}.TransitionsTo(string stateName) => _inner.TransitionsTo(stateName);");
+            }
+
             writer.AppendLine();
 
             // Public self-returning methods (preserve wrapper type through fluent chain)

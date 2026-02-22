@@ -221,7 +221,7 @@ namespace TUnit.Mocks.Generated
         global::TUnit.Mocks.Setup.ISetupChain<string> global::TUnit.Mocks.Setup.IMethodSetup<string>.SetsOutParameter(int paramIndex, object? value) => _inner.SetsOutParameter(paramIndex, value);
         global::TUnit.Mocks.Setup.ISetupChain<string> global::TUnit.Mocks.Setup.IMethodSetup<string>.TransitionsTo(string stateName) => _inner.TransitionsTo(stateName);
 
-        global::TUnit.Mocks.Setup.IMethodSetup<string> global::TUnit.Mocks.Setup.ISetupChain<string>.Then() => this;
+        global::TUnit.Mocks.Setup.IMethodSetup<string> global::TUnit.Mocks.Setup.ISetupChain<string>.Then() { _inner.Then(); return this; }
         global::TUnit.Mocks.Setup.ISetupChain<string> global::TUnit.Mocks.Setup.ISetupChain<string>.Raises(string eventName, object? args) => _inner.Raises(eventName, args);
         global::TUnit.Mocks.Setup.ISetupChain<string> global::TUnit.Mocks.Setup.ISetupChain<string>.SetsOutParameter(int paramIndex, object? value) => _inner.SetsOutParameter(paramIndex, value);
         global::TUnit.Mocks.Setup.ISetupChain<string> global::TUnit.Mocks.Setup.ISetupChain<string>.TransitionsTo(string stateName) => _inner.TransitionsTo(stateName);
@@ -294,7 +294,7 @@ namespace TUnit.Mocks.Generated
         global::TUnit.Mocks.Setup.IVoidSetupChain global::TUnit.Mocks.Setup.IVoidMethodSetup.SetsOutParameter(int paramIndex, object? value) => _inner.SetsOutParameter(paramIndex, value);
         global::TUnit.Mocks.Setup.IVoidSetupChain global::TUnit.Mocks.Setup.IVoidMethodSetup.TransitionsTo(string stateName) => _inner.TransitionsTo(stateName);
 
-        global::TUnit.Mocks.Setup.IVoidMethodSetup global::TUnit.Mocks.Setup.IVoidSetupChain.Then() => this;
+        global::TUnit.Mocks.Setup.IVoidMethodSetup global::TUnit.Mocks.Setup.IVoidSetupChain.Then() { _inner.Then(); return this; }
         global::TUnit.Mocks.Setup.IVoidSetupChain global::TUnit.Mocks.Setup.IVoidSetupChain.Raises(string eventName, object? args) => _inner.Raises(eventName, args);
         global::TUnit.Mocks.Setup.IVoidSetupChain global::TUnit.Mocks.Setup.IVoidSetupChain.SetsOutParameter(int paramIndex, object? value) => _inner.SetsOutParameter(paramIndex, value);
         global::TUnit.Mocks.Setup.IVoidSetupChain global::TUnit.Mocks.Setup.IVoidSetupChain.TransitionsTo(string stateName) => _inner.TransitionsTo(stateName);

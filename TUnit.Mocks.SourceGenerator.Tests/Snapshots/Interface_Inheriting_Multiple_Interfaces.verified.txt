@@ -110,25 +110,11 @@ namespace TUnit.Mocks.Generated
     }
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-    public readonly struct IReadWriter_Write_M2_TypedSetup : global::TUnit.Mocks.Setup.IVoidMethodSetup, global::TUnit.Mocks.Setup.IVoidSetupChain
+    public readonly struct IReadWriter_Write_M2_TypedSetup
     {
         private readonly global::TUnit.Mocks.Setup.VoidMethodSetupBuilder _inner;
 
         internal IReadWriter_Write_M2_TypedSetup(global::TUnit.Mocks.Setup.VoidMethodSetupBuilder inner) => _inner = inner;
-
-        global::TUnit.Mocks.Setup.IVoidSetupChain global::TUnit.Mocks.Setup.IVoidMethodSetup.Throws<TException>() => _inner.Throws<TException>();
-        global::TUnit.Mocks.Setup.IVoidSetupChain global::TUnit.Mocks.Setup.IVoidMethodSetup.Throws(global::System.Exception exception) => _inner.Throws(exception);
-        global::TUnit.Mocks.Setup.IVoidSetupChain global::TUnit.Mocks.Setup.IVoidMethodSetup.Callback(global::System.Action callback) => _inner.Callback(callback);
-        global::TUnit.Mocks.Setup.IVoidSetupChain global::TUnit.Mocks.Setup.IVoidMethodSetup.Callback(global::System.Action<object?[]> callback) => _inner.Callback(callback);
-        global::TUnit.Mocks.Setup.IVoidSetupChain global::TUnit.Mocks.Setup.IVoidMethodSetup.Throws(global::System.Func<object?[], global::System.Exception> exceptionFactory) => _inner.Throws(exceptionFactory);
-        global::TUnit.Mocks.Setup.IVoidSetupChain global::TUnit.Mocks.Setup.IVoidMethodSetup.Raises(string eventName, object? args) => _inner.Raises(eventName, args);
-        global::TUnit.Mocks.Setup.IVoidSetupChain global::TUnit.Mocks.Setup.IVoidMethodSetup.SetsOutParameter(int paramIndex, object? value) => _inner.SetsOutParameter(paramIndex, value);
-        global::TUnit.Mocks.Setup.IVoidSetupChain global::TUnit.Mocks.Setup.IVoidMethodSetup.TransitionsTo(string stateName) => _inner.TransitionsTo(stateName);
-
-        global::TUnit.Mocks.Setup.IVoidMethodSetup global::TUnit.Mocks.Setup.IVoidSetupChain.Then() => this;
-        global::TUnit.Mocks.Setup.IVoidSetupChain global::TUnit.Mocks.Setup.IVoidSetupChain.Raises(string eventName, object? args) => _inner.Raises(eventName, args);
-        global::TUnit.Mocks.Setup.IVoidSetupChain global::TUnit.Mocks.Setup.IVoidSetupChain.SetsOutParameter(int paramIndex, object? value) => _inner.SetsOutParameter(paramIndex, value);
-        global::TUnit.Mocks.Setup.IVoidSetupChain global::TUnit.Mocks.Setup.IVoidSetupChain.TransitionsTo(string stateName) => _inner.TransitionsTo(stateName);
 
         /// <inheritdoc />
         public IReadWriter_Write_M2_TypedSetup Throws<TException>() where TException : global::System.Exception, new() { _inner.Throws<TException>(); return this; }

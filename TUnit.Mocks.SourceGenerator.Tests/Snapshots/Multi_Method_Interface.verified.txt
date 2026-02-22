@@ -110,29 +110,11 @@ namespace TUnit.Mocks.Generated
     }
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-    public readonly struct ICalculator_Add_M0_TypedSetup : global::TUnit.Mocks.Setup.IMethodSetup<int>, global::TUnit.Mocks.Setup.ISetupChain<int>
+    public readonly struct ICalculator_Add_M0_TypedSetup
     {
         private readonly global::TUnit.Mocks.Setup.MethodSetupBuilder<int> _inner;
 
         internal ICalculator_Add_M0_TypedSetup(global::TUnit.Mocks.Setup.MethodSetupBuilder<int> inner) => _inner = inner;
-
-        global::TUnit.Mocks.Setup.ISetupChain<int> global::TUnit.Mocks.Setup.IMethodSetup<int>.Returns(int value) => _inner.Returns(value);
-        global::TUnit.Mocks.Setup.ISetupChain<int> global::TUnit.Mocks.Setup.IMethodSetup<int>.Returns(global::System.Func<int> factory) => _inner.Returns(factory);
-        global::TUnit.Mocks.Setup.ISetupChain<int> global::TUnit.Mocks.Setup.IMethodSetup<int>.ReturnsSequentially(params int[] values) => _inner.ReturnsSequentially(values);
-        global::TUnit.Mocks.Setup.ISetupChain<int> global::TUnit.Mocks.Setup.IMethodSetup<int>.Throws<TException>() => _inner.Throws<TException>();
-        global::TUnit.Mocks.Setup.ISetupChain<int> global::TUnit.Mocks.Setup.IMethodSetup<int>.Throws(global::System.Exception exception) => _inner.Throws(exception);
-        global::TUnit.Mocks.Setup.ISetupChain<int> global::TUnit.Mocks.Setup.IMethodSetup<int>.Callback(global::System.Action callback) => _inner.Callback(callback);
-        global::TUnit.Mocks.Setup.ISetupChain<int> global::TUnit.Mocks.Setup.IMethodSetup<int>.Callback(global::System.Action<object?[]> callback) => _inner.Callback(callback);
-        global::TUnit.Mocks.Setup.ISetupChain<int> global::TUnit.Mocks.Setup.IMethodSetup<int>.Returns(global::System.Func<object?[], int> factory) => _inner.Returns(factory);
-        global::TUnit.Mocks.Setup.ISetupChain<int> global::TUnit.Mocks.Setup.IMethodSetup<int>.Throws(global::System.Func<object?[], global::System.Exception> exceptionFactory) => _inner.Throws(exceptionFactory);
-        global::TUnit.Mocks.Setup.ISetupChain<int> global::TUnit.Mocks.Setup.IMethodSetup<int>.Raises(string eventName, object? args) => _inner.Raises(eventName, args);
-        global::TUnit.Mocks.Setup.ISetupChain<int> global::TUnit.Mocks.Setup.IMethodSetup<int>.SetsOutParameter(int paramIndex, object? value) => _inner.SetsOutParameter(paramIndex, value);
-        global::TUnit.Mocks.Setup.ISetupChain<int> global::TUnit.Mocks.Setup.IMethodSetup<int>.TransitionsTo(string stateName) => _inner.TransitionsTo(stateName);
-
-        global::TUnit.Mocks.Setup.IMethodSetup<int> global::TUnit.Mocks.Setup.ISetupChain<int>.Then() => this;
-        global::TUnit.Mocks.Setup.ISetupChain<int> global::TUnit.Mocks.Setup.ISetupChain<int>.Raises(string eventName, object? args) => _inner.Raises(eventName, args);
-        global::TUnit.Mocks.Setup.ISetupChain<int> global::TUnit.Mocks.Setup.ISetupChain<int>.SetsOutParameter(int paramIndex, object? value) => _inner.SetsOutParameter(paramIndex, value);
-        global::TUnit.Mocks.Setup.ISetupChain<int> global::TUnit.Mocks.Setup.ISetupChain<int>.TransitionsTo(string stateName) => _inner.TransitionsTo(stateName);
 
         /// <inheritdoc />
         public ICalculator_Add_M0_TypedSetup Returns(int value) { _inner.Returns(value); return this; }
@@ -184,29 +166,11 @@ namespace TUnit.Mocks.Generated
     }
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-    public readonly struct ICalculator_Subtract_M1_TypedSetup : global::TUnit.Mocks.Setup.IMethodSetup<int>, global::TUnit.Mocks.Setup.ISetupChain<int>
+    public readonly struct ICalculator_Subtract_M1_TypedSetup
     {
         private readonly global::TUnit.Mocks.Setup.MethodSetupBuilder<int> _inner;
 
         internal ICalculator_Subtract_M1_TypedSetup(global::TUnit.Mocks.Setup.MethodSetupBuilder<int> inner) => _inner = inner;
-
-        global::TUnit.Mocks.Setup.ISetupChain<int> global::TUnit.Mocks.Setup.IMethodSetup<int>.Returns(int value) => _inner.Returns(value);
-        global::TUnit.Mocks.Setup.ISetupChain<int> global::TUnit.Mocks.Setup.IMethodSetup<int>.Returns(global::System.Func<int> factory) => _inner.Returns(factory);
-        global::TUnit.Mocks.Setup.ISetupChain<int> global::TUnit.Mocks.Setup.IMethodSetup<int>.ReturnsSequentially(params int[] values) => _inner.ReturnsSequentially(values);
-        global::TUnit.Mocks.Setup.ISetupChain<int> global::TUnit.Mocks.Setup.IMethodSetup<int>.Throws<TException>() => _inner.Throws<TException>();
-        global::TUnit.Mocks.Setup.ISetupChain<int> global::TUnit.Mocks.Setup.IMethodSetup<int>.Throws(global::System.Exception exception) => _inner.Throws(exception);
-        global::TUnit.Mocks.Setup.ISetupChain<int> global::TUnit.Mocks.Setup.IMethodSetup<int>.Callback(global::System.Action callback) => _inner.Callback(callback);
-        global::TUnit.Mocks.Setup.ISetupChain<int> global::TUnit.Mocks.Setup.IMethodSetup<int>.Callback(global::System.Action<object?[]> callback) => _inner.Callback(callback);
-        global::TUnit.Mocks.Setup.ISetupChain<int> global::TUnit.Mocks.Setup.IMethodSetup<int>.Returns(global::System.Func<object?[], int> factory) => _inner.Returns(factory);
-        global::TUnit.Mocks.Setup.ISetupChain<int> global::TUnit.Mocks.Setup.IMethodSetup<int>.Throws(global::System.Func<object?[], global::System.Exception> exceptionFactory) => _inner.Throws(exceptionFactory);
-        global::TUnit.Mocks.Setup.ISetupChain<int> global::TUnit.Mocks.Setup.IMethodSetup<int>.Raises(string eventName, object? args) => _inner.Raises(eventName, args);
-        global::TUnit.Mocks.Setup.ISetupChain<int> global::TUnit.Mocks.Setup.IMethodSetup<int>.SetsOutParameter(int paramIndex, object? value) => _inner.SetsOutParameter(paramIndex, value);
-        global::TUnit.Mocks.Setup.ISetupChain<int> global::TUnit.Mocks.Setup.IMethodSetup<int>.TransitionsTo(string stateName) => _inner.TransitionsTo(stateName);
-
-        global::TUnit.Mocks.Setup.IMethodSetup<int> global::TUnit.Mocks.Setup.ISetupChain<int>.Then() => this;
-        global::TUnit.Mocks.Setup.ISetupChain<int> global::TUnit.Mocks.Setup.ISetupChain<int>.Raises(string eventName, object? args) => _inner.Raises(eventName, args);
-        global::TUnit.Mocks.Setup.ISetupChain<int> global::TUnit.Mocks.Setup.ISetupChain<int>.SetsOutParameter(int paramIndex, object? value) => _inner.SetsOutParameter(paramIndex, value);
-        global::TUnit.Mocks.Setup.ISetupChain<int> global::TUnit.Mocks.Setup.ISetupChain<int>.TransitionsTo(string stateName) => _inner.TransitionsTo(stateName);
 
         /// <inheritdoc />
         public ICalculator_Subtract_M1_TypedSetup Returns(int value) { _inner.Returns(value); return this; }
