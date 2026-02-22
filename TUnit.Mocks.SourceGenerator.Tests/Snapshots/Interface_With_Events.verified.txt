@@ -3,7 +3,8 @@
 
 namespace TUnit.Mocks.Generated
 {
-    public sealed class INotifier_MockEvents : global::TUnit.Mocks.IMockEvents<global::INotifier>
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public readonly struct INotifier_MockEvents
     {
         internal readonly global::TUnit.Mocks.MockEngine<global::INotifier> Engine;
 
@@ -12,10 +13,15 @@ namespace TUnit.Mocks.Generated
 
     public static class INotifier_MockEventsExtensions
     {
-        extension(global::TUnit.Mocks.IMockEvents<global::INotifier> events)
+        extension(global::TUnit.Mocks.Mock<global::INotifier> mock)
+        {
+            public INotifier_MockEvents Events => new(mock.Engine);
+        }
+
+        extension(INotifier_MockEvents events)
         {
             public global::TUnit.Mocks.EventSubscriptionAccessor ItemAdded
-                => new(((INotifier_MockEvents)events).Engine, "ItemAdded");
+                => new(events.Engine, "ItemAdded");
         }
     }
 }
@@ -44,8 +50,7 @@ namespace TUnit.Mocks.Generated
             var setup = new INotifier_MockSetup(engine);
             var verify = new INotifier_MockVerify(engine);
             var raise = new INotifier_MockRaise(impl);
-            var events = new INotifier_MockEvents(engine);
-            var mock = new global::TUnit.Mocks.Mock<global::INotifier>(impl, setup, verify, raise, events, engine);
+            var mock = new global::TUnit.Mocks.Mock<global::INotifier>(impl, setup, verify, raise, engine);
             return mock;
         }
     }

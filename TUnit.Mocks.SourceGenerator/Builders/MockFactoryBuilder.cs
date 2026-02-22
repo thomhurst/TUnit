@@ -71,12 +71,11 @@ internal static class MockFactoryBuilder
                 writer.AppendLine($"var verify = new {primarySafeName}_MockVerify(engine);");
 
                 // Events: check primary type events (from the single-type model)
-                // For multi-interface, we only use primary type's raise/events surfaces
+                // For multi-interface, we only use primary type's raise surface
                 if (model.Events.Length > 0 && model.AdditionalInterfaceNames.Length == 0)
                 {
                     writer.AppendLine($"var raise = new {primarySafeName}_MockRaise(impl);");
-                    writer.AppendLine($"var events = new {primarySafeName}_MockEvents(engine);");
-                    writer.AppendLine($"var mock = new global::TUnit.Mocks.Mock<{model.FullyQualifiedName}>(impl, setup, verify, raise, events, engine);");
+                    writer.AppendLine($"var mock = new global::TUnit.Mocks.Mock<{model.FullyQualifiedName}>(impl, setup, verify, raise, engine);");
                 }
                 else
                 {
@@ -110,8 +109,7 @@ internal static class MockFactoryBuilder
                 if (model.Events.Length > 0)
                 {
                     writer.AppendLine($"var raise = new {safeName}_MockRaise(impl);");
-                    writer.AppendLine($"var events = new {safeName}_MockEvents(engine);");
-                    writer.AppendLine($"var mock = new global::TUnit.Mocks.Mock<{model.FullyQualifiedName}>(impl, setup, verify, raise, events, engine);");
+                    writer.AppendLine($"var mock = new global::TUnit.Mocks.Mock<{model.FullyQualifiedName}>(impl, setup, verify, raise, engine);");
                 }
                 else
                 {
@@ -147,8 +145,7 @@ internal static class MockFactoryBuilder
                 if (model.Events.Length > 0)
                 {
                     writer.AppendLine($"var raise = new {safeName}_MockRaise(impl);");
-                    writer.AppendLine($"var events = new {safeName}_MockEvents(engine);");
-                    writer.AppendLine($"var mock = new global::TUnit.Mocks.Mock<{model.FullyQualifiedName}>(impl, setup, verify, raise, events, engine);");
+                    writer.AppendLine($"var mock = new global::TUnit.Mocks.Mock<{model.FullyQualifiedName}>(impl, setup, verify, raise, engine);");
                 }
                 else
                 {

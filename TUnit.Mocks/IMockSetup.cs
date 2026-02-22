@@ -20,10 +20,3 @@ public interface IMockVerify<T> where T : class { }
 /// </summary>
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 public interface IMockRaise<T> where T : class { }
-
-/// <summary>
-/// Marker interface for generated mock event subscription surfaces.
-/// Extension properties on this interface provide strongly-typed event subscription accessors.
-/// </summary>
-[System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-public interface IMockEvents<T> where T : class { }

@@ -50,15 +50,15 @@ Query and react to event subscriptions through the strongly-typed `Events` surfa
 var mock = Mock.Of<IConnection>();
 
 // Register callbacks for subscribe/unsubscribe
-mock.Events!.OnMessage.OnSubscribe(() => Console.WriteLine("subscribed"));
-mock.Events!.OnMessage.OnUnsubscribe(() => Console.WriteLine("unsubscribed"));
+mock.Events.OnMessage.OnSubscribe(() => Console.WriteLine("subscribed"));
+mock.Events.OnMessage.OnUnsubscribe(() => Console.WriteLine("unsubscribed"));
 
 mock.Object.OnMessage += (s, e) => { };
 // prints "subscribed"
 
 // Query subscriber info
-var wasSubscribed = mock.Events!.OnMessage.WasSubscribed;   // true
-var count = mock.Events!.OnMessage.SubscriberCount;          // 1
+var wasSubscribed = mock.Events.OnMessage.WasSubscribed;   // true
+var count = mock.Events.OnMessage.SubscriberCount;          // 1
 ```
 
 ## State Machine Mocking

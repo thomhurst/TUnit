@@ -15,8 +15,9 @@ internal static class MockEventsBuilder
 
         using (writer.Block("namespace TUnit.Mocks.Generated"))
         {
-            // Data holder class implementing marker interface
-            using (writer.Block($"public sealed class {safeName}_MockEvents : global::TUnit.Mocks.IMockEvents<{model.FullyQualifiedName}>"))
+            // Lightweight struct holding engine reference — no allocation
+            writer.AppendLine("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
+            using (writer.Block($"public readonly struct {safeName}_MockEvents"))
             {
                 writer.AppendLine($"internal readonly global::TUnit.Mocks.MockEngine<{model.FullyQualifiedName}> Engine;");
                 writer.AppendLine();
@@ -25,10 +26,18 @@ internal static class MockEventsBuilder
 
             writer.AppendLine();
 
-            // Extension properties class using C# 14 extension block
             using (writer.Block($"public static class {safeName}_MockEventsExtensions"))
             {
-                using (writer.Block($"extension(global::TUnit.Mocks.IMockEvents<{model.FullyQualifiedName}> events)"))
+                // Extension property on Mock<T> — non-nullable, only present when type has events
+                using (writer.Block($"extension(global::TUnit.Mocks.Mock<{model.FullyQualifiedName}> mock)"))
+                {
+                    writer.AppendLine($"public {safeName}_MockEvents Events => new(mock.Engine);");
+                }
+
+                writer.AppendLine();
+
+                // Per-event extension properties on the events struct
+                using (writer.Block($"extension({safeName}_MockEvents events)"))
                 {
                     bool first = true;
                     foreach (var evt in model.Events)
@@ -37,7 +46,7 @@ internal static class MockEventsBuilder
                         first = false;
 
                         writer.AppendLine($"public global::TUnit.Mocks.EventSubscriptionAccessor {evt.Name}");
-                        writer.AppendLine($"    => new((({safeName}_MockEvents)events).Engine, \"{evt.Name}\");");
+                        writer.AppendLine($"    => new(events.Engine, \"{evt.Name}\");");
                     }
                 }
             }

@@ -3,7 +3,8 @@
 
 namespace TUnit.Mocks.Generated
 {
-    public sealed class IService_MockEvents : global::TUnit.Mocks.IMockEvents<global::IService>
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public readonly struct IService_MockEvents
     {
         internal readonly global::TUnit.Mocks.MockEngine<global::IService> Engine;
 
@@ -12,10 +13,15 @@ namespace TUnit.Mocks.Generated
 
     public static class IService_MockEventsExtensions
     {
-        extension(global::TUnit.Mocks.IMockEvents<global::IService> events)
+        extension(global::TUnit.Mocks.Mock<global::IService> mock)
+        {
+            public IService_MockEvents Events => new(mock.Engine);
+        }
+
+        extension(IService_MockEvents events)
         {
             public global::TUnit.Mocks.EventSubscriptionAccessor StatusChanged
-                => new(((IService_MockEvents)events).Engine, "StatusChanged");
+                => new(events.Engine, "StatusChanged");
         }
     }
 }
@@ -44,8 +50,7 @@ namespace TUnit.Mocks.Generated
             var setup = new IService_MockSetup(engine);
             var verify = new IService_MockVerify(engine);
             var raise = new IService_MockRaise(impl);
-            var events = new IService_MockEvents(engine);
-            var mock = new global::TUnit.Mocks.Mock<global::IService>(impl, setup, verify, raise, events, engine);
+            var mock = new global::TUnit.Mocks.Mock<global::IService>(impl, setup, verify, raise, engine);
             return mock;
         }
     }

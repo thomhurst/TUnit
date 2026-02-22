@@ -51,11 +51,6 @@ public class Mock<T> : IMock where T : class
     /// </summary>
     public IMockRaise<T>? Raise { get; internal set; }
 
-    /// <summary>
-    /// Generated event subscription surface (if T has events).
-    /// </summary>
-    public IMockEvents<T>? Events { get; internal set; }
-
     /// <summary>Creates a Mock with an existing engine, setup, and verify surfaces. Used by generated code.</summary>
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public Mock(T mockObject, IMockSetup<T> setup, IMockVerify<T> verify, MockEngine<T> engine)
@@ -75,18 +70,6 @@ public class Mock<T> : IMock where T : class
         Setup = setup;
         Verify = verify;
         Raise = raise;
-    }
-
-    /// <summary>Creates a Mock with an existing engine, setup, verify, raise, and events surfaces. Used by generated code.</summary>
-    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public Mock(T mockObject, IMockSetup<T> setup, IMockVerify<T> verify, IMockRaise<T>? raise, IMockEvents<T>? events, MockEngine<T> engine)
-    {
-        Engine = engine;
-        Object = mockObject;
-        Setup = setup;
-        Verify = verify;
-        Raise = raise;
-        Events = events;
     }
 
     /// <summary>All calls made to this mock, in order.</summary>

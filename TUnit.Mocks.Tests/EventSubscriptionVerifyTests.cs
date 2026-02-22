@@ -15,7 +15,7 @@ public class EventSubscriptionVerifyTests
         mock.Object.OnStringAction += _ => { };
 
         // Assert
-        await Assert.That(mock.Events!.OnStringAction.WasSubscribed).IsTrue();
+        await Assert.That(mock.Events.OnStringAction.WasSubscribed).IsTrue();
     }
 
     [Test]
@@ -25,7 +25,7 @@ public class EventSubscriptionVerifyTests
         var mock = Mock.Of<ICustomEventService>();
 
         // Assert
-        await Assert.That(mock.Events!.OnStringAction.WasSubscribed).IsFalse();
+        await Assert.That(mock.Events.OnStringAction.WasSubscribed).IsFalse();
     }
 
     [Test]
@@ -39,7 +39,7 @@ public class EventSubscriptionVerifyTests
         mock.Object.OnStringAction += _ => { };
 
         // Assert
-        await Assert.That(mock.Events!.OnStringAction.SubscriberCount).IsEqualTo(2);
+        await Assert.That(mock.Events.OnStringAction.SubscriberCount).IsEqualTo(2);
     }
 
     [Test]
@@ -55,7 +55,7 @@ public class EventSubscriptionVerifyTests
         mock.Object.OnStringAction -= handler;
 
         // Assert — 2 subscribes, 1 unsubscribe = 1 remaining
-        await Assert.That(mock.Events!.OnStringAction.SubscriberCount).IsEqualTo(1);
+        await Assert.That(mock.Events.OnStringAction.SubscriberCount).IsEqualTo(1);
     }
 
     [Test]
@@ -70,9 +70,9 @@ public class EventSubscriptionVerifyTests
         mock.Object.OnSimpleAction += () => { };
 
         // Assert
-        await Assert.That(mock.Events!.OnStringAction.SubscriberCount).IsEqualTo(1);
-        await Assert.That(mock.Events!.OnSimpleAction.SubscriberCount).IsEqualTo(2);
-        await Assert.That(mock.Events!.OnMultiParamAction.WasSubscribed).IsFalse();
+        await Assert.That(mock.Events.OnStringAction.SubscriberCount).IsEqualTo(1);
+        await Assert.That(mock.Events.OnSimpleAction.SubscriberCount).IsEqualTo(2);
+        await Assert.That(mock.Events.OnMultiParamAction.WasSubscribed).IsFalse();
     }
 
     [Test]
@@ -86,7 +86,7 @@ public class EventSubscriptionVerifyTests
         mock.Reset();
 
         // Assert
-        await Assert.That(mock.Events!.OnStringAction.WasSubscribed).IsFalse();
-        await Assert.That(mock.Events!.OnStringAction.SubscriberCount).IsEqualTo(0);
+        await Assert.That(mock.Events.OnStringAction.WasSubscribed).IsFalse();
+        await Assert.That(mock.Events.OnStringAction.SubscriberCount).IsEqualTo(0);
     }
 }
