@@ -115,8 +115,8 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
     /// Use this to pass configuration values that are consumed during AppHost builder creation:
     /// <code>
     /// protected override string[] Args => [
-    ///     "UseVolumes=false",
-    ///     "UsePostgresWithSessionLifetime=true"
+    ///     "--UseVolumes=false",
+    ///     "--UsePostgresWithSessionLifetime=true"
     /// ];
     /// </code>
     /// For configuration that can be set after builder creation, use <see cref="ConfigureBuilder"/> instead.
@@ -201,10 +201,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         var sw = Stopwatch.StartNew();
 
         LogProgress($"Creating distributed application builder for {typeof(TAppHost).Name}...");
-        var args = Args;
-        var builder = args.Length > 0
-            ? await DistributedApplicationTestingBuilder.CreateAsync<TAppHost>(args)
-            : await DistributedApplicationTestingBuilder.CreateAsync<TAppHost>();
+        var builder = await DistributedApplicationTestingBuilder.CreateAsync<TAppHost>(Args);
         ConfigureBuilder(builder);
         LogProgress($"Builder created in {sw.Elapsed.TotalSeconds:0.0}s");
 

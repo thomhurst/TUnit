@@ -239,9 +239,9 @@ public class AppFixture : AspireFixture<Projects.MyAppHost>
 {
     protected override string[] Args =>
     [
-        "UseVolumes=false",
-        "UsePostgresWithPersistentLifetime=false",
-        "UsePostgresWithSessionLifetime=true"
+        "--UseVolumes=false",
+        "--UsePostgresWithPersistentLifetime=false",
+        "--UsePostgresWithSessionLifetime=true"
     ];
 }
 ```
