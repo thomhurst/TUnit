@@ -7,12 +7,9 @@ public abstract class AsyncDataSourceGeneratorAttribute<[DynamicallyAccessedMemb
 {
     protected abstract IAsyncEnumerable<Func<Task<T>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata);
 
-    public sealed override async IAsyncEnumerable<Func<Task<T>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    public sealed override IAsyncEnumerable<Func<Task<T>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
-        {
-            yield return generateDataSource;
-        }
+        return GenerateDataSourcesAsync(dataGeneratorMetadata);
     }
 }
 
@@ -25,12 +22,9 @@ public abstract class AsyncDataSourceGeneratorAttribute<
 {
     protected abstract IAsyncEnumerable<Func<Task<(T1, T2)>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata);
 
-    public sealed override async IAsyncEnumerable<Func<Task<(T1, T2)>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    public sealed override IAsyncEnumerable<Func<Task<(T1, T2)>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
-        {
-            yield return generateDataSource;
-        }
+        return GenerateDataSourcesAsync(dataGeneratorMetadata);
     }
 }
 
@@ -45,12 +39,9 @@ public abstract class AsyncDataSourceGeneratorAttribute<
 {
     protected abstract IAsyncEnumerable<Func<Task<(T1, T2, T3)>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata);
 
-    public sealed override async IAsyncEnumerable<Func<Task<(T1, T2, T3)>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    public sealed override IAsyncEnumerable<Func<Task<(T1, T2, T3)>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
-        {
-            yield return generateDataSource;
-        }
+        return GenerateDataSourcesAsync(dataGeneratorMetadata);
     }
 }
 
@@ -67,12 +58,9 @@ public abstract class AsyncDataSourceGeneratorAttribute<
 {
     protected abstract IAsyncEnumerable<Func<Task<(T1, T2, T3, T4)>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata);
 
-    public override async IAsyncEnumerable<Func<Task<(T1, T2, T3, T4)>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    public override IAsyncEnumerable<Func<Task<(T1, T2, T3, T4)>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
-        {
-            yield return generateDataSource;
-        }
+        return GenerateDataSourcesAsync(dataGeneratorMetadata);
     }
 }
 
@@ -91,11 +79,8 @@ public abstract class AsyncDataSourceGeneratorAttribute<
 {
     protected abstract IAsyncEnumerable<Func<Task<(T1, T2, T3, T4, T5)>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata);
 
-    public override async IAsyncEnumerable<Func<Task<(T1, T2, T3, T4, T5)>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    public override IAsyncEnumerable<Func<Task<(T1, T2, T3, T4, T5)>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
-        {
-            yield return generateDataSource;
-        }
+        return GenerateDataSourcesAsync(dataGeneratorMetadata);
     }
 }
