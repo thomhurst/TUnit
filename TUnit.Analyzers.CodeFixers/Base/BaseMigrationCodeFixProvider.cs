@@ -545,8 +545,7 @@ public abstract class BaseMigrationCodeFixProvider : CodeFixProvider
                     !t.IsKind(SyntaxKind.WhitespaceTrivia));
 
                 var newTrivia = trailingTrivia
-                    .Where(t => !t.IsKind(SyntaxKind.EndOfLineTrivia))
-                    .ToList();
+                    .Where(t => !t.IsKind(SyntaxKind.EndOfLineTrivia));
 
                 if (hasContentAfterLastMember)
                 {

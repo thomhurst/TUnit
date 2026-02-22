@@ -103,7 +103,7 @@ internal static class CodeGenerationHelpers
                                 syntaxIndex++;
                                 elementIndex++;
                                 return TypedConstantParser.GetRawTypedConstantValue(v, paramType);
-                            }).ToList();
+                            });
                             argStrings.AddRange(elements);
                         }
                     }
@@ -287,8 +287,7 @@ internal static class CodeGenerationHelpers
 
         // Group attributes by type
         var attributesByType = allAttributes
-            .GroupBy(attr => attr.AttributeClass?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "System.Attribute")
-            .ToList();
+            .GroupBy(attr => attr.AttributeClass?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "System.Attribute");
 
         using var writer = new CodeWriter("", includeHeader: false);
 
@@ -301,12 +300,11 @@ internal static class CodeGenerationHelpers
         foreach (var group in attributesByType)
         {
             var typeString = group.Key;
-            var attrs = group.ToList();
 
             writer.Append($"[typeof({typeString})] = new global::System.Attribute[] {{ ");
 
             var attributeStrings = new List<string>();
-            foreach (var attr in attrs)
+            foreach (var attr in group)
             {
                 attributeStrings.Add(GenerateAttributeInstantiation(attr));
             }

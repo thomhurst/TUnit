@@ -1179,8 +1179,7 @@ internal sealed class TestBuilder : ITestBuilder
     {
         var instanceClassDataSources = metadata.ClassDataSources
             .Where(ds => ds is IAccessesInstanceData)
-            .Select(ds => ds.GetType().Name)
-            .ToList();
+            .Select(ds => ds.GetType().Name);
 
         var dataSourceNames = string.Join(", ", instanceClassDataSources);
         var genericParams = string.Join(", ", metadata.TestClassType.GetGenericArguments().Select(t => t.Name));

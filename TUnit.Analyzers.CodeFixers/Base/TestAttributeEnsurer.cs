@@ -121,8 +121,7 @@ public class TestAttributeEnsurer : CSharpSyntaxRewriter
         // Strip newlines from first attribute's leading trivia, keep only indentation
         // This prevents double newlines when we insert [Test] before it
         var strippedTrivia = firstAttributeList.GetLeadingTrivia()
-            .Where(t => !t.IsKind(SyntaxKind.EndOfLineTrivia))
-            .ToList();
+            .Where(t => !t.IsKind(SyntaxKind.EndOfLineTrivia));
         var updatedFirstAttr = firstAttributeList.WithLeadingTrivia(strippedTrivia);
 
         // Build new attribute list: [Test], then updated first attr (with stripped trivia), then rest

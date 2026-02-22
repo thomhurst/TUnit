@@ -683,7 +683,7 @@ public class NUnitAssertionRewriter : AssertionRewriter
         if (lambda.Body is BlockSyntax block)
         {
             // Visit each statement to convert inner assertions
-            var convertedStatements = block.Statements.Select(s => (StatementSyntax)Visit(s)!).ToArray();
+            var convertedStatements = block.Statements.Select(s => (StatementSyntax)Visit(s)!);
             statements = SyntaxFactory.List(convertedStatements);
         }
         else if (lambda.Body is ExpressionSyntax expr)
@@ -706,7 +706,7 @@ public class NUnitAssertionRewriter : AssertionRewriter
         SyntaxList<StatementSyntax> statements;
         if (lambda.Body is BlockSyntax block)
         {
-            var convertedStatements = block.Statements.Select(s => (StatementSyntax)Visit(s)!).ToArray();
+            var convertedStatements = block.Statements.Select(s => (StatementSyntax)Visit(s)!);
             statements = SyntaxFactory.List(convertedStatements);
         }
         else if (lambda.Body is ExpressionSyntax expr)

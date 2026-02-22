@@ -1112,7 +1112,7 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
 
     protected override CompilationUnitSyntax AnalyzeBaseTypes(CompilationUnitSyntax root)
     {
-        var classNodes = OriginalRoot.DescendantNodes().OfType<ClassDeclarationSyntax>().ToList();
+        var classNodes = OriginalRoot.DescendantNodes().OfType<ClassDeclarationSyntax>();
         var currentRoot = root;
 
         foreach (var classNode in classNodes)
@@ -1481,8 +1481,7 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
         var members = OriginalRoot.DescendantNodes()
             .Where(n =>
                 (n is PropertyDeclarationSyntax prop && IsTestOutputHelperType(prop.Type)) ||
-                (n is FieldDeclarationSyntax field && IsTestOutputHelperType(field.Declaration.Type)))
-            .ToList();
+                (n is FieldDeclarationSyntax field && IsTestOutputHelperType(field.Declaration.Type)));
 
         foreach (var originalMember in members)
         {
@@ -1553,8 +1552,7 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
         // Find parameters on ORIGINAL tree (for semantic analysis)
         var parameters = OriginalRoot.DescendantNodes()
             .OfType<ParameterSyntax>()
-            .Where(p => p.Type != null && IsTestOutputHelperType(p.Type))
-            .ToList();
+            .Where(p => p.Type != null && IsTestOutputHelperType(p.Type));
 
         foreach (var originalParam in parameters)
         {
@@ -1625,8 +1623,7 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
         // Find Record.Exception calls on the ORIGINAL tree
         var recordExceptionCalls = OriginalRoot.DescendantNodes()
             .OfType<InvocationExpressionSyntax>()
-            .Where(IsRecordExceptionCall)
-            .ToList();
+            .Where(IsRecordExceptionCall);
 
         foreach (var originalCall in recordExceptionCalls)
         {
@@ -1737,8 +1734,7 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
         // Find ITestOutputHelper.WriteLine calls on the ORIGINAL tree
         var testOutputHelperCalls = OriginalRoot.DescendantNodes()
             .OfType<InvocationExpressionSyntax>()
-            .Where(IsTestOutputHelperWriteLineCall)
-            .ToList();
+            .Where(IsTestOutputHelperWriteLineCall);
 
         foreach (var originalCall in testOutputHelperCalls)
         {
@@ -1826,8 +1822,7 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
         // Find all TheoryData<T> types in the original tree (field and property declarations)
         var theoryDataNodes = OriginalRoot.DescendantNodes()
             .OfType<GenericNameSyntax>()
-            .Where(g => g.Identifier.Text == "TheoryData")
-            .ToList();
+            .Where(g => g.Identifier.Text == "TheoryData");
 
         foreach (var originalGeneric in theoryDataNodes)
         {
