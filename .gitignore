@@ -441,3 +441,6 @@ docs/plans/
 
 # Git worktrees
 .worktrees/
+
+# Speckit feature specs
+specs/
