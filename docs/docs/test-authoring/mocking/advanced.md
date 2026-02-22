@@ -61,14 +61,6 @@ var wasSubscribed = mock.Events!.OnMessage.WasSubscribed;   // true
 var count = mock.Events!.OnMessage.SubscriberCount;          // 1
 ```
 
-String-based methods are also available on `Mock<T>` for dynamic scenarios:
-
-```csharp
-mock.OnSubscribe(nameof(IConnection.OnMessage), () => { });
-mock.GetEventSubscriberCount(nameof(IConnection.OnMessage));
-mock.WasEventSubscribed(nameof(IConnection.OnMessage));
-```
-
 ## State Machine Mocking
 
 Model stateful behavior where method responses depend on the mock's current state:

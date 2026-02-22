@@ -85,8 +85,8 @@ public class EventSubscriptionVerifyTests
         // Act
         mock.Reset();
 
-        // Assert — string-based API still works after reset (Events surface references same engine)
-        await Assert.That(mock.WasEventSubscribed("OnStringAction")).IsFalse();
-        await Assert.That(mock.GetEventSubscriberCount("OnStringAction")).IsEqualTo(0);
+        // Assert
+        await Assert.That(mock.Events!.OnStringAction.WasSubscribed).IsFalse();
+        await Assert.That(mock.Events!.OnStringAction.SubscriberCount).IsEqualTo(0);
     }
 }
