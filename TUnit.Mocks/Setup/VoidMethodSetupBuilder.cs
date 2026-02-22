@@ -19,7 +19,7 @@ public sealed class VoidMethodSetupBuilder : IVoidMethodSetup, IVoidSetupChain
 
     public IVoidSetupChain Throws<TException>() where TException : Exception, new()
     {
-        _setup.AddBehavior(new ThrowBehavior(new TException()));
+        _setup.AddBehavior(new ComputedThrowBehavior(_ => new TException()));
         return this;
     }
 

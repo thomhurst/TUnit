@@ -41,7 +41,7 @@ public sealed class MethodSetupBuilder<TReturn> : IMethodSetup<TReturn>, ISetupC
 
     public ISetupChain<TReturn> Throws<TException>() where TException : Exception, new()
     {
-        _setup.AddBehavior(new ThrowBehavior(new TException()));
+        _setup.AddBehavior(new ComputedThrowBehavior(_ => new TException()));
         return this;
     }
 

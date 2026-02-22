@@ -390,7 +390,8 @@ internal static class MemberDiscovery
                         FullyQualifiedType = p.Type.GetFullyQualifiedName(),
                         Direction = p.GetParameterDirection(),
                         HasDefaultValue = p.HasExplicitDefaultValue,
-                        DefaultValueExpression = p.HasExplicitDefaultValue ? FormatDefaultValue(p) : null
+                        DefaultValueExpression = p.HasExplicitDefaultValue ? FormatDefaultValue(p) : null,
+                        IsValueType = p.Type.IsValueType
                     }).ToImmutableArray()
                 )
             });

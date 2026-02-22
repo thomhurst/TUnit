@@ -230,12 +230,15 @@ internal static class MockFactoryBuilder
                         innerFirst = false;
 
                         // Build type-check conditions for each parameter
+                        // Reference types accept null via (arg is null or Type); value types use (arg is Type)
                         var typeChecks = new List<string>();
                         var castArgs = new List<string>();
                         for (int i = 0; i < ctor.Parameters.Length; i++)
                         {
                             var p = ctor.Parameters[i];
-                            typeChecks.Add($"constructorArgs[{i}] is {p.FullyQualifiedType}");
+                            typeChecks.Add(p.IsValueType
+                                ? $"constructorArgs[{i}] is {p.FullyQualifiedType}"
+                                : $"(constructorArgs[{i}] is null or {p.FullyQualifiedType})");
                             castArgs.Add($"({p.FullyQualifiedType})constructorArgs[{i}]");
                         }
                         var condition = string.Join(" && ", typeChecks);
