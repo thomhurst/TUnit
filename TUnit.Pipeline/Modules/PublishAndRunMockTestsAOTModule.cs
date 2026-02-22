@@ -16,8 +16,8 @@ namespace TUnit.Pipeline.Modules;
 public class PublishAndRunMockTestsAOTModule : Module<IReadOnlyList<CommandResult>>
 {
     protected override ModuleConfiguration Configure() => ModuleConfiguration.Create()
-        .WithSkipWhen(_ => EnvironmentVariables.IsNetFramework
-            ? SkipDecision.Skip("Running on .NET Framework")
+        .WithSkipWhen(_ => EnvironmentVariables.IsNetFramework || !RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
+            ? SkipDecision.Skip("Only runs on Linux")
             : SkipDecision.DoNotSkip)
         .Build();
 
