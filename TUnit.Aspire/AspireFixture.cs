@@ -107,6 +107,23 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
     }
 
     /// <summary>
+    /// Command-line arguments to pass to the AppHost entry point.
+    /// These are forwarded to <see cref="DistributedApplicationTestingBuilder.CreateAsync{TEntryPoint}(string[], CancellationToken)"/>
+    /// and are available in the AppHost's <c>builder.Configuration</c> before the builder is created.
+    /// </summary>
+    /// <remarks>
+    /// Use this to pass configuration values that are consumed during AppHost builder creation:
+    /// <code>
+    /// protected override string[] Args => [
+    ///     "--UseVolumes=false",
+    ///     "--UsePostgresWithSessionLifetime=true"
+    /// ];
+    /// </code>
+    /// For configuration that can be set after builder creation, use <see cref="ConfigureBuilder"/> instead.
+    /// </remarks>
+    protected virtual string[] Args => [];
+
+    /// <summary>
     /// Override to customize the builder before building the application.
     /// </summary>
     /// <param name="builder">The distributed application testing builder.</param>
@@ -184,7 +201,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         var sw = Stopwatch.StartNew();
 
         LogProgress($"Creating distributed application builder for {typeof(TAppHost).Name}...");
-        var builder = await DistributedApplicationTestingBuilder.CreateAsync<TAppHost>();
+        var builder = await DistributedApplicationTestingBuilder.CreateAsync<TAppHost>(Args);
         ConfigureBuilder(builder);
         LogProgress($"Builder created in {sw.Elapsed.TotalSeconds:0.0}s");
 
