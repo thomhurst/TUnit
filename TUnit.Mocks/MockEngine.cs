@@ -87,7 +87,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     /// Gets the current state name. Null means no state.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public string? CurrentState => _currentState;
+    public string? CurrentState { get { lock (_setupLock) { return _currentState; } } }
 
     /// <summary>
     /// Registers a new setup. Thread-safe via lock.
@@ -472,6 +472,8 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         lock (_setupLock)
         {
             _setupsByMember.Clear();
+            _currentState = null;
+            PendingRequiredState = null;
         }
 
         // Drain the queue
@@ -482,8 +484,6 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         _onSubscribeCallbacks.Clear();
         _onUnsubscribeCallbacks.Clear();
         _autoMockCache.Clear();
-        _currentState = null;
-        PendingRequiredState = null;
     }
 
     /// <summary>
