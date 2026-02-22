@@ -43,6 +43,22 @@ public sealed class RequestSetup
         return builder;
     }
 
+    /// <summary>Return a pre-built <see cref="HttpResponseMessage"/> for matched requests.</summary>
+    public RequestSetup RespondWith(HttpResponseMessage response)
+    {
+        var builder = new ResponseBuilder().WithFactory(_ => response);
+        lock (_responseLock) { _responses.Add(builder); }
+        return this;
+    }
+
+    /// <summary>Return a dynamically-built <see cref="HttpResponseMessage"/> for matched requests.</summary>
+    public RequestSetup RespondWith(Func<HttpRequestMessage, HttpResponseMessage> factory)
+    {
+        var builder = new ResponseBuilder().WithFactory(factory);
+        lock (_responseLock) { _responses.Add(builder); }
+        return this;
+    }
+
     /// <summary>Chain another response for subsequent matched requests.</summary>
     public RequestSetup Then()
     {

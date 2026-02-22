@@ -458,4 +458,54 @@ public class MockHttpHandlerTests
         // Only one request had the header
         client.Handler.Verify(r => r.HasHeader("X-Api-Key"), Times.Once);
     }
+
+    [Test]
+    public async Task RespondWith_PreBuiltResponse()
+    {
+        using var client = Mock.HttpClient("http://localhost");
+        var customResponse = new HttpResponseMessage(HttpStatusCode.Accepted)
+        {
+            Content = new StringContent("custom body")
+        };
+        customResponse.Headers.TryAddWithoutValidation("X-Custom", "hello");
+
+        client.Handler.OnGet("/api/test").RespondWith(customResponse);
+
+        var response = await client.GetAsync("/api/test");
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.Accepted);
+        await Assert.That(await response.Content.ReadAsStringAsync()).IsEqualTo("custom body");
+        await Assert.That(response.Headers.Contains("X-Custom")).IsTrue();
+    }
+
+    [Test]
+    public async Task RespondWith_Factory()
+    {
+        using var client = Mock.HttpClient("http://localhost");
+
+        client.Handler.OnGet("/api/echo").RespondWith(req =>
+            new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent($"echoed: {req.RequestUri!.PathAndQuery}")
+            });
+
+        var response = await client.GetStringAsync("/api/echo");
+        await Assert.That(response).IsEqualTo("echoed: /api/echo");
+    }
+
+    [Test]
+    public async Task RespondWith_SequentialResponses()
+    {
+        using var client = Mock.HttpClient("http://localhost");
+
+        client.Handler.OnGet("/api/data")
+            .RespondWith(new HttpResponseMessage(HttpStatusCode.ServiceUnavailable))
+            .Then()
+            .RespondWith(new HttpResponseMessage(HttpStatusCode.OK));
+
+        var first = await client.GetAsync("/api/data");
+        var second = await client.GetAsync("/api/data");
+
+        await Assert.That(first.StatusCode).IsEqualTo(HttpStatusCode.ServiceUnavailable);
+        await Assert.That(second.StatusCode).IsEqualTo(HttpStatusCode.OK);
+    }
 }
