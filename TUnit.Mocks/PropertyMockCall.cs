@@ -214,7 +214,7 @@ public sealed class PropertySetterMockCall<TProperty> : ICallVerification
     private readonly int _setterMemberId;
     private readonly string _propertyName;
     private readonly IArgumentMatcher _matcher;
-    private VoidMethodSetupBuilder? _builder;
+    private readonly Lazy<VoidMethodSetupBuilder> _lazyBuilder;
 
     /// <summary>Creates a new property setter mock call.</summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
@@ -225,23 +225,19 @@ public sealed class PropertySetterMockCall<TProperty> : ICallVerification
         _setterMemberId = setterMemberId;
         _propertyName = propertyName;
         _matcher = matcher;
-        // Eagerly register: setter setups are commonly used without chaining
-        // (e.g., mock.Name.Set(Arg.Any<string>()) to "allow" the call in strict mode).
-        EnsureSetup();
-    }
-
-    private VoidMethodSetupBuilder EnsureSetup()
-    {
-        if (_builder is null)
+        _lazyBuilder = new Lazy<VoidMethodSetupBuilder>(() =>
         {
             var matchers = new IArgumentMatcher[] { _matcher };
             var methodSetup = new MethodSetup(_setterMemberId, matchers, $"set_{_propertyName}");
             _engine.AddSetup(methodSetup);
-            _builder = new VoidMethodSetupBuilder(methodSetup);
-        }
-
-        return _builder;
+            return new VoidMethodSetupBuilder(methodSetup);
+        });
+        // Eagerly register: setter setups are commonly used without chaining
+        // (e.g., mock.Name.Set(Arg.Any<string>()) to "allow" the call in strict mode).
+        _ = _lazyBuilder.Value;
     }
+
+    private VoidMethodSetupBuilder EnsureSetup() => _lazyBuilder.Value;
 
     // --- Setup surface ---
 
