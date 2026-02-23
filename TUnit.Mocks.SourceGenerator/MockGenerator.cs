@@ -27,18 +27,18 @@ public class MockGenerator : IIncrementalGenerator
         {
             if (model.IsDelegateType)
             {
-                // Delegate mock: generate setup, verify, and delegate factory (no impl class)
+                // Delegate mock: generate members and delegate factory (no impl class)
                 GenerateDelegateMock(spc, model);
             }
             else if (model.IsWrapMock)
             {
-                // Wrap mock: generate wrap impl, wrap factory, plus setup/verify
+                // Wrap mock: generate wrap impl, wrap factory, plus members
                 GenerateWrapMock(spc, model);
             }
             else if (model.AdditionalInterfaceNames.Length > 0)
             {
                 // Multi-interface mock: generate ONLY impl + factory
-                // Setup/verify/raise come from the single-type model (also emitted)
+                // Members/raise come from the single-type model (also emitted)
                 GenerateMultiInterfaceMock(spc, model);
             }
             else
@@ -57,13 +57,9 @@ public class MockGenerator : IIncrementalGenerator
         var implSource = MockImplBuilder.Build(model);
         spc.AddSource($"{fileName}_MockImpl.g.cs", implSource);
 
-        // Generate setup surface
-        var setupSource = MockSetupBuilder.Build(model);
-        spc.AddSource($"{fileName}_MockSetup.g.cs", setupSource);
-
-        // Generate verify surface
-        var verifySource = MockVerifyBuilder.Build(model);
-        spc.AddSource($"{fileName}_MockVerify.g.cs", verifySource);
+        // Generate unified members surface (setup + verify)
+        var membersSource = MockMembersBuilder.Build(model);
+        spc.AddSource($"{fileName}_MockMembers.g.cs", membersSource);
 
         // Generate raise surface (if type has events)
         if (model.Events.Length > 0)
@@ -84,13 +80,9 @@ public class MockGenerator : IIncrementalGenerator
     {
         var fileName = GetSafeFileName(model);
 
-        // Generate setup surface (reuses standard builder — Invoke method is just a method)
-        var setupSource = MockSetupBuilder.Build(model);
-        spc.AddSource($"{fileName}_MockSetup.g.cs", setupSource);
-
-        // Generate verify surface
-        var verifySource = MockVerifyBuilder.Build(model);
-        spc.AddSource($"{fileName}_MockVerify.g.cs", verifySource);
+        // Generate unified members surface (setup + verify)
+        var membersSource = MockMembersBuilder.Build(model);
+        spc.AddSource($"{fileName}_MockMembers.g.cs", membersSource);
 
         // Generate delegate factory (creates the delegate lambda + wraps in Mock<T>)
         var factorySource = MockDelegateFactoryBuilder.Build(model);
@@ -100,19 +92,14 @@ public class MockGenerator : IIncrementalGenerator
     private static void GenerateWrapMock(SourceProductionContext spc, MockTypeModel model)
     {
         var fileName = GetSafeFileName(model);
-        var safeName = MockImplBuilder.GetCompositeSafeName(model);
 
         // Generate wrap mock implementation (delegates to wrapped instance for unconfigured calls)
         var implSource = MockImplBuilder.Build(model);
         spc.AddSource($"{fileName}_WrapMockImpl.g.cs", implSource);
 
-        // Generate setup surface (reuses standard builder — same setup class as OfPartial)
-        var setupSource = MockSetupBuilder.Build(model);
-        spc.AddSource($"{fileName}_MockSetup.g.cs", setupSource);
-
-        // Generate verify surface
-        var verifySource = MockVerifyBuilder.Build(model);
-        spc.AddSource($"{fileName}_MockVerify.g.cs", verifySource);
+        // Generate unified members surface (setup + verify)
+        var membersSource = MockMembersBuilder.Build(model);
+        spc.AddSource($"{fileName}_MockMembers.g.cs", membersSource);
 
         // Generate raise surface (if type has events)
         if (model.Events.Length > 0)
