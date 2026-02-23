@@ -7,7 +7,10 @@ namespace TUnit.Mocks;
 
 /// <summary>
 /// Unified return type for non-void mock method calls. Supports both setup and verification.
-/// Lazily registers the method setup only when a setup method is called.
+/// Lazily registers the method setup only when a setup method (e.g. <c>.Returns()</c>) is called.
+/// Unlike <see cref="VoidMockMethodCall"/>, non-void calls are NOT eagerly registered because
+/// a non-void method without a configured return value is rarely useful. To explicitly allow
+/// a non-void call in strict mode without configuring a return value, chain <c>.Returns(default!)</c>.
 /// Public for generated code access. Not intended for direct use.
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
@@ -17,7 +20,7 @@ public sealed class MockMethodCall<TReturn> : IMethodSetup<TReturn>, ISetupChain
     private readonly int _memberId;
     private readonly string _memberName;
     private readonly IArgumentMatcher[] _matchers;
-    private MethodSetupBuilder<TReturn>? _builder;
+    private readonly Lazy<MethodSetupBuilder<TReturn>> _lazyBuilder;
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     public MockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers)
@@ -26,19 +29,15 @@ public sealed class MockMethodCall<TReturn> : IMethodSetup<TReturn>, ISetupChain
         _memberId = memberId;
         _memberName = memberName;
         _matchers = matchers;
-    }
-
-    private MethodSetupBuilder<TReturn> EnsureSetup()
-    {
-        if (_builder is null)
+        _lazyBuilder = new Lazy<MethodSetupBuilder<TReturn>>(() =>
         {
             var setup = new MethodSetup(_memberId, _matchers, _memberName);
             _engine.AddSetup(setup);
-            _builder = new MethodSetupBuilder<TReturn>(setup);
-        }
-
-        return _builder;
+            return new MethodSetupBuilder<TReturn>(setup);
+        });
     }
+
+    private MethodSetupBuilder<TReturn> EnsureSetup() => _lazyBuilder.Value;
 
     // IMethodSetup<TReturn> implementation
 

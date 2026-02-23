@@ -100,7 +100,7 @@ namespace TUnit.Mocks.Generated
         private readonly int _memberId;
         private readonly string _memberName;
         private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<bool>? _builder;
+        private readonly global::System.Lazy<global::TUnit.Mocks.Setup.MethodSetupBuilder<bool>> _lazyBuilder;
 
         internal IDictionary_TryGetValue_M0_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)
         {
@@ -108,19 +108,16 @@ namespace TUnit.Mocks.Generated
             _memberId = memberId;
             _memberName = memberName;
             _matchers = matchers;
-        }
-
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<bool> EnsureSetup()
-        {
-            if (_builder is null)
+            _lazyBuilder = new global::System.Lazy<global::TUnit.Mocks.Setup.MethodSetupBuilder<bool>>(() =>
             {
                 var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);
                 _engine.AddSetup(setup);
-                _builder = new global::TUnit.Mocks.Setup.MethodSetupBuilder<bool>(setup);
+                return new global::TUnit.Mocks.Setup.MethodSetupBuilder<bool>(setup);
             }
-
-            return _builder;
+            );
         }
+
+        private global::TUnit.Mocks.Setup.MethodSetupBuilder<bool> EnsureSetup() => _lazyBuilder.Value;
 
         /// <inheritdoc />
         public IDictionary_TryGetValue_M0_MockCall Returns(bool value) { EnsureSetup().Returns(value); return this; }

@@ -40,6 +40,9 @@ public readonly struct PropertyMockCall<TProperty> : ICallVerification
 
     /// <summary>
     /// Accesses the getter setup explicitly. Creates and registers a getter <see cref="MethodSetup"/>.
+    /// Note: Each access creates a new <see cref="MethodSetup"/> registration. This is intentional —
+    /// it allows chaining different behaviors (e.g. <c>.Getter.Returns("x")</c> then later
+    /// <c>.Getter.Returns("y")</c>) which adds a second setup that takes priority.
     /// </summary>
     public IPropertySetup<TProperty> Getter
     {
