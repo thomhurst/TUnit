@@ -5039,8 +5039,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         var attributes = filteredMethodAttributes
             .Concat(filteredClassAttributes)
-            .Concat(testMethod.TypeSymbol.ContainingAssembly.GetAttributes())
-            .ToImmutableArray();
+            .Concat(testMethod.TypeSymbol.ContainingAssembly.GetAttributes());
 
         testMethod.CompilationContext.AttributeWriter.WriteAttributes(writer, attributes);
 
