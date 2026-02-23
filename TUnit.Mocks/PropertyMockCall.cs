@@ -206,8 +206,9 @@ public readonly struct PropertyMockCall<TProperty> : ICallVerification
 /// <summary>
 /// Unified return type for property setter calls with a specific value matcher.
 /// Supports both setup (Callback, Throws) and verification (WasCalled, WasNeverCalled).
-/// Delegates to <see cref="VoidMockMethodCall"/> internally, adding only the typed return
-/// (<c>PropertySetterMockCall&lt;TProperty&gt;</c>) for fluent chaining.
+/// Eagerly registers the setup so that standalone calls (e.g., <c>mock.Name.Set(Arg.Any&lt;string&gt;())</c>)
+/// work in strict mode without requiring chaining — matching the behavior of void method extensions.
+/// Delegates to <see cref="VoidMockMethodCall"/> internally.
 /// Public for generated code access. Not intended for direct use.
 /// </summary>
 /// <typeparam name="TProperty">The property type.</typeparam>
