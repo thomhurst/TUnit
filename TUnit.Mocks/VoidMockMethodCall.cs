@@ -7,7 +7,12 @@ namespace TUnit.Mocks;
 
 /// <summary>
 /// Unified return type for void mock method calls. Supports both setup and verification.
-/// Lazily registers the method setup only when a setup method is called.
+/// When <c>eagerRegister</c> is true (the default for extension methods on <c>Mock&lt;T&gt;</c>),
+/// the setup is registered in the constructor so that standalone calls like
+/// <c>mock.Log(Arg.Any&lt;string&gt;())</c> work in strict mode without chaining.
+/// When <c>eagerRegister</c> is false (used by <see cref="PropertyMockCall{TProperty}.Setter"/>),
+/// registration is deferred until a setup method is explicitly called, avoiding unwanted
+/// setup side-effects when the object is used purely for verification.
 /// Public for generated code access. Not intended for direct use.
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
@@ -17,31 +22,34 @@ public sealed class VoidMockMethodCall : IVoidMethodSetup, IVoidSetupChain, ICal
     private readonly int _memberId;
     private readonly string _memberName;
     private readonly IArgumentMatcher[] _matchers;
-    private VoidMethodSetupBuilder? _builder;
+    private readonly Lazy<VoidMethodSetupBuilder> _lazyBuilder;
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     public VoidMockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers)
+        : this(engine, memberId, memberName, matchers, eagerRegister: true)
+    {
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal VoidMockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers, bool eagerRegister)
     {
         _engine = engine;
         _memberId = memberId;
         _memberName = memberName;
         _matchers = matchers;
-        // Eagerly register: void methods are commonly used without chaining
-        // (e.g., mock.Log(Arg.Any<string>()) to "allow" the call in strict mode).
-        EnsureSetup();
-    }
-
-    private VoidMethodSetupBuilder EnsureSetup()
-    {
-        if (_builder is null)
+        _lazyBuilder = new Lazy<VoidMethodSetupBuilder>(() =>
         {
             var setup = new MethodSetup(_memberId, _matchers, _memberName);
             _engine.AddSetup(setup);
-            _builder = new VoidMethodSetupBuilder(setup);
+            return new VoidMethodSetupBuilder(setup);
+        });
+        if (eagerRegister)
+        {
+            _ = _lazyBuilder.Value;
         }
-
-        return _builder;
     }
+
+    private VoidMethodSetupBuilder EnsureSetup() => _lazyBuilder.Value;
 
     // IVoidMethodSetup implementation
 

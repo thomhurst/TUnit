@@ -55,7 +55,7 @@ public readonly struct PropertyMockCall<TProperty> : ICallVerification
             }
 
             var matchers = Array.Empty<IArgumentMatcher>();
-            var methodSetup = new MethodSetup(_getterMemberId, matchers, $"{_propertyName} (get)");
+            var methodSetup = new MethodSetup(_getterMemberId, matchers, $"get_{_propertyName}");
             _engine.AddSetup(methodSetup);
             return new PropertySetupBuilder<TProperty>(methodSetup);
         }
@@ -65,6 +65,8 @@ public readonly struct PropertyMockCall<TProperty> : ICallVerification
     /// Accesses the setter with any-value semantics.
     /// Returns a unified type supporting both setup (<c>.Callback()</c>, <c>.Throws()</c>)
     /// and verification (<c>.WasCalled()</c>, <c>.WasNeverCalled()</c>).
+    /// Uses deferred registration to avoid unwanted setup side-effects when accessed purely
+    /// for verification. Chain a setup method (<c>.Callback()</c>, <c>.Throws()</c>) to register.
     /// </summary>
     public VoidMockMethodCall Setter
     {
@@ -76,8 +78,8 @@ public readonly struct PropertyMockCall<TProperty> : ICallVerification
                     $"Property '{_propertyName}' does not have a setter.");
             }
 
-            return new VoidMockMethodCall(_engine, _setterMemberId, $"{_propertyName} (set)",
-                Array.Empty<IArgumentMatcher>());
+            return new VoidMockMethodCall(_engine, _setterMemberId, $"set_{_propertyName}",
+                Array.Empty<IArgumentMatcher>(), eagerRegister: false);
         }
     }
 
@@ -233,7 +235,7 @@ public sealed class PropertySetterMockCall<TProperty> : ICallVerification
         if (_builder is null)
         {
             var matchers = new IArgumentMatcher[] { _matcher };
-            var methodSetup = new MethodSetup(_setterMemberId, matchers, $"{_propertyName} (set)");
+            var methodSetup = new MethodSetup(_setterMemberId, matchers, $"set_{_propertyName}");
             _engine.AddSetup(methodSetup);
             _builder = new VoidMethodSetupBuilder(methodSetup);
         }
