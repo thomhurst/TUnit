@@ -10,6 +10,11 @@ namespace TUnit.Mocks;
 /// Unified return type for property mock members. Supports both setup and verification.
 /// Provides setup (via <c>.Returns()</c>, <c>.Getter</c>, <c>.Setter</c>, <c>.Set()</c>)
 /// and verification (via <c>.WasCalled()</c>, <c>.WasNeverCalled()</c>) on a single type.
+/// <para>
+/// <b>Verification scope:</b> The <c>WasCalled</c>/<c>WasNeverCalled</c> methods on this type
+/// verify the <b>getter</b> only. To verify setter calls, use <c>.Setter.WasCalled()</c>
+/// or <c>.Set(value).WasCalled()</c>.
+/// </para>
 /// Public for generated code access. Not intended for direct use.
 /// </summary>
 /// <typeparam name="TProperty">The property type.</typeparam>
@@ -212,8 +217,8 @@ public sealed class PropertySetterMockCall<TProperty> : ICallVerification
 {
     private readonly IMockEngineAccess _engine;
     private readonly int _setterMemberId;
-    private readonly string _propertyName;
-    private readonly IArgumentMatcher _matcher;
+    private readonly string _setterName;
+    private readonly IArgumentMatcher[] _matchers;
     private readonly Lazy<VoidMethodSetupBuilder> _lazyBuilder;
 
     /// <summary>Creates a new property setter mock call.</summary>
@@ -223,12 +228,11 @@ public sealed class PropertySetterMockCall<TProperty> : ICallVerification
     {
         _engine = engine;
         _setterMemberId = setterMemberId;
-        _propertyName = propertyName;
-        _matcher = matcher;
+        _setterName = $"set_{propertyName}";
+        _matchers = [matcher];
         _lazyBuilder = new Lazy<VoidMethodSetupBuilder>(() =>
         {
-            var matchers = new IArgumentMatcher[] { _matcher };
-            var methodSetup = new MethodSetup(_setterMemberId, matchers, $"set_{_propertyName}");
+            var methodSetup = new MethodSetup(_setterMemberId, _matchers, _setterName);
             _engine.AddSetup(methodSetup);
             return new VoidMethodSetupBuilder(methodSetup);
         });
@@ -267,42 +271,36 @@ public sealed class PropertySetterMockCall<TProperty> : ICallVerification
     /// <inheritdoc />
     public void WasCalled(Times times)
     {
-        _engine.CreateVerification(_setterMemberId, $"set_{_propertyName}",
-            new IArgumentMatcher[] { _matcher }).WasCalled(times);
+        _engine.CreateVerification(_setterMemberId, _setterName, _matchers).WasCalled(times);
     }
 
     /// <inheritdoc />
     public void WasCalled(Times times, string? message)
     {
-        _engine.CreateVerification(_setterMemberId, $"set_{_propertyName}",
-            new IArgumentMatcher[] { _matcher }).WasCalled(times, message);
+        _engine.CreateVerification(_setterMemberId, _setterName, _matchers).WasCalled(times, message);
     }
 
     /// <inheritdoc />
     public void WasNeverCalled()
     {
-        _engine.CreateVerification(_setterMemberId, $"set_{_propertyName}",
-            new IArgumentMatcher[] { _matcher }).WasNeverCalled();
+        _engine.CreateVerification(_setterMemberId, _setterName, _matchers).WasNeverCalled();
     }
 
     /// <inheritdoc />
     public void WasNeverCalled(string? message)
     {
-        _engine.CreateVerification(_setterMemberId, $"set_{_propertyName}",
-            new IArgumentMatcher[] { _matcher }).WasNeverCalled(message);
+        _engine.CreateVerification(_setterMemberId, _setterName, _matchers).WasNeverCalled(message);
     }
 
     /// <inheritdoc />
     public void WasCalled()
     {
-        _engine.CreateVerification(_setterMemberId, $"set_{_propertyName}",
-            new IArgumentMatcher[] { _matcher }).WasCalled();
+        _engine.CreateVerification(_setterMemberId, _setterName, _matchers).WasCalled();
     }
 
     /// <inheritdoc />
     public void WasCalled(string? message)
     {
-        _engine.CreateVerification(_setterMemberId, $"set_{_propertyName}",
-            new IArgumentMatcher[] { _matcher }).WasCalled(message);
+        _engine.CreateVerification(_setterMemberId, _setterName, _matchers).WasCalled(message);
     }
 }
