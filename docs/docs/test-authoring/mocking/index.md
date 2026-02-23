@@ -48,7 +48,7 @@ public class GreeterTests
         var mock = Mock.Of<IGreeter>();
 
         // Configure — set up a return value
-        mock.Setup.Greet(Arg.Any<string>()).Returns("Hello!");
+        mock.Greet(Arg.Any<string>()).Returns("Hello!");
 
         // Act — use the mock object
         IGreeter greeter = mock.Object;
@@ -56,7 +56,7 @@ public class GreeterTests
 
         // Assert — verify the result and the call
         await Assert.That(result).IsEqualTo("Hello!");
-        mock.Verify.Greet("Alice").WasCalled(Times.Once);
+        mock.Greet("Alice").WasCalled(Times.Once);
     }
 }
 ```
@@ -86,15 +86,15 @@ var strict = Mock.Of<IService>(MockBehavior.Strict);   // throws on unconfigured
 
 ### The Mock Wrapper
 
-`Mock.Of<T>()` returns a `Mock<T>` wrapper with three surfaces:
+`Mock.Of<T>()` returns a `Mock<T>` wrapper. Extension methods are generated directly on `Mock<T>` for each member of the mocked type, and the chain methods (`.Returns()`, `.WasCalled()`, etc.) disambiguate between setup and verification:
 
 ```csharp
 var mock = Mock.Of<IService>();
 
-mock.Setup   // configure method/property behaviors
-mock.Verify  // verify calls were made
-mock.Raise   // raise events (if T has events)
-mock.Object  // the T instance to pass to your code under test
+mock.GetUser(Arg.Any<int>()).Returns(user);  // setup — .Returns() makes it a stub
+mock.GetUser(42).WasCalled(Times.Once);      // verify — .WasCalled() makes it a check
+mock.RaiseOnMessage("hi");                   // raise events — Raise{EventName}()
+mock.Object                                  // the T instance to pass to your code under test
 ```
 
 ### Implicit Conversion

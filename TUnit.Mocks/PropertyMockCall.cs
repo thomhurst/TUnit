@@ -8,8 +8,8 @@ namespace TUnit.Mocks;
 
 /// <summary>
 /// Unified return type for property mock members. Supports both setup and verification.
-/// Merges what was previously split between <c>PropertySetupAccessor&lt;TProperty&gt;</c>
-/// and <c>PropertyVerifyAccessor&lt;TProperty&gt;</c>.
+/// Provides setup (via <c>.Returns()</c>, <c>.Getter</c>, <c>.Setter</c>, <c>.Set()</c>)
+/// and verification (via <c>.WasCalled()</c>, <c>.WasNeverCalled()</c>) on a single type.
 /// Public for generated code access. Not intended for direct use.
 /// </summary>
 /// <typeparam name="TProperty">The property type.</typeparam>

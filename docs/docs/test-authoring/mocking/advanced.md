@@ -8,7 +8,7 @@ sidebar_position: 5
 
 ### Raising Events
 
-If the mocked interface declares events, TUnit.Mocks generates a `Raise` surface:
+If the mocked interface declares events, TUnit.Mocks generates `Raise{EventName}()` extension methods directly on `Mock<T>`:
 
 ```csharp
 public interface IConnection
@@ -24,7 +24,7 @@ string? received = null;
 mock.Object.OnMessage += (sender, msg) => received = msg;
 
 // Raise the event through the mock
-mock.Raise.OnMessage("Hello!");
+mock.RaiseOnMessage("Hello!");
 // received == "Hello!"
 ```
 
@@ -33,7 +33,7 @@ mock.Raise.OnMessage("Hello!");
 Trigger an event automatically when a method is called using the typed `.Raises{EventName}()` method on a setup chain:
 
 ```csharp
-mock.Setup.SendMessage(Arg.Any<string>())
+mock.SendMessage(Arg.Any<string>())
     .RaisesOnMessage("echo");
 
 mock.Object.SendMessage("test");
@@ -76,16 +76,16 @@ public interface IConnection
 var mock = Mock.Of<IConnection>();
 mock.SetState("disconnected");
 
-mock.InState("disconnected", setup =>
+mock.InState("disconnected", m =>
 {
-    setup.GetStatus().Returns("OFFLINE");
-    setup.Connect().TransitionsTo("connected");
+    m.GetStatus().Returns("OFFLINE");
+    m.Connect().TransitionsTo("connected");
 });
 
-mock.InState("connected", setup =>
+mock.InState("connected", m =>
 {
-    setup.GetStatus().Returns("ONLINE");
-    setup.Disconnect().TransitionsTo("disconnected");
+    m.GetStatus().Returns("ONLINE");
+    m.Disconnect().TransitionsTo("disconnected");
 });
 
 // Start disconnected
@@ -130,7 +130,7 @@ var serviceB = mock.Object.GetServiceB();
 
 // Configure the auto-mock
 var autoMock = mock.GetAutoMock<IServiceB>("GetServiceB");
-autoMock.Setup.GetValue().Returns(42);
+autoMock.GetValue().Returns(42);
 
 var value = serviceB.GetValue(); // 42
 ```
@@ -148,8 +148,8 @@ var serviceMock = repo.Of<IService>();
 var loggerMock = repo.Of<ILogger>();
 
 // Configure each mock individually
-serviceMock.Setup.GetData(Arg.Any<int>()).Returns("result");
-loggerMock.Setup.Log(Arg.Any<string>());
+serviceMock.GetData(Arg.Any<int>()).Returns("result");
+loggerMock.Log(Arg.Any<string>());
 
 // Exercise code
 serviceMock.Object.GetData(1);
@@ -181,8 +181,8 @@ repo.Reset();                // clear all mocks
 Get a diagnostic report of setup coverage and call matching:
 
 ```csharp
-mock.Setup.GetUser(Arg.Any<int>()).Returns(new User("Alice"));
-mock.Setup.Delete(Arg.Any<int>());
+mock.GetUser(Arg.Any<int>()).Returns(new User("Alice"));
+mock.Delete(Arg.Any<int>());
 
 svc.GetUser(1);
 // Delete was never called
@@ -228,7 +228,7 @@ The provider is consulted **before** auto-mocking and built-in smart defaults.
 Clear all setups, call history, state, and auto-tracked property values:
 
 ```csharp
-mock.Setup.GetUser(Arg.Any<int>()).Returns(new User("Alice"));
+mock.GetUser(Arg.Any<int>()).Returns(new User("Alice"));
 svc.GetUser(1);
 
 mock.Reset();

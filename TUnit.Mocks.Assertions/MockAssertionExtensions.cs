@@ -6,7 +6,7 @@ namespace TUnit.Mocks.Assertions;
 
 /// <summary>
 /// Extension methods for asserting mock call verification through the TUnit assertion pipeline.
-/// Enables: <c>await Assert.That(mock.Verify.Method()).WasCalled(Times.Once);</c>
+/// Enables: <c>await Assert.That(mock.Method()).WasCalled(Times.Once);</c>
 /// </summary>
 public static class MockAssertionExtensions
 {
@@ -24,7 +24,7 @@ public static class MockAssertionExtensions
 
     /// <summary>
     /// Asserts that the mock member was called the specified number of times.
-    /// Generic overload for types implementing <see cref="ICallVerification"/> (e.g. PropertyVerifyAccessor).
+    /// Generic overload for types implementing <see cref="ICallVerification"/> (e.g. PropertyMockCall).
     /// </summary>
     public static WasCalledAssertion WasCalled<T>(
         this IAssertionSource<T> source,
@@ -48,7 +48,7 @@ public static class MockAssertionExtensions
 
     /// <summary>
     /// Asserts that the mock member was never called.
-    /// Generic overload for types implementing <see cref="ICallVerification"/> (e.g. PropertyVerifyAccessor).
+    /// Generic overload for types implementing <see cref="ICallVerification"/> (e.g. PropertyMockCall).
     /// </summary>
     public static WasNeverCalledAssertion WasNeverCalled<T>(
         this IAssertionSource<T> source) where T : ICallVerification

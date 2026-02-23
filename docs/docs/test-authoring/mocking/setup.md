@@ -4,7 +4,7 @@ sidebar_position: 2
 
 # Setup & Stubbing
 
-The `mock.Setup` surface configures how the mock responds when its members are called.
+Methods are called directly on `Mock<T>` — the chain method (`.Returns()`, `.Throws()`, etc.) makes it a setup.
 
 ## Method Setup
 
@@ -12,13 +12,13 @@ The `mock.Setup` surface configures how the mock responds when its members are c
 
 ```csharp
 // Fixed return value
-mock.Setup.GetUser(Arg.Any<int>()).Returns(new User("Alice"));
+mock.GetUser(Arg.Any<int>()).Returns(new User("Alice"));
 
 // Computed return value
-mock.Setup.GetUser(Arg.Any<int>()).Returns(() => new User(DateTime.Now.ToString()));
+mock.GetUser(Arg.Any<int>()).Returns(() => new User(DateTime.Now.ToString()));
 
 // Async methods — no special API needed
-mock.Setup.GetUserAsync(Arg.Any<int>()).Returns(new User("Alice"));
+mock.GetUserAsync(Arg.Any<int>()).Returns(new User("Alice"));
 // TUnit.Mocks auto-wraps the value in Task<T> or ValueTask<T>
 ```
 
@@ -26,10 +26,10 @@ mock.Setup.GetUserAsync(Arg.Any<int>()).Returns(new User("Alice"));
 
 ```csharp
 // Throw a specific exception type
-mock.Setup.Delete(Arg.Any<int>()).Throws<InvalidOperationException>();
+mock.Delete(Arg.Any<int>()).Throws<InvalidOperationException>();
 
 // Throw a specific instance
-mock.Setup.Delete(Arg.Any<int>()).Throws(new ArgumentException("bad id"));
+mock.Delete(Arg.Any<int>()).Throws(new ArgumentException("bad id"));
 ```
 
 ### Callbacks
@@ -37,11 +37,11 @@ mock.Setup.Delete(Arg.Any<int>()).Throws(new ArgumentException("bad id"));
 ```csharp
 // Simple callback
 var callCount = 0;
-mock.Setup.Process(Arg.Any<string>())
+mock.Process(Arg.Any<string>())
     .Callback(() => callCount++);
 
 // Callback with access to arguments
-mock.Setup.Process(Arg.Any<string>())
+mock.Process(Arg.Any<string>())
     .Callback((object?[] args) => Console.WriteLine($"Called with: {args[0]}"));
 ```
 
@@ -50,7 +50,7 @@ mock.Setup.Process(Arg.Any<string>())
 Use `.Then()` to define different behaviors for successive calls:
 
 ```csharp
-mock.Setup.GetValue(Arg.Any<string>())
+mock.GetValue(Arg.Any<string>())
     .Throws<InvalidOperationException>()   // 1st call: throws
     .Then()
     .Returns("retry-succeeded")             // 2nd call: returns value
@@ -58,7 +58,7 @@ mock.Setup.GetValue(Arg.Any<string>())
     .Returns("cached");                     // 3rd+ calls: returns this value
 
 // Shorthand for sequential return values
-mock.Setup.GetValue(Arg.Any<string>())
+mock.GetValue(Arg.Any<string>())
     .ReturnsSequentially("first", "second", "third");
 // 1st: "first", 2nd: "second", 3rd+: "third" (last value repeats)
 ```
@@ -68,12 +68,14 @@ mock.Setup.GetValue(Arg.Any<string>())
 Void methods support `Callback` and `Throws` (but not `Returns`):
 
 ```csharp
-mock.Setup.Log(Arg.Any<string>())
+mock.Log(Arg.Any<string>())
     .Callback(() => { /* side effect */ });
 
-mock.Setup.Log(Arg.Any<string>())
+mock.Log(Arg.Any<string>())
     .Throws<NotSupportedException>();
 ```
+
+Void methods are also eagerly registered — calling `mock.Log(Arg.Any<string>())` without chaining is sufficient to "allow" the call in strict mode.
 
 ## Property Setup
 
@@ -83,29 +85,29 @@ TUnit.Mocks uses C# 14 extension properties for a natural property API. The defa
 
 ```csharp
 // These are equivalent — both configure the getter
-mock.Setup.Name.Returns("Alice");
-mock.Setup.Name.Getter.Returns("Alice");
+mock.Name.Returns("Alice");
+mock.Name.Getter.Returns("Alice");
 ```
 
 All method setup operations work on getters:
 
 ```csharp
-mock.Setup.Name.Throws<InvalidOperationException>();
-mock.Setup.Name.Callback(() => Console.WriteLine("Name accessed"));
-mock.Setup.Name.ReturnsSequentially("first", "second");
+mock.Name.Throws<InvalidOperationException>();
+mock.Name.Callback(() => Console.WriteLine("Name accessed"));
+mock.Name.ReturnsSequentially("first", "second");
 ```
 
 ### Setter Setup
 
 ```csharp
 // React to any value being set
-mock.Setup.Count.Setter.Callback(() => Console.WriteLine("Count was set"));
+mock.Count.Setter.Callback(() => Console.WriteLine("Count was set"));
 
 // React to a specific value being set
-mock.Setup.Count.Set(Arg.Is(42)).Callback(() => Console.WriteLine("Count set to 42"));
+mock.Count.Set(Arg.Is(42)).Callback(() => Console.WriteLine("Count set to 42"));
 
 // Throw on setter
-mock.Setup.Name.Setter.Throws<NotSupportedException>();
+mock.Name.Setter.Throws<NotSupportedException>();
 ```
 
 ### Auto-Tracking Properties
@@ -130,7 +132,7 @@ Explicit setups take precedence over auto-tracked values.
 **Out parameters** are excluded from setup signatures. Use `.SetsOutParameter()` to assign their values:
 
 ```csharp
-mock.Setup.TryGet("key")
+mock.TryGet("key")
     .Returns(true)
     .SetsOutParameter(0, "found-value"); // paramIndex 0 = first out param
 
@@ -152,7 +154,7 @@ public abstract class Calculator
 }
 
 var mock = Mock.OfPartial<Calculator>();
-mock.Setup.Multiply(Arg.Any<int>(), Arg.Any<int>()).Returns(99);
+mock.Multiply(Arg.Any<int>(), Arg.Any<int>()).Returns(99);
 
 mock.Object.Add(2, 3);      // 5 (base implementation)
 mock.Object.Multiply(2, 3); // 99 (mocked)
@@ -170,7 +172,7 @@ Mock any delegate type:
 
 ```csharp
 var mock = Mock.OfDelegate<Func<string, int>>();
-mock.Setup.Invoke(Arg.Any<string>()).Returns(42);
+mock.Invoke(Arg.Any<string>()).Returns(42);
 
 Func<string, int> func = mock;
 var result = func("hello"); // 42
@@ -187,7 +189,7 @@ var realService = new ProductionService();
 var mock = Mock.Wrap(realService);
 
 // Override just one method
-mock.Setup.GetConfig().Returns(new TestConfig());
+mock.GetConfig().Returns(new TestConfig());
 
 // All other calls go to realService
 mock.Object.DoWork(); // calls realService.DoWork()
@@ -200,7 +202,7 @@ Create a single mock that implements multiple interfaces:
 ```csharp
 var mock = Mock.Of<ILogger, IDisposable>();
 
-mock.Setup.Log(Arg.Any<string>()); // ILogger method
+mock.Log(Arg.Any<string>()); // ILogger method
 mock.Object.Log("test");
 
 ((IDisposable)mock.Object).Dispose(); // IDisposable method
@@ -213,7 +215,7 @@ Supports up to 4 interfaces: `Mock.Of<T1, T2, T3, T4>()`.
 Setup methods return chain objects that support additional behaviors:
 
 ```csharp
-mock.Setup.Process(Arg.Any<int>())
+mock.Process(Arg.Any<int>())
     .Returns(true)
     .RaisesProcessCompleted(EventArgs.Empty)   // strongly-typed auto-raise event
     .TransitionsTo("processed");               // state machine transition
