@@ -128,6 +128,6 @@ internal static class MockVerifyBuilder
                 clauses.Add($"where {tp.Name} : {tp.Constraints}");
             }
         }
-        return clauses.Count > 0 ? " " + string.Join(" ", clauses) : "";
+        return clauses.Count > 0 ? " " + string.Join(' ', clauses) : "";
     }
 }

@@ -683,7 +683,7 @@ public static class AssertionExtensions
             body = memberExpr.Expression;
         }
 
-        return parts.Count > 0 ? string.Join(".", parts) : "Unknown";
+        return parts.Count > 0 ? string.Join('.', parts) : "Unknown";
     }
 
     /// <summary>

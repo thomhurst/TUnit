@@ -814,7 +814,7 @@ internal static class MockImplBuilder
                 clauses.Add($"where {tp.Name} : {tp.Constraints}");
             }
         }
-        return clauses.Count > 0 ? " " + string.Join(" ", clauses) : "";
+        return clauses.Count > 0 ? " " + string.Join(' ', clauses) : "";
     }
 
     /// <summary>
@@ -894,7 +894,7 @@ internal static class MockImplBuilder
         var name = model.FullyQualifiedName;
         if (model.AdditionalInterfaceNames.Length > 0)
         {
-            name += "_" + string.Join("_", model.AdditionalInterfaceNames);
+            name += "_" + string.Join('_', model.AdditionalInterfaceNames);
         }
         return GetSafeName(name);
     }

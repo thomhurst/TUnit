@@ -72,7 +72,7 @@ public static class TestContextExtensions
         }
 
         hierarchy.Reverse();
-        return string.Join("+", hierarchy);
+        return string.Join('+', hierarchy);
     }
 
     /// <summary>

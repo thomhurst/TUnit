@@ -2831,7 +2831,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             formattedTypes[i] = typesList[i].ToDisplayString(DisplayFormats.FullyQualifiedGenericWithoutGlobalPrefix);
         }
-        return string.Join(",", formattedTypes);
+        return string.Join(',', formattedTypes);
     }
 
     /// <summary>

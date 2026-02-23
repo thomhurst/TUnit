@@ -407,7 +407,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
         // Only add if there are parameters (matches main branch behavior - no _0_ suffix for empty params)
         if (hook.Parameters.Length > 0)
         {
-            var paramTypes = string.Join("_", hook.Parameters.Select(p => SanitizeForFileName(GetSimpleTypeName(p.TypeName))));
+            var paramTypes = string.Join('_', hook.Parameters.Select(p => SanitizeForFileName(GetSimpleTypeName(p.TypeName))));
             baseName += $"__{paramTypes}";
         }
 

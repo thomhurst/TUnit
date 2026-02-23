@@ -1258,7 +1258,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             }
         }
 
-        return constraintParts.Count > 0 ? string.Join(" ", constraintParts) : null;
+        return constraintParts.Count > 0 ? string.Join(' ', constraintParts) : null;
     }
 
     #endregion

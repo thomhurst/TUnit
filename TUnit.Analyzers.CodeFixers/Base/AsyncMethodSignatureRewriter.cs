@@ -84,7 +84,7 @@ public class AsyncMethodSignatureRewriter : CSharpSyntaxRewriter
         // Build a key from class name, method name, and parameter types
         var className = node.Ancestors().OfType<TypeDeclarationSyntax>().FirstOrDefault()?.Identifier.Text ?? "";
         var methodName = node.Identifier.Text;
-        var parameters = string.Join(",", node.ParameterList.Parameters.Select(p => p.Type?.ToString() ?? ""));
+        var parameters = string.Join(',', node.ParameterList.Parameters.Select(p => p.Type?.ToString() ?? ""));
         return $"{className}.{methodName}({parameters})";
     }
 

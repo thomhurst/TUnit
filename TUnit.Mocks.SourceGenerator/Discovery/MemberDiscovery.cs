@@ -75,7 +75,7 @@ internal static class MemberDiscovery
 
                     case IPropertySymbol indexer when indexer.IsIndexer:
                     {
-                        var paramTypes = string.Join(",", indexer.Parameters.Select(p => p.Type.GetFullyQualifiedName()));
+                        var paramTypes = string.Join(',', indexer.Parameters.Select(p => p.Type.GetFullyQualifiedName()));
                         var key = $"I:[{paramTypes}]";
                         if (seenProperties.TryGetValue(key, out var existingIndex))
                         {
@@ -165,7 +165,7 @@ internal static class MemberDiscovery
 
                         case IPropertySymbol indexer when indexer.IsIndexer:
                         {
-                            var paramTypes = string.Join(",", indexer.Parameters.Select(p => p.Type.GetFullyQualifiedName()));
+                            var paramTypes = string.Join(',', indexer.Parameters.Select(p => p.Type.GetFullyQualifiedName()));
                             var key = $"I:[{paramTypes}]";
                             if (seenProperties.TryGetValue(key, out var existingIndex))
                             {
@@ -524,7 +524,7 @@ internal static class MemberDiscovery
 
     private static string GetMethodKey(IMethodSymbol method)
     {
-        var paramTypes = string.Join(",", method.Parameters.Select(p =>
+        var paramTypes = string.Join(',', method.Parameters.Select(p =>
             p.Type.GetFullyQualifiedName() + (p.RefKind != RefKind.None ? "&" : "")));
         var typeParams = method.TypeParameters.Length > 0 ? $"`{method.TypeParameters.Length}" : "";
         return $"M:{method.Name}{typeParams}({paramTypes})";

@@ -42,7 +42,7 @@ internal sealed class ReflectionHookDiscoveryService
             {
                 paramTypes[i] = parameters[i].ParameterType.FullName ?? "unknown";
             }
-            return $"{m.DeclaringType?.FullName}.{m.Name}({string.Join(",", paramTypes)})";
+            return $"{m.DeclaringType?.FullName}.{m.Name}({string.Join(',', paramTypes)})";
         });
     }
 

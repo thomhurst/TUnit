@@ -1167,7 +1167,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         {
             // Add generic constraints from the method
             sourceBuilder.AppendLine();
-            sourceBuilder.Append($"        {string.Join(" ", genericConstraints)}");
+            sourceBuilder.Append($"        {string.Join(' ', genericConstraints)}");
         }
 
         sourceBuilder.AppendLine();

@@ -26,7 +26,7 @@ internal class FilterParser
         return filter switch
         {
             NopFilter => null,
-            TestNodeUidListFilter testNodeUidListFilter => string.Join(",",
+            TestNodeUidListFilter testNodeUidListFilter => string.Join(',',
                 testNodeUidListFilter.TestNodeUids.Select(x => x.Value)),
             TreeNodeFilter treeNodeFilter => treeNodeFilter.Filter,
             _ => throw new ArgumentOutOfRangeException(nameof(filter))

@@ -40,7 +40,7 @@ public sealed class GenericTestMetadata : TestMetadata
                         {
                             typeNames[i] = inferredTypes[i].FullName ?? inferredTypes[i].Name;
                         }
-                        typeKey = string.Join(",", typeNames);
+                        typeKey = string.Join(',', typeNames);
 
                         // Find the matching concrete instantiation
                         if (genericMetadata.ConcreteInstantiations.TryGetValue(typeKey, out var concreteMetadata))

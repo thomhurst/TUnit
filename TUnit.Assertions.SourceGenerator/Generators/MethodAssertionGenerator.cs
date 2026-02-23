@@ -1073,7 +1073,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         }
 
         // Include parameter types to distinguish overloads
-        var paramTypes = string.Join("_", data.AdditionalParameters.Select(p => p.SimpleTypeName));
+        var paramTypes = string.Join('_', data.AdditionalParameters.Select(p => p.SimpleTypeName));
         return $"{targetTypeName}_{methodName}_{paramTypes}_Assertion";
     }
 

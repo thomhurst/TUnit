@@ -266,6 +266,6 @@ public static class TypeExtensions
         typeHierarchy.Reverse();
 
         // Join with '+' separator (matching .NET Type.FullName convention for nested types)
-        return string.Join("+", typeHierarchy);
+        return string.Join('+', typeHierarchy);
     }
 }
