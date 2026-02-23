@@ -61,12 +61,9 @@ public class MockGenerator : IIncrementalGenerator
         var membersSource = MockMembersBuilder.Build(model);
         spc.AddSource($"{fileName}_MockMembers.g.cs", membersSource);
 
-        // Generate raise surface (if type has events)
+        // Generate events surface (if type has events)
         if (model.Events.Length > 0)
         {
-            var raiseSource = MockRaiseBuilder.Build(model);
-            spc.AddSource($"{fileName}_MockRaise.g.cs", raiseSource);
-
             var eventsSource = MockEventsBuilder.Build(model);
             spc.AddSource($"{fileName}_MockEvents.g.cs", eventsSource);
         }
@@ -101,12 +98,9 @@ public class MockGenerator : IIncrementalGenerator
         var membersSource = MockMembersBuilder.Build(model);
         spc.AddSource($"{fileName}_MockMembers.g.cs", membersSource);
 
-        // Generate raise surface (if type has events)
+        // Generate events surface (if type has events)
         if (model.Events.Length > 0)
         {
-            var raiseSource = MockRaiseBuilder.Build(model);
-            spc.AddSource($"{fileName}_MockRaise.g.cs", raiseSource);
-
             var eventsSource = MockEventsBuilder.Build(model);
             spc.AddSource($"{fileName}_MockEvents.g.cs", eventsSource);
         }

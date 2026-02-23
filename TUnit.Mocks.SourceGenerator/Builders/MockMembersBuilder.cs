@@ -57,6 +57,14 @@ internal static class MockMembersBuilder
                     firstMember = false;
                     GeneratePropertyExtensionBlock(writer, memberProps, model, safeName);
                 }
+
+                // Raise extension methods for events
+                if (model.Events.Length > 0)
+                {
+                    if (!firstMember) writer.AppendLine();
+                    firstMember = false;
+                    GenerateRaiseExtensionMethods(writer, model);
+                }
             }
 
             // Generate unified sealed classes for qualifying methods
@@ -522,6 +530,45 @@ internal static class MockMembersBuilder
 
                 writer.AppendLine($"public global::TUnit.Mocks.PropertyMockCall<{prop.ReturnType}> {safePropName}");
                 writer.AppendLine($"    => new(mock.Engine, {getterMemberId}, {setterMemberId}, \"{prop.Name}\", {hasGetter}, {hasSetter});");
+            }
+        }
+    }
+
+    private static void GenerateRaiseExtensionMethods(CodeWriter writer, MockTypeModel model)
+    {
+        bool first = true;
+        foreach (var evt in model.Events)
+        {
+            if (!first) writer.AppendLine();
+            first = false;
+
+            var extensionParam = $"this global::TUnit.Mocks.Mock<{model.FullyQualifiedName}> mock";
+
+            var raiseParamStr = evt.RaiseParameterList.Length == 0
+                ? ""
+                : string.Join(", ", evt.RaiseParameterList.Select(p => $"{p.FullyQualifiedType} {p.Name}"));
+            var raiseParams = string.IsNullOrEmpty(raiseParamStr)
+                ? extensionParam
+                : $"{extensionParam}, {raiseParamStr}";
+
+            string argsExpr;
+            if (evt.RaiseParameterList.Length == 0)
+            {
+                argsExpr = "null";
+            }
+            else if (evt.RaiseParameterList.Length == 1)
+            {
+                argsExpr = $"(object?){evt.RaiseParameterList[0].Name}";
+            }
+            else
+            {
+                var paramNames = string.Join(", ", evt.RaiseParameterList.Select(p => p.Name));
+                argsExpr = $"(object?)new object?[] {{ {paramNames} }}";
+            }
+
+            using (writer.Block($"public static void Raise{evt.Name}({raiseParams})"))
+            {
+                writer.AppendLine($"((global::TUnit.Mocks.IRaisable)mock.Engine.Raisable!).RaiseEvent(\"{evt.Name}\", {argsExpr});");
             }
         }
     }
