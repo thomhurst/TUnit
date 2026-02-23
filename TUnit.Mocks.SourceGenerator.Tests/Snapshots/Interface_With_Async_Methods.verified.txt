@@ -319,7 +319,7 @@ namespace TUnit.Mocks.Generated
         private readonly int _memberId;
         private readonly string _memberName;
         private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
-        private global::TUnit.Mocks.Setup.VoidMethodSetupBuilder? _builder;
+        private readonly global::System.Lazy<global::TUnit.Mocks.Setup.VoidMethodSetupBuilder> _lazyBuilder;
 
         internal IAsyncService_InitializeAsync_M3_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)
         {
@@ -327,20 +327,17 @@ namespace TUnit.Mocks.Generated
             _memberId = memberId;
             _memberName = memberName;
             _matchers = matchers;
-            EnsureSetup();
-        }
-
-        private global::TUnit.Mocks.Setup.VoidMethodSetupBuilder EnsureSetup()
-        {
-            if (_builder is null)
+            _lazyBuilder = new global::System.Lazy<global::TUnit.Mocks.Setup.VoidMethodSetupBuilder>(() =>
             {
                 var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);
                 _engine.AddSetup(setup);
-                _builder = new global::TUnit.Mocks.Setup.VoidMethodSetupBuilder(setup);
+                return new global::TUnit.Mocks.Setup.VoidMethodSetupBuilder(setup);
             }
-
-            return _builder;
+            );
+            _ = _lazyBuilder.Value;
         }
+
+        private global::TUnit.Mocks.Setup.VoidMethodSetupBuilder EnsureSetup() => _lazyBuilder.Value;
 
         /// <inheritdoc />
         public IAsyncService_InitializeAsync_M3_MockCall Throws<TException>() where TException : global::System.Exception, new() { EnsureSetup().Throws<TException>(); return this; }

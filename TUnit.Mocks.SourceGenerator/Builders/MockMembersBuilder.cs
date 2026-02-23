@@ -248,11 +248,11 @@ internal static class MockMembersBuilder
             writer.AppendLine("private readonly int _memberId;");
             writer.AppendLine("private readonly string _memberName;");
             writer.AppendLine("private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;");
-            writer.AppendLine($"private {builderType}? _builder;");
+            writer.AppendLine($"private readonly global::System.Lazy<{builderType}> _lazyBuilder;");
             writer.AppendLine();
 
-            // Constructor — eagerly register: void methods are commonly used without chaining
-            // (e.g., mock.Log(Arg.Any<string>()) to "allow" the call in strict mode).
+            // Constructor — Lazy<T> for thread safety, eagerly materialized because void methods
+            // are commonly used without chaining (e.g., mock.Log(Arg.Any<string>()) in strict mode).
             writer.AppendLine($"internal {wrapperName}(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)");
             using (writer.Block())
             {
@@ -260,23 +260,20 @@ internal static class MockMembersBuilder
                 writer.AppendLine("_memberId = memberId;");
                 writer.AppendLine("_memberName = memberName;");
                 writer.AppendLine("_matchers = matchers;");
-                writer.AppendLine("EnsureSetup();");
+                using (writer.Block($"_lazyBuilder = new global::System.Lazy<{builderType}>(() =>"))
+                {
+                    writer.AppendLine("var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);");
+                    writer.AppendLine("_engine.AddSetup(setup);");
+                    writer.AppendLine($"return new {builderType}(setup);");
+                }
+                writer.AppendLine(");");
+                writer.AppendLine("_ = _lazyBuilder.Value;");
             }
 
             writer.AppendLine();
 
             // EnsureSetup method
-            using (writer.Block($"private {builderType} EnsureSetup()"))
-            {
-                using (writer.Block("if (_builder is null)"))
-                {
-                    writer.AppendLine("var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);");
-                    writer.AppendLine("_engine.AddSetup(setup);");
-                    writer.AppendLine($"_builder = new {builderType}(setup);");
-                }
-                writer.AppendLine();
-                writer.AppendLine("return _builder;");
-            }
+            writer.AppendLine($"private {builderType} EnsureSetup() => _lazyBuilder.Value;");
 
             writer.AppendLine();
 
