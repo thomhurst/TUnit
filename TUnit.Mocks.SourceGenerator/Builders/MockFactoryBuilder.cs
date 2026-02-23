@@ -61,27 +61,10 @@ internal static class MockFactoryBuilder
 
             using (writer.Block($"private static global::TUnit.Mocks.Mock<{model.FullyQualifiedName}> Create(global::TUnit.Mocks.MockBehavior behavior)"))
             {
-                // For multi-interface mocks: impl uses composite name, setup/verify use primary name
-                var primarySafeName = MockImplBuilder.GetSafeName(model.FullyQualifiedName);
-
                 writer.AppendLine($"var engine = new global::TUnit.Mocks.MockEngine<{model.FullyQualifiedName}>(behavior);");
                 writer.AppendLine($"var impl = new {safeName}_MockImpl(engine);");
                 writer.AppendLine("engine.Raisable = impl;");
-                writer.AppendLine($"var setup = new {primarySafeName}_MockSetup(engine);");
-                writer.AppendLine($"var verify = new {primarySafeName}_MockVerify(engine);");
-
-                // Events: check primary type events (from the single-type model)
-                // For multi-interface, we only use primary type's raise surface
-                if (model.Events.Length > 0 && model.AdditionalInterfaceNames.Length == 0)
-                {
-                    writer.AppendLine($"var raise = new {primarySafeName}_MockRaise(impl);");
-                    writer.AppendLine($"var mock = new global::TUnit.Mocks.Mock<{model.FullyQualifiedName}>(impl, setup, verify, raise, engine);");
-                }
-                else
-                {
-                    writer.AppendLine($"var mock = new global::TUnit.Mocks.Mock<{model.FullyQualifiedName}>(impl, setup, verify, engine);");
-                }
-
+                writer.AppendLine($"var mock = new global::TUnit.Mocks.Mock<{model.FullyQualifiedName}>(impl, engine);");
                 writer.AppendLine("return mock;");
             }
         }
@@ -104,18 +87,7 @@ internal static class MockFactoryBuilder
                 writer.AppendLine("engine.IsWrapMock = true;");
                 writer.AppendLine($"var impl = new {safeName}_WrapMockImpl(engine, instance);");
                 writer.AppendLine("engine.Raisable = impl;");
-                writer.AppendLine($"var setup = new {safeName}_MockSetup(engine);");
-                writer.AppendLine($"var verify = new {safeName}_MockVerify(engine);");
-                if (model.Events.Length > 0)
-                {
-                    writer.AppendLine($"var raise = new {safeName}_MockRaise(impl);");
-                    writer.AppendLine($"var mock = new global::TUnit.Mocks.Mock<{model.FullyQualifiedName}>(impl, setup, verify, raise, engine);");
-                }
-                else
-                {
-                    writer.AppendLine($"var mock = new global::TUnit.Mocks.Mock<{model.FullyQualifiedName}>(impl, setup, verify, engine);");
-                }
-
+                writer.AppendLine($"var mock = new global::TUnit.Mocks.Mock<{model.FullyQualifiedName}>(impl, engine);");
                 writer.AppendLine("return mock;");
             }
         }
@@ -140,18 +112,7 @@ internal static class MockFactoryBuilder
                 GenerateConstructorDispatch(writer, model, safeName);
 
                 writer.AppendLine("engine.Raisable = impl;");
-                writer.AppendLine($"var setup = new {safeName}_MockSetup(engine);");
-                writer.AppendLine($"var verify = new {safeName}_MockVerify(engine);");
-                if (model.Events.Length > 0)
-                {
-                    writer.AppendLine($"var raise = new {safeName}_MockRaise(impl);");
-                    writer.AppendLine($"var mock = new global::TUnit.Mocks.Mock<{model.FullyQualifiedName}>(impl, setup, verify, raise, engine);");
-                }
-                else
-                {
-                    writer.AppendLine($"var mock = new global::TUnit.Mocks.Mock<{model.FullyQualifiedName}>(impl, setup, verify, engine);");
-                }
-
+                writer.AppendLine($"var mock = new global::TUnit.Mocks.Mock<{model.FullyQualifiedName}>(impl, engine);");
                 writer.AppendLine("return mock;");
             }
         }
