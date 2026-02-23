@@ -59,10 +59,11 @@ public readonly struct PropertyMockCall<TProperty> : ICallVerification
     }
 
     /// <summary>
-    /// Accesses the setter setup with any-value semantics.
-    /// Creates and registers a setter <see cref="MethodSetup"/> matching any argument.
+    /// Accesses the setter with any-value semantics.
+    /// Returns a unified type supporting both setup (<c>.Callback()</c>, <c>.Throws()</c>)
+    /// and verification (<c>.WasCalled()</c>, <c>.WasNeverCalled()</c>).
     /// </summary>
-    public IPropertySetterSetup Setter
+    public VoidMockMethodCall Setter
     {
         get
         {
@@ -72,10 +73,8 @@ public readonly struct PropertyMockCall<TProperty> : ICallVerification
                     $"Property '{_propertyName}' does not have a setter.");
             }
 
-            var matchers = Array.Empty<IArgumentMatcher>();
-            var methodSetup = new MethodSetup(_setterMemberId, matchers, $"{_propertyName} (set)");
-            _engine.AddSetup(methodSetup);
-            return new PropertySetterSetupBuilder(methodSetup);
+            return new VoidMockMethodCall(_engine, _setterMemberId, $"{_propertyName} (set)",
+                Array.Empty<IArgumentMatcher>());
         }
     }
 
@@ -198,16 +197,19 @@ public readonly struct PropertyMockCall<TProperty> : ICallVerification
 /// <summary>
 /// Unified return type for property setter calls with a specific value matcher.
 /// Supports both setup (Callback, Throws) and verification (WasCalled, WasNeverCalled).
+/// Eagerly registers the setup so that standalone calls (e.g., <c>mock.Name.Set(Arg.Any&lt;string&gt;())</c>)
+/// work in strict mode without requiring chaining.
 /// Public for generated code access. Not intended for direct use.
 /// </summary>
 /// <typeparam name="TProperty">The property type.</typeparam>
 [EditorBrowsable(EditorBrowsableState.Never)]
-public readonly struct PropertySetterMockCall<TProperty> : ICallVerification
+public sealed class PropertySetterMockCall<TProperty> : ICallVerification
 {
     private readonly IMockEngineAccess _engine;
     private readonly int _setterMemberId;
     private readonly string _propertyName;
     private readonly IArgumentMatcher _matcher;
+    private VoidMethodSetupBuilder? _builder;
 
     /// <summary>Creates a new property setter mock call.</summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
@@ -218,35 +220,45 @@ public readonly struct PropertySetterMockCall<TProperty> : ICallVerification
         _setterMemberId = setterMemberId;
         _propertyName = propertyName;
         _matcher = matcher;
+        // Eagerly register: setter setups are commonly used without chaining
+        // (e.g., mock.Name.Set(Arg.Any<string>()) to "allow" the call in strict mode).
+        EnsureSetup();
+    }
+
+    private VoidMethodSetupBuilder EnsureSetup()
+    {
+        if (_builder is null)
+        {
+            var matchers = new IArgumentMatcher[] { _matcher };
+            var methodSetup = new MethodSetup(_setterMemberId, matchers, $"{_propertyName} (set)");
+            _engine.AddSetup(methodSetup);
+            _builder = new VoidMethodSetupBuilder(methodSetup);
+        }
+
+        return _builder;
     }
 
     // --- Setup surface ---
 
     /// <summary>Execute a callback when the property setter is called with a matching value.</summary>
-    public IVoidSetupChain Callback(Action callback)
+    public PropertySetterMockCall<TProperty> Callback(Action callback)
     {
-        var matchers = new IArgumentMatcher[] { _matcher };
-        var methodSetup = new MethodSetup(_setterMemberId, matchers, $"{_propertyName} (set)");
-        _engine.AddSetup(methodSetup);
-        return new PropertySetterSetupBuilder(methodSetup);
+        EnsureSetup().Callback(callback);
+        return this;
     }
 
     /// <summary>Configure the property setter to throw when called with a matching value.</summary>
-    public IVoidSetupChain Throws<TException>() where TException : Exception, new()
+    public PropertySetterMockCall<TProperty> Throws<TException>() where TException : Exception, new()
     {
-        var matchers = new IArgumentMatcher[] { _matcher };
-        var methodSetup = new MethodSetup(_setterMemberId, matchers, $"{_propertyName} (set)");
-        _engine.AddSetup(methodSetup);
-        return new PropertySetterSetupBuilder(methodSetup).Throws<TException>();
+        EnsureSetup().Throws<TException>();
+        return this;
     }
 
     /// <summary>Configure the property setter to throw a specific exception when called with a matching value.</summary>
-    public IVoidSetupChain Throws(Exception exception)
+    public PropertySetterMockCall<TProperty> Throws(Exception exception)
     {
-        var matchers = new IArgumentMatcher[] { _matcher };
-        var methodSetup = new MethodSetup(_setterMemberId, matchers, $"{_propertyName} (set)");
-        _engine.AddSetup(methodSetup);
-        return new PropertySetterSetupBuilder(methodSetup).Throws(exception);
+        EnsureSetup().Throws(exception);
+        return this;
     }
 
     // --- Verify surface ---

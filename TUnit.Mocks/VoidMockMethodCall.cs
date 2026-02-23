@@ -26,6 +26,9 @@ public sealed class VoidMockMethodCall : IVoidMethodSetup, IVoidSetupChain, ICal
         _memberId = memberId;
         _memberName = memberName;
         _matchers = matchers;
+        // Eagerly register: void methods are commonly used without chaining
+        // (e.g., mock.Log(Arg.Any<string>()) to "allow" the call in strict mode).
+        EnsureSetup();
     }
 
     private VoidMethodSetupBuilder EnsureSetup()

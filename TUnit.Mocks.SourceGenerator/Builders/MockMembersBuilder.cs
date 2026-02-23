@@ -229,7 +229,8 @@ internal static class MockMembersBuilder
             writer.AppendLine($"private {builderType}? _builder;");
             writer.AppendLine();
 
-            // Constructor
+            // Constructor — eagerly register: void methods are commonly used without chaining
+            // (e.g., mock.Log(Arg.Any<string>()) to "allow" the call in strict mode).
             writer.AppendLine($"internal {wrapperName}(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)");
             using (writer.Block())
             {
@@ -237,6 +238,7 @@ internal static class MockMembersBuilder
                 writer.AppendLine("_memberId = memberId;");
                 writer.AppendLine("_memberName = memberName;");
                 writer.AppendLine("_matchers = matchers;");
+                writer.AppendLine("EnsureSetup();");
             }
 
             writer.AppendLine();
