@@ -34,7 +34,7 @@ public static class AttributeExtensions
         {
             hookType = HookType.Before;
             type = attributeData.AttributeClass!;
-            hookLevel = Enum.Parse<HookLevel>(attributeData.ConstructorArguments.First().ToCSharpString().Split('.').Last());
+            hookLevel = ParseHookLevel(attributeData);
             return true;
         }
 
@@ -44,7 +44,7 @@ public static class AttributeExtensions
         {
             hookType = HookType.After;
             type = attributeData.AttributeClass!;
-            hookLevel = Enum.Parse<HookLevel>(attributeData.ConstructorArguments.First().ToCSharpString().Split('.').Last());
+            hookLevel = ParseHookLevel(attributeData);
             return true;
         }
 
@@ -63,7 +63,7 @@ public static class AttributeExtensions
         {
             hookType = HookType.Before;
             type = attributeData.AttributeClass!;
-            hookLevel = Enum.Parse<HookLevel>(attributeData.ConstructorArguments.First().ToCSharpString().Split('.').Last());
+            hookLevel = ParseHookLevel(attributeData);
 
             return true;
         }
@@ -74,7 +74,7 @@ public static class AttributeExtensions
         {
             hookType = HookType.After;
             type = attributeData.AttributeClass!;
-            hookLevel = Enum.Parse<HookLevel>(attributeData.ConstructorArguments.First().ToCSharpString().Split('.').Last());
+            hookLevel = ParseHookLevel(attributeData);
 
             return true;
         }
@@ -143,5 +143,12 @@ public static class AttributeExtensions
     public static string GetHookType(this AttributeData attributeData)
     {
         return attributeData.ConstructorArguments[0].ToCSharpString();
+    }
+
+    private static HookLevel ParseHookLevel(AttributeData attributeData)
+    {
+        var span = attributeData.ConstructorArguments.First().ToCSharpString().AsSpan();
+        var lastDot = span.LastIndexOf('.');
+        return Enum.Parse<HookLevel>(lastDot < 0 ? span : span[(lastDot + 1)..]);
     }
 }
