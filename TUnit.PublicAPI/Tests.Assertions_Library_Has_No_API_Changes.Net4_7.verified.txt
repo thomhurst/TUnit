@@ -1775,6 +1775,12 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<string> metadata) { }
         protected override string GetExpectation() { }
     }
+    public class StringLengthBetweenAssertion : .<string>
+    {
+        public StringLengthBetweenAssertion(.<string> context, int minLength, int maxLength) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
+        protected override string GetExpectation() { }
+    }
     public class StringLengthValueAssertion : .<int>
     {
         public StringLengthValueAssertion(.<string> stringContext) { }
@@ -1787,6 +1793,18 @@ namespace .Conditions
         protected override string GetExpectation() { }
         public . IgnoringCase() { }
         public . WithOptions(. options) { }
+    }
+    public class StringMaxLengthAssertion : .<string>
+    {
+        public StringMaxLengthAssertion(.<string> context, int maxLength) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class StringMinLengthAssertion : .<string>
+    {
+        public StringMinLengthAssertion(.<string> context, int minLength) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
+        protected override string GetExpectation() { }
     }
     [.("StartsWith")]
     public class StringStartsWithAssertion : .<string>
@@ -2311,6 +2329,8 @@ namespace .Extensions
         public static ..LengthWrapper HasLength(this .<string> source) { }
         [("Use Length().IsEqualTo(expectedLength) instead.")]
         public static . HasLength(this .<string> source, int expectedLength, [.("expectedLength")] string? expression = null) { }
+        public static . HasLengthBetween(this .<string> source, int minLength, int maxLength, [.("minLength")] string? minExpression = null, [.("maxLength")] string? maxExpression = null) { }
+        public static . HasMaxLength(this .<string> source, int maxLength, [.("maxLength")] string? expression = null) { }
         public static .<TException> HasMessage<TException>(this .<TException> source, string expectedMessage, [.("expectedMessage")] string? expression = null)
             where TException :  { }
         public static .<TException> HasMessage<TException>(this .<TException> source, string expectedMessage,  comparison, [.("expectedMessage")] string? expression = null)
@@ -2323,6 +2343,7 @@ namespace .Extensions
         public static .<TValue> HasMessageEqualTo<TValue>(this .<TValue> source, string expectedMessage,  comparison) { }
         public static .<TValue> HasMessageStartingWith<TValue>(this .<TValue> source, string expectedPrefix) { }
         public static .<TValue> HasMessageStartingWith<TValue>(this .<TValue> source, string expectedPrefix,  comparison) { }
+        public static . HasMinLength(this .<string> source, int minLength, [.("minLength")] string? expression = null) { }
         public static ..HasSameNameAsAssertion<TEnum> HasSameNameAs<TEnum>(this .<TEnum> source,  otherEnumValue, [.("otherEnumValue")] string? expression = null)
             where TEnum :  struct,  { }
         public static ..HasSameValueAsAssertion<TEnum> HasSameValueAs<TEnum>(this .<TEnum> source,  otherEnumValue, [.("otherEnumValue")] string? expression = null)
