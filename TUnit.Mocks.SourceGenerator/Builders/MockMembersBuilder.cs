@@ -76,7 +76,11 @@ internal static class MockMembersBuilder
         if (method.IsGenericMethod) return false;
 
         var nonOutParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out).ToList();
-        if (nonOutParams.Count == 0) return hasEvents;
+        if (nonOutParams.Count == 0)
+        {
+            var hasOutRefParams = method.Parameters.Any(p => p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref);
+            return hasEvents || hasOutRefParams;
+        }
         return nonOutParams.Count <= MaxTypedParams;
     }
 
@@ -98,18 +102,20 @@ internal static class MockMembersBuilder
 
         if (method.IsVoid)
         {
-            GenerateVoidUnifiedClass(writer, wrapperName, nonOutParams, events);
+            GenerateVoidUnifiedClass(writer, wrapperName, nonOutParams, events, method.Parameters);
         }
         else
         {
-            GenerateReturnUnifiedClass(writer, wrapperName, nonOutParams, setupReturnType, events);
+            GenerateReturnUnifiedClass(writer, wrapperName, nonOutParams, setupReturnType, events, method.Parameters);
         }
     }
 
     private static void GenerateReturnUnifiedClass(CodeWriter writer, string wrapperName,
-        List<MockParameterModel> nonOutParams, string returnType, EquatableArray<MockEventModel> events)
+        List<MockParameterModel> nonOutParams, string returnType, EquatableArray<MockEventModel> events,
+        EquatableArray<MockParameterModel> allParameters)
     {
         var builderType = $"global::TUnit.Mocks.Setup.MethodSetupBuilder<{returnType}>";
+        var hasOutRef = allParameters.Any(p => p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref);
 
         writer.AppendLine("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
         using (writer.Block($"public sealed class {wrapperName} : global::TUnit.Mocks.Verification.ICallVerification"))
@@ -167,6 +173,8 @@ internal static class MockMembersBuilder
             writer.AppendLine($"public {wrapperName} Throws(global::System.Func<object?[], global::System.Exception> exceptionFactory) {{ EnsureSetup().Throws(exceptionFactory); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
             writer.AppendLine($"public {wrapperName} Raises(string eventName, object? args = null) {{ EnsureSetup().Raises(eventName, args); return this; }}");
+            if (hasOutRef)
+                writer.AppendLine("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
             writer.AppendLine($"/// <inheritdoc />");
             writer.AppendLine($"public {wrapperName} SetsOutParameter(int paramIndex, object? value) {{ EnsureSetup().SetsOutParameter(paramIndex, value); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
@@ -183,6 +191,13 @@ internal static class MockMembersBuilder
                 GenerateTypedCallbackOverload(writer, nonOutParams, wrapperName);
                 writer.AppendLine();
                 GenerateTypedThrowsOverload(writer, nonOutParams, wrapperName);
+            }
+
+            // Typed out/ref parameter setters
+            if (hasOutRef)
+            {
+                writer.AppendLine();
+                GenerateTypedOutRefMethods(writer, allParameters, wrapperName);
             }
 
             // Typed event raises
@@ -211,9 +226,11 @@ internal static class MockMembersBuilder
     }
 
     private static void GenerateVoidUnifiedClass(CodeWriter writer, string wrapperName,
-        List<MockParameterModel> nonOutParams, EquatableArray<MockEventModel> events)
+        List<MockParameterModel> nonOutParams, EquatableArray<MockEventModel> events,
+        EquatableArray<MockParameterModel> allParameters)
     {
         var builderType = "global::TUnit.Mocks.Setup.VoidMethodSetupBuilder";
+        var hasOutRef = allParameters.Any(p => p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref);
 
         writer.AppendLine($"[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
         using (writer.Block($"public sealed class {wrapperName} : global::TUnit.Mocks.Verification.ICallVerification"))
@@ -268,6 +285,8 @@ internal static class MockMembersBuilder
             writer.AppendLine($"public {wrapperName} Throws(global::System.Func<object?[], global::System.Exception> exceptionFactory) {{ EnsureSetup().Throws(exceptionFactory); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
             writer.AppendLine($"public {wrapperName} Raises(string eventName, object? args = null) {{ EnsureSetup().Raises(eventName, args); return this; }}");
+            if (hasOutRef)
+                writer.AppendLine("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
             writer.AppendLine($"/// <inheritdoc />");
             writer.AppendLine($"public {wrapperName} SetsOutParameter(int paramIndex, object? value) {{ EnsureSetup().SetsOutParameter(paramIndex, value); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
@@ -282,6 +301,13 @@ internal static class MockMembersBuilder
                 GenerateTypedCallbackOverload(writer, nonOutParams, wrapperName);
                 writer.AppendLine();
                 GenerateTypedThrowsOverload(writer, nonOutParams, wrapperName);
+            }
+
+            // Typed out/ref parameter setters
+            if (hasOutRef)
+            {
+                writer.AppendLine();
+                GenerateTypedOutRefMethods(writer, allParameters, wrapperName);
             }
 
             // Typed event raises
@@ -386,6 +412,26 @@ internal static class MockMembersBuilder
             writer.AppendLine($"public {wrapperName} Raises{evt.Name}({paramList}) {{ EnsureSetup().Raises(\"{evt.Name}\"{argsExpr}); return this; }}");
         }
     }
+
+    private static void GenerateTypedOutRefMethods(CodeWriter writer, EquatableArray<MockParameterModel> allParameters, string wrapperName)
+    {
+        for (int i = 0; i < allParameters.Length; i++)
+        {
+            var param = allParameters[i];
+            if (param.Direction != ParameterDirection.Out && param.Direction != ParameterDirection.Ref)
+                continue;
+
+            var prefix = param.Direction == ParameterDirection.Out ? "SetsOut" : "SetsRef";
+            var methodName = prefix + ToPascalCase(param.Name);
+            var dirLabel = param.Direction == ParameterDirection.Out ? "out" : "ref";
+
+            writer.AppendLine($"/// <summary>Sets the '{param.Name}' {dirLabel} parameter to the specified value when this setup matches.</summary>");
+            writer.AppendLine($"public {wrapperName} {methodName}({param.FullyQualifiedType} {param.Name}) {{ EnsureSetup().SetsOutParameter({i}, {param.Name}); return this; }}");
+        }
+    }
+
+    private static string ToPascalCase(string name)
+        => string.IsNullOrEmpty(name) ? name : char.ToUpperInvariant(name[0]) + name.Substring(1);
 
     private static string BuildCastArgs(List<MockParameterModel> nonOutParams)
     {

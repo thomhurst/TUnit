@@ -129,18 +129,32 @@ Explicit setups take precedence over auto-tracked values.
 
 ## Out and Ref Parameters
 
-**Out parameters** are excluded from setup signatures. Use `.SetsOutParameter()` to assign their values:
+**Out parameters** are excluded from setup signatures. Use the generated strongly-typed `.SetsOut{Name}()` methods to assign their values:
 
 ```csharp
+// Strongly-typed — named after the parameter, compile-time safe
 mock.TryGet("key")
     .Returns(true)
-    .SetsOutParameter(0, "found-value"); // paramIndex 0 = first out param
+    .SetsOutValue("found-value");
 
 bool found = svc.TryGet("key", out var value);
 // found == true, value == "found-value"
 ```
 
-**Ref parameters** are included in setup signatures and participate in argument matching.
+**Ref parameters** are included in setup signatures and participate in argument matching. Use `.SetsRef{Name}()` to assign output values:
+
+```csharp
+mock.Swap(Arg.Any<int>())
+    .SetsRefValue(99);
+
+int val = 42;
+svc.Swap(ref val);
+// val == 99
+```
+
+The method names are derived from the original parameter names — e.g. `out string value` produces `.SetsOutValue()`, `ref int count` produces `.SetsRefCount()`. This gives you IntelliSense discoverability and compile-time type safety.
+
+The untyped `.SetsOutParameter(index, value)` overload remains available for advanced scenarios but is hidden from IntelliSense on typed wrappers.
 
 ## Partial Mocks
 
