@@ -329,7 +329,6 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
     private static List<ConcreteGenericTypeModel> ExtractConcreteGenericTypes(GeneratorSyntaxContext context)
     {
         var semanticModel = context.SemanticModel;
-        var results = new List<ConcreteGenericTypeModel>();
 
         var dataSourceInterface = semanticModel.Compilation.GetTypeByMetadataName("TUnit.Core.IDataSourceAttribute");
         var asyncInitializerInterface = semanticModel.Compilation.GetTypeByMetadataName("TUnit.Core.Interfaces.IAsyncInitializer");
