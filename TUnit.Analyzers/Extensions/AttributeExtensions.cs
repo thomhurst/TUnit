@@ -34,7 +34,7 @@ public static class AttributeExtensions
         {
             hookType = HookType.Before;
             type = attributeData.AttributeClass!;
-            hookLevel = (HookLevel?) Enum.Parse(typeof(HookLevel), attributeData.ConstructorArguments.First().ToCSharpString().Split('.').Last());
+            hookLevel = Enum.Parse<HookLevel>(attributeData.ConstructorArguments.First().ToCSharpString().Split('.').Last());
             return true;
         }
 
@@ -44,7 +44,7 @@ public static class AttributeExtensions
         {
             hookType = HookType.After;
             type = attributeData.AttributeClass!;
-            hookLevel = (HookLevel?) Enum.Parse(typeof(HookLevel), attributeData.ConstructorArguments.First().ToCSharpString().Split('.').Last());
+            hookLevel = Enum.Parse<HookLevel>(attributeData.ConstructorArguments.First().ToCSharpString().Split('.').Last());
             return true;
         }
 
@@ -63,7 +63,7 @@ public static class AttributeExtensions
         {
             hookType = HookType.Before;
             type = attributeData.AttributeClass!;
-            hookLevel = (HookLevel?) Enum.Parse(typeof(HookLevel), attributeData.ConstructorArguments.First().ToCSharpString().Split('.').Last());
+            hookLevel = Enum.Parse<HookLevel>(attributeData.ConstructorArguments.First().ToCSharpString().Split('.').Last());
 
             return true;
         }
@@ -74,7 +74,7 @@ public static class AttributeExtensions
         {
             hookType = HookType.After;
             type = attributeData.AttributeClass!;
-            hookLevel = (HookLevel?) Enum.Parse(typeof(HookLevel), attributeData.ConstructorArguments.First().ToCSharpString().Split('.').Last());
+            hookLevel = Enum.Parse<HookLevel>(attributeData.ConstructorArguments.First().ToCSharpString().Split('.').Last());
 
             return true;
         }
@@ -129,7 +129,7 @@ public static class AttributeExtensions
         var baseType = attributeData.AttributeClass;
         while (baseType != null)
         {
-            if (baseType.Name == "BaseClassConstructorAttribute" || 
+            if (baseType.Name == "BaseClassConstructorAttribute" ||
                 baseType.Name == "ClassConstructorAttribute")
             {
                 return true;
