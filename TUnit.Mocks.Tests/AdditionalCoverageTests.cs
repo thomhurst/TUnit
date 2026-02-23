@@ -24,7 +24,7 @@ public class MockVerificationExceptionTests
         // Act — verify wrong count
         var ex = Assert.Throws<MockVerificationException>(() =>
         {
-            mock.Verify.Add(1, 2).WasCalled(Times.Exactly(5));
+            mock.Add(1, 2).WasCalled(Times.Exactly(5));
         });
 
         // Assert — all properties accessible
@@ -43,7 +43,7 @@ public class MockVerificationExceptionTests
         // Act — verify with custom message
         var ex = Assert.Throws<MockVerificationException>(() =>
         {
-            mock.Verify.Add(1, 2).WasCalled(Times.Once, "Calculator Add was expected");
+            mock.Add(1, 2).WasCalled(Times.Once, "Calculator Add was expected");
         });
 
         await Assert.That(ex.Message).Contains("Calculator Add was expected");
@@ -62,7 +62,7 @@ public class MockVerificationExceptionTests
         // Act — verify wrong specific args
         var ex = Assert.Throws<MockVerificationException>(() =>
         {
-            mock.Verify.Add(99, 99).WasCalled(Times.Once);
+            mock.Add(99, 99).WasCalled(Times.Once);
         });
 
         // Assert — all 3 actual calls to Add are listed
@@ -146,7 +146,7 @@ public class MockObjectAccessTests
     public async Task Object_Property_Returns_Mock_Implementation()
     {
         var mock = Mock.Of<ICalculator>();
-        mock.Setup.Add(1, 2).Returns(3);
+        mock.Add(1, 2).Returns(3);
 
         var calc = mock.Object;
         var result = calc.Add(1, 2);
@@ -207,7 +207,7 @@ public class VerifyAllMessageTests
     {
         // Arrange
         var mock = Mock.Of<ICalculator>();
-        mock.Setup.Add(Arg.Any<int>(), Arg.Is<int>(x => x > 0)).Returns(1);
+        mock.Add(Arg.Any<int>(), Arg.Is<int>(x => x > 0)).Returns(1);
 
         // Act — don't call the method
 
@@ -222,9 +222,9 @@ public class VerifyAllMessageTests
     {
         // Arrange
         var mock = Mock.Of<ICalculator>();
-        mock.Setup.Add(1, 2).Returns(3);
-        mock.Setup.GetName().Returns("name");
-        mock.Setup.Log("msg");
+        mock.Add(1, 2).Returns(3);
+        mock.GetName().Returns("name");
+        mock.Log("msg");
 
         // Act — don't call any methods
 
@@ -240,8 +240,8 @@ public class VerifyAllMessageTests
     {
         // Arrange
         var mock = Mock.Of<ICalculator>();
-        mock.Setup.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(1);
-        mock.Setup.GetName().Returns("name");
+        mock.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(1);
+        mock.GetName().Returns("name");
 
         // Act — invoke all setups
         mock.Object.Add(1, 2);
@@ -336,7 +336,7 @@ public class VerificationCustomMessageTests
 
         var ex = Assert.Throws<MockVerificationException>(() =>
         {
-            mock.Verify.Add(1, 2).WasNeverCalled("Add should not have been called");
+            mock.Add(1, 2).WasNeverCalled("Add should not have been called");
         });
 
         await Assert.That(ex.Message).Contains("Add should not have been called");
@@ -350,7 +350,7 @@ public class VerificationCustomMessageTests
 
         var ex = Assert.Throws<MockVerificationException>(() =>
         {
-            mock.Verify.Add(1, 2).WasCalled("Expected Add to be called");
+            mock.Add(1, 2).WasCalled("Expected Add to be called");
         });
 
         await Assert.That(ex.Message).Contains("Expected Add to be called");

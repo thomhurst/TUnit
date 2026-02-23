@@ -55,7 +55,7 @@ public class CustomMatcherTests
     {
         // Arrange
         var mock = Mock.Of<IGreeter>();
-        mock.Setup.Greet(Arg.Matches(new StringLengthMatcher(3, 10))).Returns("valid");
+        mock.Greet(Arg.Matches(new StringLengthMatcher(3, 10))).Returns("valid");
 
         // Act
         var greeter = mock.Object;
@@ -72,7 +72,7 @@ public class CustomMatcherTests
     {
         // Arrange
         var mock = Mock.Of<ICalculator>();
-        mock.Setup.Add(Arg.Matches(new RangeMatcher(1, 10)), Arg.Any<int>()).Returns(100);
+        mock.Add(Arg.Matches(new RangeMatcher(1, 10)), Arg.Any<int>()).Returns(100);
 
         // Act
         var calc = mock.Object;
@@ -90,7 +90,7 @@ public class CustomMatcherTests
     {
         // Arrange — custom matcher for first arg, predicate for second
         var mock = Mock.Of<ICalculator>();
-        mock.Setup.Add(Arg.Matches(new RangeMatcher(0, 100)), Arg.Is<int>(b => b > 0)).Returns(42);
+        mock.Add(Arg.Matches(new RangeMatcher(0, 100)), Arg.Is<int>(b => b > 0)).Returns(42);
 
         // Act
         var calc = mock.Object;
@@ -117,7 +117,7 @@ public class CustomMatcherTests
     {
         // Arrange
         var mock = Mock.Of<ICalculator>();
-        mock.Setup.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(0);
+        mock.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(0);
 
         // Act
         var calc = mock.Object;
@@ -125,7 +125,7 @@ public class CustomMatcherTests
         calc.Add(50, 100);
 
         // Verify — using custom matcher in verification
-        mock.Verify.Add(Arg.Matches(new RangeMatcher(1, 10)), Arg.Any<int>()).WasCalled(Times.Once);
-        mock.Verify.Add(Arg.Matches(new RangeMatcher(40, 60)), Arg.Any<int>()).WasCalled(Times.Once);
+        mock.Add(Arg.Matches(new RangeMatcher(1, 10)), Arg.Any<int>()).WasCalled(Times.Once);
+        mock.Add(Arg.Matches(new RangeMatcher(40, 60)), Arg.Any<int>()).WasCalled(Times.Once);
     }
 }

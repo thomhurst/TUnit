@@ -13,7 +13,7 @@ public class ThreadSafetyTests
     {
         // Arrange
         var mock = Mock.Of<ICalculator>();
-        mock.Setup.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(42);
+        mock.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(42);
         ICalculator calc = mock.Object;
 
         // Act — 100 concurrent calls
@@ -40,7 +40,7 @@ public class ThreadSafetyTests
         await Task.WhenAll(tasks);
 
         // Assert — all 100 calls should be recorded
-        mock.Verify.Log(Arg.Any<string>()).WasCalled(Times.Exactly(100));
+        mock.Log(Arg.Any<string>()).WasCalled(Times.Exactly(100));
         await Assert.That(true).IsTrue();
     }
 
@@ -56,7 +56,7 @@ public class ThreadSafetyTests
         {
             for (int i = 0; i < 50; i++)
             {
-                mock.Setup.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(i);
+                mock.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(i);
             }
         });
 
@@ -79,9 +79,9 @@ public class ThreadSafetyTests
     {
         // Arrange
         var mock = Mock.Of<ICalculator>();
-        mock.Setup.Add(1, 1).Returns(10);
-        mock.Setup.Add(2, 2).Returns(20);
-        mock.Setup.Add(3, 3).Returns(30);
+        mock.Add(1, 1).Returns(10);
+        mock.Add(2, 2).Returns(20);
+        mock.Add(3, 3).Returns(30);
         ICalculator calc = mock.Object;
 
         // Act — concurrent calls with different args
@@ -116,7 +116,7 @@ public class ThreadSafetyTests
         // Now verify concurrently from multiple threads
         var verifyTasks = Enumerable.Range(0, 20).Select(_ => Task.Run(() =>
         {
-            mock.Verify.Add(1, 2).WasCalled(Times.Exactly(10));
+            mock.Add(1, 2).WasCalled(Times.Exactly(10));
         }));
 
         await Task.WhenAll(verifyTasks);
@@ -130,11 +130,11 @@ public class ThreadSafetyTests
     {
         // Arrange
         var calcMock = Mock.Of<ICalculator>();
-        calcMock.Setup.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(99);
+        calcMock.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(99);
         ICalculator calc = calcMock.Object;
 
         var greeterMock = Mock.Of<IGreeter>();
-        greeterMock.Setup.Greet(Arg.Any<string>()).Returns("hi");
+        greeterMock.Greet(Arg.Any<string>()).Returns("hi");
         IGreeter greeter = greeterMock.Object;
 
         // Act — concurrent calls on both mocks
@@ -164,7 +164,7 @@ public class ThreadSafetyTests
     {
         // Arrange
         var mock = Mock.Of<IGreeter>();
-        mock.Setup.Greet(Arg.Any<string>()).Returns("hello");
+        mock.Greet(Arg.Any<string>()).Returns("hello");
         IGreeter greeter = mock.Object;
 
         // Act — 100 concurrent calls
@@ -173,7 +173,7 @@ public class ThreadSafetyTests
         await Task.WhenAll(tasks);
 
         // Assert — verify total call count
-        mock.Verify.Greet(Arg.Any<string>()).WasCalled(Times.Exactly(100));
+        mock.Greet(Arg.Any<string>()).WasCalled(Times.Exactly(100));
         await Assert.That(true).IsTrue();
     }
 }

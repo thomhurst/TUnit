@@ -39,7 +39,7 @@ public class BasicMockTests
     {
         // Arrange
         var mock = Mock.Of<ICalculator>();
-        mock.Setup.Add(2, 3).Returns(5);
+        mock.Add(2, 3).Returns(5);
 
         // Act
         ICalculator calc = mock.Object;
@@ -54,7 +54,7 @@ public class BasicMockTests
     {
         // Arrange
         var mock = Mock.Of<IGreeter>();
-        mock.Setup.Greet("Alice").Returns("Hello, Alice!");
+        mock.Greet("Alice").Returns("Hello, Alice!");
 
         // Act
         IGreeter greeter = mock.Object;
@@ -96,8 +96,8 @@ public class BasicMockTests
     {
         // Arrange
         var mock = Mock.Of<ICalculator>();
-        mock.Setup.Add(1, 1).Returns(10);
-        mock.Setup.Add(1, 1).Returns(20); // Last setup wins
+        mock.Add(1, 1).Returns(10);
+        mock.Add(1, 1).Returns(20); // Last setup wins
 
         // Act
         ICalculator calc = mock.Object;
@@ -112,8 +112,8 @@ public class BasicMockTests
     {
         // Arrange
         var mock = Mock.Of<ICalculator>();
-        mock.Setup.Add(1, 2).Returns(3);
-        mock.Setup.Add(10, 20).Returns(30);
+        mock.Add(1, 2).Returns(3);
+        mock.Add(10, 20).Returns(30);
 
         // Act
         ICalculator calc = mock.Object;
@@ -154,7 +154,7 @@ public class BasicMockTests
     {
         // Arrange
         var mock = Mock.Of<ICalculator>();
-        mock.Setup.Add(1, 1).Returns(42);
+        mock.Add(1, 1).Returns(42);
 
         ICalculator calc = mock.Object;
         await Assert.That(calc.Add(1, 1)).IsEqualTo(42);

@@ -21,7 +21,7 @@ public class ErrorMessageTests
         // Act & Assert — verify a call that was never made
         var exception = Assert.Throws<MockVerificationException>(() =>
         {
-            mock.Verify.Add(1, 2).WasCalled(Times.Once);
+            mock.Add(1, 2).WasCalled(Times.Once);
         });
 
         await Assert.That(exception.Message).Contains("Add");
@@ -41,7 +41,7 @@ public class ErrorMessageTests
         // Act & Assert — expect 5 but only 3 calls made
         var exception = Assert.Throws<MockVerificationException>(() =>
         {
-            mock.Verify.Add(1, 2).WasCalled(Times.Exactly(5));
+            mock.Add(1, 2).WasCalled(Times.Exactly(5));
         });
 
         await Assert.That(exception.ActualCount).IsEqualTo(3);
@@ -59,7 +59,7 @@ public class ErrorMessageTests
         // Act & Assert — verify with different args that were never called
         var exception = Assert.Throws<MockVerificationException>(() =>
         {
-            mock.Verify.Add(10, 20).WasCalled(Times.Once);
+            mock.Add(10, 20).WasCalled(Times.Once);
         });
 
         // The expected call should mention the args we verified with
@@ -78,7 +78,7 @@ public class ErrorMessageTests
         // Act & Assert — verify a call with different string arg
         var exception = Assert.Throws<MockVerificationException>(() =>
         {
-            mock.Verify.Greet("Bob").WasCalled(Times.Once);
+            mock.Greet("Bob").WasCalled(Times.Once);
         });
 
         await Assert.That(exception.ExpectedCall).Contains("Greet");
@@ -94,7 +94,7 @@ public class ErrorMessageTests
         // Act & Assert
         var exception = Assert.Throws<MockVerificationException>(() =>
         {
-            mock.Verify.Add(1, 2).WasCalled(Times.Exactly(3));
+            mock.Add(1, 2).WasCalled(Times.Exactly(3));
         });
 
         // The message should describe the expected call count
@@ -114,7 +114,7 @@ public class ErrorMessageTests
         // Act & Assert — WasNeverCalled should fail since it was called twice
         var exception = Assert.Throws<MockVerificationException>(() =>
         {
-            mock.Verify.Add(1, 2).WasNeverCalled();
+            mock.Add(1, 2).WasNeverCalled();
         });
 
         await Assert.That(exception.ActualCount).IsEqualTo(2);
@@ -131,7 +131,7 @@ public class ErrorMessageTests
         // Act & Assert — expect at least 5 but only 1 call
         var exception = Assert.Throws<MockVerificationException>(() =>
         {
-            mock.Verify.Add(1, 2).WasCalled(Times.AtLeast(5));
+            mock.Add(1, 2).WasCalled(Times.AtLeast(5));
         });
 
         await Assert.That(exception.ActualCount).IsEqualTo(1);
@@ -150,7 +150,7 @@ public class ErrorMessageTests
         // Act & Assert — verify with Arg.Any but wrong count
         var exception = Assert.Throws<MockVerificationException>(() =>
         {
-            mock.Verify.Add(Arg.Any<int>(), Arg.Any<int>()).WasCalled(Times.Exactly(5));
+            mock.Add(Arg.Any<int>(), Arg.Any<int>()).WasCalled(Times.Exactly(5));
         });
 
         await Assert.That(exception.ActualCount).IsEqualTo(2);

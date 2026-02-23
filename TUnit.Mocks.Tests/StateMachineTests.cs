@@ -17,14 +17,14 @@ public class StateMachineTests
         var mock = Mock.Of<IConnection>();
         mock.SetState("disconnected");
 
-        mock.InState("disconnected", setup =>
+        mock.InState("disconnected", m =>
         {
-            setup.GetStatus().Returns("OFFLINE");
+            m.GetStatus().Returns("OFFLINE");
         });
 
-        mock.InState("connected", setup =>
+        mock.InState("connected", m =>
         {
-            setup.GetStatus().Returns("ONLINE");
+            m.GetStatus().Returns("ONLINE");
         });
 
         IConnection conn = mock.Object;
@@ -44,16 +44,16 @@ public class StateMachineTests
         var mock = Mock.Of<IConnection>();
         mock.SetState("disconnected");
 
-        mock.InState("disconnected", setup =>
+        mock.InState("disconnected", m =>
         {
-            setup.Connect().TransitionsTo("connected");
-            setup.GetStatus().Returns("OFFLINE");
+            m.Connect().TransitionsTo("connected");
+            m.GetStatus().Returns("OFFLINE");
         });
 
-        mock.InState("connected", setup =>
+        mock.InState("connected", m =>
         {
-            setup.Disconnect().TransitionsTo("disconnected");
-            setup.GetStatus().Returns("ONLINE");
+            m.Disconnect().TransitionsTo("disconnected");
+            m.GetStatus().Returns("ONLINE");
         });
 
         IConnection conn = mock.Object;
@@ -73,14 +73,14 @@ public class StateMachineTests
         var mock = Mock.Of<IConnection>();
         mock.SetState("connected");
 
-        mock.InState("connected", setup =>
+        mock.InState("connected", m =>
         {
-            setup.Connect().Throws<InvalidOperationException>();
+            m.Connect().Throws<InvalidOperationException>();
         });
 
-        mock.InState("disconnected", setup =>
+        mock.InState("disconnected", m =>
         {
-            setup.Disconnect().Throws<InvalidOperationException>();
+            m.Disconnect().Throws<InvalidOperationException>();
         });
 
         IConnection conn = mock.Object;
@@ -100,7 +100,7 @@ public class StateMachineTests
         mock.SetState("disconnected");
 
         // Setup without state guard — matches in any state
-        mock.Setup.GetStatus().Returns("ALWAYS");
+        mock.GetStatus().Returns("ALWAYS");
 
         IConnection conn = mock.Object;
         await Assert.That(conn.GetStatus()).IsEqualTo("ALWAYS");
@@ -118,12 +118,12 @@ public class StateMachineTests
         var mock = Mock.Of<IConnection>();
 
         // Global setup (no state guard)
-        mock.Setup.GetStatus().Returns("DEFAULT");
+        mock.GetStatus().Returns("DEFAULT");
 
         // State-scoped setup
-        mock.InState("special", setup =>
+        mock.InState("special", m =>
         {
-            setup.GetStatus().Returns("SPECIAL");
+            m.GetStatus().Returns("SPECIAL");
         });
 
         IConnection conn = mock.Object;
@@ -146,9 +146,9 @@ public class StateMachineTests
         var mock = Mock.Of<IConnection>(MockBehavior.Strict);
         mock.SetState("disconnected");
 
-        mock.InState("disconnected", setup =>
+        mock.InState("disconnected", m =>
         {
-            setup.GetStatus().Returns("OFFLINE");
+            m.GetStatus().Returns("OFFLINE");
         });
 
         // No setup for Connect in "disconnected" state — strict mode should throw
@@ -165,18 +165,18 @@ public class StateMachineTests
         var mock = Mock.Of<IConnection>();
         mock.SetState("outer");
 
-        mock.InState("outer", outerSetup =>
+        mock.InState("outer", m =>
         {
-            outerSetup.GetStatus().Returns("OUTER");
+            m.GetStatus().Returns("OUTER");
 
             // Nested InState should temporarily switch to "inner" scope
-            mock.InState("inner", innerSetup =>
+            mock.InState("inner", m =>
             {
-                innerSetup.Connect();
+                m.Connect();
             });
 
             // After inner InState returns, we should be back in "outer" scope
-            outerSetup.Disconnect();
+            m.Disconnect();
         });
 
         IConnection conn = mock.Object;
@@ -196,12 +196,12 @@ public class StateMachineTests
         var mock = Mock.Of<IConnection>();
 
         // Global (no-state) setup — added first
-        mock.Setup.GetStatus().Returns("NO_STATE");
+        mock.GetStatus().Returns("NO_STATE");
 
         // State-scoped setup — added second, wins when in "connected" state
-        mock.InState("connected", setup =>
+        mock.InState("connected", m =>
         {
-            setup.GetStatus().Returns("ONLINE");
+            m.GetStatus().Returns("ONLINE");
         });
 
         mock.SetState("connected");
@@ -232,15 +232,15 @@ public class StateMachineTests
         var mock = Mock.Of<IConnection>();
         mock.SetState("disconnected");
 
-        mock.InState("disconnected", setup =>
+        mock.InState("disconnected", m =>
         {
-            setup.Connect().TransitionsTo("connected");
+            m.Connect().TransitionsTo("connected");
         });
 
         IConnection conn = mock.Object;
         conn.Connect();
 
         // Verification should still work — the call was recorded
-        mock.Verify!.Connect().WasCalled(Times.Once);
+        mock.Connect().WasCalled(Times.Once);
     }
 }

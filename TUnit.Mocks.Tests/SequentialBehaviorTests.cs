@@ -13,7 +13,7 @@ public class SequentialBehaviorTests
     {
         // Arrange
         var mock = Mock.Of<ICalculator>();
-        mock.Setup.Add(Arg.Any<int>(), Arg.Any<int>())
+        mock.Add(Arg.Any<int>(), Arg.Any<int>())
             .Throws<InvalidOperationException>()
             .Then()
             .Returns(5);
@@ -34,7 +34,7 @@ public class SequentialBehaviorTests
     {
         // Arrange
         var mock = Mock.Of<ICalculator>();
-        mock.Setup.Add(Arg.Any<int>(), Arg.Any<int>())
+        mock.Add(Arg.Any<int>(), Arg.Any<int>())
             .ReturnsSequentially(1, 2, 3);
 
         ICalculator calc = mock.Object;
@@ -50,7 +50,7 @@ public class SequentialBehaviorTests
     {
         // Arrange
         var mock = Mock.Of<ICalculator>();
-        mock.Setup.Add(Arg.Any<int>(), Arg.Any<int>())
+        mock.Add(Arg.Any<int>(), Arg.Any<int>())
             .ReturnsSequentially(10, 20);
 
         ICalculator calc = mock.Object;
@@ -68,7 +68,7 @@ public class SequentialBehaviorTests
         // Arrange
         var callbackInvoked = false;
         var mock = Mock.Of<ICalculator>();
-        mock.Setup.Log(Arg.Any<string>())
+        mock.Log(Arg.Any<string>())
             .Callback(() => callbackInvoked = true)
             .Then()
             .Throws<InvalidOperationException>();
@@ -89,7 +89,7 @@ public class SequentialBehaviorTests
     {
         // Arrange
         var mock = Mock.Of<ICalculator>();
-        mock.Setup.Add(1, 1)
+        mock.Add(1, 1)
             .Returns(42)
             .Then()
             .Throws<InvalidOperationException>();
@@ -109,7 +109,7 @@ public class SequentialBehaviorTests
     {
         // Arrange
         var mock = Mock.Of<IGreeter>();
-        mock.Setup.Greet(Arg.Any<string>())
+        mock.Greet(Arg.Any<string>())
             .Returns("first")
             .Then()
             .Returns("second")

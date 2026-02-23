@@ -55,7 +55,7 @@ public class PartialMockTests
     {
         // Arrange
         var mock = Mock.OfPartial<AbstractService>();
-        mock.Setup.GetName().Returns("TestName");
+        mock.GetName().Returns("TestName");
 
         // Act
         var result = mock.Object.GetName();
@@ -70,7 +70,7 @@ public class PartialMockTests
         // Arrange
         var mock = Mock.OfPartial<AbstractService>();
         // GetName is abstract - configure it
-        mock.Setup.GetName().Returns("TestName");
+        mock.GetName().Returns("TestName");
         // Calculate is virtual - do NOT configure it
 
         // Act
@@ -85,8 +85,8 @@ public class PartialMockTests
     {
         // Arrange
         var mock = Mock.OfPartial<AbstractService>();
-        mock.Setup.GetName().Returns("TestName");
-        mock.Setup.Calculate(Arg.Any<int>()).Returns(42);
+        mock.GetName().Returns("TestName");
+        mock.Calculate(Arg.Any<int>()).Returns(42);
 
         // Act
         var result = mock.Object.Calculate(5);
@@ -113,7 +113,7 @@ public class PartialMockTests
     {
         // Arrange
         var mock = Mock.OfPartial<ConcreteService>();
-        mock.Setup.Greet(Arg.Any<string>()).Returns("Mocked!");
+        mock.Greet(Arg.Any<string>()).Returns("Mocked!");
 
         // Act
         var result = mock.Object.Greet("World");
@@ -127,7 +127,7 @@ public class PartialMockTests
     {
         // Arrange
         var mock = Mock.OfPartial<ConcreteService>();
-        mock.Setup.Greet("Alice").Returns("Hi Alice!");
+        mock.Greet("Alice").Returns("Hi Alice!");
         // Don't setup Add - let it call base
 
         // Act
@@ -144,7 +144,7 @@ public class PartialMockTests
     {
         // Arrange
         var mock = Mock.OfPartial<ServiceWithConstructor>("PREFIX");
-        mock.Setup.Format(Arg.Any<string>()).Returns("formatted");
+        mock.Format(Arg.Any<string>()).Returns("formatted");
 
         // Act - GetPrefix is virtual and unconfigured, so calls base which uses _prefix
         var prefix = mock.Object.GetPrefix();
@@ -158,7 +158,7 @@ public class PartialMockTests
     {
         // Arrange
         var mock = Mock.OfPartial<ServiceWithConstructor>("test");
-        mock.Setup.Format("value").Returns("test:value");
+        mock.Format("value").Returns("test:value");
 
         // Act
         var result = mock.Object.Format("value");
@@ -172,7 +172,7 @@ public class PartialMockTests
     {
         // Arrange
         var mock = Mock.OfPartial<AbstractService>();
-        mock.Setup.GetName().Returns("Name");
+        mock.GetName().Returns("Name");
 
         // Act - NonVirtualMethod is not virtual, so it runs the original implementation
         var result = mock.Object.NonVirtualMethod();
@@ -186,14 +186,14 @@ public class PartialMockTests
     {
         // Arrange
         var mock = Mock.OfPartial<ConcreteService>();
-        mock.Setup.Greet(Arg.Any<string>()).Returns("Hi");
+        mock.Greet(Arg.Any<string>()).Returns("Hi");
 
         // Act
         mock.Object.Greet("Alice");
         mock.Object.Greet("Bob");
 
         // Assert
-        mock.Verify.Greet(Arg.Any<string>()).WasCalled(Times.Exactly(2));
+        mock.Greet(Arg.Any<string>()).WasCalled(Times.Exactly(2));
     }
 
     [Test]
@@ -207,7 +207,7 @@ public class PartialMockTests
         mock.Object.Add(3, 4);
 
         // Assert - calls should still be recorded even when calling base
-        mock.Verify.Add(Arg.Any<int>(), Arg.Any<int>()).WasCalled(Times.Exactly(2));
+        mock.Add(Arg.Any<int>(), Arg.Any<int>()).WasCalled(Times.Exactly(2));
     }
 
     [Test]

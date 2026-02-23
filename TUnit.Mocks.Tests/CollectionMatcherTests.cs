@@ -21,7 +21,7 @@ public class CollectionMatcherTests
     {
         // Arrange
         var mock = Mock.Of<ICollectionService>();
-        mock.Setup.ProcessItems(Arg.Contains<List<int>, int>(42)).Returns(1);
+        mock.ProcessItems(Arg.Contains<List<int>, int>(42)).Returns(1);
 
         // Act
         var svc = mock.Object;
@@ -36,7 +36,7 @@ public class CollectionMatcherTests
     {
         // Arrange
         var mock = Mock.Of<ICollectionService>();
-        mock.Setup.ProcessItems(Arg.Contains<List<int>, int>(42)).Returns(1);
+        mock.ProcessItems(Arg.Contains<List<int>, int>(42)).Returns(1);
 
         // Act
         var svc = mock.Object;
@@ -51,7 +51,7 @@ public class CollectionMatcherTests
     {
         // Arrange
         var mock = Mock.Of<ICollectionService>();
-        mock.Setup.ProcessItems(Arg.HasCount<List<int>>(3)).Returns(99);
+        mock.ProcessItems(Arg.HasCount<List<int>>(3)).Returns(99);
 
         // Act
         var svc = mock.Object;
@@ -66,7 +66,7 @@ public class CollectionMatcherTests
     {
         // Arrange
         var mock = Mock.Of<ICollectionService>();
-        mock.Setup.ProcessItems(Arg.HasCount<List<int>>(3)).Returns(99);
+        mock.ProcessItems(Arg.HasCount<List<int>>(3)).Returns(99);
 
         // Act
         var svc = mock.Object;
@@ -81,7 +81,7 @@ public class CollectionMatcherTests
     {
         // Arrange
         var mock = Mock.Of<ICollectionService>();
-        mock.Setup.ProcessItems(Arg.IsEmpty<List<int>>()).Returns(77);
+        mock.ProcessItems(Arg.IsEmpty<List<int>>()).Returns(77);
 
         // Act
         var svc = mock.Object;
@@ -95,7 +95,7 @@ public class CollectionMatcherTests
     {
         // Arrange
         var mock = Mock.Of<ICollectionService>();
-        mock.Setup.ProcessItems(Arg.IsEmpty<List<int>>()).Returns(77);
+        mock.ProcessItems(Arg.IsEmpty<List<int>>()).Returns(77);
 
         // Act
         var svc = mock.Object;
@@ -109,7 +109,7 @@ public class CollectionMatcherTests
     {
         // Arrange
         var mock = Mock.Of<ICollectionService>();
-        mock.Setup.ProcessItems(Arg.SequenceEquals<List<int>, int>(new[] { 1, 2, 3 })).Returns(55);
+        mock.ProcessItems(Arg.SequenceEquals<List<int>, int>(new[] { 1, 2, 3 })).Returns(55);
 
         // Act
         var svc = mock.Object;
@@ -123,7 +123,7 @@ public class CollectionMatcherTests
     {
         // Arrange
         var mock = Mock.Of<ICollectionService>();
-        mock.Setup.ProcessItems(Arg.SequenceEquals<List<int>, int>(new[] { 1, 2, 3 })).Returns(55);
+        mock.ProcessItems(Arg.SequenceEquals<List<int>, int>(new[] { 1, 2, 3 })).Returns(55);
 
         // Act
         var svc = mock.Object;
@@ -139,7 +139,7 @@ public class CollectionMatcherTests
     {
         // Arrange
         var mock = Mock.Of<ICollectionService>();
-        mock.Setup.JoinNames(Arg.SequenceEquals<IEnumerable<string>, string>(new[] { "a", "b" })).Returns("matched");
+        mock.JoinNames(Arg.SequenceEquals<IEnumerable<string>, string>(new[] { "a", "b" })).Returns("matched");
 
         // Act
         var svc = mock.Object;
@@ -155,7 +155,7 @@ public class CollectionMatcherTests
     {
         // Arrange
         var mock = Mock.Of<ICollectionService>();
-        mock.Setup.JoinNames(Arg.Contains<IEnumerable<string>, string>("hello")).Returns("found");
+        mock.JoinNames(Arg.Contains<IEnumerable<string>, string>("hello")).Returns("found");
 
         // Act
         var svc = mock.Object;

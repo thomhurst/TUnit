@@ -22,8 +22,8 @@ public class OrderedVerificationTests
         // Assert — verifying in the same order they were called should pass
         Mock.VerifyInOrder(() =>
         {
-            mock.Verify.Add(1, 2).WasCalled();
-            mock.Verify.GetName().WasCalled();
+            mock.Add(1, 2).WasCalled();
+            mock.GetName().WasCalled();
         });
     }
 
@@ -43,8 +43,8 @@ public class OrderedVerificationTests
         {
             Mock.VerifyInOrder(() =>
             {
-                mock.Verify.Add(1, 2).WasCalled();
-                mock.Verify.GetName().WasCalled();
+                mock.Add(1, 2).WasCalled();
+                mock.GetName().WasCalled();
             });
         });
 
@@ -68,9 +68,9 @@ public class OrderedVerificationTests
         // Assert — verify the cross-mock order
         Mock.VerifyInOrder(() =>
         {
-            calcMock.Verify.Add(1, 2).WasCalled();
-            greeterMock.Verify.Greet("Alice").WasCalled();
-            calcMock.Verify.GetName().WasCalled();
+            calcMock.Add(1, 2).WasCalled();
+            greeterMock.Greet("Alice").WasCalled();
+            calcMock.GetName().WasCalled();
         });
     }
 
@@ -92,8 +92,8 @@ public class OrderedVerificationTests
         {
             Mock.VerifyInOrder(() =>
             {
-                calcMock.Verify.Add(1, 2).WasCalled();
-                greeterMock.Verify.Greet("Alice").WasCalled();
+                calcMock.Add(1, 2).WasCalled();
+                greeterMock.Greet("Alice").WasCalled();
             });
         });
 
@@ -113,7 +113,7 @@ public class OrderedVerificationTests
         // Assert — single call trivially passes
         Mock.VerifyInOrder(() =>
         {
-            mock.Verify.Add(1, 2).WasCalled();
+            mock.Add(1, 2).WasCalled();
         });
     }
 
@@ -133,8 +133,8 @@ public class OrderedVerificationTests
         {
             Mock.VerifyInOrder(() =>
             {
-                mock.Verify.Add(1, 2).WasCalled();
-                mock.Verify.Log("hello").WasCalled();
+                mock.Add(1, 2).WasCalled();
+                mock.Log("hello").WasCalled();
             });
         });
 
@@ -170,8 +170,8 @@ public class OrderedVerificationTests
         {
             Mock.VerifyInOrder(() =>
             {
-                mock.Verify.Add(1, 2).WasCalled();
-                mock.Verify.GetName().WasCalled();
+                mock.Add(1, 2).WasCalled();
+                mock.GetName().WasCalled();
             });
         });
 
@@ -192,8 +192,8 @@ public class OrderedVerificationTests
         // Assert — verify both in order
         Mock.VerifyInOrder(() =>
         {
-            mock.Verify.Add(1, 2).WasCalled();
-            mock.Verify.Add(3, 4).WasCalled();
+            mock.Add(1, 2).WasCalled();
+            mock.Add(3, 4).WasCalled();
         });
     }
 
@@ -213,8 +213,8 @@ public class OrderedVerificationTests
         {
             Mock.VerifyInOrder(() =>
             {
-                mock.Verify.Add(1, 2).WasCalled();
-                mock.Verify.Add(3, 4).WasCalled();
+                mock.Add(1, 2).WasCalled();
+                mock.Add(3, 4).WasCalled();
             });
         });
 
@@ -236,8 +236,8 @@ public class OrderedVerificationTests
         // Assert — verify Add was called exactly 3 times, then GetName once
         Mock.VerifyInOrder(() =>
         {
-            mock.Verify.Add(1, 2).WasCalled(Times.Exactly(3));
-            mock.Verify.GetName().WasCalled(Times.Once);
+            mock.Add(1, 2).WasCalled(Times.Exactly(3));
+            mock.GetName().WasCalled(Times.Once);
         });
     }
 
@@ -254,7 +254,7 @@ public class OrderedVerificationTests
         {
             Mock.VerifyInOrder(() =>
             {
-                mock.Verify.Add(1, 2).WasCalled(Times.Never);
+                mock.Add(1, 2).WasCalled(Times.Never);
             });
         });
 
@@ -274,7 +274,7 @@ public class OrderedVerificationTests
         {
             Mock.VerifyInOrder(() =>
             {
-                mock.Verify.Add(1, 2).WasCalled(Times.AtMost(3));
+                mock.Add(1, 2).WasCalled(Times.AtMost(3));
             });
         });
 
@@ -294,7 +294,7 @@ public class OrderedVerificationTests
         {
             Mock.VerifyInOrder(() =>
             {
-                mock.Verify.Add(1, 2).WasCalled(Times.Between(0, 3));
+                mock.Add(1, 2).WasCalled(Times.Between(0, 3));
             });
         });
 
@@ -316,8 +316,8 @@ public class OrderedVerificationTests
         // Assert — verify Add was called at least 2 times (actual: 3), then GetName
         Mock.VerifyInOrder(() =>
         {
-            mock.Verify.Add(1, 2).WasCalled(Times.AtLeast(2));
-            mock.Verify.GetName().WasCalled();
+            mock.Add(1, 2).WasCalled(Times.AtLeast(2));
+            mock.GetName().WasCalled();
         });
     }
 
@@ -335,8 +335,8 @@ public class OrderedVerificationTests
         // Assert — VerifyInOrder should mark calls as verified
         Mock.VerifyInOrder(() =>
         {
-            mock.Verify.Add(1, 2).WasCalled();
-            mock.Verify.GetName().WasCalled();
+            mock.Add(1, 2).WasCalled();
+            mock.GetName().WasCalled();
         });
 
         // This should pass because the calls above were verified in VerifyInOrder
@@ -358,8 +358,8 @@ public class OrderedVerificationTests
         // Assert — only verify first two in order
         Mock.VerifyInOrder(() =>
         {
-            mock.Verify.Add(1, 2).WasCalled();
-            mock.Verify.GetName().WasCalled();
+            mock.Add(1, 2).WasCalled();
+            mock.GetName().WasCalled();
         });
 
         // Log("hello") was not verified, so this should fail
@@ -389,8 +389,8 @@ public class OrderedVerificationTests
         {
             Mock.VerifyInOrder(() =>
             {
-                mock.Verify.Add(1, 2).WasCalled(Times.Exactly(2));
-                mock.Verify.GetName().WasCalled();
+                mock.Add(1, 2).WasCalled(Times.Exactly(2));
+                mock.GetName().WasCalled();
             });
         });
     }

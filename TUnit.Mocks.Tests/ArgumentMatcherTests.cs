@@ -13,7 +13,7 @@ public class ArgumentMatcherTests
     {
         // Arrange
         var mock = Mock.Of<ICalculator>();
-        mock.Setup.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(42);
+        mock.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(42);
 
         // Act
         ICalculator calc = mock.Object;
@@ -30,7 +30,7 @@ public class ArgumentMatcherTests
     {
         // Arrange
         var mock = Mock.Of<ICalculator>();
-        mock.Setup.Add(Arg.Is<int>(a => a > 0), Arg.Is<int>(b => b > 0)).Returns(100);
+        mock.Add(Arg.Is<int>(a => a > 0), Arg.Is<int>(b => b > 0)).Returns(100);
 
         // Act
         ICalculator calc = mock.Object;
@@ -50,7 +50,7 @@ public class ArgumentMatcherTests
     {
         // Arrange
         var mock = Mock.Of<ICalculator>();
-        mock.Setup.Add(Arg.Is(10), Arg.Is(20)).Returns(30);
+        mock.Add(Arg.Is(10), Arg.Is(20)).Returns(30);
 
         // Act
         ICalculator calc = mock.Object;
@@ -69,7 +69,7 @@ public class ArgumentMatcherTests
         // Arrange
         var firstArg = Arg.Any<int>();
         var mock = Mock.Of<ICalculator>();
-        mock.Setup.Add(firstArg, Arg.Any<int>()).Returns(1);
+        mock.Add(firstArg, Arg.Any<int>()).Returns(1);
 
         // Act
         ICalculator calc = mock.Object;
@@ -91,7 +91,7 @@ public class ArgumentMatcherTests
         // Arrange
         var mock = Mock.Of<ICalculator>();
         // First arg: any int. Second arg: exact 5.
-        mock.Setup.Add(Arg.Any<int>(), 5).Returns(99);
+        mock.Add(Arg.Any<int>(), 5).Returns(99);
 
         // Act
         ICalculator calc = mock.Object;
@@ -111,7 +111,7 @@ public class ArgumentMatcherTests
     {
         // Arrange
         var mock = Mock.Of<IGreeter>();
-        mock.Setup.Greet(Arg.IsNull<string>()).Returns("got null");
+        mock.Greet(Arg.IsNull<string>()).Returns("got null");
 
         // Act
         IGreeter greeter = mock.Object;
@@ -128,7 +128,7 @@ public class ArgumentMatcherTests
     {
         // Arrange
         var mock = Mock.Of<IGreeter>();
-        mock.Setup.Greet(Arg.IsNotNull<string>()).Returns("got something");
+        mock.Greet(Arg.IsNotNull<string>()).Returns("got something");
 
         // Act
         IGreeter greeter = mock.Object;
@@ -148,7 +148,7 @@ public class ArgumentMatcherTests
         // Arrange
         var nameArg = Arg.Any<string>();
         var mock = Mock.Of<IGreeter>();
-        mock.Setup.Greet(nameArg).Returns("hi");
+        mock.Greet(nameArg).Returns("hi");
 
         // Act
         IGreeter greeter = mock.Object;
@@ -167,8 +167,8 @@ public class ArgumentMatcherTests
     {
         // Arrange — more specific setup first, then broader
         var mock = Mock.Of<ICalculator>();
-        mock.Setup.Add(1, 1).Returns(100);
-        mock.Setup.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(42);
+        mock.Add(1, 1).Returns(100);
+        mock.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(42);
 
         // Act
         ICalculator calc = mock.Object;
@@ -183,8 +183,8 @@ public class ArgumentMatcherTests
     {
         // Arrange — broad setup first, then specific
         var mock = Mock.Of<ICalculator>();
-        mock.Setup.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(42);
-        mock.Setup.Add(1, 1).Returns(100);
+        mock.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(42);
+        mock.Add(1, 1).Returns(100);
 
         // Act
         ICalculator calc = mock.Object;
@@ -211,7 +211,7 @@ public class ArgumentMatcherTests
         // Arrange — setup requires first arg = any (captured), second arg starts with "prefix"
         var firstArg = Arg.Any<int>();
         var mock = Mock.Of<ICalculator>();
-        mock.Setup.Add(firstArg, Arg.Is<int>(b => b > 100)).Returns(999);
+        mock.Add(firstArg, Arg.Is<int>(b => b > 100)).Returns(999);
 
         ICalculator calc = mock.Object;
 
@@ -235,7 +235,7 @@ public class ArgumentMatcherTests
     {
         // Arrange
         var mock = Mock.Of<IGreeter>();
-        mock.Setup.Greet(Arg.Is<string>(s => s != null && s.StartsWith("A"))).Returns("starts with A");
+        mock.Greet(Arg.Is<string>(s => s != null && s.StartsWith("A"))).Returns("starts with A");
 
         // Act
         IGreeter greeter = mock.Object;

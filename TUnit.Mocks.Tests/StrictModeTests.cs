@@ -45,7 +45,7 @@ public class StrictModeTests
     {
         // Arrange
         var mock = Mock.Of<ICalculator>(MockBehavior.Strict);
-        mock.Setup.Add(2, 3).Returns(5);
+        mock.Add(2, 3).Returns(5);
 
         // Act
         ICalculator calc = mock.Object;
@@ -60,7 +60,7 @@ public class StrictModeTests
     {
         // Arrange
         var mock = Mock.Of<ICalculator>(MockBehavior.Strict);
-        mock.Setup.Log("expected message");
+        mock.Log("expected message");
 
         // Act & Assert — configured void method should not throw
         ICalculator calc = mock.Object;
@@ -123,7 +123,7 @@ public class StrictModeTests
     {
         // Arrange — configure Add but not Log or GetName
         var mock = Mock.Of<ICalculator>(MockBehavior.Strict);
-        mock.Setup.Add(1, 2).Returns(3);
+        mock.Add(1, 2).Returns(3);
 
         ICalculator calc = mock.Object;
 
@@ -151,7 +151,7 @@ public class StrictModeTests
     {
         // Arrange — configure Add with specific args
         var mock = Mock.Of<ICalculator>(MockBehavior.Strict);
-        mock.Setup.Add(1, 2).Returns(3);
+        mock.Add(1, 2).Returns(3);
 
         ICalculator calc = mock.Object;
 

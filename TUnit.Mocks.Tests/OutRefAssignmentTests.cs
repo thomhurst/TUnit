@@ -13,7 +13,7 @@ public class OutRefAssignmentTests
     {
         // Arrange
         var mock = Mock.Of<IDictionary>();
-        mock.Setup.TryGet("found")
+        mock.TryGet("found")
             .Returns(true)
             .SetsOutParameter(1, "found-value");
 
@@ -32,7 +32,7 @@ public class OutRefAssignmentTests
     {
         // Arrange
         var mock = Mock.Of<IDictionary>();
-        mock.Setup.TryGet("key").Returns(false);
+        mock.TryGet("key").Returns(false);
 
         IDictionary dict = mock.Object;
 
@@ -49,7 +49,7 @@ public class OutRefAssignmentTests
     {
         // Arrange
         var mock = Mock.Of<IDictionary>();
-        mock.Setup.TryParse(Arg.Any<string>())
+        mock.TryParse(Arg.Any<string>())
             .Returns(true)
             .SetsOutParameter(1, 42);
 
@@ -68,7 +68,7 @@ public class OutRefAssignmentTests
     {
         // Arrange
         var mock = Mock.Of<IDictionary>();
-        mock.Setup.TryGet(Arg.Any<string>())
+        mock.TryGet(Arg.Any<string>())
             .Returns(true)
             .SetsOutParameter(1, "any-value");
 
@@ -88,7 +88,7 @@ public class OutRefAssignmentTests
     {
         // Arrange
         var mock = Mock.Of<IDictionary>();
-        mock.Setup.Swap(Arg.Any<int>())
+        mock.Swap(Arg.Any<int>())
             .SetsOutParameter(0, 99);
 
         IDictionary dict = mock.Object;

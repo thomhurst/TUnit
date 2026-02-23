@@ -22,7 +22,7 @@ public class VerificationMessageTests
         // Assert — verify expects exactly twice with custom message
         var ex = Assert.Throws<MockVerificationException>(() =>
         {
-            mock.Verify.Add(1, 2).WasCalled(Times.Exactly(2), "Expected retry logic to call twice");
+            mock.Add(1, 2).WasCalled(Times.Exactly(2), "Expected retry logic to call twice");
         });
 
         await Assert.That(ex.Message).Contains("Expected retry logic to call twice");
@@ -40,7 +40,7 @@ public class VerificationMessageTests
         // Assert
         var ex = Assert.Throws<MockVerificationException>(() =>
         {
-            mock.Verify.Add(1, 2).WasNeverCalled("Should not have called Add in read-only mode");
+            mock.Add(1, 2).WasNeverCalled("Should not have called Add in read-only mode");
         });
 
         await Assert.That(ex.Message).Contains("Should not have called Add in read-only mode");
@@ -56,7 +56,7 @@ public class VerificationMessageTests
         // Assert — not called at all
         var ex = Assert.Throws<MockVerificationException>(() =>
         {
-            mock.Verify.Add(1, 2).WasCalled("Expected at least one Add call");
+            mock.Add(1, 2).WasCalled("Expected at least one Add call");
         });
 
         await Assert.That(ex.Message).Contains("Expected at least one Add call");
@@ -72,7 +72,7 @@ public class VerificationMessageTests
         // Assert
         var ex = Assert.Throws<MockVerificationException>(() =>
         {
-            mock.Verify.Add(1, 2).WasCalled(Times.Once);
+            mock.Add(1, 2).WasCalled(Times.Once);
         });
 
         // Should NOT have a custom message line before "Mock verification failed."
@@ -88,7 +88,7 @@ public class VerificationMessageTests
         // Assert
         var ex = Assert.Throws<MockVerificationException>(() =>
         {
-            mock.Verify.Add(1, 2).WasCalled(Times.Once, null);
+            mock.Add(1, 2).WasCalled(Times.Once, null);
         });
 
         await Assert.That(ex.Message).StartsWith("Mock verification failed.");
@@ -103,7 +103,7 @@ public class VerificationMessageTests
         // Assert
         var ex = Assert.Throws<MockVerificationException>(() =>
         {
-            mock.Verify.Add(1, 2).WasCalled(Times.Once, "");
+            mock.Add(1, 2).WasCalled(Times.Once, "");
         });
 
         await Assert.That(ex.Message).StartsWith("Mock verification failed.");

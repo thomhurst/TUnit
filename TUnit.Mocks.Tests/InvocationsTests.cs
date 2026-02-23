@@ -12,7 +12,7 @@ public class InvocationsTests
     public async Task Invocations_Returns_All_Calls()
     {
         var mock = Mock.Of<IService>();
-        mock.Setup.GetValue(Arg.Any<string>()).Returns("value");
+        mock.GetValue(Arg.Any<string>()).Returns("value");
 
         var svc = mock.Object;
         svc.GetValue("key1");
@@ -26,7 +26,7 @@ public class InvocationsTests
     public async Task Invocations_Contains_Correct_Method_Names()
     {
         var mock = Mock.Of<IService>();
-        mock.Setup.GetValue(Arg.Any<string>()).Returns("value");
+        mock.GetValue(Arg.Any<string>()).Returns("value");
 
         var svc = mock.Object;
         svc.GetValue("key1");
@@ -40,7 +40,7 @@ public class InvocationsTests
     public async Task Invocations_Contains_Correct_Arguments()
     {
         var mock = Mock.Of<IService>();
-        mock.Setup.GetValue(Arg.Any<string>()).Returns("value");
+        mock.GetValue(Arg.Any<string>()).Returns("value");
 
         var svc = mock.Object;
         svc.GetValue("hello");
@@ -59,7 +59,7 @@ public class InvocationsTests
     public async Task Invocations_Is_Empty_After_Reset()
     {
         var mock = Mock.Of<IService>();
-        mock.Setup.GetValue(Arg.Any<string>()).Returns("value");
+        mock.GetValue(Arg.Any<string>()).Returns("value");
 
         var svc = mock.Object;
         svc.GetValue("key1");

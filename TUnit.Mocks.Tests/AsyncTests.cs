@@ -26,7 +26,7 @@ public class AsyncTests
     {
         // Arrange
         var mock = Mock.Of<IAsyncService>();
-        mock.Setup.GetValueAsync().Returns(5);
+        mock.GetValueAsync().Returns(5);
 
         IAsyncService service = mock.Object;
 
@@ -42,7 +42,7 @@ public class AsyncTests
     {
         // Arrange
         var mock = Mock.Of<IAsyncService>();
-        mock.Setup.GetNameAsync(Arg.Any<string>()).Returns("hello");
+        mock.GetNameAsync(Arg.Any<string>()).Returns("hello");
 
         IAsyncService service = mock.Object;
 
@@ -58,8 +58,8 @@ public class AsyncTests
     {
         // Arrange
         var mock = Mock.Of<IAsyncService>();
-        mock.Setup.GetNameAsync("key1").Returns("value1");
-        mock.Setup.GetNameAsync("key2").Returns("value2");
+        mock.GetNameAsync("key1").Returns("value1");
+        mock.GetNameAsync("key2").Returns("value2");
 
         IAsyncService service = mock.Object;
 
@@ -88,7 +88,7 @@ public class AsyncTests
     {
         // Arrange
         var mock = Mock.Of<IAsyncService>();
-        mock.Setup.GetValueValueTaskAsync().Returns(42);
+        mock.GetValueValueTaskAsync().Returns(42);
 
         IAsyncService service = mock.Object;
 
@@ -104,7 +104,7 @@ public class AsyncTests
     {
         // Arrange
         var mock = Mock.Of<IAsyncService>();
-        mock.Setup.GetValueAsync().Throws<InvalidOperationException>();
+        mock.GetValueAsync().Throws<InvalidOperationException>();
 
         IAsyncService service = mock.Object;
 
@@ -162,7 +162,7 @@ public class AsyncTests
     {
         // Arrange
         var mock = Mock.Of<IAsyncService>();
-        mock.Setup.GetValueAsync().ReturnsSequentially(10, 20, 30);
+        mock.GetValueAsync().ReturnsSequentially(10, 20, 30);
 
         IAsyncService service = mock.Object;
 
@@ -179,7 +179,7 @@ public class AsyncTests
     {
         // Arrange
         var mock = Mock.Of<IAsyncService>();
-        mock.Setup.GetValueAsync().Returns(5);
+        mock.GetValueAsync().Returns(5);
 
         IAsyncService service = mock.Object;
 
@@ -188,7 +188,7 @@ public class AsyncTests
         await service.GetValueAsync();
 
         // Assert — verify it was called twice
-        mock.Verify.GetValueAsync().WasCalled(Times.Exactly(2));
+        mock.GetValueAsync().WasCalled(Times.Exactly(2));
         await Assert.That(true).IsTrue();
     }
 }

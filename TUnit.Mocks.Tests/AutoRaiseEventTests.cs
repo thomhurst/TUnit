@@ -25,7 +25,7 @@ public class AutoRaiseEventTests
 
         mock.Object.StatusChanged += (sender, status) => receivedStatus = status;
 
-        mock.Setup.Process(Arg.Any<int>())
+        mock.Process(Arg.Any<int>())
             .Returns(true)
             .RaisesStatusChanged("completed");
 
@@ -42,7 +42,7 @@ public class AutoRaiseEventTests
 
         mock.Object.StatusChanged += (sender, status) => receivedStatus = status;
 
-        mock.Setup.Execute(Arg.Any<string>())
+        mock.Execute(Arg.Any<string>())
             .RaisesStatusChanged("executed");
 
         mock.Object.Execute("run");
@@ -58,7 +58,7 @@ public class AutoRaiseEventTests
 
         mock.Object.StatusChanged += (sender, status) => receivedStatuses.Add(status);
 
-        mock.Setup.Process(Arg.Any<int>())
+        mock.Process(Arg.Any<int>())
             .Returns(true)
             .RaisesStatusChanged("first")
             .RaisesStatusChanged("second");
@@ -75,7 +75,7 @@ public class AutoRaiseEventTests
     {
         var mock = Mock.Of<IProcessService>();
 
-        mock.Setup.Process(Arg.Any<int>())
+        mock.Process(Arg.Any<int>())
             .Returns(true)
             .RaisesStatusChanged("ignored");
 
@@ -93,7 +93,7 @@ public class AutoRaiseEventTests
 
         mock.Object.StatusChanged += (sender, status) => callCount++;
 
-        mock.Setup.Process(Arg.Any<int>())
+        mock.Process(Arg.Any<int>())
             .Returns(true)
             .RaisesStatusChanged("ping");
 
@@ -112,7 +112,7 @@ public class AutoRaiseEventTests
 
         mock.Object.OnSimple += () => wasCalled = true;
 
-        mock.Setup.Trigger()
+        mock.Trigger()
             .RaisesOnSimple();
 
         mock.Object.Trigger();
@@ -128,7 +128,7 @@ public class AutoRaiseEventTests
 
         mock.Object.OnSimple += () => wasCalled = true;
 
-        mock.Setup.Query()
+        mock.Query()
             .Returns("result")
             .RaisesOnSimple();
 
@@ -151,7 +151,7 @@ public class AutoRaiseEventTests
             receivedCount = count;
         };
 
-        mock.Setup.Trigger()
+        mock.Trigger()
             .RaisesOnMultiParam("hello", 42);
 
         mock.Object.Trigger();

@@ -132,7 +132,7 @@ public class AutoMockTests
 
         // Retrieve and configure the auto-mock
         var autoMock = mock.GetAutoMock<IServiceB>("GetServiceB");
-        autoMock.Setup.GetValue().Returns(42);
+        autoMock.GetValue().Returns(42);
 
         // Act
         var value = serviceB.GetValue();
@@ -146,7 +146,7 @@ public class AutoMockTests
     {
         // Arrange
         var mock = Mock.Of<IServiceA>(MockBehavior.Strict);
-        mock.Setup.GetName().Returns("test");
+        mock.GetName().Returns("test");
 
         // Act & Assert — strict mode throws for unconfigured method
         Assert.Throws<MockStrictBehaviorException>(() =>
@@ -161,8 +161,8 @@ public class AutoMockTests
         // Arrange
         var mock = Mock.Of<IServiceA>();
         var customServiceB = Mock.Of<IServiceB>();
-        customServiceB.Setup.GetValue().Returns(99);
-        mock.Setup.GetServiceB().Returns(customServiceB.Object);
+        customServiceB.GetValue().Returns(99);
+        mock.GetServiceB().Returns(customServiceB.Object);
 
         // Act
         var serviceB = mock.Object.GetServiceB();

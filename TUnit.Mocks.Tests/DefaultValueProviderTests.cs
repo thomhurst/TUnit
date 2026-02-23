@@ -61,7 +61,7 @@ public class DefaultValueProviderTests
         // Arrange
         var mock = Mock.Of<ICalculator>();
         mock.DefaultValueProvider = new CustomProvider();
-        mock.Setup.Add(1, 2).Returns(100);
+        mock.Add(1, 2).Returns(100);
 
         ICalculator calc = mock.Object;
 

@@ -48,8 +48,8 @@ public class MockRepositoryTests
         var serviceMock = repo.Of<IRepoService>();
         var loggerMock = repo.Of<IRepoLogger>();
 
-        serviceMock.Setup.GetData(Arg.Any<int>()).Returns("result");
-        loggerMock.Setup.Log(Arg.Any<string>());
+        serviceMock.GetData(Arg.Any<int>()).Returns("result");
+        loggerMock.Log(Arg.Any<string>());
 
         // Act — invoke all setups
         serviceMock.Object.GetData(1);
@@ -67,8 +67,8 @@ public class MockRepositoryTests
         var serviceMock = repo.Of<IRepoService>();
         var loggerMock = repo.Of<IRepoLogger>();
 
-        serviceMock.Setup.GetData(Arg.Any<int>()).Returns("result");
-        loggerMock.Setup.Log(Arg.Any<string>());
+        serviceMock.GetData(Arg.Any<int>()).Returns("result");
+        loggerMock.Log(Arg.Any<string>());
 
         // Act — only invoke one mock's setup
         serviceMock.Object.GetData(1);
@@ -93,8 +93,8 @@ public class MockRepositoryTests
         loggerMock.Object.Log("hello");
 
         // Verify each call
-        serviceMock.Verify!.GetData(Arg.Is(1)).WasCalled();
-        loggerMock.Verify!.Log(Arg.Is("hello")).WasCalled();
+        serviceMock.GetData(Arg.Is(1)).WasCalled();
+        loggerMock.Log(Arg.Is("hello")).WasCalled();
 
         // Assert — no unverified calls
         repo.VerifyNoOtherCalls();
@@ -113,7 +113,7 @@ public class MockRepositoryTests
         loggerMock.Object.Log("hello");
 
         // Only verify one mock
-        serviceMock.Verify!.GetData(Arg.Is(1)).WasCalled();
+        serviceMock.GetData(Arg.Is(1)).WasCalled();
 
         // Assert — loggerMock has unverified calls
         var ex = Assert.Throws<AggregateException>(() => repo.VerifyNoOtherCalls());
@@ -129,7 +129,7 @@ public class MockRepositoryTests
         var serviceMock = repo.Of<IRepoService>();
         var loggerMock = repo.Of<IRepoLogger>();
 
-        serviceMock.Setup.GetData(Arg.Any<int>()).Returns("configured");
+        serviceMock.GetData(Arg.Any<int>()).Returns("configured");
         loggerMock.Object.Log("call before reset");
 
         // Act
@@ -223,7 +223,7 @@ public class MockRepositoryTests
         // Arrange
         var repo = new MockRepository();
         var mock = repo.OfPartial<ConcreteService>();
-        mock.Setup.Greet(Arg.Any<string>()).Returns("Mocked!");
+        mock.Greet(Arg.Any<string>()).Returns("Mocked!");
 
         // Act
         var result = mock.Object.Greet("World");
@@ -238,7 +238,7 @@ public class MockRepositoryTests
         // Arrange
         var repo = new MockRepository();
         var mock = repo.OfPartial<ServiceWithConstructor>("PREFIX");
-        mock.Setup.Format(Arg.Any<string>()).Returns("formatted");
+        mock.Format(Arg.Any<string>()).Returns("formatted");
 
         // Act — GetPrefix is virtual, unconfigured → calls base
         var prefix = mock.Object.GetPrefix();
@@ -255,8 +255,8 @@ public class MockRepositoryTests
         var serviceMock = repo.Of<IRepoService>();
         var partialMock = repo.OfPartial<ConcreteService>();
 
-        serviceMock.Setup.GetData(Arg.Any<int>()).Returns("data");
-        partialMock.Setup.Greet(Arg.Any<string>()).Returns("Hi");
+        serviceMock.GetData(Arg.Any<int>()).Returns("data");
+        partialMock.Greet(Arg.Any<string>()).Returns("Hi");
 
         // Act — invoke both setups
         serviceMock.Object.GetData(1);

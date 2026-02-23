@@ -43,7 +43,7 @@ public class OutRefTests
         dict.TryGet("hello", out _);
 
         // Assert - verify with the input arg only (out param excluded from matchers)
-        mock.Verify.TryGet("hello").WasCalled(Times.Once);
+        mock.TryGet("hello").WasCalled(Times.Once);
         await Assert.That(true).IsTrue();
     }
 
@@ -52,7 +52,7 @@ public class OutRefTests
     {
         // Arrange
         var mock = Mock.Of<IDictionary>();
-        mock.Setup.TryGet("found").Returns(true);
+        mock.TryGet("found").Returns(true);
 
         // Act
         IDictionary dict = mock.Object;
@@ -67,7 +67,7 @@ public class OutRefTests
     {
         // Arrange
         var mock = Mock.Of<IDictionary>();
-        mock.Setup.TryGet(Arg.Any<string>()).Returns(true);
+        mock.TryGet(Arg.Any<string>()).Returns(true);
 
         // Act
         IDictionary dict = mock.Object;
@@ -101,7 +101,7 @@ public class OutRefTests
         var mock = Mock.Of<IDictionary>();
 
         // Assert - never called
-        mock.Verify.TryGet("key").WasNeverCalled();
+        mock.TryGet("key").WasNeverCalled();
         await Assert.That(true).IsTrue();
     }
 
@@ -133,7 +133,7 @@ public class OutRefTests
         dict.Swap(ref val);
 
         // Assert - ref params ARE included in matchers
-        mock.Verify.Swap(10).WasCalled(Times.Once);
+        mock.Swap(10).WasCalled(Times.Once);
         await Assert.That(true).IsTrue();
     }
 
@@ -150,8 +150,8 @@ public class OutRefTests
         dict.TryGet("a", out _);
 
         // Assert
-        mock.Verify.TryGet("a").WasCalled(Times.Exactly(2));
-        mock.Verify.TryGet("b").WasCalled(Times.Once);
+        mock.TryGet("a").WasCalled(Times.Exactly(2));
+        mock.TryGet("b").WasCalled(Times.Once);
         await Assert.That(true).IsTrue();
     }
 }

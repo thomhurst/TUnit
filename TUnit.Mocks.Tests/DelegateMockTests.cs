@@ -8,7 +8,7 @@ public class DelegateMockTests
     public async Task Func_Returns_Configured_Value()
     {
         var mock = Mock.OfDelegate<Func<string, int>>();
-        mock.Setup.Invoke(Arg.Any<string>()).Returns(42);
+        mock.Invoke(Arg.Any<string>()).Returns(42);
 
         var result = mock.Object("hello");
 
@@ -32,14 +32,14 @@ public class DelegateMockTests
 
         mock.Object("hello");
 
-        mock.Verify!.Invoke("hello").WasCalled(Times.Once);
+        mock.Invoke("hello").WasCalled(Times.Once);
     }
 
     [Test]
     public async Task Custom_Delegate_Returns_Configured_Value()
     {
         var mock = Mock.OfDelegate<Calculator>();
-        mock.Setup.Invoke(Arg.Any<int>(), Arg.Any<int>()).Returns(100);
+        mock.Invoke(Arg.Any<int>(), Arg.Any<int>()).Returns(100);
 
         var result = mock.Object(3, 5);
 
@@ -50,7 +50,7 @@ public class DelegateMockTests
     public async Task Func_Throws_When_Configured()
     {
         var mock = Mock.OfDelegate<Func<string, int>>();
-        mock.Setup.Invoke(Arg.Any<string>()).Throws<InvalidOperationException>();
+        mock.Invoke(Arg.Any<string>()).Throws<InvalidOperationException>();
 
         var act = () => mock.Object("test");
 
@@ -63,7 +63,7 @@ public class DelegateMockTests
         var mock = Mock.OfDelegate<Func<string, int>>();
         var callbackFired = false;
 
-        mock.Setup.Invoke(Arg.Any<string>())
+        mock.Invoke(Arg.Any<string>())
             .Callback(() => callbackFired = true)
             .Then()
             .Returns(1);
@@ -78,7 +78,7 @@ public class DelegateMockTests
     {
         var mock = Mock.OfDelegate<Func<string, int>>();
         var nameArg = Arg.Any<string>();
-        mock.Setup.Invoke(nameArg).Returns(1);
+        mock.Invoke(nameArg).Returns(1);
 
         mock.Object("first");
         mock.Object("second");
@@ -92,12 +92,12 @@ public class DelegateMockTests
     public async Task Func_Verify_WasCalled()
     {
         var mock = Mock.OfDelegate<Func<string, int>>();
-        mock.Setup.Invoke(Arg.Any<string>()).Returns(1);
+        mock.Invoke(Arg.Any<string>()).Returns(1);
 
         mock.Object("a");
         mock.Object("b");
 
-        mock.Verify!.Invoke(Arg.Any<string>()).WasCalled(Times.Exactly(2));
+        mock.Invoke(Arg.Any<string>()).WasCalled(Times.Exactly(2));
     }
 
     [Test]
@@ -114,7 +114,7 @@ public class DelegateMockTests
     public async Task Func_Implicit_Conversion_Works()
     {
         var mock = Mock.OfDelegate<Func<int, int>>();
-        mock.Setup.Invoke(Arg.Any<int>()).Returns(99);
+        mock.Invoke(Arg.Any<int>()).Returns(99);
 
         Func<int, int> func = mock;
         var result = func(5);
