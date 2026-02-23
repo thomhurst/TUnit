@@ -139,8 +139,8 @@ namespace TUnit.Mocks.Generated
         public IDictionary_TryGetValue_M0_MockCall Throws(global::System.Func<object?[], global::System.Exception> exceptionFactory) { EnsureSetup().Throws(exceptionFactory); return this; }
         /// <inheritdoc />
         public IDictionary_TryGetValue_M0_MockCall Raises(string eventName, object? args = null) { EnsureSetup().Raises(eventName, args); return this; }
-        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
         /// <inheritdoc />
+        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
         public IDictionary_TryGetValue_M0_MockCall SetsOutParameter(int paramIndex, object? value) { EnsureSetup().SetsOutParameter(paramIndex, value); return this; }
         /// <inheritdoc />
         public IDictionary_TryGetValue_M0_MockCall TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
@@ -228,8 +228,8 @@ namespace TUnit.Mocks.Generated
         public IDictionary_Swap_M1_MockCall Throws(global::System.Func<object?[], global::System.Exception> exceptionFactory) { EnsureSetup().Throws(exceptionFactory); return this; }
         /// <inheritdoc />
         public IDictionary_Swap_M1_MockCall Raises(string eventName, object? args = null) { EnsureSetup().Raises(eventName, args); return this; }
-        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
         /// <inheritdoc />
+        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
         public IDictionary_Swap_M1_MockCall SetsOutParameter(int paramIndex, object? value) { EnsureSetup().SetsOutParameter(paramIndex, value); return this; }
         /// <inheritdoc />
         public IDictionary_Swap_M1_MockCall TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }

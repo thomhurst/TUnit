@@ -173,9 +173,9 @@ internal static class MockMembersBuilder
             writer.AppendLine($"public {wrapperName} Throws(global::System.Func<object?[], global::System.Exception> exceptionFactory) {{ EnsureSetup().Throws(exceptionFactory); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
             writer.AppendLine($"public {wrapperName} Raises(string eventName, object? args = null) {{ EnsureSetup().Raises(eventName, args); return this; }}");
+            writer.AppendLine($"/// <inheritdoc />");
             if (hasOutRef)
                 writer.AppendLine("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
-            writer.AppendLine($"/// <inheritdoc />");
             writer.AppendLine($"public {wrapperName} SetsOutParameter(int paramIndex, object? value) {{ EnsureSetup().SetsOutParameter(paramIndex, value); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
             writer.AppendLine($"public {wrapperName} TransitionsTo(string stateName) {{ EnsureSetup().TransitionsTo(stateName); return this; }}");
@@ -285,9 +285,9 @@ internal static class MockMembersBuilder
             writer.AppendLine($"public {wrapperName} Throws(global::System.Func<object?[], global::System.Exception> exceptionFactory) {{ EnsureSetup().Throws(exceptionFactory); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
             writer.AppendLine($"public {wrapperName} Raises(string eventName, object? args = null) {{ EnsureSetup().Raises(eventName, args); return this; }}");
+            writer.AppendLine($"/// <inheritdoc />");
             if (hasOutRef)
                 writer.AppendLine("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
-            writer.AppendLine($"/// <inheritdoc />");
             writer.AppendLine($"public {wrapperName} SetsOutParameter(int paramIndex, object? value) {{ EnsureSetup().SetsOutParameter(paramIndex, value); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
             writer.AppendLine($"public {wrapperName} TransitionsTo(string stateName) {{ EnsureSetup().TransitionsTo(stateName); return this; }}");
@@ -431,7 +431,7 @@ internal static class MockMembersBuilder
     }
 
     private static string ToPascalCase(string name)
-        => string.IsNullOrEmpty(name) ? name : char.ToUpperInvariant(name[0]) + name.Substring(1);
+        => string.IsNullOrEmpty(name) ? name : char.ToUpperInvariant(name[0]) + name[1..];
 
     private static string BuildCastArgs(List<MockParameterModel> nonOutParams)
     {
