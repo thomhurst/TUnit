@@ -1,20 +1,17 @@
+using System.ComponentModel;
 using TUnit.Mocks.Exceptions;
 using TUnit.Mocks.Verification;
 
 namespace TUnit.Mocks;
 
 /// <summary>
-/// Wraps a generated mock implementation and provides access to Setup, Verify, and Raise surfaces.
-/// <para>
-/// The source generator produces extension methods on <c>IMockSetup&lt;T&gt;</c>, <c>IMockVerify&lt;T&gt;</c>,
-/// and <c>IMockRaise&lt;T&gt;</c> that provide strongly-typed setup/verify/raise members.
-/// This approach is fully AOT-compatible — no dynamic dispatch is needed.
-/// </para>
+/// Wraps a generated mock implementation. Source-generated extension methods on <c>Mock&lt;T&gt;</c>
+/// provide strongly-typed setup and verification members directly.
 /// </summary>
 public class Mock<T> : IMock where T : class
 {
     /// <summary>The mock engine. Used by generated code. Not intended for direct use.</summary>
-    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public MockEngine<T> Engine { get; }
 
     /// <summary>The mock object that implements T.</summary>
@@ -36,40 +33,12 @@ public class Mock<T> : IMock where T : class
         set => Engine.DefaultValueProvider = value;
     }
 
-    /// <summary>
-    /// Generated setup surface -- extension methods provide T's members with <c>Arg{T}</c> parameters.
-    /// </summary>
-    public IMockSetup<T> Setup { get; }
-
-    /// <summary>
-    /// Generated verification surface -- extension methods provide T's members with <c>Arg{T}</c> parameters.
-    /// </summary>
-    public IMockVerify<T> Verify { get; internal set; }
-
-    /// <summary>
-    /// Generated event-raising surface (if T has events).
-    /// </summary>
-    public IMockRaise<T>? Raise { get; internal set; }
-
-    /// <summary>Creates a Mock with an existing engine, setup, and verify surfaces. Used by generated code.</summary>
-    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public Mock(T mockObject, IMockSetup<T> setup, IMockVerify<T> verify, MockEngine<T> engine)
+    /// <summary>Creates a Mock wrapping the given object and engine. Used by generated code.</summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public Mock(T mockObject, MockEngine<T> engine)
     {
         Engine = engine;
         Object = mockObject;
-        Setup = setup;
-        Verify = verify;
-    }
-
-    /// <summary>Creates a Mock with an existing engine, setup, verify, and raise surfaces. Used by generated code.</summary>
-    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public Mock(T mockObject, IMockSetup<T> setup, IMockVerify<T> verify, IMockRaise<T>? raise, MockEngine<T> engine)
-    {
-        Engine = engine;
-        Object = mockObject;
-        Setup = setup;
-        Verify = verify;
-        Raise = raise;
     }
 
     /// <summary>All calls made to this mock, in order.</summary>
@@ -161,13 +130,13 @@ public class Mock<T> : IMock where T : class
     /// Configures setups scoped to a specific state. All setups registered inside
     /// the <paramref name="configure"/> action will only match when the engine is in the specified state.
     /// </summary>
-    public void InState(string stateName, Action<IMockSetup<T>> configure)
+    public void InState(string stateName, Action<Mock<T>> configure)
     {
         var previous = Engine.PendingRequiredState;
         Engine.PendingRequiredState = stateName;
         try
         {
-            configure(Setup);
+            configure(this);
         }
         finally
         {
