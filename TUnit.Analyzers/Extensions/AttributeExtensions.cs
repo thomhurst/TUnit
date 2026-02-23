@@ -119,7 +119,7 @@ public static class AttributeExtensions
         return attributeData.AttributeClass.AllInterfaces.Contains(dataAttributeInterface, SymbolEqualityComparer.Default);
     }
 
-    public static bool IsClassConstructorAttribute(this AttributeData? attributeData, Compilation compilation)
+    public static bool IsClassConstructorAttribute(this AttributeData? attributeData)
     {
         if (attributeData?.AttributeClass is null)
         {
@@ -138,11 +138,6 @@ public static class AttributeExtensions
         }
 
         return false;
-    }
-
-    public static string GetHookType(this AttributeData attributeData)
-    {
-        return attributeData.ConstructorArguments[0].ToCSharpString();
     }
 
     private static HookLevel ParseHookLevel(AttributeData attributeData)
