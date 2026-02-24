@@ -1,0 +1,147 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+
+  <!-- Core framework packages -->
+  <Folder Name="/Core/">
+    <Project Path="TUnit/TUnit.csproj" />
+    <Project Path="TUnit.Core/TUnit.Core.csproj" />
+    <Project Path="TUnit.Engine/TUnit.Engine.csproj" />
+    <Project Path="TUnit.Assertions/TUnit.Assertions.csproj" />
+    <Project Path="TUnit.Assertions.FSharp/TUnit.Assertions.FSharp.fsproj" />
+  </Folder>
+
+  <!-- Extension libraries and integrations -->
+  <Folder Name="/Libraries/">
+    <Project Path="TUnit.Aspire/TUnit.Aspire.csproj" />
+    <Project Path="TUnit.AspNetCore/TUnit.AspNetCore.csproj" />
+    <Project Path="TUnit.FsCheck/TUnit.FsCheck.csproj" />
+    <Project Path="TUnit.Logging.Microsoft/TUnit.Logging.Microsoft.csproj" />
+    <Project Path="TUnit.Mocks/TUnit.Mocks.csproj" />
+    <Project Path="TUnit.Mocks.Assertions/TUnit.Mocks.Assertions.csproj" />
+    <Project Path="TUnit.Mocks.Http/TUnit.Mocks.Http.csproj" />
+    <Project Path="TUnit.Mocks.Logging/TUnit.Mocks.Logging.csproj" />
+    <Project Path="TUnit.Playwright/TUnit.Playwright.csproj" />
+  </Folder>
+
+  <!-- Roslyn analyzers and code fixers -->
+  <Folder Name="/Analyzers/">
+    <Project Path="TUnit.Analyzers/TUnit.Analyzers.csproj" />
+    <Project Path="TUnit.Analyzers.CodeFixers/TUnit.Analyzers.CodeFixers.csproj" />
+    <Project Path="TUnit.Analyzers.Roslyn414/TUnit.Analyzers.Roslyn414.csproj" />
+    <Project Path="TUnit.Analyzers.Roslyn44/TUnit.Analyzers.Roslyn44.csproj" />
+    <Project Path="TUnit.Analyzers.Roslyn47/TUnit.Analyzers.Roslyn47.csproj" />
+    <Project Path="TUnit.AspNetCore.Analyzers/TUnit.AspNetCore.Analyzers.csproj" />
+    <Project Path="TUnit.AspNetCore.Analyzers.Roslyn414/TUnit.AspNetCore.Analyzers.Roslyn414.csproj" />
+    <Project Path="TUnit.AspNetCore.Analyzers.Roslyn44/TUnit.AspNetCore.Analyzers.Roslyn44.csproj" />
+    <Project Path="TUnit.AspNetCore.Analyzers.Roslyn47/TUnit.AspNetCore.Analyzers.Roslyn47.csproj" />
+    <Project Path="TUnit.Assertions.Analyzers/TUnit.Assertions.Analyzers.csproj" />
+    <Project Path="TUnit.Assertions.Analyzers.CodeFixers/TUnit.Assertions.Analyzers.CodeFixers.csproj" />
+    <Project Path="TUnit.Mocks.Analyzers/TUnit.Mocks.Analyzers.csproj" />
+  </Folder>
+
+  <!-- Source generators and Roslyn version variants -->
+  <Folder Name="/SourceGenerators/">
+    <Project Path="TUnit.Assertions.SourceGenerator/TUnit.Assertions.SourceGenerator.csproj" />
+    <Project Path="TUnit.Core.SourceGenerator/TUnit.Core.SourceGenerator.csproj" />
+    <Project Path="TUnit.Core.SourceGenerator.Roslyn414/TUnit.Core.SourceGenerator.Roslyn414.csproj" />
+    <Project Path="TUnit.Core.SourceGenerator.Roslyn44/TUnit.Core.SourceGenerator.Roslyn44.csproj" />
+    <Project Path="TUnit.Core.SourceGenerator.Roslyn47/TUnit.Core.SourceGenerator.Roslyn47.csproj" />
+    <Project Path="TUnit.Mocks.SourceGenerator/TUnit.Mocks.SourceGenerator.csproj" />
+    <Project Path="TUnit.Mocks.SourceGenerator.Roslyn414/TUnit.Mocks.SourceGenerator.Roslyn414.csproj" />
+    <Project Path="TUnit.Mocks.SourceGenerator.Roslyn44/TUnit.Mocks.SourceGenerator.Roslyn44.csproj" />
+    <Project Path="TUnit.Mocks.SourceGenerator.Roslyn47/TUnit.Mocks.SourceGenerator.Roslyn47.csproj" />
+  </Folder>
+
+  <!-- Test projects -->
+  <Folder Name="/Tests/">
+    <Project Path="TUnit.Analyzers.Tests/TUnit.Analyzers.Tests.csproj" />
+    <Project Path="TUnit.AspNetCore.Analyzers.Tests/TUnit.AspNetCore.Analyzers.Tests.csproj" />
+    <Project Path="TUnit.Assertions.Analyzers.CodeFixers.Tests/TUnit.Assertions.Analyzers.CodeFixers.Tests.csproj" />
+    <Project Path="TUnit.Assertions.Analyzers.Tests/TUnit.Assertions.Analyzers.Tests.csproj" />
+    <Project Path="TUnit.Assertions.SourceGenerator.Tests/TUnit.Assertions.SourceGenerator.Tests.csproj" />
+    <Project Path="TUnit.Assertions.Tests/TUnit.Assertions.Tests.csproj" />
+    <Project Path="TUnit.Core.SourceGenerator.Tests/TUnit.Core.SourceGenerator.Tests.csproj" />
+    <Project Path="TUnit.Engine.Tests/TUnit.Engine.Tests.csproj" />
+    <Project Path="TUnit.Mocks.Analyzers.Tests/TUnit.Mocks.Analyzers.Tests.csproj" />
+    <Project Path="TUnit.Mocks.Http.Tests/TUnit.Mocks.Http.Tests.csproj" />
+    <Project Path="TUnit.Mocks.Logging.Tests/TUnit.Mocks.Logging.Tests.csproj" />
+    <Project Path="TUnit.Mocks.SourceGenerator.Tests/TUnit.Mocks.SourceGenerator.Tests.csproj" />
+    <Project Path="TUnit.Mocks.Tests/TUnit.Mocks.Tests.csproj" />
+    <Project Path="TUnit.Profile/TUnit.Profile.csproj" />
+    <Project Path="TUnit.PublicAPI/TUnit.PublicAPI.csproj" />
+    <Project Path="TUnit.RpcTests/TUnit.RpcTests.csproj" />
+    <Project Path="TUnit.SourceGenerator.IncrementalTests/TUnit.SourceGenerator.IncrementalTests.csproj" />
+    <Project Path="TUnit.Templates.Tests/TUnit.Templates.Tests.csproj" />
+    <Project Path="TUnit.UnitTests/TUnit.UnitTests.csproj" />
+  </Folder>
+
+  <!-- Benchmarks -->
+  <Folder Name="/Benchmarks/">
+    <Project Path="TUnit.SourceGenerator.Benchmarks/TUnit.SourceGenerator.Benchmarks.csproj" />
+  </Folder>
+
+  <!-- Build infrastructure -->
+  <Folder Name="/Build/">
+    <Project Path="TUnit.Pipeline/TUnit.Pipeline.csproj" />
+  </Folder>
+
+  <!-- Examples and playground projects -->
+  <Folder Name="/Examples/">
+    <Project Path="Playground/Playground.csproj" />
+    <Project Path="TUnit.Example.Asp.Net/TUnit.Example.Asp.Net.csproj" />
+    <Project Path="TUnit.Example.Asp.Net.TestProject/TUnit.Example.Asp.Net.TestProject.csproj" />
+    <Project Path="TUnit.Example.FsCheck.TestProject/TUnit.Example.FsCheck.TestProject.csproj" />
+    <Project Path="TUnit.TestProject/TUnit.TestProject.csproj" />
+    <Project Path="TUnit.TestProject.FSharp/TUnit.TestProject.FSharp.fsproj" />
+    <Project Path="TUnit.TestProject.Library/TUnit.TestProject.Library.csproj" />
+    <Project Path="TUnit.TestProject.VB.NET/TUnit.TestProject.VB.NET.vbproj" />
+  </Folder>
+  <Folder Name="/Examples/CloudShop/">
+    <Project Path="examples/CloudShop/CloudShop.ApiService/CloudShop.ApiService.csproj" />
+    <Project Path="examples/CloudShop/CloudShop.AppHost/CloudShop.AppHost.csproj" />
+    <Project Path="examples/CloudShop/CloudShop.ServiceDefaults/CloudShop.ServiceDefaults.csproj" />
+    <Project Path="examples/CloudShop/CloudShop.Shared/CloudShop.Shared.csproj" />
+    <Project Path="examples/CloudShop/CloudShop.Tests/CloudShop.Tests.csproj" />
+    <Project Path="examples/CloudShop/CloudShop.Web/CloudShop.Web.csproj" />
+    <Project Path="examples/CloudShop/CloudShop.Worker/CloudShop.Worker.csproj" />
+  </Folder>
+
+  <!-- Project templates -->
+  <Folder Name="/Templates/">
+    <Project Path="TUnit.Templates/TUnit.Templates.csproj" />
+  </Folder>
+  <Folder Name="/Templates/AspireStarter/">
+    <Project Path="TUnit.Templates/content/TUnit.Aspire.Starter/ExampleNamespace.ApiService/ExampleNamespace.ApiService.csproj" />
+    <Project Path="TUnit.Templates/content/TUnit.Aspire.Starter/ExampleNamespace.AppHost/ExampleNamespace.AppHost.csproj" />
+    <Project Path="TUnit.Templates/content/TUnit.Aspire.Starter/ExampleNamespace.ServiceDefaults/ExampleNamespace.ServiceDefaults.csproj" />
+    <Project Path="TUnit.Templates/content/TUnit.Aspire.Starter/ExampleNamespace.TestProject/ExampleNamespace.TestProject.csproj" />
+    <Project Path="TUnit.Templates/content/TUnit.Aspire.Starter/ExampleNamespace.WebApp/ExampleNamespace.WebApp.csproj" />
+  </Folder>
+  <Folder Name="/Templates/AspireTest/">
+    <Project Path="TUnit.Templates/content/TUnit.Aspire.Test/ExampleNamespace.csproj" />
+  </Folder>
+  <Folder Name="/Templates/AspNet/">
+    <Project Path="TUnit.Templates/content/TUnit.AspNet/TestProject/TestProject.csproj" />
+    <Project Path="TUnit.Templates/content/TUnit.AspNet/WebApp/WebApp.csproj" />
+  </Folder>
+  <Folder Name="/Templates/AspNet/FSharp/">
+    <Project Path="TUnit.Templates/content/TUnit.AspNet.FSharp/TestProject/TestProject.fsproj" />
+    <Project Path="TUnit.Templates/content/TUnit.AspNet.FSharp/WebApp/WebApp.fsproj" />
+  </Folder>
+  <Folder Name="/Templates/Basic/">
+    <Project Path="TUnit.Templates/content/TUnit/TestProject.csproj" />
+  </Folder>
+  <Folder Name="/Templates/Basic/FSharp/">
+    <Project Path="TUnit.Templates/content/TUnit.FSharp/TestProject.fsproj" />
+  </Folder>
+  <Folder Name="/Templates/Basic/VB/">
+    <Project Path="TUnit.Templates/content/TUnit.VB/TestProject.vbproj" />
+  </Folder>
+  <Folder Name="/Templates/Playwright/">
+    <Project Path="TUnit.Templates/content/TUnit.Playwright/TestProject.csproj" />
+  </Folder>
+</Solution>

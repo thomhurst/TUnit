@@ -51,17 +51,6 @@ public class ExternalCancellationTests(TestMode testMode) : InvokableTestBase(te
 
         var command = testMode switch
         {
-            TestMode.SourceGenerated => Cli.Wrap(file)
-                .WithArguments(
-                [
-                    "--treenode-filter", filter,
-                    "--report-trx", "--report-trx-filename", trxFilename,
-                    "--diagnostic-verbosity", "Debug",
-                    "--diagnostic", "--diagnostic-file-prefix", $"log_ExternalCancellation_{GetType().Name}_",
-                ])
-                .WithWorkingDirectory(testProject.DirectoryName!)
-                .WithValidation(CommandResultValidation.None),
-
             TestMode.Reflection => Cli.Wrap(file)
                 .WithArguments(
                 [

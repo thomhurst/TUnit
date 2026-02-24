@@ -1,0 +1,5 @@
+<Project>
+    <PropertyGroup>
+        <TUnitMockImplicitUsings Condition="'$(TUnitMockImplicitUsings)' == ''">enable</TUnitMockImplicitUsings>
+    </PropertyGroup>
+</Project>
