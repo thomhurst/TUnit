@@ -27419,7 +27419,7 @@ EOF < /dev/null
 
 ### Raising Events
 
-If the mocked interface declares events, TUnit.Mocks generates a `Raise` surface:
+If the mocked interface declares events, TUnit.Mocks generates `Raise{EventName}()` extension methods directly on `Mock<T>`:
 
 ```csharp
 public interface IConnection
@@ -27435,7 +27435,7 @@ string? received = null;
 mock.Object.OnMessage += (sender, msg) => received = msg;
 
 // Raise the event through the mock
-mock.Raise.OnMessage("Hello!");
+mock.RaiseOnMessage("Hello!");
 // received == "Hello!"
 ```
 
@@ -27444,7 +27444,7 @@ mock.Raise.OnMessage("Hello!");
 Trigger an event automatically when a method is called using the typed `.Raises{EventName}()` method on a setup chain:
 
 ```csharp
-mock.Setup.SendMessage(Arg.Any<string>())
+mock.SendMessage(Arg.Any<string>())
     .RaisesOnMessage("echo");
 
 mock.Object.SendMessage("test");
@@ -27487,16 +27487,16 @@ public interface IConnection
 var mock = Mock.Of<IConnection>();
 mock.SetState("disconnected");
 
-mock.InState("disconnected", setup =>
+mock.InState("disconnected", m =>
 {
-    setup.GetStatus().Returns("OFFLINE");
-    setup.Connect().TransitionsTo("connected");
+    m.GetStatus().Returns("OFFLINE");
+    m.Connect().TransitionsTo("connected");
 });
 
-mock.InState("connected", setup =>
+mock.InState("connected", m =>
 {
-    setup.GetStatus().Returns("ONLINE");
-    setup.Disconnect().TransitionsTo("disconnected");
+    m.GetStatus().Returns("ONLINE");
+    m.Disconnect().TransitionsTo("disconnected");
 });
 
 // Start disconnected
@@ -27541,7 +27541,7 @@ var serviceB = mock.Object.GetServiceB();
 
 // Configure the auto-mock
 var autoMock = mock.GetAutoMock<IServiceB>("GetServiceB");
-autoMock.Setup.GetValue().Returns(42);
+autoMock.GetValue().Returns(42);
 
 var value = serviceB.GetValue(); // 42
 ```
@@ -27559,8 +27559,8 @@ var serviceMock = repo.Of<IService>();
 var loggerMock = repo.Of<ILogger>();
 
 // Configure each mock individually
-serviceMock.Setup.GetData(Arg.Any<int>()).Returns("result");
-loggerMock.Setup.Log(Arg.Any<string>());
+serviceMock.GetData(Arg.Any<int>()).Returns("result");
+loggerMock.Log(Arg.Any<string>());
 
 // Exercise code
 serviceMock.Object.GetData(1);
@@ -27592,8 +27592,8 @@ repo.Reset();                // clear all mocks
 Get a diagnostic report of setup coverage and call matching:
 
 ```csharp
-mock.Setup.GetUser(Arg.Any<int>()).Returns(new User("Alice"));
-mock.Setup.Delete(Arg.Any<int>());
+mock.GetUser(Arg.Any<int>()).Returns(new User("Alice"));
+mock.Delete(Arg.Any<int>());
 
 svc.GetUser(1);
 // Delete was never called
@@ -27639,7 +27639,7 @@ The provider is consulted **before** auto-mocking and built-in smart defaults.
 Clear all setups, call history, state, and auto-tracked property values:
 
 ```csharp
-mock.Setup.GetUser(Arg.Any<int>()).Returns(new User("Alice"));
+mock.GetUser(Arg.Any<int>()).Returns(new User("Alice"));
 svc.GetUser(1);
 
 mock.Reset();
@@ -27655,7 +27655,7 @@ The `SetupAllProperties()` flag is preserved across resets.
 ## Argument Matchers
 
 
-Argument matchers control which calls a setup or verification matches. They are used in both `mock.Setup` and `mock.Verify` surfaces.
+Argument matchers control which calls a setup or verification matches. The same matchers work in both contexts — the chain method determines whether it's a setup or verification.
 
 ## Quick Reference
 
@@ -27684,7 +27684,7 @@ Argument matchers control which calls a setup or verification matches. They are 
 Matches any value, including null:
 
 ```csharp
-mock.Setup.GetUser(Arg.Any<int>()).Returns(new User("Default"));
+mock.GetUser(Arg.Any<int>()).Returns(new User("Default"));
 
 svc.GetUser(1);    // matches
 svc.GetUser(999);  // matches
@@ -27695,8 +27695,8 @@ svc.GetUser(999);  // matches
 Match a specific value using equality:
 
 ```csharp
-mock.Setup.GetUser(Arg.Is(42)).Returns(new User("Alice"));
-mock.Setup.GetUser(Arg.Is(99)).Returns(new User("Bob"));
+mock.GetUser(Arg.Is(42)).Returns(new User("Alice"));
+mock.GetUser(Arg.Is(99)).Returns(new User("Bob"));
 
 svc.GetUser(42);  // returns Alice
 svc.GetUser(99);  // returns Bob
@@ -27706,8 +27706,8 @@ svc.GetUser(1);   // no match — returns default
 :::tip Implicit Conversion
 Raw values are implicitly converted to `Arg.Is(value)`, so these are equivalent:
 ```csharp
-mock.Setup.GetUser(Arg.Is(42)).Returns(new User("Alice"));
-mock.Setup.GetUser(42).Returns(new User("Alice")); // same thing
+mock.GetUser(Arg.Is(42)).Returns(new User("Alice"));
+mock.GetUser(42).Returns(new User("Alice")); // same thing
 ```
 :::
 
@@ -27716,15 +27716,15 @@ mock.Setup.GetUser(42).Returns(new User("Alice")); // same thing
 Match values satisfying a condition:
 
 ```csharp
-mock.Setup.GetUser(Arg.Is<int>(id => id > 0)).Returns(new User("Valid"));
-mock.Setup.GetUser(Arg.Is<int>(id => id <= 0)).Throws<ArgumentException>();
+mock.GetUser(Arg.Is<int>(id => id > 0)).Returns(new User("Valid"));
+mock.GetUser(Arg.Is<int>(id => id <= 0)).Throws<ArgumentException>();
 ```
 
 ### Null and NotNull
 
 ```csharp
-mock.Setup.Process(Arg.IsNull<string>()).Returns("was null");
-mock.Setup.Process(Arg.IsNotNull<string>()).Returns("had value");
+mock.Process(Arg.IsNull<string>()).Returns("was null");
+mock.Process(Arg.IsNotNull<string>()).Returns("had value");
 ```
 
 ## String Matchers
@@ -27733,7 +27733,7 @@ mock.Setup.Process(Arg.IsNotNull<string>()).Returns("had value");
 
 ```csharp
 // Match strings against a regex pattern
-mock.Setup.Search(Arg.Matches(@"^user_\d+$")).Returns(new[] { "found" });
+mock.Search(Arg.Matches(@"^user_\d+$")).Returns(new[] { "found" });
 
 svc.Search("user_42");   // matches
 svc.Search("admin_1");   // no match
@@ -27743,7 +27743,7 @@ svc.Search("admin_1");   // no match
 
 ```csharp
 var pattern = new Regex(@"^user_\d+$", RegexOptions.Compiled);
-mock.Setup.Search(Arg.Matches(pattern)).Returns(new[] { "found" });
+mock.Search(Arg.Matches(pattern)).Returns(new[] { "found" });
 ```
 
 ## Collection Matchers
@@ -27751,7 +27751,7 @@ mock.Setup.Search(Arg.Matches(pattern)).Returns(new[] { "found" });
 ### Contains
 
 ```csharp
-mock.Setup.ProcessItems(Arg.Contains<List<int>, int>(42)).Returns(true);
+mock.ProcessItems(Arg.Contains<List<int>, int>(42)).Returns(true);
 
 svc.ProcessItems(new List<int> { 1, 42, 3 }); // matches — contains 42
 svc.ProcessItems(new List<int> { 1, 2, 3 });  // no match
@@ -27760,7 +27760,7 @@ svc.ProcessItems(new List<int> { 1, 2, 3 });  // no match
 ### HasCount
 
 ```csharp
-mock.Setup.ProcessItems(Arg.HasCount<List<int>>(3)).Returns(true);
+mock.ProcessItems(Arg.HasCount<List<int>>(3)).Returns(true);
 
 svc.ProcessItems(new List<int> { 1, 2, 3 }); // matches — count is 3
 svc.ProcessItems(new List<int> { 1, 2 });     // no match
@@ -27769,7 +27769,7 @@ svc.ProcessItems(new List<int> { 1, 2 });     // no match
 ### IsEmpty
 
 ```csharp
-mock.Setup.ProcessItems(Arg.IsEmpty<List<int>>()).Returns(false);
+mock.ProcessItems(Arg.IsEmpty<List<int>>()).Returns(false);
 
 svc.ProcessItems(new List<int>());          // matches
 svc.ProcessItems(new List<int> { 1 });      // no match
@@ -27778,7 +27778,7 @@ svc.ProcessItems(new List<int> { 1 });      // no match
 ### SequenceEquals
 
 ```csharp
-mock.Setup.ProcessItems(
+mock.ProcessItems(
     Arg.SequenceEquals<List<int>, int>(new[] { 1, 2, 3 })
 ).Returns(true);
 
@@ -27791,7 +27791,7 @@ svc.ProcessItems(new List<int> { 3, 2, 1 }); // no match — wrong order
 ### IsInRange
 
 ```csharp
-mock.Setup.SetAge(Arg.IsInRange(0, 120)).Returns(true);
+mock.SetAge(Arg.IsInRange(0, 120)).Returns(true);
 
 svc.SetAge(25);   // matches
 svc.SetAge(-1);   // no match
@@ -27801,8 +27801,8 @@ svc.SetAge(200);  // no match
 ### IsIn / IsNotIn
 
 ```csharp
-mock.Setup.GetRole(Arg.IsIn("admin", "editor", "viewer")).Returns(true);
-mock.Setup.GetRole(Arg.IsNotIn("admin", "superadmin")).Returns(false);
+mock.GetRole(Arg.IsIn("admin", "editor", "viewer")).Returns(true);
+mock.GetRole(Arg.IsNotIn("admin", "superadmin")).Returns(false);
 ```
 
 ## Negation
@@ -27810,7 +27810,7 @@ mock.Setup.GetRole(Arg.IsNotIn("admin", "superadmin")).Returns(false);
 Wrap any matcher with `Not` to invert it:
 
 ```csharp
-mock.Setup.Process(Arg.Not(Arg.Is(0))).Returns("non-zero");
+mock.Process(Arg.Not(Arg.Is(0))).Returns("non-zero");
 // Matches any int except 0
 ```
 
@@ -27820,7 +27820,7 @@ Every `Arg<T>` matcher automatically captures the values it sees:
 
 ```csharp
 var nameArg = Arg.Any<string>();
-mock.Setup.Greet(nameArg).Returns("Hi");
+mock.Greet(nameArg).Returns("Hi");
 
 svc.Greet("Alice");
 svc.Greet("Bob");
@@ -27864,7 +27864,7 @@ public class StringLengthMatcher : IArgumentMatcher<string>
 }
 
 // Usage
-mock.Setup.Greet(Arg.Matches(new StringLengthMatcher(3, 50)))
+mock.Greet(Arg.Matches(new StringLengthMatcher(3, 50)))
     .Returns("Valid name");
 ```
 
@@ -28163,7 +28163,7 @@ public class GreeterTests
         var mock = Mock.Of<IGreeter>();
 
         // Configure — set up a return value
-        mock.Setup.Greet(Arg.Any<string>()).Returns("Hello!");
+        mock.Greet(Arg.Any<string>()).Returns("Hello!");
 
         // Act — use the mock object
         IGreeter greeter = mock.Object;
@@ -28171,7 +28171,7 @@ public class GreeterTests
 
         // Assert — verify the result and the call
         await Assert.That(result).IsEqualTo("Hello!");
-        mock.Verify.Greet("Alice").WasCalled(Times.Once);
+        mock.Greet("Alice").WasCalled(Times.Once);
     }
 }
 ```
@@ -28201,15 +28201,15 @@ var strict = Mock.Of<IService>(MockBehavior.Strict);   // throws on unconfigured
 
 ### The Mock Wrapper
 
-`Mock.Of<T>()` returns a `Mock<T>` wrapper with three surfaces:
+`Mock.Of<T>()` returns a `Mock<T>` wrapper. Extension methods are generated directly on `Mock<T>` for each member of the mocked type, and the chain methods (`.Returns()`, `.WasCalled()`, etc.) disambiguate between setup and verification:
 
 ```csharp
 var mock = Mock.Of<IService>();
 
-mock.Setup   // configure method/property behaviors
-mock.Verify  // verify calls were made
-mock.Raise   // raise events (if T has events)
-mock.Object  // the T instance to pass to your code under test
+mock.GetUser(Arg.Any<int>()).Returns(user);  // setup — .Returns() makes it a stub
+mock.GetUser(42).WasCalled(Times.Once);      // verify — .WasCalled() makes it a check
+mock.RaiseOnMessage("hi");                   // raise events — Raise{EventName}()
+mock.Object                                  // the T instance to pass to your code under test
 ```
 
 ### Implicit Conversion
@@ -28413,7 +28413,7 @@ public async Task OrderService_Logs_Errors()
 ## Setup & Stubbing
 
 
-The `mock.Setup` surface configures how the mock responds when its members are called.
+Methods are called directly on `Mock<T>` — the chain method (`.Returns()`, `.Throws()`, etc.) makes it a setup.
 
 ## Method Setup
 
@@ -28421,13 +28421,13 @@ The `mock.Setup` surface configures how the mock responds when its members are c
 
 ```csharp
 // Fixed return value
-mock.Setup.GetUser(Arg.Any<int>()).Returns(new User("Alice"));
+mock.GetUser(Arg.Any<int>()).Returns(new User("Alice"));
 
 // Computed return value
-mock.Setup.GetUser(Arg.Any<int>()).Returns(() => new User(DateTime.Now.ToString()));
+mock.GetUser(Arg.Any<int>()).Returns(() => new User(DateTime.Now.ToString()));
 
 // Async methods — no special API needed
-mock.Setup.GetUserAsync(Arg.Any<int>()).Returns(new User("Alice"));
+mock.GetUserAsync(Arg.Any<int>()).Returns(new User("Alice"));
 // TUnit.Mocks auto-wraps the value in Task<T> or ValueTask<T>
 ```
 
@@ -28435,10 +28435,10 @@ mock.Setup.GetUserAsync(Arg.Any<int>()).Returns(new User("Alice"));
 
 ```csharp
 // Throw a specific exception type
-mock.Setup.Delete(Arg.Any<int>()).Throws<InvalidOperationException>();
+mock.Delete(Arg.Any<int>()).Throws<InvalidOperationException>();
 
 // Throw a specific instance
-mock.Setup.Delete(Arg.Any<int>()).Throws(new ArgumentException("bad id"));
+mock.Delete(Arg.Any<int>()).Throws(new ArgumentException("bad id"));
 ```
 
 ### Callbacks
@@ -28446,11 +28446,11 @@ mock.Setup.Delete(Arg.Any<int>()).Throws(new ArgumentException("bad id"));
 ```csharp
 // Simple callback
 var callCount = 0;
-mock.Setup.Process(Arg.Any<string>())
+mock.Process(Arg.Any<string>())
     .Callback(() => callCount++);
 
 // Callback with access to arguments
-mock.Setup.Process(Arg.Any<string>())
+mock.Process(Arg.Any<string>())
     .Callback((object?[] args) => Console.WriteLine($"Called with: {args[0]}"));
 ```
 
@@ -28459,7 +28459,7 @@ mock.Setup.Process(Arg.Any<string>())
 Use `.Then()` to define different behaviors for successive calls:
 
 ```csharp
-mock.Setup.GetValue(Arg.Any<string>())
+mock.GetValue(Arg.Any<string>())
     .Throws<InvalidOperationException>()   // 1st call: throws
     .Then()
     .Returns("retry-succeeded")             // 2nd call: returns value
@@ -28467,7 +28467,7 @@ mock.Setup.GetValue(Arg.Any<string>())
     .Returns("cached");                     // 3rd+ calls: returns this value
 
 // Shorthand for sequential return values
-mock.Setup.GetValue(Arg.Any<string>())
+mock.GetValue(Arg.Any<string>())
     .ReturnsSequentially("first", "second", "third");
 // 1st: "first", 2nd: "second", 3rd+: "third" (last value repeats)
 ```
@@ -28477,12 +28477,14 @@ mock.Setup.GetValue(Arg.Any<string>())
 Void methods support `Callback` and `Throws` (but not `Returns`):
 
 ```csharp
-mock.Setup.Log(Arg.Any<string>())
+mock.Log(Arg.Any<string>())
     .Callback(() => { /* side effect */ });
 
-mock.Setup.Log(Arg.Any<string>())
+mock.Log(Arg.Any<string>())
     .Throws<NotSupportedException>();
 ```
+
+Void methods are also eagerly registered — calling `mock.Log(Arg.Any<string>())` without chaining is sufficient to "allow" the call in strict mode.
 
 ## Property Setup
 
@@ -28492,29 +28494,29 @@ TUnit.Mocks uses C# 14 extension properties for a natural property API. The defa
 
 ```csharp
 // These are equivalent — both configure the getter
-mock.Setup.Name.Returns("Alice");
-mock.Setup.Name.Getter.Returns("Alice");
+mock.Name.Returns("Alice");
+mock.Name.Getter.Returns("Alice");
 ```
 
 All method setup operations work on getters:
 
 ```csharp
-mock.Setup.Name.Throws<InvalidOperationException>();
-mock.Setup.Name.Callback(() => Console.WriteLine("Name accessed"));
-mock.Setup.Name.ReturnsSequentially("first", "second");
+mock.Name.Throws<InvalidOperationException>();
+mock.Name.Callback(() => Console.WriteLine("Name accessed"));
+mock.Name.ReturnsSequentially("first", "second");
 ```
 
 ### Setter Setup
 
 ```csharp
 // React to any value being set
-mock.Setup.Count.Setter.Callback(() => Console.WriteLine("Count was set"));
+mock.Count.Setter.Callback(() => Console.WriteLine("Count was set"));
 
 // React to a specific value being set
-mock.Setup.Count.Set(Arg.Is(42)).Callback(() => Console.WriteLine("Count set to 42"));
+mock.Count.Set(Arg.Is(42)).Callback(() => Console.WriteLine("Count set to 42"));
 
 // Throw on setter
-mock.Setup.Name.Setter.Throws<NotSupportedException>();
+mock.Name.Setter.Throws<NotSupportedException>();
 ```
 
 ### Auto-Tracking Properties
@@ -28536,18 +28538,32 @@ Explicit setups take precedence over auto-tracked values.
 
 ## Out and Ref Parameters
 
-**Out parameters** are excluded from setup signatures. Use `.SetsOutParameter()` to assign their values:
+**Out parameters** are excluded from setup signatures. Use the generated strongly-typed `.SetsOut{Name}()` methods to assign their values:
 
 ```csharp
-mock.Setup.TryGet("key")
+// Strongly-typed — named after the parameter, compile-time safe
+mock.TryGet("key")
     .Returns(true)
-    .SetsOutParameter(0, "found-value"); // paramIndex 0 = first out param
+    .SetsOutValue("found-value");
 
 bool found = svc.TryGet("key", out var value);
 // found == true, value == "found-value"
 ```
 
-**Ref parameters** are included in setup signatures and participate in argument matching.
+**Ref parameters** are included in setup signatures and participate in argument matching. Use `.SetsRef{Name}()` to assign output values:
+
+```csharp
+mock.Swap(Arg.Any<int>())
+    .SetsRefValue(99);
+
+int val = 42;
+svc.Swap(ref val);
+// val == 99
+```
+
+The method names are derived from the original parameter names — e.g. `out string value` produces `.SetsOutValue()`, `ref int count` produces `.SetsRefCount()`. This gives you IntelliSense discoverability and compile-time type safety.
+
+The untyped `.SetsOutParameter(index, value)` overload remains available for advanced scenarios but is hidden from IntelliSense on typed wrappers.
 
 ## Partial Mocks
 
@@ -28561,7 +28577,7 @@ public abstract class Calculator
 }
 
 var mock = Mock.OfPartial<Calculator>();
-mock.Setup.Multiply(Arg.Any<int>(), Arg.Any<int>()).Returns(99);
+mock.Multiply(Arg.Any<int>(), Arg.Any<int>()).Returns(99);
 
 mock.Object.Add(2, 3);      // 5 (base implementation)
 mock.Object.Multiply(2, 3); // 99 (mocked)
@@ -28579,7 +28595,7 @@ Mock any delegate type:
 
 ```csharp
 var mock = Mock.OfDelegate<Func<string, int>>();
-mock.Setup.Invoke(Arg.Any<string>()).Returns(42);
+mock.Invoke(Arg.Any<string>()).Returns(42);
 
 Func<string, int> func = mock;
 var result = func("hello"); // 42
@@ -28596,7 +28612,7 @@ var realService = new ProductionService();
 var mock = Mock.Wrap(realService);
 
 // Override just one method
-mock.Setup.GetConfig().Returns(new TestConfig());
+mock.GetConfig().Returns(new TestConfig());
 
 // All other calls go to realService
 mock.Object.DoWork(); // calls realService.DoWork()
@@ -28609,7 +28625,7 @@ Create a single mock that implements multiple interfaces:
 ```csharp
 var mock = Mock.Of<ILogger, IDisposable>();
 
-mock.Setup.Log(Arg.Any<string>()); // ILogger method
+mock.Log(Arg.Any<string>()); // ILogger method
 mock.Object.Log("test");
 
 ((IDisposable)mock.Object).Dispose(); // IDisposable method
@@ -28622,7 +28638,7 @@ Supports up to 4 interfaces: `Mock.Of<T1, T2, T3, T4>()`.
 Setup methods return chain objects that support additional behaviors:
 
 ```csharp
-mock.Setup.Process(Arg.Any<int>())
+mock.Process(Arg.Any<int>())
     .Returns(true)
     .RaisesProcessCompleted(EventArgs.Empty)   // strongly-typed auto-raise event
     .TransitionsTo("processed");               // state machine transition
@@ -28637,19 +28653,19 @@ See [Advanced Features](advanced) for details on events and state machines.
 ## Verification
 
 
-The `mock.Verify` surface checks that expected calls were made to the mock.
+Verification uses the same methods as setup — the chain method (`.WasCalled()`, `.WasNeverCalled()`) makes it a verification instead of a setup.
 
 ## Basic Verification
 
 ```csharp
 // Verify a method was called at least once
-mock.Verify.GetUser(42).WasCalled();
+mock.GetUser(42).WasCalled();
 
 // Verify exact call count
-mock.Verify.GetUser(42).WasCalled(Times.Once);
+mock.GetUser(42).WasCalled(Times.Once);
 
 // Verify never called
-mock.Verify.Delete(Arg.Any<int>()).WasNeverCalled();
+mock.Delete(Arg.Any<int>()).WasNeverCalled();
 ```
 
 ### Times
@@ -28667,8 +28683,8 @@ mock.Verify.Delete(Arg.Any<int>()).WasNeverCalled();
 ### Custom Failure Messages
 
 ```csharp
-mock.Verify.GetUser(42).WasCalled(Times.Once, "GetUser should be called once during initialization");
-mock.Verify.Delete(Arg.Any<int>()).WasNeverCalled("Delete should not be called in read-only mode");
+mock.GetUser(42).WasCalled(Times.Once, "GetUser should be called once during initialization");
+mock.Delete(Arg.Any<int>()).WasNeverCalled("Delete should not be called in read-only mode");
 ```
 
 ## Property Verification
@@ -28677,17 +28693,17 @@ Property verification mirrors the setup API — defaults to the **getter**:
 
 ```csharp
 // Getter verification
-mock.Verify.Name.WasCalled(Times.Once);           // getter called once
-mock.Verify.Name.Getter.WasCalled(Times.Once);    // explicit — same as above
-mock.Verify.Name.WasNeverCalled();                 // getter never accessed
+mock.Name.WasCalled(Times.Once);           // getter called once
+mock.Name.Getter.WasCalled(Times.Once);    // explicit — same as above
+mock.Name.WasNeverCalled();                 // getter never accessed
 
 // Setter verification — any value
-mock.Verify.Count.Setter.WasCalled(Times.Exactly(3));
-mock.Verify.Count.Setter.WasNeverCalled();
+mock.Count.Setter.WasCalled(Times.Exactly(3));
+mock.Count.Setter.WasNeverCalled();
 
 // Setter verification — specific value
-mock.Verify.Count.Set(42).WasCalled(Times.Once);
-mock.Verify.Count.Set(Arg.Is<int>(v => v > 0)).WasCalled(Times.AtLeast(1));
+mock.Count.Set(42).WasCalled(Times.Once);
+mock.Count.Set(Arg.Is<int>(v => v > 0)).WasCalled(Times.AtLeast(1));
 ```
 
 ## Argument Matching in Verification
@@ -28696,13 +28712,13 @@ Verification uses the same `Arg<T>` matchers as setup:
 
 ```csharp
 // Exact value
-mock.Verify.GetUser(42).WasCalled(Times.Once);
+mock.GetUser(42).WasCalled(Times.Once);
 
 // Any value
-mock.Verify.GetUser(Arg.Any<int>()).WasCalled(Times.Exactly(3));
+mock.GetUser(Arg.Any<int>()).WasCalled(Times.Exactly(3));
 
 // Predicate
-mock.Verify.GetUser(Arg.Is<int>(id => id > 0)).WasCalled(Times.AtLeast(1));
+mock.GetUser(Arg.Is<int>(id => id > 0)).WasCalled(Times.AtLeast(1));
 ```
 
 See [Argument Matchers](argument-matchers) for the full list of matchers.
@@ -28714,9 +28730,9 @@ Verify calls occurred in a specific order **across one or more mocks**:
 ```csharp
 Mock.VerifyInOrder(() =>
 {
-    mockLogger.Verify.Log("Starting").WasCalled();
-    mockRepo.Verify.SaveAsync(Arg.Any<int>()).WasCalled();
-    mockLogger.Verify.Log("Done").WasCalled();
+    mockLogger.Log("Starting").WasCalled();
+    mockRepo.SaveAsync(Arg.Any<int>()).WasCalled();
+    mockLogger.Log("Done").WasCalled();
 });
 ```
 
@@ -28731,8 +28747,8 @@ If calls occurred out of order, `VerifyInOrder` throws with a message showing th
 Verify that **every setup** was invoked at least once:
 
 ```csharp
-mock.Setup.GetUser(Arg.Any<int>()).Returns(new User("Alice"));
-mock.Setup.Delete(Arg.Any<int>());
+mock.GetUser(Arg.Any<int>()).Returns(new User("Alice"));
+mock.Delete(Arg.Any<int>());
 
 svc.GetUser(1);
 svc.Delete(2);
@@ -28750,8 +28766,8 @@ Verify that all recorded calls have been explicitly verified:
 svc.GetUser(1);
 svc.Delete(2);
 
-mock.Verify.GetUser(1).WasCalled(Times.Once);
-mock.Verify.Delete(2).WasCalled(Times.Once);
+mock.GetUser(1).WasCalled(Times.Once);
+mock.Delete(2).WasCalled(Times.Once);
 
 mock.VerifyNoOtherCalls(); // passes — all calls accounted for
 ```
@@ -28765,11 +28781,11 @@ Use TUnit's `Assert.That` pipeline for assertion-style verification with better 
 ```csharp
 using TUnit.Mocks.Assertions;
 
-await Assert.That(mock.Verify.GetUser(42)).WasCalled(Times.Once);
-await Assert.That(mock.Verify.Delete(Arg.Any<int>())).WasNeverCalled();
+await Assert.That(mock.GetUser(42)).WasCalled(Times.Once);
+await Assert.That(mock.Delete(Arg.Any<int>())).WasNeverCalled();
 
 // Property verification through assertions
-await Assert.That(mock.Verify.Name).WasCalled(Times.Once);
+await Assert.That(mock.Name).WasCalled(Times.Once);
 ```
 
 This integrates with TUnit's assertion engine — failures appear as assertion errors with expression trees in the output.
