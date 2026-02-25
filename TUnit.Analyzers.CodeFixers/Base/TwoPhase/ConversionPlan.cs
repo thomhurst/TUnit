@@ -483,9 +483,16 @@ public class InvocationReplacement : ConversionTarget
 public class TheoryDataConversion : ConversionTarget
 {
     /// <summary>
-    /// The element type(s) from TheoryData&lt;T&gt; (e.g., "TimeSpan" from TheoryData&lt;TimeSpan&gt;)
+    /// The element type(s) from TheoryData&lt;T&gt; (e.g., "TimeSpan" from TheoryData&lt;TimeSpan&gt;
+    /// or "(string, int)" from TheoryData&lt;string, int&gt;)
     /// </summary>
     public required string ElementType { get; init; }
+
+    /// <summary>
+    /// Whether the TheoryData has multiple type arguments (e.g., TheoryData&lt;string, int&gt;).
+    /// When true, initializer expressions { val1, val2 } must be converted to tuple expressions (val1, val2).
+    /// </summary>
+    public bool IsMultiType { get; init; }
 
     /// <summary>
     /// Annotation for the GenericName (TheoryData&lt;T&gt;) type syntax to convert to IEnumerable&lt;T&gt;

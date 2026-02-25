@@ -229,7 +229,7 @@ public class MigrationTransformer
 
                     if (objectCreation?.Initializer != null)
                     {
-                        // Build array type: T[]
+                        // Build array type: T[] or (T1, T2)[]
                         var arrayType = SyntaxFactory.ArrayType(
                             SyntaxFactory.ParseTypeName(conversion.ElementType),
                             SyntaxFactory.SingletonList(
@@ -251,11 +251,21 @@ public class MigrationTransformer
                                 SyntaxFactory.Whitespace("    "));
                         }
 
+                        // For multi-type TheoryData, convert complex initializer expressions
+                        // { val1, val2 } to tuple expressions (val1, val2)
+                        var expressions = objectCreation.Initializer.Expressions;
+                        if (conversion.IsMultiType)
+                        {
+                            expressions = SyntaxFactory.SeparatedList(
+                                expressions.Select(expr => ConvertToTupleExpression(expr)),
+                                expressions.GetSeparators());
+                        }
+
                         // Create array initializer from the collection initializer
                         var newInitializer = SyntaxFactory.InitializerExpression(
                             SyntaxKind.ArrayInitializerExpression,
                             openBrace,
-                            objectCreation.Initializer.Expressions,
+                            expressions,
                             objectCreation.Initializer.CloseBraceToken);
 
                         // Build the array creation expression
@@ -273,7 +283,7 @@ public class MigrationTransformer
                     }
                 }
 
-                // Then, transform the type declaration from TheoryData<T> to IEnumerable<T>
+                // Then, transform the type declaration from TheoryData<T> to IEnumerable<T> or IEnumerable<(T1, T2)>
                 if (conversion.TypeAnnotation != null)
                 {
                     var genericName = currentRoot.DescendantNodes()
@@ -282,10 +292,27 @@ public class MigrationTransformer
 
                     if (genericName != null)
                     {
+                        TypeArgumentListSyntax typeArgList;
+                        if (conversion.IsMultiType)
+                        {
+                            // TheoryData<T1, T2, ...> → IEnumerable<(T1, T2, ...)>
+                            var tupleType = SyntaxFactory.TupleType(
+                                SyntaxFactory.SeparatedList(
+                                    genericName.TypeArgumentList.Arguments.Select(
+                                        arg => SyntaxFactory.TupleElement(arg))));
+                            typeArgList = SyntaxFactory.TypeArgumentList(
+                                SyntaxFactory.SingletonSeparatedList<TypeSyntax>(tupleType));
+                        }
+                        else
+                        {
+                            // TheoryData<T> → IEnumerable<T>
+                            typeArgList = SyntaxFactory.TypeArgumentList(
+                                SyntaxFactory.SeparatedList(genericName.TypeArgumentList.Arguments));
+                        }
+
                         var enumerableType = SyntaxFactory.GenericName(
                             SyntaxFactory.Identifier("IEnumerable"),
-                            SyntaxFactory.TypeArgumentList(
-                                SyntaxFactory.SeparatedList(genericName.TypeArgumentList.Arguments)))
+                            typeArgList)
                             .WithLeadingTrivia(genericName.GetLeadingTrivia())
                             .WithTrailingTrivia(genericName.GetTrailingTrivia());
 
@@ -306,6 +333,29 @@ public class MigrationTransformer
         }
 
         return currentRoot;
+    }
+
+    /// <summary>
+    /// Converts a complex initializer expression { val1, val2 } to a tuple expression (val1, val2).
+    /// For simple expressions (single-value), returns the expression unchanged.
+    /// </summary>
+    private static ExpressionSyntax ConvertToTupleExpression(ExpressionSyntax expression)
+    {
+        if (expression is not InitializerExpressionSyntax initializer
+            || !initializer.IsKind(SyntaxKind.ComplexElementInitializerExpression))
+        {
+            return expression;
+        }
+
+        var arguments = initializer.Expressions.Select(
+            expr => SyntaxFactory.Argument(expr.WithoutLeadingTrivia().WithoutTrailingTrivia()));
+
+        var tupleExpression = SyntaxFactory.TupleExpression(
+            SyntaxFactory.SeparatedList(arguments))
+            .WithLeadingTrivia(initializer.GetLeadingTrivia())
+            .WithTrailingTrivia(initializer.GetTrailingTrivia());
+
+        return tupleExpression;
     }
 
     private CompilationUnitSyntax TransformAssertions(CompilationUnitSyntax root)

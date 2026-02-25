@@ -564,6 +564,68 @@ public class XUnitMigrationAnalyzerTests
     }
 
     [Test]
+    public async Task TheoryData_MultiType_Is_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                {|#0:using System;
+
+                public class MyClass
+                {
+                    public static TheoryData<string, int> MyData
+                    {
+                        get
+                        {
+                            var data = new TheoryData<string, int>
+                            {
+                                { "a", 1 },
+                                { "b", 2 }
+                            };
+                            return data;
+                        }
+                    }
+                }|}
+                """,
+                ConfigureXUnitTest,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0)
+            );
+    }
+
+    [Test]
+    public async Task TheoryData_MultiType_Can_Be_Converted()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using Xunit;
+
+                public class MyClass
+                {
+                    public static readonly TheoryData<string, int> Items = new()
+                    {
+                        { "a", 1 },
+                        { "b", 2 }
+                    };
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+
+                public class MyClass
+                {
+                    public static readonly IEnumerable<(string, int)> Items = new (string, int)[]
+                    {
+                        ("a", 1),
+                        ("b", 2)
+                    };
+                }
+                """,
+                ConfigureXUnitTest
+            );
+    }
+
+    [Test]
     public async Task ITestOutputHelper_Is_Flagged()
     {
         await Verifier
