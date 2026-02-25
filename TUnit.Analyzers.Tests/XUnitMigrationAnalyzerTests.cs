@@ -626,6 +626,39 @@ public class XUnitMigrationAnalyzerTests
     }
 
     [Test]
+    public async Task TheoryData_ThreeTypes_Can_Be_Converted()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using Xunit;
+
+                public class MyClass
+                {
+                    public static readonly TheoryData<string, int, bool> Items = new()
+                    {
+                        { "a", 1, true },
+                        { "b", 2, false }
+                    };
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+
+                public class MyClass
+                {
+                    public static readonly IEnumerable<(string, int, bool)> Items = new (string, int, bool)[]
+                    {
+                        ("a", 1, true),
+                        ("b", 2, false)
+                    };
+                }
+                """,
+                ConfigureXUnitTest
+            );
+    }
+
+    [Test]
     public async Task ITestOutputHelper_Is_Flagged()
     {
         await Verifier
