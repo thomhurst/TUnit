@@ -25,6 +25,7 @@ Argument matchers control which calls a setup or verification matches. The same 
 | `Arg.IsIn<T>(values)` | Value in a set |
 | `Arg.IsNotIn<T>(values)` | Value not in a set |
 | `Arg.Not<T>(inner)` | Negation of another matcher |
+| `RefStructArg<T>.Any` | Any value of a ref struct type (.NET 9+) |
 
 ## Basic Matchers
 
@@ -185,6 +186,60 @@ await Assert.That(nameArg.Values).HasCount().EqualTo(3);
 :::tip
 Capture works in both setup and verification contexts. Store the `Arg<T>` in a variable, then inspect `.Values` or `.Latest` after exercising the code.
 :::
+
+## Ref Struct Parameters
+
+Regular `Arg<T>` matchers cannot be used with ref struct types like `ReadOnlySpan<T>` or `Span<T>` because ref structs cannot be generic type arguments. On **.NET 9+**, TUnit.Mocks provides `RefStructArg<T>` which uses the `allows ref struct` anti-constraint to make these parameters visible in the setup and verification API.
+
+:::note .NET 9+ Only
+`RefStructArg<T>` requires .NET 9 or later. On older target frameworks, ref struct parameters are excluded from the setup/verify API and all calls match regardless of the ref struct argument value.
+:::
+
+### Matching Any Value
+
+Currently, `RefStructArg<T>.Any` is the only supported matcher — it matches any value passed for that parameter:
+
+```csharp
+public interface IBufferProcessor
+{
+    void Process(ReadOnlySpan<byte> data);
+    int Parse(ReadOnlySpan<char> text);
+}
+
+var mock = Mock.Of<IBufferProcessor>();
+
+// Setup — ref struct param is visible in the API
+mock.Process(RefStructArg<ReadOnlySpan<byte>>.Any).Callback(() => Console.WriteLine("called"));
+mock.Parse(RefStructArg<ReadOnlySpan<char>>.Any).Returns(42);
+
+// Verification
+mock.Process(RefStructArg<ReadOnlySpan<byte>>.Any).WasCalled(Times.Once);
+```
+
+### Mixed Parameters
+
+When a method has both regular and ref struct parameters, use `Arg<T>` for the regular ones and `RefStructArg<T>` for the ref struct ones. Argument matching works on the regular parameters while the ref struct parameter matches any value:
+
+```csharp
+public interface IMixedProcessor
+{
+    int Compute(int id, ReadOnlySpan<byte> data);
+}
+
+var mock = Mock.Of<IMixedProcessor>();
+
+// Match on 'id', accept any span value
+mock.Compute(1, RefStructArg<ReadOnlySpan<byte>>.Any).Returns(100);
+mock.Compute(2, RefStructArg<ReadOnlySpan<byte>>.Any).Returns(200);
+
+var result = mock.Object.Compute(1, new byte[] { 0xFF }); // returns 100
+```
+
+### Limitations
+
+- **Only `.Any` matching** — exact value and predicate matching are not supported because ref struct values cannot be stored on the heap
+- **No argument capture** — `RefStructArg<T>` does not support `.Values` or `.Latest` like `Arg<T>` does
+- **Not available in typed callbacks** — ref struct parameters are excluded from the typed `Callback`/`Returns`/`Throws` delegate overloads (use the `Action<object?[]>` overload instead)
 
 ## Custom Matchers
 
