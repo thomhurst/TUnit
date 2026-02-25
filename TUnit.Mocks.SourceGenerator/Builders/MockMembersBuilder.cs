@@ -16,9 +16,7 @@ internal static class MockMembersBuilder
 
     private static readonly HashSet<string> MockMemberNames = new(System.StringComparer.Ordinal)
     {
-        "Object", "Engine", "Behavior", "Invocations", "DefaultValueProvider",
-        "SetupAllProperties", "Reset", "VerifyAll", "VerifyNoOtherCalls",
-        "GetAutoMock", "GetDiagnostics", "SetState", "InState",
+        "Object", "Engine",
         "GetHashCode", "GetType", "ToString", "Equals"
     };
 
