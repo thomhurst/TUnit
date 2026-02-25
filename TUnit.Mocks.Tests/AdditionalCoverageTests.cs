@@ -266,11 +266,11 @@ public class InvocationOrderingTests
         mock.Object.GetName();
         mock.Object.Add(3, 4);
 
-        await Assert.That(Mock.Invocations(mock)).HasCount().EqualTo(4);
-        await Assert.That(Mock.Invocations(mock)[0].MemberName).IsEqualTo("Add");
-        await Assert.That(Mock.Invocations(mock)[1].MemberName).IsEqualTo("Log");
-        await Assert.That(Mock.Invocations(mock)[2].MemberName).IsEqualTo("GetName");
-        await Assert.That(Mock.Invocations(mock)[3].MemberName).IsEqualTo("Add");
+        await Assert.That(Mock.GetInvocations(mock)).HasCount().EqualTo(4);
+        await Assert.That(Mock.GetInvocations(mock)[0].MemberName).IsEqualTo("Add");
+        await Assert.That(Mock.GetInvocations(mock)[1].MemberName).IsEqualTo("Log");
+        await Assert.That(Mock.GetInvocations(mock)[2].MemberName).IsEqualTo("GetName");
+        await Assert.That(Mock.GetInvocations(mock)[3].MemberName).IsEqualTo("Add");
     }
 
     [Test]
@@ -282,7 +282,7 @@ public class InvocationOrderingTests
         mock.Object.GetName();
         mock.Object.Log("msg");
 
-        var invocations = Mock.Invocations(mock);
+        var invocations = Mock.GetInvocations(mock);
         for (int i = 1; i < invocations.Count; i++)
         {
             await Assert.That(invocations[i].SequenceNumber)

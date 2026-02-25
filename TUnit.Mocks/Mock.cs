@@ -304,7 +304,7 @@ public static class Mock
     // ──────────────────────────────────────────────────────────
 
     /// <summary>All calls made to this mock, in order.</summary>
-    public static IReadOnlyList<CallRecord> Invocations<T>(Mock<T> mock) where T : class
+    public static IReadOnlyList<CallRecord> GetInvocations<T>(Mock<T> mock) where T : class
         => mock.Engine.GetAllCalls();
 
     /// <summary>Returns the mock behavior (Loose or Strict).</summary>

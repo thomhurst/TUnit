@@ -234,7 +234,7 @@ svc.GetUser(1);
 Mock.Reset(mock);
 
 svc.GetUser(1); // returns default (setup cleared)
-Mock.Invocations(mock).Count; // 0 (history cleared)
+Mock.GetInvocations(mock).Count; // 0 (history cleared)
 ```
 
 The `SetupAllProperties()` flag is preserved across resets.

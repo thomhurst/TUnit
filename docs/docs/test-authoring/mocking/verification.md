@@ -146,7 +146,7 @@ This integrates with TUnit's assertion engine — failures appear as assertion e
 Access the raw call history for custom inspection:
 
 ```csharp
-var calls = Mock.Invocations(mock);
+var calls = Mock.GetInvocations(mock);
 
 await Assert.That(calls).HasCount().EqualTo(3);
 await Assert.That(calls[0].MemberName).IsEqualTo("GetUser");

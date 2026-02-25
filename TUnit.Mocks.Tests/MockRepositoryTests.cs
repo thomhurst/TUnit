@@ -137,8 +137,8 @@ public class MockRepositoryTests
 
         // Assert — setups and history are cleared
         await Assert.That(serviceMock.Object.GetData(1)).IsEmpty(); // no setup, returns smart default
-        await Assert.That(Mock.Invocations(serviceMock)).Count().IsEqualTo(1); // only the new call
-        await Assert.That(Mock.Invocations(loggerMock)).Count().IsEqualTo(0); // history cleared
+        await Assert.That(Mock.GetInvocations(serviceMock)).Count().IsEqualTo(1); // only the new call
+        await Assert.That(Mock.GetInvocations(loggerMock)).Count().IsEqualTo(0); // history cleared
     }
 
     [Test]
