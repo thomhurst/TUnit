@@ -76,13 +76,13 @@ namespace TUnit.Mocks.Generated
         extension(global::TUnit.Mocks.Mock<global::IRepository> mock)
         {
             public global::TUnit.Mocks.PropertyMockCall<string> Name
-                => new(mock.Engine, 0, 1, "Name", true, true);
+                => new(global::TUnit.Mocks.Mock.GetEngine(mock), 0, 1, "Name", true, true);
 
             public global::TUnit.Mocks.PropertyMockCall<int> Count
-                => new(mock.Engine, 2, 0, "Count", true, false);
+                => new(global::TUnit.Mocks.Mock.GetEngine(mock), 2, 0, "Count", true, false);
 
             public global::TUnit.Mocks.PropertyMockCall<bool> IsOpen
-                => new(mock.Engine, 0, 4, "IsOpen", false, true);
+                => new(global::TUnit.Mocks.Mock.GetEngine(mock), 0, 4, "IsOpen", false, true);
         }
     }
 }

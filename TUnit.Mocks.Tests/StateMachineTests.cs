@@ -222,8 +222,8 @@ public class StateMachineTests
 
         Mock.Reset(mock);
 
-        // After reset, Engine.CurrentState should be null
-        await Assert.That(mock.Engine.CurrentState).IsNull();
+        // After reset, current state should be null
+        await Assert.That(Mock.GetEngine(mock).CurrentState).IsNull();
     }
 
     [Test]

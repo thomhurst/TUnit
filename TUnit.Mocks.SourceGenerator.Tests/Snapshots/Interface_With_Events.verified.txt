@@ -15,7 +15,7 @@ namespace TUnit.Mocks.Generated
     {
         extension(global::TUnit.Mocks.Mock<global::INotifier> mock)
         {
-            public INotifier_MockEvents Events => new(mock.Engine);
+            public INotifier_MockEvents Events => new(global::TUnit.Mocks.Mock.GetEngine(mock));
         }
 
         extension(INotifier_MockEvents events)
@@ -117,12 +117,12 @@ namespace TUnit.Mocks.Generated
         public static INotifier_Notify_M0_MockCall Notify(this global::TUnit.Mocks.Mock<global::INotifier> mock, global::TUnit.Mocks.Arguments.Arg<string> message)
         {
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { message.Matcher };
-            return new INotifier_Notify_M0_MockCall(mock.Engine, 0, "Notify", matchers);
+            return new INotifier_Notify_M0_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 0, "Notify", matchers);
         }
 
         public static void RaiseItemAdded(this global::TUnit.Mocks.Mock<global::INotifier> mock, string e)
         {
-            ((global::TUnit.Mocks.IRaisable)mock.Engine.Raisable!).RaiseEvent("ItemAdded", (object?)e);
+            ((global::TUnit.Mocks.IRaisable)global::TUnit.Mocks.Mock.GetEngine(mock).Raisable!).RaiseEvent("ItemAdded", (object?)e);
         }
     }
 

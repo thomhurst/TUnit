@@ -16,7 +16,7 @@ internal static class MockMembersBuilder
 
     private static readonly HashSet<string> MockMemberNames = new(System.StringComparer.Ordinal)
     {
-        "Object", "Engine",
+        "Object",
         "GetHashCode", "GetType", "ToString", "Equals"
     };
 
@@ -555,15 +555,15 @@ internal static class MockMembersBuilder
             if (useTypedWrapper)
             {
                 var wrapperName = GetWrapperName(safeName, method);
-                writer.AppendLine($"return new {wrapperName}(mock.Engine, {method.MemberId}, \"{method.Name}\", matchers);");
+                writer.AppendLine($"return new {wrapperName}(global::TUnit.Mocks.Mock.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
             }
             else if (method.IsVoid || method.IsRefStructReturn)
             {
-                writer.AppendLine($"return new global::TUnit.Mocks.VoidMockMethodCall(mock.Engine, {method.MemberId}, \"{method.Name}\", matchers);");
+                writer.AppendLine($"return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.Mock.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
             }
             else
             {
-                writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<{setupReturnType}>(mock.Engine, {method.MemberId}, \"{method.Name}\", matchers);");
+                writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<{setupReturnType}>(global::TUnit.Mocks.Mock.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
             }
         }
     }
@@ -586,7 +586,7 @@ internal static class MockMembersBuilder
                 var safePropName = GetSafeMemberName(prop.Name);
 
                 writer.AppendLine($"public global::TUnit.Mocks.PropertyMockCall<{prop.ReturnType}> {safePropName}");
-                writer.AppendLine($"    => new(mock.Engine, {getterMemberId}, {setterMemberId}, \"{prop.Name}\", {hasGetter}, {hasSetter});");
+                writer.AppendLine($"    => new(global::TUnit.Mocks.Mock.GetEngine(mock), {getterMemberId}, {setterMemberId}, \"{prop.Name}\", {hasGetter}, {hasSetter});");
             }
         }
     }
@@ -625,7 +625,7 @@ internal static class MockMembersBuilder
 
             using (writer.Block($"public static void Raise{evt.Name}({raiseParams})"))
             {
-                writer.AppendLine($"((global::TUnit.Mocks.IRaisable)mock.Engine.Raisable!).RaiseEvent(\"{evt.Name}\", {argsExpr});");
+                writer.AppendLine($"((global::TUnit.Mocks.IRaisable)global::TUnit.Mocks.Mock.GetEngine(mock).Raisable!).RaiseEvent(\"{evt.Name}\", {argsExpr});");
             }
         }
     }

@@ -129,7 +129,7 @@ public static class Mock
     public static Mock<T> Of<T>(MockBehavior behavior, IDefaultValueProvider defaultValueProvider) where T : class
     {
         var mock = Of<T>(behavior);
-        mock.Engine.DefaultValueProvider = defaultValueProvider;
+        GetEngine(mock).DefaultValueProvider = defaultValueProvider;
         return mock;
     }
 
@@ -303,38 +303,45 @@ public static class Mock
     //  Static helpers – expose control surface without cluttering Mock<T>
     // ──────────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Gets the mock engine for generated code. Not intended for direct use.
+    /// </summary>
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    public static MockEngine<T> GetEngine<T>(Mock<T> mock) where T : class
+        => ((IMockEngineAccess<T>)mock).Engine;
+
     /// <summary>All calls made to this mock, in order.</summary>
     public static IReadOnlyList<CallRecord> GetInvocations<T>(Mock<T> mock) where T : class
-        => mock.Engine.GetAllCalls();
+        => GetEngine(mock).GetAllCalls();
 
     /// <summary>Returns the mock behavior (Loose or Strict).</summary>
     public static MockBehavior GetBehavior<T>(Mock<T> mock) where T : class
-        => mock.Engine.Behavior;
+        => GetEngine(mock).Behavior;
 
     /// <summary>
     /// Gets the custom default value provider for unconfigured methods in loose mode.
     /// When set, this provider is consulted before auto-mocking and built-in defaults.
     /// </summary>
     public static IDefaultValueProvider? GetDefaultValueProvider<T>(Mock<T> mock) where T : class
-        => mock.Engine.DefaultValueProvider;
+        => GetEngine(mock).DefaultValueProvider;
 
     /// <summary>
     /// Sets the custom default value provider for unconfigured methods in loose mode.
     /// When set, this provider is consulted before auto-mocking and built-in defaults.
     /// </summary>
     public static void SetDefaultValueProvider<T>(Mock<T> mock, IDefaultValueProvider? provider) where T : class
-        => mock.Engine.DefaultValueProvider = provider;
+        => GetEngine(mock).DefaultValueProvider = provider;
 
     /// <summary>
     /// Enables auto-tracking for all properties. Property setters store values and getters return them,
     /// acting like real auto-properties. Explicit setups take precedence over auto-tracked values.
     /// </summary>
     public static void SetupAllProperties<T>(Mock<T> mock) where T : class
-        => mock.Engine.AutoTrackProperties = true;
+        => GetEngine(mock).AutoTrackProperties = true;
 
     /// <summary>Clears all setups and call history.</summary>
     public static void Reset<T>(Mock<T> mock) where T : class
-        => ((IMock)mock).Reset();
+        => GetEngine(mock).Reset();
 
     /// <summary>
     /// Verifies all registered setups were invoked at least once.
@@ -354,13 +361,13 @@ public static class Mock
     /// Returns a diagnostic report of this mock's setup coverage and call matching.
     /// </summary>
     public static MockDiagnostics GetDiagnostics<T>(Mock<T> mock) where T : class
-        => mock.Engine.GetDiagnostics();
+        => GetEngine(mock).GetDiagnostics();
 
     /// <summary>
     /// Sets the current state for state machine mocking. Null clears the state.
     /// </summary>
     public static void SetState<T>(Mock<T> mock, string? stateName) where T : class
-        => mock.Engine.TransitionTo(stateName);
+        => GetEngine(mock).TransitionTo(stateName);
 
     /// <summary>
     /// Configures setups scoped to a specific state. All setups registered inside
@@ -368,15 +375,16 @@ public static class Mock
     /// </summary>
     public static void InState<T>(Mock<T> mock, string stateName, Action<Mock<T>> configure) where T : class
     {
-        var previous = mock.Engine.PendingRequiredState;
-        mock.Engine.PendingRequiredState = stateName;
+        var engine = GetEngine(mock);
+        var previous = engine.PendingRequiredState;
+        engine.PendingRequiredState = stateName;
         try
         {
             configure(mock);
         }
         finally
         {
-            mock.Engine.PendingRequiredState = previous;
+            engine.PendingRequiredState = previous;
         }
     }
 }

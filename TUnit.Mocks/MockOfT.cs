@@ -8,11 +8,9 @@ namespace TUnit.Mocks;
 /// Wraps a generated mock implementation. Source-generated extension methods on <c>Mock&lt;T&gt;</c>
 /// provide strongly-typed setup and verification members directly.
 /// </summary>
-public class Mock<T> : IMock where T : class
+public class Mock<T> : IMock, IMockEngineAccess<T> where T : class
 {
-    /// <summary>The mock engine. Used by generated code. Not intended for direct use.</summary>
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public MockEngine<T> Engine { get; }
+    private readonly MockEngine<T> _engine;
 
     /// <summary>The mock object that implements T.</summary>
     public T Object { get; }
@@ -20,11 +18,14 @@ public class Mock<T> : IMock where T : class
     /// <inheritdoc />
     object IMock.ObjectInstance => Object;
 
+    /// <inheritdoc />
+    MockEngine<T> IMockEngineAccess<T>.Engine => _engine;
+
     /// <summary>Creates a Mock wrapping the given object and engine. Used by generated code.</summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public Mock(T mockObject, MockEngine<T> engine)
     {
-        Engine = engine;
+        _engine = engine;
         Object = mockObject;
         Mock.Register(mockObject, this);
     }
@@ -32,7 +33,7 @@ public class Mock<T> : IMock where T : class
     /// <inheritdoc />
     void IMock.VerifyAll()
     {
-        var setups = Engine.GetSetups();
+        var setups = _engine.GetSetups();
         var uninvoked = new List<string>();
         foreach (var setup in setups)
         {
@@ -57,7 +58,7 @@ public class Mock<T> : IMock where T : class
     /// <inheritdoc />
     void IMock.VerifyNoOtherCalls()
     {
-        var unverified = Engine.GetUnverifiedCalls();
+        var unverified = _engine.GetUnverifiedCalls();
         if (unverified.Count > 0)
         {
             var message = $"VerifyNoOtherCalls failed. The following calls were not verified:\n" +
@@ -67,7 +68,7 @@ public class Mock<T> : IMock where T : class
     }
 
     /// <inheritdoc />
-    void IMock.Reset() => Engine.Reset();
+    void IMock.Reset() => _engine.Reset();
 
     /// <summary>Implicit conversion to T -- no .Object needed.</summary>
     public static implicit operator T(Mock<T> mock) => mock.Object;

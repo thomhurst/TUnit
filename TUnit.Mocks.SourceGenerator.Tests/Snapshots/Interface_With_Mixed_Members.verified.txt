@@ -15,7 +15,7 @@ namespace TUnit.Mocks.Generated
     {
         extension(global::TUnit.Mocks.Mock<global::IService> mock)
         {
-            public IService_MockEvents Events => new(mock.Engine);
+            public IService_MockEvents Events => new(global::TUnit.Mocks.Mock.GetEngine(mock));
         }
 
         extension(IService_MockEvents events)
@@ -141,27 +141,27 @@ namespace TUnit.Mocks.Generated
         public static IService_GetAsync_M3_MockCall GetAsync(this global::TUnit.Mocks.Mock<global::IService> mock, global::TUnit.Mocks.Arguments.Arg<int> id)
         {
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { id.Matcher };
-            return new IService_GetAsync_M3_MockCall(mock.Engine, 3, "GetAsync", matchers);
+            return new IService_GetAsync_M3_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 3, "GetAsync", matchers);
         }
 
         public static IService_Process_M4_MockCall Process(this global::TUnit.Mocks.Mock<global::IService> mock, global::TUnit.Mocks.Arguments.Arg<string> data)
         {
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { data.Matcher };
-            return new IService_Process_M4_MockCall(mock.Engine, 4, "Process", matchers);
+            return new IService_Process_M4_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 4, "Process", matchers);
         }
 
         extension(global::TUnit.Mocks.Mock<global::IService> mock)
         {
             public global::TUnit.Mocks.PropertyMockCall<string> Name
-                => new(mock.Engine, 0, 1, "Name", true, true);
+                => new(global::TUnit.Mocks.Mock.GetEngine(mock), 0, 1, "Name", true, true);
 
             public global::TUnit.Mocks.PropertyMockCall<int> Count
-                => new(mock.Engine, 2, 0, "Count", true, false);
+                => new(global::TUnit.Mocks.Mock.GetEngine(mock), 2, 0, "Count", true, false);
         }
 
         public static void RaiseStatusChanged(this global::TUnit.Mocks.Mock<global::IService> mock, string e)
         {
-            ((global::TUnit.Mocks.IRaisable)mock.Engine.Raisable!).RaiseEvent("StatusChanged", (object?)e);
+            ((global::TUnit.Mocks.IRaisable)global::TUnit.Mocks.Mock.GetEngine(mock).Raisable!).RaiseEvent("StatusChanged", (object?)e);
         }
     }
 

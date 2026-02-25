@@ -65,7 +65,7 @@ namespace TUnit.Mocks.Generated
         public static IGreeter_Greet_M0_MockCall Greet(this global::TUnit.Mocks.Mock<global::IGreeter> mock, global::TUnit.Mocks.Arguments.Arg<string> name)
         {
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { name.Matcher };
-            return new IGreeter_Greet_M0_MockCall(mock.Engine, 0, "Greet", matchers);
+            return new IGreeter_Greet_M0_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 0, "Greet", matchers);
         }
     }
 

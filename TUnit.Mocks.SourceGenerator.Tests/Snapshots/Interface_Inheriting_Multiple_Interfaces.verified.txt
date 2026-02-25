@@ -75,19 +75,19 @@ namespace TUnit.Mocks.Generated
         public static global::TUnit.Mocks.VoidMockMethodCall Flush(this global::TUnit.Mocks.Mock<global::IReadWriter> mock)
         {
             var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
-            return new global::TUnit.Mocks.VoidMockMethodCall(mock.Engine, 0, "Flush", matchers);
+            return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.Mock.GetEngine(mock), 0, "Flush", matchers);
         }
 
         public static global::TUnit.Mocks.MockMethodCall<string> Read(this global::TUnit.Mocks.Mock<global::IReadWriter> mock)
         {
             var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
-            return new global::TUnit.Mocks.MockMethodCall<string>(mock.Engine, 1, "Read", matchers);
+            return new global::TUnit.Mocks.MockMethodCall<string>(global::TUnit.Mocks.Mock.GetEngine(mock), 1, "Read", matchers);
         }
 
         public static IReadWriter_Write_M2_MockCall Write(this global::TUnit.Mocks.Mock<global::IReadWriter> mock, global::TUnit.Mocks.Arguments.Arg<string> data)
         {
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { data.Matcher };
-            return new IReadWriter_Write_M2_MockCall(mock.Engine, 2, "Write", matchers);
+            return new IReadWriter_Write_M2_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 2, "Write", matchers);
         }
     }
 

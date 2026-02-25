@@ -80,25 +80,25 @@ namespace TUnit.Mocks.Generated
         public static IFormatter_Format_M0_MockCall Format(this global::TUnit.Mocks.Mock<global::IFormatter> mock, global::TUnit.Mocks.Arguments.Arg<string> value)
         {
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { value.Matcher };
-            return new IFormatter_Format_M0_MockCall(mock.Engine, 0, "Format", matchers);
+            return new IFormatter_Format_M0_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 0, "Format", matchers);
         }
 
         public static IFormatter_Format_M1_MockCall Format(this global::TUnit.Mocks.Mock<global::IFormatter> mock, global::TUnit.Mocks.Arguments.Arg<int> value)
         {
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { value.Matcher };
-            return new IFormatter_Format_M1_MockCall(mock.Engine, 1, "Format", matchers);
+            return new IFormatter_Format_M1_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 1, "Format", matchers);
         }
 
         public static IFormatter_Format_M2_MockCall Format(this global::TUnit.Mocks.Mock<global::IFormatter> mock, global::TUnit.Mocks.Arguments.Arg<string> template, global::TUnit.Mocks.Arguments.Arg<string> arg1)
         {
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { template.Matcher, arg1.Matcher };
-            return new IFormatter_Format_M2_MockCall(mock.Engine, 2, "Format", matchers);
+            return new IFormatter_Format_M2_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 2, "Format", matchers);
         }
 
         public static IFormatter_Format_M3_MockCall Format(this global::TUnit.Mocks.Mock<global::IFormatter> mock, global::TUnit.Mocks.Arguments.Arg<string> template, global::TUnit.Mocks.Arguments.Arg<string> arg1, global::TUnit.Mocks.Arguments.Arg<string> arg2)
         {
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { template.Matcher, arg1.Matcher, arg2.Matcher };
-            return new IFormatter_Format_M3_MockCall(mock.Engine, 3, "Format", matchers);
+            return new IFormatter_Format_M3_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 3, "Format", matchers);
         }
     }
 

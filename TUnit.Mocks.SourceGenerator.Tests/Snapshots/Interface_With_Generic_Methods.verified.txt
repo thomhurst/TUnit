@@ -75,19 +75,19 @@ namespace TUnit.Mocks.Generated
         public static global::TUnit.Mocks.MockMethodCall<T> GetById<T>(this global::TUnit.Mocks.Mock<global::IRepository> mock, global::TUnit.Mocks.Arguments.Arg<int> id) where T : class
         {
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { id.Matcher };
-            return new global::TUnit.Mocks.MockMethodCall<T>(mock.Engine, 0, "GetById", matchers);
+            return new global::TUnit.Mocks.MockMethodCall<T>(global::TUnit.Mocks.Mock.GetEngine(mock), 0, "GetById", matchers);
         }
 
         public static global::TUnit.Mocks.VoidMockMethodCall Save<T>(this global::TUnit.Mocks.Mock<global::IRepository> mock, global::TUnit.Mocks.Arguments.Arg<T> entity) where T : class, new()
         {
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { entity.Matcher };
-            return new global::TUnit.Mocks.VoidMockMethodCall(mock.Engine, 1, "Save", matchers);
+            return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.Mock.GetEngine(mock), 1, "Save", matchers);
         }
 
         public static global::TUnit.Mocks.MockMethodCall<TResult> Transform<TInput, TResult>(this global::TUnit.Mocks.Mock<global::IRepository> mock, global::TUnit.Mocks.Arguments.Arg<TInput> input) where TInput : notnull where TResult : struct
         {
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { input.Matcher };
-            return new global::TUnit.Mocks.MockMethodCall<TResult>(mock.Engine, 2, "Transform", matchers);
+            return new global::TUnit.Mocks.MockMethodCall<TResult>(global::TUnit.Mocks.Mock.GetEngine(mock), 2, "Transform", matchers);
         }
     }
 }
