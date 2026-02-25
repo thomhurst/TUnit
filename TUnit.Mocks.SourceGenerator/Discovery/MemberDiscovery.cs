@@ -300,6 +300,7 @@ internal static class MemberDiscovery
                     Direction = p.GetParameterDirection(),
                     HasDefaultValue = p.HasExplicitDefaultValue,
                     DefaultValueExpression = p.HasExplicitDefaultValue ? FormatDefaultValue(p) : null,
+                    IsValueType = p.Type.IsValueType,
                     IsRefStruct = p.Type.IsRefLikeType
                 }).ToImmutableArray()
             ),
@@ -394,7 +395,8 @@ internal static class MemberDiscovery
                         Direction = p.GetParameterDirection(),
                         HasDefaultValue = p.HasExplicitDefaultValue,
                         DefaultValueExpression = p.HasExplicitDefaultValue ? FormatDefaultValue(p) : null,
-                        IsValueType = p.Type.IsValueType
+                        IsValueType = p.Type.IsValueType,
+                        IsRefStruct = p.Type.IsRefLikeType
                     }).ToImmutableArray()
                 )
             });
