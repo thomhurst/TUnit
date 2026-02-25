@@ -266,11 +266,12 @@ public class InvocationOrderingTests
         mock.Object.GetName();
         mock.Object.Add(3, 4);
 
-        await Assert.That(Mock.GetInvocations(mock)).HasCount().EqualTo(4);
-        await Assert.That(Mock.GetInvocations(mock)[0].MemberName).IsEqualTo("Add");
-        await Assert.That(Mock.GetInvocations(mock)[1].MemberName).IsEqualTo("Log");
-        await Assert.That(Mock.GetInvocations(mock)[2].MemberName).IsEqualTo("GetName");
-        await Assert.That(Mock.GetInvocations(mock)[3].MemberName).IsEqualTo("Add");
+        var invocations = Mock.GetInvocations(mock);
+        await Assert.That(invocations).HasCount().EqualTo(4);
+        await Assert.That(invocations[0].MemberName).IsEqualTo("Add");
+        await Assert.That(invocations[1].MemberName).IsEqualTo("Log");
+        await Assert.That(invocations[2].MemberName).IsEqualTo("GetName");
+        await Assert.That(invocations[3].MemberName).IsEqualTo("Add");
     }
 
     [Test]
