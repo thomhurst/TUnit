@@ -1837,12 +1837,7 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
                 var typeArgs = originalGeneric.TypeArgumentList.Arguments;
                 if (typeArgs.Count == 0) continue;
 
-                // For single type: TheoryData<T> → IEnumerable<T>, element type is T
-                // For multi type: TheoryData<T1, T2> → IEnumerable<(T1, T2)>, element type is (T1, T2)
-                var isMultiType = typeArgs.Count > 1;
-                var elementType = isMultiType
-                    ? $"({string.Join(", ", typeArgs.Select(t => t.ToString()))})"
-                    : typeArgs[0].ToString();
+                var elementTypes = typeArgs.Select(t => t.ToString()).ToList();
 
                 // Create annotations for both the type and the object creation
                 var typeAnnotation = new SyntaxAnnotation("TUnitMigration", Guid.NewGuid().ToString());
@@ -1850,8 +1845,7 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
 
                 var conversion = new TheoryDataConversion
                 {
-                    ElementType = elementType,
-                    IsMultiType = isMultiType,
+                    ElementTypes = elementTypes,
                     TypeAnnotation = typeAnnotation,
                     CreationAnnotation = creationAnnotation,
                     OriginalText = originalGeneric.ToString()

@@ -626,6 +626,53 @@ public class XUnitMigrationAnalyzerTests
     }
 
     [Test]
+    public async Task TheoryData_MultiType_PropertyGetter_Can_Be_Converted()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using Xunit;
+
+                public class MyClass
+                {
+                    public static TheoryData<string, int> MyData
+                    {
+                        get
+                        {
+                            var data = new TheoryData<string, int>
+                            {
+                                { "a", 1 },
+                                { "b", 2 }
+                            };
+                            return data;
+                        }
+                    }
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+
+                public class MyClass
+                {
+                    public static IEnumerable<(string, int)> MyData
+                    {
+                        get
+                        {
+                            var data = new (string, int)[]
+                            {
+                                ("a", 1),
+                                ("b", 2)
+                            };
+                            return data;
+                        }
+                    }
+                }
+                """,
+                ConfigureXUnitTest
+            );
+    }
+
+    [Test]
     public async Task TheoryData_ThreeTypes_Can_Be_Converted()
     {
         await CodeFixer
