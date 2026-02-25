@@ -88,9 +88,13 @@ internal static class MockMembersBuilder
         var matchableParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out && !p.IsRefStruct).ToList();
         if (matchableParams.Count == 0)
         {
+            // Include span-type ref struct out/ref params (supported via array conversion)
             var hasOutRefParams = method.Parameters.Any(p =>
-                !p.IsRefStruct && (p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref));
-            return hasEvents || hasOutRefParams;
+                (!p.IsRefStruct || p.SpanElementType is not null) &&
+                (p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref));
+            // Span return types need a typed wrapper for the generated Returns(SpanType) method
+            var hasSpanReturn = method.SpanReturnElementType is not null;
+            return hasEvents || hasOutRefParams || hasSpanReturn;
         }
         return matchableParams.Count <= MaxTypedParams;
     }
@@ -116,7 +120,7 @@ internal static class MockMembersBuilder
         // Ref struct returns use the void wrapper (can't use generic type args with ref structs)
         if (method.IsVoid || method.IsRefStructReturn)
         {
-            GenerateVoidUnifiedClass(writer, wrapperName, matchableParams, events, method.Parameters, hasRefStructParams, allNonOutParams);
+            GenerateVoidUnifiedClass(writer, wrapperName, matchableParams, events, method.Parameters, hasRefStructParams, allNonOutParams, method.SpanReturnElementType, method.ReturnType);
         }
         else
         {
@@ -260,7 +264,8 @@ internal static class MockMembersBuilder
 
     private static void GenerateVoidUnifiedClass(CodeWriter writer, string wrapperName,
         List<MockParameterModel> nonOutParams, EquatableArray<MockEventModel> events,
-        EquatableArray<MockParameterModel> allParameters, bool hasRefStructParams, List<MockParameterModel> allNonOutParams)
+        EquatableArray<MockParameterModel> allParameters, bool hasRefStructParams, List<MockParameterModel> allNonOutParams,
+        string? spanReturnElementType = null, string? spanReturnType = null)
     {
         var builderType = "global::TUnit.Mocks.Setup.VoidMethodSetupBuilder";
         var hasOutRef = allParameters.Any(p => p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref);
@@ -323,6 +328,14 @@ internal static class MockMembersBuilder
             writer.AppendLine($"public {wrapperName} TransitionsTo(string stateName) {{ EnsureSetup().TransitionsTo(stateName); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
             writer.AppendLine($"public {wrapperName} Then() {{ EnsureSetup().Then(); return this; }}");
+
+            // Span return support: generate Returns(SpanType) that stores via SetsOutParameter(-1, ...)
+            if (spanReturnElementType is not null && spanReturnType is not null)
+            {
+                writer.AppendLine();
+                writer.AppendLine($"/// <summary>Configure the return value for this span-returning method.</summary>");
+                writer.AppendLine($"public {wrapperName} Returns({spanReturnType} value) {{ EnsureSetup().SetsOutParameter(-1, value.ToArray()); return this; }}");
+            }
 
             // Typed parameter overloads (only for methods with typed params)
             if (nonOutParams.Count >= 1)
@@ -466,12 +479,24 @@ internal static class MockMembersBuilder
             if (param.Direction != ParameterDirection.Out && param.Direction != ParameterDirection.Ref)
                 continue;
 
+            // Skip non-span ref structs (can't be boxed)
+            if (param.IsRefStruct && param.SpanElementType is null)
+                continue;
+
             var prefix = param.Direction == ParameterDirection.Out ? "SetsOut" : "SetsRef";
             var methodName = prefix + ToPascalCase(param.Name);
             var dirLabel = param.Direction == ParameterDirection.Out ? "out" : "ref";
 
             writer.AppendLine($"/// <summary>Sets the '{param.Name}' {dirLabel} parameter to the specified value when this setup matches.</summary>");
-            writer.AppendLine($"public {wrapperName} {methodName}({param.FullyQualifiedType} {param.Name}) {{ EnsureSetup().SetsOutParameter({i}, {param.Name}); return this; }}");
+            if (param.SpanElementType is not null)
+            {
+                // Span types: convert to array for storage, reconstruct at invocation time
+                writer.AppendLine($"public {wrapperName} {methodName}({param.FullyQualifiedType} {param.Name}) {{ EnsureSetup().SetsOutParameter({i}, {param.Name}.ToArray()); return this; }}");
+            }
+            else
+            {
+                writer.AppendLine($"public {wrapperName} {methodName}({param.FullyQualifiedType} {param.Name}) {{ EnsureSetup().SetsOutParameter({i}, {param.Name}); return this; }}");
+            }
         }
     }
 

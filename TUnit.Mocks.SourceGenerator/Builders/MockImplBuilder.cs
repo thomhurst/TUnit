@@ -243,8 +243,15 @@ internal static class MockImplBuilder
             writer.AppendLine($"if (_engine.TryHandleCall({method.MemberId}, \"{method.Name}\", {argsArray}))");
             writer.AppendLine("{");
             writer.IncreaseIndent();
-            EmitOutRefReadback(writer, method);
-            writer.AppendLine("return default;");
+            if (method.SpanReturnElementType is not null)
+            {
+                EmitSpanReturnReadback(writer, method);
+            }
+            else
+            {
+                EmitOutRefReadback(writer, method);
+                writer.AppendLine("return default;");
+            }
             writer.DecreaseIndent();
             writer.AppendLine("}");
             writer.AppendLine($"return _wrappedInstance.{method.Name}({argPassList});");
@@ -520,8 +527,15 @@ internal static class MockImplBuilder
             writer.AppendLine($"if (_engine.TryHandleCall({method.MemberId}, \"{method.Name}\", {argsArray}))");
             writer.AppendLine("{");
             writer.IncreaseIndent();
-            EmitOutRefReadback(writer, method);
-            writer.AppendLine("return default;");
+            if (method.SpanReturnElementType is not null)
+            {
+                EmitSpanReturnReadback(writer, method);
+            }
+            else
+            {
+                EmitOutRefReadback(writer, method);
+                writer.AppendLine("return default;");
+            }
             writer.DecreaseIndent();
             writer.AppendLine("}");
             writer.AppendLine($"return base.{method.Name}({argPassList});");
@@ -621,10 +635,18 @@ internal static class MockImplBuilder
         {
             // Synchronous method returning a ref struct — can't use HandleCallWithReturn<T> because
             // ref structs can't be generic type arguments. Use void dispatch for call tracking,
-            // callbacks, and throws. Return default (e.g. ReadOnlySpan<byte>.Empty).
+            // callbacks, and throws.
             writer.AppendLine($"_engine.HandleCall({method.MemberId}, \"{method.Name}\", {argsArray});");
-            EmitOutRefReadback(writer, method);
-            writer.AppendLine("return default;");
+            if (method.SpanReturnElementType is not null)
+            {
+                // Span return: read back out/ref params AND extract return value from OutRefContext index -1
+                EmitSpanReturnReadback(writer, method);
+            }
+            else
+            {
+                EmitOutRefReadback(writer, method);
+                writer.AppendLine("return default;");
+            }
         }
         else
         {
@@ -946,13 +968,51 @@ internal static class MockImplBuilder
             for (int i = 0; i < method.Parameters.Length; i++)
             {
                 var p = method.Parameters[i];
-                if (p.IsRefStruct) continue; // ref structs can't be cast from object
+                if (p.IsRefStruct && p.SpanElementType is null) continue; // non-span ref structs can't be cast from object
                 if (p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref)
                 {
-                    writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i})) {p.Name} = ({p.FullyQualifiedType})__v{i}!;");
+                    if (p.SpanElementType is not null)
+                    {
+                        // Span types: reconstruct from stored array
+                        writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i})) {p.Name} = new {p.FullyQualifiedType}(({p.SpanElementType}[])__v{i}!);");
+                    }
+                    else
+                    {
+                        writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i})) {p.Name} = ({p.FullyQualifiedType})__v{i}!;");
+                    }
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// For ref struct return methods with span support: emits code to consume OutRefContext,
+    /// read back out/ref params, extract span return value from index -1, and return.
+    /// Always ends with "return default;" as fallback.
+    /// </summary>
+    private static void EmitSpanReturnReadback(CodeWriter writer, MockMemberModel method)
+    {
+        writer.AppendLine("var __outRef = global::TUnit.Mocks.Setup.OutRefContext.Consume();");
+        using (writer.Block("if (__outRef is not null)"))
+        {
+            // Read back out/ref params (same logic as EmitOutRefReadback)
+            for (int i = 0; i < method.Parameters.Length; i++)
+            {
+                var p = method.Parameters[i];
+                if (p.IsRefStruct && p.SpanElementType is null) continue;
+                if (p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref)
+                {
+                    if (p.SpanElementType is not null)
+                        writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i})) {p.Name} = new {p.FullyQualifiedType}(({p.SpanElementType}[])__v{i}!);");
+                    else
+                        writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i})) {p.Name} = ({p.FullyQualifiedType})__v{i}!;");
+                }
+            }
+
+            // Extract span return value from index -1
+            writer.AppendLine($"if (__outRef.TryGetValue(-1, out var __spanRet)) return new {method.ReturnType}(({method.SpanReturnElementType}[])__spanRet!);");
+        }
+        writer.AppendLine("return default;");
     }
 
     private static string EmitArgsArrayVariable(CodeWriter writer, MockMemberModel method)

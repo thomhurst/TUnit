@@ -13,6 +13,12 @@ internal sealed record MockParameterModel : IEquatable<MockParameterModel>
     public bool IsValueType { get; init; }
     public bool IsRefStruct { get; init; }
 
+    /// <summary>
+    /// For ReadOnlySpan&lt;T&gt; or Span&lt;T&gt; parameters, the fully qualified element type (e.g. "byte").
+    /// Null for non-span parameters. Used to support out/ref span parameters via array conversion.
+    /// </summary>
+    public string? SpanElementType { get; init; }
+
     public bool Equals(MockParameterModel? other)
     {
         if (other is null) return false;
@@ -21,7 +27,8 @@ internal sealed record MockParameterModel : IEquatable<MockParameterModel>
             && FullyQualifiedType == other.FullyQualifiedType
             && Direction == other.Direction
             && IsValueType == other.IsValueType
-            && IsRefStruct == other.IsRefStruct;
+            && IsRefStruct == other.IsRefStruct
+            && SpanElementType == other.SpanElementType;
     }
 
     public override int GetHashCode()
@@ -34,6 +41,7 @@ internal sealed record MockParameterModel : IEquatable<MockParameterModel>
             hash = hash * 31 + (int)Direction;
             hash = hash * 31 + IsValueType.GetHashCode();
             hash = hash * 31 + IsRefStruct.GetHashCode();
+            hash = hash * 31 + (SpanElementType?.GetHashCode() ?? 0);
             return hash;
         }
     }

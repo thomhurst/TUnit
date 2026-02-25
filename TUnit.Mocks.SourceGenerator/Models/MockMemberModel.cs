@@ -33,6 +33,12 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
     public bool IsRefStructReturn { get; init; }
 
     /// <summary>
+    /// For methods returning ReadOnlySpan&lt;T&gt; or Span&lt;T&gt;, the fully qualified element type.
+    /// Null for non-span return types. Used to support configurable span return values via array conversion.
+    /// </summary>
+    public string? SpanReturnElementType { get; init; }
+
+    /// <summary>
     /// Returns true if the method has any non-out ref struct parameters.
     /// Computed from <see cref="Parameters"/> — does not participate in equality.
     /// </summary>
@@ -63,7 +69,8 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             && IsAbstractMember == other.IsAbstractMember
             && IsVirtualMember == other.IsVirtualMember
             && IsProtected == other.IsProtected
-            && IsRefStructReturn == other.IsRefStructReturn;
+            && IsRefStructReturn == other.IsRefStructReturn
+            && SpanReturnElementType == other.SpanReturnElementType;
     }
 
     public override int GetHashCode()

@@ -301,7 +301,8 @@ internal static class MemberDiscovery
                     HasDefaultValue = p.HasExplicitDefaultValue,
                     DefaultValueExpression = p.HasExplicitDefaultValue ? FormatDefaultValue(p) : null,
                     IsValueType = p.Type.IsValueType,
-                    IsRefStruct = p.Type.IsRefLikeType
+                    IsRefStruct = p.Type.IsRefLikeType,
+                    SpanElementType = GetSpanElementType(p.Type)
                 }).ToImmutableArray()
             ),
             TypeParameters = new EquatableArray<MockTypeParameterModel>(
@@ -319,7 +320,8 @@ internal static class MemberDiscovery
             IsVirtualMember = method.IsVirtual || method.IsOverride,
             IsProtected = method.DeclaredAccessibility == Accessibility.Protected
                        || method.DeclaredAccessibility == Accessibility.ProtectedOrInternal,
-            IsRefStructReturn = returnType.IsRefLikeType
+            IsRefStructReturn = returnType.IsRefLikeType,
+            SpanReturnElementType = returnType.IsRefLikeType ? GetSpanElementType(returnType) : null
         };
     }
 
@@ -369,7 +371,8 @@ internal static class MemberDiscovery
             IsVirtualMember = property.IsVirtual || property.IsOverride,
             IsProtected = property.DeclaredAccessibility == Accessibility.Protected
                        || property.DeclaredAccessibility == Accessibility.ProtectedOrInternal,
-            IsRefStructReturn = property.Type.IsRefLikeType
+            IsRefStructReturn = property.Type.IsRefLikeType,
+            SpanReturnElementType = property.Type.IsRefLikeType ? GetSpanElementType(property.Type) : null
         };
     }
 
@@ -544,5 +547,26 @@ internal static class MemberDiscovery
         if (value is bool b) return b ? "true" : "false";
         if (value is char c) return $"'{c}'";
         return value.ToString();
+    }
+
+    /// <summary>
+    /// For ReadOnlySpan&lt;T&gt; or Span&lt;T&gt; types, returns the fully qualified element type.
+    /// Returns null for all other types.
+    /// </summary>
+    private static string? GetSpanElementType(ITypeSymbol type)
+    {
+        if (type is not INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1 } namedType)
+            return null;
+
+        var constructed = namedType.ConstructedFrom;
+        var ns = constructed.ContainingNamespace?.ToDisplayString();
+        var name = constructed.MetadataName;
+
+        if (ns == "System" && name is "ReadOnlySpan`1" or "Span`1")
+        {
+            return namedType.TypeArguments[0].GetFullyQualifiedName();
+        }
+
+        return null;
     }
 }
