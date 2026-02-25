@@ -84,7 +84,7 @@ namespace TUnit.Mocks.Generated
             return new ICalculator_Subtract_M1_MockCall(mock.Engine, 1, "Subtract", matchers);
         }
 
-        public static global::TUnit.Mocks.VoidMockMethodCall Reset_(this global::TUnit.Mocks.Mock<global::ICalculator> mock)
+        public static global::TUnit.Mocks.VoidMockMethodCall Reset(this global::TUnit.Mocks.Mock<global::ICalculator> mock)
         {
             var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
             return new global::TUnit.Mocks.VoidMockMethodCall(mock.Engine, 2, "Reset", matchers);
