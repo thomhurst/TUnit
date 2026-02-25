@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using TUnit.Mocks.Diagnostics;
 using TUnit.Mocks.Verification;
 
 namespace TUnit.Mocks;
@@ -82,7 +83,7 @@ public static class Mock
     public static Mock<T> Of<T>(MockBehavior behavior, IDefaultValueProvider defaultValueProvider) where T : class
     {
         var mock = Of<T>(behavior);
-        mock.DefaultValueProvider = defaultValueProvider;
+        mock.Engine.DefaultValueProvider = defaultValueProvider;
         return mock;
     }
 
@@ -250,5 +251,105 @@ public static class Mock
     public static void VerifyInOrder(Action verificationActions)
     {
         OrderedVerification.Verify(verificationActions);
+    }
+
+    // ──────────────────────────────────────────────────────────
+    //  Static helpers – expose control surface without cluttering Mock<T>
+    // ──────────────────────────────────────────────────────────
+
+    /// <summary>All calls made to this mock, in order.</summary>
+    public static IReadOnlyList<CallRecord> Invocations<T>(Mock<T> mock) where T : class
+        => mock.Engine.GetAllCalls();
+
+    /// <summary>Returns the mock behavior (Loose or Strict).</summary>
+    public static MockBehavior GetBehavior<T>(Mock<T> mock) where T : class
+        => mock.Engine.Behavior;
+
+    /// <summary>
+    /// Gets the custom default value provider for unconfigured methods in loose mode.
+    /// When set, this provider is consulted before auto-mocking and built-in defaults.
+    /// </summary>
+    public static IDefaultValueProvider? GetDefaultValueProvider<T>(Mock<T> mock) where T : class
+        => mock.Engine.DefaultValueProvider;
+
+    /// <summary>
+    /// Sets the custom default value provider for unconfigured methods in loose mode.
+    /// When set, this provider is consulted before auto-mocking and built-in defaults.
+    /// </summary>
+    public static void SetDefaultValueProvider<T>(Mock<T> mock, IDefaultValueProvider? provider) where T : class
+        => mock.Engine.DefaultValueProvider = provider;
+
+    /// <summary>
+    /// Enables auto-tracking for all properties. Property setters store values and getters return them,
+    /// acting like real auto-properties. Explicit setups take precedence over auto-tracked values.
+    /// </summary>
+    public static void SetupAllProperties<T>(Mock<T> mock) where T : class
+        => mock.Engine.AutoTrackProperties = true;
+
+    /// <summary>Clears all setups and call history.</summary>
+    public static void Reset<T>(Mock<T> mock) where T : class
+        => ((IMock)mock).Reset();
+
+    /// <summary>
+    /// Verifies all registered setups were invoked at least once.
+    /// Throws <see cref="Exceptions.MockVerificationException"/> listing uninvoked setups.
+    /// </summary>
+    public static void VerifyAll<T>(Mock<T> mock) where T : class
+        => ((IMock)mock).VerifyAll();
+
+    /// <summary>
+    /// Fails if any recorded call was not matched by a prior verification statement.
+    /// Throws <see cref="Exceptions.MockVerificationException"/> listing unverified calls.
+    /// </summary>
+    public static void VerifyNoOtherCalls<T>(Mock<T> mock) where T : class
+        => ((IMock)mock).VerifyNoOtherCalls();
+
+    /// <summary>
+    /// Retrieves the auto-mock wrapper for a child interface returned by this mock.
+    /// Use this to configure auto-mocked return values.
+    /// </summary>
+    public static Mock<TChild> GetAutoMock<T, TChild>(Mock<T> mock, string memberName)
+        where T : class
+        where TChild : class
+    {
+        var cacheKey = memberName + "|" + typeof(TChild).FullName;
+        if (mock.Engine.TryGetAutoMock(cacheKey, out var autoMock))
+        {
+            return (Mock<TChild>)autoMock;
+        }
+
+        throw new InvalidOperationException(
+            $"No auto-mock found for member '{memberName}' returning type '{typeof(TChild).Name}'. " +
+            $"Ensure the method was called at least once before retrieving its auto-mock.");
+    }
+
+    /// <summary>
+    /// Returns a diagnostic report of this mock's setup coverage and call matching.
+    /// </summary>
+    public static MockDiagnostics GetDiagnostics<T>(Mock<T> mock) where T : class
+        => mock.Engine.GetDiagnostics();
+
+    /// <summary>
+    /// Sets the current state for state machine mocking. Null clears the state.
+    /// </summary>
+    public static void SetState<T>(Mock<T> mock, string? stateName) where T : class
+        => mock.Engine.TransitionTo(stateName);
+
+    /// <summary>
+    /// Configures setups scoped to a specific state. All setups registered inside
+    /// the <paramref name="configure"/> action will only match when the engine is in the specified state.
+    /// </summary>
+    public static void InState<T>(Mock<T> mock, string stateName, Action<Mock<T>> configure) where T : class
+    {
+        var previous = mock.Engine.PendingRequiredState;
+        mock.Engine.PendingRequiredState = stateName;
+        try
+        {
+            configure(mock);
+        }
+        finally
+        {
+            mock.Engine.PendingRequiredState = previous;
+        }
     }
 }
