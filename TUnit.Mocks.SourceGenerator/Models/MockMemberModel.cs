@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 namespace TUnit.Mocks.SourceGenerator.Models;
 
@@ -30,6 +31,12 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
     public bool IsVirtualMember { get; init; }
     public bool IsProtected { get; init; }
     public bool IsRefStructReturn { get; init; }
+
+    /// <summary>
+    /// Returns true if the method has any non-out ref struct parameters.
+    /// Computed from <see cref="Parameters"/> — does not participate in equality.
+    /// </summary>
+    public bool HasRefStructParams => Parameters.Any(p => p.IsRefStruct && p.Direction != ParameterDirection.Out);
 
     public bool Equals(MockMemberModel? other)
     {

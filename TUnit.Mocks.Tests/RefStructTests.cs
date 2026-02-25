@@ -263,5 +263,94 @@ public class RefStructTests
         await Assert.That(true).IsTrue();
     }
 
+    [Test]
+    public async Task RefStructArg_Void_Method_Throws_Configured_Exception()
+    {
+        // Arrange
+        var mock = Mock.Of<IBufferProcessor>();
+        mock.Process(RefStructArg<ReadOnlySpan<byte>>.Any).Throws<InvalidOperationException>();
+
+        // Act & Assert
+        IBufferProcessor processor = mock.Object;
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+        {
+            processor.Process(new byte[] { 1 });
+        });
+
+        await Assert.That(ex).IsNotNull();
+    }
+
+    [Test]
+    public async Task RefStructArg_NonVoid_Method_Returns_Configured_Value()
+    {
+        // Arrange — Parse takes ReadOnlySpan<char> param but returns int
+        var mock = Mock.Of<IBufferProcessor>();
+        mock.Parse(RefStructArg<ReadOnlySpan<char>>.Any).Returns(42);
+
+        // Act
+        IBufferProcessor processor = mock.Object;
+        var result = processor.Parse("hello".AsSpan());
+
+        // Assert
+        await Assert.That(result).IsEqualTo(42);
+    }
+
+    [Test]
+    public async Task RefStructArg_NonVoid_Method_Verification()
+    {
+        // Arrange
+        var mock = Mock.Of<IBufferProcessor>();
+        mock.Parse(RefStructArg<ReadOnlySpan<char>>.Any).Returns(0);
+
+        // Act
+        IBufferProcessor processor = mock.Object;
+        processor.Parse("abc".AsSpan());
+        processor.Parse("xyz".AsSpan());
+
+        // Assert
+        mock.Parse(RefStructArg<ReadOnlySpan<char>>.Any).WasCalled(Times.Exactly(2));
+        await Assert.That(true).IsTrue();
+    }
+
+    [Test]
+    public async Task RefStructArg_Mixed_Params_ArgMatching_On_NonRefStruct_Params()
+    {
+        // Arrange — Compute(int id, ReadOnlySpan<byte> data) returns int
+        // Both params participate in matching on net9.0+ via RefStructArg.Any
+        var mock = Mock.Of<IMixedProcessor>();
+        mock.Compute(1, RefStructArg<ReadOnlySpan<byte>>.Any).Returns(100);
+        mock.Compute(2, RefStructArg<ReadOnlySpan<byte>>.Any).Returns(200);
+
+        // Act
+        IMixedProcessor processor = mock.Object;
+        var result1 = processor.Compute(1, new byte[] { 0xFF });
+        var result2 = processor.Compute(2, ReadOnlySpan<byte>.Empty);
+        var result3 = processor.Compute(99, new byte[] { 0x00 });
+
+        // Assert — argument matching works on the int param
+        await Assert.That(result1).IsEqualTo(100);
+        await Assert.That(result2).IsEqualTo(200);
+        await Assert.That(result3).IsEqualTo(0); // no setup for id=99, returns default
+    }
+
+    [Test]
+    public async Task RefStructArg_Mixed_Params_Verification_With_Matcher()
+    {
+        // Arrange
+        var mock = Mock.Of<IMixedProcessor>();
+        IMixedProcessor processor = mock.Object;
+
+        // Act
+        processor.Send("server-a", new byte[] { 1, 2, 3 });
+        processor.Send("server-b", ReadOnlySpan<byte>.Empty);
+        processor.Send("server-a", new byte[] { 4, 5, 6 });
+
+        // Assert — verify by the string destination (non-ref-struct param) with RefStructArg.Any
+        mock.Send("server-a", RefStructArg<ReadOnlySpan<byte>>.Any).WasCalled(Times.Exactly(2));
+        mock.Send("server-b", RefStructArg<ReadOnlySpan<byte>>.Any).WasCalled(Times.Once);
+        mock.Send(Arg.Any<string>(), RefStructArg<ReadOnlySpan<byte>>.Any).WasCalled(Times.Exactly(3));
+        await Assert.That(true).IsTrue();
+    }
+
 #endif
 }

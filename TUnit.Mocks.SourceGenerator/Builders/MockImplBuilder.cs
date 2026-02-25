@@ -188,21 +188,7 @@ internal static class MockImplBuilder
             }
         }
 
-        string argsArray;
-        if (HasRefStructParams(method))
-        {
-            // Emit #if block so the variable is defined under both branches
-            writer.AppendLine("#if NET9_0_OR_GREATER");
-            writer.AppendLine($"var __args = {GetArgsArrayExpression(method, true)};");
-            writer.AppendLine("#else");
-            writer.AppendLine($"var __args = {GetArgsArrayExpression(method, false)};");
-            writer.AppendLine("#endif");
-            argsArray = "__args";
-        }
-        else
-        {
-            argsArray = GetArgsArrayExpression(method, false);
-        }
+        var argsArray = EmitArgsArrayVariable(writer, method);
         var argPassList = GetArgPassList(method);
 
         if (method.IsVoid && !method.IsAsync)
@@ -475,20 +461,7 @@ internal static class MockImplBuilder
             }
         }
 
-        string argsArray;
-        if (HasRefStructParams(method))
-        {
-            writer.AppendLine("#if NET9_0_OR_GREATER");
-            writer.AppendLine($"var __args = {GetArgsArrayExpression(method, true)};");
-            writer.AppendLine("#else");
-            writer.AppendLine($"var __args = {GetArgsArrayExpression(method, false)};");
-            writer.AppendLine("#endif");
-            argsArray = "__args";
-        }
-        else
-        {
-            argsArray = GetArgsArrayExpression(method, false);
-        }
+        var argsArray = EmitArgsArrayVariable(writer, method);
         var argPassList = GetArgPassList(method);
 
         if (method.IsVoid && !method.IsAsync)
@@ -578,20 +551,7 @@ internal static class MockImplBuilder
             }
         }
 
-        string argsArray;
-        if (HasRefStructParams(method))
-        {
-            writer.AppendLine("#if NET9_0_OR_GREATER");
-            writer.AppendLine($"var __args = {GetArgsArrayExpression(method, true)};");
-            writer.AppendLine("#else");
-            writer.AppendLine($"var __args = {GetArgsArrayExpression(method, false)};");
-            writer.AppendLine("#endif");
-            argsArray = "__args";
-        }
-        else
-        {
-            argsArray = GetArgsArrayExpression(method, false);
-        }
+        var argsArray = EmitArgsArrayVariable(writer, method);
 
         var hasOutRef = HasOutRefParams(method);
 
@@ -995,8 +955,18 @@ internal static class MockImplBuilder
         }
     }
 
-    private static bool HasRefStructParams(MockMemberModel method)
-        => method.Parameters.Any(p => p.IsRefStruct && p.Direction != ParameterDirection.Out);
+    private static string EmitArgsArrayVariable(CodeWriter writer, MockMemberModel method)
+    {
+        if (!method.HasRefStructParams)
+            return GetArgsArrayExpression(method, false);
+
+        writer.AppendLine("#if NET9_0_OR_GREATER");
+        writer.AppendLine($"var __args = {GetArgsArrayExpression(method, true)};");
+        writer.AppendLine("#else");
+        writer.AppendLine($"var __args = {GetArgsArrayExpression(method, false)};");
+        writer.AppendLine("#endif");
+        return "__args";
+    }
 
     private static string GetArgsArrayExpression(MockMemberModel method, bool includeRefStructSentinels)
     {

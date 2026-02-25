@@ -110,7 +110,7 @@ internal static class MockMembersBuilder
 
         var wrapperName = GetWrapperName(safeName, method);
         var matchableParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out && !p.IsRefStruct).ToList();
-        var hasRefStructParams = HasRefStructParams(method);
+        var hasRefStructParams = method.HasRefStructParams;
         var allNonOutParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out).ToList();
 
         // Ref struct returns use the void wrapper (can't use generic type args with ref structs)
@@ -381,22 +381,7 @@ internal static class MockMembersBuilder
     }
 
     private static void GenerateTypedReturnsOverload(CodeWriter writer, List<MockParameterModel> nonOutParams,
-        string returnType, string wrapperName)
-    {
-        var typeList = string.Join(", ", nonOutParams.Select(p => p.FullyQualifiedType));
-        var funcType = $"global::System.Func<{typeList}, {returnType}>";
-        var castArgs = BuildCastArgs(nonOutParams);
-
-        writer.AppendLine("/// <summary>Configure a typed computed return value using the actual method parameters.</summary>");
-        using (writer.Block($"public {wrapperName} Returns({funcType} factory)"))
-        {
-            writer.AppendLine($"EnsureSetup().Returns(args => factory({castArgs}));");
-            writer.AppendLine("return this;");
-        }
-    }
-
-    private static void GenerateTypedReturnsOverload(CodeWriter writer, List<MockParameterModel> nonOutParams,
-        string returnType, string wrapperName, List<MockParameterModel> allNonOutParams)
+        string returnType, string wrapperName, List<MockParameterModel>? allNonOutParams = null)
     {
         var typeList = string.Join(", ", nonOutParams.Select(p => p.FullyQualifiedType));
         var funcType = $"global::System.Func<{typeList}, {returnType}>";
@@ -411,22 +396,7 @@ internal static class MockMembersBuilder
     }
 
     private static void GenerateTypedCallbackOverload(CodeWriter writer, List<MockParameterModel> nonOutParams,
-        string wrapperName)
-    {
-        var typeList = string.Join(", ", nonOutParams.Select(p => p.FullyQualifiedType));
-        var actionType = $"global::System.Action<{typeList}>";
-        var castArgs = BuildCastArgs(nonOutParams);
-
-        writer.AppendLine("/// <summary>Execute a typed callback using the actual method parameters.</summary>");
-        using (writer.Block($"public {wrapperName} Callback({actionType} callback)"))
-        {
-            writer.AppendLine($"EnsureSetup().Callback(args => callback({castArgs}));");
-            writer.AppendLine("return this;");
-        }
-    }
-
-    private static void GenerateTypedCallbackOverload(CodeWriter writer, List<MockParameterModel> nonOutParams,
-        string wrapperName, List<MockParameterModel> allNonOutParams)
+        string wrapperName, List<MockParameterModel>? allNonOutParams = null)
     {
         var typeList = string.Join(", ", nonOutParams.Select(p => p.FullyQualifiedType));
         var actionType = $"global::System.Action<{typeList}>";
@@ -441,22 +411,7 @@ internal static class MockMembersBuilder
     }
 
     private static void GenerateTypedThrowsOverload(CodeWriter writer, List<MockParameterModel> nonOutParams,
-        string wrapperName)
-    {
-        var typeList = string.Join(", ", nonOutParams.Select(p => p.FullyQualifiedType));
-        var funcType = $"global::System.Func<{typeList}, global::System.Exception>";
-        var castArgs = BuildCastArgs(nonOutParams);
-
-        writer.AppendLine("/// <summary>Configure a typed computed exception using the actual method parameters.</summary>");
-        using (writer.Block($"public {wrapperName} Throws({funcType} exceptionFactory)"))
-        {
-            writer.AppendLine($"EnsureSetup().Throws(args => exceptionFactory({castArgs}));");
-            writer.AppendLine("return this;");
-        }
-    }
-
-    private static void GenerateTypedThrowsOverload(CodeWriter writer, List<MockParameterModel> nonOutParams,
-        string wrapperName, List<MockParameterModel> allNonOutParams)
+        string wrapperName, List<MockParameterModel>? allNonOutParams = null)
     {
         var typeList = string.Join(", ", nonOutParams.Select(p => p.FullyQualifiedType));
         var funcType = $"global::System.Func<{typeList}, global::System.Exception>";
@@ -523,27 +478,18 @@ internal static class MockMembersBuilder
     private static string ToPascalCase(string name)
         => string.IsNullOrEmpty(name) ? name : char.ToUpperInvariant(name[0]) + name[1..];
 
-    private static string BuildCastArgs(List<MockParameterModel> nonOutParams)
+    private static string BuildCastArgs(List<MockParameterModel> nonOutParams, List<MockParameterModel>? allNonOutParams = null)
     {
-        return string.Join(", ", nonOutParams.Select((p, i) =>
-            $"({p.FullyQualifiedType})args[{i}]!"));
-    }
+        if (allNonOutParams is null)
+            return string.Join(", ", nonOutParams.Select((p, i) => $"({p.FullyQualifiedType})args[{i}]!"));
 
-    private static string BuildCastArgs(List<MockParameterModel> nonRefStructParams, List<MockParameterModel> allNonOutParams)
-    {
-        return string.Join(", ", nonRefStructParams.Select(p =>
-        {
-            var realIndex = allNonOutParams.IndexOf(p);
-            return $"({p.FullyQualifiedType})args[{realIndex}]!";
-        }));
+        var indexMap = allNonOutParams.Select((p, i) => (p, i)).ToDictionary(x => x.p, x => x.i);
+        return string.Join(", ", nonOutParams.Select(p => $"({p.FullyQualifiedType})args[{indexMap[p]}]!"));
     }
-
-    private static bool HasRefStructParams(MockMemberModel method)
-        => method.Parameters.Any(p => p.IsRefStruct && p.Direction != ParameterDirection.Out);
 
     private static void GenerateMemberMethod(CodeWriter writer, MockMemberModel method, MockTypeModel model, string safeName)
     {
-        if (HasRefStructParams(method))
+        if (method.HasRefStructParams)
         {
             writer.AppendLine("#if NET9_0_OR_GREATER");
             EmitMemberMethodBody(writer, method, model, safeName, includeRefStructArgs: true);
