@@ -188,7 +188,21 @@ internal static class MockImplBuilder
             }
         }
 
-        var argsArray = GetArgsArrayExpression(method);
+        string argsArray;
+        if (HasRefStructParams(method))
+        {
+            // Emit #if block so the variable is defined under both branches
+            writer.AppendLine("#if NET9_0_OR_GREATER");
+            writer.AppendLine($"var __args = {GetArgsArrayExpression(method, true)};");
+            writer.AppendLine("#else");
+            writer.AppendLine($"var __args = {GetArgsArrayExpression(method, false)};");
+            writer.AppendLine("#endif");
+            argsArray = "__args";
+        }
+        else
+        {
+            argsArray = GetArgsArrayExpression(method, false);
+        }
         var argPassList = GetArgPassList(method);
 
         if (method.IsVoid && !method.IsAsync)
@@ -461,7 +475,20 @@ internal static class MockImplBuilder
             }
         }
 
-        var argsArray = GetArgsArrayExpression(method);
+        string argsArray;
+        if (HasRefStructParams(method))
+        {
+            writer.AppendLine("#if NET9_0_OR_GREATER");
+            writer.AppendLine($"var __args = {GetArgsArrayExpression(method, true)};");
+            writer.AppendLine("#else");
+            writer.AppendLine($"var __args = {GetArgsArrayExpression(method, false)};");
+            writer.AppendLine("#endif");
+            argsArray = "__args";
+        }
+        else
+        {
+            argsArray = GetArgsArrayExpression(method, false);
+        }
         var argPassList = GetArgPassList(method);
 
         if (method.IsVoid && !method.IsAsync)
@@ -551,7 +578,20 @@ internal static class MockImplBuilder
             }
         }
 
-        var argsArray = GetArgsArrayExpression(method);
+        string argsArray;
+        if (HasRefStructParams(method))
+        {
+            writer.AppendLine("#if NET9_0_OR_GREATER");
+            writer.AppendLine($"var __args = {GetArgsArrayExpression(method, true)};");
+            writer.AppendLine("#else");
+            writer.AppendLine($"var __args = {GetArgsArrayExpression(method, false)};");
+            writer.AppendLine("#endif");
+            argsArray = "__args";
+        }
+        else
+        {
+            argsArray = GetArgsArrayExpression(method, false);
+        }
 
         var hasOutRef = HasOutRefParams(method);
 
@@ -955,14 +995,22 @@ internal static class MockImplBuilder
         }
     }
 
-    private static string GetArgsArrayExpression(MockMemberModel method)
+    private static bool HasRefStructParams(MockMemberModel method)
+        => method.Parameters.Any(p => p.IsRefStruct && p.Direction != ParameterDirection.Out);
+
+    private static string GetArgsArrayExpression(MockMemberModel method, bool includeRefStructSentinels)
     {
-        // Only include non-out, non-ref-struct parameters in args array
-        // (ref structs cannot be boxed into object?[])
-        var matchableParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out && !p.IsRefStruct).ToList();
+        var nonOutParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out).ToList();
+        if (includeRefStructSentinels)
+        {
+            if (nonOutParams.Count == 0) return "global::System.Array.Empty<object?>()";
+            var args = string.Join(", ", nonOutParams.Select(p => p.IsRefStruct ? "null" : p.Name));
+            return $"new object?[] {{ {args} }}";
+        }
+        var matchableParams = nonOutParams.Where(p => !p.IsRefStruct).ToList();
         if (matchableParams.Count == 0) return "global::System.Array.Empty<object?>()";
-        var args = string.Join(", ", matchableParams.Select(p => p.Name));
-        return $"new object?[] {{ {args} }}";
+        var argsStr = string.Join(", ", matchableParams.Select(p => p.Name));
+        return $"new object?[] {{ {argsStr} }}";
     }
 
     /// <summary>
