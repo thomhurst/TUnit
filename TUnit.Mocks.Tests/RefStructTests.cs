@@ -42,6 +42,8 @@ public class RefStructTests
         await Assert.That(name).IsEqualTo("processor-1");
     }
 
+#if !NET9_0_OR_GREATER
+
     [Test]
     public async Task Void_RefStruct_Method_Callback_Fires()
     {
@@ -123,6 +125,8 @@ public class RefStructTests
         await Assert.That(true).IsTrue();
     }
 
+#endif
+
     [Test]
     public async Task Void_Normal_Method_Still_Works()
     {
@@ -139,6 +143,8 @@ public class RefStructTests
         await Assert.That(wasCalled).IsTrue();
         mock.Clear().WasCalled(Times.Once);
     }
+
+#if !NET9_0_OR_GREATER
 
     [Test]
     public async Task Mixed_Params_ArgMatching_On_NonRefStruct_Params()
@@ -179,4 +185,83 @@ public class RefStructTests
         mock.Send(Arg.Any<string>()).WasCalled(Times.Exactly(3));
         await Assert.That(true).IsTrue();
     }
+
+#endif
+
+#if NET9_0_OR_GREATER
+
+    [Test]
+    public async Task RefStructArg_Any_Matches_Void_Method()
+    {
+        // Arrange
+        var wasCalled = false;
+        var mock = Mock.Of<IBufferProcessor>();
+        mock.Process(RefStructArg<ReadOnlySpan<byte>>.Any).Callback(() => wasCalled = true);
+
+        // Act
+        mock.Object.Process(new byte[] { 1, 2, 3 });
+
+        // Assert
+        await Assert.That(wasCalled).IsTrue();
+    }
+
+    [Test]
+    public async Task RefStructArg_Any_Matches_Return_Method()
+    {
+        // Arrange
+        var mock = Mock.Of<IBufferProcessor>();
+        mock.Parse(RefStructArg<ReadOnlySpan<char>>.Any).Returns(99);
+
+        // Act
+        var result = mock.Object.Parse("test".AsSpan());
+
+        // Assert
+        await Assert.That(result).IsEqualTo(99);
+    }
+
+    [Test]
+    public async Task RefStructArg_Mixed_Params_Works()
+    {
+        // Arrange — Compute(int id, ReadOnlySpan<byte> data)
+        var mock = Mock.Of<IMixedProcessor>();
+        mock.Compute(1, RefStructArg<ReadOnlySpan<byte>>.Any).Returns(100);
+        mock.Compute(2, RefStructArg<ReadOnlySpan<byte>>.Any).Returns(200);
+
+        // Act
+        var result1 = mock.Object.Compute(1, new byte[] { 0xFF });
+        var result2 = mock.Object.Compute(2, ReadOnlySpan<byte>.Empty);
+
+        // Assert
+        await Assert.That(result1).IsEqualTo(100);
+        await Assert.That(result2).IsEqualTo(200);
+    }
+
+    [Test]
+    public async Task RefStructArg_Verification_With_Any()
+    {
+        // Arrange
+        var mock = Mock.Of<IBufferProcessor>();
+        mock.Object.Process(new byte[] { 1, 2, 3 });
+        mock.Object.Process(ReadOnlySpan<byte>.Empty);
+
+        // Assert
+        mock.Process(RefStructArg<ReadOnlySpan<byte>>.Any).WasCalled(Times.Exactly(2));
+        await Assert.That(true).IsTrue();
+    }
+
+    [Test]
+    public async Task RefStructArg_Mixed_Verification()
+    {
+        // Arrange — Send(string destination, ReadOnlySpan<byte> payload)
+        var mock = Mock.Of<IMixedProcessor>();
+        mock.Object.Send("server-a", new byte[] { 1, 2, 3 });
+        mock.Object.Send("server-b", ReadOnlySpan<byte>.Empty);
+
+        // Assert — verify with both Arg<string> and RefStructArg<ReadOnlySpan<byte>>
+        mock.Send("server-a", RefStructArg<ReadOnlySpan<byte>>.Any).WasCalled(Times.Once);
+        mock.Send(Arg.Any<string>(), RefStructArg<ReadOnlySpan<byte>>.Any).WasCalled(Times.Exactly(2));
+        await Assert.That(true).IsTrue();
+    }
+
+#endif
 }
