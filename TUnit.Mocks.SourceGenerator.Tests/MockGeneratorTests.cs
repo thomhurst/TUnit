@@ -243,6 +243,32 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public Task Interface_With_RefStruct_Parameters()
+    {
+        var source = """
+            using System;
+            using TUnit.Mocks;
+
+            public interface IBufferProcessor
+            {
+                void Process(ReadOnlySpan<byte> data);
+                int Parse(ReadOnlySpan<char> text);
+                string GetName();
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<IBufferProcessor>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
     public Task Interface_With_Mixed_Members()
     {
         var source = """

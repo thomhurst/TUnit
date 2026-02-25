@@ -29,6 +29,7 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
     public bool IsAbstractMember { get; init; }
     public bool IsVirtualMember { get; init; }
     public bool IsProtected { get; init; }
+    public bool IsRefStructReturn { get; init; }
 
     public bool Equals(MockMemberModel? other)
     {
@@ -54,7 +55,8 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             && UnwrappedSmartDefault == other.UnwrappedSmartDefault
             && IsAbstractMember == other.IsAbstractMember
             && IsVirtualMember == other.IsVirtualMember
-            && IsProtected == other.IsProtected;
+            && IsProtected == other.IsProtected
+            && IsRefStructReturn == other.IsRefStructReturn;
     }
 
     public override int GetHashCode()

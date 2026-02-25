@@ -48,8 +48,9 @@ internal static class MockMembersBuilder
                 }
 
                 // Properties -- extension properties via C# 14 extension blocks
+                // (skip ref struct properties — can't use PropertyMockCall<RefStruct>)
                 var memberProps = model.Properties
-                    .Where(p => !p.IsIndexer && (p.HasGetter || p.HasSetter))
+                    .Where(p => !p.IsIndexer && !p.IsRefStructReturn && (p.HasGetter || p.HasSetter))
                     .ToList();
                 if (memberProps.Count > 0)
                 {
@@ -83,13 +84,15 @@ internal static class MockMembersBuilder
     {
         if (method.IsGenericMethod) return false;
 
-        var nonOutParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out).ToList();
-        if (nonOutParams.Count == 0)
+        // Exclude out params and ref struct params (can't be boxed or used as type args)
+        var matchableParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out && !p.IsRefStruct).ToList();
+        if (matchableParams.Count == 0)
         {
-            var hasOutRefParams = method.Parameters.Any(p => p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref);
+            var hasOutRefParams = method.Parameters.Any(p =>
+                !p.IsRefStruct && (p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref));
             return hasEvents || hasOutRefParams;
         }
-        return nonOutParams.Count <= MaxTypedParams;
+        return matchableParams.Count <= MaxTypedParams;
     }
 
     private static string GetWrapperName(string safeName, MockMemberModel method)
@@ -106,15 +109,16 @@ internal static class MockMembersBuilder
             : method.ReturnType;
 
         var wrapperName = GetWrapperName(safeName, method);
-        var nonOutParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out).ToList();
+        var matchableParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out && !p.IsRefStruct).ToList();
 
-        if (method.IsVoid)
+        // Ref struct returns use the void wrapper (can't use generic type args with ref structs)
+        if (method.IsVoid || method.IsRefStructReturn)
         {
-            GenerateVoidUnifiedClass(writer, wrapperName, nonOutParams, events, method.Parameters);
+            GenerateVoidUnifiedClass(writer, wrapperName, matchableParams, events, method.Parameters);
         }
         else
         {
-            GenerateReturnUnifiedClass(writer, wrapperName, nonOutParams, setupReturnType, events, method.Parameters);
+            GenerateReturnUnifiedClass(writer, wrapperName, matchableParams, setupReturnType, events, method.Parameters);
         }
     }
 
@@ -460,8 +464,9 @@ internal static class MockMembersBuilder
         {
             returnType = GetWrapperName(safeName, method);
         }
-        else if (method.IsVoid)
+        else if (method.IsVoid || method.IsRefStructReturn)
         {
+            // Ref struct returns use VoidMockMethodCall (can't use ref struct as generic type arg)
             returnType = "global::TUnit.Mocks.VoidMockMethodCall";
         }
         else
@@ -479,16 +484,17 @@ internal static class MockMembersBuilder
 
         using (writer.Block($"public static {returnType} {safeMemberName}{typeParams}({fullParamList}){constraints}"))
         {
-            // Build matchers array
-            var nonOutParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out).ToList();
+            // Build matchers array (exclude out and ref struct params)
+            var matchableParams = method.Parameters
+                .Where(p => p.Direction != ParameterDirection.Out && !p.IsRefStruct).ToList();
 
-            if (nonOutParams.Count == 0)
+            if (matchableParams.Count == 0)
             {
                 writer.AppendLine("var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();");
             }
             else
             {
-                var matcherArgs = string.Join(", ", nonOutParams.Select(p => $"{p.Name}.Matcher"));
+                var matcherArgs = string.Join(", ", matchableParams.Select(p => $"{p.Name}.Matcher"));
                 writer.AppendLine($"var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] {{ {matcherArgs} }};");
             }
 
@@ -497,7 +503,7 @@ internal static class MockMembersBuilder
                 var wrapperName = GetWrapperName(safeName, method);
                 writer.AppendLine($"return new {wrapperName}(mock.Engine, {method.MemberId}, \"{method.Name}\", matchers);");
             }
-            else if (method.IsVoid)
+            else if (method.IsVoid || method.IsRefStructReturn)
             {
                 writer.AppendLine($"return new global::TUnit.Mocks.VoidMockMethodCall(mock.Engine, {method.MemberId}, \"{method.Name}\", matchers);");
             }
@@ -572,9 +578,10 @@ internal static class MockMembersBuilder
 
     private static string GetArgParameterList(MockMemberModel method)
     {
-        // Only include non-out parameters as Arg<T> in setup
+        // Only include non-out, non-ref-struct parameters as Arg<T> in setup
+        // (ref structs cannot be used as generic type arguments)
         return string.Join(", ", method.Parameters
-            .Where(p => p.Direction != ParameterDirection.Out)
+            .Where(p => p.Direction != ParameterDirection.Out && !p.IsRefStruct)
             .Select(p => $"global::TUnit.Mocks.Arguments.Arg<{p.FullyQualifiedType}> {p.Name}"));
     }
 

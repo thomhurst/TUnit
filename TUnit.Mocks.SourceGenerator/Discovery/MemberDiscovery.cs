@@ -299,7 +299,8 @@ internal static class MemberDiscovery
                     FullyQualifiedType = p.Type.GetFullyQualifiedName(),
                     Direction = p.GetParameterDirection(),
                     HasDefaultValue = p.HasExplicitDefaultValue,
-                    DefaultValueExpression = p.HasExplicitDefaultValue ? FormatDefaultValue(p) : null
+                    DefaultValueExpression = p.HasExplicitDefaultValue ? FormatDefaultValue(p) : null,
+                    IsRefStruct = p.Type.IsRefLikeType
                 }).ToImmutableArray()
             ),
             TypeParameters = new EquatableArray<MockTypeParameterModel>(
@@ -316,7 +317,8 @@ internal static class MemberDiscovery
             IsAbstractMember = method.IsAbstract,
             IsVirtualMember = method.IsVirtual || method.IsOverride,
             IsProtected = method.DeclaredAccessibility == Accessibility.Protected
-                       || method.DeclaredAccessibility == Accessibility.ProtectedOrInternal
+                       || method.DeclaredAccessibility == Accessibility.ProtectedOrInternal,
+            IsRefStructReturn = returnType.IsRefLikeType
         };
     }
 
@@ -365,7 +367,8 @@ internal static class MemberDiscovery
             IsAbstractMember = property.IsAbstract,
             IsVirtualMember = property.IsVirtual || property.IsOverride,
             IsProtected = property.DeclaredAccessibility == Accessibility.Protected
-                       || property.DeclaredAccessibility == Accessibility.ProtectedOrInternal
+                       || property.DeclaredAccessibility == Accessibility.ProtectedOrInternal,
+            IsRefStructReturn = property.Type.IsRefLikeType
         };
     }
 

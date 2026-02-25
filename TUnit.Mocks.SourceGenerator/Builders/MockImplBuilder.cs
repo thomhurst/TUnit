@@ -238,6 +238,17 @@ internal static class MockImplBuilder
             writer.AppendLine("}");
             writer.AppendLine($"return _wrappedInstance.{method.Name}({argPassList});");
         }
+        else if (method.IsRefStructReturn)
+        {
+            writer.AppendLine($"if (_engine.TryHandleCall({method.MemberId}, \"{method.Name}\", {argsArray}))");
+            writer.AppendLine("{");
+            writer.IncreaseIndent();
+            EmitOutRefReadback(writer, method);
+            writer.AppendLine("return default;");
+            writer.DecreaseIndent();
+            writer.AppendLine("}");
+            writer.AppendLine($"return _wrappedInstance.{method.Name}({argPassList});");
+        }
         else
         {
             writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{method.ReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.SmartDefault}, out var __result))");
@@ -475,6 +486,18 @@ internal static class MockImplBuilder
             writer.AppendLine("}");
             writer.AppendLine($"return base.{method.Name}({argPassList});");
         }
+        else if (method.IsRefStructReturn)
+        {
+            // synchronous method returning ref struct — use void dispatch, fall back to base
+            writer.AppendLine($"if (_engine.TryHandleCall({method.MemberId}, \"{method.Name}\", {argsArray}))");
+            writer.AppendLine("{");
+            writer.IncreaseIndent();
+            EmitOutRefReadback(writer, method);
+            writer.AppendLine("return default;");
+            writer.DecreaseIndent();
+            writer.AppendLine("}");
+            writer.AppendLine($"return base.{method.Name}({argPassList});");
+        }
         else
         {
             // synchronous method with return value
@@ -566,6 +589,15 @@ internal static class MockImplBuilder
                 }
             }
         }
+        else if (method.IsRefStructReturn)
+        {
+            // Synchronous method returning a ref struct — can't use HandleCallWithReturn<T> because
+            // ref structs can't be generic type arguments. Use void dispatch for call tracking,
+            // callbacks, and throws. Return default (e.g. ReadOnlySpan<byte>.Empty).
+            writer.AppendLine($"_engine.HandleCall({method.MemberId}, \"{method.Name}\", {argsArray});");
+            EmitOutRefReadback(writer, method);
+            writer.AppendLine("return default;");
+        }
         else
         {
             // Synchronous method with return value — need to read back out/ref before returning
@@ -589,12 +621,32 @@ internal static class MockImplBuilder
 
         if (prop.HasGetter)
         {
-            writer.AppendLine($"get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault});");
+            if (prop.IsRefStructReturn)
+            {
+                // ref struct property — can't use HandleCallWithReturn<T>, use void dispatch + return default
+                writer.AppendLine("get");
+                writer.OpenBrace();
+                writer.AppendLine($"_engine.HandleCall({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>());");
+                writer.AppendLine("return default;");
+                writer.CloseBrace();
+            }
+            else
+            {
+                writer.AppendLine($"get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault});");
+            }
         }
 
         if (prop.HasSetter)
         {
-            writer.AppendLine($"set => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", new object?[] {{ value }});");
+            if (prop.IsRefStructReturn)
+            {
+                // ref struct property — can't box value, use empty args
+                writer.AppendLine($"set => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", global::System.Array.Empty<object?>());");
+            }
+            else
+            {
+                writer.AppendLine($"set => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", new object?[] {{ value }});");
+            }
         }
 
         writer.CloseBrace();
@@ -838,6 +890,7 @@ internal static class MockImplBuilder
             for (int i = 0; i < method.Parameters.Length; i++)
             {
                 var p = method.Parameters[i];
+                if (p.IsRefStruct) continue; // ref structs can't be cast from object
                 if (p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref)
                 {
                     writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i})) {p.Name} = ({p.FullyQualifiedType})__v{i}!;");
@@ -848,8 +901,9 @@ internal static class MockImplBuilder
 
     private static string GetArgsArrayExpression(MockMemberModel method)
     {
-        // Only include non-out parameters in args array
-        var matchableParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out).ToList();
+        // Only include non-out, non-ref-struct parameters in args array
+        // (ref structs cannot be boxed into object?[])
+        var matchableParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out && !p.IsRefStruct).ToList();
         if (matchableParams.Count == 0) return "global::System.Array.Empty<object?>()";
         var args = string.Join(", ", matchableParams.Select(p => p.Name));
         return $"new object?[] {{ {args} }}";
