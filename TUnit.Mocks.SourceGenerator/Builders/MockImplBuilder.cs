@@ -965,29 +965,13 @@ internal static class MockImplBuilder
         writer.AppendLine("var __outRef = global::TUnit.Mocks.Setup.OutRefContext.Consume();");
         using (writer.Block("if (__outRef is not null)"))
         {
-            for (int i = 0; i < method.Parameters.Length; i++)
-            {
-                var p = method.Parameters[i];
-                if (p.IsRefStruct && p.SpanElementType is null) continue; // non-span ref structs can't be cast from object
-                if (p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref)
-                {
-                    if (p.SpanElementType is not null)
-                    {
-                        // Span types: reconstruct from stored array
-                        writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i})) {p.Name} = new {p.FullyQualifiedType}(({p.SpanElementType}[])__v{i}!);");
-                    }
-                    else
-                    {
-                        writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i})) {p.Name} = ({p.FullyQualifiedType})__v{i}!;");
-                    }
-                }
-            }
+            EmitOutRefParamAssignments(writer, method);
         }
     }
 
     /// <summary>
     /// For ref struct return methods with span support: emits code to consume OutRefContext,
-    /// read back out/ref params, extract span return value from index -1, and return.
+    /// read back out/ref params, extract span return value, and return.
     /// Always ends with "return default;" as fallback.
     /// </summary>
     private static void EmitSpanReturnReadback(CodeWriter writer, MockMemberModel method)
@@ -995,24 +979,35 @@ internal static class MockImplBuilder
         writer.AppendLine("var __outRef = global::TUnit.Mocks.Setup.OutRefContext.Consume();");
         using (writer.Block("if (__outRef is not null)"))
         {
-            // Read back out/ref params (same logic as EmitOutRefReadback)
-            for (int i = 0; i < method.Parameters.Length; i++)
-            {
-                var p = method.Parameters[i];
-                if (p.IsRefStruct && p.SpanElementType is null) continue;
-                if (p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref)
-                {
-                    if (p.SpanElementType is not null)
-                        writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i})) {p.Name} = new {p.FullyQualifiedType}(({p.SpanElementType}[])__v{i}!);");
-                    else
-                        writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i})) {p.Name} = ({p.FullyQualifiedType})__v{i}!;");
-                }
-            }
-
-            // Extract span return value from index -1
-            writer.AppendLine($"if (__outRef.TryGetValue(-1, out var __spanRet)) return new {method.ReturnType}(({method.SpanReturnElementType}[])__spanRet!);");
+            EmitOutRefParamAssignments(writer, method);
+            writer.AppendLine($"if (__outRef.TryGetValue(global::TUnit.Mocks.Setup.OutRefContext.SpanReturnValueIndex, out var __spanRet)) return new {method.ReturnType}(({method.SpanReturnElementType}[])__spanRet!);");
         }
         writer.AppendLine("return default;");
+    }
+
+    /// <summary>
+    /// Emits individual out/ref parameter assignments from the __outRef dictionary.
+    /// Shared by <see cref="EmitOutRefReadback"/> and <see cref="EmitSpanReturnReadback"/>.
+    /// </summary>
+    private static void EmitOutRefParamAssignments(CodeWriter writer, MockMemberModel method)
+    {
+        for (int i = 0; i < method.Parameters.Length; i++)
+        {
+            var p = method.Parameters[i];
+            if (p.IsRefStruct && p.SpanElementType is null) continue; // non-span ref structs can't be cast from object
+            if (p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref)
+            {
+                if (p.SpanElementType is not null)
+                {
+                    // Span types: reconstruct from stored array
+                    writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i})) {p.Name} = new {p.FullyQualifiedType}(({p.SpanElementType}[])__v{i}!);");
+                }
+                else
+                {
+                    writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i})) {p.Name} = ({p.FullyQualifiedType})__v{i}!;");
+                }
+            }
+        }
     }
 
     private static string EmitArgsArrayVariable(CodeWriter writer, MockMemberModel method)

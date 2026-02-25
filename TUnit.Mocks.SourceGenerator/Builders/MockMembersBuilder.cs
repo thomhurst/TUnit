@@ -334,7 +334,7 @@ internal static class MockMembersBuilder
             {
                 writer.AppendLine();
                 writer.AppendLine($"/// <summary>Configure the return value for this span-returning method.</summary>");
-                writer.AppendLine($"public {wrapperName} Returns({spanReturnType} value) {{ EnsureSetup().SetsOutParameter(-1, value.ToArray()); return this; }}");
+                writer.AppendLine($"public {wrapperName} Returns({spanReturnType} value) {{ EnsureSetup().SetsOutParameter(global::TUnit.Mocks.Setup.OutRefContext.SpanReturnValueIndex, value.ToArray()); return this; }}");
             }
 
             // Typed parameter overloads (only for methods with typed params)

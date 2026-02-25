@@ -10,6 +10,12 @@ namespace TUnit.Mocks.Setup;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public static class OutRefContext
 {
+    /// <summary>
+    /// Reserved index used to store the return value for span-returning methods.
+    /// Parameter indices are always &gt;= 0, so -1 is safe from collision.
+    /// </summary>
+    public const int SpanReturnValueIndex = -1;
+
     [ThreadStatic]
     private static Dictionary<int, object?>? _assignments;
 
