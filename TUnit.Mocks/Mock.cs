@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 using TUnit.Mocks.Diagnostics;
 using TUnit.Mocks.Verification;
 
@@ -9,6 +10,10 @@ namespace TUnit.Mocks;
 /// </summary>
 public static class Mock
 {
+    // Maps mock implementation objects back to their Mock<T> wrappers.
+    // ConditionalWeakTable so mocks can be GC'd normally.
+    private static readonly ConditionalWeakTable<object, IMock> _objectToMock = new();
+
     // The source generator registers factories via this method at module initialization time.
     // ConcurrentDictionary is used because module initializers from multiple assemblies
     // can run concurrently when test assemblies are loaded in parallel.
@@ -25,6 +30,47 @@ public static class Mock
 
     // Separate registry for wrap mock factories that accept a real instance.
     private static readonly ConcurrentDictionary<Type, Func<MockBehavior, object, object>> _wrapFactories = new();
+
+    /// <summary>
+    /// Registers the mapping from a mock implementation object to its <see cref="Mock{T}"/> wrapper.
+    /// Called from the <see cref="Mock{T}"/> constructor. Not intended for direct use.
+    /// </summary>
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    public static void Register(object mockObject, IMock mockWrapper)
+    {
+#if NET7_0_OR_GREATER
+        _objectToMock.AddOrUpdate(mockObject, mockWrapper);
+#else
+        // ConditionalWeakTable.AddOrUpdate not available before .NET 7.
+        // Each mock object is unique so Add should not throw, but be safe.
+        try { _objectToMock.Add(mockObject, mockWrapper); }
+        catch (ArgumentException) { _objectToMock.Remove(mockObject); _objectToMock.Add(mockObject, mockWrapper); }
+#endif
+    }
+
+    /// <summary>
+    /// Retrieves the <see cref="Mock{T}"/> wrapper for a mock implementation object.
+    /// Use this to access the mock wrapper from auto-mocked return values or any mocked object.
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// var mock = Mock.Of&lt;IServiceA&gt;();
+    /// var serviceB = mock.Object.GetServiceB(); // auto-mocked
+    /// var autoMock = Mock.Get(serviceB);         // get the wrapper
+    /// autoMock.GetValue().Returns(42);
+    /// </code>
+    /// </example>
+    public static Mock<T> Get<T>(T mockedObject) where T : class
+    {
+        if (_objectToMock.TryGetValue(mockedObject, out var mock))
+        {
+            return (Mock<T>)mock;
+        }
+
+        throw new InvalidOperationException(
+            $"The object of type '{typeof(T).Name}' is not a mock. " +
+            $"Mock.Get can only be used with objects created by Mock.Of, auto-mocking, or other Mock factory methods.");
+    }
 
     /// <summary>
     /// Registers a factory for creating mocks of type T. Called by generated code.
@@ -303,25 +349,6 @@ public static class Mock
     /// </summary>
     public static void VerifyNoOtherCalls<T>(Mock<T> mock) where T : class
         => ((IMock)mock).VerifyNoOtherCalls();
-
-    /// <summary>
-    /// Retrieves the auto-mock wrapper for a child interface returned by this mock.
-    /// Use this to configure auto-mocked return values.
-    /// </summary>
-    public static Mock<TChild> GetAutoMock<T, TChild>(Mock<T> mock, string memberName)
-        where T : class
-        where TChild : class
-    {
-        var cacheKey = memberName + "|" + typeof(TChild).FullName;
-        if (mock.Engine.TryGetAutoMock(cacheKey, out var autoMock))
-        {
-            return (Mock<TChild>)autoMock;
-        }
-
-        throw new InvalidOperationException(
-            $"No auto-mock found for member '{memberName}' returning type '{typeof(TChild).Name}'. " +
-            $"Ensure the method was called at least once before retrieving its auto-mock.");
-    }
 
     /// <summary>
     /// Returns a diagnostic report of this mock's setup coverage and call matching.

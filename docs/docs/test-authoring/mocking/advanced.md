@@ -128,14 +128,14 @@ var mock = Mock.Of<IServiceA>();
 var serviceB = mock.Object.GetServiceB();
 // serviceB is not null — it's a working mock
 
-// Configure the auto-mock
-var autoMock = Mock.GetAutoMock<IServiceA, IServiceB>(mock, "GetServiceB");
+// Configure the auto-mock via Mock.Get
+var autoMock = Mock.Get(serviceB);
 autoMock.GetValue().Returns(42);
 
 var value = serviceB.GetValue(); // 42
 ```
 
-Auto-mocks are cached — calling the same method returns the same mock instance.
+Use `Mock.Get(obj)` to retrieve the `Mock<T>` wrapper for any mock object — auto-mocked return values, or any object created by `Mock.Of`. Auto-mocks are cached — calling the same method returns the same mock instance.
 
 ## MockRepository
 

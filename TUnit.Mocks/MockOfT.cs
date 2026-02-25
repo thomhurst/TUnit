@@ -26,6 +26,7 @@ public class Mock<T> : IMock where T : class
     {
         Engine = engine;
         Object = mockObject;
+        Mock.Register(mockObject, this);
     }
 
     /// <inheritdoc />

@@ -178,23 +178,22 @@ public class MockObjectAccessTests
     }
 }
 
-// ─── GetAutoMock Error Path ─────────────────────────────────────────────────
+// ─── Mock.Get Error Path ────────────────────────────────────────────────────
 
-public class AutoMockErrorPathTests
+public class MockGetErrorPathTests
 {
     [Test]
-    public async Task GetAutoMock_Throws_When_No_AutoMock_Exists()
+    public async Task Mock_Get_Throws_For_Non_Mock_Object()
     {
-        var mock = Mock.Of<ICalculator>();
+        // A plain object, not created by Mock.Of
+        var notAMock = new List<string>();
 
-        // No method has been called, so no auto-mock was created
         var ex = Assert.Throws<InvalidOperationException>(() =>
         {
-            Mock.GetAutoMock<ICalculator, IGreeter>(mock, "NonExistentMethod");
+            Mock.Get(notAMock);
         });
 
-        await Assert.That(ex.Message).Contains("No auto-mock found");
-        await Assert.That(ex.Message).Contains("NonExistentMethod");
+        await Assert.That(ex.Message).Contains("is not a mock");
     }
 }
 
@@ -283,10 +282,11 @@ public class InvocationOrderingTests
         mock.Object.GetName();
         mock.Object.Log("msg");
 
-        for (int i = 1; i < Mock.Invocations(mock).Count; i++)
+        var invocations = Mock.Invocations(mock);
+        for (int i = 1; i < invocations.Count; i++)
         {
-            await Assert.That(Mock.Invocations(mock)[i].SequenceNumber)
-                .IsGreaterThan(Mock.Invocations(mock)[i - 1].SequenceNumber);
+            await Assert.That(invocations[i].SequenceNumber)
+                .IsGreaterThan(invocations[i - 1].SequenceNumber);
         }
     }
 }
