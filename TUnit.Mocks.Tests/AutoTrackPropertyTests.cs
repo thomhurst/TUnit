@@ -23,7 +23,7 @@ public class AutoTrackPropertyTests
     {
         // Arrange — opt in to auto-tracking
         var mock = Mock.Of<IAutoTrackEntity>();
-        mock.SetupAllProperties();
+        Mock.SetupAllProperties(mock);
 
         // Act
         mock.Object.Name = "Alice";
@@ -38,7 +38,7 @@ public class AutoTrackPropertyTests
     {
         // Arrange
         var mock = Mock.Of<IAutoTrackEntity>();
-        mock.SetupAllProperties();
+        Mock.SetupAllProperties(mock);
 
         // Act
         mock.Object.Name = "Bob";
@@ -68,7 +68,7 @@ public class AutoTrackPropertyTests
     {
         // Arrange
         var mock = Mock.Of<IAutoTrackEntity>();
-        mock.SetupAllProperties();
+        Mock.SetupAllProperties(mock);
         mock.Name.Returns("Configured");
 
         // Act — set a tracked value, but explicit setup should win
@@ -83,7 +83,7 @@ public class AutoTrackPropertyTests
     {
         // Arrange
         var mock = Mock.Of<IAutoTrackEntity>();
-        mock.SetupAllProperties();
+        Mock.SetupAllProperties(mock);
 
         // Act — set then overwrite
         mock.Object.Name = "First";
@@ -111,7 +111,7 @@ public class AutoTrackPropertyTests
     {
         // Arrange — explicit opt-in enables auto-tracking
         var mock = Mock.Of<IAutoTrackEntity>();
-        mock.SetupAllProperties();
+        Mock.SetupAllProperties(mock);
 
         // Act
         mock.Object.Name = "Alice";
@@ -140,7 +140,7 @@ public class AutoTrackPropertyTests
     {
         // Arrange — strict mode with explicit opt-in
         var mock = Mock.Of<IAutoTrackEntity>(MockBehavior.Strict);
-        mock.SetupAllProperties();
+        Mock.SetupAllProperties(mock);
         mock.Name.Set(Arg.Any<string>());
         mock.Name.Returns("");
 
@@ -156,11 +156,11 @@ public class AutoTrackPropertyTests
     {
         // Arrange
         var mock = Mock.Of<IAutoTrackEntity>();
-        mock.SetupAllProperties();
+        Mock.SetupAllProperties(mock);
         mock.Object.Name = "Alice";
 
         // Act
-        mock.Reset();
+        Mock.Reset(mock);
 
         // Assert — tracked values cleared, but auto-track still active
         await Assert.That(mock.Object.Name).IsEmpty();

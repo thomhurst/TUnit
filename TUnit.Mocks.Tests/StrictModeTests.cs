@@ -65,7 +65,7 @@ public class StrictModeTests
         // Act & Assert — configured void method should not throw
         ICalculator calc = mock.Object;
         calc.Log("expected message");
-        await Assert.That(mock.Behavior).IsEqualTo(MockBehavior.Strict);
+        await Assert.That(Mock.GetBehavior(mock)).IsEqualTo(MockBehavior.Strict);
     }
 
     [Test]
@@ -197,6 +197,6 @@ public class StrictModeTests
 
         // Assert
         await Assert.That(result).IsEqualTo(0);
-        await Assert.That(mock.Behavior).IsEqualTo(MockBehavior.Loose);
+        await Assert.That(Mock.GetBehavior(mock)).IsEqualTo(MockBehavior.Loose);
     }
 }

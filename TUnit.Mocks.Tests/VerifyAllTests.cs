@@ -21,7 +21,7 @@ public class VerifyAllTests
         svc.GetValue("key");
         svc.Process(1);
 
-        mock.VerifyAll();
+        Mock.VerifyAll(mock);
         await Assert.That(true).IsTrue();
     }
 
@@ -35,7 +35,7 @@ public class VerifyAllTests
         var svc = mock.Object;
         svc.GetValue("key"); // Only call GetValue, not Process
 
-        var ex = Assert.Throws<MockVerificationException>(() => mock.VerifyAll());
+        var ex = Assert.Throws<MockVerificationException>(() => Mock.VerifyAll(mock));
         await Assert.That(ex.Message).Contains("Process");
     }
 
@@ -45,7 +45,7 @@ public class VerifyAllTests
         var mock = Mock.Of<IService>();
         mock.GetValue(Arg.Any<string>()).Returns("value");
 
-        var ex = Assert.Throws<MockVerificationException>(() => mock.VerifyAll());
+        var ex = Assert.Throws<MockVerificationException>(() => Mock.VerifyAll(mock));
         await Assert.That(ex.Message).Contains("GetValue");
     }
 
@@ -53,7 +53,7 @@ public class VerifyAllTests
     public async Task VerifyAll_Passes_When_No_Setups_Registered()
     {
         var mock = Mock.Of<IService>();
-        mock.VerifyAll(); // No setups = nothing to verify
+        Mock.VerifyAll(mock); // No setups = nothing to verify
         await Assert.That(true).IsTrue();
     }
 
@@ -65,7 +65,7 @@ public class VerifyAllTests
         mock.Process(42);
 
         // Don't call anything
-        var ex = Assert.Throws<MockVerificationException>(() => mock.VerifyAll());
+        var ex = Assert.Throws<MockVerificationException>(() => Mock.VerifyAll(mock));
         await Assert.That(ex.Message).Contains("GetValue");
         await Assert.That(ex.Message).Contains("Process");
     }

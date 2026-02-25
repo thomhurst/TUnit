@@ -19,7 +19,7 @@ public class InvocationsTests
         svc.GetValue("key2");
         svc.Process(42);
 
-        await Assert.That(mock.Invocations.Count).IsEqualTo(3);
+        await Assert.That(Mock.Invocations(mock).Count).IsEqualTo(3);
     }
 
     [Test]
@@ -32,8 +32,8 @@ public class InvocationsTests
         svc.GetValue("key1");
         svc.Process(99);
 
-        await Assert.That(mock.Invocations[0].MemberName).IsEqualTo("GetValue");
-        await Assert.That(mock.Invocations[1].MemberName).IsEqualTo("Process");
+        await Assert.That(Mock.Invocations(mock)[0].MemberName).IsEqualTo("GetValue");
+        await Assert.That(Mock.Invocations(mock)[1].MemberName).IsEqualTo("Process");
     }
 
     [Test]
@@ -45,14 +45,14 @@ public class InvocationsTests
         var svc = mock.Object;
         svc.GetValue("hello");
 
-        await Assert.That(mock.Invocations[0].Arguments[0]).IsEqualTo("hello");
+        await Assert.That(Mock.Invocations(mock)[0].Arguments[0]).IsEqualTo("hello");
     }
 
     [Test]
     public async Task Invocations_Is_Empty_When_No_Calls_Made()
     {
         var mock = Mock.Of<IService>();
-        await Assert.That(mock.Invocations.Count).IsEqualTo(0);
+        await Assert.That(Mock.Invocations(mock).Count).IsEqualTo(0);
     }
 
     [Test]
@@ -64,8 +64,8 @@ public class InvocationsTests
         var svc = mock.Object;
         svc.GetValue("key1");
 
-        mock.Reset();
+        Mock.Reset(mock);
 
-        await Assert.That(mock.Invocations.Count).IsEqualTo(0);
+        await Assert.That(Mock.Invocations(mock).Count).IsEqualTo(0);
     }
 }

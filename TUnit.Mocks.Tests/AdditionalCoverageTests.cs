@@ -190,7 +190,7 @@ public class AutoMockErrorPathTests
         // No method has been called, so no auto-mock was created
         var ex = Assert.Throws<InvalidOperationException>(() =>
         {
-            mock.GetAutoMock<IGreeter>("NonExistentMethod");
+            Mock.GetAutoMock<ICalculator, IGreeter>(mock, "NonExistentMethod");
         });
 
         await Assert.That(ex.Message).Contains("No auto-mock found");
@@ -212,7 +212,7 @@ public class VerifyAllMessageTests
         // Act — don't call the method
 
         // Assert
-        var ex = Assert.Throws<MockVerificationException>(() => mock.VerifyAll());
+        var ex = Assert.Throws<MockVerificationException>(() => Mock.VerifyAll(mock));
         await Assert.That(ex.Message).Contains("Add(");
         await Assert.That(ex.Message).Contains("never invoked");
     }
@@ -229,7 +229,7 @@ public class VerifyAllMessageTests
         // Act — don't call any methods
 
         // Assert
-        var ex = Assert.Throws<MockVerificationException>(() => mock.VerifyAll());
+        var ex = Assert.Throws<MockVerificationException>(() => Mock.VerifyAll(mock));
         await Assert.That(ex.Message).Contains("Add(");
         await Assert.That(ex.Message).Contains("GetName()");
         await Assert.That(ex.Message).Contains("Log(");
@@ -248,7 +248,7 @@ public class VerifyAllMessageTests
         mock.Object.GetName();
 
         // Assert — no exception
-        mock.VerifyAll();
+        Mock.VerifyAll(mock);
         await Assert.That(true).IsTrue();
     }
 }
@@ -267,11 +267,11 @@ public class InvocationOrderingTests
         mock.Object.GetName();
         mock.Object.Add(3, 4);
 
-        await Assert.That(mock.Invocations).HasCount().EqualTo(4);
-        await Assert.That(mock.Invocations[0].MemberName).IsEqualTo("Add");
-        await Assert.That(mock.Invocations[1].MemberName).IsEqualTo("Log");
-        await Assert.That(mock.Invocations[2].MemberName).IsEqualTo("GetName");
-        await Assert.That(mock.Invocations[3].MemberName).IsEqualTo("Add");
+        await Assert.That(Mock.Invocations(mock)).HasCount().EqualTo(4);
+        await Assert.That(Mock.Invocations(mock)[0].MemberName).IsEqualTo("Add");
+        await Assert.That(Mock.Invocations(mock)[1].MemberName).IsEqualTo("Log");
+        await Assert.That(Mock.Invocations(mock)[2].MemberName).IsEqualTo("GetName");
+        await Assert.That(Mock.Invocations(mock)[3].MemberName).IsEqualTo("Add");
     }
 
     [Test]
@@ -283,10 +283,10 @@ public class InvocationOrderingTests
         mock.Object.GetName();
         mock.Object.Log("msg");
 
-        for (int i = 1; i < mock.Invocations.Count; i++)
+        for (int i = 1; i < Mock.Invocations(mock).Count; i++)
         {
-            await Assert.That(mock.Invocations[i].SequenceNumber)
-                .IsGreaterThan(mock.Invocations[i - 1].SequenceNumber);
+            await Assert.That(Mock.Invocations(mock)[i].SequenceNumber)
+                .IsGreaterThan(Mock.Invocations(mock)[i - 1].SequenceNumber);
         }
     }
 }
@@ -305,7 +305,7 @@ public class AutoTrackPropertyResetTests
     public async Task Reset_Clears_Auto_Tracked_Property_Values()
     {
         var mock = Mock.Of<ISettingsService>();
-        mock.SetupAllProperties();
+        Mock.SetupAllProperties(mock);
 
         var svc = mock.Object;
         svc.Theme = "dark";
@@ -315,8 +315,8 @@ public class AutoTrackPropertyResetTests
         await Assert.That(svc.FontSize).IsEqualTo(14);
 
         // Reset should clear tracked values
-        mock.Reset();
-        mock.SetupAllProperties();
+        Mock.Reset(mock);
+        Mock.SetupAllProperties(mock);
 
         // After reset + re-enable auto-track, values are back to defaults
         await Assert.That(svc.Theme).IsNotEqualTo("dark");
@@ -373,9 +373,9 @@ public class MockDefaultValueProviderPropertyTests
         var mock = Mock.Of<IGreeter>();
         var provider = new FixedStringProvider();
 
-        mock.DefaultValueProvider = provider;
+        Mock.SetDefaultValueProvider(mock, provider);
 
-        await Assert.That(mock.DefaultValueProvider).IsEqualTo(provider);
+        await Assert.That(Mock.GetDefaultValueProvider(mock)).IsEqualTo(provider);
     }
 
     [Test]
@@ -398,13 +398,13 @@ public class MockBehaviorPropertyTests
     public async Task Loose_Mock_Has_Loose_Behavior()
     {
         var mock = Mock.Of<ICalculator>();
-        await Assert.That(mock.Behavior).IsEqualTo(MockBehavior.Loose);
+        await Assert.That(Mock.GetBehavior(mock)).IsEqualTo(MockBehavior.Loose);
     }
 
     [Test]
     public async Task Strict_Mock_Has_Strict_Behavior()
     {
         var mock = Mock.Of<ICalculator>(MockBehavior.Strict);
-        await Assert.That(mock.Behavior).IsEqualTo(MockBehavior.Strict);
+        await Assert.That(Mock.GetBehavior(mock)).IsEqualTo(MockBehavior.Strict);
     }
 }

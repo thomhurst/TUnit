@@ -131,7 +131,7 @@ public class AutoMockTests
         var serviceB = mock.Object.GetServiceB();
 
         // Retrieve and configure the auto-mock
-        var autoMock = mock.GetAutoMock<IServiceB>("GetServiceB");
+        var autoMock = Mock.GetAutoMock<IServiceA, IServiceB>(mock, "GetServiceB");
         autoMock.GetValue().Returns(42);
 
         // Act

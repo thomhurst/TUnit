@@ -16,7 +16,7 @@ public class DiagnosticsTests
         ICalculator calc = mock.Object;
         _ = calc.Add(1, 2); // only exercise the first setup
 
-        var diag = mock.GetDiagnostics();
+        var diag = Mock.GetDiagnostics(mock);
 
         await Assert.That(diag.TotalSetups).IsEqualTo(2);
         await Assert.That(diag.ExercisedSetups).IsEqualTo(1);
@@ -36,7 +36,7 @@ public class DiagnosticsTests
         _ = calc.Add(1, 2); // matches setup
         _ = calc.Add(5, 5); // no setup match — unmatched
 
-        var diag = mock.GetDiagnostics();
+        var diag = Mock.GetDiagnostics(mock);
 
         await Assert.That(diag.UnmatchedCalls).HasCount().EqualTo(1);
         await Assert.That(diag.UnmatchedCalls[0].MemberName).IsEqualTo("Add");
@@ -52,7 +52,7 @@ public class DiagnosticsTests
         ICalculator calc = mock.Object;
         _ = calc.Add(1, 2);
 
-        var diag = mock.GetDiagnostics();
+        var diag = Mock.GetDiagnostics(mock);
 
         await Assert.That(diag.TotalSetups).IsEqualTo(1);
         await Assert.That(diag.ExercisedSetups).IsEqualTo(1);
@@ -67,7 +67,7 @@ public class DiagnosticsTests
         mock.Add(1, 2).Returns(3);
         mock.Add(3, 4).Returns(7);
 
-        var diag = mock.GetDiagnostics();
+        var diag = Mock.GetDiagnostics(mock);
 
         await Assert.That(diag.TotalSetups).IsEqualTo(2);
         await Assert.That(diag.ExercisedSetups).IsEqualTo(0);
@@ -80,7 +80,7 @@ public class DiagnosticsTests
         var mock = Mock.Of<ICalculator>();
         mock.Add(Arg.Any<int>(), Arg.Is<int>(x => x > 0)).Returns(1);
 
-        var diag = mock.GetDiagnostics();
+        var diag = Mock.GetDiagnostics(mock);
 
         await Assert.That(diag.UnusedSetups).HasCount().EqualTo(1);
         var setup = diag.UnusedSetups[0];
@@ -98,9 +98,9 @@ public class DiagnosticsTests
         ICalculator calc = mock.Object;
         _ = calc.Add(5, 5); // unmatched
 
-        mock.Reset();
+        Mock.Reset(mock);
 
-        var diag = mock.GetDiagnostics();
+        var diag = Mock.GetDiagnostics(mock);
 
         await Assert.That(diag.TotalSetups).IsEqualTo(0);
         await Assert.That(diag.ExercisedSetups).IsEqualTo(0);
@@ -113,7 +113,7 @@ public class DiagnosticsTests
     {
         var mock = Mock.Of<ICalculator>();
 
-        var diag = mock.GetDiagnostics();
+        var diag = Mock.GetDiagnostics(mock);
 
         await Assert.That(diag.TotalSetups).IsEqualTo(0);
         await Assert.That(diag.ExercisedSetups).IsEqualTo(0);

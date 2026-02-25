@@ -23,7 +23,7 @@ public class ResetTests
         await Assert.That(calc.Add(3, 4)).IsEqualTo(99);
 
         // Act
-        mock.Reset();
+        Mock.Reset(mock);
 
         // Assert — after reset, all setups are gone, returns default
         await Assert.That(calc.Add(1, 2)).IsEqualTo(0);
@@ -44,7 +44,7 @@ public class ResetTests
         mock.Add(Arg.Any<int>(), Arg.Any<int>()).WasCalled(Times.Exactly(3));
 
         // Act
-        mock.Reset();
+        Mock.Reset(mock);
 
         // Assert — after reset, call history is cleared
         mock.Add(Arg.Any<int>(), Arg.Any<int>()).WasNeverCalled();
@@ -62,7 +62,7 @@ public class ResetTests
         await Assert.That(calc.Add(1, 2)).IsEqualTo(42);
 
         // Act — reset and reconfigure with different return value
-        mock.Reset();
+        Mock.Reset(mock);
         mock.Add(1, 2).Returns(100);
 
         // Assert — new setup is in effect
@@ -81,7 +81,7 @@ public class ResetTests
         mock.Add(1, 2).WasCalled(Times.Exactly(2));
 
         // Act
-        mock.Reset();
+        Mock.Reset(mock);
 
         // Make one new call
         calc.Add(1, 2);
@@ -102,7 +102,7 @@ public class ResetTests
         await Assert.That(calc.Add(1, 2)).IsEqualTo(3);
 
         // Act — reset clears all setups
-        mock.Reset();
+        Mock.Reset(mock);
 
         // Assert — strict mock throws again for unconfigured calls
         var exception = Assert.Throws<MockStrictBehaviorException>(() =>
@@ -125,7 +125,7 @@ public class ResetTests
         await Assert.That(greeter.Greet("Alice")).IsEqualTo("Hello, Alice!");
 
         // Act
-        mock.Reset();
+        Mock.Reset(mock);
 
         // Assert — after reset, returns default (empty string for non-nullable string)
         var result = greeter.Greet("Alice");
@@ -144,7 +144,7 @@ public class ResetTests
         mock.Log(Arg.Any<string>()).WasCalled(Times.Exactly(2));
 
         // Act
-        mock.Reset();
+        Mock.Reset(mock);
 
         // Assert — void method call history is cleared
         mock.Log(Arg.Any<string>()).WasNeverCalled();
@@ -163,7 +163,7 @@ public class ResetTests
         mock.Add(1, 1).WasCalled(Times.Once);
 
         // Act — reset
-        mock.Reset();
+        Mock.Reset(mock);
 
         // Re-setup with new values
         mock.Add(1, 1).Returns(20);
@@ -188,17 +188,17 @@ public class ResetTests
         // First cycle
         mock.Add(1, 1).Returns(10);
         await Assert.That(calc.Add(1, 1)).IsEqualTo(10);
-        mock.Reset();
+        Mock.Reset(mock);
 
         // Second cycle
         mock.Add(1, 1).Returns(20);
         await Assert.That(calc.Add(1, 1)).IsEqualTo(20);
-        mock.Reset();
+        Mock.Reset(mock);
 
         // Third cycle
         mock.Add(1, 1).Returns(30);
         await Assert.That(calc.Add(1, 1)).IsEqualTo(30);
-        mock.Reset();
+        Mock.Reset(mock);
 
         // After final reset — returns default
         await Assert.That(calc.Add(1, 1)).IsEqualTo(0);

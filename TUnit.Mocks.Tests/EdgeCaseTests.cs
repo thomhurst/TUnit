@@ -582,7 +582,7 @@ public class ResetReconfigurationTests
         await Assert.That(firstResult).IsEqualTo("A");
 
         // Reset and reconfigure
-        mock.Reset();
+        Mock.Reset(mock);
         mock.GetConfig("key").Returns("B");
 
         // Second phase
@@ -609,7 +609,7 @@ public class ResetReconfigurationTests
         mock.GetConfig("key2").WasCalled(Times.Once);
 
         // Reset — clears call history
-        mock.Reset();
+        Mock.Reset(mock);
 
         // Post-reset: previous calls should not count
         mock.GetConfig("key1").WasNeverCalled();
