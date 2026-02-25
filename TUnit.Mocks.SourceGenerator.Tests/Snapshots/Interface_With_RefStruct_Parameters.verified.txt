@@ -41,12 +41,22 @@ namespace TUnit.Mocks.Generated
 
         public void Process(global::System.ReadOnlySpan<byte> data)
         {
-            _engine.HandleCall(0, "Process", global::System.Array.Empty<object?>());
+            #if NET9_0_OR_GREATER
+            var __args = new object?[] { null };
+            #else
+            var __args = global::System.Array.Empty<object?>();
+            #endif
+            _engine.HandleCall(0, "Process", __args);
         }
 
         public int Parse(global::System.ReadOnlySpan<char> text)
         {
-            return _engine.HandleCallWithReturn<int>(1, "Parse", global::System.Array.Empty<object?>(), default);
+            #if NET9_0_OR_GREATER
+            var __args = new object?[] { null };
+            #else
+            var __args = global::System.Array.Empty<object?>();
+            #endif
+            return _engine.HandleCallWithReturn<int>(1, "Parse", __args, default);
         }
 
         public string GetName()
@@ -72,17 +82,33 @@ namespace TUnit.Mocks.Generated
 {
     public static class IBufferProcessor_MockMemberExtensions
     {
+        #if NET9_0_OR_GREATER
+        public static global::TUnit.Mocks.VoidMockMethodCall Process(this global::TUnit.Mocks.Mock<global::IBufferProcessor> mock, global::TUnit.Mocks.Arguments.RefStructArg<global::System.ReadOnlySpan<byte>> data)
+        {
+            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { data.Matcher };
+            return new global::TUnit.Mocks.VoidMockMethodCall(mock.Engine, 0, "Process", matchers);
+        }
+        #else
         public static global::TUnit.Mocks.VoidMockMethodCall Process(this global::TUnit.Mocks.Mock<global::IBufferProcessor> mock)
         {
             var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
             return new global::TUnit.Mocks.VoidMockMethodCall(mock.Engine, 0, "Process", matchers);
         }
+        #endif
 
+        #if NET9_0_OR_GREATER
+        public static global::TUnit.Mocks.MockMethodCall<int> Parse(this global::TUnit.Mocks.Mock<global::IBufferProcessor> mock, global::TUnit.Mocks.Arguments.RefStructArg<global::System.ReadOnlySpan<char>> text)
+        {
+            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { text.Matcher };
+            return new global::TUnit.Mocks.MockMethodCall<int>(mock.Engine, 1, "Parse", matchers);
+        }
+        #else
         public static global::TUnit.Mocks.MockMethodCall<int> Parse(this global::TUnit.Mocks.Mock<global::IBufferProcessor> mock)
         {
             var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
             return new global::TUnit.Mocks.MockMethodCall<int>(mock.Engine, 1, "Parse", matchers);
         }
+        #endif
 
         public static global::TUnit.Mocks.MockMethodCall<string> GetName(this global::TUnit.Mocks.Mock<global::IBufferProcessor> mock)
         {
