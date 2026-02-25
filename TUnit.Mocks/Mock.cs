@@ -35,16 +35,14 @@ public static class Mock
     /// Registers the mapping from a mock implementation object to its <see cref="Mock{T}"/> wrapper.
     /// Called from the <see cref="Mock{T}"/> constructor. Not intended for direct use.
     /// </summary>
-    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public static void Register(object mockObject, IMock mockWrapper)
+    internal static void Register(object mockObject, IMock mockWrapper)
     {
 #if NET7_0_OR_GREATER
         _objectToMock.AddOrUpdate(mockObject, mockWrapper);
 #else
         // ConditionalWeakTable.AddOrUpdate not available before .NET 7.
-        // Each mock object is unique so Add should not throw, but be safe.
-        try { _objectToMock.Add(mockObject, mockWrapper); }
-        catch (ArgumentException) { _objectToMock.Remove(mockObject); _objectToMock.Add(mockObject, mockWrapper); }
+        // Each mock object is unique (created by new), so Add will not throw.
+        _objectToMock.Add(mockObject, mockWrapper);
 #endif
     }
 
@@ -64,7 +62,11 @@ public static class Mock
     {
         if (_objectToMock.TryGetValue(mockedObject, out var mock))
         {
-            return (Mock<T>)mock;
+            if (mock is Mock<T> typed)
+                return typed;
+
+            throw new InvalidOperationException(
+                $"The object is a mock of '{mock.GetType().GenericTypeArguments[0].Name}', not '{typeof(T).Name}'.");
         }
 
         throw new InvalidOperationException(

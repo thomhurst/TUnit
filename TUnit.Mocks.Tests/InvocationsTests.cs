@@ -32,8 +32,9 @@ public class InvocationsTests
         svc.GetValue("key1");
         svc.Process(99);
 
-        await Assert.That(Mock.GetInvocations(mock)[0].MemberName).IsEqualTo("GetValue");
-        await Assert.That(Mock.GetInvocations(mock)[1].MemberName).IsEqualTo("Process");
+        var invocations = Mock.GetInvocations(mock);
+        await Assert.That(invocations[0].MemberName).IsEqualTo("GetValue");
+        await Assert.That(invocations[1].MemberName).IsEqualTo("Process");
     }
 
     [Test]
