@@ -116,7 +116,7 @@ Call `SetupAllProperties()` to make properties behave like real auto-properties 
 
 ```csharp
 var mock = Mock.Of<IEntity>();
-mock.SetupAllProperties();
+Mock.SetupAllProperties(mock);
 
 mock.Object.Name = "Alice";
 var name = mock.Object.Name; // "Alice"

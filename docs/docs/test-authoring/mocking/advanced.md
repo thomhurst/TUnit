@@ -74,15 +74,15 @@ public interface IConnection
 }
 
 var mock = Mock.Of<IConnection>();
-mock.SetState("disconnected");
+Mock.SetState(mock, "disconnected");
 
-mock.InState("disconnected", m =>
+Mock.InState(mock, "disconnected", m =>
 {
     m.GetStatus().Returns("OFFLINE");
     m.Connect().TransitionsTo("connected");
 });
 
-mock.InState("connected", m =>
+Mock.InState(mock, "connected", m =>
 {
     m.GetStatus().Returns("ONLINE");
     m.Disconnect().TransitionsTo("disconnected");
@@ -102,9 +102,9 @@ status = mock.Object.GetStatus();     // "OFFLINE"
 
 | Method | Description |
 |---|---|
-| `mock.SetState("name")` | Set the current state |
-| `mock.SetState(null)` | Clear state (all setups match) |
-| `mock.InState("name", configure)` | Register setups scoped to a state |
+| `Mock.SetState(mock, "name")` | Set the current state |
+| `Mock.SetState(mock, null)` | Clear state (all setups match) |
+| `Mock.InState(mock, "name", configure)` | Register setups scoped to a state |
 | `.TransitionsTo("name")` | Transition state after method call (on setup chain) |
 
 ## Recursive / Auto-Mocking
@@ -129,7 +129,7 @@ var serviceB = mock.Object.GetServiceB();
 // serviceB is not null — it's a working mock
 
 // Configure the auto-mock
-var autoMock = mock.GetAutoMock<IServiceB>("GetServiceB");
+var autoMock = Mock.GetAutoMock<IServiceA, IServiceB>(mock, "GetServiceB");
 autoMock.GetValue().Returns(42);
 
 var value = serviceB.GetValue(); // 42
@@ -187,7 +187,7 @@ mock.Delete(Arg.Any<int>());
 svc.GetUser(1);
 // Delete was never called
 
-var diag = mock.GetDiagnostics();
+var diag = Mock.GetDiagnostics(mock);
 diag.TotalSetups;       // 2
 diag.ExercisedSetups;   // 1
 diag.UnusedSetups;      // [Delete(Arg.Any<int>())]
@@ -215,7 +215,7 @@ public class TestDefaults : IDefaultValueProvider
 }
 
 var mock = Mock.Of<IService>();
-mock.DefaultValueProvider = new TestDefaults();
+Mock.SetDefaultValueProvider(mock, new TestDefaults());
 
 var name = mock.Object.GetName();  // "test-default" (no setup needed)
 var count = mock.Object.GetCount(); // -1
@@ -231,10 +231,10 @@ Clear all setups, call history, state, and auto-tracked property values:
 mock.GetUser(Arg.Any<int>()).Returns(new User("Alice"));
 svc.GetUser(1);
 
-mock.Reset();
+Mock.Reset(mock);
 
 svc.GetUser(1); // returns default (setup cleared)
-mock.Invocations.Count; // 0 (history cleared)
+Mock.Invocations(mock).Count; // 0 (history cleared)
 ```
 
 The `SetupAllProperties()` flag is preserved across resets.
