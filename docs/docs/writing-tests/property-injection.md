@@ -380,13 +380,7 @@ public class IntegrationTests
 
 ### Sharing Strategies
 
-When using nested property injection, the `Shared` parameter becomes crucial:
-
-- **`SharedType.PerTestSession`**: Single instance for the entire test run - ideal for expensive resources like containers
-- **`SharedType.PerAssembly`**: Single instance shared for every test in the same assembly as itself.
-- **`SharedType.PerClass`**: One instance per test class
-- **`SharedType.Keyed`**: Share instances based on a key value
-- **`SharedType.None`**: New instance for each injection point (default)
+When using nested property injection, the `Shared` parameter controls object lifetime and reuse. Use `SharedType.PerTestSession` for expensive resources like containers. See [ClassDataSource](class-data-source.md) for all sharing options.
 
 ### Best Practices
 

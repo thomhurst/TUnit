@@ -1,13 +1,11 @@
 # Test Lifecycle Overview
 
-Understanding TUnit's complete test lifecycle helps you write effective tests and place setup/cleanup logic in the right place. TUnit provides multiple mechanisms for hooking into the lifecycle:
+TUnit provides multiple mechanisms for hooking into the test lifecycle:
 
 1. **Hook Attributes** (`[Before]`, `[After]`, etc.) - Method-based hooks
 2. **Event Receivers** (interfaces like `ITestStartEventReceiver`) - Object-based event subscriptions
 3. **Initialization Interfaces** (`IAsyncInitializer`, `IAsyncDiscoveryInitializer`) - Async object setup
 4. **Disposal Interfaces** (`IDisposable`, `IAsyncDisposable`) - Resource cleanup
-
-This page provides a complete visual overview of when each mechanism executes.
 
 ## Complete Lifecycle Diagram
 
@@ -167,7 +165,7 @@ sequenceDiagram
 
 ### Complete Test Execution Order
 
-Here's the exact order of operations for a single test:
+Exact order of operations for a single test:
 
 | Order | What Happens | Type |
 |-------|-------------|------|

@@ -1,14 +1,6 @@
 # Data Driven Tests
 
-It's common to want to repeat tests but pass in different values on each execution.
-We can do that with a data driven test.
-
-Compile-time known data can be injected via `[Arguments(...)]` attributes.
-This attribute takes an array of arguments. It can take as many as you like, but your test method has to have the same number of parameters and they must be the same type.
-If you include multiple `[Arguments]` attributes, your test will be repeated that many times, containing the data passed into the attribute.
-
-When your test is executed, TUnit will pass the values provided in the attribute, into the test by the parameters.
-Here's an example:
+Inject compile-time known data via `[Arguments(...)]` attributes. The attribute takes an array of arguments that must match the test method's parameter count and types. Multiple `[Arguments]` attributes repeat the test once per attribute:
 
 ```csharp
 using TUnit.Assertions;

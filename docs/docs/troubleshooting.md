@@ -8,96 +8,11 @@ These are conceptual questions about TUnit's design and capabilities.
 
 ### Why do I have to await all assertions? Can I use synchronous assertions?
 
-All TUnit assertions must be awaited. There's no synchronous alternative.
+All TUnit assertions must be awaited. Assertions don't execute until awaited — forgetting `await` means the test passes without checking anything. The compiler warns about unawaited tasks, but watch for this common mistake.
 
-**Important:** Test methods themselves can be either synchronous (`void`) or asynchronous (`async Task`). However, if your test uses TUnit's assertion library (`Assert.That(...)`), the test method **must** be `async Task` because assertions return awaitable objects that must be awaited to execute. Tests without assertions can remain synchronous. See [Test Method Signatures](getting-started/writing-your-first-test.md#test-method-signatures) for examples.
+If your test uses `Assert.That(...)`, the method **must** be `async Task`. Tests without assertions can remain synchronous. See [Awaiting Assertions](assertions/awaiting.md) for details, examples, and the design rationale.
 
-**Why this design?**
-
-TUnit's assertion library uses the awaitable pattern (custom objects with `GetAwaiter()` methods). This means:
-- Assertions don't execute until they're awaited - this is when the actual verification happens
-- All assertions work consistently, whether they're simple value checks or complex async operations
-- Custom assertions can perform async work (like database queries or HTTP calls)
-- No sync-over-async patterns that cause deadlocks
-- Assertions can be chained fluently before execution
-
-**What this means when migrating:**
-
-You need to convert your tests to `async Task` and add `await` before assertions.
-
-Before (xUnit/NUnit/MSTest):
-```csharp
-[Test]
-public void MyTest()
-{
-    var result = Calculate(2, 3);
-    Assert.Equal(5, result);
-}
-```
-
-After (TUnit):
-```csharp
-[Test]
-public async Task MyTest()
-{
-    var result = Calculate(2, 3);
-    await Assert.That(result).IsEqualTo(5);
-}
-```
-
-**Automated migration**
-
-TUnit includes code fixers that handle most of this conversion for you:
-
-```bash
-# For xUnit
-dotnet format analyzers --severity info --diagnostics TUXU0001
-
-# For NUnit
-dotnet format analyzers --severity info --diagnostics TUNU0001
-
-# For MSTest
-dotnet format analyzers --severity info --diagnostics TUMS0001
-```
-
-The code fixer converts test methods to async, adds await to assertions, and updates attribute names. It handles most common cases automatically, though you may need to adjust complex scenarios manually.
-
-See the migration guides for step-by-step instructions:
-- [xUnit migration](migration/xunit.md#automated-migration-with-code-fixers)
-- [NUnit migration](migration/nunit.md#automated-migration-with-code-fixers)
-- [MSTest migration](migration/mstest.md#automated-migration-with-code-fixers)
-
-**What you gain**
-
-Async assertions enable patterns that aren't possible with synchronous assertions:
-
-```csharp
-[Test]
-public async Task AsyncAssertion_Example()
-{
-    // Await async operations in assertions
-    await Assert.That(async () => await GetUserAsync(123))
-        .Throws<UserNotFoundException>();
-
-    // Chain assertions naturally
-    var user = await GetUserAsync(456);
-    await Assert.That(user.Email)
-        .IsNotNull()
-        .And.Contains("@example.com");
-}
-```
-
-**Watch out for missing awaits**
-
-The most common mistake is forgetting `await`. The compiler warns you, but the test will pass without actually running the assertion:
-
-```csharp
-// Wrong - test passes without checking anything
-Assert.That(result).IsEqualTo(5);  // Returns an awaitable object that's never executed
-
-// Correct
-await Assert.That(result).IsEqualTo(5);  // The await triggers the actual assertion execution
-```
+For migrating from other frameworks, TUnit includes code fixers that automate the conversion — see the [xUnit](migration/xunit.md#automated-migration-with-code-fixers), [NUnit](migration/nunit.md#automated-migration-with-code-fixers), or [MSTest](migration/mstest.md#automated-migration-with-code-fixers) migration guides.
 
 ### Does TUnit work with Coverlet for code coverage?
 

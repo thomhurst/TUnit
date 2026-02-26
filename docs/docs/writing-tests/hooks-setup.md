@@ -1,11 +1,8 @@
 # Setup Hooks
 
-Most setup for a test can be performed in the constructor (think setting up mocks, assigning fields.)
+Most setup can go in the constructor (setting up mocks, assigning fields).
 
-However some scenarios require further setup that could be an asynchronous operation.
-E.g. pinging a service to wake it up in preparation for the tests.
-
-For this, we can declare a method with a `[Before(...)]` or a `[BeforeEvery(...)]` attribute.
+For asynchronous setup -- such as pinging a service before tests run -- declare a method with a `[Before(...)]` or `[BeforeEvery(...)]` attribute.
 
 ## Hook Method Signatures
 
@@ -33,37 +30,31 @@ public async Task AsyncSetup()  // ✅ Valid - asynchronous hook
 
 ### Hook Parameters
 
-Hooks can optionally accept parameters for accessing context information and cancellation tokens:
+Hooks can optionally accept context and cancellation token parameters:
 
 ```csharp
 [Before(Test)]
 public async Task Setup(TestContext context, CancellationToken cancellationToken)
 {
-    // Access test information via context
     Console.WriteLine($"Setting up test: {context.Metadata.TestName}");
-
-    // Use cancellation token for timeout-aware operations
     await SomeLongRunningOperation(cancellationToken);
 }
 
 [Before(Class)]
 public static async Task ClassSetup(ClassHookContext context, CancellationToken cancellationToken)
 {
-    // Both context and cancellation token available for class-level hooks
     await InitializeResources(cancellationToken);
 }
 
 [Before(Test)]
 public async Task SetupWithToken(CancellationToken cancellationToken)
 {
-    // Can use CancellationToken without context
     await Task.Delay(100, cancellationToken);
 }
 
 [Before(Test)]
 public async Task SetupWithContext(TestContext context)
 {
-    // Can use context without CancellationToken
     Console.WriteLine(context.Metadata.TestName);
 }
 ```
@@ -103,8 +94,7 @@ Must be a static method. Will run once before the first test in the test session
 Must be a static method. Will run once before any tests are discovered.
 
 ## [BeforeEvery(HookType)]
-All [BeforeEvery(...)] methods must be static. They should ideally be placed in their own file that's easy to find, as they can globally affect the test suite, so it should be easy for developers to locate this behaviour.
-e.g. `GlobalHooks.cs` at the root of the test project.
+All [BeforeEvery(...)] methods must be static. Place them in a dedicated file (e.g. `GlobalHooks.cs` at the root of the test project) since they globally affect the test suite.
 
 ### [BeforeEvery(Test)]
 Will be executed before every test that will run in the test session.
@@ -318,18 +308,14 @@ public class ApiTests
 }
 ```
 
-**Why:** Class-level setup runs once, sharing expensive resources across tests. Much faster!
+**Why:** Class-level setup runs once, sharing expensive resources across tests.
 
   </TabItem>
 </Tabs>
 
 ## AsyncLocal
 
-If you are wanting to set AsyncLocal values within your `[Before(...)]` hooks, this is supported.
-
-But to propagate the values into the test framework, you must call `context.AddAsyncLocalValues()` - Where `context` is the relevant context object injected into your hook method.
-
-E.g.
+Setting AsyncLocal values in `[Before(...)]` hooks is supported. To propagate them into the test framework, call `context.AddAsyncLocalValues()` on the context object injected into the hook method:
 
 ```csharp
     [BeforeEvery(Class)]

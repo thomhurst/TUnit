@@ -1,13 +1,11 @@
 # Intro
 
 **TUnit** is another testing framework for C# / .NET.
-It can be used for unit testing, integration testing, acceptance testing, you name it.
+Use it for unit testing, integration testing, acceptance testing, or anything else.
 
-It provides you a skeleton framework to write, execute and assert tests, with little opinion on how your tests should be. In fact, it aims to be flexible, giving you various ways to inject test data, such as options for new data or shared instances, and a variety of hooks to run before and after tests.
+TUnit provides flexible ways to inject test data (new or shared instances) and hooks to run before and after tests, with minimal opinions on test style.
 
-That means you get more control over your setup, execution, and style of tests.
-
-It is also built on top of the newer Microsoft Testing Platform, which was rewritten to make .NET testing simpler and more extensible.
+Built on Microsoft.Testing.Platform for simpler, more extensible .NET testing.
 
 :::performance
 TUnit is designed for speed. Through source generation and compile-time optimizations, TUnit significantly outperforms traditional testing frameworks. See the [performance benchmarks](/docs/benchmarks) for real-world speed comparisons.
@@ -16,10 +14,11 @@ TUnit is designed for speed. Through source generation and compile-time optimiza
 ## What's in These Docs
 
 - **[Getting Started](getting-started/installation.md)** — Install TUnit, write your first test, and run it
-- **[Writing Tests](writing-tests/things-to-know.md)** — Test attributes, data-driven testing, lifecycle hooks, and dependency injection
+- **[Writing Tests](writing-tests/things-to-know.md)** — Test data, lifecycle hooks, dependency injection, parallelism, and mocking
 - **[Assertions](assertions/getting-started.md)** — Fluent assertion syntax for values, collections, strings, exceptions, and more
-- **[Execution](execution/parallelism.md)** — Control parallelism, ordering, retries, and timeouts
-- **[Extending TUnit](extending/built-in-extensions.md)** — Built-in extensions, custom data sources, and event subscribers
-- **[Migration](migration/xunit.md)** — Guides for switching from xUnit, NUnit, or MSTest
-- **[Comparison](comparison/framework-differences.md)** — Feature comparisons with other frameworks
-- **[Guides](guides/best-practices.md)** — Best practices, cookbook recipes, and philosophy
+- **[Running Tests](execution/test-filters.md)** — Filters, timeouts, retries, CI/CD reporting, and AOT
+- **[Integrations](examples/aspnet.md)** — ASP.NET Core, Aspire, Playwright, and other integration examples
+- **[Extending TUnit](extending/extension-points.md)** — Custom data sources, formatters, and event subscribers
+- **[Comparing Frameworks](comparison/framework-differences.md)** — Feature comparisons with xUnit, NUnit, and MSTest
+- **[Migration](migration/xunit.md)** — Step-by-step guides for switching frameworks
+- **[Guides](guides/best-practices.md)** — Tips, performance guidance, and philosophy

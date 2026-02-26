@@ -102,7 +102,6 @@ public class LazyDataProvider
 using TUnit.Core;
 using TUnit.Core.Interfaces;
 
-// Set maximum parallel test execution using an assembly-level parallel limiter
 [assembly: ParallelLimiter<ProcessorCountLimit>]
 
 public class ProcessorCountLimit : IParallelLimit
@@ -230,59 +229,7 @@ var userCount = await GetUserCountFromDatabase();
 await Assert.That(userCount).IsEqualTo(1000);
 ```
 
-#### Use Early Exit Patterns
-
-```csharp
-[Test]
-public async Task EfficientValidation()
-{
-    var result = await GetResultAsync();
-    
-    // Quick checks first
-    if (result == null)
-    {
-        await Assert.That(result).IsNotNull();
-        return; // Exit early
-    }
-    
-    // More expensive validations only if needed
-    await Assert.That(result.Items).Count().IsGreaterThan(0);
-}
-```
-
 ## Memory Management
-
-### Dispose Resources Properly
-
-```csharp
-public class MemoryEfficientTests : IAsyncDisposable
-{
-    private readonly List<IDisposable> _disposables = new();
-    
-    [Test]
-    public async Task TestWithResources()
-    {
-        var resource = new LargeResource();
-        _disposables.Add(resource);
-        
-        // Use resource
-        await resource.ProcessAsync();
-    }
-    
-    public async ValueTask DisposeAsync()
-    {
-        foreach (var disposable in _disposables)
-        {
-            disposable.Dispose();
-        }
-        _disposables.Clear();
-        
-        // Force garbage collection if needed
-        GC.Collect();
-        GC.WaitForPendingFinalizers();
-    }
-}
-```
 
 ### Avoid Memory Leaks in Static Fields
 
@@ -321,12 +268,11 @@ public class EfficientTests
 ### Use ValueTask for High-Frequency Operations
 
 ```csharp
-// For operations called many times, use ValueTask to reduce allocations
 public async ValueTask<bool> FastCheckAsync(int id)
 {
     if (_cache.TryGetValue(id, out var cached))
     {
-        return cached; // No allocation for cached path
+        return cached;
     }
     
     var result = await LoadFromDatabaseAsync(id);
@@ -447,35 +393,6 @@ public class FastDatabaseTests
 }
 ```
 
-### Use In-Memory Databases for Unit Tests
-
-```csharp
-public class InMemoryDatabaseTests
-{
-    private DbContext CreateInMemoryContext()
-    {
-        var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
-            
-        return new AppDbContext(options);
-    }
-    
-    [Test]
-    public async Task FastDatabaseTest()
-    {
-        using var context = CreateInMemoryContext();
-        
-        // Test runs entirely in memory
-        context.Users.Add(new User { Name = "Test" });
-        await context.SaveChangesAsync();
-        
-        var count = await context.Users.CountAsync();
-        await Assert.That(count).IsEqualTo(1);
-    }
-}
-```
-
 ## CI/CD Optimization
 
 ### Split Test Suites
@@ -491,11 +408,6 @@ dotnet test --no-build -- --treenode-filter "/*/*/*/*[Category=Integration]"
 dotnet test --no-build -- --treenode-filter "/*/*/*/*[Category=E2E]"
 ```
 
-> **Note**: With .NET 10 SDK or newer, you can use the simpler syntax:
-> ```bash
-> dotnet test --no-build --treenode-filter "/**[Category=Unit]"
-> ```
-
 ### Fail Fast in CI
 
 ```bash
@@ -503,72 +415,9 @@ dotnet test --no-build -- --treenode-filter "/*/*/*/*[Category=E2E]"
 dotnet test -- --fail-fast
 ```
 
-## Monitoring and Profiling
-
-### Add Performance Logging
-
-```csharp
-public class PerformanceAwareExecutor : ITestExecutor
-{
-    private readonly ILogger<PerformanceAwareExecutor> _logger;
-    
-    public async ValueTask ExecuteTest(TestContext context, Func<ValueTask> action)
-    {
-        var stopwatch = Stopwatch.StartNew();
-
-        try
-        {
-            await action();
-        }
-        finally
-        {
-            stopwatch.Stop();
-            
-            if (stopwatch.ElapsedMilliseconds > 1000)
-            {
-                _logger.LogWarning(
-                    "Slow test detected: {TestName} took {ElapsedMs}ms",
-                    context.Metadata.TestName,
-                    stopwatch.ElapsedMilliseconds);
-            }
-        }
-    }
-}
-```
-
-### Track Test Metrics
-
-```csharp
-[After(Test)]
-public static void RecordTestMetrics()
-{
-    var context = TestContext.Current;
-    if (context?.Execution.Result != null)
-    {
-        TelemetryClient.TrackMetric(
-            "TestDuration",
-            context.Execution.Result.Duration.TotalMilliseconds,
-            new Dictionary<string, string>
-            {
-                ["TestName"] = context.Metadata.TestName,
-                ["TestClass"] = context.Metadata.TestDetails.ClassType.Name,
-                ["Result"] = context.Execution.Result.State.ToString()
-            });
-    }
-}
-```
-
 ## Summary
 
-Key performance principles:
-
-1. **Optimize Discovery**: Keep data sources lightweight and limit test combinations
-2. **Parallelize Wisely**: Use appropriate parallel limits and grouping
-3. **Manage Resources**: Dispose properly and avoid memory leaks
-4. **Cache Aggressively**: Cache expensive operations and file I/O
-5. **Batch Operations**: Group database and I/O operations
-6. **Monitor Performance**: Track and alert on slow tests
-7. **Use AOT Mode**: Enable AOT for best performance
-8. **Fail Fast**: Stop early on failures in CI
-
-By following these practices, you can maintain a fast, efficient test suite that scales with your codebase.
+- **Optimize Discovery**: Keep data sources lightweight, use AOT mode, limit test combinations
+- **Parallelize Wisely**: Use appropriate parallel limits and grouping
+- **Manage Resources**: Dispose properly, avoid memory leaks, use ValueTask in hot paths
+- **Batch I/O and Cache**: Group operations and cache expensive results

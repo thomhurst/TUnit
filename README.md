@@ -42,7 +42,7 @@
 
 **Migrating?** See the **[Migration Guides](https://tunit.dev/docs/migration/xunit)**
 
-**Learn more:** **[Data-Driven Testing](https://tunit.dev/docs/test-authoring/arguments)**, **[Test Dependencies](https://tunit.dev/docs/test-authoring/depends-on)**, **[Parallelism Control](https://tunit.dev/docs/parallelism/not-in-parallel)**
+**Learn more:** **[Data-Driven Testing](https://tunit.dev/docs/writing-tests/arguments)**, **[Test Dependencies](https://tunit.dev/docs/writing-tests/ordering)**, **[Parallelism Control](https://tunit.dev/docs/execution/parallelism)**
 
 </div>
 

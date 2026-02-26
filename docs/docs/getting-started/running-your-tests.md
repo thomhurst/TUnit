@@ -103,8 +103,7 @@ To continue your journey with TUnit, explore these topics:
 
 **Common Tasks:**
 - **[Mocking](../writing-tests/mocking/index.md)** - Use mocks and fakes in your tests
-- **[Best Practices](../guides/best-practices.md)** - Write maintainable, reliable tests
-- **[Cookbook](../guides/cookbook.md)** - Common testing patterns and recipes
+- **[Tips & Pitfalls](../guides/best-practices.md)** - TUnit-specific tips to avoid common mistakes
 
 **Advanced Features:**
 - **[Parallelism](../execution/parallelism.md)** - Control how tests run in parallel

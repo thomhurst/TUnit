@@ -10,13 +10,13 @@ To use TUnit with a file-based C# application, you can follow these steps:
 2.  **Add TUnit to your project**: You can add TUnit as a package reference in your file. At the top of your `Program.cs`, add the following line:
 
     ```csharp
-    #:package TUnit@0.*
+    #:package TUnit@1.*
     ```
 
     -   Alternatively, you can specify a specific version:
 
         ```csharp
-        #:package TUnit@0.25.0
+        #:package TUnit@1.6.0
         ```
 
     -   You can also use msbuild props files to include TUnit. By creating a `Directory.build.props` file in the same directory as the csharp file.
@@ -32,7 +32,7 @@ To use TUnit with a file-based C# application, you can follow these steps:
 3.  **Write your tests**: You can write your tests in the same way you would in a regular C# project. For example:
 
     ```csharp
-    #:package TUnit@0.*
+    #:package TUnit@1.*
 
     using TUnit;
     public class Tests

@@ -21,21 +21,6 @@ const sidebars: SidebarsConfig = {
         'writing-tests/things-to-know',
         {
           type: 'category',
-          label: 'Lifecycle & Hooks',
-          collapsed: true,
-          items: [
-            'writing-tests/lifecycle',
-            'writing-tests/hooks-setup',
-            'writing-tests/hooks-cleanup',
-            'writing-tests/test-context',
-            'writing-tests/artifacts',
-            'writing-tests/property-injection',
-            'writing-tests/dependency-injection',
-            'writing-tests/event-subscribing',
-          ],
-        },
-        {
-          type: 'category',
           label: 'Test Data',
           collapsed: true,
           items: [
@@ -51,14 +36,43 @@ const sidebars: SidebarsConfig = {
         },
         {
           type: 'category',
-          label: 'Controlling Execution',
+          label: 'Setup & Cleanup',
+          collapsed: true,
+          items: [
+            'writing-tests/lifecycle',
+            'writing-tests/hooks-setup',
+            'writing-tests/hooks-cleanup',
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Test Context & Output',
+          collapsed: true,
+          items: [
+            'writing-tests/test-context',
+            'writing-tests/artifacts',
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Test Infrastructure',
+          collapsed: true,
+          items: [
+            'writing-tests/property-injection',
+            'writing-tests/dependency-injection',
+            'writing-tests/event-subscribing',
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Controlling Tests',
           collapsed: true,
           items: [
             'writing-tests/skip',
             'writing-tests/explicit',
             'writing-tests/ordering',
+            'execution/parallelism',
             'writing-tests/culture',
-            'writing-tests/aot',
           ],
         },
         {
@@ -146,9 +160,26 @@ const sidebars: SidebarsConfig = {
         'execution/timeouts',
         'execution/retrying',
         'execution/repeating',
-        'execution/parallelism',
         'execution/ci-cd-reporting',
         'execution/engine-modes',
+        'writing-tests/aot',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Integrations',
+      collapsed: true,
+      items: [
+        'examples/aspnet',
+        'examples/aspire',
+        'examples/playwright',
+        'examples/complex-test-infrastructure',
+        'examples/fscheck',
+        'examples/opentelemetry',
+        'examples/filebased-csharp',
+        'examples/fsharp-interactive',
+        'examples/tunit-ci-pipeline',
+        'examples/instrumenting-global-test-ids',
       ],
     },
     {
@@ -171,15 +202,21 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: 'Migration Guides',
+      label: 'Comparing Frameworks',
       collapsed: true,
       items: [
         'comparison/framework-differences',
         'comparison/attributes',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Migration Guides',
+      collapsed: true,
+      items: [
         'migration/xunit',
         'migration/nunit',
         'migration/mstest',
-        'migration/testcontext-interface-organization',
       ],
     },
     {
@@ -189,20 +226,8 @@ const sidebars: SidebarsConfig = {
       items: [
         'guides/best-practices',
         'guides/performance',
-        'guides/cookbook',
-        'examples/aspnet',
-        'examples/aspire',
-        'examples/playwright',
-        'examples/complex-test-infrastructure',
-        'examples/fscheck',
-        'examples/opentelemetry',
-        'examples/filebased-csharp',
-        'examples/fsharp-interactive',
-        'examples/tunit-ci-pipeline',
-        'examples/instrumenting-global-test-ids',
       ],
     },
-    'troubleshooting',
     {
       type: 'category',
       label: 'Reference',
@@ -213,6 +238,7 @@ const sidebars: SidebarsConfig = {
         'reference/test-configuration',
       ],
     },
+    'troubleshooting',
     {
       type: 'category',
       label: 'About TUnit',
