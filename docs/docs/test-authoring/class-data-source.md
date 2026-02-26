@@ -4,29 +4,11 @@ The `ClassDataSource` attribute is used to instantiate and inject in new classes
 
 The attribute takes a generic type argument, which is the type of data you want to inject into your test.
 
-It also takes an optional `Shared` argument, controlling whether you want to share the instance among other tests.
-This could be useful for times where it's very intensive to spin up lots of objects, and you instead want to share that same instance across many tests.
+It also takes an optional `Shared` argument, controlling whether you want to share the instance among other tests. This is useful when it is expensive to create an object and you want to reuse the same instance across many tests.
 
-Ideally don't manipulate the state of this object within your tests if your object is shared. Because of concurrency, it's impossible to know which test will run in which order, and so your tests could become flaky and undeterministic.
+Avoid mutating the state of shared objects within tests. Because tests run concurrently, the execution order is unpredictable, and shared mutable state leads to flaky tests.
 
-Options are:
-
-### Shared = SharedType.None (Default)
-The instance is not shared ever. A new one will be created for you. This is the default if `Shared` is not specified.
-
-### Shared = SharedType.PerClass
-The instance is shared for every test in the same class as itself, that also has this setting.
-
-### Shared = SharedType.PerAssembly
-The instance is shared for every test in the same assembly as itself, that also has this setting.
-
-### Shared = SharedType.PerTestSession
-The instance is shared for every test in the current test session, meaning it'll always be the same instance.
-
-### Shared = SharedType.Keyed
-When using this, you must also populate the `Key` argument on the attribute.
-
-The instance is shared for every test that also has this setting, and also uses the same key.
+The `SharedType` parameter controls how instances are shared across tests. See [Property Injection -- Sharing Strategies](../test-lifecycle/property-injection.md#sharing-strategies) for full details on the available options (`None`, `PerClass`, `PerAssembly`, `PerTestSession`, `Keyed`).
 
 ## Initialization and TearDown
 If you need to do some initialization or teardown for when this object is created/disposed, simply implement the `IAsyncInitializer` and/or `IAsyncDisposable` interfaces

@@ -30,7 +30,11 @@ public async Task AsyncCleanup()  // ✅ Valid - asynchronous hook
 
 ### Hook Parameters
 
-Hooks can optionally accept parameters for accessing context information and cancellation tokens:
+:::info
+`[After]` hooks accept the same parameters as `[Before]` hooks. See [Setup Hooks -- Hook Parameters](setup.md#hook-parameters) for the full reference.
+:::
+
+A common pattern in cleanup hooks is checking the test result to perform conditional cleanup:
 
 ```csharp
 [After(Test)]
@@ -42,44 +46,7 @@ public async Task Cleanup(TestContext context, CancellationToken cancellationTok
         await CaptureScreenshot(cancellationToken);
     }
 }
-
-[After(Class)]
-public static async Task ClassCleanup(ClassHookContext context, CancellationToken cancellationToken)
-{
-    // Use cancellation token for timeout-aware cleanup operations
-    await DisposeResources(cancellationToken);
-}
-
-[After(Test)]
-public async Task CleanupWithToken(CancellationToken cancellationToken)
-{
-    // Can use CancellationToken without context
-    await FlushBuffers(cancellationToken);
-}
-
-[After(Test)]
-public async Task CleanupWithContext(TestContext context)
-{
-    // Can use context without CancellationToken
-    Console.WriteLine($"Test {context.Metadata.TestName} completed");
-}
 ```
-
-**Valid Parameter Combinations:**
-- No parameters: `public void Hook() { }`
-- Context only: `public void Hook(TestContext context) { }`
-- CancellationToken only: `public async Task Hook(CancellationToken ct) { }`
-- Both: `public async Task Hook(TestContext context, CancellationToken ct) { }`
-
-**Context Types by Hook Level:**
-
-| Hook Level | Context Type | Example |
-|------------|-------------|---------|
-| `[After(Test)]` | `TestContext` | Access test results, output writer |
-| `[After(Class)]` | `ClassHookContext` | Access class information |
-| `[After(Assembly)]` | `AssemblyHookContext` | Access assembly information |
-| `[After(TestSession)]` | `TestSessionContext` | Access test session information |
-| `[After(TestDiscovery)]` | `TestDiscoveryContext` | Access discovery results |
 
 ## [After(HookType)]
 
@@ -115,12 +82,6 @@ Will be executed after the last test of every class that will run in the test se
 
 ### [AfterEvery(Assembly)]
 Will be executed after the last test of every assembly that will run in the test session.
-
-### [AfterEvery(TestSession)]
-The same as [After(TestSession)]
-
-### [AfterEvery(TestDiscovery)]
-The same as [After(TestDiscovery)]
 
 ```csharp
 using TUnit.Core;

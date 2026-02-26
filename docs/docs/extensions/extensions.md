@@ -22,82 +22,9 @@ If you don't want these extensions, you can reference `TUnit.Engine` and `TUnit.
 
 ### Code Coverage
 
-Code coverage is provided via the `Microsoft.Testing.Extensions.CodeCoverage` NuGet package.
+Code coverage is provided via `Microsoft.Testing.Extensions.CodeCoverage`, included automatically with the TUnit package.
 
-**✅ Included automatically with the TUnit package** - No manual installation needed!
-
-#### Usage
-
-Run your tests with the `--coverage` flag:
-```bash
-# Basic coverage
-dotnet run --configuration Release --coverage
-
-# Specify output location
-dotnet run --configuration Release --coverage --coverage-output ./coverage/
-
-# Specify output format (cobertura is default)
-dotnet run --configuration Release --coverage --coverage-output-format cobertura
-
-# Multiple formats
-dotnet run --configuration Release --coverage \
-  --coverage-output-format cobertura \
-  --coverage-output-format xml
-```
-
-#### Important: Coverlet Incompatibility ⚠️
-
-**If you're migrating from xUnit, NUnit, or MSTest:**
-
-- **Remove Coverlet** (`coverlet.collector` or `coverlet.msbuild`) from your project
-- TUnit uses Microsoft.Testing.Platform (not VSTest), which is incompatible with Coverlet
-- Microsoft.Testing.Extensions.CodeCoverage is the modern replacement and provides the same functionality
-
-**Migration Example:**
-```xml
-<!-- Remove from your .csproj -->
-<PackageReference Include="coverlet.collector" Version="x.x.x" />
-<PackageReference Include="coverlet.msbuild" Version="x.x.x" />
-
-<!-- Already included with TUnit meta package -->
-<PackageReference Include="TUnit" Version="0.x.x" />
-```
-
-See the migration guides for detailed instructions:
-- [xUnit Migration Guide - Code Coverage](../migration/xunit.md#code-coverage)
-- [NUnit Migration Guide - Code Coverage](../migration/nunit.md#code-coverage)
-- [MSTest Migration Guide - Code Coverage](../migration/mstest.md#code-coverage)
-
-#### Advanced Configuration
-
-You can customize coverage with a `testconfig.json` file:
-
-**testconfig.json:**
-```json
-{
-  "codeCoverage": {
-    "Configuration": {
-      "CodeCoverage": {
-        "ModulePaths": {
-          "Include": [".*\\.dll$"],
-          "Exclude": [".*tests\\.dll$"]
-        }
-      }
-    }
-  }
-}
-```
-
-Place the `testconfig.json` file in the same directory as your test project. It will be picked up automatically when running tests.
-
-**Alternatively, you can use an XML coverage settings file:**
-```bash
-dotnet run --configuration Release --coverage --coverage-settings coverage.config
-```
-
-**📚 More Resources:**
-- [Microsoft's Code Coverage Documentation](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-platform-extensions-code-coverage)
-- [Unit Testing Code Coverage Guide](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-code-coverage)
+See the [Code Coverage](code-coverage.md) page for usage, configuration, and CI/CD integration.
 
 ---
 

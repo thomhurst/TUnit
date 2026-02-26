@@ -115,12 +115,6 @@ Will be executed before the first test of every class that will run in the test 
 ### [BeforeEvery(Assembly)]
 Will be executed before the first test of every assembly that will run in the test session.
 
-### [BeforeEvery(TestSession)]
-The same as [Before(TestSession)]
-
-### [BeforeEvery(TestDiscovery)]
-The same as [Before(TestDiscovery)]
-
 ```csharp
 using TUnit.Core;
 
