@@ -4,7 +4,7 @@ As TUnit is built on-top of the newer Microsoft.Testing.Platform, and combined w
 
 :::info
 
-Please note that for the coverage and trx report, you need to install [additional extensions](../extending/built-in-extensions.md)
+Coverage and TRX reporting are built in. See [Extensions](../extending/built-in-extensions.md) for usage flags.
 
 :::
 
@@ -107,7 +107,7 @@ To continue your journey with TUnit, explore these topics:
 - **[Cookbook](../guides/cookbook.md)** - Common testing patterns and recipes
 
 **Advanced Features:**
-- **[Parallelism](../execution/not-in-parallel.md)** - Control how tests run in parallel
+- **[Parallelism](../execution/parallelism.md)** - Control how tests run in parallel
 - **[CI/CD Integration](../execution/ci-cd-reporting.md)** - Integrate TUnit into your pipeline
 
 Need help? Check the [Troubleshooting & FAQ](../troubleshooting.md) guide.

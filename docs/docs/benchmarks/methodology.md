@@ -286,5 +286,3 @@ Found an issue with the benchmarks? [Open an issue](https://github.com/thomhurst
 - [BenchmarkDotNet Documentation](https://benchmarkdotnet.org/articles/overview.html)
 - [.NET Performance Best Practices](https://learn.microsoft.com/en-us/dotnet/framework/performance/)
 - [TUnit Performance Best Practices](/docs/guides/performance)
-
-*Last updated: {new Date().toISOString().split('T')[0]}*

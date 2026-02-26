@@ -128,3 +128,5 @@ If you prefer to manage the Polyfill version yourself, you can:
 TUnit automatically sets `<PolyUseEmbeddedAttribute>true</PolyUseEmbeddedAttribute>` to ensure that Polyfill types are embedded in each project. This prevents type conflicts when using `InternalsVisibleTo` or when multiple projects in your solution reference Polyfill. Each project gets its own isolated copy of the polyfill types, following the [recommended Polyfill consuming pattern](https://github.com/SimonCropp/Polyfill/blob/main/consuming.md#recommended-consuming-pattern).
 
 You can override this behavior by setting `<PolyUseEmbeddedAttribute>false</PolyUseEmbeddedAttribute>` in your project file if needed.
+
+**Next:** [Write Your First Test →](writing-your-first-test.md)

@@ -27,7 +27,7 @@ public class WebApplicationFactory : TestWebApplicationFactory<Program>
         {
             config.AddInMemoryCollection(new Dictionary<string, string?>
             {
-                { "ConnectionStrings:Default", "..." }
+                { "ConnectionStrings:Default", "Server=localhost;Database=TestDb" }
             });
         });
     }

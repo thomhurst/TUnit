@@ -78,3 +78,8 @@ public async Task MyTest()
 ```
 
 Both forms aggregate failures. When the `using` scope ends, any accumulated assertion failures are thrown as a single exception listing all violations.
+
+## See Also
+
+- [Getting Started with Assertions](getting-started.md) — Assertion basics and fluent syntax
+- [Exception Assertions](exceptions.md) — Assert on thrown exceptions

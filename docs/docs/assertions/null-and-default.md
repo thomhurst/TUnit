@@ -401,48 +401,6 @@ public async Task DateTime_Default()
 }
 ```
 
-## Combining with Other Assertions
-
-### Null Coalescing Validation
-
-```csharp
-[Test]
-public async Task Null_Coalescing_Default()
-{
-    string? input = GetOptionalInput();
-    string result = input ?? "default";
-
-    if (input == null)
-    {
-        await Assert.That(result).IsEqualTo("default");
-    }
-    else
-    {
-        await Assert.That(result).IsEqualTo(input);
-    }
-}
-```
-
-### Null Conditional Operator
-
-```csharp
-[Test]
-public async Task Null_Conditional()
-{
-    Person? person = FindPerson("id");
-    string? name = person?.Name;
-
-    if (person == null)
-    {
-        await Assert.That(name).IsNull();
-    }
-    else
-    {
-        await Assert.That(name).IsNotNull();
-    }
-}
-```
-
 ## Common Patterns
 
 ### Validate Required Dependencies

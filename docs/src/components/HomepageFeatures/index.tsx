@@ -22,9 +22,9 @@ const FeatureList: FeatureItem[] = [
     codeExample: `[Test]
 [Arguments(1, 2, 3)]
 [Arguments(4, 5, 9)]
-public void TestAdd(int a, int b, int expected)
+public async Task TestAdd(int a, int b, int expected)
 {
-    Assert.That(a + b).IsEqualTo(expected);
+    await Assert.That(a + b).IsEqualTo(expected);
 }`
   },
   {
@@ -54,11 +54,11 @@ public async Task TestAsync()
     ),
     codeExample: `// AOT Compatible
 [Test]
-public void PerformantTest()
+public async Task PerformantTest()
 {
     // Source generated
     // No reflection overhead
-    Assert.That(true).IsTrue();
+    await Assert.That(true).IsTrue();
 }`
   },
 ];

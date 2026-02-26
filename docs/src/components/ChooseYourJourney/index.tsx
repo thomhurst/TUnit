@@ -32,7 +32,7 @@ const journeys: JourneyCard[] = [
     icon: '🔄',
     color: '#3b82f6',
     links: [
-      { label: 'Migration Overview', href: '/docs/migration/testcontext-interface-organization' },
+      { label: 'Migration Overview', href: '/docs/comparison/framework-differences' },
       { label: 'From xUnit', href: '/docs/migration/xunit' },
       { label: 'From NUnit', href: '/docs/migration/nunit' },
       { label: 'From MSTest', href: '/docs/migration/mstest' },
@@ -47,7 +47,7 @@ const journeys: JourneyCard[] = [
       { label: 'Assertions Library', href: '/docs/assertions/library' },
       { label: 'Assertion Basics', href: '/docs/assertions/getting-started' },
       { label: 'Data Driven Testing', href: '/docs/writing-tests/arguments' },
-      { label: 'Test Lifecycle', href: '/docs/writing-tests/hooks-setup' },
+      { label: 'Test Lifecycle', href: '/docs/writing-tests/lifecycle' },
     ],
   },
   {
@@ -58,7 +58,7 @@ const journeys: JourneyCard[] = [
     links: [
       { label: 'Best Practices', href: '/docs/guides/best-practices' },
       { label: 'Performance Benchmarks', href: '/docs/benchmarks' },
-      { label: 'Parallel Execution', href: '/docs/execution/not-in-parallel' },
+      { label: 'Parallel Execution', href: '/docs/execution/parallelism' },
       { label: 'Customization', href: '/docs/extending/data-source-generators' },
     ],
   },

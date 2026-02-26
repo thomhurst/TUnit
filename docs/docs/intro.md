@@ -12,3 +12,14 @@ It is also built on top of the newer Microsoft Testing Platform, which was rewri
 :::performance
 TUnit is designed for speed. Through source generation and compile-time optimizations, TUnit significantly outperforms traditional testing frameworks. See the [performance benchmarks](/docs/benchmarks) for real-world speed comparisons.
 :::
+
+## What's in These Docs
+
+- **[Getting Started](getting-started/installation.md)** — Install TUnit, write your first test, and run it
+- **[Writing Tests](writing-tests/things-to-know.md)** — Test attributes, data-driven testing, lifecycle hooks, and dependency injection
+- **[Assertions](assertions/getting-started.md)** — Fluent assertion syntax for values, collections, strings, exceptions, and more
+- **[Execution](execution/parallelism.md)** — Control parallelism, ordering, retries, and timeouts
+- **[Extending TUnit](extending/built-in-extensions.md)** — Built-in extensions, custom data sources, and event subscribers
+- **[Migration](migration/xunit.md)** — Guides for switching from xUnit, NUnit, or MSTest
+- **[Comparison](comparison/framework-differences.md)** — Feature comparisons with other frameworks
+- **[Guides](guides/best-practices.md)** — Best practices, cookbook recipes, and philosophy

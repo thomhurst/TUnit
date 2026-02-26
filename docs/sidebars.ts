@@ -83,7 +83,7 @@ const sidebars: SidebarsConfig = {
       collapsed: true,
       items: [
         'assertions/getting-started',
-        'assertions/library',
+        'assertions/awaiting',
         {
           type: 'category',
           label: 'Value Assertions',
@@ -113,7 +113,6 @@ const sidebars: SidebarsConfig = {
           label: 'Async & Exceptions',
           collapsed: true,
           items: [
-            'assertions/awaiting',
             'assertions/tasks-and-async',
             'assertions/exceptions',
             'assertions/delegates',
@@ -135,6 +134,7 @@ const sidebars: SidebarsConfig = {
             'assertions/extensibility/extensibility-returning-items-from-await',
           ],
         },
+        'assertions/library',
       ],
     },
     {
@@ -146,16 +146,7 @@ const sidebars: SidebarsConfig = {
         'execution/timeouts',
         'execution/retrying',
         'execution/repeating',
-        {
-          type: 'category',
-          label: 'Parallelism',
-          collapsed: true,
-          items: [
-            'execution/not-in-parallel',
-            'execution/parallel-groups',
-            'execution/parallel-limiter',
-          ],
-        },
+        'execution/parallelism',
         'execution/ci-cd-reporting',
         'execution/engine-modes',
       ],

@@ -32,6 +32,10 @@ public class CalculatorTests
 
 ## Step-by-Step Guide
 
+:::tip Auto-Imported Namespaces
+The TUnit package automatically configures global usings for `TUnit.Core`, `TUnit.Assertions`, and `TUnit.Assertions.Extensions`. The explicit `using` statements in the examples below are shown for clarity — you don't need them in practice.
+:::
+
 Start by creating a new class:
 
 ```csharp
@@ -194,28 +198,4 @@ public class StringTests
 }
 ```
 
-### Using Statements
-
-The examples above show explicit using statements for clarity:
-
-```csharp
-using TUnit.Core;                    // For [Test] attribute
-using TUnit.Assertions;              // For Assert.That()
-using TUnit.Assertions.Extensions;   // For assertion methods like IsEqualTo(), IsTrue(), etc.
-```
-
-**However**, the TUnit package automatically configures these namespaces as global usings, so in practice you don't need to include them in each test file. Your test classes can be as simple as:
-
-```csharp
-namespace MyTestProject;
-
-public class ValidatorTests
-{
-    [Test]
-    public async Task IsPositive_WithNegativeNumber_ReturnsFalse()
-    {
-        var result = Validator.IsPositive(-1);
-        await Assert.That(result).IsFalse();
-    }
-}
-``` 
+**Next:** [Run Your Tests →](running-your-tests.md)
