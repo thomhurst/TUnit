@@ -150,10 +150,23 @@ const sidebars: SidebarsConfig = {
         },
         {
           type: 'category',
+          label: 'Mocking',
+          collapsed: false,
+          items: [
+            'test-authoring/mocking/index',
+            'test-authoring/mocking/setup',
+            'test-authoring/mocking/verification',
+            'test-authoring/mocking/argument-matchers',
+            'test-authoring/mocking/advanced',
+            'test-authoring/mocking/http',
+            'test-authoring/mocking/logging',
+          ],
+        },
+        {
+          type: 'category',
           label: 'Advanced Techniques',
           collapsed: false,
           items: [
-            'test-authoring/mocking',
             'test-authoring/generic-attributes',
           ],
         },

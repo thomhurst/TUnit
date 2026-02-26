@@ -34,7 +34,7 @@ public static class AttributeExtensions
         {
             hookType = HookType.Before;
             type = attributeData.AttributeClass!;
-            hookLevel = (HookLevel?) Enum.Parse(typeof(HookLevel), attributeData.ConstructorArguments.First().ToCSharpString().Split('.').Last());
+            hookLevel = ParseHookLevel(attributeData);
             return true;
         }
 
@@ -44,7 +44,7 @@ public static class AttributeExtensions
         {
             hookType = HookType.After;
             type = attributeData.AttributeClass!;
-            hookLevel = (HookLevel?) Enum.Parse(typeof(HookLevel), attributeData.ConstructorArguments.First().ToCSharpString().Split('.').Last());
+            hookLevel = ParseHookLevel(attributeData);
             return true;
         }
 
@@ -63,7 +63,7 @@ public static class AttributeExtensions
         {
             hookType = HookType.Before;
             type = attributeData.AttributeClass!;
-            hookLevel = (HookLevel?) Enum.Parse(typeof(HookLevel), attributeData.ConstructorArguments.First().ToCSharpString().Split('.').Last());
+            hookLevel = ParseHookLevel(attributeData);
 
             return true;
         }
@@ -74,7 +74,7 @@ public static class AttributeExtensions
         {
             hookType = HookType.After;
             type = attributeData.AttributeClass!;
-            hookLevel = (HookLevel?) Enum.Parse(typeof(HookLevel), attributeData.ConstructorArguments.First().ToCSharpString().Split('.').Last());
+            hookLevel = ParseHookLevel(attributeData);
 
             return true;
         }
@@ -119,7 +119,7 @@ public static class AttributeExtensions
         return attributeData.AttributeClass.AllInterfaces.Contains(dataAttributeInterface, SymbolEqualityComparer.Default);
     }
 
-    public static bool IsClassConstructorAttribute(this AttributeData? attributeData, Compilation compilation)
+    public static bool IsClassConstructorAttribute(this AttributeData? attributeData)
     {
         if (attributeData?.AttributeClass is null)
         {
@@ -129,7 +129,7 @@ public static class AttributeExtensions
         var baseType = attributeData.AttributeClass;
         while (baseType != null)
         {
-            if (baseType.Name == "BaseClassConstructorAttribute" || 
+            if (baseType.Name == "BaseClassConstructorAttribute" ||
                 baseType.Name == "ClassConstructorAttribute")
             {
                 return true;
@@ -140,8 +140,10 @@ public static class AttributeExtensions
         return false;
     }
 
-    public static string GetHookType(this AttributeData attributeData)
+    private static HookLevel ParseHookLevel(AttributeData attributeData)
     {
-        return attributeData.ConstructorArguments[0].ToCSharpString();
+        var span = attributeData.ConstructorArguments.First().ToCSharpString().AsSpan();
+        var lastDot = span.LastIndexOf('.');
+        return Enum.Parse<HookLevel>(lastDot < 0 ? span : span[(lastDot + 1)..]);
     }
 }

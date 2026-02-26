@@ -473,7 +473,7 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
 # Copy solution and project files
-COPY *.sln .
+COPY *.slnx .
 COPY src/**/*.csproj ./src/
 COPY tests/**/*.csproj ./tests/
 

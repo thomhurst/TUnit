@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\TestProject.props" />
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TUnit.Mocks.Logging\TUnit.Mocks.Logging.csproj" />
+  </ItemGroup>
+
+  <Import Project="..\TestProject.targets" />
+
+</Project>

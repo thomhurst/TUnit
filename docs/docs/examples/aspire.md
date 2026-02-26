@@ -196,6 +196,7 @@ When a timeout occurs, the error includes:
 |--------|---------|-------------|
 | `InitializeAsync()` | Full lifecycle | Override to add post-start logic (migrations, seeding) |
 | `DisposeAsync()` | Stop and dispose app | Override to add custom cleanup |
+| `Args` | Empty | Command-line arguments passed to the AppHost entry point |
 | `ConfigureBuilder(builder)` | No-op | Customize the builder before building |
 | `ResourceTimeout` | 60 seconds | How long to wait for startup and resources |
 | `WaitBehavior` | `AllHealthy` | Which resources to wait for |
@@ -228,6 +229,27 @@ public class AppFixture : AspireFixture<Projects.MyAppHost>
     }
 }
 ```
+
+### Passing Arguments to the AppHost
+
+Use the `Args` property to pass command-line arguments to the AppHost entry point. These are forwarded to `DistributedApplicationTestingBuilder.CreateAsync` and are available in the AppHost's `builder.Configuration` during builder creation — before `ConfigureBuilder` is called:
+
+```csharp
+public class AppFixture : AspireFixture<Projects.MyAppHost>
+{
+    protected override string[] Args =>
+    [
+        "--UseVolumes=false",
+        "--UsePostgresWithPersistentLifetime=false",
+        "--UsePostgresWithSessionLifetime=true"
+    ];
+}
+```
+
+:::tip When to use `Args` vs `ConfigureBuilder`
+- Use **`Args`** for configuration values that the AppHost reads during `CreateBuilder(args)` — these must be set *before* the builder is created.
+- Use **`ConfigureBuilder`** for service registrations, HTTP client defaults, and other configuration that can be applied *after* the builder is created.
+:::
 
 ## Watching Resource Logs
 

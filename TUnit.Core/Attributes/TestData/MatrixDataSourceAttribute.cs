@@ -206,12 +206,8 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
 
         if (resolvedType.IsEnum)
         {
-#if NET5_0_OR_GREATER
             var enumValues = Enum.GetValuesAsUnderlyingType(resolvedType)
                                  .Cast<object?>();
-#else
-            var enumValues = Enum.GetValues(resolvedType).Cast<object?>();
-#endif
 
             if (isNullable)
             {

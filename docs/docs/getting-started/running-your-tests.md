@@ -102,7 +102,7 @@ To continue your journey with TUnit, explore these topics:
 - **[Data-Driven Testing](../test-authoring/arguments.md)** - Run tests with multiple input values
 
 **Common Tasks:**
-- **[Mocking](../test-authoring/mocking.md)** - Use mocks and fakes in your tests
+- **[Mocking](../test-authoring/mocking/index.md)** - Use mocks and fakes in your tests
 - **[Best Practices](../guides/best-practices.md)** - Write maintainable, reliable tests
 - **[Cookbook](../guides/cookbook.md)** - Common testing patterns and recipes
 
