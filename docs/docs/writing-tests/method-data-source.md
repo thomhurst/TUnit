@@ -23,6 +23,26 @@ Returning a `Func<T>` ensures that each test gets a fresh object.
 If you return a reference to the same object, tests may interfere with each other.
 :::
 
+Here's the simplest example — a method that returns a single `Func<T>`, creating one test case:
+
+```csharp
+public static class MyTestDataSources
+{
+    public static Func<AdditionTestData> SingleTestCase()
+        => () => new AdditionTestData(1, 2, 3);
+}
+
+public class MyTestClass
+{
+    [Test]
+    [MethodDataSource(typeof(MyTestDataSources), nameof(MyTestDataSources.SingleTestCase))]
+    public async Task MyTest(AdditionTestData data)
+    {
+        await Assert.That(data.Value1 + data.Value2).IsEqualTo(data.ExpectedResult);
+    }
+}
+```
+
 Return an `IEnumerable<Func<T>>` to generate multiple test cases. For each item returned, a new test will be created with that item passed in to the parameters. Each `Func<>` should return a `new T()` so every test gets its own instance.
 
 Here's an example using a record type (the test is invoked 3 times):

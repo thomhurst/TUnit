@@ -11,11 +11,12 @@ Register it with `[ClassConstructor<T>]` on the test class. Each test gets its o
 ```csharp
 public class CustomConstructor : IClassConstructor
 {
-    public T Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(
-        ClassConstructorMetadata classConstructorMetadata) where T : class
+    public Task<object> Create(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type type,
+        ClassConstructorMetadata classConstructorMetadata)
     {
-        // Resolve T however you like — manual construction, a container, etc.
-        return Activator.CreateInstance<T>();
+        // Resolve the type however you like — manual construction, a container, etc.
+        return Task.FromResult(Activator.CreateInstance(type)!);
     }
 }
 
@@ -25,7 +26,7 @@ public class MyTestClass(SomeDependency dep)
     [Test]
     public async Task MyTest()
     {
-        // dep was provided by CustomConstructor.Create<T>()
+        // dep was provided by CustomConstructor.Create()
     }
 }
 ```

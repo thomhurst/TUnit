@@ -224,10 +224,8 @@ public class SafeTestExecutor : ITestExecutor
         }
         catch (Exception ex)
         {
-            // Wrap other exceptions with context
-            throw new TestExecutionException(
-                $"Test '{context.Metadata.TestName}' failed with unexpected exception",
-                ex);
+            // Wrap other exceptions in a TestExecutionException
+            throw new TestExecutionException(ex, [], []);
         }
     }
 }
