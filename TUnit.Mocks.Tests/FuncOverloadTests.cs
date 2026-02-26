@@ -4,6 +4,15 @@ using TUnit.Mocks.Arguments;
 namespace TUnit.Mocks.Tests;
 
 /// <summary>
+/// Interface whose parameter is itself a Func — tests that generated Func overloads
+/// don't cause ambiguity with the base Arg&lt;Func&lt;int, bool&gt;&gt; overload.
+/// </summary>
+public interface IFilterService
+{
+    int Apply(Func<int, bool> filter);
+}
+
+/// <summary>
 /// Tests for Func&lt;T, bool&gt; parameter overloads that enable inline lambda syntax.
 /// Verifies that mock.Method(x => predicate, Any()) compiles and works correctly.
 /// </summary>
@@ -182,6 +191,24 @@ public class FuncOverloadTests
         // Assert
         await Assert.That(matched).IsEqualTo("Hello World!");
         await Assert.That(unmatched).IsEqualTo("");
+    }
+
+    [Test]
+    public async Task Func_Typed_Parameter_No_Ambiguity()
+    {
+        // Arrange — IFilterService.Apply takes Func<int, bool> as a parameter.
+        // The base overload is Arg<Func<int, bool>> and the generated Func overload
+        // is Func<Func<int, bool>, bool>. Passing a Func<int, bool> value should
+        // target the base overload (implicit T -> Arg<T>), not cause ambiguity.
+        var mock = Mock.Of<IFilterService>();
+        Func<int, bool> isPositive = x => x > 0;
+        mock.Apply(isPositive).Returns(42);
+
+        // Act
+        var result = mock.Object.Apply(isPositive);
+
+        // Assert
+        await Assert.That(result).IsEqualTo(42);
     }
 
     [Test]
