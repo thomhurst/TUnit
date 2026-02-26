@@ -13,6 +13,7 @@ namespace TUnit.Mocks.SourceGenerator.Builders;
 internal static class MockMembersBuilder
 {
     private const int MaxTypedParams = 8;
+    private const int MaxFuncOverloadParams = 4;
 
     private static readonly HashSet<string> MockMemberNames = new(System.StringComparer.Ordinal)
     {
@@ -529,31 +530,30 @@ internal static class MockMembersBuilder
         }
     }
 
-    private static void EmitMemberMethodBody(CodeWriter writer, MockMemberModel method, MockTypeModel model, string safeName, bool includeRefStructArgs)
+    private static (bool UseTypedWrapper, string ReturnType, string SetupReturnType) GetReturnTypeInfo(
+        MockMemberModel method, MockTypeModel model, string safeName)
     {
-        // For async methods (Task<T>/ValueTask<T>), unwrap the return type so users write .Returns(5) not .Returns(Task.FromResult(5))
-        // For void-async methods (Task/ValueTask), IsVoid is already true
         var setupReturnType = method.IsAsync && !method.IsVoid
             ? method.UnwrappedReturnType
             : method.ReturnType;
 
         var hasEvents = model.Events.Length > 0;
         var useTypedWrapper = ShouldGenerateTypedWrapper(method, hasEvents);
-        string returnType;
 
+        string returnType;
         if (useTypedWrapper)
-        {
             returnType = GetWrapperName(safeName, method);
-        }
         else if (method.IsVoid || method.IsRefStructReturn)
-        {
-            // Ref struct returns use VoidMockMethodCall (can't use ref struct as generic type arg)
             returnType = "global::TUnit.Mocks.VoidMockMethodCall";
-        }
         else
-        {
             returnType = $"global::TUnit.Mocks.MockMethodCall<{setupReturnType}>";
-        }
+
+        return (useTypedWrapper, returnType, setupReturnType);
+    }
+
+    private static void EmitMemberMethodBody(CodeWriter writer, MockMemberModel method, MockTypeModel model, string safeName, bool includeRefStructArgs)
+    {
+        var (useTypedWrapper, returnType, setupReturnType) = GetReturnTypeInfo(method, model, safeName);
 
         var paramList = GetArgParameterList(method, includeRefStructArgs);
         var typeParams = GetTypeParameterList(method);
@@ -615,7 +615,7 @@ internal static class MockMembersBuilder
         string safeName, bool includeRefStructArgs)
     {
         var eligible = GetFuncEligibleParamIndices(method);
-        if (eligible.Count == 0 || eligible.Count > MaxTypedParams) return;
+        if (eligible.Count == 0 || eligible.Count > MaxFuncOverloadParams) return;
 
         int totalMasks = (1 << eligible.Count) - 1;
         for (int mask = 1; mask <= totalMasks; mask++)
@@ -636,18 +636,7 @@ internal static class MockMembersBuilder
                 funcIndices.Add(eligibleIndices[bit]);
         }
 
-        // Return type (same logic as EmitMemberMethodBody)
-        var setupReturnType = method.IsAsync && !method.IsVoid ? method.UnwrappedReturnType : method.ReturnType;
-        var hasEvents = model.Events.Length > 0;
-        var useTypedWrapper = ShouldGenerateTypedWrapper(method, hasEvents);
-
-        string returnType;
-        if (useTypedWrapper)
-            returnType = GetWrapperName(safeName, method);
-        else if (method.IsVoid || method.IsRefStructReturn)
-            returnType = "global::TUnit.Mocks.VoidMockMethodCall";
-        else
-            returnType = $"global::TUnit.Mocks.MockMethodCall<{setupReturnType}>";
+        var (useTypedWrapper, returnType, setupReturnType) = GetReturnTypeInfo(method, model, safeName);
 
         // Build mixed parameter list
         var paramParts = new List<string>();

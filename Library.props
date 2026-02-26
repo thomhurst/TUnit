@@ -3,7 +3,6 @@
         <TargetFrameworks>netstandard2.0;net8.0;net9.0;net10.0</TargetFrameworks>
 
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-        <NoWarn>$(NoWarn);AD0001</NoWarn>
 
         <TrimmerSingleWarn>false</TrimmerSingleWarn>
 

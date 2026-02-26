@@ -219,10 +219,10 @@ public class FuncOverloadTests
         mock.Add(x => x > 0, Any()).Returns(50);
         mock.Add(x => x > 10, Any()).Returns(100);
 
-        // Act — 15 matches both, but last-registered wins
-        var result = mock.Object.Add(15, 0);
+        // Act & Assert — value matching only the first setup returns 50
+        await Assert.That(mock.Object.Add(5, 0)).IsEqualTo(50);
 
-        // Assert
-        await Assert.That(result).IsEqualTo(100);
+        // Act & Assert — value matching both setups returns 100 (last-registered wins)
+        await Assert.That(mock.Object.Add(15, 0)).IsEqualTo(100);
     }
 }

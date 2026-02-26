@@ -7,14 +7,13 @@ namespace TUnit.Mocks.Arguments;
 /// Provides static factory methods for creating argument matchers
 /// used in mock setup and verification expressions.
 /// </summary>
-public class Arg
+public static class Arg
 {
-    private Arg()
-    {
-    }
-
     /// <summary>Matches any value of the specified type, including null.</summary>
     public static Arg<T> Any<T>() => new(new AnyMatcher<T>());
+
+    /// <summary>Matches any value — type is inferred from the parameter position.</summary>
+    public static AnyArg Any() => AnyArg.Instance;
 
     /// <summary>Matches using exact equality.</summary>
     public static Arg<T> Is<T>(T value) => new(new ExactMatcher<T>(value));
@@ -65,6 +64,15 @@ public class Arg
 
     /// <summary>Negates the inner matcher -- matches when the inner matcher does NOT match.</summary>
     public static Arg<T> Not<T>(Arg<T> inner) => new(new NotMatcher<T>(inner.Matcher));
+}
 
-    public static Arg Any() => new();
+/// <summary>
+/// Sentinel type returned by <see cref="Arg.Any()"/> that implicitly converts to <see cref="Arg{T}"/>
+/// for any T, enabling untyped <c>Any()</c> calls where the type is inferred from context.
+/// </summary>
+[System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+public sealed class AnyArg
+{
+    internal static readonly AnyArg Instance = new();
+    private AnyArg() { }
 }
