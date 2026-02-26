@@ -27437,7 +27437,7 @@ mock.RaiseOnMessage("Hello!");
 Trigger an event automatically when a method is called using the typed `.Raises{EventName}()` method on a setup chain:
 
 ```csharp
-mock.SendMessage(Any<string>())
+mock.SendMessage(Any())
     .RaisesOnMessage("echo");
 
 mock.Object.SendMessage("test");
@@ -27552,8 +27552,8 @@ var serviceMock = repo.Of<IService>();
 var loggerMock = repo.Of<ILogger>();
 
 // Configure each mock individually
-serviceMock.GetData(Any<int>()).Returns("result");
-loggerMock.Log(Any<string>());
+serviceMock.GetData(Any()).Returns("result");
+loggerMock.Log(Any());
 
 // Exercise code
 serviceMock.Object.GetData(1);
@@ -27585,8 +27585,8 @@ repo.Reset();                // clear all mocks
 Get a diagnostic report of setup coverage and call matching:
 
 ```csharp
-mock.GetUser(Any<int>()).Returns(new User("Alice"));
-mock.Delete(Any<int>());
+mock.GetUser(Any()).Returns(new User("Alice"));
+mock.Delete(Any());
 
 svc.GetUser(1);
 // Delete was never called
@@ -27594,7 +27594,7 @@ svc.GetUser(1);
 var diag = Mock.GetDiagnostics(mock);
 diag.TotalSetups;       // 2
 diag.ExercisedSetups;   // 1
-diag.UnusedSetups;      // [Delete(Any<int>())]
+diag.UnusedSetups;      // [Delete(Any())]
 diag.UnmatchedCalls;    // [] (all calls matched a setup)
 ```
 
@@ -27632,7 +27632,7 @@ The provider is consulted **before** auto-mocking and built-in smart defaults.
 Clear all setups, call history, state, and auto-tracked property values:
 
 ```csharp
-mock.GetUser(Any<int>()).Returns(new User("Alice"));
+mock.GetUser(Any()).Returns(new User("Alice"));
 svc.GetUser(1);
 
 Mock.Reset(mock);
@@ -28204,7 +28204,9 @@ client.Handler.Reset(); // clears all setups and captured requests
 ## TUnit.Mocks
 
 
-TUnit.Mocks is a **source-generated, AOT-compatible** mocking framework built for TUnit. Because mocks are generated at compile time, it works with Native AOT, trimming, and single-file publishing — unlike traditional mocking libraries that rely on runtime proxy generation.
+TUnit.Mocks is a **standalone, source-generated, AOT-compatible** mocking framework. Because mocks are generated at compile time, it works with Native AOT, trimming, and single-file publishing — unlike traditional mocking libraries that rely on runtime proxy generation.
+
+While it integrates seamlessly with TUnit's assertion engine, TUnit.Mocks has **no dependency on the TUnit test framework** and works with any test runner — xUnit, NUnit, MSTest, or no framework at all.
 
 :::note Beta
 TUnit.Mocks is currently in **beta**. The API may change before the stable release.
@@ -28532,13 +28534,13 @@ Methods are called directly on `Mock<T>` — the chain method (`.Returns()`, `.T
 
 ```csharp
 // Fixed return value
-mock.GetUser(Any<int>()).Returns(new User("Alice"));
+mock.GetUser(Any()).Returns(new User("Alice"));
 
 // Computed return value
-mock.GetUser(Any<int>()).Returns(() => new User(DateTime.Now.ToString()));
+mock.GetUser(Any()).Returns(() => new User(DateTime.Now.ToString()));
 
 // Async methods — no special API needed
-mock.GetUserAsync(Any<int>()).Returns(new User("Alice"));
+mock.GetUserAsync(Any()).Returns(new User("Alice"));
 // TUnit.Mocks auto-wraps the value in Task<T> or ValueTask<T>
 ```
 
@@ -28546,10 +28548,10 @@ mock.GetUserAsync(Any<int>()).Returns(new User("Alice"));
 
 ```csharp
 // Throw a specific exception type
-mock.Delete(Any<int>()).Throws<InvalidOperationException>();
+mock.Delete(Any()).Throws<InvalidOperationException>();
 
 // Throw a specific instance
-mock.Delete(Any<int>()).Throws(new ArgumentException("bad id"));
+mock.Delete(Any()).Throws(new ArgumentException("bad id"));
 ```
 
 ### Callbacks
@@ -28557,11 +28559,11 @@ mock.Delete(Any<int>()).Throws(new ArgumentException("bad id"));
 ```csharp
 // Simple callback
 var callCount = 0;
-mock.Process(Any<string>())
+mock.Process(Any())
     .Callback(() => callCount++);
 
 // Callback with access to arguments
-mock.Process(Any<string>())
+mock.Process(Any())
     .Callback((object?[] args) => Console.WriteLine($"Called with: {args[0]}"));
 ```
 
@@ -28570,7 +28572,7 @@ mock.Process(Any<string>())
 Use `.Then()` to define different behaviors for successive calls:
 
 ```csharp
-mock.GetValue(Any<string>())
+mock.GetValue(Any())
     .Throws<InvalidOperationException>()   // 1st call: throws
     .Then()
     .Returns("retry-succeeded")             // 2nd call: returns value
@@ -28578,7 +28580,7 @@ mock.GetValue(Any<string>())
     .Returns("cached");                     // 3rd+ calls: returns this value
 
 // Shorthand for sequential return values
-mock.GetValue(Any<string>())
+mock.GetValue(Any())
     .ReturnsSequentially("first", "second", "third");
 // 1st: "first", 2nd: "second", 3rd+: "third" (last value repeats)
 ```
@@ -28588,14 +28590,14 @@ mock.GetValue(Any<string>())
 Void methods support `Callback` and `Throws` (but not `Returns`):
 
 ```csharp
-mock.Log(Any<string>())
+mock.Log(Any())
     .Callback(() => { /* side effect */ });
 
-mock.Log(Any<string>())
+mock.Log(Any())
     .Throws<NotSupportedException>();
 ```
 
-Void methods are also eagerly registered — calling `mock.Log(Any<string>())` without chaining is sufficient to "allow" the call in strict mode.
+Void methods are also eagerly registered — calling `mock.Log(Any())` without chaining is sufficient to "allow" the call in strict mode.
 
 ## Property Setup
 
@@ -28664,7 +28666,7 @@ bool found = svc.TryGet("key", out var value);
 **Ref parameters** are included in setup signatures and participate in argument matching. Use `.SetsRef{Name}()` to assign output values:
 
 ```csharp
-mock.Swap(Any<int>())
+mock.Swap(Any())
     .SetsRefValue(99);
 
 int val = 42;
@@ -28688,7 +28690,7 @@ public abstract class Calculator
 }
 
 var mock = Mock.OfPartial<Calculator>();
-mock.Multiply(Any<int>(), Any<int>()).Returns(99);
+mock.Multiply(Any(), Any()).Returns(99);
 
 mock.Object.Add(2, 3);      // 5 (base implementation)
 mock.Object.Multiply(2, 3); // 99 (mocked)
@@ -28706,7 +28708,7 @@ Mock any delegate type:
 
 ```csharp
 var mock = Mock.OfDelegate<Func<string, int>>();
-mock.Invoke(Any<string>()).Returns(42);
+mock.Invoke(Any()).Returns(42);
 
 Func<string, int> func = mock;
 var result = func("hello"); // 42
@@ -28736,7 +28738,7 @@ Create a single mock that implements multiple interfaces:
 ```csharp
 var mock = Mock.Of<ILogger, IDisposable>();
 
-mock.Log(Any<string>()); // ILogger method
+mock.Log(Any()); // ILogger method
 mock.Object.Log("test");
 
 ((IDisposable)mock.Object).Dispose(); // IDisposable method
@@ -28749,7 +28751,7 @@ Supports up to 4 interfaces: `Mock.Of<T1, T2, T3, T4>()`.
 Setup methods return chain objects that support additional behaviors:
 
 ```csharp
-mock.Process(Any<int>())
+mock.Process(Any())
     .Returns(true)
     .RaisesProcessCompleted(EventArgs.Empty)   // strongly-typed auto-raise event
     .TransitionsTo("processed");               // state machine transition
@@ -28776,7 +28778,7 @@ mock.GetUser(42).WasCalled();
 mock.GetUser(42).WasCalled(Times.Once);
 
 // Verify never called
-mock.Delete(Any<int>()).WasNeverCalled();
+mock.Delete(Any()).WasNeverCalled();
 ```
 
 ### Times
@@ -28795,7 +28797,7 @@ mock.Delete(Any<int>()).WasNeverCalled();
 
 ```csharp
 mock.GetUser(42).WasCalled(Times.Once, "GetUser should be called once during initialization");
-mock.Delete(Any<int>()).WasNeverCalled("Delete should not be called in read-only mode");
+mock.Delete(Any()).WasNeverCalled("Delete should not be called in read-only mode");
 ```
 
 ## Property Verification
@@ -28814,7 +28816,7 @@ mock.Count.Setter.WasNeverCalled();
 
 // Setter verification — specific value
 mock.Count.Set(42).WasCalled(Times.Once);
-mock.Count.Set(Is<int>(v => v > 0)).WasCalled(Times.AtLeast(1));
+mock.Count.Set(v => v > 0).WasCalled(Times.AtLeast(1));
 ```
 
 ## Argument Matching in Verification
@@ -28826,10 +28828,10 @@ Verification uses the same `Arg<T>` matchers as setup:
 mock.GetUser(42).WasCalled(Times.Once);
 
 // Any value
-mock.GetUser(Any<int>()).WasCalled(Times.Exactly(3));
+mock.GetUser(Any()).WasCalled(Times.Exactly(3));
 
-// Predicate
-mock.GetUser(Is<int>(id => id > 0)).WasCalled(Times.AtLeast(1));
+// Predicate — inline lambda works directly
+mock.GetUser(id => id > 0).WasCalled(Times.AtLeast(1));
 ```
 
 See [Argument Matchers](argument-matchers) for the full list of matchers.
@@ -28842,7 +28844,7 @@ Verify calls occurred in a specific order **across one or more mocks**:
 Mock.VerifyInOrder(() =>
 {
     mockLogger.Log("Starting").WasCalled();
-    mockRepo.SaveAsync(Any<int>()).WasCalled();
+    mockRepo.SaveAsync(Any()).WasCalled();
     mockLogger.Log("Done").WasCalled();
 });
 ```
@@ -28858,8 +28860,8 @@ If calls occurred out of order, `VerifyInOrder` throws with a message showing th
 Verify that **every setup** was invoked at least once:
 
 ```csharp
-mock.GetUser(Any<int>()).Returns(new User("Alice"));
-mock.Delete(Any<int>());
+mock.GetUser(Any()).Returns(new User("Alice"));
+mock.Delete(Any());
 
 svc.GetUser(1);
 svc.Delete(2);
@@ -28893,7 +28895,7 @@ Use TUnit's `Assert.That` pipeline for assertion-style verification with better 
 using TUnit.Mocks.Assertions;
 
 await Assert.That(mock.GetUser(42)).WasCalled(Times.Once);
-await Assert.That(mock.Delete(Any<int>())).WasNeverCalled();
+await Assert.That(mock.Delete(Any())).WasNeverCalled();
 
 // Property verification through assertions
 await Assert.That(mock.Name).WasCalled(Times.Once);
