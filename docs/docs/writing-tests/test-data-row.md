@@ -197,4 +197,4 @@ public class DatabaseTests
 - [Arguments Attribute](./arguments.md) - For compile-time constant data with inline metadata
 - [Method Data Sources](./method-data-source.md) - For dynamic test data generation
 - [Class Data Sources](./class-data-source.md) - For class-based test data
-- [Display Names](../customization-extensibility/display-names.md) - For global display name formatting
+- [Display Names](../extending/display-names.md) - For global display name formatting

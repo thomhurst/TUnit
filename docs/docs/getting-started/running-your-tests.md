@@ -4,7 +4,7 @@ As TUnit is built on-top of the newer Microsoft.Testing.Platform, and combined w
 
 :::info
 
-Please note that for the coverage and trx report, you need to install [additional extensions](../extensions/extensions.md)
+Please note that for the coverage and trx report, you need to install [additional extensions](../extending/built-in-extensions.md)
 
 :::
 
@@ -98,16 +98,16 @@ To continue your journey with TUnit, explore these topics:
 
 **Core Testing Concepts:**
 - **[Assertions](../assertions/getting-started.md)** - Learn TUnit's fluent assertion syntax
-- **[Test Lifecycle](../test-lifecycle/setup.md)** - Set up and tear down test state with hooks
-- **[Data-Driven Testing](../test-authoring/arguments.md)** - Run tests with multiple input values
+- **[Test Lifecycle](../writing-tests/hooks-setup.md)** - Set up and tear down test state with hooks
+- **[Data-Driven Testing](../writing-tests/arguments.md)** - Run tests with multiple input values
 
 **Common Tasks:**
-- **[Mocking](../test-authoring/mocking/index.md)** - Use mocks and fakes in your tests
+- **[Mocking](../writing-tests/mocking/index.md)** - Use mocks and fakes in your tests
 - **[Best Practices](../guides/best-practices.md)** - Write maintainable, reliable tests
 - **[Cookbook](../guides/cookbook.md)** - Common testing patterns and recipes
 
 **Advanced Features:**
-- **[Parallelism](../parallelism/not-in-parallel.md)** - Control how tests run in parallel
+- **[Parallelism](../execution/not-in-parallel.md)** - Control how tests run in parallel
 - **[CI/CD Integration](../execution/ci-cd-reporting.md)** - Integrate TUnit into your pipeline
 
 Need help? Check the [Troubleshooting & FAQ](../troubleshooting.md) guide.

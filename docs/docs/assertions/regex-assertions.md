@@ -1,3 +1,7 @@
+---
+sidebar_position: 13
+---
+
 # Regex Assertions
 
 The `.Matches()` method allows you to validate strings against regular expressions and assert on capture groups, match positions, and match lengths. This is useful when you need to validate structured text like emails, phone numbers, dates, or extract specific parts of a string.

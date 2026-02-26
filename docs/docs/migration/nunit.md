@@ -394,7 +394,7 @@ public async Task TestWithAttachment()
 }
 ```
 
-For more information about working with test artifacts, including session-level artifacts and best practices, see the [Test Artifacts guide](../test-lifecycle/artifacts.md).
+For more information about working with test artifacts, including session-level artifacts and best practices, see the [Test Artifacts guide](../writing-tests/artifacts.md).
 
 ### Combinatorial Testing
 
@@ -840,4 +840,4 @@ public static class AssemblyHooks
 
 TUnit includes built-in code coverage support. Do **not** use Coverlet — it is incompatible with TUnit's Microsoft.Testing.Platform.
 
-See the [Code Coverage guide](../extensions/code-coverage.md) for setup and configuration.
+See the [Code Coverage guide](../extending/code-coverage.md) for setup and configuration.

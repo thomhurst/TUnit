@@ -328,7 +328,7 @@ public class OrderServiceTUnitMocksTests
 - **AOT-compatible** — source-generated mocks work with Native AOT, trimming, and single-file publishing
 - **Built-in capture** — every `Arg<T>` automatically captures values for inspection via `.Values` and `.Latest`
 
-See the full [TUnit.Mocks documentation](../test-authoring/mocking) for setup, verification, argument matchers, and more.
+See the full [TUnit.Mocks documentation](../writing-tests/mocking) for setup, verification, argument matchers, and more.
 :::
 
 ### Partial Mocks and Spy Pattern

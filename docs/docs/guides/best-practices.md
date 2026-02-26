@@ -658,7 +658,7 @@ TUnit is designed for performance at scale. Follow these guidelines to keep your
 ### Optimize Test Discovery
 
 - Use AOT mode for faster test discovery and lower memory usage
-- Keep data sources lightweight (see [Performance Best Practices](../advanced/performance-best-practices.md))
+- Keep data sources lightweight (see [Performance Best Practices](performance.md))
 - Limit matrix test combinations to avoid test explosion
 
 ### Optimize Test Execution
@@ -692,7 +692,7 @@ public async Task GetUserData()
 }
 ```
 
-For detailed performance guidance, see [Performance Best Practices](../advanced/performance-best-practices.md).
+For detailed performance guidance, see [Performance Best Practices](performance.md).
 
 ## Summary
 

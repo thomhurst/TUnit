@@ -483,8 +483,7 @@ for (int i = 0; i < 10000; i++)  // Creates 10,000 tests!
 
 ## See Also
 
-- [Test Context](../test-lifecycle/test-context.md) - Understanding TestContext and StateBag
-- [Dynamic Tests](../experimental/dynamic-tests.md) - Pre-execution test generation
+- [Test Context](../writing-tests/test-context.md) - Understanding TestContext and StateBag
+- [Dynamic Tests](dynamic-tests.md) - Pre-execution test generation
 - [Retrying](../execution/retrying.md) - Built-in retry mechanism comparison
-- [Properties](../test-lifecycle/properties.md) - Test metadata and custom properties
-- [Event Subscribing](../test-lifecycle/event-subscribing.md) - Test lifecycle event receivers
+- [Event Subscribing](../writing-tests/event-subscribing.md) - Test lifecycle event receivers

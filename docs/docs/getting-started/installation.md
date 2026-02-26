@@ -81,8 +81,8 @@ dotnet run --configuration Release --coverage --report-trx
 **Important:** Do **not** install `coverlet.collector` or `coverlet.msbuild`. These packages are incompatible with TUnit because they require the VSTest platform, while TUnit uses the modern Microsoft.Testing.Platform.
 
 For more details, see:
-- [Code Coverage Documentation](../extensions/extensions.md#code-coverage)
-- [Extensions Overview](../extensions/extensions.md)
+- [Code Coverage Documentation](../extending/built-in-extensions.md#code-coverage)
+- [Extensions Overview](../extending/built-in-extensions.md)
 
 That's it. We're ready to write our first test.
 

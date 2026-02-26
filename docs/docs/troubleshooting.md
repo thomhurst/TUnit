@@ -274,7 +274,7 @@ public class Fixture : IAsyncDiscoveryInitializer  // Changed from IAsyncInitial
 
 **Performance note:** Solution 1 is preferred because discovery happens frequently (IDE reloads, project switches, `--list-tests`), and you want to avoid expensive operations during discovery when possible.
 
-For detailed examples, see [Property Injection - Discovery Phase Initialization](test-lifecycle/property-injection.md#discovery-phase-initialization).
+For detailed examples, see [Property Injection - Discovery Phase Initialization](writing-tests/property-injection.md#discovery-phase-initialization).
 
 ## Test Execution Issues
 

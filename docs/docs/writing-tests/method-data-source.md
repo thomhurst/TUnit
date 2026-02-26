@@ -271,4 +271,4 @@ public class MyTests
 1. **Preferred:** Return predefined values that don't require initialization
 2. **Alternative:** Use `IAsyncDiscoveryInitializer` if you need discovery-time initialization
 
-See [Property Injection - Discovery Phase Initialization](../test-lifecycle/property-injection.md#discovery-phase-initialization) for detailed guidance and examples.
+See [Property Injection - Discovery Phase Initialization](property-injection.md#discovery-phase-initialization) for detailed guidance and examples.

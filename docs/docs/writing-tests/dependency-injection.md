@@ -30,7 +30,7 @@ public class MyTestClass(SomeDependency dep)
 }
 ```
 
-The `ClassConstructorMetadata` parameter provides context about the test being constructed, including the test's data-source arguments and metadata. You can also implement [event-subscribing interfaces](test-lifecycle/event-subscribing.md) on the same class to get notified when a test finishes — useful for disposing objects after the test completes.
+The `ClassConstructorMetadata` parameter provides context about the test being constructed, including the test's data-source arguments and metadata. You can also implement [event-subscribing interfaces](event-subscribing.md) on the same class to get notified when a test finishes — useful for disposing objects after the test completes.
 
 ## DependencyInjectionDataSourceAttribute
 

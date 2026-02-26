@@ -509,7 +509,7 @@ public class MyTests
 }
 ```
 
-See [Property Injection - Discovery Phase Initialization](../test-lifecycle/property-injection.md#discovery-phase-initialization) for detailed guidance and best practices.
+See [Property Injection - Discovery Phase Initialization](../writing-tests/property-injection.md#discovery-phase-initialization) for detailed guidance and best practices.
 
 ## Best Practices
 
