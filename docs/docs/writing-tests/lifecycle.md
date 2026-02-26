@@ -431,8 +431,8 @@ All `[After]` hooks, `ITestEndEventReceiver` events, and disposal methods run ev
 
 ## Related Pages
 
-- [Test Set Ups](setup.md) - Detailed guide to `[Before]` hooks
-- [Test Clean Ups](cleanup.md) - Detailed guide to `[After]` hooks
+- [Test Set Ups](hooks-setup.md) - Detailed guide to `[Before]` hooks
+- [Test Clean Ups](hooks-cleanup.md) - Detailed guide to `[After]` hooks
 - [Event Subscribing](event-subscribing.md) - Event receiver interfaces
 - [Property Injection](property-injection.md) - Property injection and `IAsyncInitializer`
 - [Dependency Injection](dependency-injection.md) - DI integration

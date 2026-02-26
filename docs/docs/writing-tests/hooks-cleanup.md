@@ -31,7 +31,7 @@ public async Task AsyncCleanup()  // ✅ Valid - asynchronous hook
 ### Hook Parameters
 
 :::info
-`[After]` hooks accept the same parameters as `[Before]` hooks. See [Setup Hooks -- Hook Parameters](setup.md#hook-parameters) for the full reference.
+`[After]` hooks accept the same parameters as `[Before]` hooks. See [Setup Hooks — Hook Parameters](hooks-setup.md#hook-parameters) for the full reference.
 :::
 
 A common pattern in cleanup hooks is checking the test result to perform conditional cleanup:
