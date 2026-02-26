@@ -76,7 +76,7 @@ public class FileLogSink : ILogSink, IAsyncDisposable
     {
         // Get test name from context if available
         var testName = context is TestContext tc
-            ? tc.TestDetails.TestName
+            ? tc.Metadata.TestName
             : "Unknown";
 
         _writer.WriteLine($"[{DateTime.Now:HH:mm:ss}] [{level}] [{testName}] {message}");
@@ -133,8 +133,8 @@ public void Log(LogLevel level, string message, Exception? exception, Context? c
     {
         case TestContext tc:
             // During test execution
-            var testName = tc.TestDetails.TestName;
-            var className = tc.TestDetails.ClassType.Name;
+            var testName = tc.Metadata.TestName;
+            var className = tc.Metadata.TestDetails.ClassType.Name;
             break;
 
         case ClassHookContext chc:
@@ -185,7 +185,7 @@ public class SeqLogSink : ILogSink, IDisposable
             _ => Serilog.Events.LogEventLevel.Information
         };
 
-        var testName = context is TestContext tc ? tc.TestDetails.TestName : "Unknown";
+        var testName = context is TestContext tc ? tc.Metadata.TestName : "Unknown";
 
         _logger
             .ForContext("TestName", testName)
@@ -276,7 +276,7 @@ public class TestHeaderLogger : DefaultLogger
         if (!_hasOutputHeader && Context is TestContext testContext)
         {
             _hasOutputHeader = true;
-            var testId = $"{testContext.TestDetails.ClassType.Name}.{testContext.TestDetails.TestName}";
+            var testId = $"{testContext.Metadata.TestDetails.ClassType.Name}.{testContext.Metadata.TestName}";
             return $"--- {testId} ---\n{baseMessage}";
         }
 

@@ -828,13 +828,13 @@ public class SharedDatabaseTests
 {
     private static DbContext _sharedContext;
 
-    [Before(HookType.Class)]
+    [Before(Class)]
     public static async Task ClassSetup()
     {
         _sharedContext = await SetupDatabaseAsync();
     }
 
-    [Before(HookType.Test)]
+    [Before(Test)]
     public async Task TestSetup()
     {
         // Clear data between tests
@@ -848,7 +848,7 @@ public class SharedDatabaseTests
         // Use _sharedContext
     }
 
-    [After(HookType.Class)]
+    [After(Class)]
     public static async Task ClassCleanup()
     {
         _sharedContext?.Dispose();
@@ -1062,7 +1062,7 @@ public class ConfigurationTests
 {
     private static IConfiguration _configuration;
 
-    [Before(HookType.Class)]
+    [Before(Class)]
     public static void SetupConfiguration()
     {
         _configuration = new ConfigurationBuilder()
@@ -1091,7 +1091,7 @@ public class ConfigurationTests
 #### 1. Use Environment-Specific Files
 
 ```csharp
-[Before(HookType.Class)]
+[Before(Class)]
 public static void SetupConfiguration()
 {
     var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
@@ -1164,7 +1164,7 @@ dotnet user-secrets set "ConnectionStrings:Database" "Server=localhost;..."
 #### 3. Load Secrets in Tests
 
 ```csharp
-[Before(HookType.Class)]
+[Before(Class)]
 public static void SetupConfiguration()
 {
     _configuration = new ConfigurationBuilder()
@@ -1186,7 +1186,7 @@ public static void SetupConfiguration()
 **Recommended for CI/CD:**
 
 ```csharp
-[Before(HookType.Class)]
+[Before(Class)]
 public static void SetupConfiguration()
 {
     _configuration = new ConfigurationBuilder()
@@ -1244,7 +1244,7 @@ public class ConfigurationTests
 {
     private static AppSettings _settings;
 
-    [Before(HookType.Class)]
+    [Before(Class)]
     public static void SetupConfiguration()
     {
         var config = new ConfigurationBuilder()
@@ -1272,7 +1272,7 @@ public class TestBase
 {
     protected static IConfiguration Configuration { get; private set; }
 
-    [Before(HookType.Assembly)]
+    [Before(Assembly)]
     public static void SetupSharedConfiguration()
     {
         Configuration = new ConfigurationBuilder()
@@ -1332,7 +1332,7 @@ public class PerTestConfigTests
 
 **Debug:**
 ```csharp
-[Before(HookType.Class)]
+[Before(Class)]
 public static void SetupConfiguration()
 {
     var currentDir = Directory.GetCurrentDirectory();
@@ -1859,7 +1859,7 @@ public async Task FetchUserData()
 #### 1. Ensure Services Are Registered
 ```csharp
 // In your test setup or configuration
-[Before(HookType.Assembly)]
+[Before(Assembly)]
 public static void ConfigureServices()
 {
     var services = new ServiceCollection();
@@ -1980,7 +1980,7 @@ public class Conservative : IParallelLimit
 
 #### 3. Clear Test Data Between Runs
 ```csharp
-[After(HookType.Test)]
+[After(Test)]
 public void Cleanup()
 {
     GC.Collect(); // Force garbage collection if needed
@@ -2002,11 +2002,11 @@ public void Cleanup()
 #### 1. Check Hook Scope
 ```csharp
 // ❌ Instance method for class-level hook
-[Before(HookType.Class)]
+[Before(Class)]
 public void ClassSetup() { } // Won't work!
 
 // ✅ Static method for class-level hook
-[Before(HookType.Class)]
+[Before(Class)]
 public static void ClassSetup() { } // Works!
 ```
 

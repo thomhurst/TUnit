@@ -111,7 +111,7 @@ public class UserApiTests
         var redis = services.GetRequiredService<IConnectionMultiplexer>();
         var cached = await redis.GetDatabase().StringGetAsync("user:john@example.com");
         
-        Assert.That(cached.HasValue).IsTrue();
+        await Assert.That(cached.HasValue).IsTrue();
     }
 }
 ```

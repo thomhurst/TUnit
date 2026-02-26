@@ -214,7 +214,7 @@ public class LoggingService
 
 ### Async Property Initialization
 
-Properties can implement `IAsyncInitializable` for complex setup:
+Properties can implement `IAsyncInitializer` for complex setup:
 
 ```csharp
 using TUnit.Core;
@@ -235,7 +235,7 @@ public class AsyncInitializationTests
     }
 }
 
-public class AsyncContainer : IAsyncInitializable, IAsyncDisposable
+public class AsyncContainer : IAsyncInitializer, IAsyncDisposable
 {
     public bool IsInitialized { get; private set; }
     public string ConnectionString { get; private set; } = "";

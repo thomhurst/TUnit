@@ -167,7 +167,7 @@ public class DatabaseIntegrationTests
 // ❌ Bad: Expensive setup per test
 public class ExpensiveTests
 {
-    [Before(HookType.Test)]
+    [Before(Test)]
     public async Task SetupEachTest()
     {
         await StartDatabaseContainer();
@@ -180,14 +180,14 @@ public class EfficientTests
 {
     private static DatabaseContainer? _container;
     
-    [Before(HookType.Class)]
+    [Before(Class)]
     public static async Task SetupOnce()
     {
         _container = await StartDatabaseContainer();
         await MigrateDatabase();
     }
     
-    [After(HookType.Class)]
+    [After(Class)]
     public static async Task CleanupOnce()
     {
         if (_container != null)
@@ -292,7 +292,7 @@ public class LeakyTests
 {
     private static readonly List<TestResult> _allResults = new();
     
-    [After(HookType.Test)]
+    [After(Test)]
     public void StoreResult()
     {
         _allResults.Add(GetCurrentResult()); // Memory leak!
@@ -305,7 +305,7 @@ public class EfficientTests
     private static readonly Queue<TestResult> _recentResults = new();
     private const int MaxResults = 100;
     
-    [After(HookType.Test)]
+    [After(Test)]
     public void StoreResult()
     {
         _recentResults.Enqueue(GetCurrentResult());
@@ -395,14 +395,14 @@ public async Task AsyncIOTest()
 ```csharp
 public class FileTestsWithCache
 {
-    private static readonly ConcurrentDictionary<string, string> _fileCache = new();
-    
-    private async Task<string> GetFileContentAsync(string path)
+    private static readonly ConcurrentDictionary<string, Lazy<Task<string>>> _fileCache = new();
+
+    private Task<string> GetFileContentAsync(string path)
     {
-        return await _fileCache.GetOrAddAsync(path, 
-            async p => await File.ReadAllTextAsync(p));
+        return _fileCache.GetOrAdd(path,
+            p => new Lazy<Task<string>>(() => File.ReadAllTextAsync(p))).Value;
     }
-    
+
     [Test]
     [Arguments("config1.json")]
     [Arguments("config2.json")]
@@ -496,16 +496,6 @@ dotnet test --no-build -- --treenode-filter "/*/*/*/*[Category=E2E]"
 > dotnet test --no-build --treenode-filter "/**[Category=Unit]"
 > ```
 
-### Use Test Result Caching
-
-```xml
-<!-- Cache test results in CI -->
-<PropertyGroup>
-    <TUnitCacheTestResults>true</TUnitCacheTestResults>
-    <TUnitTestResultsCachePath>$(Build.StagingDirectory)/testcache</TUnitTestResultsCachePath>
-</PropertyGroup>
-```
-
 ### Fail Fast in CI
 
 ```bash
@@ -522,13 +512,13 @@ public class PerformanceAwareExecutor : ITestExecutor
 {
     private readonly ILogger<PerformanceAwareExecutor> _logger;
     
-    public async Task ExecuteAsync(TestContext context, Func<Task> testBody)
+    public async ValueTask ExecuteTest(TestContext context, Func<ValueTask> action)
     {
         var stopwatch = Stopwatch.StartNew();
-        
+
         try
         {
-            await testBody();
+            await action();
         }
         finally
         {
@@ -549,7 +539,7 @@ public class PerformanceAwareExecutor : ITestExecutor
 ### Track Test Metrics
 
 ```csharp
-[After(HookType.Test)]
+[After(Test)]
 public static void RecordTestMetrics()
 {
     var context = TestContext.Current;
@@ -561,7 +551,7 @@ public static void RecordTestMetrics()
             new Dictionary<string, string>
             {
                 ["TestName"] = context.Metadata.TestName,
-                ["TestClass"] = context.Metadata.TestDetails.TestClass,
+                ["TestClass"] = context.Metadata.TestDetails.ClassType.Name,
                 ["Result"] = context.Execution.Result.State.ToString()
             });
     }

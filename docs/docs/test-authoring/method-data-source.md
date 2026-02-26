@@ -272,4 +272,3 @@ public class MyTests
 2. **Alternative:** Use `IAsyncDiscoveryInitializer` if you need discovery-time initialization
 
 See [Property Injection - Discovery Phase Initialization](../test-lifecycle/property-injection.md#discovery-phase-initialization) for detailed guidance and examples.
-EOF < /dev/null

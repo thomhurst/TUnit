@@ -271,7 +271,7 @@ public abstract class EfCoreTodoTestBase
         });
     }
 
-    [After(HookType.Test)]
+    [After(Test)]
     public async Task CleanupSchema()
     {
         await using var conn = new NpgsqlConnection(

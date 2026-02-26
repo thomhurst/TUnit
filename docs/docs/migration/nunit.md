@@ -24,7 +24,7 @@ Migrating from NUnit to TUnit can improve test execution speed. Check the [bench
 | `Assert.AreEqual(expected, actual)` | `await Assert.That(actual).IsEqualTo(expected)` |
 | `Assert.That(actual, Is.EqualTo(expected))` | `await Assert.That(actual).IsEqualTo(expected)` |
 | `Assert.Throws<T>(() => ...)` | `await Assert.ThrowsAsync<T>(() => ...)` |
-| `TestContext.WriteLine(...)` | `TestContext` parameter with `context.OutputWriter.WriteLine(...)` |
+| `TestContext.WriteLine(...)` | `TestContext` parameter with `context.Output.WriteLine(...)` |
 | `TestContext.AddTestAttachment(path, name)` | `TestContext.Current!.Output.AttachArtifact(new Artifact { File = new FileInfo(path), DisplayName = name })` |
 | `CollectionAssert.AreEqual(expected, actual)` | `await Assert.That(actual).IsEquivalentTo(expected)` |
 | `StringAssert.Contains(substring, text)` | `await Assert.That(text).Contains(substring)` |
@@ -214,13 +214,13 @@ dotnet run -- --list-tests
 
 ### Setup and Teardown
 
-`[SetUp]` becomes `[Before(HookType.Test)]`
+`[SetUp]` becomes `[Before(Test)]`
 
-`[TearDown]` becomes `[After(HookType.Test)]`
+`[TearDown]` becomes `[After(Test)]`
 
-`[OneTimeSetUp]` becomes `[Before(HookType.Class)]`
+`[OneTimeSetUp]` becomes `[Before(Class)]`
 
-`[OneTimeTearDown]` becomes `[After(HookType.Class)]`
+`[OneTimeTearDown]` becomes `[After(Class)]`
 
 ### Assertions
 
@@ -358,8 +358,8 @@ TestContext.Out.WriteLine("More output");
 // TUnit (inject TestContext)
 public async Task MyTest(TestContext context)
 {
-    context.OutputWriter.WriteLine("Test output");
-    context.OutputWriter.WriteLine("More output");
+    context.Output.WriteLine("Test output");
+    context.Output.WriteLine("More output");
 }
 ```
 
@@ -692,9 +692,9 @@ public void Test_WithContextProperties()
 [Test]
 public async Task Test_WithContextProperties(TestContext context)
 {
-    context.OutputWriter.WriteLine($"Test Name: {context.Metadata.TestName}");
-    context.OutputWriter.WriteLine($"Test ID: {context.Metadata.TestDetails.TestId}");
-    context.OutputWriter.WriteLine($"Class Name: {context.Metadata.TestDetails.ClassType.Name}");
+    context.Output.WriteLine($"Test Name: {context.Metadata.TestName}");
+    context.Output.WriteLine($"Test ID: {context.Metadata.TestDetails.TestId}");
+    context.Output.WriteLine($"Class Name: {context.Metadata.TestDetails.ClassType.Name}");
 
     // Test implementation
 }

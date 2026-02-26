@@ -142,7 +142,7 @@ This works with nested properties too:
 
 ```csharp
 await Assert.That(order)
-    .Member(o => o.Customer.Address.City, city => city.IsEqualTo("Seattle");
+    .Member(o => o.Customer.Address.City, city => city.IsEqualTo("Seattle"));
 ```
 
 ## Working with Collections

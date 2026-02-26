@@ -207,7 +207,7 @@ dotnet run -- --list-tests
 **TestContext errors:**
 - Remove the `public TestContext TestContext { get; set; }` property
 - Add `TestContext context` parameter to test methods that need it
-- Access output via `context.OutputWriter.WriteLine(...)` instead of `TestContext.WriteLine(...)`
+- Access output via `context.Output.WriteLine(...)` instead of `TestContext.WriteLine(...)`
 
 **ClassInitialize/AssemblyInitialize errors:**
 - Remove the `TestContext context` parameter from these methods
@@ -239,17 +239,17 @@ dotnet run -- --list-tests
 
 ### Setup and Teardown
 
-`[TestInitialize]` becomes `[Before(HookType.Test)]`
+`[TestInitialize]` becomes `[Before(Test)]`
 
-`[TestCleanup]` becomes `[After(HookType.Test)]`
+`[TestCleanup]` becomes `[After(Test)]`
 
-`[ClassInitialize]` becomes `[Before(HookType.Class)]` and remove the TestContext parameter
+`[ClassInitialize]` becomes `[Before(Class)]` and remove the TestContext parameter
 
-`[ClassCleanup]` becomes `[After(HookType.Class)]`
+`[ClassCleanup]` becomes `[After(Class)]`
 
-`[AssemblyInitialize]` becomes `[Before(HookType.Assembly)]` and remove the TestContext parameter
+`[AssemblyInitialize]` becomes `[Before(Assembly)]` and remove the TestContext parameter
 
-`[AssemblyCleanup]` becomes `[After(HookType.Assembly)]`
+`[AssemblyCleanup]` becomes `[After(Assembly)]`
 
 ### Assertions
 
@@ -422,10 +422,10 @@ public class MyTests
     [Test]
     public async Task MyTest(TestContext context)
     {
-        context.OutputWriter.WriteLine("Test output");
+        context.Output.WriteLine("Test output");
     }
     
-    [Before(HookType.Class)]
+    [Before(Class)]
     public static async Task ClassInit()
     {
         // Setup code - no TestContext parameter needed
@@ -610,7 +610,7 @@ public class OrderServiceTests
     {
         // Runs before each test
         _orderService = new OrderService(_sharedDatabase);
-        context.OutputWriter.WriteLine("Starting test");
+        context.Output.WriteLine("Starting test");
     }
 
     [Test]
@@ -626,7 +626,7 @@ public class OrderServiceTests
         await Assert.That(order.ProductName).IsEqualTo(productName);
         await Assert.That(order.Price).IsEqualTo((decimal)price);
 
-        context.OutputWriter.WriteLine($"Order created: {order.Id}");
+        context.Output.WriteLine($"Order created: {order.Id}");
     }
 
     [Test]
@@ -656,7 +656,7 @@ public class OrderServiceTests
     {
         // Runs after each test
         _orderService?.Dispose();
-        context.OutputWriter.WriteLine("Test completed");
+        context.Output.WriteLine("Test completed");
     }
 
     [After(Class)]
@@ -1055,18 +1055,18 @@ public class ContextTests
     public async Task UsingTestContext_AllProperties(TestContext context)
     {
         // Writing output
-        context.OutputWriter.WriteLine($"Test: {context.Metadata.TestName}");
-        context.OutputWriter.WriteLine($"Test ID: {context.Metadata.TestDetails.TestId}");
+        context.Output.WriteLine($"Test: {context.Metadata.TestName}");
+        context.Output.WriteLine($"Test ID: {context.Metadata.TestDetails.TestId}");
 
         // Accessing test details
-        context.OutputWriter.WriteLine($"Class: {context.Metadata.TestDetails.ClassType.Name}");
-        context.OutputWriter.WriteLine($"Method: {context.Metadata.TestDetails.MethodInfo.Name}");
+        context.Output.WriteLine($"Class: {context.Metadata.TestDetails.ClassType.Name}");
+        context.Output.WriteLine($"Method: {context.Metadata.TestDetails.MethodInfo.Name}");
 
         // Accessing attributes and properties
         var properties = context.Metadata.TestDetails.Attributes.OfType<PropertyAttribute>();
         foreach (var prop in properties)
         {
-            context.OutputWriter.WriteLine($"{prop.Key}: {prop.Value}");
+            context.Output.WriteLine($"{prop.Key}: {prop.Value}");
         }
 
         await Assert.That(true).IsTrue();
@@ -1085,14 +1085,14 @@ public class ContextTests
             .OfType<PropertyAttribute>()
             .FirstOrDefault(p => p.Key == "Environment");
 
-        context.OutputWriter.WriteLine($"Running on {browserProp?.Value} in {envProp?.Value}");
+        context.Output.WriteLine($"Running on {browserProp?.Value} in {envProp?.Value}");
     }
 }
 ```
 
 **Key Changes:**
 - TestContext is injected as parameter, not a property
-- Access output via `context.OutputWriter.WriteLine()`
+- Access output via `context.Output.WriteLine()`
 - Test metadata available via `context.Metadata.TestDetails`
 - Properties accessed through attributes rather than dictionary
 - More type-safe property access

@@ -795,11 +795,11 @@ public class LoggingTests
     [Test]
     public async Task Test_WithLogging(TestContext context)
     {
-        context.OutputWriter.WriteLine("Starting test");
+        context.Output.WriteLine("Starting test");
 
         var result = PerformOperation();
 
-        context.OutputWriter.WriteLine($"Result: {result}");
+        context.Output.WriteLine($"Result: {result}");
         await Assert.That(result).IsGreaterThan(0);
     }
 }
@@ -807,7 +807,7 @@ public class LoggingTests
 
 **Key Changes:**
 - `ITestOutputHelper` injected in constructor → `TestContext` injected as method parameter
-- Access output via `context.OutputWriter.WriteLine()`
+- Access output via `context.Output.WriteLine()`
 - TestContext provides additional test metadata
 
 #### Test Attachments
@@ -1122,7 +1122,7 @@ public class UserServiceTests(DatabaseFixture dbFixture)
     [Arguments("jane@example.com", "Jane")]
     public async Task CreateUser_WithValidData_Succeeds(string email, string name, TestContext context)
     {
-        context.OutputWriter.WriteLine($"Creating user: {name}");
+        context.Output.WriteLine($"Creating user: {name}");
 
         var user = await _userService.CreateUserAsync(email, name);
 
@@ -1130,7 +1130,7 @@ public class UserServiceTests(DatabaseFixture dbFixture)
         await Assert.That(user.Email).IsEqualTo(email);
         await Assert.That(user.Name).IsEqualTo(name);
 
-        context.OutputWriter.WriteLine($"User created with ID: {user.Id}");
+        context.Output.WriteLine($"User created with ID: {user.Id}");
     }
 
     [Test]

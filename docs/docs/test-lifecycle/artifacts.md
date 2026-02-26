@@ -58,7 +58,7 @@ A common pattern is to capture a screenshot when a test fails:
 ```csharp
 public class MyTests
 {
-    [After(HookType.Test)]
+    [After(Test)]
     public async Task TakeScreenshotOnFailure()
     {
         var testContext = TestContext.Current;
@@ -72,7 +72,7 @@ public class MyTests
             {
                 File = new FileInfo(screenshotPath),
                 DisplayName = "Failure Screenshot",
-                Description = $"Screenshot captured when test '{testContext.TestDetails.TestName}' failed"
+                Description = $"Screenshot captured when test '{testContext.Metadata.TestName}' failed"
             });
         }
     }
@@ -131,7 +131,7 @@ Attach files to the entire test session using `TestSessionContext.Current.AddArt
 ### Basic Usage
 
 ```csharp
-[Before(HookType.TestSession)]
+[Before(TestSession)]
 public static void SetupTestSession()
 {
     // Start capturing session-wide logs
@@ -153,7 +153,7 @@ public static void SetupTestSession()
 Attach configuration files to document the test environment:
 
 ```csharp
-[Before(HookType.TestSession)]
+[Before(TestSession)]
 public static void DocumentTestEnvironment()
 {
     // Attach environment configuration
@@ -182,7 +182,7 @@ public static void DocumentTestEnvironment()
 Generate and attach performance reports for the entire test session:
 
 ```csharp
-[After(HookType.TestSession)]
+[After(TestSession)]
 public static void GeneratePerformanceReport()
 {
     // Generate performance report after all tests complete
@@ -222,7 +222,7 @@ public class Artifact
 Consider cleaning up temporary artifact files after test execution to avoid accumulating files:
 
 ```csharp
-[After(HookType.TestSession)]
+[After(TestSession)]
 public static void CleanupArtifacts()
 {
     var artifactDir = "test-artifacts";
@@ -238,10 +238,10 @@ public static void CleanupArtifacts()
 Create a unique directory for each test's artifacts:
 
 ```csharp
-[Before(HookType.Test)]
+[Before(Test)]
 public void SetupTestArtifactDirectory()
 {
-    var testName = TestContext.Current!.TestDetails.TestName;
+    var testName = TestContext.Current!.Metadata.TestName;
     var sanitizedName = string.Concat(testName.Split(Path.GetInvalidFileNameChars()));
     var artifactDir = Path.Combine("test-artifacts", sanitizedName);
     Directory.CreateDirectory(artifactDir);
@@ -270,7 +270,7 @@ public void MyTest()
 For large artifacts (videos, extensive logs), consider only attaching them when tests fail:
 
 ```csharp
-[After(HookType.Test)]
+[After(Test)]
 public async Task ConditionalArtifactAttachment()
 {
     var testContext = TestContext.Current;
@@ -337,7 +337,7 @@ else
 ### Browser Testing with Playwright
 
 ```csharp
-[After(HookType.Test)]
+[After(Test)]
 public async Task CapturePlaywrightArtifacts()
 {
     var testContext = TestContext.Current;

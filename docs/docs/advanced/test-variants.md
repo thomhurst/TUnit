@@ -312,12 +312,19 @@ Inject faults and verify system resilience:
 
 ```csharp
 [Test]
-public async Task Resilience_DatabaseFailover()
+[Arguments("none")]
+public async Task Resilience_DatabaseFailover(string faultType)
 {
     var context = TestContext.Current!;
     var system = new DistributedSystem();
 
-    // Normal operation test
+    // Inject fault if specified
+    if (faultType != "none")
+    {
+        system.InjectFault(faultType);
+    }
+
+    // Test system behavior
     var result = await system.ProcessRequestAsync();
     await Assert.That(result.Success).IsTrue();
 
@@ -330,13 +337,13 @@ public async Task Resilience_DatabaseFailover()
         ("cascading-failure", "Cascading Failure")
     };
 
-    foreach (var (faultType, displayName) in chaosScenarios)
+    foreach (var (scenario, displayName) in chaosScenarios)
     {
         await context.CreateTestVariant(
-            arguments: new object[] { faultType },
+            arguments: new object[] { scenario },
             properties: new Dictionary<string, object?>
             {
-                { "ChaosType", faultType },
+                { "ChaosType", scenario },
                 { "InjectionPoint", "AfterSuccess" }
             },
             relationship: TestRelationship.Derived,

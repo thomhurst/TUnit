@@ -37,10 +37,10 @@ Hook exceptions are thrown when setup or cleanup operations fail. Each hook type
 
 #### BeforeTestException / AfterTestException
 
-Thrown when a `[Before(HookType.Test)]` or `[After(HookType.Test)]` hook fails.
+Thrown when a `[Before(Test)]` or `[After(Test)]` hook fails.
 
 ```csharp
-[Before(HookType.Test)]
+[Before(Test)]
 public async Task TestSetup()
 {
     // If this throws, it will be wrapped in BeforeTestException
@@ -68,7 +68,7 @@ public async Task MyTest()
 Thrown when class-level hooks fail. These affect all tests in the class.
 
 ```csharp
-[Before(HookType.Class)]
+[Before(Class)]
 public static async Task ClassSetup()
 {
     // If this fails, all tests in the class will be marked as failed
@@ -206,11 +206,11 @@ When implementing custom test executors or hook executors, proper exception hand
 ```csharp
 public class SafeTestExecutor : ITestExecutor
 {
-    public async Task ExecuteAsync(TestContext context, Func<Task> testBody)
+    public async ValueTask ExecuteTest(TestContext context, Func<ValueTask> action)
     {
         try
         {
-            await testBody();
+            await action();
         }
         catch (TUnitException)
         {
@@ -226,7 +226,7 @@ public class SafeTestExecutor : ITestExecutor
         {
             // Wrap other exceptions with context
             throw new TestExecutionException(
-                $"Test '{context.TestName}' failed with unexpected exception",
+                $"Test '{context.Metadata.TestName}' failed with unexpected exception",
                 ex);
         }
     }
@@ -408,7 +408,7 @@ public async Task ExceptionResultTest()
     }
 }
 
-[After(HookType.Test)]
+[After(Test)]
 public async Task LogTestExceptions()
 {
     var result = TestContext.Current?.Result;
@@ -480,7 +480,7 @@ public async Task ResourceTest()
 ### Scenario: Conditional Test Execution
 
 ```csharp
-[Before(HookType.Test)]
+[Before(Test)]
 public async Task CheckEnvironment()
 {
     if (!IsCorrectEnvironment())
