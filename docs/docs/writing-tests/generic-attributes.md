@@ -23,10 +23,10 @@ public class CalculatorTests
 {
     [Test]
     [MethodDataSource<TestDataProviders>(nameof(TestDataProviders.AdditionTestCases))]
-    public void Add_ShouldReturnCorrectSum(int a, int b, int expected)
+    public async Task Add_ShouldReturnCorrectSum(int a, int b, int expected)
     {
         var result = Calculator.Add(a, b);
-        Assert.That(result).IsEqualTo(expected);
+        await Assert.That(result).IsEqualTo(expected);
     }
 }
 ```
@@ -135,9 +135,9 @@ public class RandomNumbersAttribute : DataSourceGeneratorAttribute<int>
 // Usage
 [Test]
 [RandomNumbers(5, min: 1, max: 10)]
-public void TestWithRandomNumbers(int number)
+public async Task TestWithRandomNumbers(int number)
 {
-    Assert.That(number).IsBetween(1, 10);
+    await Assert.That(number).IsBetween(1, 10);
 }
 ```
 
@@ -238,11 +238,11 @@ public class ScenarioDataSource<TScenario> : TypedDataSourceAttribute<TScenario>
 
 [Test]
 [ScenarioDataSource<CalculationScenario>]
-public void TestCalculation(CalculationScenario scenario)
+public async Task TestCalculation(CalculationScenario scenario)
 {
     var (a, b) = scenario.Input;
     var result = Calculator.Add(a, b);
-    Assert.That(result).IsEqualTo(scenario.Expected);
+    await Assert.That(result).IsEqualTo(scenario.Expected);
 }
 ```
 

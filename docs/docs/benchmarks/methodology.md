@@ -44,9 +44,9 @@ All benchmarks use [BenchmarkDotNet](https://benchmarkdotnet.org/), the industry
 [Arguments(1, 2, 3)]
 [Arguments(4, 5, 9)]
 // ... 50 argument sets
-public void TestAddition(int a, int b, int expected)
+public async Task TestAddition(int a, int b, int expected)
 {
-    Assert.That(a + b).IsEqualTo(expected);
+    await Assert.That(a + b).IsEqualTo(expected);
 }
 ```
 

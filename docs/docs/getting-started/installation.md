@@ -1,8 +1,8 @@
 # Installing TUnit
 
-## Easily
+## Quick Start
 
-Assuming you have the .NET SDK installed, simply run:
+Assuming you have the .NET SDK installed, run:
 
 `dotnet new install TUnit.Templates`
 
@@ -25,7 +25,7 @@ cd YourTestProjectNameHere
 dotnet add package TUnit --prerelease
 ```
 
-And then remove any automatically generated `Program.cs` or main method, as this'll be taken care of by the TUnit package.
+And then remove any automatically generated `Program.cs` or main method, as this is handled by the TUnit package.
 
 ### Global Usings
 

@@ -69,30 +69,9 @@ Tools for viewing results:
 
 ## Configuration
 
-### testconfig.json
+### Coverage Settings File
 
-You can customize coverage behavior with a `testconfig.json` file placed in the same directory as your test project:
-
-```json
-{
-  "codeCoverage": {
-    "Configuration": {
-      "CodeCoverage": {
-        "ModulePaths": {
-          "Include": [".*\\.dll$"],
-          "Exclude": [".*tests\\.dll$"]
-        }
-      }
-    }
-  }
-}
-```
-
-The file is picked up automatically when running tests.
-
-### XML Settings File
-
-Alternatively, you can use an XML coverage settings file:
+You can customize coverage behavior (include/exclude modules, etc.) with a settings file:
 
 ```bash
 dotnet run --configuration Release --coverage --coverage-settings coverage.config

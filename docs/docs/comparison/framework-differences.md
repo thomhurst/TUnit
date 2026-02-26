@@ -115,11 +115,11 @@ NUnit assertions largely influenced the way that TUnit assertions work. However,
 
 ## Other
 
-### Source generated + Native AOT Support + Single File Support
-As mentioned, TUnit is source generated. This should mean things are fast. And you can check out the generated code yourself! Because tests are source generated and not scanned via reflection, this means you can build your test projects using Native AOT or as a Single File application - Something that you can't current do with NUnit or xUnit.
+### Source Generated + Native AOT + Single File Support
+TUnit is source generated, so test discovery happens at compile time rather than through runtime reflection. You can inspect the generated code yourself. Because tests are source generated, you can build your test projects using Native AOT or as a Single File application — something that NUnit and xUnit do not currently support.
 
-### More lifecycle hooks
-TUnit has tried to make it easy to hook into a range of lifecycles.
+### More Lifecycle Hooks
+TUnit provides a wide range of lifecycle hook points.
 The attributes you can use on your hook methods are:
 - `[Before(Test)]` - Run before every test in the class it's defined in
 - `[After(Test)]` - Run after every test in the class it's defined in
@@ -139,13 +139,12 @@ The attributes you can use on your hook methods are:
 - `[BeforeEvery(Assembly)]` - Run before the first test in every assembly in the test run
 - `[AfterEvery(Assembly)]` - Run after the last test in every assembly in the test run
 
-And all those hooks allow injecting in a relevant `[HookType]Context` object - So you can interrogate it for information about the test run so far. Hopefully meeting the needs of most users!
+All hooks accept a relevant `[HookType]Context` object, giving you access to information about the current test run.
 
 
-### Test dependencies
-Got tests that require another test to execute first?
-In other frameworks it usually involves turning off parallelisation, then setting an `[Order]` attribute with 1, 2, 3, etc.
-In TUnit, you can use a `[DependsOn(...)]` attribute. That test will wait to start, only once its dependencies have finished. And you don't have to turn off parallelisation of other tests!
+### Test Dependencies
+In other frameworks, running tests in a specific order usually requires turning off parallelisation and setting an `[Order]` attribute with 1, 2, 3, etc.
+In TUnit, you can use a `[DependsOn(...)]` attribute. That test will wait to start until its dependencies have finished, without disabling parallelisation for other tests.
 
 ```csharp
     [Test]
@@ -170,4 +169,4 @@ In TUnit, you can use a `[DependsOn(...)]` attribute. That test will wait to sta
 ```
 
 ### Class Arguments
-A lot of the data injection mechanisms in xUnit/NUnit work for the method, or the class, and not vice-versa. With TUnit, you can use `[Arguments(...)]` or `[Matrix(...)]` or `[MethodDataSource(...)]` etc. for both classes and test methods, making it super flexible!
+Many data injection mechanisms in xUnit/NUnit work for either the method or the class, but not both. With TUnit, you can use `[Arguments(...)]`, `[Matrix(...)]`, `[MethodDataSource(...)]`, and other data attributes on both classes and test methods.

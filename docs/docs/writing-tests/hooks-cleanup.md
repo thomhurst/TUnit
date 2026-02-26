@@ -1,4 +1,4 @@
-# Test Clean Ups
+# Cleanup Hooks
 
 TUnit supports having your test class implement `IDisposable` or `IAsyncDisposable`. These will be called after your test has finished executing. However, using the attributes below offers better support for running multiple methods, and without having to implement your own try/catch logic. Every `[After]` method will be run, and any exceptions will be lazily thrown afterwards.
 
@@ -55,10 +55,10 @@ Must be an instance method. Will be executed after each test in the class it's d
 Methods will be executed top-down, so the current class clean ups will execute first, then the base classes' last.
 
 ### [After(Class)]
-Must be a static method. Will run once after the last test in the class it's defined it finishes.
+Must be a static method. Will run once after the last test in the class it's defined in finishes.
 
 ### [After(Assembly)]
-Must be a static method. Will run once after the last test in the assembly it's defined it finishes.
+Must be a static method. Will run once after the last test in the assembly it's defined in finishes.
 
 ### [After(TestSession)]
 Must be a static method. Will run once after the last test in the test session finishes.
@@ -67,7 +67,7 @@ Must be a static method. Will run once after the last test in the test session f
 Must be a static method. Will run once after tests are discovered.
 
 ## [AfterEvery(HookType)]
-All [AfterEvery(...)] methods must be static - And should ideally be placed in their own file that's easy to find, as they can globally affect the test suite, so it should be easy for developers to locate this behaviour.
+All [AfterEvery(...)] methods must be static. They should ideally be placed in their own file that's easy to find, as they can globally affect the test suite, so it should be easy for developers to locate this behaviour.
 e.g. `GlobalHooks.cs` at the root of the test project.
 
 :::info

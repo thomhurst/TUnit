@@ -31,18 +31,19 @@ This produces a class library (`.dll`), not an executable.
 
 ```csharp
 using TUnit.Core;
+using static TUnit.Core.HookType;
 
 namespace MyCompany.Testing;
 
 public abstract class DatabaseTestBase
 {
-    [Before(HookType.Test)]
+    [Before(Test)]
     public async Task ResetDatabase()
     {
         await TestDatabase.ResetAsync();
     }
 
-    [After(HookType.Test)]
+    [After(Test)]
     public async Task CleanupConnections()
     {
         await TestDatabase.CloseConnectionsAsync();

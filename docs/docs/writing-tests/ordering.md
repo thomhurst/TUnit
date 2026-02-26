@@ -134,7 +134,7 @@ If your tests depends on another test, it's possible to retrieve that test's con
 
 This is done by calling the `GetTests` method on the `TestContext.Dependencies` property. It takes the test's method name (so you can use `nameof(...)`) and optionally the parameter types for if there's multiple overloads.
 
-You'll notice this returns an array - This is because tests may be data driven and be invoked multiple times - If this is the case you'll have to find the one you want yourself.
+You'll notice this returns an array. This is because tests may be data driven and be invoked multiple times. If this is the case, you'll have to find the one you want yourself.
 
 :::info
 For data-driven tests (e.g., with `[Arguments]` or `[MethodDataSource]`), `GetTests` returns all invocations.  

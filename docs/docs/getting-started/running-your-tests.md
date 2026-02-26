@@ -53,7 +53,7 @@ dotnet YourTestProject.dll --report-trx --coverage
 ## Published Test Project
 
 When you publish your test project, you'll be given an executable.
-On windows this'll be a `.exe` and on Linux/MacOS there'll be no extension.
+On Windows this will be a `.exe` and on Linux/macOS there will be no extension.
 
 This can be invoked directly and passed any flags.
 
@@ -64,7 +64,7 @@ cd 'C:/Your/Test/Directory/bin/Release/net8.0/win-x64/publish'
 ./YourTestProject.exe --report-trx --coverage
 ```
 
-# IDE Support
+## IDE Support
 
 ## Visual Studio
 Visual Studio is supported. The "Use testing platform server mode" option must be selected in Tools > Manage Preview Features.
@@ -98,7 +98,7 @@ To continue your journey with TUnit, explore these topics:
 
 **Core Testing Concepts:**
 - **[Assertions](../assertions/getting-started.md)** - Learn TUnit's fluent assertion syntax
-- **[Test Lifecycle](../writing-tests/hooks-setup.md)** - Set up and tear down test state with hooks
+- **[Test Lifecycle](../writing-tests/lifecycle.md)** - Understand the test execution lifecycle
 - **[Data-Driven Testing](../writing-tests/arguments.md)** - Run tests with multiple input values
 
 **Common Tasks:**

@@ -1,4 +1,4 @@
-# Test Set Ups
+# Setup Hooks
 
 Most setup for a test can be performed in the constructor (think setting up mocks, assigning fields.)
 
@@ -103,7 +103,7 @@ Must be a static method. Will run once before the first test in the test session
 Must be a static method. Will run once before any tests are discovered.
 
 ## [BeforeEvery(HookType)]
-All [BeforeEvery(...)] methods must be static - And should ideally be placed in their own file that's easy to find, as they can globally affect the test suite, so it should be easy for developers to locate this behaviour.
+All [BeforeEvery(...)] methods must be static. They should ideally be placed in their own file that's easy to find, as they can globally affect the test suite, so it should be easy for developers to locate this behaviour.
 e.g. `GlobalHooks.cs` at the root of the test project.
 
 ### [BeforeEvery(Test)]
@@ -339,3 +339,8 @@ E.g.
         context.AddAsyncLocalValues();
     }
 ```
+
+## See Also
+
+- [Cleanup Hooks](hooks-cleanup.md) — Teardown logic with `[After]` and `[AfterEvery]`
+- [Test Lifecycle](lifecycle.md) — Full overview of the test execution lifecycle
