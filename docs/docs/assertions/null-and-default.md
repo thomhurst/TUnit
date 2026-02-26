@@ -233,7 +233,7 @@ public async Task Uninitialized_Field()
 [Test]
 public async Task Constructor_Injection()
 {
-    var logger = new Mock<ILogger>();
+    var logger = Mock.Of<ILogger>();
     var service = new UserService(logger.Object);
 
     // Verify dependency was injected

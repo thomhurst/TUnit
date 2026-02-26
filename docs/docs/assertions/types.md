@@ -631,7 +631,7 @@ public async Task Type_Is_Serializable()
 [Test]
 public async Task Mock_Implements_Interface()
 {
-    var mock = new Mock<IUserRepository>();
+    var mock = Mock.Of<IUserRepository>();
     var instance = mock.Object;
 
     await Assert.That(instance).IsAssignableTo<IUserRepository>();

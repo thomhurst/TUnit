@@ -46,7 +46,7 @@ public class InParameterTests
     public async Task In_Params_Arg_Any_Matching()
     {
         var mock = Mock.Of<ICalculatorWithIn>();
-        mock.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(42);
+        mock.Add(Any(), Any()).Returns(42);
 
         var result = mock.Object.Add(10, 20);
 
@@ -72,7 +72,7 @@ public class InParameterTests
     {
         var wasCalled = false;
         var mock = Mock.Of<ICalculatorWithIn>();
-        mock.Log(Arg.Any<string>()).Callback(() => wasCalled = true);
+        mock.Log(Any()).Callback(() => wasCalled = true);
 
         mock.Object.Log("hello");
 
@@ -83,7 +83,7 @@ public class InParameterTests
     public void In_Params_Throws()
     {
         var mock = Mock.Of<ICalculatorWithIn>();
-        mock.Add(Arg.Any<int>(), Arg.Any<int>()).Throws<InvalidOperationException>();
+        mock.Add(Any(), Any()).Throws<InvalidOperationException>();
 
         Assert.Throws<InvalidOperationException>(() => mock.Object.Add(1, 2));
     }
@@ -92,12 +92,12 @@ public class InParameterTests
     public async Task In_Params_Verify_WasCalled()
     {
         var mock = Mock.Of<ICalculatorWithIn>();
-        mock.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(0);
+        mock.Add(Any(), Any()).Returns(0);
 
         mock.Object.Add(1, 2);
         mock.Object.Add(3, 4);
 
-        mock.Add(Arg.Any<int>(), Arg.Any<int>()).WasCalled(Times.Exactly(2));
+        mock.Add(Any(), Any()).WasCalled(Times.Exactly(2));
         await Assert.That(true).IsTrue();
     }
 
@@ -114,7 +114,7 @@ public class InParameterTests
     public async Task In_Params_Mixed_With_Regular_Params()
     {
         var mock = Mock.Of<ICalculatorWithIn>();
-        mock.Compute(Arg.Any<int>(), Arg.Any<double>()).Returns(99.5);
+        mock.Compute(Any(), Any()).Returns(99.5);
 
         var result = mock.Object.Compute(42, 2.0);
 
@@ -139,7 +139,7 @@ public class InParameterTests
     public async Task In_Struct_Params()
     {
         var mock = Mock.Of<IGeometry>();
-        mock.Distance(Arg.Any<Point>(), Arg.Any<Point>()).Returns(5.0);
+        mock.Distance(Any(), Any()).Returns(5.0);
 
         var origin = new Point { X = 0, Y = 0 };
         var target = new Point { X = 3, Y = 4 };
@@ -152,7 +152,7 @@ public class InParameterTests
     public async Task In_Struct_Mixed_With_Regular()
     {
         var mock = Mock.Of<IGeometry>();
-        mock.Contains(Arg.Any<Point>(), Arg.Any<int>()).Returns(true);
+        mock.Contains(Any(), Any()).Returns(true);
 
         var center = new Point { X = 5, Y = 5 };
         var result = mock.Object.Contains(center, 10);
@@ -165,7 +165,7 @@ public class InParameterTests
     {
         int capturedA = 0, capturedB = 0;
         var mock = Mock.Of<ICalculatorWithIn>();
-        mock.Add(Arg.Any<int>(), Arg.Any<int>())
+        mock.Add(Any(), Any())
             .Callback((object?[] args) =>
             {
                 capturedA = (int)args[0]!;
@@ -183,7 +183,7 @@ public class InParameterTests
     public async Task In_Params_Verify_Specific_Values()
     {
         var mock = Mock.Of<ICalculatorWithIn>();
-        mock.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(0);
+        mock.Add(Any(), Any()).Returns(0);
 
         mock.Object.Add(1, 2);
         mock.Object.Add(3, 4);
@@ -199,7 +199,7 @@ public class InParameterTests
     {
         var messages = new List<string>();
         var mock = Mock.Of<ICalculatorWithIn>();
-        mock.Log(Arg.Any<string>()).Callback((object?[] args) => messages.Add((string)args[0]!));
+        mock.Log(Any()).Callback((object?[] args) => messages.Add((string)args[0]!));
 
         mock.Object.Log("first");
         mock.Object.Log("second");
@@ -213,7 +213,7 @@ public class InParameterTests
     public async Task In_Params_Arg_Is_Predicate()
     {
         var mock = Mock.Of<ICalculatorWithIn>();
-        mock.Add(Arg.Is<int>(x => x > 0), Arg.Is<int>(x => x > 0)).Returns(100);
+        mock.Add(Is<int>(x => x > 0), Is<int>(x => x > 0)).Returns(100);
 
         var r1 = mock.Object.Add(5, 10);
         await Assert.That(r1).IsEqualTo(100);

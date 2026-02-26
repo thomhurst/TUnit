@@ -13,7 +13,7 @@ public class RegexMatcherTests
     {
         // Arrange
         var mock = Mock.Of<IGreeter>();
-        mock.Greet(Arg.Matches(@"^[A-Z]")).Returns("capitalized");
+        mock.Greet(Matches(@"^[A-Z]")).Returns("capitalized");
 
         // Act
         var greeter = mock.Object;
@@ -28,7 +28,7 @@ public class RegexMatcherTests
     {
         // Arrange
         var mock = Mock.Of<IGreeter>();
-        mock.Greet(Arg.Matches(@"^[A-Z]")).Returns("capitalized");
+        mock.Greet(Matches(@"^[A-Z]")).Returns("capitalized");
 
         // Act
         var greeter = mock.Object;
@@ -44,7 +44,7 @@ public class RegexMatcherTests
         // Arrange
         var regex = new Regex(@"\d{3}-\d{4}", RegexOptions.Compiled);
         var mock = Mock.Of<IGreeter>();
-        mock.Greet(Arg.Matches(regex)).Returns("phone");
+        mock.Greet(Matches(regex)).Returns("phone");
 
         // Act
         var greeter = mock.Object;
@@ -59,7 +59,7 @@ public class RegexMatcherTests
     {
         // Arrange
         var mock = Mock.Of<IGreeter>();
-        mock.Greet(Arg.Matches(".*")).Returns("matched");
+        mock.Greet(Matches(".*")).Returns("matched");
 
         // Act
         var greeter = mock.Object;
@@ -73,7 +73,7 @@ public class RegexMatcherTests
     {
         // Arrange
         var mock = Mock.Of<IGreeter>();
-        mock.Greet(Arg.Matches(@"^[\w.+-]+@[\w-]+\.[\w.]+$")).Returns("email");
+        mock.Greet(Matches(@"^[\w.+-]+@[\w-]+\.[\w.]+$")).Returns("email");
 
         // Act
         var greeter = mock.Object;

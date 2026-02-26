@@ -150,7 +150,7 @@ public class ErrorMessageTests
         // Act & Assert — verify with Arg.Any but wrong count
         var exception = Assert.Throws<MockVerificationException>(() =>
         {
-            mock.Add(Arg.Any<int>(), Arg.Any<int>()).WasCalled(Times.Exactly(5));
+            mock.Add(Any(), Any()).WasCalled(Times.Exactly(5));
         });
 
         await Assert.That(exception.ActualCount).IsEqualTo(2);

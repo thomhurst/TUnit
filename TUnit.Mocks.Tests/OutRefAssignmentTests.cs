@@ -49,7 +49,7 @@ public class OutRefAssignmentTests
     {
         // Arrange
         var mock = Mock.Of<IDictionary>();
-        mock.TryParse(Arg.Any<string>())
+        mock.TryParse(Any())
             .Returns(true)
             .SetsOutResult(42);
 
@@ -68,7 +68,7 @@ public class OutRefAssignmentTests
     {
         // Arrange
         var mock = Mock.Of<IDictionary>();
-        mock.TryGet(Arg.Any<string>())
+        mock.TryGet(Any())
             .Returns(true)
             .SetsOutValue("any-value");
 
@@ -88,7 +88,7 @@ public class OutRefAssignmentTests
     {
         // Arrange
         var mock = Mock.Of<IDictionary>();
-        mock.Swap(Arg.Any<int>())
+        mock.Swap(Any())
             .SetsRefValue(99);
 
         IDictionary dict = mock.Object;
@@ -125,7 +125,7 @@ public class OutRefAssignmentTests
     {
         // Arrange — chain typed out/ref setter with Returns
         var mock = Mock.Of<IDictionary>();
-        mock.TryGet(Arg.Any<string>())
+        mock.TryGet(Any())
             .SetsOutValue("chained")
             .Returns(true);
 

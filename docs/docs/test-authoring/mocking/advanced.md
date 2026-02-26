@@ -33,7 +33,7 @@ mock.RaiseOnMessage("Hello!");
 Trigger an event automatically when a method is called using the typed `.Raises{EventName}()` method on a setup chain:
 
 ```csharp
-mock.SendMessage(Arg.Any<string>())
+mock.SendMessage(Any<string>())
     .RaisesOnMessage("echo");
 
 mock.Object.SendMessage("test");
@@ -148,8 +148,8 @@ var serviceMock = repo.Of<IService>();
 var loggerMock = repo.Of<ILogger>();
 
 // Configure each mock individually
-serviceMock.GetData(Arg.Any<int>()).Returns("result");
-loggerMock.Log(Arg.Any<string>());
+serviceMock.GetData(Any<int>()).Returns("result");
+loggerMock.Log(Any<string>());
 
 // Exercise code
 serviceMock.Object.GetData(1);
@@ -181,8 +181,8 @@ repo.Reset();                // clear all mocks
 Get a diagnostic report of setup coverage and call matching:
 
 ```csharp
-mock.GetUser(Arg.Any<int>()).Returns(new User("Alice"));
-mock.Delete(Arg.Any<int>());
+mock.GetUser(Any<int>()).Returns(new User("Alice"));
+mock.Delete(Any<int>());
 
 svc.GetUser(1);
 // Delete was never called
@@ -190,7 +190,7 @@ svc.GetUser(1);
 var diag = Mock.GetDiagnostics(mock);
 diag.TotalSetups;       // 2
 diag.ExercisedSetups;   // 1
-diag.UnusedSetups;      // [Delete(Arg.Any<int>())]
+diag.UnusedSetups;      // [Delete(Any<int>())]
 diag.UnmatchedCalls;    // [] (all calls matched a setup)
 ```
 
@@ -228,7 +228,7 @@ The provider is consulted **before** auto-mocking and built-in smart defaults.
 Clear all setups, call history, state, and auto-tracked property values:
 
 ```csharp
-mock.GetUser(Arg.Any<int>()).Returns(new User("Alice"));
+mock.GetUser(Any<int>()).Returns(new User("Alice"));
 svc.GetUser(1);
 
 Mock.Reset(mock);

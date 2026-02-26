@@ -232,7 +232,7 @@ public class OutReadOnlySpanCharTests
     public async Task Out_ReadOnlySpan_Char_Arg_Any_Matcher()
     {
         var mock = Mock.Of<ICharSpanReader>();
-        mock.GetToken(Arg.Any<string>())
+        mock.GetToken(Any())
             .Returns(1)
             .SetsOutToken("x".AsSpan());
 
@@ -251,7 +251,7 @@ public class OutReadOnlySpanCharTests
     public async Task Out_ReadOnlySpan_Char_Arg_Is_Predicate()
     {
         var mock = Mock.Of<ICharSpanReader>();
-        mock.GetToken(Arg.Is<string>(s => s.StartsWith("J")))
+        mock.GetToken(Is<string>(s => s.StartsWith("J")))
             .Returns(42)
             .SetsOutToken("json".AsSpan());
 
@@ -271,7 +271,7 @@ public class OutReadOnlySpanCharTests
     public async Task Out_ReadOnlySpan_Char_Verification_Multiple()
     {
         var mock = Mock.Of<ICharSpanReader>();
-        mock.GetToken(Arg.Any<string>()).Returns(0);
+        mock.GetToken(Any()).Returns(0);
 
         mock.Object.GetToken("a", out _);
         mock.Object.GetToken("b", out _);
@@ -279,7 +279,7 @@ public class OutReadOnlySpanCharTests
 
         mock.GetToken("a").WasCalled(Times.Exactly(2));
         mock.GetToken("b").WasCalled(Times.Once);
-        mock.GetToken(Arg.Any<string>()).WasCalled(Times.Exactly(3));
+        mock.GetToken(Any()).WasCalled(Times.Exactly(3));
         mock.GetToken("z").WasNeverCalled();
         await Assert.That(true).IsTrue();
     }
@@ -350,7 +350,7 @@ public class MultipleOutParamsTests
     public async Task Multiple_Out_Chain_Order_SetsOut_Before_Returns()
     {
         var mock = Mock.Of<IMultiOutput>();
-        mock.Extract(Arg.Any<string>())
+        mock.Extract(Any())
             .SetsOutCount(99)
             .SetsOutData(new ReadOnlySpan<byte>([0xFF]))
             .Returns(true);
@@ -400,7 +400,7 @@ public class MultipleOutParamsTests
     {
         string? capturedInput = null;
         var mock = Mock.Of<IMultiOutput>();
-        mock.Extract(Arg.Any<string>())
+        mock.Extract(Any())
             .Callback((Action<object?[]>)(args => capturedInput = (string?)args[0]))
             .Returns(true)
             .SetsOutCount(1)
@@ -427,7 +427,7 @@ public class MultipleOutParamsTests
     public async Task Multiple_Out_Verification()
     {
         var mock = Mock.Of<IMultiOutput>();
-        mock.Extract(Arg.Any<string>()).Returns(false);
+        mock.Extract(Any()).Returns(false);
 
         mock.Object.Extract("a", out _, out _);
         mock.Object.Extract("b", out _, out _);
@@ -435,7 +435,7 @@ public class MultipleOutParamsTests
 
         mock.Extract("a").WasCalled(Times.Exactly(2));
         mock.Extract("b").WasCalled(Times.Once);
-        mock.Extract(Arg.Any<string>()).WasCalled(Times.Exactly(3));
+        mock.Extract(Any()).WasCalled(Times.Exactly(3));
         mock.Extract("c").WasNeverCalled();
         await Assert.That(true).IsTrue();
     }
@@ -513,7 +513,7 @@ public class RefAndOutSpanTests
     public async Task Ref_And_Out_Span_With_Any_Matcher()
     {
         var mock = Mock.Of<ICodec>();
-        mock.Decode(Arg.Any<int>())
+        mock.Decode(Any())
             .Returns(true)
             .SetsRefOffset(100)
             .SetsOutDecoded(new ReadOnlySpan<byte>([0xFF]));
@@ -531,7 +531,7 @@ public class RefAndOutSpanTests
     public async Task Ref_And_Out_Span_Verification()
     {
         var mock = Mock.Of<ICodec>();
-        mock.Decode(Arg.Any<int>()).Returns(false);
+        mock.Decode(Any()).Returns(false);
 
         int p1 = 0, p2 = 5;
         mock.Object.Decode(ref p1, out _);
@@ -539,7 +539,7 @@ public class RefAndOutSpanTests
 
         mock.Decode(0).WasCalled(Times.Once);
         mock.Decode(5).WasCalled(Times.Once);
-        mock.Decode(Arg.Any<int>()).WasCalled(Times.Exactly(2));
+        mock.Decode(Any()).WasCalled(Times.Exactly(2));
         mock.Decode(99).WasNeverCalled();
         await Assert.That(true).IsTrue();
     }
@@ -562,7 +562,7 @@ public class RefAndOutSpanTests
     {
         var wasCalled = false;
         var mock = Mock.Of<ICodec>();
-        mock.Decode(Arg.Any<int>())
+        mock.Decode(Any())
             .Callback(() => wasCalled = true)
             .Returns(true)
             .SetsOutDecoded(new ReadOnlySpan<byte>([1]));
@@ -675,7 +675,7 @@ public class ComprehensiveRefTests
     public async Task Ref_With_Return_Value()
     {
         var mock = Mock.Of<ICounter>();
-        mock.Increment(Arg.Any<int>(), 1)
+        mock.Increment(Any(), 1)
             .Returns(1)
             .SetsRefValue(11);
 
@@ -709,11 +709,11 @@ public class ComprehensiveRefTests
     public async Task Ref_Predicate_Matching()
     {
         var mock = Mock.Of<ICounter>();
-        mock.TryAdvance(Arg.Is<int>(v => v >= 0), 100)
+        mock.TryAdvance(Is<int>(v => v >= 0), 100)
             .Returns(true)
             .SetsRefPosition(50);
 
-        mock.TryAdvance(Arg.Is<int>(v => v < 0), Arg.Any<int>())
+        mock.TryAdvance(Is<int>(v => v < 0), Any())
             .Returns(false);
 
         // Positive position
@@ -732,7 +732,7 @@ public class ComprehensiveRefTests
     public async Task Ref_Void_Method()
     {
         var mock = Mock.Of<ICounter>();
-        mock.Clear(Arg.Any<int>()).SetsRefValue(0);
+        mock.Clear(Any()).SetsRefValue(0);
 
         int val = 42;
         mock.Object.Clear(ref val);
@@ -758,7 +758,7 @@ public class ComprehensiveRefTests
     {
         var wasCalled = false;
         var mock = Mock.Of<ICounter>();
-        mock.Clear(Arg.Any<int>())
+        mock.Clear(Any())
             .Callback(() => wasCalled = true)
             .SetsRefValue(0);
 
@@ -773,7 +773,7 @@ public class ComprehensiveRefTests
     public async Task Ref_Throws()
     {
         var mock = Mock.Of<ICounter>();
-        mock.Increment(Arg.Any<int>(), 0).Throws<ArgumentException>();
+        mock.Increment(Any(), 0).Throws<ArgumentException>();
 
         int val = 1;
         var ex = Assert.Throws<ArgumentException>(() => mock.Object.Increment(ref val, 0));
@@ -785,7 +785,7 @@ public class ComprehensiveRefTests
     public async Task Ref_Verification_With_Exact_Value()
     {
         var mock = Mock.Of<ICounter>();
-        mock.Increment(Arg.Any<int>(), Arg.Any<int>()).Returns(0);
+        mock.Increment(Any(), Any()).Returns(0);
 
         int v1 = 5, v2 = 10;
         mock.Object.Increment(ref v1, 1);
@@ -794,7 +794,7 @@ public class ComprehensiveRefTests
 
         mock.Increment(5, 1).WasCalled(Times.Exactly(2));
         mock.Increment(10, 2).WasCalled(Times.Once);
-        mock.Increment(Arg.Any<int>(), Arg.Any<int>()).WasCalled(Times.Exactly(3));
+        mock.Increment(Any(), Any()).WasCalled(Times.Exactly(3));
         await Assert.That(true).IsTrue();
     }
 
@@ -802,16 +802,16 @@ public class ComprehensiveRefTests
     public async Task Ref_Verification_AtLeast_AtMost()
     {
         var mock = Mock.Of<ICounter>();
-        mock.Clear(Arg.Any<int>());
+        mock.Clear(Any());
 
         int v = 1;
         mock.Object.Clear(ref v);
         mock.Object.Clear(ref v);
         mock.Object.Clear(ref v);
 
-        mock.Clear(Arg.Any<int>()).WasCalled(Times.AtLeast(2));
-        mock.Clear(Arg.Any<int>()).WasCalled(Times.AtMost(5));
-        mock.Clear(Arg.Any<int>()).WasCalled(Times.Between(2, 4));
+        mock.Clear(Any()).WasCalled(Times.AtLeast(2));
+        mock.Clear(Any()).WasCalled(Times.AtMost(5));
+        mock.Clear(Any()).WasCalled(Times.Between(2, 4));
         await Assert.That(true).IsTrue();
     }
 }
@@ -841,7 +841,7 @@ public class RefAndOutCombinedTests
     public async Task Ref_And_Out_Only_Ref_Set()
     {
         var mock = Mock.Of<ISwapper>();
-        mock.SwapAndReport(Arg.Any<int>()).SetsRefValue(99);
+        mock.SwapAndReport(Any()).SetsRefValue(99);
 
         int val = 1;
         mock.Object.SwapAndReport(ref val, out var report);
@@ -854,7 +854,7 @@ public class RefAndOutCombinedTests
     public async Task Ref_And_Out_Only_Out_Set()
     {
         var mock = Mock.Of<ISwapper>();
-        mock.SwapAndReport(Arg.Any<int>()).SetsOutReport("report");
+        mock.SwapAndReport(Any()).SetsOutReport("report");
 
         int val = 50;
         mock.Object.SwapAndReport(ref val, out var report);
@@ -869,7 +869,7 @@ public class RefAndOutCombinedTests
     {
         var wasCalled = false;
         var mock = Mock.Of<ISwapper>();
-        mock.SwapAndReport(Arg.Any<int>())
+        mock.SwapAndReport(Any())
             .Callback(() => wasCalled = true)
             .SetsRefValue(0)
             .SetsOutReport("done");
@@ -905,7 +905,7 @@ public class RefAndOutCombinedTests
 
         mock.SwapAndReport(1).WasCalled(Times.Exactly(2));
         mock.SwapAndReport(2).WasCalled(Times.Once);
-        mock.SwapAndReport(Arg.Any<int>()).WasCalled(Times.Exactly(3));
+        mock.SwapAndReport(Any()).WasCalled(Times.Exactly(3));
         await Assert.That(true).IsTrue();
     }
 }
@@ -978,7 +978,7 @@ public class DualSpanOutputTests
 
         mock.Split("a").WasCalled(Times.Once);
         mock.Split("b").WasCalled(Times.Once);
-        mock.Split(Arg.Any<string>()).WasCalled(Times.Exactly(2));
+        mock.Split(Any()).WasCalled(Times.Exactly(2));
         mock.Split("c").WasNeverCalled();
         await Assert.That(true).IsTrue();
     }
@@ -1007,7 +1007,7 @@ public class SequentialSpanSetupTests
     {
         // SetsOut applies at setup level; Then() sequences Returns/Callback/Throws
         var mock = Mock.Of<ISpanParser>();
-        mock.TryParse(Arg.Any<string>())
+        mock.TryParse(Any())
             .SetsOutData(new ReadOnlySpan<byte>([0xAA]))
             .Returns(true)
             .Then()
@@ -1079,7 +1079,7 @@ public class SequentialSpanSetupTests
     public async Task ReturnsSequentially_With_Out_Span()
     {
         var mock = Mock.Of<ISpanParser>();
-        mock.TryParse(Arg.Any<string>())
+        mock.TryParse(Any())
             .ReturnsSequentially(true, true, false)
             .SetsOutData(new ReadOnlySpan<byte>([0x01, 0x02]));
 
@@ -1324,7 +1324,7 @@ public class ReadOnlySpanByteOutComprehensiveTests
     public async Task Out_Span_Verification_With_Mixed_Params()
     {
         var mock = Mock.Of<ISpanParser>();
-        mock.TryParse(Arg.Any<string>()).Returns(false);
+        mock.TryParse(Any()).Returns(false);
 
         mock.Object.TryParse("x", out _);
         mock.Object.TryParse("y", out _);
@@ -1332,7 +1332,7 @@ public class ReadOnlySpanByteOutComprehensiveTests
 
         mock.TryParse("x").WasCalled(Times.Exactly(2));
         mock.TryParse("y").WasCalled(Times.Once);
-        mock.TryParse(Arg.Any<string>()).WasCalled(Times.Exactly(3));
+        mock.TryParse(Any()).WasCalled(Times.Exactly(3));
         mock.TryParse("z").WasNeverCalled();
         await Assert.That(true).IsTrue();
     }
@@ -1342,7 +1342,7 @@ public class ReadOnlySpanByteOutComprehensiveTests
     {
         string? capturedInput = null;
         var mock = Mock.Of<ISpanParser>();
-        mock.TryParse(Arg.Any<string>())
+        mock.TryParse(Any())
             .Callback((Action<object?[]>)(args => capturedInput = (string?)args[0]))
             .Returns(true)
             .SetsOutData(new ReadOnlySpan<byte>([1]));
@@ -1356,7 +1356,7 @@ public class ReadOnlySpanByteOutComprehensiveTests
     public async Task Out_Span_Throws_Exception_Factory()
     {
         var mock = Mock.Of<ISpanParser>();
-        mock.TryParse(Arg.Any<string>())
+        mock.TryParse(Any())
             .Throws((Func<object?[], Exception>)(args =>
                 new ArgumentException($"Bad input: {args[0]}")));
 

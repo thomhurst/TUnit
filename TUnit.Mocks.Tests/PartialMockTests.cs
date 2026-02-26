@@ -86,7 +86,7 @@ public class PartialMockTests
         // Arrange
         var mock = Mock.OfPartial<AbstractService>();
         mock.GetName().Returns("TestName");
-        mock.Calculate(Arg.Any<int>()).Returns(42);
+        mock.Calculate(Any()).Returns(42);
 
         // Act
         var result = mock.Object.Calculate(5);
@@ -113,7 +113,7 @@ public class PartialMockTests
     {
         // Arrange
         var mock = Mock.OfPartial<ConcreteService>();
-        mock.Greet(Arg.Any<string>()).Returns("Mocked!");
+        mock.Greet(Any()).Returns("Mocked!");
 
         // Act
         var result = mock.Object.Greet("World");
@@ -144,7 +144,7 @@ public class PartialMockTests
     {
         // Arrange
         var mock = Mock.OfPartial<ServiceWithConstructor>("PREFIX");
-        mock.Format(Arg.Any<string>()).Returns("formatted");
+        mock.Format(Any()).Returns("formatted");
 
         // Act - GetPrefix is virtual and unconfigured, so calls base which uses _prefix
         var prefix = mock.Object.GetPrefix();
@@ -186,14 +186,14 @@ public class PartialMockTests
     {
         // Arrange
         var mock = Mock.OfPartial<ConcreteService>();
-        mock.Greet(Arg.Any<string>()).Returns("Hi");
+        mock.Greet(Any()).Returns("Hi");
 
         // Act
         mock.Object.Greet("Alice");
         mock.Object.Greet("Bob");
 
         // Assert
-        mock.Greet(Arg.Any<string>()).WasCalled(Times.Exactly(2));
+        mock.Greet(Any()).WasCalled(Times.Exactly(2));
     }
 
     [Test]
@@ -207,7 +207,7 @@ public class PartialMockTests
         mock.Object.Add(3, 4);
 
         // Assert - calls should still be recorded even when calling base
-        mock.Add(Arg.Any<int>(), Arg.Any<int>()).WasCalled(Times.Exactly(2));
+        mock.Add(Any(), Any()).WasCalled(Times.Exactly(2));
     }
 
     [Test]

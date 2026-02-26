@@ -52,14 +52,14 @@ public class MultipleInterfaceTests
     {
         // Arrange
         var mock = Mock.Of<IMultiLogger, IMultiDisposable>();
-        mock.Log(Arg.Any<string>());
+        mock.Log(Any());
 
         // Act
         var logger = mock.Object;
         logger.Log("test message");
 
         // Assert — call recorded and verifiable
-        mock.Log(Arg.Is("test message")).WasCalled();
+        mock.Log(Is("test message")).WasCalled();
     }
 
     [Test]
@@ -107,7 +107,7 @@ public class MultipleInterfaceTests
     {
         // Arrange
         var mock = Mock.Of<IMultiLogger, IMultiDisposable>();
-        mock.Log(Arg.Any<string>());
+        mock.Log(Any());
 
         // Act — call primary and secondary interface methods
         mock.Object.Log("hello");
@@ -135,7 +135,7 @@ public class MultipleInterfaceTests
     {
         // Arrange
         var mock = Mock.Of<IMultiLogger, IMultiDisposable, IMultiSerializable, IMultiCloneable>();
-        mock.Log(Arg.Any<string>());
+        mock.Log(Any());
 
         // Act
         mock.Object.Log("hello from four-interface mock");

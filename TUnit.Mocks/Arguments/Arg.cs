@@ -7,8 +7,12 @@ namespace TUnit.Mocks.Arguments;
 /// Provides static factory methods for creating argument matchers
 /// used in mock setup and verification expressions.
 /// </summary>
-public static class Arg
+public class Arg
 {
+    private Arg()
+    {
+    }
+
     /// <summary>Matches any value of the specified type, including null.</summary>
     public static Arg<T> Any<T>() => new(new AnyMatcher<T>());
 
@@ -61,4 +65,6 @@ public static class Arg
 
     /// <summary>Negates the inner matcher -- matches when the inner matcher does NOT match.</summary>
     public static Arg<T> Not<T>(Arg<T> inner) => new(new NotMatcher<T>(inner.Matcher));
+
+    public static Arg Any() => new();
 }

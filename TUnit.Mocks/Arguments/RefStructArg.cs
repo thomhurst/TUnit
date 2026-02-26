@@ -30,7 +30,7 @@ public readonly struct RefStructArg<T> where T : allows ref struct
     }
 
     /// <summary>Matches any value of the ref struct type. This is currently the only supported matcher for ref struct parameters.</summary>
-    public static RefStructArg<T> Any => new(Mocks.Matchers.AnyMatcher.Instance);
+    public static RefStructArg<T> Any => new(Matchers.AnyMatcher.Instance);
 }
 
 #endif

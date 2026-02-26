@@ -169,9 +169,9 @@ public class OverloadEdgeCaseTests
         var singleArgCalled = false;
         var twoArgCalled = false;
         var mock = Mock.Of<IOverloadedService>();
-        mock.Process(Arg.Any<string>())
+        mock.Process(Any())
             .Callback(() => singleArgCalled = true);
-        mock.Process(Arg.Any<string>(), Arg.Any<bool>())
+        mock.Process(Any(), Any())
             .Callback(() => twoArgCalled = true);
 
         // Act
@@ -189,8 +189,8 @@ public class OverloadEdgeCaseTests
     {
         // Arrange
         var mock = Mock.Of<IOverloadedService>();
-        mock.Format(Arg.Any<int>()).Returns("int");
-        mock.Format(Arg.Any<string>()).Returns("string");
+        mock.Format(Any<int>()).Returns("int");
+        mock.Format(Any<string>()).Returns("string");
 
         // Act
         IOverloadedService svc = mock.Object;
@@ -199,8 +199,8 @@ public class OverloadEdgeCaseTests
         svc.Format("abc");
 
         // Assert — verify only the int overload was called twice
-        mock.Format(Arg.Any<int>()).WasCalled(Times.Exactly(2));
-        mock.Format(Arg.Any<string>()).WasCalled(Times.Once);
+        mock.Format(Any<int>()).WasCalled(Times.Exactly(2));
+        mock.Format(Any<string>()).WasCalled(Times.Once);
         await Assert.That(true).IsTrue();
     }
 }
@@ -217,10 +217,10 @@ public class LargeParameterCountTests
         var mock = Mock.Of<IComplexOperations>();
         mock.BuildQuery(
             "users",
-            Arg.Any<string[]>(),
-            Arg.Is<string?>(w => w != null && w.Contains("active")),
-            Arg.Any<int?>(),
-            Arg.Any<int?>(),
+            Any<string[]>(),
+            Is<string?>(w => w != null && w.Contains("active")),
+            Any<int?>(),
+            Any<int?>(),
             "name",
             true
         ).Returns("SELECT * FROM users WHERE active ORDER BY name ASC");
@@ -260,11 +260,11 @@ public class LargeParameterCountTests
         var mock = Mock.Of<IComplexOperations>();
         mock.ProcessPaymentAsync(
             "merchant-123",
-            Arg.Is<decimal>(a => a > 0),
+            Is<decimal>(a => a > 0),
             "USD",
-            Arg.Any<string>(),
-            Arg.Any<string?>(),
-            Arg.Any<CancellationToken>()
+            Any(),
+            Any<string?>(),
+            Any()
         ).Returns(true);
 
         // Act
@@ -285,11 +285,11 @@ public class LargeParameterCountTests
         // Verify the call was made
         mock.ProcessPaymentAsync(
             "merchant-123",
-            Arg.Any<decimal>(),
+            Any(),
             "USD",
-            Arg.Any<string>(),
-            Arg.Any<string?>(),
-            Arg.Any<CancellationToken>()
+            Any(),
+            Any<string?>(),
+            Any()
         ).WasCalled(Times.Once);
         await Assert.That(true).IsTrue();
     }
@@ -425,7 +425,7 @@ public class ExceptionEdgeCaseTests
     {
         // Arrange
         var mock = Mock.Of<IExternalApi>();
-        mock.CallRemoteServiceAsync(Arg.Any<string>()).Throws<TimeoutException>();
+        mock.CallRemoteServiceAsync(Any()).Throws<TimeoutException>();
 
         // Act — the method should return a faulted task, NOT throw synchronously
         IExternalApi api = mock.Object;
@@ -479,7 +479,7 @@ public class ComplexArgumentMatchingTests
     {
         // Arrange
         var mock = Mock.Of<IValidator>();
-        mock.Validate(Arg.Is<string>(s => s != null && s.Length >= 3 && s.Length <= 50)).Returns(true);
+        mock.Validate(Is<string>(s => s != null && s.Length >= 3 && s.Length <= 50)).Returns(true);
 
         // Act
         IValidator validator = mock.Object;
@@ -501,8 +501,8 @@ public class ComplexArgumentMatchingTests
         // Arrange
         var mock = Mock.Of<IValidator>();
         mock.Score(
-            Arg.Is<string>(t => t != null && t.Length > 0),
-            Arg.Is<int>(w => w >= 1 && w <= 10)
+            Is<string>(t => t != null && t.Length > 0),
+            Is<int>(w => w >= 1 && w <= 10)
         ).Returns(100);
 
         // Act
@@ -524,7 +524,7 @@ public class ComplexArgumentMatchingTests
     {
         // Arrange — setup Any first, then exact. Last setup wins for matching args.
         var mock = Mock.Of<IValidator>();
-        mock.Validate(Arg.Any<string>()).Returns(false);
+        mock.Validate(Any()).Returns(false);
         mock.Validate("special").Returns(true);
 
         // Act
@@ -540,7 +540,7 @@ public class ComplexArgumentMatchingTests
     public async Task Arg_Capture_Across_Multiple_Calls_Verifies_All()
     {
         // Arrange
-        var input = Arg.Any<string>();
+        var input = Any<string>();
         var mock = Mock.Of<IValidator>();
         mock.Validate(input).Returns(true);
 
@@ -635,7 +635,7 @@ public class ConcurrentAccessTests
     {
         // Arrange
         var mock = Mock.Of<IConcurrentService>();
-        mock.GetValue(Arg.Any<string>()).Returns(42);
+        mock.GetValue(Any()).Returns(42);
         IConcurrentService svc = mock.Object;
 
         // Act — 10 threads setting up and calling simultaneously
@@ -663,7 +663,7 @@ public class ConcurrentAccessTests
     {
         // Arrange
         var mock = Mock.Of<IConcurrentService>();
-        mock.IncrementAsync(Arg.Any<string>()).Returns(1);
+        mock.IncrementAsync(Any()).Returns(1);
         IConcurrentService svc = mock.Object;
 
         // Act — 100 parallel calls
@@ -719,8 +719,8 @@ public class EnumParameterTests
     {
         // Arrange
         var mock = Mock.Of<ITaskManager>();
-        mock.CountByStatusAsync(Arg.Is<Status>(s => s == Status.Active || s == Status.Pending)).Returns(10);
-        mock.CountByStatusAsync(Arg.Is<Status>(s => s == Status.Completed || s == Status.Failed)).Returns(5);
+        mock.CountByStatusAsync(Is<Status>(s => s == Status.Active || s == Status.Pending)).Returns(10);
+        mock.CountByStatusAsync(Is<Status>(s => s == Status.Completed || s == Status.Failed)).Returns(5);
 
         // Act
         ITaskManager mgr = mock.Object;
@@ -747,10 +747,10 @@ public class EnumParameterTests
         mgr.UpdateStatus(3, Status.Active);
 
         // Assert — verify UpdateStatus called with specific Status values
-        mock.UpdateStatus(Arg.Any<int>(), Status.Active).WasCalled(Times.Exactly(2));
-        mock.UpdateStatus(Arg.Any<int>(), Status.Completed).WasCalled(Times.Once);
-        mock.UpdateStatus(Arg.Any<int>(), Status.Failed).WasNeverCalled();
-        mock.UpdateStatus(Arg.Any<int>(), Status.Pending).WasNeverCalled();
+        mock.UpdateStatus(Any(), Status.Active).WasCalled(Times.Exactly(2));
+        mock.UpdateStatus(Any(), Status.Completed).WasCalled(Times.Once);
+        mock.UpdateStatus(Any(), Status.Failed).WasNeverCalled();
+        mock.UpdateStatus(Any(), Status.Pending).WasNeverCalled();
 
         // Verify specific task ID + status combination
         mock.UpdateStatus(1, Status.Active).WasCalled(Times.Once);

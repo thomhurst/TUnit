@@ -858,7 +858,7 @@ public class SharedDatabaseTests
 
 ### Mocking HTTP Calls and External APIs
 
-**Strategy 1: Using Moq with HttpClient**
+**Strategy 1: Using TUnit.Mocks.Http**
 
 ```csharp
 public class WeatherServiceTests
@@ -866,21 +866,12 @@ public class WeatherServiceTests
     [Test]
     public async Task GetWeather_ReturnsTemperature()
     {
-        // Arrange
-        var mockHandler = new Mock<HttpMessageHandler>();
-        mockHandler.Protected()
-            .Setup<Task<HttpResponseMessage>>(
-                "SendAsync",
-                ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(new HttpResponseMessage
-            {
-                StatusCode = HttpStatusCode.OK,
-                Content = new StringContent("{\"temperature\": 22.5}")
-            });
+        // Arrange — MockHttpClient is a real HttpClient with mock setup
+        using var client = Mock.HttpClient("https://api.weather.com");
+        client.Handler.OnGet("/weather/London")
+            .RespondWithJson("""{"temperature": 22.5}""");
 
-        var httpClient = new HttpClient(mockHandler.Object);
-        var service = new WeatherService(httpClient);
+        var service = new WeatherService(client);
 
         // Act
         var weather = await service.GetWeatherAsync("London");
@@ -1778,8 +1769,8 @@ public async Task IsBusinessHours()
 [Test]
 public async Task IsBusinessHours()
 {
-    var mockTime = new Mock<ITimeProvider>();
-    mockTime.Setup(t => t.Now).Returns(new DateTime(2024, 1, 15, 10, 0, 0)); // Monday 10 AM
+    var mockTime = Mock.Of<ITimeProvider>();
+    mockTime.Now.Returns(new DateTime(2024, 1, 15, 10, 0, 0)); // Monday 10 AM
 
     var service = new BusinessHoursService(mockTime.Object);
     var result = service.IsBusinessHours();
@@ -1807,18 +1798,11 @@ public async Task FetchUserData()
 [Test]
 public async Task FetchUserData()
 {
-    var mockHandler = new Mock<HttpMessageHandler>();
-    mockHandler.Protected()
-        .Setup<Task<HttpResponseMessage>>("SendAsync",
-            ItExpr.IsAny<HttpRequestMessage>(),
-            ItExpr.IsAny<CancellationToken>())
-        .ReturnsAsync(new HttpResponseMessage
-        {
-            Content = new StringContent("{\"username\": \"alice\"}")
-        });
+    using var client = Mock.HttpClient("https://api.example.com");
+    client.Handler.OnGet("/users/1")
+        .RespondWithJson("""{"username": "alice"}""");
 
-    var client = new HttpClient(mockHandler.Object);
-    var response = await client.GetStringAsync("https://api.example.com/users/1");
+    var response = await client.GetStringAsync("/users/1");
 
     await Assert.That(response).Contains("username"); // Always passes
 }

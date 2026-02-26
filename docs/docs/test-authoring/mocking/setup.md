@@ -12,13 +12,13 @@ Methods are called directly on `Mock<T>` — the chain method (`.Returns()`, `.T
 
 ```csharp
 // Fixed return value
-mock.GetUser(Arg.Any<int>()).Returns(new User("Alice"));
+mock.GetUser(Any<int>()).Returns(new User("Alice"));
 
 // Computed return value
-mock.GetUser(Arg.Any<int>()).Returns(() => new User(DateTime.Now.ToString()));
+mock.GetUser(Any<int>()).Returns(() => new User(DateTime.Now.ToString()));
 
 // Async methods — no special API needed
-mock.GetUserAsync(Arg.Any<int>()).Returns(new User("Alice"));
+mock.GetUserAsync(Any<int>()).Returns(new User("Alice"));
 // TUnit.Mocks auto-wraps the value in Task<T> or ValueTask<T>
 ```
 
@@ -26,10 +26,10 @@ mock.GetUserAsync(Arg.Any<int>()).Returns(new User("Alice"));
 
 ```csharp
 // Throw a specific exception type
-mock.Delete(Arg.Any<int>()).Throws<InvalidOperationException>();
+mock.Delete(Any<int>()).Throws<InvalidOperationException>();
 
 // Throw a specific instance
-mock.Delete(Arg.Any<int>()).Throws(new ArgumentException("bad id"));
+mock.Delete(Any<int>()).Throws(new ArgumentException("bad id"));
 ```
 
 ### Callbacks
@@ -37,11 +37,11 @@ mock.Delete(Arg.Any<int>()).Throws(new ArgumentException("bad id"));
 ```csharp
 // Simple callback
 var callCount = 0;
-mock.Process(Arg.Any<string>())
+mock.Process(Any<string>())
     .Callback(() => callCount++);
 
 // Callback with access to arguments
-mock.Process(Arg.Any<string>())
+mock.Process(Any<string>())
     .Callback((object?[] args) => Console.WriteLine($"Called with: {args[0]}"));
 ```
 
@@ -50,7 +50,7 @@ mock.Process(Arg.Any<string>())
 Use `.Then()` to define different behaviors for successive calls:
 
 ```csharp
-mock.GetValue(Arg.Any<string>())
+mock.GetValue(Any<string>())
     .Throws<InvalidOperationException>()   // 1st call: throws
     .Then()
     .Returns("retry-succeeded")             // 2nd call: returns value
@@ -58,7 +58,7 @@ mock.GetValue(Arg.Any<string>())
     .Returns("cached");                     // 3rd+ calls: returns this value
 
 // Shorthand for sequential return values
-mock.GetValue(Arg.Any<string>())
+mock.GetValue(Any<string>())
     .ReturnsSequentially("first", "second", "third");
 // 1st: "first", 2nd: "second", 3rd+: "third" (last value repeats)
 ```
@@ -68,14 +68,14 @@ mock.GetValue(Arg.Any<string>())
 Void methods support `Callback` and `Throws` (but not `Returns`):
 
 ```csharp
-mock.Log(Arg.Any<string>())
+mock.Log(Any<string>())
     .Callback(() => { /* side effect */ });
 
-mock.Log(Arg.Any<string>())
+mock.Log(Any<string>())
     .Throws<NotSupportedException>();
 ```
 
-Void methods are also eagerly registered — calling `mock.Log(Arg.Any<string>())` without chaining is sufficient to "allow" the call in strict mode.
+Void methods are also eagerly registered — calling `mock.Log(Any<string>())` without chaining is sufficient to "allow" the call in strict mode.
 
 ## Property Setup
 
@@ -104,7 +104,7 @@ mock.Name.ReturnsSequentially("first", "second");
 mock.Count.Setter.Callback(() => Console.WriteLine("Count was set"));
 
 // React to a specific value being set
-mock.Count.Set(Arg.Is(42)).Callback(() => Console.WriteLine("Count set to 42"));
+mock.Count.Set(Is(42)).Callback(() => Console.WriteLine("Count set to 42"));
 
 // Throw on setter
 mock.Name.Setter.Throws<NotSupportedException>();
@@ -144,7 +144,7 @@ bool found = svc.TryGet("key", out var value);
 **Ref parameters** are included in setup signatures and participate in argument matching. Use `.SetsRef{Name}()` to assign output values:
 
 ```csharp
-mock.Swap(Arg.Any<int>())
+mock.Swap(Any<int>())
     .SetsRefValue(99);
 
 int val = 42;
@@ -168,7 +168,7 @@ public abstract class Calculator
 }
 
 var mock = Mock.OfPartial<Calculator>();
-mock.Multiply(Arg.Any<int>(), Arg.Any<int>()).Returns(99);
+mock.Multiply(Any<int>(), Any<int>()).Returns(99);
 
 mock.Object.Add(2, 3);      // 5 (base implementation)
 mock.Object.Multiply(2, 3); // 99 (mocked)
@@ -186,7 +186,7 @@ Mock any delegate type:
 
 ```csharp
 var mock = Mock.OfDelegate<Func<string, int>>();
-mock.Invoke(Arg.Any<string>()).Returns(42);
+mock.Invoke(Any<string>()).Returns(42);
 
 Func<string, int> func = mock;
 var result = func("hello"); // 42
@@ -216,7 +216,7 @@ Create a single mock that implements multiple interfaces:
 ```csharp
 var mock = Mock.Of<ILogger, IDisposable>();
 
-mock.Log(Arg.Any<string>()); // ILogger method
+mock.Log(Any<string>()); // ILogger method
 mock.Object.Log("test");
 
 ((IDisposable)mock.Object).Dispose(); // IDisposable method
@@ -229,7 +229,7 @@ Supports up to 4 interfaces: `Mock.Of<T1, T2, T3, T4>()`.
 Setup methods return chain objects that support additional behaviors:
 
 ```csharp
-mock.Process(Arg.Any<int>())
+mock.Process(Any<int>())
     .Returns(true)
     .RaisesProcessCompleted(EventArgs.Empty)   // strongly-typed auto-raise event
     .TransitionsTo("processed");               // state machine transition

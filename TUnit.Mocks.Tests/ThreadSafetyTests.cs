@@ -13,7 +13,7 @@ public class ThreadSafetyTests
     {
         // Arrange
         var mock = Mock.Of<ICalculator>();
-        mock.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(42);
+        mock.Add(Any(), Any()).Returns(42);
         ICalculator calc = mock.Object;
 
         // Act — 100 concurrent calls
@@ -40,7 +40,7 @@ public class ThreadSafetyTests
         await Task.WhenAll(tasks);
 
         // Assert — all 100 calls should be recorded
-        mock.Log(Arg.Any<string>()).WasCalled(Times.Exactly(100));
+        mock.Log(Any()).WasCalled(Times.Exactly(100));
         await Assert.That(true).IsTrue();
     }
 
@@ -56,7 +56,7 @@ public class ThreadSafetyTests
         {
             for (int i = 0; i < 50; i++)
             {
-                mock.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(i);
+                mock.Add(Any(), Any()).Returns(i);
             }
         });
 
@@ -130,11 +130,11 @@ public class ThreadSafetyTests
     {
         // Arrange
         var calcMock = Mock.Of<ICalculator>();
-        calcMock.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(99);
+        calcMock.Add(Any(), Any()).Returns(99);
         ICalculator calc = calcMock.Object;
 
         var greeterMock = Mock.Of<IGreeter>();
-        greeterMock.Greet(Arg.Any<string>()).Returns("hi");
+        greeterMock.Greet(Any()).Returns("hi");
         IGreeter greeter = greeterMock.Object;
 
         // Act — concurrent calls on both mocks
@@ -164,7 +164,7 @@ public class ThreadSafetyTests
     {
         // Arrange
         var mock = Mock.Of<IGreeter>();
-        mock.Greet(Arg.Any<string>()).Returns("hello");
+        mock.Greet(Any()).Returns("hello");
         IGreeter greeter = mock.Object;
 
         // Act — 100 concurrent calls
@@ -173,7 +173,7 @@ public class ThreadSafetyTests
         await Task.WhenAll(tasks);
 
         // Assert — verify total call count
-        mock.Greet(Arg.Any<string>()).WasCalled(Times.Exactly(100));
+        mock.Greet(Any()).WasCalled(Times.Exactly(100));
         await Assert.That(true).IsTrue();
     }
 }

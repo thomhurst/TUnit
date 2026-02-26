@@ -592,10 +592,10 @@ Don't mock everything. Use real implementations when they're fast and reliable:
 [Test]
 public async Task ProcessOrder()
 {
-    var mockLogger = new Mock<ILogger>();
-    var mockValidator = new Mock<IValidator>();
-    var mockCalculator = new Mock<IPriceCalculator>();
-    var mockRepository = new Mock<IOrderRepository>();
+    var mockLogger = Mock.Of<ILogger>();
+    var mockValidator = Mock.Of<IValidator>();
+    var mockCalculator = Mock.Of<IPriceCalculator>();
+    var mockRepository = Mock.Of<IOrderRepository>();
 
     // So much setup...
 }
@@ -607,7 +607,7 @@ public async Task ProcessOrder()
     var logger = new NullLogger();  // Real lightweight implementation
     var validator = new OrderValidator();  // Real validator is fast
     var calculator = new PriceCalculator();  // Simple calculations
-    var mockRepository = new Mock<IOrderRepository>();  // Mock database
+    var mockRepository = Mock.Of<IOrderRepository>();  // Mock database
 
     // Much simpler!
 }
@@ -624,13 +624,13 @@ Test behavior, not implementation. Your tests should verify what the code does, 
 [Test]
 public async Task ProcessOrder_CallsRepositorySaveMethod()
 {
-    var mockRepository = new Mock<IOrderRepository>();
+    var mockRepository = Mock.Of<IOrderRepository>();
     var service = new OrderService(mockRepository.Object);
 
     await service.ProcessOrder(order);
 
     // Verifying method calls instead of behavior
-    mockRepository.Verify(r => r.Save(It.IsAny<Order>()), Times.Once);
+    mockRepository.Save(Any()).WasCalled(Times.Once);
 }
 
 // ✅ Good: Testing actual behavior
