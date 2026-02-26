@@ -12,7 +12,7 @@ These benchmarks were automatically generated on **2026-02-26** from the latest 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.103
 :::
 
-## 🚀 Runtime Benchmarks
+## Runtime Benchmarks
 
 Click on any benchmark to view detailed results:
 
@@ -24,14 +24,14 @@ Click on any benchmark to view detailed results:
 - [SetupTeardownTests](SetupTeardownTests) - Detailed performance analysis
 
 
-## 🔨 Build Benchmarks
+## Build Benchmarks
 
 - [Build Performance](BuildTime) - Compilation time comparison
 
 
 ---
 
-## 📊 Methodology
+## Methodology
 
 These benchmarks compare TUnit against the most popular .NET testing frameworks:
 

@@ -23,81 +23,9 @@ Returning a `Func<T>` ensures that each test gets a fresh object.
 If you return a reference to the same object, tests may interfere with each other.
 :::
 
-Here's an example returning a simple object:
+Return an `IEnumerable<Func<T>>` to generate multiple test cases. For each item returned, a new test will be created with that item passed in to the parameters. Each `Func<>` should return a `new T()` so every test gets its own instance.
 
-```csharp
-using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-using TUnit.Core;
-
-namespace MyTestProject;
-
-public record AdditionTestData(int Value1, int Value2, int ExpectedResult);
-
-public static class MyTestDataSources
-{
-    public static Func<AdditionTestData> AdditionTestData()
-    {
-        return () => new AdditionTestData(1, 2, 3);
-    }
-}
-
-public class MyTestClass
-{
-    [Test]
-    [MethodDataSource(typeof(MyTestDataSources), nameof(MyTestDataSources.AdditionTestData))]
-    public async Task MyTest(AdditionTestData additionTestData)
-    {
-        var result = Add(additionTestData.Value1, additionTestData.Value2);
-
-        await Assert.That(result).IsEqualTo(additionTestData.ExpectedResult);
-    }
-
-    private int Add(int x, int y)
-    {
-        return x + y;
-    }
-}
-```
-
-This can also accept tuples if you don't want to create lots of new types within your test assembly:
-
-```csharp
-using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-using TUnit.Core;
-
-namespace MyTestProject;
-
-public static class MyTestDataSources
-{
-    public static Func<(int, int, int)> AdditionTestData()
-    {
-        return () => (1, 2, 3);
-    }
-}
-
-public class MyTestClass
-{
-    [Test]
-    [MethodDataSource(typeof(MyTestDataSources), nameof(MyTestDataSources.AdditionTestData))]
-    public async Task MyTest(int value1, int value2, int expectedResult)
-    {
-        var result = Add(value1, value2);
-
-        await Assert.That(result).IsEqualTo(expectedResult);
-    }
-
-    private int Add(int x, int y)
-    {
-        return x + y;
-    }
-}
-```
-
-This attribute can also accept `IEnumerable<>`. For each item returned, a new test will be created with that item passed in to the parameters. Again, if using a reference type, return an `IEnumerable<Func<T>>` and make sure each `Func<>` returns a `new T()`
-
-Here's an example where the test would be invoked 3 times:
+Here's an example using a record type (the test is invoked 3 times):
 
 ```csharp
 using TUnit.Assertions;

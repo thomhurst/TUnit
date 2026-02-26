@@ -190,40 +190,22 @@ public abstract class TypedDataSourceAttribute<T> : DataSourceAttribute
     public abstract IEnumerable<T> GetData();
 }
 
-// Implementation example
-public class FibonacciDataAttribute : TypedDataSourceAttribute<int>
+// Custom implementation
+public class SampleUsersAttribute : TypedDataSourceAttribute<User>
 {
-    private readonly int _count;
-    
-    public FibonacciDataAttribute(int count)
+    public override IEnumerable<User> GetData()
     {
-        _count = count;
-    }
-    
-    public override IEnumerable<int> GetData()
-    {
-        int a = 0, b = 1;
-        yield return a;
-        
-        if (_count > 1) yield return b;
-        
-        for (int i = 2; i < _count; i++)
-        {
-            int temp = a + b;
-            yield return temp;
-            a = b;
-            b = temp;
-        }
+        yield return new User { Id = 1, Name = "Alice", Role = "Admin" };
+        yield return new User { Id = 2, Name = "Bob", Role = "User" };
     }
 }
 
 // Usage
 [Test]
-[FibonacciData(7)]
-public void TestFibonacciNumber(int fibNumber)
+[SampleUsers]
+public async Task ValidateUser(User user)
 {
-    // Test with Fibonacci sequence: 0, 1, 1, 2, 3, 5, 8
-    Assert.That(fibNumber).IsGreaterThanOrEqualTo(0);
+    await Assert.That(user.Name).IsNotEmpty();
 }
 ```
 
@@ -412,30 +394,6 @@ public class ReflectiveDataSource<[DynamicallyAccessedMembers(
 }
 ```
 
-### Generic Constraints for AOT
-
-Use constraints to ensure AOT compatibility:
-
-```csharp
-public class SerializableDataSource<T> : TypedDataSourceAttribute<T>
-    where T : IJsonSerializable<T> // Ensures T can be serialized
-{
-    private readonly string _jsonFile;
-    
-    public SerializableDataSource(string jsonFile)
-    {
-        _jsonFile = jsonFile;
-    }
-    
-    public override IEnumerable<T> GetData()
-    {
-        var json = File.ReadAllText(_jsonFile);
-        var items = JsonSerializer.Deserialize<List<T>>(json);
-        return items ?? Enumerable.Empty<T>();
-    }
-}
-```
-
 ## Best Practices
 
 ### 1. Use Generic Attributes for Type Safety
@@ -495,81 +453,6 @@ public class CsvDataSource<T> : TypedDataSourceAttribute<T>
     where T : new()
 {
     // Implementation
-}
-```
-
-## Common Patterns
-
-### Factory Pattern with Generics
-
-```csharp
-public class EntityFactory<T> where T : IEntity, new()
-{
-    public static IEnumerable<T> CreateTestEntities(int count)
-    {
-        for (int i = 0; i < count; i++)
-        {
-            yield return new T 
-            { 
-                Id = i,
-                CreatedAt = DateTime.UtcNow
-            };
-        }
-    }
-}
-
-public class FactoryDataSource<T> : TypedDataSourceAttribute<T>
-    where T : IEntity, new()
-{
-    private readonly int _count;
-    
-    public FactoryDataSource(int count = 3)
-    {
-        _count = count;
-    }
-    
-    public override IEnumerable<T> GetData()
-    {
-        return EntityFactory<T>.CreateTestEntities(_count);
-    }
-}
-
-// Usage
-[Test]
-[FactoryDataSource<Product>(5)]
-public async Task TestProductEntity(Product product)
-{
-    await Assert.That(product.Id).IsGreaterThanOrEqualTo(0);
-}
-```
-
-### Builder Pattern with Generics
-
-```csharp
-public abstract class TestDataBuilder<T> : TypedDataSourceAttribute<T>
-{
-    protected abstract T BuildDefault();
-    protected abstract T BuildInvalid();
-    protected abstract T BuildEdgeCase();
-    
-    public override IEnumerable<T> GetData()
-    {
-        yield return BuildDefault();
-        yield return BuildInvalid();
-        yield return BuildEdgeCase();
-    }
-}
-
-public class UserDataBuilder : TestDataBuilder<User>
-{
-    protected override User BuildDefault() => 
-        new User { Id = 1, Name = "John", Age = 30 };
-        
-    protected override User BuildInvalid() => 
-        new User { Id = -1, Name = "", Age = -5 };
-        
-    protected override User BuildEdgeCase() => 
-        new User { Id = int.MaxValue, Name = new string('a', 1000), Age = 150 };
 }
 ```
 

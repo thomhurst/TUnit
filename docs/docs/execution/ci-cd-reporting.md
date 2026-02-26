@@ -31,7 +31,7 @@ The collapsible style provides a clean, concise summary with expandable details:
 | 5 | Failed |
 
 <details>
-<summary>📊 Test Details (click to expand)</summary>
+<summary>Test Details (click to expand)</summary>
 
 ### Details
 | Test | Status | Details | Duration |

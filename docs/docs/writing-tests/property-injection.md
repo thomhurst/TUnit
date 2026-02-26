@@ -322,101 +322,14 @@ public class InMemorySql : IAsyncInitializer, IAsyncDisposable
     }
 }
 
-// Redis container with similar pattern
-public class InMemoryRedis : IAsyncInitializer, IAsyncDisposable
-{
-    private TestcontainersContainer? _container;
+// Apply the same pattern for other services (Redis, message buses, etc.)
 
-    public TestcontainersContainer Container => _container
-        ?? throw new InvalidOperationException("Container not initialized");
-
-    public async Task InitializeAsync()
-    {
-        _container = new TestcontainersBuilder<TestcontainersContainer>()
-            .WithImage("redis:latest")
-            .Build();
-
-        await _container.StartAsync();
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (_container != null)
-        {
-            await _container.DisposeAsync();
-        }
-    }
-}
-
-// Message bus container
-public class InMemoryMessageBus : IAsyncInitializer, IAsyncDisposable
-{
-    private TestcontainersContainer? _container;
-
-    public TestcontainersContainer Container => _container
-        ?? throw new InvalidOperationException("Container not initialized");
-
-    public async Task InitializeAsync()
-    {
-        _container = new TestcontainersBuilder<TestcontainersContainer>()
-            .WithImage("rabbitmq:3-management")
-            .Build();
-
-        await _container.StartAsync();
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (_container != null)
-        {
-            await _container.DisposeAsync();
-        }
-    }
-}
-
-// UI component that depends on the message bus
-public class MessageBusUserInterface : IAsyncInitializer, IAsyncDisposable
-{
-    private TestcontainersContainer? _container;
-
-    // Inject the message bus dependency - shared per test session
-    [ClassDataSource<InMemoryMessageBus>(Shared = SharedType.PerTestSession)]
-    public required InMemoryMessageBus MessageBus { get; init; }
-
-    public TestcontainersContainer Container => _container
-        ?? throw new InvalidOperationException("Container not initialized");
-
-    public async Task InitializeAsync()
-    {
-        // The MessageBus property is already initialized when this runs!
-        _container = new MessageBusUIContainerBuilder()
-            .WithConnectionString(MessageBus.Container.GetConnectionString())
-            .Build();
-
-        await _container.StartAsync();
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (_container != null)
-        {
-            await _container.DisposeAsync();
-        }
-    }
-}
-
-// Web application factory that depends on multiple services
+// Web application factory that depends on infrastructure services
 public class InMemoryWebApplicationFactory : WebApplicationFactory<Program>, IAsyncInitializer
 {
-    // Inject all required infrastructure - all shared per test session
+    // Inject required infrastructure - shared per test session
     [ClassDataSource<InMemorySql>(Shared = SharedType.PerTestSession)]
     public required InMemorySql Sql { get; init; }
-
-    [ClassDataSource<InMemoryRedis>(Shared = SharedType.PerTestSession)]
-    public required InMemoryRedis Redis { get; init; }
-
-    [ClassDataSource<InMemoryMessageBus>(Shared = SharedType.PerTestSession)]
-    public required InMemoryMessageBus MessageBus { get; init; }
 
     public Task InitializeAsync()
     {
@@ -429,11 +342,9 @@ public class InMemoryWebApplicationFactory : WebApplicationFactory<Program>, IAs
     {
         builder.ConfigureAppConfiguration((context, configBuilder) =>
         {
-            // All injected properties are already initialized!
+            // Injected properties are already initialized!
             configBuilder.AddInMemoryCollection(new Dictionary<string, string?>
             {
-                { "MessageBus:ConnectionString", MessageBus.Container.GetConnectionString() },
-                { "Redis:ConnectionString", Redis.Container.GetConnectionString() },
                 { "PostgreSql:ConnectionString", Sql.Container.GetConnectionString() }
             });
         });
@@ -447,21 +358,14 @@ public class IntegrationTests
     [ClassDataSource<InMemoryWebApplicationFactory>]
     public required InMemoryWebApplicationFactory WebApplicationFactory { get; init; }
 
-    [ClassDataSource<MessageBusUserInterface>]
-    public required MessageBusUserInterface MessageBusUI { get; init; }
-
     [Test]
     public async Task Full_Integration_Test()
     {
         // Everything is initialized in the correct order!
         var client = WebApplicationFactory.CreateClient();
 
-        // Test your application with all infrastructure running
         var response = await client.GetAsync("/api/products");
         await Assert.That(response.IsSuccessStatusCode).IsTrue();
-
-        // The MessageBusUI shares the same MessageBus instance as the WebApplicationFactory
-        // because they both use SharedType.PerTestSession
     }
 }
 ```
@@ -530,5 +434,4 @@ public class ServiceB : IAsyncInitializer
 }
 ```
 
-This powerful feature makes complex test orchestration simple and maintainable, allowing you to focus on writing tests rather than managing test infrastructure!
 

@@ -433,23 +433,6 @@ public async Task Record_Created_Recently()
 }
 ```
 
-### Time Zone Conversions
-
-```csharp
-[Test]
-public async Task Time_Zone_Conversion()
-{
-    var utcTime = DateTime.UtcNow;
-    var localTime = utcTime.ToLocalTime();
-
-    await Assert.That(utcTime).IsUtc();
-    await Assert.That(localTime).IsNotUtc();
-
-    var offset = localTime - utcTime;
-    await Assert.That(Math.Abs(offset.TotalHours)).IsLessThan(24);
-}
-```
-
 ## Working with Date Components
 
 ```csharp
@@ -464,45 +447,6 @@ public async Task Date_Components()
     await Assert.That(date.Hour).IsEqualTo(14);
     await Assert.That(date.Minute).IsEqualTo(30);
     await Assert.That(date.Second).IsEqualTo(45);
-}
-```
-
-## First and Last Day of Month
-
-```csharp
-[Test]
-public async Task First_Day_Of_Month()
-{
-    var date = new DateTime(2024, 3, 15);
-    var firstDay = new DateTime(date.Year, date.Month, 1);
-
-    await Assert.That(firstDay.Day).IsEqualTo(1);
-}
-
-[Test]
-public async Task Last_Day_Of_Month()
-{
-    var date = new DateTime(2024, 2, 15);
-    var daysInMonth = DateTime.DaysInMonth(date.Year, date.Month);
-    var lastDay = new DateTime(date.Year, date.Month, daysInMonth);
-
-    await Assert.That(lastDay.Day).IsEqualTo(29); // 2024 is a leap year
-}
-```
-
-## Quarter Calculation
-
-```csharp
-[Test]
-public async Task Date_Quarter()
-{
-    var q1 = new DateTime(2024, 2, 1);
-    var quarter1 = (q1.Month - 1) / 3 + 1;
-    await Assert.That(quarter1).IsEqualTo(1);
-
-    var q3 = new DateTime(2024, 8, 1);
-    var quarter3 = (q3.Month - 1) / 3 + 1;
-    await Assert.That(quarter3).IsEqualTo(3);
 }
 ```
 

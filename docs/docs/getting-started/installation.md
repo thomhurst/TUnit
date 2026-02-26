@@ -54,16 +54,16 @@ public class MyTests  // No [TestClass] needed!
 
 When you install the **TUnit** meta package, you automatically get several useful extensions without any additional installation:
 
-#### ✅ Built-In Extensions
+#### Built-In Extensions
 
 **Microsoft.Testing.Extensions.CodeCoverage**
-- 📊 Code coverage support via `--coverage` flag
-- 📈 Outputs Cobertura and XML formats
-- 🔄 Replacement for Coverlet (which is **not compatible** with TUnit)
+- Code coverage support via `--coverage` flag
+- Outputs Cobertura and XML formats
+- Replacement for Coverlet (which is **not compatible** with TUnit)
 
 **Microsoft.Testing.Extensions.TrxReport**
-- 📝 TRX test report generation via `--report-trx` flag
-- 🤝 Compatible with Azure DevOps and other CI/CD systems
+- TRX test report generation via `--report-trx` flag
+- Compatible with Azure DevOps and other CI/CD systems
 
 This means you can run tests with coverage and reports right away:
 

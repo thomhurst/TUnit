@@ -12,7 +12,7 @@ This benchmark was automatically generated on **2026-02-26** from the latest CI 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.103
 :::
 
-## 📊 Results
+## Results
 
 Compilation time comparison across frameworks:
 
@@ -23,7 +23,7 @@ Compilation time comparison across frameworks:
 | Build_MSTest | 4.1.0 | 1.933 s | 1.932 s | 0.0186 s |
 | Build_xUnit3 | 3.2.2 | 1.839 s | 1.838 s | 0.0242 s |
 
-## 📈 Visual Comparison
+## Visual Comparison
 
 ```mermaid
 %%{init: {

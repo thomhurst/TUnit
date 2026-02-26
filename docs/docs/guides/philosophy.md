@@ -170,14 +170,6 @@ TUnit is a good fit when performance matters—you have large test suites that n
 
 When might you want alternatives? If you have an existing huge test suite, migration costs might outweigh the benefits. If your team strongly prefers another framework's style, that's a legitimate reason to stick with what works for you. Or if you absolutely need a tool that only works with VSTest, you'll need to use something else.
 
-## The Bottom Line
-
-TUnit exists because modern .NET deserves a modern testing framework. One that prioritizes performance, isolation, and developer experience without carrying the baggage of legacy compromises.
-
-Every decision—async assertions, parallel-by-default, source generation—flows from wanting tests to be fast, isolated, modern, and pleasant to write. Tests should run in parallel, create new instances per test, support async naturally, and minimize boilerplate.
-
-If that resonates with you, TUnit is probably a good fit for your project.
-
 For migration details, check out:
 - [xUnit Migration](../migration/xunit.md)
 - [NUnit Migration](../migration/nunit.md)

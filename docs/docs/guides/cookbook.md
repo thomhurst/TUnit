@@ -98,31 +98,12 @@ public class OrderServiceTests
 
 ### Testing a Minimal API Endpoint (Shared Server)
 
-For API tests, it's more efficient to share a single WebApplicationFactory across all tests:
+For API tests, share a single WebApplicationFactory across all tests. See [Best Practices -- Sharing Expensive Resources](best-practices.md#sharing-expensive-resources) for the shared `TestWebServer` pattern using `ClassDataSource` with `SharedType.PerTestSession`.
 
 ```csharp
-using Microsoft.AspNetCore.Mvc.Testing;
 using System.Net;
 using System.Net.Http.Json;
 using TUnit.Core;
-
-// Shared web server for all API tests
-public class TestWebServer : IAsyncInitializer, IAsyncDisposable
-{
-    public WebApplicationFactory<Program>? Factory { get; private set; }
-
-    public async Task InitializeAsync()
-    {
-        Factory = new WebApplicationFactory<Program>();
-        await Task.CompletedTask;
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (Factory != null)
-            await Factory.DisposeAsync();
-    }
-}
 
 [ClassDataSource<TestWebServer>(Shared = SharedType.PerTestSession)]
 public class UserApiTests(TestWebServer server)

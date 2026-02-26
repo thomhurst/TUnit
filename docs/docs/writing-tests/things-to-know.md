@@ -12,7 +12,7 @@ Classes are `new`ed up for each test within their class.
 
 This is by design because tests should be stateless and side effect free. 
 
-By doing this it enables parallelisation (for speed and throughput), and reduces bugs and side effects when there is stale data left over from previous tests. This is something I've experienced with NUnit before. I've seen test suites that were all green, and they were actually broken, because they were asserting against instance data that had been left over from previous tests.
+By doing this it enables parallelisation (for speed and throughput), and reduces bugs and side effects when there is stale data left over from previous tests. Test suites can appear green while actually being broken, because they assert against instance data left over from previous tests.
 
 So if you have:
 

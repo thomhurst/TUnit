@@ -12,7 +12,7 @@ This benchmark was automatically generated on **2026-02-26** from the latest CI 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.103
 :::
 
-## 📊 Results
+## Results
 
 | Framework | Version | Mean | Median | StdDev |
 |-----------|---------|------|--------|--------|
@@ -22,7 +22,7 @@ This benchmark was automatically generated on **2026-02-26** from the latest CI 
 | xUnit3 | 3.2.2 | 783.8 ms | 783.0 ms | 7.77 ms |
 | **TUnit (AOT)** | 1.17.25 | 123.6 ms | 123.7 ms | 0.27 ms |
 
-## 📈 Visual Comparison
+## Visual Comparison
 
 ```mermaid
 %%{init: {
@@ -62,7 +62,7 @@ xychart-beta
   bar [553.6, 724.3, 650, 783.8, 123.6]
 ```
 
-## 🎯 Key Insights
+## Key Insights
 
 This benchmark compares TUnit's performance against NUnit, MSTest, xUnit3 using identical test scenarios.
 

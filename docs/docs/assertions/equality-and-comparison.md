@@ -54,7 +54,7 @@ public async Task Using_EqualTo_Alias()
     var numbers = new[] { 1, 2, 3 };
 
     await Assert.That(numbers)
-        .Count().IsEqualTo(3)
+        .Count().EqualTo(3)
         .And.Contains(2);
 }
 ```
@@ -282,8 +282,9 @@ public async Task Decimal_With_Tolerance()
 [Test]
 public async Task Long_With_Tolerance()
 {
-    long timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-    long expected = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+    var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+    long timestamp = now;
+    long expected = now + 50; // Simulate small drift
 
     // Allow 100ms difference
     await Assert.That(timestamp).IsEqualTo(expected).Within(100L);
@@ -398,97 +399,6 @@ public async Task Struct_Equality()
     var coord2 = new Coordinate { Latitude = 47.6, Longitude = -122.3 };
 
     await Assert.That(coord1).IsEqualTo(coord2);
-}
-```
-
-## Practical Examples
-
-### Validating Calculation Results
-
-```csharp
-[Test]
-public async Task Calculate_Discount()
-{
-    var originalPrice = 100m;
-    var discount = 0.20m; // 20%
-
-    var finalPrice = originalPrice * (1 - discount);
-
-    await Assert.That(finalPrice).IsEqualTo(80m);
-    await Assert.That(finalPrice).IsLessThan(originalPrice);
-    await Assert.That(finalPrice).IsGreaterThan(0);
-}
-```
-
-### Validating Ranges
-
-```csharp
-[Test]
-public async Task Temperature_In_Valid_Range()
-{
-    var roomTemperature = GetRoomTemperature();
-
-    await Assert.That(roomTemperature)
-        .IsBetween(18, 26) // Comfortable range in Celsius
-        .And.IsPositive();
-}
-```
-
-### Comparing with Mathematical Constants
-
-```csharp
-[Test]
-public async Task Mathematical_Constants()
-{
-    var calculatedPi = CalculatePiUsingLeibniz(10000);
-
-    await Assert.That(calculatedPi).IsEqualTo(Math.PI).Within(0.0001);
-}
-```
-
-### API Response Validation
-
-```csharp
-[Test]
-public async Task API_Response_Time()
-{
-    var stopwatch = Stopwatch.StartNew();
-    await CallApiEndpoint();
-    stopwatch.Stop();
-
-    await Assert.That(stopwatch.ElapsedMilliseconds)
-        .IsLessThan(500) // Must respond within 500ms
-        .And.IsGreaterThan(0);
-}
-```
-
-## Common Patterns
-
-### Validating User Input
-
-```csharp
-[Test]
-public async Task Username_Length()
-{
-    var username = GetUserInput();
-
-    await Assert.That(username.Length)
-        .IsBetween(3, 20)
-        .And.IsGreaterThan(0);
-}
-```
-
-### Percentage Validation
-
-```csharp
-[Test]
-public async Task Percentage_Valid()
-{
-    var successRate = CalculateSuccessRate();
-
-    await Assert.That(successRate)
-        .IsBetween(0, 100)
-        .And.IsGreaterThanOrEqualTo(0);
 }
 ```
 

@@ -32,7 +32,7 @@ See the [Code Coverage](code-coverage.md) page for usage, configuration, and CI/
 
 TRX reports are provided via the `Microsoft.Testing.Extensions.TrxReport` NuGet package.
 
-**✅ Included automatically with the TUnit package** - No manual installation needed!
+**Included automatically with the TUnit package** - No manual installation needed.
 
 #### Usage
 
@@ -45,7 +45,7 @@ dotnet run --configuration Release --report-trx
 dotnet run --configuration Release --results-directory ./reports --report-trx --report-trx-filename testresults.trx
 ```
 
-**📚 More Resources:**
+**More Resources:**
 - [Microsoft's TRX Report Documentation](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-platform-extensions-test-reports)
 
 ---
@@ -54,7 +54,7 @@ dotnet run --configuration Release --results-directory ./reports --report-trx --
 
 Telemetry is provided via the `Microsoft.Testing.Extensions.Telemetry` NuGet package.
 
-**✅ Included automatically with the TUnit package**
+**Included automatically with the TUnit package**
 
 This extension enables Microsoft to collect anonymous usage metrics to help improve the testing platform. No personal data or source code is collected.
 
@@ -72,7 +72,7 @@ set TESTINGPLATFORM_TELEMETRY_OPTOUT=1
 
 Alternatively, you can use `DOTNET_CLI_TELEMETRY_OPTOUT=1` which also disables .NET SDK telemetry.
 
-**📚 More Resources:**
+**More Resources:**
 - [Microsoft.Testing.Platform Telemetry Documentation](https://learn.microsoft.com/en-us/dotnet/core/testing/microsoft-testing-platform-telemetry)
 
 ---
