@@ -48,7 +48,7 @@ public class GreeterTests
         var mock = Mock.Of<IGreeter>();
 
         // Configure — set up a return value
-        mock.Greet(Arg.Any<string>()).Returns("Hello!");
+        mock.Greet(Any()).Returns("Hello!");
 
         // Act — use the mock object
         IGreeter greeter = mock.Object;
@@ -91,7 +91,7 @@ var strict = Mock.Of<IService>(MockBehavior.Strict);   // throws on unconfigured
 ```csharp
 var mock = Mock.Of<IService>();
 
-mock.GetUser(Arg.Any<int>()).Returns(user);  // setup — .Returns() makes it a stub
+mock.GetUser(Any()).Returns(user);       // setup — .Returns() makes it a stub
 mock.GetUser(42).WasCalled(Times.Once);      // verify — .WasCalled() makes it a check
 mock.RaiseOnMessage("hi");                   // raise events — Raise{EventName}()
 mock.Object                                  // the T instance to pass to your code under test
@@ -112,6 +112,32 @@ IGreeter greeter = mock; // implicit conversion
 |---|---|---|
 | `MockBehavior.Loose` | Return smart defaults (`0`, `""`, `false`, `null`, auto-mocked interfaces) | Yes |
 | `MockBehavior.Strict` | Throw `MockStrictBehaviorException` | No |
+
+### Concise Argument Matching
+
+TUnit.Mocks imports matchers globally — no `Arg.` prefix needed. Raw values, inline lambdas, and `Any()` work directly as arguments:
+
+```csharp
+var mock = Mock.Of<IUserService>();
+
+// Any() — matches everything
+mock.GetUser(Any()).Returns(user);
+
+// Raw values — implicit exact matching
+mock.GetUser(42).Returns(alice);
+
+// Inline lambdas — predicate matching directly in the call
+mock.GetUser(id => id > 0).Returns(validUser);
+mock.GetByRole(role => role == "admin").Returns(admins);
+
+// Mix lambdas with Any() or raw values
+mock.Search(name => name.StartsWith("A"), Any()).Returns(results);
+
+// Is<T>() — explicit predicate matching (also works)
+mock.GetUser(Is<int>(id => id > 0)).Returns(validUser);
+```
+
+See [Argument Matchers](argument-matchers) for the full API.
 
 ## What's Next
 

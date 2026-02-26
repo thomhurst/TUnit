@@ -67,6 +67,13 @@ namespace TUnit.Mocks.Generated
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { name.Matcher };
             return new IGreeter_Greet_M0_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 0, "Greet", matchers);
         }
+
+        public static IGreeter_Greet_M0_MockCall Greet(this global::TUnit.Mocks.Mock<global::IGreeter> mock, global::System.Func<string, bool> name)
+        {
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_name = name;
+            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_name.Matcher };
+            return new IGreeter_Greet_M0_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 0, "Greet", matchers);
+        }
     }
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]

@@ -232,75 +232,25 @@ public class AuthenticatedApiTests
 
 ## Mocking Patterns
 
-### Using Moq
+### Using TUnit.Mocks (Recommended)
+
+TUnit.Mocks is TUnit's first-party, source-generated mocking framework. It's **AOT-compatible**, requires no runtime proxy generation, and provides a concise API with no `Arg.` prefix needed:
 
 ```csharp
-using Moq;
-using TUnit.Core;
+using TUnit.Mocks;
 
-public class OrderServiceMoqTests
+public class OrderServiceTUnitMocksTests
 {
     [Test]
     public async Task ProcessOrder_CallsPaymentService()
     {
-        // Arrange
-        var mockPaymentService = new Mock<IPaymentService>();
+        // Arrange — create mock, configure with concise syntax
+        var mockPaymentService = Mock.Of<IPaymentService>();
         mockPaymentService
-            .Setup(p => p.ProcessPaymentAsync(It.IsAny<decimal>(), It.IsAny<string>()))
-            .ReturnsAsync(new PaymentResult { Success = true, TransactionId = "TX123" });
-
-        var orderService = new OrderService(mockPaymentService.Object);
-        var order = new Order { Total = 100.00m, PaymentMethod = "Credit Card" };
-
-        // Act
-        var result = await orderService.ProcessAsync(order);
-
-        // Assert
-        await Assert.That(result.IsSuccess).IsTrue();
-        mockPaymentService.Verify(
-            p => p.ProcessPaymentAsync(100.00m, "Credit Card"),
-            Times.Once);
-    }
-
-    [Test]
-    public async Task ProcessOrder_HandlesPaymentFailure()
-    {
-        // Arrange
-        var mockPaymentService = new Mock<IPaymentService>();
-        mockPaymentService
-            .Setup(p => p.ProcessPaymentAsync(It.IsAny<decimal>(), It.IsAny<string>()))
-            .ThrowsAsync(new PaymentException("Insufficient funds"));
-
-        var orderService = new OrderService(mockPaymentService.Object);
-        var order = new Order { Total = 1000.00m, PaymentMethod = "Credit Card" };
-
-        // Act & Assert
-        await Assert.That(async () => await orderService.ProcessAsync(order))
-            .ThrowsExactly<PaymentException>()
-            .WithMessage("Insufficient funds");
-    }
-}
-```
-
-### Using NSubstitute
-
-```csharp
-using NSubstitute;
-using NSubstitute.ExceptionExtensions;
-using TUnit.Core;
-
-public class OrderServiceNSubstituteTests
-{
-    [Test]
-    public async Task ProcessOrder_CallsPaymentService()
-    {
-        // Arrange
-        var paymentService = Substitute.For<IPaymentService>();
-        paymentService
-            .ProcessPaymentAsync(Arg.Any<decimal>(), Arg.Any<string>())
+            .ProcessPaymentAsync(Any(), Any())
             .Returns(new PaymentResult { Success = true, TransactionId = "TX123" });
 
-        var orderService = new OrderService(paymentService);
+        var orderService = new OrderService(mockPaymentService.Object);
         var order = new Order { Total = 100.00m, PaymentMethod = "Credit Card" };
 
         // Act
@@ -308,58 +258,101 @@ public class OrderServiceNSubstituteTests
 
         // Assert
         await Assert.That(result.IsSuccess).IsTrue();
-        await paymentService.Received(1).ProcessPaymentAsync(100.00m, "Credit Card");
+        mockPaymentService
+            .ProcessPaymentAsync(100.00m, "Credit Card")
+            .WasCalled(Times.Once);
     }
 
     [Test]
     public async Task ProcessOrder_HandlesPaymentFailure()
     {
         // Arrange
-        var paymentService = Substitute.For<IPaymentService>();
-        paymentService
-            .ProcessPaymentAsync(Arg.Any<decimal>(), Arg.Any<string>())
-            .Throws(new PaymentException("Insufficient funds"));
+        var mockPaymentService = Mock.Of<IPaymentService>();
+        mockPaymentService
+            .ProcessPaymentAsync(Any(), Any())
+            .Throws<PaymentException>();
 
-        var orderService = new OrderService(paymentService);
+        var orderService = new OrderService(mockPaymentService.Object);
         var order = new Order { Total = 1000.00m, PaymentMethod = "Credit Card" };
 
         // Act & Assert
         await Assert.That(async () => await orderService.ProcessAsync(order))
-            .ThrowsExactly<PaymentException>()
-            .WithMessage("Insufficient funds");
+            .ThrowsExactly<PaymentException>();
+    }
+
+    [Test]
+    public async Task ProcessOrder_UsesInlineLambdaPredicates()
+    {
+        // Arrange — inline lambdas work directly as argument matchers
+        var mockPaymentService = Mock.Of<IPaymentService>();
+        mockPaymentService
+            .ProcessPaymentAsync(amount => amount > 0, method => method.Contains("Card"))
+            .Returns(new PaymentResult { Success = true, TransactionId = "TX456" });
+
+        var orderService = new OrderService(mockPaymentService.Object);
+
+        // Act — "Credit Card" contains "Card", so it matches
+        var result = await orderService.ProcessAsync(
+            new Order { Total = 50.00m, PaymentMethod = "Credit Card" });
+
+        // Assert
+        await Assert.That(result.IsSuccess).IsTrue();
+    }
+
+    [Test]
+    public async Task ProcessOrder_CapturesArguments()
+    {
+        // Arrange — capture arguments for inspection
+        var amountArg = Any<decimal>();
+        var mockPaymentService = Mock.Of<IPaymentService>();
+        mockPaymentService
+            .ProcessPaymentAsync(amountArg, Any())
+            .Returns(new PaymentResult { Success = true, TransactionId = "TX789" });
+
+        var orderService = new OrderService(mockPaymentService.Object);
+        await orderService.ProcessAsync(new Order { Total = 100.00m, PaymentMethod = "Card" });
+        await orderService.ProcessAsync(new Order { Total = 200.00m, PaymentMethod = "Card" });
+
+        // Assert — inspect captured values
+        await Assert.That(amountArg.Values).HasCount().EqualTo(2);
+        await Assert.That(amountArg.Values[0]).IsEqualTo(100.00m);
+        await Assert.That(amountArg.Values[1]).IsEqualTo(200.00m);
     }
 }
 ```
+
+:::tip Why TUnit.Mocks?
+- **No `Arg.` prefix** — `Any()`, `Is<T>()`, and matchers work directly thanks to `global using static`
+- **Inline lambdas** — write predicates directly in the call: `mock.Add(x => x > 5, Any())` — works for all types
+- **Implicit values** — pass raw values (`42`, `"hello"`) directly as exact matchers
+- **AOT-compatible** — source-generated mocks work with Native AOT, trimming, and single-file publishing
+- **Built-in capture** — every `Arg<T>` automatically captures values for inspection via `.Values` and `.Latest`
+
+See the full [TUnit.Mocks documentation](../test-authoring/mocking) for setup, verification, argument matchers, and more.
+:::
 
 ### Partial Mocks and Spy Pattern
 
 ```csharp
-using Moq;
+using TUnit.Mocks;
 
 public class NotificationServiceTests
 {
     [Test]
     public async Task SendNotification_LogsAttempt()
     {
-        // Arrange - create a partial mock that calls real methods
-        var mockLogger = new Mock<ILogger>();
-        var notificationService = new Mock<NotificationService>(mockLogger.Object)
-        {
-            CallBase = true  // Call real implementation
-        };
+        // Arrange — partial mock calls base implementation for unconfigured methods
+        var mockLogger = Mock.Of<ILogger>();
+        var notificationService = Mock.OfPartial<NotificationService>(mockLogger.Object);
 
         // Override only the SendEmail method
-        notificationService
-            .Setup(n => n.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>()))
-            .ReturnsAsync(true);
+        notificationService.SendEmailAsync(Any(), Any()).Returns(true);
 
         // Act
         await notificationService.Object.NotifyUserAsync("user@example.com", "Hello");
 
-        // Assert - verify the real method called SendEmail
-        notificationService.Verify(
-            n => n.SendEmailAsync("user@example.com", It.IsAny<string>()),
-            Times.Once);
+        // Assert — verify the real method called SendEmail
+        notificationService.SendEmailAsync("user@example.com", Any()).WasCalled(Times.Once);
     }
 }
 ```
@@ -795,7 +788,7 @@ These cookbook recipes cover the most common testing scenarios. You can adapt th
 
 - **Dependency Injection**: Use service collections for realistic testing with dependencies
 - **API Testing**: Use `WebApplicationFactory` for end-to-end API tests
-- **Mocking**: Choose Moq or NSubstitute based on your preference
+- **Mocking**: Use TUnit.Mocks for AOT-compatible, source-generated mocking with a concise API
 - **Data-Driven Tests**: Use `MethodDataSource` or `DataSourceGenerator` for parameterized tests
 - **Exception Testing**: Use TUnit's fluent exception assertions
 - **Integration Tests**: Test with real databases, containers, or file systems

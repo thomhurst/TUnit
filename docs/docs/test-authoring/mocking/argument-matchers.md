@@ -6,25 +6,32 @@ sidebar_position: 4
 
 Argument matchers control which calls a setup or verification matches. The same matchers work in both contexts — the chain method determines whether it's a setup or verification.
 
+:::tip Static Import
+TUnit.Mocks automatically imports the `Arg` class via `global using static`, so you can call matcher methods directly — no `Arg.` prefix needed.
+:::
+
 ## Quick Reference
 
 | Matcher | Matches |
 |---|---|
-| `Arg.Any<T>()` | Any value of type T (including null) |
-| `Arg.Is<T>(value)` | Exact equality |
-| `Arg.Is<T>(predicate)` | Values satisfying a predicate |
-| `Arg.IsNull<T>()` | Null only |
-| `Arg.IsNotNull<T>()` | Any non-null value |
-| `Arg.Matches(pattern)` | String matching a regex pattern |
-| `Arg.Matches(regex)` | String matching a compiled `Regex` |
-| `Arg.Contains<TCol, TElem>(item)` | Collection containing an element |
-| `Arg.HasCount<T>(n)` | Collection with exactly n elements |
-| `Arg.IsEmpty<T>()` | Empty collection |
-| `Arg.SequenceEquals<TCol, TElem>(expected)` | Collection matching element-by-element |
-| `Arg.IsInRange<T>(min, max)` | Value within an inclusive range |
-| `Arg.IsIn<T>(values)` | Value in a set |
-| `Arg.IsNotIn<T>(values)` | Value not in a set |
-| `Arg.Not<T>(inner)` | Negation of another matcher |
+| `Any()` / `Any<T>()` | Any value of type T (including null) |
+| `Is<T>(value)` | Exact equality |
+| `Is<T>(predicate)` | Values satisfying a predicate |
+| Raw value (e.g. `42`, `"hello"`) | Exact equality (implicit conversion) |
+| Inline lambda (e.g. `x => x > 5`) | Predicate matching (all types) |
+| `Func<T?, bool>` variable | Predicate matching (implicit conversion) |
+| `IsNull<T>()` | Null only |
+| `IsNotNull<T>()` | Any non-null value |
+| `Matches(pattern)` | String matching a regex pattern |
+| `Matches(regex)` | String matching a compiled `Regex` |
+| `Contains<TCol, TElem>(item)` | Collection containing an element |
+| `HasCount<T>(n)` | Collection with exactly n elements |
+| `IsEmpty<T>()` | Empty collection |
+| `SequenceEquals<TCol, TElem>(expected)` | Collection matching element-by-element |
+| `IsInRange<T>(min, max)` | Value within an inclusive range |
+| `IsIn<T>(values)` | Value in a set |
+| `IsNotIn<T>(values)` | Value not in a set |
+| `Not<T>(inner)` | Negation of another matcher |
 | `RefStructArg<T>.Any` | Any value of a ref struct type (.NET 9+) |
 
 ## Basic Matchers
@@ -34,7 +41,7 @@ Argument matchers control which calls a setup or verification matches. The same 
 Matches any value, including null:
 
 ```csharp
-mock.GetUser(Arg.Any<int>()).Returns(new User("Default"));
+mock.GetUser(Any()).Returns(new User("Default"));
 
 svc.GetUser(1);    // matches
 svc.GetUser(999);  // matches
@@ -45,8 +52,8 @@ svc.GetUser(999);  // matches
 Match a specific value using equality:
 
 ```csharp
-mock.GetUser(Arg.Is(42)).Returns(new User("Alice"));
-mock.GetUser(Arg.Is(99)).Returns(new User("Bob"));
+mock.GetUser(Is(42)).Returns(new User("Alice"));
+mock.GetUser(Is(99)).Returns(new User("Bob"));
 
 svc.GetUser(42);  // returns Alice
 svc.GetUser(99);  // returns Bob
@@ -54,9 +61,9 @@ svc.GetUser(1);   // no match — returns default
 ```
 
 :::tip Implicit Conversion
-Raw values are implicitly converted to `Arg.Is(value)`, so these are equivalent:
+Raw values are implicitly converted to exact matchers, so these are equivalent:
 ```csharp
-mock.GetUser(Arg.Is(42)).Returns(new User("Alice"));
+mock.GetUser(Is(42)).Returns(new User("Alice"));
 mock.GetUser(42).Returns(new User("Alice")); // same thing
 ```
 :::
@@ -66,15 +73,45 @@ mock.GetUser(42).Returns(new User("Alice")); // same thing
 Match values satisfying a condition:
 
 ```csharp
-mock.GetUser(Arg.Is<int>(id => id > 0)).Returns(new User("Valid"));
-mock.GetUser(Arg.Is<int>(id => id <= 0)).Throws<ArgumentException>();
+mock.GetUser(Is<int>(id => id > 0)).Returns(new User("Valid"));
+mock.GetUser(Is<int>(id => id <= 0)).Throws<ArgumentException>();
+```
+
+### Inline Lambda Predicates
+
+You can write lambda predicates directly in mock setup and verification calls — no `Is<T>()` wrapper needed:
+
+```csharp
+// Inline lambda — works for both value types and reference types
+mock.GetUser(id => id > 0).Returns(validUser);
+mock.Greet(name => name.StartsWith("A")).Returns("A-name");
+
+// Mix lambdas with Any() or raw values
+mock.Add(x => x > 5, Any()).Returns(100);
+mock.Search(name => name.Length > 3, 10).Returns(results);
+
+// Both parameters as lambdas
+mock.Add(x => x > 0, y => y % 2 == 0).Returns(42);
+```
+
+:::tip
+Inline lambdas are the recommended syntax. They work with all parameter types — value types (`int`, `bool`, etc.) and reference types (`string`, `object`, etc.) — thanks to source-generated `Func<T, bool>` overloads.
+:::
+
+You can also assign predicates to `Func<T?, bool>` variables for reuse:
+
+```csharp
+Func<string?, bool> isEmail = s => s != null && s.Contains("@");
+Func<string?, bool> isLong = s => s != null && s.Length > 10;
+
+mock.SendEmail(isEmail, "Welcome", isLong).Returns(true);
 ```
 
 ### Null and NotNull
 
 ```csharp
-mock.Process(Arg.IsNull<string>()).Returns("was null");
-mock.Process(Arg.IsNotNull<string>()).Returns("had value");
+mock.Process(IsNull<string>()).Returns("was null");
+mock.Process(IsNotNull<string>()).Returns("had value");
 ```
 
 ## String Matchers
@@ -83,7 +120,7 @@ mock.Process(Arg.IsNotNull<string>()).Returns("had value");
 
 ```csharp
 // Match strings against a regex pattern
-mock.Search(Arg.Matches(@"^user_\d+$")).Returns(new[] { "found" });
+mock.Search(Matches(@"^user_\d+$")).Returns(new[] { "found" });
 
 svc.Search("user_42");   // matches
 svc.Search("admin_1");   // no match
@@ -93,7 +130,7 @@ svc.Search("admin_1");   // no match
 
 ```csharp
 var pattern = new Regex(@"^user_\d+$", RegexOptions.Compiled);
-mock.Search(Arg.Matches(pattern)).Returns(new[] { "found" });
+mock.Search(Matches(pattern)).Returns(new[] { "found" });
 ```
 
 ## Collection Matchers
@@ -101,7 +138,7 @@ mock.Search(Arg.Matches(pattern)).Returns(new[] { "found" });
 ### Contains
 
 ```csharp
-mock.ProcessItems(Arg.Contains<List<int>, int>(42)).Returns(true);
+mock.ProcessItems(Contains<List<int>, int>(42)).Returns(true);
 
 svc.ProcessItems(new List<int> { 1, 42, 3 }); // matches — contains 42
 svc.ProcessItems(new List<int> { 1, 2, 3 });  // no match
@@ -110,7 +147,7 @@ svc.ProcessItems(new List<int> { 1, 2, 3 });  // no match
 ### HasCount
 
 ```csharp
-mock.ProcessItems(Arg.HasCount<List<int>>(3)).Returns(true);
+mock.ProcessItems(HasCount<List<int>>(3)).Returns(true);
 
 svc.ProcessItems(new List<int> { 1, 2, 3 }); // matches — count is 3
 svc.ProcessItems(new List<int> { 1, 2 });     // no match
@@ -119,7 +156,7 @@ svc.ProcessItems(new List<int> { 1, 2 });     // no match
 ### IsEmpty
 
 ```csharp
-mock.ProcessItems(Arg.IsEmpty<List<int>>()).Returns(false);
+mock.ProcessItems(IsEmpty<List<int>>()).Returns(false);
 
 svc.ProcessItems(new List<int>());          // matches
 svc.ProcessItems(new List<int> { 1 });      // no match
@@ -129,7 +166,7 @@ svc.ProcessItems(new List<int> { 1 });      // no match
 
 ```csharp
 mock.ProcessItems(
-    Arg.SequenceEquals<List<int>, int>(new[] { 1, 2, 3 })
+    SequenceEquals<List<int>, int>(new[] { 1, 2, 3 })
 ).Returns(true);
 
 svc.ProcessItems(new List<int> { 1, 2, 3 }); // matches
@@ -141,7 +178,7 @@ svc.ProcessItems(new List<int> { 3, 2, 1 }); // no match — wrong order
 ### IsInRange
 
 ```csharp
-mock.SetAge(Arg.IsInRange(0, 120)).Returns(true);
+mock.SetAge(IsInRange(0, 120)).Returns(true);
 
 svc.SetAge(25);   // matches
 svc.SetAge(-1);   // no match
@@ -151,8 +188,8 @@ svc.SetAge(200);  // no match
 ### IsIn / IsNotIn
 
 ```csharp
-mock.GetRole(Arg.IsIn("admin", "editor", "viewer")).Returns(true);
-mock.GetRole(Arg.IsNotIn("admin", "superadmin")).Returns(false);
+mock.GetRole(IsIn("admin", "editor", "viewer")).Returns(true);
+mock.GetRole(IsNotIn("admin", "superadmin")).Returns(false);
 ```
 
 ## Negation
@@ -160,7 +197,7 @@ mock.GetRole(Arg.IsNotIn("admin", "superadmin")).Returns(false);
 Wrap any matcher with `Not` to invert it:
 
 ```csharp
-mock.Process(Arg.Not(Arg.Is(0))).Returns("non-zero");
+mock.Process(Not(Is(0))).Returns("non-zero");
 // Matches any int except 0
 ```
 
@@ -169,7 +206,7 @@ mock.Process(Arg.Not(Arg.Is(0))).Returns("non-zero");
 Every `Arg<T>` matcher automatically captures the values it sees:
 
 ```csharp
-var nameArg = Arg.Any<string>();
+var nameArg = Any<string>();
 mock.Greet(nameArg).Returns("Hi");
 
 svc.Greet("Alice");
@@ -268,7 +305,7 @@ public class StringLengthMatcher : IArgumentMatcher<string>
 }
 
 // Usage
-mock.Greet(Arg.Matches(new StringLengthMatcher(3, 50)))
+mock.Greet(Matches(new StringLengthMatcher(3, 50)))
     .Returns("Valid name");
 ```
 
