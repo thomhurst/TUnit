@@ -1833,11 +1833,11 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
         {
             try
             {
-                // Get the type argument
-                var typeArg = originalGeneric.TypeArgumentList.Arguments.FirstOrDefault();
-                if (typeArg == null) continue;
+                // Get the type arguments
+                var typeArgs = originalGeneric.TypeArgumentList.Arguments;
+                if (typeArgs.Count == 0) continue;
 
-                var elementType = typeArg.ToString();
+                var elementTypes = typeArgs.Select(t => t.ToString()).ToList();
 
                 // Create annotations for both the type and the object creation
                 var typeAnnotation = new SyntaxAnnotation("TUnitMigration", Guid.NewGuid().ToString());
@@ -1845,7 +1845,7 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
 
                 var conversion = new TheoryDataConversion
                 {
-                    ElementType = elementType,
+                    ElementTypes = elementTypes,
                     TypeAnnotation = typeAnnotation,
                     CreationAnnotation = creationAnnotation,
                     OriginalText = originalGeneric.ToString()

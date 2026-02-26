@@ -22,7 +22,11 @@ public class GetPackageProjectsModule : Module<List<File>>
             Sourcy.DotNet.Projects.TUnit_Logging_Microsoft,
             Sourcy.DotNet.Projects.TUnit_AspNetCore,
             Sourcy.DotNet.Projects.TUnit_Aspire,
-            Sourcy.DotNet.Projects.TUnit_FsCheck
+            Sourcy.DotNet.Projects.TUnit_FsCheck,
+            Sourcy.DotNet.Projects.TUnit_Mocks,
+            Sourcy.DotNet.Projects.TUnit_Mocks_Assertions,
+            Sourcy.DotNet.Projects.TUnit_Mocks_Http,
+            Sourcy.DotNet.Projects.TUnit_Mocks_Logging
         ];
     }
 }

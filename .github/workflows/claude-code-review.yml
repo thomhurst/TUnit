@@ -47,10 +47,9 @@ jobs:
           plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
           plugins: 'code-review@claude-code-plugins'
           prompt: |
-            /code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number || inputs.pr_number }}
-
-            Additional instructions:
+            Instructions:
             - ALWAYS post a review comment, even if no issues are found. If the code is good, acknowledge it.
+            - Compare the current state of the PR against any previous PR comments to make sure they have been addressed.
             - You MUST post your review as a PR comment using `gh pr review` or `gh pr comment` before finishing. Do not just output the review - actually post it to the PR.
             - When you find issues, ALWAYS suggest better approaches or architectural improvements, not just minor optimizations.
             - Focus on:
@@ -60,6 +59,8 @@ jobs:
               * Better abstractions or simplifications
             - Skip minor style/formatting issues unless they impact readability significantly.
             - Always explain WHY the suggested approach is better, not just WHAT to change.
+
+            Use the code review skill to run this review: /code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number || inputs.pr_number }}
           claude_args: "--allowedTools Bash,Read,Glob,Grep,WebFetch,WebSearch"
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://code.claude.com/docs/en/cli-reference for available options

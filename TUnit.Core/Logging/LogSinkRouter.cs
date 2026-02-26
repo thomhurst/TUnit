@@ -5,6 +5,11 @@ namespace TUnit.Core.Logging;
 /// </summary>
 internal static class LogSinkRouter
 {
+    // Use a TextWriter that bypasses any console interceptor to avoid recursion.
+    // Console.OpenStandardError() returns the raw stderr stream, unaffected by Console.SetError().
+    private static readonly TextWriter SafeStdErr = TextWriter.Synchronized(
+        new StreamWriter(Console.OpenStandardError()) { AutoFlush = true });
+
     public static void RouteToSinks(LogLevel level, string message, Exception? exception, Context? context)
     {
         var sinks = TUnitLoggerFactory.GetSinks();
@@ -26,8 +31,8 @@ internal static class LogSinkRouter
             }
             catch (Exception ex)
             {
-                // Write to original console to avoid recursion
-                GlobalContext.Current.OriginalConsoleError.WriteLine(
+                // Write directly to raw stderr to avoid recursion through console interceptors
+                SafeStdErr.WriteLine(
                     $"[TUnit] Log sink {sink.GetType().Name} failed: {ex.Message}");
             }
         }
@@ -54,8 +59,8 @@ internal static class LogSinkRouter
             }
             catch (Exception ex)
             {
-                // Write to original console to avoid recursion
-                await GlobalContext.Current.OriginalConsoleError.WriteLineAsync(
+                // Write directly to raw stderr to avoid recursion through console interceptors
+                await SafeStdErr.WriteLineAsync(
                     $"[TUnit] Log sink {sink.GetType().Name} failed: {ex.Message}").ConfigureAwait(false);
             }
         }
