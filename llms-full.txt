@@ -8057,7 +8057,7 @@ public async Task Uninitialized_Field()
 [Test]
 public async Task Constructor_Injection()
 {
-    var logger = new Mock<ILogger>();
+    var logger = Mock.Of<ILogger>();
     var service = new UserService(logger.Object);
 
     // Verify dependency was injected
@@ -12017,7 +12017,7 @@ public async Task Type_Is_Serializable()
 [Test]
 public async Task Mock_Implements_Interface()
 {
-    var mock = new Mock<IUserRepository>();
+    var mock = Mock.Of<IUserRepository>();
     var instance = mock.Object;
 
     await Assert.That(instance).IsAssignableTo<IUserRepository>();
@@ -19203,10 +19203,10 @@ Don't mock everything. Use real implementations when they're fast and reliable:
 [Test]
 public async Task ProcessOrder()
 {
-    var mockLogger = new Mock<ILogger>();
-    var mockValidator = new Mock<IValidator>();
-    var mockCalculator = new Mock<IPriceCalculator>();
-    var mockRepository = new Mock<IOrderRepository>();
+    var mockLogger = Mock.Of<ILogger>();
+    var mockValidator = Mock.Of<IValidator>();
+    var mockCalculator = Mock.Of<IPriceCalculator>();
+    var mockRepository = Mock.Of<IOrderRepository>();
 
     // So much setup...
 }
@@ -19218,7 +19218,7 @@ public async Task ProcessOrder()
     var logger = new NullLogger();  // Real lightweight implementation
     var validator = new OrderValidator();  // Real validator is fast
     var calculator = new PriceCalculator();  // Simple calculations
-    var mockRepository = new Mock<IOrderRepository>();  // Mock database
+    var mockRepository = Mock.Of<IOrderRepository>();  // Mock database
 
     // Much simpler!
 }
@@ -19235,13 +19235,13 @@ Test behavior, not implementation. Your tests should verify what the code does, 
 [Test]
 public async Task ProcessOrder_CallsRepositorySaveMethod()
 {
-    var mockRepository = new Mock<IOrderRepository>();
+    var mockRepository = Mock.Of<IOrderRepository>();
     var service = new OrderService(mockRepository.Object);
 
     await service.ProcessOrder(order);
 
     // Verifying method calls instead of behavior
-    mockRepository.Verify(r => r.Save(It.IsAny<Order>()), Times.Once);
+    mockRepository.Save(Any()).WasCalled(Times.Once);
 }
 
 // ✅ Good: Testing actual behavior
@@ -19553,75 +19553,25 @@ public class AuthenticatedApiTests
 
 ## Mocking Patterns
 
-### Using Moq
+### Using TUnit.Mocks (Recommended)
+
+TUnit.Mocks is TUnit's first-party, source-generated mocking framework. It's **AOT-compatible**, requires no runtime proxy generation, and provides a concise API with no `Arg.` prefix needed:
 
 ```csharp
-using Moq;
-using TUnit.Core;
+using TUnit.Mocks;
 
-public class OrderServiceMoqTests
+public class OrderServiceTUnitMocksTests
 {
     [Test]
     public async Task ProcessOrder_CallsPaymentService()
     {
-        // Arrange
-        var mockPaymentService = new Mock<IPaymentService>();
+        // Arrange — create mock, configure with concise syntax
+        var mockPaymentService = Mock.Of<IPaymentService>();
         mockPaymentService
-            .Setup(p => p.ProcessPaymentAsync(It.IsAny<decimal>(), It.IsAny<string>()))
-            .ReturnsAsync(new PaymentResult { Success = true, TransactionId = "TX123" });
-
-        var orderService = new OrderService(mockPaymentService.Object);
-        var order = new Order { Total = 100.00m, PaymentMethod = "Credit Card" };
-
-        // Act
-        var result = await orderService.ProcessAsync(order);
-
-        // Assert
-        await Assert.That(result.IsSuccess).IsTrue();
-        mockPaymentService.Verify(
-            p => p.ProcessPaymentAsync(100.00m, "Credit Card"),
-            Times.Once);
-    }
-
-    [Test]
-    public async Task ProcessOrder_HandlesPaymentFailure()
-    {
-        // Arrange
-        var mockPaymentService = new Mock<IPaymentService>();
-        mockPaymentService
-            .Setup(p => p.ProcessPaymentAsync(It.IsAny<decimal>(), It.IsAny<string>()))
-            .ThrowsAsync(new PaymentException("Insufficient funds"));
-
-        var orderService = new OrderService(mockPaymentService.Object);
-        var order = new Order { Total = 1000.00m, PaymentMethod = "Credit Card" };
-
-        // Act & Assert
-        await Assert.That(async () => await orderService.ProcessAsync(order))
-            .ThrowsExactly<PaymentException>()
-            .WithMessage("Insufficient funds");
-    }
-}
-```
-
-### Using NSubstitute
-
-```csharp
-using NSubstitute;
-using NSubstitute.ExceptionExtensions;
-using TUnit.Core;
-
-public class OrderServiceNSubstituteTests
-{
-    [Test]
-    public async Task ProcessOrder_CallsPaymentService()
-    {
-        // Arrange
-        var paymentService = Substitute.For<IPaymentService>();
-        paymentService
-            .ProcessPaymentAsync(Arg.Any<decimal>(), Arg.Any<string>())
+            .ProcessPaymentAsync(Any(), Any())
             .Returns(new PaymentResult { Success = true, TransactionId = "TX123" });
 
-        var orderService = new OrderService(paymentService);
+        var orderService = new OrderService(mockPaymentService.Object);
         var order = new Order { Total = 100.00m, PaymentMethod = "Credit Card" };
 
         // Act
@@ -19629,58 +19579,101 @@ public class OrderServiceNSubstituteTests
 
         // Assert
         await Assert.That(result.IsSuccess).IsTrue();
-        await paymentService.Received(1).ProcessPaymentAsync(100.00m, "Credit Card");
+        mockPaymentService
+            .ProcessPaymentAsync(100.00m, "Credit Card")
+            .WasCalled(Times.Once);
     }
 
     [Test]
     public async Task ProcessOrder_HandlesPaymentFailure()
     {
         // Arrange
-        var paymentService = Substitute.For<IPaymentService>();
-        paymentService
-            .ProcessPaymentAsync(Arg.Any<decimal>(), Arg.Any<string>())
-            .Throws(new PaymentException("Insufficient funds"));
+        var mockPaymentService = Mock.Of<IPaymentService>();
+        mockPaymentService
+            .ProcessPaymentAsync(Any(), Any())
+            .Throws<PaymentException>();
 
-        var orderService = new OrderService(paymentService);
+        var orderService = new OrderService(mockPaymentService.Object);
         var order = new Order { Total = 1000.00m, PaymentMethod = "Credit Card" };
 
         // Act & Assert
         await Assert.That(async () => await orderService.ProcessAsync(order))
-            .ThrowsExactly<PaymentException>()
-            .WithMessage("Insufficient funds");
+            .ThrowsExactly<PaymentException>();
+    }
+
+    [Test]
+    public async Task ProcessOrder_UsesInlineLambdaPredicates()
+    {
+        // Arrange — inline lambdas work directly as argument matchers
+        var mockPaymentService = Mock.Of<IPaymentService>();
+        mockPaymentService
+            .ProcessPaymentAsync(amount => amount > 0, method => method.Contains("Card"))
+            .Returns(new PaymentResult { Success = true, TransactionId = "TX456" });
+
+        var orderService = new OrderService(mockPaymentService.Object);
+
+        // Act — "Credit Card" contains "Card", so it matches
+        var result = await orderService.ProcessAsync(
+            new Order { Total = 50.00m, PaymentMethod = "Credit Card" });
+
+        // Assert
+        await Assert.That(result.IsSuccess).IsTrue();
+    }
+
+    [Test]
+    public async Task ProcessOrder_CapturesArguments()
+    {
+        // Arrange — capture arguments for inspection
+        var amountArg = Any<decimal>();
+        var mockPaymentService = Mock.Of<IPaymentService>();
+        mockPaymentService
+            .ProcessPaymentAsync(amountArg, Any())
+            .Returns(new PaymentResult { Success = true, TransactionId = "TX789" });
+
+        var orderService = new OrderService(mockPaymentService.Object);
+        await orderService.ProcessAsync(new Order { Total = 100.00m, PaymentMethod = "Card" });
+        await orderService.ProcessAsync(new Order { Total = 200.00m, PaymentMethod = "Card" });
+
+        // Assert — inspect captured values
+        await Assert.That(amountArg.Values).HasCount().EqualTo(2);
+        await Assert.That(amountArg.Values[0]).IsEqualTo(100.00m);
+        await Assert.That(amountArg.Values[1]).IsEqualTo(200.00m);
     }
 }
 ```
+
+:::tip Why TUnit.Mocks?
+- **No `Arg.` prefix** — `Any()`, `Is<T>()`, and matchers work directly thanks to `global using static`
+- **Inline lambdas** — write predicates directly in the call: `mock.Add(x => x > 5, Any())` — works for all types
+- **Implicit values** — pass raw values (`42`, `"hello"`) directly as exact matchers
+- **AOT-compatible** — source-generated mocks work with Native AOT, trimming, and single-file publishing
+- **Built-in capture** — every `Arg<T>` automatically captures values for inspection via `.Values` and `.Latest`
+
+See the full [TUnit.Mocks documentation](../test-authoring/mocking) for setup, verification, argument matchers, and more.
+:::
 
 ### Partial Mocks and Spy Pattern
 
 ```csharp
-using Moq;
+using TUnit.Mocks;
 
 public class NotificationServiceTests
 {
     [Test]
     public async Task SendNotification_LogsAttempt()
     {
-        // Arrange - create a partial mock that calls real methods
-        var mockLogger = new Mock<ILogger>();
-        var notificationService = new Mock<NotificationService>(mockLogger.Object)
-        {
-            CallBase = true  // Call real implementation
-        };
+        // Arrange — partial mock calls base implementation for unconfigured methods
+        var mockLogger = Mock.Of<ILogger>();
+        var notificationService = Mock.OfPartial<NotificationService>(mockLogger.Object);
 
         // Override only the SendEmail method
-        notificationService
-            .Setup(n => n.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>()))
-            .ReturnsAsync(true);
+        notificationService.SendEmailAsync(Any(), Any()).Returns(true);
 
         // Act
         await notificationService.Object.NotifyUserAsync("user@example.com", "Hello");
 
-        // Assert - verify the real method called SendEmail
-        notificationService.Verify(
-            n => n.SendEmailAsync("user@example.com", It.IsAny<string>()),
-            Times.Once);
+        // Assert — verify the real method called SendEmail
+        notificationService.SendEmailAsync("user@example.com", Any()).WasCalled(Times.Once);
     }
 }
 ```
@@ -20116,7 +20109,7 @@ These cookbook recipes cover the most common testing scenarios. You can adapt th
 
 - **Dependency Injection**: Use service collections for realistic testing with dependencies
 - **API Testing**: Use `WebApplicationFactory` for end-to-end API tests
-- **Mocking**: Choose Moq or NSubstitute based on your preference
+- **Mocking**: Use TUnit.Mocks for AOT-compatible, source-generated mocking with a concise API
 - **Data-Driven Tests**: Use `MethodDataSource` or `DataSourceGenerator` for parameterized tests
 - **Exception Testing**: Use TUnit's fluent exception assertions
 - **Integration Tests**: Test with real databases, containers, or file systems
@@ -27444,7 +27437,7 @@ mock.RaiseOnMessage("Hello!");
 Trigger an event automatically when a method is called using the typed `.Raises{EventName}()` method on a setup chain:
 
 ```csharp
-mock.SendMessage(Arg.Any<string>())
+mock.SendMessage(Any<string>())
     .RaisesOnMessage("echo");
 
 mock.Object.SendMessage("test");
@@ -27559,8 +27552,8 @@ var serviceMock = repo.Of<IService>();
 var loggerMock = repo.Of<ILogger>();
 
 // Configure each mock individually
-serviceMock.GetData(Arg.Any<int>()).Returns("result");
-loggerMock.Log(Arg.Any<string>());
+serviceMock.GetData(Any<int>()).Returns("result");
+loggerMock.Log(Any<string>());
 
 // Exercise code
 serviceMock.Object.GetData(1);
@@ -27592,8 +27585,8 @@ repo.Reset();                // clear all mocks
 Get a diagnostic report of setup coverage and call matching:
 
 ```csharp
-mock.GetUser(Arg.Any<int>()).Returns(new User("Alice"));
-mock.Delete(Arg.Any<int>());
+mock.GetUser(Any<int>()).Returns(new User("Alice"));
+mock.Delete(Any<int>());
 
 svc.GetUser(1);
 // Delete was never called
@@ -27601,7 +27594,7 @@ svc.GetUser(1);
 var diag = Mock.GetDiagnostics(mock);
 diag.TotalSetups;       // 2
 diag.ExercisedSetups;   // 1
-diag.UnusedSetups;      // [Delete(Arg.Any<int>())]
+diag.UnusedSetups;      // [Delete(Any<int>())]
 diag.UnmatchedCalls;    // [] (all calls matched a setup)
 ```
 
@@ -27639,7 +27632,7 @@ The provider is consulted **before** auto-mocking and built-in smart defaults.
 Clear all setups, call history, state, and auto-tracked property values:
 
 ```csharp
-mock.GetUser(Arg.Any<int>()).Returns(new User("Alice"));
+mock.GetUser(Any<int>()).Returns(new User("Alice"));
 svc.GetUser(1);
 
 Mock.Reset(mock);
@@ -27657,25 +27650,32 @@ The `SetupAllProperties()` flag is preserved across resets.
 
 Argument matchers control which calls a setup or verification matches. The same matchers work in both contexts — the chain method determines whether it's a setup or verification.
 
+:::tip Static Import
+TUnit.Mocks automatically imports the `Arg` class via `global using static`, so you can call matcher methods directly — no `Arg.` prefix needed.
+:::
+
 ## Quick Reference
 
 | Matcher | Matches |
 |---|---|
-| `Arg.Any<T>()` | Any value of type T (including null) |
-| `Arg.Is<T>(value)` | Exact equality |
-| `Arg.Is<T>(predicate)` | Values satisfying a predicate |
-| `Arg.IsNull<T>()` | Null only |
-| `Arg.IsNotNull<T>()` | Any non-null value |
-| `Arg.Matches(pattern)` | String matching a regex pattern |
-| `Arg.Matches(regex)` | String matching a compiled `Regex` |
-| `Arg.Contains<TCol, TElem>(item)` | Collection containing an element |
-| `Arg.HasCount<T>(n)` | Collection with exactly n elements |
-| `Arg.IsEmpty<T>()` | Empty collection |
-| `Arg.SequenceEquals<TCol, TElem>(expected)` | Collection matching element-by-element |
-| `Arg.IsInRange<T>(min, max)` | Value within an inclusive range |
-| `Arg.IsIn<T>(values)` | Value in a set |
-| `Arg.IsNotIn<T>(values)` | Value not in a set |
-| `Arg.Not<T>(inner)` | Negation of another matcher |
+| `Any()` / `Any<T>()` | Any value of type T (including null) |
+| `Is<T>(value)` | Exact equality |
+| `Is<T>(predicate)` | Values satisfying a predicate |
+| Raw value (e.g. `42`, `"hello"`) | Exact equality (implicit conversion) |
+| Inline lambda (e.g. `x => x > 5`) | Predicate matching (all types) |
+| `Func<T?, bool>` variable | Predicate matching (implicit conversion) |
+| `IsNull<T>()` | Null only |
+| `IsNotNull<T>()` | Any non-null value |
+| `Matches(pattern)` | String matching a regex pattern |
+| `Matches(regex)` | String matching a compiled `Regex` |
+| `Contains<TCol, TElem>(item)` | Collection containing an element |
+| `HasCount<T>(n)` | Collection with exactly n elements |
+| `IsEmpty<T>()` | Empty collection |
+| `SequenceEquals<TCol, TElem>(expected)` | Collection matching element-by-element |
+| `IsInRange<T>(min, max)` | Value within an inclusive range |
+| `IsIn<T>(values)` | Value in a set |
+| `IsNotIn<T>(values)` | Value not in a set |
+| `Not<T>(inner)` | Negation of another matcher |
 | `RefStructArg<T>.Any` | Any value of a ref struct type (.NET 9+) |
 
 ## Basic Matchers
@@ -27685,7 +27685,7 @@ Argument matchers control which calls a setup or verification matches. The same 
 Matches any value, including null:
 
 ```csharp
-mock.GetUser(Arg.Any<int>()).Returns(new User("Default"));
+mock.GetUser(Any()).Returns(new User("Default"));
 
 svc.GetUser(1);    // matches
 svc.GetUser(999);  // matches
@@ -27696,8 +27696,8 @@ svc.GetUser(999);  // matches
 Match a specific value using equality:
 
 ```csharp
-mock.GetUser(Arg.Is(42)).Returns(new User("Alice"));
-mock.GetUser(Arg.Is(99)).Returns(new User("Bob"));
+mock.GetUser(Is(42)).Returns(new User("Alice"));
+mock.GetUser(Is(99)).Returns(new User("Bob"));
 
 svc.GetUser(42);  // returns Alice
 svc.GetUser(99);  // returns Bob
@@ -27705,9 +27705,9 @@ svc.GetUser(1);   // no match — returns default
 ```
 
 :::tip Implicit Conversion
-Raw values are implicitly converted to `Arg.Is(value)`, so these are equivalent:
+Raw values are implicitly converted to exact matchers, so these are equivalent:
 ```csharp
-mock.GetUser(Arg.Is(42)).Returns(new User("Alice"));
+mock.GetUser(Is(42)).Returns(new User("Alice"));
 mock.GetUser(42).Returns(new User("Alice")); // same thing
 ```
 :::
@@ -27717,15 +27717,45 @@ mock.GetUser(42).Returns(new User("Alice")); // same thing
 Match values satisfying a condition:
 
 ```csharp
-mock.GetUser(Arg.Is<int>(id => id > 0)).Returns(new User("Valid"));
-mock.GetUser(Arg.Is<int>(id => id <= 0)).Throws<ArgumentException>();
+mock.GetUser(Is<int>(id => id > 0)).Returns(new User("Valid"));
+mock.GetUser(Is<int>(id => id <= 0)).Throws<ArgumentException>();
+```
+
+### Inline Lambda Predicates
+
+You can write lambda predicates directly in mock setup and verification calls — no `Is<T>()` wrapper needed:
+
+```csharp
+// Inline lambda — works for both value types and reference types
+mock.GetUser(id => id > 0).Returns(validUser);
+mock.Greet(name => name.StartsWith("A")).Returns("A-name");
+
+// Mix lambdas with Any() or raw values
+mock.Add(x => x > 5, Any()).Returns(100);
+mock.Search(name => name.Length > 3, 10).Returns(results);
+
+// Both parameters as lambdas
+mock.Add(x => x > 0, y => y % 2 == 0).Returns(42);
+```
+
+:::tip
+Inline lambdas are the recommended syntax. They work with all parameter types — value types (`int`, `bool`, etc.) and reference types (`string`, `object`, etc.) — thanks to source-generated `Func<T, bool>` overloads.
+:::
+
+You can also assign predicates to `Func<T?, bool>` variables for reuse:
+
+```csharp
+Func<string?, bool> isEmail = s => s != null && s.Contains("@");
+Func<string?, bool> isLong = s => s != null && s.Length > 10;
+
+mock.SendEmail(isEmail, "Welcome", isLong).Returns(true);
 ```
 
 ### Null and NotNull
 
 ```csharp
-mock.Process(Arg.IsNull<string>()).Returns("was null");
-mock.Process(Arg.IsNotNull<string>()).Returns("had value");
+mock.Process(IsNull<string>()).Returns("was null");
+mock.Process(IsNotNull<string>()).Returns("had value");
 ```
 
 ## String Matchers
@@ -27734,7 +27764,7 @@ mock.Process(Arg.IsNotNull<string>()).Returns("had value");
 
 ```csharp
 // Match strings against a regex pattern
-mock.Search(Arg.Matches(@"^user_\d+$")).Returns(new[] { "found" });
+mock.Search(Matches(@"^user_\d+$")).Returns(new[] { "found" });
 
 svc.Search("user_42");   // matches
 svc.Search("admin_1");   // no match
@@ -27744,7 +27774,7 @@ svc.Search("admin_1");   // no match
 
 ```csharp
 var pattern = new Regex(@"^user_\d+$", RegexOptions.Compiled);
-mock.Search(Arg.Matches(pattern)).Returns(new[] { "found" });
+mock.Search(Matches(pattern)).Returns(new[] { "found" });
 ```
 
 ## Collection Matchers
@@ -27752,7 +27782,7 @@ mock.Search(Arg.Matches(pattern)).Returns(new[] { "found" });
 ### Contains
 
 ```csharp
-mock.ProcessItems(Arg.Contains<List<int>, int>(42)).Returns(true);
+mock.ProcessItems(Contains<List<int>, int>(42)).Returns(true);
 
 svc.ProcessItems(new List<int> { 1, 42, 3 }); // matches — contains 42
 svc.ProcessItems(new List<int> { 1, 2, 3 });  // no match
@@ -27761,7 +27791,7 @@ svc.ProcessItems(new List<int> { 1, 2, 3 });  // no match
 ### HasCount
 
 ```csharp
-mock.ProcessItems(Arg.HasCount<List<int>>(3)).Returns(true);
+mock.ProcessItems(HasCount<List<int>>(3)).Returns(true);
 
 svc.ProcessItems(new List<int> { 1, 2, 3 }); // matches — count is 3
 svc.ProcessItems(new List<int> { 1, 2 });     // no match
@@ -27770,7 +27800,7 @@ svc.ProcessItems(new List<int> { 1, 2 });     // no match
 ### IsEmpty
 
 ```csharp
-mock.ProcessItems(Arg.IsEmpty<List<int>>()).Returns(false);
+mock.ProcessItems(IsEmpty<List<int>>()).Returns(false);
 
 svc.ProcessItems(new List<int>());          // matches
 svc.ProcessItems(new List<int> { 1 });      // no match
@@ -27780,7 +27810,7 @@ svc.ProcessItems(new List<int> { 1 });      // no match
 
 ```csharp
 mock.ProcessItems(
-    Arg.SequenceEquals<List<int>, int>(new[] { 1, 2, 3 })
+    SequenceEquals<List<int>, int>(new[] { 1, 2, 3 })
 ).Returns(true);
 
 svc.ProcessItems(new List<int> { 1, 2, 3 }); // matches
@@ -27792,7 +27822,7 @@ svc.ProcessItems(new List<int> { 3, 2, 1 }); // no match — wrong order
 ### IsInRange
 
 ```csharp
-mock.SetAge(Arg.IsInRange(0, 120)).Returns(true);
+mock.SetAge(IsInRange(0, 120)).Returns(true);
 
 svc.SetAge(25);   // matches
 svc.SetAge(-1);   // no match
@@ -27802,8 +27832,8 @@ svc.SetAge(200);  // no match
 ### IsIn / IsNotIn
 
 ```csharp
-mock.GetRole(Arg.IsIn("admin", "editor", "viewer")).Returns(true);
-mock.GetRole(Arg.IsNotIn("admin", "superadmin")).Returns(false);
+mock.GetRole(IsIn("admin", "editor", "viewer")).Returns(true);
+mock.GetRole(IsNotIn("admin", "superadmin")).Returns(false);
 ```
 
 ## Negation
@@ -27811,7 +27841,7 @@ mock.GetRole(Arg.IsNotIn("admin", "superadmin")).Returns(false);
 Wrap any matcher with `Not` to invert it:
 
 ```csharp
-mock.Process(Arg.Not(Arg.Is(0))).Returns("non-zero");
+mock.Process(Not(Is(0))).Returns("non-zero");
 // Matches any int except 0
 ```
 
@@ -27820,7 +27850,7 @@ mock.Process(Arg.Not(Arg.Is(0))).Returns("non-zero");
 Every `Arg<T>` matcher automatically captures the values it sees:
 
 ```csharp
-var nameArg = Arg.Any<string>();
+var nameArg = Any<string>();
 mock.Greet(nameArg).Returns("Hi");
 
 svc.Greet("Alice");
@@ -27919,7 +27949,7 @@ public class StringLengthMatcher : IArgumentMatcher<string>
 }
 
 // Usage
-mock.Greet(Arg.Matches(new StringLengthMatcher(3, 50)))
+mock.Greet(Matches(new StringLengthMatcher(3, 50)))
     .Returns("Valid name");
 ```
 
@@ -28218,7 +28248,7 @@ public class GreeterTests
         var mock = Mock.Of<IGreeter>();
 
         // Configure — set up a return value
-        mock.Greet(Arg.Any<string>()).Returns("Hello!");
+        mock.Greet(Any()).Returns("Hello!");
 
         // Act — use the mock object
         IGreeter greeter = mock.Object;
@@ -28261,7 +28291,7 @@ var strict = Mock.Of<IService>(MockBehavior.Strict);   // throws on unconfigured
 ```csharp
 var mock = Mock.Of<IService>();
 
-mock.GetUser(Arg.Any<int>()).Returns(user);  // setup — .Returns() makes it a stub
+mock.GetUser(Any()).Returns(user);       // setup — .Returns() makes it a stub
 mock.GetUser(42).WasCalled(Times.Once);      // verify — .WasCalled() makes it a check
 mock.RaiseOnMessage("hi");                   // raise events — Raise{EventName}()
 mock.Object                                  // the T instance to pass to your code under test
@@ -28282,6 +28312,32 @@ IGreeter greeter = mock; // implicit conversion
 |---|---|---|
 | `MockBehavior.Loose` | Return smart defaults (`0`, `""`, `false`, `null`, auto-mocked interfaces) | Yes |
 | `MockBehavior.Strict` | Throw `MockStrictBehaviorException` | No |
+
+### Concise Argument Matching
+
+TUnit.Mocks imports matchers globally — no `Arg.` prefix needed. Raw values, inline lambdas, and `Any()` work directly as arguments:
+
+```csharp
+var mock = Mock.Of<IUserService>();
+
+// Any() — matches everything
+mock.GetUser(Any()).Returns(user);
+
+// Raw values — implicit exact matching
+mock.GetUser(42).Returns(alice);
+
+// Inline lambdas — predicate matching directly in the call
+mock.GetUser(id => id > 0).Returns(validUser);
+mock.GetByRole(role => role == "admin").Returns(admins);
+
+// Mix lambdas with Any() or raw values
+mock.Search(name => name.StartsWith("A"), Any()).Returns(results);
+
+// Is<T>() — explicit predicate matching (also works)
+mock.GetUser(Is<int>(id => id > 0)).Returns(validUser);
+```
+
+See [Argument Matchers](argument-matchers) for the full API.
 
 ## What's Next
 
@@ -28476,13 +28532,13 @@ Methods are called directly on `Mock<T>` — the chain method (`.Returns()`, `.T
 
 ```csharp
 // Fixed return value
-mock.GetUser(Arg.Any<int>()).Returns(new User("Alice"));
+mock.GetUser(Any<int>()).Returns(new User("Alice"));
 
 // Computed return value
-mock.GetUser(Arg.Any<int>()).Returns(() => new User(DateTime.Now.ToString()));
+mock.GetUser(Any<int>()).Returns(() => new User(DateTime.Now.ToString()));
 
 // Async methods — no special API needed
-mock.GetUserAsync(Arg.Any<int>()).Returns(new User("Alice"));
+mock.GetUserAsync(Any<int>()).Returns(new User("Alice"));
 // TUnit.Mocks auto-wraps the value in Task<T> or ValueTask<T>
 ```
 
@@ -28490,10 +28546,10 @@ mock.GetUserAsync(Arg.Any<int>()).Returns(new User("Alice"));
 
 ```csharp
 // Throw a specific exception type
-mock.Delete(Arg.Any<int>()).Throws<InvalidOperationException>();
+mock.Delete(Any<int>()).Throws<InvalidOperationException>();
 
 // Throw a specific instance
-mock.Delete(Arg.Any<int>()).Throws(new ArgumentException("bad id"));
+mock.Delete(Any<int>()).Throws(new ArgumentException("bad id"));
 ```
 
 ### Callbacks
@@ -28501,11 +28557,11 @@ mock.Delete(Arg.Any<int>()).Throws(new ArgumentException("bad id"));
 ```csharp
 // Simple callback
 var callCount = 0;
-mock.Process(Arg.Any<string>())
+mock.Process(Any<string>())
     .Callback(() => callCount++);
 
 // Callback with access to arguments
-mock.Process(Arg.Any<string>())
+mock.Process(Any<string>())
     .Callback((object?[] args) => Console.WriteLine($"Called with: {args[0]}"));
 ```
 
@@ -28514,7 +28570,7 @@ mock.Process(Arg.Any<string>())
 Use `.Then()` to define different behaviors for successive calls:
 
 ```csharp
-mock.GetValue(Arg.Any<string>())
+mock.GetValue(Any<string>())
     .Throws<InvalidOperationException>()   // 1st call: throws
     .Then()
     .Returns("retry-succeeded")             // 2nd call: returns value
@@ -28522,7 +28578,7 @@ mock.GetValue(Arg.Any<string>())
     .Returns("cached");                     // 3rd+ calls: returns this value
 
 // Shorthand for sequential return values
-mock.GetValue(Arg.Any<string>())
+mock.GetValue(Any<string>())
     .ReturnsSequentially("first", "second", "third");
 // 1st: "first", 2nd: "second", 3rd+: "third" (last value repeats)
 ```
@@ -28532,14 +28588,14 @@ mock.GetValue(Arg.Any<string>())
 Void methods support `Callback` and `Throws` (but not `Returns`):
 
 ```csharp
-mock.Log(Arg.Any<string>())
+mock.Log(Any<string>())
     .Callback(() => { /* side effect */ });
 
-mock.Log(Arg.Any<string>())
+mock.Log(Any<string>())
     .Throws<NotSupportedException>();
 ```
 
-Void methods are also eagerly registered — calling `mock.Log(Arg.Any<string>())` without chaining is sufficient to "allow" the call in strict mode.
+Void methods are also eagerly registered — calling `mock.Log(Any<string>())` without chaining is sufficient to "allow" the call in strict mode.
 
 ## Property Setup
 
@@ -28568,7 +28624,7 @@ mock.Name.ReturnsSequentially("first", "second");
 mock.Count.Setter.Callback(() => Console.WriteLine("Count was set"));
 
 // React to a specific value being set
-mock.Count.Set(Arg.Is(42)).Callback(() => Console.WriteLine("Count set to 42"));
+mock.Count.Set(Is(42)).Callback(() => Console.WriteLine("Count set to 42"));
 
 // Throw on setter
 mock.Name.Setter.Throws<NotSupportedException>();
@@ -28608,7 +28664,7 @@ bool found = svc.TryGet("key", out var value);
 **Ref parameters** are included in setup signatures and participate in argument matching. Use `.SetsRef{Name}()` to assign output values:
 
 ```csharp
-mock.Swap(Arg.Any<int>())
+mock.Swap(Any<int>())
     .SetsRefValue(99);
 
 int val = 42;
@@ -28632,7 +28688,7 @@ public abstract class Calculator
 }
 
 var mock = Mock.OfPartial<Calculator>();
-mock.Multiply(Arg.Any<int>(), Arg.Any<int>()).Returns(99);
+mock.Multiply(Any<int>(), Any<int>()).Returns(99);
 
 mock.Object.Add(2, 3);      // 5 (base implementation)
 mock.Object.Multiply(2, 3); // 99 (mocked)
@@ -28650,7 +28706,7 @@ Mock any delegate type:
 
 ```csharp
 var mock = Mock.OfDelegate<Func<string, int>>();
-mock.Invoke(Arg.Any<string>()).Returns(42);
+mock.Invoke(Any<string>()).Returns(42);
 
 Func<string, int> func = mock;
 var result = func("hello"); // 42
@@ -28680,7 +28736,7 @@ Create a single mock that implements multiple interfaces:
 ```csharp
 var mock = Mock.Of<ILogger, IDisposable>();
 
-mock.Log(Arg.Any<string>()); // ILogger method
+mock.Log(Any<string>()); // ILogger method
 mock.Object.Log("test");
 
 ((IDisposable)mock.Object).Dispose(); // IDisposable method
@@ -28693,7 +28749,7 @@ Supports up to 4 interfaces: `Mock.Of<T1, T2, T3, T4>()`.
 Setup methods return chain objects that support additional behaviors:
 
 ```csharp
-mock.Process(Arg.Any<int>())
+mock.Process(Any<int>())
     .Returns(true)
     .RaisesProcessCompleted(EventArgs.Empty)   // strongly-typed auto-raise event
     .TransitionsTo("processed");               // state machine transition
@@ -28720,7 +28776,7 @@ mock.GetUser(42).WasCalled();
 mock.GetUser(42).WasCalled(Times.Once);
 
 // Verify never called
-mock.Delete(Arg.Any<int>()).WasNeverCalled();
+mock.Delete(Any<int>()).WasNeverCalled();
 ```
 
 ### Times
@@ -28739,7 +28795,7 @@ mock.Delete(Arg.Any<int>()).WasNeverCalled();
 
 ```csharp
 mock.GetUser(42).WasCalled(Times.Once, "GetUser should be called once during initialization");
-mock.Delete(Arg.Any<int>()).WasNeverCalled("Delete should not be called in read-only mode");
+mock.Delete(Any<int>()).WasNeverCalled("Delete should not be called in read-only mode");
 ```
 
 ## Property Verification
@@ -28758,7 +28814,7 @@ mock.Count.Setter.WasNeverCalled();
 
 // Setter verification — specific value
 mock.Count.Set(42).WasCalled(Times.Once);
-mock.Count.Set(Arg.Is<int>(v => v > 0)).WasCalled(Times.AtLeast(1));
+mock.Count.Set(Is<int>(v => v > 0)).WasCalled(Times.AtLeast(1));
 ```
 
 ## Argument Matching in Verification
@@ -28770,10 +28826,10 @@ Verification uses the same `Arg<T>` matchers as setup:
 mock.GetUser(42).WasCalled(Times.Once);
 
 // Any value
-mock.GetUser(Arg.Any<int>()).WasCalled(Times.Exactly(3));
+mock.GetUser(Any<int>()).WasCalled(Times.Exactly(3));
 
 // Predicate
-mock.GetUser(Arg.Is<int>(id => id > 0)).WasCalled(Times.AtLeast(1));
+mock.GetUser(Is<int>(id => id > 0)).WasCalled(Times.AtLeast(1));
 ```
 
 See [Argument Matchers](argument-matchers) for the full list of matchers.
@@ -28786,7 +28842,7 @@ Verify calls occurred in a specific order **across one or more mocks**:
 Mock.VerifyInOrder(() =>
 {
     mockLogger.Log("Starting").WasCalled();
-    mockRepo.SaveAsync(Arg.Any<int>()).WasCalled();
+    mockRepo.SaveAsync(Any<int>()).WasCalled();
     mockLogger.Log("Done").WasCalled();
 });
 ```
@@ -28802,8 +28858,8 @@ If calls occurred out of order, `VerifyInOrder` throws with a message showing th
 Verify that **every setup** was invoked at least once:
 
 ```csharp
-mock.GetUser(Arg.Any<int>()).Returns(new User("Alice"));
-mock.Delete(Arg.Any<int>());
+mock.GetUser(Any<int>()).Returns(new User("Alice"));
+mock.Delete(Any<int>());
 
 svc.GetUser(1);
 svc.Delete(2);
@@ -28837,7 +28893,7 @@ Use TUnit's `Assert.That` pipeline for assertion-style verification with better 
 using TUnit.Mocks.Assertions;
 
 await Assert.That(mock.GetUser(42)).WasCalled(Times.Once);
-await Assert.That(mock.Delete(Arg.Any<int>())).WasNeverCalled();
+await Assert.That(mock.Delete(Any<int>())).WasNeverCalled();
 
 // Property verification through assertions
 await Assert.That(mock.Name).WasCalled(Times.Once);
@@ -32882,7 +32938,7 @@ public class SharedDatabaseTests
 
 ### Mocking HTTP Calls and External APIs
 
-**Strategy 1: Using Moq with HttpClient**
+**Strategy 1: Using TUnit.Mocks.Http**
 
 ```csharp
 public class WeatherServiceTests
@@ -32890,21 +32946,12 @@ public class WeatherServiceTests
     [Test]
     public async Task GetWeather_ReturnsTemperature()
     {
-        // Arrange
-        var mockHandler = new Mock<HttpMessageHandler>();
-        mockHandler.Protected()
-            .Setup<Task<HttpResponseMessage>>(
-                "SendAsync",
-                ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(new HttpResponseMessage
-            {
-                StatusCode = HttpStatusCode.OK,
-                Content = new StringContent("{\"temperature\": 22.5}")
-            });
+        // Arrange — MockHttpClient is a real HttpClient with mock setup
+        using var client = Mock.HttpClient("https://api.weather.com");
+        client.Handler.OnGet("/weather/London")
+            .RespondWithJson("""{"temperature": 22.5}""");
 
-        var httpClient = new HttpClient(mockHandler.Object);
-        var service = new WeatherService(httpClient);
+        var service = new WeatherService(client);
 
         // Act
         var weather = await service.GetWeatherAsync("London");
@@ -33802,8 +33849,8 @@ public async Task IsBusinessHours()
 [Test]
 public async Task IsBusinessHours()
 {
-    var mockTime = new Mock<ITimeProvider>();
-    mockTime.Setup(t => t.Now).Returns(new DateTime(2024, 1, 15, 10, 0, 0)); // Monday 10 AM
+    var mockTime = Mock.Of<ITimeProvider>();
+    mockTime.Now.Returns(new DateTime(2024, 1, 15, 10, 0, 0)); // Monday 10 AM
 
     var service = new BusinessHoursService(mockTime.Object);
     var result = service.IsBusinessHours();
@@ -33831,18 +33878,11 @@ public async Task FetchUserData()
 [Test]
 public async Task FetchUserData()
 {
-    var mockHandler = new Mock<HttpMessageHandler>();
-    mockHandler.Protected()
-        .Setup<Task<HttpResponseMessage>>("SendAsync",
-            ItExpr.IsAny<HttpRequestMessage>(),
-            ItExpr.IsAny<CancellationToken>())
-        .ReturnsAsync(new HttpResponseMessage
-        {
-            Content = new StringContent("{\"username\": \"alice\"}")
-        });
+    using var client = Mock.HttpClient("https://api.example.com");
+    client.Handler.OnGet("/users/1")
+        .RespondWithJson("""{"username": "alice"}""");
 
-    var client = new HttpClient(mockHandler.Object);
-    var response = await client.GetStringAsync("https://api.example.com/users/1");
+    var response = await client.GetStringAsync("/users/1");
 
     await Assert.That(response).Contains("username"); // Always passes
 }
