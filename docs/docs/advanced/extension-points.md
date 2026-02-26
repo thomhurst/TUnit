@@ -75,6 +75,25 @@ public async Task MyTest()
 }
 ```
 
+### STA Thread Example
+
+A common use case for `ITestExecutor` is running tests on an STA thread (required by some COM / UI components on Windows):
+
+```csharp
+[Test]
+[TestExecutor<STAThreadExecutor>]
+public async Task With_STA()
+{
+    await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEqualTo(ApartmentState.STA);
+}
+
+[Test]
+public async Task Without_STA()
+{
+    await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEqualTo(ApartmentState.MTA);
+}
+```
+
 ## IHookExecutor
 
 The `IHookExecutor` interface allows you to customize how setup and cleanup hooks are executed. This is useful for:

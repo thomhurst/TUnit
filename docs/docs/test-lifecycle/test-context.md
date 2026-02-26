@@ -80,6 +80,31 @@ These are useful for any test that needs unique resource names — database tabl
 If you're using `TUnit.AspNetCore`, the `WebApplicationTest` base class provides the same helpers as `protected` methods (`GetIsolatedName`, `GetIsolatedPrefix`). Both share the same underlying counter, so IDs are unique across all test types.
 :::
 
+## Custom Properties
+
+Custom properties can be added to a test using the `[Property]` attribute. Properties are key-value pairs of strings that serve multiple purposes:
+
+- **Test filtering**: Filter tests at the command line with `dotnet run --treenode-filter /*/*/*/*[PropertyName=PropertyValue]`
+- **Runtime logic**: Access properties in setup/cleanup hooks via `TestContext` to conditionally execute logic
+- **Inheritance**: Apply `[Property]` on a base class and all sub-class tests inherit it
+
+```csharp
+public class MyTestClass
+{
+    [Test]
+    [Property("Category", "Integration")]
+    public async Task MyTest(CancellationToken cancellationToken)
+    {
+        // Access the property at runtime
+        var properties = TestContext.Current!.Metadata.TestDetails.CustomProperties;
+        if (properties.ContainsKey("Category"))
+        {
+            // Conditional logic based on property
+        }
+    }
+}
+```
+
 ## Dependency Injection
 
 **Note**: `TestContext` does NOT provide direct access to dependency injection services. The internal service provider in `TestContext` is exclusively for TUnit framework services and is not meant for user-provided dependencies.

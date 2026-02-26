@@ -1,4 +1,33 @@
-# Depends On
+# Test Ordering & Dependencies
+
+## Ordering with [Order]
+
+:::warning
+
+It is recommended to use `[DependsOn]` instead of `[Order]` as it provides more flexibility and does not sacrifice parallelisation.
+
+:::
+
+By default, TUnit tests run in parallel, so ordering has no effect unless parallelism is disabled. To order tests that share a `[NotInParallel]` constraint, set the `Order` property. Tests execute from smallest to largest order value.
+
+```csharp
+public class MyTestClass
+{
+    [Test]
+    [NotInParallel(Order = 1)]
+    public async Task Step1_CreateRecord()
+    {
+    }
+
+    [Test]
+    [NotInParallel(Order = 2)]
+    public async Task Step2_VerifyRecord()
+    {
+    }
+}
+```
+
+## Dependencies with [DependsOn]
 
 :::warning Test Isolation Best Practice
 **Important**: Tests should ideally be self-contained, isolated, and side-effect free. This ensures they are:

@@ -434,10 +434,3 @@ public async Task Database_Pagination(
 - [ClassDataSource Documentation](class-data-source.md)
 - [Arguments Attribute Documentation](arguments.md)
 
-## Version History
-
-- **v1.0.0** - Initial release
-  - Parameter-level data source support
-  - Cartesian product generation
-  - Support for all `IDataSourceAttribute` implementations
-  - Full AOT compatibility
