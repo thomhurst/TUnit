@@ -57,3 +57,21 @@ public class DataDrivenTests
         yield return (0, 0, 0);
     }
 }
+
+// Arguments can also be applied at the class level to parameterize the constructor
+[Arguments(10)]
+[Arguments(100)]
+public class ClassLevelArgumentTests(int divisor)
+{
+    [Test]
+    [Arguments(100)]
+    [Arguments(50)]
+    public async Task Divide_WithClassAndMethodArguments(int dividend)
+    {
+        var calculator = new Calculator();
+
+        var result = calculator.Divide(dividend, divisor);
+
+        await Assert.That(result).IsGreaterThan(0);
+    }
+}

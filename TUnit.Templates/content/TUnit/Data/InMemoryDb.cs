@@ -4,7 +4,7 @@ namespace TestProject;
 
 public class InMemoryDb : IAsyncInitializer, IAsyncDisposable
 {
-    private Dictionary<string, string> _store = new();
+    private Dictionary<string, string> _store = null!;
 
     public Task InitializeAsync()
     {

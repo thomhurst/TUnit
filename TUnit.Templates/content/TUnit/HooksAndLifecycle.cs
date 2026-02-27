@@ -20,17 +20,4 @@ public class GlobalHooks
         return Task.CompletedTask;
     }
 
-    [After(Class)]
-    public static Task AfterClass(ClassHookContext context)
-    {
-        // Runs after each test class
-        return Task.CompletedTask;
-    }
-
-    [After(Test)]
-    public Task AfterTest(TestContext context)
-    {
-        // Runs after each individual test
-        return Task.CompletedTask;
-    }
 }
