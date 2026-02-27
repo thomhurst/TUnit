@@ -48,7 +48,7 @@ public class MyTests
 }
 ```
 
-**Fix:** Use `static` fields if you genuinely need shared state, but prefer making tests independent or using `[ClassDataSource<>]` instead.
+**Fix:** Use `private static int _value;` if you genuinely need shared state, but prefer making tests independent or using `[ClassDataSource<>]` instead.
 
 ## See Also
 

@@ -10,7 +10,7 @@ TUnit offers several ways to provide data to your tests. Use this guide to pick 
 | Data from a method | `[MethodDataSource]` | [Method Data Sources](method-data-source.md) |
 | Shared object with lifecycle | `[ClassDataSource<T>]` | [Class Data Source](class-data-source.md) |
 | Reusable data rows | `[TestDataRow<T>]` | [Test Data Row](test-data-row.md) |
-| All parameter combinations | `[Matrix]` | [Matrix Tests](matrix-tests.md) |
+| All parameter combinations | `[MatrixDataSource]` | [Matrix Tests](matrix-tests.md) |
 | Multiple sources on one method | Combined attributes | [Combined Data Sources](combined-data-source.md) |
 | Hierarchical injection | Nested properties | [Nested Data Sources](nested-data-sources.md) |
 | Custom generic attributes | `[GenericArguments<T>]` | [Generic Attributes](generic-attributes.md) |
@@ -61,7 +61,7 @@ public class MyTests(DatabaseFixture db)
 
 ```csharp
 [Test]
-[Matrix]
+[MatrixDataSource]
 public async Task Multiply(
     [Matrix(2, 3)] int a,
     [Matrix(4, 5)] int b)
@@ -76,5 +76,5 @@ public async Task Multiply(
 - **`[Arguments]`** is the simplest — use it when values are known at compile time.
 - **`[MethodDataSource]`** is best for computed or complex data.
 - **`[ClassDataSource<T>]`** manages object lifecycles (initialization, disposal, sharing across tests).
-- **`[Matrix]`** generates the Cartesian product of all parameter values.
+- **`[MatrixDataSource]`** generates the Cartesian product of all `[Matrix]` parameter values.
 - Attributes can be combined on a single method — see [Combined Data Sources](combined-data-source.md).
