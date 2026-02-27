@@ -150,6 +150,125 @@ public class TypeAssertionAmbiguityTests
         }).Throws<TUnit.Assertions.Exceptions.AssertionException>();
     }
 
+    // ============ IsAssignableFrom TESTS ============
+
+    [Test]
+    public async Task IsAssignableFrom_DerivedToBase_Passes()
+    {
+        IElement element = new Element();
+        await Assert.That(element).IsAssignableFrom<Element>();
+    }
+
+    [Test]
+    public async Task IsAssignableFrom_ExactType_Passes()
+    {
+        Element element = new Element();
+        await Assert.That(element).IsAssignableFrom<Element>();
+    }
+
+    [Test]
+    public async Task IsAssignableFrom_BaseAcceptsDerived_Passes()
+    {
+        Element element = new Element();
+        await Assert.That(element).IsAssignableFrom<DerivedElement>();
+    }
+
+    [Test]
+    public async Task IsAssignableFrom_InterfaceAcceptsDerived_Passes()
+    {
+        IElement element = new Element();
+        await Assert.That(element).IsAssignableFrom<DerivedElement>();
+    }
+
+    [Test]
+    public async Task IsAssignableFrom_Fails_WhenNotAssignable()
+    {
+        await Assert.That(async () =>
+        {
+            DerivedElement derived = new DerivedElement();
+            await Assert.That(derived).IsAssignableFrom<string>();
+        }).Throws<TUnit.Assertions.Exceptions.AssertionException>();
+    }
+
+    [Test]
+    public async Task IsAssignableFrom_ObjectVariable_Passes()
+    {
+        object obj = new Element();
+        await Assert.That(obj).IsAssignableFrom<DerivedElement>();
+    }
+
+    // ============ IsNotAssignableFrom TESTS ============
+
+    [Test]
+    public async Task IsNotAssignableFrom_UnrelatedTypes_Passes()
+    {
+        DerivedElement derived = new DerivedElement();
+        await Assert.That(derived).IsNotAssignableFrom<string>();
+    }
+
+    [Test]
+    public async Task IsNotAssignableFrom_DerivedFromBase_Passes()
+    {
+        DerivedElement derived = new DerivedElement();
+        await Assert.That(derived).IsNotAssignableFrom<Element>();
+    }
+
+    [Test]
+    public async Task IsNotAssignableFrom_Fails_WhenAssignable()
+    {
+        await Assert.That(async () =>
+        {
+            Element element = new Element();
+            await Assert.That(element).IsNotAssignableFrom<DerivedElement>();
+        }).Throws<TUnit.Assertions.Exceptions.AssertionException>();
+    }
+
+    // ============ IsAssignableFrom CHAINING TESTS ============
+
+    [Test]
+    public async Task IsAssignableFrom_Chained_NoAmbiguity()
+    {
+        IElement element = new Element();
+        await Assert.That(element)
+            .IsNotNull()
+            .And
+            .IsAssignableFrom<Element>()
+            .And
+            .IsAssignableFrom<DerivedElement>();
+    }
+
+    [Test]
+    public async Task IsNotAssignableFrom_Chained_NoAmbiguity()
+    {
+        DerivedElement derived = new DerivedElement();
+        await Assert.That(derived)
+            .IsNotNull()
+            .And
+            .IsNotAssignableFrom<string>()
+            .And
+            .IsNotAssignableFrom<Element>();
+    }
+
+    // ============ IsAssignableFrom IN MEMBER LAMBDA TESTS ============
+
+    [Test]
+    public async Task IsAssignableFrom_InMemberLambda_NoAmbiguity()
+    {
+        var container = new Container { ElementProperty = new Element() };
+
+        await Assert.That(container)
+            .Member(c => c.ElementProperty, assert => assert.IsAssignableFrom<Element>());
+    }
+
+    [Test]
+    public async Task IsNotAssignableFrom_InMemberLambda_NoAmbiguity()
+    {
+        var container = new Container { ElementProperty = new Element() };
+
+        await Assert.That(container)
+            .Member(c => c.ElementProperty, assert => assert.IsNotAssignableFrom<string>());
+    }
+
     // ============ ISSUE #3737 REGRESSION TESTS ============
 
     [Test]
@@ -318,6 +437,27 @@ public class TypeAssertionAmbiguityTests
             .IsAssignableTo<IElement>()
             .And
             .IsNotAssignableTo<DerivedElement>();
+    }
+
+    [Test]
+    public async Task AllSixMethods_InSingleChain_NoAmbiguity()
+    {
+        object obj = new Element();
+
+        await Assert.That(obj)
+            .IsNotNull()
+            .And
+            .IsNotTypeOf<string>()
+            .And
+            .IsTypeOf<Element>()
+            .And
+            .IsAssignableTo<IElement>()
+            .And
+            .IsNotAssignableTo<DerivedElement>()
+            .And
+            .IsAssignableFrom<DerivedElement>()
+            .And
+            .IsNotAssignableFrom<string>();
     }
 
     // ============ LAMBDA ASSERTION CONTEXTS (.Member) ============

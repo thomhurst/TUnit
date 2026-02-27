@@ -169,6 +169,18 @@ public class AssertionSourceAdapter<T> : IAssertionSource<T>
         return new IsNotAssignableToAssertion<TTarget, T>(Context);
     }
 
+    public IsAssignableFromAssertion<TSource, T> IsAssignableFrom<TSource>()
+    {
+        Context.ExpressionBuilder.Append($".IsAssignableFrom<{typeof(TSource).Name}>()");
+        return new IsAssignableFromAssertion<TSource, T>(Context);
+    }
+
+    public IsNotAssignableFromAssertion<TSource, T> IsNotAssignableFrom<TSource>()
+    {
+        Context.ExpressionBuilder.Append($".IsNotAssignableFrom<{typeof(TSource).Name}>()");
+        return new IsNotAssignableFromAssertion<TSource, T>(Context);
+    }
+
     /// <summary>
     /// Asserts that the value is NOT of the specified type.
     /// Example: await Assert.That(obj).Member(x => x.Property).Satisfies(val => val.IsNotTypeOf<int>());

@@ -279,7 +279,9 @@ namespace .Assertions
     {
         public .<TObject> Context { get; }
         public .<TObject?> GetAwaiter() { }
+        public .<TSource, TObject> IsAssignableFrom<TSource>() { }
         public .<TTarget, TObject> IsAssignableTo<TTarget>() { }
+        public .<TSource, TObject> IsNotAssignableFrom<TSource>() { }
         public .<TTarget, TObject> IsNotAssignableTo<TTarget>() { }
         public .<TObject, TExpected> IsNotTypeOf<TExpected>() { }
         public .<TObject, TExpected> IsTypeOf<TExpected>() { }
@@ -351,7 +353,9 @@ namespace .
         public WhenParsedIntoAssertion(.<string> stringContext, ? formatProvider = null) { }
         protected override .<.> CheckAsync(.<T> metadata) { }
         protected override string GetExpectation() { }
+        public .<TSource, T> IsAssignableFrom<TSource>() { }
         public .<TTarget, T> IsAssignableTo<TTarget>() { }
+        public .<TSource, T> IsNotAssignableFrom<TSource>() { }
         public .<TTarget, T> IsNotAssignableTo<TTarget>() { }
         public .<T, TExpected> IsNotTypeOf<TExpected>() { }
         public .<T, TExpected> IsTypeOf<TExpected>() { }
@@ -466,7 +470,9 @@ namespace .Conditions
     {
         public AssertionSourceAdapter(.<T> context) { }
         public .<T> Context { get; }
+        public .<TSource, T> IsAssignableFrom<TSource>() { }
         public .<TTarget, T> IsAssignableTo<TTarget>() { }
+        public .<TSource, T> IsNotAssignableFrom<TSource>() { }
         public .<TTarget, T> IsNotAssignableTo<TTarget>() { }
         public .<T, TExpected> IsNotTypeOf<TExpected>() { }
         public .<T, TExpected> IsTypeOf<TExpected>() { }
@@ -1170,6 +1176,12 @@ namespace .Conditions
         protected override string GetExpectation() { }
         public . Within(int tolerance) { }
     }
+    public class IsAssignableFromAssertion<TSource, TValue> : .<TValue>
+    {
+        public IsAssignableFromAssertion(.<TValue> context) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
     public class IsAssignableToAssertion<TTarget, TValue> : .<TValue>
     {
         public IsAssignableToAssertion(.<TValue> context) { }
@@ -1219,6 +1231,12 @@ namespace .Conditions
         protected override string GetExpectation() { }
         public .<TCollection, TItem> Using(.<TItem> comparer) { }
         public .<TCollection, TItem> Using(<TItem?, TItem?, bool> equalityPredicate) { }
+    }
+    public class IsNotAssignableFromAssertion<TSource, TValue> : .<TValue>
+    {
+        public IsNotAssignableFromAssertion(.<TValue> context) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
     }
     public class IsNotAssignableToAssertion<TTarget, TValue> : .<TValue>
     {
@@ -1311,8 +1329,10 @@ namespace .Conditions
     {
         public ListItemAtSource(.<TList> listContext, int index) { }
         public .<TItem> Context { get; }
+        public .<TExpected, TItem> IsAssignableFrom<TExpected>() { }
         public .<TExpected, TItem> IsAssignableTo<TExpected>() { }
         public .<TList, TItem> IsEqualTo(TItem expected, [.("expected")] string? expression = null) { }
+        public .<TExpected, TItem> IsNotAssignableFrom<TExpected>() { }
         public .<TExpected, TItem> IsNotAssignableTo<TExpected>() { }
         public .<TList, TItem> IsNotEqualTo(TItem expected, [.("expected")] string? expression = null) { }
         public .<TList, TItem> IsNotNull() { }
@@ -1347,8 +1367,10 @@ namespace .Conditions
     {
         public ListLastItemSource(.<TList> listContext) { }
         public .<TItem> Context { get; }
+        public .<TExpected, TItem> IsAssignableFrom<TExpected>() { }
         public .<TExpected, TItem> IsAssignableTo<TExpected>() { }
         public .<TList, TItem> IsEqualTo(TItem expected, [.("expected")] string? expression = null) { }
+        public .<TExpected, TItem> IsNotAssignableFrom<TExpected>() { }
         public .<TExpected, TItem> IsNotAssignableTo<TExpected>() { }
         public .<TList, TItem> IsNotEqualTo(TItem expected, [.("expected")] string? expression = null) { }
         public .<TList, TItem> IsNotNull() { }
@@ -1555,8 +1577,10 @@ namespace .Conditions
     {
         public ReadOnlyListItemAtSource(.<TList> listContext, int index) { }
         public .<TItem> Context { get; }
+        public .<TExpected, TItem> IsAssignableFrom<TExpected>() { }
         public .<TExpected, TItem> IsAssignableTo<TExpected>() { }
         public .<TList, TItem> IsEqualTo(TItem expected, [.("expected")] string? expression = null) { }
+        public .<TExpected, TItem> IsNotAssignableFrom<TExpected>() { }
         public .<TExpected, TItem> IsNotAssignableTo<TExpected>() { }
         public .<TList, TItem> IsNotEqualTo(TItem expected, [.("expected")] string? expression = null) { }
         public .<TList, TItem> IsNotNull() { }
@@ -1591,8 +1615,10 @@ namespace .Conditions
     {
         public ReadOnlyListLastItemSource(.<TList> listContext) { }
         public .<TItem> Context { get; }
+        public .<TExpected, TItem> IsAssignableFrom<TExpected>() { }
         public .<TExpected, TItem> IsAssignableTo<TExpected>() { }
         public .<TList, TItem> IsEqualTo(TItem expected, [.("expected")] string? expression = null) { }
+        public .<TExpected, TItem> IsNotAssignableFrom<TExpected>() { }
         public .<TExpected, TItem> IsNotAssignableTo<TExpected>() { }
         public .<TList, TItem> IsNotEqualTo(TItem expected, [.("expected")] string? expression = null) { }
         public .<TList, TItem> IsNotNull() { }
@@ -2190,7 +2216,9 @@ namespace .Core
     public interface IAssertionSource<TValue> : .
     {
         .<TValue> Context { get; }
+        .<TExpected, TValue> IsAssignableFrom<TExpected>();
         .<TExpected, TValue> IsAssignableTo<TExpected>();
+        .<TExpected, TValue> IsNotAssignableFrom<TExpected>();
         .<TExpected, TValue> IsNotAssignableTo<TExpected>();
         .<TValue, TExpected> IsNotTypeOf<TExpected>();
         .<TValue, TExpected> IsTypeOf<TExpected>();
@@ -4955,10 +4983,12 @@ namespace .Sources
     {
         public AsyncDelegateAssertion(<.> action, string? expression) { }
         public .<object?> Context { get; }
+        public .<TSource, object?> IsAssignableFrom<TSource>() { }
         public .<TTarget, object?> IsAssignableTo<TTarget>() { }
         public .<.> IsCanceled() { }
         public .<.> IsCompleted() { }
         public .<.> IsFaulted() { }
+        public .<TSource, object?> IsNotAssignableFrom<TSource>() { }
         public .<TTarget, object?> IsNotAssignableTo<TTarget>() { }
         public .<.> IsNotCanceled() { }
         public .<.> IsNotCompleted() { }
@@ -4988,8 +5018,10 @@ namespace .Sources
         public .<TItem> HasAtMost(int maxCount, [.("maxCount")] string? expression = null) { }
         public .<TItem> HasCount(int expected, [.("expected")] string? expression = null) { }
         public .<TItem> HasCountBetween(int min, int max, [.("min")] string? minExpression = null, [.("max")] string? maxExpression = null) { }
+        public .<TExpected, .<TItem>> IsAssignableFrom<TExpected>() { }
         public .<TExpected, .<TItem>> IsAssignableTo<TExpected>() { }
         public .<TItem> IsEmpty() { }
+        public .<TExpected, .<TItem>> IsNotAssignableFrom<TExpected>() { }
         public .<TExpected, .<TItem>> IsNotAssignableTo<TExpected>() { }
         public .<TItem> IsNotEmpty() { }
         public .<.<TItem>, TExpected> IsNotTypeOf<TExpected>() { }
@@ -5003,7 +5035,9 @@ namespace .Sources
     {
         public AsyncFuncAssertion(<.<TValue?>> func, string? expression) { }
         public .<TValue> Context { get; }
+        public .<TSource, TValue> IsAssignableFrom<TSource>() { }
         public .<TTarget, TValue> IsAssignableTo<TTarget>() { }
+        public .<TSource, TValue> IsNotAssignableFrom<TSource>() { }
         public .<TTarget, TValue> IsNotAssignableTo<TTarget>() { }
         public .<TValue, TExpected> IsNotTypeOf<TExpected>() { }
         public .<TValue, TExpected> IsTypeOf<TExpected>() { }
@@ -5052,10 +5086,12 @@ namespace .Sources
         public .<TCollection, TItem> HasDistinctItems(.<TItem> comparer, [.("comparer")] string? comparerExpression = null) { }
         public .<TCollection, TItem> HasSingleItem() { }
         public .<TCollection, TItem> HasSingleItem(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public .<TSource, TCollection> IsAssignableFrom<TSource>() { }
         public .<TTarget, TCollection> IsAssignableTo<TTarget>() { }
         public .<TCollection, TItem> IsEmpty() { }
         public .<TCollection, TItem> IsInDescendingOrder() { }
         public .<TCollection, TItem> IsInOrder() { }
+        public .<TSource, TCollection> IsNotAssignableFrom<TSource>() { }
         public .<TTarget, TCollection> IsNotAssignableTo<TTarget>() { }
         public .<TCollection, TItem> IsNotEmpty() { }
         public .<TCollection, TExpected> IsNotTypeOf<TExpected>() { }
@@ -5073,7 +5109,9 @@ namespace .Sources
     {
         public DelegateAssertion( action, string? expression) { }
         public .<object?> Context { get; }
+        public .<TSource, object?> IsAssignableFrom<TSource>() { }
         public .<TTarget, object?> IsAssignableTo<TTarget>() { }
+        public .<TSource, object?> IsNotAssignableFrom<TSource>() { }
         public .<TTarget, object?> IsNotAssignableTo<TTarget>() { }
         public .<object?, TExpected> IsNotTypeOf<TExpected>() { }
         public .<object?, TExpected> IsTypeOf<TExpected>() { }
@@ -5110,7 +5148,9 @@ namespace .Sources
     {
         public FuncAssertion(<TValue?> func, string? expression) { }
         public .<TValue> Context { get; }
+        public .<TSource, TValue> IsAssignableFrom<TSource>() { }
         public .<TTarget, TValue> IsAssignableTo<TTarget>() { }
+        public .<TSource, TValue> IsNotAssignableFrom<TSource>() { }
         public .<TTarget, TValue> IsNotAssignableTo<TTarget>() { }
         public .<TValue, TExpected> IsNotTypeOf<TExpected>() { }
         public .<TValue, TExpected> IsTypeOf<TExpected>() { }
@@ -5221,10 +5261,12 @@ namespace .Sources
     {
         public TaskAssertion(.<TValue?> task, string? expression) { }
         public .<TValue> Context { get; }
+        public .<TSource, TValue> IsAssignableFrom<TSource>() { }
         public .<TTarget, TValue> IsAssignableTo<TTarget>() { }
         public .<.<TValue>> IsCanceled() { }
         public .<.<TValue>> IsCompleted() { }
         public .<.<TValue>> IsFaulted() { }
+        public .<TSource, TValue> IsNotAssignableFrom<TSource>() { }
         public .<TTarget, TValue> IsNotAssignableTo<TTarget>() { }
         public .<.<TValue>> IsNotCanceled() { }
         public .<.<TValue>> IsNotCompleted() { }
@@ -5241,7 +5283,9 @@ namespace .Sources
         protected ValueAssertion(.<TValue> context) { }
         public ValueAssertion(TValue? value, string? expression) { }
         public .<TValue> Context { get; }
+        public .<TSource, TValue> IsAssignableFrom<TSource>() { }
         public .<TTarget, TValue> IsAssignableTo<TTarget>() { }
+        public .<TSource, TValue> IsNotAssignableFrom<TSource>() { }
         public .<TTarget, TValue> IsNotAssignableTo<TTarget>() { }
         public .<TValue, TExpected> IsNotTypeOf<TExpected>() { }
         public .<TValue, TExpected> IsTypeOf<TExpected>() { }

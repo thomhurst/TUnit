@@ -77,6 +77,35 @@ public async Task Not_Assignable()
 }
 ```
 
+### IsAssignableFrom
+
+Tests that a value of the specified type can be assigned to a variable of this value's type. This is the reverse of `IsAssignableTo`:
+
+```csharp
+[Test]
+public async Task Assignable_From_Derived()
+{
+    Animal animal = GetAnimal();
+
+    // Animal variable can accept a Dog value
+    await Assert.That(animal).IsAssignableFrom<Dog>();
+}
+```
+
+### IsNotAssignableFrom
+
+Tests that a value of the specified type cannot be assigned to a variable of this value's type:
+
+```csharp
+[Test]
+public async Task Not_Assignable_From()
+{
+    Dog dog = GetDog();
+
+    await Assert.That(dog).IsNotAssignableFrom<string>();
+}
+```
+
 ## Delegate Return Types
 
 Type assertions also work on delegate return values, letting you verify the type returned by a method or lambda:
