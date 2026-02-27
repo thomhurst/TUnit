@@ -4619,20 +4619,17 @@ The basic flow is:
 
 ## Why Await?
 
-TUnit assertions must be awaited. This design enables:
-- **Async support**: Seamlessly test async operations
-- **Rich error messages**: Build detailed failure messages during execution
-- **Extensibility**: Create custom assertions that can perform async operations
+TUnit assertions must be awaited — they won't execute without `await`, and the test will pass silently:
 
 ```csharp
 // ✅ Correct - awaited
 await Assert.That(result).IsEqualTo(42);
 
-// ❌ Wrong - will cause compiler warning
+// ❌ Wrong - assertion never runs, test passes without checking
 Assert.That(result).IsEqualTo(42);
 ```
 
-TUnit includes a built-in analyzer that warns you if you forget to `await` an assertion.
+A built-in analyzer warns if you forget. See [Awaiting Assertions](awaiting.md) for more examples and design rationale.
 
 ## Assertion Categories
 
@@ -4848,133 +4845,12 @@ await Assert.That(number).IsEqualTo(42);
 // await Assert.That(number).IsEqualTo("42");
 ```
 
-## Common Mistakes & Best Practices
+## Common Mistakes
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
-
-### Forgetting to Await
-
-<Tabs>
-  <TabItem value="bad" label="❌ Bad - Missing Await" default>
-
-```csharp
-[Test]
-public void TestValue()
-{
-    // Compiler warning: assertion not awaited
-    Assert.That(result).IsEqualTo(42);
-}
-```
-
-**Problem:** Assertion never executes, test always passes even if it should fail.
-
-  </TabItem>
-  <TabItem value="good" label="✅ Good - Awaited Properly">
-
-```csharp
-[Test]
-public async Task TestValue()
-{
-    await Assert.That(result).IsEqualTo(42);
-}
-```
-
-**Why:** Awaiting ensures the assertion executes and can fail the test.
-
-  </TabItem>
-</Tabs>
-
-### Comparing Different Types
-
-<Tabs>
-  <TabItem value="bad" label="❌ Bad - Type Confusion">
-
-```csharp
-int number = 42;
-// This won't compile - can't compare int to string
-// await Assert.That(number).IsEqualTo("42");
-
-// Or this pattern that converts implicitly
-string value = GetValue();
-await Assert.That(value).IsEqualTo(42); // Won't compile
-```
-
-**Problem:** Type mismatches are caught at compile time, preventing runtime surprises.
-
-  </TabItem>
-  <TabItem value="good" label="✅ Good - Explicit Conversion">
-
-```csharp
-string value = GetValue();
-int parsed = int.Parse(value);
-await Assert.That(parsed).IsEqualTo(42);
-
-// Or test the string directly
-await Assert.That(value).IsEqualTo("42");
-```
-
-**Why:** Be explicit about what you're testing - the string value or its parsed equivalent.
-
-  </TabItem>
-</Tabs>
-
-### Collection Ordering
-
-<Tabs>
-  <TabItem value="bad" label="❌ Bad - Assuming Order">
-
-```csharp
-var items = GetItemsFromDatabase(); // Order not guaranteed
-await Assert.That(items).IsEqualTo(new[] { 1, 2, 3 });
-```
-
-**Problem:** Fails unexpectedly if database returns `[3, 1, 2]` even though items are equivalent.
-
-  </TabItem>
-  <TabItem value="good" label="✅ Good - Order-Independent">
-
-```csharp
-var items = GetItemsFromDatabase();
-await Assert.That(items).IsEquivalentTo(new[] { 1, 2, 3 });
-```
-
-**Why:** `IsEquivalentTo` checks for same items regardless of order, making tests more resilient.
-
-  </TabItem>
-</Tabs>
-
-### Multiple Related Assertions
-
-<Tabs>
-  <TabItem value="bad" label="❌ Bad - Sequential Assertions">
-
-```csharp
-await Assert.That(user.FirstName).IsEqualTo("John");
-await Assert.That(user.LastName).IsEqualTo("Doe");
-await Assert.That(user.Age).IsGreaterThan(18);
-// If first assertion fails, you won't see the other failures
-```
-
-**Problem:** Stops at first failure, hiding other issues.
-
-  </TabItem>
-  <TabItem value="good" label="✅ Good - Assert.Multiple">
-
-```csharp
-using (Assert.Multiple())
-{
-    await Assert.That(user.FirstName).IsEqualTo("John");
-    await Assert.That(user.LastName).IsEqualTo("Doe");
-    await Assert.That(user.Age).IsGreaterThan(18);
-}
-// Shows ALL failures at once
-```
-
-**Why:** See all failures in one test run, saving debugging time.
-
-  </TabItem>
-</Tabs>
+- **Forgetting `await`** — Unawaited assertions never execute; the test passes silently. Always `await Assert.That(...)`. The compiler warns about this, but it's the most common TUnit mistake. See [Awaiting Assertions](awaiting.md).
+- **Type confusion** — `Assert.That(number).IsEqualTo("42")` won't compile. TUnit assertions are strongly typed. Convert explicitly before asserting.
+- **Assuming collection order** — Use `IsEquivalentTo()` instead of `IsEqualTo()` when item order doesn't matter (e.g., database results).
+- **Sequential assertions hiding failures** — Wrap related assertions in `using (Assert.Multiple()) { ... }` to see all failures at once instead of stopping at the first.
 
 ## Next Steps
 
@@ -17579,11 +17455,11 @@ public async Task AsyncTestWithAssertions()  // ✅ Recommended - asynchronous t
 ```
 
 **Important Notes:**
-- If you use TUnit's assertion library (`Assert.That(...)`), your test **must** be `async Task` because assertions return awaitable objects that must be awaited to execute
+- If you use `Assert.That(...)`, your test **must** be `async Task` — assertions return awaitable objects that won't execute without `await`
 - Synchronous `void` tests are allowed but cannot use assertions
 - `async void` tests are **not allowed** and will cause a compiler error
-- **Best Practice**: Use `async Task` for all tests to enable TUnit's assertion library
-- **Technical Detail**: Assertions return custom assertion builder objects with a `GetAwaiter()` method, making them awaitable
+
+See [Awaiting Assertions](../assertions/awaiting.md) for more details.
 
 Let's add some code to show you how a test might look once finished:
 
@@ -17697,27 +17573,7 @@ TUnit-specific tips to avoid common mistakes.
 
 ## Always Await Assertions
 
-TUnit assertions are async and return `Task`. Forgetting `await` means the assertion never executes — the test passes silently:
-
-```csharp
-// Wrong: assertion is never checked
-[Test]
-public async Task MyTest()
-{
-    Assert.That(result).IsEqualTo(5);  // passes without checking!
-}
-
-// Correct: assertion is awaited
-[Test]
-public async Task MyTest()
-{
-    await Assert.That(result).IsEqualTo(5);
-}
-```
-
-The compiler warns about unawaited tasks, but this remains the most common TUnit mistake.
-
-See [Awaiting Assertions](../assertions/awaiting.md) for details.
+TUnit assertions won't execute without `await` — the test passes silently. A built-in analyzer warns about this, but it remains the most common TUnit mistake. See [Awaiting Assertions](../assertions/awaiting.md) for details and examples.
 
 ## New Instance Per Test
 
@@ -18441,8 +18297,7 @@ TUnit is designed for speed. Through source generation and compile-time optimiza
 - **[Integrations](examples/aspnet.md)** — ASP.NET Core, Aspire, Playwright, and other integration examples
 - **[Extending TUnit](extending/extension-points.md)** — Custom data sources, formatters, and event subscribers
 - **[Comparing Frameworks](comparison/framework-differences.md)** — Feature comparisons with xUnit, NUnit, and MSTest
-- **[Migration](migration/xunit.md)** — Step-by-step guides for switching frameworks
-- **[Guides](guides/best-practices.md)** — Tips, performance guidance, and philosophy
+- **[Migration](migration/xunit.md)** — Step-by-step guides for switching from xUnit, NUnit, or MSTest
 
 ---
 
@@ -22477,11 +22332,7 @@ These are conceptual questions about TUnit's design and capabilities.
 
 ### Why do I have to await all assertions? Can I use synchronous assertions?
 
-All TUnit assertions must be awaited. Assertions don't execute until awaited — forgetting `await` means the test passes without checking anything. The compiler warns about unawaited tasks, but watch for this common mistake.
-
-If your test uses `Assert.That(...)`, the method **must** be `async Task`. Tests without assertions can remain synchronous. See [Awaiting Assertions](assertions/awaiting.md) for details, examples, and the design rationale.
-
-For migrating from other frameworks, TUnit includes code fixers that automate the conversion — see the [xUnit](migration/xunit.md#automated-migration-with-code-fixers), [NUnit](migration/nunit.md#automated-migration-with-code-fixers), or [MSTest](migration/mstest.md#automated-migration-with-code-fixers) migration guides.
+Assertions don't execute until awaited — forgetting `await` means the test passes silently. See [Awaiting Assertions](assertions/awaiting.md) for details. For migrating from other frameworks, TUnit includes code fixers — see the [xUnit](migration/xunit.md#automated-migration-with-code-fixers), [NUnit](migration/nunit.md#automated-migration-with-code-fixers), or [MSTest](migration/mstest.md#automated-migration-with-code-fixers) migration guides.
 
 ### Does TUnit work with Coverlet for code coverage?
 
@@ -25724,7 +25575,7 @@ The exact behavior depends on your test runner configuration and CI/CD platform.
 ## See Also
 
 - [Test Context](./test-context.md) - Overview of TestContext
-- [Test Lifecycle Hooks](./hooks-setup.md) - Using Before/After hooks
+- [Hooks](./hooks.md) - Using Before/After hooks
 - [CI/CD Reporting](../execution/ci-cd-reporting.md) - Integrating with CI systems
 
 ---
@@ -26330,6 +26181,90 @@ Lock the culture for the entire test assembly:
 ## See Also
 
 - [Command-Line Flags](../reference/command-line-flags.md) — Runtime configuration options
+
+---
+
+## Choosing a Data Approach
+
+
+TUnit offers several ways to provide data to your tests. Use this guide to pick the right one.
+
+## Decision Table
+
+| Scenario | Approach | Page |
+|----------|----------|------|
+| Fixed inline values | `[Arguments(...)]` | [Arguments](arguments.md) |
+| Data from a method | `[MethodDataSource]` | [Method Data Sources](method-data-source.md) |
+| Shared object with lifecycle | `[ClassDataSource<T>]` | [Class Data Source](class-data-source.md) |
+| Reusable data rows | `[TestDataRow<T>]` | [Test Data Row](test-data-row.md) |
+| All parameter combinations | `[MatrixDataSource]` | [Matrix Tests](matrix-tests.md) |
+| Multiple sources on one method | Combined attributes | [Combined Data Sources](combined-data-source.md) |
+| Hierarchical injection | Nested properties | [Nested Data Sources](nested-data-sources.md) |
+| Custom generic attributes | `[GenericArguments<T>]` | [Generic Attributes](generic-attributes.md) |
+
+## Quick Examples
+
+### Inline arguments
+
+```csharp
+[Test]
+[Arguments(1, 2, 3)]
+[Arguments(0, 0, 0)]
+public async Task Add_ReturnsSum(int a, int b, int expected)
+{
+    await Assert.That(a + b).IsEqualTo(expected);
+}
+```
+
+### Method data source
+
+```csharp
+[Test]
+[MethodDataSource(nameof(GetCases))]
+public async Task MyTest(string input)
+{
+    await Assert.That(input).IsNotEmpty();
+}
+
+public static IEnumerable<string> GetCases() => ["hello", "world"];
+```
+
+### Class data source (shared fixture)
+
+```csharp
+[ClassDataSource<DatabaseFixture>(Shared = SharedType.PerTestSession)]
+public class MyTests(DatabaseFixture db)
+{
+    [Test]
+    public async Task QueryWorks()
+    {
+        var result = await db.QueryAsync("SELECT 1");
+        await Assert.That(result).IsNotNull();
+    }
+}
+```
+
+### Matrix (combinatorial)
+
+```csharp
+[Test]
+[MatrixDataSource]
+public async Task Multiply(
+    [Matrix(2, 3)] int a,
+    [Matrix(4, 5)] int b)
+{
+    await Assert.That(a * b).IsGreaterThan(0);
+}
+// Generates: (2,4), (2,5), (3,4), (3,5)
+```
+
+## Quick Rules
+
+- **`[Arguments]`** is the simplest — use it when values are known at compile time.
+- **`[MethodDataSource]`** is best for computed or complex data.
+- **`[ClassDataSource<T>]`** manages object lifecycles (initialization, disposal, sharing across tests).
+- **`[MatrixDataSource]`** generates the Cartesian product of all `[Matrix]` parameter values.
+- Attributes can be combined on a single method — see [Combined Data Sources](combined-data-source.md).
 
 ---
 
@@ -27143,50 +27078,83 @@ Use generic attributes whenever possible to improve code quality and maintainabi
 
 ---
 
-## Cleanup Hooks
+## Hooks
 
 
-TUnit supports having your test class implement `IDisposable` or `IAsyncDisposable`. These will be called after your test has finished executing. However, using the attributes below offers better support for running multiple methods, and without having to implement your own try/catch logic. Every `[After]` method will be run, and any exceptions will be lazily thrown afterwards.
+Hooks let you run code at specific points in the test lifecycle using `[Before]` / `[BeforeEvery]` and `[After]` / `[AfterEvery]` attributes. Most simple setup belongs in the constructor; use hooks for async operations or shared resource management.
 
-You can also declare a method with an `[After(...)]` or an `[AfterEvery(...)]` attribute.
+For the full execution order, see [Test Lifecycle](lifecycle.md).
 
 ## Hook Method Signatures
 
-Hook methods can be either synchronous or asynchronous:
+Hook methods can be synchronous or asynchronous:
 
 ```csharp
+[Before(Test)]
+public void SynchronousSetup()  // ✅ Valid
+{
+    _value = 99;
+}
+
+[Before(Test)]
+public async Task AsyncSetup()  // ✅ Valid
+{
+    _response = await new HttpClient().GetAsync("https://localhost/ping");
+}
+
 [After(Test)]
-public void SynchronousCleanup()  // ✅ Valid - synchronous hook
+public void SynchronousCleanup()  // ✅ Valid
 {
     _resource?.Dispose();
 }
 
 [After(Test)]
-public async Task AsyncCleanup()  // ✅ Valid - asynchronous hook
+public async Task AsyncCleanup()  // ✅ Valid
 {
-    await new HttpClient().GetAsync("https://localhost/test-finished-notifier");
+    await NotifyTestFinished();
 }
 ```
 
-**Important Notes:**
 - Hooks can be `void` (synchronous) or `async Task` (asynchronous)
-- Use async hooks when you need to perform async operations (HTTP calls, database queries, etc.)
-- Use synchronous hooks for simple cleanup (disposing objects, resetting state, etc.)
 - `async void` hooks are **not allowed** and will cause a compiler error
 
-### Hook Parameters
+## Hook Parameters
 
-:::info
-`[After]` hooks accept the same parameters as `[Before]` hooks. See [Setup Hooks — Hook Parameters](hooks-setup.md#hook-parameters) for the full reference.
-:::
+Hooks can optionally accept a context object and/or a `CancellationToken`:
 
-A common pattern in cleanup hooks is checking the test result to perform conditional cleanup:
+```csharp
+[Before(Test)]
+public async Task Setup(TestContext context, CancellationToken cancellationToken)
+{
+    Console.WriteLine($"Setting up: {context.Metadata.TestName}");
+    await SomeLongRunningOperation(cancellationToken);
+}
+```
+
+**Valid parameter combinations:**
+- No parameters: `public void Hook() { }`
+- Context only: `public void Hook(TestContext context) { }`
+- CancellationToken only: `public async Task Hook(CancellationToken ct) { }`
+- Both: `public async Task Hook(TestContext context, CancellationToken ct) { }`
+
+**Context types by hook level:**
+
+| Hook Level | Context Type |
+|------------|-------------|
+| `[Before(Test)]` / `[After(Test)]` | `TestContext` |
+| `[Before(Class)]` / `[After(Class)]` | `ClassHookContext` |
+| `[Before(Assembly)]` / `[After(Assembly)]` | `AssemblyHookContext` |
+| `[Before(TestSession)]` / `[After(TestSession)]` | `TestSessionContext` |
+| `[Before(TestDiscovery)]` / `[After(TestDiscovery)]` | `BeforeTestDiscoveryContext` |
+
+### Checking Test Results in Cleanup
+
+A common pattern in `[After]` hooks is checking whether the test failed:
 
 ```csharp
 [After(Test)]
 public async Task Cleanup(TestContext context, CancellationToken cancellationToken)
 {
-    // Access test results via context
     if (context.Execution.Result?.State == TestState.Failed)
     {
         await CaptureScreenshot(cancellationToken);
@@ -27194,185 +27162,29 @@ public async Task Cleanup(TestContext context, CancellationToken cancellationTok
 }
 ```
 
-## [After(HookType)]
+## Setup Hooks: [Before] and [BeforeEvery]
 
-### [After(Test)]
-Must be an instance method. Will be executed after each test in the class it's defined in.
-Methods will be executed top-down, so the current class clean ups will execute first, then the base classes' last.
+### [Before(HookType)]
 
-### [After(Class)]
-Must be a static method. Will run once after the last test in the class it's defined in finishes.
+| Level | Method Type | Scope |
+|-------|------------|-------|
+| `[Before(Test)]` | Instance | Before each test in the declaring class. Base class hooks run first (bottom-up). |
+| `[Before(Class)]` | Static | Once before the first test in the declaring class. |
+| `[Before(Assembly)]` | Static | Once before the first test in the assembly. |
+| `[Before(TestSession)]` | Static | Once before the first test in the session. |
+| `[Before(TestDiscovery)]` | Static | Once before any tests are discovered. |
 
-### [After(Assembly)]
-Must be a static method. Will run once after the last test in the assembly it's defined in finishes.
+### [BeforeEvery(HookType)]
 
-### [After(TestSession)]
-Must be a static method. Will run once after the last test in the test session finishes.
+All `[BeforeEvery]` methods must be **static**. Place them in a dedicated file (e.g., `GlobalHooks.cs`) since they globally affect the test suite.
 
-### [After(TestDiscovery)]
-Must be a static method. Will run once after tests are discovered.
+| Level | Scope |
+|-------|-------|
+| `[BeforeEvery(Test)]` | Before **every** test in the session |
+| `[BeforeEvery(Class)]` | Before the first test of **every** class |
+| `[BeforeEvery(Assembly)]` | Before the first test of **every** assembly |
 
-## [AfterEvery(HookType)]
-All [AfterEvery(...)] methods must be static. They should ideally be placed in their own file that's easy to find, as they can globally affect the test suite, so it should be easy for developers to locate this behaviour.
-e.g. `GlobalHooks.cs` at the root of the test project.
-
-:::info
-Use `[AfterEvery(...)]` for global clean-up logic that should run after every test/class/assembly/session, regardless of where the test is defined.
-:::
-
-### [AfterEvery(Test)]
-Will be executed after every test that will run in the test session.
-
-### [AfterEvery(Class)]
-Will be executed after the last test of every class that will run in the test session.
-
-### [AfterEvery(Assembly)]
-Will be executed after the last test of every assembly that will run in the test session.
-
-```csharp
-using TUnit.Core;
-
-namespace MyTestProject;
-
-public class MyTestClass
-{
-    private int _value;
-    private static HttpResponseMessage? _pingResponse;
-
-    [After(Class)]
-    public static async Task KillChromedrivers()
-    {
-        await Task.CompletedTask;
-
-        foreach (var process in Process.GetProcessesByName("chromedriver.exe"))
-        {
-            process.Kill();
-        }
-    }
-    
-    [After(Test)]
-    public async Task AfterEachTest()
-    {
-        await new HttpClient().GetAsync($"https://localhost/test-finished-notifier?testName={TestContext.Current.Metadata.TestName}");
-    }
-
-    [Test]
-    public async Task MyTest()
-    {
-        // Do something
-    }
-}
-```
-
----
-
-## Setup Hooks
-
-
-Most setup can go in the constructor (setting up mocks, assigning fields).
-
-For asynchronous setup -- such as pinging a service before tests run -- declare a method with a `[Before(...)]` or `[BeforeEvery(...)]` attribute.
-
-## Hook Method Signatures
-
-Hook methods can be either synchronous or asynchronous:
-
-```csharp
-[Before(Test)]
-public void SynchronousSetup()  // ✅ Valid - synchronous hook
-{
-    _value = 99;
-}
-
-[Before(Test)]
-public async Task AsyncSetup()  // ✅ Valid - asynchronous hook
-{
-    _response = await new HttpClient().GetAsync("https://localhost/ping");
-}
-```
-
-**Important Notes:**
-- Hooks can be `void` (synchronous) or `async Task` (asynchronous)
-- Use async hooks when you need to perform async operations (HTTP calls, database queries, etc.)
-- Use synchronous hooks for simple setup (setting fields, initializing values, etc.)
-- `async void` hooks are **not allowed** and will cause a compiler error
-
-### Hook Parameters
-
-Hooks can optionally accept context and cancellation token parameters:
-
-```csharp
-[Before(Test)]
-public async Task Setup(TestContext context, CancellationToken cancellationToken)
-{
-    Console.WriteLine($"Setting up test: {context.Metadata.TestName}");
-    await SomeLongRunningOperation(cancellationToken);
-}
-
-[Before(Class)]
-public static async Task ClassSetup(ClassHookContext context, CancellationToken cancellationToken)
-{
-    await InitializeResources(cancellationToken);
-}
-
-[Before(Test)]
-public async Task SetupWithToken(CancellationToken cancellationToken)
-{
-    await Task.Delay(100, cancellationToken);
-}
-
-[Before(Test)]
-public async Task SetupWithContext(TestContext context)
-{
-    Console.WriteLine(context.Metadata.TestName);
-}
-```
-
-**Valid Parameter Combinations:**
-- No parameters: `public void Hook() { }`
-- Context only: `public void Hook(TestContext context) { }`
-- CancellationToken only: `public async Task Hook(CancellationToken ct) { }`
-- Both: `public async Task Hook(TestContext context, CancellationToken ct) { }`
-
-**Context Types by Hook Level:**
-
-| Hook Level | Context Type | Example |
-|------------|-------------|---------|
-| `[Before(Test)]` | `TestContext` | Access test details, output writer |
-| `[Before(Class)]` | `ClassHookContext` | Access class information |
-| `[Before(Assembly)]` | `AssemblyHookContext` | Access assembly information |
-| `[Before(TestSession)]` | `TestSessionContext` | Access test session information |
-| `[Before(TestDiscovery)]` | `BeforeTestDiscoveryContext` | Access discovery context |
-
-## [Before(HookType)]
-
-### [Before(Test)]
-Must be an instance method. Will be executed before each test in the class it's defined in.
-Methods will be executed bottom-up, so the base class set ups will execute first and then the inheriting classes.
-
-### [Before(Class)]
-Must be a static method. Will run once before the first test in the class it's defined in starts.
-
-### [Before(Assembly)]
-Must be a static method. Will run once before the first test in the assembly it's defined in starts.
-
-### [Before(TestSession)]
-Must be a static method. Will run once before the first test in the test session starts.
-
-### [Before(TestDiscovery)]
-Must be a static method. Will run once before any tests are discovered.
-
-## [BeforeEvery(HookType)]
-All [BeforeEvery(...)] methods must be static. Place them in a dedicated file (e.g. `GlobalHooks.cs` at the root of the test project) since they globally affect the test suite.
-
-### [BeforeEvery(Test)]
-Will be executed before every test that will run in the test session.
-
-### [BeforeEvery(Class)]
-Will be executed before the first test of every class that will run in the test session.
-
-### [BeforeEvery(Assembly)]
-Will be executed before the first test of every assembly that will run in the test session.
+### Setup Example
 
 ```csharp
 using TUnit.Core;
@@ -27389,12 +27201,11 @@ public class MyTestClass
     {
         _pingResponse = await new HttpClient().GetAsync("https://localhost/ping");
     }
-    
+
     [Before(Test)]
     public async Task Setup()
     {
         await Task.CompletedTask;
-        
         _value = 99;
     }
 
@@ -27408,197 +27219,93 @@ public class MyTestClass
     }
 }
 ```
-## Common Mistakes & Best Practices
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+## Cleanup Hooks: [After] and [AfterEvery]
 
-### Confusing Instance vs Static Hooks
+TUnit also supports `IDisposable` and `IAsyncDisposable` on test classes, but `[After]` attributes are preferred — they support multiple methods and collect exceptions from all of them, throwing lazily afterwards.
 
-<Tabs>
-  <TabItem value="bad" label="❌ Bad - Wrong Hook Scope" default>
+### [After(HookType)]
 
-```csharp
-public class DatabaseTests
-{
-    // ❌ Won't compile - Class-level hooks must be static
-    [Before(Class)]
-    public async Task SetupDatabase()
-    {
-        await InitializeDatabaseAsync();
-    }
+| Level | Method Type | Scope |
+|-------|------------|-------|
+| `[After(Test)]` | Instance | After each test. Current class hooks run first (top-down). |
+| `[After(Class)]` | Static | Once after the last test in the declaring class. |
+| `[After(Assembly)]` | Static | Once after the last test in the assembly. |
+| `[After(TestSession)]` | Static | Once after the last test in the session. |
+| `[After(TestDiscovery)]` | Static | Once after tests are discovered. |
 
-    // ❌ Won't compile - Test hooks cannot be static
-    [Before(Test)]
-    public static void SetupTest()
-    {
-        // Cannot access instance fields
-    }
-}
-```
+### [AfterEvery(HookType)]
 
-**Problem:** Hook scope (instance/static) must match the hook level.
+All `[AfterEvery]` methods must be **static**. Place them in their own file (e.g., `GlobalHooks.cs`).
 
-  </TabItem>
-  <TabItem value="good" label="✅ Good - Correct Hook Scopes">
+:::info
+Use `[AfterEvery(...)]` for global cleanup logic that should run after every test/class/assembly/session, regardless of where the test is defined.
+:::
+
+| Level | Scope |
+|-------|-------|
+| `[AfterEvery(Test)]` | After **every** test in the session |
+| `[AfterEvery(Class)]` | After the last test of **every** class |
+| `[AfterEvery(Assembly)]` | After the last test of **every** assembly |
+
+### Cleanup Example
 
 ```csharp
-public class DatabaseTests
+using TUnit.Core;
+
+namespace MyTestProject;
+
+public class MyTestClass
 {
-    // ✅ Class hooks must be static
-    [Before(Class)]
-    public static async Task SetupDatabase()
-    {
-        await InitializeDatabaseAsync();
-    }
-
-    // ✅ Test hooks must be instance methods
-    [Before(Test)]
-    public void SetupTest()
-    {
-        _testData = CreateTestData();
-    }
-}
-```
-
-**Why:** Class-level hooks run once and cannot access instance state. Test-level hooks run per test and can access instance fields.
-
-  </TabItem>
-</Tabs>
-
-### Mixing Sync and Async Incorrectly
-
-<Tabs>
-  <TabItem value="bad" label="❌ Bad - Async Void">
-
-```csharp
-// ❌ Won't compile - async void is not allowed
-[Before(Test)]
-public async void SetupAsync()
-{
-    await Task.Delay(100);
-}
-
-// ❌ Blocking on async code
-[Before(Test)]
-public void Setup()
-{
-    SomeAsyncMethod().Wait(); // Can cause deadlocks
-}
-```
-
-**Problem:** Async void can't be awaited and blocking async code can cause deadlocks.
-
-  </TabItem>
-  <TabItem value="good" label="✅ Good - Proper Async">
-
-```csharp
-// ✅ Use async Task for asynchronous operations
-[Before(Test)]
-public async Task SetupAsync()
-{
-    await Task.Delay(100);
-}
-
-// ✅ Use synchronous method for synchronous work
-[Before(Test)]
-public void Setup()
-{
-    _value = 42;
-}
-```
-
-**Why:** `async Task` allows proper awaiting and error handling. Synchronous hooks are fine for non-async work.
-
-  </TabItem>
-</Tabs>
-
-### Expensive Setup at Wrong Level
-
-<Tabs>
-  <TabItem value="bad" label="❌ Bad - Repeated Expensive Setup">
-
-```csharp
-public class ApiTests
-{
-    private HttpClient _client;
-
-    // ❌ Creates new client for EVERY test
-    [Before(Test)]
-    public void Setup()
-    {
-        _client = new HttpClient
-        {
-            BaseAddress = new Uri("https://api.example.com")
-        };
-    }
-
-    [Test]
-    public async Task Test1() { /* ... */ }
-
-    [Test]
-    public async Task Test2() { /* ... */ }
-    // Client created 2 times unnecessarily
-}
-```
-
-**Problem:** Creating expensive resources per test wastes time and resources.
-
-  </TabItem>
-  <TabItem value="good" label="✅ Good - Shared Setup">
-
-```csharp
-public class ApiTests
-{
-    private static HttpClient _client;
-
-    // ✅ Creates client once for all tests
-    [Before(Class)]
-    public static void SetupOnce()
-    {
-        _client = new HttpClient
-        {
-            BaseAddress = new Uri("https://api.example.com")
-        };
-    }
-
     [After(Class)]
-    public static void CleanupOnce()
+    public static async Task KillChromedrivers()
     {
-        _client?.Dispose();
+        await Task.CompletedTask;
+
+        foreach (var process in Process.GetProcessesByName("chromedriver.exe"))
+        {
+            process.Kill();
+        }
+    }
+
+    [After(Test)]
+    public async Task AfterEachTest()
+    {
+        await new HttpClient().GetAsync($"https://localhost/test-finished-notifier?testName={TestContext.Current.Metadata.TestName}");
     }
 
     [Test]
-    public async Task Test1() { /* ... */ }
-
-    [Test]
-    public async Task Test2() { /* ... */ }
-    // Client created only once
+    public async Task MyTest()
+    {
+        // Do something
+    }
 }
 ```
 
-**Why:** Class-level setup runs once, sharing expensive resources across tests.
+## Common Mistakes
 
-  </TabItem>
-</Tabs>
+- **Instance vs static mismatch** — `[Before(Class)]` and higher must be `static`. `[Before(Test)]` must be an instance method. The compiler will error if you mix these up.
+- **`async void`** — Not allowed. Use `async Task` for async hooks, or `void` for synchronous hooks.
+- **Blocking on async** — Never call `.Wait()` or `.Result` inside a hook. Use `async Task` instead.
+- **Expensive per-test setup** — If setup is expensive (HTTP clients, DB connections), use `[Before(Class)]` to run it once, or use `[ClassDataSource<T>]` for automatic lifecycle management.
 
 ## AsyncLocal
 
-Setting AsyncLocal values in `[Before(...)]` hooks is supported. To propagate them into the test framework, call `context.AddAsyncLocalValues()` on the context object injected into the hook method:
+Setting `AsyncLocal` values in `[Before]` hooks is supported. Call `context.AddAsyncLocalValues()` to propagate them into the test framework:
 
 ```csharp
-    [BeforeEvery(Class)]
-    public static void BeforeClass(ClassHookContext context)
-    {
-        _myAsyncLocal.Value = "Some Value";
-        context.AddAsyncLocalValues();
-    }
+[BeforeEvery(Class)]
+public static void BeforeClass(ClassHookContext context)
+{
+    _myAsyncLocal.Value = "Some Value";
+    context.AddAsyncLocalValues();
+}
 ```
 
 ## See Also
 
-- [Cleanup Hooks](hooks-cleanup.md) — Teardown logic with `[After]` and `[AfterEvery]`
 - [Test Lifecycle](lifecycle.md) — Full overview of the test execution lifecycle
+- [Event Subscribing](event-subscribing.md) — Event receiver interfaces for advanced scenarios
 
 ---
 
@@ -28034,8 +27741,7 @@ All `[After]` hooks, `ITestEndEventReceiver` events, and disposal methods run ev
 
 ## Related Pages
 
-- [Test Set Ups](hooks-setup.md) - Detailed guide to `[Before]` hooks
-- [Test Clean Ups](hooks-cleanup.md) - Detailed guide to `[After]` hooks
+- [Hooks](hooks.md) - Detailed guide to `[Before]` and `[After]` hooks
 - [Event Subscribing](event-subscribing.md) - Event receiver interfaces
 - [Property Injection](property-injection.md) - Property injection and `IAsyncInitializer`
 - [Dependency Injection](dependency-injection.md) - DI integration
@@ -30498,72 +30204,32 @@ Most tests don't need discovery-time initialization. Discovery-time initializati
 
 **Performance Note:** Discovery happens frequently (IDE reloads, project switches, `--list-tests`), so discovery-time initialization runs more often than test execution. Avoid expensive operations in `IAsyncDiscoveryInitializer` when possible.
 
-### Using IAsyncDiscoveryInitializer
+### IAsyncInitializer vs IAsyncDiscoveryInitializer
 
-When you need data available during discovery, implement `IAsyncDiscoveryInitializer` instead of `IAsyncInitializer`:
+| Interface | Runs During | Use Case |
+|-----------|------------|----------|
+| `IAsyncInitializer` | Test execution (after `[Before(Class)]`) | Starting containers, DB connections, expensive resources |
+| `IAsyncDiscoveryInitializer` | Test discovery (before test enumeration) | Loading data needed to generate test cases |
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+Discovery happens frequently (IDE reloads, `--list-tests`, CI enumeration), so **prefer `IAsyncInitializer`** unless your test case generation depends on async-loaded data.
 
-<Tabs>
-  <TabItem value="wrong" label="❌ Wrong - Data not available during discovery" default>
+See [Test Lifecycle — Initialization Interfaces](lifecycle.md#initialization-interfaces) for the full timing diagram.
 
-```csharp
-// This fixture's data won't be available during discovery
-public class TestDataFixture : IAsyncInitializer, IAsyncDisposable
-{
-    private List<string> _testCases = [];
+### Example: Discovery-Time Initialization
 
-    public async Task InitializeAsync()
-    {
-        // This runs during EXECUTION, not DISCOVERY
-        _testCases = await LoadTestCasesFromDatabaseAsync();
-    }
-
-    // This will return empty list during discovery!
-    public IEnumerable<string> GetTestCases() => _testCases;
-
-    public async ValueTask DisposeAsync()
-    {
-        _testCases.Clear();
-    }
-}
-
-public class MyTests
-{
-    [ClassDataSource<TestDataFixture>(Shared = SharedType.PerClass)]
-    public required TestDataFixture Fixture { get; init; }
-
-    // During discovery, Fixture.GetTestCases() returns empty list
-    // Result: No tests are generated!
-    public IEnumerable<string> TestCases => Fixture.GetTestCases();
-
-    [Test]
-    [InstanceMethodDataSource(nameof(TestCases))]
-    public async Task MyTest(string testCase)
-    {
-        // This test is never created because TestCases was empty during discovery
-        await Assert.That(testCase).IsNotNullOrEmpty();
-    }
-}
-```
-
-  </TabItem>
-  <TabItem value="correct" label="✅ Correct - Uses IAsyncDiscoveryInitializer">
+When `InstanceMethodDataSource` returns dynamically loaded data, use `IAsyncDiscoveryInitializer` so the data is available during test enumeration:
 
 ```csharp
-// This fixture's data IS available during discovery
 public class TestDataFixture : IAsyncDiscoveryInitializer, IAsyncDisposable
 {
     private List<string> _testCases = [];
 
     public async Task InitializeAsync()
     {
-        // This runs during DISCOVERY, before test enumeration
+        // Runs during DISCOVERY, before test enumeration
         _testCases = await LoadTestCasesFromDatabaseAsync();
     }
 
-    // This returns populated list during discovery!
     public IEnumerable<string> GetTestCases() => _testCases;
 
     public async ValueTask DisposeAsync()
@@ -30577,71 +30243,20 @@ public class MyTests
     [ClassDataSource<TestDataFixture>(Shared = SharedType.PerClass)]
     public required TestDataFixture Fixture { get; init; }
 
-    // During discovery, Fixture is already initialized
-    // Result: Tests are generated successfully!
     public IEnumerable<string> TestCases => Fixture.GetTestCases();
 
     [Test]
     [InstanceMethodDataSource(nameof(TestCases))]
     public async Task MyTest(string testCase)
     {
-        // This test IS created with each test case from the fixture
         await Assert.That(testCase).IsNotNullOrEmpty();
     }
 }
 ```
 
-  </TabItem>
-  <TabItem value="best" label="✅ Best - Predefined data without discovery initialization">
-
-```csharp
-// Best approach: Predefined test case IDs, expensive initialization during execution only
-public class TestDataFixture : IAsyncInitializer, IAsyncDisposable
-{
-    // Test case IDs are predefined - no initialization needed for discovery
-    private static readonly string[] PredefinedTestCases = ["Case1", "Case2", "Case3"];
-
-    private DockerContainer? _container;
-
-    public async Task InitializeAsync()
-    {
-        // Expensive initialization runs during EXECUTION only
-        _container = await StartDockerContainerAsync();
-    }
-
-    // Returns predefined IDs - works during discovery without initialization
-    public IEnumerable<string> GetTestCaseIds() => PredefinedTestCases;
-
-    public async ValueTask DisposeAsync()
-    {
-        if (_container != null)
-            await _container.DisposeAsync();
-    }
-}
-
-public class MyTests
-{
-    [ClassDataSource<TestDataFixture>(Shared = SharedType.PerClass)]
-    public required TestDataFixture Fixture { get; init; }
-
-    // Returns predefined IDs - no initialization required during discovery
-    public IEnumerable<string> TestCases => Fixture.GetTestCaseIds();
-
-    [Test]
-    [InstanceMethodDataSource(nameof(TestCases))]
-    public async Task MyTest(string testCaseId)
-    {
-        // Fixture IS initialized by the time the test runs
-        // Can now use the expensive resources (Docker container, etc.)
-        await Assert.That(testCaseId).IsNotNullOrEmpty();
-    }
-}
-```
-
-  </TabItem>
-</Tabs>
-
-**Recommendation:** Prefer the "predefined data" approach when possible. This avoids expensive initialization during discovery, which happens frequently (IDE reloads, `--list-tests`, etc.).
+:::tip
+If your test case IDs are predefined (not loaded at runtime), use `IAsyncInitializer` instead — it avoids running expensive initialization during every discovery pass.
+:::
 
 For more troubleshooting, see [Test Discovery Issues](../troubleshooting.md#test-discovery-issues).
 
@@ -31472,16 +31087,10 @@ Then `MyTest1` and `MyTest2` will have a different instance of `MyTests`.
 
 This isn't that important unless you're storing state.
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
-
-<Tabs>
-  <TabItem value="bad" label="❌ Bad - Will Fail" default>
-
 ```csharp
 public class MyTests
 {
-    private int _value;
+    private int _value;  // ❌ reset to 0 for every test — different instances!
 
     [Test, NotInParallel]
     public void MyTest1() { _value = 99; }
@@ -31489,42 +31098,16 @@ public class MyTests
     [Test, NotInParallel]
     public async Task MyTest2()
     {
-        // This will FAIL because _value is 0
-        // Different test instance = different _value
+        // FAILS — _value is 0 because this is a different instance
         await Assert.That(_value).IsEqualTo(99);
     }
 }
 ```
 
-**Why this fails:** Each test gets a new instance of `MyTests`, so `_value` in `MyTest2` is a different field than in `MyTest1`.
-
-  </TabItem>
-  <TabItem value="good" label="✅ Good - Use Static">
-
-```csharp
-public class MyTests
-{
-    private static int _value;
-
-    [Test, NotInParallel]
-    public void MyTest1() { _value = 99; }
-
-    [Test, NotInParallel]
-    public async Task MyTest2()
-    {
-        // This works because _value is static
-        await Assert.That(_value).IsEqualTo(99);
-    }
-}
-```
-
-**Why this works:** The `static` keyword makes the field persist across instances, making it clear that data is shared.
-
-  </TabItem>
-</Tabs>
+**Fix:** Use `private static int _value;` if you genuinely need shared state, but prefer making tests independent or using `[ClassDataSource<>]` instead.
 
 ## See Also
 
 - [Test Lifecycle](lifecycle.md) — Understand the order of setup, execution, and cleanup
-- [Hooks & Setup](hooks-setup.md) — Run code before tests, classes, or assemblies
+- [Hooks](hooks.md) — Run code before and after tests, classes, or assemblies
 - [Controlling Parallelism](../execution/parallelism.md) — Configure how tests run in parallel
