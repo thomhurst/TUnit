@@ -74,7 +74,7 @@ This file contains links to documentation sections following the llmstxt.org sta
 - [Writing your first test](https://tunit.dev/docs/getting-started/writing-your-first-test): Here's a complete TUnit test class with all necessary using statements:
 - [Tips & Pitfalls](https://tunit.dev/docs/guides/best-practices): TUnit-specific tips to avoid common mistakes.
 - [Performance Best Practices](https://tunit.dev/docs/guides/performance): This guide provides recommendations for optimizing test performance and ensuring your TUnit test suite runs efficiently.
-- [TUnit Philosophy & Design Decisions](https://tunit.dev/docs/guides/philosophy): If you're wondering why TUnit does things differently from other testing frameworks, this page has the answers. Understanding the reasoning behind ...
+- [Philosophy](https://tunit.dev/docs/guides/philosophy): TUnit does some things differently from other .NET testing frameworks. This page explains the thinking behind those choices.
 - [Intro](https://tunit.dev/docs/intro): **TUnit** is another testing framework for C# / .NET.
 - [Migrating from MSTest](https://tunit.dev/docs/migration/mstest): :::from-mstest Performance Boost
 - [Migrating from NUnit](https://tunit.dev/docs/migration/nunit): :::from-nunit Performance Boost
