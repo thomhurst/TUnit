@@ -90,9 +90,12 @@ public async Task AsyncTestWithAssertions()  // ✅ Recommended - asynchronous t
 }
 ```
 
-:::tip Assertions Must Be Awaited
-If you use `Assert.That(...)`, your test **must** be `async Task` — assertions are awaitable and won't execute without `await`. `async void` tests are not allowed. See [Awaiting Assertions](../assertions/awaiting.md) for details.
-:::
+**Important Notes:**
+- If you use `Assert.That(...)`, your test **must** be `async Task` — assertions return awaitable objects that won't execute without `await`
+- Synchronous `void` tests are allowed but cannot use assertions
+- `async void` tests are **not allowed** and will cause a compiler error
+
+See [Awaiting Assertions](../assertions/awaiting.md) for more details.
 
 Let's add some code to show you how a test might look once finished:
 

@@ -21,7 +21,17 @@ The basic flow is:
 
 ## Why Await?
 
-TUnit assertions must be awaited — they won't execute without `await`, and a built-in analyzer warns if you forget. See [Awaiting Assertions](awaiting.md) for detailed examples and design rationale.
+TUnit assertions must be awaited — they won't execute without `await`, and the test will pass silently:
+
+```csharp
+// ✅ Correct - awaited
+await Assert.That(result).IsEqualTo(42);
+
+// ❌ Wrong - assertion never runs, test passes without checking
+Assert.That(result).IsEqualTo(42);
+```
+
+A built-in analyzer warns if you forget. See [Awaiting Assertions](awaiting.md) for more examples and design rationale.
 
 ## Assertion Categories
 
