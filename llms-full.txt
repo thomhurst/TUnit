@@ -12183,89 +12183,9 @@ public class InMemoryPostgreSqlDatabase : IAsyncInitializer, IAsyncDisposable
 
 ### EF Core Code First with Per-Test Schema Isolation
 
-For EF Core Code First applications, use per-test PostgreSQL schemas instead of per-test table names. This avoids fighting EF Core's table naming conventions:
+For EF Core Code First applications, use per-test PostgreSQL schemas instead of per-test table names. This avoids fighting EF Core's table naming conventions and provides complete isolation using `GetIsolatedName("schema")`.
 
-```csharp
-// DbContext with dynamic schema support — reads schema from IConfiguration when
-// resolved via DI, falls back to "public" when constructed standalone.
-public class TodoDbContext : DbContext
-{
-    public string SchemaName { get; set; }
-    public DbSet<Todo> Todos => Set<Todo>();
-
-    public TodoDbContext(DbContextOptions<TodoDbContext> options, IConfiguration? config = null)
-        : base(options)
-    {
-        SchemaName = config?["Database:Schema"] ?? "public";
-    }
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.HasDefaultSchema(SchemaName);
-        // ... entity configuration
-    }
-}
-
-// IModelCacheKeyFactory ensures different schemas get different model caches
-public class SchemaModelCacheKeyFactory : IModelCacheKeyFactory
-{
-    public object Create(DbContext context, bool designTime)
-        => context is TodoDbContext tc
-            ? (context.GetType(), tc.SchemaName, designTime)
-            : (object)(context.GetType(), designTime);
-}
-
-// Test base: creates schema + tables in SetupAsync, drops in cleanup
-public abstract class EfCoreTodoTestBase
-    : WebApplicationTest<EfCoreWebApplicationFactory, Program>
-{
-    [ClassDataSource<InMemoryPostgreSqlDatabase>(Shared = SharedType.PerTestSession)]
-    public InMemoryPostgreSqlDatabase PostgreSql { get; init; } = null!;
-
-    protected string SchemaName { get; private set; } = null!;
-
-    protected override async Task SetupAsync()
-    {
-        SchemaName = GetIsolatedName("schema"); // e.g. "Test_42_schema"
-
-        // Create schema, then let EF Core create tables
-        await using var conn = new NpgsqlConnection(
-            PostgreSql.Container.GetConnectionString());
-        await conn.OpenAsync();
-        await using var cmd = conn.CreateCommand();
-        cmd.CommandText = $"CREATE SCHEMA IF NOT EXISTS \"{SchemaName}\"";
-        await cmd.ExecuteNonQueryAsync();
-
-        var options = new DbContextOptionsBuilder<TodoDbContext>()
-            .UseNpgsql(PostgreSql.Container.GetConnectionString())
-            .ReplaceService<IModelCacheKeyFactory, SchemaModelCacheKeyFactory>()
-            .Options;
-        await using var db = new TodoDbContext(options) { SchemaName = SchemaName };
-        await db.Database.EnsureCreatedAsync();
-    }
-
-    protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
-    {
-        config.AddInMemoryCollection(new Dictionary<string, string?>
-        {
-            { "Database:Schema", SchemaName }
-        });
-    }
-
-    [After(Test)]
-    public async Task CleanupSchema()
-    {
-        await using var conn = new NpgsqlConnection(
-            PostgreSql.Container.GetConnectionString());
-        await conn.OpenAsync();
-        await using var cmd = conn.CreateCommand();
-        cmd.CommandText = $"DROP SCHEMA IF EXISTS \"{SchemaName}\" CASCADE";
-        await cmd.ExecuteNonQueryAsync();
-    }
-}
-```
-
-See the full working example in `TUnit.Example.Asp.Net.TestProject/EfCore/`.
+See the full pattern with `IModelCacheKeyFactory`, `EnsureCreatedAsync()`, and schema cleanup in the [ASP.NET Core Integration Testing](aspnet.md#per-test-schema-isolation-with-ef-core) guide, or the working example in `TUnit.Example.Asp.Net.TestProject/EfCore/`.
 
 ## Comparison with Other Frameworks
 
@@ -12346,13 +12266,13 @@ To use TUnit with a file-based C# application, you can follow these steps:
 2.  **Add TUnit to your project**: You can add TUnit as a package reference in your file. At the top of your `Program.cs`, add the following line:
 
     ```csharp
-    #:package TUnit@0.*
+    #:package TUnit@1.*
     ```
 
     -   Alternatively, you can specify a specific version:
 
         ```csharp
-        #:package TUnit@0.25.0
+        #:package TUnit@1.6.0
         ```
 
     -   You can also use msbuild props files to include TUnit. By creating a `Directory.build.props` file in the same directory as the csharp file.
@@ -12368,7 +12288,7 @@ To use TUnit with a file-based C# application, you can follow these steps:
 3.  **Write your tests**: You can write your tests in the same way you would in a regular C# project. For example:
 
     ```csharp
-    #:package TUnit@0.*
+    #:package TUnit@1.*
 
     using TUnit;
     public class Tests
@@ -12678,14 +12598,14 @@ format. To use TUnit with F# Interactive, follow these steps:
    Alternatively, you can specify a specific version:
 
    ```fsharp
-   #r "nuget: TUnit, 0.20.16"
+   #r "nuget: TUnit, 1.6.0"
    ```
 
 2. **Write your tests**: You can write your tests in the same way you would in a regular F# project. For example:
 
    ```fsharp
-      #r "nuget: TUnit, 0.20.16"
-      #r "nuget: TUnit.Assertions.Fsharp, 0.20.16"
+      #r "nuget: TUnit"
+      #r "nuget: TUnit.Assertions.Fsharp"
 
       open System
       open TUnit
@@ -17555,8 +17475,7 @@ To continue your journey with TUnit, explore these topics:
 
 **Common Tasks:**
 - **[Mocking](../writing-tests/mocking/index.md)** - Use mocks and fakes in your tests
-- **[Best Practices](../guides/best-practices.md)** - Write maintainable, reliable tests
-- **[Cookbook](../guides/cookbook.md)** - Common testing patterns and recipes
+- **[Tips & Pitfalls](../guides/best-practices.md)** - TUnit-specific tips to avoid common mistakes
 
 **Advanced Features:**
 - **[Parallelism](../execution/parallelism.md)** - Control how tests run in parallel
@@ -17771,178 +17690,24 @@ public class StringTests
 
 ---
 
-## Best Practices
+## Tips & Pitfalls
 
 
-This guide covers best practices for writing clean, maintainable, and robust tests with TUnit. Following these patterns will help you create a test suite that's easy to understand and maintain over time.
+TUnit-specific tips to avoid common mistakes.
 
-## Test Naming
+## Always Await Assertions
 
-### Use Descriptive Names
-
-Good test names clearly describe what's being tested and what's expected. A common pattern is `Method_Scenario_ExpectedBehavior`:
+TUnit assertions are async and return `Task`. Forgetting `await` means the assertion never executes — the test passes silently:
 
 ```csharp
-// ✅ Good: Clearly describes what's being tested
-[Test]
-public async Task CalculateTotal_WithDiscount_ReturnsReducedPrice()
-{
-    var calculator = new PriceCalculator();
-    var result = calculator.CalculateTotal(100, discount: 0.2);
-    await Assert.That(result).IsEqualTo(80);
-}
-
-// ❌ Bad: Vague and unclear
-[Test]
-public async Task Test1()
-{
-    var calculator = new PriceCalculator();
-    var result = calculator.CalculateTotal(100, 0.2);
-    await Assert.That(result).IsEqualTo(80);
-}
-```
-
-### Alternative Naming Patterns
-
-You can also use sentence-like names that read naturally:
-
-```csharp
-[Test]
-public async Task When_discount_is_applied_total_is_reduced()
-{
-    // Test implementation
-}
-
-[Test]
-public async Task Should_return_reduced_price_when_discount_applied()
-{
-    // Test implementation
-}
-```
-
-Pick a naming convention and stick to it throughout your project for consistency.
-
-## Test Organization
-
-### One Test Class Per Production Class
-
-Organize your tests to mirror your production code structure:
-
-```
-MyApp/
-  Services/
-    OrderService.cs
-    PaymentService.cs
-
-MyApp.Tests/
-  Services/
-    OrderServiceTests.cs
-    PaymentServiceTests.cs
-```
-
-This makes it easy to find tests and keeps your test suite organized as your codebase grows.
-
-### Group Related Tests
-
-Use nested classes or separate test classes to group related test scenarios:
-
-```csharp
-public class OrderServiceTests
-{
-    public class CreateOrder
-    {
-        [Test]
-        public async Task Creates_order_with_valid_data()
-        {
-            // Test implementation
-        }
-
-        [Test]
-        public async Task Throws_exception_when_user_not_found()
-        {
-            // Test implementation
-        }
-    }
-
-    public class CancelOrder
-    {
-        [Test]
-        public async Task Cancels_order_successfully()
-        {
-            // Test implementation
-        }
-
-        [Test]
-        public async Task Throws_when_order_already_shipped()
-        {
-            // Test implementation
-        }
-    }
-}
-```
-
-### Keep Test Files Focused
-
-Each test file should focus on testing a single class or component. If your test file is getting large (>500 lines), consider splitting it into multiple files or using nested classes.
-
-## Assertion Best Practices
-
-### Prefer Specific Assertions
-
-Use the most specific assertion available for better failure messages:
-
-```csharp
-// ✅ Good: Specific assertion with clear failure message
-await Assert.That(result).IsEqualTo(5);
-// Failure: Expected 5 but was 3
-
-// ❌ Okay but less helpful: Generic boolean assertion
-await Assert.That(result == 5).IsTrue();
-// Failure: Expected true but was false
-```
-
-### One Logical Assertion Per Test
-
-Each test should verify one specific behavior. Multiple assertions are fine if they're testing different aspects of the same behavior:
-
-```csharp
-// ✅ Good: Multiple assertions testing one behavior (user creation)
-[Test]
-public async Task CreateUser_SetsAllProperties()
-{
-    var user = await userService.CreateUser("john@example.com", "John Doe");
-
-    await Assert.That(user.Email).IsEqualTo("john@example.com");
-    await Assert.That(user.Name).IsEqualTo("John Doe");
-    await Assert.That(user.CreatedAt).IsNotEqualTo(default(DateTime));
-}
-
-// ❌ Bad: Testing multiple unrelated behaviors
-[Test]
-public async Task UserService_Works()
-{
-    var user = await userService.CreateUser("john@example.com", "John");
-    await Assert.That(user.Email).IsEqualTo("john@example.com");
-
-    await userService.DeleteUser(user.Id);
-    var deleted = await userService.GetUser(user.Id);
-    await Assert.That(deleted).IsNull();
-}
-```
-
-### Always Await Assertions
-
-TUnit assertions are async and must be awaited. Forgetting `await` means the assertion never runs:
-
-```csharp
-// ❌ Wrong: Assertion returns Task that's never awaited
+// Wrong: assertion is never checked
 [Test]
 public async Task MyTest()
 {
-    Assert.That(result).IsEqualTo(5);  // Test passes without checking!
+    Assert.That(result).IsEqualTo(5);  // passes without checking!
 }
 
-// ✅ Correct: Assertion is awaited and executed
+// Correct: assertion is awaited
 [Test]
 public async Task MyTest()
 {
@@ -17950,55 +17715,72 @@ public async Task MyTest()
 }
 ```
 
-The compiler will warn you about unawaited tasks, but watch for this common mistake.
+The compiler warns about unawaited tasks, but this remains the most common TUnit mistake.
 
-## Test Lifecycle Management
+See [Awaiting Assertions](../assertions/awaiting.md) for details.
 
-### Use Hooks for Setup and Cleanup
+## New Instance Per Test
 
-TUnit provides several hooks for test lifecycle management. Use them to keep your test logic clean:
+TUnit creates a **new instance** of your test class for every test method. Instance fields are never shared between tests:
 
 ```csharp
-public class DatabaseTests
+public class MyTests
 {
-    private TestDatabase? _database;
+    private int _value;  // reset to 0 for every test
 
-    [Before(Test)]
-    public async Task SetupDatabase()
+    [Test, NotInParallel]
+    public void Test1()
     {
-        _database = await TestDatabase.CreateAsync();
+        _value = 99;
     }
 
-    [After(Test)]
-    public async Task CleanupDatabase()
+    [Test, NotInParallel]
+    public async Task Test2()
     {
-        if (_database != null)
-            await _database.DisposeAsync();
-    }
-
-    [Test]
-    public async Task Can_insert_record()
-    {
-        // Database is ready to use
-        await _database!.InsertAsync(new Record { Id = 1 });
-        var result = await _database.GetAsync(1);
-        await Assert.That(result).IsNotNull();
+        // Fails! _value is 0 — this is a different instance
+        await Assert.That(_value).IsEqualTo(99);
     }
 }
 ```
 
-### Choose the Right Hook Level
+If you genuinely need shared state, use `static` fields — but prefer making tests independent or using `[ClassDataSource<>]` instead.
 
-- `[Before(Test)]` / `[After(Test)]`: Runs before/after each test (most common)
-- `[Before(Class)]` / `[After(Class)]`: Runs once per test class
-- `[Before(Assembly)]` / `[After(Assembly)]`: Runs once per test assembly
+## Use [DependsOn] for Test Ordering
 
-### Sharing Expensive Resources
-
-For expensive setup that needs to be shared across tests (like web servers, databases, or containers), use `[ClassDataSource<>]` with shared types and `IAsyncInitializer`/`IAsyncDisposable`:
+When tests must run in a specific order, use `[DependsOn]`. Unlike `[NotInParallel(Order = N)]`, it preserves parallelism for unrelated tests:
 
 ```csharp
-// ✅ Best: Shared resource with ClassDataSource
+[Test]
+public async Task Step1_CreateUser()
+{
+    // Runs first
+}
+
+[Test]
+[DependsOn(nameof(Step1_CreateUser))]
+public async Task Step2_UpdateUser()
+{
+    // Runs after Step1 completes
+    // Other unrelated tests still run in parallel
+}
+
+[Test]
+[DependsOn(nameof(Step2_UpdateUser))]
+public async Task Step3_DeleteUser()
+{
+    // Runs after Step2 completes
+}
+```
+
+`[DependsOn]` explicitly declares dependencies and supports depending on multiple tests. If you find yourself ordering many tests, consider whether they should be a single test or use proper setup/teardown instead.
+
+See [Parallelism](../execution/parallelism.md) for `[NotInParallel]`, parallel groups, and concurrency configuration.
+
+## Sharing Expensive Resources
+
+For expensive setup shared across tests (web servers, databases, containers), use `[ClassDataSource<>]` with `IAsyncInitializer` and `IAsyncDisposable`:
+
+```csharp
 public class TestWebServer : IAsyncInitializer, IAsyncDisposable
 {
     public WebApplicationFactory<Program>? Factory { get; private set; }
@@ -18037,1228 +17819,17 @@ public class ApiTests(TestWebServer server)
 }
 ```
 
-**Why this is better:**
-- Keeps test files simpler (no static fields or Before/After hooks)
-- Shared resources work across multiple test classes
-- Can share across assemblies using `SharedType.PerTestSession`
-- Cleaner lifecycle management with `IAsyncInitializer`/`IAsyncDisposable`
-- Type-safe dependency injection into test constructors
+This approach gives you type-safe constructor injection, automatic lifecycle management, and cross-class sharing via `SharedType`.
 
-**Shared Type Options:**
-- `SharedType.PerTestSession`: One instance for entire test run, shared across assemblies (best for expensive resources)
-- `SharedType.PerClass`: One instance per test class
-- `SharedType.None`: New instance per test (default)
+See [ClassDataSource](../writing-tests/class-data-source.md) for all sharing options.
 
-You can also use hooks, but they're less flexible:
+## Choosing the Right Hook Level
 
-```csharp
-// ❌ Less flexible: Using hooks for shared setup
-public class ApiTests
-{
-    private static WebApplicationFactory<Program>? _factory;
+- **`[Before(Test)]` / `[After(Test)]`** — runs before/after each test (most common)
+- **`[Before(Class)]` / `[After(Class)]`** — runs once per test class
+- **`[Before(Assembly)]` / `[After(Assembly)]`** — runs once per test assembly
 
-    [Before(Class)]
-    public static async Task StartServer()
-    {
-        _factory = new WebApplicationFactory<Program>();
-    }
-
-    [After(Class)]
-    public static async Task StopServer()
-    {
-        _factory?.Dispose();
-    }
-
-    // Tests use static _factory field
-}
-```
-
-### Avoid Complex Setup Logic
-
-Keep your setup code simple and focused. If setup is complex, extract it to helper methods:
-
-```csharp
-// ✅ Good: Simple setup with extracted helpers
-[Before(Test)]
-public async Task Setup()
-{
-    _database = await CreateTestDatabase();
-    _testUser = await CreateTestUser();
-}
-
-private async Task<TestDatabase> CreateTestDatabase()
-{
-    var db = await TestDatabase.CreateAsync();
-    await db.SeedDefaultData();
-    return db;
-}
-
-// ❌ Bad: Complex setup logic in hook
-[Before(Test)]
-public async Task Setup()
-{
-    _database = await TestDatabase.CreateAsync();
-    await _database.ExecuteAsync("CREATE TABLE Users (...)");
-    await _database.ExecuteAsync("INSERT INTO Users VALUES (...)");
-    await _database.ExecuteAsync("CREATE TABLE Orders (...)");
-    // ... lots more setup code
-}
-```
-
-## Parallelism Guidance
-
-### Tests Run in Parallel By Default
-
-TUnit runs tests in parallel for better performance. Write your tests to be independent:
-
-```csharp
-// ✅ Good: Test is self-contained and independent
-[Test]
-public async Task Can_create_order()
-{
-    var orderId = Guid.NewGuid();  // Unique ID
-    var order = new Order { Id = orderId, Total = 100 };
-    await orderService.CreateAsync(order);
-
-    var result = await orderService.GetAsync(orderId);
-    await Assert.That(result).IsNotNull();
-}
-```
-
-### Use NotInParallel When Needed
-
-Some tests can't run in parallel (database tests, file system tests). Use `[NotInParallel]`:
-
-```csharp
-// Tests that modify shared state
-[Test, NotInParallel]
-public async Task Updates_configuration_file()
-{
-    await ConfigurationManager.SetAsync("key", "value");
-    var result = await ConfigurationManager.GetAsync("key");
-    await Assert.That(result).IsEqualTo("value");
-}
-```
-
-### Control Execution Order
-
-When tests need to run in a specific order, use `[DependsOn]` instead of `NotInParallel` with `Order`:
-
-```csharp
-// ✅ Good: Use DependsOn for ordering while maintaining parallelism
-[Test]
-public async Task Step1_CreateUser()
-{
-    // Runs first
-}
-
-[Test]
-[DependsOn(nameof(Step1_CreateUser))]
-public async Task Step2_UpdateUser()
-{
-    // Runs after Step1_CreateUser completes
-    // Other unrelated tests can still run in parallel
-}
-
-[Test]
-[DependsOn(nameof(Step2_UpdateUser))]
-public async Task Step3_DeleteUser()
-{
-    // Runs after Step2_UpdateUser completes
-}
-```
-
-**Why `[DependsOn]` is better:**
-- More intuitive: explicitly declares dependencies between tests
-- More flexible: tests can depend on multiple other tests
-- Maintains parallelism: unrelated tests still run in parallel
-- Better for complex workflows: clear dependency chains
-
-You can also use `NotInParallel` with `Order`, but this forces sequential execution:
-
-```csharp
-// ❌ Less flexible: Forces all tests to run sequentially
-[Test, NotInParallel(Order = 1)]
-public async Task Step1_CreateUser()
-{
-    // Runs first
-}
-
-[Test, NotInParallel(Order = 2)]
-public async Task Step2_UpdateUser()
-{
-    // Runs second, but blocks all other tests
-}
-```
-
-**Important:** If tests need ordering, they might be too tightly coupled. Consider:
-- Refactoring into a single test
-- Using proper setup/teardown
-- Making tests truly independent
-
-### Use Parallel Groups
-
-Group related tests that can't run in parallel with each other but can run in parallel with other groups:
-
-```csharp
-public class FileSystemTests
-{
-    // These tests can't run in parallel with each other
-    // but can run in parallel with DatabaseTests
-
-    [Test, NotInParallel("FileGroup")]
-    public async Task Test1_WritesFile()
-    {
-        // Test implementation
-    }
-
-    [Test, NotInParallel("FileGroup")]
-    public async Task Test2_ReadsFile()
-    {
-        // Test implementation
-    }
-}
-
-public class DatabaseTests
-{
-    [Test, NotInParallel("DbGroup")]
-    public async Task Test1_InsertsRecord()
-    {
-        // Runs in parallel with FileSystemTests
-    }
-}
-```
-
-## Common Anti-Patterns to Avoid
-
-### Avoid Test Interdependence
-
-Each test should be completely independent and not rely on other tests:
-
-```csharp
-// ❌ Bad: Tests depend on execution order
-private static User? _user;
-
-[Test]
-public async Task Test1_CreateUser()
-{
-    _user = await userService.CreateAsync("john@example.com");
-}
-
-[Test]
-public async Task Test2_UpdateUser()
-{
-    // Assumes Test1 ran first!
-    _user!.Name = "Jane Doe";
-    await userService.UpdateAsync(_user);
-}
-
-// ✅ Good: Each test is independent
-[Test]
-public async Task Can_create_user()
-{
-    var user = await userService.CreateAsync("john@example.com");
-    await Assert.That(user.Email).IsEqualTo("john@example.com");
-}
-
-[Test]
-public async Task Can_update_user()
-{
-    var user = await userService.CreateAsync("jane@example.com");
-    user.Name = "Jane Doe";
-    await userService.UpdateAsync(user);
-
-    var updated = await userService.GetAsync(user.Id);
-    await Assert.That(updated.Name).IsEqualTo("Jane Doe");
-}
-```
-
-### Avoid Shared Instance State
-
-**Important:** TUnit creates a new instance of your test class for each test method. Don't rely on instance fields to share state:
-
-```csharp
-// ❌ Bad: Trying to share instance state between tests
-public class MyTests
-{
-    private int _value;  // Different instance per test!
-
-    [Test, NotInParallel]
-    public void Test1()
-    {
-        _value = 99;
-    }
-
-    [Test, NotInParallel]
-    public async Task Test2()
-    {
-        await Assert.That(_value).IsEqualTo(99);  // Fails! _value is 0
-    }
-}
-
-// ✅ Good: Use static fields if you really need shared state
-public class MyTests
-{
-    private static int _value;  // Shared across all tests
-
-    [Test, NotInParallel]
-    public void Test1()
-    {
-        _value = 99;
-    }
-
-    [Test, NotInParallel]
-    public async Task Test2()
-    {
-        await Assert.That(_value).IsEqualTo(99);  // Works!
-    }
-}
-```
-
-But seriously: if tests need to share state, reconsider your design. It's usually better to make tests independent.
-
-### Avoid Complex Test Logic
-
-Tests should be simple and easy to understand. Avoid complex conditionals, loops, or calculations:
-
-```csharp
-// ❌ Bad: Complex logic in test
-[Test]
-public async Task CalculatesTotals()
-{
-    var items = await GetItems();
-    decimal expected = 0;
-    foreach (var item in items)
-    {
-        if (item.IsDiscounted)
-            expected += item.Price * 0.8m;
-        else
-            expected += item.Price;
-    }
-
-    var result = calculator.CalculateTotal(items);
-    await Assert.That(result).IsEqualTo(expected);
-}
-
-// ✅ Good: Simple, explicit test
-[Test]
-public async Task CalculateTotal_WithMixedItems()
-{
-    var items = new[]
-    {
-        new Item { Price = 100, IsDiscounted = false },  // 100
-        new Item { Price = 50, IsDiscounted = true }     // 40
-    };
-
-    var result = calculator.CalculateTotal(items);
-    await Assert.That(result).IsEqualTo(140);
-}
-```
-
-If your test has complex logic, you're essentially writing code to test code. Keep it simple!
-
-### Avoid Over-Mocking
-
-Don't mock everything. Use real implementations when they're fast and reliable:
-
-```csharp
-// ❌ Bad: Mocking things that don't need mocking
-[Test]
-public async Task ProcessOrder()
-{
-    var mockLogger = Mock.Of<ILogger>();
-    var mockValidator = Mock.Of<IValidator>();
-    var mockCalculator = Mock.Of<IPriceCalculator>();
-    var mockRepository = Mock.Of<IOrderRepository>();
-
-    // So much setup...
-}
-
-// ✅ Good: Only mock expensive or external dependencies
-[Test]
-public async Task ProcessOrder()
-{
-    var logger = new NullLogger();  // Real lightweight implementation
-    var validator = new OrderValidator();  // Real validator is fast
-    var calculator = new PriceCalculator();  // Simple calculations
-    var mockRepository = Mock.Of<IOrderRepository>();  // Mock database
-
-    // Much simpler!
-}
-```
-
-Mock external dependencies (databases, APIs, file systems) but use real implementations for simple logic.
-
-### Avoid Testing Implementation Details
-
-Test behavior, not implementation. Your tests should verify what the code does, not how it does it:
-
-```csharp
-// ❌ Bad: Testing internal implementation
-[Test]
-public async Task ProcessOrder_CallsRepositorySaveMethod()
-{
-    var mockRepository = Mock.Of<IOrderRepository>();
-    var service = new OrderService(mockRepository.Object);
-
-    await service.ProcessOrder(order);
-
-    // Verifying method calls instead of behavior
-    mockRepository.Save(Any()).WasCalled(Times.Once);
-}
-
-// ✅ Good: Testing actual behavior
-[Test]
-public async Task ProcessOrder_SavesOrderToDatabase()
-{
-    var repository = new InMemoryOrderRepository();
-    var service = new OrderService(repository);
-
-    await service.ProcessOrder(order);
-
-    // Verifying the result
-    var saved = await repository.GetAsync(order.Id);
-    await Assert.That(saved).IsNotNull();
-    await Assert.That(saved.Status).IsEqualTo(OrderStatus.Processed);
-}
-```
-
-Tests that verify implementation details are brittle and break when you refactor.
-
-## Performance Considerations
-
-TUnit is designed for performance at scale. Follow these guidelines to keep your test suite fast:
-
-### Optimize Test Discovery
-
-- Use AOT mode for faster test discovery and lower memory usage
-- Keep data sources lightweight (see [Performance Best Practices](performance.md))
-- Limit matrix test combinations to avoid test explosion
-
-### Optimize Test Execution
-
-- Let tests run in parallel (it's fast!)
-- Only use `[NotInParallel]` when absolutely necessary
-- Configure parallelism using the `--maximum-parallel-tests` CLI flag or `[assembly: ParallelLimiter<T>]` attribute
-- Avoid expensive setup in `[Before(Test)]` hooks - use class or assembly-level hooks for shared resources
-
-### Avoid Slow Operations in Tests
-
-Tests should be fast. If a test takes more than a few seconds, look for optimization opportunities:
-
-```csharp
-// ❌ Slow: Real HTTP calls
-[Test]
-public async Task GetUserData()
-{
-    var client = new HttpClient();
-    var response = await client.GetAsync("https://api.example.com/users");
-    // Slow and unreliable
-}
-
-// ✅ Fast: Use in-memory test doubles
-[Test]
-public async Task GetUserData()
-{
-    var client = new TestHttpClient();  // In-memory fake
-    var response = await client.GetAsync("/users");
-    // Fast and reliable
-}
-```
-
-For detailed performance guidance, see [Performance Best Practices](performance.md).
-
-## Summary
-
-Following these best practices will help you:
-
-- Write tests that are easy to understand and maintain
-- Create a fast, reliable test suite that scales
-- Catch bugs without introducing brittle tests
-- Make your codebase more maintainable over time
-
-Remember: good tests are simple, focused, independent, and fast. When in doubt, ask yourself: "Will someone else understand what this test is doing and why it might fail?"
-
----
-
-## Testing Cookbook
-
-
-This cookbook provides practical, copy-paste examples for common testing scenarios with TUnit. Each recipe is a complete, working example you can adapt for your own tests.
-
-## Dependency Injection Testing
-
-### Testing with Microsoft.Extensions.DependencyInjection
-
-```csharp
-using Microsoft.Extensions.DependencyInjection;
-using TUnit.Core;
-
-public class UserServiceTests
-{
-    private ServiceProvider? _serviceProvider;
-    private IUserService? _userService;
-
-    [Before(Test)]
-    public async Task Setup()
-    {
-        // Create a service collection and register dependencies
-        var services = new ServiceCollection();
-
-        // Register services
-        services.AddSingleton<IUserRepository, InMemoryUserRepository>();
-        services.AddScoped<IUserService, UserService>();
-        services.AddLogging();
-
-        _serviceProvider = services.BuildServiceProvider();
-        _userService = _serviceProvider.GetRequiredService<IUserService>();
-    }
-
-    [After(Test)]
-    public async Task Cleanup()
-    {
-        _serviceProvider?.Dispose();
-    }
-
-    [Test]
-    public async Task CreateUser_RegistersNewUser()
-    {
-        var email = "test@example.com";
-        var name = "Test User";
-
-        var user = await _userService!.CreateAsync(email, name);
-
-        await Assert.That(user.Email).IsEqualTo(email);
-        await Assert.That(user.Name).IsEqualTo(name);
-        await Assert.That(user.Id).IsNotEqualTo(Guid.Empty);
-    }
-}
-```
-
-### Testing with Scoped Services
-
-```csharp
-public class OrderServiceTests
-{
-    private ServiceProvider? _serviceProvider;
-
-    [Before(Test)]
-    public async Task Setup()
-    {
-        var services = new ServiceCollection();
-        services.AddDbContext<OrderDbContext>(options =>
-            options.UseInMemoryDatabase("TestDb"));
-        services.AddScoped<IOrderService, OrderService>();
-
-        _serviceProvider = services.BuildServiceProvider();
-    }
-
-    [After(Test)]
-    public async Task Cleanup()
-    {
-        _serviceProvider?.Dispose();
-    }
-
-    [Test]
-    public async Task CreateOrder_UsesScop​edDbContext()
-    {
-        // Create a scope for this test
-        using var scope = _serviceProvider!.CreateScope();
-        var orderService = scope.ServiceProvider.GetRequiredService<IOrderService>();
-
-        var order = await orderService.CreateAsync(new CreateOrderRequest
-        {
-            CustomerId = 1,
-            Items = new[] { new OrderItem { ProductId = 1, Quantity = 2 } }
-        });
-
-        await Assert.That(order.Id).IsGreaterThan(0);
-        await Assert.That(order.Items).Count().IsEqualTo(1);
-    }
-}
-```
-
-## API Testing with WebApplicationFactory
-
-### Testing a Minimal API Endpoint (Shared Server)
-
-For API tests, share a single WebApplicationFactory across all tests. See [Best Practices -- Sharing Expensive Resources](best-practices.md#sharing-expensive-resources) for the shared `TestWebServer` pattern using `ClassDataSource` with `SharedType.PerTestSession`.
-
-```csharp
-using System.Net;
-using System.Net.Http.Json;
-using TUnit.Core;
-
-[ClassDataSource<TestWebServer>(Shared = SharedType.PerTestSession)]
-public class UserApiTests(TestWebServer server)
-{
-    [Test]
-    public async Task GetUsers_ReturnsSuccessStatus()
-    {
-        var client = server.Factory!.CreateClient();
-        var response = await client.GetAsync("/api/users");
-
-        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
-    }
-
-    [Test]
-    public async Task CreateUser_ReturnsCreatedUser()
-    {
-        var client = server.Factory!.CreateClient();
-        var newUser = new CreateUserRequest
-        {
-            Email = "test@example.com",
-            Name = "Test User"
-        };
-
-        var response = await client.PostAsJsonAsync("/api/users", newUser);
-
-        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.Created);
-
-        var user = await response.Content.ReadFromJsonAsync<UserResponse>();
-        await Assert.That(user).IsNotNull();
-        await Assert.That(user!.Email).IsEqualTo(newUser.Email);
-    }
-
-    [Test]
-    public async Task GetUser_WithInvalidId_ReturnsNotFound()
-    {
-        var client = server.Factory!.CreateClient();
-        var response = await client.GetAsync("/api/users/99999");
-
-        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.NotFound);
-    }
-}
-```
-
-### Testing with Authentication (Per-Test Setup)
-
-When each test needs different configuration (like different auth setups), use per-test hooks:
-
-```csharp
-public class AuthenticatedApiTests
-{
-    private WebApplicationFactory<Program>? _factory;
-    private HttpClient? _client;
-
-    [Before(Test)]
-    public async Task Setup()
-    {
-        _factory = new WebApplicationFactory<Program>()
-            .WithWebHostBuilder(builder =>
-            {
-                builder.ConfigureServices(services =>
-                {
-                    // Configure test authentication
-                    services.AddAuthentication("Test")
-                        .AddScheme<TestAuthenticationOptions, TestAuthenticationHandler>(
-                            "Test", options => { });
-                });
-            });
-
-        _client = _factory.CreateClient();
-
-        // Add auth header
-        _client.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Test");
-    }
-
-    [After(Test)]
-    public async Task Cleanup()
-    {
-        _client?.Dispose();
-        if (_factory != null)
-            await _factory.DisposeAsync();
-    }
-
-    [Test]
-    public async Task GetProfile_WithAuth_ReturnsUserProfile()
-    {
-        var response = await _client!.GetAsync("/api/profile");
-
-        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
-        var profile = await response.Content.ReadFromJsonAsync<UserProfile>();
-        await Assert.That(profile).IsNotNull();
-    }
-
-    [Test]
-    public async Task GetProfile_WithoutAuth_ReturnsUnauthorized()
-    {
-        _client!.DefaultRequestHeaders.Authorization = null;
-
-        var response = await _client.GetAsync("/api/profile");
-
-        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
-    }
-}
-```
-
-> **Tip**: Use per-test setup (hooks) when tests need different configurations. Use shared setup (`ClassDataSource` with `SharedType.PerTestSession`) when all tests can use the same configuration.
-
-## Mocking Patterns
-
-### Using TUnit.Mocks (Recommended)
-
-TUnit.Mocks is TUnit's first-party, source-generated mocking framework. It's **AOT-compatible**, requires no runtime proxy generation, and provides a concise API with no `Arg.` prefix needed:
-
-```csharp
-using TUnit.Mocks;
-
-public class OrderServiceTUnitMocksTests
-{
-    [Test]
-    public async Task ProcessOrder_CallsPaymentService()
-    {
-        // Arrange — create mock, configure with concise syntax
-        var mockPaymentService = Mock.Of<IPaymentService>();
-        mockPaymentService
-            .ProcessPaymentAsync(Any(), Any())
-            .Returns(new PaymentResult { Success = true, TransactionId = "TX123" });
-
-        var orderService = new OrderService(mockPaymentService.Object);
-        var order = new Order { Total = 100.00m, PaymentMethod = "Credit Card" };
-
-        // Act
-        var result = await orderService.ProcessAsync(order);
-
-        // Assert
-        await Assert.That(result.IsSuccess).IsTrue();
-        mockPaymentService
-            .ProcessPaymentAsync(100.00m, "Credit Card")
-            .WasCalled(Times.Once);
-    }
-
-    [Test]
-    public async Task ProcessOrder_HandlesPaymentFailure()
-    {
-        // Arrange
-        var mockPaymentService = Mock.Of<IPaymentService>();
-        mockPaymentService
-            .ProcessPaymentAsync(Any(), Any())
-            .Throws<PaymentException>();
-
-        var orderService = new OrderService(mockPaymentService.Object);
-        var order = new Order { Total = 1000.00m, PaymentMethod = "Credit Card" };
-
-        // Act & Assert
-        await Assert.That(async () => await orderService.ProcessAsync(order))
-            .ThrowsExactly<PaymentException>();
-    }
-
-    [Test]
-    public async Task ProcessOrder_UsesInlineLambdaPredicates()
-    {
-        // Arrange — inline lambdas work directly as argument matchers
-        var mockPaymentService = Mock.Of<IPaymentService>();
-        mockPaymentService
-            .ProcessPaymentAsync(amount => amount > 0, method => method.Contains("Card"))
-            .Returns(new PaymentResult { Success = true, TransactionId = "TX456" });
-
-        var orderService = new OrderService(mockPaymentService.Object);
-
-        // Act — "Credit Card" contains "Card", so it matches
-        var result = await orderService.ProcessAsync(
-            new Order { Total = 50.00m, PaymentMethod = "Credit Card" });
-
-        // Assert
-        await Assert.That(result.IsSuccess).IsTrue();
-    }
-
-    [Test]
-    public async Task ProcessOrder_CapturesArguments()
-    {
-        // Arrange — capture arguments for inspection
-        var amountArg = Any<decimal>();
-        var mockPaymentService = Mock.Of<IPaymentService>();
-        mockPaymentService
-            .ProcessPaymentAsync(amountArg, Any())
-            .Returns(new PaymentResult { Success = true, TransactionId = "TX789" });
-
-        var orderService = new OrderService(mockPaymentService.Object);
-        await orderService.ProcessAsync(new Order { Total = 100.00m, PaymentMethod = "Card" });
-        await orderService.ProcessAsync(new Order { Total = 200.00m, PaymentMethod = "Card" });
-
-        // Assert — inspect captured values
-        await Assert.That(amountArg.Values).HasCount().EqualTo(2);
-        await Assert.That(amountArg.Values[0]).IsEqualTo(100.00m);
-        await Assert.That(amountArg.Values[1]).IsEqualTo(200.00m);
-    }
-}
-```
-
-:::tip Why TUnit.Mocks?
-- **No `Arg.` prefix** — `Any()`, `Is<T>()`, and matchers work directly thanks to `global using static`
-- **Inline lambdas** — write predicates directly in the call: `mock.Add(x => x > 5, Any())` — works for all types
-- **Implicit values** — pass raw values (`42`, `"hello"`) directly as exact matchers
-- **AOT-compatible** — source-generated mocks work with Native AOT, trimming, and single-file publishing
-- **Built-in capture** — every `Arg<T>` automatically captures values for inspection via `.Values` and `.Latest`
-
-See the full [TUnit.Mocks documentation](../writing-tests/mocking) for setup, verification, argument matchers, and more.
-:::
-
-### Partial Mocks and Spy Pattern
-
-```csharp
-using TUnit.Mocks;
-
-public class NotificationServiceTests
-{
-    [Test]
-    public async Task SendNotification_LogsAttempt()
-    {
-        // Arrange — partial mock calls base implementation for unconfigured methods
-        var mockLogger = Mock.Of<ILogger>();
-        var notificationService = Mock.OfPartial<NotificationService>(mockLogger.Object);
-
-        // Override only the SendEmail method
-        notificationService.SendEmailAsync(Any(), Any()).Returns(true);
-
-        // Act
-        await notificationService.Object.NotifyUserAsync("user@example.com", "Hello");
-
-        // Assert — verify the real method called SendEmail
-        notificationService.SendEmailAsync("user@example.com", Any()).WasCalled(Times.Once);
-    }
-}
-```
-
-## Data-Driven Test Patterns
-
-### Using MethodDataSource
-
-```csharp
-using TUnit.Core;
-
-public class CalculatorDataDrivenTests
-{
-    [Test]
-    [MethodDataSource(nameof(GetCalculationTestCases))]
-    public async Task Add_ReturnsCorrectSum(int a, int b, int expected)
-    {
-        var calculator = new Calculator();
-        var result = calculator.Add(a, b);
-        await Assert.That(result).IsEqualTo(expected);
-    }
-
-    public static IEnumerable<(int, int, int)> GetCalculationTestCases()
-    {
-        yield return (1, 2, 3);
-        yield return (0, 0, 0);
-        yield return (-1, 1, 0);
-        yield return (100, 200, 300);
-    }
-}
-```
-
-### Using MethodDataSource with Complex Objects
-
-```csharp
-public class OrderValidationTests
-{
-    [Test]
-    [MethodDataSource(nameof(GetInvalidOrders))]
-    public async Task ValidateOrder_WithInvalidData_ReturnsErrors(
-        Order order,
-        string expectedError)
-    {
-        var validator = new OrderValidator();
-
-        var result = await validator.ValidateAsync(order);
-
-        await Assert.That(result.IsValid).IsFalse();
-        await Assert.That(result.Errors).Contains(e => e.Message.Contains(expectedError));
-    }
-
-    public static IEnumerable<(Order, string)> GetInvalidOrders()
-    {
-        yield return (
-            new Order { Total = 0, Items = new List<OrderItem>() },
-            "Order must have at least one item"
-        );
-
-        yield return (
-            new Order { Total = -10, Items = new List<OrderItem> { new() { Quantity = 1 } } },
-            "Total must be positive"
-        );
-
-        yield return (
-            new Order { Total = 100, CustomerId = 0, Items = new List<OrderItem> { new() } },
-            "Customer ID is required"
-        );
-    }
-}
-```
-
-### Using DataSourceGenerator
-
-```csharp
-using TUnit.Core;
-
-public class UserTestDataGenerator : DataSourceGeneratorAttribute<User>
-{
-    public override IEnumerable<User> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
-    {
-        yield return new User { Id = 1, Email = "user1@example.com", Role = "Admin" };
-        yield return new User { Id = 2, Email = "user2@example.com", Role = "User" };
-        yield return new User { Id = 3, Email = "user3@example.com", Role = "Guest" };
-    }
-}
-
-public class UserPermissionTests
-{
-    [Test]
-    [UserTestDataGenerator]
-    public async Task CheckPermissions_ReturnsCorrectAccess(User user)
-    {
-        var permissionService = new PermissionService();
-
-        var canDelete = await permissionService.CanDeleteAsync(user);
-
-        if (user.Role == "Admin")
-            await Assert.That(canDelete).IsTrue();
-        else
-            await Assert.That(canDelete).IsFalse();
-    }
-}
-```
-
-## Exception Testing
-
-### Testing for Specific Exceptions
-
-```csharp
-using TUnit.Core;
-
-public class ExceptionTests
-{
-    [Test]
-    public async Task Divide_ByZero_ThrowsException()
-    {
-        var calculator = new Calculator();
-
-        await Assert.That(() => calculator.Divide(10, 0))
-            .ThrowsExactly<DivideByZeroException>();
-    }
-
-    [Test]
-    public async Task CreateUser_WithInvalidEmail_ThrowsValidationException()
-    {
-        var userService = new UserService();
-
-        await Assert.That(async () => await userService.CreateAsync("invalid-email", "John"))
-            .ThrowsExactly<ValidationException>()
-            .WithMessage("Invalid email format");
-    }
-}
-```
-
-### Testing Exception Messages and Properties
-
-```csharp
-public class DetailedExceptionTests
-{
-    [Test]
-    public async Task ProcessPayment_InsufficientFunds_ThrowsWithDetails()
-    {
-        var paymentService = new PaymentService();
-        var payment = new Payment { Amount = 1000, AccountBalance = 100 };
-
-        var exception = await Assert.That(async () => await paymentService.ProcessAsync(payment))
-            .ThrowsExactly<PaymentException>();
-
-        await Assert.That(exception.Message).Contains("Insufficient funds");
-        await Assert.That(exception.RequiredAmount).IsEqualTo(1000);
-        await Assert.That(exception.AvailableAmount).IsEqualTo(100);
-    }
-}
-```
-
-### Testing Async Exceptions
-
-```csharp
-public class AsyncExceptionTests
-{
-    [Test]
-    public async Task FetchData_WithInvalidUrl_ThrowsHttpException()
-    {
-        var apiClient = new ApiClient();
-
-        // Test async method that throws
-        await Assert.That(async () => await apiClient.GetDataAsync("invalid-url"))
-            .ThrowsExactly<HttpRequestException>();
-    }
-
-    [Test]
-    public async Task ProcessBatch_WithTimeout_ThrowsTaskCanceledException()
-    {
-        var processor = new BatchProcessor();
-        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
-
-        await Assert.That(async () => await processor.ProcessAsync(1000, cts.Token))
-            .Throws<TaskCanceledException>();
-    }
-}
-```
-
-## Integration Test Patterns
-
-### Testing with In-Memory Database
-
-```csharp
-using Microsoft.EntityFrameworkCore;
-using TUnit.Core;
-
-public class OrderRepositoryIntegrationTests
-{
-    private DbContextOptions<OrderDbContext>? _options;
-    private OrderDbContext? _context;
-
-    [Before(Test)]
-    public async Task Setup()
-    {
-        _options = new DbContextOptionsBuilder<OrderDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .Options;
-
-        _context = new OrderDbContext(_options);
-        await _context.Database.EnsureCreatedAsync();
-    }
-
-    [After(Test)]
-    public async Task Cleanup()
-    {
-        if (_context != null)
-        {
-            await _context.Database.EnsureDeletedAsync();
-            await _context.DisposeAsync();
-        }
-    }
-
-    [Test]
-    public async Task SaveOrder_PersistsToDatabase()
-    {
-        var repository = new OrderRepository(_context!);
-        var order = new Order
-        {
-            CustomerId = 1,
-            Total = 100.00m,
-            Status = OrderStatus.Pending
-        };
-
-        await repository.SaveAsync(order);
-        await _context!.SaveChangesAsync();
-
-        var saved = await _context.Orders.FirstOrDefaultAsync(o => o.Id == order.Id);
-        await Assert.That(saved).IsNotNull();
-        await Assert.That(saved!.Total).IsEqualTo(100.00m);
-    }
-
-    [Test]
-    public async Task GetOrder_WithRelatedData_LoadsNavigationProperties()
-    {
-        // Seed data
-        var order = new Order
-        {
-            CustomerId = 1,
-            Items = new List<OrderItem>
-            {
-                new() { ProductId = 1, Quantity = 2, Price = 10.00m },
-                new() { ProductId = 2, Quantity = 1, Price = 20.00m }
-            }
-        };
-        _context!.Orders.Add(order);
-        await _context.SaveChangesAsync();
-
-        // Test
-        var repository = new OrderRepository(_context);
-        var loaded = await repository.GetWithItemsAsync(order.Id);
-
-        await Assert.That(loaded).IsNotNull();
-        await Assert.That(loaded!.Items).Count().IsEqualTo(2);
-    }
-}
-```
-
-### Testing with EF Core + TestContainers + WebApplicationFactory
-
-For a complete integration testing setup with EF Core Code First, TestContainers, and per-test schema isolation, see the full working example in `TUnit.Example.Asp.Net.TestProject/EfCore/`. This demonstrates:
-
-- **Per-test schema isolation**: Each test gets its own PostgreSQL schema via `GetIsolatedName("schema")`
-- **EF Core table creation**: Uses `EnsureCreatedAsync()` to create tables from the model
-- **Dynamic schema support**: Custom `IModelCacheKeyFactory` ensures correct model caching per schema
-- **Clean teardown**: `DROP SCHEMA ... CASCADE` removes all tables after each test
-
-See the [ASP.NET Core Integration Testing](/docs/examples/aspnet#per-test-schema-isolation-with-ef-core) docs for the full pattern.
-
-### Testing with Test Containers (Docker)
-
-```csharp
-using Testcontainers.PostgreSql;
-using TUnit.Core;
-
-public class PostgresIntegrationTests
-{
-    private PostgreSqlContainer? _container;
-    private string? _connectionString;
-
-    [Before(Test)]
-    public async Task Setup()
-    {
-        _container = new PostgreSqlBuilder()
-            .WithImage("postgres:15")
-            .WithDatabase("testdb")
-            .WithUsername("test")
-            .WithPassword("test")
-            .Build();
-
-        await _container.StartAsync();
-        _connectionString = _container.GetConnectionString();
-    }
-
-    [After(Test)]
-    public async Task Cleanup()
-    {
-        if (_container != null)
-            await _container.DisposeAsync();
-    }
-
-    [Test]
-    public async Task CanConnectToPostgres()
-    {
-        using var connection = new NpgsqlConnection(_connectionString);
-        await connection.OpenAsync();
-
-        await Assert.That(connection.State).IsEqualTo(ConnectionState.Open);
-    }
-}
-```
-
-### Testing HTTP Client Integration
-
-```csharp
-using System.Net;
-using TUnit.Core;
-
-public class HttpClientIntegrationTests
-{
-    private HttpClient? _httpClient;
-
-    [Before(Test)]
-    public async Task Setup()
-    {
-        var handler = new HttpClientHandler
-        {
-            ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
-        };
-
-        _httpClient = new HttpClient(handler)
-        {
-            BaseAddress = new Uri("https://api.example.com"),
-            Timeout = TimeSpan.FromSeconds(30)
-        };
-
-        _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer test-token");
-    }
-
-    [After(Test)]
-    public void Cleanup()
-    {
-        _httpClient?.Dispose();
-    }
-
-    [Test]
-    public async Task GetUser_ReturnsValidResponse()
-    {
-        var response = await _httpClient!.GetAsync("/users/1");
-
-        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
-
-        var user = await response.Content.ReadFromJsonAsync<User>();
-        await Assert.That(user).IsNotNull();
-        await Assert.That(user!.Id).IsEqualTo(1);
-    }
-
-    [Test]
-    public async Task GetUser_HandlesRateLimiting()
-    {
-        // Make multiple requests to trigger rate limiting
-        var tasks = Enumerable.Range(1, 100)
-            .Select(i => _httpClient!.GetAsync($"/users/{i}"));
-
-        var responses = await Task.WhenAll(tasks);
-
-        var rateLimited = responses.Count(r => r.StatusCode == HttpStatusCode.TooManyRequests);
-        await Assert.That(rateLimited).IsGreaterThan(0);
-    }
-}
-```
-
-### Testing File System Operations
-
-```csharp
-using TUnit.Core;
-
-public class FileServiceTests
-{
-    private string? _testDirectory;
-
-    [Before(Test)]
-    public async Task Setup()
-    {
-        _testDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-        Directory.CreateDirectory(_testDirectory);
-    }
-
-    [After(Test)]
-    public async Task Cleanup()
-    {
-        if (_testDirectory != null && Directory.Exists(_testDirectory))
-        {
-            Directory.Delete(_testDirectory, recursive: true);
-        }
-    }
-
-    [Test]
-    public async Task SaveFile_CreatesFileWithContent()
-    {
-        var fileService = new FileService();
-        var fileName = "test.txt";
-        var content = "Hello, World!";
-        var filePath = Path.Combine(_testDirectory!, fileName);
-
-        await fileService.SaveAsync(filePath, content);
-
-        await Assert.That(File.Exists(filePath)).IsTrue();
-        var savedContent = await File.ReadAllTextAsync(filePath);
-        await Assert.That(savedContent).IsEqualTo(content);
-    }
-
-    [Test, NotInParallel("FileSystem")]
-    public async Task DeleteFile_RemovesFile()
-    {
-        var filePath = Path.Combine(_testDirectory!, "delete-me.txt");
-        await File.WriteAllTextAsync(filePath, "content");
-
-        var fileService = new FileService();
-        await fileService.DeleteAsync(filePath);
-
-        await Assert.That(File.Exists(filePath)).IsFalse();
-    }
-}
-```
-
-## Summary
-
-These cookbook recipes cover the most common testing scenarios. You can adapt these patterns for your specific needs:
-
-- **Dependency Injection**: Use service collections for realistic testing with dependencies
-- **API Testing**: Use `WebApplicationFactory` for end-to-end API tests
-- **Mocking**: Use TUnit.Mocks for AOT-compatible, source-generated mocking with a concise API
-- **Data-Driven Tests**: Use `MethodDataSource` or `DataSourceGenerator` for parameterized tests
-- **Exception Testing**: Use TUnit's fluent exception assertions
-- **Integration Tests**: Test with real databases, containers, or file systems
-
-For more examples, check out the [ASP.NET Core](../examples/aspnet) and [Aspire](../examples/aspire) integration guides.
+For shared resources, prefer `[ClassDataSource<>]` over class/assembly hooks — it handles lifecycle automatically and works across multiple test classes.
 
 ---
 
@@ -19367,7 +17938,6 @@ public class LazyDataProvider
 using TUnit.Core;
 using TUnit.Core.Interfaces;
 
-// Set maximum parallel test execution using an assembly-level parallel limiter
 [assembly: ParallelLimiter<ProcessorCountLimit>]
 
 public class ProcessorCountLimit : IParallelLimit
@@ -19495,59 +18065,7 @@ var userCount = await GetUserCountFromDatabase();
 await Assert.That(userCount).IsEqualTo(1000);
 ```
 
-#### Use Early Exit Patterns
-
-```csharp
-[Test]
-public async Task EfficientValidation()
-{
-    var result = await GetResultAsync();
-    
-    // Quick checks first
-    if (result == null)
-    {
-        await Assert.That(result).IsNotNull();
-        return; // Exit early
-    }
-    
-    // More expensive validations only if needed
-    await Assert.That(result.Items).Count().IsGreaterThan(0);
-}
-```
-
 ## Memory Management
-
-### Dispose Resources Properly
-
-```csharp
-public class MemoryEfficientTests : IAsyncDisposable
-{
-    private readonly List<IDisposable> _disposables = new();
-    
-    [Test]
-    public async Task TestWithResources()
-    {
-        var resource = new LargeResource();
-        _disposables.Add(resource);
-        
-        // Use resource
-        await resource.ProcessAsync();
-    }
-    
-    public async ValueTask DisposeAsync()
-    {
-        foreach (var disposable in _disposables)
-        {
-            disposable.Dispose();
-        }
-        _disposables.Clear();
-        
-        // Force garbage collection if needed
-        GC.Collect();
-        GC.WaitForPendingFinalizers();
-    }
-}
-```
 
 ### Avoid Memory Leaks in Static Fields
 
@@ -19586,12 +18104,11 @@ public class EfficientTests
 ### Use ValueTask for High-Frequency Operations
 
 ```csharp
-// For operations called many times, use ValueTask to reduce allocations
 public async ValueTask<bool> FastCheckAsync(int id)
 {
     if (_cache.TryGetValue(id, out var cached))
     {
-        return cached; // No allocation for cached path
+        return cached;
     }
     
     var result = await LoadFromDatabaseAsync(id);
@@ -19712,35 +18229,6 @@ public class FastDatabaseTests
 }
 ```
 
-### Use In-Memory Databases for Unit Tests
-
-```csharp
-public class InMemoryDatabaseTests
-{
-    private DbContext CreateInMemoryContext()
-    {
-        var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
-            
-        return new AppDbContext(options);
-    }
-    
-    [Test]
-    public async Task FastDatabaseTest()
-    {
-        using var context = CreateInMemoryContext();
-        
-        // Test runs entirely in memory
-        context.Users.Add(new User { Name = "Test" });
-        await context.SaveChangesAsync();
-        
-        var count = await context.Users.CountAsync();
-        await Assert.That(count).IsEqualTo(1);
-    }
-}
-```
-
 ## CI/CD Optimization
 
 ### Split Test Suites
@@ -19756,11 +18244,6 @@ dotnet test --no-build -- --treenode-filter "/*/*/*/*[Category=Integration]"
 dotnet test --no-build -- --treenode-filter "/*/*/*/*[Category=E2E]"
 ```
 
-> **Note**: With .NET 10 SDK or newer, you can use the simpler syntax:
-> ```bash
-> dotnet test --no-build --treenode-filter "/**[Category=Unit]"
-> ```
-
 ### Fail Fast in CI
 
 ```bash
@@ -19768,75 +18251,12 @@ dotnet test --no-build -- --treenode-filter "/*/*/*/*[Category=E2E]"
 dotnet test -- --fail-fast
 ```
 
-## Monitoring and Profiling
-
-### Add Performance Logging
-
-```csharp
-public class PerformanceAwareExecutor : ITestExecutor
-{
-    private readonly ILogger<PerformanceAwareExecutor> _logger;
-    
-    public async ValueTask ExecuteTest(TestContext context, Func<ValueTask> action)
-    {
-        var stopwatch = Stopwatch.StartNew();
-
-        try
-        {
-            await action();
-        }
-        finally
-        {
-            stopwatch.Stop();
-            
-            if (stopwatch.ElapsedMilliseconds > 1000)
-            {
-                _logger.LogWarning(
-                    "Slow test detected: {TestName} took {ElapsedMs}ms",
-                    context.Metadata.TestName,
-                    stopwatch.ElapsedMilliseconds);
-            }
-        }
-    }
-}
-```
-
-### Track Test Metrics
-
-```csharp
-[After(Test)]
-public static void RecordTestMetrics()
-{
-    var context = TestContext.Current;
-    if (context?.Execution.Result != null)
-    {
-        TelemetryClient.TrackMetric(
-            "TestDuration",
-            context.Execution.Result.Duration.TotalMilliseconds,
-            new Dictionary<string, string>
-            {
-                ["TestName"] = context.Metadata.TestName,
-                ["TestClass"] = context.Metadata.TestDetails.ClassType.Name,
-                ["Result"] = context.Execution.Result.State.ToString()
-            });
-    }
-}
-```
-
 ## Summary
 
-Key performance principles:
-
-1. **Optimize Discovery**: Keep data sources lightweight and limit test combinations
-2. **Parallelize Wisely**: Use appropriate parallel limits and grouping
-3. **Manage Resources**: Dispose properly and avoid memory leaks
-4. **Cache Aggressively**: Cache expensive operations and file I/O
-5. **Batch Operations**: Group database and I/O operations
-6. **Monitor Performance**: Track and alert on slow tests
-7. **Use AOT Mode**: Enable AOT for best performance
-8. **Fail Fast**: Stop early on failures in CI
-
-By following these practices, you can maintain a fast, efficient test suite that scales with your codebase.
+- **Optimize Discovery**: Keep data sources lightweight, use AOT mode, limit test combinations
+- **Parallelize Wisely**: Use appropriate parallel limits and grouping
+- **Manage Resources**: Dispose properly, avoid memory leaks, use ValueTask in hot paths
+- **Batch I/O and Cache**: Group operations and cache expensive results
 
 ---
 
@@ -19851,27 +18271,23 @@ If you're wondering why TUnit does things differently from other testing framewo
 
 TUnit is built for speed at any scale. Whether you have 100 tests or 100,000, they should run as fast as possible. Tests run in parallel by default, using Roslyn source generators to discover tests at compile time instead of expensive runtime reflection. You can choose between source-generated mode (fastest) or reflection mode (more flexible) depending on your needs.
 
-Fast tests create faster feedback loops. When tests run quickly, developers actually run them more often. They catch bugs earlier and stay in flow instead of context-switching while waiting for test results.
-
 ### Modern .NET First
 
 TUnit embraces modern .NET without compromises. Everything is async by default. Assertions, hooks, all of it. It uses C# 12+ features like collection expressions and file-scoped namespaces. Native AOT and trimming work out of the box. It's built on Microsoft.Testing.Platform instead of the legacy VSTest infrastructure.
 
-Modern .NET applications deserve a modern testing framework. While TUnit supports .NET Standard 2.0 (including .NET Framework), it's designed around modern patterns and idioms, not legacy approaches from a decade ago.
+TUnit supports .NET Standard 2.0 but is designed around modern patterns, not legacy approaches.
 
 ### Test Isolation
 
 Every test should be completely independent. TUnit creates a new instance of your test class for each test method, so instance fields can't leak between tests. Tests can run in any order, on any thread, without affecting each other. If you need shared state, you make it explicit with the `static` keyword.
 
-Isolated tests are reliable tests. You never get those mysterious failures where Test B only fails when Test A runs first. Everything is deterministic.
+Isolated tests are reliable tests.
 
 But what about when tests really do need to depend on each other? Use `[DependsOn]` to enforce ordering. It ensures the dependency always runs first, and if it fails, the dependent test gets skipped instead of running with bad state. This reduces flakiness compared to hoping tests run in the right order by accident.
 
 ### Developer Experience
 
 Writing tests should be pleasant, not painful. TUnit has minimal boilerplate—just put `[Test]` on your methods, no class attributes needed. Assertions read naturally: `await Assert.That(value).IsEqualTo(expected)`. Error messages are clear and actionable. You can access test metadata through `TestContext` whenever you need it.
-
-Developers spend a lot of time writing and debugging tests. Small improvements in ergonomics really do add up over time.
 
 ## Key Design Decisions
 
@@ -19899,7 +18315,7 @@ Assert.Equal(expected, result);
 
 The reasoning: consistency and extensibility. If all assertions work the same way, you never have to remember which ones need await and which don't. Custom assertions can do async work like database queries or HTTP calls. You can chain assertions naturally without blocking threads. And you avoid all the sync-over-async deadlock problems.
 
-Yes, it's more verbose. Yes, there's a learning curve. But it enables patterns that just aren't possible with sync assertions:
+This enables patterns not possible with sync assertions:
 
 ```csharp
 // Custom async assertion
@@ -19911,8 +18327,6 @@ await Assert.That(user.Email)
     .IsNotNull()
     .And.Contains("@example.com");
 ```
-
-The benefits outweigh the extra `await` keyword. Plus, the code fixers handle most of the migration work automatically anyway.
 
 ### Why Microsoft.Testing.Platform?
 
@@ -19926,7 +18340,7 @@ The downside? Some older tools only work with VSTest. Coverlet is the most notab
 
 Most testing frameworks make you opt-in to parallelism. TUnit flips that around.
 
-Running tests in parallel can improve execution time. Modern CPUs have many cores—TUnit uses them by default. And here's the thing: tests that are safe to run in parallel are usually well-isolated tests. Making parallelism the default encourages better test design.
+Running tests in parallel uses all CPU cores. Making parallelism the default encourages better test isolation.
 
 When do you opt-out? Use `[NotInParallel]` for tests that modify shared files or databases, use global state, must run in a specific order, or access hardware like cameras or GPIO pins.
 
@@ -19965,53 +18379,37 @@ public class MyTests
 
 This prevents instance fields from leaking between tests. No race conditions on instance data. No mysterious "Test B fails when Test A runs first" issues. If you need shared state, you use `static`, which makes it explicit and obvious in the code.
 
-Coming from NUnit (which shares instances by default)? Yes, this is a breaking change. But it's the right default for test isolation.
-
 ### Why Source Generators?
 
 TUnit uses Roslyn source generators for test discovery. No runtime reflection means better performance and Native AOT compatibility. You get compile-time errors for test configuration issues instead of runtime surprises. IDEs understand the generated code, so IntelliSense and refactoring work better.
 
-Source generators do add complexity and can make debugging trickier. But for most users, the performance and AOT benefits are worth it. If you really need more flexibility, reflection mode is always available with `dotnet test -- --reflection`.
+If you need more flexibility, reflection mode is available with `dotnet test -- --reflection`.
 
 ## What Problems Does TUnit Solve?
 
 ### Slow Test Suites
 
-Traditional frameworks run tests sequentially by default and use runtime reflection for discovery. TUnit runs tests in parallel by default and discovers them at compile time with source generators. This can significantly reduce test suite execution time, especially for large test suites.
+Traditional frameworks run tests sequentially by default and use runtime reflection for discovery. TUnit runs tests in parallel by default and discovers them at compile time with source generators.
 
 ### Flaky Tests from State Leaks
 
-NUnit shares test class instances. xUnit allows state in constructors. It's easy to accidentally share state and get those frustrating "works alone, fails in the suite" bugs. TUnit creates a new instance per test with no way to opt out. If you need shared state, you use `static`, making it explicit. Parallel execution catches state problems early instead of hiding them.
+TUnit creates a new instance per test with no way to opt out. If you need shared state, you use `static`, making it explicit.
 
 ### Limited Async Support
 
-Older frameworks have a mix of sync and async APIs. You need `IAsyncLifetime` for async setup. Some parts do sync-over-async. TUnit is async everywhere—hooks, assertions, all of it. No deadlocks, clean code throughout.
+TUnit is async everywhere—hooks, assertions, all of it. No deadlocks, clean code throughout.
 
 ### Poor AOT Support
 
-Heavy runtime reflection doesn't work with Native AOT. TUnit uses source generation, supports AOT from day one, and has proper trimming annotations. Your tests work with Native AOT deployments.
+TUnit uses source generation and has proper trimming annotations. Your tests work with Native AOT deployments.
 
 ## Comparison with Other Frameworks
 
-### TUnit vs xUnit
-
-xUnit and TUnit have a lot in common—neither requires class attributes, both have modern extensible designs. The main differences: TUnit runs parallel by default with better async control, uses source generation for discovery, has a richer hook system instead of constructor/IDisposable patterns, and uses fluent assertions instead of static methods.
-
-### TUnit vs NUnit
-
-Both use `[Test]` attributes and have rich assertion libraries. The biggest difference is isolation: TUnit creates a new instance per test, NUnit shares by default. TUnit also defaults to parallel execution (NUnit defaults to sequential), has async assertions (NUnit is sync), and doesn't need the `[TestFixture]` attribute.
-
-### TUnit vs MSTest
-
-Both are Microsoft-backed with good IDE integration. TUnit drops the class attribute requirement (MSTest needs `[TestClass]`), runs on the modern testing platform, defaults to parallel execution, and has better async support throughout.
-
-For detailed comparisons, check out [Framework Differences](../comparison/framework-differences.md).
+For detailed comparisons, see [Framework Differences](../comparison/framework-differences.md).
 
 ## When to Choose TUnit
 
 TUnit is a good fit when performance matters—you have large test suites that need to run fast. It supports .NET Standard 2.0, so it works with .NET Framework and all modern .NET versions. It works great with Native AOT, and shines when you want parallel test execution. If you're starting a new project without legacy constraints, TUnit is worth considering.
-
-When might you want alternatives? If you have an existing huge test suite, migration costs might outweigh the benefits. If your team strongly prefers another framework's style, that's a legitimate reason to stick with what works for you. Or if you absolutely need a tool that only works with VSTest, you'll need to use something else.
 
 For migration details, check out:
 - [xUnit Migration](../migration/xunit.md)
@@ -20024,13 +18422,11 @@ For migration details, check out:
 
 
 **TUnit** is another testing framework for C# / .NET.
-It can be used for unit testing, integration testing, acceptance testing, you name it.
+Use it for unit testing, integration testing, acceptance testing, or anything else.
 
-It provides you a skeleton framework to write, execute and assert tests, with little opinion on how your tests should be. In fact, it aims to be flexible, giving you various ways to inject test data, such as options for new data or shared instances, and a variety of hooks to run before and after tests.
+TUnit provides flexible ways to inject test data (new or shared instances) and hooks to run before and after tests, with minimal opinions on test style.
 
-That means you get more control over your setup, execution, and style of tests.
-
-It is also built on top of the newer Microsoft Testing Platform, which was rewritten to make .NET testing simpler and more extensible.
+Built on Microsoft.Testing.Platform for simpler, more extensible .NET testing.
 
 :::performance
 TUnit is designed for speed. Through source generation and compile-time optimizations, TUnit significantly outperforms traditional testing frameworks. See the [performance benchmarks](/docs/benchmarks) for real-world speed comparisons.
@@ -20039,13 +18435,14 @@ TUnit is designed for speed. Through source generation and compile-time optimiza
 ## What's in These Docs
 
 - **[Getting Started](getting-started/installation.md)** — Install TUnit, write your first test, and run it
-- **[Writing Tests](writing-tests/things-to-know.md)** — Test attributes, data-driven testing, lifecycle hooks, and dependency injection
+- **[Writing Tests](writing-tests/things-to-know.md)** — Test data, lifecycle hooks, dependency injection, parallelism, and mocking
 - **[Assertions](assertions/getting-started.md)** — Fluent assertion syntax for values, collections, strings, exceptions, and more
-- **[Execution](execution/parallelism.md)** — Control parallelism, ordering, retries, and timeouts
-- **[Extending TUnit](extending/built-in-extensions.md)** — Built-in extensions, custom data sources, and event subscribers
-- **[Migration](migration/xunit.md)** — Guides for switching from xUnit, NUnit, or MSTest
-- **[Comparison](comparison/framework-differences.md)** — Feature comparisons with other frameworks
-- **[Guides](guides/best-practices.md)** — Best practices, cookbook recipes, and philosophy
+- **[Running Tests](execution/test-filters.md)** — Filters, timeouts, retries, CI/CD reporting, and AOT
+- **[Integrations](examples/aspnet.md)** — ASP.NET Core, Aspire, Playwright, and other integration examples
+- **[Extending TUnit](extending/extension-points.md)** — Custom data sources, formatters, and event subscribers
+- **[Comparing Frameworks](comparison/framework-differences.md)** — Feature comparisons with xUnit, NUnit, and MSTest
+- **[Migration](migration/xunit.md)** — Step-by-step guides for switching frameworks
+- **[Guides](guides/best-practices.md)** — Tips, performance guidance, and philosophy
 
 ---
 
@@ -24080,96 +22477,11 @@ These are conceptual questions about TUnit's design and capabilities.
 
 ### Why do I have to await all assertions? Can I use synchronous assertions?
 
-All TUnit assertions must be awaited. There's no synchronous alternative.
+All TUnit assertions must be awaited. Assertions don't execute until awaited — forgetting `await` means the test passes without checking anything. The compiler warns about unawaited tasks, but watch for this common mistake.
 
-**Important:** Test methods themselves can be either synchronous (`void`) or asynchronous (`async Task`). However, if your test uses TUnit's assertion library (`Assert.That(...)`), the test method **must** be `async Task` because assertions return awaitable objects that must be awaited to execute. Tests without assertions can remain synchronous. See [Test Method Signatures](getting-started/writing-your-first-test.md#test-method-signatures) for examples.
+If your test uses `Assert.That(...)`, the method **must** be `async Task`. Tests without assertions can remain synchronous. See [Awaiting Assertions](assertions/awaiting.md) for details, examples, and the design rationale.
 
-**Why this design?**
-
-TUnit's assertion library uses the awaitable pattern (custom objects with `GetAwaiter()` methods). This means:
-- Assertions don't execute until they're awaited - this is when the actual verification happens
-- All assertions work consistently, whether they're simple value checks or complex async operations
-- Custom assertions can perform async work (like database queries or HTTP calls)
-- No sync-over-async patterns that cause deadlocks
-- Assertions can be chained fluently before execution
-
-**What this means when migrating:**
-
-You need to convert your tests to `async Task` and add `await` before assertions.
-
-Before (xUnit/NUnit/MSTest):
-```csharp
-[Test]
-public void MyTest()
-{
-    var result = Calculate(2, 3);
-    Assert.Equal(5, result);
-}
-```
-
-After (TUnit):
-```csharp
-[Test]
-public async Task MyTest()
-{
-    var result = Calculate(2, 3);
-    await Assert.That(result).IsEqualTo(5);
-}
-```
-
-**Automated migration**
-
-TUnit includes code fixers that handle most of this conversion for you:
-
-```bash
-# For xUnit
-dotnet format analyzers --severity info --diagnostics TUXU0001
-
-# For NUnit
-dotnet format analyzers --severity info --diagnostics TUNU0001
-
-# For MSTest
-dotnet format analyzers --severity info --diagnostics TUMS0001
-```
-
-The code fixer converts test methods to async, adds await to assertions, and updates attribute names. It handles most common cases automatically, though you may need to adjust complex scenarios manually.
-
-See the migration guides for step-by-step instructions:
-- [xUnit migration](migration/xunit.md#automated-migration-with-code-fixers)
-- [NUnit migration](migration/nunit.md#automated-migration-with-code-fixers)
-- [MSTest migration](migration/mstest.md#automated-migration-with-code-fixers)
-
-**What you gain**
-
-Async assertions enable patterns that aren't possible with synchronous assertions:
-
-```csharp
-[Test]
-public async Task AsyncAssertion_Example()
-{
-    // Await async operations in assertions
-    await Assert.That(async () => await GetUserAsync(123))
-        .Throws<UserNotFoundException>();
-
-    // Chain assertions naturally
-    var user = await GetUserAsync(456);
-    await Assert.That(user.Email)
-        .IsNotNull()
-        .And.Contains("@example.com");
-}
-```
-
-**Watch out for missing awaits**
-
-The most common mistake is forgetting `await`. The compiler warns you, but the test will pass without actually running the assertion:
-
-```csharp
-// Wrong - test passes without checking anything
-Assert.That(result).IsEqualTo(5);  // Returns an awaitable object that's never executed
-
-// Correct
-await Assert.That(result).IsEqualTo(5);  // The await triggers the actual assertion execution
-```
+For migrating from other frameworks, TUnit includes code fixers that automate the conversion — see the [xUnit](migration/xunit.md#automated-migration-with-code-fixers), [NUnit](migration/nunit.md#automated-migration-with-code-fixers), or [MSTest](migration/mstest.md#automated-migration-with-code-fixers) migration guides.
 
 ### Does TUnit work with Coverlet for code coverage?
 
@@ -26851,15 +25163,7 @@ These settings help balance compilation time, binary size, and functionality bas
 ## Data Driven Tests
 
 
-It's common to want to repeat tests but pass in different values on each execution.
-We can do that with a data driven test.
-
-Compile-time known data can be injected via `[Arguments(...)]` attributes.
-This attribute takes an array of arguments. It can take as many as you like, but your test method has to have the same number of parameters and they must be the same type.
-If you include multiple `[Arguments]` attributes, your test will be repeated that many times, containing the data passed into the attribute.
-
-When your test is executed, TUnit will pass the values provided in the attribute, into the test by the parameters.
-Here's an example:
+Inject compile-time known data via `[Arguments(...)]` attributes. The attribute takes an array of arguments that must match the test method's parameter count and types. Multiple `[Arguments]` attributes repeat the test once per attribute:
 
 ```csharp
 using TUnit.Assertions;
@@ -27436,7 +25740,13 @@ It also takes an optional `Shared` argument, controlling whether you want to sha
 
 Avoid mutating the state of shared objects within tests. Because tests run concurrently, the execution order is unpredictable, and shared mutable state leads to flaky tests.
 
-The `SharedType` parameter controls how instances are shared across tests. See [Property Injection -- Sharing Strategies](property-injection.md#sharing-strategies) for full details on the available options (`None`, `PerClass`, `PerAssembly`, `PerTestSession`, `Keyed`).
+The `SharedType` parameter controls how instances are shared across tests:
+
+- **`SharedType.None`** (default) — new instance for each injection point
+- **`SharedType.PerClass`** — one instance per test class
+- **`SharedType.PerAssembly`** — one instance shared across all tests in the same assembly
+- **`SharedType.PerTestSession`** — single instance for the entire test run, shared across assemblies (best for expensive resources like containers)
+- **`SharedType.Keyed`** — share instances based on a key value (use the `Key` parameter)
 
 ## Initialization and TearDown
 If you need to do some initialization or teardown for when this object is created/disposed, simply implement the `IAsyncInitializer` and/or `IAsyncDisposable` interfaces
@@ -28959,12 +27269,9 @@ public class MyTestClass
 ## Setup Hooks
 
 
-Most setup for a test can be performed in the constructor (think setting up mocks, assigning fields.)
+Most setup can go in the constructor (setting up mocks, assigning fields).
 
-However some scenarios require further setup that could be an asynchronous operation.
-E.g. pinging a service to wake it up in preparation for the tests.
-
-For this, we can declare a method with a `[Before(...)]` or a `[BeforeEvery(...)]` attribute.
+For asynchronous setup -- such as pinging a service before tests run -- declare a method with a `[Before(...)]` or `[BeforeEvery(...)]` attribute.
 
 ## Hook Method Signatures
 
@@ -28992,37 +27299,31 @@ public async Task AsyncSetup()  // ✅ Valid - asynchronous hook
 
 ### Hook Parameters
 
-Hooks can optionally accept parameters for accessing context information and cancellation tokens:
+Hooks can optionally accept context and cancellation token parameters:
 
 ```csharp
 [Before(Test)]
 public async Task Setup(TestContext context, CancellationToken cancellationToken)
 {
-    // Access test information via context
     Console.WriteLine($"Setting up test: {context.Metadata.TestName}");
-
-    // Use cancellation token for timeout-aware operations
     await SomeLongRunningOperation(cancellationToken);
 }
 
 [Before(Class)]
 public static async Task ClassSetup(ClassHookContext context, CancellationToken cancellationToken)
 {
-    // Both context and cancellation token available for class-level hooks
     await InitializeResources(cancellationToken);
 }
 
 [Before(Test)]
 public async Task SetupWithToken(CancellationToken cancellationToken)
 {
-    // Can use CancellationToken without context
     await Task.Delay(100, cancellationToken);
 }
 
 [Before(Test)]
 public async Task SetupWithContext(TestContext context)
 {
-    // Can use context without CancellationToken
     Console.WriteLine(context.Metadata.TestName);
 }
 ```
@@ -29062,8 +27363,7 @@ Must be a static method. Will run once before the first test in the test session
 Must be a static method. Will run once before any tests are discovered.
 
 ## [BeforeEvery(HookType)]
-All [BeforeEvery(...)] methods must be static. They should ideally be placed in their own file that's easy to find, as they can globally affect the test suite, so it should be easy for developers to locate this behaviour.
-e.g. `GlobalHooks.cs` at the root of the test project.
+All [BeforeEvery(...)] methods must be static. Place them in a dedicated file (e.g. `GlobalHooks.cs` at the root of the test project) since they globally affect the test suite.
 
 ### [BeforeEvery(Test)]
 Will be executed before every test that will run in the test session.
@@ -29277,18 +27577,14 @@ public class ApiTests
 }
 ```
 
-**Why:** Class-level setup runs once, sharing expensive resources across tests. Much faster!
+**Why:** Class-level setup runs once, sharing expensive resources across tests.
 
   </TabItem>
 </Tabs>
 
 ## AsyncLocal
 
-If you are wanting to set AsyncLocal values within your `[Before(...)]` hooks, this is supported.
-
-But to propagate the values into the test framework, you must call `context.AddAsyncLocalValues()` - Where `context` is the relevant context object injected into your hook method.
-
-E.g.
+Setting AsyncLocal values in `[Before(...)]` hooks is supported. To propagate them into the test framework, call `context.AddAsyncLocalValues()` on the context object injected into the hook method:
 
 ```csharp
     [BeforeEvery(Class)]
@@ -29309,14 +27605,12 @@ E.g.
 ## Test Lifecycle Overview
 
 
-Understanding TUnit's complete test lifecycle helps you write effective tests and place setup/cleanup logic in the right place. TUnit provides multiple mechanisms for hooking into the lifecycle:
+TUnit provides multiple mechanisms for hooking into the test lifecycle:
 
 1. **Hook Attributes** (`[Before]`, `[After]`, etc.) - Method-based hooks
 2. **Event Receivers** (interfaces like `ITestStartEventReceiver`) - Object-based event subscriptions
 3. **Initialization Interfaces** (`IAsyncInitializer`, `IAsyncDiscoveryInitializer`) - Async object setup
 4. **Disposal Interfaces** (`IDisposable`, `IAsyncDisposable`) - Resource cleanup
-
-This page provides a complete visual overview of when each mechanism executes.
 
 ## Complete Lifecycle Diagram
 
@@ -29476,7 +27770,7 @@ sequenceDiagram
 
 ### Complete Test Execution Order
 
-Here's the exact order of operations for a single test:
+Exact order of operations for a single test:
 
 | Order | What Happens | Type |
 |-------|-------------|------|
@@ -32514,13 +30808,7 @@ public class IntegrationTests
 
 ### Sharing Strategies
 
-When using nested property injection, the `Shared` parameter becomes crucial:
-
-- **`SharedType.PerTestSession`**: Single instance for the entire test run - ideal for expensive resources like containers
-- **`SharedType.PerAssembly`**: Single instance shared for every test in the same assembly as itself.
-- **`SharedType.PerClass`**: One instance per test class
-- **`SharedType.Keyed`**: Share instances based on a key value
-- **`SharedType.None`**: New instance for each injection point (default)
+When using nested property injection, the `Shared` parameter controls object lifetime and reuse. Use `SharedType.PerTestSession` for expensive resources like containers. See [ClassDataSource](class-data-source.md) for all options.
 
 ### Best Practices
 
@@ -32754,11 +31042,10 @@ All tests have a `TestContext` object available to them.
 
 This can be accessed statically via `TestContext.Current`.
 
-Here you can see information about the test, including things like the test name, containing class, custom properties, categories, etc.
+Access information about the test, including things like the test name, containing class, custom properties, categories, etc.
 
-This can be useful if you want something like a generic `AfterEachTest` for all tests, but with logic to execute for only certain tests.
+Useful for a generic `AfterEachTest` for all tests, but with logic to execute for only certain tests.
 
-e.g.
 ```csharp
 if (TestContext.Current?.Metadata.TestDetails.CustomProperties.ContainsKey("SomeProperty") == true)
 {
@@ -32766,11 +31053,10 @@ if (TestContext.Current?.Metadata.TestDetails.CustomProperties.ContainsKey("Some
 }
 ```
 
-The context also has a `Results` object. You'll notice this is nullable. This will be null until you're in the context of a `AfterEachTest` method. That's because the `Results` can only be set after a test has finished.
+The context has a `Results` object (nullable). It's null until an `AfterEachTest` method runs, since results are only available after test completion.
 
-These results can be handy when you're cleaning up, but maybe only want to do something if a test failed.
+Use results to conditionally execute cleanup logic:
 
-e.g.
 ```csharp
 if (TestContext.Current?.Result?.State == TestState.Failed)
 {
