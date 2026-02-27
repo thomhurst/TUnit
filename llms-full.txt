@@ -17134,7 +17134,7 @@ To that project add the `TUnit` package:
 
 ```powershell
 cd YourTestProjectNameHere
-dotnet add package TUnit --prerelease
+dotnet add package TUnit
 ```
 
 And then remove any automatically generated `Program.cs` or main method, as this is handled by the TUnit package.
