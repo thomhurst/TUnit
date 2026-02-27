@@ -223,6 +223,50 @@ public class TypeAssertionAmbiguityTests
         }).Throws<TUnit.Assertions.Exceptions.AssertionException>();
     }
 
+    // ============ IsAssignableFrom EDGE CASE TESTS ============
+
+    [Test]
+    public async Task IsAssignableFrom_Fails_WhenNull()
+    {
+        await Assert.That(async () =>
+        {
+            Element? element = null;
+            await Assert.That(element).IsAssignableFrom<DerivedElement>();
+        }).Throws<TUnit.Assertions.Exceptions.AssertionException>();
+    }
+
+    [Test]
+    public async Task IsNotAssignableFrom_Fails_WhenNull()
+    {
+        await Assert.That(async () =>
+        {
+            Element? element = null;
+            await Assert.That(element).IsNotAssignableFrom<string>();
+        }).Throws<TUnit.Assertions.Exceptions.AssertionException>();
+    }
+
+    [Test]
+    public async Task IsAssignableFrom_WithException_ChecksExceptionType()
+    {
+        await Assert.That(async () =>
+        {
+            throw new InvalidOperationException("test");
+        }).Throws<InvalidOperationException>()
+          .And
+          .IsAssignableFrom<InvalidOperationException>();
+    }
+
+    [Test]
+    public async Task IsNotAssignableFrom_WithException_ChecksExceptionType()
+    {
+        await Assert.That(async () =>
+        {
+            throw new InvalidOperationException("test");
+        }).Throws<InvalidOperationException>()
+          .And
+          .IsNotAssignableFrom<string>();
+    }
+
     // ============ IsAssignableFrom CHAINING TESTS ============
 
     [Test]
