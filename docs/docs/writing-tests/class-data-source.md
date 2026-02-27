@@ -8,7 +8,13 @@ It also takes an optional `Shared` argument, controlling whether you want to sha
 
 Avoid mutating the state of shared objects within tests. Because tests run concurrently, the execution order is unpredictable, and shared mutable state leads to flaky tests.
 
-The `SharedType` parameter controls how instances are shared across tests. See [Property Injection -- Sharing Strategies](property-injection.md#sharing-strategies) for full details on the available options (`None`, `PerClass`, `PerAssembly`, `PerTestSession`, `Keyed`).
+The `SharedType` parameter controls how instances are shared across tests:
+
+- **`SharedType.None`** (default) — new instance for each injection point
+- **`SharedType.PerClass`** — one instance per test class
+- **`SharedType.PerAssembly`** — one instance shared across all tests in the same assembly
+- **`SharedType.PerTestSession`** — single instance for the entire test run, shared across assemblies (best for expensive resources like containers)
+- **`SharedType.Keyed`** — share instances based on a key value (use the `Key` parameter)
 
 ## Initialization and TearDown
 If you need to do some initialization or teardown for when this object is created/disposed, simply implement the `IAsyncInitializer` and/or `IAsyncDisposable` interfaces

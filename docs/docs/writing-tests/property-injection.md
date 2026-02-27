@@ -380,7 +380,7 @@ public class IntegrationTests
 
 ### Sharing Strategies
 
-When using nested property injection, the `Shared` parameter controls object lifetime and reuse. Use `SharedType.PerTestSession` for expensive resources like containers. See [ClassDataSource](class-data-source.md) for all sharing options.
+When using nested property injection, the `Shared` parameter controls object lifetime and reuse. Use `SharedType.PerTestSession` for expensive resources like containers. See [ClassDataSource](class-data-source.md) for all options.
 
 ### Best Practices
 
