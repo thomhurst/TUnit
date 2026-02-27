@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using TUnit.Assertions.Conditions;
 using TUnit.Assertions.Core;
+using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.Assertions;
 
@@ -63,7 +64,7 @@ public class PropertyAssertion<TObject, TProperty>
     {
         _parentContext.ExpressionBuilder.Append(".IsNull()");
 
-        var assertion = new Conditions.NullAssertion<TProperty>(_propertyContext);
+        var assertion = new TValue_IsNull_Assertion<TProperty>(_propertyContext);
         var erasedAssertion = new Conditions.TypeErasedAssertion<TProperty>(assertion);
 
         return new PropertyAssertionResult<TObject>(_parentContext, erasedAssertion);

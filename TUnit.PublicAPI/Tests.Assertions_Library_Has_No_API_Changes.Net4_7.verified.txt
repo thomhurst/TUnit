@@ -216,47 +216,26 @@ namespace
 }
 namespace .
 {
-    public class DoesNotHaveFlagAssertion<TEnum> : .<TEnum>
-        where TEnum :  struct, 
+    public static class EnumAssertionExtensions
     {
-        public DoesNotHaveFlagAssertion(.<TEnum> context, TEnum unexpectedFlag) { }
-        protected override .<.> CheckAsync(.<TEnum> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public class DoesNotHaveSameNameAsAssertion<TEnum> : .<TEnum>
-        where TEnum :  struct, 
-    {
-        public DoesNotHaveSameNameAsAssertion(.<TEnum> context,  otherEnumValue) { }
-        protected override .<.> CheckAsync(.<TEnum> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public class DoesNotHaveSameValueAsAssertion<TEnum> : .<TEnum>
-        where TEnum :  struct, 
-    {
-        public DoesNotHaveSameValueAsAssertion(.<TEnum> context,  otherEnumValue) { }
-        protected override .<.> CheckAsync(.<TEnum> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public class HasFlagAssertion<TEnum> : .<TEnum>
-        where TEnum :  struct, 
-    {
-        public HasFlagAssertion(.<TEnum> context, TEnum expectedFlag) { }
-        protected override .<.> CheckAsync(.<TEnum> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public class HasSameNameAsAssertion<TEnum> : .<TEnum>
-        where TEnum :  struct, 
-    {
-        public HasSameNameAsAssertion(.<TEnum> context,  otherEnumValue) { }
-        protected override .<.> CheckAsync(.<TEnum> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public class HasSameValueAsAssertion<TEnum> : .<TEnum>
-        where TEnum :  struct, 
-    {
-        public HasSameValueAsAssertion(.<TEnum> context,  otherEnumValue) { }
-        protected override .<.> CheckAsync(.<TEnum> metadata) { }
-        protected override string GetExpectation() { }
+        [.(ExpectationMessage="to not have flag {unexpectedFlag}")]
+        public static . DoesNotHaveFlag<TEnum>(this TEnum value, TEnum unexpectedFlag)
+            where TEnum :  struct,  { }
+        [.(ExpectationMessage="to not have the same name as {otherEnumValue}")]
+        public static . DoesNotHaveSameNameAs<TEnum>(this TEnum value,  otherEnumValue)
+            where TEnum :  struct,  { }
+        [.(ExpectationMessage="to not have the same value as {otherEnumValue}")]
+        public static . DoesNotHaveSameValueAs<TEnum>(this TEnum value,  otherEnumValue)
+            where TEnum :  struct,  { }
+        [.(ExpectationMessage="to have flag {expectedFlag}")]
+        public static . HasFlag<TEnum>(this TEnum value, TEnum expectedFlag)
+            where TEnum :  struct,  { }
+        [.(ExpectationMessage="to have the same name as {otherEnumValue}")]
+        public static . HasSameNameAs<TEnum>(this TEnum value,  otherEnumValue)
+            where TEnum :  struct,  { }
+        [.(ExpectationMessage="to have the same value as {otherEnumValue}")]
+        public static . HasSameValueAs<TEnum>(this TEnum value,  otherEnumValue)
+            where TEnum :  struct,  { }
     }
     public class IsDefinedAssertion<TEnum> : .<TEnum>
         where TEnum :  struct, 
@@ -786,6 +765,21 @@ namespace .Conditions
         protected bool HasCustomComparer() { }
         protected void SetComparer(.<TItem> comparer) { }
     }
+    public static class ComparisonAssertionExtensions
+    {
+        [.(ExpectationMessage="to be greater than {minimum}")]
+        public static . IsGreaterThan<TValue>(this TValue value, TValue minimum)
+            where TValue : <TValue> { }
+        [.(ExpectationMessage="to be greater than or equal to {minimum}")]
+        public static . IsGreaterThanOrEqualTo<TValue>(this TValue value, TValue minimum)
+            where TValue : <TValue> { }
+        [.(ExpectationMessage="to be less than {maximum}")]
+        public static . IsLessThan<TValue>(this TValue value, TValue maximum)
+            where TValue : <TValue> { }
+        [.(ExpectationMessage="to be less than or equal to {maximum}")]
+        public static . IsLessThanOrEqualTo<TValue>(this TValue value, TValue maximum)
+            where TValue : <TValue> { }
+    }
     public class CompletesWithinActionAssertion : .<object?>
     {
         public CompletesWithinActionAssertion( action,  timeout, .<object?>? context = null) { }
@@ -1062,22 +1056,6 @@ namespace .Conditions
         protected override bool HasToleranceValue() { }
         protected override bool IsWithinTolerance(float actual, float expected, float tolerance) { }
     }
-    [.("IsGreaterThan")]
-    public class GreaterThanAssertion<TValue> : .<TValue>
-        where TValue : <TValue>
-    {
-        public GreaterThanAssertion(.<TValue> context, TValue minimum) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    [.("IsGreaterThanOrEqualTo")]
-    public class GreaterThanOrEqualAssertion<TValue> : .<TValue>
-        where TValue : <TValue>
-    {
-        public GreaterThanOrEqualAssertion(.<TValue> context, TValue minimum) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
-    }
     public class HasDistinctItemsAssertion<TCollection, TItem> : .<TCollection, TItem>
         where TCollection : .<TItem>
     {
@@ -1277,22 +1255,6 @@ namespace .Conditions
     public class IsTypeOfRuntimeAssertion<TValue> : .<TValue>
     {
         public IsTypeOfRuntimeAssertion(.<TValue> context,  expectedType) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    [.("IsLessThan")]
-    public class LessThanAssertion<TValue> : .<TValue>
-        where TValue : <TValue>
-    {
-        public LessThanAssertion(.<TValue> context, TValue maximum) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    [.("IsLessThanOrEqualTo")]
-    public class LessThanOrEqualAssertion<TValue> : .<TValue>
-        where TValue : <TValue>
-    {
-        public LessThanOrEqualAssertion(.<TValue> context, TValue maximum) { }
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
@@ -1502,13 +1464,6 @@ namespace .Conditions
         public new .<TValue> GetAwaiter() { }
         protected override string GetExpectation() { }
     }
-    [.("IsNotSameReferenceAs")]
-    public class NotSameReferenceAssertion<TValue> : .<TValue>
-    {
-        public NotSameReferenceAssertion(.<TValue> context, object? expected) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
-    }
     public class NotStructuralEquivalencyAssertion<TValue> : .<TValue>
     {
         public NotStructuralEquivalencyAssertion(.<TValue> context, object? notExpected, string? notExpectedExpression = null) { }
@@ -1518,13 +1473,6 @@ namespace .Conditions
         public .<TValue> IgnoringType( type) { }
         public .<TValue> IgnoringType<T>() { }
         public .<TValue> WithPartialEquivalency() { }
-    }
-    [.("IsNull")]
-    public class NullAssertion<TValue> : .<TValue>
-    {
-        public NullAssertion(.<TValue> context) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
     }
     [.(typeof(int?), "HasValue", CustomName="DoesNotHaveValue", ExpectationMessage="have a value", NegateLogic=true)]
     [.(typeof(int?), "HasValue", ExpectationMessage="have a value")]
@@ -1626,13 +1574,6 @@ namespace .Conditions
         public .<TList, TItem> IsNull() { }
         public .<TItem, TExpected> IsTypeOf<TExpected>() { }
         public .<TList, TItem> Satisfies(<.<TItem>, .<TItem>?> assertion, [.("assertion")] string? expression = null) { }
-    }
-    [.("IsSameReferenceAs")]
-    public class SameReferenceAssertion<TValue> : .<TValue>
-    {
-        public SameReferenceAssertion(.<TValue> context, object? expected) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
     }
     public class SatisfiesAssertion<TValue> : .<TValue>
     {
@@ -1757,6 +1698,13 @@ namespace .Conditions
         public . IgnoringCase() { }
         public . WithComparison( comparison) { }
     }
+    public static class StringEmptyAssertionExtensions
+    {
+        [.(ExpectationMessage="to be empty")]
+        public static . IsEmpty(this string value) { }
+        [.(ExpectationMessage="to not be null or empty")]
+        public static . IsNotEmpty(this string value) { }
+    }
     [.("EndsWith")]
     public class StringEndsWithAssertion : .<string>
     {
@@ -1780,20 +1728,6 @@ namespace .Conditions
         public .<TActual> WithComparison( comparison) { }
         public .<TActual> WithNullAndEmptyEquality() { }
         public .<TActual> WithTrimming() { }
-    }
-    [.("IsEmpty")]
-    public class StringIsEmptyAssertion : .<string>
-    {
-        public StringIsEmptyAssertion(.<string> context) { }
-        protected override .<.> CheckAsync(.<string> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    [.("IsNotEmpty")]
-    public class StringIsNotEmptyAssertion : .<string>
-    {
-        public StringIsNotEmptyAssertion(.<string> context) { }
-        protected override .<.> CheckAsync(.<string> metadata) { }
-        protected override string GetExpectation() { }
     }
     public class StringLengthAssertion : .<string>
     {
@@ -2090,12 +2024,12 @@ namespace .
         public CountWrapper(.<TCollection> context) { }
         public .<int> Between(int minimum, int maximum, [.("minimum")] string? minExpression = null, [.("maximum")] string? maxExpression = null) { }
         public .<TCollection, TItem> EqualTo(int expectedCount, [.("expectedCount")] string? expression = null) { }
-        public .<int> GreaterThan(int expected, [.("expected")] string? expression = null) { }
-        public .<int> GreaterThanOrEqualTo(int expected, [.("expected")] string? expression = null) { }
-        public .<int> LessThan(int expected, [.("expected")] string? expression = null) { }
-        public .<int> LessThanOrEqualTo(int expected, [.("expected")] string? expression = null) { }
+        public ._IsGreaterThan_TValue_Assertion<int> GreaterThan(int expected, [.("expected")] string? expression = null) { }
+        public ._IsGreaterThanOrEqualTo_TValue_Assertion<int> GreaterThanOrEqualTo(int expected, [.("expected")] string? expression = null) { }
+        public ._IsLessThan_TValue_Assertion<int> LessThan(int expected, [.("expected")] string? expression = null) { }
+        public ._IsLessThanOrEqualTo_TValue_Assertion<int> LessThanOrEqualTo(int expected, [.("expected")] string? expression = null) { }
         public .<int> NotEqualTo(int expected, [.("expected")] string? expression = null) { }
-        public .<int> Positive() { }
+        public ._IsGreaterThan_TValue_Assertion<int> Positive() { }
         public .<TCollection, TItem> Zero() { }
     }
     public class LengthWrapper : ., .<string>
@@ -2324,16 +2258,8 @@ namespace .Extensions
     {
         public static . CompletesWithin(this . source,  timeout, [.("timeout")] string? expression = null) { }
         public static . CompletesWithin(this . source,  timeout, [.("timeout")] string? expression = null) { }
-        public static ..DoesNotHaveFlagAssertion<TEnum> DoesNotHaveFlag<TEnum>(this .<TEnum> source, TEnum unexpectedFlag, [.("unexpectedFlag")] string? expression = null)
-            where TEnum :  struct,  { }
-        public static ..DoesNotHaveSameNameAsAssertion<TEnum> DoesNotHaveSameNameAs<TEnum>(this .<TEnum> source,  otherEnumValue, [.("otherEnumValue")] string? expression = null)
-            where TEnum :  struct,  { }
-        public static ..DoesNotHaveSameValueAsAssertion<TEnum> DoesNotHaveSameValueAs<TEnum>(this .<TEnum> source,  otherEnumValue, [.("otherEnumValue")] string? expression = null)
-            where TEnum :  struct,  { }
         public static .<TValue> EqualTo<TValue>(this .<TValue> source, TValue? expected, [.("expected")] string? expression = null) { }
         public static .<TValue> Eventually<TValue>(this .<TValue> source, <.<TValue>, .<TValue>> assertionBuilder,  timeout, ? pollingInterval = default, [.("timeout")] string? timeoutExpression = null, [.("pollingInterval")] string? pollingIntervalExpression = null) { }
-        public static ..HasFlagAssertion<TEnum> HasFlag<TEnum>(this .<TEnum> source, TEnum expectedFlag, [.("expectedFlag")] string? expression = null)
-            where TEnum :  struct,  { }
         [("Use Length() instead, which provides all numeric assertion methods. Example: Asse" +
             "(str).Length().IsGreaterThan(5)")]
         public static ..LengthWrapper HasLength(this .<string> source) { }
@@ -2351,24 +2277,20 @@ namespace .Extensions
         public static .<TValue> HasMessageEqualTo<TValue>(this .<TValue> source, string expectedMessage,  comparison) { }
         public static .<TValue> HasMessageStartingWith<TValue>(this .<TValue> source, string expectedPrefix) { }
         public static .<TValue> HasMessageStartingWith<TValue>(this .<TValue> source, string expectedPrefix,  comparison) { }
-        public static ..HasSameNameAsAssertion<TEnum> HasSameNameAs<TEnum>(this .<TEnum> source,  otherEnumValue, [.("otherEnumValue")] string? expression = null)
-            where TEnum :  struct,  { }
-        public static ..HasSameValueAsAssertion<TEnum> HasSameValueAs<TEnum>(this .<TEnum> source,  otherEnumValue, [.("otherEnumValue")] string? expression = null)
-            where TEnum :  struct,  { }
-        public static .<> IsAfter(this .<> source,  expected, [.("expected")] string? expression = null) { }
-        public static .<> IsAfter(this .<> source,  expected, [.("expected")] string? expression = null) { }
-        public static .<> IsAfterOrEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
-        public static .<> IsAfterOrEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
-        public static .<> IsBefore(this .<> source,  expected, [.("expected")] string? expression = null) { }
-        public static .<> IsBefore(this .<> source,  expected, [.("expected")] string? expression = null) { }
-        public static .<> IsBeforeOrEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
-        public static .<> IsBeforeOrEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        public static ._IsGreaterThan_TValue_Assertion<> IsAfter(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        public static ._IsGreaterThan_TValue_Assertion<> IsAfter(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        public static ._IsGreaterThanOrEqualTo_TValue_Assertion<> IsAfterOrEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        public static ._IsGreaterThanOrEqualTo_TValue_Assertion<> IsAfterOrEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        public static ._IsLessThan_TValue_Assertion<> IsBefore(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        public static ._IsLessThan_TValue_Assertion<> IsBefore(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        public static ._IsLessThanOrEqualTo_TValue_Assertion<> IsBeforeOrEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        public static ._IsLessThanOrEqualTo_TValue_Assertion<> IsBeforeOrEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
         public static ..IsDefinedAssertion<TEnum> IsDefined<TEnum>(this .<TEnum> source)
             where TEnum :  struct,  { }
         public static .<TValue> IsEquivalentTo<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expression = null) { }
-        public static .<TValue> IsNegative<TValue>(this .<TValue> source)
+        public static ._IsLessThan_TValue_Assertion<TValue> IsNegative<TValue>(this .<TValue> source)
             where TValue : <TValue> { }
-        public static .<TValue> IsNegative<TValue>(this .<TValue?> source)
+        public static ._IsLessThan_TValue_Assertion<TValue> IsNegative<TValue>(this .<TValue?> source)
             where TValue :  struct, <TValue> { }
         public static ..IsNotDefinedAssertion<TEnum> IsNotDefined<TEnum>(this .<TEnum> source)
             where TEnum :  struct,  { }
@@ -2382,9 +2304,9 @@ namespace .Extensions
         public static ..IsNotParsableIntoAssertion<T> IsNotParsableInto<T>(this .<string> source) { }
         public static .<TValue> IsOfType<TValue>(this .<TValue> source,  expectedType, [.("expectedType")] string? expression = null) { }
         public static ..IsParsableIntoAssertion<T> IsParsableInto<T>(this .<string> source) { }
-        public static .<TValue> IsPositive<TValue>(this .<TValue> source)
+        public static ._IsGreaterThan_TValue_Assertion<TValue> IsPositive<TValue>(this .<TValue> source)
             where TValue : <TValue> { }
-        public static .<TValue> IsPositive<TValue>(this .<TValue?> source)
+        public static ._IsGreaterThan_TValue_Assertion<TValue> IsPositive<TValue>(this .<TValue?> source)
             where TValue :  struct, <TValue> { }
         public static . Length(this .<string> source) { }
         public static .<TObject> Member<TObject, TItem>(this .<TObject> source, .<<TObject, .<TItem>>> memberSelector, <.<.<TItem>, TItem>, .<.<TItem>>> assertions) { }
@@ -2709,6 +2631,17 @@ namespace .Extensions
     {
         public static .<TCollection, TItem> IsInOrder<TCollection, TItem>(this .<TCollection> source)
             where TCollection : .<TItem> { }
+    }
+    public static class ComparisonAssertionExtensions
+    {
+        public static ._IsGreaterThan_TValue_Assertion<TValue> IsGreaterThan<TValue>(this .<TValue> source, TValue minimum, [.("minimum")] string? minimumExpression = null)
+            where TValue : <TValue> { }
+        public static ._IsGreaterThanOrEqualTo_TValue_Assertion<TValue> IsGreaterThanOrEqualTo<TValue>(this .<TValue> source, TValue minimum, [.("minimum")] string? minimumExpression = null)
+            where TValue : <TValue> { }
+        public static ._IsLessThan_TValue_Assertion<TValue> IsLessThan<TValue>(this .<TValue> source, TValue maximum, [.("maximum")] string? maximumExpression = null)
+            where TValue : <TValue> { }
+        public static ._IsLessThanOrEqualTo_TValue_Assertion<TValue> IsLessThanOrEqualTo<TValue>(this .<TValue> source, TValue maximum, [.("maximum")] string? maximumExpression = null)
+            where TValue : <TValue> { }
     }
     public static class CookieAssertionExtensions
     {
@@ -3238,6 +3171,21 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<.Encoding> metadata) { }
         protected override string GetExpectation() { }
     }
+    public static class EnumAssertionExtensions
+    {
+        public static ._DoesNotHaveFlag_TEnum_Assertion<TEnum> DoesNotHaveFlag<TEnum>(this .<TEnum> source, TEnum unexpectedFlag, [.("unexpectedFlag")] string? unexpectedFlagExpression = null)
+            where TEnum :  struct,  { }
+        public static ._DoesNotHaveSameNameAs_Enum_Assertion<TEnum> DoesNotHaveSameNameAs<TEnum>(this .<TEnum> source,  otherEnumValue, [.("otherEnumValue")] string? otherEnumValueExpression = null)
+            where TEnum :  struct,  { }
+        public static ._DoesNotHaveSameValueAs_Enum_Assertion<TEnum> DoesNotHaveSameValueAs<TEnum>(this .<TEnum> source,  otherEnumValue, [.("otherEnumValue")] string? otherEnumValueExpression = null)
+            where TEnum :  struct,  { }
+        public static ._HasFlag_TEnum_Assertion<TEnum> HasFlag<TEnum>(this .<TEnum> source, TEnum expectedFlag, [.("expectedFlag")] string? expectedFlagExpression = null)
+            where TEnum :  struct,  { }
+        public static ._HasSameNameAs_Enum_Assertion<TEnum> HasSameNameAs<TEnum>(this .<TEnum> source,  otherEnumValue, [.("otherEnumValue")] string? otherEnumValueExpression = null)
+            where TEnum :  struct,  { }
+        public static ._HasSameValueAs_Enum_Assertion<TEnum> HasSameValueAs<TEnum>(this .<TEnum> source,  otherEnumValue, [.("otherEnumValue")] string? otherEnumValueExpression = null)
+            where TEnum :  struct,  { }
+    }
     public static class EqualsAssertionExtensions
     {
         public static .<TValue> IsEqualTo<TValue>(this .<TValue> source, TValue? expected, [.("expected")] string? expectedExpression = null) { }
@@ -3475,16 +3423,6 @@ namespace .Extensions
         public static .Extensions.T_IsIn_IEnumerableT_Assertion<T> IsIn<T>(this .<T> source, .<T> collection, [.("collection")] string? collectionExpression = null) { }
         public static .Extensions.T_IsNotIn_TArray_Assertion<T> IsNotIn<T>(this .<T> source, params T[] collection) { }
         public static .Extensions.T_IsNotIn_IEnumerableT_Assertion<T> IsNotIn<T>(this .<T> source, .<T> collection, [.("collection")] string? collectionExpression = null) { }
-    }
-    public static class GreaterThanAssertionExtensions
-    {
-        public static .<TValue> IsGreaterThan<TValue>(this .<TValue> source, TValue minimum, [.("minimum")] string? minimumExpression = null)
-            where TValue : <TValue> { }
-    }
-    public static class GreaterThanOrEqualAssertionExtensions
-    {
-        public static .<TValue> IsGreaterThanOrEqualTo<TValue>(this .<TValue> source, TValue minimum, [.("minimum")] string? minimumExpression = null)
-            where TValue : <TValue> { }
     }
     public static class GuidAssertionExtensions
     {
@@ -3985,16 +3923,6 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<<T>> metadata) { }
         protected override string GetExpectation() { }
     }
-    public static class LessThanAssertionExtensions
-    {
-        public static .<TValue> IsLessThan<TValue>(this .<TValue> source, TValue maximum, [.("maximum")] string? maximumExpression = null)
-            where TValue : <TValue> { }
-    }
-    public static class LessThanOrEqualAssertionExtensions
-    {
-        public static .<TValue> IsLessThanOrEqualTo<TValue>(this .<TValue> source, TValue maximum, [.("maximum")] string? maximumExpression = null)
-            where TValue : <TValue> { }
-    }
     public static class LongAssertions
     {
         public static ._IsEven_Assertion IsEven(this .<long> source) { }
@@ -4041,13 +3969,9 @@ namespace .Extensions
         public static .<TCollection, TItem> IsNotEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> notExpected, .<TItem> comparer, . ordering = 0, [.("notExpected")] string? notExpectedExpression = null, [.("comparer")] string? comparerExpression = null, [.("ordering")] string? orderingExpression = null)
             where TCollection : .<TItem> { }
     }
-    public static class NotSameReferenceAssertionExtensions
+    public static class NullAssertionExtension
     {
-        public static .<TValue> IsNotSameReferenceAs<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expectedExpression = null) { }
-    }
-    public static class NullAssertionExtensions
-    {
-        public static .<TValue> IsNull<TValue>(this .<TValue> source) { }
+        public static ._IsNull_Assertion<TValue> IsNull<TValue>(this .<TValue> source) { }
     }
     public static class NullableAssertionExtensions
     {
@@ -4109,6 +4033,11 @@ namespace .Extensions
         public static .<TObject, TProperty> HasProperty<TObject, TProperty>(this .<TObject> source, .<<TObject, TProperty>> propertySelector) { }
         public static .<TObject> HasProperty<TObject, TProperty>(this .<TObject> source, .<<TObject, TProperty>> propertySelector, TProperty expectedValue, [.("expectedValue")] string? expression = null) { }
     }
+    public static class ReferenceAssertionExtensions
+    {
+        public static ._IsNotSameReferenceAs_Object_Assertion<TValue> IsNotSameReferenceAs<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expectedExpression = null) { }
+        public static ._IsSameReferenceAs_Object_Assertion<TValue> IsSameReferenceAs<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expectedExpression = null) { }
+    }
     public static class RegexAssertionExtensions
     {
         public static ..MatchGroupAssertion Group(this .<..RegexMatch> continuation, int groupIndex, <.<string>, .<string>?> assertion) { }
@@ -4145,10 +4074,6 @@ namespace .Extensions
         public SByte_IsZero_Assertion(.<sbyte> context) { }
         protected override .<.> CheckAsync(.<sbyte> metadata) { }
         protected override string GetExpectation() { }
-    }
-    public static class SameReferenceAssertionExtensions
-    {
-        public static .<TValue> IsSameReferenceAs<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expectedExpression = null) { }
     }
     public static class SbyteAssertions
     {
@@ -4292,6 +4217,11 @@ namespace .Extensions
         public static . DoesNotStartWith(this .<string> source, string expected, [.("expected")] string? expectedExpression = null) { }
         public static . DoesNotStartWith(this .<string> source, string expected,  comparison, [.("expected")] string? expectedExpression = null, [.("comparison")] string? comparisonExpression = null) { }
     }
+    public static class StringEmptyAssertionExtensions
+    {
+        public static ._IsEmpty_Assertion IsEmpty(this .<string> source) { }
+        public static ._IsNotEmpty_Assertion IsNotEmpty(this .<string> source) { }
+    }
     public static class StringEndsWithAssertionExtensions
     {
         public static . EndsWith(this .<string> source, string expected, [.("expected")] string? expectedExpression = null) { }
@@ -4302,14 +4232,6 @@ namespace .Extensions
         public static .<TActual> IsEqualTo<TActual>(this .<TActual> source, string? expected, [.("expected")] string? expectedExpression = null) { }
         public static .<TActual> IsEqualTo<TActual>(this .<TActual> source, string? expected, .<string> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
         public static .<TActual> IsEqualTo<TActual>(this .<TActual> source, string? expected,  comparison, [.("expected")] string? expectedExpression = null, [.("comparison")] string? comparisonExpression = null) { }
-    }
-    public static class StringIsEmptyAssertionExtensions
-    {
-        public static . IsEmpty(this .<string> source) { }
-    }
-    public static class StringIsNotEmptyAssertionExtensions
-    {
-        public static . IsNotEmpty(this .<string> source) { }
     }
     public class StringIsNullOrEmptyWithStringAssertion : .<string>
     {
@@ -4334,6 +4256,18 @@ namespace .Extensions
         public static . IsNotNullOrWhiteSpace(this .<string> source) { }
         public static . IsNullOrEmpty(this .<string> source) { }
         public static . IsNullOrWhiteSpace(this .<string> source) { }
+    }
+    public sealed class String_IsEmpty_Assertion : .<string>
+    {
+        public String_IsEmpty_Assertion(.<string> context) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class String_IsNotEmpty_Assertion : .<string>
+    {
+        public String_IsNotEmpty_Assertion(.<string> context) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
+        protected override string GetExpectation() { }
     }
     public sealed class String_IsNotValidJson_Assertion : .<string>
     {
@@ -4381,6 +4315,94 @@ namespace .Extensions
     {
         public TArray_IsSingleElement_Assertion(.<T[]> context) { }
         protected override .<.> CheckAsync(.<T[]> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class TEnum_DoesNotHaveFlag_TEnum_Assertion<TEnum> : .<TEnum>
+        where TEnum :  struct, 
+    {
+        public TEnum_DoesNotHaveFlag_TEnum_Assertion(.<TEnum> context, TEnum unexpectedFlag) { }
+        protected override .<.> CheckAsync(.<TEnum> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class TEnum_DoesNotHaveSameNameAs_Enum_Assertion<TEnum> : .<TEnum>
+        where TEnum :  struct, 
+    {
+        public TEnum_DoesNotHaveSameNameAs_Enum_Assertion(.<TEnum> context,  otherEnumValue) { }
+        protected override .<.> CheckAsync(.<TEnum> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class TEnum_DoesNotHaveSameValueAs_Enum_Assertion<TEnum> : .<TEnum>
+        where TEnum :  struct, 
+    {
+        public TEnum_DoesNotHaveSameValueAs_Enum_Assertion(.<TEnum> context,  otherEnumValue) { }
+        protected override .<.> CheckAsync(.<TEnum> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class TEnum_HasFlag_TEnum_Assertion<TEnum> : .<TEnum>
+        where TEnum :  struct, 
+    {
+        public TEnum_HasFlag_TEnum_Assertion(.<TEnum> context, TEnum expectedFlag) { }
+        protected override .<.> CheckAsync(.<TEnum> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class TEnum_HasSameNameAs_Enum_Assertion<TEnum> : .<TEnum>
+        where TEnum :  struct, 
+    {
+        public TEnum_HasSameNameAs_Enum_Assertion(.<TEnum> context,  otherEnumValue) { }
+        protected override .<.> CheckAsync(.<TEnum> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class TEnum_HasSameValueAs_Enum_Assertion<TEnum> : .<TEnum>
+        where TEnum :  struct, 
+    {
+        public TEnum_HasSameValueAs_Enum_Assertion(.<TEnum> context,  otherEnumValue) { }
+        protected override .<.> CheckAsync(.<TEnum> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class TValue_IsGreaterThanOrEqualTo_TValue_Assertion<TValue> : .<TValue>
+        where TValue : <TValue>
+    {
+        public TValue_IsGreaterThanOrEqualTo_TValue_Assertion(.<TValue> context, TValue minimum) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class TValue_IsGreaterThan_TValue_Assertion<TValue> : .<TValue>
+        where TValue : <TValue>
+    {
+        public TValue_IsGreaterThan_TValue_Assertion(.<TValue> context, TValue minimum) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class TValue_IsLessThanOrEqualTo_TValue_Assertion<TValue> : .<TValue>
+        where TValue : <TValue>
+    {
+        public TValue_IsLessThanOrEqualTo_TValue_Assertion(.<TValue> context, TValue maximum) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class TValue_IsLessThan_TValue_Assertion<TValue> : .<TValue>
+        where TValue : <TValue>
+    {
+        public TValue_IsLessThan_TValue_Assertion(.<TValue> context, TValue maximum) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class TValue_IsNotSameReferenceAs_Object_Assertion<TValue> : .<TValue>
+    {
+        public TValue_IsNotSameReferenceAs_Object_Assertion(.<TValue> context, object? expected) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class TValue_IsNull_Assertion<TValue> : .<TValue>
+    {
+        public TValue_IsNull_Assertion(.<TValue> context) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class TValue_IsSameReferenceAs_Object_Assertion<TValue> : .<TValue>
+    {
+        public TValue_IsSameReferenceAs_Object_Assertion(.<TValue> context, object? expected) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
     public sealed class T_IsIn_IEnumerableT_Assertion<T> : .<T>

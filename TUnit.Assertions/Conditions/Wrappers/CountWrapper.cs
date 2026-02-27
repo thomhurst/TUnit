@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using TUnit.Assertions.Conditions;
 using TUnit.Assertions.Core;
+using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.Conditions.Wrappers;
 
@@ -97,7 +98,7 @@ public class CountWrapper<TCollection, TItem> : IAssertionSource<TCollection>
     /// <summary>
     /// Asserts that the collection count is greater than or equal to the expected count.
     /// </summary>
-    public GreaterThanOrEqualAssertion<int> GreaterThanOrEqualTo(
+    public TValue_IsGreaterThanOrEqualTo_TValue_Assertion<int> GreaterThanOrEqualTo(
         int expected,
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
@@ -117,13 +118,13 @@ public class CountWrapper<TCollection, TItem> : IAssertionSource<TCollection>
 
             return value.Cast<object>().Count();
         });
-        return new GreaterThanOrEqualAssertion<int>(countContext, expected);
+        return new TValue_IsGreaterThanOrEqualTo_TValue_Assertion<int>(countContext, expected);
     }
 
     /// <summary>
     /// Asserts that the collection count is positive (greater than 0).
     /// </summary>
-    public GreaterThanAssertion<int> Positive()
+    public TValue_IsGreaterThan_TValue_Assertion<int> Positive()
     {
         _context.ExpressionBuilder.Append(".Positive()");
         // Map context to get the count
@@ -141,13 +142,13 @@ public class CountWrapper<TCollection, TItem> : IAssertionSource<TCollection>
 
             return value.Cast<object>().Count();
         });
-        return new GreaterThanAssertion<int>(countContext, 0);
+        return new TValue_IsGreaterThan_TValue_Assertion<int>(countContext, 0);
     }
 
     /// <summary>
     /// Asserts that the collection count is greater than the expected count.
     /// </summary>
-    public GreaterThanAssertion<int> GreaterThan(
+    public TValue_IsGreaterThan_TValue_Assertion<int> GreaterThan(
         int expected,
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
@@ -167,13 +168,13 @@ public class CountWrapper<TCollection, TItem> : IAssertionSource<TCollection>
 
             return value.Cast<object>().Count();
         });
-        return new GreaterThanAssertion<int>(countContext, expected);
+        return new TValue_IsGreaterThan_TValue_Assertion<int>(countContext, expected);
     }
 
     /// <summary>
     /// Asserts that the collection count is less than the expected count.
     /// </summary>
-    public LessThanAssertion<int> LessThan(
+    public TValue_IsLessThan_TValue_Assertion<int> LessThan(
         int expected,
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
@@ -193,13 +194,13 @@ public class CountWrapper<TCollection, TItem> : IAssertionSource<TCollection>
 
             return value.Cast<object>().Count();
         });
-        return new LessThanAssertion<int>(countContext, expected);
+        return new TValue_IsLessThan_TValue_Assertion<int>(countContext, expected);
     }
 
     /// <summary>
     /// Asserts that the collection count is less than or equal to the expected count.
     /// </summary>
-    public LessThanOrEqualAssertion<int> LessThanOrEqualTo(
+    public TValue_IsLessThanOrEqualTo_TValue_Assertion<int> LessThanOrEqualTo(
         int expected,
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
@@ -219,7 +220,7 @@ public class CountWrapper<TCollection, TItem> : IAssertionSource<TCollection>
 
             return value.Cast<object>().Count();
         });
-        return new LessThanOrEqualAssertion<int>(countContext, expected);
+        return new TValue_IsLessThanOrEqualTo_TValue_Assertion<int>(countContext, expected);
     }
 
     /// <summary>
