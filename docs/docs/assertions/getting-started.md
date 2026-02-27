@@ -21,20 +21,7 @@ The basic flow is:
 
 ## Why Await?
 
-TUnit assertions must be awaited. This design enables:
-- **Async support**: Seamlessly test async operations
-- **Rich error messages**: Build detailed failure messages during execution
-- **Extensibility**: Create custom assertions that can perform async operations
-
-```csharp
-// ✅ Correct - awaited
-await Assert.That(result).IsEqualTo(42);
-
-// ❌ Wrong - will cause compiler warning
-Assert.That(result).IsEqualTo(42);
-```
-
-TUnit includes a built-in analyzer that warns you if you forget to `await` an assertion.
+TUnit assertions must be awaited — they won't execute without `await`, and a built-in analyzer warns if you forget. See [Awaiting Assertions](awaiting.md) for detailed examples and design rationale.
 
 ## Assertion Categories
 
@@ -250,133 +237,12 @@ await Assert.That(number).IsEqualTo(42);
 // await Assert.That(number).IsEqualTo("42");
 ```
 
-## Common Mistakes & Best Practices
+## Common Mistakes
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
-
-### Forgetting to Await
-
-<Tabs>
-  <TabItem value="bad" label="❌ Bad - Missing Await" default>
-
-```csharp
-[Test]
-public void TestValue()
-{
-    // Compiler warning: assertion not awaited
-    Assert.That(result).IsEqualTo(42);
-}
-```
-
-**Problem:** Assertion never executes, test always passes even if it should fail.
-
-  </TabItem>
-  <TabItem value="good" label="✅ Good - Awaited Properly">
-
-```csharp
-[Test]
-public async Task TestValue()
-{
-    await Assert.That(result).IsEqualTo(42);
-}
-```
-
-**Why:** Awaiting ensures the assertion executes and can fail the test.
-
-  </TabItem>
-</Tabs>
-
-### Comparing Different Types
-
-<Tabs>
-  <TabItem value="bad" label="❌ Bad - Type Confusion">
-
-```csharp
-int number = 42;
-// This won't compile - can't compare int to string
-// await Assert.That(number).IsEqualTo("42");
-
-// Or this pattern that converts implicitly
-string value = GetValue();
-await Assert.That(value).IsEqualTo(42); // Won't compile
-```
-
-**Problem:** Type mismatches are caught at compile time, preventing runtime surprises.
-
-  </TabItem>
-  <TabItem value="good" label="✅ Good - Explicit Conversion">
-
-```csharp
-string value = GetValue();
-int parsed = int.Parse(value);
-await Assert.That(parsed).IsEqualTo(42);
-
-// Or test the string directly
-await Assert.That(value).IsEqualTo("42");
-```
-
-**Why:** Be explicit about what you're testing - the string value or its parsed equivalent.
-
-  </TabItem>
-</Tabs>
-
-### Collection Ordering
-
-<Tabs>
-  <TabItem value="bad" label="❌ Bad - Assuming Order">
-
-```csharp
-var items = GetItemsFromDatabase(); // Order not guaranteed
-await Assert.That(items).IsEqualTo(new[] { 1, 2, 3 });
-```
-
-**Problem:** Fails unexpectedly if database returns `[3, 1, 2]` even though items are equivalent.
-
-  </TabItem>
-  <TabItem value="good" label="✅ Good - Order-Independent">
-
-```csharp
-var items = GetItemsFromDatabase();
-await Assert.That(items).IsEquivalentTo(new[] { 1, 2, 3 });
-```
-
-**Why:** `IsEquivalentTo` checks for same items regardless of order, making tests more resilient.
-
-  </TabItem>
-</Tabs>
-
-### Multiple Related Assertions
-
-<Tabs>
-  <TabItem value="bad" label="❌ Bad - Sequential Assertions">
-
-```csharp
-await Assert.That(user.FirstName).IsEqualTo("John");
-await Assert.That(user.LastName).IsEqualTo("Doe");
-await Assert.That(user.Age).IsGreaterThan(18);
-// If first assertion fails, you won't see the other failures
-```
-
-**Problem:** Stops at first failure, hiding other issues.
-
-  </TabItem>
-  <TabItem value="good" label="✅ Good - Assert.Multiple">
-
-```csharp
-using (Assert.Multiple())
-{
-    await Assert.That(user.FirstName).IsEqualTo("John");
-    await Assert.That(user.LastName).IsEqualTo("Doe");
-    await Assert.That(user.Age).IsGreaterThan(18);
-}
-// Shows ALL failures at once
-```
-
-**Why:** See all failures in one test run, saving debugging time.
-
-  </TabItem>
-</Tabs>
+- **Forgetting `await`** — Unawaited assertions never execute; the test passes silently. Always `await Assert.That(...)`. The compiler warns about this, but it's the most common TUnit mistake. See [Awaiting Assertions](awaiting.md).
+- **Type confusion** — `Assert.That(number).IsEqualTo("42")` won't compile. TUnit assertions are strongly typed. Convert explicitly before asserting.
+- **Assuming collection order** — Use `IsEquivalentTo()` instead of `IsEqualTo()` when item order doesn't matter (e.g., database results).
+- **Sequential assertions hiding failures** — Wrap related assertions in `using (Assert.Multiple()) { ... }` to see all failures at once instead of stopping at the first.
 
 ## Next Steps
 

@@ -70,72 +70,32 @@ Most tests don't need discovery-time initialization. Discovery-time initializati
 
 **Performance Note:** Discovery happens frequently (IDE reloads, project switches, `--list-tests`), so discovery-time initialization runs more often than test execution. Avoid expensive operations in `IAsyncDiscoveryInitializer` when possible.
 
-### Using IAsyncDiscoveryInitializer
+### IAsyncInitializer vs IAsyncDiscoveryInitializer
 
-When you need data available during discovery, implement `IAsyncDiscoveryInitializer` instead of `IAsyncInitializer`:
+| Interface | Runs During | Use Case |
+|-----------|------------|----------|
+| `IAsyncInitializer` | Test execution (after `[Before(Class)]`) | Starting containers, DB connections, expensive resources |
+| `IAsyncDiscoveryInitializer` | Test discovery (before test enumeration) | Loading data needed to generate test cases |
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+Discovery happens frequently (IDE reloads, `--list-tests`, CI enumeration), so **prefer `IAsyncInitializer`** unless your test case generation depends on async-loaded data.
 
-<Tabs>
-  <TabItem value="wrong" label="❌ Wrong - Data not available during discovery" default>
+See [Test Lifecycle — Initialization Interfaces](lifecycle.md#initialization-interfaces) for the full timing diagram.
 
-```csharp
-// This fixture's data won't be available during discovery
-public class TestDataFixture : IAsyncInitializer, IAsyncDisposable
-{
-    private List<string> _testCases = [];
+### Example: Discovery-Time Initialization
 
-    public async Task InitializeAsync()
-    {
-        // This runs during EXECUTION, not DISCOVERY
-        _testCases = await LoadTestCasesFromDatabaseAsync();
-    }
-
-    // This will return empty list during discovery!
-    public IEnumerable<string> GetTestCases() => _testCases;
-
-    public async ValueTask DisposeAsync()
-    {
-        _testCases.Clear();
-    }
-}
-
-public class MyTests
-{
-    [ClassDataSource<TestDataFixture>(Shared = SharedType.PerClass)]
-    public required TestDataFixture Fixture { get; init; }
-
-    // During discovery, Fixture.GetTestCases() returns empty list
-    // Result: No tests are generated!
-    public IEnumerable<string> TestCases => Fixture.GetTestCases();
-
-    [Test]
-    [InstanceMethodDataSource(nameof(TestCases))]
-    public async Task MyTest(string testCase)
-    {
-        // This test is never created because TestCases was empty during discovery
-        await Assert.That(testCase).IsNotNullOrEmpty();
-    }
-}
-```
-
-  </TabItem>
-  <TabItem value="correct" label="✅ Correct - Uses IAsyncDiscoveryInitializer">
+When `InstanceMethodDataSource` returns dynamically loaded data, use `IAsyncDiscoveryInitializer` so the data is available during test enumeration:
 
 ```csharp
-// This fixture's data IS available during discovery
 public class TestDataFixture : IAsyncDiscoveryInitializer, IAsyncDisposable
 {
     private List<string> _testCases = [];
 
     public async Task InitializeAsync()
     {
-        // This runs during DISCOVERY, before test enumeration
+        // Runs during DISCOVERY, before test enumeration
         _testCases = await LoadTestCasesFromDatabaseAsync();
     }
 
-    // This returns populated list during discovery!
     public IEnumerable<string> GetTestCases() => _testCases;
 
     public async ValueTask DisposeAsync()
@@ -149,71 +109,20 @@ public class MyTests
     [ClassDataSource<TestDataFixture>(Shared = SharedType.PerClass)]
     public required TestDataFixture Fixture { get; init; }
 
-    // During discovery, Fixture is already initialized
-    // Result: Tests are generated successfully!
     public IEnumerable<string> TestCases => Fixture.GetTestCases();
 
     [Test]
     [InstanceMethodDataSource(nameof(TestCases))]
     public async Task MyTest(string testCase)
     {
-        // This test IS created with each test case from the fixture
         await Assert.That(testCase).IsNotNullOrEmpty();
     }
 }
 ```
 
-  </TabItem>
-  <TabItem value="best" label="✅ Best - Predefined data without discovery initialization">
-
-```csharp
-// Best approach: Predefined test case IDs, expensive initialization during execution only
-public class TestDataFixture : IAsyncInitializer, IAsyncDisposable
-{
-    // Test case IDs are predefined - no initialization needed for discovery
-    private static readonly string[] PredefinedTestCases = ["Case1", "Case2", "Case3"];
-
-    private DockerContainer? _container;
-
-    public async Task InitializeAsync()
-    {
-        // Expensive initialization runs during EXECUTION only
-        _container = await StartDockerContainerAsync();
-    }
-
-    // Returns predefined IDs - works during discovery without initialization
-    public IEnumerable<string> GetTestCaseIds() => PredefinedTestCases;
-
-    public async ValueTask DisposeAsync()
-    {
-        if (_container != null)
-            await _container.DisposeAsync();
-    }
-}
-
-public class MyTests
-{
-    [ClassDataSource<TestDataFixture>(Shared = SharedType.PerClass)]
-    public required TestDataFixture Fixture { get; init; }
-
-    // Returns predefined IDs - no initialization required during discovery
-    public IEnumerable<string> TestCases => Fixture.GetTestCaseIds();
-
-    [Test]
-    [InstanceMethodDataSource(nameof(TestCases))]
-    public async Task MyTest(string testCaseId)
-    {
-        // Fixture IS initialized by the time the test runs
-        // Can now use the expensive resources (Docker container, etc.)
-        await Assert.That(testCaseId).IsNotNullOrEmpty();
-    }
-}
-```
-
-  </TabItem>
-</Tabs>
-
-**Recommendation:** Prefer the "predefined data" approach when possible. This avoids expensive initialization during discovery, which happens frequently (IDE reloads, `--list-tests`, etc.).
+:::tip
+If your test case IDs are predefined (not loaded at runtime), use `IAsyncInitializer` instead — it avoids running expensive initialization during every discovery pass.
+:::
 
 For more troubleshooting, see [Test Discovery Issues](../troubleshooting.md#test-discovery-issues).
 

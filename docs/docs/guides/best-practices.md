@@ -4,27 +4,7 @@ TUnit-specific tips to avoid common mistakes.
 
 ## Always Await Assertions
 
-TUnit assertions are async and return `Task`. Forgetting `await` means the assertion never executes — the test passes silently:
-
-```csharp
-// Wrong: assertion is never checked
-[Test]
-public async Task MyTest()
-{
-    Assert.That(result).IsEqualTo(5);  // passes without checking!
-}
-
-// Correct: assertion is awaited
-[Test]
-public async Task MyTest()
-{
-    await Assert.That(result).IsEqualTo(5);
-}
-```
-
-The compiler warns about unawaited tasks, but this remains the most common TUnit mistake.
-
-See [Awaiting Assertions](../assertions/awaiting.md) for details.
+TUnit assertions won't execute without `await` — the test passes silently. A built-in analyzer warns about this, but it remains the most common TUnit mistake. See [Awaiting Assertions](../assertions/awaiting.md) for details and examples.
 
 ## New Instance Per Test
 

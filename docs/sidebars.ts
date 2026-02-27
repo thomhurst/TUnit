@@ -24,6 +24,7 @@ const sidebars: SidebarsConfig = {
           label: 'Test Data',
           collapsed: true,
           items: [
+            'writing-tests/data-driven-overview',
             'writing-tests/arguments',
             'writing-tests/method-data-source',
             'writing-tests/class-data-source',
@@ -36,12 +37,11 @@ const sidebars: SidebarsConfig = {
         },
         {
           type: 'category',
-          label: 'Setup & Cleanup',
+          label: 'Lifecycle & Hooks',
           collapsed: true,
           items: [
             'writing-tests/lifecycle',
-            'writing-tests/hooks-setup',
-            'writing-tests/hooks-cleanup',
+            'writing-tests/hooks',
           ],
         },
         {
@@ -163,6 +163,7 @@ const sidebars: SidebarsConfig = {
         'execution/ci-cd-reporting',
         'execution/engine-modes',
         'writing-tests/aot',
+        'guides/performance',
       ],
     },
     {
@@ -202,30 +203,14 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: 'Comparing Frameworks',
+      label: 'Comparing & Migrating',
       collapsed: true,
       items: [
         'comparison/framework-differences',
         'comparison/attributes',
-      ],
-    },
-    {
-      type: 'category',
-      label: 'Migration Guides',
-      collapsed: true,
-      items: [
         'migration/xunit',
         'migration/nunit',
         'migration/mstest',
-      ],
-    },
-    {
-      type: 'category',
-      label: 'Guides',
-      collapsed: true,
-      items: [
-        'guides/best-practices',
-        'guides/performance',
       ],
     },
     {
@@ -236,6 +221,11 @@ const sidebars: SidebarsConfig = {
         'reference/command-line-flags',
         'reference/environment-variables',
         'reference/test-configuration',
+        {
+          type: 'doc',
+          id: 'guides/best-practices',
+          label: 'Tips & Pitfalls',
+        },
       ],
     },
     'troubleshooting',

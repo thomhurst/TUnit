@@ -19,6 +19,4 @@ TUnit is designed for speed. Through source generation and compile-time optimiza
 - **[Running Tests](execution/test-filters.md)** — Filters, timeouts, retries, CI/CD reporting, and AOT
 - **[Integrations](examples/aspnet.md)** — ASP.NET Core, Aspire, Playwright, and other integration examples
 - **[Extending TUnit](extending/extension-points.md)** — Custom data sources, formatters, and event subscribers
-- **[Comparing Frameworks](comparison/framework-differences.md)** — Feature comparisons with xUnit, NUnit, and MSTest
-- **[Migration](migration/xunit.md)** — Step-by-step guides for switching frameworks
-- **[Guides](guides/best-practices.md)** — Tips, performance guidance, and philosophy
+- **[Comparing & Migrating](comparison/framework-differences.md)** — Feature comparisons and step-by-step migration guides for xUnit, NUnit, and MSTest

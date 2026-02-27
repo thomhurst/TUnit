@@ -446,5 +446,5 @@ The exact behavior depends on your test runner configuration and CI/CD platform.
 ## See Also
 
 - [Test Context](./test-context.md) - Overview of TestContext
-- [Test Lifecycle Hooks](./hooks-setup.md) - Using Before/After hooks
+- [Hooks](./hooks.md) - Using Before/After hooks
 - [CI/CD Reporting](../execution/ci-cd-reporting.md) - Integrating with CI systems

@@ -31,16 +31,10 @@ Then `MyTest1` and `MyTest2` will have a different instance of `MyTests`.
 
 This isn't that important unless you're storing state.
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
-
-<Tabs>
-  <TabItem value="bad" label="❌ Bad - Will Fail" default>
-
 ```csharp
 public class MyTests
 {
-    private int _value;
+    private int _value;  // ❌ reset to 0 for every test — different instances!
 
     [Test, NotInParallel]
     public void MyTest1() { _value = 99; }
@@ -48,42 +42,16 @@ public class MyTests
     [Test, NotInParallel]
     public async Task MyTest2()
     {
-        // This will FAIL because _value is 0
-        // Different test instance = different _value
+        // FAILS — _value is 0 because this is a different instance
         await Assert.That(_value).IsEqualTo(99);
     }
 }
 ```
 
-**Why this fails:** Each test gets a new instance of `MyTests`, so `_value` in `MyTest2` is a different field than in `MyTest1`.
-
-  </TabItem>
-  <TabItem value="good" label="✅ Good - Use Static">
-
-```csharp
-public class MyTests
-{
-    private static int _value;
-
-    [Test, NotInParallel]
-    public void MyTest1() { _value = 99; }
-
-    [Test, NotInParallel]
-    public async Task MyTest2()
-    {
-        // This works because _value is static
-        await Assert.That(_value).IsEqualTo(99);
-    }
-}
-```
-
-**Why this works:** The `static` keyword makes the field persist across instances, making it clear that data is shared.
-
-  </TabItem>
-</Tabs>
+**Fix:** Use `static` fields if you genuinely need shared state, but prefer making tests independent or using `[ClassDataSource<>]` instead.
 
 ## See Also
 
 - [Test Lifecycle](lifecycle.md) — Understand the order of setup, execution, and cleanup
-- [Hooks & Setup](hooks-setup.md) — Run code before tests, classes, or assemblies
+- [Hooks](hooks.md) — Run code before and after tests, classes, or assemblies
 - [Controlling Parallelism](../execution/parallelism.md) — Configure how tests run in parallel

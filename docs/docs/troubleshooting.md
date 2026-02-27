@@ -8,11 +8,7 @@ These are conceptual questions about TUnit's design and capabilities.
 
 ### Why do I have to await all assertions? Can I use synchronous assertions?
 
-All TUnit assertions must be awaited. Assertions don't execute until awaited — forgetting `await` means the test passes without checking anything. The compiler warns about unawaited tasks, but watch for this common mistake.
-
-If your test uses `Assert.That(...)`, the method **must** be `async Task`. Tests without assertions can remain synchronous. See [Awaiting Assertions](assertions/awaiting.md) for details, examples, and the design rationale.
-
-For migrating from other frameworks, TUnit includes code fixers that automate the conversion — see the [xUnit](migration/xunit.md#automated-migration-with-code-fixers), [NUnit](migration/nunit.md#automated-migration-with-code-fixers), or [MSTest](migration/mstest.md#automated-migration-with-code-fixers) migration guides.
+Assertions don't execute until awaited — forgetting `await` means the test passes silently. See [Awaiting Assertions](assertions/awaiting.md) for details. For migrating from other frameworks, TUnit includes code fixers — see the [xUnit](migration/xunit.md#automated-migration-with-code-fixers), [NUnit](migration/nunit.md#automated-migration-with-code-fixers), or [MSTest](migration/mstest.md#automated-migration-with-code-fixers) migration guides.
 
 ### Does TUnit work with Coverlet for code coverage?
 
