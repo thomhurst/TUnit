@@ -228,6 +228,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             stringBuilder.Append(detailsBuilder.ToString());
             stringBuilder.AppendLine();
             stringBuilder.AppendLine("</details>");
+            stringBuilder.AppendLine();
         }
         else
         {
