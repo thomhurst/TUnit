@@ -14,7 +14,7 @@
 
 /* Dark mode adjustments */
 [data-theme='dark'] .markdown .docusaurus-mermaid-container svg text {
-  fill: #e5e7eb !important;
+  fill: var(--ifm-font-color-base) !important;
 }
 
 [data-theme='dark'] .markdown .docusaurus-mermaid-container svg .main > rect {
