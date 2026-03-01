@@ -291,6 +291,7 @@ internal static class TestExtensions
         return _cachedIsTrxEnabled.Value;
     }
 
+#pragma warning disable CS0618 // Obsolete Timing API — still needed for TimingProperty reporting
     private static TimingProperty GetTimingProperty(TestContext testContext, DateTimeOffset overallStart)
     {
         if (overallStart == default(DateTimeOffset))
@@ -309,6 +310,7 @@ internal static class TestExtensions
 
         return new TimingProperty(new TimingInfo(overallStart, end, end - overallStart), stepTimings);
     }
+#pragma warning restore CS0618
 
     private static IEnumerable<TrxMessage> GetTrxMessages(TestContext testContext, string? standardOutput, string? standardError)
     {

@@ -397,20 +397,6 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
         var startTime = timingProperty?.GlobalTiming.StartTime;
         var endTime = startTime.HasValue ? startTime.Value + timingProperty!.GlobalTiming.Duration : (DateTimeOffset?)null;
 
-        ReportTimingStep[]? timingSteps = null;
-        if (timingProperty?.StepTimings is { Length: > 0 } steps)
-        {
-            timingSteps = new ReportTimingStep[steps.Length];
-            for (var i = 0; i < steps.Length; i++)
-            {
-                timingSteps[i] = new ReportTimingStep
-                {
-                    Name = steps[i].Id,
-                    DurationMs = steps[i].Timing.Duration.TotalMilliseconds
-                };
-            }
-        }
-
         return new ReportTestResult
         {
             Id = testId,
@@ -430,7 +416,6 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
             LineNumber = fileLocation?.LineSpan.Start.Line,
             SkipReason = skipReason,
             RetryAttempt = retryAttempt,
-            TimingSteps = timingSteps,
             TraceId = traceId,
             SpanId = spanId
         };

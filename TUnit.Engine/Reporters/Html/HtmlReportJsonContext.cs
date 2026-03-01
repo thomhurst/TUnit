@@ -7,7 +7,6 @@ namespace TUnit.Engine.Reporters.Html;
 [JsonSerializable(typeof(ReportTestGroup))]
 [JsonSerializable(typeof(ReportTestResult))]
 [JsonSerializable(typeof(ReportExceptionData))]
-[JsonSerializable(typeof(ReportTimingStep))]
 [JsonSerializable(typeof(ReportKeyValue))]
 [JsonSerializable(typeof(SpanData))]
 [JsonSerializable(typeof(SpanEvent))]

@@ -139,9 +139,6 @@ internal sealed class ReportTestResult
     [JsonPropertyName("retryAttempt")]
     public int RetryAttempt { get; init; }
 
-    [JsonPropertyName("timingSteps")]
-    public ReportTimingStep[]? TimingSteps { get; init; }
-
     [JsonPropertyName("traceId")]
     public string? TraceId { get; init; }
 
@@ -162,15 +159,6 @@ internal sealed class ReportExceptionData
 
     [JsonPropertyName("innerException")]
     public ReportExceptionData? InnerException { get; init; }
-}
-
-internal sealed class ReportTimingStep
-{
-    [JsonPropertyName("name")]
-    public required string Name { get; init; }
-
-    [JsonPropertyName("durationMs")]
-    public double DurationMs { get; init; }
 }
 
 internal sealed class ReportKeyValue

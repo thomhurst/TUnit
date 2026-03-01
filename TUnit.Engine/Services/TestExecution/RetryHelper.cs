@@ -46,7 +46,9 @@ internal static class RetryHelper
                     testContext.Execution.Result = null;
                     testContext.TestStart = null;
                     testContext.Execution.TestEnd = null;
+#pragma warning disable CS0618 // Obsolete Timing API
                     testContext.Timings.Clear();
+#pragma warning restore CS0618
                     continue;
                 }
 
