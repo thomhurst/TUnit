@@ -15,14 +15,7 @@ internal sealed class TUnit_TestProject_DataSourceClassCombinedWithDataSourceMet
             TestClassType = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
             TestMethodName = "DataSourceClassCombinedWithDataSourceMethodTest",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = static () =>
-            [
-                new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
-                new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
-                new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
-                new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
-            ],
+            AttributeFactory = __CreateAttributes,
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
                 new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One")
@@ -124,55 +117,29 @@ internal sealed class TUnit_TestProject_DataSourceClassCombinedWithDataSourceMet
                         ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod).GetMethod("DataSourceClassCombinedWithDataSourceMethodTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", static () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", new global::TUnit.Core.ClassMetadata
                 {
-                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod)),
+                    Name = "DataSourceClassCombinedWithDataSourceMethod",
+                    Namespace = "TUnit.TestProject",
+                    Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+                    Parameters = new global::TUnit.Core.ParameterMetadata[]
                     {
-                        Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod)),
-                        Name = "DataSourceClassCombinedWithDataSourceMethod",
-                        Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-                        Parameters = new global::TUnit.Core.ParameterMetadata[]
+                        new global::TUnit.Core.ParameterMetadata(typeof(int))
                         {
-                            new global::TUnit.Core.ParameterMetadata(typeof(int))
-                            {
-                                Name = "i",
-                                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-                                IsNullable = false,
-                                ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
-                            }
-                        },
-                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-                        Parent = null
-                    };
-                    return classMetadata;
+                            Name = "i",
+                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
+                            IsNullable = false,
+                            ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
+                        }
+                    },
+                    Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                    Parent = null
                 })
             },
-            InstanceFactory = static (typeArgs, args) =>
-            {
-                return new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-            },
-            InvokeTypedTest = static (instance, args, cancellationToken) =>
-            {
-                try
-                {
-                    switch (args.Length)
-                    {
-                        case 1:
-                            {
-                                instance.DataSourceClassCombinedWithDataSourceMethodTest(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-                                return default(global::System.Threading.Tasks.ValueTask);
-                            }
-                        default:
-                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                    }
-                }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
-            },
+            InstanceFactory = __CreateInstance,
+            InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -194,6 +161,41 @@ internal sealed class TUnit_TestProject_DataSourceClassCombinedWithDataSourceMet
             DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTests
         };
+    }
+    private static global::System.Attribute[] __CreateAttributes()
+    {
+        return
+        [
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
+            new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "One"),
+            new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Two"),
+            new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.CommonTestData), "Three")
+        ];
+    }
+    private static global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod __CreateInstance(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+    }
+    private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            switch (args.Length)
+            {
+                case 1:
+                    {
+                        instance.DataSourceClassCombinedWithDataSourceMethodTest(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+                        return default(global::System.Threading.Tasks.ValueTask);
+                    }
+                default:
+                    throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+            }
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
     }
 }
 internal static class TUnit_TestProject_DataSourceClassCombinedWithDataSourceMethod_DataSourceClassCombinedW_3C180E22_ModuleInitializer

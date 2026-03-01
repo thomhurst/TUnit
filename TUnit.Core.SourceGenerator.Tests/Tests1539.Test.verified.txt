@@ -15,15 +15,7 @@ internal sealed class TUnit_TestProject_Bugs__1539_Tests_Test_TestSource : globa
             TestClassType = typeof(global::TUnit.TestProject.Bugs._1539.Tests),
             TestMethodName = "Test",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = static () =>
-            [
-                new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.TestProject.Bugs._1539.Tests.AttributeWithPositionalArgs(),
-                new global::TUnit.TestProject.Bugs._1539.Tests.AttributeWithPositionalArgs(11),
-                new global::TUnit.TestProject.Bugs._1539.Tests.AttributeWithPositionalArgs(two: "two"),
-                new global::TUnit.TestProject.Bugs._1539.Tests.AttributeWithPositionalArgs(three: false),
-                new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
-            ],
+            AttributeFactory = __CreateAttributes,
             DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
@@ -40,35 +32,20 @@ internal sealed class TUnit_TestProject_Bugs__1539_Tests_Test_TestSource : globa
                 ReturnType = typeof(void),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1539.Tests", static () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1539.Tests", new global::TUnit.Core.ClassMetadata
                 {
-                    var classMetadata = new global::TUnit.Core.ClassMetadata
-                    {
-                        Type = typeof(global::TUnit.TestProject.Bugs._1539.Tests),
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1539.Tests)),
-                        Name = "Tests",
-                        Namespace = "TUnit.TestProject.Bugs._1539",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-                        Parent = null
-                    };
-                    return classMetadata;
+                    Type = typeof(global::TUnit.TestProject.Bugs._1539.Tests),
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1539.Tests)),
+                    Name = "Tests",
+                    Namespace = "TUnit.TestProject.Bugs._1539",
+                    Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+                    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                    Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                    Parent = null
                 })
             },
-            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.Bugs._1539.Tests(),
-            InvokeTypedTest = static (instance, args, cancellationToken) =>
-            {
-                try
-                {
-                    instance.Test();
-                    return default(global::System.Threading.Tasks.ValueTask);
-                }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
-            },
+            InstanceFactory = __CreateInstance,
+            InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -90,6 +67,34 @@ internal sealed class TUnit_TestProject_Bugs__1539_Tests_Test_TestSource : globa
             DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTests
         };
+    }
+    private static global::System.Attribute[] __CreateAttributes()
+    {
+        return
+        [
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.TestProject.Bugs._1539.Tests.AttributeWithPositionalArgs(),
+            new global::TUnit.TestProject.Bugs._1539.Tests.AttributeWithPositionalArgs(11),
+            new global::TUnit.TestProject.Bugs._1539.Tests.AttributeWithPositionalArgs(two: "two"),
+            new global::TUnit.TestProject.Bugs._1539.Tests.AttributeWithPositionalArgs(three: false),
+            new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
+        ];
+    }
+    private static global::TUnit.TestProject.Bugs._1539.Tests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._1539.Tests();
+    }
+    private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.Bugs._1539.Tests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            instance.Test();
+            return default(global::System.Threading.Tasks.ValueTask);
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
     }
 }
 internal static class TUnit_TestProject_Bugs__1539_Tests_Test_ModuleInitializer

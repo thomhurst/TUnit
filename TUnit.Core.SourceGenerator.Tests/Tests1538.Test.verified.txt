@@ -15,11 +15,7 @@ internal sealed class TUnit_TestProject_Bugs__1538_Tests_Eight_Args__bool_string
             TestClassType = typeof(global::TUnit.TestProject.Bugs._1538.Tests),
             TestMethodName = "Eight_Args",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = static () =>
-            [
-                new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
-            ],
+            AttributeFactory = __CreateAttributes,
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
                 new global::TUnit.Core.MethodDataSourceAttribute("EightItems")
@@ -118,43 +114,20 @@ internal sealed class TUnit_TestProject_Bugs__1538_Tests_Eight_Args__bool_string
                         ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("Eight_Args", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[7]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1538.Tests", static () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1538.Tests", new global::TUnit.Core.ClassMetadata
                 {
-                    var classMetadata = new global::TUnit.Core.ClassMetadata
-                    {
-                        Type = typeof(global::TUnit.TestProject.Bugs._1538.Tests),
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1538.Tests)),
-                        Name = "Tests",
-                        Namespace = "TUnit.TestProject.Bugs._1538",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-                        Parent = null
-                    };
-                    return classMetadata;
+                    Type = typeof(global::TUnit.TestProject.Bugs._1538.Tests),
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1538.Tests)),
+                    Name = "Tests",
+                    Namespace = "TUnit.TestProject.Bugs._1538",
+                    Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+                    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                    Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                    Parent = null
                 })
             },
-            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.Bugs._1538.Tests(),
-            InvokeTypedTest = static (instance, args, cancellationToken) =>
-            {
-                try
-                {
-                    switch (args.Length)
-                    {
-                        case 8:
-                            {
-                                instance.Eight_Args(global::TUnit.Core.Helpers.CastHelper.Cast<bool>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[5]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[6]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[7]));
-                                return default(global::System.Threading.Tasks.ValueTask);
-                            }
-                        default:
-                            throw new global::System.ArgumentException($"Expected exactly 8 arguments, but got {args.Length}");
-                    }
-                }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
-            },
+            InstanceFactory = __CreateInstance,
+            InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -176,6 +149,38 @@ internal sealed class TUnit_TestProject_Bugs__1538_Tests_Eight_Args__bool_string
             DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTests
         };
+    }
+    private static global::System.Attribute[] __CreateAttributes()
+    {
+        return
+        [
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
+        ];
+    }
+    private static global::TUnit.TestProject.Bugs._1538.Tests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._1538.Tests();
+    }
+    private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.Bugs._1538.Tests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            switch (args.Length)
+            {
+                case 8:
+                    {
+                        instance.Eight_Args(global::TUnit.Core.Helpers.CastHelper.Cast<bool>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[5]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[6]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[7]));
+                        return default(global::System.Threading.Tasks.ValueTask);
+                    }
+                default:
+                    throw new global::System.ArgumentException($"Expected exactly 8 arguments, but got {args.Length}");
+            }
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
     }
 }
 internal static class TUnit_TestProject_Bugs__1538_Tests_Eight_Args__bool_string__string__string__string__st_35276EED_ModuleInitializer
@@ -207,11 +212,7 @@ internal sealed class TUnit_TestProject_Bugs__1538_Tests_SixteenArgs__bool_strin
             TestClassType = typeof(global::TUnit.TestProject.Bugs._1538.Tests),
             TestMethodName = "SixteenArgs",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = static () =>
-            [
-                new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
-            ],
+            AttributeFactory = __CreateAttributes,
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
                 new global::TUnit.Core.MethodDataSourceAttribute("SixteenItems")
@@ -366,43 +367,20 @@ internal sealed class TUnit_TestProject_Bugs__1538_Tests_SixteenArgs__bool_strin
                         ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("SixteenArgs", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[15]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1538.Tests", static () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1538.Tests", new global::TUnit.Core.ClassMetadata
                 {
-                    var classMetadata = new global::TUnit.Core.ClassMetadata
-                    {
-                        Type = typeof(global::TUnit.TestProject.Bugs._1538.Tests),
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1538.Tests)),
-                        Name = "Tests",
-                        Namespace = "TUnit.TestProject.Bugs._1538",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-                        Parent = null
-                    };
-                    return classMetadata;
+                    Type = typeof(global::TUnit.TestProject.Bugs._1538.Tests),
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1538.Tests)),
+                    Name = "Tests",
+                    Namespace = "TUnit.TestProject.Bugs._1538",
+                    Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+                    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                    Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                    Parent = null
                 })
             },
-            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.Bugs._1538.Tests(),
-            InvokeTypedTest = static (instance, args, cancellationToken) =>
-            {
-                try
-                {
-                    switch (args.Length)
-                    {
-                        case 16:
-                            {
-                                instance.SixteenArgs(global::TUnit.Core.Helpers.CastHelper.Cast<bool>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[5]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[6]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[7]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[8]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[9]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[10]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[11]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[12]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[13]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[14]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[15]));
-                                return default(global::System.Threading.Tasks.ValueTask);
-                            }
-                        default:
-                            throw new global::System.ArgumentException($"Expected exactly 16 arguments, but got {args.Length}");
-                    }
-                }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
-            },
+            InstanceFactory = __CreateInstance,
+            InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -424,6 +402,38 @@ internal sealed class TUnit_TestProject_Bugs__1538_Tests_SixteenArgs__bool_strin
             DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTests
         };
+    }
+    private static global::System.Attribute[] __CreateAttributes()
+    {
+        return
+        [
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
+        ];
+    }
+    private static global::TUnit.TestProject.Bugs._1538.Tests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._1538.Tests();
+    }
+    private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.Bugs._1538.Tests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            switch (args.Length)
+            {
+                case 16:
+                    {
+                        instance.SixteenArgs(global::TUnit.Core.Helpers.CastHelper.Cast<bool>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[5]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[6]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[7]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[8]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[9]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[10]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[11]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[12]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[13]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[14]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[15]));
+                        return default(global::System.Threading.Tasks.ValueTask);
+                    }
+                default:
+                    throw new global::System.ArgumentException($"Expected exactly 16 arguments, but got {args.Length}");
+            }
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
     }
 }
 internal static class TUnit_TestProject_Bugs__1538_Tests_SixteenArgs__bool_string__string__string__string__s_972B9C97_ModuleInitializer

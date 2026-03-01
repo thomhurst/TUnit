@@ -15,10 +15,7 @@ internal sealed class TUnit_TestProject_ModuleInitializerTest_TestWithModuleInit
             TestClassType = typeof(global::TUnit.TestProject.ModuleInitializerTest),
             TestMethodName = "TestWithModuleInit",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = static () =>
-            [
-                new global::TUnit.Core.TestAttribute()
-            ],
+            AttributeFactory = __CreateAttributes,
             DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
@@ -35,35 +32,20 @@ internal sealed class TUnit_TestProject_ModuleInitializerTest_TestWithModuleInit
                 ReturnType = typeof(void),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("UnifiedReflectionFreeTests:global::TUnit.TestProject.ModuleInitializerTest", static () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("UnifiedReflectionFreeTests:global::TUnit.TestProject.ModuleInitializerTest", new global::TUnit.Core.ClassMetadata
                 {
-                    var classMetadata = new global::TUnit.Core.ClassMetadata
-                    {
-                        Type = typeof(global::TUnit.TestProject.ModuleInitializerTest),
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ModuleInitializerTest)),
-                        Name = "ModuleInitializerTest",
-                        Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("UnifiedReflectionFreeTests", static () => new global::TUnit.Core.AssemblyMetadata { Name = "UnifiedReflectionFreeTests" }),
-                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-                        Parent = null
-                    };
-                    return classMetadata;
+                    Type = typeof(global::TUnit.TestProject.ModuleInitializerTest),
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ModuleInitializerTest)),
+                    Name = "ModuleInitializerTest",
+                    Namespace = "TUnit.TestProject",
+                    Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("UnifiedReflectionFreeTests", "UnifiedReflectionFreeTests"),
+                    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                    Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                    Parent = null
                 })
             },
-            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.ModuleInitializerTest(),
-            InvokeTypedTest = static (instance, args, cancellationToken) =>
-            {
-                try
-                {
-                    instance.TestWithModuleInit();
-                    return default(global::System.Threading.Tasks.ValueTask);
-                }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
-            },
+            InstanceFactory = __CreateInstance,
+            InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -85,6 +67,29 @@ internal sealed class TUnit_TestProject_ModuleInitializerTest_TestWithModuleInit
             DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTests
         };
+    }
+    private static global::System.Attribute[] __CreateAttributes()
+    {
+        return
+        [
+            new global::TUnit.Core.TestAttribute()
+        ];
+    }
+    private static global::TUnit.TestProject.ModuleInitializerTest __CreateInstance(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.ModuleInitializerTest();
+    }
+    private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.ModuleInitializerTest instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            instance.TestWithModuleInit();
+            return default(global::System.Threading.Tasks.ValueTask);
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
     }
 }
 internal static class TUnit_TestProject_ModuleInitializerTest_TestWithModuleInit_ModuleInitializer

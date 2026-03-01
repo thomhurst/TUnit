@@ -381,7 +381,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            GenerateTestMetadataInstance(writer, testMethod, className, addToResultsList: false);
+            GenerateTestMetadataInstance(writer, testMethod, className, addToResultsList: false, useNamedMethods: true);
             writer.AppendLine("return new global::TUnit.Core.TestMetadata[] { metadata };");
         }
         writer.Unindent();
@@ -392,13 +392,28 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Generate EnumerateTestDescriptors method for fast filtering
         GenerateEnumerateTestDescriptors(writer, testMethod);
 
+        if (!needsList)
+        {
+            // Emit named static helper methods to avoid generating a <>c display class.
+            // These are referenced by method group in the metadata above.
+            writer.AppendLine();
+            EmitAttributeFactoryMethod(writer, testMethod);
+            writer.AppendLine();
+            EmitInstanceFactoryMethod(writer, testMethod);
+            if (testMethod is { IsGenericType: false, IsGenericMethod: false })
+            {
+                writer.AppendLine();
+                EmitInvokeTestMethod(writer, testMethod, className);
+            }
+        }
+
         writer.Unindent();
         writer.AppendLine("}");
 
         GenerateModuleInitializer(writer, testMethod, uniqueClassName);
     }
 
-    private static void GenerateTestMetadataInstance(CodeWriter writer, TestMethodMetadata testMethod, string className, bool addToResultsList = true)
+    private static void GenerateTestMetadataInstance(CodeWriter writer, TestMethodMetadata testMethod, string className, bool addToResultsList = true, bool useNamedMethods = false)
     {
         var methodName = testMethod.MethodSymbol.Name;
 
@@ -419,7 +434,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"TestClassType = {GenerateTypeReference(testMethod.TypeSymbol, testMethod.IsGenericType)},");
         writer.AppendLine($"TestMethodName = \"{methodName}\",");
 
-        GenerateMetadata(writer, testMethod);
+        GenerateMetadata(writer, testMethod, useNamedMethods);
 
         if (testMethod.IsGenericType)
         {
@@ -433,7 +448,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         // Generate typed invokers and factory
-        GenerateTypedInvokers(writer, testMethod, className);
+        GenerateTypedInvokers(writer, testMethod, className, useNamedMethods);
 
         writer.Unindent();
         writer.AppendLine("};");
@@ -454,26 +469,33 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
     }
 
-    private static void GenerateMetadata(CodeWriter writer, TestMethodMetadata testMethod)
+    private static void GenerateMetadata(CodeWriter writer, TestMethodMetadata testMethod, bool useNamedMethods = false)
     {
         var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
         var methodSymbol = testMethod.MethodSymbol;
 
         GenerateDependencies(writer, methodSymbol);
 
-        writer.AppendLine("AttributeFactory = static () =>");
-        writer.AppendLine("[");
-        writer.Indent();
+        if (useNamedMethods)
+        {
+            writer.AppendLine("AttributeFactory = __CreateAttributes,");
+        }
+        else
+        {
+            writer.AppendLine("AttributeFactory = static () =>");
+            writer.AppendLine("[");
+            writer.Indent();
 
-        var attributes = methodSymbol.GetAttributes()
-            .Where(a => !DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
-            .Concat(testMethod.TypeSymbol.GetAttributesIncludingBaseTypes())
-            .Concat(testMethod.TypeSymbol.ContainingAssembly.GetAttributes());
+            var attributes = methodSymbol.GetAttributes()
+                .Where(a => !DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
+                .Concat(testMethod.TypeSymbol.GetAttributesIncludingBaseTypes())
+                .Concat(testMethod.TypeSymbol.ContainingAssembly.GetAttributes());
 
-        testMethod.CompilationContext.AttributeWriter.WriteAttributes(writer, attributes);
+            testMethod.CompilationContext.AttributeWriter.WriteAttributes(writer, attributes);
 
-        writer.Unindent();
-        writer.AppendLine("],");
+            writer.Unindent();
+            writer.AppendLine("],");
+        }
 
         // Extract and emit RepeatCount if present
         var repeatCount = ExtractRepeatCount(methodSymbol, testMethod.TypeSymbol);
@@ -1776,7 +1798,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
     }
 
-    private static void GenerateTypedInvokers(CodeWriter writer, TestMethodMetadata testMethod, string className)
+    private static void GenerateTypedInvokers(CodeWriter writer, TestMethodMetadata testMethod, string className, bool useNamedMethods = false)
     {
         var methodName = testMethod.MethodSymbol.Name;
         var parameters = testMethod.MethodSymbol.Parameters;
@@ -1790,14 +1812,28 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             ? parameters.Take(parameters.Length - 1).ToArray()
             : parameters.ToArray();
 
-        // Use centralized instance factory generator for all types (generic and non-generic)
-        InstanceFactoryGenerator.GenerateInstanceFactory(writer, testMethod.TypeSymbol, testMethod);
+        if (useNamedMethods)
+        {
+            writer.AppendLine("InstanceFactory = __CreateInstance,");
+        }
+        else
+        {
+            // Use centralized instance factory generator for all types (generic and non-generic)
+            InstanceFactoryGenerator.GenerateInstanceFactory(writer, testMethod.TypeSymbol, testMethod);
+        }
 
         // Generate InvokeTypedTest for non-generic tests
         var returnPattern = GetReturnPattern(testMethod.MethodSymbol);
         if (testMethod is { IsGenericType: false, IsGenericMethod: false })
         {
-            GenerateConcreteTestInvoker(writer, methodName, returnPattern, hasCancellationToken, parametersFromArgs);
+            if (useNamedMethods)
+            {
+                writer.AppendLine("InvokeTypedTest = __InvokeTest,");
+            }
+            else
+            {
+                GenerateConcreteTestInvoker(writer, methodName, returnPattern, hasCancellationToken, parametersFromArgs);
+            }
         }
     }
 
@@ -1807,8 +1843,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("InvokeTypedTest = static (instance, args, cancellationToken) =>");
         writer.AppendLine("{");
         writer.Indent();
+        GenerateConcreteTestInvokerBody(writer, methodName, returnPattern, hasCancellationToken, parametersFromArgs);
+        writer.Unindent();
+        writer.AppendLine("},");
+    }
 
-        // Wrap entire lambda body in try-catch to handle synchronous exceptions
+    private static void GenerateConcreteTestInvokerBody(CodeWriter writer, string methodName, TestReturnPattern returnPattern, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs)
+    {
+        // Wrap entire body in try-catch to handle synchronous exceptions
         writer.AppendLine("try");
         writer.AppendLine("{");
         writer.Indent();
@@ -1934,9 +1976,66 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));");
         writer.Unindent();
         writer.AppendLine("}");
+    }
+
+    /// <summary>
+    /// Emits the AttributeFactory as a named static method to avoid generating a display class.
+    /// </summary>
+    private static void EmitAttributeFactoryMethod(CodeWriter writer, TestMethodMetadata testMethod)
+    {
+        writer.AppendLine("private static global::System.Attribute[] __CreateAttributes()");
+        writer.AppendLine("{");
+        writer.Indent();
+
+        writer.AppendLine("return");
+        writer.AppendLine("[");
+        writer.Indent();
+
+        var attributes = testMethod.MethodSymbol.GetAttributes()
+            .Where(a => !DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
+            .Concat(testMethod.TypeSymbol.GetAttributesIncludingBaseTypes())
+            .Concat(testMethod.TypeSymbol.ContainingAssembly.GetAttributes());
+
+        testMethod.CompilationContext.AttributeWriter.WriteAttributes(writer, attributes);
 
         writer.Unindent();
-        writer.AppendLine("},");
+        writer.AppendLine("];");
+
+        writer.Unindent();
+        writer.AppendLine("}");
+    }
+
+    /// <summary>
+    /// Emits the InstanceFactory as a named static method to avoid generating a display class.
+    /// </summary>
+    private static void EmitInstanceFactoryMethod(CodeWriter writer, TestMethodMetadata testMethod)
+    {
+        InstanceFactoryGenerator.GenerateInstanceFactoryAsMethod(writer, testMethod.TypeSymbol);
+    }
+
+    /// <summary>
+    /// Emits the InvokeTypedTest as a named static method to avoid generating a display class.
+    /// </summary>
+    private static void EmitInvokeTestMethod(CodeWriter writer, TestMethodMetadata testMethod, string className)
+    {
+        var methodName = testMethod.MethodSymbol.Name;
+        var parameters = testMethod.MethodSymbol.Parameters;
+
+        var hasCancellationToken = parameters.Length > 0 &&
+            parameters.Last().Type.GloballyQualified() == "global::System.Threading.CancellationToken";
+
+        var parametersFromArgs = hasCancellationToken
+            ? parameters.Take(parameters.Length - 1).ToArray()
+            : parameters.ToArray();
+
+        var returnPattern = GetReturnPattern(testMethod.MethodSymbol);
+
+        writer.AppendLine($"private static global::System.Threading.Tasks.ValueTask __InvokeTest({className} instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)");
+        writer.AppendLine("{");
+        writer.Indent();
+        GenerateConcreteTestInvokerBody(writer, methodName, returnPattern, hasCancellationToken, parametersFromArgs);
+        writer.Unindent();
+        writer.AppendLine("}");
     }
 
     private static void GenerateEnumerateTestDescriptors(CodeWriter writer, TestMethodMetadata testMethod)

@@ -15,10 +15,7 @@ internal sealed class TUnit_TestProject_AotDataSourceTest_TestWithDataSource__in
             TestClassType = typeof(global::TUnit.TestProject.AotDataSourceTest),
             TestMethodName = "TestWithDataSource",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = static () =>
-            [
-                new global::TUnit.Core.TestAttribute()
-            ],
+            AttributeFactory = __CreateAttributes,
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
                 new global::TUnit.Core.ArgumentsAttribute(1, 2, 3),
@@ -62,43 +59,20 @@ internal sealed class TUnit_TestProject_AotDataSourceTest_TestWithDataSource__in
                         ReflectionInfo = typeof(global::TUnit.TestProject.AotDataSourceTest).GetMethod("TestWithDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int) }, null)!.GetParameters()[2]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("UnifiedReflectionFreeTests:global::TUnit.TestProject.AotDataSourceTest", static () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("UnifiedReflectionFreeTests:global::TUnit.TestProject.AotDataSourceTest", new global::TUnit.Core.ClassMetadata
                 {
-                    var classMetadata = new global::TUnit.Core.ClassMetadata
-                    {
-                        Type = typeof(global::TUnit.TestProject.AotDataSourceTest),
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AotDataSourceTest)),
-                        Name = "AotDataSourceTest",
-                        Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("UnifiedReflectionFreeTests", static () => new global::TUnit.Core.AssemblyMetadata { Name = "UnifiedReflectionFreeTests" }),
-                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-                        Parent = null
-                    };
-                    return classMetadata;
+                    Type = typeof(global::TUnit.TestProject.AotDataSourceTest),
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AotDataSourceTest)),
+                    Name = "AotDataSourceTest",
+                    Namespace = "TUnit.TestProject",
+                    Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("UnifiedReflectionFreeTests", "UnifiedReflectionFreeTests"),
+                    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                    Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                    Parent = null
                 })
             },
-            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.AotDataSourceTest(),
-            InvokeTypedTest = static (instance, args, cancellationToken) =>
-            {
-                try
-                {
-                    switch (args.Length)
-                    {
-                        case 3:
-                            {
-                                instance.TestWithDataSource(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]));
-                                return default(global::System.Threading.Tasks.ValueTask);
-                            }
-                        default:
-                            throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
-                    }
-                }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
-            },
+            InstanceFactory = __CreateInstance,
+            InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -120,6 +94,37 @@ internal sealed class TUnit_TestProject_AotDataSourceTest_TestWithDataSource__in
             DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTests
         };
+    }
+    private static global::System.Attribute[] __CreateAttributes()
+    {
+        return
+        [
+            new global::TUnit.Core.TestAttribute()
+        ];
+    }
+    private static global::TUnit.TestProject.AotDataSourceTest __CreateInstance(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.AotDataSourceTest();
+    }
+    private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.AotDataSourceTest instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            switch (args.Length)
+            {
+                case 3:
+                    {
+                        instance.TestWithDataSource(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]));
+                        return default(global::System.Threading.Tasks.ValueTask);
+                    }
+                default:
+                    throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
+            }
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
     }
 }
 internal static class TUnit_TestProject_AotDataSourceTest_TestWithDataSource__int_int_int_ModuleInitializer

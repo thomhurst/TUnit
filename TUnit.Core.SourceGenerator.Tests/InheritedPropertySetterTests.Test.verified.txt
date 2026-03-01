@@ -29,12 +29,7 @@ internal sealed class TUnit_TestProject_PropertySetterTests_Test_TestSource : gl
             TestClassType = typeof(global::TUnit.TestProject.PropertySetterTests),
             TestMethodName = "Test",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = static () =>
-            [
-                new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
-                new global::TUnit.Core.NotInParallelAttribute("PropertySetterTests")
-            ],
+            AttributeFactory = __CreateAttributes,
             DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
@@ -201,138 +196,110 @@ internal sealed class TUnit_TestProject_PropertySetterTests_Test_TestSource : gl
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.PropertySetterTests", static () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.PropertySetterTests", new global::TUnit.Core.ClassMetadata
                 {
-                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    Type = typeof(global::TUnit.TestProject.PropertySetterTests),
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.PropertySetterTests)),
+                    Name = "PropertySetterTests",
+                    Namespace = "TUnit.TestProject",
+                    Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+                    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                    Properties = new global::TUnit.Core.PropertyMetadata[]
                     {
-                        Type = typeof(global::TUnit.TestProject.PropertySetterTests),
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.PropertySetterTests)),
-                        Name = "PropertySetterTests",
-                        Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                        Properties = new global::TUnit.Core.PropertyMetadata[]
+                        new global::TUnit.Core.PropertyMetadata
                         {
-                            new global::TUnit.Core.PropertyMetadata
-                            {
-                                ReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty("Property1"),
-                                Type = typeof(string),
-                                Name = "Property1",
-                                IsStatic = false,
-                                IsNullable = false,
-                                Getter = o => ((global::TUnit.TestProject.PropertySetterTests)o).Property1,
-                                ClassMetadata = null!,
-                                ContainingTypeMetadata = null!
-                            },
-                            new global::TUnit.Core.PropertyMetadata
-                            {
-                                ReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty("Property2"),
-                                Type = typeof(string),
-                                Name = "Property2",
-                                IsStatic = false,
-                                IsNullable = false,
-                                Getter = o => ((global::TUnit.TestProject.PropertySetterTests)o).Property2,
-                                ClassMetadata = null!,
-                                ContainingTypeMetadata = null!
-                            },
-                            new global::TUnit.Core.PropertyMetadata
-                            {
-                                ReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty("Property3"),
-                                Type = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
-                                Name = "Property3",
-                                IsStatic = false,
-                                IsNullable = false,
-                                Getter = o => ((global::TUnit.TestProject.PropertySetterTests)o).Property3,
-                                ClassMetadata = null!,
-                                ContainingTypeMetadata = null!
-                            },
-                            new global::TUnit.Core.PropertyMetadata
-                            {
-                                ReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty("Property4"),
-                                Type = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
-                                Name = "Property4",
-                                IsStatic = false,
-                                IsNullable = false,
-                                Getter = o => ((global::TUnit.TestProject.PropertySetterTests)o).Property4,
-                                ClassMetadata = null!,
-                                ContainingTypeMetadata = null!
-                            },
-                            new global::TUnit.Core.PropertyMetadata
-                            {
-                                ReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty("Property5"),
-                                Type = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
-                                Name = "Property5",
-                                IsStatic = false,
-                                IsNullable = false,
-                                Getter = o => ((global::TUnit.TestProject.PropertySetterTests)o).Property5,
-                                ClassMetadata = null!,
-                                ContainingTypeMetadata = null!
-                            },
-                            new global::TUnit.Core.PropertyMetadata
-                            {
-                                ReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty("Property6"),
-                                Type = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
-                                Name = "Property6",
-                                IsStatic = false,
-                                IsNullable = false,
-                                Getter = o => ((global::TUnit.TestProject.PropertySetterTests)o).Property6,
-                                ClassMetadata = null!,
-                                ContainingTypeMetadata = null!
-                            },
-                            new global::TUnit.Core.PropertyMetadata
-                            {
-                                ReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty("Property7"),
-                                Type = typeof(string),
-                                Name = "Property7",
-                                IsStatic = false,
-                                IsNullable = false,
-                                Getter = o => ((global::TUnit.TestProject.PropertySetterTests)o).Property7,
-                                ClassMetadata = null!,
-                                ContainingTypeMetadata = null!
-                            },
-                            new global::TUnit.Core.PropertyMetadata
-                            {
-                                ReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty("StaticProperty"),
-                                Type = typeof(global::TUnit.TestProject.PropertySetterTests.StaticInnerModel),
-                                Name = "StaticProperty",
-                                IsStatic = true,
-                                IsNullable = false,
-                                Getter = _ => global::TUnit.TestProject.PropertySetterTests.StaticProperty,
-                                ClassMetadata = null!,
-                                ContainingTypeMetadata = null!
-                            }
+                            ReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty("Property1"),
+                            Type = typeof(string),
+                            Name = "Property1",
+                            IsStatic = false,
+                            IsNullable = false,
+                            Getter = o => ((global::TUnit.TestProject.PropertySetterTests)o).Property1,
+                            ClassMetadata = null!,
+                            ContainingTypeMetadata = null!
                         },
-                        Parent = null
-                    };
-                    foreach (var prop in classMetadata.Properties)
-                    {
-                        prop.ClassMetadata = classMetadata;
-                        prop.ContainingTypeMetadata = classMetadata;
-                    }
-                    return classMetadata;
+                        new global::TUnit.Core.PropertyMetadata
+                        {
+                            ReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty("Property2"),
+                            Type = typeof(string),
+                            Name = "Property2",
+                            IsStatic = false,
+                            IsNullable = false,
+                            Getter = o => ((global::TUnit.TestProject.PropertySetterTests)o).Property2,
+                            ClassMetadata = null!,
+                            ContainingTypeMetadata = null!
+                        },
+                        new global::TUnit.Core.PropertyMetadata
+                        {
+                            ReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty("Property3"),
+                            Type = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+                            Name = "Property3",
+                            IsStatic = false,
+                            IsNullable = false,
+                            Getter = o => ((global::TUnit.TestProject.PropertySetterTests)o).Property3,
+                            ClassMetadata = null!,
+                            ContainingTypeMetadata = null!
+                        },
+                        new global::TUnit.Core.PropertyMetadata
+                        {
+                            ReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty("Property4"),
+                            Type = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+                            Name = "Property4",
+                            IsStatic = false,
+                            IsNullable = false,
+                            Getter = o => ((global::TUnit.TestProject.PropertySetterTests)o).Property4,
+                            ClassMetadata = null!,
+                            ContainingTypeMetadata = null!
+                        },
+                        new global::TUnit.Core.PropertyMetadata
+                        {
+                            ReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty("Property5"),
+                            Type = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+                            Name = "Property5",
+                            IsStatic = false,
+                            IsNullable = false,
+                            Getter = o => ((global::TUnit.TestProject.PropertySetterTests)o).Property5,
+                            ClassMetadata = null!,
+                            ContainingTypeMetadata = null!
+                        },
+                        new global::TUnit.Core.PropertyMetadata
+                        {
+                            ReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty("Property6"),
+                            Type = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+                            Name = "Property6",
+                            IsStatic = false,
+                            IsNullable = false,
+                            Getter = o => ((global::TUnit.TestProject.PropertySetterTests)o).Property6,
+                            ClassMetadata = null!,
+                            ContainingTypeMetadata = null!
+                        },
+                        new global::TUnit.Core.PropertyMetadata
+                        {
+                            ReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty("Property7"),
+                            Type = typeof(string),
+                            Name = "Property7",
+                            IsStatic = false,
+                            IsNullable = false,
+                            Getter = o => ((global::TUnit.TestProject.PropertySetterTests)o).Property7,
+                            ClassMetadata = null!,
+                            ContainingTypeMetadata = null!
+                        },
+                        new global::TUnit.Core.PropertyMetadata
+                        {
+                            ReflectionInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetProperty("StaticProperty"),
+                            Type = typeof(global::TUnit.TestProject.PropertySetterTests.StaticInnerModel),
+                            Name = "StaticProperty",
+                            IsStatic = true,
+                            IsNullable = false,
+                            Getter = _ => global::TUnit.TestProject.PropertySetterTests.StaticProperty,
+                            ClassMetadata = null!,
+                            ContainingTypeMetadata = null!
+                        }
+                    },
+                    Parent = null
                 })
             },
-            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.PropertySetterTests()
-            {
-                Property1 = default!,
-                Property2 = default!,
-                Property3 = default!,
-                Property4 = default!,
-                Property5 = default!,
-                Property6 = default!,
-                Property7 = default!,
-            },
-            InvokeTypedTest = static (instance, args, cancellationToken) =>
-            {
-                try
-                {
-                    return new global::System.Threading.Tasks.ValueTask(instance.Test());
-                }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
-            },
+            InstanceFactory = __CreateInstance,
+            InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -354,6 +321,39 @@ internal sealed class TUnit_TestProject_PropertySetterTests_Test_TestSource : gl
             DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTests
         };
+    }
+    private static global::System.Attribute[] __CreateAttributes()
+    {
+        return
+        [
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
+            new global::TUnit.Core.NotInParallelAttribute("PropertySetterTests")
+        ];
+    }
+    private static global::TUnit.TestProject.PropertySetterTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.PropertySetterTests()
+        {
+            Property1 = default!,
+            Property2 = default!,
+            Property3 = default!,
+            Property4 = default!,
+            Property5 = default!,
+            Property6 = default!,
+            Property7 = default!,
+        };
+    }
+    private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.PropertySetterTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            return new global::System.Threading.Tasks.ValueTask(instance.Test());
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
     }
 }
 internal static class TUnit_TestProject_PropertySetterTests_Test_ModuleInitializer
@@ -399,13 +399,7 @@ internal sealed class TUnit_TestProject_InheritedPropertySetterTests_Test_TestSo
             TestClassType = typeof(global::TUnit.TestProject.InheritedPropertySetterTests),
             TestMethodName = "Test",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = static () =>
-            [
-                new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.InheritsTestsAttribute(),
-                new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
-                new global::TUnit.Core.NotInParallelAttribute("PropertySetterTests")
-            ],
+            AttributeFactory = __CreateAttributes,
             DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
@@ -561,43 +555,20 @@ internal sealed class TUnit_TestProject_InheritedPropertySetterTests_Test_TestSo
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.InheritedPropertySetterTests", static () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.InheritedPropertySetterTests", new global::TUnit.Core.ClassMetadata
                 {
-                    var classMetadata = new global::TUnit.Core.ClassMetadata
-                    {
-                        Type = typeof(global::TUnit.TestProject.InheritedPropertySetterTests),
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.InheritedPropertySetterTests)),
-                        Name = "InheritedPropertySetterTests",
-                        Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-                        Parent = null
-                    };
-                    return classMetadata;
+                    Type = typeof(global::TUnit.TestProject.InheritedPropertySetterTests),
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.InheritedPropertySetterTests)),
+                    Name = "InheritedPropertySetterTests",
+                    Namespace = "TUnit.TestProject",
+                    Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+                    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                    Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                    Parent = null
                 })
             },
-            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.InheritedPropertySetterTests()
-            {
-                Property1 = default!,
-                Property2 = default!,
-                Property3 = default!,
-                Property4 = default!,
-                Property5 = default!,
-                Property6 = default!,
-                Property7 = default!,
-            },
-            InvokeTypedTest = static (instance, args, cancellationToken) =>
-            {
-                try
-                {
-                    return new global::System.Threading.Tasks.ValueTask(instance.Test());
-                }
-                catch (global::System.Exception ex)
-                {
-                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
-                }
-            },
+            InstanceFactory = __CreateInstance,
+            InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -619,6 +590,40 @@ internal sealed class TUnit_TestProject_InheritedPropertySetterTests_Test_TestSo
             DependsOn = global::System.Array.Empty<string>(),
             Materializer = GetTests
         };
+    }
+    private static global::System.Attribute[] __CreateAttributes()
+    {
+        return
+        [
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.InheritsTestsAttribute(),
+            new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
+            new global::TUnit.Core.NotInParallelAttribute("PropertySetterTests")
+        ];
+    }
+    private static global::TUnit.TestProject.InheritedPropertySetterTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.InheritedPropertySetterTests()
+        {
+            Property1 = default!,
+            Property2 = default!,
+            Property3 = default!,
+            Property4 = default!,
+            Property5 = default!,
+            Property6 = default!,
+            Property7 = default!,
+        };
+    }
+    private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.InheritedPropertySetterTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            return new global::System.Threading.Tasks.ValueTask(instance.Test());
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
     }
 }
 internal static class TUnit_TestProject_InheritedPropertySetterTests_Test_ModuleInitializer

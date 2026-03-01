@@ -31,10 +31,15 @@ public static class InstanceFactoryGenerator
         writer.AppendLine("InstanceFactory = static (typeArgs, args) =>");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("// ClassConstructor attribute is present - instance creation handled at runtime");
-        writer.AppendLine("throw new global::System.NotSupportedException(\"Instance creation for classes with ClassConstructor attribute is handled at runtime\");");
+        GenerateClassConstructorStubBody(writer);
         writer.Unindent();
         writer.AppendLine("},");
+    }
+
+    private static void GenerateClassConstructorStubBody(CodeWriter writer)
+    {
+        writer.AppendLine("// ClassConstructor attribute is present - instance creation handled at runtime");
+        writer.AppendLine("throw new global::System.NotSupportedException(\"Instance creation for classes with ClassConstructor attribute is handled at runtime\");");
     }
 
     /// <summary>
@@ -131,6 +136,63 @@ public static class InstanceFactoryGenerator
         }
     }
 
+    /// <summary>
+    /// Generates the InstanceFactory as a named static method instead of a lambda,
+    /// to avoid generating a &lt;&gt;c display class.
+    /// </summary>
+    public static void GenerateInstanceFactoryAsMethod(CodeWriter writer, ITypeSymbol typeSymbol)
+    {
+        var className = typeSymbol.GloballyQualified();
+
+        writer.AppendLine($"private static {className} __CreateInstance(global::System.Type[] typeArgs, object?[] args)");
+        writer.AppendLine("{");
+        writer.Indent();
+
+        if (typeSymbol is INamedTypeSymbol namedTypeSymbol && HasClassConstructorAttribute(namedTypeSymbol))
+        {
+            GenerateClassConstructorStubBody(writer);
+        }
+        else if (typeSymbol.HasParameterizedConstructor())
+        {
+            var constructor = GetPrimaryConstructor(typeSymbol);
+            if (constructor != null)
+            {
+                GenerateTypedConstructorCallBody(writer, className, constructor);
+            }
+            else
+            {
+                writer.AppendLine("return null!;");
+            }
+        }
+        else
+        {
+            var requiredProperties = RequiredPropertyHelper.GetAllRequiredProperties(typeSymbol);
+
+            if (!requiredProperties.Any())
+            {
+                writer.AppendLine($"return new {className}();");
+            }
+            else
+            {
+                writer.AppendLine($"return new {className}()");
+                writer.AppendLine("{");
+                writer.Indent();
+
+                foreach (var property in requiredProperties)
+                {
+                    var defaultValue = RequiredPropertyHelper.GetDefaultValueForType(property.Type);
+                    writer.AppendLine($"{property.Name} = {defaultValue},");
+                }
+
+                writer.Unindent();
+                writer.AppendLine("};");
+            }
+        }
+
+        writer.Unindent();
+        writer.AppendLine("}");
+    }
+
     private static IMethodSymbol? GetPrimaryConstructor(ITypeSymbol typeSymbol)
     {
         // Materialize constructors once to avoid multiple enumerations
@@ -166,7 +228,13 @@ public static class InstanceFactoryGenerator
         writer.AppendLine("InstanceFactory = static (typeArgs, args) =>");
         writer.AppendLine("{");
         writer.Indent();
+        GenerateTypedConstructorCallBody(writer, className, constructor);
+        writer.Unindent();
+        writer.AppendLine("},");
+    }
 
+    private static void GenerateTypedConstructorCallBody(CodeWriter writer, string className, IMethodSymbol constructor)
+    {
         // Check for required properties
         var requiredProperties = RequiredPropertyHelper.GetAllRequiredProperties(constructor.ContainingType);
 
@@ -216,9 +284,6 @@ public static class InstanceFactoryGenerator
 
             writer.AppendLine(";");
         }
-
-        writer.Unindent();
-        writer.AppendLine("},");
     }
 
     private static void GenerateGenericInstanceFactory(CodeWriter writer, INamedTypeSymbol genericType)

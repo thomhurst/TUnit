@@ -78,19 +78,12 @@ internal static class MetadataGenerationHelper
     private static void WriteClassMetadataGetOrAdd(ICodeWriter writer, INamedTypeSymbol typeSymbol, string? parentExpression = null)
     {
         var qualifiedName = $"{typeSymbol.ContainingAssembly.Name}:{typeSymbol.GloballyQualified()}";
-        writer.AppendLine($"global::TUnit.Core.ClassMetadata.GetOrAdd(\"{qualifiedName}\", static () => ");
+        writer.AppendLine($"global::TUnit.Core.ClassMetadata.GetOrAdd(\"{qualifiedName}\", new global::TUnit.Core.ClassMetadata");
         writer.AppendLine("{");
 
         // Manually increment indent level without calling EnsureNewLine
         var currentIndent = writer.IndentLevel;
         writer.SetIndentLevel(currentIndent + 1);
-
-        // Create the ClassMetadata instance
-        writer.AppendLine("var classMetadata = new global::TUnit.Core.ClassMetadata");
-        writer.AppendLine("{");
-
-        // Increment for the object initializer content
-        writer.SetIndentLevel(currentIndent + 2);
 
         writer.AppendLine($"Type = typeof({typeSymbol.GloballyQualified()}),");
         writer.AppendLine($"TypeInfo = {CodeGenerationHelpers.GenerateTypeInfo(typeSymbol)},");
@@ -116,30 +109,9 @@ internal static class MetadataGenerationHelper
         }
 
         writer.Append("Properties = ");
-        WritePropertyMetadataArray(writer, typeSymbol, out var propertyCount);
+        WritePropertyMetadataArray(writer, typeSymbol, out _);
         writer.AppendLine(",");
         writer.Append($"Parent = {parentExpression ?? "null"}");
-
-        // Back to lambda body level
-        writer.SetIndentLevel(currentIndent + 1);
-        writer.AppendLine();
-        writer.AppendLine("};");
-
-        if (propertyCount > 0)
-        {
-            // Set ClassMetadata reference on each property
-            writer.AppendLine("foreach (var prop in classMetadata.Properties)");
-            writer.AppendLine("{");
-
-            writer.SetIndentLevel(currentIndent + 2);
-            writer.AppendLine("prop.ClassMetadata = classMetadata;");
-            writer.Append("prop.ContainingTypeMetadata = classMetadata;");
-
-            writer.SetIndentLevel(currentIndent + 1);
-            writer.AppendLine();
-            writer.AppendLine("}");
-        }
-        writer.Append("return classMetadata;");
 
         // Back to original level
         writer.SetIndentLevel(currentIndent);
@@ -172,12 +144,7 @@ internal static class MetadataGenerationHelper
     {
         var qualifiedName = $"{typeSymbol.ContainingAssembly.Name}:{typeSymbol.GloballyQualified()}";
         var writer = new CodeWriter("", includeHeader: false).SetIndentLevel(currentIndentLevel);
-        writer.AppendLine($"global::TUnit.Core.ClassMetadata.GetOrAdd(\"{qualifiedName}\", static () => ");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        // Create the ClassMetadata instance
-        writer.AppendLine("var classMetadata = new global::TUnit.Core.ClassMetadata");
+        writer.AppendLine($"global::TUnit.Core.ClassMetadata.GetOrAdd(\"{qualifiedName}\", new global::TUnit.Core.ClassMetadata");
         writer.AppendLine("{");
         writer.Indent();
 
@@ -200,27 +167,8 @@ internal static class MetadataGenerationHelper
         {
             writer.AppendLine("Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),");
         }
-        writer.AppendLine($"Properties = {GeneratePropertyMetadataArray(typeSymbol, writer.IndentLevel, out var propertyCount)},");
+        writer.AppendLine($"Properties = {GeneratePropertyMetadataArray(typeSymbol, writer.IndentLevel, out _)},");
         writer.AppendLine($"Parent = {parentExpression ?? "null"}");
-
-        writer.Unindent();
-        writer.AppendLine("};");
-        writer.AppendLine();
-
-        if(propertyCount > 0)
-        {
-            // Set ClassMetadata reference on each property
-            writer.AppendLine("foreach (var prop in classMetadata.Properties)");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("prop.ClassMetadata = classMetadata;");
-            writer.AppendLine("prop.ContainingTypeMetadata = classMetadata;");
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.AppendLine();
-        }
-
-        writer.AppendLine("return classMetadata;");
 
         writer.Unindent();
         writer.Append("})");
@@ -233,7 +181,7 @@ internal static class MetadataGenerationHelper
     /// </summary>
     public static string GenerateAssemblyMetadataGetOrAdd(IAssemblySymbol assembly)
     {
-        return $"global::TUnit.Core.AssemblyMetadata.GetOrAdd(\"{assembly.Name}\", static () => new global::TUnit.Core.AssemblyMetadata {{ Name = \"{assembly.Name}\" }})";
+        return $"global::TUnit.Core.AssemblyMetadata.GetOrAdd(\"{assembly.Name}\", \"{assembly.Name}\")";
     }
 
     /// <summary>
