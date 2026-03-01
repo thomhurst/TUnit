@@ -95,7 +95,7 @@ public static class TestApplicationBuilderExtensions
 
             if (commandLineOptions.TryGetOptionArgumentList(HtmlReporterCommandProvider.ReportHtmlFilename, out var pathArgs))
             {
-                htmlReporter.SetOutputPath(Helpers.PathValidator.ValidateAndNormalizePath(pathArgs[0], nameof(pathArgs)));
+                htmlReporter.SetOutputPath(Helpers.PathValidator.ValidateAndNormalizePath(pathArgs[0], HtmlReporterCommandProvider.ReportHtmlFilename));
             }
 
             return htmlReporter;

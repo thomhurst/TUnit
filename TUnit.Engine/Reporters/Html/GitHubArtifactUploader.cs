@@ -12,7 +12,7 @@ internal static class GitHubArtifactUploader
     private const double RetryMultiplier = 1.5;
 
     private static readonly HashSet<int> RetryableStatusCodes = [429, 500, 502, 503, 504];
-    private static readonly HttpClient SharedHttpClient = new();
+    private static readonly HttpClient SharedHttpClient = new() { Timeout = TimeSpan.FromSeconds(30) };
 
     internal static async Task<string?> UploadAsync(
         string filePath,

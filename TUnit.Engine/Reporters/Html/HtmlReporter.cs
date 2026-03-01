@@ -472,8 +472,33 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
     private static bool IsFileLocked(IOException exception)
     {
         var errorCode = exception.HResult & 0xFFFF;
-        return errorCode == 0x20 || errorCode == 0x21 ||
-               exception.Message.Contains("being used by another process") ||
+
+#if NET
+        if (OperatingSystem.IsWindows())
+        {
+            // Windows ERROR_SHARING_VIOLATION (0x20) and ERROR_LOCK_VIOLATION (0x21)
+            if (errorCode is 0x20 or 0x21)
+            {
+                return true;
+            }
+        }
+        else
+        {
+            // POSIX EACCES (13) and EAGAIN (11)
+            if (errorCode is 13 or 11)
+            {
+                return true;
+            }
+        }
+#else
+        // netstandard2.0: check Windows codes (most common target)
+        if (errorCode is 0x20 or 0x21)
+        {
+            return true;
+        }
+#endif
+
+        return exception.Message.Contains("being used by another process") ||
                exception.Message.Contains("access denied", StringComparison.OrdinalIgnoreCase);
     }
 
