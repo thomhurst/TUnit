@@ -718,21 +718,32 @@ function renderDetail(t) {
     if (t.retryAttempt > 0) {
         h += '<div class="d-sec"><span class="retry-tag">Retry attempt '+t.retryAttempt+'</span></div>';
     }
-    if (t.traceId && spansByTrace[t.traceId]) h += renderTrace(t.traceId);
+    if (t.traceId && t.spanId && spansByTrace[t.traceId]) h += renderTrace(t.traceId, t.spanId);
     return h;
 }
 
-function renderTrace(tid) {
-    const sp = spansByTrace[tid];
-    if (!sp || !sp.length) return '';
+function renderTrace(tid, rootSpanId) {
+    const allSpans = spansByTrace[tid];
+    if (!allSpans || !allSpans.length) return '';
+    // Build lookup and filter to only the test's own span + its descendants
+    const byId={};
+    allSpans.forEach(s=>{byId[s.spanId]=s});
+    const included=new Set();
+    function includeDescendants(sid){
+        if(included.has(sid))return;
+        included.add(sid);
+        allSpans.forEach(s=>{if(s.parentSpanId===sid)includeDescendants(s.spanId)});
+    }
+    includeDescendants(rootSpanId);
+    const sp=allSpans.filter(s=>included.has(s.spanId));
+    if (!sp.length) return '';
     const mn = Math.min(...sp.map(s=>s.startTimeMs));
     const mx = Math.max(...sp.map(s=>s.startTimeMs+s.durationMs));
     const dur = mx-mn||1;
-    const depth={}, byId={};
-    sp.forEach(s=>{byId[s.spanId]=s});
+    const depth={};
     function gd(s){
         if(depth[s.spanId]!==undefined)return depth[s.spanId];
-        if(!s.parentSpanId||!byId[s.parentSpanId]){depth[s.spanId]=0;return 0}
+        if(!s.parentSpanId||!byId[s.parentSpanId]||!included.has(s.parentSpanId)){depth[s.spanId]=0;return 0}
         depth[s.spanId]=gd(byId[s.parentSpanId])+1;return depth[s.spanId];
     }
     sp.forEach(gd);
