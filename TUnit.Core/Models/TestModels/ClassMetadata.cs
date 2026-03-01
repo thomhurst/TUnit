@@ -29,6 +29,12 @@ public record ClassMetadata : IMemberMetadata
         return Cache.GetOrAdd(name, static (_, factory) => factory(), factory);
     }
 
+    /// <summary>
+    /// Gets or adds a ClassMetadata from the cache using a pre-constructed value.
+    /// This overload trades potential wasted allocations on cache hits for eliminating
+    /// a factory lambda in generated code, which removes the compiler-generated &lt;&gt;c
+    /// display class and its JIT overhead (~3 methods per test source).
+    /// </summary>
     public static ClassMetadata GetOrAdd(string name, ClassMetadata value)
     {
         // Set up property back-references
