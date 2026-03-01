@@ -467,8 +467,15 @@ internal class HtmlReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         var runtimeToken = Environment.GetEnvironmentVariable(EnvironmentConstants.ActionsRuntimeToken);
         var resultsUrl = Environment.GetEnvironmentVariable(EnvironmentConstants.ActionsResultsUrl);
 
-        if (string.IsNullOrEmpty(runtimeToken) || string.IsNullOrEmpty(resultsUrl))
+        if (string.IsNullOrEmpty(runtimeToken))
         {
+            Console.WriteLine("Warning: ACTIONS_RUNTIME_TOKEN not set — skipping HTML report artifact upload");
+            return;
+        }
+
+        if (string.IsNullOrEmpty(resultsUrl))
+        {
+            Console.WriteLine("Warning: ACTIONS_RESULTS_URL not set — skipping HTML report artifact upload");
             return;
         }
 
@@ -476,21 +483,26 @@ internal class HtmlReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         {
             var artifactId = await GitHubArtifactUploader.UploadAsync(filePath, runtimeToken, resultsUrl, cancellationToken);
 
-            if (artifactId is not null)
+            if (artifactId is null)
             {
-                var repo = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRepository);
-                var runId = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRunId);
-                var summaryPath = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubStepSummary);
+                Console.WriteLine("Warning: HTML report artifact upload returned no artifact ID");
+                return;
+            }
 
-                if (!string.IsNullOrEmpty(summaryPath) && !string.IsNullOrEmpty(repo) && !string.IsNullOrEmpty(runId))
-                {
-                    var link = $"\n📊 [View HTML Test Report](https://github.com/{repo}/actions/runs/{runId}/artifacts/{artifactId})\n";
+            Console.WriteLine($"HTML report uploaded as GitHub artifact (ID: {artifactId})");
+
+            var repo = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRepository);
+            var runId = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRunId);
+            var summaryPath = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubStepSummary);
+
+            if (!string.IsNullOrEmpty(summaryPath) && !string.IsNullOrEmpty(repo) && !string.IsNullOrEmpty(runId))
+            {
+                var link = $"\n📊 [View HTML Test Report](https://github.com/{repo}/actions/runs/{runId}/artifacts/{artifactId})\n";
 #if NET
-                    await File.AppendAllTextAsync(summaryPath, link, cancellationToken);
+                await File.AppendAllTextAsync(summaryPath, link, cancellationToken);
 #else
-                    File.AppendAllText(summaryPath, link);
+                File.AppendAllText(summaryPath, link);
 #endif
-                }
             }
         }
         catch (Exception ex)
