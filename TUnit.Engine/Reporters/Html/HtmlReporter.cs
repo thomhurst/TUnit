@@ -133,10 +133,24 @@ internal class HtmlReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         double overallStartMs = double.MaxValue;
         double overallEndMs = double.MinValue;
 
+        // Build span lookup to correlate traces with test results
+#if NET
+        var spanLookup = _activityCollector?.GetTestSpanLookup();
+#else
+        var spanLookup = (Dictionary<string, (string TraceId, string SpanId)>?)null;
+#endif
+
         foreach (var kvp in lastUpdates)
         {
             var testNode = kvp.Value.TestNode;
             var testResult = ExtractTestResult(kvp.Key, testNode);
+
+            // Correlate trace/span IDs from collected activities
+            if (spanLookup?.TryGetValue(kvp.Key, out var spanInfo) == true)
+            {
+                testResult.TraceId = spanInfo.TraceId;
+                testResult.SpanId = spanInfo.SpanId;
+            }
 
             // Track retry attempts by counting final-state updates.
             // A non-retried test has exactly 1 final-state update; each retry adds another.

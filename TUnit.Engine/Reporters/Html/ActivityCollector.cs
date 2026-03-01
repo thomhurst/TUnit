@@ -41,6 +41,37 @@ internal sealed class ActivityCollector : IDisposable
         return all.ToArray();
     }
 
+    /// <summary>
+    /// Builds a lookup from TestNode UID to (TraceId, SpanId) by finding the root
+    /// "test case" span for each test via the <c>tunit.test.node_uid</c> activity tag.
+    /// </summary>
+    public Dictionary<string, (string TraceId, string SpanId)> GetTestSpanLookup()
+    {
+        var lookup = new Dictionary<string, (string, string)>();
+
+        foreach (var kvp in _spansByTrace)
+        {
+            foreach (var span in kvp.Value)
+            {
+                if (span.Name != "test case" || span.Tags is null)
+                {
+                    continue;
+                }
+
+                foreach (var tag in span.Tags)
+                {
+                    if (tag.Key == "tunit.test.node_uid" && !string.IsNullOrEmpty(tag.Value))
+                    {
+                        lookup[tag.Value] = (span.TraceId, span.SpanId);
+                        break;
+                    }
+                }
+            }
+        }
+
+        return lookup;
+    }
+
     private void OnActivityStopped(Activity activity)
     {
         var traceId = activity.TraceId.ToString();

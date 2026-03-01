@@ -125,10 +125,10 @@ internal sealed class ReportTestResult
     public ReportTimingStep[]? TimingSteps { get; init; }
 
     [JsonPropertyName("traceId")]
-    public string? TraceId { get; init; }
+    public string? TraceId { get; set; }
 
     [JsonPropertyName("spanId")]
-    public string? SpanId { get; init; }
+    public string? SpanId { get; set; }
 }
 
 internal sealed class ReportExceptionData

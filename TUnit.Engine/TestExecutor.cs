@@ -130,6 +130,7 @@ internal class TestExecutor
                         new("tunit.test.class", testDetails.ClassType.FullName),
                         new("tunit.test.method", testDetails.MethodName),
                         new("tunit.test.id", executableTest.Context.Id),
+                        new("tunit.test.node_uid", testDetails.TestId),
                         new("tunit.test.categories", testDetails.Categories.ToArray())
                     ]);
             }
