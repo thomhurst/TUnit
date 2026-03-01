@@ -201,15 +201,20 @@ internal static class GitHubArtifactUploader
             {
                 return await action();
             }
-            catch (HttpRequestException ex) when (attempt < MaxRetries - 1 && IsRetryable(ex))
+            catch (HttpRequestException ex) when (IsRetryable(ex))
             {
+                if (attempt == MaxRetries - 1)
+                {
+                    Console.WriteLine($"Warning: GitHub artifact upload step failed after {MaxRetries} attempts");
+                    return default;
+                }
+
                 var delay = (int)(BaseRetryMs * Math.Pow(RetryMultiplier, attempt));
                 var jitter = Random.Shared.Next(0, 500);
                 await Task.Delay(delay + jitter, cancellationToken);
             }
         }
 
-        Console.WriteLine($"Warning: GitHub artifact upload step failed after {MaxRetries} attempts");
         return default;
     }
 

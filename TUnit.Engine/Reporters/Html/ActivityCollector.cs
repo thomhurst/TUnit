@@ -18,11 +18,9 @@ internal sealed class ActivityCollector : IDisposable
     {
         _listener = new ActivityListener
         {
-            ShouldListenTo = _ => true,
-            Sample = static (ref ActivityCreationOptions<ActivityContext> options) =>
-                IsTUnitSource(options.Source) ? ActivitySamplingResult.AllDataAndRecorded : ActivitySamplingResult.PropagationData,
-            SampleUsingParentId = static (ref ActivityCreationOptions<string> options) =>
-                IsTUnitSource(options.Source) ? ActivitySamplingResult.AllDataAndRecorded : ActivitySamplingResult.PropagationData,
+            ShouldListenTo = static source => IsTUnitSource(source),
+            Sample = static (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded,
+            SampleUsingParentId = static (ref ActivityCreationOptions<string> _) => ActivitySamplingResult.AllDataAndRecorded,
             ActivityStopped = OnActivityStopped
         };
 
@@ -95,6 +93,7 @@ internal sealed class ActivityCollector : IDisposable
         if (traceCount > MaxSpansPerTrace)
         {
             Interlocked.Decrement(ref _totalSpanCount);
+            _spanCountsByTrace.AddOrUpdate(traceId, 0, (_, c) => Math.Max(0, c - 1));
             return;
         }
 
