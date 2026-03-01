@@ -91,8 +91,8 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
 
             await WriteFileAsync(_outputPath!, html, cancellation);
 
-            // GitHub Actions artifact upload
-            await TryUploadGitHubArtifactAsync(_outputPath!, cancellation);
+            // GitHub Actions integration (artifact upload + step summary)
+            await TryGitHubIntegrationAsync(_outputPath!, cancellation);
         }
         catch (Exception ex)
         {
@@ -502,57 +502,68 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
                exception.Message.Contains("access denied", StringComparison.OrdinalIgnoreCase);
     }
 
-    private static async Task TryUploadGitHubArtifactAsync(string filePath, CancellationToken cancellationToken)
+    private static async Task TryGitHubIntegrationAsync(string filePath, CancellationToken cancellationToken)
     {
         if (Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubActions) is not "true")
         {
             return;
         }
 
+        var summaryPath = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubStepSummary);
+        var repo = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRepository);
+        var runId = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRunId);
+
+        // Try in-process artifact upload if the runtime token is available
+        string? artifactId = null;
         var runtimeToken = Environment.GetEnvironmentVariable(EnvironmentConstants.ActionsRuntimeToken);
         var resultsUrl = Environment.GetEnvironmentVariable(EnvironmentConstants.ActionsResultsUrl);
 
-        if (string.IsNullOrEmpty(runtimeToken))
+        if (!string.IsNullOrEmpty(runtimeToken) && !string.IsNullOrEmpty(resultsUrl))
         {
-            Console.WriteLine("Warning: ACTIONS_RUNTIME_TOKEN not set — skipping HTML report artifact upload");
-            return;
-        }
-
-        if (string.IsNullOrEmpty(resultsUrl))
-        {
-            Console.WriteLine("Warning: ACTIONS_RESULTS_URL not set — skipping HTML report artifact upload");
-            return;
-        }
-
-        try
-        {
-            var artifactId = await GitHubArtifactUploader.UploadAsync(filePath, runtimeToken, resultsUrl, cancellationToken);
-
-            if (artifactId is null)
+            try
             {
-                Console.WriteLine("Warning: HTML report artifact upload returned no artifact ID");
-                return;
+                artifactId = await GitHubArtifactUploader.UploadAsync(filePath, runtimeToken, resultsUrl, cancellationToken);
+
+                if (artifactId is not null)
+                {
+                    Console.WriteLine($"HTML report uploaded as GitHub artifact (ID: {artifactId})");
+                }
             }
-
-            Console.WriteLine($"HTML report uploaded as GitHub artifact (ID: {artifactId})");
-
-            var repo = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRepository);
-            var runId = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRunId);
-            var summaryPath = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubStepSummary);
-
-            if (!string.IsNullOrEmpty(summaryPath) && !string.IsNullOrEmpty(repo) && !string.IsNullOrEmpty(runId))
+            catch (Exception ex)
             {
-                var link = $"\n📊 [View HTML Test Report](https://github.com/{repo}/actions/runs/{runId}/artifacts/{artifactId})\n";
+                Console.WriteLine($"Warning: Failed to upload HTML report artifact: {ex.Message}");
+            }
+        }
+
+        // Always write to step summary when running in GitHub Actions
+        if (!string.IsNullOrEmpty(summaryPath))
+        {
+            try
+            {
+                var summary = new StringBuilder();
+                summary.AppendLine();
+
+                if (artifactId is not null && !string.IsNullOrEmpty(repo) && !string.IsNullOrEmpty(runId))
+                {
+                    summary.AppendLine($"\ud83d\udcca [View HTML Test Report](https://github.com/{repo}/actions/runs/{runId}/artifacts/{artifactId})");
+                }
+                else
+                {
+                    summary.AppendLine($"\ud83d\udcca HTML test report generated: `{Path.GetFileName(filePath)}`");
+                }
+
+                summary.AppendLine();
+
 #if NET
-                await File.AppendAllTextAsync(summaryPath, link, cancellationToken);
+                await File.AppendAllTextAsync(summaryPath, summary.ToString(), cancellationToken);
 #else
-                File.AppendAllText(summaryPath, link);
+                File.AppendAllText(summaryPath, summary.ToString());
 #endif
             }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Warning: Failed to upload HTML report to GitHub Actions: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Warning: Failed to write GitHub step summary: {ex.Message}");
+            }
         }
     }
 }
