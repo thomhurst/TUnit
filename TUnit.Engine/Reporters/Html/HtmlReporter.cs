@@ -517,8 +517,9 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
         string? artifactId = null;
         var runtimeToken = Environment.GetEnvironmentVariable(EnvironmentConstants.ActionsRuntimeToken);
         var resultsUrl = Environment.GetEnvironmentVariable(EnvironmentConstants.ActionsResultsUrl);
+        var hasRuntimeToken = !string.IsNullOrEmpty(runtimeToken) && !string.IsNullOrEmpty(resultsUrl);
 
-        if (string.IsNullOrEmpty(runtimeToken) || string.IsNullOrEmpty(resultsUrl))
+        if (!hasRuntimeToken)
         {
             Console.WriteLine("Tip: To enable automatic HTML report artifact upload, add this step before your test step:");
             Console.WriteLine("  - uses: actions/github-script@v7");
@@ -528,7 +529,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
             Console.WriteLine("        core.exportVariable('ACTIONS_RESULTS_URL', process.env['ACTIONS_RESULTS_URL']);");
         }
 
-        if (!string.IsNullOrEmpty(runtimeToken) && !string.IsNullOrEmpty(resultsUrl))
+        if (hasRuntimeToken)
         {
             try
             {
@@ -560,6 +561,10 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
                 else
                 {
                     summary.AppendLine($"\ud83d\udcca HTML test report generated: `{Path.GetFileName(filePath)}`");
+                }
+
+                if (!hasRuntimeToken)
+                {
                     summary.AppendLine();
                     summary.AppendLine("<details><summary>\u2139\ufe0f Enable automatic artifact upload</summary>");
                     summary.AppendLine();
