@@ -48,7 +48,7 @@ internal static class GitHubArtifactUploader
 #endif
             );
             using var doc = JsonDocument.Parse(json);
-            return doc.RootElement.GetProperty("signedUploadUrl").GetString()!;
+            return doc.RootElement.GetProperty("signed_upload_url").GetString()!;
         }, cancellationToken);
 
         if (signedUploadUrl is null)
@@ -98,7 +98,7 @@ internal static class GitHubArtifactUploader
 #endif
             );
             using var doc = JsonDocument.Parse(json);
-            return doc.RootElement.GetProperty("artifactId").GetString();
+            return doc.RootElement.GetProperty("artifact_id").GetString();
         }, cancellationToken);
 
         return artifactId;
@@ -109,11 +109,11 @@ internal static class GitHubArtifactUploader
         using var ms = new MemoryStream();
         using var w = new Utf8JsonWriter(ms);
         w.WriteStartObject();
-        w.WriteString("workflowRunBackendId", runId);
-        w.WriteString("workflowJobRunBackendId", jobId);
+        w.WriteString("workflow_run_backend_id", runId);
+        w.WriteString("workflow_job_run_backend_id", jobId);
         w.WriteString("name", fileName);
         w.WriteNumber("version", 7);
-        w.WriteStartObject("mimeType");
+        w.WriteStartObject("mime_type");
         w.WriteString("value", "text/html");
         w.WriteEndObject();
         w.WriteEndObject();
@@ -126,8 +126,8 @@ internal static class GitHubArtifactUploader
         using var ms = new MemoryStream();
         using var w = new Utf8JsonWriter(ms);
         w.WriteStartObject();
-        w.WriteString("workflowRunBackendId", runId);
-        w.WriteString("workflowJobRunBackendId", jobId);
+        w.WriteString("workflow_run_backend_id", runId);
+        w.WriteString("workflow_job_run_backend_id", jobId);
         w.WriteString("name", fileName);
         w.WriteString("size", size.ToString());
         w.WriteStartObject("hash");
