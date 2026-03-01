@@ -520,15 +520,12 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
 
         if (string.IsNullOrEmpty(runtimeToken) || string.IsNullOrEmpty(resultsUrl))
         {
-            // Log which ACTIONS_* variables are available for debugging
-            var actionsVars = Environment.GetEnvironmentVariables()
-                .Cast<System.Collections.DictionaryEntry>()
-                .Where(e => e.Key is string key && key.StartsWith("ACTIONS_", StringComparison.OrdinalIgnoreCase))
-                .Select(e => (string)e.Key!)
-                .OrderBy(k => k);
-
-            Console.WriteLine($"HTML report artifact upload: ACTIONS_RUNTIME_TOKEN={(!string.IsNullOrEmpty(runtimeToken) ? "set" : "missing")}, ACTIONS_RESULTS_URL={(!string.IsNullOrEmpty(resultsUrl) ? "set" : "missing")}");
-            Console.WriteLine($"Available ACTIONS_* env vars: {string.Join(", ", actionsVars)}");
+            Console.WriteLine("Tip: To enable automatic HTML report artifact upload, add this step before your test step:");
+            Console.WriteLine("  - uses: actions/github-script@v7");
+            Console.WriteLine("    with:");
+            Console.WriteLine("      script: |");
+            Console.WriteLine("        core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env['ACTIONS_RUNTIME_TOKEN']);");
+            Console.WriteLine("        core.exportVariable('ACTIONS_RESULTS_URL', process.env['ACTIONS_RESULTS_URL']);");
         }
 
         if (!string.IsNullOrEmpty(runtimeToken) && !string.IsNullOrEmpty(resultsUrl))
@@ -563,6 +560,20 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
                 else
                 {
                     summary.AppendLine($"\ud83d\udcca HTML test report generated: `{Path.GetFileName(filePath)}`");
+                    summary.AppendLine();
+                    summary.AppendLine("<details><summary>\u2139\ufe0f Enable automatic artifact upload</summary>");
+                    summary.AppendLine();
+                    summary.AppendLine("Add this step **before** your test step to enable automatic HTML report artifact upload:");
+                    summary.AppendLine();
+                    summary.AppendLine("```yaml");
+                    summary.AppendLine("- uses: actions/github-script@v7");
+                    summary.AppendLine("  with:");
+                    summary.AppendLine("    script: |");
+                    summary.AppendLine("      core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env['ACTIONS_RUNTIME_TOKEN']);");
+                    summary.AppendLine("      core.exportVariable('ACTIONS_RESULTS_URL', process.env['ACTIONS_RESULTS_URL']);");
+                    summary.AppendLine("```");
+                    summary.AppendLine();
+                    summary.AppendLine("</details>");
                 }
 
                 summary.AppendLine();
