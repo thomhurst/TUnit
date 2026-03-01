@@ -18,8 +18,10 @@ internal sealed class ActivityCollector : IDisposable
         _listener = new ActivityListener
         {
             ShouldListenTo = _ => true,
-            Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded,
-            SampleUsingParentId = (ref ActivityCreationOptions<string> _) => ActivitySamplingResult.AllDataAndRecorded,
+            Sample = static (ref ActivityCreationOptions<ActivityContext> options) =>
+                IsTUnitSource(options.Source) ? ActivitySamplingResult.AllDataAndRecorded : ActivitySamplingResult.PropagationData,
+            SampleUsingParentId = static (ref ActivityCreationOptions<string> options) =>
+                IsTUnitSource(options.Source) ? ActivitySamplingResult.AllDataAndRecorded : ActivitySamplingResult.PropagationData,
             ActivityStopped = OnActivityStopped
         };
 
@@ -73,6 +75,10 @@ internal sealed class ActivityCollector : IDisposable
 
         return lookup;
     }
+
+    private static bool IsTUnitSource(ActivitySource source) =>
+        source.Name.StartsWith("TUnit", StringComparison.Ordinal) ||
+        source.Name.StartsWith("Microsoft.Testing", StringComparison.Ordinal);
 
     private void OnActivityStopped(Activity activity)
     {

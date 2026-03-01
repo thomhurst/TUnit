@@ -165,16 +165,24 @@ internal static class GitHubArtifactUploader
                 return (null, null);
             }
 
-            // Format: "Actions.Results:{workflowRunBackendId}:{workflowJobRunBackendId}"
-            var colonParts = scp.Split(':');
-            if (colonParts.Length >= 3)
+            // scp may be space-separated list of scopes; find "Actions.Results:{runId}:{jobId}"
+            foreach (var scope in scp.Split(' '))
             {
-                return (colonParts[1], colonParts[2]);
+                if (!scope.StartsWith("Actions.Results:", StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                var colonParts = scope.Split(':');
+                if (colonParts.Length >= 3)
+                {
+                    return (colonParts[1], colonParts[2]);
+                }
             }
 
             return (null, null);
         }
-        catch
+        catch (Exception)
         {
             return (null, null);
         }

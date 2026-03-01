@@ -824,7 +824,7 @@ function renderSuiteTrace(className) {
     all.forEach(s => { if (s.name === 'test case') testCaseIds.add(s.spanId); });
     const tcDescendants = new Set();
     testCaseIds.forEach(id => { getDescendants(all, id).forEach(s => { if (s.spanId !== id) tcDescendants.add(s.spanId); }); });
-    const filtered = all.filter(s => !tcDescendants.has(s.spanId));
+    const filtered = all.filter(s => !tcDescendants.has(s.spanId) && !testCaseIds.has(s.spanId));
     if (filtered.length <= 1) return '';
     return '<div class="suite-trace"><div class="tl-toggle">' + tlArrow + 'Class Timeline</div><div class="tl-content">' + renderSpanRows(filtered, 'suite-' + className) + '</div></div>';
 }

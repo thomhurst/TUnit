@@ -14,10 +14,10 @@ using TUnit.Engine.Framework;
 
 namespace TUnit.Engine.Reporters.Html;
 
-internal class HtmlReporter(IExtension extension) : IDataConsumer, ITestHostApplicationLifetime, IFilterReceiver
+internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestHostApplicationLifetime, IFilterReceiver
 {
     private string? _outputPath;
-    private readonly ConcurrentDictionary<string, ConcurrentBag<TestNodeUpdateMessage>> _updates = [];
+    private readonly ConcurrentDictionary<string, ConcurrentQueue<TestNodeUpdateMessage>> _updates = [];
 
 #if NET
     private ActivityCollector? _activityCollector;
@@ -48,7 +48,7 @@ internal class HtmlReporter(IExtension extension) : IDataConsumer, ITestHostAppl
     public Task ConsumeAsync(IDataProducer dataProducer, IData value, CancellationToken cancellationToken)
     {
         var testNodeUpdateMessage = (TestNodeUpdateMessage)value;
-        _updates.GetOrAdd(testNodeUpdateMessage.TestNode.Uid.Value, _ => []).Add(testNodeUpdateMessage);
+        _updates.GetOrAdd(testNodeUpdateMessage.TestNode.Uid.Value, _ => []).Enqueue(testNodeUpdateMessage);
         return Task.CompletedTask;
     }
 
@@ -293,40 +293,54 @@ internal class HtmlReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
     private static ReportTestResult ExtractTestResult(string testId, TestNode testNode)
     {
-        var stateProperty = testNode.Properties.AsEnumerable()
-            .FirstOrDefault(p => p is TestNodeStateProperty);
+        IProperty? stateProperty = null;
+        TestMethodIdentifierProperty? testMethodIdentifier = null;
+        TimingProperty? timingProperty = null;
+        TestFileLocationProperty? fileLocation = null;
+        string? stdOut = null;
+        string? stdErr = null;
+        List<string>? categories = null;
+        List<ReportKeyValue>? customProperties = null;
 
-        var testMethodIdentifier = testNode.Properties.AsEnumerable()
-            .OfType<TestMethodIdentifierProperty>()
-            .FirstOrDefault();
+        foreach (var prop in testNode.Properties.AsEnumerable())
+        {
+            switch (prop)
+            {
+                case TestNodeStateProperty when stateProperty is null:
+                    stateProperty = prop;
+                    break;
+                case TestMethodIdentifierProperty m:
+                    testMethodIdentifier = m;
+                    break;
+                case TimingProperty t:
+                    timingProperty = t;
+                    break;
+                case TestFileLocationProperty f:
+                    fileLocation = f;
+                    break;
+                case StandardOutputProperty o:
+                    stdOut = o.StandardOutput;
+                    break;
+                case StandardErrorProperty e:
+                    stdErr = e.StandardError;
+                    break;
+                case TestMetadataProperty meta:
+                    if (string.IsNullOrEmpty(meta.Key))
+                    {
+                        categories ??= [];
+                        categories.Add(meta.Value);
+                    }
+                    else
+                    {
+                        customProperties ??= [];
+                        customProperties.Add(new ReportKeyValue { Key = meta.Key, Value = meta.Value });
+                    }
+                    break;
+            }
+        }
 
-        var timingProperty = testNode.Properties.AsEnumerable()
-            .OfType<TimingProperty>()
-            .FirstOrDefault();
-
-        var fileLocation = testNode.Properties.AsEnumerable()
-            .OfType<TestFileLocationProperty>()
-            .FirstOrDefault();
-
-        var stdOut = testNode.Properties.AsEnumerable()
-            .OfType<StandardOutputProperty>()
-            .FirstOrDefault()?.StandardOutput;
-
-        var stdErr = testNode.Properties.AsEnumerable()
-            .OfType<StandardErrorProperty>()
-            .FirstOrDefault()?.StandardError;
-
-        var categories = testNode.Properties.AsEnumerable()
-            .OfType<TestMetadataProperty>()
-            .Where(p => string.IsNullOrEmpty(p.Key))
-            .Select(p => p.Value)
-            .ToArray();
-
-        var customProperties = testNode.Properties.AsEnumerable()
-            .OfType<TestMetadataProperty>()
-            .Where(p => !string.IsNullOrEmpty(p.Key))
-            .Select(p => new ReportKeyValue { Key = p.Key, Value = p.Value })
-            .ToArray();
+        var categoriesArray = categories?.ToArray();
+        var customPropertiesArray = customProperties?.ToArray();
 
         var className = testMethodIdentifier?.TypeName ?? "UnknownClass";
         var methodName = testMethodIdentifier?.MethodName ?? testNode.DisplayName;
@@ -364,8 +378,8 @@ internal class HtmlReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             Exception = exception,
             Output = stdOut,
             ErrorOutput = stdErr,
-            Categories = categories.Length > 0 ? categories : null,
-            CustomProperties = customProperties.Length > 0 ? customProperties : null,
+            Categories = categoriesArray is { Length: > 0 } ? categoriesArray : null,
+            CustomProperties = customPropertiesArray is { Length: > 0 } ? customPropertiesArray : null,
             FilePath = fileLocation?.FilePath,
             LineNumber = fileLocation?.LineSpan.Start.Line,
             SkipReason = skipReason,
