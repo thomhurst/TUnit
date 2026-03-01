@@ -107,23 +107,22 @@ internal static class FileNameHelper
             sb.Append('_');
         }
 
-        // Add all containing types (outer classes first, then inner classes)
-        var containingTypes = new List<string>();
+        // Walk from the target type up to the outermost containing type, then reverse
+        // to get outer-to-inner order (e.g. [OuterClass, InnerClass, TargetType])
+        var typeHierarchy = new List<string>();
         var currentType = typeSymbol;
         while (currentType != null)
         {
-            containingTypes.Add(SanitizeForFileName(currentType.Name));
+            typeHierarchy.Add(SanitizeForFileName(currentType.Name));
             currentType = currentType.ContainingType;
         }
 
-        // Reverse to get outer-to-inner order
-        containingTypes.Reverse();
+        typeHierarchy.Reverse();
 
-        // Append containing types from outer to inner
-        for (int i = 0; i < containingTypes.Count; i++)
+        for (int i = 0; i < typeHierarchy.Count; i++)
         {
             if (i > 0) sb.Append('_');
-            sb.Append(containingTypes[i]);
+            sb.Append(typeHierarchy[i]);
         }
 
         // Add generic parameters if any (for the innermost type)

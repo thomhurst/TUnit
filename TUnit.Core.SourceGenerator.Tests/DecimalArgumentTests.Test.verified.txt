@@ -1446,17 +1446,17 @@ internal static class TUnit_TestProject_DecimalArgumentTests__ClassHelper
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     internal static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_Transfer__decimal_decimal_TestSource());
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_SimpleDecimal__decimal_TestSource());
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_SmallDecimal__decimal_TestSource());
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_MaxDecimal__decimal_TestSource());
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_MinDecimal__decimal_TestSource());
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_ExplicitDecimalValue__decimal_TestSource());
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_MultipleDecimals__decimal_decimal_decimal_TestSource());
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_Test__decimal_TestSource());
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_TransactionDiscountCalculations__decimal_decima_54FB9799_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_Equality3__decimal_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_Equality4__decimal_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_ExplicitDecimalValue__decimal_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_MaxDecimal__decimal_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_MinDecimal__decimal_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_MultipleDecimals__decimal_decimal_decimal_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_SimpleDecimal__decimal_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_SmallDecimal__decimal_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_TestMethod__decimal_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_Test__decimal_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_TransactionDiscountCalculations__decimal_decima_54FB9799_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_Transfer__decimal_decimal_TestSource());
     }
 }

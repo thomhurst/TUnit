@@ -884,8 +884,8 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests__ClassHelper
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     internal static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), new TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Class__SomeAsyncDisposableClass_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), new TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Class_Generic__SomeAsyncDisposableClass_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), new TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Class__SomeAsyncDisposableClass_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), new TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_1_ClassDataSource__Ini_01E5B4B7_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), new TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_2_ClassDataSources__In_52B92153_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), new TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_3_ClassDataSources__In_8432A34C_TestSource());

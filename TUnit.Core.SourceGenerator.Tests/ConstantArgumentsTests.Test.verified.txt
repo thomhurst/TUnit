@@ -812,11 +812,11 @@ internal static class TUnit_TestProject_ConstantArgumentsTests__ClassHelper
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     internal static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new TUnit_TestProject_ConstantArgumentsTests_String1__string_TestSource());
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new TUnit_TestProject_ConstantArgumentsTests_Int__int_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new TUnit_TestProject_ConstantArgumentsTests_Double__double_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new TUnit_TestProject_ConstantArgumentsTests_Float__float_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new TUnit_TestProject_ConstantArgumentsTests_Int__int_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new TUnit_TestProject_ConstantArgumentsTests_Long__long_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new TUnit_TestProject_ConstantArgumentsTests_String1__string_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new TUnit_TestProject_ConstantArgumentsTests_UInt__uint_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new TUnit_TestProject_ConstantArgumentsTests_ULong__ulong_TestSource());
     }

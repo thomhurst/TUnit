@@ -320,7 +320,7 @@ internal static class TUnit_TestProject_Bugs__2112_Tests__ClassHelper
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     internal static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._2112.Tests), new TUnit_TestProject_Bugs__2112_Tests_Test__int_long___TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._2112.Tests), new TUnit_TestProject_Bugs__2112_Tests_Test2__int_long___TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._2112.Tests), new TUnit_TestProject_Bugs__2112_Tests_Test__int_long___TestSource());
     }
 }

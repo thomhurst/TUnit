@@ -373,8 +373,8 @@ internal static class TUnit_TestProject_Bugs__1304_Tests__ClassHelper
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     internal static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._1304.Tests), new TUnit_TestProject_Bugs__1304_Tests_TryParse_InvalidString_ReturnsFailure__string__Canc_9F7FA274_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._1304.Tests), new TUnit_TestProject_Bugs__1304_Tests_Parse_InvalidString_ThrowsException__string__TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._1304.Tests), new TUnit_TestProject_Bugs__1304_Tests_TryParse_InvalidString_ReturnsFailure__string__Canc_9F7FA274_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._1304.Tests), new TUnit_TestProject_Bugs__1304_Tests_TryParse_ValidString_ReturnsAccountId__string_TestSource());
     }
 }

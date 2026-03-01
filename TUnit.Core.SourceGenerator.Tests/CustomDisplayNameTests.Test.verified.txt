@@ -1100,14 +1100,14 @@ internal static class TUnit_TestProject_CustomDisplayNameTests__ClassHelper
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     internal static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), new TUnit_TestProject_CustomDisplayNameTests_Test_TestSource());
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), new TUnit_TestProject_CustomDisplayNameTests_Test2_TestSource());
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), new TUnit_TestProject_CustomDisplayNameTests_Test3__string_int_bool_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), new TUnit_TestProject_CustomDisplayNameTests_DifferentClassConstantTest_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), new TUnit_TestProject_CustomDisplayNameTests_MethodDataSourceTest__string_TestSource());
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), new TUnit_TestProject_CustomDisplayNameTests_TestParameterNamePrefixBug__int_string_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), new TUnit_TestProject_CustomDisplayNameTests_NestedClassConstantTest_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), new TUnit_TestProject_CustomDisplayNameTests_PasswordTest__string_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), new TUnit_TestProject_CustomDisplayNameTests_SameClassConstantTest_TestSource());
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), new TUnit_TestProject_CustomDisplayNameTests_DifferentClassConstantTest_TestSource());
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), new TUnit_TestProject_CustomDisplayNameTests_NestedClassConstantTest_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), new TUnit_TestProject_CustomDisplayNameTests_Test2_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), new TUnit_TestProject_CustomDisplayNameTests_Test3__string_int_bool_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), new TUnit_TestProject_CustomDisplayNameTests_TestParameterNamePrefixBug__int_string_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), new TUnit_TestProject_CustomDisplayNameTests_Test_TestSource());
     }
 }

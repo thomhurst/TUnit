@@ -282,7 +282,7 @@ internal static class TUnit_TestProject_ExpectedArgumentTypeTests__ClassHelper
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     internal static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ExpectedArgumentTypeTests), new TUnit_TestProject_ExpectedArgumentTypeTests_TypedArguments__object_Type_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ExpectedArgumentTypeTests), new TUnit_TestProject_ExpectedArgumentTypeTests_EnumTypes__object_Type_Type_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ExpectedArgumentTypeTests), new TUnit_TestProject_ExpectedArgumentTypeTests_TypedArguments__object_Type_TestSource());
     }
 }

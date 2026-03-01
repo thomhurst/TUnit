@@ -1498,20 +1498,20 @@ internal static class TUnit_TestProject_STAThreadTests__ClassHelper
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     internal static void Initialize()
     {
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithAsyncEnumerable_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithCompletedTask_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithConfigureAwaitTrue_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithExceptionHandling_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithFuncAssertion_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithMultipleAwaits_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithNestedAsyncCalls_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithSimpleAwait_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithTaskFromResult_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithTaskRun_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithTaskWhenAll_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithTaskYield_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithThrowsNothingAssertion_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_With_STA_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_Without_STA_TestSource());
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithSimpleAwait_TestSource());
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithTaskYield_TestSource());
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithConfigureAwaitTrue_TestSource());
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithNestedAsyncCalls_TestSource());
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithTaskFromResult_TestSource());
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithCompletedTask_TestSource());
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithTaskRun_TestSource());
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithMultipleAwaits_TestSource());
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithAsyncEnumerable_TestSource());
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithTaskWhenAll_TestSource());
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithExceptionHandling_TestSource());
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithThrowsNothingAssertion_TestSource());
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithFuncAssertion_TestSource());
     }
 }

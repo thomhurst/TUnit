@@ -581,8 +581,8 @@ internal static class TUnit_TestProject_PriorityFilteringTests__ClassHelper
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new TUnit_TestProject_PriorityFilteringTests_High_1_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new TUnit_TestProject_PriorityFilteringTests_High_2_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new TUnit_TestProject_PriorityFilteringTests_High_3_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new TUnit_TestProject_PriorityFilteringTests_Low_1_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new TUnit_TestProject_PriorityFilteringTests_Medium_1_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new TUnit_TestProject_PriorityFilteringTests_Medium_2_TestSource());
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new TUnit_TestProject_PriorityFilteringTests_Low_1_TestSource());
     }
 }

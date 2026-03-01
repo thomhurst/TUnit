@@ -62,6 +62,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Per-class helper pipeline: collect non-generic direct test methods,
         // group by class, emit one helper per class with shared CreateInstance + batched ModuleInitializer.
+        // NOTE: .Collect() is a fan-in that invalidates all class helpers when any [Test] method changes.
+        // This is the same trade-off as PropertyInjectionSourceGenerator. Roslyn's output caching on
+        // ClassTestGroup's value equality means only the changed class's file is actually re-emitted,
+        // but GroupMethodsByClass still re-executes for all classes on every edit.
         var classHelperProvider = testMethodsProvider
             .Select(static (data, _) => data.Left)
             .Where(static m => m is not null && !m!.IsGenericType && !m.IsGenericMethod)
@@ -1827,7 +1831,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         if (useNamedMethods)
         {
-            if (testMethod.InheritanceDepth == 0)
+            if (testMethod is { InheritanceDepth: 0, IsGenericType: false, IsGenericMethod: false })
             {
                 // Non-generic, direct test methods use the shared per-class helper
                 var classHelperName = FileNameHelper.GetSafeClassHelperName(testMethod.TypeSymbol);
@@ -1835,7 +1839,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
             else
             {
-                // Inherited tests keep their own __CreateInstance method
+                // Inherited or generic tests keep their own __CreateInstance method
                 writer.AppendLine("InstanceFactory = __CreateInstance,");
             }
         }
@@ -2424,6 +2428,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     TestSourceClassNames = g.Select(m =>
                         FileNameHelper.GetDeterministicFileNameForMethod(m!.TypeSymbol, m.MethodSymbol)
                             .Replace(".g.cs", "_TestSource"))
+                        .OrderBy(static s => s, StringComparer.Ordinal)
                         .ToEquatableArray(),
                     InstanceFactoryBodyCode = InstanceFactoryGenerator.GenerateInstanceFactoryBody(typeSymbol),
                 };

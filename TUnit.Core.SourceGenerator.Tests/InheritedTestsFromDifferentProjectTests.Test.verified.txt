@@ -452,9 +452,9 @@ internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     internal static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), new TUnit_TestProject_InheritedTestsFromDifferentProjectTests_Test_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), new TUnit_TestProject_InheritedTestsFromDifferentProjectTests_GenericMethodDataSource__string_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), new TUnit_TestProject_InheritedTestsFromDifferentProjectTests_NonGenericMethodDataSource__string_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), new TUnit_TestProject_InheritedTestsFromDifferentProjectTests_Test_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), new TUnit_TestProject_InheritedTestsFromDifferentProjectTests_VerifyInheritedCategoriesAreAvailable_TestSource());
     }
 }

@@ -253,7 +253,7 @@ internal static class TUnit_TestProject_NullableByteArgumentTests__ClassHelper
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     internal static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.NullableByteArgumentTests), new TUnit_TestProject_NullableByteArgumentTests_Test__byte__TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.NullableByteArgumentTests), new TUnit_TestProject_NullableByteArgumentTests_Test2__byte_byte__TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.NullableByteArgumentTests), new TUnit_TestProject_NullableByteArgumentTests_Test__byte__TestSource());
     }
 }

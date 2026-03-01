@@ -474,8 +474,8 @@ internal static class TUnit_TestProject_DataSourceGeneratorTests__ClassHelper
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     internal static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DataSourceGeneratorTests), new TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_Method__int_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DataSourceGeneratorTests), new TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_Method2__int_string_bool_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DataSourceGeneratorTests), new TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_Method3__int_string_bool_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DataSourceGeneratorTests), new TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_Method__int_TestSource());
     }
 }
