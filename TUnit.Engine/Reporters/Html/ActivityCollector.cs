@@ -10,6 +10,7 @@ internal sealed class ActivityCollector : IDisposable
     private const int MaxTotalSpans = 50_000;
 
     private readonly ConcurrentDictionary<string, ConcurrentBag<SpanData>> _spansByTrace = new();
+    private readonly ConcurrentDictionary<string, int> _spanCountsByTrace = new();
     private ActivityListener? _listener;
     private int _totalSpanCount;
 
@@ -82,18 +83,22 @@ internal sealed class ActivityCollector : IDisposable
 
     private void OnActivityStopped(Activity activity)
     {
-        if (Volatile.Read(ref _totalSpanCount) >= MaxTotalSpans)
+        var newTotal = Interlocked.Increment(ref _totalSpanCount);
+        if (newTotal > MaxTotalSpans)
         {
+            Interlocked.Decrement(ref _totalSpanCount);
             return;
         }
 
         var traceId = activity.TraceId.ToString();
-        var bag = _spansByTrace.GetOrAdd(traceId, _ => new ConcurrentBag<SpanData>());
-
-        if (bag.Count >= MaxSpansPerTrace)
+        var traceCount = _spanCountsByTrace.AddOrUpdate(traceId, 1, (_, c) => c + 1);
+        if (traceCount > MaxSpansPerTrace)
         {
+            Interlocked.Decrement(ref _totalSpanCount);
             return;
         }
+
+        var bag = _spansByTrace.GetOrAdd(traceId, _ => new ConcurrentBag<SpanData>());
 
         ReportKeyValue[]? tags = null;
         var tagCollection = activity.TagObjects.ToArray();
@@ -168,7 +173,6 @@ internal sealed class ActivityCollector : IDisposable
         };
 
         bag.Add(spanData);
-        Interlocked.Increment(ref _totalSpanCount);
     }
 
     public void Dispose()

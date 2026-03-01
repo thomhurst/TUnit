@@ -119,16 +119,16 @@ internal sealed class ReportTestResult
     public string? SkipReason { get; init; }
 
     [JsonPropertyName("retryAttempt")]
-    public int RetryAttempt { get; set; }
+    public int RetryAttempt { get; init; }
 
     [JsonPropertyName("timingSteps")]
     public ReportTimingStep[]? TimingSteps { get; init; }
 
     [JsonPropertyName("traceId")]
-    public string? TraceId { get; set; }
+    public string? TraceId { get; init; }
 
     [JsonPropertyName("spanId")]
-    public string? SpanId { get; set; }
+    public string? SpanId { get; init; }
 }
 
 internal sealed class ReportExceptionData

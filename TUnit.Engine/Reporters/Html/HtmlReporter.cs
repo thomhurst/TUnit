@@ -153,17 +153,18 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
         foreach (var kvp in lastUpdates)
         {
             var testNode = kvp.Value.TestNode;
-            var testResult = ExtractTestResult(kvp.Key, testNode);
 
             // Correlate trace/span IDs from collected activities
+            string? traceId = null, spanId = null;
             if (spanLookup?.TryGetValue(kvp.Key, out var spanInfo) == true)
             {
-                testResult.TraceId = spanInfo.TraceId;
-                testResult.SpanId = spanInfo.SpanId;
+                traceId = spanInfo.TraceId;
+                spanId = spanInfo.SpanId;
             }
 
             // Track retry attempts by counting final-state updates.
             // A non-retried test has exactly 1 final-state update; each retry adds another.
+            var retryAttempt = 0;
             if (_updates.TryGetValue(kvp.Key, out var allUpdates))
             {
                 var finalStateCount = 0;
@@ -178,9 +179,11 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
 
                 if (finalStateCount > 1)
                 {
-                    testResult.RetryAttempt = finalStateCount - 1;
+                    retryAttempt = finalStateCount - 1;
                 }
             }
+
+            var testResult = ExtractTestResult(kvp.Key, testNode, traceId, spanId, retryAttempt);
 
             AccumulateStatus(summary, testResult.Status);
 
@@ -291,7 +294,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
         }
     }
 
-    private static ReportTestResult ExtractTestResult(string testId, TestNode testNode)
+    private static ReportTestResult ExtractTestResult(string testId, TestNode testNode, string? traceId, string? spanId, int retryAttempt)
     {
         IProperty? stateProperty = null;
         TestMethodIdentifierProperty? testMethodIdentifier = null;
@@ -383,7 +386,10 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
             FilePath = fileLocation?.FilePath,
             LineNumber = fileLocation?.LineSpan.Start.Line,
             SkipReason = skipReason,
-            TimingSteps = timingSteps
+            RetryAttempt = retryAttempt,
+            TimingSteps = timingSteps,
+            TraceId = traceId,
+            SpanId = spanId
         };
     }
 

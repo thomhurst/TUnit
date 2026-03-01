@@ -12,6 +12,7 @@ internal static class GitHubArtifactUploader
     private const double RetryMultiplier = 1.5;
 
     private static readonly HashSet<int> RetryableStatusCodes = [429, 500, 502, 503, 504];
+    private static readonly HttpClient SharedHttpClient = new();
 
     internal static async Task<string?> UploadAsync(
         string filePath,
@@ -29,17 +30,17 @@ internal static class GitHubArtifactUploader
         var origin = new Uri(resultsUrl).GetLeftPart(UriPartial.Authority);
         var fileName = Path.GetFileName(filePath);
 
-        using var httpClient = new HttpClient();
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", runtimeToken);
-
         // Step 1: CreateArtifact
         var createUrl = $"{origin}/twirp/github.actions.results.api.v1.ArtifactService/CreateArtifact";
         var createBody = BuildCreateArtifactJson(workflowRunBackendId, workflowJobRunBackendId, fileName);
 
         var signedUploadUrl = await RetryAsync(async () =>
         {
-            var response = await httpClient.PostAsync(createUrl,
-                new StringContent(createBody, Encoding.UTF8, "application/json"), cancellationToken);
+            using var request = new HttpRequestMessage(HttpMethod.Post, createUrl);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", runtimeToken);
+            request.Content = new StringContent(createBody, Encoding.UTF8, "application/json");
+
+            var response = await SharedHttpClient.SendAsync(request, cancellationToken);
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync(
 #if NET
@@ -52,6 +53,7 @@ internal static class GitHubArtifactUploader
 
         if (signedUploadUrl is null)
         {
+            Console.WriteLine("Warning: CreateArtifact failed — could not obtain signed upload URL");
             return null;
         }
 
@@ -73,7 +75,7 @@ internal static class GitHubArtifactUploader
             request.Content.Headers.ContentType = new MediaTypeHeaderValue("text/html");
             request.Headers.Add("x-ms-blob-type", "BlockBlob");
 
-            var response = await httpClient.SendAsync(request, cancellationToken);
+            var response = await SharedHttpClient.SendAsync(request, cancellationToken);
             response.EnsureSuccessStatusCode();
             return true;
         }, cancellationToken);
@@ -84,8 +86,11 @@ internal static class GitHubArtifactUploader
 
         var artifactId = await RetryAsync(async () =>
         {
-            var response = await httpClient.PostAsync(finalizeUrl,
-                new StringContent(finalizeBody, Encoding.UTF8, "application/json"), cancellationToken);
+            using var request = new HttpRequestMessage(HttpMethod.Post, finalizeUrl);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", runtimeToken);
+            request.Content = new StringContent(finalizeBody, Encoding.UTF8, "application/json");
+
+            var response = await SharedHttpClient.SendAsync(request, cancellationToken);
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync(
 #if NET
@@ -124,7 +129,7 @@ internal static class GitHubArtifactUploader
         w.WriteString("workflowRunBackendId", runId);
         w.WriteString("workflowJobRunBackendId", jobId);
         w.WriteString("name", fileName);
-        w.WriteString("size", size.ToString());
+        w.WriteNumber("size", size);
         w.WriteStartObject("hash");
         w.WriteString("value", $"sha256:{sha256Hash}");
         w.WriteEndObject();
