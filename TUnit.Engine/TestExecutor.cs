@@ -185,6 +185,16 @@ internal class TestExecutor
 
             // Only the test body is subject to the [Timeout] — hooks and data source
             // initialization run outside the timeout scope (fixes #4772)
+#if NET
+            Activity? testBodyActivity = null;
+            if (TUnitActivitySource.Source.HasListeners())
+            {
+                testBodyActivity = TUnitActivitySource.StartActivity(
+                    "test body",
+                    ActivityKind.Internal,
+                    executableTest.Context.Activity?.Context ?? default);
+            }
+#endif
             try
             {
                 var timeoutMessage = testTimeout.HasValue
@@ -197,8 +207,21 @@ internal class TestExecutor
                     cancellationToken,
                     timeoutMessage).ConfigureAwait(false);
             }
+            catch
+#if NET
+            (Exception ex)
+#endif
+            {
+#if NET
+                TUnitActivitySource.RecordException(testBodyActivity, ex);
+#endif
+                throw;
+            }
             finally
             {
+#if NET
+                TUnitActivitySource.StopActivity(testBodyActivity);
+#endif
                 executableTest.Context.Execution.TestEnd ??= DateTimeOffset.UtcNow;
             }
 
