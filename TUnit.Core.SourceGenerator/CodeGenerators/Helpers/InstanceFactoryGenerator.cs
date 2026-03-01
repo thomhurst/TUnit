@@ -28,7 +28,7 @@ public static class InstanceFactoryGenerator
     /// </summary>
     public static void GenerateClassConstructorStub(CodeWriter writer)
     {
-        writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
+        writer.AppendLine("InstanceFactory = static (typeArgs, args) =>");
         writer.AppendLine("{");
         writer.Indent();
         writer.AppendLine("// ClassConstructor attribute is present - instance creation handled at runtime");
@@ -111,11 +111,11 @@ public static class InstanceFactoryGenerator
 
             if (!requiredProperties.Any())
             {
-                writer.AppendLine($"InstanceFactory = (typeArgs, args) => new {className}(),");
+                writer.AppendLine($"InstanceFactory = static (typeArgs, args) => new {className}(),");
             }
             else
             {
-                writer.AppendLine($"InstanceFactory = (typeArgs, args) => new {className}()");
+                writer.AppendLine($"InstanceFactory = static (typeArgs, args) => new {className}()");
                 writer.AppendLine("{");
                 writer.Indent();
 
@@ -163,7 +163,7 @@ public static class InstanceFactoryGenerator
 
     private static void GenerateTypedConstructorCall(CodeWriter writer, string className, IMethodSymbol constructor)
     {
-        writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
+        writer.AppendLine("InstanceFactory = static (typeArgs, args) =>");
         writer.AppendLine("{");
         writer.Indent();
 
@@ -223,7 +223,7 @@ public static class InstanceFactoryGenerator
 
     private static void GenerateGenericInstanceFactory(CodeWriter writer, INamedTypeSymbol genericType)
     {
-        writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
+        writer.AppendLine("InstanceFactory = static (typeArgs, args) =>");
         writer.AppendLine("{");
         writer.Indent();
 

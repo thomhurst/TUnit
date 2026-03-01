@@ -58,7 +58,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_With_STA_TestSource : glo
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -165,7 +165,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_Without_STA_TestSource : 
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -273,7 +273,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithSimpleAwait_TestS
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -381,7 +381,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskYield_TestSou
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -489,7 +489,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithConfigureAwaitTru
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -597,7 +597,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithNestedAsyncCalls_
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -705,7 +705,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskFromResult_Te
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -813,7 +813,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithCompletedTask_Tes
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -921,7 +921,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskRun_TestSourc
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -1029,7 +1029,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithMultipleAwaits_Te
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -1137,7 +1137,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithAsyncEnumerable_T
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -1245,7 +1245,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskWhenAll_TestS
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -1353,7 +1353,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithExceptionHandling
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -1461,7 +1461,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithThrowsNothingAsse
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -1569,7 +1569,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithFuncAssertion_Tes
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try

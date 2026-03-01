@@ -52,7 +52,7 @@ internal sealed class TUnit_TestProject_BasicTests_SynchronousTest_TestSource : 
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.BasicTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.BasicTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -155,7 +155,7 @@ internal sealed class TUnit_TestProject_BasicTests_AsynchronousTest_TestSource :
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.BasicTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.BasicTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -257,7 +257,7 @@ internal sealed class TUnit_TestProject_BasicTests_ValueTaskAsynchronousTest_Tes
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.BasicTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.BasicTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try

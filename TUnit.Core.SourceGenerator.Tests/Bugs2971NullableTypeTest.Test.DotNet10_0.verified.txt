@@ -53,7 +53,7 @@ internal sealed class TUnit_TestProject_Bugs__2971_Tests_SimpleTest_TestSource :
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._2971.Tests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.Bugs._2971.Tests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try

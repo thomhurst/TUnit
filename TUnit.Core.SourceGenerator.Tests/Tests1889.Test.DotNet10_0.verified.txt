@@ -54,7 +54,7 @@ internal sealed class TUnit_TestProject_Bugs__1889_DerivedTest_Test1_TestSource 
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._1889.DerivedTest(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.Bugs._1889.DerivedTest(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -171,7 +171,7 @@ internal sealed class TUnit_TestProject_Bugs__1889_DerivedTest_Test2__bool_TestS
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._1889.DerivedTest(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.Bugs._1889.DerivedTest(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -297,7 +297,7 @@ internal sealed class TUnit_TestProject_Bugs__1889_DerivedTest_Test3__bool_TestS
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._1889.DerivedTest(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.Bugs._1889.DerivedTest(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
