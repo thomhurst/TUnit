@@ -36,6 +36,18 @@ internal sealed class ReportData
 
     [JsonPropertyName("spans")]
     public SpanData[]? Spans { get; init; }
+
+    [JsonPropertyName("commitSha")]
+    public string? CommitSha { get; init; }
+
+    [JsonPropertyName("branch")]
+    public string? Branch { get; init; }
+
+    [JsonPropertyName("pullRequestNumber")]
+    public string? PullRequestNumber { get; init; }
+
+    [JsonPropertyName("repositorySlug")]
+    public string? RepositorySlug { get; init; }
 }
 
 internal sealed class ReportSummary

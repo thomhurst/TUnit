@@ -35,4 +35,10 @@ internal static class EnvironmentConstants
     public const string ActionsResultsUrl = "ACTIONS_RESULTS_URL";
     public const string GitHubRepository = "GITHUB_REPOSITORY";
     public const string GitHubRunId = "GITHUB_RUN_ID";
+
+    // GitHub Actions context (for CI metadata in reports)
+    public const string GitHubSha = "GITHUB_SHA";
+    public const string GitHubRef = "GITHUB_REF";
+    public const string GitHubHeadRef = "GITHUB_HEAD_REF";
+    public const string GitHubEventName = "GITHUB_EVENT_NAME";
 }

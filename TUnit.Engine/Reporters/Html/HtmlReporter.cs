@@ -258,11 +258,13 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
         }
 #endif
 
+        var (commitSha, branch, prNumber, repoSlug) = GetCiContext();
+
         return new ReportData
         {
             AssemblyName = assemblyName,
             MachineName = Environment.MachineName,
-            Timestamp = DateTimeOffset.UtcNow.ToString("o"),
+            Timestamp = DateTimeOffset.UtcNow.ToString("dd MMM yyyy, HH:mm:ss 'UTC'"),
             TUnitVersion = tunitVersion,
             OperatingSystem = RuntimeInformation.OSDescription,
             RuntimeVersion = RuntimeInformation.FrameworkDescription,
@@ -270,8 +272,46 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
             TotalDurationMs = totalDurationMs,
             Summary = summary,
             Groups = groups,
-            Spans = spans
+            Spans = spans,
+            CommitSha = commitSha,
+            Branch = branch,
+            PullRequestNumber = prNumber,
+            RepositorySlug = repoSlug
         };
+    }
+
+    private static (string? CommitSha, string? Branch, string? PullRequestNumber, string? RepositorySlug) GetCiContext()
+    {
+        if (Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubActions) is not "true")
+        {
+            return (null, null, null, null);
+        }
+
+        var commitSha = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubSha);
+        var repoSlug = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRepository);
+
+        // Branch: prefer GITHUB_HEAD_REF (set on PRs), fallback to GITHUB_REF (strip refs/heads/)
+        var branch = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubHeadRef);
+        if (string.IsNullOrEmpty(branch))
+        {
+            var ghRef = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRef);
+            if (ghRef is not null && ghRef.StartsWith("refs/heads/", StringComparison.Ordinal))
+            {
+                branch = ghRef.Substring("refs/heads/".Length);
+            }
+        }
+
+        // PR number: parse from GITHUB_REF if it matches refs/pull/{n}/merge
+        string? prNumber = null;
+        var refValue = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRef);
+        if (refValue is not null &&
+            refValue.StartsWith("refs/pull/", StringComparison.Ordinal) &&
+            refValue.EndsWith("/merge", StringComparison.Ordinal))
+        {
+            prNumber = refValue.Substring("refs/pull/".Length, refValue.Length - "refs/pull/".Length - "/merge".Length);
+        }
+
+        return (commitSha, branch, prNumber, repoSlug);
     }
 
     private static void AccumulateStatus(ReportSummary summary, string status)

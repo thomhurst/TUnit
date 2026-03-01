@@ -10,7 +10,7 @@ internal static class HtmlReportGenerator
     {
         var sb = new StringBuilder(96 * 1024);
         sb.AppendLine("<!DOCTYPE html>");
-        sb.AppendLine("<html lang=\"en\">");
+        sb.AppendLine("<html lang=\"en\" data-theme=\"dark\">");
 
         AppendHead(sb, data);
         AppendBody(sb, data);
@@ -44,6 +44,11 @@ internal static class HtmlReportGenerator
 
         AppendHeader(sb, data);
         AppendSummaryDashboard(sb, data.Summary, data.TotalDurationMs);
+
+        // Quick-access sections populated by JS
+        sb.AppendLine("<div id=\"failedSection\"></div>");
+        sb.AppendLine("<div id=\"slowestSection\"></div>");
+
         AppendSearchAndFilters(sb);
         AppendTestGroups(sb, data);
         AppendJsonData(sb, data);
@@ -82,7 +87,44 @@ internal static class HtmlReportGenerator
             AppendMetaChip(sb, "filter", data.Filter!);
         }
 
+        if (!string.IsNullOrEmpty(data.Branch))
+        {
+            AppendMetaChip(sb, "branch", data.Branch!);
+        }
+
+        if (!string.IsNullOrEmpty(data.CommitSha))
+        {
+            var shortSha = data.CommitSha!.Length > 7 ? data.CommitSha[..7] : data.CommitSha;
+            if (!string.IsNullOrEmpty(data.RepositorySlug))
+            {
+                AppendMetaChipLink(sb, "commit", shortSha, $"https://github.com/{data.RepositorySlug}/commit/{data.CommitSha}");
+            }
+            else
+            {
+                AppendMetaChip(sb, "commit", shortSha);
+            }
+        }
+
+        if (!string.IsNullOrEmpty(data.PullRequestNumber))
+        {
+            if (!string.IsNullOrEmpty(data.RepositorySlug))
+            {
+                AppendMetaChipLink(sb, "pr", $"PR #{data.PullRequestNumber}", $"https://github.com/{data.RepositorySlug}/pull/{data.PullRequestNumber}");
+            }
+            else
+            {
+                AppendMetaChip(sb, "pr", $"PR #{data.PullRequestNumber}");
+            }
+        }
+
         sb.AppendLine("</div>");
+
+        // Theme toggle button
+        sb.AppendLine("<button id=\"themeToggle\" class=\"theme-btn\" aria-label=\"Toggle theme\">");
+        sb.AppendLine("<svg class=\"theme-icon theme-sun\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32l1.41-1.41\"/></svg>");
+        sb.AppendLine("<svg class=\"theme-icon theme-moon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z\"/></svg>");
+        sb.AppendLine("</button>");
+
         sb.AppendLine("</header>");
     }
 
@@ -93,6 +135,17 @@ internal static class HtmlReportGenerator
         sb.Append("\"></span>");
         sb.Append(WebUtility.HtmlEncode(text));
         sb.AppendLine("</span>");
+    }
+
+    private static void AppendMetaChipLink(StringBuilder sb, string icon, string text, string href)
+    {
+        sb.Append("<a class=\"chip chip-link\" href=\"");
+        sb.Append(WebUtility.HtmlEncode(href));
+        sb.Append("\" target=\"_blank\" rel=\"noopener\"><span class=\"chip-icon\" data-icon=\"");
+        sb.Append(icon);
+        sb.Append("\"></span>");
+        sb.Append(WebUtility.HtmlEncode(text));
+        sb.AppendLine("</a>");
     }
 
     private static void AppendSummaryDashboard(StringBuilder sb, ReportSummary summary, double totalDurationMs)
@@ -307,6 +360,22 @@ internal static class HtmlReportGenerator
   --ease:      cubic-bezier(.4,0,.2,1);
 }
 
+/* ── Light Theme ──────────────────────────────────── */
+:root[data-theme="light"]{
+  --bg:#f8f9fb;--surface-0:#ffffff;--surface-1:#f0f1f4;--surface-2:#e4e6eb;--surface-3:#d1d5de;
+  --border:rgba(0,0,0,.08);--border-h:rgba(0,0,0,.14);
+  --text:#1a1d24;--text-2:#5a5f6e;--text-3:#8b91a0;
+  --emerald-d:rgba(52,211,153,.15);--rose-d:rgba(251,113,133,.15);
+  --amber-d:rgba(251,191,36,.12);--slate-d:rgba(148,163,184,.12);
+  --indigo-d:rgba(129,140,248,.12);
+}
+:root[data-theme="light"] .grain{opacity:.008}
+
+/* ── Theme Transition ─────────────────────────────── */
+.theme-transition,.theme-transition *,.theme-transition *::before,.theme-transition *::after{
+  transition:background-color .3s var(--ease),color .3s var(--ease),border-color .3s var(--ease),box-shadow .3s var(--ease)!important;
+}
+
 /* ── Reset & Base ──────────────────────────────────── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
@@ -338,6 +407,20 @@ body{
 [data-anim]:nth-child(3){animation-delay:.16s}
 .ring-seg{animation:ring-draw .9s var(--ease) both}
 
+/* Stat card stagger */
+[data-anim] .stat{animation:fade-up .4s var(--ease) both}
+[data-anim] .stat:nth-child(1){animation-delay:0s}
+[data-anim] .stat:nth-child(2){animation-delay:.05s}
+[data-anim] .stat:nth-child(3){animation-delay:.1s}
+[data-anim] .stat:nth-child(4){animation-delay:.15s}
+[data-anim] .stat:nth-child(5){animation-delay:.2s}
+
+/* Test row stagger on group open */
+.grp.open .t-row{animation:fade-up .3s var(--ease) both;animation-delay:calc(var(--row-idx,0) * .03s)}
+
+/* Reduced motion */
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
 /* ── Header ────────────────────────────────────────── */
 .hdr{
   display:flex;align-items:flex-start;justify-content:space-between;
@@ -352,6 +435,7 @@ body{
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
   background-clip:text;
 }
+:root[data-theme="light"] .hdr-name{background:linear-gradient(135deg,#1a1d24 30%,#6366f1);-webkit-background-clip:text;background-clip:text}
 .hdr-sub{font-size:.78rem;color:var(--text-3);letter-spacing:.06em;text-transform:uppercase}
 .hdr-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .chip{
@@ -360,6 +444,25 @@ body{
   background:var(--surface-1);border:1px solid var(--border);
   font-size:.78rem;color:var(--text-2);white-space:nowrap;
 }
+.chip-link{
+  text-decoration:none;cursor:pointer;
+  transition:border-color .2s var(--ease),background .2s var(--ease);
+}
+.chip-link:hover{border-color:var(--indigo);background:var(--indigo-d);color:var(--text)}
+
+/* ── Theme Toggle ─────────────────────────────────── */
+.theme-btn{
+  display:flex;align-items:center;justify-content:center;
+  width:36px;height:36px;border-radius:100px;
+  background:var(--surface-1);border:1px solid var(--border);
+  color:var(--text-2);cursor:pointer;flex-shrink:0;
+  transition:border-color .2s var(--ease),color .2s var(--ease),background .2s var(--ease);
+}
+.theme-btn:hover{border-color:var(--border-h);color:var(--text)}
+.theme-btn svg{width:18px;height:18px;transition:transform .3s var(--ease)}
+.theme-btn:active svg{transform:rotate(30deg)}
+[data-theme="dark"] .theme-sun{display:none}
+[data-theme="light"] .theme-moon{display:none}
 
 /* ── Dashboard ─────────────────────────────────────── */
 .dash{
@@ -402,7 +505,7 @@ body{
   opacity:.7;
 }
 .stat:hover{border-color:var(--border-h);transform:translateY(-1px)}
-.stat-n{display:block;font-size:1.65rem;font-weight:800;letter-spacing:-.03em;line-height:1.1}
+.stat-n{display:block;font-size:1.65rem;font-weight:800;letter-spacing:-.03em;line-height:1.1;font-variant-numeric:tabular-nums}
 .stat-l{display:block;font-size:.72rem;color:var(--text-3);margin-top:4px;text-transform:uppercase;letter-spacing:.06em}
 
 /* coloured numbers */
@@ -468,7 +571,7 @@ body{
 }
 .grp:hover{border-color:var(--border-h)}
 .grp-hd{
-  display:flex;align-items:center;gap:12px;padding:11px 16px;
+  display:flex;align-items:center;gap:12px;padding:9px 16px;
   cursor:pointer;user-select:none;
   transition:background .15s var(--ease);
 }
@@ -494,8 +597,10 @@ body{
   background:var(--emerald);opacity:.6;
 }
 .grp-hd.fail .grp-indicator{background:var(--rose)}
-.grp-body{display:none;border-top:1px solid var(--border)}
-.grp.open .grp-body{display:block}
+.grp-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s var(--ease)}
+.grp.open .grp-body{grid-template-rows:1fr}
+.grp-body-inner{overflow:hidden;min-height:0}
+.grp-body-pad{border-top:1px solid var(--border)}
 
 /* ── Test Rows ─────────────────────────────────────── */
 .t-row{
@@ -511,9 +616,9 @@ body{
   text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;
   line-height:1;
 }
-.t-badge.passed{background:var(--emerald-d);color:var(--emerald)}
-.t-badge.failed,.t-badge.error,.t-badge.timedOut{background:var(--rose-d);color:var(--rose)}
-.t-badge.skipped{background:var(--amber-d);color:var(--amber)}
+.t-badge.passed{background:var(--emerald-d);color:var(--emerald);box-shadow:0 0 6px rgba(52,211,153,.15)}
+.t-badge.failed,.t-badge.error,.t-badge.timedOut{background:var(--rose-d);color:var(--rose);box-shadow:0 0 6px rgba(251,113,133,.15)}
+.t-badge.skipped{background:var(--amber-d);color:var(--amber);box-shadow:0 0 6px rgba(251,191,36,.12)}
 .t-badge.cancelled{background:var(--slate-d);color:var(--slate)}
 .t-badge.inProgress,.t-badge.unknown{background:var(--surface-2);color:var(--text-3)}
 .t-name{flex:1;font-size:.88rem;word-break:break-word;color:var(--text)}
@@ -525,12 +630,33 @@ body{
 
 /* ── Test Detail Panel ─────────────────────────────── */
 .t-detail{
-  display:none;padding:14px 18px 14px 22px;
-  background:var(--surface-1);border-bottom:1px solid var(--border);
+  display:grid;grid-template-rows:0fr;
+  transition:grid-template-rows .3s var(--ease);
 }
-.t-detail.open{display:block;animation:fade-up .25s var(--ease)}
+.t-detail.open{grid-template-rows:1fr}
+.t-detail-inner{overflow:hidden;min-height:0}
+.t-detail-pad{padding:14px 18px 14px 22px;background:var(--surface-1);border-bottom:1px solid var(--border)}
 .d-sec{margin-bottom:14px}
 .d-sec:last-child{margin-bottom:0}
+.d-info{
+  display:flex;gap:20px;flex-wrap:wrap;
+  padding:10px 14px;border-radius:var(--r);
+  background:var(--surface-0);border:1px solid var(--border);
+}
+.d-info-item{font-size:.82rem;color:var(--text-2)}
+.d-info-label{font-size:.68rem;font-weight:700;text-transform:uppercase;color:var(--text-3);letter-spacing:.07em;margin-right:4px}
+.d-collapsible .d-collapse-toggle{
+  display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none;
+  font-size:.68rem;font-weight:700;text-transform:uppercase;
+  color:var(--text-3);letter-spacing:.07em;margin-bottom:5px;
+  transition:color .15s var(--ease);
+}
+.d-collapsible .d-collapse-toggle:hover{color:var(--text)}
+.d-collapsible .d-collapse-toggle .tl-arrow{transition:transform .2s var(--ease);flex-shrink:0}
+.d-collapsible.d-col-open .d-collapse-toggle .tl-arrow{transform:rotate(90deg)}
+.d-collapsible .d-collapse-content{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s var(--ease)}
+.d-collapsible.d-col-open .d-collapse-content{grid-template-rows:1fr}
+.d-collapse-inner{overflow:hidden;min-height:0}
 .d-lbl{
   font-size:.68rem;font-weight:700;text-transform:uppercase;
   color:var(--text-3);margin-bottom:5px;letter-spacing:.07em;
@@ -541,9 +667,10 @@ body{
   font-family:var(--mono);font-size:.8rem;color:var(--text-2);
   white-space:pre-wrap;word-break:break-word;
   max-height:320px;overflow:auto;line-height:1.5;
+  border-left:2px solid var(--indigo);
 }
-.d-pre.err{color:var(--rose);border-color:rgba(251,113,133,.15)}
-.d-pre.stack{color:var(--text-3);font-size:.76rem}
+.d-pre.err{color:var(--rose);border-color:rgba(251,113,133,.15);border-left:2px solid var(--rose)}
+.d-pre.stack{color:var(--text-3);font-size:.76rem;border-left-color:var(--text-3)}
 .d-tags{display:flex;gap:6px;flex-wrap:wrap}
 .d-tag{
   padding:3px 10px;border-radius:100px;font-size:.76rem;
@@ -557,6 +684,21 @@ body{
 .tb-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--indigo),var(--emerald));min-width:2px;transition:width .4s var(--ease)}
 .tb-val{font-family:var(--mono);color:var(--text-3);font-size:.76rem;min-width:52px;text-align:right}
 .d-src{font-size:.78rem;color:var(--text-3);font-family:var(--mono)}
+
+/* ── Copy Button ──────────────────────────────────── */
+.d-pre-wrap{position:relative}
+.d-pre-wrap .d-pre{margin:0}
+.copy-btn{
+  position:absolute;top:6px;right:6px;
+  background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r);
+  color:var(--text-3);cursor:pointer;padding:4px 6px;
+  opacity:0;transition:opacity .15s var(--ease),color .15s var(--ease),border-color .15s var(--ease);
+  display:flex;align-items:center;justify-content:center;
+}
+.d-pre-wrap:hover .copy-btn{opacity:1}
+.copy-btn:hover{color:var(--text);border-color:var(--border-h)}
+.copy-btn.copied{color:var(--emerald);border-color:var(--emerald)}
+.copy-btn svg{width:14px;height:14px}
 
 /* ── Trace Timeline ────────────────────────────────── */
 .trace{margin-top:6px}
@@ -589,9 +731,60 @@ body{
 .tl-toggle:hover{color:var(--text)}
 .tl-toggle .tl-arrow{transition:transform .2s var(--ease);flex-shrink:0}
 .tl-open .tl-arrow{transform:rotate(90deg)}
-.tl-content{display:none;padding:0 16px 14px}
-.suite-trace .tl-content{padding:0 14px 10px}
-.tl-open .tl-content{display:block;animation:fade-up .2s var(--ease)}
+.tl-content{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s var(--ease)}
+.tl-open .tl-content{grid-template-rows:1fr}
+.tl-content-inner{overflow:hidden;min-height:0}
+.tl-content-pad{padding:0 16px 14px}
+.suite-trace .tl-content-pad{padding:0 14px 10px}
+
+/* ── Group Summary ─────────────────────────────────── */
+.grp-summary{
+  display:flex;gap:20px;flex-wrap:wrap;align-items:center;
+  padding:10px 16px;background:var(--surface-1);
+  border-bottom:1px solid var(--border);
+  font-size:.82rem;color:var(--text-2);
+}
+.grp-summary .d-info-label{font-size:.68rem;font-weight:700;text-transform:uppercase;color:var(--text-3);letter-spacing:.07em;margin-right:4px}
+.grp-summary .grp-sum-dur{font-family:var(--mono);font-weight:600;color:var(--text)}
+
+/* ── Quick-Access Sections ─────────────────────────── */
+.qa-section{
+  background:var(--surface-0);border:1px solid var(--border);border-radius:var(--r-lg);
+  margin-bottom:16px;overflow:hidden;
+}
+.qa-section .tl-toggle{padding:12px 16px;font-size:.82rem;font-weight:600;color:var(--text-2)}
+.qa-section .tl-content-pad{padding:0 16px 12px}
+.qa-item{
+  display:flex;align-items:center;gap:10px;padding:8px 12px;
+  border-radius:var(--r);cursor:pointer;
+  transition:background .12s var(--ease);
+}
+.qa-item:hover{background:var(--surface-2)}
+.qa-info{flex:1;min-width:0}
+.qa-info-name{font-size:.86rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qa-info-class{font-size:.72rem;color:var(--text-3)}
+.qa-err{
+  font-size:.74rem;color:var(--rose);font-family:var(--mono);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  max-width:340px;
+}
+.qa-dur{font-size:.78rem;color:var(--text-3);font-family:var(--mono);white-space:nowrap;flex-shrink:0;font-variant-numeric:tabular-nums}
+
+/* Slowest tests */
+.slow-rank{
+  font-size:.72rem;font-weight:800;color:var(--text-3);
+  min-width:22px;text-align:center;flex-shrink:0;
+  font-variant-numeric:tabular-nums;
+}
+.slow-bar-track{flex:1;height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden;min-width:60px}
+.slow-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--amber),var(--rose));min-width:2px}
+
+/* ── Highlight Flash ───────────────────────────────── */
+@keyframes flash-highlight{
+  0%{background:rgba(129,140,248,.18)}
+  100%{background:transparent}
+}
+.qa-highlight{animation:flash-highlight 1.5s var(--ease)}
 
 /* ── Empty State ───────────────────────────────────── */
 .empty{
@@ -609,14 +802,17 @@ body{
   .bar{flex-direction:column;align-items:stretch}
   .search{max-width:none}
   .hdr{flex-direction:column}
+  .qa-err{display:none}
 }
 
 /* ── Print ─────────────────────────────────────────── */
 @media print{
+  :root{--bg:#fff;--surface-0:#fff;--surface-1:#f9f9f9;--surface-2:#f0f0f0;--surface-3:#e0e0e0;
+    --border:rgba(0,0,0,.1);--border-h:rgba(0,0,0,.2);--text:#000;--text-2:#333;--text-3:#666}
   body{background:#fff;color:#000}
-  .grain,.bar{display:none}
-  .grp-body{display:block!important}
-  .t-detail{display:block!important;background:#f9f9f9}
+  .grain,.bar,.theme-btn{display:none}
+  .grp-body{grid-template-rows:1fr!important}
+  .t-detail{grid-template-rows:1fr!important;background:#f9f9f9}
   .shell{max-width:none;padding:0}
 }
 
@@ -625,6 +821,13 @@ body{
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--surface-3);border-radius:3px}
 ::-webkit-scrollbar-thumb:hover{background:var(--text-3)}
+
+/* ── Light Mode Hover Adjustments ─────────────────── */
+:root[data-theme="light"] .t-row:hover{background:rgba(0,0,0,.02)}
+:root[data-theme="light"] .dash::before{
+  background:radial-gradient(ellipse 60% 50% at 20% 50%,rgba(99,102,241,.06),transparent),
+             radial-gradient(ellipse 40% 60% at 80% 30%,rgba(52,211,153,.04),transparent);
+}
 """;
     }
 
@@ -648,19 +851,17 @@ let searchText = '';
 let debounceTimer;
 
 const spansByTrace = {};
-const spansByName = {};
 const bySpanId = {};
 spans.forEach(s => {
     if (!spansByTrace[s.traceId]) spansByTrace[s.traceId] = [];
     spansByTrace[s.traceId].push(s);
-    if (!spansByName[s.name]) spansByName[s.name] = [];
-    spansByName[s.name].push(s);
     bySpanId[s.spanId] = s;
 });
 
 // Build suite span lookup: className -> span
 const suiteSpanByClass = {};
-(spansByName['test suite']||[]).forEach(s => {
+spans.forEach(s => {
+    if (!s.name.startsWith('test suite')) return;
     const tag = (s.tags||[]).find(t => t.key === 'test.suite.name');
     if (tag) suiteSpanByClass[tag.value] = s;
 });
@@ -695,40 +896,65 @@ function esc(s) {
 
 const arrow = '<svg class="grp-arrow" viewBox="0 0 16 16" fill="currentColor"><path d="M6.22 4.22a.75.75 0 0 1 1.06 0l3.25 3.25a.75.75 0 0 1 0 1.06l-3.25 3.25a.75.75 0 0 1-1.06-1.06L8.94 8 6.22 5.28a.75.75 0 0 1 0-1.06Z"/></svg>';
 
+function fmtTime(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit',fractionalSecondDigits:3});
+}
+
+const copyIcon = '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>';
+const checkIcon = '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/></svg>';
+
+function wrapPre(content, cls) {
+    return '<div class="d-pre-wrap"><div class="d-pre'+(cls?' '+cls:'')+'">' + content + '</div><button class="copy-btn" title="Copy to clipboard">'+copyIcon+'</button></div>';
+}
+
 function renderDetail(t) {
     let h = '';
+
+    // Summary info row
+    h += '<div class="d-sec d-info">';
+    h += '<span class="d-info-item"><span class="d-info-label">Started</span> ' + fmtTime(t.startTime) + '</span>';
+    h += '<span class="d-info-item"><span class="d-info-label">Ended</span> ' + fmtTime(t.endTime) + '</span>';
+    h += '<span class="d-info-item"><span class="d-info-label">Duration</span> ' + fmt(t.durationMs) + '</span>';
+    if (t.retryAttempt > 0) {
+        h += '<span class="d-info-item"><span class="retry-tag">Retry #'+t.retryAttempt+'</span></span>';
+    }
+    h += '</div>';
+
     if (t.exception) {
         h += '<div class="d-sec"><div class="d-lbl">Exception</div>';
-        h += '<div class="d-pre err">' + esc(t.exception.type) + ': ' + esc(t.exception.message) + '</div>';
-        if (t.exception.stackTrace) h += '<div class="d-pre stack">' + esc(t.exception.stackTrace) + '</div>';
+        h += wrapPre(esc(t.exception.type) + ': ' + esc(t.exception.message), 'err');
+        if (t.exception.stackTrace) h += wrapPre(esc(t.exception.stackTrace), 'stack');
         let inner = t.exception.innerException;
         while (inner) {
             h += '<div class="d-lbl" style="margin-top:8px">Inner Exception</div>';
-            h += '<div class="d-pre err">' + esc(inner.type) + ': ' + esc(inner.message) + '</div>';
-            if (inner.stackTrace) h += '<div class="d-pre stack">' + esc(inner.stackTrace) + '</div>';
+            h += wrapPre(esc(inner.type) + ': ' + esc(inner.message), 'err');
+            if (inner.stackTrace) h += wrapPre(esc(inner.stackTrace), 'stack');
             inner = inner.innerException;
         }
         h += '</div>';
     }
-    if (t.output) {
-        h += '<div class="d-sec"><div class="d-lbl">Standard Output</div>';
-        h += '<div class="d-pre">' + esc(t.output) + '</div></div>';
-    }
-    if (t.errorOutput) {
-        h += '<div class="d-sec"><div class="d-lbl">Error Output</div>';
-        h += '<div class="d-pre err">' + esc(t.errorOutput) + '</div></div>';
-    }
     if (t.skipReason) {
         h += '<div class="d-sec"><div class="d-lbl">Skip Reason</div>';
-        h += '<div class="d-pre">' + esc(t.skipReason) + '</div></div>';
+        h += wrapPre(esc(t.skipReason)) + '</div>';
+    }
+    if (t.output) {
+        h += '<div class="d-sec d-collapsible"><div class="d-collapse-toggle">' + tlArrow + 'Standard Output</div>';
+        h += '<div class="d-collapse-content"><div class="d-collapse-inner">' + wrapPre(esc(t.output)) + '</div></div></div>';
+    }
+    if (t.errorOutput) {
+        h += '<div class="d-sec d-collapsible"><div class="d-collapse-toggle">' + tlArrow + 'Error Output</div>';
+        h += '<div class="d-collapse-content"><div class="d-collapse-inner">' + wrapPre(esc(t.errorOutput), 'err') + '</div></div></div>';
     }
     if (t.timingSteps && t.timingSteps.length > 0) {
         const mx = Math.max(...t.timingSteps.map(s=>s.durationMs),1);
         h += '<div class="d-sec"><div class="d-lbl">Timing</div><div class="timing-bars">';
         t.timingSteps.forEach(s => {
             const pct = Math.max((s.durationMs/mx)*100,1);
+            const grad = pct > 66 ? 'linear-gradient(90deg,var(--amber),var(--rose))' : pct > 33 ? 'linear-gradient(90deg,var(--indigo),var(--amber))' : 'linear-gradient(90deg,var(--indigo),var(--emerald))';
             h += '<div class="tb"><span class="tb-name">'+esc(s.name)+'</span>';
-            h += '<div class="tb-track"><div class="tb-fill" style="width:'+pct.toFixed(1)+'%"></div></div>';
+            h += '<div class="tb-track"><div class="tb-fill" style="width:'+pct.toFixed(1)+'%;background:'+grad+'"></div></div>';
             h += '<span class="tb-val">'+fmt(s.durationMs)+'</span></div>';
         });
         h += '</div></div>';
@@ -747,9 +973,6 @@ function renderDetail(t) {
         h += '<div class="d-sec"><span class="d-src">'+esc(t.filePath);
         if (t.lineNumber) h += ':'+t.lineNumber;
         h += '</span></div>';
-    }
-    if (t.retryAttempt > 0) {
-        h += '<div class="d-sec"><span class="retry-tag">Retry attempt '+t.retryAttempt+'</span></div>';
     }
     if (t.traceId && t.spanId && spansByTrace[t.traceId]) h += renderTrace(t.traceId, t.spanId);
     return h;
@@ -805,18 +1028,59 @@ function renderSpanRows(sp, uid) {
     return h;
 }
 
-// Per-test trace: test case span + its descendants only
+// Per-test trace: include parent suite span for context, then test case span + its descendants
 function renderTrace(tid, rootSpanId) {
     const allSpans = spansByTrace[tid];
     if (!allSpans || !allSpans.length) return '';
     const sp = getDescendants(allSpans, rootSpanId);
     if (!sp.length) return '';
+    // Include the parent suite span so the test bar is shown relative to the class duration
+    const root = bySpanId[rootSpanId];
+    if (root && root.parentSpanId && bySpanId[root.parentSpanId]) {
+        const parent = bySpanId[root.parentSpanId];
+        if (!sp.some(s => s.spanId === parent.spanId)) {
+            sp.unshift(parent);
+        }
+    }
     return '<div class="d-sec"><div class="d-lbl">Trace Timeline</div>' + renderSpanRows(sp, 't-' + rootSpanId) + '</div>';
 }
 
 const tlArrow = '<svg class="tl-arrow" width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M6.22 4.22a.75.75 0 0 1 1.06 0l3.25 3.25a.75.75 0 0 1 0 1.06l-3.25 3.25a.75.75 0 0 1-1.06-1.06L8.94 8 6.22 5.28a.75.75 0 0 1 0-1.06Z"/></svg>';
 
 // Suite-level trace: test suite span + non-test-case children (hooks, setup, teardown)
+function renderClassSummary(g, ft) {
+    // Compute start/end from suite span if available, else from tests
+    const suite = suiteSpanByClass[g.className];
+    let startIso = null, endIso = null, durMs = 0;
+    if (suite) {
+        // Suite span times are relative ms — use the earliest test's startTime as anchor
+        durMs = suite.durationMs;
+    }
+    // Derive from test timestamps
+    let minStart = null, maxEnd = null;
+    ft.forEach(function(t){
+        if (t.startTime) {
+            const s = new Date(t.startTime);
+            if (!minStart || s < minStart) minStart = s;
+        }
+        if (t.endTime) {
+            const e = new Date(t.endTime);
+            if (!maxEnd || e > maxEnd) maxEnd = e;
+        }
+    });
+    startIso = minStart;
+    endIso = maxEnd;
+    if (!durMs && minStart && maxEnd) durMs = maxEnd - minStart;
+
+    let h = '<div class="grp-summary">';
+    h += '<span><span class="d-info-label">Started</span> ' + (startIso ? fmtTime(startIso.toISOString()) : '\u2014') + '</span>';
+    h += '<span><span class="d-info-label">Ended</span> ' + (endIso ? fmtTime(endIso.toISOString()) : '\u2014') + '</span>';
+    h += '<span><span class="d-info-label">Duration</span> <span class="grp-sum-dur">' + fmt(durMs) + '</span></span>';
+    h += '<span><span class="d-info-label">Tests</span> ' + ft.length + '</span>';
+    h += '</div>';
+    return h;
+}
+
 function renderSuiteTrace(className) {
     const suite = suiteSpanByClass[className];
     if (!suite) return '';
@@ -824,23 +1088,77 @@ function renderSuiteTrace(className) {
     if (!allSpans) return '';
     const all = getDescendants(allSpans, suite.spanId);
     const testCaseIds = new Set();
-    all.forEach(s => { if (s.name === 'test case') testCaseIds.add(s.spanId); });
+    all.forEach(s => { if (s.name.startsWith('test case')) testCaseIds.add(s.spanId); });
     const tcDescendants = new Set();
     testCaseIds.forEach(id => { getDescendants(all, id).forEach(s => { if (s.spanId !== id) tcDescendants.add(s.spanId); }); });
     const filtered = all.filter(s => !tcDescendants.has(s.spanId) && !testCaseIds.has(s.spanId));
+    // Include parent spans (assembly, session) for context
+    let ancestor = suite.parentSpanId ? bySpanId[suite.parentSpanId] : null;
+    while (ancestor) {
+        if (!filtered.some(s => s.spanId === ancestor.spanId)) filtered.unshift(ancestor);
+        ancestor = ancestor.parentSpanId ? bySpanId[ancestor.parentSpanId] : null;
+    }
     if (filtered.length <= 1) return '';
-    return '<div class="suite-trace"><div class="tl-toggle">' + tlArrow + 'Class Timeline</div><div class="tl-content">' + renderSpanRows(filtered, 'suite-' + className) + '</div></div>';
+    return '<div class="suite-trace"><div class="tl-toggle">' + tlArrow + 'Class Timeline</div><div class="tl-content"><div class="tl-content-inner"><div class="tl-content-pad">' + renderSpanRows(filtered, 'suite-' + className) + '</div></div></div></div>';
 }
 
-// Global timeline: session + assembly spans (excluding test suite children)
+// Global timeline: session + assembly + suite spans
 function renderGlobalTimeline() {
-    const sessionSpans = spansByName['test session'] || [];
-    const assemblySpans = spansByName['test assembly'] || [];
-    const suiteSpans = spansByName['test suite'] || [];
-    if (!sessionSpans.length && !assemblySpans.length) return '';
-    const topSpans = [...sessionSpans, ...assemblySpans, ...suiteSpans];
+    const topSpans = spans.filter(s => s.name.startsWith('test session') || s.name.startsWith('test assembly') || s.name.startsWith('test suite'));
     if (!topSpans.length) return '';
-    return '<div class="global-trace"><div class="tl-toggle">' + tlArrow + 'Execution Timeline</div><div class="tl-content">' + renderSpanRows(topSpans, 'global') + '</div></div>';
+    return '<div class="global-trace"><div class="tl-toggle">' + tlArrow + 'Execution Timeline</div><div class="tl-content"><div class="tl-content-inner"><div class="tl-content-pad">' + renderSpanRows(topSpans, 'global') + '</div></div></div></div>';
+}
+
+function renderFailedSection() {
+    const sec = document.getElementById('failedSection');
+    if (!sec) return;
+    const failed = [];
+    groups.forEach(function(g){
+        g.tests.forEach(function(t){
+            if (t.status==='failed'||t.status==='error'||t.status==='timedOut') failed.push({t:t,cls:g.className});
+        });
+    });
+    if (!failed.length) { sec.innerHTML=''; return; }
+    let h = '<div class="qa-section tl-open"><div class="tl-toggle">'+tlArrow+' Failed Tests ('+failed.length+')</div><div class="tl-content"><div class="tl-content-inner"><div class="tl-content-pad">';
+    failed.forEach(function(f){
+        const errMsg = f.t.exception ? (f.t.exception.type+': '+f.t.exception.message) : '';
+        const truncErr = errMsg.length > 120 ? errMsg.substring(0,120)+'…' : errMsg;
+        h += '<div class="qa-item" data-scroll-tid="'+f.t.id+'">';
+        h += '<span class="t-badge '+f.t.status+'">'+esc(f.t.status)+'</span>';
+        h += '<div class="qa-info"><div class="qa-info-name">'+esc(f.t.displayName)+'</div>';
+        h += '<div class="qa-info-class">'+esc(f.cls)+'</div></div>';
+        if (truncErr) h += '<span class="qa-err" title="'+esc(errMsg)+'">'+esc(truncErr)+'</span>';
+        h += '<span class="qa-dur">'+fmt(f.t.durationMs)+'</span>';
+        h += '</div>';
+    });
+    h += '</div></div></div></div>';
+    sec.innerHTML = h;
+}
+
+function renderSlowestSection() {
+    const sec = document.getElementById('slowestSection');
+    if (!sec) return;
+    const all = [];
+    groups.forEach(function(g){
+        g.tests.forEach(function(t){ all.push({t:t,cls:g.className}); });
+    });
+    all.sort(function(a,b){ return b.t.durationMs - a.t.durationMs; });
+    const top = all.slice(0,10);
+    if (!top.length) { sec.innerHTML=''; return; }
+    const maxMs = top[0].t.durationMs || 1;
+    let h = '<div class="qa-section"><div class="tl-toggle">'+tlArrow+' Top 10 Slowest Tests</div><div class="tl-content"><div class="tl-content-inner"><div class="tl-content-pad">';
+    top.forEach(function(f,i){
+        const pct = Math.max((f.t.durationMs/maxMs)*100,1).toFixed(1);
+        h += '<div class="qa-item" data-scroll-tid="'+f.t.id+'">';
+        h += '<span class="slow-rank">#'+(i+1)+'</span>';
+        h += '<div class="qa-info"><div class="qa-info-name">'+esc(f.t.displayName)+'</div>';
+        h += '<div class="qa-info-class">'+esc(f.cls)+'</div></div>';
+        h += '<div class="slow-bar-track"><div class="slow-bar-fill" style="width:'+pct+'%"></div></div>';
+        h += '<span class="qa-dur">'+fmt(f.t.durationMs)+'</span>';
+        h += '</div>';
+    });
+    h += '</div></div></div></div>';
+    sec.innerHTML = h;
 }
 
 function render() {
@@ -869,30 +1187,59 @@ function render() {
         if(c.s) html += '<span class="grp-b gs">'+c.s+'</span>';
         html += '<span class="grp-b gt">'+ft.length+'</span>';
         html += '</span></div>';
-        html += '<div class="grp-body">';
+        html += '<div class="grp-body"><div class="grp-body-inner"><div class="grp-body-pad">';
+        html += renderClassSummary(g, ft);
         html += renderSuiteTrace(g.className);
         ft.forEach((t,ti)=>{
-            html += '<div class="t-row" data-gi="'+gi+'" data-ti="'+ti+'">';
+            html += '<div class="t-row" id="test-'+t.id+'" data-gi="'+gi+'" data-ti="'+ti+'" data-tid="'+t.id+'" style="--row-idx:'+Math.min(ti,7)+'">';
             html += '<span class="t-badge '+t.status+'">'+esc(t.status)+'</span>';
             html += '<span class="t-name">'+esc(t.displayName)+'</span>';
             if(t.retryAttempt>0) html += '<span class="retry-tag">retry '+t.retryAttempt+'</span>';
             html += '<span class="t-dur">'+fmt(t.durationMs)+'</span>';
             html += '</div>';
-            html += '<div class="t-detail" data-gi="'+gi+'" data-ti="'+ti+'">';
+            html += '<div class="t-detail" data-gi="'+gi+'" data-ti="'+ti+'"><div class="t-detail-inner"><div class="t-detail-pad">';
             html += renderDetail(t);
-            html += '</div>';
+            html += '</div></div></div>';
         });
-        html += '</div></div>';
+        html += '</div></div></div></div>';
     });
     container.innerHTML = html;
     filterSummary.textContent = (activeFilter!=='all'||searchText)
         ? 'Showing '+total+' of '+data.summary.total+' tests' : '';
 }
 
-// Toggle for collapsible timelines (delegated on document for both global and per-group)
+function scrollToTest(testId) {
+    const row = document.getElementById('test-' + testId);
+    if (!row) return;
+    // Expand parent group
+    const grp = row.closest('.grp');
+    if (grp && !grp.classList.contains('open')) grp.classList.add('open');
+    // Expand detail panel
+    const det = row.nextElementSibling;
+    if (det && det.classList.contains('t-detail') && !det.classList.contains('open')) det.classList.add('open');
+    // Scroll into view
+    row.scrollIntoView({behavior:'smooth',block:'center'});
+    // Flash highlight
+    row.classList.add('qa-highlight');
+    setTimeout(function(){row.classList.remove('qa-highlight');},1500);
+    // Update hash
+    history.replaceState(null,'','#test-'+testId);
+}
+
+function checkHash() {
+    const h = location.hash;
+    if (h && h.startsWith('#test-')) {
+        const testId = h.substring(6);
+        setTimeout(function(){scrollToTest(testId);},100);
+    }
+}
+
+// Toggle for collapsible sections (timelines & output panels)
 document.addEventListener('click',function(e){
     const tl = e.target.closest('.tl-toggle');
     if(tl){tl.parentElement.classList.toggle('tl-open');return;}
+    const ct = e.target.closest('.d-collapse-toggle');
+    if(ct){ct.parentElement.classList.toggle('d-col-open');return;}
 });
 
 container.addEventListener('click',function(e){
@@ -902,6 +1249,7 @@ container.addEventListener('click',function(e){
     if(row){
         const det = container.querySelector('.t-detail[data-gi="'+row.dataset.gi+'"][data-ti="'+row.dataset.ti+'"]');
         if(det) det.classList.toggle('open');
+        if(row.dataset.tid) history.replaceState(null,'','#test-'+row.dataset.tid);
         return;
     }
     const sr = e.target.closest('.sp-row');
@@ -924,10 +1272,47 @@ searchInput.addEventListener('input',function(){
 });
 clearBtn.addEventListener('click',function(){searchInput.value='';clearBtn.style.display='none';searchText='';render();});
 
+// Quick-access section click delegation
+document.addEventListener('click',function(e){
+    const qi = e.target.closest('.qa-item');
+    if(qi && qi.dataset.scrollTid){scrollToTest(qi.dataset.scrollTid);return;}
+    const cb = e.target.closest('.copy-btn');
+    if(cb){
+        const wrap = cb.closest('.d-pre-wrap');
+        const pre = wrap && wrap.querySelector('.d-pre');
+        if(pre){
+            navigator.clipboard.writeText(pre.textContent).then(function(){
+                cb.innerHTML = checkIcon;
+                cb.classList.add('copied');
+                setTimeout(function(){cb.innerHTML=copyIcon;cb.classList.remove('copied');},1500);
+            });
+        }
+    }
+});
+
+// Theme initialization
+const savedTheme = localStorage.getItem('tunit-theme');
+const prefersDark = window.matchMedia('(prefers-color-scheme:dark)').matches;
+const initTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+document.documentElement.setAttribute('data-theme', initTheme);
+
 // Render global execution timeline (static, doesn't change with filters)
 document.getElementById('globalTimeline').innerHTML = renderGlobalTimeline();
 
 render();
+renderFailedSection();
+renderSlowestSection();
+checkHash();
+
+// Theme toggle handler
+document.getElementById('themeToggle').addEventListener('click', function(){
+    document.body.classList.add('theme-transition');
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('tunit-theme', next);
+    setTimeout(function(){document.body.classList.remove('theme-transition');}, 350);
+});
 })();
 """;
     }
