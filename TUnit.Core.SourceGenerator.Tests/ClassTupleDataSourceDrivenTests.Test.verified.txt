@@ -5,7 +5,7 @@
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
-internal sealed class TUnit_TestProject_ClassTupleDataSourceDrivenTests_DataSource_TupleMethod__int_string_bool_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal sealed class TUnit_TestProject_ClassTupleDataSourceDrivenTests_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     #if NET8_0_OR_GREATER
     [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "<Property1>k__BackingField")]
@@ -17,7 +17,7 @@ internal sealed class TUnit_TestProject_ClassTupleDataSourceDrivenTests_DataSour
     [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "<Property4>k__BackingField")]
     private static extern ref global::System.ValueTuple<int, string, bool> GetProperty4BackingField(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests instance);
     #endif
-    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
+    private async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> Materialize_DataSource_TupleMethod_0(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>
         {
@@ -384,6 +384,14 @@ internal sealed class TUnit_TestProject_ClassTupleDataSourceDrivenTests_DataSour
         yield return metadata;
         yield break;
     }
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
+    {
+        await foreach (var item in Materialize_DataSource_TupleMethod_0(testSessionId, cancellationToken).ConfigureAwait(false))
+        {
+            yield return item;
+        }
+        yield break;
+    }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
         yield return new global::TUnit.Core.TestDescriptor
@@ -399,15 +407,15 @@ internal sealed class TUnit_TestProject_ClassTupleDataSourceDrivenTests_DataSour
             HasDataSource = true,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            Materializer = GetTestsAsync
+            Materializer = Materialize_DataSource_TupleMethod_0
         };
     }
 }
-internal static class TUnit_TestProject_ClassTupleDataSourceDrivenTests_DataSource_TupleMethod__int_string_bool_ModuleInitializer
+internal static class TUnit_TestProject_ClassTupleDataSourceDrivenTests_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests), new TUnit_TestProject_ClassTupleDataSourceDrivenTests_DataSource_TupleMethod__int_string_bool_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests), new TUnit_TestProject_ClassTupleDataSourceDrivenTests_TestSource());
     }
 }

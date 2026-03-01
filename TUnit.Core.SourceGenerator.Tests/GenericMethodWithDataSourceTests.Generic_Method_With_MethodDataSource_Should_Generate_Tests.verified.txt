@@ -5,9 +5,9 @@
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
-internal sealed class TUnit_TestProject_Bugs__4431_GenericClassNoDataSource_T_Should_Create_Instance_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal sealed class TUnit_TestProject_Bugs__4431_GenericClassNoDataSource_T_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
-    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
+    private async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> Materialize_Should_Create_Instance_0(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
         // Create generic metadata with concrete type registrations
         var genericMetadata = new global::TUnit.Core.GenericTestMetadata
@@ -203,6 +203,14 @@ internal sealed class TUnit_TestProject_Bugs__4431_GenericClassNoDataSource_T_Sh
         yield return genericMetadata;
         yield break;
     }
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
+    {
+        await foreach (var item in Materialize_Should_Create_Instance_0(testSessionId, cancellationToken).ConfigureAwait(false))
+        {
+            yield return item;
+        }
+        yield break;
+    }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
         yield return new global::TUnit.Core.TestDescriptor
@@ -218,16 +226,16 @@ internal sealed class TUnit_TestProject_Bugs__4431_GenericClassNoDataSource_T_Sh
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            Materializer = GetTestsAsync
+            Materializer = Materialize_Should_Create_Instance_0
         };
     }
 }
-internal static class TUnit_TestProject_Bugs__4431_GenericClassNoDataSource_T_Should_Create_Instance_ModuleInitializer
+internal static class TUnit_TestProject_Bugs__4431_GenericClassNoDataSource_T_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassNoDataSource<>), new TUnit_TestProject_Bugs__4431_GenericClassNoDataSource_T_Should_Create_Instance_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassNoDataSource<>), new TUnit_TestProject_Bugs__4431_GenericClassNoDataSource_T_TestSource());
     }
 }
 
@@ -241,9 +249,9 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassNoDataSource_T_Sh
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
-internal sealed class TUnit_TestProject_Bugs__4431_GenericClassWithMethodDataSource_T_Should_Have_Number__int_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal sealed class TUnit_TestProject_Bugs__4431_GenericClassWithMethodDataSource_T_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
-    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
+    private async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> Materialize_Should_Have_Number_0(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
         // Create generic metadata with concrete type registrations
         var genericMetadata = new global::TUnit.Core.GenericTestMetadata
@@ -516,6 +524,14 @@ internal sealed class TUnit_TestProject_Bugs__4431_GenericClassWithMethodDataSou
         yield return genericMetadata;
         yield break;
     }
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
+    {
+        await foreach (var item in Materialize_Should_Have_Number_0(testSessionId, cancellationToken).ConfigureAwait(false))
+        {
+            yield return item;
+        }
+        yield break;
+    }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
         yield return new global::TUnit.Core.TestDescriptor
@@ -531,16 +547,16 @@ internal sealed class TUnit_TestProject_Bugs__4431_GenericClassWithMethodDataSou
             HasDataSource = true,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            Materializer = GetTestsAsync
+            Materializer = Materialize_Should_Have_Number_0
         };
     }
 }
-internal static class TUnit_TestProject_Bugs__4431_GenericClassWithMethodDataSource_T_Should_Have_Number__int_ModuleInitializer
+internal static class TUnit_TestProject_Bugs__4431_GenericClassWithMethodDataSource_T_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<>), new TUnit_TestProject_Bugs__4431_GenericClassWithMethodDataSource_T_Should_Have_Number__int_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<>), new TUnit_TestProject_Bugs__4431_GenericClassWithMethodDataSource_T_TestSource());
     }
 }
 
@@ -554,9 +570,9 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithMethodDataSou
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
-internal sealed class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMethod_GenericMethod_Should_Work_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal sealed class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMethod_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
-    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
+    private async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> Materialize_GenericMethod_Should_Work_0(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
         // Create generic metadata with concrete type registrations
         var genericMetadata = new global::TUnit.Core.GenericTestMetadata
@@ -818,6 +834,14 @@ internal sealed class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMet
         yield return genericMetadata;
         yield break;
     }
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
+    {
+        await foreach (var item in Materialize_GenericMethod_Should_Work_0(testSessionId, cancellationToken).ConfigureAwait(false))
+        {
+            yield return item;
+        }
+        yield break;
+    }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
         yield return new global::TUnit.Core.TestDescriptor
@@ -833,16 +857,16 @@ internal sealed class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMet
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            Materializer = GetTestsAsync
+            Materializer = Materialize_GenericMethod_Should_Work_0
         };
     }
 }
-internal static class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMethod_GenericMethod_Should_Work_ModuleInitializer
+internal static class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMethod_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod), new TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMethod_GenericMethod_Should_Work_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod), new TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMethod_TestSource());
     }
 }
 
@@ -856,9 +880,9 @@ internal static class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMet
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
-internal sealed class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMethodAndDataSource_GenericMeth_0AB5EDCD_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal sealed class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMethodAndDataSource_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
-    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
+    private async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> Materialize_GenericMethod_With_DataSource_0(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
         // Create generic metadata with concrete type registrations
         var genericMetadata = new global::TUnit.Core.GenericTestMetadata
@@ -1127,6 +1151,14 @@ internal sealed class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMet
         yield return genericMetadata;
         yield break;
     }
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
+    {
+        await foreach (var item in Materialize_GenericMethod_With_DataSource_0(testSessionId, cancellationToken).ConfigureAwait(false))
+        {
+            yield return item;
+        }
+        yield break;
+    }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
         yield return new global::TUnit.Core.TestDescriptor
@@ -1142,16 +1174,16 @@ internal sealed class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMet
             HasDataSource = true,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            Materializer = GetTestsAsync
+            Materializer = Materialize_GenericMethod_With_DataSource_0
         };
     }
 }
-internal static class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMethodAndDataSource_GenericMeth_0AB5EDCD_ModuleInitializer
+internal static class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMethodAndDataSource_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource), new TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMethodAndDataSource_GenericMeth_0AB5EDCD_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource), new TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMethodAndDataSource_TestSource());
     }
 }
 
@@ -1165,9 +1197,9 @@ internal static class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMet
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
-internal sealed class TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod_TClass_BothGeneric_Should_Work_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal sealed class TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod_TClass_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
-    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
+    private async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> Materialize_BothGeneric_Should_Work_0(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
         // Create generic metadata with concrete type registrations
         var genericMetadata = new global::TUnit.Core.GenericTestMetadata
@@ -1507,6 +1539,14 @@ internal sealed class TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod
         yield return genericMetadata;
         yield break;
     }
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
+    {
+        await foreach (var item in Materialize_BothGeneric_Should_Work_0(testSessionId, cancellationToken).ConfigureAwait(false))
+        {
+            yield return item;
+        }
+        yield break;
+    }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
         yield return new global::TUnit.Core.TestDescriptor
@@ -1522,16 +1562,16 @@ internal sealed class TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            Materializer = GetTestsAsync
+            Materializer = Materialize_BothGeneric_Should_Work_0
         };
     }
 }
-internal static class TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod_TClass_BothGeneric_Should_Work_ModuleInitializer
+internal static class TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod_TClass_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<>), new TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod_TClass_BothGeneric_Should_Work_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<>), new TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod_TClass_TestSource());
     }
 }
 
@@ -1545,9 +1585,9 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
-internal sealed class TUnit_TestProject_Bugs__4431_GenericClassWithConstructor_T_Should_Have_Label_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal sealed class TUnit_TestProject_Bugs__4431_GenericClassWithConstructor_T_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
-    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
+    private async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> Materialize_Should_Have_Label_0(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
         // Create generic metadata with concrete type registrations
         var genericMetadata = new global::TUnit.Core.GenericTestMetadata
@@ -1743,6 +1783,14 @@ internal sealed class TUnit_TestProject_Bugs__4431_GenericClassWithConstructor_T
         yield return genericMetadata;
         yield break;
     }
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
+    {
+        await foreach (var item in Materialize_Should_Have_Label_0(testSessionId, cancellationToken).ConfigureAwait(false))
+        {
+            yield return item;
+        }
+        yield break;
+    }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
         yield return new global::TUnit.Core.TestDescriptor
@@ -1758,16 +1806,16 @@ internal sealed class TUnit_TestProject_Bugs__4431_GenericClassWithConstructor_T
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            Materializer = GetTestsAsync
+            Materializer = Materialize_Should_Have_Label_0
         };
     }
 }
-internal static class TUnit_TestProject_Bugs__4431_GenericClassWithConstructor_T_Should_Have_Label_ModuleInitializer
+internal static class TUnit_TestProject_Bugs__4431_GenericClassWithConstructor_T_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithConstructor<>), new TUnit_TestProject_Bugs__4431_GenericClassWithConstructor_T_Should_Have_Label_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithConstructor<>), new TUnit_TestProject_Bugs__4431_GenericClassWithConstructor_T_TestSource());
     }
 }
 
@@ -1781,9 +1829,9 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithConstructor_T
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
-internal sealed class TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_Should_Handle_Multiple_Type__8C0B02C5_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal sealed class TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
-    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
+    private async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> Materialize_Should_Handle_Multiple_Type_Parameters_0(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
         // Create generic metadata with concrete type registrations
         var genericMetadata = new global::TUnit.Core.GenericTestMetadata
@@ -1979,6 +2027,14 @@ internal sealed class TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_
         yield return genericMetadata;
         yield break;
     }
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
+    {
+        await foreach (var item in Materialize_Should_Handle_Multiple_Type_Parameters_0(testSessionId, cancellationToken).ConfigureAwait(false))
+        {
+            yield return item;
+        }
+        yield break;
+    }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
         yield return new global::TUnit.Core.TestDescriptor
@@ -1994,16 +2050,16 @@ internal sealed class TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            Materializer = GetTestsAsync
+            Materializer = Materialize_Should_Handle_Multiple_Type_Parameters_0
         };
     }
 }
-internal static class TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_Should_Handle_Multiple_Type__8C0B02C5_ModuleInitializer
+internal static class TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._4431.MultipleTypeParameters<,>), new TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_Should_Handle_Multiple_Type__8C0B02C5_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._4431.MultipleTypeParameters<,>), new TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_TestSource());
     }
 }
 
@@ -2017,9 +2073,9 @@ internal static class TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
-internal sealed class TUnit_TestProject_Bugs__4431_DerivedGenericClass_T_Should_Create_From_Base_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal sealed class TUnit_TestProject_Bugs__4431_DerivedGenericClass_T_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
-    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
+    private async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> Materialize_Should_Create_From_Base_0(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
         // Create generic metadata with concrete type registrations
         var genericMetadata = new global::TUnit.Core.GenericTestMetadata
@@ -2215,6 +2271,14 @@ internal sealed class TUnit_TestProject_Bugs__4431_DerivedGenericClass_T_Should_
         yield return genericMetadata;
         yield break;
     }
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
+    {
+        await foreach (var item in Materialize_Should_Create_From_Base_0(testSessionId, cancellationToken).ConfigureAwait(false))
+        {
+            yield return item;
+        }
+        yield break;
+    }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
         yield return new global::TUnit.Core.TestDescriptor
@@ -2230,16 +2294,16 @@ internal sealed class TUnit_TestProject_Bugs__4431_DerivedGenericClass_T_Should_
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            Materializer = GetTestsAsync
+            Materializer = Materialize_Should_Create_From_Base_0
         };
     }
 }
-internal static class TUnit_TestProject_Bugs__4431_DerivedGenericClass_T_Should_Create_From_Base_ModuleInitializer
+internal static class TUnit_TestProject_Bugs__4431_DerivedGenericClass_T_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._4431.DerivedGenericClass<>), new TUnit_TestProject_Bugs__4431_DerivedGenericClass_T_Should_Create_From_Base_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._4431.DerivedGenericClass<>), new TUnit_TestProject_Bugs__4431_DerivedGenericClass_T_TestSource());
     }
 }
 
@@ -2253,9 +2317,9 @@ internal static class TUnit_TestProject_Bugs__4431_DerivedGenericClass_T_Should_
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
-internal sealed class TUnit_TestProject_Bugs__4431_GenericClassWithClassDataSource_T_Should_Have_DataSource_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal sealed class TUnit_TestProject_Bugs__4431_GenericClassWithClassDataSource_T_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
-    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
+    private async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> Materialize_Should_Have_DataSource_0(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
         // Create generic metadata with concrete type registrations
         var genericMetadata = new global::TUnit.Core.GenericTestMetadata
@@ -2583,6 +2647,14 @@ internal sealed class TUnit_TestProject_Bugs__4431_GenericClassWithClassDataSour
         yield return genericMetadata;
         yield break;
     }
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
+    {
+        await foreach (var item in Materialize_Should_Have_DataSource_0(testSessionId, cancellationToken).ConfigureAwait(false))
+        {
+            yield return item;
+        }
+        yield break;
+    }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
         yield return new global::TUnit.Core.TestDescriptor
@@ -2598,16 +2670,16 @@ internal sealed class TUnit_TestProject_Bugs__4431_GenericClassWithClassDataSour
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            Materializer = GetTestsAsync
+            Materializer = Materialize_Should_Have_DataSource_0
         };
     }
 }
-internal static class TUnit_TestProject_Bugs__4431_GenericClassWithClassDataSource_T_Should_Have_DataSource_ModuleInitializer
+internal static class TUnit_TestProject_Bugs__4431_GenericClassWithClassDataSource_T_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<>), new TUnit_TestProject_Bugs__4431_GenericClassWithClassDataSource_T_Should_Have_DataSource_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<>), new TUnit_TestProject_Bugs__4431_GenericClassWithClassDataSource_T_TestSource());
     }
 }
 
@@ -2621,9 +2693,9 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithClassDataSour
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
-internal sealed class TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWithDataSources_TClass_FullyGene_0A3B401E_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal sealed class TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWithDataSources_TClass_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
-    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
+    private async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> Materialize_FullyGeneric_With_DataSources_0(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
         // Create generic metadata with concrete type registrations
         var genericMetadata = new global::TUnit.Core.GenericTestMetadata
@@ -3328,6 +3400,14 @@ internal sealed class TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWith
         yield return genericMetadata;
         yield break;
     }
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
+    {
+        await foreach (var item in Materialize_FullyGeneric_With_DataSources_0(testSessionId, cancellationToken).ConfigureAwait(false))
+        {
+            yield return item;
+        }
+        yield break;
+    }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
         yield return new global::TUnit.Core.TestDescriptor
@@ -3343,15 +3423,15 @@ internal sealed class TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWith
             HasDataSource = true,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            Materializer = GetTestsAsync
+            Materializer = Materialize_FullyGeneric_With_DataSources_0
         };
     }
 }
-internal static class TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWithDataSources_TClass_FullyGene_0A3B401E_ModuleInitializer
+internal static class TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWithDataSources_TClass_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>), new TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWithDataSources_TClass_FullyGene_0A3B401E_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>), new TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWithDataSources_TClass_TestSource());
     }
 }

@@ -10,6 +10,49 @@ namespace TUnit.Core.SourceGenerator.Models;
 public record CompilationContext(CSharpCompilation Compilation, AttributeWriter AttributeWriter, WellKnownTypes WellKnownTypes);
 
 /// <summary>
+/// Groups all test methods belonging to the same test class for per-class source generation.
+/// </summary>
+internal sealed class TestClassGroup : IEquatable<TestClassGroup>
+{
+    public ImmutableArray<TestMethodMetadata> Methods { get; }
+
+    public TestClassGroup(ImmutableArray<TestMethodMetadata> methods) => Methods = methods;
+
+    public bool Equals(TestClassGroup? other)
+    {
+        if (ReferenceEquals(null, other))
+            return false;
+        if (ReferenceEquals(this, other))
+            return true;
+        if (Methods.Length != other.Methods.Length)
+            return false;
+
+        for (var i = 0; i < Methods.Length; i++)
+        {
+            if (!Methods[i].Equals(other.Methods[i]))
+                return false;
+        }
+
+        return true;
+    }
+
+    public override bool Equals(object? obj) => Equals(obj as TestClassGroup);
+
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            var hash = 17;
+            foreach (var method in Methods)
+            {
+                hash = (hash * 31) + method.GetHashCode();
+            }
+            return hash;
+        }
+    }
+}
+
+/// <summary>
 /// Contains all the metadata about a test method discovered by the source generator.
 /// </summary>
 public class TestMethodMetadata : IEquatable<TestMethodMetadata>

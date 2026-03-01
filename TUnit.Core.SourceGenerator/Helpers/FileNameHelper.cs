@@ -21,6 +21,71 @@ internal static class FileNameHelper
     // can be ~140 chars, so hint name must be well under 120 chars to stay within 260.
     private const int MaxHintNameLength = 100;
 
+    /// <summary>
+    /// Generates a deterministic filename for a test class (all methods combined).
+    /// Format: {Namespace}_{ClassName}.g.cs
+    /// </summary>
+    public static string GetDeterministicFileNameForClass(INamedTypeSymbol typeSymbol, string suffix = "")
+    {
+        var sb = new StringBuilder();
+
+        // Add namespace
+        if (!typeSymbol.ContainingNamespace.IsGlobalNamespace)
+        {
+            sb.Append(SanitizeForFileName(typeSymbol.ContainingNamespace.ToDisplayString()));
+            sb.Append('_');
+        }
+
+        // Add all containing types (outer classes first, then inner classes)
+        var containingTypes = new List<string>();
+        var currentType = typeSymbol;
+        while (currentType != null)
+        {
+            containingTypes.Add(SanitizeForFileName(currentType.Name));
+            currentType = currentType.ContainingType;
+        }
+
+        // Reverse to get outer-to-inner order
+        containingTypes.Reverse();
+
+        // Append containing types from outer to inner
+        for (int i = 0; i < containingTypes.Count; i++)
+        {
+            if (i > 0) sb.Append('_');
+            sb.Append(containingTypes[i]);
+        }
+
+        // Add generic parameters if any (for the innermost type)
+        if (typeSymbol.TypeArguments.Length > 0)
+        {
+            sb.Append('_');
+            for (int i = 0; i < typeSymbol.TypeArguments.Length; i++)
+            {
+                if (i > 0) sb.Append('_');
+                sb.Append(SanitizeForFileName(typeSymbol.TypeArguments[i].Name));
+            }
+        }
+
+        if (!string.IsNullOrEmpty(suffix))
+        {
+            sb.Append('_');
+            sb.Append(suffix);
+        }
+
+        var baseName = sb.ToString();
+
+        // Truncate and append a hash if the name would exceed the limit
+        const int suffixLength = 5; // ".g.cs"
+        if (baseName.Length + suffixLength > MaxHintNameLength)
+        {
+            var hashSuffix = $"_{GetStableHashCode(baseName):X8}";
+            var maxBaseLength = MaxHintNameLength - suffixLength - hashSuffix.Length;
+            baseName = baseName.Substring(0, maxBaseLength) + hashSuffix;
+        }
+
+        return baseName + ".g.cs";
+    }
+
     public static string GetDeterministicFileNameForMethod(INamedTypeSymbol typeSymbol, IMethodSymbol methodSymbol)
     {
         var sb = new StringBuilder();

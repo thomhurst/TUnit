@@ -5,9 +5,9 @@
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
-internal sealed class TUnit_TestProject_MultiGenericTestClass_T1_T2_TestMethod_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal sealed class TUnit_TestProject_MultiGenericTestClass_T1_T2_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
-    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
+    private async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> Materialize_TestMethod_0(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
         // Create generic metadata with concrete type registrations
         var genericMetadata = new global::TUnit.Core.GenericTestMetadata
@@ -200,6 +200,14 @@ internal sealed class TUnit_TestProject_MultiGenericTestClass_T1_T2_TestMethod_T
         yield return genericMetadata;
         yield break;
     }
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
+    {
+        await foreach (var item in Materialize_TestMethod_0(testSessionId, cancellationToken).ConfigureAwait(false))
+        {
+            yield return item;
+        }
+        yield break;
+    }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
         yield return new global::TUnit.Core.TestDescriptor
@@ -215,15 +223,15 @@ internal sealed class TUnit_TestProject_MultiGenericTestClass_T1_T2_TestMethod_T
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            Materializer = GetTestsAsync
+            Materializer = Materialize_TestMethod_0
         };
     }
 }
-internal static class TUnit_TestProject_MultiGenericTestClass_T1_T2_TestMethod_ModuleInitializer
+internal static class TUnit_TestProject_MultiGenericTestClass_T1_T2_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MultiGenericTestClass<,>), new TUnit_TestProject_MultiGenericTestClass_T1_T2_TestMethod_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MultiGenericTestClass<,>), new TUnit_TestProject_MultiGenericTestClass_T1_T2_TestSource());
     }
 }

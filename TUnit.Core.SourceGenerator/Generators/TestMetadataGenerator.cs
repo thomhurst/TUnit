@@ -47,7 +47,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 transform: static (ctx, _) => ctx)
             .Combine(compilationContext)
             .Select(static (ctx, _) => GetTestMethodMetadata(ctx.Left, ctx.Right))
-            .Where(static m => m is not null)
+            .Where(static m => m is not null);
+
+        // Collect all test methods and group by containing type for per-class output
+        var testClassGroupsProvider = testMethodsProvider
+            .Collect()
+            .SelectMany(static (methods, _) => GroupByContainingType(methods!))
             .Combine(enabledProvider);
 
         var inheritsTestsClassesProvider = context.SyntaxProvider
@@ -60,15 +65,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             .Where(static m => m is not null)
             .Combine(enabledProvider);
 
-        context.RegisterSourceOutput(testMethodsProvider,
+        context.RegisterSourceOutput(testClassGroupsProvider,
             static (context, data) =>
             {
-                var (testMethod, isEnabled) = data;
+                var (classGroup, isEnabled) = data;
                 if (!isEnabled)
                 {
                     return;
                 }
-                GenerateTestMethodSource(context, testMethod);
+                GenerateTestClassSource(context, classGroup);
             });
 
         context.RegisterSourceOutput(inheritsTestsClassesProvider,
@@ -153,6 +158,35 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         };
     }
 
+    private static ImmutableArray<TestClassGroup> GroupByContainingType(ImmutableArray<TestMethodMetadata?> methods)
+    {
+        var groups = new Dictionary<INamedTypeSymbol, List<TestMethodMetadata>>(SymbolEqualityComparer.Default);
+
+        foreach (var method in methods)
+        {
+            if (method is null)
+            {
+                continue;
+            }
+
+            if (!groups.TryGetValue(method.TypeSymbol, out var list))
+            {
+                list = [];
+                groups[method.TypeSymbol] = list;
+            }
+
+            list.Add(method);
+        }
+
+        var builder = ImmutableArray.CreateBuilder<TestClassGroup>(groups.Count);
+        foreach (var kvp in groups)
+        {
+            builder.Add(new TestClassGroup(kvp.Value.ToImmutableArray()));
+        }
+
+        return builder.MoveToImmutable();
+    }
+
     private static bool HasOpenGenericContainingType(INamedTypeSymbol type)
     {
         var current = type.ContainingType;
@@ -175,6 +209,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         var inheritedTestMethods = CollectInheritedTestMethods(classInfo.TypeSymbol);
+        var collectedMethods = new List<TestMethodMetadata>();
 
         foreach (var method in inheritedTestMethods)
         {
@@ -217,7 +252,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 }
             }
 
-            var testMethodMetadata = new TestMethodMetadata
+            collectedMethods.Add(new TestMethodMetadata
             {
                 MethodSymbol = concreteMethod ?? method, // Use concrete method if found, otherwise base method
                 TypeSymbol = typeForMetadata, // Use constructed generic base if applicable
@@ -231,9 +266,108 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 IsGenericMethod = (concreteMethod ?? method).IsGenericMethod,
                 MethodAttributes = (concreteMethod ?? method).GetAttributes(), // Use concrete method attributes
                 InheritanceDepth = inheritanceDepth
-            };
+            });
+        }
 
-            GenerateTestMethodSource(context, testMethodMetadata);
+        if (collectedMethods.Count > 0)
+        {
+            GenerateTestClassSourceForInherited(context, classInfo.TypeSymbol, new TestClassGroup(collectedMethods.ToImmutableArray()));
+        }
+    }
+
+    private static void GenerateTestClassSourceForInherited(SourceProductionContext context, INamedTypeSymbol inheritingType, TestClassGroup classGroup)
+    {
+        try
+        {
+            var writer = new CodeWriter();
+            GenerateFileHeader(writer);
+
+            // Use the inheriting type for the filename with _Inherited suffix to avoid collision
+            var uniqueClassName = FileNameHelper.GetDeterministicFileNameForClass(inheritingType, "Inherited")
+                .Replace(".g.cs", "_TestSource");
+
+            writer.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]");
+            writer.AppendLine($"[global::System.CodeDom.Compiler.GeneratedCode(\"TUnit\", \"{typeof(TestMetadataGenerator).Assembly.GetName().Version}\")]");
+            writer.AppendLine($"internal sealed class {uniqueClassName} : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource");
+            writer.AppendLine("{");
+            writer.Indent();
+
+            // Generate reflection field accessors for the inheriting type
+            GenerateReflectionFieldAccessors(writer, inheritingType);
+
+            // Generate per-method private materializer methods
+            var materializerNames = new List<string>();
+            for (var i = 0; i < classGroup.Methods.Length; i++)
+            {
+                var method = classGroup.Methods[i];
+                var materializerName = GetMaterializerName(method, i);
+                materializerNames.Add(materializerName);
+
+                GenerateMethodMaterializer(writer, method, materializerName);
+                writer.AppendLine();
+            }
+
+            // Generate GetTestsAsync that delegates to all materializers
+            writer.AppendLine("public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)");
+            writer.AppendLine("{");
+            writer.Indent();
+
+            foreach (var name in materializerNames)
+            {
+                writer.AppendLine($"await foreach (var item in {name}(testSessionId, cancellationToken).ConfigureAwait(false))");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine("yield return item;");
+                writer.Unindent();
+                writer.AppendLine("}");
+            }
+
+            writer.AppendLine("yield break;");
+            writer.Unindent();
+            writer.AppendLine("}");
+
+            writer.AppendLine();
+
+            GenerateClassEnumerateTestDescriptors(writer, classGroup, materializerNames);
+
+            writer.Unindent();
+            writer.AppendLine("}");
+
+            // Module initializer - register with the inheriting type
+            var firstMethod = classGroup.Methods[0];
+            writer.AppendLine();
+            writer.AppendLine($"internal static class {uniqueClassName.Replace("_TestSource", "_ModuleInitializer")}");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
+            writer.AppendLine("public static void Initialize()");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine($"global::TUnit.Core.SourceRegistrar.Register({GenerateTypeReference(firstMethod.TypeSymbol, firstMethod.IsGenericType)}, new {uniqueClassName}());");
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.Unindent();
+            writer.AppendLine("}");
+
+            var fileName = FileNameHelper.GetDeterministicFileNameForClass(inheritingType, "Inherited");
+            context.AddSource(fileName, SourceText.From(writer.ToString(), Encoding.UTF8));
+        }
+        catch (Exception ex)
+        {
+            var className = inheritingType.Name;
+            var location = inheritingType.Locations.FirstOrDefault() ?? Location.None;
+
+            context.ReportDiagnostic(Diagnostic.Create(
+                new DiagnosticDescriptor(
+                    "TUNIT0999",
+                    "Source Generation Error",
+                    "Failed to generate inherited test metadata for class {0}: {1}",
+                    "TUnit",
+                    DiagnosticSeverity.Error,
+                    true),
+                location,
+                className,
+                ex.ToString()));
         }
     }
 
@@ -264,59 +398,52 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return depth;
     }
 
-    private static void GenerateTestMethodSource(SourceProductionContext context, TestMethodMetadata? testMethod)
+    private static void GenerateTestClassSource(SourceProductionContext context, TestClassGroup classGroup)
     {
+        if (classGroup.Methods.Length == 0)
+        {
+            return;
+        }
+
         try
         {
-            if (testMethod?.MethodSymbol == null || testMethod.Context == null)
-            {
-                return;
-            }
+            var firstMethod = classGroup.Methods[0];
+            var typeSymbol = firstMethod.TypeSymbol;
 
             var writer = new CodeWriter();
             GenerateFileHeader(writer);
-            GenerateTestMetadata(writer, testMethod);
+            GenerateTestClassBody(writer, classGroup);
 
-            var fileName = FileNameHelper.GetDeterministicFileNameForMethod(testMethod.TypeSymbol, testMethod.MethodSymbol);
+            var fileName = FileNameHelper.GetDeterministicFileNameForClass(typeSymbol);
             context.AddSource(fileName, SourceText.From(writer.ToString(), Encoding.UTF8));
         }
         catch (Exception ex)
         {
-            var methodName = testMethod?.MethodSymbol?.Name ?? "Unknown";
-            var className = testMethod?.TypeSymbol?.Name ?? "Unknown";
-
-            var location = testMethod?.MethodSymbol?.Locations.FirstOrDefault() ?? Location.None;
+            var firstMethod = classGroup.Methods[0];
+            var className = firstMethod.TypeSymbol?.Name ?? "Unknown";
+            var location = firstMethod.MethodSymbol?.Locations.FirstOrDefault() ?? Location.None;
 
             context.ReportDiagnostic(Diagnostic.Create(
                 new DiagnosticDescriptor(
                     "TUNIT0999",
                     "Source Generation Error",
-                    "Failed to generate test metadata for {0}.{1}: {2}",
+                    "Failed to generate test metadata for class {0}: {1}",
                     "TUnit",
                     DiagnosticSeverity.Error,
                     true),
                 location,
                 className,
-                methodName,
-                ex.ToString())); // Use ToString() to get full stack trace for debugging
+                ex.ToString()));
         }
     }
 
-    private static void GenerateFileHeader(CodeWriter writer)
+    private static void GenerateTestClassBody(CodeWriter writer, TestClassGroup classGroup)
     {
-        writer.AppendLine("#nullable enable");
-        writer.AppendLine();
-        writer.AppendLine();
-        writer.AppendLine($"namespace {GeneratedNamespace};");
-        writer.AppendLine();
-    }
+        var firstMethod = classGroup.Methods[0];
+        var typeSymbol = firstMethod.TypeSymbol;
 
-    private static void GenerateTestMetadata(CodeWriter writer, TestMethodMetadata testMethod)
-    {
-        var className = testMethod.TypeSymbol.GloballyQualified();
-
-        // Generate unique class name using same pattern as filename (without .g.cs extension)
-        var uniqueClassName = FileNameHelper.GetDeterministicFileNameForMethod(testMethod.TypeSymbol, testMethod.MethodSymbol)
+        // Generate unique class name from the class-level filename
+        var uniqueClassName = FileNameHelper.GetDeterministicFileNameForClass(typeSymbol)
             .Replace(".g.cs", "_TestSource");
 
         writer.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]");
@@ -325,12 +452,65 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
 
-        GenerateReflectionFieldAccessors(writer, testMethod.TypeSymbol);
+        // Generate reflection field accessors once for the class (deduplicated)
+        GenerateReflectionFieldAccessors(writer, typeSymbol);
 
+        // Generate per-method private materializer methods
+        var materializerNames = new List<string>();
+        for (var i = 0; i < classGroup.Methods.Length; i++)
+        {
+            var method = classGroup.Methods[i];
+            var materializerName = GetMaterializerName(method, i);
+            materializerNames.Add(materializerName);
+
+            GenerateMethodMaterializer(writer, method, materializerName);
+            writer.AppendLine();
+        }
+
+        // Generate GetTestsAsync that delegates to all materializers
         writer.AppendLine("public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)");
         writer.AppendLine("{");
         writer.Indent();
 
+        foreach (var name in materializerNames)
+        {
+            writer.AppendLine($"await foreach (var item in {name}(testSessionId, cancellationToken).ConfigureAwait(false))");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("yield return item;");
+            writer.Unindent();
+            writer.AppendLine("}");
+        }
+
+        writer.AppendLine("yield break;");
+        writer.Unindent();
+        writer.AppendLine("}");
+
+        writer.AppendLine();
+
+        // Generate EnumerateTestDescriptors for all methods
+        GenerateClassEnumerateTestDescriptors(writer, classGroup, materializerNames);
+
+        writer.Unindent();
+        writer.AppendLine("}");
+
+        // Generate one module initializer for the class
+        GenerateClassModuleInitializer(writer, classGroup, uniqueClassName);
+    }
+
+    private static string GetMaterializerName(TestMethodMetadata method, int index)
+    {
+        var methodName = method.MethodSymbol.Name;
+        return $"Materialize_{methodName}_{index}";
+    }
+
+    private static void GenerateMethodMaterializer(CodeWriter writer, TestMethodMetadata testMethod, string materializerName)
+    {
+        var className = testMethod.TypeSymbol.GloballyQualified();
+
+        writer.AppendLine($"private async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> {materializerName}(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)");
+        writer.AppendLine("{");
+        writer.Indent();
         writer.AppendLine();
 
         if (testMethod.IsGenericType || testMethod is { IsGenericMethod: true, MethodSymbol.TypeParameters.Length: > 0 })
@@ -369,8 +549,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
             else
             {
-                // For generic classes with no way to resolve type arguments, this will generate
-                // GenericTestMetadata that the engine will fail with a clear error message
                 GenerateTestMetadataInstance(writer, testMethod, className);
             }
         }
@@ -382,16 +560,95 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("yield break;");
         writer.Unindent();
         writer.AppendLine("}");
+    }
 
-        writer.AppendLine();
+    private static void GenerateClassEnumerateTestDescriptors(CodeWriter writer, TestClassGroup classGroup, List<string> materializerNames)
+    {
+        writer.AppendLine("public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()");
+        writer.AppendLine("{");
+        writer.Indent();
 
-        // Generate EnumerateTestDescriptors method for fast filtering
-        GenerateEnumerateTestDescriptors(writer, testMethod);
+        for (var i = 0; i < classGroup.Methods.Length; i++)
+        {
+            var testMethod = classGroup.Methods[i];
+            var materializerName = materializerNames[i];
+            var methodName = testMethod.MethodSymbol.Name;
+            var namespaceName = testMethod.TypeSymbol.ContainingNamespace?.ToDisplayString() ?? "";
+            var simpleClassName = testMethod.TypeSymbol.GetNestedClassName();
+            var fullyQualifiedName = string.IsNullOrEmpty(namespaceName)
+                ? $"{simpleClassName}.{methodName}"
+                : $"{namespaceName}.{simpleClassName}.{methodName}";
+
+            var categories = ExtractCategories(testMethod);
+            var categoriesArray = categories.Count == 0
+                ? "global::System.Array.Empty<string>()"
+                : $"new string[] {{ {string.Join(", ", categories.Select(c => $"\"{EscapeString(c)}\""))} }}";
+
+            var properties = ExtractProperties(testMethod);
+            var propertiesArray = properties.Length == 0
+                ? "global::System.Array.Empty<string>()"
+                : $"new string[] {{ {string.Join(", ", properties.Select(p => $"\"{EscapeString(p)}\""))} }}";
+
+            var hasDataSource = HasDataSources(testMethod);
+            var repeatCount = ExtractRepeatCount(testMethod);
+
+            var dependsOn = ExtractDependsOn(testMethod);
+            var dependsOnArray = dependsOn.Length == 0
+                ? "global::System.Array.Empty<string>()"
+                : $"new string[] {{ {string.Join(", ", dependsOn.Select(d => $"\"{EscapeString(d)}\""))} }}";
+
+            writer.AppendLine("yield return new global::TUnit.Core.TestDescriptor");
+            writer.AppendLine("{");
+            writer.Indent();
+
+            writer.AppendLine($"TestId = \"{EscapeString(fullyQualifiedName)}\",");
+            writer.AppendLine($"ClassName = \"{EscapeString(simpleClassName)}\",");
+            writer.AppendLine($"MethodName = \"{EscapeString(methodName)}\",");
+            writer.AppendLine($"FullyQualifiedName = \"{EscapeString(fullyQualifiedName)}\",");
+            writer.AppendLine($"FilePath = @\"{(testMethod.FilePath ?? "").Replace("\\", "\\\\")}\",");
+            writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
+            writer.AppendLine($"Categories = {categoriesArray},");
+            writer.AppendLine($"Properties = {propertiesArray},");
+            writer.AppendLine($"HasDataSource = {(hasDataSource ? "true" : "false")},");
+            writer.AppendLine($"RepeatCount = {repeatCount},");
+            writer.AppendLine($"DependsOn = {dependsOnArray},");
+            writer.AppendLine($"Materializer = {materializerName}");
+
+            writer.Unindent();
+            writer.AppendLine("};");
+        }
 
         writer.Unindent();
         writer.AppendLine("}");
+    }
 
-        GenerateModuleInitializer(writer, testMethod, uniqueClassName);
+    private static void GenerateClassModuleInitializer(CodeWriter writer, TestClassGroup classGroup, string uniqueClassName)
+    {
+        // Use the first method to get the type symbol — all methods in the group share the same type
+        var firstMethod = classGroup.Methods[0];
+
+        writer.AppendLine();
+        writer.AppendLine($"internal static class {uniqueClassName.Replace("_TestSource", "_ModuleInitializer")}");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
+        writer.AppendLine("public static void Initialize()");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine($"global::TUnit.Core.SourceRegistrar.Register({GenerateTypeReference(firstMethod.TypeSymbol, firstMethod.IsGenericType)}, new {uniqueClassName}());");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.Unindent();
+        writer.AppendLine("}");
+    }
+
+    private static void GenerateFileHeader(CodeWriter writer)
+    {
+        writer.AppendLine("#nullable enable");
+        writer.AppendLine();
+        writer.AppendLine();
+        writer.AppendLine($"namespace {GeneratedNamespace};");
+        writer.AppendLine();
     }
 
     private static void GenerateTestMetadataInstance(CodeWriter writer, TestMethodMetadata testMethod, string className)
@@ -1932,67 +2189,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("},");
     }
 
-    private static void GenerateEnumerateTestDescriptors(CodeWriter writer, TestMethodMetadata testMethod)
-    {
-        var methodName = testMethod.MethodSymbol.Name;
-        var namespaceName = testMethod.TypeSymbol.ContainingNamespace?.ToDisplayString() ?? "";
-        var simpleClassName = testMethod.TypeSymbol.GetNestedClassName();
-        var fullyQualifiedName = string.IsNullOrEmpty(namespaceName)
-            ? $"{simpleClassName}.{methodName}"
-            : $"{namespaceName}.{simpleClassName}.{methodName}";
-
-        // Extract categories from CategoryAttribute at compile time
-        var categories = ExtractCategories(testMethod);
-        var categoriesArray = categories.Count == 0
-            ? "global::System.Array.Empty<string>()"
-            : $"new string[] {{ {string.Join(", ", categories.Select(c => $"\"{EscapeString(c)}\""))} }}";
-
-        // Extract properties from PropertyAttribute at compile time
-        var properties = ExtractProperties(testMethod);
-        var propertiesArray = properties.Length == 0
-            ? "global::System.Array.Empty<string>()"
-            : $"new string[] {{ {string.Join(", ", properties.Select(p => $"\"{EscapeString(p)}\""))} }}";
-
-        // Check if test has data sources
-        var hasDataSource = HasDataSources(testMethod);
-
-        // Extract repeat count from RepeatAttribute
-        var repeatCount = ExtractRepeatCount(testMethod);
-
-        // Extract dependencies from DependsOnAttribute
-        var dependsOn = ExtractDependsOn(testMethod);
-        var dependsOnArray = dependsOn.Length == 0
-            ? "global::System.Array.Empty<string>()"
-            : $"new string[] {{ {string.Join(", ", dependsOn.Select(d => $"\"{EscapeString(d)}\""))} }}";
-
-        writer.AppendLine("public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        writer.AppendLine("yield return new global::TUnit.Core.TestDescriptor");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        writer.AppendLine($"TestId = \"{EscapeString(fullyQualifiedName)}\",");
-        writer.AppendLine($"ClassName = \"{EscapeString(simpleClassName)}\",");
-        writer.AppendLine($"MethodName = \"{EscapeString(methodName)}\",");
-        writer.AppendLine($"FullyQualifiedName = \"{EscapeString(fullyQualifiedName)}\",");
-        writer.AppendLine($"FilePath = @\"{(testMethod.FilePath ?? "").Replace("\\", "\\\\")}\",");
-        writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
-        writer.AppendLine($"Categories = {categoriesArray},");
-        writer.AppendLine($"Properties = {propertiesArray},");
-        writer.AppendLine($"HasDataSource = {(hasDataSource ? "true" : "false")},");
-        writer.AppendLine($"RepeatCount = {repeatCount},");
-        writer.AppendLine($"DependsOn = {dependsOnArray},");
-        writer.AppendLine("Materializer = GetTestsAsync");
-
-        writer.Unindent();
-        writer.AppendLine("};");
-
-        writer.Unindent();
-        writer.AppendLine("}");
-    }
-
     private static HashSet<string> ExtractCategories(TestMethodMetadata testMethod)
     {
         var categories = new HashSet<string>();
@@ -2250,23 +2446,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             .Replace("\n", "\\n")
             .Replace("\r", "\\r")
             .Replace("\t", "\\t");
-    }
-
-    private static void GenerateModuleInitializer(CodeWriter writer, TestMethodMetadata testMethod, string uniqueClassName)
-    {
-        writer.AppendLine();
-        writer.AppendLine($"internal static class {uniqueClassName.Replace("_TestSource", "_ModuleInitializer")}");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
-        writer.AppendLine("public static void Initialize()");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine($"global::TUnit.Core.SourceRegistrar.Register({GenerateTypeReference(testMethod.TypeSymbol, testMethod.IsGenericType)}, new {uniqueClassName}());");
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.Unindent();
-        writer.AppendLine("}");
     }
 
     private enum TestReturnPattern

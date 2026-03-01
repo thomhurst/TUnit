@@ -21,15 +21,15 @@ internal class InheritsTestsTests : TestsBase
         async generatedFiles =>
         {
             // BaseClass has 1 test method with [Repeat(10)] and 3 [Arguments]
-            // So BaseClass should generate 1 file
+            // So BaseClass should generate 1 file (per-class)
             // Tests, Tests2, Tests3 each inherit this test, so 3 more files
-            // Total: 4 generated files (1 for base, 3 for inheriting classes)
+            // With per-class consolidation, class names no longer contain method names
             // Verify that each inheriting class has a generated test file
-            var hasTests1 = generatedFiles.Any(f => f.Contains("Tests_Test_") && !f.Contains("Tests2") && !f.Contains("Tests3"));
-            var hasTests2 = generatedFiles.Any(f => f.Contains("Tests2_Test_"));
-            var hasTests3 = generatedFiles.Any(f => f.Contains("Tests3_Test_"));
-            var hasBaseClass = generatedFiles.Any(f => f.Contains("BaseClass_Test_"));
-            
+            var hasTests1 = generatedFiles.Any(f => f.Contains("class") && f.Contains("Tests_Inherited_TestSource") && !f.Contains("Tests2") && !f.Contains("Tests3"));
+            var hasTests2 = generatedFiles.Any(f => f.Contains("Tests2_Inherited_TestSource"));
+            var hasTests3 = generatedFiles.Any(f => f.Contains("Tests3_Inherited_TestSource"));
+            var hasBaseClass = generatedFiles.Any(f => f.Contains("BaseClass_TestSource"));
+
             await Assert.That(hasBaseClass).IsTrue();
             await Assert.That(hasTests1).IsTrue();
             await Assert.That(hasTests2).IsTrue();
