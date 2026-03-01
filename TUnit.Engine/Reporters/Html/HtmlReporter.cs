@@ -533,7 +533,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
         {
             try
             {
-                artifactId = await GitHubArtifactUploader.UploadAsync(filePath, runtimeToken, resultsUrl, cancellationToken);
+                artifactId = await GitHubArtifactUploader.UploadAsync(filePath, runtimeToken!, resultsUrl!, cancellationToken);
 
                 if (artifactId is not null)
                 {
