@@ -113,9 +113,7 @@ internal static class GitHubArtifactUploader
         w.WriteString("workflow_job_run_backend_id", jobId);
         w.WriteString("name", fileName);
         w.WriteNumber("version", 7);
-        w.WriteStartObject("mime_type");
-        w.WriteString("value", "text/html");
-        w.WriteEndObject();
+        w.WriteString("mime_type", "text/html");
         w.WriteEndObject();
         w.Flush();
         return Encoding.UTF8.GetString(ms.ToArray());
@@ -130,9 +128,7 @@ internal static class GitHubArtifactUploader
         w.WriteString("workflow_job_run_backend_id", jobId);
         w.WriteString("name", fileName);
         w.WriteString("size", size.ToString());
-        w.WriteStartObject("hash");
-        w.WriteString("value", $"sha256:{sha256Hash}");
-        w.WriteEndObject();
+        w.WriteString("hash", $"sha256:{sha256Hash}");
         w.WriteEndObject();
         w.Flush();
         return Encoding.UTF8.GetString(ms.ToArray());
