@@ -9,7 +9,7 @@ internal sealed class ActivityCollector : IDisposable
     private const int MaxSpansPerTrace = 1000;
     private const int MaxTotalSpans = 50_000;
 
-    private readonly ConcurrentDictionary<string, ConcurrentBag<SpanData>> _spansByTrace = new();
+    private readonly ConcurrentDictionary<string, ConcurrentQueue<SpanData>> _spansByTrace = new();
     private readonly ConcurrentDictionary<string, int> _spanCountsByTrace = new();
     private ActivityListener? _listener;
     private int _totalSpanCount;
@@ -35,13 +35,7 @@ internal sealed class ActivityCollector : IDisposable
 
     public SpanData[] GetAllSpans()
     {
-        var all = new List<SpanData>();
-        foreach (var kvp in _spansByTrace)
-        {
-            all.AddRange(kvp.Value);
-        }
-
-        return all.ToArray();
+        return _spansByTrace.Values.SelectMany(q => q).ToArray();
     }
 
     /// <summary>
@@ -122,7 +116,7 @@ internal sealed class ActivityCollector : IDisposable
             return;
         }
 
-        var bag = _spansByTrace.GetOrAdd(traceId, _ => new ConcurrentBag<SpanData>());
+        var queue = _spansByTrace.GetOrAdd(traceId, _ => new ConcurrentQueue<SpanData>());
 
         ReportKeyValue[]? tags = null;
         var tagCollection = activity.TagObjects.ToArray();
@@ -196,7 +190,7 @@ internal sealed class ActivityCollector : IDisposable
             Events = events
         };
 
-        bag.Add(spanData);
+        queue.Enqueue(spanData);
     }
 
     public void Dispose()

@@ -1300,11 +1300,18 @@ function renderDetail(t) {
 
 // Collect descendants of a span within a trace
 function getDescendants(traceSpans, rootId) {
+    const children = {};
+    traceSpans.forEach(s => {
+        if (s.parentSpanId) {
+            if (!children[s.parentSpanId]) children[s.parentSpanId] = [];
+            children[s.parentSpanId].push(s.spanId);
+        }
+    });
     const included = new Set();
     function walk(sid) {
         if (included.has(sid)) return;
         included.add(sid);
-        traceSpans.forEach(s => { if (s.parentSpanId === sid) walk(s.spanId); });
+        (children[sid] || []).forEach(walk);
     }
     walk(rootId);
     return traceSpans.filter(s => included.has(s.spanId));

@@ -546,15 +546,13 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
 
     private static bool IsFileLocked(IOException exception)
     {
-        // .NET maps to Win32 error codes in HResult on all platforms
-        var errorCode = exception.HResult & 0xFFFF;
-
-        // ERROR_SHARING_VIOLATION (0x20) and ERROR_LOCK_VIOLATION (0x21)
-        if (errorCode is 0x20 or 0x21)
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            return true;
+            var errorCode = exception.HResult & 0xFFFF;
+            return errorCode is 0x20 or 0x21; // ERROR_SHARING_VIOLATION / ERROR_LOCK_VIOLATION
         }
 
+        // On POSIX, concurrent writers are less common; fallback to message heuristic
         return exception.Message.Contains("being used by another process") ||
                exception.Message.Contains("access denied", StringComparison.OrdinalIgnoreCase);
     }

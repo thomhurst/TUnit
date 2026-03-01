@@ -137,13 +137,6 @@ jobs:
           nuget-apikey: ${{ secrets.NUGET__APIKEY }}
           publish-packages: ${{ (github.event.inputs.publish-packages || false) && matrix.os == 'ubuntu-latest' }}
 
-      - name: Upload HTML Test Reports
-        uses: actions/upload-artifact@v7.0.0
-        if: always()
-        with:
-          name: HtmlTestReports-${{matrix.os}}
-          path: '**/*-report.html'
-
       - name: Upload Diagnostic Logs
         uses: actions/upload-artifact@v7.0.0
         if: always()
