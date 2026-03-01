@@ -37,11 +37,14 @@ internal static class HtmlReportGenerator
     {
         sb.AppendLine("<body>");
 
+        // Skip-to-content link for keyboard/screen-reader users
+        sb.AppendLine("<a href=\"#testGroups\" class=\"skip-link\">Skip to test results</a>");
+
         // Ambient background grain
-        sb.AppendLine("<div class=\"grain\"></div>");
+        sb.AppendLine("<div class=\"grain\" aria-hidden=\"true\"></div>");
 
         // Feature 8: Sticky mini-header
-        sb.Append("<div class=\"sticky-bar\" id=\"stickyBar\">");
+        sb.Append("<div class=\"sticky-bar\" id=\"stickyBar\" aria-hidden=\"true\">");
         sb.Append("<span class=\"sticky-name\">");
         sb.Append(WebUtility.HtmlEncode(data.AssemblyName));
         sb.Append("</span>");
@@ -62,14 +65,18 @@ internal static class HtmlReportGenerator
         sb.AppendLine("<div class=\"shell\">");
 
         AppendHeader(sb, data);
+
+        sb.AppendLine("<main id=\"main\">");
+        AppendSearchAndFilters(sb, data.Summary);
         AppendSummaryDashboard(sb, data.Summary, data.TotalDurationMs);
 
         // Quick-access sections populated by JS
-        sb.AppendLine("<div id=\"failedSection\"></div>");
-        sb.AppendLine("<div id=\"slowestSection\"></div>");
+        sb.AppendLine("<div id=\"failedSection\" role=\"region\" aria-label=\"Failed tests\"></div>");
+        sb.AppendLine("<div id=\"slowestSection\" role=\"region\" aria-label=\"Slowest tests\"></div>");
 
-        AppendSearchAndFilters(sb, data.Summary);
         AppendTestGroups(sb, data);
+        sb.AppendLine("</main>");
+
         AppendJsonData(sb, data);
         AppendJavaScript(sb);
 
@@ -171,7 +178,7 @@ internal static class HtmlReportGenerator
     {
         var passRate = summary.Total > 0 ? (double)summary.Passed / summary.Total * 100 : 0;
 
-        sb.AppendLine("<section class=\"dash\" data-anim=\"fade-up\">");
+        sb.AppendLine("<section class=\"dash\" data-anim=\"fade-up\" aria-label=\"Test summary\">");
 
         // Ring chart — SVG
         var circumference = 2 * Math.PI * 54; // r=54
@@ -275,42 +282,44 @@ internal static class HtmlReportGenerator
     private static void AppendSearchAndFilters(StringBuilder sb, ReportSummary summary)
     {
         sb.AppendLine("<div class=\"bar\" data-anim=\"fade-up\">");
-        sb.AppendLine("<div class=\"search\">");
+        sb.AppendLine("<div class=\"search\" role=\"search\">");
         // Search icon inline SVG
-        sb.AppendLine("<svg class=\"search-icon\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path fill-rule=\"evenodd\" d=\"M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.45 4.39l3.58 3.58a.75.75 0 1 1-1.06 1.06l-3.58-3.58A7 7 0 0 1 2 9Z\" clip-rule=\"evenodd\"/></svg>");
-        sb.AppendLine("<input type=\"text\" id=\"searchInput\" placeholder=\"Search tests\u2026\" autocomplete=\"off\" spellcheck=\"false\">");
-        sb.AppendLine("<button id=\"clearSearch\" class=\"search-clear\" aria-label=\"Clear\">&times;</button>");
+        sb.AppendLine("<svg class=\"search-icon\" viewBox=\"0 0 20 20\" fill=\"currentColor\" aria-hidden=\"true\"><path fill-rule=\"evenodd\" d=\"M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.45 4.39l3.58 3.58a.75.75 0 1 1-1.06 1.06l-3.58-3.58A7 7 0 0 1 2 9Z\" clip-rule=\"evenodd\"/></svg>");
+        sb.AppendLine("<input type=\"text\" id=\"searchInput\" placeholder=\"Search tests\u2026\" autocomplete=\"off\" spellcheck=\"false\" aria-label=\"Search tests\">");
+        sb.AppendLine("<button id=\"clearSearch\" class=\"search-clear\" aria-label=\"Clear search\">&times;</button>");
         sb.AppendLine("</div>");
-        sb.AppendLine("<div class=\"pills\" id=\"filterButtons\">");
-        sb.Append("<button class=\"pill active\" data-filter=\"all\">All <span class=\"pill-count\">");
+        sb.AppendLine("<div class=\"pills\" id=\"filterButtons\" role=\"group\" aria-label=\"Filter by status\">");
+        sb.Append("<button class=\"pill active\" data-filter=\"all\" aria-pressed=\"true\">All <span class=\"pill-count\">");
         sb.Append(summary.Total);
         sb.AppendLine("</span></button>");
-        sb.Append("<button class=\"pill\" data-filter=\"passed\"><span class=\"dot emerald\"></span>Passed <span class=\"pill-count\">");
+        sb.Append("<button class=\"pill\" data-filter=\"passed\" aria-pressed=\"false\"><span class=\"dot emerald\"></span>Passed <span class=\"pill-count\">");
         sb.Append(summary.Passed);
         sb.AppendLine("</span></button>");
-        sb.Append("<button class=\"pill\" data-filter=\"failed\"><span class=\"dot rose\"></span>Failed <span class=\"pill-count\">");
+        sb.Append("<button class=\"pill\" data-filter=\"failed\" aria-pressed=\"false\"><span class=\"dot rose\"></span>Failed <span class=\"pill-count\">");
         sb.Append(summary.Failed + summary.TimedOut);
         sb.AppendLine("</span></button>");
-        sb.Append("<button class=\"pill\" data-filter=\"skipped\"><span class=\"dot amber\"></span>Skipped <span class=\"pill-count\">");
+        sb.Append("<button class=\"pill\" data-filter=\"skipped\" aria-pressed=\"false\"><span class=\"dot amber\"></span>Skipped <span class=\"pill-count\">");
         sb.Append(summary.Skipped);
         sb.AppendLine("</span></button>");
-        sb.Append("<button class=\"pill\" data-filter=\"cancelled\"><span class=\"dot slate\"></span>Cancelled <span class=\"pill-count\">");
+        sb.Append("<button class=\"pill\" data-filter=\"cancelled\" aria-pressed=\"false\"><span class=\"dot slate\"></span>Cancelled <span class=\"pill-count\">");
         sb.Append(summary.Cancelled);
         sb.AppendLine("</span></button>");
         sb.AppendLine("</div>");
 
         // Feature 2: Expand/Collapse All + Feature 3: Sort Toggle
         sb.AppendLine("<div class=\"bar-actions\">");
-        sb.AppendLine("<button id=\"expandAll\" class=\"bar-btn\" title=\"Expand all groups\"><svg viewBox=\"0 0 16 16\" fill=\"currentColor\" width=\"14\" height=\"14\"><path d=\"M1.75 10a.75.75 0 0 1 .75.75v2.5h2.5a.75.75 0 0 1 0 1.5h-3.25a.75.75 0 0 1-.75-.75v-3.25a.75.75 0 0 1 .75-.75Zm12.5 0a.75.75 0 0 1 .75.75v3.25a.75.75 0 0 1-.75.75h-3.25a.75.75 0 0 1 0-1.5h2.5v-2.5a.75.75 0 0 1 .75-.75ZM2.5 2.25h-2.5v2.5a.75.75 0 0 1-1.5 0v-3.25a.75.75 0 0 1 .75-.75h3.25a.75.75 0 0 1 0 1.5Zm8.75-1.5a.75.75 0 0 1 0-1.5h3.25a.75.75 0 0 1 .75.75v3.25a.75.75 0 0 1-1.5 0v-2.5h-2.5Z\"/></svg></button>");
-        sb.AppendLine("<button id=\"collapseAll\" class=\"bar-btn\" title=\"Collapse all groups\"><svg viewBox=\"0 0 16 16\" fill=\"currentColor\" width=\"14\" height=\"14\"><path d=\"M3.75 14a.75.75 0 0 1-.75-.75v-2.5h-2.5a.75.75 0 0 1 0-1.5h3.25a.75.75 0 0 1 .75.75v3.25a.75.75 0 0 1-.75.75Zm8.5 0a.75.75 0 0 1-.75-.75v-3.25a.75.75 0 0 1 .75-.75h3.25a.75.75 0 0 1 0 1.5h-2.5v2.5a.75.75 0 0 1-.75.75ZM.5 4.75a.75.75 0 0 1 0-1.5h2.5v-2.5a.75.75 0 0 1 1.5 0v3.25a.75.75 0 0 1-.75.75H.5Zm11 0a.75.75 0 0 1-.75-.75v-3.25a.75.75 0 0 1 1.5 0v2.5h2.5a.75.75 0 0 1 0 1.5h-3.25Z\"/></svg></button>");
+        sb.AppendLine("<button id=\"expandAll\" class=\"bar-btn\" aria-label=\"Expand all groups\" title=\"Expand all groups\"><svg viewBox=\"0 0 16 16\" fill=\"currentColor\" width=\"14\" height=\"14\" aria-hidden=\"true\"><path d=\"M1.75 10a.75.75 0 0 1 .75.75v2.5h2.5a.75.75 0 0 1 0 1.5h-3.25a.75.75 0 0 1-.75-.75v-3.25a.75.75 0 0 1 .75-.75Zm12.5 0a.75.75 0 0 1 .75.75v3.25a.75.75 0 0 1-.75.75h-3.25a.75.75 0 0 1 0-1.5h2.5v-2.5a.75.75 0 0 1 .75-.75ZM2.5 2.25h-2.5v2.5a.75.75 0 0 1-1.5 0v-3.25a.75.75 0 0 1 .75-.75h3.25a.75.75 0 0 1 0 1.5Zm8.75-1.5a.75.75 0 0 1 0-1.5h3.25a.75.75 0 0 1 .75.75v3.25a.75.75 0 0 1-1.5 0v-2.5h-2.5Z\"/></svg></button>");
+        sb.AppendLine("<button id=\"collapseAll\" class=\"bar-btn\" aria-label=\"Collapse all groups\" title=\"Collapse all groups\"><svg viewBox=\"0 0 16 16\" fill=\"currentColor\" width=\"14\" height=\"14\" aria-hidden=\"true\"><path d=\"M3.75 14a.75.75 0 0 1-.75-.75v-2.5h-2.5a.75.75 0 0 1 0-1.5h3.25a.75.75 0 0 1 .75.75v3.25a.75.75 0 0 1-.75.75Zm8.5 0a.75.75 0 0 1-.75-.75v-3.25a.75.75 0 0 1 .75-.75h3.25a.75.75 0 0 1 0 1.5h-2.5v2.5a.75.75 0 0 1-.75.75ZM.5 4.75a.75.75 0 0 1 0-1.5h2.5v-2.5a.75.75 0 0 1 1.5 0v3.25a.75.75 0 0 1-.75.75H.5Zm11 0a.75.75 0 0 1-.75-.75v-3.25a.75.75 0 0 1 1.5 0v2.5h2.5a.75.75 0 0 1 0 1.5h-3.25Z\"/></svg></button>");
         sb.AppendLine("<span class=\"bar-sep\"></span>");
-        sb.AppendLine("<span class=\"bar-lbl\">Sort:</span>");
-        sb.AppendLine("<button class=\"sort-btn active\" data-sort=\"default\" title=\"Failures first\">Default</button>");
-        sb.AppendLine("<button class=\"sort-btn\" data-sort=\"duration\" title=\"Slowest first\">Duration</button>");
-        sb.AppendLine("<button class=\"sort-btn\" data-sort=\"name\" title=\"Alphabetical\">Name</button>");
+        sb.AppendLine("<span class=\"bar-lbl\" id=\"sortLabel\">Sort:</span>");
+        sb.AppendLine("<div class=\"sort-group\" role=\"radiogroup\" aria-labelledby=\"sortLabel\">");
+        sb.AppendLine("<button class=\"sort-btn active\" data-sort=\"default\" role=\"radio\" aria-checked=\"true\" title=\"Failures first\">Default</button>");
+        sb.AppendLine("<button class=\"sort-btn\" data-sort=\"duration\" role=\"radio\" aria-checked=\"false\" title=\"Slowest first\">Duration</button>");
+        sb.AppendLine("<button class=\"sort-btn\" data-sort=\"name\" role=\"radio\" aria-checked=\"false\" title=\"Alphabetical\">Name</button>");
+        sb.AppendLine("</div>");
         sb.AppendLine("</div>");
 
-        sb.AppendLine("<span class=\"bar-info\" id=\"filterSummary\"></span>");
+        sb.AppendLine("<span class=\"bar-info\" id=\"filterSummary\" aria-live=\"polite\" aria-atomic=\"true\"></span>");
         sb.AppendLine("</div>");
     }
 
@@ -1005,6 +1014,81 @@ mark{background:rgba(251,191,36,.25);color:inherit;border-radius:2px;padding:0 1
   opacity:0;transition:opacity .15s var(--ease);
 }
 .dur-hist-bar:hover::after{opacity:1}
+
+/* ── Accessibility: Skip Link ────────────────────── */
+.skip-link{
+  position:absolute;top:-100%;left:16px;
+  padding:8px 16px;border-radius:var(--r);
+  background:var(--indigo);color:#fff;font-size:.84rem;font-weight:600;
+  z-index:10000;text-decoration:none;
+  transition:top .2s var(--ease);
+}
+.skip-link:focus{top:8px}
+
+/* ── Accessibility: Focus-Visible ────────────────── */
+:focus-visible{outline:2px solid var(--indigo);outline-offset:2px;border-radius:var(--r)}
+.pill:focus-visible,.sort-btn:focus-visible{outline-offset:0}
+.search input:focus-visible{outline:none} /* uses custom box-shadow instead */
+.t-row:focus-visible{outline-offset:-2px}
+
+/* ── Accessibility: Touch Targets ────────────────── */
+@media(pointer:coarse){
+  .theme-btn{width:44px;height:44px}
+  .bar-btn{width:40px;height:40px}
+  .pill{padding:10px 16px}
+  .sort-btn{padding:8px 14px}
+  .t-row{padding:12px 16px 12px 20px;min-height:44px}
+  .t-link-btn{width:36px;height:36px;opacity:.5}
+  .grp-hd{padding:12px 16px;min-height:44px}
+  .sticky-search-btn{width:36px;height:36px}
+}
+
+/* ── Accessibility: Contrast Boost ───────────────── */
+/* Dark theme: bump secondary/tertiary text to meet WCAG AA */
+:root{
+  --text-2:#a8aebb;
+  --text-3:#717a8c;
+}
+:root[data-theme="light"]{
+  --text-2:#4a5060;
+  --text-3:#6b7280;
+}
+
+/* ── Accessibility: Sort Group ───────────────────── */
+.sort-group{display:flex;gap:4px;align-items:center}
+
+/* ── Mobile Improvements ─────────────────────────── */
+@media(max-width:768px){
+  .bar-actions{margin-left:0;width:100%;justify-content:flex-start}
+  .bar-sep{display:none}
+  .sticky-bar{padding:8px 12px;gap:8px}
+  .sticky-name{font-size:.78rem;max-width:120px}
+}
+@media(max-width:480px){
+  .pills{flex-wrap:wrap}
+  .pill .pill-count{display:none}
+  .sort-group{flex-wrap:wrap}
+}
+
+/* ── Print Improvements ──────────────────────────── */
+@media print{
+  .skip-link,.sticky-bar,.bar-actions,.t-link-btn,.search,.copy-btn,.theme-btn{display:none!important}
+  .grp{break-inside:avoid}
+  .t-row{break-inside:avoid}
+  .t-badge{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .grp-b{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .dot{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .ring-seg{stroke-opacity:1!important}
+}
+
+/* ── High Contrast Mode ──────────────────────────── */
+@media(forced-colors:active){
+  .pill.active{border:2px solid LinkText}
+  .sort-btn.active{border:2px solid LinkText}
+  .t-badge{border:1px solid CanvasText}
+  .grp-indicator{forced-color-adjust:none}
+  .t-row.kb-focus{outline:2px solid LinkText}
+}
 """;
     }
 
@@ -1387,7 +1471,7 @@ function render() {
             else if(t.status==='skipped')c.s++;
         });
         html += '<div class="grp'+(open?' open':'')+'" data-gi="'+gi+'">';
-        html += '<div class="grp-hd'+(fail?' fail':'')+'">';
+        html += '<div class="grp-hd'+(fail?' fail':'')+'" role="button" tabindex="0" aria-expanded="'+(open?'true':'false')+'">';
         html += '<div class="grp-indicator"></div>';
         html += arrow;
         html += '<span class="grp-name">'+(searchText?highlight(g.className,searchText):esc(g.className))+'</span>';
@@ -1470,7 +1554,7 @@ container.addEventListener('click',function(e){
         return;
     }
     const hd = e.target.closest('.grp-hd');
-    if(hd){hd.parentElement.classList.toggle('open');return;}
+    if(hd){const grp=hd.parentElement;grp.classList.toggle('open');hd.setAttribute('aria-expanded',grp.classList.contains('open')?'true':'false');return;}
     const row = e.target.closest('.t-row');
     if(row){
         const det = container.querySelector('.t-detail[data-gi="'+row.dataset.gi+'"][data-ti="'+row.dataset.ti+'"]');
@@ -1485,8 +1569,9 @@ container.addEventListener('click',function(e){
 filterBtns.addEventListener('click',function(e){
     const btn=e.target.closest('.pill');
     if(!btn)return;
-    filterBtns.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+    filterBtns.querySelectorAll('.pill').forEach(function(b){b.classList.remove('active');b.setAttribute('aria-pressed','false');});
     btn.classList.add('active');
+    btn.setAttribute('aria-pressed','true');
     activeFilter=btn.dataset.filter;
     render();
 });
@@ -1502,17 +1587,20 @@ clearBtn.addEventListener('click',function(){searchInput.value='';clearBtn.style
 document.getElementById('expandAll').addEventListener('click',function(){
     container.querySelectorAll('.grp').forEach(function(g){g.classList.add('open');});
     container.querySelectorAll('.t-detail').forEach(function(d){d.classList.add('open');});
+    document.querySelectorAll('.qa-section').forEach(function(s){s.classList.add('tl-open');});
 });
 document.getElementById('collapseAll').addEventListener('click',function(){
     container.querySelectorAll('.grp').forEach(function(g){g.classList.remove('open');});
     container.querySelectorAll('.t-detail').forEach(function(d){d.classList.remove('open');});
+    document.querySelectorAll('.qa-section').forEach(function(s){s.classList.remove('tl-open');});
 });
 
 // Feature 3: Sort Toggle
 document.querySelectorAll('.sort-btn').forEach(function(btn){
     btn.addEventListener('click',function(){
-        document.querySelectorAll('.sort-btn').forEach(function(b){b.classList.remove('active');});
+        document.querySelectorAll('.sort-btn').forEach(function(b){b.classList.remove('active');b.setAttribute('aria-checked','false');});
         btn.classList.add('active');
+        btn.setAttribute('aria-checked','true');
         sortMode = btn.dataset.sort;
         render();
     });
@@ -1578,6 +1666,7 @@ function showKbHelp(){
     let ov=document.getElementById('kbOverlay');
     if(ov){ov.remove();return;}
     ov=document.createElement('div');ov.id='kbOverlay';ov.className='kb-overlay';
+    ov.setAttribute('role','dialog');ov.setAttribute('aria-modal','true');ov.setAttribute('aria-label','Keyboard shortcuts');
     ov.innerHTML='<div class="kb-modal"><h3>Keyboard Shortcuts</h3>'
         +'<div class="kb-row"><span>Next test</span><span class="kb-key">j</span></div>'
         +'<div class="kb-row"><span>Previous test</span><span class="kb-key">k</span></div>'
@@ -1585,9 +1674,12 @@ function showKbHelp(){
         +'<div class="kb-row"><span>Close / clear</span><span class="kb-key">Esc</span></div>'
         +'<div class="kb-row"><span>Focus search</span><span class="kb-key">/</span></div>'
         +'<div class="kb-row"><span>This help</span><span class="kb-key">?</span></div>'
+        +'<button class="bar-btn" style="margin-top:14px" aria-label="Close" id="kbClose">&times;</button>'
         +'</div>';
     ov.addEventListener('click',function(ev){if(ev.target===ov)ov.remove();});
     document.body.appendChild(ov);
+    document.getElementById('kbClose').focus();
+    document.getElementById('kbClose').addEventListener('click',function(){ov.remove();});
 }
 document.addEventListener('keydown',function(e){
     const tag=e.target.tagName;
