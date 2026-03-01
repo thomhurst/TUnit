@@ -574,9 +574,21 @@ body{
 .sp-extra.open{display:block;animation:fade-up .2s var(--ease)}
 .global-trace,.suite-trace{
   background:var(--surface-1);border:1px solid var(--border);border-radius:var(--r-lg);
-  padding:16px 18px;margin-bottom:16px;
+  padding:0;margin-bottom:16px;overflow:hidden;
 }
-.suite-trace{margin:0 0 12px;padding:12px 14px;background:var(--surface-0);border-radius:var(--r)}
+.suite-trace{margin:0 0 12px;background:var(--surface-0);border-radius:var(--r)}
+.tl-toggle{
+  display:flex;align-items:center;gap:6px;padding:12px 16px;cursor:pointer;
+  user-select:none;font-size:.82rem;font-weight:600;color:var(--text-2);
+  transition:color .15s var(--ease);
+}
+.suite-trace .tl-toggle{padding:10px 14px;font-size:.78rem}
+.tl-toggle:hover{color:var(--text)}
+.tl-toggle .tl-arrow{transition:transform .2s var(--ease);flex-shrink:0}
+.tl-open .tl-arrow{transform:rotate(90deg)}
+.tl-content{display:none;padding:0 16px 14px}
+.suite-trace .tl-content{padding:0 14px 10px}
+.tl-open .tl-content{display:block;animation:fade-up .2s var(--ease)}
 
 /* ── Empty State ───────────────────────────────────── */
 .empty{
@@ -799,22 +811,22 @@ function renderTrace(tid, rootSpanId) {
     return '<div class="d-sec"><div class="d-lbl">Trace Timeline</div>' + renderSpanRows(sp, 't-' + rootSpanId) + '</div>';
 }
 
+const tlArrow = '<svg class="tl-arrow" width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M6.22 4.22a.75.75 0 0 1 1.06 0l3.25 3.25a.75.75 0 0 1 0 1.06l-3.25 3.25a.75.75 0 0 1-1.06-1.06L8.94 8 6.22 5.28a.75.75 0 0 1 0-1.06Z"/></svg>';
+
 // Suite-level trace: test suite span + non-test-case children (hooks, setup, teardown)
 function renderSuiteTrace(className) {
     const suite = suiteSpanByClass[className];
     if (!suite) return '';
     const allSpans = spansByTrace[suite.traceId];
     if (!allSpans) return '';
-    // Get suite + descendants, then exclude test case subtrees
     const all = getDescendants(allSpans, suite.spanId);
     const testCaseIds = new Set();
     all.forEach(s => { if (s.name === 'test case') testCaseIds.add(s.spanId); });
-    // Remove test case spans and their descendants
     const tcDescendants = new Set();
     testCaseIds.forEach(id => { getDescendants(all, id).forEach(s => { if (s.spanId !== id) tcDescendants.add(s.spanId); }); });
     const filtered = all.filter(s => !tcDescendants.has(s.spanId));
     if (filtered.length <= 1) return '';
-    return '<div class="suite-trace"><div class="d-lbl">Class Timeline</div>' + renderSpanRows(filtered, 'suite-' + className) + '</div>';
+    return '<div class="suite-trace"><div class="tl-toggle">' + tlArrow + 'Class Timeline</div><div class="tl-content">' + renderSpanRows(filtered, 'suite-' + className) + '</div></div>';
 }
 
 // Global timeline: session + assembly spans (excluding test suite children)
@@ -823,10 +835,9 @@ function renderGlobalTimeline() {
     const assemblySpans = spansByName['test assembly'] || [];
     const suiteSpans = spansByName['test suite'] || [];
     if (!sessionSpans.length && !assemblySpans.length) return '';
-    // Collect session, assembly, and suite spans (but not their children)
     const topSpans = [...sessionSpans, ...assemblySpans, ...suiteSpans];
     if (!topSpans.length) return '';
-    return '<div class="global-trace"><div class="d-lbl">Execution Timeline</div>' + renderSpanRows(topSpans, 'global') + '</div>';
+    return '<div class="global-trace"><div class="tl-toggle">' + tlArrow + 'Execution Timeline</div><div class="tl-content">' + renderSpanRows(topSpans, 'global') + '</div></div>';
 }
 
 function render() {
@@ -874,6 +885,12 @@ function render() {
     filterSummary.textContent = (activeFilter!=='all'||searchText)
         ? 'Showing '+total+' of '+data.summary.total+' tests' : '';
 }
+
+// Toggle for collapsible timelines (delegated on document for both global and per-group)
+document.addEventListener('click',function(e){
+    const tl = e.target.closest('.tl-toggle');
+    if(tl){tl.parentElement.classList.toggle('tl-open');return;}
+});
 
 container.addEventListener('click',function(e){
     const hd = e.target.closest('.grp-hd');
