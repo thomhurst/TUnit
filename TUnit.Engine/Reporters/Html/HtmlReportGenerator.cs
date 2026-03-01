@@ -225,6 +225,7 @@ internal static class HtmlReportGenerator
             return;
         }
 
+        sb.AppendLine("<div id=\"globalTimeline\"></div>");
         sb.AppendLine("<div id=\"testGroups\" class=\"groups\"></div>");
     }
 
@@ -571,6 +572,11 @@ body{
   font-size:.76rem;color:var(--text-2);
 }
 .sp-extra.open{display:block;animation:fade-up .2s var(--ease)}
+.global-trace,.suite-trace{
+  background:var(--surface-1);border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:16px 18px;margin-bottom:16px;
+}
+.suite-trace{margin:0 0 12px;padding:12px 14px;background:var(--surface-0);border-radius:var(--r)}
 
 /* ── Empty State ───────────────────────────────────── */
 .empty{
@@ -627,9 +633,21 @@ let searchText = '';
 let debounceTimer;
 
 const spansByTrace = {};
+const spansByName = {};
+const bySpanId = {};
 spans.forEach(s => {
     if (!spansByTrace[s.traceId]) spansByTrace[s.traceId] = [];
     spansByTrace[s.traceId].push(s);
+    if (!spansByName[s.name]) spansByName[s.name] = [];
+    spansByName[s.name].push(s);
+    bySpanId[s.spanId] = s;
+});
+
+// Build suite span lookup: className -> span
+const suiteSpanByClass = {};
+(spansByName['test suite']||[]).forEach(s => {
+    const tag = (s.tags||[]).find(t => t.key === 'test.suite.name');
+    if (tag) suiteSpanByClass[tag.value] = s;
 });
 
 function matchesFilter(t) {
@@ -722,53 +740,93 @@ function renderDetail(t) {
     return h;
 }
 
+// Collect descendants of a span within a trace
+function getDescendants(traceSpans, rootId) {
+    const included = new Set();
+    function walk(sid) {
+        if (included.has(sid)) return;
+        included.add(sid);
+        traceSpans.forEach(s => { if (s.parentSpanId === sid) walk(s.spanId); });
+    }
+    walk(rootId);
+    return traceSpans.filter(s => included.has(s.spanId));
+}
+
+// Render a span waterfall from a filtered list of spans
+function renderSpanRows(sp, uid) {
+    if (!sp || !sp.length) return '';
+    const mn = Math.min(...sp.map(s => s.startTimeMs));
+    const mx = Math.max(...sp.map(s => s.startTimeMs + s.durationMs));
+    const dur = mx - mn || 1;
+    const idSet = new Set(sp.map(s => s.spanId));
+    const depth = {};
+    function gd(s) {
+        if (depth[s.spanId] !== undefined) return depth[s.spanId];
+        if (!s.parentSpanId || !bySpanId[s.parentSpanId] || !idSet.has(s.parentSpanId)) { depth[s.spanId] = 0; return 0; }
+        depth[s.spanId] = gd(bySpanId[s.parentSpanId]) + 1; return depth[s.spanId];
+    }
+    sp.forEach(gd);
+    const sorted = [...sp].sort((a, b) => a.startTimeMs - b.startTimeMs);
+    let h = '<div class="trace">';
+    sorted.forEach((s, i) => {
+        const d = depth[s.spanId] || 0;
+        const l = ((s.startTimeMs - mn) / dur * 100).toFixed(2);
+        const w = Math.max((s.durationMs / dur * 100), .5).toFixed(2);
+        const cls = s.status === 'Error' ? 'err' : s.status === 'Ok' ? 'ok' : 'unk';
+        h += '<div class="sp-row" data-si="' + i + '">';
+        h += '<span class="sp-indent" style="width:' + (d * 14) + 'px"></span>';
+        h += '<div class="sp-bar ' + cls + '" style="margin-left:' + l + '%;width:' + w + '%" title="' + esc(s.name) + ' (' + fmt(s.durationMs) + ')"></div>';
+        h += '<span class="sp-name">' + esc(s.name) + '</span>';
+        h += '<span class="sp-dur">' + fmt(s.durationMs) + '</span>';
+        h += '</div>';
+        let ex = '<div class="sp-extra" id="sp-' + uid + '-' + i + '">';
+        ex += '<strong>Source:</strong> ' + esc(s.source) + ' &middot; <strong>Kind:</strong> ' + esc(s.kind);
+        if (s.tags && s.tags.length) { ex += '<br><strong>Tags:</strong> '; s.tags.forEach(t => { ex += esc(t.key) + '=' + esc(t.value) + ' '; }); }
+        if (s.events && s.events.length) { ex += '<br><strong>Events:</strong> '; s.events.forEach(e => { ex += esc(e.name) + ' '; if (e.tags) e.tags.forEach(t => { ex += esc(t.key) + '=' + esc(t.value) + ' '; }); }); }
+        ex += '</div>';
+        h += ex;
+    });
+    h += '</div>';
+    return h;
+}
+
+// Per-test trace: test case span + its descendants only
 function renderTrace(tid, rootSpanId) {
     const allSpans = spansByTrace[tid];
     if (!allSpans || !allSpans.length) return '';
-    // Build lookup and filter to only the test's own span + its descendants
-    const byId={};
-    allSpans.forEach(s=>{byId[s.spanId]=s});
-    const included=new Set();
-    function includeDescendants(sid){
-        if(included.has(sid))return;
-        included.add(sid);
-        allSpans.forEach(s=>{if(s.parentSpanId===sid)includeDescendants(s.spanId)});
-    }
-    includeDescendants(rootSpanId);
-    const sp=allSpans.filter(s=>included.has(s.spanId));
+    const sp = getDescendants(allSpans, rootSpanId);
     if (!sp.length) return '';
-    const mn = Math.min(...sp.map(s=>s.startTimeMs));
-    const mx = Math.max(...sp.map(s=>s.startTimeMs+s.durationMs));
-    const dur = mx-mn||1;
-    const depth={};
-    function gd(s){
-        if(depth[s.spanId]!==undefined)return depth[s.spanId];
-        if(!s.parentSpanId||!byId[s.parentSpanId]||!included.has(s.parentSpanId)){depth[s.spanId]=0;return 0}
-        depth[s.spanId]=gd(byId[s.parentSpanId])+1;return depth[s.spanId];
-    }
-    sp.forEach(gd);
-    const sorted=[...sp].sort((a,b)=>a.startTimeMs-b.startTimeMs);
-    let h='<div class="d-sec"><div class="d-lbl">Trace Timeline</div><div class="trace">';
-    sorted.forEach((s,i)=>{
-        const d=depth[s.spanId]||0;
-        const l=((s.startTimeMs-mn)/dur*100).toFixed(2);
-        const w=Math.max((s.durationMs/dur*100),.5).toFixed(2);
-        const cls=s.status==='Error'?'err':s.status==='Ok'?'ok':'unk';
-        h+='<div class="sp-row" data-si="'+i+'">';
-        h+='<span class="sp-indent" style="width:'+(d*14)+'px"></span>';
-        h+='<div class="sp-bar '+cls+'" style="margin-left:'+l+'%;width:'+w+'%" title="'+esc(s.name)+' ('+fmt(s.durationMs)+')"></div>';
-        h+='<span class="sp-name">'+esc(s.name)+'</span>';
-        h+='<span class="sp-dur">'+fmt(s.durationMs)+'</span>';
-        h+='</div>';
-        let ex='<div class="sp-extra" id="sp-'+tid+'-'+i+'">';
-        ex+='<strong>Source:</strong> '+esc(s.source)+' &middot; <strong>Kind:</strong> '+esc(s.kind);
-        if(s.tags&&s.tags.length){ex+='<br><strong>Tags:</strong> ';s.tags.forEach(t=>{ex+=esc(t.key)+'='+esc(t.value)+' '});}
-        if(s.events&&s.events.length){ex+='<br><strong>Events:</strong> ';s.events.forEach(e=>{ex+=esc(e.name)+' ';if(e.tags)e.tags.forEach(t=>{ex+=esc(t.key)+'='+esc(t.value)+' '})});}
-        ex+='</div>';
-        h+=ex;
-    });
-    h+='</div></div>';
-    return h;
+    return '<div class="d-sec"><div class="d-lbl">Trace Timeline</div>' + renderSpanRows(sp, 't-' + rootSpanId) + '</div>';
+}
+
+// Suite-level trace: test suite span + non-test-case children (hooks, setup, teardown)
+function renderSuiteTrace(className) {
+    const suite = suiteSpanByClass[className];
+    if (!suite) return '';
+    const allSpans = spansByTrace[suite.traceId];
+    if (!allSpans) return '';
+    // Get suite + descendants, then exclude test case subtrees
+    const all = getDescendants(allSpans, suite.spanId);
+    const testCaseIds = new Set();
+    all.forEach(s => { if (s.name === 'test case') testCaseIds.add(s.spanId); });
+    // Remove test case spans and their descendants
+    const tcDescendants = new Set();
+    testCaseIds.forEach(id => { getDescendants(all, id).forEach(s => { if (s.spanId !== id) tcDescendants.add(s.spanId); }); });
+    const filtered = all.filter(s => !tcDescendants.has(s.spanId));
+    if (filtered.length <= 1) return '';
+    return '<div class="suite-trace"><div class="d-lbl">Class Timeline</div>' + renderSpanRows(filtered, 'suite-' + className) + '</div>';
+}
+
+// Global timeline: session + assembly spans (excluding test suite children)
+function renderGlobalTimeline() {
+    const sessionSpans = spansByName['test session'] || [];
+    const assemblySpans = spansByName['test assembly'] || [];
+    const suiteSpans = spansByName['test suite'] || [];
+    if (!sessionSpans.length && !assemblySpans.length) return '';
+    // Collect session, assembly, and suite spans (but not their children)
+    const topSpans = [...sessionSpans, ...assemblySpans, ...suiteSpans];
+    if (!topSpans.length) return '';
+    return '<div class="global-trace"><div class="d-lbl">Execution Timeline</div>' + renderSpanRows(topSpans, 'global') + '</div>';
 }
 
 function render() {
@@ -798,6 +856,7 @@ function render() {
         html += '<span class="grp-b gt">'+ft.length+'</span>';
         html += '</span></div>';
         html += '<div class="grp-body">';
+        html += renderSuiteTrace(g.className);
         ft.forEach((t,ti)=>{
             html += '<div class="t-row" data-gi="'+gi+'" data-ti="'+ti+'">';
             html += '<span class="t-badge '+t.status+'">'+esc(t.status)+'</span>';
@@ -844,6 +903,9 @@ searchInput.addEventListener('input',function(){
     debounceTimer=setTimeout(function(){searchText=searchInput.value.trim();render();},150);
 });
 clearBtn.addEventListener('click',function(){searchInput.value='';clearBtn.style.display='none';searchText='';render();});
+
+// Render global execution timeline (static, doesn't change with filters)
+document.getElementById('globalTimeline').innerHTML = renderGlobalTimeline();
 
 render();
 })();
