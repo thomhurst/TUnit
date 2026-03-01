@@ -9,7 +9,6 @@ internal sealed class TUnit_TestProject_AbstractTests_ConcreteClass2_SecondTest_
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.AbstractTests.ConcreteClass2>
         {
             TestName = "SecondTest",
@@ -69,8 +68,7 @@ internal sealed class TUnit_TestProject_AbstractTests_ConcreteClass2_SecondTest_
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -114,7 +112,6 @@ internal sealed class TUnit_TestProject_AbstractTests_ConcreteClass2_AssertClass
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.AbstractTests.ConcreteClass2>
         {
             TestName = "AssertClassName",
@@ -173,8 +170,7 @@ internal sealed class TUnit_TestProject_AbstractTests_ConcreteClass2_AssertClass
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -218,7 +214,6 @@ internal sealed class TUnit_TestProject_AbstractTests_ConcreteClass1_AssertClass
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.AbstractTests.ConcreteClass1>
         {
             TestName = "AssertClassName",
@@ -276,8 +271,7 @@ internal sealed class TUnit_TestProject_AbstractTests_ConcreteClass1_AssertClass
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {

@@ -9,7 +9,6 @@ internal sealed class TUnit_TestProject_Bugs__1692_Tests_NullTest__string__TestS
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.Bugs._1692.Tests>
         {
             TestName = "NullTest",
@@ -88,8 +87,7 @@ internal sealed class TUnit_TestProject_Bugs__1692_Tests_NullTest__string__TestS
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {

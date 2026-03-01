@@ -9,7 +9,6 @@ internal sealed class TUnit_TestProject_Bugs__1304_Tests_TryParse_InvalidString_
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.Bugs._1304.Tests>
         {
             TestName = "TryParse_InvalidString_ReturnsFailure",
@@ -99,8 +98,7 @@ internal sealed class TUnit_TestProject_Bugs__1304_Tests_TryParse_InvalidString_
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -144,7 +142,6 @@ internal sealed class TUnit_TestProject_Bugs__1304_Tests_Parse_InvalidString_Thr
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.Bugs._1304.Tests>
         {
             TestName = "Parse_InvalidString_ThrowsException",
@@ -226,8 +223,7 @@ internal sealed class TUnit_TestProject_Bugs__1304_Tests_Parse_InvalidString_Thr
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -271,7 +267,6 @@ internal sealed class TUnit_TestProject_Bugs__1304_Tests_TryParse_ValidString_Re
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.Bugs._1304.Tests>
         {
             TestName = "TryParse_ValidString_ReturnsAccountId",
@@ -350,8 +345,7 @@ internal sealed class TUnit_TestProject_Bugs__1304_Tests_TryParse_ValidString_Re
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {

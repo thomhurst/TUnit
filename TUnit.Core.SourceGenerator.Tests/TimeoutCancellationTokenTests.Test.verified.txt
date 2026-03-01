@@ -9,7 +9,6 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_DefaultTes
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>
         {
             TestName = "DefaultTest",
@@ -114,8 +113,7 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_DefaultTes
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -159,7 +157,6 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_BasicTest_
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>
         {
             TestName = "BasicTest",
@@ -266,8 +263,7 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_BasicTest_
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -311,7 +307,6 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_InheritedT
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>
         {
             TestName = "InheritedTimeoutAttribute",
@@ -417,8 +412,7 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_InheritedT
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -462,7 +456,6 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_DataTest__
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>
         {
             TestName = "DataTest",
@@ -587,8 +580,7 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_DataTest__
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -632,7 +624,6 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_DataSource
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>
         {
             TestName = "DataSourceTest",
@@ -778,8 +769,7 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_DataSource
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -823,7 +813,6 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_MatrixTest
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>
         {
             TestName = "MatrixTest",
@@ -949,8 +938,7 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_MatrixTest
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -994,7 +982,6 @@ internal sealed class TUnit_TestProject_TimeoutDoesNotFireTests_QuickTestDoesNot
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.TimeoutDoesNotFireTests>
         {
             TestName = "QuickTestDoesNotTimeout",
@@ -1100,8 +1087,7 @@ internal sealed class TUnit_TestProject_TimeoutDoesNotFireTests_QuickTestDoesNot
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -1145,7 +1131,6 @@ internal sealed class TUnit_TestProject_CancellationTokenTriggeredTests_Cancella
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.CancellationTokenTriggeredTests>
         {
             TestName = "CancellationTokenIsTriggered",
@@ -1251,8 +1236,7 @@ internal sealed class TUnit_TestProject_CancellationTokenTriggeredTests_Cancella
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {

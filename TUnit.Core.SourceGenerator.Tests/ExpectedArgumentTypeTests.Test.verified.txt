@@ -9,7 +9,6 @@ internal sealed class TUnit_TestProject_ExpectedArgumentTypeTests_TypedArguments
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.ExpectedArgumentTypeTests>
         {
             TestName = "TypedArguments",
@@ -106,8 +105,7 @@ internal sealed class TUnit_TestProject_ExpectedArgumentTypeTests_TypedArguments
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -151,7 +149,6 @@ internal sealed class TUnit_TestProject_ExpectedArgumentTypeTests_EnumTypes__obj
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.ExpectedArgumentTypeTests>
         {
             TestName = "EnumTypes",
@@ -250,8 +247,7 @@ internal sealed class TUnit_TestProject_ExpectedArgumentTypeTests_EnumTypes__obj
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {

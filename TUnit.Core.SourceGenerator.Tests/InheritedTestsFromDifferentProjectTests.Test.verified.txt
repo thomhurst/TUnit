@@ -9,7 +9,6 @@ internal sealed class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>
         {
             TestName = "Test",
@@ -70,8 +69,7 @@ internal sealed class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -115,7 +113,6 @@ internal sealed class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>
         {
             TestName = "GenericMethodDataSource",
@@ -196,8 +193,7 @@ internal sealed class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -241,7 +237,6 @@ internal sealed class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>
         {
             TestName = "NonGenericMethodDataSource",
@@ -333,8 +328,7 @@ internal sealed class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -378,7 +372,6 @@ internal sealed class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>
         {
             TestName = "VerifyInheritedCategoriesAreAvailable",
@@ -438,8 +431,7 @@ internal sealed class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -483,7 +475,6 @@ internal sealed class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>
         {
             TestName = "BaseTest",
@@ -545,8 +536,7 @@ internal sealed class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -590,7 +580,6 @@ internal sealed class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>
         {
             TestName = "BaseTestWithMultipleCategories",
@@ -653,8 +642,7 @@ internal sealed class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {

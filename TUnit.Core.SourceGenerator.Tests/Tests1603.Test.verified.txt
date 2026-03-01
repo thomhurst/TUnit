@@ -9,7 +9,6 @@ internal sealed class TUnit_TestProject_Bugs__1603_Tests_Casted_Integer_To_Short
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.Bugs._1603.Tests>
         {
             TestName = "Casted_Integer_To_Short_Converts",
@@ -87,8 +86,7 @@ internal sealed class TUnit_TestProject_Bugs__1603_Tests_Casted_Integer_To_Short
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -132,7 +130,6 @@ internal sealed class TUnit_TestProject_Bugs__1603_Tests_Integer_To_Short_Conver
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.Bugs._1603.Tests>
         {
             TestName = "Integer_To_Short_Converts",
@@ -210,8 +207,7 @@ internal sealed class TUnit_TestProject_Bugs__1603_Tests_Integer_To_Short_Conver
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {

@@ -9,7 +9,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Transfer__decimal_d
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.DecimalArgumentTests>
         {
             TestName = "Transfer",
@@ -96,8 +95,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Transfer__decimal_d
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -141,7 +139,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_SimpleDecimal__deci
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.DecimalArgumentTests>
         {
             TestName = "SimpleDecimal",
@@ -219,8 +216,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_SimpleDecimal__deci
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -264,7 +260,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_SmallDecimal__decim
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.DecimalArgumentTests>
         {
             TestName = "SmallDecimal",
@@ -342,8 +337,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_SmallDecimal__decim
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -387,7 +381,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_MaxDecimal__decimal
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.DecimalArgumentTests>
         {
             TestName = "MaxDecimal",
@@ -465,8 +458,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_MaxDecimal__decimal
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -510,7 +502,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_MinDecimal__decimal
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.DecimalArgumentTests>
         {
             TestName = "MinDecimal",
@@ -588,8 +579,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_MinDecimal__decimal
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -633,7 +623,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_ExplicitDecimalValu
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.DecimalArgumentTests>
         {
             TestName = "ExplicitDecimalValue",
@@ -711,8 +700,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_ExplicitDecimalValu
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -756,7 +744,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_MultipleDecimals__d
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.DecimalArgumentTests>
         {
             TestName = "MultipleDecimals",
@@ -848,8 +835,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_MultipleDecimals__d
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -893,7 +879,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Test__decimal_TestS
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.DecimalArgumentTests>
         {
             TestName = "Test",
@@ -974,8 +959,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Test__decimal_TestS
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -1019,7 +1003,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_TransactionDiscount
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.DecimalArgumentTests>
         {
             TestName = "TransactionDiscountCalculations",
@@ -1135,8 +1118,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_TransactionDiscount
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -1180,7 +1162,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Equality3__decimal_
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.DecimalArgumentTests>
         {
             TestName = "Equality3",
@@ -1258,8 +1239,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Equality3__decimal_
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -1303,7 +1283,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Equality4__decimal_
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.DecimalArgumentTests>
         {
             TestName = "Equality4",
@@ -1381,8 +1360,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Equality4__decimal_
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -1426,7 +1404,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_TestMethod__decimal
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.DecimalArgumentTests>
         {
             TestName = "TestMethod",
@@ -1504,8 +1481,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_TestMethod__decimal
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {

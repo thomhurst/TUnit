@@ -9,7 +9,6 @@ internal sealed class TUnit_TestProject_ClassAndMethodArgumentsTests_Simple_Test
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
         {
             TestName = "Simple",
@@ -84,8 +83,7 @@ internal sealed class TUnit_TestProject_ClassAndMethodArgumentsTests_Simple_Test
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -129,7 +127,6 @@ internal sealed class TUnit_TestProject_ClassAndMethodArgumentsTests_WithMethodL
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
         {
             TestName = "WithMethodLevel",
@@ -225,8 +222,7 @@ internal sealed class TUnit_TestProject_ClassAndMethodArgumentsTests_WithMethodL
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -270,7 +266,6 @@ internal sealed class TUnit_TestProject_ClassAndMethodArgumentsTests_IgnoreParam
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
         {
             TestName = "IgnoreParameters",
@@ -366,8 +361,7 @@ internal sealed class TUnit_TestProject_ClassAndMethodArgumentsTests_IgnoreParam
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {

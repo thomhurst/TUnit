@@ -9,7 +9,6 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Cl
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
         {
             TestName = "DataSource_Class",
@@ -88,8 +87,7 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Cl
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -133,7 +131,6 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Cl
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
         {
             TestName = "DataSource_Class_Generic",
@@ -212,8 +209,7 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Cl
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -257,7 +253,6 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
         {
             TestName = "IsInitialized_With_1_ClassDataSource",
@@ -335,8 +330,7 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -380,7 +374,6 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
         {
             TestName = "IsInitialized_With_2_ClassDataSources",
@@ -465,8 +458,7 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -510,7 +502,6 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
         {
             TestName = "IsInitialized_With_3_ClassDataSources",
@@ -602,8 +593,7 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -647,7 +637,6 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
         {
             TestName = "IsInitialized_With_4_ClassDataSources",
@@ -746,8 +735,7 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -791,7 +779,6 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests>
         {
             TestName = "IsInitialized_With_5_ClassDataSources",
@@ -897,8 +884,7 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {

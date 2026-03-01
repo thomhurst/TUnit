@@ -331,11 +331,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
 
-        writer.AppendLine("var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();");
-        writer.AppendLine();
+        var needsList = testMethod.IsGenericType || testMethod is { IsGenericMethod: true, MethodSymbol.TypeParameters.Length: > 0 };
 
-        if (testMethod.IsGenericType || testMethod is { IsGenericMethod: true, MethodSymbol.TypeParameters.Length: > 0 })
+        if (needsList)
         {
+            writer.AppendLine("var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();");
+            writer.AppendLine();
+
             var hasTypedDataSource = testMethod.MethodAttributes
                 .Any(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass) &&
                          InferTypesFromDataSourceAttribute(testMethod.MethodSymbol, a) != null);
@@ -374,13 +376,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 // GenericTestMetadata that the engine will fail with a clear error message
                 GenerateTestMetadataInstance(writer, testMethod, className);
             }
+
+            writer.AppendLine("return __results;");
         }
         else
         {
-            GenerateTestMetadataInstance(writer, testMethod, className);
+            GenerateTestMetadataInstance(writer, testMethod, className, addToResultsList: false);
+            writer.AppendLine("return new global::TUnit.Core.TestMetadata[] { metadata };");
         }
-
-        writer.AppendLine("return __results;");
         writer.Unindent();
         writer.AppendLine("}");
 
@@ -395,7 +398,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         GenerateModuleInitializer(writer, testMethod, uniqueClassName);
     }
 
-    private static void GenerateTestMetadataInstance(CodeWriter writer, TestMethodMetadata testMethod, string className)
+    private static void GenerateTestMetadataInstance(CodeWriter writer, TestMethodMetadata testMethod, string className, bool addToResultsList = true)
     {
         var methodName = testMethod.MethodSymbol.Name;
 
@@ -445,7 +448,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("metadata.TestSessionId = testSessionId;");
         }
 
-        writer.AppendLine("__results.Add(metadata);");
+        if (addToResultsList)
+        {
+            writer.AppendLine("__results.Add(metadata);");
+        }
     }
 
     private static void GenerateMetadata(CodeWriter writer, TestMethodMetadata testMethod)

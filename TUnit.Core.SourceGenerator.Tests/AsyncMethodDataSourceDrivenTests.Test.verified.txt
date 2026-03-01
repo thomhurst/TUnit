@@ -9,7 +9,6 @@ internal sealed class TUnit_TestProject_AsyncMethodDataSourceDrivenTests_AsyncMe
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>
         {
             TestName = "AsyncMethodDataSource_SingleValue",
@@ -108,8 +107,7 @@ internal sealed class TUnit_TestProject_AsyncMethodDataSourceDrivenTests_AsyncMe
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -153,7 +151,6 @@ internal sealed class TUnit_TestProject_AsyncMethodDataSourceDrivenTests_AsyncMe
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>
         {
             TestName = "AsyncMethodDataSource_Tuples",
@@ -259,8 +256,7 @@ internal sealed class TUnit_TestProject_AsyncMethodDataSourceDrivenTests_AsyncMe
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -304,7 +300,6 @@ internal sealed class TUnit_TestProject_AsyncMethodDataSourceDrivenTests_AsyncMe
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>
         {
             TestName = "AsyncMethodDataSource_Enumerable",
@@ -403,8 +398,7 @@ internal sealed class TUnit_TestProject_AsyncMethodDataSourceDrivenTests_AsyncMe
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -448,7 +442,6 @@ internal sealed class TUnit_TestProject_AsyncMethodDataSourceDrivenTests_AsyncMe
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>
         {
             TestName = "AsyncMethodDataSource_Func",
@@ -547,8 +540,7 @@ internal sealed class TUnit_TestProject_AsyncMethodDataSourceDrivenTests_AsyncMe
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -592,7 +584,6 @@ internal sealed class TUnit_TestProject_AsyncMethodDataSourceDrivenTests_AsyncMe
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>
         {
             TestName = "AsyncMethodDataSource_WithArguments",
@@ -691,8 +682,7 @@ internal sealed class TUnit_TestProject_AsyncMethodDataSourceDrivenTests_AsyncMe
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -736,7 +726,6 @@ internal sealed class TUnit_TestProject_AsyncMethodDataSourceDrivenTests_AsyncMe
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>
         {
             TestName = "AsyncMethodDataSource_ExternalClass",
@@ -835,8 +824,7 @@ internal sealed class TUnit_TestProject_AsyncMethodDataSourceDrivenTests_AsyncMe
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -880,7 +868,6 @@ internal sealed class TUnit_TestProject_AsyncMethodDataSourceDrivenTests_ValueTa
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>
         {
             TestName = "ValueTaskMethodDataSource_SingleValue",
@@ -979,8 +966,7 @@ internal sealed class TUnit_TestProject_AsyncMethodDataSourceDrivenTests_ValueTa
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {

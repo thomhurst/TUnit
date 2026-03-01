@@ -9,7 +9,6 @@ internal sealed class TUnit_TestProject_MatrixTests_MatrixTest_One__string_int_b
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.MatrixTests>
         {
             TestName = "MatrixTest_One",
@@ -101,8 +100,7 @@ internal sealed class TUnit_TestProject_MatrixTests_MatrixTest_One__string_int_b
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -146,7 +144,6 @@ internal sealed class TUnit_TestProject_MatrixTests_MatrixTest_Two__int_int_int_
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.MatrixTests>
         {
             TestName = "MatrixTest_Two",
@@ -245,8 +242,7 @@ internal sealed class TUnit_TestProject_MatrixTests_MatrixTest_Two__int_int_int_
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -290,7 +286,6 @@ internal sealed class TUnit_TestProject_MatrixTests_MatrixTest_Enum__int_TestEnu
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.MatrixTests>
         {
             TestName = "MatrixTest_Enum",
@@ -382,8 +377,7 @@ internal sealed class TUnit_TestProject_MatrixTests_MatrixTest_Enum__int_TestEnu
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -427,7 +421,6 @@ internal sealed class TUnit_TestProject_MatrixTests_AutoGenerateBools__string_bo
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.MatrixTests>
         {
             TestName = "AutoGenerateBools",
@@ -512,8 +505,7 @@ internal sealed class TUnit_TestProject_MatrixTests_AutoGenerateBools__string_bo
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -557,7 +549,6 @@ internal sealed class TUnit_TestProject_MatrixTests_AutoGenerateBools2__string_b
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.MatrixTests>
         {
             TestName = "AutoGenerateBools2",
@@ -642,8 +633,7 @@ internal sealed class TUnit_TestProject_MatrixTests_AutoGenerateBools2__string_b
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -687,7 +677,6 @@ internal sealed class TUnit_TestProject_MatrixTests_ImplicitConversion__OneOf_Te
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.MatrixTests>
         {
             TestName = "ImplicitConversion",
@@ -772,8 +761,7 @@ internal sealed class TUnit_TestProject_MatrixTests_ImplicitConversion__OneOf_Te
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -817,7 +805,6 @@ internal sealed class TUnit_TestProject_MatrixTests_ExcludingAutoGeneratedMatrix
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.MatrixTests>
         {
             TestName = "ExcludingAutoGeneratedMatrixValues",
@@ -902,8 +889,7 @@ internal sealed class TUnit_TestProject_MatrixTests_ExcludingAutoGeneratedMatrix
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -947,7 +933,6 @@ internal sealed class TUnit_TestProject_MatrixTests_Method1__int_TestSource : gl
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.MatrixTests>
         {
             TestName = "Method1",
@@ -1025,8 +1010,7 @@ internal sealed class TUnit_TestProject_MatrixTests_Method1__int_TestSource : gl
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -1070,7 +1054,6 @@ internal sealed class TUnit_TestProject_MatrixTests_Method2__int_TestSource : gl
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.MatrixTests>
         {
             TestName = "Method2",
@@ -1148,8 +1131,7 @@ internal sealed class TUnit_TestProject_MatrixTests_Method2__int_TestSource : gl
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -1193,7 +1175,6 @@ internal sealed class TUnit_TestProject_MatrixTests_Method3__int_TestSource : gl
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.MatrixTests>
         {
             TestName = "Method3",
@@ -1271,8 +1252,7 @@ internal sealed class TUnit_TestProject_MatrixTests_Method3__int_TestSource : gl
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -1316,7 +1296,6 @@ internal sealed class TUnit_TestProject_MatrixTests_Method4__int_TestSource : gl
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.MatrixTests>
         {
             TestName = "Method4",
@@ -1394,8 +1373,7 @@ internal sealed class TUnit_TestProject_MatrixTests_Method4__int_TestSource : gl
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -1439,7 +1417,6 @@ internal sealed class TUnit_TestProject_MatrixTests_Exclusion__int_int_TestSourc
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.MatrixTests>
         {
             TestName = "Exclusion",
@@ -1527,8 +1504,7 @@ internal sealed class TUnit_TestProject_MatrixTests_Exclusion__int_int_TestSourc
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -1572,7 +1548,6 @@ internal sealed class TUnit_TestProject_MatrixTests_MatrixMethod_WithEnumParamet
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.MatrixTests>
         {
             TestName = "MatrixMethod_WithEnumParameter_UsesOnlyMethodValues",
@@ -1657,8 +1632,7 @@ internal sealed class TUnit_TestProject_MatrixTests_MatrixMethod_WithEnumParamet
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
