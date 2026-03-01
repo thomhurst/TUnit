@@ -10,11 +10,11 @@
 /// </para>
 /// <list type="number">
 /// <item>Fast enumeration via <see cref="ITestDescriptorSource.EnumerateTestDescriptors"/></item>
-/// <item>Lazy materialization via <see cref="GetTestsAsync"/></item>
+/// <item>Lazy materialization via <see cref="GetTests"/></item>
 /// </list>
 /// <para>
 /// If <see cref="ITestDescriptorSource"/> is not implemented, the discovery pipeline
-/// falls back to <see cref="GetTestsAsync"/> for all tests.
+/// falls back to <see cref="GetTests"/> for all tests.
 /// </para>
 /// </remarks>
 public interface ITestSource
@@ -23,7 +23,6 @@ public interface ITestSource
     /// Gets all test metadata for this test source.
     /// </summary>
     /// <param name="testSessionId">The test session identifier.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>An async enumerable of test metadata.</returns>
-    IAsyncEnumerable<TestMetadata> GetTestsAsync(string testSessionId, CancellationToken cancellationToken = default);
+    /// <returns>A read-only list of test metadata.</returns>
+    IReadOnlyList<TestMetadata> GetTests(string testSessionId);
 }

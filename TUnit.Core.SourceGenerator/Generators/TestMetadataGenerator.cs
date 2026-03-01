@@ -327,10 +327,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         GenerateReflectionFieldAccessors(writer, testMethod.TypeSymbol);
 
-        writer.AppendLine("public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)");
+        writer.AppendLine("public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)");
         writer.AppendLine("{");
         writer.Indent();
 
+        writer.AppendLine("var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();");
         writer.AppendLine();
 
         if (testMethod.IsGenericType || testMethod is { IsGenericMethod: true, MethodSymbol.TypeParameters.Length: > 0 })
@@ -379,7 +380,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             GenerateTestMetadataInstance(writer, testMethod, className);
         }
 
-        writer.AppendLine("yield break;");
+        writer.AppendLine("return __results;");
         writer.Unindent();
         writer.AppendLine("}");
 
@@ -444,7 +445,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("metadata.TestSessionId = testSessionId;");
         }
 
-        writer.AppendLine("yield return metadata;");
+        writer.AppendLine("__results.Add(metadata);");
     }
 
     private static void GenerateMetadata(CodeWriter writer, TestMethodMetadata testMethod)
@@ -1984,7 +1985,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"HasDataSource = {(hasDataSource ? "true" : "false")},");
         writer.AppendLine($"RepeatCount = {repeatCount},");
         writer.AppendLine($"DependsOn = {dependsOnArray},");
-        writer.AppendLine("Materializer = GetTestsAsync");
+        writer.AppendLine("Materializer = GetTests");
 
         writer.Unindent();
         writer.AppendLine("};");
@@ -3545,7 +3546,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("};");
 
         writer.AppendLine("genericMetadata.TestSessionId = testSessionId;");
-        writer.AppendLine("yield return genericMetadata;");
+        writer.AppendLine("__results.Add(genericMetadata);");
     }
 
     private static List<ITypeSymbol[]> ExtractTypeArgumentSets(IEnumerable<AttributeData> attributes)
@@ -5162,7 +5163,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("};");
 
-        writer.AppendLine("yield return metadata;");
+        writer.AppendLine("__results.Add(metadata);");
     }
 
     private static int? ExtractRepeatCount(IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
