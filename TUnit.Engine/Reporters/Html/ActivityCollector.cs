@@ -56,7 +56,7 @@ internal sealed class ActivityCollector : IDisposable
         {
             foreach (var span in kvp.Value)
             {
-                if (span.Name != "test case" || span.Tags is null)
+                if (!span.Name.StartsWith("test case", StringComparison.Ordinal) || span.Tags is null)
                 {
                     continue;
                 }
@@ -78,6 +78,31 @@ internal sealed class ActivityCollector : IDisposable
     private static bool IsTUnitSource(ActivitySource source) =>
         source.Name.StartsWith("TUnit", StringComparison.Ordinal) ||
         source.Name.StartsWith("Microsoft.Testing", StringComparison.Ordinal);
+
+    private static string EnrichSpanName(Activity activity)
+    {
+        var displayName = activity.DisplayName;
+
+        // Look up the semantic name tag to produce a more descriptive label
+        var tagKey = displayName switch
+        {
+            "test case" => "test.case.name",
+            "test suite" => "test.suite.name",
+            "test assembly" => "tunit.assembly.name",
+            _ => null
+        };
+
+        if (tagKey is not null)
+        {
+            var value = activity.GetTagItem(tagKey)?.ToString();
+            if (!string.IsNullOrEmpty(value))
+            {
+                return $"{displayName}: {value}";
+            }
+        }
+
+        return displayName;
+    }
 
     private void OnActivityStopped(Activity activity)
     {
@@ -160,7 +185,7 @@ internal sealed class ActivityCollector : IDisposable
             TraceId = traceId,
             SpanId = activity.SpanId.ToString(),
             ParentSpanId = parentSpanId,
-            Name = activity.DisplayName,
+            Name = EnrichSpanName(activity),
             Source = activity.Source.Name,
             Kind = activity.Kind.ToString(),
             StartTimeMs = activity.StartTimeUtc.Subtract(DateTime.UnixEpoch).TotalMilliseconds,

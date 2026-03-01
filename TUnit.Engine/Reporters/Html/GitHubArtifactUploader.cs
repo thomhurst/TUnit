@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
@@ -30,26 +31,42 @@ internal static class GitHubArtifactUploader
         var origin = new Uri(resultsUrl).GetLeftPart(UriPartial.Authority);
         var fileName = Path.GetFileName(filePath);
 
-        // Step 1: CreateArtifact
+        // Step 1: CreateArtifact (deduplicate name on 409 conflict)
         var createUrl = $"{origin}/twirp/github.actions.results.api.v1.ArtifactService/CreateArtifact";
-        var createBody = BuildCreateArtifactJson(workflowRunBackendId, workflowJobRunBackendId, fileName);
+        string? signedUploadUrl = null;
 
-        var signedUploadUrl = await RetryAsync(async () =>
+        for (var nameAttempt = 0; nameAttempt < 3 && signedUploadUrl is null; nameAttempt++)
         {
-            using var request = new HttpRequestMessage(HttpMethod.Post, createUrl);
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", runtimeToken);
-            request.Content = new StringContent(createBody, Encoding.UTF8, "application/json");
+            var artifactName = nameAttempt == 0
+                ? fileName
+                : $"{Path.GetFileNameWithoutExtension(fileName)}-{nameAttempt + 1}{Path.GetExtension(fileName)}";
 
-            var response = await SharedHttpClient.SendAsync(request, cancellationToken);
-            await EnsureSuccessOrLogAsync(response, "CreateArtifact", cancellationToken);
-            var json = await response.Content.ReadAsStringAsync(
+            var createBody = BuildCreateArtifactJson(workflowRunBackendId, workflowJobRunBackendId, artifactName);
+
+            signedUploadUrl = await RetryAsync(async () =>
+            {
+                using var request = new HttpRequestMessage(HttpMethod.Post, createUrl);
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", runtimeToken);
+                request.Content = new StringContent(createBody, Encoding.UTF8, "application/json");
+
+                var response = await SharedHttpClient.SendAsync(request, cancellationToken);
+
+                if (response.StatusCode == HttpStatusCode.Conflict)
+                {
+                    // Artifact name already taken — outer loop will retry with a new name
+                    return null;
+                }
+
+                await EnsureSuccessAsync(response, "CreateArtifact", cancellationToken);
+                var json = await response.Content.ReadAsStringAsync(
 #if NET
-                cancellationToken
+                    cancellationToken
 #endif
-            );
-            using var doc = JsonDocument.Parse(json);
-            return doc.RootElement.GetProperty("signed_upload_url").GetString()!;
-        }, cancellationToken);
+                );
+                using var doc = JsonDocument.Parse(json);
+                return doc.RootElement.GetProperty("signed_upload_url").GetString();
+            }, cancellationToken);
+        }
 
         if (signedUploadUrl is null)
         {
@@ -68,7 +85,7 @@ internal static class GitHubArtifactUploader
         var sha256Hash = BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
 #endif
 
-        await RetryAsync(async () =>
+        var uploadSucceeded = await RetryAsync(async () =>
         {
             using var request = new HttpRequestMessage(HttpMethod.Put, signedUploadUrl);
             request.Content = new ByteArrayContent(fileBytes);
@@ -76,9 +93,15 @@ internal static class GitHubArtifactUploader
             request.Headers.Add("x-ms-blob-type", "BlockBlob");
 
             var response = await SharedHttpClient.SendAsync(request, cancellationToken);
-            await EnsureSuccessOrLogAsync(response, "BlobUpload", cancellationToken);
+            await EnsureSuccessAsync(response, "BlobUpload", cancellationToken);
             return true;
         }, cancellationToken);
+
+        if (uploadSucceeded is not true)
+        {
+            Console.WriteLine("Warning: Blob upload failed — skipping artifact finalization");
+            return null;
+        }
 
         // Step 3: FinalizeArtifact
         var finalizeUrl = $"{origin}/twirp/github.actions.results.api.v1.ArtifactService/FinalizeArtifact";
@@ -91,7 +114,7 @@ internal static class GitHubArtifactUploader
             request.Content = new StringContent(finalizeBody, Encoding.UTF8, "application/json");
 
             var response = await SharedHttpClient.SendAsync(request, cancellationToken);
-            await EnsureSuccessOrLogAsync(response, "FinalizeArtifact", cancellationToken);
+            await EnsureSuccessAsync(response, "FinalizeArtifact", cancellationToken);
             var json = await response.Content.ReadAsStringAsync(
 #if NET
                 cancellationToken
@@ -201,7 +224,7 @@ internal static class GitHubArtifactUploader
             {
                 if (attempt == MaxRetries - 1)
                 {
-                    Console.WriteLine($"Warning: GitHub artifact upload step failed after {MaxRetries} attempts");
+                    Console.WriteLine($"Warning: GitHub artifact upload step failed after {MaxRetries} attempts: {ex.Message}");
                     return default;
                 }
 
@@ -214,7 +237,7 @@ internal static class GitHubArtifactUploader
         return default;
     }
 
-    private static async Task EnsureSuccessOrLogAsync(HttpResponseMessage response, string step, CancellationToken cancellationToken)
+    private static async Task EnsureSuccessAsync(HttpResponseMessage response, string step, CancellationToken cancellationToken)
     {
         if (response.IsSuccessStatusCode)
         {
@@ -227,8 +250,13 @@ internal static class GitHubArtifactUploader
 #endif
         );
 
-        Console.WriteLine($"Warning: {step} returned {(int)response.StatusCode}: {body}");
-        response.EnsureSuccessStatusCode();
+        // Include response body in the exception message rather than logging per-attempt,
+        // so only the final failure is surfaced by RetryAsync.
+#if NET
+        throw new HttpRequestException($"{step} returned {(int)response.StatusCode}: {body}", null, response.StatusCode);
+#else
+        throw new HttpRequestException($"{step} returned {(int)response.StatusCode}: {body}");
+#endif
     }
 
     private static bool IsRetryable(HttpRequestException ex)
@@ -237,7 +265,15 @@ internal static class GitHubArtifactUploader
         var statusCode = (int?)ex.StatusCode;
         return statusCode is not null && RetryableStatusCodes.Contains(statusCode.Value);
 #else
-        // On netstandard2.0, HttpRequestException doesn't have StatusCode — retry on any failure
+        // On netstandard2.0, HttpRequestException doesn't have StatusCode.
+        // Use message heuristic to avoid retrying non-retryable errors like 401/403.
+        var msg = ex.Message;
+        if (msg.Contains("401") || msg.Contains("403") ||
+            msg.Contains("Unauthorized") || msg.Contains("Forbidden"))
+        {
+            return false;
+        }
+
         return true;
 #endif
     }
