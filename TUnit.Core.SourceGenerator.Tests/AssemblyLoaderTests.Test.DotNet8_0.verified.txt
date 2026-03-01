@@ -9,7 +9,6 @@ internal sealed class TUnit_TestProject_BasicTests_SynchronousTest_TestSource : 
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.BasicTests>
         {
             TestName = "SynchronousTest",
@@ -52,7 +51,7 @@ internal sealed class TUnit_TestProject_BasicTests_SynchronousTest_TestSource : 
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.BasicTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.BasicTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -67,8 +66,7 @@ internal sealed class TUnit_TestProject_BasicTests_SynchronousTest_TestSource : 
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -112,7 +110,6 @@ internal sealed class TUnit_TestProject_BasicTests_AsynchronousTest_TestSource :
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.BasicTests>
         {
             TestName = "AsynchronousTest",
@@ -155,7 +152,7 @@ internal sealed class TUnit_TestProject_BasicTests_AsynchronousTest_TestSource :
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.BasicTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.BasicTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -169,8 +166,7 @@ internal sealed class TUnit_TestProject_BasicTests_AsynchronousTest_TestSource :
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -214,7 +210,6 @@ internal sealed class TUnit_TestProject_BasicTests_ValueTaskAsynchronousTest_Tes
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.BasicTests>
         {
             TestName = "ValueTaskAsynchronousTest",
@@ -257,7 +252,7 @@ internal sealed class TUnit_TestProject_BasicTests_ValueTaskAsynchronousTest_Tes
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.BasicTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.BasicTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -271,8 +266,7 @@ internal sealed class TUnit_TestProject_BasicTests_ValueTaskAsynchronousTest_Tes
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {

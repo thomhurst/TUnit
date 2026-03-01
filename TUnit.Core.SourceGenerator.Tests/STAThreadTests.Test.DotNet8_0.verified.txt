@@ -9,7 +9,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_With_STA_TestSource : glo
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.STAThreadTests>
         {
             TestName = "With_STA",
@@ -58,7 +57,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_With_STA_TestSource : glo
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -72,8 +71,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_With_STA_TestSource : glo
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -117,7 +115,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_Without_STA_TestSource : 
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.STAThreadTests>
         {
             TestName = "Without_STA",
@@ -165,7 +162,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_Without_STA_TestSource : 
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -179,8 +176,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_Without_STA_TestSource : 
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -224,7 +220,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithSimpleAwait_TestS
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.STAThreadTests>
         {
             TestName = "STA_WithSimpleAwait",
@@ -273,7 +268,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithSimpleAwait_TestS
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -287,8 +282,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithSimpleAwait_TestS
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -332,7 +326,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskYield_TestSou
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.STAThreadTests>
         {
             TestName = "STA_WithTaskYield",
@@ -381,7 +374,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskYield_TestSou
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -395,8 +388,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskYield_TestSou
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -440,7 +432,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithConfigureAwaitTru
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.STAThreadTests>
         {
             TestName = "STA_WithConfigureAwaitTrue",
@@ -489,7 +480,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithConfigureAwaitTru
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -503,8 +494,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithConfigureAwaitTru
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -548,7 +538,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithNestedAsyncCalls_
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.STAThreadTests>
         {
             TestName = "STA_WithNestedAsyncCalls",
@@ -597,7 +586,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithNestedAsyncCalls_
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -611,8 +600,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithNestedAsyncCalls_
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -656,7 +644,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskFromResult_Te
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.STAThreadTests>
         {
             TestName = "STA_WithTaskFromResult",
@@ -705,7 +692,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskFromResult_Te
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -719,8 +706,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskFromResult_Te
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -764,7 +750,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithCompletedTask_Tes
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.STAThreadTests>
         {
             TestName = "STA_WithCompletedTask",
@@ -813,7 +798,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithCompletedTask_Tes
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -827,8 +812,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithCompletedTask_Tes
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -872,7 +856,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskRun_TestSourc
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.STAThreadTests>
         {
             TestName = "STA_WithTaskRun",
@@ -921,7 +904,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskRun_TestSourc
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -935,8 +918,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskRun_TestSourc
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -980,7 +962,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithMultipleAwaits_Te
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.STAThreadTests>
         {
             TestName = "STA_WithMultipleAwaits",
@@ -1029,7 +1010,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithMultipleAwaits_Te
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -1043,8 +1024,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithMultipleAwaits_Te
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -1088,7 +1068,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithAsyncEnumerable_T
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.STAThreadTests>
         {
             TestName = "STA_WithAsyncEnumerable",
@@ -1137,7 +1116,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithAsyncEnumerable_T
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -1151,8 +1130,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithAsyncEnumerable_T
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -1196,7 +1174,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskWhenAll_TestS
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.STAThreadTests>
         {
             TestName = "STA_WithTaskWhenAll",
@@ -1245,7 +1222,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskWhenAll_TestS
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -1259,8 +1236,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskWhenAll_TestS
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -1304,7 +1280,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithExceptionHandling
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.STAThreadTests>
         {
             TestName = "STA_WithExceptionHandling",
@@ -1353,7 +1328,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithExceptionHandling
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -1367,8 +1342,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithExceptionHandling
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -1412,7 +1386,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithThrowsNothingAsse
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.STAThreadTests>
         {
             TestName = "STA_WithThrowsNothingAssertion",
@@ -1461,7 +1434,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithThrowsNothingAsse
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -1475,8 +1448,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithThrowsNothingAsse
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
@@ -1520,7 +1492,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithFuncAssertion_Tes
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.STAThreadTests>
         {
             TestName = "STA_WithFuncAssertion",
@@ -1569,7 +1540,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithFuncAssertion_Tes
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -1583,8 +1554,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithFuncAssertion_Tes
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {

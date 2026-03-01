@@ -9,7 +9,6 @@ internal sealed class TUnit_TestProject_Bugs__2971_Tests_SimpleTest_TestSource :
 {
     public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
-        var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.Bugs._2971.Tests>
         {
             TestName = "SimpleTest",
@@ -53,7 +52,7 @@ internal sealed class TUnit_TestProject_Bugs__2971_Tests_SimpleTest_TestSource :
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._2971.Tests(),
+            InstanceFactory = static (typeArgs, args) => new global::TUnit.TestProject.Bugs._2971.Tests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 try
@@ -68,8 +67,7 @@ internal sealed class TUnit_TestProject_Bugs__2971_Tests_SimpleTest_TestSource :
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        __results.Add(metadata);
-        return __results;
+        return new global::TUnit.Core.TestMetadata[] { metadata };
     }
     public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
