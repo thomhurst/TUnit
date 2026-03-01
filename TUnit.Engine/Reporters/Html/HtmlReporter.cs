@@ -17,7 +17,7 @@ namespace TUnit.Engine.Reporters.Html;
 internal class HtmlReporter(IExtension extension) : IDataConsumer, ITestHostApplicationLifetime, IFilterReceiver
 {
     private string? _outputPath;
-    private readonly ConcurrentDictionary<string, List<TestNodeUpdateMessage>> _updates = [];
+    private readonly ConcurrentDictionary<string, ConcurrentBag<TestNodeUpdateMessage>> _updates = [];
 
 #if NET
     private ActivityCollector? _activityCollector;
@@ -34,11 +34,6 @@ internal class HtmlReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             return false;
         }
 
-        if (string.IsNullOrEmpty(_outputPath))
-        {
-            _outputPath = GetDefaultOutputPath();
-        }
-
         return await extension.IsEnabledAsync();
     }
 
@@ -53,7 +48,7 @@ internal class HtmlReporter(IExtension extension) : IDataConsumer, ITestHostAppl
     public Task ConsumeAsync(IDataProducer dataProducer, IData value, CancellationToken cancellationToken)
     {
         var testNodeUpdateMessage = (TestNodeUpdateMessage)value;
-        _updates.GetOrAdd(testNodeUpdateMessage.TestNode.Uid.Value, []).Add(testNodeUpdateMessage);
+        _updates.GetOrAdd(testNodeUpdateMessage.TestNode.Uid.Value, _ => []).Add(testNodeUpdateMessage);
         return Task.CompletedTask;
     }
 
@@ -61,6 +56,11 @@ internal class HtmlReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
     public Task BeforeRunAsync(CancellationToken cancellationToken)
     {
+        if (string.IsNullOrEmpty(_outputPath))
+        {
+            _outputPath = GetDefaultOutputPath();
+        }
+
 #if NET
         _activityCollector = new ActivityCollector();
         _activityCollector.Start();
@@ -117,13 +117,23 @@ internal class HtmlReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         var assemblyName = Assembly.GetEntryAssembly()?.GetName().Name ?? "TestResults";
         var tunitVersion = typeof(HtmlReporter).Assembly.GetName().Version?.ToString() ?? "unknown";
 
-        // Get the last update for each test (final state)
+        // Get the last update with a final state for each test
         var lastUpdates = new Dictionary<string, TestNodeUpdateMessage>(_updates.Count);
         foreach (var kvp in _updates)
         {
-            if (kvp.Value.Count > 0)
+            TestNodeUpdateMessage? lastFinal = null;
+            foreach (var update in kvp.Value)
             {
-                lastUpdates[kvp.Key] = kvp.Value[^1];
+                var state = update.TestNode.Properties.SingleOrDefault<TestNodeStateProperty>();
+                if (state is not null and not InProgressTestNodeStateProperty and not DiscoveredTestNodeStateProperty)
+                {
+                    lastFinal = update;
+                }
+            }
+
+            if (lastFinal != null)
+            {
+                lastUpdates[kvp.Key] = lastFinal;
             }
         }
 
@@ -172,27 +182,7 @@ internal class HtmlReporter(IExtension extension) : IDataConsumer, ITestHostAppl
                 }
             }
 
-            // Accumulate summary
-            switch (testResult.Status)
-            {
-                case "passed":
-                    summary.Passed++;
-                    break;
-                case "failed" or "error":
-                    summary.Failed++;
-                    break;
-                case "skipped":
-                    summary.Skipped++;
-                    break;
-                case "timedOut":
-                    summary.TimedOut++;
-                    break;
-                case "cancelled":
-                    summary.Cancelled++;
-                    break;
-            }
-
-            summary.Total++;
+            AccumulateStatus(summary, testResult.Status);
 
             // Group by class name
             var className = testResult.ClassName;
@@ -243,25 +233,7 @@ internal class HtmlReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             var groupSummary = new ReportSummary();
             foreach (var test in kvp.Value)
             {
-                groupSummary.Total++;
-                switch (test.Status)
-                {
-                    case "passed":
-                        groupSummary.Passed++;
-                        break;
-                    case "failed" or "error":
-                        groupSummary.Failed++;
-                        break;
-                    case "skipped":
-                        groupSummary.Skipped++;
-                        break;
-                    case "timedOut":
-                        groupSummary.TimedOut++;
-                        break;
-                    case "cancelled":
-                        groupSummary.Cancelled++;
-                        break;
-                }
+                AccumulateStatus(groupSummary, test.Status);
             }
 
             groups[i++] = new ReportTestGroup
@@ -294,6 +266,29 @@ internal class HtmlReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             Groups = groups,
             Spans = spans
         };
+    }
+
+    private static void AccumulateStatus(ReportSummary summary, string status)
+    {
+        summary.Total++;
+        switch (status)
+        {
+            case "passed":
+                summary.Passed++;
+                break;
+            case "failed" or "error":
+                summary.Failed++;
+                break;
+            case "skipped":
+                summary.Skipped++;
+                break;
+            case "timedOut":
+                summary.TimedOut++;
+                break;
+            case "cancelled":
+                summary.Cancelled++;
+                break;
+        }
     }
 
     private static ReportTestResult ExtractTestResult(string testId, TestNode testNode)

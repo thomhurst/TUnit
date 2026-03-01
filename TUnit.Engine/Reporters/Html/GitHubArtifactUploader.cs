@@ -196,6 +196,7 @@ internal static class GitHubArtifactUploader
             }
         }
 
+        Console.WriteLine($"Warning: GitHub artifact upload step failed after {MaxRetries} attempts");
         return default;
     }
 

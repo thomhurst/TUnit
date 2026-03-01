@@ -7,9 +7,11 @@ namespace TUnit.Engine.Reporters.Html;
 internal sealed class ActivityCollector : IDisposable
 {
     private const int MaxSpansPerTrace = 1000;
+    private const int MaxTotalSpans = 50_000;
 
     private readonly ConcurrentDictionary<string, ConcurrentBag<SpanData>> _spansByTrace = new();
     private ActivityListener? _listener;
+    private int _totalSpanCount;
 
     public void Start()
     {
@@ -74,6 +76,11 @@ internal sealed class ActivityCollector : IDisposable
 
     private void OnActivityStopped(Activity activity)
     {
+        if (Volatile.Read(ref _totalSpanCount) >= MaxTotalSpans)
+        {
+            return;
+        }
+
         var traceId = activity.TraceId.ToString();
         var bag = _spansByTrace.GetOrAdd(traceId, _ => new ConcurrentBag<SpanData>());
 
@@ -155,6 +162,7 @@ internal sealed class ActivityCollector : IDisposable
         };
 
         bag.Add(spanData);
+        Interlocked.Increment(ref _totalSpanCount);
     }
 
     public void Dispose()
