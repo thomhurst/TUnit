@@ -96,7 +96,7 @@ If you prefer not to expose the runtime token, you can upload the report yoursel
   if: always()
   with:
     name: TestReport
-    path: '**/TestResults/*-report.html'
+    path: '**/*-report.html'
 ```
 
 ### Viewing the Report
