@@ -41,7 +41,7 @@ internal static class GitHubArtifactUploader
             request.Content = new StringContent(createBody, Encoding.UTF8, "application/json");
 
             var response = await SharedHttpClient.SendAsync(request, cancellationToken);
-            response.EnsureSuccessStatusCode();
+            await EnsureSuccessOrLogAsync(response, "CreateArtifact", cancellationToken);
             var json = await response.Content.ReadAsStringAsync(
 #if NET
                 cancellationToken
@@ -76,7 +76,7 @@ internal static class GitHubArtifactUploader
             request.Headers.Add("x-ms-blob-type", "BlockBlob");
 
             var response = await SharedHttpClient.SendAsync(request, cancellationToken);
-            response.EnsureSuccessStatusCode();
+            await EnsureSuccessOrLogAsync(response, "BlobUpload", cancellationToken);
             return true;
         }, cancellationToken);
 
@@ -91,7 +91,7 @@ internal static class GitHubArtifactUploader
             request.Content = new StringContent(finalizeBody, Encoding.UTF8, "application/json");
 
             var response = await SharedHttpClient.SendAsync(request, cancellationToken);
-            response.EnsureSuccessStatusCode();
+            await EnsureSuccessOrLogAsync(response, "FinalizeArtifact", cancellationToken);
             var json = await response.Content.ReadAsStringAsync(
 #if NET
                 cancellationToken
@@ -129,7 +129,7 @@ internal static class GitHubArtifactUploader
         w.WriteString("workflowRunBackendId", runId);
         w.WriteString("workflowJobRunBackendId", jobId);
         w.WriteString("name", fileName);
-        w.WriteNumber("size", size);
+        w.WriteString("size", size.ToString());
         w.WriteStartObject("hash");
         w.WriteString("value", $"sha256:{sha256Hash}");
         w.WriteEndObject();
@@ -216,6 +216,23 @@ internal static class GitHubArtifactUploader
         }
 
         return default;
+    }
+
+    private static async Task EnsureSuccessOrLogAsync(HttpResponseMessage response, string step, CancellationToken cancellationToken)
+    {
+        if (response.IsSuccessStatusCode)
+        {
+            return;
+        }
+
+        var body = await response.Content.ReadAsStringAsync(
+#if NET
+            cancellationToken
+#endif
+        );
+
+        Console.WriteLine($"Warning: {step} returned {(int)response.StatusCode}: {body}");
+        response.EnsureSuccessStatusCode();
     }
 
     private static bool IsRetryable(HttpRequestException ex)
