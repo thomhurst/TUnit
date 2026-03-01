@@ -40,6 +40,25 @@ internal static class HtmlReportGenerator
         // Ambient background grain
         sb.AppendLine("<div class=\"grain\"></div>");
 
+        // Feature 8: Sticky mini-header
+        sb.Append("<div class=\"sticky-bar\" id=\"stickyBar\">");
+        sb.Append("<span class=\"sticky-name\">");
+        sb.Append(WebUtility.HtmlEncode(data.AssemblyName));
+        sb.Append("</span>");
+        sb.Append("<span class=\"sticky-badges\">");
+        sb.Append("<span class=\"sticky-b sb-pass\">");
+        sb.Append(data.Summary.Passed);
+        sb.Append("</span>");
+        sb.Append("<span class=\"sticky-b sb-fail\">");
+        sb.Append(data.Summary.Failed + data.Summary.TimedOut);
+        sb.Append("</span>");
+        sb.Append("<span class=\"sticky-b sb-skip\">");
+        sb.Append(data.Summary.Skipped);
+        sb.Append("</span>");
+        sb.Append("</span>");
+        sb.AppendLine("<button class=\"sticky-search-btn\" id=\"stickySearchBtn\" title=\"Focus search\"><svg viewBox=\"0 0 20 20\" fill=\"currentColor\" width=\"14\" height=\"14\"><path fill-rule=\"evenodd\" d=\"M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.45 4.39l3.58 3.58a.75.75 0 1 1-1.06 1.06l-3.58-3.58A7 7 0 0 1 2 9Z\" clip-rule=\"evenodd\"/></svg></button>");
+        sb.AppendLine("</div>");
+
         sb.AppendLine("<div class=\"shell\">");
 
         AppendHeader(sb, data);
@@ -49,7 +68,7 @@ internal static class HtmlReportGenerator
         sb.AppendLine("<div id=\"failedSection\"></div>");
         sb.AppendLine("<div id=\"slowestSection\"></div>");
 
-        AppendSearchAndFilters(sb);
+        AppendSearchAndFilters(sb, data.Summary);
         AppendTestGroups(sb, data);
         AppendJsonData(sb, data);
         AppendJavaScript(sb);
@@ -214,6 +233,7 @@ internal static class HtmlReportGenerator
         sb.Append(FormatDuration(totalDurationMs));
         sb.AppendLine("</span>");
         sb.AppendLine("<span class=\"dash-dur-lbl\">duration</span>");
+        sb.AppendLine("<div id=\"durationHist\" class=\"dur-hist\"></div>");
         sb.AppendLine("</div>");
 
         sb.AppendLine("</section>");
@@ -252,7 +272,7 @@ internal static class HtmlReportGenerator
         sb.AppendLine("</span></div>");
     }
 
-    private static void AppendSearchAndFilters(StringBuilder sb)
+    private static void AppendSearchAndFilters(StringBuilder sb, ReportSummary summary)
     {
         sb.AppendLine("<div class=\"bar\" data-anim=\"fade-up\">");
         sb.AppendLine("<div class=\"search\">");
@@ -262,12 +282,34 @@ internal static class HtmlReportGenerator
         sb.AppendLine("<button id=\"clearSearch\" class=\"search-clear\" aria-label=\"Clear\">&times;</button>");
         sb.AppendLine("</div>");
         sb.AppendLine("<div class=\"pills\" id=\"filterButtons\">");
-        sb.AppendLine("<button class=\"pill active\" data-filter=\"all\">All</button>");
-        sb.AppendLine("<button class=\"pill\" data-filter=\"passed\"><span class=\"dot emerald\"></span>Passed</button>");
-        sb.AppendLine("<button class=\"pill\" data-filter=\"failed\"><span class=\"dot rose\"></span>Failed</button>");
-        sb.AppendLine("<button class=\"pill\" data-filter=\"skipped\"><span class=\"dot amber\"></span>Skipped</button>");
-        sb.AppendLine("<button class=\"pill\" data-filter=\"cancelled\"><span class=\"dot slate\"></span>Cancelled</button>");
+        sb.Append("<button class=\"pill active\" data-filter=\"all\">All <span class=\"pill-count\">");
+        sb.Append(summary.Total);
+        sb.AppendLine("</span></button>");
+        sb.Append("<button class=\"pill\" data-filter=\"passed\"><span class=\"dot emerald\"></span>Passed <span class=\"pill-count\">");
+        sb.Append(summary.Passed);
+        sb.AppendLine("</span></button>");
+        sb.Append("<button class=\"pill\" data-filter=\"failed\"><span class=\"dot rose\"></span>Failed <span class=\"pill-count\">");
+        sb.Append(summary.Failed + summary.TimedOut);
+        sb.AppendLine("</span></button>");
+        sb.Append("<button class=\"pill\" data-filter=\"skipped\"><span class=\"dot amber\"></span>Skipped <span class=\"pill-count\">");
+        sb.Append(summary.Skipped);
+        sb.AppendLine("</span></button>");
+        sb.Append("<button class=\"pill\" data-filter=\"cancelled\"><span class=\"dot slate\"></span>Cancelled <span class=\"pill-count\">");
+        sb.Append(summary.Cancelled);
+        sb.AppendLine("</span></button>");
         sb.AppendLine("</div>");
+
+        // Feature 2: Expand/Collapse All + Feature 3: Sort Toggle
+        sb.AppendLine("<div class=\"bar-actions\">");
+        sb.AppendLine("<button id=\"expandAll\" class=\"bar-btn\" title=\"Expand all groups\"><svg viewBox=\"0 0 16 16\" fill=\"currentColor\" width=\"14\" height=\"14\"><path d=\"M1.75 10a.75.75 0 0 1 .75.75v2.5h2.5a.75.75 0 0 1 0 1.5h-3.25a.75.75 0 0 1-.75-.75v-3.25a.75.75 0 0 1 .75-.75Zm12.5 0a.75.75 0 0 1 .75.75v3.25a.75.75 0 0 1-.75.75h-3.25a.75.75 0 0 1 0-1.5h2.5v-2.5a.75.75 0 0 1 .75-.75ZM2.5 2.25h-2.5v2.5a.75.75 0 0 1-1.5 0v-3.25a.75.75 0 0 1 .75-.75h3.25a.75.75 0 0 1 0 1.5Zm8.75-1.5a.75.75 0 0 1 0-1.5h3.25a.75.75 0 0 1 .75.75v3.25a.75.75 0 0 1-1.5 0v-2.5h-2.5Z\"/></svg></button>");
+        sb.AppendLine("<button id=\"collapseAll\" class=\"bar-btn\" title=\"Collapse all groups\"><svg viewBox=\"0 0 16 16\" fill=\"currentColor\" width=\"14\" height=\"14\"><path d=\"M3.75 14a.75.75 0 0 1-.75-.75v-2.5h-2.5a.75.75 0 0 1 0-1.5h3.25a.75.75 0 0 1 .75.75v3.25a.75.75 0 0 1-.75.75Zm8.5 0a.75.75 0 0 1-.75-.75v-3.25a.75.75 0 0 1 .75-.75h3.25a.75.75 0 0 1 0 1.5h-2.5v2.5a.75.75 0 0 1-.75.75ZM.5 4.75a.75.75 0 0 1 0-1.5h2.5v-2.5a.75.75 0 0 1 1.5 0v3.25a.75.75 0 0 1-.75.75H.5Zm11 0a.75.75 0 0 1-.75-.75v-3.25a.75.75 0 0 1 1.5 0v2.5h2.5a.75.75 0 0 1 0 1.5h-3.25Z\"/></svg></button>");
+        sb.AppendLine("<span class=\"bar-sep\"></span>");
+        sb.AppendLine("<span class=\"bar-lbl\">Sort:</span>");
+        sb.AppendLine("<button class=\"sort-btn active\" data-sort=\"default\" title=\"Failures first\">Default</button>");
+        sb.AppendLine("<button class=\"sort-btn\" data-sort=\"duration\" title=\"Slowest first\">Duration</button>");
+        sb.AppendLine("<button class=\"sort-btn\" data-sort=\"name\" title=\"Alphabetical\">Name</button>");
+        sb.AppendLine("</div>");
+
         sb.AppendLine("<span class=\"bar-info\" id=\"filterSummary\"></span>");
         sb.AppendLine("</div>");
     }
@@ -828,6 +870,141 @@ body{
   background:radial-gradient(ellipse 60% 50% at 20% 50%,rgba(99,102,241,.06),transparent),
              radial-gradient(ellipse 40% 60% at 80% 30%,rgba(52,211,153,.04),transparent);
 }
+
+/* ── Feature 1: Pill Counts ───────────────────────── */
+.pill-count{font-size:.72rem;opacity:.7;font-variant-numeric:tabular-nums;margin-left:2px}
+.pill.active .pill-count{opacity:.85}
+
+/* ── Feature 2: Expand/Collapse All ──────────────── */
+.bar-actions{display:flex;align-items:center;gap:6px;margin-left:auto}
+.bar-btn{
+  display:flex;align-items:center;justify-content:center;
+  width:32px;height:32px;border-radius:var(--r);
+  background:var(--surface-1);border:1px solid var(--border);
+  color:var(--text-3);cursor:pointer;
+  transition:border-color .2s var(--ease),color .2s var(--ease),background .2s var(--ease);
+}
+.bar-btn:hover{border-color:var(--border-h);color:var(--text)}
+
+/* ── Feature 3: Sort Toggle ──────────────────────── */
+.bar-sep{width:1px;height:18px;background:var(--border);margin:0 4px}
+.bar-lbl{font-size:.72rem;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+.sort-btn{
+  padding:5px 10px;border-radius:100px;font-size:.74rem;
+  background:var(--surface-1);border:1px solid var(--border);
+  color:var(--text-2);cursor:pointer;font-family:var(--font);
+  transition:all .18s var(--ease);white-space:nowrap;
+}
+.sort-btn:hover{border-color:var(--border-h);color:var(--text)}
+.sort-btn.active{background:var(--indigo);border-color:var(--indigo);color:#fff}
+
+/* ── Feature 4: Search Highlighting ──────────────── */
+mark{background:rgba(251,191,36,.25);color:inherit;border-radius:2px;padding:0 1px}
+:root[data-theme="light"] mark{background:rgba(251,191,36,.35)}
+
+/* ── Feature 5: Copy Deep-Link Button ────────────── */
+.t-link-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:24px;height:24px;border-radius:4px;
+  background:transparent;border:none;color:var(--text-3);
+  cursor:pointer;opacity:0;transition:opacity .15s var(--ease),color .15s var(--ease);
+  flex-shrink:0;position:relative;
+}
+.t-row:hover .t-link-btn{opacity:.6}
+.t-link-btn:hover{opacity:1!important;color:var(--indigo)}
+.t-link-copied{
+  position:absolute;bottom:100%;left:50%;transform:translateX(-50%);
+  padding:2px 8px;border-radius:4px;font-size:.68rem;white-space:nowrap;
+  background:var(--surface-3);color:var(--text);pointer-events:none;
+  animation:fade-up .2s var(--ease);
+}
+
+/* ── Feature 6: Diff-Friendly Error Display ──────── */
+.err-expected{color:var(--emerald);font-weight:600}
+.err-actual{color:var(--rose);font-weight:600}
+
+/* ── Feature 7: Keyboard Navigation ──────────────── */
+.t-row.kb-focus{outline:2px solid var(--indigo);outline-offset:-2px;background:var(--indigo-d)}
+.kb-overlay{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center}
+.kb-modal{
+  background:var(--surface-0);border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:24px 28px;max-width:380px;width:90%;box-shadow:0 24px 48px rgba(0,0,0,.3);
+}
+.kb-modal h3{font-size:1rem;font-weight:700;margin-bottom:14px;color:var(--text)}
+.kb-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:.84rem;color:var(--text-2)}
+.kb-key{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:24px;height:24px;padding:0 7px;border-radius:4px;
+  background:var(--surface-2);border:1px solid var(--border);
+  font-family:var(--mono);font-size:.74rem;font-weight:600;color:var(--text);
+}
+:root[data-theme="light"] .kb-overlay{background:rgba(0,0,0,.3)}
+
+/* ── Feature 8: Sticky Mini-Header ───────────────── */
+.sticky-bar{
+  position:sticky;top:0;z-index:100;
+  display:flex;align-items:center;gap:12px;
+  padding:8px 24px;
+  background:rgba(11,13,17,.85);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  transform:translateY(-100%);opacity:0;
+  transition:transform .25s var(--ease),opacity .25s var(--ease);
+}
+.sticky-bar.visible{transform:none;opacity:1}
+.sticky-name{font-size:.84rem;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sticky-badges{display:flex;gap:6px;flex-shrink:0}
+.sticky-b{
+  font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:100px;
+  font-variant-numeric:tabular-nums;
+}
+.sb-pass{background:var(--emerald-d);color:var(--emerald)}
+.sb-fail{background:var(--rose-d);color:var(--rose)}
+.sb-skip{background:var(--amber-d);color:var(--amber)}
+.sticky-search-btn{
+  margin-left:auto;display:flex;align-items:center;justify-content:center;
+  width:28px;height:28px;border-radius:var(--r);
+  background:var(--surface-2);border:1px solid var(--border);
+  color:var(--text-3);cursor:pointer;
+  transition:color .15s var(--ease),border-color .15s var(--ease);
+}
+.sticky-search-btn:hover{color:var(--text);border-color:var(--border-h)}
+:root[data-theme="light"] .sticky-bar{background:rgba(248,249,251,.85)}
+
+/* ── Feature 9: 100% Pass Celebration ────────────── */
+@keyframes shimmer{
+  0%{background-position:200% 0}
+  100%{background-position:-200% 0}
+}
+@keyframes ring-glow{
+  0%,100%{filter:drop-shadow(0 0 6px rgba(52,211,153,.3))}
+  50%{filter:drop-shadow(0 0 16px rgba(52,211,153,.6))}
+}
+.dash.celebrate .stat{
+  background-image:linear-gradient(90deg,transparent 30%,rgba(52,211,153,.06) 50%,transparent 70%);
+  background-size:200% 100%;animation:shimmer 3s linear infinite;
+}
+.dash.celebrate .ring{animation:ring-glow 2.5s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){
+  .dash.celebrate .stat,.dash.celebrate .ring{animation:none}
+}
+
+/* ── Feature 10: Duration Histogram ──────────────── */
+.dur-hist{display:flex;align-items:flex-end;gap:2px;height:36px;margin-top:8px}
+.dur-hist-bar{
+  flex:1;min-width:0;border-radius:2px 2px 0 0;
+  background:linear-gradient(to top,var(--indigo),rgba(129,140,248,.5));
+  position:relative;cursor:default;
+  transition:filter .15s var(--ease);
+}
+.dur-hist-bar:hover{filter:brightness(1.3)}
+.dur-hist-bar::after{
+  content:attr(data-tip);
+  position:absolute;bottom:100%;left:50%;transform:translateX(-50%);
+  padding:3px 8px;border-radius:4px;font-size:.66rem;white-space:nowrap;
+  background:var(--surface-3);color:var(--text);pointer-events:none;
+  opacity:0;transition:opacity .15s var(--ease);
+}
+.dur-hist-bar:hover::after{opacity:1}
 """;
     }
 
@@ -849,6 +1026,8 @@ const filterSummary = document.getElementById('filterSummary');
 let activeFilter = 'all';
 let searchText = '';
 let debounceTimer;
+let sortMode = 'default';
+let kbIdx = -1;
 
 const spansByTrace = {};
 const bySpanId = {};
@@ -894,6 +1073,37 @@ function esc(s) {
     return d.innerHTML;
 }
 
+// Feature 4: Search highlight helper
+function highlight(text, query) {
+    if (!query) return esc(text);
+    const escaped = esc(text);
+    const re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+    return escaped.replace(re, '<mark>$1</mark>');
+}
+
+// Feature 3: Sort comparator
+const statusOrder = {failed:0,error:0,timedOut:1,inProgress:2,unknown:3,passed:4,skipped:5,cancelled:6};
+function sortTests(tests) {
+    if (sortMode === 'duration') return [...tests].sort((a,b) => b.durationMs - a.durationMs);
+    if (sortMode === 'name') return [...tests].sort((a,b) => a.displayName.localeCompare(b.displayName));
+    return [...tests].sort((a,b) => (statusOrder[a.status]||9) - (statusOrder[b.status]||9));
+}
+
+// Feature 6: Diff-friendly error formatting
+function formatAssertionMessage(msg) {
+    if (!msg) return '';
+    let s = esc(msg);
+    // Pattern: "Expected: X\nActual: Y" or "Expected: X\r\nActual: Y"
+    s = s.replace(/^(Expected:\s*)(.+)$/gm, '$1<span class="err-expected">$2</span>');
+    s = s.replace(/^(Actual:\s*)(.+)$/gm, '$1<span class="err-actual">$2</span>');
+    // Pattern: "expected X but was Y"
+    s = s.replace(/(expected\s+)(.+?)(\s+but was\s+)(.+)/gi, '$1<span class="err-expected">$2</span>$3<span class="err-actual">$4</span>');
+    return s;
+}
+
+// Feature 5: Link icon SVG
+const linkIcon = '<svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14"><path d="M7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-.8 9.45a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25Z"/></svg>';
+
 const arrow = '<svg class="grp-arrow" viewBox="0 0 16 16" fill="currentColor"><path d="M6.22 4.22a.75.75 0 0 1 1.06 0l3.25 3.25a.75.75 0 0 1 0 1.06l-3.25 3.25a.75.75 0 0 1-1.06-1.06L8.94 8 6.22 5.28a.75.75 0 0 1 0-1.06Z"/></svg>';
 
 function fmtTime(iso) {
@@ -924,12 +1134,12 @@ function renderDetail(t) {
 
     if (t.exception) {
         h += '<div class="d-sec"><div class="d-lbl">Exception</div>';
-        h += wrapPre(esc(t.exception.type) + ': ' + esc(t.exception.message), 'err');
+        h += wrapPre(esc(t.exception.type) + ': ' + formatAssertionMessage(t.exception.message), 'err');
         if (t.exception.stackTrace) h += wrapPre(esc(t.exception.stackTrace), 'stack');
         let inner = t.exception.innerException;
         while (inner) {
             h += '<div class="d-lbl" style="margin-top:8px">Inner Exception</div>';
-            h += wrapPre(esc(inner.type) + ': ' + esc(inner.message), 'err');
+            h += wrapPre(esc(inner.type) + ': ' + formatAssertionMessage(inner.message), 'err');
             if (inner.stackTrace) h += wrapPre(esc(inner.stackTrace), 'stack');
             inner = inner.innerException;
         }
@@ -1165,7 +1375,7 @@ function render() {
     let total = 0;
     let html = '';
     groups.forEach((g,gi)=>{
-        const ft = g.tests.filter(matchesFilter);
+        const ft = sortTests(g.tests.filter(matchesFilter));
         if (!ft.length) return;
         total += ft.length;
         const fail = ft.some(t=>t.status==='failed'||t.status==='error'||t.status==='timedOut');
@@ -1180,7 +1390,7 @@ function render() {
         html += '<div class="grp-hd'+(fail?' fail':'')+'">';
         html += '<div class="grp-indicator"></div>';
         html += arrow;
-        html += '<span class="grp-name">'+esc(g.className)+'</span>';
+        html += '<span class="grp-name">'+(searchText?highlight(g.className,searchText):esc(g.className))+'</span>';
         html += '<span class="grp-badges">';
         if(c.p) html += '<span class="grp-b gp">'+c.p+'</span>';
         if(c.f) html += '<span class="grp-b gf">'+c.f+'</span>';
@@ -1193,8 +1403,9 @@ function render() {
         ft.forEach((t,ti)=>{
             html += '<div class="t-row" id="test-'+t.id+'" data-gi="'+gi+'" data-ti="'+ti+'" data-tid="'+t.id+'" style="--row-idx:'+Math.min(ti,7)+'">';
             html += '<span class="t-badge '+t.status+'">'+esc(t.status)+'</span>';
-            html += '<span class="t-name">'+esc(t.displayName)+'</span>';
+            html += '<span class="t-name">'+(searchText?highlight(t.displayName,searchText):esc(t.displayName))+'</span>';
             if(t.retryAttempt>0) html += '<span class="retry-tag">retry '+t.retryAttempt+'</span>';
+            html += '<button class="t-link-btn" data-link-tid="'+t.id+'" title="Copy link">'+linkIcon+'</button>';
             html += '<span class="t-dur">'+fmt(t.durationMs)+'</span>';
             html += '</div>';
             html += '<div class="t-detail" data-gi="'+gi+'" data-ti="'+ti+'"><div class="t-detail-inner"><div class="t-detail-pad">';
@@ -1206,6 +1417,7 @@ function render() {
     container.innerHTML = html;
     filterSummary.textContent = (activeFilter!=='all'||searchText)
         ? 'Showing '+total+' of '+data.summary.total+' tests' : '';
+    kbIdx = -1;
 }
 
 function scrollToTest(testId) {
@@ -1243,6 +1455,20 @@ document.addEventListener('click',function(e){
 });
 
 container.addEventListener('click',function(e){
+    // Feature 5: Deep-link copy button
+    const lb = e.target.closest('.t-link-btn');
+    if(lb){
+        e.stopPropagation();
+        const tid = lb.dataset.linkTid;
+        const url = location.origin + location.pathname + '#test-' + tid;
+        navigator.clipboard.writeText(url).then(function(){
+            const tip = document.createElement('span');
+            tip.className='t-link-copied';tip.textContent='Copied!';
+            lb.appendChild(tip);
+            setTimeout(function(){tip.remove();},1200);
+        });
+        return;
+    }
     const hd = e.target.closest('.grp-hd');
     if(hd){hd.parentElement.classList.toggle('open');return;}
     const row = e.target.closest('.t-row');
@@ -1271,6 +1497,26 @@ searchInput.addEventListener('input',function(){
     debounceTimer=setTimeout(function(){searchText=searchInput.value.trim();render();},150);
 });
 clearBtn.addEventListener('click',function(){searchInput.value='';clearBtn.style.display='none';searchText='';render();});
+
+// Feature 2: Expand/Collapse All
+document.getElementById('expandAll').addEventListener('click',function(){
+    container.querySelectorAll('.grp').forEach(function(g){g.classList.add('open');});
+    container.querySelectorAll('.t-detail').forEach(function(d){d.classList.add('open');});
+});
+document.getElementById('collapseAll').addEventListener('click',function(){
+    container.querySelectorAll('.grp').forEach(function(g){g.classList.remove('open');});
+    container.querySelectorAll('.t-detail').forEach(function(d){d.classList.remove('open');});
+});
+
+// Feature 3: Sort Toggle
+document.querySelectorAll('.sort-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+        document.querySelectorAll('.sort-btn').forEach(function(b){b.classList.remove('active');});
+        btn.classList.add('active');
+        sortMode = btn.dataset.sort;
+        render();
+    });
+});
 
 // Quick-access section click delegation
 document.addEventListener('click',function(e){
@@ -1313,6 +1559,102 @@ document.getElementById('themeToggle').addEventListener('click', function(){
     localStorage.setItem('tunit-theme', next);
     setTimeout(function(){document.body.classList.remove('theme-transition');}, 350);
 });
+
+// ── Feature 7: Keyboard Navigation ──────────────────
+function getVisibleRows(){return Array.from(container.querySelectorAll('.t-row'));}
+function setKbFocus(idx){
+    const rows = getVisibleRows();
+    const old = container.querySelector('.t-row.kb-focus');
+    if(old) old.classList.remove('kb-focus');
+    if(idx<0||idx>=rows.length){kbIdx=-1;return;}
+    kbIdx=idx;
+    const row=rows[idx];
+    row.classList.add('kb-focus');
+    const grp=row.closest('.grp');
+    if(grp&&!grp.classList.contains('open')) grp.classList.add('open');
+    row.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function showKbHelp(){
+    let ov=document.getElementById('kbOverlay');
+    if(ov){ov.remove();return;}
+    ov=document.createElement('div');ov.id='kbOverlay';ov.className='kb-overlay';
+    ov.innerHTML='<div class="kb-modal"><h3>Keyboard Shortcuts</h3>'
+        +'<div class="kb-row"><span>Next test</span><span class="kb-key">j</span></div>'
+        +'<div class="kb-row"><span>Previous test</span><span class="kb-key">k</span></div>'
+        +'<div class="kb-row"><span>Toggle detail</span><span class="kb-key">Enter</span></div>'
+        +'<div class="kb-row"><span>Close / clear</span><span class="kb-key">Esc</span></div>'
+        +'<div class="kb-row"><span>Focus search</span><span class="kb-key">/</span></div>'
+        +'<div class="kb-row"><span>This help</span><span class="kb-key">?</span></div>'
+        +'</div>';
+    ov.addEventListener('click',function(ev){if(ev.target===ov)ov.remove();});
+    document.body.appendChild(ov);
+}
+document.addEventListener('keydown',function(e){
+    const tag=e.target.tagName;
+    if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'){
+        if(e.key==='Escape'){e.target.blur();if(e.target===searchInput){searchInput.value='';clearBtn.style.display='none';searchText='';render();}}
+        return;
+    }
+    const ov=document.getElementById('kbOverlay');
+    if(ov&&e.key==='Escape'){ov.remove();return;}
+    if(e.key==='j'){e.preventDefault();const rows=getVisibleRows();setKbFocus(Math.min(kbIdx+1,rows.length-1));return;}
+    if(e.key==='k'){e.preventDefault();setKbFocus(Math.max(kbIdx-1,0));return;}
+    if(e.key==='Enter'&&kbIdx>=0){
+        e.preventDefault();const rows=getVisibleRows();const row=rows[kbIdx];
+        if(row){const det=container.querySelector('.t-detail[data-gi="'+row.dataset.gi+'"][data-ti="'+row.dataset.ti+'"]');if(det)det.classList.toggle('open');}
+        return;
+    }
+    if(e.key==='Escape'){
+        const focused=container.querySelector('.t-row.kb-focus');
+        if(focused)focused.classList.remove('kb-focus');
+        kbIdx=-1;
+        container.querySelectorAll('.t-detail.open').forEach(function(d){d.classList.remove('open');});
+        return;
+    }
+    if(e.key==='/'){e.preventDefault();searchInput.focus();return;}
+    if(e.key==='?'){e.preventDefault();showKbHelp();return;}
+});
+
+// ── Feature 8: Sticky Mini-Header ───────────────────
+(function(){
+    const dash=document.querySelector('.dash');
+    const bar=document.getElementById('stickyBar');
+    if(!dash||!bar)return;
+    const obs=new IntersectionObserver(function(entries){
+        entries.forEach(function(en){bar.classList.toggle('visible',!en.isIntersecting);});
+    },{threshold:0});
+    obs.observe(dash);
+    var ssb=document.getElementById('stickySearchBtn');
+    if(ssb) ssb.addEventListener('click',function(){searchInput.focus();searchInput.scrollIntoView({behavior:'smooth',block:'center'});});
+})();
+
+// ── Feature 9: 100% Pass Celebration ────────────────
+if(data.summary.passed===data.summary.total&&data.summary.total>0){
+    const dash=document.querySelector('.dash');
+    if(dash) dash.classList.add('celebrate');
+}
+
+// ── Feature 10: Duration Histogram ──────────────────
+(function(){
+    const hist=document.getElementById('durationHist');
+    if(!hist)return;
+    const durations=[];
+    groups.forEach(function(g){g.tests.forEach(function(t){durations.push(t.durationMs);});});
+    if(!durations.length)return;
+    const mn=Math.min.apply(null,durations);
+    const mx=Math.max.apply(null,durations);
+    if(mx<=mn){hist.innerHTML='<div class="dur-hist-bar" style="height:100%" data-tip="'+durations.length+' tests at '+fmt(mn)+'"></div>';return;}
+    const bins=10;const step=(mx-mn)/bins;const buckets=new Array(bins).fill(0);
+    durations.forEach(function(d){var i=Math.min(Math.floor((d-mn)/step),bins-1);buckets[i]++;});
+    const maxB=Math.max.apply(null,buckets)||1;
+    let h='';
+    for(var i=0;i<bins;i++){
+        const lo=mn+i*step;const hi=lo+step;
+        const pct=Math.max((buckets[i]/maxB)*100,2);
+        h+='<div class="dur-hist-bar" style="height:'+pct.toFixed(1)+'%" data-tip="'+fmt(lo)+' \u2013 '+fmt(hi)+': '+buckets[i]+'"></div>';
+    }
+    hist.innerHTML=h;
+})();
 })();
 """;
     }
