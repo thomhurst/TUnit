@@ -521,12 +521,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
 
         if (!hasRuntimeToken)
         {
-            Console.WriteLine("Tip: To enable automatic HTML report artifact upload, add this step before your test step:");
-            Console.WriteLine("  - uses: actions/github-script@v7");
-            Console.WriteLine("    with:");
-            Console.WriteLine("      script: |");
-            Console.WriteLine("        core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env['ACTIONS_RUNTIME_TOKEN']);");
-            Console.WriteLine("        core.exportVariable('ACTIONS_RESULTS_URL', process.env['ACTIONS_RESULTS_URL']);");
+            Console.WriteLine("Tip: To enable automatic HTML report artifact upload, see https://tunit.dev/docs/guides/html-report#enabling-automatic-artifact-upload");
         }
 
         if (hasRuntimeToken)
@@ -566,19 +561,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
                 if (!hasRuntimeToken)
                 {
                     summary.AppendLine();
-                    summary.AppendLine("<details><summary>\u2139\ufe0f Enable automatic artifact upload</summary>");
-                    summary.AppendLine();
-                    summary.AppendLine("Add this step **before** your test step to enable automatic HTML report artifact upload:");
-                    summary.AppendLine();
-                    summary.AppendLine("```yaml");
-                    summary.AppendLine("- uses: actions/github-script@v7");
-                    summary.AppendLine("  with:");
-                    summary.AppendLine("    script: |");
-                    summary.AppendLine("      core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env['ACTIONS_RUNTIME_TOKEN']);");
-                    summary.AppendLine("      core.exportVariable('ACTIONS_RESULTS_URL', process.env['ACTIONS_RESULTS_URL']);");
-                    summary.AppendLine("```");
-                    summary.AppendLine();
-                    summary.AppendLine("</details>");
+                    summary.AppendLine("\u2139\ufe0f [Enable automatic artifact upload](https://tunit.dev/docs/guides/html-report#enabling-automatic-artifact-upload)");
                 }
 
                 summary.AppendLine();
