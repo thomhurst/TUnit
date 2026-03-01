@@ -670,7 +670,7 @@ function matchesFilter(t) {
     }
     if (searchText) {
         const q = searchText.toLowerCase();
-        const h = (t.displayName + ' ' + t.className + ' ' + (t.categories||[]).join(' ')).toLowerCase();
+        const h = (t.displayName + ' ' + t.className + ' ' + (t.categories||[]).join(' ') + ' ' + (t.traceId||'') + ' ' + (t.spanId||'')).toLowerCase();
         if (!h.includes(q)) return false;
     }
     return true;
