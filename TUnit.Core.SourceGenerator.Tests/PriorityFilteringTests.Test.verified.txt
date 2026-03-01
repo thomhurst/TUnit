@@ -44,7 +44,7 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_High_1_TestSource
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_PriorityFilteringTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -76,10 +76,6 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_High_1_TestSource
             new global::TUnit.TestProject.PriorityAttribute(global::TUnit.TestProject.Enums.PriorityLevel.High)
         ];
     }
-    private static global::TUnit.TestProject.PriorityFilteringTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.PriorityFilteringTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.PriorityFilteringTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -90,14 +86,6 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_High_1_TestSource
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_PriorityFilteringTests_High_1_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new TUnit_TestProject_PriorityFilteringTests_High_1_TestSource());
     }
 }
 
@@ -150,7 +138,7 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_High_2_TestSource
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_PriorityFilteringTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -182,10 +170,6 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_High_2_TestSource
             new global::TUnit.TestProject.PriorityAttribute(global::TUnit.TestProject.Enums.PriorityLevel.High)
         ];
     }
-    private static global::TUnit.TestProject.PriorityFilteringTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.PriorityFilteringTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.PriorityFilteringTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -196,14 +180,6 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_High_2_TestSource
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_PriorityFilteringTests_High_2_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new TUnit_TestProject_PriorityFilteringTests_High_2_TestSource());
     }
 }
 
@@ -256,7 +232,7 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_High_3_TestSource
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_PriorityFilteringTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -288,10 +264,6 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_High_3_TestSource
             new global::TUnit.TestProject.PriorityAttribute(global::TUnit.TestProject.Enums.PriorityLevel.High)
         ];
     }
-    private static global::TUnit.TestProject.PriorityFilteringTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.PriorityFilteringTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.PriorityFilteringTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -302,14 +274,6 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_High_3_TestSource
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_PriorityFilteringTests_High_3_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new TUnit_TestProject_PriorityFilteringTests_High_3_TestSource());
     }
 }
 
@@ -362,7 +326,7 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_Medium_1_TestSour
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_PriorityFilteringTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -394,10 +358,6 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_Medium_1_TestSour
             new global::TUnit.TestProject.PriorityAttribute(global::TUnit.TestProject.Enums.PriorityLevel.Medium)
         ];
     }
-    private static global::TUnit.TestProject.PriorityFilteringTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.PriorityFilteringTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.PriorityFilteringTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -408,14 +368,6 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_Medium_1_TestSour
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_PriorityFilteringTests_Medium_1_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new TUnit_TestProject_PriorityFilteringTests_Medium_1_TestSource());
     }
 }
 
@@ -468,7 +420,7 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_Medium_2_TestSour
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_PriorityFilteringTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -500,10 +452,6 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_Medium_2_TestSour
             new global::TUnit.TestProject.PriorityAttribute(global::TUnit.TestProject.Enums.PriorityLevel.Medium)
         ];
     }
-    private static global::TUnit.TestProject.PriorityFilteringTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.PriorityFilteringTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.PriorityFilteringTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -514,14 +462,6 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_Medium_2_TestSour
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_PriorityFilteringTests_Medium_2_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new TUnit_TestProject_PriorityFilteringTests_Medium_2_TestSource());
     }
 }
 
@@ -574,7 +514,7 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_Low_1_TestSource 
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_PriorityFilteringTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -606,10 +546,6 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_Low_1_TestSource 
             new global::TUnit.TestProject.PriorityAttribute(global::TUnit.TestProject.Enums.PriorityLevel.Low)
         ];
     }
-    private static global::TUnit.TestProject.PriorityFilteringTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.PriorityFilteringTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.PriorityFilteringTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -622,11 +558,31 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_Low_1_TestSource 
         }
     }
 }
-internal static class TUnit_TestProject_PriorityFilteringTests_Low_1_ModuleInitializer
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+internal static class TUnit_TestProject_PriorityFilteringTests__ClassHelper
 {
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
+    internal static global::TUnit.TestProject.PriorityFilteringTests CreateInstance(global::System.Type[] typeArgs, object?[] args)
     {
+        return new global::TUnit.TestProject.PriorityFilteringTests();
+    }
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void Initialize()
+    {
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new TUnit_TestProject_PriorityFilteringTests_High_1_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new TUnit_TestProject_PriorityFilteringTests_High_2_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new TUnit_TestProject_PriorityFilteringTests_High_3_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new TUnit_TestProject_PriorityFilteringTests_Medium_1_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new TUnit_TestProject_PriorityFilteringTests_Medium_2_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new TUnit_TestProject_PriorityFilteringTests_Low_1_TestSource());
     }
 }

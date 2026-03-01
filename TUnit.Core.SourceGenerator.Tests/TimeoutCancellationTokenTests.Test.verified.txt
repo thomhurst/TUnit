@@ -86,7 +86,7 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_DefaultTes
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_TimeoutCancellationTokenTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -120,10 +120,6 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_DefaultTes
             new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
         ];
     }
-    private static global::TUnit.TestProject.TimeoutCancellationTokenTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.TimeoutCancellationTokenTests(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.TimeoutCancellationTokenTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -134,14 +130,6 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_DefaultTes
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_TimeoutCancellationTokenTests_DefaultTest__CancellationToken_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), new TUnit_TestProject_TimeoutCancellationTokenTests_DefaultTest__CancellationToken_TestSource());
     }
 }
 
@@ -236,7 +224,7 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_BasicTest_
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_TimeoutCancellationTokenTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -272,10 +260,6 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_BasicTest_
             new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
         ];
     }
-    private static global::TUnit.TestProject.TimeoutCancellationTokenTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.TimeoutCancellationTokenTests(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.TimeoutCancellationTokenTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -286,14 +270,6 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_BasicTest_
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_TimeoutCancellationTokenTests_BasicTest__CancellationToken_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), new TUnit_TestProject_TimeoutCancellationTokenTests_BasicTest__CancellationToken_TestSource());
     }
 }
 
@@ -388,7 +364,7 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_InheritedT
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_TimeoutCancellationTokenTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -423,10 +399,6 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_InheritedT
             new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
         ];
     }
-    private static global::TUnit.TestProject.TimeoutCancellationTokenTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.TimeoutCancellationTokenTests(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.TimeoutCancellationTokenTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -437,14 +409,6 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_InheritedT
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_TimeoutCancellationTokenTests_InheritedTimeoutAttribute__CancellationToken_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), new TUnit_TestProject_TimeoutCancellationTokenTests_InheritedTimeoutAttribute__CancellationToken_TestSource());
     }
 }
 
@@ -549,7 +513,7 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_DataTest__
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_TimeoutCancellationTokenTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -584,10 +548,6 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_DataTest__
             new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
         ];
     }
-    private static global::TUnit.TestProject.TimeoutCancellationTokenTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.TimeoutCancellationTokenTests(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.TimeoutCancellationTokenTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -607,14 +567,6 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_DataTest__
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_TimeoutCancellationTokenTests_DataTest__int_CancellationToken_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), new TUnit_TestProject_TimeoutCancellationTokenTests_DataTest__int_CancellationToken_TestSource());
     }
 }
 
@@ -740,7 +692,7 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_DataSource
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_TimeoutCancellationTokenTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -775,10 +727,6 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_DataSource
             new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
         ];
     }
-    private static global::TUnit.TestProject.TimeoutCancellationTokenTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.TimeoutCancellationTokenTests(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.TimeoutCancellationTokenTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -798,14 +746,6 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_DataSource
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_TimeoutCancellationTokenTests_DataSourceTest__int_CancellationToken_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), new TUnit_TestProject_TimeoutCancellationTokenTests_DataSourceTest__int_CancellationToken_TestSource());
     }
 }
 
@@ -910,7 +850,7 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_MatrixTest
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_TimeoutCancellationTokenTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -946,10 +886,6 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_MatrixTest
             new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
         ];
     }
-    private static global::TUnit.TestProject.TimeoutCancellationTokenTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.TimeoutCancellationTokenTests(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.TimeoutCancellationTokenTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -969,14 +905,6 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_MatrixTest
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_TimeoutCancellationTokenTests_MatrixTest__int_CancellationToken_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), new TUnit_TestProject_TimeoutCancellationTokenTests_MatrixTest__int_CancellationToken_TestSource());
     }
 }
 
@@ -1071,7 +999,7 @@ internal sealed class TUnit_TestProject_TimeoutDoesNotFireTests_QuickTestDoesNot
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_TimeoutDoesNotFireTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -1106,10 +1034,6 @@ internal sealed class TUnit_TestProject_TimeoutDoesNotFireTests_QuickTestDoesNot
             new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
         ];
     }
-    private static global::TUnit.TestProject.TimeoutDoesNotFireTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.TimeoutDoesNotFireTests(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.TimeoutDoesNotFireTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -1120,14 +1044,6 @@ internal sealed class TUnit_TestProject_TimeoutDoesNotFireTests_QuickTestDoesNot
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_TimeoutDoesNotFireTests_QuickTestDoesNotTimeout__CancellationToken_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests), new TUnit_TestProject_TimeoutDoesNotFireTests_QuickTestDoesNotTimeout__CancellationToken_TestSource());
     }
 }
 
@@ -1222,7 +1138,7 @@ internal sealed class TUnit_TestProject_CancellationTokenTriggeredTests_Cancella
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_CancellationTokenTriggeredTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -1257,10 +1173,6 @@ internal sealed class TUnit_TestProject_CancellationTokenTriggeredTests_Cancella
             new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
         ];
     }
-    private static global::TUnit.TestProject.CancellationTokenTriggeredTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.CancellationTokenTriggeredTests(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.CancellationTokenTriggeredTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -1273,10 +1185,76 @@ internal sealed class TUnit_TestProject_CancellationTokenTriggeredTests_Cancella
         }
     }
 }
-internal static class TUnit_TestProject_CancellationTokenTriggeredTests_CancellationTokenIsTriggered__Cancel_38B13F70_ModuleInitializer
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+internal static class TUnit_TestProject_TimeoutCancellationTokenTests__ClassHelper
 {
+    internal static global::TUnit.TestProject.TimeoutCancellationTokenTests CreateInstance(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.TimeoutCancellationTokenTests(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+    }
     [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
+    internal static void Initialize()
+    {
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), new TUnit_TestProject_TimeoutCancellationTokenTests_DefaultTest__CancellationToken_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), new TUnit_TestProject_TimeoutCancellationTokenTests_BasicTest__CancellationToken_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), new TUnit_TestProject_TimeoutCancellationTokenTests_InheritedTimeoutAttribute__CancellationToken_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), new TUnit_TestProject_TimeoutCancellationTokenTests_DataTest__int_CancellationToken_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), new TUnit_TestProject_TimeoutCancellationTokenTests_DataSourceTest__int_CancellationToken_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), new TUnit_TestProject_TimeoutCancellationTokenTests_MatrixTest__int_CancellationToken_TestSource());
+    }
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+internal static class TUnit_TestProject_TimeoutDoesNotFireTests__ClassHelper
+{
+    internal static global::TUnit.TestProject.TimeoutDoesNotFireTests CreateInstance(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.TimeoutDoesNotFireTests(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+    }
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void Initialize()
+    {
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests), new TUnit_TestProject_TimeoutDoesNotFireTests_QuickTestDoesNotTimeout__CancellationToken_TestSource());
+    }
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+internal static class TUnit_TestProject_CancellationTokenTriggeredTests__ClassHelper
+{
+    internal static global::TUnit.TestProject.CancellationTokenTriggeredTests CreateInstance(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.CancellationTokenTriggeredTests(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+    }
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests), new TUnit_TestProject_CancellationTokenTriggeredTests_CancellationTokenIsTriggered__Cancel_38B13F70_TestSource());
     }

@@ -193,6 +193,60 @@ public static class InstanceFactoryGenerator
         writer.AppendLine("}");
     }
 
+    /// <summary>
+    /// Pre-generates the instance factory method body as a string.
+    /// Used by the per-class helper pipeline where ISymbol is available during the transform step
+    /// but not during source output.
+    /// </summary>
+    public static string GenerateInstanceFactoryBody(ITypeSymbol typeSymbol)
+    {
+        var bodyWriter = new CodeWriter(includeHeader: false);
+        var className = typeSymbol.GloballyQualified();
+
+        if (typeSymbol is INamedTypeSymbol namedTypeSymbol && HasClassConstructorAttribute(namedTypeSymbol))
+        {
+            GenerateClassConstructorStubBody(bodyWriter);
+        }
+        else if (typeSymbol.HasParameterizedConstructor())
+        {
+            var constructor = GetPrimaryConstructor(typeSymbol);
+            if (constructor != null)
+            {
+                GenerateTypedConstructorCallBody(bodyWriter, className, constructor);
+            }
+            else
+            {
+                bodyWriter.AppendLine("return null!;");
+            }
+        }
+        else
+        {
+            var requiredProperties = RequiredPropertyHelper.GetAllRequiredProperties(typeSymbol);
+
+            if (!requiredProperties.Any())
+            {
+                bodyWriter.AppendLine($"return new {className}();");
+            }
+            else
+            {
+                bodyWriter.AppendLine($"return new {className}()");
+                bodyWriter.AppendLine("{");
+                bodyWriter.Indent();
+
+                foreach (var property in requiredProperties)
+                {
+                    var defaultValue = RequiredPropertyHelper.GetDefaultValueForType(property.Type);
+                    bodyWriter.AppendLine($"{property.Name} = {defaultValue},");
+                }
+
+                bodyWriter.Unindent();
+                bodyWriter.AppendLine("};");
+            }
+        }
+
+        return bodyWriter.ToString();
+    }
+
     private static IMethodSymbol? GetPrimaryConstructor(ITypeSymbol typeSymbol)
     {
         // Materialize constructors once to avoid multiple enumerations

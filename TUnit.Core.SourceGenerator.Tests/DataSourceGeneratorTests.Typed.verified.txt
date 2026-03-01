@@ -83,7 +83,7 @@ internal sealed class TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_M
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_DataSourceGeneratorTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -117,10 +117,6 @@ internal sealed class TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_M
             new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute()
         ];
     }
-    private static global::TUnit.TestProject.DataSourceGeneratorTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.DataSourceGeneratorTests(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<bool>(args[2]));
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.DataSourceGeneratorTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -140,14 +136,6 @@ internal sealed class TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_M
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_Method__int_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DataSourceGeneratorTests), new TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_Method__int_TestSource());
     }
 }
 
@@ -253,7 +241,7 @@ internal sealed class TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_M
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_DataSourceGeneratorTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -287,10 +275,6 @@ internal sealed class TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_M
             new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute()
         ];
     }
-    private static global::TUnit.TestProject.DataSourceGeneratorTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.DataSourceGeneratorTests(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<bool>(args[2]));
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.DataSourceGeneratorTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -310,14 +294,6 @@ internal sealed class TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_M
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_Method2__int_string_bool_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DataSourceGeneratorTests), new TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_Method2__int_string_bool_TestSource());
     }
 }
 
@@ -423,7 +399,7 @@ internal sealed class TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_M
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_DataSourceGeneratorTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -457,10 +433,6 @@ internal sealed class TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_M
             new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute()
         ];
     }
-    private static global::TUnit.TestProject.DataSourceGeneratorTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.DataSourceGeneratorTests(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<bool>(args[2]));
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.DataSourceGeneratorTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -482,11 +454,28 @@ internal sealed class TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_M
         }
     }
 }
-internal static class TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_Method3__int_string_bool_ModuleInitializer
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+internal static class TUnit_TestProject_DataSourceGeneratorTests__ClassHelper
 {
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
+    internal static global::TUnit.TestProject.DataSourceGeneratorTests CreateInstance(global::System.Type[] typeArgs, object?[] args)
     {
+        return new global::TUnit.TestProject.DataSourceGeneratorTests(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<bool>(args[2]));
+    }
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void Initialize()
+    {
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DataSourceGeneratorTests), new TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_Method__int_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DataSourceGeneratorTests), new TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_Method2__int_string_bool_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DataSourceGeneratorTests), new TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_Method3__int_string_bool_TestSource());
     }
 }

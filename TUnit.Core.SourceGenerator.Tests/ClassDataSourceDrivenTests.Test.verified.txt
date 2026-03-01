@@ -56,7 +56,7 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Cl
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_ClassDataSourceDrivenTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -88,10 +88,6 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Cl
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.ClassDataSourceDrivenTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.ClassDataSourceDrivenTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.ClassDataSourceDrivenTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -111,14 +107,6 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Cl
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Class__SomeAsyncDisposableClass_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), new TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Class__SomeAsyncDisposableClass_TestSource());
     }
 }
 
@@ -183,7 +171,7 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Cl
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_ClassDataSourceDrivenTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -215,10 +203,6 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Cl
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.ClassDataSourceDrivenTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.ClassDataSourceDrivenTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.ClassDataSourceDrivenTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -238,14 +222,6 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Cl
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Class_Generic__SomeAsyncDisposableClass_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), new TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Class_Generic__SomeAsyncDisposableClass_TestSource());
     }
 }
 
@@ -310,7 +286,7 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_ClassDataSourceDrivenTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -342,10 +318,6 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.ClassDataSourceDrivenTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.ClassDataSourceDrivenTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.ClassDataSourceDrivenTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -364,14 +336,6 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_1_ClassDataSource__Ini_01E5B4B7_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), new TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_1_ClassDataSource__Ini_01E5B4B7_TestSource());
     }
 }
 
@@ -443,7 +407,7 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_ClassDataSourceDrivenTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -475,10 +439,6 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.ClassDataSourceDrivenTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.ClassDataSourceDrivenTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.ClassDataSourceDrivenTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -497,14 +457,6 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_2_ClassDataSources__In_52B92153_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), new TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_2_ClassDataSources__In_52B92153_TestSource());
     }
 }
 
@@ -583,7 +535,7 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_ClassDataSourceDrivenTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -615,10 +567,6 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.ClassDataSourceDrivenTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.ClassDataSourceDrivenTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.ClassDataSourceDrivenTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -637,14 +585,6 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_3_ClassDataSources__In_8432A34C_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), new TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_3_ClassDataSources__In_8432A34C_TestSource());
     }
 }
 
@@ -730,7 +670,7 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_ClassDataSourceDrivenTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -762,10 +702,6 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.ClassDataSourceDrivenTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.ClassDataSourceDrivenTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.ClassDataSourceDrivenTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -784,14 +720,6 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_4_ClassDataSources__In_159CD9D1_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), new TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_4_ClassDataSources__In_159CD9D1_TestSource());
     }
 }
 
@@ -884,7 +812,7 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_ClassDataSourceDrivenTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -916,10 +844,6 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.ClassDataSourceDrivenTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.ClassDataSourceDrivenTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.ClassDataSourceDrivenTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -940,11 +864,32 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
         }
     }
 }
-internal static class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_5_ClassDataSources__In_CB437346_ModuleInitializer
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+internal static class TUnit_TestProject_ClassDataSourceDrivenTests__ClassHelper
 {
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
+    internal static global::TUnit.TestProject.ClassDataSourceDrivenTests CreateInstance(global::System.Type[] typeArgs, object?[] args)
     {
+        return new global::TUnit.TestProject.ClassDataSourceDrivenTests();
+    }
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void Initialize()
+    {
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), new TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Class__SomeAsyncDisposableClass_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), new TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Class_Generic__SomeAsyncDisposableClass_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), new TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_1_ClassDataSource__Ini_01E5B4B7_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), new TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_2_ClassDataSources__In_52B92153_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), new TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_3_ClassDataSources__In_8432A34C_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), new TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_4_ClassDataSources__In_159CD9D1_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), new TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized_With_5_ClassDataSources__In_CB437346_TestSource());
     }
 }

@@ -92,6 +92,67 @@ internal static class FileNameHelper
     }
 
     /// <summary>
+    /// Generates a deterministic class helper name for a test class.
+    /// Format: {Namespace}_{ClassName}__ClassHelper
+    /// Must produce the same name for the same type across both per-class and per-method pipelines.
+    /// </summary>
+    public static string GetSafeClassHelperName(INamedTypeSymbol typeSymbol)
+    {
+        var sb = new StringBuilder();
+
+        // Add namespace
+        if (!typeSymbol.ContainingNamespace.IsGlobalNamespace)
+        {
+            sb.Append(SanitizeForFileName(typeSymbol.ContainingNamespace.ToDisplayString()));
+            sb.Append('_');
+        }
+
+        // Add all containing types (outer classes first, then inner classes)
+        var containingTypes = new List<string>();
+        var currentType = typeSymbol;
+        while (currentType != null)
+        {
+            containingTypes.Add(SanitizeForFileName(currentType.Name));
+            currentType = currentType.ContainingType;
+        }
+
+        // Reverse to get outer-to-inner order
+        containingTypes.Reverse();
+
+        // Append containing types from outer to inner
+        for (int i = 0; i < containingTypes.Count; i++)
+        {
+            if (i > 0) sb.Append('_');
+            sb.Append(containingTypes[i]);
+        }
+
+        // Add generic parameters if any (for the innermost type)
+        if (typeSymbol.TypeArguments.Length > 0)
+        {
+            sb.Append('_');
+            for (int i = 0; i < typeSymbol.TypeArguments.Length; i++)
+            {
+                if (i > 0) sb.Append('_');
+                sb.Append(SanitizeForFileName(typeSymbol.TypeArguments[i].Name));
+            }
+        }
+
+        var baseName = sb.ToString();
+        var helperSuffix = "__ClassHelper";
+
+        // Truncate and append a hash if the name would exceed the limit
+        const int fileExtLength = 5; // ".g.cs"
+        if (baseName.Length + helperSuffix.Length + fileExtLength > MaxHintNameLength)
+        {
+            var hashSuffix = $"_{GetStableHashCode(baseName):X8}";
+            var maxBaseLength = MaxHintNameLength - fileExtLength - helperSuffix.Length - hashSuffix.Length;
+            baseName = baseName.Substring(0, maxBaseLength) + hashSuffix;
+        }
+
+        return baseName + helperSuffix;
+    }
+
+    /// <summary>
     /// Computes a deterministic hash code for a string (FNV-1a).
     /// Unlike string.GetHashCode(), this is stable across processes and platforms.
     /// </summary>

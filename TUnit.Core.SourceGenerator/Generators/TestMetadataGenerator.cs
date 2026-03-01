@@ -60,6 +60,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             .Where(static m => m is not null)
             .Combine(enabledProvider);
 
+        // Per-class helper pipeline: collect non-generic direct test methods,
+        // group by class, emit one helper per class with shared CreateInstance + batched ModuleInitializer.
+        var classHelperProvider = testMethodsProvider
+            .Select(static (data, _) => data.Left)
+            .Where(static m => m is not null && !m!.IsGenericType && !m.IsGenericMethod)
+            .Collect()
+            .SelectMany(static (methods, _) => GroupMethodsByClass(methods))
+            .Combine(enabledProvider);
+
         context.RegisterSourceOutput(testMethodsProvider,
             static (context, data) =>
             {
@@ -69,6 +78,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     return;
                 }
                 GenerateTestMethodSource(context, testMethod);
+            });
+
+        context.RegisterSourceOutput(classHelperProvider,
+            static (context, data) =>
+            {
+                var (classGroup, isEnabled) = data;
+                if (!isEnabled)
+                {
+                    return;
+                }
+                GenerateClassHelper(context, classGroup);
             });
 
         context.RegisterSourceOutput(inheritsTestsClassesProvider,
@@ -392,14 +412,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Generate EnumerateTestDescriptors method for fast filtering
         GenerateEnumerateTestDescriptors(writer, testMethod);
 
+        // Non-generic, direct test methods use the per-class helper for instance creation
+        // and module initialization. Generic or inherited tests keep the per-method pattern.
+        var useClassHelper = !needsList && testMethod.InheritanceDepth == 0;
+
         if (!needsList)
         {
             // Emit named static helper methods to avoid generating a <>c display class.
             // These are referenced by method group in the metadata above.
             writer.AppendLine();
             EmitAttributeFactoryMethod(writer, testMethod);
-            writer.AppendLine();
-            EmitInstanceFactoryMethod(writer, testMethod);
+            if (!useClassHelper)
+            {
+                writer.AppendLine();
+                EmitInstanceFactoryMethod(writer, testMethod);
+            }
             if (testMethod is { IsGenericType: false, IsGenericMethod: false })
             {
                 writer.AppendLine();
@@ -410,7 +437,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("}");
 
-        GenerateModuleInitializer(writer, testMethod, uniqueClassName);
+        if (!useClassHelper)
+        {
+            GenerateModuleInitializer(writer, testMethod, uniqueClassName);
+        }
     }
 
     private static void GenerateTestMetadataInstance(CodeWriter writer, TestMethodMetadata testMethod, string className, bool addToResultsList = true, bool useNamedMethods = false)
@@ -1797,7 +1827,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         if (useNamedMethods)
         {
-            writer.AppendLine("InstanceFactory = __CreateInstance,");
+            if (testMethod.InheritanceDepth == 0)
+            {
+                // Non-generic, direct test methods use the shared per-class helper
+                var classHelperName = FileNameHelper.GetSafeClassHelperName(testMethod.TypeSymbol);
+                writer.AppendLine($"InstanceFactory = {classHelperName}.CreateInstance,");
+            }
+            else
+            {
+                // Inherited tests keep their own __CreateInstance method
+                writer.AppendLine("InstanceFactory = __CreateInstance,");
+            }
         }
         else
         {
@@ -2365,6 +2405,85 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("}");
         writer.Unindent();
         writer.AppendLine("}");
+    }
+
+    private static IEnumerable<ClassTestGroup> GroupMethodsByClass(ImmutableArray<TestMethodMetadata?> methods)
+    {
+        return methods
+            .Where(m => m is not null)
+            .GroupBy(m => m!.TypeSymbol, SymbolEqualityComparer.Default)
+            .Select(g =>
+            {
+                var first = g.First()!;
+                var typeSymbol = first.TypeSymbol;
+
+                return new ClassTestGroup
+                {
+                    ClassFullyQualified = typeSymbol.GloballyQualified(),
+                    ClassHelperName = FileNameHelper.GetSafeClassHelperName(typeSymbol),
+                    TestSourceClassNames = g.Select(m =>
+                        FileNameHelper.GetDeterministicFileNameForMethod(m!.TypeSymbol, m.MethodSymbol)
+                            .Replace(".g.cs", "_TestSource"))
+                        .ToEquatableArray(),
+                    InstanceFactoryBodyCode = InstanceFactoryGenerator.GenerateInstanceFactoryBody(typeSymbol),
+                };
+            });
+    }
+
+    private static void GenerateClassHelper(SourceProductionContext context, ClassTestGroup classGroup)
+    {
+        try
+        {
+            var writer = new CodeWriter();
+            GenerateFileHeader(writer);
+
+            writer.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]");
+            writer.AppendLine($"[global::System.CodeDom.Compiler.GeneratedCode(\"TUnit\", \"{typeof(TestMetadataGenerator).Assembly.GetName().Version}\")]");
+            writer.AppendLine($"internal static class {classGroup.ClassHelperName}");
+            writer.AppendLine("{");
+            writer.Indent();
+
+            // CreateInstance method
+            writer.AppendLine($"internal static {classGroup.ClassFullyQualified} CreateInstance(global::System.Type[] typeArgs, object?[] args)");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendRaw(classGroup.InstanceFactoryBodyCode);
+            writer.Unindent();
+            writer.AppendLine("}");
+
+            writer.AppendLine();
+
+            // Batched ModuleInitializer
+            writer.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
+            writer.AppendLine("internal static void Initialize()");
+            writer.AppendLine("{");
+            writer.Indent();
+            foreach (var testSourceName in classGroup.TestSourceClassNames)
+            {
+                writer.AppendLine($"global::TUnit.Core.SourceRegistrar.Register(typeof({classGroup.ClassFullyQualified}), new {testSourceName}());");
+            }
+            writer.Unindent();
+            writer.AppendLine("}");
+
+            writer.Unindent();
+            writer.AppendLine("}");
+
+            context.AddSource($"{classGroup.ClassHelperName}.g.cs", SourceText.From(writer.ToString(), Encoding.UTF8));
+        }
+        catch (Exception ex)
+        {
+            context.ReportDiagnostic(Diagnostic.Create(
+                new DiagnosticDescriptor(
+                    "TUNIT0998",
+                    "Class Helper Generation Error",
+                    "Failed to generate class helper for {0}: {1}",
+                    "TUnit",
+                    DiagnosticSeverity.Error,
+                    true),
+                Location.None,
+                classGroup.ClassFullyQualified,
+                ex.ToString()));
+        }
     }
 
     private enum TestReturnPattern

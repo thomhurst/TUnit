@@ -45,7 +45,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_With_STA_TestSource : glo
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_STAThreadTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -81,10 +81,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_With_STA_TestSource : glo
             new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
         ];
     }
-    private static global::TUnit.TestProject.STAThreadTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.STAThreadTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.STAThreadTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -95,14 +91,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_With_STA_TestSource : glo
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_STAThreadTests_With_STA_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_With_STA_TestSource());
     }
 }
 
@@ -156,7 +144,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_Without_STA_TestSource : 
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_STAThreadTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -191,10 +179,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_Without_STA_TestSource : 
             new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
         ];
     }
-    private static global::TUnit.TestProject.STAThreadTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.STAThreadTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.STAThreadTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -205,14 +189,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_Without_STA_TestSource : 
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_STAThreadTests_Without_STA_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_Without_STA_TestSource());
     }
 }
 
@@ -266,7 +242,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithSimpleAwait_TestS
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_STAThreadTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -302,10 +278,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithSimpleAwait_TestS
             new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
         ];
     }
-    private static global::TUnit.TestProject.STAThreadTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.STAThreadTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.STAThreadTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -316,14 +288,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithSimpleAwait_TestS
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_STAThreadTests_STA_WithSimpleAwait_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithSimpleAwait_TestSource());
     }
 }
 
@@ -377,7 +341,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskYield_TestSou
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_STAThreadTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -413,10 +377,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskYield_TestSou
             new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
         ];
     }
-    private static global::TUnit.TestProject.STAThreadTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.STAThreadTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.STAThreadTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -427,14 +387,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskYield_TestSou
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_STAThreadTests_STA_WithTaskYield_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithTaskYield_TestSource());
     }
 }
 
@@ -488,7 +440,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithConfigureAwaitTru
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_STAThreadTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -524,10 +476,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithConfigureAwaitTru
             new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
         ];
     }
-    private static global::TUnit.TestProject.STAThreadTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.STAThreadTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.STAThreadTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -538,14 +486,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithConfigureAwaitTru
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_STAThreadTests_STA_WithConfigureAwaitTrue_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithConfigureAwaitTrue_TestSource());
     }
 }
 
@@ -599,7 +539,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithNestedAsyncCalls_
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_STAThreadTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -635,10 +575,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithNestedAsyncCalls_
             new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
         ];
     }
-    private static global::TUnit.TestProject.STAThreadTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.STAThreadTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.STAThreadTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -649,14 +585,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithNestedAsyncCalls_
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_STAThreadTests_STA_WithNestedAsyncCalls_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithNestedAsyncCalls_TestSource());
     }
 }
 
@@ -710,7 +638,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskFromResult_Te
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_STAThreadTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -746,10 +674,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskFromResult_Te
             new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
         ];
     }
-    private static global::TUnit.TestProject.STAThreadTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.STAThreadTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.STAThreadTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -760,14 +684,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskFromResult_Te
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_STAThreadTests_STA_WithTaskFromResult_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithTaskFromResult_TestSource());
     }
 }
 
@@ -821,7 +737,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithCompletedTask_Tes
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_STAThreadTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -857,10 +773,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithCompletedTask_Tes
             new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
         ];
     }
-    private static global::TUnit.TestProject.STAThreadTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.STAThreadTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.STAThreadTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -871,14 +783,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithCompletedTask_Tes
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_STAThreadTests_STA_WithCompletedTask_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithCompletedTask_TestSource());
     }
 }
 
@@ -932,7 +836,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskRun_TestSourc
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_STAThreadTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -968,10 +872,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskRun_TestSourc
             new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
         ];
     }
-    private static global::TUnit.TestProject.STAThreadTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.STAThreadTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.STAThreadTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -982,14 +882,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskRun_TestSourc
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_STAThreadTests_STA_WithTaskRun_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithTaskRun_TestSource());
     }
 }
 
@@ -1043,7 +935,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithMultipleAwaits_Te
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_STAThreadTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -1079,10 +971,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithMultipleAwaits_Te
             new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
         ];
     }
-    private static global::TUnit.TestProject.STAThreadTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.STAThreadTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.STAThreadTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -1093,14 +981,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithMultipleAwaits_Te
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_STAThreadTests_STA_WithMultipleAwaits_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithMultipleAwaits_TestSource());
     }
 }
 
@@ -1154,7 +1034,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithAsyncEnumerable_T
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_STAThreadTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -1190,10 +1070,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithAsyncEnumerable_T
             new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
         ];
     }
-    private static global::TUnit.TestProject.STAThreadTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.STAThreadTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.STAThreadTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -1204,14 +1080,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithAsyncEnumerable_T
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_STAThreadTests_STA_WithAsyncEnumerable_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithAsyncEnumerable_TestSource());
     }
 }
 
@@ -1265,7 +1133,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskWhenAll_TestS
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_STAThreadTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -1301,10 +1169,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskWhenAll_TestS
             new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
         ];
     }
-    private static global::TUnit.TestProject.STAThreadTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.STAThreadTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.STAThreadTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -1315,14 +1179,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskWhenAll_TestS
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_STAThreadTests_STA_WithTaskWhenAll_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithTaskWhenAll_TestSource());
     }
 }
 
@@ -1376,7 +1232,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithExceptionHandling
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_STAThreadTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -1412,10 +1268,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithExceptionHandling
             new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
         ];
     }
-    private static global::TUnit.TestProject.STAThreadTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.STAThreadTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.STAThreadTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -1426,14 +1278,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithExceptionHandling
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_STAThreadTests_STA_WithExceptionHandling_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithExceptionHandling_TestSource());
     }
 }
 
@@ -1487,7 +1331,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithThrowsNothingAsse
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_STAThreadTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -1523,10 +1367,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithThrowsNothingAsse
             new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
         ];
     }
-    private static global::TUnit.TestProject.STAThreadTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.STAThreadTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.STAThreadTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -1537,14 +1377,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithThrowsNothingAsse
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_STAThreadTests_STA_WithThrowsNothingAssertion_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithThrowsNothingAssertion_TestSource());
     }
 }
 
@@ -1598,7 +1430,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithFuncAssertion_Tes
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_STAThreadTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -1634,10 +1466,6 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithFuncAssertion_Tes
             new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
         ];
     }
-    private static global::TUnit.TestProject.STAThreadTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.STAThreadTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.STAThreadTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -1650,11 +1478,40 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithFuncAssertion_Tes
         }
     }
 }
-internal static class TUnit_TestProject_STAThreadTests_STA_WithFuncAssertion_ModuleInitializer
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+internal static class TUnit_TestProject_STAThreadTests__ClassHelper
 {
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
+    internal static global::TUnit.TestProject.STAThreadTests CreateInstance(global::System.Type[] typeArgs, object?[] args)
     {
+        return new global::TUnit.TestProject.STAThreadTests();
+    }
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void Initialize()
+    {
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_With_STA_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_Without_STA_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithSimpleAwait_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithTaskYield_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithConfigureAwaitTrue_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithNestedAsyncCalls_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithTaskFromResult_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithCompletedTask_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithTaskRun_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithMultipleAwaits_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithAsyncEnumerable_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithTaskWhenAll_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithExceptionHandling_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithThrowsNothingAssertion_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithFuncAssertion_TestSource());
     }
 }

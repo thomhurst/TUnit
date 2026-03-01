@@ -56,7 +56,7 @@ internal sealed class TUnit_TestProject_ConstantArgumentsTests_String1__string_T
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_ConstantArgumentsTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -88,10 +88,6 @@ internal sealed class TUnit_TestProject_ConstantArgumentsTests_String1__string_T
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.ConstantArgumentsTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.ConstantArgumentsTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.ConstantArgumentsTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -110,14 +106,6 @@ internal sealed class TUnit_TestProject_ConstantArgumentsTests_String1__string_T
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_ConstantArgumentsTests_String1__string_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new TUnit_TestProject_ConstantArgumentsTests_String1__string_TestSource());
     }
 }
 
@@ -182,7 +170,7 @@ internal sealed class TUnit_TestProject_ConstantArgumentsTests_Int__int_TestSour
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_ConstantArgumentsTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -214,10 +202,6 @@ internal sealed class TUnit_TestProject_ConstantArgumentsTests_Int__int_TestSour
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.ConstantArgumentsTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.ConstantArgumentsTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.ConstantArgumentsTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -236,14 +220,6 @@ internal sealed class TUnit_TestProject_ConstantArgumentsTests_Int__int_TestSour
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_ConstantArgumentsTests_Int__int_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new TUnit_TestProject_ConstantArgumentsTests_Int__int_TestSource());
     }
 }
 
@@ -308,7 +284,7 @@ internal sealed class TUnit_TestProject_ConstantArgumentsTests_Double__double_Te
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_ConstantArgumentsTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -340,10 +316,6 @@ internal sealed class TUnit_TestProject_ConstantArgumentsTests_Double__double_Te
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.ConstantArgumentsTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.ConstantArgumentsTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.ConstantArgumentsTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -362,14 +334,6 @@ internal sealed class TUnit_TestProject_ConstantArgumentsTests_Double__double_Te
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_ConstantArgumentsTests_Double__double_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new TUnit_TestProject_ConstantArgumentsTests_Double__double_TestSource());
     }
 }
 
@@ -434,7 +398,7 @@ internal sealed class TUnit_TestProject_ConstantArgumentsTests_Float__float_Test
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_ConstantArgumentsTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -466,10 +430,6 @@ internal sealed class TUnit_TestProject_ConstantArgumentsTests_Float__float_Test
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.ConstantArgumentsTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.ConstantArgumentsTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.ConstantArgumentsTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -488,14 +448,6 @@ internal sealed class TUnit_TestProject_ConstantArgumentsTests_Float__float_Test
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_ConstantArgumentsTests_Float__float_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new TUnit_TestProject_ConstantArgumentsTests_Float__float_TestSource());
     }
 }
 
@@ -560,7 +512,7 @@ internal sealed class TUnit_TestProject_ConstantArgumentsTests_Long__long_TestSo
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_ConstantArgumentsTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -592,10 +544,6 @@ internal sealed class TUnit_TestProject_ConstantArgumentsTests_Long__long_TestSo
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.ConstantArgumentsTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.ConstantArgumentsTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.ConstantArgumentsTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -614,14 +562,6 @@ internal sealed class TUnit_TestProject_ConstantArgumentsTests_Long__long_TestSo
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_ConstantArgumentsTests_Long__long_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new TUnit_TestProject_ConstantArgumentsTests_Long__long_TestSource());
     }
 }
 
@@ -686,7 +626,7 @@ internal sealed class TUnit_TestProject_ConstantArgumentsTests_UInt__uint_TestSo
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_ConstantArgumentsTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -718,10 +658,6 @@ internal sealed class TUnit_TestProject_ConstantArgumentsTests_UInt__uint_TestSo
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.ConstantArgumentsTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.ConstantArgumentsTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.ConstantArgumentsTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -740,14 +676,6 @@ internal sealed class TUnit_TestProject_ConstantArgumentsTests_UInt__uint_TestSo
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_ConstantArgumentsTests_UInt__uint_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new TUnit_TestProject_ConstantArgumentsTests_UInt__uint_TestSource());
     }
 }
 
@@ -812,7 +740,7 @@ internal sealed class TUnit_TestProject_ConstantArgumentsTests_ULong__ulong_Test
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_ConstantArgumentsTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -844,10 +772,6 @@ internal sealed class TUnit_TestProject_ConstantArgumentsTests_ULong__ulong_Test
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.ConstantArgumentsTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.ConstantArgumentsTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.ConstantArgumentsTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -868,11 +792,32 @@ internal sealed class TUnit_TestProject_ConstantArgumentsTests_ULong__ulong_Test
         }
     }
 }
-internal static class TUnit_TestProject_ConstantArgumentsTests_ULong__ulong_ModuleInitializer
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+internal static class TUnit_TestProject_ConstantArgumentsTests__ClassHelper
 {
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
+    internal static global::TUnit.TestProject.ConstantArgumentsTests CreateInstance(global::System.Type[] typeArgs, object?[] args)
     {
+        return new global::TUnit.TestProject.ConstantArgumentsTests();
+    }
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void Initialize()
+    {
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new TUnit_TestProject_ConstantArgumentsTests_String1__string_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new TUnit_TestProject_ConstantArgumentsTests_Int__int_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new TUnit_TestProject_ConstantArgumentsTests_Double__double_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new TUnit_TestProject_ConstantArgumentsTests_Float__float_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new TUnit_TestProject_ConstantArgumentsTests_Long__long_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new TUnit_TestProject_ConstantArgumentsTests_UInt__uint_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new TUnit_TestProject_ConstantArgumentsTests_ULong__ulong_TestSource());
     }
 }

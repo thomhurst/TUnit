@@ -57,7 +57,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test_TestSource :
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_CustomDisplayNameTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -90,10 +90,6 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test_TestSource :
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.CustomDisplayNameTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.CustomDisplayNameTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.CustomDisplayNameTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -104,14 +100,6 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test_TestSource :
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_CustomDisplayNameTests_Test_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), new TUnit_TestProject_CustomDisplayNameTests_Test_TestSource());
     }
 }
 
@@ -177,7 +165,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test2_TestSource 
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_CustomDisplayNameTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -210,10 +198,6 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test2_TestSource 
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.CustomDisplayNameTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.CustomDisplayNameTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.CustomDisplayNameTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -224,14 +208,6 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test2_TestSource 
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_CustomDisplayNameTests_Test2_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), new TUnit_TestProject_CustomDisplayNameTests_Test2_TestSource());
     }
 }
 
@@ -324,7 +300,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test3__string_int
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_CustomDisplayNameTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -357,10 +333,6 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test3__string_int
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.CustomDisplayNameTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.CustomDisplayNameTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.CustomDisplayNameTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -379,14 +351,6 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test3__string_int
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_CustomDisplayNameTests_Test3__string_int_bool_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), new TUnit_TestProject_CustomDisplayNameTests_Test3__string_int_bool_TestSource());
     }
 }
 
@@ -475,7 +439,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_MethodDataSourceT
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_CustomDisplayNameTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -508,10 +472,6 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_MethodDataSourceT
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.CustomDisplayNameTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.CustomDisplayNameTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.CustomDisplayNameTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -530,14 +490,6 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_MethodDataSourceT
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_CustomDisplayNameTests_MethodDataSourceTest__string_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), new TUnit_TestProject_CustomDisplayNameTests_MethodDataSourceTest__string_TestSource());
     }
 }
 
@@ -624,7 +576,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_TestParameterName
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_CustomDisplayNameTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -657,10 +609,6 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_TestParameterName
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.CustomDisplayNameTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.CustomDisplayNameTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.CustomDisplayNameTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -679,14 +627,6 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_TestParameterName
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_CustomDisplayNameTests_TestParameterNamePrefixBug__int_string_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), new TUnit_TestProject_CustomDisplayNameTests_TestParameterNamePrefixBug__int_string_TestSource());
     }
 }
 
@@ -764,7 +704,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_PasswordTest__str
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_CustomDisplayNameTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -796,10 +736,6 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_PasswordTest__str
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.CustomDisplayNameTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.CustomDisplayNameTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.CustomDisplayNameTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -818,14 +754,6 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_PasswordTest__str
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_CustomDisplayNameTests_PasswordTest__string_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), new TUnit_TestProject_CustomDisplayNameTests_PasswordTest__string_TestSource());
     }
 }
 
@@ -891,7 +819,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_SameClassConstant
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_CustomDisplayNameTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -924,10 +852,6 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_SameClassConstant
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.CustomDisplayNameTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.CustomDisplayNameTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.CustomDisplayNameTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -938,14 +862,6 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_SameClassConstant
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_CustomDisplayNameTests_SameClassConstantTest_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), new TUnit_TestProject_CustomDisplayNameTests_SameClassConstantTest_TestSource());
     }
 }
 
@@ -1011,7 +927,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_DifferentClassCon
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_CustomDisplayNameTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -1044,10 +960,6 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_DifferentClassCon
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.CustomDisplayNameTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.CustomDisplayNameTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.CustomDisplayNameTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -1058,14 +970,6 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_DifferentClassCon
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_CustomDisplayNameTests_DifferentClassConstantTest_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), new TUnit_TestProject_CustomDisplayNameTests_DifferentClassConstantTest_TestSource());
     }
 }
 
@@ -1131,7 +1035,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_NestedClassConsta
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_CustomDisplayNameTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -1164,10 +1068,6 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_NestedClassConsta
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.CustomDisplayNameTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.CustomDisplayNameTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.CustomDisplayNameTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -1180,11 +1080,34 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_NestedClassConsta
         }
     }
 }
-internal static class TUnit_TestProject_CustomDisplayNameTests_NestedClassConstantTest_ModuleInitializer
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+internal static class TUnit_TestProject_CustomDisplayNameTests__ClassHelper
 {
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
+    internal static global::TUnit.TestProject.CustomDisplayNameTests CreateInstance(global::System.Type[] typeArgs, object?[] args)
     {
+        return new global::TUnit.TestProject.CustomDisplayNameTests();
+    }
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void Initialize()
+    {
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), new TUnit_TestProject_CustomDisplayNameTests_Test_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), new TUnit_TestProject_CustomDisplayNameTests_Test2_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), new TUnit_TestProject_CustomDisplayNameTests_Test3__string_int_bool_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), new TUnit_TestProject_CustomDisplayNameTests_MethodDataSourceTest__string_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), new TUnit_TestProject_CustomDisplayNameTests_TestParameterNamePrefixBug__int_string_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), new TUnit_TestProject_CustomDisplayNameTests_PasswordTest__string_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), new TUnit_TestProject_CustomDisplayNameTests_SameClassConstantTest_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), new TUnit_TestProject_CustomDisplayNameTests_DifferentClassConstantTest_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), new TUnit_TestProject_CustomDisplayNameTests_NestedClassConstantTest_TestSource());
     }
 }

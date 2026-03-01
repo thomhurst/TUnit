@@ -70,7 +70,7 @@ internal sealed class TUnit_TestProject_MatrixTests_MatrixTest_One__string_int_b
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_MatrixTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -102,10 +102,6 @@ internal sealed class TUnit_TestProject_MatrixTests_MatrixTest_One__string_int_b
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.MatrixTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.MatrixTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.MatrixTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -124,14 +120,6 @@ internal sealed class TUnit_TestProject_MatrixTests_MatrixTest_One__string_int_b
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_MatrixTests_MatrixTest_One__string_int_bool_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_MatrixTest_One__string_int_bool_TestSource());
     }
 }
 
@@ -217,7 +205,7 @@ internal sealed class TUnit_TestProject_MatrixTests_MatrixTest_Two__int_int_int_
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_MatrixTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -249,10 +237,6 @@ internal sealed class TUnit_TestProject_MatrixTests_MatrixTest_Two__int_int_int_
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.MatrixTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.MatrixTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.MatrixTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -271,14 +255,6 @@ internal sealed class TUnit_TestProject_MatrixTests_MatrixTest_Two__int_int_int_
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_MatrixTests_MatrixTest_Two__int_int_int_bool_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_MatrixTest_Two__int_int_int_bool_TestSource());
     }
 }
 
@@ -357,7 +333,7 @@ internal sealed class TUnit_TestProject_MatrixTests_MatrixTest_Enum__int_TestEnu
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_MatrixTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -389,10 +365,6 @@ internal sealed class TUnit_TestProject_MatrixTests_MatrixTest_Enum__int_TestEnu
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.MatrixTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.MatrixTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.MatrixTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -411,14 +383,6 @@ internal sealed class TUnit_TestProject_MatrixTests_MatrixTest_Enum__int_TestEnu
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_MatrixTests_MatrixTest_Enum__int_TestEnum_TestEnum__ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_MatrixTest_Enum__int_TestEnum_TestEnum__TestSource());
     }
 }
 
@@ -490,7 +454,7 @@ internal sealed class TUnit_TestProject_MatrixTests_AutoGenerateBools__string_bo
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_MatrixTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -522,10 +486,6 @@ internal sealed class TUnit_TestProject_MatrixTests_AutoGenerateBools__string_bo
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.MatrixTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.MatrixTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.MatrixTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -544,14 +504,6 @@ internal sealed class TUnit_TestProject_MatrixTests_AutoGenerateBools__string_bo
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_MatrixTests_AutoGenerateBools__string_bool_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_AutoGenerateBools__string_bool_TestSource());
     }
 }
 
@@ -623,7 +575,7 @@ internal sealed class TUnit_TestProject_MatrixTests_AutoGenerateBools2__string_b
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_MatrixTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -655,10 +607,6 @@ internal sealed class TUnit_TestProject_MatrixTests_AutoGenerateBools2__string_b
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.MatrixTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.MatrixTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.MatrixTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -677,14 +625,6 @@ internal sealed class TUnit_TestProject_MatrixTests_AutoGenerateBools2__string_b
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_MatrixTests_AutoGenerateBools2__string_bool__ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_AutoGenerateBools2__string_bool__TestSource());
     }
 }
 
@@ -756,7 +696,7 @@ internal sealed class TUnit_TestProject_MatrixTests_ImplicitConversion__OneOf_Te
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_MatrixTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -788,10 +728,6 @@ internal sealed class TUnit_TestProject_MatrixTests_ImplicitConversion__OneOf_Te
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.MatrixTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.MatrixTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.MatrixTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -810,14 +746,6 @@ internal sealed class TUnit_TestProject_MatrixTests_ImplicitConversion__OneOf_Te
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_MatrixTests_ImplicitConversion__OneOf_TestEnum__TestEnum2__bool_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_ImplicitConversion__OneOf_TestEnum__TestEnum2__bool_TestSource());
     }
 }
 
@@ -889,7 +817,7 @@ internal sealed class TUnit_TestProject_MatrixTests_ExcludingAutoGeneratedMatrix
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_MatrixTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -921,10 +849,6 @@ internal sealed class TUnit_TestProject_MatrixTests_ExcludingAutoGeneratedMatrix
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.MatrixTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.MatrixTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.MatrixTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -943,14 +867,6 @@ internal sealed class TUnit_TestProject_MatrixTests_ExcludingAutoGeneratedMatrix
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_MatrixTests_ExcludingAutoGeneratedMatrixValues__CountToTenEnum_bool_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_ExcludingAutoGeneratedMatrixValues__CountToTenEnum_bool_TestSource());
     }
 }
 
@@ -1015,7 +931,7 @@ internal sealed class TUnit_TestProject_MatrixTests_Method1__int_TestSource : gl
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_MatrixTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -1047,10 +963,6 @@ internal sealed class TUnit_TestProject_MatrixTests_Method1__int_TestSource : gl
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.MatrixTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.MatrixTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.MatrixTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -1069,14 +981,6 @@ internal sealed class TUnit_TestProject_MatrixTests_Method1__int_TestSource : gl
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_MatrixTests_Method1__int_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_Method1__int_TestSource());
     }
 }
 
@@ -1141,7 +1045,7 @@ internal sealed class TUnit_TestProject_MatrixTests_Method2__int_TestSource : gl
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_MatrixTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -1173,10 +1077,6 @@ internal sealed class TUnit_TestProject_MatrixTests_Method2__int_TestSource : gl
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.MatrixTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.MatrixTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.MatrixTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -1195,14 +1095,6 @@ internal sealed class TUnit_TestProject_MatrixTests_Method2__int_TestSource : gl
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_MatrixTests_Method2__int_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_Method2__int_TestSource());
     }
 }
 
@@ -1267,7 +1159,7 @@ internal sealed class TUnit_TestProject_MatrixTests_Method3__int_TestSource : gl
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_MatrixTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -1299,10 +1191,6 @@ internal sealed class TUnit_TestProject_MatrixTests_Method3__int_TestSource : gl
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.MatrixTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.MatrixTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.MatrixTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -1321,14 +1209,6 @@ internal sealed class TUnit_TestProject_MatrixTests_Method3__int_TestSource : gl
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_MatrixTests_Method3__int_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_Method3__int_TestSource());
     }
 }
 
@@ -1393,7 +1273,7 @@ internal sealed class TUnit_TestProject_MatrixTests_Method4__int_TestSource : gl
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_MatrixTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -1425,10 +1305,6 @@ internal sealed class TUnit_TestProject_MatrixTests_Method4__int_TestSource : gl
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.MatrixTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.MatrixTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.MatrixTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -1447,14 +1323,6 @@ internal sealed class TUnit_TestProject_MatrixTests_Method4__int_TestSource : gl
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_MatrixTests_Method4__int_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_Method4__int_TestSource());
     }
 }
 
@@ -1526,7 +1394,7 @@ internal sealed class TUnit_TestProject_MatrixTests_Exclusion__int_int_TestSourc
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_MatrixTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -1561,10 +1429,6 @@ internal sealed class TUnit_TestProject_MatrixTests_Exclusion__int_int_TestSourc
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.MatrixTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.MatrixTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.MatrixTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -1583,14 +1447,6 @@ internal sealed class TUnit_TestProject_MatrixTests_Exclusion__int_int_TestSourc
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_MatrixTests_Exclusion__int_int_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_Exclusion__int_int_TestSource());
     }
 }
 
@@ -1662,7 +1518,7 @@ internal sealed class TUnit_TestProject_MatrixTests_MatrixMethod_WithEnumParamet
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_MatrixTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -1694,10 +1550,6 @@ internal sealed class TUnit_TestProject_MatrixTests_MatrixMethod_WithEnumParamet
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.MatrixTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.MatrixTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.MatrixTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -1718,11 +1570,38 @@ internal sealed class TUnit_TestProject_MatrixTests_MatrixMethod_WithEnumParamet
         }
     }
 }
-internal static class TUnit_TestProject_MatrixTests_MatrixMethod_WithEnumParameter_UsesOnlyMethodValues__boo_38BEEE8F_ModuleInitializer
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+internal static class TUnit_TestProject_MatrixTests__ClassHelper
 {
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
+    internal static global::TUnit.TestProject.MatrixTests CreateInstance(global::System.Type[] typeArgs, object?[] args)
     {
+        return new global::TUnit.TestProject.MatrixTests();
+    }
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void Initialize()
+    {
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_MatrixTest_One__string_int_bool_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_MatrixTest_Two__int_int_int_bool_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_MatrixTest_Enum__int_TestEnum_TestEnum__TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_AutoGenerateBools__string_bool_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_AutoGenerateBools2__string_bool__TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_ImplicitConversion__OneOf_TestEnum__TestEnum2__bool_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_ExcludingAutoGeneratedMatrixValues__CountToTenEnum_bool_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_Method1__int_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_Method2__int_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_Method3__int_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_Method4__int_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_Exclusion__int_int_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_MatrixMethod_WithEnumParameter_UsesOnlyMethodValues__boo_38BEEE8F_TestSource());
     }
 }

@@ -65,7 +65,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Transfer__decimal_d
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_DecimalArgumentTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -97,10 +97,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Transfer__decimal_d
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.DecimalArgumentTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.DecimalArgumentTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.DecimalArgumentTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -119,14 +115,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Transfer__decimal_d
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_DecimalArgumentTests_Transfer__decimal_decimal_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_Transfer__decimal_decimal_TestSource());
     }
 }
 
@@ -191,7 +179,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_SimpleDecimal__deci
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_DecimalArgumentTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -223,10 +211,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_SimpleDecimal__deci
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.DecimalArgumentTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.DecimalArgumentTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.DecimalArgumentTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -245,14 +229,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_SimpleDecimal__deci
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_DecimalArgumentTests_SimpleDecimal__decimal_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_SimpleDecimal__decimal_TestSource());
     }
 }
 
@@ -317,7 +293,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_SmallDecimal__decim
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_DecimalArgumentTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -349,10 +325,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_SmallDecimal__decim
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.DecimalArgumentTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.DecimalArgumentTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.DecimalArgumentTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -371,14 +343,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_SmallDecimal__decim
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_DecimalArgumentTests_SmallDecimal__decimal_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_SmallDecimal__decimal_TestSource());
     }
 }
 
@@ -443,7 +407,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_MaxDecimal__decimal
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_DecimalArgumentTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -475,10 +439,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_MaxDecimal__decimal
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.DecimalArgumentTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.DecimalArgumentTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.DecimalArgumentTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -497,14 +457,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_MaxDecimal__decimal
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_DecimalArgumentTests_MaxDecimal__decimal_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_MaxDecimal__decimal_TestSource());
     }
 }
 
@@ -569,7 +521,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_MinDecimal__decimal
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_DecimalArgumentTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -601,10 +553,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_MinDecimal__decimal
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.DecimalArgumentTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.DecimalArgumentTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.DecimalArgumentTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -623,14 +571,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_MinDecimal__decimal
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_DecimalArgumentTests_MinDecimal__decimal_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_MinDecimal__decimal_TestSource());
     }
 }
 
@@ -695,7 +635,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_ExplicitDecimalValu
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_DecimalArgumentTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -727,10 +667,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_ExplicitDecimalValu
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.DecimalArgumentTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.DecimalArgumentTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.DecimalArgumentTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -749,14 +685,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_ExplicitDecimalValu
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_DecimalArgumentTests_ExplicitDecimalValue__decimal_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_ExplicitDecimalValue__decimal_TestSource());
     }
 }
 
@@ -835,7 +763,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_MultipleDecimals__d
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_DecimalArgumentTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -867,10 +795,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_MultipleDecimals__d
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.DecimalArgumentTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.DecimalArgumentTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.DecimalArgumentTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -889,14 +813,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_MultipleDecimals__d
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_DecimalArgumentTests_MultipleDecimals__decimal_decimal_decimal_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_MultipleDecimals__decimal_decimal_decimal_TestSource());
     }
 }
 
@@ -963,7 +879,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Test__decimal_TestS
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_DecimalArgumentTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -995,10 +911,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Test__decimal_TestS
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.DecimalArgumentTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.DecimalArgumentTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.DecimalArgumentTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -1018,14 +930,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Test__decimal_TestS
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_DecimalArgumentTests_Test__decimal_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_Test__decimal_TestSource());
     }
 }
 
@@ -1127,7 +1031,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_TransactionDiscount
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_DecimalArgumentTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -1159,10 +1063,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_TransactionDiscount
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.DecimalArgumentTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.DecimalArgumentTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.DecimalArgumentTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -1182,14 +1082,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_TransactionDiscount
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_DecimalArgumentTests_TransactionDiscountCalculations__decimal_decima_54FB9799_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_TransactionDiscountCalculations__decimal_decima_54FB9799_TestSource());
     }
 }
 
@@ -1254,7 +1146,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Equality3__decimal_
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_DecimalArgumentTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -1286,10 +1178,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Equality3__decimal_
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.DecimalArgumentTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.DecimalArgumentTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.DecimalArgumentTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -1308,14 +1196,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Equality3__decimal_
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_DecimalArgumentTests_Equality3__decimal_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_Equality3__decimal_TestSource());
     }
 }
 
@@ -1380,7 +1260,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Equality4__decimal_
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_DecimalArgumentTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -1412,10 +1292,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Equality4__decimal_
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.DecimalArgumentTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.DecimalArgumentTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.DecimalArgumentTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -1434,14 +1310,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Equality4__decimal_
         {
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
-    }
-}
-internal static class TUnit_TestProject_DecimalArgumentTests_Equality4__decimal_ModuleInitializer
-{
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_Equality4__decimal_TestSource());
     }
 }
 
@@ -1506,7 +1374,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_TestMethod__decimal
                     Parent = null
                 })
             },
-            InstanceFactory = __CreateInstance,
+            InstanceFactory = TUnit_TestProject_DecimalArgumentTests__ClassHelper.CreateInstance,
             InvokeTypedTest = __InvokeTest,
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -1538,10 +1406,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_TestMethod__decimal
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         ];
     }
-    private static global::TUnit.TestProject.DecimalArgumentTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
-    {
-        return new global::TUnit.TestProject.DecimalArgumentTests();
-    }
     private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.DecimalArgumentTests instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
@@ -1562,11 +1426,37 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_TestMethod__decimal
         }
     }
 }
-internal static class TUnit_TestProject_DecimalArgumentTests_TestMethod__decimal_ModuleInitializer
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+internal static class TUnit_TestProject_DecimalArgumentTests__ClassHelper
 {
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
+    internal static global::TUnit.TestProject.DecimalArgumentTests CreateInstance(global::System.Type[] typeArgs, object?[] args)
     {
+        return new global::TUnit.TestProject.DecimalArgumentTests();
+    }
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void Initialize()
+    {
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_Transfer__decimal_decimal_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_SimpleDecimal__decimal_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_SmallDecimal__decimal_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_MaxDecimal__decimal_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_MinDecimal__decimal_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_ExplicitDecimalValue__decimal_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_MultipleDecimals__decimal_decimal_decimal_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_Test__decimal_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_TransactionDiscountCalculations__decimal_decima_54FB9799_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_Equality3__decimal_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_Equality4__decimal_TestSource());
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests_TestMethod__decimal_TestSource());
     }
 }
