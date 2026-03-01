@@ -1392,7 +1392,7 @@ namespace
         public required string FullyQualifiedName { get; init; }
         public bool HasDataSource { get; init; }
         public required int LineNumber { get; init; }
-        public required <string, .CancellationToken, .<.TestMetadata>> Materializer { get; init; }
+        public required <string, .<.TestMetadata>> Materializer { get; init; }
         public required string MethodName { get; init; }
         public string[] Properties { get; init; }
         public int RepeatCount { get; init; }
@@ -2554,7 +2554,7 @@ namespace .
     }
     public interface ITestSource
     {
-        .<.TestMetadata> GetTestsAsync(string testSessionId, .CancellationToken cancellationToken = default);
+        .<.TestMetadata> GetTests(string testSessionId);
     }
     public sealed class PropertyInjectionMetadata
     {
