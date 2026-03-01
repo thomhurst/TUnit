@@ -198,15 +198,12 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
         // and avoids false positives from empty member lists.
         if (expectedMembers.Count == 0)
         {
-            var actualMembersCheck = ReflectionHelper.GetMembersToCompare(actualType);
-            if (actualMembersCheck.Count == 0)
+            if (!Equals(actual, expected))
             {
-                if (!Equals(actual, expected))
-                {
-                    return AssertionResult.Failed($"Property {path} did not match{Environment.NewLine}Expected: {FormatValue(expected)}{Environment.NewLine}Received: {FormatValue(actual)}");
-                }
-                return AssertionResult.Passed;
+                var label = string.IsNullOrEmpty(path) ? "Objects" : $"Property {path}";
+                return AssertionResult.Failed($"{label} did not match{Environment.NewLine}Expected: {FormatValue(expected)}{Environment.NewLine}Received: {FormatValue(actual)}");
             }
+            return AssertionResult.Passed;
         }
 
         foreach (var member in expectedMembers)

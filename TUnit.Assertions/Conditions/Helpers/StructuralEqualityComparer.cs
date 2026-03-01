@@ -115,18 +115,8 @@ public sealed class StructuralEqualityComparer<T> : IEqualityComparer<T>
 
         foreach (var member in members)
         {
-            object? xValue, yValue;
-            try
-            {
-                xValue = ReflectionHelper.GetMemberValue(x, member);
-                yValue = ReflectionHelper.GetMemberValue(y, member);
-            }
-            catch (NotSupportedException)
-            {
-                // Property getter cannot be invoked via reflection (e.g., .NET runtime restrictions).
-                // Fall back to Equals() for the entire object comparison.
-                return Equals(x, y);
-            }
+            var xValue = ReflectionHelper.GetMemberValue(x, member);
+            var yValue = ReflectionHelper.GetMemberValue(y, member);
 
             if (!CompareStructurally(xValue, yValue, visited))
             {

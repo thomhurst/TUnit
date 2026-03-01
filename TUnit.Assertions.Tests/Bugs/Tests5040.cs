@@ -34,6 +34,11 @@ public class Tests5040
         public override string ToString() => _value;
     }
 
+    private class PublicStateMessage
+    {
+        public string Content { get; set; } = string.Empty;
+    }
+
     #endregion
 
     [Test]
@@ -76,5 +81,39 @@ public class Tests5040
         };
 
         await Assert.That(list).IsEquivalentTo(expected);
+    }
+
+    [Test]
+    public async Task No_Public_Members_Vs_Public_Members_Fails()
+    {
+        // Expected has no public members, actual has public members — types are incompatible
+        var expected = new PrivateStatePath("/home/user/file.txt");
+        var actual = new PublicStateMessage { Content = "/home/user/file.txt" };
+
+        var exception = await Assert.ThrowsAsync<TUnitAssertionException>(
+            async () => await Assert.That(actual).IsEquivalentTo(expected));
+
+        await Assert.That(exception).IsNotNull();
+    }
+
+    [Test]
+    public async Task Partial_Equivalency_With_No_Public_Members_Equal_Values_Passes()
+    {
+        var path1 = new PrivateStatePath("/home/user/file.txt");
+        var path2 = new PrivateStatePath("/home/user/file.txt");
+
+        await Assert.That(path1).IsEquivalentTo(path2).WithPartialEquivalency();
+    }
+
+    [Test]
+    public async Task Partial_Equivalency_With_No_Public_Members_Different_Values_Fails()
+    {
+        var path1 = new PrivateStatePath("/home/user/file1.txt");
+        var path2 = new PrivateStatePath("/home/user/file2.txt");
+
+        var exception = await Assert.ThrowsAsync<TUnitAssertionException>(
+            async () => await Assert.That(path1).IsEquivalentTo(path2).WithPartialEquivalency());
+
+        await Assert.That(exception).IsNotNull();
     }
 }

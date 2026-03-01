@@ -25,7 +25,7 @@ internal static class ReflectionHelper
         var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
         foreach (var prop in properties)
         {
-            if (prop.GetIndexParameters().Length == 0)
+            if (prop.GetIndexParameters().Length == 0 && prop.CanRead && prop.GetMethod?.IsPublic == true)
             {
                 members.Add(prop);
             }
