@@ -11,8 +11,12 @@ TUnit automatically generates a rich HTML test report after every test run. No c
 After running your tests, the report is written to:
 
 ```
-TestResults/{AssemblyName}-report.html
+TestResults/{AssemblyName}-{os}-{tfm}-report.html
 ```
+
+For example: `TestResults/MyTests-linux-net10.0-report.html`
+
+The OS and runtime version are included automatically so that matrix builds (multiple platforms/TFMs) produce distinct files instead of overwriting each other.
 
 Open it in any modern browser. The report is fully self-contained (single HTML file) and works offline.
 

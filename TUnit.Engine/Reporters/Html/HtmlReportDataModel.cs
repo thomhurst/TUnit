@@ -16,6 +16,12 @@ internal sealed class ReportData
     [JsonPropertyName("tunitVersion")]
     public required string TUnitVersion { get; init; }
 
+    [JsonPropertyName("operatingSystem")]
+    public required string OperatingSystem { get; init; }
+
+    [JsonPropertyName("runtimeVersion")]
+    public required string RuntimeVersion { get; init; }
+
     [JsonPropertyName("filter")]
     public string? Filter { get; init; }
 

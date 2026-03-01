@@ -74,6 +74,8 @@ internal static class HtmlReportGenerator
         sb.AppendLine("<div class=\"hdr-meta\">");
         AppendMetaChip(sb, "clock", data.Timestamp);
         AppendMetaChip(sb, "cpu", data.MachineName);
+        AppendMetaChip(sb, "os", data.OperatingSystem);
+        AppendMetaChip(sb, "runtime", data.RuntimeVersion);
         AppendMetaChip(sb, "tag", "TUnit " + data.TUnitVersion);
         if (!string.IsNullOrEmpty(data.Filter))
         {
@@ -251,7 +253,8 @@ internal static class HtmlReportGenerator
             return "<1ms";
         }
 
-        if (ms < 1000)
+        // Show milliseconds for anything under 1 second (avoids rounding 999ms to "1.00s")
+        if (Math.Round(ms) < 1000)
         {
             return $"{ms:F0}ms";
         }
@@ -678,7 +681,7 @@ function matchesFilter(t) {
 
 function fmt(ms) {
     if (ms < 1) return '<1ms';
-    if (ms < 1000) return ms.toFixed(0) + 'ms';
+    if (Math.round(ms) < 1000) return Math.round(ms) + 'ms';
     if (ms < 60000) return (ms/1000).toFixed(2) + 's';
     return (ms/60000).toFixed(1) + 'm';
 }

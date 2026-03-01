@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Net;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Testing.Platform.Extensions;
@@ -263,6 +264,8 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
             MachineName = Environment.MachineName,
             Timestamp = DateTimeOffset.UtcNow.ToString("o"),
             TUnitVersion = tunitVersion,
+            OperatingSystem = RuntimeInformation.OSDescription,
+            RuntimeVersion = RuntimeInformation.FrameworkDescription,
             Filter = Filter,
             TotalDurationMs = totalDurationMs,
             Summary = summary,
@@ -430,7 +433,54 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
     {
         var assemblyName = Assembly.GetEntryAssembly()?.GetName().Name ?? "TestResults";
         var sanitizedName = string.Concat(assemblyName.Split(Path.GetInvalidFileNameChars()));
-        return Path.GetFullPath(Path.Combine("TestResults", $"{sanitizedName}-report.html"));
+        var os = GetShortOsName();
+        var tfm = GetShortFrameworkName();
+        return Path.GetFullPath(Path.Combine("TestResults", $"{sanitizedName}-{os}-{tfm}-report.html"));
+    }
+
+    private static string GetShortOsName()
+    {
+#if NET
+        if (OperatingSystem.IsWindows()) return "windows";
+        if (OperatingSystem.IsLinux()) return "linux";
+        if (OperatingSystem.IsMacOS()) return "macos";
+#else
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return "windows";
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) return "linux";
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return "macos";
+#endif
+        return "unknown";
+    }
+
+    private static string GetShortFrameworkName()
+    {
+        // RuntimeInformation.FrameworkDescription returns e.g. ".NET 10.0.0" or ".NET Framework 4.8.0"
+        var desc = RuntimeInformation.FrameworkDescription;
+        if (desc.StartsWith(".NET Framework", StringComparison.OrdinalIgnoreCase))
+        {
+            var version = desc.Substring(".NET Framework ".Length).Trim();
+            var dotIndex = version.IndexOf('.');
+            if (dotIndex > 0)
+            {
+                var secondDot = version.IndexOf('.', dotIndex + 1);
+                if (secondDot > 0) version = version.Substring(0, secondDot);
+            }
+            return $"net{version.Replace(".", "")}";
+        }
+
+        if (desc.StartsWith(".NET ", StringComparison.OrdinalIgnoreCase))
+        {
+            var version = desc.Substring(".NET ".Length).Trim();
+            var dotIndex = version.IndexOf('.');
+            if (dotIndex > 0)
+            {
+                var secondDot = version.IndexOf('.', dotIndex + 1);
+                if (secondDot > 0) version = version.Substring(0, secondDot);
+            }
+            return $"net{version}";
+        }
+
+        return "unknown";
     }
 
     private static async Task WriteFileAsync(string path, string content, CancellationToken cancellationToken)
@@ -523,35 +573,27 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
             }
         }
 
-        // Always write to step summary when running in GitHub Actions
+        // Write to step summary
         if (!string.IsNullOrEmpty(summaryPath))
         {
             try
             {
-                var summary = new StringBuilder();
-                summary.AppendLine();
+                var assemblyName = Assembly.GetEntryAssembly()?.GetName().Name ?? Path.GetFileNameWithoutExtension(filePath);
+                string line;
 
                 if (artifactId is not null && !string.IsNullOrEmpty(repo) && !string.IsNullOrEmpty(runId))
                 {
-                    summary.AppendLine($"\ud83d\udcca [View HTML Test Report](https://github.com/{repo}/actions/runs/{runId}/artifacts/{artifactId})");
+                    line = $"\n\ud83d\udcca [{assemblyName} — View HTML Report](https://github.com/{repo}/actions/runs/{runId}/artifacts/{artifactId})\n";
                 }
                 else
                 {
-                    summary.AppendLine($"\ud83d\udcca HTML test report generated: `{Path.GetFileName(filePath)}`");
+                    line = $"\n\ud83d\udcca **{assemblyName}** HTML report was generated — [Enable automatic artifact upload](https://tunit.dev/docs/guides/html-report#enabling-automatic-artifact-upload)\n";
                 }
-
-                if (!hasRuntimeToken)
-                {
-                    summary.AppendLine();
-                    summary.AppendLine("\u2139\ufe0f [Enable automatic artifact upload](https://tunit.dev/docs/guides/html-report#enabling-automatic-artifact-upload)");
-                }
-
-                summary.AppendLine();
 
 #if NET
-                await File.AppendAllTextAsync(summaryPath, summary.ToString(), cancellationToken);
+                await File.AppendAllTextAsync(summaryPath, line, cancellationToken);
 #else
-                File.AppendAllText(summaryPath, summary.ToString());
+                File.AppendAllText(summaryPath, line);
 #endif
             }
             catch (Exception ex)
