@@ -518,6 +518,19 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
         var runtimeToken = Environment.GetEnvironmentVariable(EnvironmentConstants.ActionsRuntimeToken);
         var resultsUrl = Environment.GetEnvironmentVariable(EnvironmentConstants.ActionsResultsUrl);
 
+        if (string.IsNullOrEmpty(runtimeToken) || string.IsNullOrEmpty(resultsUrl))
+        {
+            // Log which ACTIONS_* variables are available for debugging
+            var actionsVars = Environment.GetEnvironmentVariables()
+                .Cast<System.Collections.DictionaryEntry>()
+                .Where(e => e.Key is string key && key.StartsWith("ACTIONS_", StringComparison.OrdinalIgnoreCase))
+                .Select(e => (string)e.Key!)
+                .OrderBy(k => k);
+
+            Console.WriteLine($"HTML report artifact upload: ACTIONS_RUNTIME_TOKEN={(!string.IsNullOrEmpty(runtimeToken) ? "set" : "missing")}, ACTIONS_RESULTS_URL={(!string.IsNullOrEmpty(resultsUrl) ? "set" : "missing")}");
+            Console.WriteLine($"Available ACTIONS_* env vars: {string.Join(", ", actionsVars)}");
+        }
+
         if (!string.IsNullOrEmpty(runtimeToken) && !string.IsNullOrEmpty(resultsUrl))
         {
             try

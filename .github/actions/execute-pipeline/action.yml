@@ -39,3 +39,5 @@ runs:
         NuGet__ApiKey: ${{ inputs.nuget-apikey }}
         NuGet__ShouldPublish: ${{ inputs.publish-packages }}
         NET_VERSION: ${{ inputs.netversion }}
+        ACTIONS_RUNTIME_TOKEN: ${{ env.ACTIONS_RUNTIME_TOKEN }}
+        ACTIONS_RESULTS_URL: ${{ env.ACTIONS_RESULTS_URL }}
