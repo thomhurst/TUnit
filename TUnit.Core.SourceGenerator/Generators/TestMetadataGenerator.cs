@@ -11,6 +11,7 @@ using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Helpers;
 using TUnit.Core.SourceGenerator.Models;
+using TUnit.Core.SourceGenerator.Utilities;
 
 namespace TUnit.Core.SourceGenerator.Generators;
 
@@ -1395,147 +1396,139 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static void GeneratePropertyInjections(CodeWriter writer, INamedTypeSymbol typeSymbol, string className)
     {
-        // Walk inheritance hierarchy to find properties with data source attributes
-        var currentType = typeSymbol;
-        var processedProperties = new HashSet<string>();
-        var hasPropertyInjections = false;
-
-        // First check if we have any property injections
-        var tempType = currentType;
-        while (tempType != null)
-        {
-            foreach (var member in tempType.GetMembers())
-            {
-                if (member is IPropertySymbol { DeclaredAccessibility: Accessibility.Public, SetMethod.DeclaredAccessibility: Accessibility.Public, IsStatic: false } property &&
-                    !processedProperties.Contains(property.Name))
-                {
-                    var dataSourceAttr = property.GetAttributes()
-                        .FirstOrDefault(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass));
-
-                    if (dataSourceAttr != null)
-                    {
-                        hasPropertyInjections = true;
-                        processedProperties.Add(property.Name);
-                    }
-                }
-            }
-            tempType = tempType.BaseType;
-        }
-
-        // Reset for actual generation
-        processedProperties.Clear();
-
-        if (!hasPropertyInjections)
+        var expr = GeneratePropertyInjectionsExpression(typeSymbol, className);
+        if (expr == null)
         {
             writer.AppendLine("PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),");
         }
         else
         {
-            writer.AppendLine("PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]");
-            writer.AppendLine("{");
-            writer.Indent();
+            writer.AppendLine($"PropertyInjections = {expr},");
+        }
+    }
 
-            currentType = typeSymbol;
-            while (currentType != null)
+    /// <summary>
+    /// Returns a PropertyInjectionData[] array expression, or null if no qualifying properties exist.
+    /// Single-pass: collects qualifying properties then generates the expression.
+    /// </summary>
+    private static string? GeneratePropertyInjectionsExpression(INamedTypeSymbol typeSymbol, string className)
+    {
+        // Single pass: collect qualifying properties with their containing type context
+        var qualifyingProperties = new List<(IPropertySymbol Property, INamedTypeSymbol ContainingType)>();
+        var processedNames = new HashSet<string>();
+        var currentType = typeSymbol;
+
+        while (currentType != null)
+        {
+            foreach (var member in currentType.GetMembers())
             {
-                foreach (var member in currentType.GetMembers())
+                if (member is IPropertySymbol { DeclaredAccessibility: Accessibility.Public, SetMethod.DeclaredAccessibility: Accessibility.Public, IsStatic: false } property &&
+                    !processedNames.Contains(property.Name))
                 {
-                    if (member is IPropertySymbol { DeclaredAccessibility: Accessibility.Public, SetMethod.DeclaredAccessibility: Accessibility.Public, IsStatic: false } property &&
-                        !processedProperties.Contains(property.Name))
+                    if (property.GetAttributes().Any(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass)))
                     {
-                        var dataSourceAttr = property.GetAttributes()
-                            .FirstOrDefault(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass));
-
-                        if (dataSourceAttr != null)
-                        {
-                            processedProperties.Add(property.Name);
-                            var propertyType = property.Type.GloballyQualified();
-
-                            writer.AppendLine("new global::TUnit.Core.PropertyInjectionData");
-                            writer.AppendLine("{");
-                            writer.Indent();
-                            writer.AppendLine($"PropertyName = \"{property.Name}\",");
-                            writer.AppendLine($"PropertyType = typeof({propertyType}),");
-
-                            // Generate appropriate setter based on whether property is init-only
-                            if (property.SetMethod.IsInitOnly)
-                            {
-                                // For init-only properties, use UnsafeAccessor on .NET 8+ (but not for generic types)
-                                // UnsafeAccessor doesn't work with open generic types
-                                // IMPORTANT: Use currentType (which is the closed generic type from the inheritance chain)
-                                // instead of property.ContainingType (which is the open generic type definition)
-                                var containingTypeName = currentType.GloballyQualified();
-                                var isGenericContainingType = currentType.IsGenericType;
-
-                                if (isGenericContainingType)
-                                {
-                                    // For init-only properties on generic types, use reflection with the closed generic type.
-                                    // UnsafeAccessor doesn't work with generic base classes, but reflection does.
-                                    // This is AOT-compatible because we use the closed generic type known at compile time.
-                                    writer.AppendLine("Setter = (instance, value) =>");
-                                    writer.AppendLine("{");
-                                    writer.Indent();
-                                    writer.AppendLine($"var backingField = typeof({containingTypeName}).GetField(\"<{property.Name}>k__BackingField\",");
-                                    writer.AppendLine("    global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.NonPublic);");
-                                    writer.AppendLine("if (backingField != null)");
-                                    writer.AppendLine("{");
-                                    writer.Indent();
-                                    writer.AppendLine("backingField.SetValue(instance, value);");
-                                    writer.Unindent();
-                                    writer.AppendLine("}");
-                                    writer.AppendLine("else");
-                                    writer.AppendLine("{");
-                                    writer.Indent();
-                                    writer.AppendLine($"throw new global::System.InvalidOperationException(\"Could not find backing field for property {property.Name} on type {containingTypeName}\");");
-                                    writer.Unindent();
-                                    writer.AppendLine("}");
-                                    writer.Unindent();
-                                    writer.AppendLine("},");
-                                }
-                                else
-                                {
-                                    writer.AppendLine("#if NET8_0_OR_GREATER");
-                                    // Cast to the property's containing type if needed
-                                    if (containingTypeName != className)
-                                    {
-                                        writer.AppendLine($"Setter = (instance, value) => Get{property.Name}BackingField(({containingTypeName})instance) = ({propertyType})value,");
-                                    }
-                                    else
-                                    {
-                                        writer.AppendLine($"Setter = (instance, value) => Get{property.Name}BackingField(({className})instance) = ({propertyType})value,");
-                                    }
-                                    writer.AppendLine("#else");
-                                    writer.AppendLine("Setter = (instance, value) => throw new global::System.NotSupportedException(\"Setting init-only properties requires .NET 8 or later\"),");
-                                    writer.AppendLine("#endif");
-                                }
-                            }
-                            else
-                            {
-                                // For regular properties, use normal property assignment
-                                // For regular properties, use direct assignment (tuple conversion happens at runtime)
-                                writer.AppendLine($"Setter = (instance, value) => (({className})instance).{property.Name} = ({propertyType})value,");
-                            }
-
-                            // ValueFactory will be provided by the TestDataCombination at runtime
-                            writer.AppendLine("ValueFactory = () => throw new global::System.InvalidOperationException(\"ValueFactory should be provided by TestDataCombination\"),");
-
-                            // Generate nested property injections
-                            GenerateNestedPropertyInjections(writer, property.Type, processedProperties);
-
-                            // Generate nested property value factory
-                            GenerateNestedPropertyValueFactory(writer, property.Type);
-
-                            writer.Unindent();
-                            writer.AppendLine("},");
-                        }
+                        processedNames.Add(property.Name);
+                        // IMPORTANT: Store currentType (closed generic type from inheritance chain)
+                        // instead of property.ContainingType (open generic type definition)
+                        qualifyingProperties.Add((property, currentType));
                     }
                 }
-                currentType = currentType.BaseType;
             }
+            currentType = currentType.BaseType;
+        }
+
+        if (qualifyingProperties.Count == 0)
+        {
+            return null;
+        }
+
+        var writer = new CodeWriter(includeHeader: false);
+        writer.AppendLine("new global::TUnit.Core.PropertyInjectionData[]");
+        writer.AppendLine("{");
+        writer.Indent();
+
+        foreach (var (property, containingType) in qualifyingProperties)
+        {
+            var propertyType = property.Type.GloballyQualified();
+
+            writer.AppendLine("new global::TUnit.Core.PropertyInjectionData");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine($"PropertyName = \"{property.Name}\",");
+            writer.AppendLine($"PropertyType = typeof({propertyType}),");
+
+            // Generate appropriate setter based on whether property is init-only
+            if (property.SetMethod!.IsInitOnly)
+            {
+                // For init-only properties, use UnsafeAccessor on .NET 8+ (but not for generic types)
+                // UnsafeAccessor doesn't work with open generic types
+                var containingTypeName = containingType.GloballyQualified();
+                var isGenericContainingType = containingType.IsGenericType;
+
+                if (isGenericContainingType)
+                {
+                    // For init-only properties on generic types, use reflection with the closed generic type.
+                    // UnsafeAccessor doesn't work with generic base classes, but reflection does.
+                    // This is AOT-compatible because we use the closed generic type known at compile time.
+                    writer.AppendLine("Setter = (instance, value) =>");
+                    writer.AppendLine("{");
+                    writer.Indent();
+                    writer.AppendLine($"var backingField = typeof({containingTypeName}).GetField(\"<{property.Name}>k__BackingField\",");
+                    writer.AppendLine("    global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.NonPublic);");
+                    writer.AppendLine("if (backingField != null)");
+                    writer.AppendLine("{");
+                    writer.Indent();
+                    writer.AppendLine("backingField.SetValue(instance, value);");
+                    writer.Unindent();
+                    writer.AppendLine("}");
+                    writer.AppendLine("else");
+                    writer.AppendLine("{");
+                    writer.Indent();
+                    writer.AppendLine($"throw new global::System.InvalidOperationException(\"Could not find backing field for property {property.Name} on type {containingTypeName}\");");
+                    writer.Unindent();
+                    writer.AppendLine("}");
+                    writer.Unindent();
+                    writer.AppendLine("},");
+                }
+                else
+                {
+                    writer.AppendLine("#if NET8_0_OR_GREATER");
+                    // Cast to the property's containing type if needed
+                    if (containingTypeName != className)
+                    {
+                        writer.AppendLine($"Setter = (instance, value) => Get{property.Name}BackingField(({containingTypeName})instance) = ({propertyType})value,");
+                    }
+                    else
+                    {
+                        writer.AppendLine($"Setter = (instance, value) => Get{property.Name}BackingField(({className})instance) = ({propertyType})value,");
+                    }
+                    writer.AppendLine("#else");
+                    writer.AppendLine("Setter = (instance, value) => throw new global::System.NotSupportedException(\"Setting init-only properties requires .NET 8 or later\"),");
+                    writer.AppendLine("#endif");
+                }
+            }
+            else
+            {
+                // For regular properties, use direct assignment (tuple conversion happens at runtime)
+                writer.AppendLine($"Setter = (instance, value) => (({className})instance).{property.Name} = ({propertyType})value,");
+            }
+
+            // ValueFactory will be provided by the TestDataCombination at runtime
+            writer.AppendLine("ValueFactory = () => throw new global::System.InvalidOperationException(\"ValueFactory should be provided by TestDataCombination\"),");
+
+            // Generate nested property injections
+            GenerateNestedPropertyInjections(writer, property.Type, processedNames);
+
+            // Generate nested property value factory
+            GenerateNestedPropertyValueFactory(writer, property.Type);
 
             writer.Unindent();
             writer.AppendLine("},");
         }
+
+        writer.Unindent();
+        writer.Append("}");
+        return writer.ToString();
     }
 
     private static void GeneratePropertyDataSources(CodeWriter writer, TestMethodMetadata testMethod)
@@ -2425,7 +2418,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     /// <summary>
     /// Pre-generates the metadata block for one method's contribution to GetTests().
-    /// Output: var metadata_{id} = new TestMetadata&lt;T&gt; { ... }; metadata_{id}.UseRuntimeDataGeneration(...);
+    /// Uses TestMetadataFactory.Create and MethodMetadataFactory.Create to reduce JIT native code.
+    /// References shared locals (__classMetadata, __classType) declared at top of GetTests().
     /// </summary>
     private static string PreGenerateMetadataBlock(
         TestMethodMetadata testMethod,
@@ -2434,42 +2428,31 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         int attributeGroupIndex)
     {
         var writer = new CodeWriter(includeHeader: false);
+        var methodName = testMethod.MethodSymbol.Name;
+        var filePath = (testMethod.FilePath ?? "").Replace("\\", "\\\\");
 
-        writer.AppendLine($"var metadata_{methodId} = new global::TUnit.Core.TestMetadata<{className}>");
-        writer.AppendLine("{");
+        // Build MethodMetadata factory call
+        var methodMetadataCall = GenerateMethodMetadataFactoryCall(testMethod.MethodSymbol);
+
+        // Start TestMetadataFactory.Create call
+        writer.AppendLine($"var metadata_{methodId} = global::TUnit.Core.TestMetadataFactory.Create<{className}>(");
         writer.Indent();
+        writer.AppendLine($"\"{methodName}\", \"{methodName}\", {testMethod.LineNumber},");
+        writer.AppendLine($"__InvokeTest_{methodId}, __CreateAttributes_{attributeGroupIndex}, CreateInstance,");
+        writer.Append(methodMetadataCall);
 
-        writer.AppendLine($"TestName = \"{testMethod.MethodSymbol.Name}\",");
-        writer.AppendLine($"TestClassType = typeof({className}),");
-        writer.AppendLine($"TestMethodName = \"{testMethod.MethodSymbol.Name}\",");
+        // Add optional named parameters only when non-default
+        AppendOptionalFactoryParameters(writer, testMethod, className);
 
-        // Reuse existing helper methods that write to CodeWriter
-        GenerateDependencies(writer, testMethod.MethodSymbol);
-        writer.AppendLine($"AttributeFactory = __CreateAttributes_{attributeGroupIndex},");
-        GenerateDataSources(writer, testMethod);
-        GeneratePropertyInjections(writer, testMethod.TypeSymbol, className);
-        writer.AppendLine("InheritanceDepth = 0,");
-        writer.AppendLine($"FilePath = @\"{(testMethod.FilePath ?? "").Replace("\\", "\\\\")}\",");
-        writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
-
-        // MethodMetadata
-        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
-        writer.Append("MethodMetadata = ");
-        SourceInformationWriter.GenerateMethodInformation(writer, compilation, testMethod.TypeSymbol, testMethod.MethodSymbol, null, ',');
-
-        writer.AppendLine($"InstanceFactory = CreateInstance,");
-        writer.AppendLine($"InvokeTypedTest = __InvokeTest_{methodId},");
-
-        // RepeatCount
-        var repeatCount = ExtractRepeatCount(testMethod.MethodSymbol, testMethod.TypeSymbol);
-        if (repeatCount.HasValue)
+        writer.AppendLine(",");
+        if (!string.IsNullOrEmpty(filePath))
         {
-            writer.AppendLine($"RepeatCount = {repeatCount.Value},");
+            writer.AppendLine($"filePath: @\"{filePath}\",");
         }
+        writer.Append("testSessionId: testSessionId");
 
         writer.Unindent();
-        writer.AppendLine("};");
-        writer.AppendLine($"metadata_{methodId}.UseRuntimeDataGeneration(testSessionId);");
+        writer.AppendLine(");");
 
         return writer.ToString();
     }
@@ -2551,6 +2534,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// <summary>
     /// Pre-generates the full __Materialize_{id} static method.
     /// This is only called when --treenode-filter is used (never JIT'd in normal runs).
+    /// Uses factory calls for consistency, with inline shared locals (since this is a separate method).
     /// </summary>
     private static string PreGenerateMaterializerMethod(
         TestMethodMetadata testMethod,
@@ -2564,39 +2548,35 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
 
-        // Same metadata as in GetTests, but with a simple 'metadata' variable name
-        writer.AppendLine($"var metadata = new global::TUnit.Core.TestMetadata<{className}>");
-        writer.AppendLine("{");
+        var methodName = testMethod.MethodSymbol.Name;
+        var filePath = (testMethod.FilePath ?? "").Replace("\\", "\\\\");
+
+        // Inline shared locals (can't reference GetTests locals from a separate method)
+        // Use AppendRaw to properly indent the multi-line ClassMetadata expression
+        writer.AppendRaw(PreGenerateSharedLocals(testMethod.TypeSymbol, className));
+
+        // Build MethodMetadata factory call
+        var methodMetadataCall = GenerateMethodMetadataFactoryCall(testMethod.MethodSymbol);
+
+        // TestMetadataFactory.Create call
+        writer.AppendLine($"var metadata = global::TUnit.Core.TestMetadataFactory.Create<{className}>(");
         writer.Indent();
+        writer.AppendLine($"\"{methodName}\", \"{methodName}\", {testMethod.LineNumber},");
+        writer.AppendLine($"__InvokeTest_{methodId}, __CreateAttributes_{attributeGroupIndex}, CreateInstance,");
+        writer.Append(methodMetadataCall);
 
-        writer.AppendLine($"TestName = \"{testMethod.MethodSymbol.Name}\",");
-        writer.AppendLine($"TestClassType = typeof({className}),");
-        writer.AppendLine($"TestMethodName = \"{testMethod.MethodSymbol.Name}\",");
+        // Add optional named parameters
+        AppendOptionalFactoryParameters(writer, testMethod, className);
 
-        GenerateDependencies(writer, testMethod.MethodSymbol);
-        writer.AppendLine($"AttributeFactory = __CreateAttributes_{attributeGroupIndex},");
-        GenerateDataSources(writer, testMethod);
-        GeneratePropertyInjections(writer, testMethod.TypeSymbol, className);
-        writer.AppendLine("InheritanceDepth = 0,");
-        writer.AppendLine($"FilePath = @\"{(testMethod.FilePath ?? "").Replace("\\", "\\\\")}\",");
-        writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
-
-        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
-        writer.Append("MethodMetadata = ");
-        SourceInformationWriter.GenerateMethodInformation(writer, compilation, testMethod.TypeSymbol, testMethod.MethodSymbol, null, ',');
-
-        writer.AppendLine($"InstanceFactory = CreateInstance,");
-        writer.AppendLine($"InvokeTypedTest = __InvokeTest_{methodId},");
-
-        var repeatCount = ExtractRepeatCount(testMethod.MethodSymbol, testMethod.TypeSymbol);
-        if (repeatCount.HasValue)
+        writer.AppendLine(",");
+        if (!string.IsNullOrEmpty(filePath))
         {
-            writer.AppendLine($"RepeatCount = {repeatCount.Value},");
+            writer.AppendLine($"filePath: @\"{filePath}\",");
         }
+        writer.Append("testSessionId: testSessionId");
 
         writer.Unindent();
-        writer.AppendLine("};");
-        writer.AppendLine("metadata.UseRuntimeDataGeneration(testSessionId);");
+        writer.AppendLine(");");
         writer.AppendLine("return new global::TUnit.Core.TestMetadata[] { metadata };");
 
         writer.Unindent();
@@ -2620,6 +2600,248 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("];");
 
+        return writer.ToString();
+    }
+
+    /// <summary>
+    /// Pre-generates shared local variable declarations for the top of GetTests().
+    /// Generates __classMetadata and __classType locals that are referenced by factory calls.
+    /// </summary>
+    private static string PreGenerateSharedLocals(INamedTypeSymbol typeSymbol, string className)
+    {
+        var writer = new CodeWriter(includeHeader: false);
+        var classMetadataExpr = MetadataGenerationHelper.GenerateClassMetadataGetOrAddWithParentExpression(typeSymbol, writer.IndentLevel);
+        writer.AppendLine($"var __classMetadata = {classMetadataExpr};");
+        writer.AppendLine($"var __classType = typeof({className});");
+        return writer.ToString();
+    }
+
+    /// <summary>
+    /// Generates a MethodMetadataFactory.Create(...) call expression referencing __classType and __classMetadata.
+    /// </summary>
+    private static string GenerateMethodMetadataFactoryCall(IMethodSymbol methodSymbol)
+    {
+        var returnType = methodSymbol.ReturnType.GloballyQualified();
+        var sb = new System.Text.StringBuilder();
+        sb.Append($"global::TUnit.Core.MethodMetadataFactory.Create(\"{methodSymbol.Name}\", __classType, typeof({returnType}), __classMetadata");
+
+        if (methodSymbol.TypeParameters.Length > 0)
+        {
+            sb.Append($", genericTypeCount: {methodSymbol.TypeParameters.Length}");
+        }
+
+        if (methodSymbol.Parameters.Length > 0)
+        {
+            var paramExpr = MetadataGenerationHelper.GenerateParameterMetadataArrayForMethodExpression(methodSymbol);
+            if (paramExpr != null)
+            {
+                sb.Append($", parameters: {paramExpr}");
+            }
+        }
+
+        sb.Append(')');
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// Appends optional named parameters to a TestMetadataFactory.Create call.
+    /// Only includes parameters that differ from the factory defaults (null/empty).
+    /// </summary>
+    private static void AppendOptionalFactoryParameters(CodeWriter writer, TestMethodMetadata testMethod, string className)
+    {
+        // Dependencies
+        var deps = PreGenerateDependenciesExpression(testMethod.MethodSymbol);
+        if (deps != null)
+        {
+            writer.AppendLine(",");
+            writer.Append($"dependencies: {deps}");
+        }
+
+        // Method-level data sources
+        var methodDS = PreGenerateMethodDataSourcesExpression(testMethod);
+        if (methodDS != null)
+        {
+            writer.AppendLine(",");
+            writer.Append($"dataSources: {methodDS}");
+        }
+
+        // Class-level data sources
+        var classDS = PreGenerateClassDataSourcesExpression(testMethod);
+        if (classDS != null)
+        {
+            writer.AppendLine(",");
+            writer.Append($"classDataSources: {classDS}");
+        }
+
+        // Property data sources
+        var propDS = PreGeneratePropertyDataSourcesExpression(testMethod);
+        if (propDS != null)
+        {
+            writer.AppendLine(",");
+            writer.Append($"propertyDataSources: {propDS}");
+        }
+
+        // Property injections
+        var propInj = GeneratePropertyInjectionsExpression(testMethod.TypeSymbol, className);
+        if (propInj != null)
+        {
+            writer.AppendLine(",");
+            writer.Append($"propertyInjections: {propInj}");
+        }
+
+        // RepeatCount
+        var repeatCount = ExtractRepeatCount(testMethod.MethodSymbol, testMethod.TypeSymbol);
+        if (repeatCount.HasValue)
+        {
+            writer.AppendLine(",");
+            writer.Append($"repeatCount: {repeatCount.Value}");
+        }
+    }
+
+    /// <summary>
+    /// Returns a TestDependency[] expression, or null if empty (factory default).
+    /// </summary>
+    private static string? PreGenerateDependenciesExpression(IMethodSymbol methodSymbol)
+    {
+        var dependsOnAttributes = methodSymbol.GetAttributes()
+            .Concat(methodSymbol.ContainingType.GetAttributes())
+            .Where(attr => attr.AttributeClass?.Name == "DependsOnAttribute" &&
+                          attr.AttributeClass.ContainingNamespace?.ToDisplayString() == "TUnit.Core")
+            .ToArray();
+
+        if (dependsOnAttributes.Length == 0)
+        {
+            return null;
+        }
+
+        var writer = new CodeWriter(includeHeader: false);
+        writer.AppendLine("new global::TUnit.Core.TestDependency[]");
+        writer.AppendLine("{");
+        writer.Indent();
+        for (var i = 0; i < dependsOnAttributes.Length; i++)
+        {
+            GenerateTestDependency(writer, dependsOnAttributes[i]);
+            if (i < dependsOnAttributes.Length - 1)
+            {
+                writer.AppendLine(",");
+            }
+        }
+        writer.Unindent();
+        writer.AppendLine();
+        writer.Append("}");
+        return writer.ToString();
+    }
+
+    /// <summary>
+    /// Returns an IDataSourceAttribute[] expression for method-level data sources, or null if empty.
+    /// </summary>
+    private static string? PreGenerateMethodDataSourcesExpression(TestMethodMetadata testMethod)
+    {
+        var methodDataSources = testMethod.MethodSymbol.GetAttributes()
+            .Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
+            .ToArray();
+
+        if (methodDataSources.Length == 0)
+        {
+            return null;
+        }
+
+        var writer = new CodeWriter(includeHeader: false);
+        writer.AppendLine("new global::TUnit.Core.IDataSourceAttribute[]");
+        writer.AppendLine("{");
+        writer.Indent();
+        foreach (var attr in methodDataSources)
+        {
+            GenerateDataSourceAttribute(writer, testMethod.CompilationContext, attr, testMethod.MethodSymbol, testMethod.TypeSymbol);
+        }
+        writer.Unindent();
+        writer.Append("}");
+        return writer.ToString();
+    }
+
+    /// <summary>
+    /// Returns an IDataSourceAttribute[] expression for class-level data sources, or null if empty.
+    /// </summary>
+    private static string? PreGenerateClassDataSourcesExpression(TestMethodMetadata testMethod)
+    {
+        var classDataSources = testMethod.TypeSymbol.GetAttributesIncludingBaseTypes()
+            .Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
+            .ToArray();
+
+        if (classDataSources.Length == 0)
+        {
+            return null;
+        }
+
+        var writer = new CodeWriter(includeHeader: false);
+        writer.AppendLine("new global::TUnit.Core.IDataSourceAttribute[]");
+        writer.AppendLine("{");
+        writer.Indent();
+        foreach (var attr in classDataSources)
+        {
+            GenerateDataSourceAttribute(writer, testMethod.CompilationContext, attr, testMethod.MethodSymbol, testMethod.TypeSymbol);
+        }
+        writer.Unindent();
+        writer.Append("}");
+        return writer.ToString();
+    }
+
+    /// <summary>
+    /// Returns a PropertyDataSource[] expression, or null if empty.
+    /// </summary>
+    private static string? PreGeneratePropertyDataSourcesExpression(TestMethodMetadata testMethod)
+    {
+        var typeSymbol = testMethod.TypeSymbol;
+        var processedNames = new HashSet<string>();
+        var qualifyingProperties = new List<(IPropertySymbol Property, AttributeData DataSourceAttr)>();
+
+        // Single pass: collect qualifying properties with their data source attributes
+        var currentType = typeSymbol;
+        while (currentType != null)
+        {
+            foreach (var member in currentType.GetMembers())
+            {
+                if (member is IPropertySymbol { DeclaredAccessibility: Accessibility.Public, IsStatic: false } property &&
+                    !processedNames.Contains(property.Name))
+                {
+                    var dataSourceAttr = property.GetAttributes()
+                        .FirstOrDefault(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass));
+
+                    if (dataSourceAttr != null)
+                    {
+                        processedNames.Add(property.Name);
+                        qualifyingProperties.Add((property, dataSourceAttr));
+                    }
+                }
+            }
+            currentType = currentType.BaseType;
+        }
+
+        if (qualifyingProperties.Count == 0)
+        {
+            return null;
+        }
+
+        var writer = new CodeWriter(includeHeader: false);
+        writer.AppendLine("new global::TUnit.Core.PropertyDataSource[]");
+        writer.AppendLine("{");
+        writer.Indent();
+
+        foreach (var (property, dataSourceAttr) in qualifyingProperties)
+        {
+            writer.AppendLine("new global::TUnit.Core.PropertyDataSource");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine($"PropertyName = \"{property.Name}\",");
+            writer.AppendLine($"PropertyType = typeof({property.Type.GloballyQualified()}),");
+            writer.Append("DataSource = ");
+            GenerateDataSourceAttribute(writer, testMethod.CompilationContext, dataSourceAttr, testMethod.MethodSymbol, typeSymbol);
+            writer.Unindent();
+            writer.AppendLine("},");
+        }
+
+        writer.Unindent();
+        writer.Append("}");
         return writer.ToString();
     }
 
@@ -2700,6 +2922,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     AttributeGroups = distinctBodies.ToEquatableArray(),
                     InstanceFactoryBodyCode = InstanceFactoryGenerator.GenerateInstanceFactoryBody(typeSymbol),
                     ReflectionFieldAccessorsCode = PreGenerateReflectionFieldAccessors(typeSymbol),
+                    SharedLocalsCode = PreGenerateSharedLocals(typeSymbol, className),
                 };
             });
     }
@@ -2727,6 +2950,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("public static global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)");
             writer.AppendLine("{");
             writer.Indent();
+
+            // Shared locals: __classMetadata and __classType (referenced by factory calls)
+            writer.AppendRaw(classGroup.SharedLocalsCode);
 
             foreach (var method in classGroup.Methods)
             {

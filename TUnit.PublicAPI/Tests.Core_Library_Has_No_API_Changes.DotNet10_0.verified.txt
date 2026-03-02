@@ -1023,6 +1023,11 @@ namespace
         public override int GetHashCode() { }
         protected virtual bool PrintMembers(.StringBuilder stringBuilder) { }
     }
+    public static class MethodMetadataFactory
+    {
+        [.("ReflectionAnalysis", "IL2067", Justification="Factory is only called from generated code that always passes concrete types")]
+        public static .MethodMetadata Create(string name,  type,  returnType, .ClassMetadata classMetadata, int genericTypeCount = 0, .ParameterMetadata[]? parameters = null) { }
+    }
     [(.Assembly | .Class | .Method, AllowMultiple=false, Inherited=true)]
     public class NotDiscoverableAttribute : .TUnitAttribute, ., .
     {
@@ -1533,6 +1538,29 @@ namespace
         public required string TestMethodName { get; init; }
         public required string TestName { get; init; }
         public string TestSessionId { get; set; }
+    }
+    public static class TestMetadataFactory
+    {
+        [.("ReflectionAnalysis", "IL2087", Justification="Factory is only called from generated code that always passes concrete types")]
+        [.("ReflectionAnalysis", "IL2091", Justification="Factory is only called from generated code that always passes concrete types")]
+        public static .TestMetadata<T> Create<T>(
+                    string testName,
+                    string testMethodName,
+                    int lineNumber,
+                    <T, object?[], .CancellationToken, .> invokeTypedTest,
+                    <[]> attributeFactory,
+                    <[], object?[], T> instanceFactory,
+                    .MethodMetadata methodMetadata,
+                    string testSessionId,
+                    string filePath = "",
+                    int inheritanceDepth = 0,
+                    .TestDependency[]? dependencies = null,
+                    .IDataSourceAttribute[]? dataSources = null,
+                    .IDataSourceAttribute[]? classDataSources = null,
+                    .PropertyDataSource[]? propertyDataSources = null,
+                    .PropertyInjectionData[]? propertyInjections = null,
+                    int? repeatCount = default)
+            where T :  class { }
     }
     public class TestMetadata<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  T> : .TestMetadata, .
         where T :  class

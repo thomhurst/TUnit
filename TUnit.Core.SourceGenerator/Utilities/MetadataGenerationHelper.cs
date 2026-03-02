@@ -120,6 +120,33 @@ internal static class MetadataGenerationHelper
     }
 
     /// <summary>
+    /// Generates ClassMetadata with recursive parent as a string expression.
+    /// Used by the per-class path to pre-generate shared locals.
+    /// </summary>
+    public static string GenerateClassMetadataGetOrAddWithParentExpression(INamedTypeSymbol typeSymbol, int indentLevel = 0)
+    {
+        var writer = new CodeWriter(includeHeader: false).SetIndentLevel(indentLevel);
+        WriteClassMetadataGetOrAddWithParent(writer, typeSymbol);
+        return writer.ToString();
+    }
+
+    /// <summary>
+    /// Generates a ParameterMetadata[] expression for a method's parameters as a string.
+    /// Returns null if the method has no parameters.
+    /// </summary>
+    public static string? GenerateParameterMetadataArrayForMethodExpression(IMethodSymbol method, int indentLevel = 0)
+    {
+        if (method.Parameters.Length == 0)
+        {
+            return null;
+        }
+
+        var writer = new CodeWriter("", includeHeader: false).SetIndentLevel(indentLevel);
+        WriteParameterMetadataArrayForMethod(writer, method);
+        return writer.ToString();
+    }
+
+    /// <summary>
     /// Writes ClassMetadata with recursive parent generation for nested types
     /// </summary>
     private static void WriteClassMetadataGetOrAddWithParent(ICodeWriter writer, INamedTypeSymbol typeSymbol)
