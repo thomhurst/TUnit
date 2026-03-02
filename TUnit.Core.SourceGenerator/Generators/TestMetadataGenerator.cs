@@ -2682,7 +2682,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         // Property injections
-        var propInj = PreGeneratePropertyInjectionsExpression(testMethod.TypeSymbol, className);
+        var propInj = GeneratePropertyInjectionsExpression(testMethod.TypeSymbol, className);
         if (propInj != null)
         {
             writer.AppendLine(",");
@@ -2843,14 +2843,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.Append("}");
         return writer.ToString();
-    }
-
-    /// <summary>
-    /// Returns a PropertyInjectionData[] expression, or null if empty.
-    /// </summary>
-    private static string? PreGeneratePropertyInjectionsExpression(INamedTypeSymbol typeSymbol, string className)
-    {
-        return GeneratePropertyInjectionsExpression(typeSymbol, className);
     }
 
     /// <summary>
