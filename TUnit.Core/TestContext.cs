@@ -257,6 +257,29 @@ public partial class TestContext : Context,
     /// </summary>
     public object Lock { get; } = new();
 
+#if NET
+    /// <summary>
+    /// Gets the <see cref="System.Diagnostics.Activity"/> associated with this test's execution,
+    /// or <c>null</c> if no activity is active.
+    /// Use <c>Activity.Context</c> to parent external work (e.g., HttpClient calls) under this test's trace.
+    /// </summary>
+    public new System.Diagnostics.Activity? Activity
+    {
+        get => base.Activity;
+        internal set => base.Activity = value;
+    }
+
+    /// <summary>
+    /// Registers an external trace ID to be associated with this test.
+    /// Registered traces will be captured by the activity collector and displayed
+    /// in the HTML report as linked traces.
+    /// </summary>
+    /// <param name="traceId">The trace ID of the external trace to associate with this test.</param>
+    public void RegisterTrace(System.Diagnostics.ActivityTraceId traceId)
+    {
+        TraceRegistry.Register(traceId.ToString(), TestDetails.TestId);
+    }
+#endif
 
     internal IClassConstructor? ClassConstructor => _testBuilderContext.ClassConstructor;
 

@@ -1,6 +1,7 @@
 #if NET
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using TUnit.Core;
 
 namespace TUnit.Engine.Reporters.Html;
 
@@ -12,6 +13,9 @@ internal sealed class ActivityCollector : IDisposable
 
     private readonly ConcurrentDictionary<string, ConcurrentQueue<SpanData>> _spansByTrace = new();
     private readonly ConcurrentDictionary<string, int> _spanCountsByTrace = new();
+    // Fast-path cache of trace IDs that should be collected. Subsumes TraceRegistry lookups
+    // so that subsequent activities on the same trace avoid cross-class dictionary checks.
+    private readonly ConcurrentDictionary<string, byte> _knownTraceIds = new(StringComparer.OrdinalIgnoreCase);
     private ActivityListener? _listener;
     private int _totalSpanCount;
 
@@ -19,13 +23,67 @@ internal sealed class ActivityCollector : IDisposable
     {
         _listener = new ActivityListener
         {
-            ShouldListenTo = static source => IsTUnitSource(source),
-            Sample = static (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded,
-            SampleUsingParentId = static (ref ActivityCreationOptions<string> _) => ActivitySamplingResult.AllDataAndRecorded,
+            ShouldListenTo = static _ => true,
+            Sample = SampleActivity,
+            SampleUsingParentId = SampleActivityUsingParentId,
             ActivityStopped = OnActivityStopped
         };
 
         ActivitySource.AddActivityListener(_listener);
+    }
+
+    private ActivitySamplingResult SampleActivity(ref ActivityCreationOptions<ActivityContext> options)
+    {
+        var sourceName = options.Source.Name;
+
+        // TUnit/Microsoft.Testing sources: always record, register trace
+        if (IsTUnitSource(sourceName))
+        {
+            if (options.Parent.TraceId != default)
+            {
+                _knownTraceIds.TryAdd(options.Parent.TraceId.ToString(), 0);
+            }
+
+            return ActivitySamplingResult.AllDataAndRecorded;
+        }
+
+        // No parent trace → nothing to correlate with
+        if (options.Parent.TraceId == default)
+        {
+            return ActivitySamplingResult.PropagationData;
+        }
+
+        var parentTraceId = options.Parent.TraceId.ToString();
+
+        // Parent trace is known (child of a TUnit activity, e.g. HttpClient)
+        if (_knownTraceIds.ContainsKey(parentTraceId))
+        {
+            return ActivitySamplingResult.AllDataAndRecorded;
+        }
+
+        // Trace registered via TestContext.RegisterTrace
+        if (TraceRegistry.IsRegistered(parentTraceId))
+        {
+            _knownTraceIds.TryAdd(parentTraceId, 0);
+            return ActivitySamplingResult.AllDataAndRecorded;
+        }
+
+        // Everything else: create the Activity for context propagation but no timing/tags
+        return ActivitySamplingResult.PropagationData;
+    }
+
+    private ActivitySamplingResult SampleActivityUsingParentId(ref ActivityCreationOptions<string> options)
+    {
+        var sourceName = options.Source.Name;
+
+        if (IsTUnitSource(sourceName))
+        {
+            return ActivitySamplingResult.AllDataAndRecorded;
+        }
+
+        // For string-based parent IDs we can't easily extract the trace ID,
+        // so use PropagationData to allow context flow
+        return ActivitySamplingResult.PropagationData;
     }
 
     public void Stop()
@@ -70,9 +128,9 @@ internal sealed class ActivityCollector : IDisposable
         return lookup;
     }
 
-    private static bool IsTUnitSource(ActivitySource source) =>
-        source.Name.StartsWith("TUnit", StringComparison.Ordinal) ||
-        source.Name.StartsWith("Microsoft.Testing", StringComparison.Ordinal);
+    private static bool IsTUnitSource(string sourceName) =>
+        sourceName.StartsWith("TUnit", StringComparison.Ordinal) ||
+        sourceName.StartsWith("Microsoft.Testing", StringComparison.Ordinal);
 
     private static string EnrichSpanName(Activity activity)
     {
@@ -101,6 +159,14 @@ internal sealed class ActivityCollector : IDisposable
 
     private void OnActivityStopped(Activity activity)
     {
+        var traceId = activity.TraceId.ToString();
+
+        // Only collect spans for known traces (TUnit or registered external traces)
+        if (!_knownTraceIds.ContainsKey(traceId))
+        {
+            return;
+        }
+
         var newTotal = Interlocked.Increment(ref _totalSpanCount);
         if (newTotal > MaxTotalSpans)
         {
@@ -108,7 +174,6 @@ internal sealed class ActivityCollector : IDisposable
             return;
         }
 
-        var traceId = activity.TraceId.ToString();
         var traceCount = _spanCountsByTrace.AddOrUpdate(traceId, 1, (_, c) => c + 1);
         if (traceCount > MaxSpansPerTrace)
         {

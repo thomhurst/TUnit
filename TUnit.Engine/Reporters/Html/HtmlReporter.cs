@@ -7,6 +7,7 @@ using System.Text.Json;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestHost;
+using TUnit.Core;
 using TUnit.Engine.Configuration;
 using TUnit.Engine.Constants;
 using TUnit.Engine.Framework;
@@ -184,7 +185,14 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
                 }
             }
 
-            var testResult = ExtractTestResult(kvp.Key, testNode, traceId, spanId, retryAttempt);
+#if NET
+            var additionalTraceIds = TraceRegistry.GetTraceIds(kvp.Key);
+            string[]? additionalTraceIdsForResult = additionalTraceIds.Length > 0 ? additionalTraceIds : null;
+#else
+            string[]? additionalTraceIdsForResult = null;
+#endif
+
+            var testResult = ExtractTestResult(kvp.Key, testNode, traceId, spanId, retryAttempt, additionalTraceIdsForResult);
 
             AccumulateStatus(summary, testResult.Status);
 
@@ -337,7 +345,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
         }
     }
 
-    private static ReportTestResult ExtractTestResult(string testId, TestNode testNode, string? traceId, string? spanId, int retryAttempt)
+    private static ReportTestResult ExtractTestResult(string testId, TestNode testNode, string? traceId, string? spanId, int retryAttempt, string[]? additionalTraceIds)
     {
         IProperty? stateProperty = null;
         TestMethodIdentifierProperty? testMethodIdentifier = null;
@@ -417,7 +425,8 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
             SkipReason = skipReason,
             RetryAttempt = retryAttempt,
             TraceId = traceId,
-            SpanId = spanId
+            SpanId = spanId,
+            AdditionalTraceIds = additionalTraceIds
         };
     }
 

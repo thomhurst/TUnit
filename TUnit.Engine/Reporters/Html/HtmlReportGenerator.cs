@@ -1287,6 +1287,11 @@ function renderDetail(t) {
         h += '</span></div>';
     }
     if (t.traceId && t.spanId && spansByTrace[t.traceId]) h += renderTrace(t.traceId, t.spanId);
+    if (t.additionalTraceIds && t.additionalTraceIds.length) {
+        t.additionalTraceIds.forEach(function(tid) {
+            if (spansByTrace[tid]) h += renderExternalTrace(tid);
+        });
+    }
     return h;
 }
 
@@ -1362,6 +1367,19 @@ function renderTrace(tid, rootSpanId) {
         }
     }
     return '<div class="d-sec"><div class="d-lbl">Trace Timeline</div>' + renderSpanRows(sp, 't-' + rootSpanId) + '</div>';
+}
+
+// Render an external (linked) trace as a flat timeline
+function renderExternalTrace(tid) {
+    const sp = spansByTrace[tid];
+    if (!sp || !sp.length) return '';
+    // Determine a label from the most common source name
+    const srcCounts = {};
+    sp.forEach(function(s) { srcCounts[s.source] = (srcCounts[s.source] || 0) + 1; });
+    let topSrc = tid.substring(0, 8);
+    let topCount = 0;
+    for (var src in srcCounts) { if (srcCounts[src] > topCount) { topCount = srcCounts[src]; topSrc = src; } }
+    return '<div class="d-sec"><div class="d-lbl">Linked Trace: ' + esc(topSrc) + '</div>' + renderSpanRows(sp, 'ext-' + tid) + '</div>';
 }
 
 const tlArrow = '<svg class="tl-arrow" width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M6.22 4.22a.75.75 0 0 1 1.06 0l3.25 3.25a.75.75 0 0 1 0 1.06l-3.25 3.25a.75.75 0 0 1-1.06-1.06L8.94 8 6.22 5.28a.75.75 0 0 1 0-1.06Z"/></svg>';
