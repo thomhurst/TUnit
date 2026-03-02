@@ -1,0 +1,57 @@
+using System.Diagnostics.CodeAnalysis;
+
+namespace TUnit.Core;
+
+/// <summary>
+/// Factory for creating TestMetadata instances.
+/// A single generic method <c>Create&lt;T&gt;() where T : class</c> gets JIT'd once by the .NET runtime
+/// (reference types share native code), so replacing 1,000 inline object initializers with calls
+/// to this shared factory dramatically reduces JIT-compiled native code size.
+/// </summary>
+public static class TestMetadataFactory
+{
+    [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2091",
+        Justification = "Factory is only called from generated code that always passes concrete types")]
+    [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2087",
+        Justification = "Factory is only called from generated code that always passes concrete types")]
+    public static TestMetadata<T> Create<T>(
+        string testName,
+        string testMethodName,
+        int lineNumber,
+        Func<T, object?[], CancellationToken, ValueTask> invokeTypedTest,
+        Func<Attribute[]> attributeFactory,
+        Func<Type[], object?[], T> instanceFactory,
+        MethodMetadata methodMetadata,
+        string filePath = "",
+        int inheritanceDepth = 0,
+        TestDependency[]? dependencies = null,
+        IDataSourceAttribute[]? dataSources = null,
+        IDataSourceAttribute[]? classDataSources = null,
+        PropertyDataSource[]? propertyDataSources = null,
+        PropertyInjectionData[]? propertyInjections = null,
+        int? repeatCount = null,
+        string? testSessionId = null
+    ) where T : class
+    {
+        return new TestMetadata<T>
+        {
+            TestName = testName,
+            TestClassType = typeof(T),
+            TestMethodName = testMethodName,
+            Dependencies = dependencies ?? [],
+            AttributeFactory = attributeFactory,
+            DataSources = dataSources ?? [],
+            ClassDataSources = classDataSources ?? [],
+            PropertyDataSources = propertyDataSources ?? [],
+            PropertyInjections = propertyInjections ?? [],
+            InheritanceDepth = inheritanceDepth,
+            FilePath = filePath,
+            LineNumber = lineNumber,
+            MethodMetadata = methodMetadata,
+            InstanceFactory = instanceFactory,
+            InvokeTypedTest = invokeTypedTest,
+            RepeatCount = repeatCount,
+            TestSessionId = testSessionId ?? Guid.NewGuid().ToString(),
+        };
+    }
+}

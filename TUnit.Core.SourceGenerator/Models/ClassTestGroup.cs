@@ -41,4 +41,10 @@ public sealed record ClassTestGroup
     /// Empty string if none needed.
     /// </summary>
     public required string ReflectionFieldAccessorsCode { get; init; }
+
+    /// <summary>
+    /// Pre-generated shared local variable declarations (ClassMetadata, classType)
+    /// emitted once at the top of GetTests().
+    /// </summary>
+    public required string SharedLocalsCode { get; init; }
 }
