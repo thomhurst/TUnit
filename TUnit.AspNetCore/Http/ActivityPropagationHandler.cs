@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Net.Http.Headers;
 
 namespace TUnit.AspNetCore;
 
@@ -26,10 +27,17 @@ internal sealed class ActivityPropagationHandler : DelegatingHandler
             activity.SetTag("url.full", request.RequestUri?.ToString());
             activity.SetTag("server.address", request.RequestUri?.Host);
 
-            // Inject W3C traceparent header so the server creates child activities under the same trace
-            request.Headers.Remove("traceparent");
-            request.Headers.TryAddWithoutValidation("traceparent",
-                $"00-{activity.TraceId}-{activity.SpanId}-{(activity.Recorded ? "01" : "00")}");
+            // Inject trace context headers (traceparent + tracestate) so the server
+            // creates child activities under the same trace
+            DistributedContextPropagator.Current.Inject(activity, request.Headers,
+                static (headers, key, value) =>
+                {
+                    if (headers is HttpRequestHeaders h)
+                    {
+                        h.Remove(key);
+                        h.TryAddWithoutValidation(key, value);
+                    }
+                });
         }
 
         var response = await base.SendAsync(request, cancellationToken);
