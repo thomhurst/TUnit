@@ -1357,6 +1357,7 @@ namespace
     public class TestContext : .Context, ., ., ., ., ., ., ., .
     {
         public TestContext(string testName,  serviceProvider, .ClassHookContext classContext, .TestBuilderContext testBuilderContext, .CancellationToken cancellationToken) { }
+        public new .Activity? Activity { get; }
         public .ClassHookContext ClassContext { get; }
         public . Dependencies { get; }
         public . Events { get; }
@@ -1375,6 +1376,7 @@ namespace
         public static string WorkingDirectory { get; set; }
         public override string GetErrorOutput() { }
         public override string GetStandardOutput() { }
+        public void RegisterTrace(.ActivityTraceId traceId) { }
         public static .TestContext? GetById(string id) { }
     }
     public class TestContextEvents : .
