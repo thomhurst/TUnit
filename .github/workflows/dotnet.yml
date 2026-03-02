@@ -87,7 +87,7 @@ jobs:
 
       - name: Docker Setup Docker
         if: matrix.os == 'ubuntu-latest'
-        uses: docker/setup-docker-action@v4.7.0
+        uses: docker/setup-docker-action@v5.0.0
 
       - name: Cache Playwright Browsers
         uses: actions/cache@v5
