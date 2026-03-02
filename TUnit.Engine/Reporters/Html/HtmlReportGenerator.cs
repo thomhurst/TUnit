@@ -757,7 +757,7 @@ body{
 .trace{margin-top:6px}
 .sp-row{display:flex;align-items:center;gap:6px;padding:2px 0;font-size:.78rem;cursor:pointer}
 .sp-row:hover .sp-bar{filter:brightness(1.2)}
-.sp-lbl{flex:0 0 auto;display:flex;align-items:center;gap:4px;min-width:0;max-width:240px}
+.sp-lbl{flex:0 0 240px;display:flex;align-items:center;gap:4px;min-width:0}
 .sp-track{flex:1;position:relative;height:14px;min-width:0}
 .sp-bar{position:absolute;top:0;height:100%;border-radius:3px;min-width:3px;transition:filter .15s}
 .sp-bar.ok{background:linear-gradient(90deg,rgba(52,211,153,.6),var(--emerald))}
