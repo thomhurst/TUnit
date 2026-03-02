@@ -757,13 +757,14 @@ body{
 .trace{margin-top:6px}
 .sp-row{display:flex;align-items:center;gap:6px;padding:2px 0;font-size:.78rem;cursor:pointer}
 .sp-row:hover .sp-bar{filter:brightness(1.2)}
-.sp-indent{flex-shrink:0}
-.sp-bar{height:14px;border-radius:3px;min-width:3px;transition:filter .15s}
+.sp-lbl{flex:0 0 auto;display:flex;align-items:center;gap:4px;min-width:0;max-width:240px}
+.sp-track{flex:1;position:relative;height:14px;min-width:0}
+.sp-bar{position:absolute;top:0;height:100%;border-radius:3px;min-width:3px;transition:filter .15s}
 .sp-bar.ok{background:linear-gradient(90deg,rgba(52,211,153,.6),var(--emerald))}
 .sp-bar.err{background:linear-gradient(90deg,rgba(251,113,133,.6),var(--rose))}
 .sp-bar.unk{background:linear-gradient(90deg,rgba(148,163,184,.4),var(--slate))}
-.sp-name{color:var(--text-2);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sp-dur{font-family:var(--mono);color:var(--text-3);font-size:.72rem}
+.sp-name{color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sp-dur{font-family:var(--mono);color:var(--text-3);font-size:.72rem;flex-shrink:0}
 .sp-extra{
   display:none;padding:6px 10px;margin:2px 0 4px;
   background:var(--surface-0);border:1px solid var(--border);border-radius:var(--r);
@@ -1336,10 +1337,11 @@ function renderSpanRows(sp, uid) {
         const w = Math.max((s.durationMs / dur * 100), .5).toFixed(2);
         const cls = s.status === 'Error' ? 'err' : s.status === 'Ok' ? 'ok' : 'unk';
         h += '<div class="sp-row" data-si="' + i + '">';
-        h += '<span class="sp-indent" style="width:' + (d * 14) + 'px"></span>';
-        h += '<div class="sp-bar ' + cls + '" style="margin-left:' + l + '%;width:' + w + '%" title="' + esc(s.name) + ' (' + fmt(s.durationMs) + ')"></div>';
+        h += '<div class="sp-lbl" style="padding-left:' + (d * 14) + 'px">';
         h += '<span class="sp-name">' + esc(s.name) + '</span>';
         h += '<span class="sp-dur">' + fmt(s.durationMs) + '</span>';
+        h += '</div>';
+        h += '<div class="sp-track"><div class="sp-bar ' + cls + '" style="left:' + l + '%;width:' + w + '%" title="' + esc(s.name) + ' (' + fmt(s.durationMs) + ')"></div></div>';
         h += '</div>';
         let ex = '<div class="sp-extra" id="sp-' + uid + '-' + i + '">';
         ex += '<strong>Source:</strong> ' + esc(s.source) + ' &middot; <strong>Kind:</strong> ' + esc(s.kind);
