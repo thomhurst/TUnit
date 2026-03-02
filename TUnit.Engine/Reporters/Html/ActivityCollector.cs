@@ -6,6 +6,7 @@ namespace TUnit.Engine.Reporters.Html;
 
 internal sealed class ActivityCollector : IDisposable
 {
+    // Soft caps — intentionally racy for performance; may be slightly exceeded under high concurrency.
     private const int MaxSpansPerTrace = 1000;
     private const int MaxTotalSpans = 50_000;
 
