@@ -172,11 +172,12 @@ internal sealed class ActivityCollector : IDisposable
     private void OnActivityStopped(Activity activity)
     {
         var traceId = activity.TraceId.ToString();
+        var isTUnit = IsTUnitSource(activity.Source.Name);
 
         // TUnit activities always register their own trace ID. This catches root activities
         // (e.g. "test session") whose TraceId is assigned by the runtime after sampling,
         // so it couldn't be registered in SampleActivity where only the parent TraceId is known.
-        if (IsTUnitSource(activity.Source.Name))
+        if (isTUnit)
         {
             _knownTraceIds.TryAdd(traceId, 0);
         }
@@ -185,19 +186,25 @@ internal sealed class ActivityCollector : IDisposable
             return;
         }
 
-        var newTotal = Interlocked.Increment(ref _totalSpanCount);
-        if (newTotal > MaxTotalSpans)
+        // TUnit's own spans (test case, hooks, body) are exempt from caps — they're essential
+        // for the report and bounded by test count. Caps only limit external library spans
+        // (HttpClient, EF Core, etc.) to prevent unbounded memory growth.
+        if (!isTUnit)
         {
-            Interlocked.Decrement(ref _totalSpanCount);
-            return;
-        }
+            var newTotal = Interlocked.Increment(ref _totalSpanCount);
+            if (newTotal > MaxTotalSpans)
+            {
+                Interlocked.Decrement(ref _totalSpanCount);
+                return;
+            }
 
-        var traceCount = _spanCountsByTrace.AddOrUpdate(traceId, 1, (_, c) => c + 1);
-        if (traceCount > MaxSpansPerTrace)
-        {
-            Interlocked.Decrement(ref _totalSpanCount);
-            _spanCountsByTrace.AddOrUpdate(traceId, 0, (_, c) => Math.Max(0, c - 1));
-            return;
+            var traceCount = _spanCountsByTrace.AddOrUpdate(traceId, 1, (_, c) => c + 1);
+            if (traceCount > MaxSpansPerTrace)
+            {
+                Interlocked.Decrement(ref _totalSpanCount);
+                _spanCountsByTrace.AddOrUpdate(traceId, 0, (_, c) => Math.Max(0, c - 1));
+                return;
+            }
         }
 
         var queue = _spansByTrace.GetOrAdd(traceId, _ => new ConcurrentQueue<SpanData>());
