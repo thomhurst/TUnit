@@ -1551,6 +1551,7 @@ namespace
                     <[]> attributeFactory,
                     <[], object?[], T> instanceFactory,
                     .MethodMetadata methodMetadata,
+                    string testSessionId,
                     string filePath = "",
                     int inheritanceDepth = 0,
                     .TestDependency[]? dependencies = null,
@@ -1558,8 +1559,7 @@ namespace
                     .IDataSourceAttribute[]? classDataSources = null,
                     .PropertyDataSource[]? propertyDataSources = null,
                     .PropertyInjectionData[]? propertyInjections = null,
-                    int? repeatCount = default,
-                    string? testSessionId = null)
+                    int? repeatCount = default)
             where T :  class { }
     }
     public class TestMetadata<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  T> : .TestMetadata, .
