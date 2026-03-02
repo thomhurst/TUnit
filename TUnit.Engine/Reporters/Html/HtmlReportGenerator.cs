@@ -1692,9 +1692,9 @@ document.getElementById('collapseAll').addEventListener('click',function(){
 });
 
 // Feature 3: Sort Toggle
-document.querySelectorAll('.sort-btn').forEach(function(btn){
+document.querySelectorAll('.sort-group .sort-btn').forEach(function(btn){
     btn.addEventListener('click',function(){
-        document.querySelectorAll('.sort-btn').forEach(function(b){b.classList.remove('active');b.setAttribute('aria-checked','false');});
+        document.querySelectorAll('.sort-group .sort-btn').forEach(function(b){b.classList.remove('active');b.setAttribute('aria-checked','false');});
         btn.classList.add('active');
         btn.setAttribute('aria-checked','true');
         sortMode = btn.dataset.sort;
