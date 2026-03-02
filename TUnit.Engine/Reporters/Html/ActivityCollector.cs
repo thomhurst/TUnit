@@ -214,7 +214,6 @@ internal sealed class ActivityCollector : IDisposable
                 var count = _externalSpanCountsByTest.AddOrUpdate(testSpanId, 1, (_, c) => c + 1);
                 if (count > MaxExternalSpansPerTest)
                 {
-                    _externalSpanCountsByTest.AddOrUpdate(testSpanId, 0, (_, c) => Math.Max(0, c - 1));
                     return;
                 }
             }

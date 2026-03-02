@@ -16,7 +16,7 @@ using TUnit.Engine.Framework;
 
 namespace TUnit.Engine.Reporters.Html;
 
-internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestHostApplicationLifetime, IFilterReceiver
+internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestHostApplicationLifetime, IFilterReceiver, IDisposable
 {
     private string? _outputPath;
     private readonly ConcurrentDictionary<string, ConcurrentQueue<TestNodeUpdateMessage>> _updates = [];
@@ -106,6 +106,13 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
         {
             Console.WriteLine($"Warning: HTML report generation failed: {ex.Message}");
         }
+    }
+
+    public void Dispose()
+    {
+#if NET
+        _activityCollector?.Dispose();
+#endif
     }
 
     public string? Filter { get; set; }

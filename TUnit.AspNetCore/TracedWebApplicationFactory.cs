@@ -22,7 +22,7 @@ public sealed class TracedWebApplicationFactory<TEntryPoint> : IAsyncDisposable,
 {
     private readonly WebApplicationFactory<TEntryPoint> _inner;
 
-    internal TracedWebApplicationFactory(WebApplicationFactory<TEntryPoint> inner)
+    public TracedWebApplicationFactory(WebApplicationFactory<TEntryPoint> inner)
     {
         _inner = inner;
     }
