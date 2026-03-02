@@ -7,17 +7,18 @@ namespace TUnit.Engine.Reporters.Html;
 
 internal sealed class ActivityCollector : IDisposable
 {
-    // Soft caps — intentionally racy for performance; may be slightly exceeded under high concurrency.
-    private const int MaxSpansPerTrace = 1000;
-    private const int MaxTotalSpans = 50_000;
+    // Cap external (non-TUnit) spans per test to keep the report manageable.
+    // TUnit's own spans are always captured regardless of caps.
+    // Soft cap — intentionally racy for performance; may be slightly exceeded under high concurrency.
+    private const int MaxExternalSpansPerTest = 100;
 
     private readonly ConcurrentDictionary<string, ConcurrentQueue<SpanData>> _spansByTrace = new();
-    private readonly ConcurrentDictionary<string, int> _spanCountsByTrace = new();
+    // Track external span count per test case (keyed by test case span ID)
+    private readonly ConcurrentDictionary<string, int> _externalSpanCountsByTest = new();
     // Fast-path cache of trace IDs that should be collected. Subsumes TraceRegistry lookups
     // so that subsequent activities on the same trace avoid cross-class dictionary checks.
     private readonly ConcurrentDictionary<string, byte> _knownTraceIds = new(StringComparer.OrdinalIgnoreCase);
     private ActivityListener? _listener;
-    private int _totalSpanCount;
 
     public void Start()
     {
@@ -140,6 +141,23 @@ internal sealed class ActivityCollector : IDisposable
         return lookup;
     }
 
+    private static string? FindTestCaseAncestor(Activity activity)
+    {
+        var current = activity.Parent;
+        while (current is not null)
+        {
+            if (IsTUnitSource(current.Source.Name) &&
+                current.DisplayName.StartsWith("test case", StringComparison.Ordinal))
+            {
+                return current.SpanId.ToString();
+            }
+
+            current = current.Parent;
+        }
+
+        return null;
+    }
+
     private static bool IsTUnitSource(string sourceName) =>
         sourceName.StartsWith("TUnit", StringComparison.Ordinal) ||
         sourceName.StartsWith("Microsoft.Testing", StringComparison.Ordinal);
@@ -186,25 +204,21 @@ internal sealed class ActivityCollector : IDisposable
             return;
         }
 
-        // TUnit's own spans (test case, hooks, body) are exempt from caps — they're essential
-        // for the report and bounded by test count. Caps only limit external library spans
-        // (HttpClient, EF Core, etc.) to prevent unbounded memory growth.
+        // Cap external spans per test to keep the report size manageable.
+        // TUnit's own spans are always captured — they're essential for the report.
         if (!isTUnit)
         {
-            var newTotal = Interlocked.Increment(ref _totalSpanCount);
-            if (newTotal > MaxTotalSpans)
+            var testSpanId = FindTestCaseAncestor(activity);
+            if (testSpanId is not null)
             {
-                Interlocked.Decrement(ref _totalSpanCount);
-                return;
+                var count = _externalSpanCountsByTest.AddOrUpdate(testSpanId, 1, (_, c) => c + 1);
+                if (count > MaxExternalSpansPerTest)
+                {
+                    _externalSpanCountsByTest.AddOrUpdate(testSpanId, 0, (_, c) => Math.Max(0, c - 1));
+                    return;
+                }
             }
-
-            var traceCount = _spanCountsByTrace.AddOrUpdate(traceId, 1, (_, c) => c + 1);
-            if (traceCount > MaxSpansPerTrace)
-            {
-                Interlocked.Decrement(ref _totalSpanCount);
-                _spanCountsByTrace.AddOrUpdate(traceId, 0, (_, c) => Math.Max(0, c - 1));
-                return;
-            }
+            // External spans not under any test (e.g., fixture/infrastructure setup) are uncapped
         }
 
         var queue = _spansByTrace.GetOrAdd(traceId, _ => new ConcurrentQueue<SpanData>());
