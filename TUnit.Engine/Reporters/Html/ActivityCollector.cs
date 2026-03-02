@@ -1,31 +1,102 @@
 #if NET
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using TUnit.Core;
 
 namespace TUnit.Engine.Reporters.Html;
 
 internal sealed class ActivityCollector : IDisposable
 {
-    // Soft caps — intentionally racy for performance; may be slightly exceeded under high concurrency.
-    private const int MaxSpansPerTrace = 1000;
-    private const int MaxTotalSpans = 50_000;
+    // Cap external (non-TUnit) spans per test to keep the report manageable.
+    // TUnit's own spans are always captured regardless of caps.
+    // Soft cap — intentionally racy for performance; may be slightly exceeded under high concurrency.
+    private const int MaxExternalSpansPerTest = 100;
 
     private readonly ConcurrentDictionary<string, ConcurrentQueue<SpanData>> _spansByTrace = new();
-    private readonly ConcurrentDictionary<string, int> _spanCountsByTrace = new();
+    // Track external span count per test case (keyed by test case span ID)
+    private readonly ConcurrentDictionary<string, int> _externalSpanCountsByTest = new();
+    // Fast-path cache of trace IDs that should be collected. Subsumes TraceRegistry lookups
+    // so that subsequent activities on the same trace avoid cross-class dictionary checks.
+    private readonly ConcurrentDictionary<string, byte> _knownTraceIds = new(StringComparer.OrdinalIgnoreCase);
     private ActivityListener? _listener;
-    private int _totalSpanCount;
 
     public void Start()
     {
+        // Listen to ALL sources so we can capture child spans from HttpClient, ASP.NET Core,
+        // EF Core, etc. The Sample callback uses smart filtering to avoid overhead: only spans
+        // belonging to known test traces are fully recorded; everything else gets PropagationData
+        // (near-zero cost — enables context flow without timing/tags).
         _listener = new ActivityListener
         {
-            ShouldListenTo = static source => IsTUnitSource(source),
-            Sample = static (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded,
-            SampleUsingParentId = static (ref ActivityCreationOptions<string> _) => ActivitySamplingResult.AllDataAndRecorded,
+            ShouldListenTo = static _ => true,
+            Sample = SampleActivity,
+            SampleUsingParentId = SampleActivityUsingParentId,
             ActivityStopped = OnActivityStopped
         };
 
         ActivitySource.AddActivityListener(_listener);
+    }
+
+    private ActivitySamplingResult SampleActivity(ref ActivityCreationOptions<ActivityContext> options)
+    {
+        var sourceName = options.Source.Name;
+
+        // TUnit/Microsoft.Testing sources: always record, register trace
+        if (IsTUnitSource(sourceName))
+        {
+            if (options.Parent.TraceId != default)
+            {
+                _knownTraceIds.TryAdd(options.Parent.TraceId.ToString(), 0);
+            }
+
+            return ActivitySamplingResult.AllDataAndRecorded;
+        }
+
+        // No parent trace → nothing to correlate with
+        if (options.Parent.TraceId == default)
+        {
+            return ActivitySamplingResult.PropagationData;
+        }
+
+        var parentTraceId = options.Parent.TraceId.ToString();
+
+        // Parent trace is known (child of a TUnit activity, e.g. HttpClient)
+        if (_knownTraceIds.ContainsKey(parentTraceId))
+        {
+            return ActivitySamplingResult.AllDataAndRecorded;
+        }
+
+        // Trace registered via TestContext.RegisterTrace
+        if (TraceRegistry.IsRegistered(parentTraceId))
+        {
+            _knownTraceIds.TryAdd(parentTraceId, 0);
+            return ActivitySamplingResult.AllDataAndRecorded;
+        }
+
+        // Everything else: create the Activity for context propagation but no timing/tags
+        return ActivitySamplingResult.PropagationData;
+    }
+
+    private ActivitySamplingResult SampleActivityUsingParentId(ref ActivityCreationOptions<string> options)
+    {
+        if (IsTUnitSource(options.Source.Name))
+        {
+            return ActivitySamplingResult.AllDataAndRecorded;
+        }
+
+        // Try to extract the trace ID from W3C format: "00-{32-hex-traceId}-{16-hex-spanId}-{2-hex-flags}"
+        var parentId = options.Parent;
+        if (parentId is { Length: >= 35 } && parentId[2] == '-')
+        {
+            var traceIdStr = parentId.Substring(3, 32);
+            if (_knownTraceIds.ContainsKey(traceIdStr) || TraceRegistry.IsRegistered(traceIdStr))
+            {
+                _knownTraceIds.TryAdd(traceIdStr, 0);
+                return ActivitySamplingResult.AllDataAndRecorded;
+            }
+        }
+
+        return ActivitySamplingResult.PropagationData;
     }
 
     public void Stop()
@@ -70,9 +141,26 @@ internal sealed class ActivityCollector : IDisposable
         return lookup;
     }
 
-    private static bool IsTUnitSource(ActivitySource source) =>
-        source.Name.StartsWith("TUnit", StringComparison.Ordinal) ||
-        source.Name.StartsWith("Microsoft.Testing", StringComparison.Ordinal);
+    private static string? FindTestCaseAncestor(Activity activity)
+    {
+        var current = activity.Parent;
+        while (current is not null)
+        {
+            if (IsTUnitSource(current.Source.Name) &&
+                current.GetTagItem("tunit.test.node_uid") is not null)
+            {
+                return current.SpanId.ToString();
+            }
+
+            current = current.Parent;
+        }
+
+        return null;
+    }
+
+    private static bool IsTUnitSource(string sourceName) =>
+        sourceName.StartsWith("TUnit", StringComparison.Ordinal) ||
+        sourceName.StartsWith("Microsoft.Testing", StringComparison.Ordinal);
 
     private static string EnrichSpanName(Activity activity)
     {
@@ -101,20 +189,35 @@ internal sealed class ActivityCollector : IDisposable
 
     private void OnActivityStopped(Activity activity)
     {
-        var newTotal = Interlocked.Increment(ref _totalSpanCount);
-        if (newTotal > MaxTotalSpans)
+        var traceId = activity.TraceId.ToString();
+        var isTUnit = IsTUnitSource(activity.Source.Name);
+
+        // TUnit activities always register their own trace ID. This catches root activities
+        // (e.g. "test session") whose TraceId is assigned by the runtime after sampling,
+        // so it couldn't be registered in SampleActivity where only the parent TraceId is known.
+        if (isTUnit)
         {
-            Interlocked.Decrement(ref _totalSpanCount);
+            _knownTraceIds.TryAdd(traceId, 0);
+        }
+        else if (!_knownTraceIds.ContainsKey(traceId))
+        {
             return;
         }
 
-        var traceId = activity.TraceId.ToString();
-        var traceCount = _spanCountsByTrace.AddOrUpdate(traceId, 1, (_, c) => c + 1);
-        if (traceCount > MaxSpansPerTrace)
+        // Cap external spans per test to keep the report size manageable.
+        // TUnit's own spans are always captured — they're essential for the report.
+        if (!isTUnit)
         {
-            Interlocked.Decrement(ref _totalSpanCount);
-            _spanCountsByTrace.AddOrUpdate(traceId, 0, (_, c) => Math.Max(0, c - 1));
-            return;
+            var testSpanId = FindTestCaseAncestor(activity);
+            if (testSpanId is not null)
+            {
+                var count = _externalSpanCountsByTest.AddOrUpdate(testSpanId, 1, (_, c) => c + 1);
+                if (count > MaxExternalSpansPerTest)
+                {
+                    return;
+                }
+            }
+            // External spans not under any test (e.g., fixture/infrastructure setup) are uncapped
         }
 
         var queue = _spansByTrace.GetOrAdd(traceId, _ => new ConcurrentQueue<SpanData>());

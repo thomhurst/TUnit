@@ -144,6 +144,9 @@ internal sealed class ReportTestResult
 
     [JsonPropertyName("spanId")]
     public string? SpanId { get; init; }
+
+    [JsonPropertyName("additionalTraceIds")]
+    public string[]? AdditionalTraceIds { get; init; }
 }
 
 internal sealed class ReportExceptionData
