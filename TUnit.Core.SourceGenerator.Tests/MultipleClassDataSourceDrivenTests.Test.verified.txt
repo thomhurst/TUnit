@@ -11,51 +11,51 @@ internal static class TUnit_TestProject_MultipleClassDataSourceDrivenTests__Test
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MultipleClassDataSourceDrivenTests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests)),
-        Name = "MultipleClassDataSourceDrivenTests",
-        Namespace = "TUnit.TestProject",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = new global::TUnit.Core.ParameterMetadata[]
-        {
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1))
-        {
-        Name = "inject1",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5) })!.GetParameters()[0]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2))
-        {
-        Name = "inject2",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5) })!.GetParameters()[1]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3))
-        {
-        Name = "inject3",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5) })!.GetParameters()[2]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4))
-        {
-        Name = "inject4",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5) })!.GetParameters()[3]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5))
-        {
-        Name = "inject5",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5) })!.GetParameters()[4]
-        }
-        },
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests)),
+            Name = "MultipleClassDataSourceDrivenTests",
+            Namespace = "TUnit.TestProject",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            {
+                new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1))
+                {
+                    Name = "inject1",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5) })!.GetParameters()[0]
+                },
+                new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2))
+                {
+                    Name = "inject2",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5) })!.GetParameters()[1]
+                },
+                new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3))
+                {
+                    Name = "inject3",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5) })!.GetParameters()[2]
+                },
+                new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4))
+                {
+                    Name = "inject4",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5) })!.GetParameters()[3]
+                },
+                new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5))
+                {
+                    Name = "inject5",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5) })!.GetParameters()[4]
+                }
+            },
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests);
         var metadata_Test1 = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>(
@@ -153,51 +153,51 @@ internal static class TUnit_TestProject_MultipleClassDataSourceDrivenTests__Test
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MultipleClassDataSourceDrivenTests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests)),
-        Name = "MultipleClassDataSourceDrivenTests",
-        Namespace = "TUnit.TestProject",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = new global::TUnit.Core.ParameterMetadata[]
-        {
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1))
-        {
-        Name = "inject1",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5) })!.GetParameters()[0]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2))
-        {
-        Name = "inject2",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5) })!.GetParameters()[1]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3))
-        {
-        Name = "inject3",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5) })!.GetParameters()[2]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4))
-        {
-        Name = "inject4",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5) })!.GetParameters()[3]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5))
-        {
-        Name = "inject5",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5) })!.GetParameters()[4]
-        }
-        },
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests)),
+            Name = "MultipleClassDataSourceDrivenTests",
+            Namespace = "TUnit.TestProject",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            {
+                new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1))
+                {
+                    Name = "inject1",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5) })!.GetParameters()[0]
+                },
+                new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2))
+                {
+                    Name = "inject2",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5) })!.GetParameters()[1]
+                },
+                new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3))
+                {
+                    Name = "inject3",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5) })!.GetParameters()[2]
+                },
+                new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4))
+                {
+                    Name = "inject4",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5) })!.GetParameters()[3]
+                },
+                new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5))
+                {
+                    Name = "inject5",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5) })!.GetParameters()[4]
+                }
+            },
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>(
@@ -217,51 +217,51 @@ internal static class TUnit_TestProject_MultipleClassDataSourceDrivenTests__Test
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MultipleClassDataSourceDrivenTests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests)),
-        Name = "MultipleClassDataSourceDrivenTests",
-        Namespace = "TUnit.TestProject",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = new global::TUnit.Core.ParameterMetadata[]
-        {
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1))
-        {
-        Name = "inject1",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5) })!.GetParameters()[0]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2))
-        {
-        Name = "inject2",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5) })!.GetParameters()[1]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3))
-        {
-        Name = "inject3",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5) })!.GetParameters()[2]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4))
-        {
-        Name = "inject4",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5) })!.GetParameters()[3]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5))
-        {
-        Name = "inject5",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5) })!.GetParameters()[4]
-        }
-        },
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests)),
+            Name = "MultipleClassDataSourceDrivenTests",
+            Namespace = "TUnit.TestProject",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            {
+                new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1))
+                {
+                    Name = "inject1",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5) })!.GetParameters()[0]
+                },
+                new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2))
+                {
+                    Name = "inject2",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5) })!.GetParameters()[1]
+                },
+                new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3))
+                {
+                    Name = "inject3",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5) })!.GetParameters()[2]
+                },
+                new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4))
+                {
+                    Name = "inject4",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5) })!.GetParameters()[3]
+                },
+                new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5))
+                {
+                    Name = "inject5",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4), typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5) })!.GetParameters()[4]
+                }
+            },
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>(

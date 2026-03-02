@@ -11,23 +11,23 @@ internal static class TUnit_TestProject_Bugs__1594_MyTests__TestSource
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1594.MyTests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.Bugs._1594.MyTests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1594.MyTests)),
-        Name = "MyTests",
-        Namespace = "TUnit.TestProject.Bugs._1594",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = new global::TUnit.Core.ParameterMetadata[]
-        {
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Bugs._1594.MyFixture))
-        {
-        Name = "myFixture",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1594.MyFixture)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1594.MyTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.Bugs._1594.MyFixture) })!.GetParameters()[0]
-        }
-        },
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.Bugs._1594.MyTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1594.MyTests)),
+            Name = "MyTests",
+            Namespace = "TUnit.TestProject.Bugs._1594",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            {
+                new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Bugs._1594.MyFixture))
+                {
+                    Name = "myFixture",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1594.MyFixture)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1594.MyTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.Bugs._1594.MyFixture) })!.GetParameters()[0]
+                }
+            },
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.Bugs._1594.MyTests);
         var metadata_Test1 = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.Bugs._1594.MyTests>(
@@ -87,23 +87,23 @@ internal static class TUnit_TestProject_Bugs__1594_MyTests__TestSource
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1594.MyTests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.Bugs._1594.MyTests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1594.MyTests)),
-        Name = "MyTests",
-        Namespace = "TUnit.TestProject.Bugs._1594",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = new global::TUnit.Core.ParameterMetadata[]
-        {
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Bugs._1594.MyFixture))
-        {
-        Name = "myFixture",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1594.MyFixture)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1594.MyTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.Bugs._1594.MyFixture) })!.GetParameters()[0]
-        }
-        },
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.Bugs._1594.MyTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1594.MyTests)),
+            Name = "MyTests",
+            Namespace = "TUnit.TestProject.Bugs._1594",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            {
+                new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Bugs._1594.MyFixture))
+                {
+                    Name = "myFixture",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1594.MyFixture)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1594.MyTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.Bugs._1594.MyFixture) })!.GetParameters()[0]
+                }
+            },
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.Bugs._1594.MyTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.Bugs._1594.MyTests>(

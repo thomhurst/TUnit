@@ -11,23 +11,23 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.TimeoutCancellationTokenTests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests)),
-        Name = "TimeoutCancellationTokenTests",
-        Namespace = "TUnit.TestProject",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = new global::TUnit.Core.ParameterMetadata[]
-        {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
-        }
-        },
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests)),
+            Name = "TimeoutCancellationTokenTests",
+            Namespace = "TUnit.TestProject",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            {
+                new global::TUnit.Core.ParameterMetadata(typeof(int))
+                {
+                    Name = "value",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
+                }
+            },
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests);
         var metadata_DefaultTest__CancellationToken = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.TimeoutCancellationTokenTests>(
@@ -583,23 +583,23 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.TimeoutCancellationTokenTests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests)),
-        Name = "TimeoutCancellationTokenTests",
-        Namespace = "TUnit.TestProject",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = new global::TUnit.Core.ParameterMetadata[]
-        {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
-        }
-        },
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests)),
+            Name = "TimeoutCancellationTokenTests",
+            Namespace = "TUnit.TestProject",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            {
+                new global::TUnit.Core.ParameterMetadata(typeof(int))
+                {
+                    Name = "value",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
+                }
+            },
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.TimeoutCancellationTokenTests>(
@@ -648,23 +648,23 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.TimeoutCancellationTokenTests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests)),
-        Name = "TimeoutCancellationTokenTests",
-        Namespace = "TUnit.TestProject",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = new global::TUnit.Core.ParameterMetadata[]
-        {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
-        }
-        },
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests)),
+            Name = "TimeoutCancellationTokenTests",
+            Namespace = "TUnit.TestProject",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            {
+                new global::TUnit.Core.ParameterMetadata(typeof(int))
+                {
+                    Name = "value",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
+                }
+            },
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.TimeoutCancellationTokenTests>(
@@ -713,23 +713,23 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.TimeoutCancellationTokenTests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests)),
-        Name = "TimeoutCancellationTokenTests",
-        Namespace = "TUnit.TestProject",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = new global::TUnit.Core.ParameterMetadata[]
-        {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
-        }
-        },
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests)),
+            Name = "TimeoutCancellationTokenTests",
+            Namespace = "TUnit.TestProject",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            {
+                new global::TUnit.Core.ParameterMetadata(typeof(int))
+                {
+                    Name = "value",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
+                }
+            },
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.TimeoutCancellationTokenTests>(
@@ -778,23 +778,23 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.TimeoutCancellationTokenTests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests)),
-        Name = "TimeoutCancellationTokenTests",
-        Namespace = "TUnit.TestProject",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = new global::TUnit.Core.ParameterMetadata[]
-        {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
-        }
-        },
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests)),
+            Name = "TimeoutCancellationTokenTests",
+            Namespace = "TUnit.TestProject",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            {
+                new global::TUnit.Core.ParameterMetadata(typeof(int))
+                {
+                    Name = "value",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
+                }
+            },
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.TimeoutCancellationTokenTests>(
@@ -854,23 +854,23 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.TimeoutCancellationTokenTests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests)),
-        Name = "TimeoutCancellationTokenTests",
-        Namespace = "TUnit.TestProject",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = new global::TUnit.Core.ParameterMetadata[]
-        {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
-        }
-        },
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests)),
+            Name = "TimeoutCancellationTokenTests",
+            Namespace = "TUnit.TestProject",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            {
+                new global::TUnit.Core.ParameterMetadata(typeof(int))
+                {
+                    Name = "value",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
+                }
+            },
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.TimeoutCancellationTokenTests>(
@@ -951,23 +951,23 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.TimeoutCancellationTokenTests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests)),
-        Name = "TimeoutCancellationTokenTests",
-        Namespace = "TUnit.TestProject",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = new global::TUnit.Core.ParameterMetadata[]
-        {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
-        }
-        },
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests)),
+            Name = "TimeoutCancellationTokenTests",
+            Namespace = "TUnit.TestProject",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            {
+                new global::TUnit.Core.ParameterMetadata(typeof(int))
+                {
+                    Name = "value",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
+                }
+            },
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.TimeoutCancellationTokenTests>(
@@ -1050,23 +1050,23 @@ internal static class TUnit_TestProject_TimeoutDoesNotFireTests__TestSource
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.TimeoutDoesNotFireTests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests)),
-        Name = "TimeoutDoesNotFireTests",
-        Namespace = "TUnit.TestProject",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = new global::TUnit.Core.ParameterMetadata[]
-        {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
-        }
-        },
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests)),
+            Name = "TimeoutDoesNotFireTests",
+            Namespace = "TUnit.TestProject",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            {
+                new global::TUnit.Core.ParameterMetadata(typeof(int))
+                {
+                    Name = "value",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
+                }
+            },
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests);
         var metadata_QuickTestDoesNotTimeout__CancellationToken = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.TimeoutDoesNotFireTests>(
@@ -1155,23 +1155,23 @@ internal static class TUnit_TestProject_TimeoutDoesNotFireTests__TestSource
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.TimeoutDoesNotFireTests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests)),
-        Name = "TimeoutDoesNotFireTests",
-        Namespace = "TUnit.TestProject",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = new global::TUnit.Core.ParameterMetadata[]
-        {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
-        }
-        },
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests)),
+            Name = "TimeoutDoesNotFireTests",
+            Namespace = "TUnit.TestProject",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            {
+                new global::TUnit.Core.ParameterMetadata(typeof(int))
+                {
+                    Name = "value",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
+                }
+            },
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.TimeoutDoesNotFireTests>(
@@ -1243,23 +1243,23 @@ internal static class TUnit_TestProject_CancellationTokenTriggeredTests__TestSou
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CancellationTokenTriggeredTests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests)),
-        Name = "CancellationTokenTriggeredTests",
-        Namespace = "TUnit.TestProject",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = new global::TUnit.Core.ParameterMetadata[]
-        {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
-        }
-        },
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests)),
+            Name = "CancellationTokenTriggeredTests",
+            Namespace = "TUnit.TestProject",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            {
+                new global::TUnit.Core.ParameterMetadata(typeof(int))
+                {
+                    Name = "value",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
+                }
+            },
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests);
         var metadata_CancellationTokenIsTriggered__CancellationToken = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.CancellationTokenTriggeredTests>(
@@ -1348,23 +1348,23 @@ internal static class TUnit_TestProject_CancellationTokenTriggeredTests__TestSou
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CancellationTokenTriggeredTests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests)),
-        Name = "CancellationTokenTriggeredTests",
-        Namespace = "TUnit.TestProject",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = new global::TUnit.Core.ParameterMetadata[]
-        {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
-        }
-        },
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests)),
+            Name = "CancellationTokenTriggeredTests",
+            Namespace = "TUnit.TestProject",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            {
+                new global::TUnit.Core.ParameterMetadata(typeof(int))
+                {
+                    Name = "value",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
+                }
+            },
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.CancellationTokenTriggeredTests>(

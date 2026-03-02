@@ -125,7 +125,7 @@ internal static class MetadataGenerationHelper
     /// </summary>
     public static string GenerateClassMetadataGetOrAddWithParentExpression(INamedTypeSymbol typeSymbol, int indentLevel = 0)
     {
-        var writer = new CodeWriter("", includeHeader: false).SetIndentLevel(indentLevel);
+        var writer = new CodeWriter(includeHeader: false).SetIndentLevel(indentLevel);
         WriteClassMetadataGetOrAddWithParent(writer, typeSymbol);
         return writer.ToString();
     }

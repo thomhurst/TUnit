@@ -11,37 +11,37 @@ internal static class TUnit_TestProject_DataSourceGeneratorTests__TestSource
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DataSourceGeneratorTests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DataSourceGeneratorTests)),
-        Name = "DataSourceGeneratorTests",
-        Namespace = "TUnit.TestProject",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = new global::TUnit.Core.ParameterMetadata[]
-        {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[0]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(string))
-        {
-        Name = "value2",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[1]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(bool))
-        {
-        Name = "value3",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[2]
-        }
-        },
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DataSourceGeneratorTests)),
+            Name = "DataSourceGeneratorTests",
+            Namespace = "TUnit.TestProject",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            {
+                new global::TUnit.Core.ParameterMetadata(typeof(int))
+                {
+                    Name = "value",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[0]
+                },
+                new global::TUnit.Core.ParameterMetadata(typeof(string))
+                {
+                    Name = "value2",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[1]
+                },
+                new global::TUnit.Core.ParameterMetadata(typeof(bool))
+                {
+                    Name = "value3",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[2]
+                }
+            },
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.DataSourceGeneratorTests);
         var metadata_GeneratedData_Method__int = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.DataSourceGeneratorTests>(
@@ -268,37 +268,37 @@ internal static class TUnit_TestProject_DataSourceGeneratorTests__TestSource
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DataSourceGeneratorTests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DataSourceGeneratorTests)),
-        Name = "DataSourceGeneratorTests",
-        Namespace = "TUnit.TestProject",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = new global::TUnit.Core.ParameterMetadata[]
-        {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[0]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(string))
-        {
-        Name = "value2",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[1]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(bool))
-        {
-        Name = "value3",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[2]
-        }
-        },
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DataSourceGeneratorTests)),
+            Name = "DataSourceGeneratorTests",
+            Namespace = "TUnit.TestProject",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            {
+                new global::TUnit.Core.ParameterMetadata(typeof(int))
+                {
+                    Name = "value",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[0]
+                },
+                new global::TUnit.Core.ParameterMetadata(typeof(string))
+                {
+                    Name = "value2",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[1]
+                },
+                new global::TUnit.Core.ParameterMetadata(typeof(bool))
+                {
+                    Name = "value3",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[2]
+                }
+            },
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.DataSourceGeneratorTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.DataSourceGeneratorTests>(
@@ -331,37 +331,37 @@ internal static class TUnit_TestProject_DataSourceGeneratorTests__TestSource
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DataSourceGeneratorTests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DataSourceGeneratorTests)),
-        Name = "DataSourceGeneratorTests",
-        Namespace = "TUnit.TestProject",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = new global::TUnit.Core.ParameterMetadata[]
-        {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[0]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(string))
-        {
-        Name = "value2",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[1]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(bool))
-        {
-        Name = "value3",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[2]
-        }
-        },
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DataSourceGeneratorTests)),
+            Name = "DataSourceGeneratorTests",
+            Namespace = "TUnit.TestProject",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            {
+                new global::TUnit.Core.ParameterMetadata(typeof(int))
+                {
+                    Name = "value",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[0]
+                },
+                new global::TUnit.Core.ParameterMetadata(typeof(string))
+                {
+                    Name = "value2",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[1]
+                },
+                new global::TUnit.Core.ParameterMetadata(typeof(bool))
+                {
+                    Name = "value3",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[2]
+                }
+            },
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.DataSourceGeneratorTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.DataSourceGeneratorTests>(
@@ -408,37 +408,37 @@ internal static class TUnit_TestProject_DataSourceGeneratorTests__TestSource
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DataSourceGeneratorTests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DataSourceGeneratorTests)),
-        Name = "DataSourceGeneratorTests",
-        Namespace = "TUnit.TestProject",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = new global::TUnit.Core.ParameterMetadata[]
-        {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[0]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(string))
-        {
-        Name = "value2",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[1]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(bool))
-        {
-        Name = "value3",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[2]
-        }
-        },
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DataSourceGeneratorTests)),
+            Name = "DataSourceGeneratorTests",
+            Namespace = "TUnit.TestProject",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            {
+                new global::TUnit.Core.ParameterMetadata(typeof(int))
+                {
+                    Name = "value",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[0]
+                },
+                new global::TUnit.Core.ParameterMetadata(typeof(string))
+                {
+                    Name = "value2",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[1]
+                },
+                new global::TUnit.Core.ParameterMetadata(typeof(bool))
+                {
+                    Name = "value3",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[2]
+                }
+            },
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.DataSourceGeneratorTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.DataSourceGeneratorTests>(

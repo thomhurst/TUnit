@@ -11,14 +11,14 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests)),
-        Name = "AsyncMethodDataSourceDrivenTests",
-        Namespace = "TUnit.TestProject",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests)),
+            Name = "AsyncMethodDataSourceDrivenTests",
+            Namespace = "TUnit.TestProject",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests);
         var metadata_AsyncMethodDataSource_SingleValue__int = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
@@ -563,14 +563,14 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests)),
-        Name = "AsyncMethodDataSourceDrivenTests",
-        Namespace = "TUnit.TestProject",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests)),
+            Name = "AsyncMethodDataSourceDrivenTests",
+            Namespace = "TUnit.TestProject",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
@@ -619,14 +619,14 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests)),
-        Name = "AsyncMethodDataSourceDrivenTests",
-        Namespace = "TUnit.TestProject",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests)),
+            Name = "AsyncMethodDataSourceDrivenTests",
+            Namespace = "TUnit.TestProject",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
@@ -682,14 +682,14 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests)),
-        Name = "AsyncMethodDataSourceDrivenTests",
-        Namespace = "TUnit.TestProject",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests)),
+            Name = "AsyncMethodDataSourceDrivenTests",
+            Namespace = "TUnit.TestProject",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
@@ -738,14 +738,14 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests)),
-        Name = "AsyncMethodDataSourceDrivenTests",
-        Namespace = "TUnit.TestProject",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests)),
+            Name = "AsyncMethodDataSourceDrivenTests",
+            Namespace = "TUnit.TestProject",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
@@ -794,14 +794,14 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests)),
-        Name = "AsyncMethodDataSourceDrivenTests",
-        Namespace = "TUnit.TestProject",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests)),
+            Name = "AsyncMethodDataSourceDrivenTests",
+            Namespace = "TUnit.TestProject",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
@@ -850,14 +850,14 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests)),
-        Name = "AsyncMethodDataSourceDrivenTests",
-        Namespace = "TUnit.TestProject",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests)),
+            Name = "AsyncMethodDataSourceDrivenTests",
+            Namespace = "TUnit.TestProject",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
@@ -906,14 +906,14 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests)),
-        Name = "AsyncMethodDataSourceDrivenTests",
-        Namespace = "TUnit.TestProject",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests)),
+            Name = "AsyncMethodDataSourceDrivenTests",
+            Namespace = "TUnit.TestProject",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(

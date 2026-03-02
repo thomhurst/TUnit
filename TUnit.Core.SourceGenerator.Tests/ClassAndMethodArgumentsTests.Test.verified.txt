@@ -11,23 +11,23 @@ internal static class TUnit_TestProject_ClassAndMethodArgumentsTests__TestSource
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ClassAndMethodArgumentsTests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests)),
-        Name = "ClassAndMethodArgumentsTests",
-        Namespace = "TUnit.TestProject",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = new global::TUnit.Core.ParameterMetadata[]
-        {
-        new global::TUnit.Core.ParameterMetadata(typeof(string))
-        {
-        Name = "arg1",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetConstructor(new global::System.Type[] { typeof(string) })!.GetParameters()[0]
-        }
-        },
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests)),
+            Name = "ClassAndMethodArgumentsTests",
+            Namespace = "TUnit.TestProject",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            {
+                new global::TUnit.Core.ParameterMetadata(typeof(string))
+                {
+                    Name = "arg1",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetConstructor(new global::System.Type[] { typeof(string) })!.GetParameters()[0]
+                }
+            },
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests);
         var metadata_Simple = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(
@@ -203,23 +203,23 @@ internal static class TUnit_TestProject_ClassAndMethodArgumentsTests__TestSource
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ClassAndMethodArgumentsTests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests)),
-        Name = "ClassAndMethodArgumentsTests",
-        Namespace = "TUnit.TestProject",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = new global::TUnit.Core.ParameterMetadata[]
-        {
-        new global::TUnit.Core.ParameterMetadata(typeof(string))
-        {
-        Name = "arg1",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetConstructor(new global::System.Type[] { typeof(string) })!.GetParameters()[0]
-        }
-        },
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests)),
+            Name = "ClassAndMethodArgumentsTests",
+            Namespace = "TUnit.TestProject",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            {
+                new global::TUnit.Core.ParameterMetadata(typeof(string))
+                {
+                    Name = "arg1",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetConstructor(new global::System.Type[] { typeof(string) })!.GetParameters()[0]
+                }
+            },
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(
@@ -239,23 +239,23 @@ internal static class TUnit_TestProject_ClassAndMethodArgumentsTests__TestSource
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ClassAndMethodArgumentsTests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests)),
-        Name = "ClassAndMethodArgumentsTests",
-        Namespace = "TUnit.TestProject",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = new global::TUnit.Core.ParameterMetadata[]
-        {
-        new global::TUnit.Core.ParameterMetadata(typeof(string))
-        {
-        Name = "arg1",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetConstructor(new global::System.Type[] { typeof(string) })!.GetParameters()[0]
-        }
-        },
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests)),
+            Name = "ClassAndMethodArgumentsTests",
+            Namespace = "TUnit.TestProject",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            {
+                new global::TUnit.Core.ParameterMetadata(typeof(string))
+                {
+                    Name = "arg1",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetConstructor(new global::System.Type[] { typeof(string) })!.GetParameters()[0]
+                }
+            },
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(
@@ -289,23 +289,23 @@ internal static class TUnit_TestProject_ClassAndMethodArgumentsTests__TestSource
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ClassAndMethodArgumentsTests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests)),
-        Name = "ClassAndMethodArgumentsTests",
-        Namespace = "TUnit.TestProject",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = new global::TUnit.Core.ParameterMetadata[]
-        {
-        new global::TUnit.Core.ParameterMetadata(typeof(string))
-        {
-        Name = "arg1",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetConstructor(new global::System.Type[] { typeof(string) })!.GetParameters()[0]
-        }
-        },
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests)),
+            Name = "ClassAndMethodArgumentsTests",
+            Namespace = "TUnit.TestProject",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            {
+                new global::TUnit.Core.ParameterMetadata(typeof(string))
+                {
+                    Name = "arg1",
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
+                    IsNullable = false,
+                    ReflectionInfo = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetConstructor(new global::System.Type[] { typeof(string) })!.GetParameters()[0]
+                }
+            },
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(

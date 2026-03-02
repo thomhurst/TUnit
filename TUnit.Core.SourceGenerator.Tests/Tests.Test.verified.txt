@@ -11,14 +11,14 @@ internal static class TUnit_TestProject_Bugs__1304_Tests__TestSource
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1304.Tests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.Bugs._1304.Tests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1304.Tests)),
-        Name = "Tests",
-        Namespace = "TUnit.TestProject.Bugs._1304",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.Bugs._1304.Tests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1304.Tests)),
+            Name = "Tests",
+            Namespace = "TUnit.TestProject.Bugs._1304",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.Bugs._1304.Tests);
         var metadata_TryParse_InvalidString_ReturnsFailure__string__CancellationToken = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.Bugs._1304.Tests>(
@@ -214,14 +214,14 @@ internal static class TUnit_TestProject_Bugs__1304_Tests__TestSource
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1304.Tests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.Bugs._1304.Tests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1304.Tests)),
-        Name = "Tests",
-        Namespace = "TUnit.TestProject.Bugs._1304",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.Bugs._1304.Tests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1304.Tests)),
+            Name = "Tests",
+            Namespace = "TUnit.TestProject.Bugs._1304",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.Bugs._1304.Tests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.Bugs._1304.Tests>(
@@ -260,14 +260,14 @@ internal static class TUnit_TestProject_Bugs__1304_Tests__TestSource
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1304.Tests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.Bugs._1304.Tests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1304.Tests)),
-        Name = "Tests",
-        Namespace = "TUnit.TestProject.Bugs._1304",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.Bugs._1304.Tests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1304.Tests)),
+            Name = "Tests",
+            Namespace = "TUnit.TestProject.Bugs._1304",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.Bugs._1304.Tests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.Bugs._1304.Tests>(
@@ -299,14 +299,14 @@ internal static class TUnit_TestProject_Bugs__1304_Tests__TestSource
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1304.Tests", new global::TUnit.Core.ClassMetadata
         {
-        Type = typeof(global::TUnit.TestProject.Bugs._1304.Tests),
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1304.Tests)),
-        Name = "Tests",
-        Namespace = "TUnit.TestProject.Bugs._1304",
-        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-        Parent = null
+            Type = typeof(global::TUnit.TestProject.Bugs._1304.Tests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1304.Tests)),
+            Name = "Tests",
+            Namespace = "TUnit.TestProject.Bugs._1304",
+            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+            Parent = null
         });
         var __classType = typeof(global::TUnit.TestProject.Bugs._1304.Tests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.Bugs._1304.Tests>(
