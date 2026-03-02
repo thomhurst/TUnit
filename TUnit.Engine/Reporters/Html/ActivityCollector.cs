@@ -147,7 +147,7 @@ internal sealed class ActivityCollector : IDisposable
         while (current is not null)
         {
             if (IsTUnitSource(current.Source.Name) &&
-                current.DisplayName.StartsWith("test case", StringComparison.Ordinal))
+                current.GetTagItem("tunit.test.node_uid") is not null)
             {
                 return current.SpanId.ToString();
             }

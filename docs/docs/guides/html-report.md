@@ -192,7 +192,7 @@ This is useful when calling libraries that don't automatically propagate `Activi
 
 ### Overhead
 
-The collector uses **smart sampling**: spans from known test traces are fully recorded, while unrelated activities receive only `PropagationData` (near-zero cost — no timing or tags collected). The existing caps (1,000 spans per trace, 50,000 total) apply only to collected spans.
+The collector uses **smart sampling**: spans from known test traces are fully recorded, while unrelated activities receive only `PropagationData` (near-zero cost — no timing or tags collected). TUnit's own spans are always captured. External spans (HttpClient, ASP.NET Core, etc.) are capped at 100 per test to keep the report size manageable.
 
 ## Troubleshooting
 
