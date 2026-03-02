@@ -277,6 +277,8 @@ public partial class TestContext : Context,
     /// <param name="traceId">The trace ID of the external trace to associate with this test.</param>
     public void RegisterTrace(System.Diagnostics.ActivityTraceId traceId)
     {
+        // TestDetails.TestId is the stable test node UID (e.g. "MyNs.MyClass.MyTest:0")
+        // used as the key in GetTestSpanLookup and HtmlReporter's BuildReportData loop.
         TraceRegistry.Register(traceId.ToString(), TestDetails.TestId);
     }
 #endif

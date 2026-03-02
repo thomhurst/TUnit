@@ -21,6 +21,10 @@ internal sealed class ActivityCollector : IDisposable
 
     public void Start()
     {
+        // Listen to ALL sources so we can capture child spans from HttpClient, ASP.NET Core,
+        // EF Core, etc. The Sample callback uses smart filtering to avoid overhead: only spans
+        // belonging to known test traces are fully recorded; everything else gets PropagationData
+        // (near-zero cost — enables context flow without timing/tags).
         _listener = new ActivityListener
         {
             ShouldListenTo = static _ => true,
@@ -74,15 +78,23 @@ internal sealed class ActivityCollector : IDisposable
 
     private ActivitySamplingResult SampleActivityUsingParentId(ref ActivityCreationOptions<string> options)
     {
-        var sourceName = options.Source.Name;
-
-        if (IsTUnitSource(sourceName))
+        if (IsTUnitSource(options.Source.Name))
         {
             return ActivitySamplingResult.AllDataAndRecorded;
         }
 
-        // For string-based parent IDs we can't easily extract the trace ID,
-        // so use PropagationData to allow context flow
+        // Try to extract the trace ID from W3C format: "00-{32-hex-traceId}-{16-hex-spanId}-{2-hex-flags}"
+        var parentId = options.Parent;
+        if (parentId is { Length: >= 35 } && parentId[2] == '-')
+        {
+            var traceIdStr = parentId.Substring(3, 32);
+            if (_knownTraceIds.ContainsKey(traceIdStr) || TraceRegistry.IsRegistered(traceIdStr))
+            {
+                _knownTraceIds.TryAdd(traceIdStr, 0);
+                return ActivitySamplingResult.AllDataAndRecorded;
+            }
+        }
+
         return ActivitySamplingResult.PropagationData;
     }
 
@@ -161,8 +173,14 @@ internal sealed class ActivityCollector : IDisposable
     {
         var traceId = activity.TraceId.ToString();
 
-        // Only collect spans for known traces (TUnit or registered external traces)
-        if (!_knownTraceIds.ContainsKey(traceId))
+        // TUnit activities always register their own trace ID. This catches root activities
+        // (e.g. "test session") whose TraceId is assigned by the runtime after sampling,
+        // so it couldn't be registered in SampleActivity where only the parent TraceId is known.
+        if (IsTUnitSource(activity.Source.Name))
+        {
+            _knownTraceIds.TryAdd(traceId, 0);
+        }
+        else if (!_knownTraceIds.ContainsKey(traceId))
         {
             return;
         }
