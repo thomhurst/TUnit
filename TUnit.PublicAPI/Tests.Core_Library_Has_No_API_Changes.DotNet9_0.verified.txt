@@ -1259,6 +1259,7 @@ namespace
         public static bool IsEnabled { get; set; }
         public static void Register(..ITestSource testSource) { }
         public static void Register( testClassType, ..ITestSource testSource) { }
+        public static void Register( testClassType, <string, .<.TestMetadata>> getTests, <.<.TestDescriptor>> enumerateDescriptors) { }
         public static void RegisterAssembly(<.Assembly> assemblyLoader) { }
         public static void RegisterDynamic(.IDynamicTestSource testSource) { }
         public static void RegisterGlobalInitializer(<.> initializer) { }

@@ -121,6 +121,7 @@ namespace
         public required string Name { get; init; }
         public virtual bool Equals(.AssemblyMetadata? other) { }
         public override int GetHashCode() { }
+        public static .AssemblyMetadata GetOrAdd(string key, string name) { }
         public static .AssemblyMetadata GetOrAdd(string name, <.AssemblyMetadata> factory) { }
     }
     public static class AsyncConvert
@@ -358,6 +359,7 @@ namespace
         public virtual bool Equals(.ClassMetadata? other) { }
         public override int GetHashCode() { }
         public static .ClassMetadata GetOrAdd(string name, <.ClassMetadata> factory) { }
+        public static .ClassMetadata GetOrAdd(string name, .ClassMetadata value) { }
     }
     [(.Class | .Method)]
     public sealed class CombinedDataSourcesAttribute : .AsyncUntypedDataSourceGeneratorAttribute
@@ -1214,6 +1216,7 @@ namespace
         public static bool IsEnabled { get; set; }
         public static void Register(..ITestSource testSource) { }
         public static void Register( testClassType, ..ITestSource testSource) { }
+        public static void Register( testClassType, <string, .<.TestMetadata>> getTests, <.<.TestDescriptor>> enumerateDescriptors) { }
         public static void RegisterAssembly(<.Assembly> assemblyLoader) { }
         public static void RegisterDynamic(.IDynamicTestSource testSource) { }
         public static void RegisterGlobalInitializer(<.> initializer) { }
