@@ -38,7 +38,6 @@ internal static class TUnit_TestProject_NameOfArgumentTests__TestSource
         {
             new global::TUnit.Core.ArgumentsAttribute("TestName"),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_TestName__string };
@@ -119,7 +118,6 @@ internal static class TUnit_TestProject_NameOfArgumentTests__TestSource
     {
         new global::TUnit.Core.ArgumentsAttribute("TestName"),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

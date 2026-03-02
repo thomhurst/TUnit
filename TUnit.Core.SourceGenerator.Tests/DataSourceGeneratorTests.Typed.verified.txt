@@ -66,7 +66,6 @@ internal static class TUnit_TestProject_DataSourceGeneratorTests__TestSource
             new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>(),
             new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute(),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_GeneratedData_Method2__int_string_bool = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.DataSourceGeneratorTests>(
@@ -105,7 +104,6 @@ internal static class TUnit_TestProject_DataSourceGeneratorTests__TestSource
             new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>(),
             new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute(),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_GeneratedData_Method3__int_string_bool = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.DataSourceGeneratorTests>(
@@ -144,7 +142,6 @@ internal static class TUnit_TestProject_DataSourceGeneratorTests__TestSource
             new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>(),
             new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute(),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_GeneratedData_Method__int, metadata_GeneratedData_Method2__int_string_bool, metadata_GeneratedData_Method3__int_string_bool };
@@ -326,7 +323,6 @@ internal static class TUnit_TestProject_DataSourceGeneratorTests__TestSource
         new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>(),
         new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute(),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -404,7 +400,6 @@ internal static class TUnit_TestProject_DataSourceGeneratorTests__TestSource
         new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>(),
         new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute(),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -482,7 +477,6 @@ internal static class TUnit_TestProject_DataSourceGeneratorTests__TestSource
         new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>(),
         new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute(),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

@@ -1396,147 +1396,139 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static void GeneratePropertyInjections(CodeWriter writer, INamedTypeSymbol typeSymbol, string className)
     {
-        // Walk inheritance hierarchy to find properties with data source attributes
-        var currentType = typeSymbol;
-        var processedProperties = new HashSet<string>();
-        var hasPropertyInjections = false;
-
-        // First check if we have any property injections
-        var tempType = currentType;
-        while (tempType != null)
-        {
-            foreach (var member in tempType.GetMembers())
-            {
-                if (member is IPropertySymbol { DeclaredAccessibility: Accessibility.Public, SetMethod.DeclaredAccessibility: Accessibility.Public, IsStatic: false } property &&
-                    !processedProperties.Contains(property.Name))
-                {
-                    var dataSourceAttr = property.GetAttributes()
-                        .FirstOrDefault(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass));
-
-                    if (dataSourceAttr != null)
-                    {
-                        hasPropertyInjections = true;
-                        processedProperties.Add(property.Name);
-                    }
-                }
-            }
-            tempType = tempType.BaseType;
-        }
-
-        // Reset for actual generation
-        processedProperties.Clear();
-
-        if (!hasPropertyInjections)
+        var expr = GeneratePropertyInjectionsExpression(typeSymbol, className);
+        if (expr == null)
         {
             writer.AppendLine("PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),");
         }
         else
         {
-            writer.AppendLine("PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]");
-            writer.AppendLine("{");
-            writer.Indent();
+            writer.AppendLine($"PropertyInjections = {expr},");
+        }
+    }
 
-            currentType = typeSymbol;
-            while (currentType != null)
+    /// <summary>
+    /// Returns a PropertyInjectionData[] array expression, or null if no qualifying properties exist.
+    /// Single-pass: collects qualifying properties then generates the expression.
+    /// </summary>
+    private static string? GeneratePropertyInjectionsExpression(INamedTypeSymbol typeSymbol, string className)
+    {
+        // Single pass: collect qualifying properties with their containing type context
+        var qualifyingProperties = new List<(IPropertySymbol Property, INamedTypeSymbol ContainingType)>();
+        var processedNames = new HashSet<string>();
+        var currentType = typeSymbol;
+
+        while (currentType != null)
+        {
+            foreach (var member in currentType.GetMembers())
             {
-                foreach (var member in currentType.GetMembers())
+                if (member is IPropertySymbol { DeclaredAccessibility: Accessibility.Public, SetMethod.DeclaredAccessibility: Accessibility.Public, IsStatic: false } property &&
+                    !processedNames.Contains(property.Name))
                 {
-                    if (member is IPropertySymbol { DeclaredAccessibility: Accessibility.Public, SetMethod.DeclaredAccessibility: Accessibility.Public, IsStatic: false } property &&
-                        !processedProperties.Contains(property.Name))
+                    if (property.GetAttributes().Any(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass)))
                     {
-                        var dataSourceAttr = property.GetAttributes()
-                            .FirstOrDefault(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass));
-
-                        if (dataSourceAttr != null)
-                        {
-                            processedProperties.Add(property.Name);
-                            var propertyType = property.Type.GloballyQualified();
-
-                            writer.AppendLine("new global::TUnit.Core.PropertyInjectionData");
-                            writer.AppendLine("{");
-                            writer.Indent();
-                            writer.AppendLine($"PropertyName = \"{property.Name}\",");
-                            writer.AppendLine($"PropertyType = typeof({propertyType}),");
-
-                            // Generate appropriate setter based on whether property is init-only
-                            if (property.SetMethod.IsInitOnly)
-                            {
-                                // For init-only properties, use UnsafeAccessor on .NET 8+ (but not for generic types)
-                                // UnsafeAccessor doesn't work with open generic types
-                                // IMPORTANT: Use currentType (which is the closed generic type from the inheritance chain)
-                                // instead of property.ContainingType (which is the open generic type definition)
-                                var containingTypeName = currentType.GloballyQualified();
-                                var isGenericContainingType = currentType.IsGenericType;
-
-                                if (isGenericContainingType)
-                                {
-                                    // For init-only properties on generic types, use reflection with the closed generic type.
-                                    // UnsafeAccessor doesn't work with generic base classes, but reflection does.
-                                    // This is AOT-compatible because we use the closed generic type known at compile time.
-                                    writer.AppendLine("Setter = (instance, value) =>");
-                                    writer.AppendLine("{");
-                                    writer.Indent();
-                                    writer.AppendLine($"var backingField = typeof({containingTypeName}).GetField(\"<{property.Name}>k__BackingField\",");
-                                    writer.AppendLine("    global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.NonPublic);");
-                                    writer.AppendLine("if (backingField != null)");
-                                    writer.AppendLine("{");
-                                    writer.Indent();
-                                    writer.AppendLine("backingField.SetValue(instance, value);");
-                                    writer.Unindent();
-                                    writer.AppendLine("}");
-                                    writer.AppendLine("else");
-                                    writer.AppendLine("{");
-                                    writer.Indent();
-                                    writer.AppendLine($"throw new global::System.InvalidOperationException(\"Could not find backing field for property {property.Name} on type {containingTypeName}\");");
-                                    writer.Unindent();
-                                    writer.AppendLine("}");
-                                    writer.Unindent();
-                                    writer.AppendLine("},");
-                                }
-                                else
-                                {
-                                    writer.AppendLine("#if NET8_0_OR_GREATER");
-                                    // Cast to the property's containing type if needed
-                                    if (containingTypeName != className)
-                                    {
-                                        writer.AppendLine($"Setter = (instance, value) => Get{property.Name}BackingField(({containingTypeName})instance) = ({propertyType})value,");
-                                    }
-                                    else
-                                    {
-                                        writer.AppendLine($"Setter = (instance, value) => Get{property.Name}BackingField(({className})instance) = ({propertyType})value,");
-                                    }
-                                    writer.AppendLine("#else");
-                                    writer.AppendLine("Setter = (instance, value) => throw new global::System.NotSupportedException(\"Setting init-only properties requires .NET 8 or later\"),");
-                                    writer.AppendLine("#endif");
-                                }
-                            }
-                            else
-                            {
-                                // For regular properties, use normal property assignment
-                                // For regular properties, use direct assignment (tuple conversion happens at runtime)
-                                writer.AppendLine($"Setter = (instance, value) => (({className})instance).{property.Name} = ({propertyType})value,");
-                            }
-
-                            // ValueFactory will be provided by the TestDataCombination at runtime
-                            writer.AppendLine("ValueFactory = () => throw new global::System.InvalidOperationException(\"ValueFactory should be provided by TestDataCombination\"),");
-
-                            // Generate nested property injections
-                            GenerateNestedPropertyInjections(writer, property.Type, processedProperties);
-
-                            // Generate nested property value factory
-                            GenerateNestedPropertyValueFactory(writer, property.Type);
-
-                            writer.Unindent();
-                            writer.AppendLine("},");
-                        }
+                        processedNames.Add(property.Name);
+                        // IMPORTANT: Store currentType (closed generic type from inheritance chain)
+                        // instead of property.ContainingType (open generic type definition)
+                        qualifyingProperties.Add((property, currentType));
                     }
                 }
-                currentType = currentType.BaseType;
             }
+            currentType = currentType.BaseType;
+        }
+
+        if (qualifyingProperties.Count == 0)
+        {
+            return null;
+        }
+
+        var writer = new CodeWriter(includeHeader: false);
+        writer.AppendLine("new global::TUnit.Core.PropertyInjectionData[]");
+        writer.AppendLine("{");
+        writer.Indent();
+
+        foreach (var (property, containingType) in qualifyingProperties)
+        {
+            var propertyType = property.Type.GloballyQualified();
+
+            writer.AppendLine("new global::TUnit.Core.PropertyInjectionData");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine($"PropertyName = \"{property.Name}\",");
+            writer.AppendLine($"PropertyType = typeof({propertyType}),");
+
+            // Generate appropriate setter based on whether property is init-only
+            if (property.SetMethod!.IsInitOnly)
+            {
+                // For init-only properties, use UnsafeAccessor on .NET 8+ (but not for generic types)
+                // UnsafeAccessor doesn't work with open generic types
+                var containingTypeName = containingType.GloballyQualified();
+                var isGenericContainingType = containingType.IsGenericType;
+
+                if (isGenericContainingType)
+                {
+                    // For init-only properties on generic types, use reflection with the closed generic type.
+                    // UnsafeAccessor doesn't work with generic base classes, but reflection does.
+                    // This is AOT-compatible because we use the closed generic type known at compile time.
+                    writer.AppendLine("Setter = (instance, value) =>");
+                    writer.AppendLine("{");
+                    writer.Indent();
+                    writer.AppendLine($"var backingField = typeof({containingTypeName}).GetField(\"<{property.Name}>k__BackingField\",");
+                    writer.AppendLine("    global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.NonPublic);");
+                    writer.AppendLine("if (backingField != null)");
+                    writer.AppendLine("{");
+                    writer.Indent();
+                    writer.AppendLine("backingField.SetValue(instance, value);");
+                    writer.Unindent();
+                    writer.AppendLine("}");
+                    writer.AppendLine("else");
+                    writer.AppendLine("{");
+                    writer.Indent();
+                    writer.AppendLine($"throw new global::System.InvalidOperationException(\"Could not find backing field for property {property.Name} on type {containingTypeName}\");");
+                    writer.Unindent();
+                    writer.AppendLine("}");
+                    writer.Unindent();
+                    writer.AppendLine("},");
+                }
+                else
+                {
+                    writer.AppendLine("#if NET8_0_OR_GREATER");
+                    // Cast to the property's containing type if needed
+                    if (containingTypeName != className)
+                    {
+                        writer.AppendLine($"Setter = (instance, value) => Get{property.Name}BackingField(({containingTypeName})instance) = ({propertyType})value,");
+                    }
+                    else
+                    {
+                        writer.AppendLine($"Setter = (instance, value) => Get{property.Name}BackingField(({className})instance) = ({propertyType})value,");
+                    }
+                    writer.AppendLine("#else");
+                    writer.AppendLine("Setter = (instance, value) => throw new global::System.NotSupportedException(\"Setting init-only properties requires .NET 8 or later\"),");
+                    writer.AppendLine("#endif");
+                }
+            }
+            else
+            {
+                // For regular properties, use direct assignment (tuple conversion happens at runtime)
+                writer.AppendLine($"Setter = (instance, value) => (({className})instance).{property.Name} = ({propertyType})value,");
+            }
+
+            // ValueFactory will be provided by the TestDataCombination at runtime
+            writer.AppendLine("ValueFactory = () => throw new global::System.InvalidOperationException(\"ValueFactory should be provided by TestDataCombination\"),");
+
+            // Generate nested property injections
+            GenerateNestedPropertyInjections(writer, property.Type, processedNames);
+
+            // Generate nested property value factory
+            GenerateNestedPropertyValueFactory(writer, property.Type);
 
             writer.Unindent();
             writer.AppendLine("},");
         }
+
+        writer.Unindent();
+        writer.Append("}");
+        return writer.ToString();
     }
 
     private static void GeneratePropertyDataSources(CodeWriter writer, TestMethodMetadata testMethod)
@@ -2452,9 +2444,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Add optional named parameters only when non-default
         AppendOptionalFactoryParameters(writer, testMethod, className);
 
-        // Always emit filePath (it's almost never empty)
         writer.AppendLine(",");
-        writer.AppendLine($"filePath: @\"{filePath}\",");
+        if (!string.IsNullOrEmpty(filePath))
+        {
+            writer.AppendLine($"filePath: @\"{filePath}\",");
+        }
         writer.Append("testSessionId: testSessionId");
 
         writer.Unindent();
@@ -2576,7 +2570,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         AppendOptionalFactoryParameters(writer, testMethod, className);
 
         writer.AppendLine(",");
-        writer.AppendLine($"filePath: @\"{filePath}\",");
+        if (!string.IsNullOrEmpty(filePath))
+        {
+            writer.AppendLine($"filePath: @\"{filePath}\",");
+        }
         writer.Append("testSessionId: testSessionId");
 
         writer.Unindent();
@@ -2796,65 +2793,52 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private static string? PreGeneratePropertyDataSourcesExpression(TestMethodMetadata testMethod)
     {
         var typeSymbol = testMethod.TypeSymbol;
-        var processedProperties = new HashSet<string>();
+        var processedNames = new HashSet<string>();
+        var qualifyingProperties = new List<(IPropertySymbol Property, AttributeData DataSourceAttr)>();
 
-        // Check if any property data sources exist
-        var tempType = typeSymbol;
-        while (tempType != null)
-        {
-            foreach (var member in tempType.GetMembers())
-            {
-                if (member is IPropertySymbol { DeclaredAccessibility: Accessibility.Public, IsStatic: false } property &&
-                    !processedProperties.Contains(property.Name))
-                {
-                    if (property.GetAttributes().Any(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass)))
-                    {
-                        processedProperties.Add(property.Name);
-                    }
-                }
-            }
-            tempType = tempType.BaseType;
-        }
-
-        if (processedProperties.Count == 0)
-        {
-            return null;
-        }
-
-        processedProperties.Clear();
-
-        var writer = new CodeWriter(includeHeader: false);
-        writer.AppendLine("new global::TUnit.Core.PropertyDataSource[]");
-        writer.AppendLine("{");
-        writer.Indent();
-
+        // Single pass: collect qualifying properties with their data source attributes
         var currentType = typeSymbol;
         while (currentType != null)
         {
             foreach (var member in currentType.GetMembers())
             {
                 if (member is IPropertySymbol { DeclaredAccessibility: Accessibility.Public, IsStatic: false } property &&
-                    !processedProperties.Contains(property.Name))
+                    !processedNames.Contains(property.Name))
                 {
                     var dataSourceAttr = property.GetAttributes()
                         .FirstOrDefault(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass));
 
                     if (dataSourceAttr != null)
                     {
-                        processedProperties.Add(property.Name);
-                        writer.AppendLine("new global::TUnit.Core.PropertyDataSource");
-                        writer.AppendLine("{");
-                        writer.Indent();
-                        writer.AppendLine($"PropertyName = \"{property.Name}\",");
-                        writer.AppendLine($"PropertyType = typeof({property.Type.GloballyQualified()}),");
-                        writer.Append("DataSource = ");
-                        GenerateDataSourceAttribute(writer, testMethod.CompilationContext, dataSourceAttr, testMethod.MethodSymbol, typeSymbol);
-                        writer.Unindent();
-                        writer.AppendLine("},");
+                        processedNames.Add(property.Name);
+                        qualifyingProperties.Add((property, dataSourceAttr));
                     }
                 }
             }
             currentType = currentType.BaseType;
+        }
+
+        if (qualifyingProperties.Count == 0)
+        {
+            return null;
+        }
+
+        var writer = new CodeWriter(includeHeader: false);
+        writer.AppendLine("new global::TUnit.Core.PropertyDataSource[]");
+        writer.AppendLine("{");
+        writer.Indent();
+
+        foreach (var (property, dataSourceAttr) in qualifyingProperties)
+        {
+            writer.AppendLine("new global::TUnit.Core.PropertyDataSource");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine($"PropertyName = \"{property.Name}\",");
+            writer.AppendLine($"PropertyType = typeof({property.Type.GloballyQualified()}),");
+            writer.Append("DataSource = ");
+            GenerateDataSourceAttribute(writer, testMethod.CompilationContext, dataSourceAttr, testMethod.MethodSymbol, typeSymbol);
+            writer.Unindent();
+            writer.AppendLine("},");
         }
 
         writer.Unindent();
@@ -2867,58 +2851,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// </summary>
     private static string? PreGeneratePropertyInjectionsExpression(INamedTypeSymbol typeSymbol, string className)
     {
-        var processedProperties = new HashSet<string>();
-
-        // Check if any property injections exist
-        var tempType = typeSymbol;
-        while (tempType != null)
-        {
-            foreach (var member in tempType.GetMembers())
-            {
-                if (member is IPropertySymbol { DeclaredAccessibility: Accessibility.Public, SetMethod.DeclaredAccessibility: Accessibility.Public, IsStatic: false } property &&
-                    !processedProperties.Contains(property.Name))
-                {
-                    if (property.GetAttributes().Any(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass)))
-                    {
-                        processedProperties.Add(property.Name);
-                    }
-                }
-            }
-            tempType = tempType.BaseType;
-        }
-
-        if (processedProperties.Count == 0)
-        {
-            return null;
-        }
-
-        // Use the existing method to generate, then extract the expression
-        processedProperties.Clear();
-        var writer = new CodeWriter(includeHeader: false);
-        GeneratePropertyInjections(writer, typeSymbol, className);
-        var output = writer.ToString().Trim();
-
-        // Output format: "PropertyInjections = <expression>,"
-        // Strip the prefix and trailing comma
-        const string prefix = "PropertyInjections = ";
-        if (!output.StartsWith(prefix))
-        {
-            return null;
-        }
-
-        var expr = output[prefix.Length..].TrimEnd();
-        if (expr.EndsWith(","))
-        {
-            expr = expr[..^1].TrimEnd();
-        }
-
-        // If it's an empty array, return null (use factory default)
-        if (expr.Contains("Array.Empty<"))
-        {
-            return null;
-        }
-
-        return expr;
+        return GeneratePropertyInjectionsExpression(typeSymbol, className);
     }
 
     /// <summary>

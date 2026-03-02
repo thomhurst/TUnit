@@ -40,7 +40,6 @@ internal static class TUnit_TestProject_ArgumentWithImplicitConverterTests__Test
             new global::TUnit.Core.ArgumentsAttribute(2),
             new global::TUnit.Core.ArgumentsAttribute(3),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_Implicit__ImplicitInteger = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>(
@@ -62,7 +61,6 @@ internal static class TUnit_TestProject_ArgumentWithImplicitConverterTests__Test
             new global::TUnit.Core.ArgumentsAttribute(2),
             new global::TUnit.Core.ArgumentsAttribute(3),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_Explicit__ExplicitInteger, metadata_Implicit__ImplicitInteger };
@@ -181,7 +179,6 @@ internal static class TUnit_TestProject_ArgumentWithImplicitConverterTests__Test
         new global::TUnit.Core.ArgumentsAttribute(2),
         new global::TUnit.Core.ArgumentsAttribute(3),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -219,7 +216,6 @@ internal static class TUnit_TestProject_ArgumentWithImplicitConverterTests__Test
         new global::TUnit.Core.ArgumentsAttribute(2),
         new global::TUnit.Core.ArgumentsAttribute(3),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

@@ -7,7 +7,9 @@
         <TrimmerSingleWarn>false</TrimmerSingleWarn>
 
         <!-- Suppress AD0001 analyzer crash in .NET 9 ILLink DynamicallyAccessedMembersAnalyzer.
-             This is a known .NET 9 SDK analyzer bug, not a code issue. -->
+             This is a known .NET 9 SDK analyzer bug, not a code issue.
+             See: https://github.com/dotnet/runtime/issues/109352
+                  https://github.com/dotnet/runtime/issues/120728 -->
         <NoWarn Condition="'$(TargetFramework)' == 'net9.0'">$(NoWarn);AD0001</NoWarn>
 
         <IsAotCompatible

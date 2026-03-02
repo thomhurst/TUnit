@@ -26,7 +26,6 @@ internal static class TUnit_TestProject_AssemblyRepeatTests__TestSource
             __InvokeTest_TestWithAssemblyRepeat, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("TestWithAssemblyRepeat", __classType, typeof(void), __classMetadata),
             repeatCount: 3,
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_TestWithMethodRepeatOverride = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.AssemblyRepeatTests>(
@@ -34,7 +33,6 @@ internal static class TUnit_TestProject_AssemblyRepeatTests__TestSource
             __InvokeTest_TestWithMethodRepeatOverride, __CreateAttributes_1, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("TestWithMethodRepeatOverride", __classType, typeof(void), __classMetadata),
             repeatCount: 1,
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_TestWithAssemblyRepeat, metadata_TestWithMethodRepeatOverride };
@@ -132,7 +130,6 @@ internal static class TUnit_TestProject_AssemblyRepeatTests__TestSource
             __InvokeTest_TestWithAssemblyRepeat, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("TestWithAssemblyRepeat", __classType, typeof(void), __classMetadata),
             repeatCount: 3,
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -156,7 +153,6 @@ internal static class TUnit_TestProject_AssemblyRepeatTests__TestSource
             __InvokeTest_TestWithMethodRepeatOverride, __CreateAttributes_1, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("TestWithMethodRepeatOverride", __classType, typeof(void), __classMetadata),
             repeatCount: 1,
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

@@ -57,7 +57,6 @@ internal static class TUnit_TestProject_ExpectedArgumentTypeTests__TestSource
             new global::TUnit.Core.ArgumentsAttribute((ulong)0, typeof(ulong)),
             new global::TUnit.Core.ArgumentsAttribute(0UL, typeof(ulong)),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_EnumTypes__object_Type_Type = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.ExpectedArgumentTypeTests>(
@@ -98,7 +97,6 @@ internal static class TUnit_TestProject_ExpectedArgumentTypeTests__TestSource
             new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.Int64Enum.Default, typeof(global::TUnit.TestProject.Int64Enum), typeof(long)),
             new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.UInt64Enum.Default, typeof(global::TUnit.TestProject.UInt64Enum), typeof(ulong)),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_TypedArguments__object_Type, metadata_EnumTypes__object_Type_Type };
@@ -232,7 +230,6 @@ internal static class TUnit_TestProject_ExpectedArgumentTypeTests__TestSource
         new global::TUnit.Core.ArgumentsAttribute((ulong)0, typeof(ulong)),
         new global::TUnit.Core.ArgumentsAttribute(0UL, typeof(ulong)),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -289,7 +286,6 @@ internal static class TUnit_TestProject_ExpectedArgumentTypeTests__TestSource
         new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.Int64Enum.Default, typeof(global::TUnit.TestProject.Int64Enum), typeof(long)),
         new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.UInt64Enum.Default, typeof(global::TUnit.TestProject.UInt64Enum), typeof(ulong)),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

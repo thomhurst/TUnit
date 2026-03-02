@@ -38,7 +38,6 @@ internal static class TUnit_TestProject_Bugs__1603_Tests__TestSource
         {
             new global::TUnit.Core.ArgumentsAttribute((short) -123),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_Integer_To_Short_Converts__short = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.Bugs._1603.Tests>(
@@ -58,7 +57,6 @@ internal static class TUnit_TestProject_Bugs__1603_Tests__TestSource
         {
             new global::TUnit.Core.ArgumentsAttribute(-123),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_Casted_Integer_To_Short_Converts__short, metadata_Integer_To_Short_Converts__short };
@@ -173,7 +171,6 @@ internal static class TUnit_TestProject_Bugs__1603_Tests__TestSource
     {
         new global::TUnit.Core.ArgumentsAttribute((short) -123),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -209,7 +206,6 @@ internal static class TUnit_TestProject_Bugs__1603_Tests__TestSource
     {
         new global::TUnit.Core.ArgumentsAttribute(-123),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

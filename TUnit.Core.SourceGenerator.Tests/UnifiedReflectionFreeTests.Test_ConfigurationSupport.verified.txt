@@ -25,7 +25,6 @@ internal static class TUnit_TestProject_ConfigurationTest__TestSource
             "TestWithConfiguration", "TestWithConfiguration", 7,
             __InvokeTest_TestWithConfiguration, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("TestWithConfiguration", __classType, typeof(void), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_TestWithConfiguration };
@@ -85,7 +84,6 @@ internal static class TUnit_TestProject_ConfigurationTest__TestSource
             "TestWithConfiguration", "TestWithConfiguration", 7,
             __InvokeTest_TestWithConfiguration, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("TestWithConfiguration", __classType, typeof(void), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

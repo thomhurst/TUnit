@@ -25,42 +25,36 @@ internal static class TUnit_TestProject_PriorityFilteringTests__TestSource
             "High_1", "High_1", 12,
             __InvokeTest_High_1, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("High_1", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_High_2 = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.PriorityFilteringTests>(
             "High_2", "High_2", 18,
             __InvokeTest_High_2, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("High_2", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_High_3 = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.PriorityFilteringTests>(
             "High_3", "High_3", 24,
             __InvokeTest_High_3, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("High_3", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_Medium_1 = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.PriorityFilteringTests>(
             "Medium_1", "Medium_1", 30,
             __InvokeTest_Medium_1, __CreateAttributes_1, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Medium_1", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_Medium_2 = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.PriorityFilteringTests>(
             "Medium_2", "Medium_2", 36,
             __InvokeTest_Medium_2, __CreateAttributes_1, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Medium_2", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_Low_1 = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.PriorityFilteringTests>(
             "Low_1", "Low_1", 42,
             __InvokeTest_Low_1, __CreateAttributes_2, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Low_1", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_High_1, metadata_High_2, metadata_High_3, metadata_Medium_1, metadata_Medium_2, metadata_Low_1 };
@@ -266,7 +260,6 @@ internal static class TUnit_TestProject_PriorityFilteringTests__TestSource
             "High_1", "High_1", 12,
             __InvokeTest_High_1, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("High_1", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -289,7 +282,6 @@ internal static class TUnit_TestProject_PriorityFilteringTests__TestSource
             "High_2", "High_2", 18,
             __InvokeTest_High_2, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("High_2", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -312,7 +304,6 @@ internal static class TUnit_TestProject_PriorityFilteringTests__TestSource
             "High_3", "High_3", 24,
             __InvokeTest_High_3, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("High_3", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -335,7 +326,6 @@ internal static class TUnit_TestProject_PriorityFilteringTests__TestSource
             "Medium_1", "Medium_1", 30,
             __InvokeTest_Medium_1, __CreateAttributes_1, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Medium_1", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -358,7 +348,6 @@ internal static class TUnit_TestProject_PriorityFilteringTests__TestSource
             "Medium_2", "Medium_2", 36,
             __InvokeTest_Medium_2, __CreateAttributes_1, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Medium_2", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -381,7 +370,6 @@ internal static class TUnit_TestProject_PriorityFilteringTests__TestSource
             "Low_1", "Low_1", 42,
             __InvokeTest_Low_1, __CreateAttributes_2, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Low_1", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

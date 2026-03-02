@@ -156,7 +156,6 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenWithCancellationTo
                 }
             },
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_MyTest__int_CancellationToken };
@@ -358,7 +357,6 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenWithCancellationTo
             }
         },
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

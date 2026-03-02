@@ -25,7 +25,6 @@ internal static class TUnit_TestProject_SimpleTestClass__TestSource
             "NonGenericTest", "NonGenericTest", 7,
             __InvokeTest_NonGenericTest, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("NonGenericTest", __classType, typeof(void), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_NonGenericTest };
@@ -85,7 +84,6 @@ internal static class TUnit_TestProject_SimpleTestClass__TestSource
             "NonGenericTest", "NonGenericTest", 7,
             __InvokeTest_NonGenericTest, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("NonGenericTest", __classType, typeof(void), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

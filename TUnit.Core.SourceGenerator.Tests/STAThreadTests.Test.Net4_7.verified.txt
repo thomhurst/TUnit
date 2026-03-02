@@ -26,7 +26,6 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             __InvokeTest_With_STA, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("With_STA", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
             repeatCount: 100,
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_Without_STA = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.STAThreadTests>(
@@ -34,7 +33,6 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             __InvokeTest_Without_STA, __CreateAttributes_1, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Without_STA", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
             repeatCount: 100,
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_STA_WithSimpleAwait = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.STAThreadTests>(
@@ -42,7 +40,6 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             __InvokeTest_STA_WithSimpleAwait, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("STA_WithSimpleAwait", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
             repeatCount: 100,
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_STA_WithTaskYield = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.STAThreadTests>(
@@ -50,7 +47,6 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             __InvokeTest_STA_WithTaskYield, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("STA_WithTaskYield", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
             repeatCount: 100,
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_STA_WithConfigureAwaitTrue = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.STAThreadTests>(
@@ -58,7 +54,6 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             __InvokeTest_STA_WithConfigureAwaitTrue, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("STA_WithConfigureAwaitTrue", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
             repeatCount: 100,
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_STA_WithNestedAsyncCalls = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.STAThreadTests>(
@@ -66,7 +61,6 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             __InvokeTest_STA_WithNestedAsyncCalls, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("STA_WithNestedAsyncCalls", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
             repeatCount: 100,
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_STA_WithTaskFromResult = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.STAThreadTests>(
@@ -74,7 +68,6 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             __InvokeTest_STA_WithTaskFromResult, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("STA_WithTaskFromResult", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
             repeatCount: 100,
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_STA_WithCompletedTask = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.STAThreadTests>(
@@ -82,7 +75,6 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             __InvokeTest_STA_WithCompletedTask, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("STA_WithCompletedTask", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
             repeatCount: 100,
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_STA_WithTaskRun = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.STAThreadTests>(
@@ -90,7 +82,6 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             __InvokeTest_STA_WithTaskRun, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("STA_WithTaskRun", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
             repeatCount: 100,
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_STA_WithMultipleAwaits = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.STAThreadTests>(
@@ -98,7 +89,6 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             __InvokeTest_STA_WithMultipleAwaits, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("STA_WithMultipleAwaits", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
             repeatCount: 100,
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_STA_WithAsyncEnumerable = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.STAThreadTests>(
@@ -106,7 +96,6 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             __InvokeTest_STA_WithAsyncEnumerable, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("STA_WithAsyncEnumerable", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
             repeatCount: 100,
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_STA_WithTaskWhenAll = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.STAThreadTests>(
@@ -114,7 +103,6 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             __InvokeTest_STA_WithTaskWhenAll, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("STA_WithTaskWhenAll", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
             repeatCount: 100,
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_STA_WithExceptionHandling = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.STAThreadTests>(
@@ -122,7 +110,6 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             __InvokeTest_STA_WithExceptionHandling, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("STA_WithExceptionHandling", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
             repeatCount: 100,
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_STA_WithThrowsNothingAssertion = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.STAThreadTests>(
@@ -130,7 +117,6 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             __InvokeTest_STA_WithThrowsNothingAssertion, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("STA_WithThrowsNothingAssertion", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
             repeatCount: 100,
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_STA_WithFuncAssertion = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.STAThreadTests>(
@@ -138,7 +124,6 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             __InvokeTest_STA_WithFuncAssertion, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("STA_WithFuncAssertion", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
             repeatCount: 100,
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_With_STA, metadata_Without_STA, metadata_STA_WithSimpleAwait, metadata_STA_WithTaskYield, metadata_STA_WithConfigureAwaitTrue, metadata_STA_WithNestedAsyncCalls, metadata_STA_WithTaskFromResult, metadata_STA_WithCompletedTask, metadata_STA_WithTaskRun, metadata_STA_WithMultipleAwaits, metadata_STA_WithAsyncEnumerable, metadata_STA_WithTaskWhenAll, metadata_STA_WithExceptionHandling, metadata_STA_WithThrowsNothingAssertion, metadata_STA_WithFuncAssertion };
@@ -578,7 +563,6 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             __InvokeTest_With_STA, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("With_STA", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
             repeatCount: 100,
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -602,7 +586,6 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             __InvokeTest_Without_STA, __CreateAttributes_1, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Without_STA", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
             repeatCount: 100,
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -626,7 +609,6 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             __InvokeTest_STA_WithSimpleAwait, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("STA_WithSimpleAwait", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
             repeatCount: 100,
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -650,7 +632,6 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             __InvokeTest_STA_WithTaskYield, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("STA_WithTaskYield", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
             repeatCount: 100,
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -674,7 +655,6 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             __InvokeTest_STA_WithConfigureAwaitTrue, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("STA_WithConfigureAwaitTrue", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
             repeatCount: 100,
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -698,7 +678,6 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             __InvokeTest_STA_WithNestedAsyncCalls, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("STA_WithNestedAsyncCalls", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
             repeatCount: 100,
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -722,7 +701,6 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             __InvokeTest_STA_WithTaskFromResult, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("STA_WithTaskFromResult", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
             repeatCount: 100,
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -746,7 +724,6 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             __InvokeTest_STA_WithCompletedTask, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("STA_WithCompletedTask", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
             repeatCount: 100,
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -770,7 +747,6 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             __InvokeTest_STA_WithTaskRun, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("STA_WithTaskRun", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
             repeatCount: 100,
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -794,7 +770,6 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             __InvokeTest_STA_WithMultipleAwaits, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("STA_WithMultipleAwaits", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
             repeatCount: 100,
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -818,7 +793,6 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             __InvokeTest_STA_WithAsyncEnumerable, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("STA_WithAsyncEnumerable", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
             repeatCount: 100,
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -842,7 +816,6 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             __InvokeTest_STA_WithTaskWhenAll, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("STA_WithTaskWhenAll", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
             repeatCount: 100,
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -866,7 +839,6 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             __InvokeTest_STA_WithExceptionHandling, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("STA_WithExceptionHandling", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
             repeatCount: 100,
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -890,7 +862,6 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             __InvokeTest_STA_WithThrowsNothingAssertion, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("STA_WithThrowsNothingAssertion", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
             repeatCount: 100,
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -914,7 +885,6 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
             __InvokeTest_STA_WithFuncAssertion, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("STA_WithFuncAssertion", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
             repeatCount: 100,
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

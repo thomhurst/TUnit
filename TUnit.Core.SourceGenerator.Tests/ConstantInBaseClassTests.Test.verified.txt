@@ -38,7 +38,6 @@ internal static class TUnit_TestProject_Bugs__1432_ConstantInBaseClassTests__Tes
         {
             new global::TUnit.Core.ArgumentsAttribute("Value"),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_SomeTest__string };
@@ -119,7 +118,6 @@ internal static class TUnit_TestProject_Bugs__1432_ConstantInBaseClassTests__Tes
     {
         new global::TUnit.Core.ArgumentsAttribute("Value"),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

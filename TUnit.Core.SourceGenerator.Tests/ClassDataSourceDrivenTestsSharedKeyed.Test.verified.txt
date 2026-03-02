@@ -39,7 +39,6 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTestsSharedKeyed__T
             new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>()
         {Shared = global::TUnit.Core.SharedType.Keyed,Key = "🔑",},
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_DataSource_Class_Generic__SomeAsyncDisposableClass = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed>(
@@ -60,7 +59,6 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTestsSharedKeyed__T
             new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>()
         {Shared = global::TUnit.Core.SharedType.Keyed,Key = "🔑",},
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_DataSource_Class__SomeAsyncDisposableClass, metadata_DataSource_Class_Generic__SomeAsyncDisposableClass };
@@ -178,7 +176,6 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTestsSharedKeyed__T
         new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>()
     {Shared = global::TUnit.Core.SharedType.Keyed,Key = "🔑",},
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -215,7 +212,6 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTestsSharedKeyed__T
         new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>()
     {Shared = global::TUnit.Core.SharedType.Keyed,Key = "🔑",},
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

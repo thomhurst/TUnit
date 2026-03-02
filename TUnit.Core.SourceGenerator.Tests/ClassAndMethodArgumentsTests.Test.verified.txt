@@ -39,7 +39,6 @@ internal static class TUnit_TestProject_ClassAndMethodArgumentsTests__TestSource
             new global::TUnit.Core.ArgumentsAttribute("1"),
             new global::TUnit.Core.ArgumentsAttribute("2"),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_WithMethodLevel__string = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(
@@ -65,7 +64,6 @@ internal static class TUnit_TestProject_ClassAndMethodArgumentsTests__TestSource
             new global::TUnit.Core.ArgumentsAttribute("1"),
             new global::TUnit.Core.ArgumentsAttribute("2"),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_IgnoreParameters__string = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(
@@ -91,7 +89,6 @@ internal static class TUnit_TestProject_ClassAndMethodArgumentsTests__TestSource
             new global::TUnit.Core.ArgumentsAttribute("1"),
             new global::TUnit.Core.ArgumentsAttribute("2"),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_Simple, metadata_WithMethodLevel__string, metadata_IgnoreParameters__string };
@@ -234,7 +231,6 @@ internal static class TUnit_TestProject_ClassAndMethodArgumentsTests__TestSource
         new global::TUnit.Core.ArgumentsAttribute("1"),
         new global::TUnit.Core.ArgumentsAttribute("2"),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -285,7 +281,6 @@ internal static class TUnit_TestProject_ClassAndMethodArgumentsTests__TestSource
         new global::TUnit.Core.ArgumentsAttribute("1"),
         new global::TUnit.Core.ArgumentsAttribute("2"),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -336,7 +331,6 @@ internal static class TUnit_TestProject_ClassAndMethodArgumentsTests__TestSource
         new global::TUnit.Core.ArgumentsAttribute("1"),
         new global::TUnit.Core.ArgumentsAttribute("2"),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

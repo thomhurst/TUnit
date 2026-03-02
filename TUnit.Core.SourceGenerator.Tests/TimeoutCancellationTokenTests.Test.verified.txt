@@ -68,7 +68,6 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
                 }
             },
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_BasicTest__CancellationToken = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.TimeoutCancellationTokenTests>(
@@ -109,7 +108,6 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
                 }
             },
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_InheritedTimeoutAttribute__CancellationToken = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.TimeoutCancellationTokenTests>(
@@ -150,7 +148,6 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
                 }
             },
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_DataTest__int_CancellationToken = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.TimeoutCancellationTokenTests>(
@@ -202,7 +199,6 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
                 }
             },
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_DataSourceTest__int_CancellationToken = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.TimeoutCancellationTokenTests>(
@@ -275,7 +271,6 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
                 }
             },
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_MatrixTest__int_CancellationToken = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.TimeoutCancellationTokenTests>(
@@ -327,7 +322,6 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
                 }
             },
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_DefaultTest__CancellationToken, metadata_BasicTest__CancellationToken, metadata_InheritedTimeoutAttribute__CancellationToken, metadata_DataTest__int_CancellationToken, metadata_DataSourceTest__int_CancellationToken, metadata_MatrixTest__int_CancellationToken };
@@ -646,7 +640,6 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
             }
         },
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -712,7 +705,6 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
             }
         },
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -778,7 +770,6 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
             }
         },
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -855,7 +846,6 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
             }
         },
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -953,7 +943,6 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
             }
         },
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -1030,7 +1019,6 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
             }
         },
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -1119,7 +1107,6 @@ internal static class TUnit_TestProject_TimeoutDoesNotFireTests__TestSource
                 }
             },
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_QuickTestDoesNotTimeout__CancellationToken };
@@ -1225,7 +1212,6 @@ internal static class TUnit_TestProject_TimeoutDoesNotFireTests__TestSource
             }
         },
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -1314,7 +1300,6 @@ internal static class TUnit_TestProject_CancellationTokenTriggeredTests__TestSou
                 }
             },
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_CancellationTokenIsTriggered__CancellationToken };
@@ -1420,7 +1405,6 @@ internal static class TUnit_TestProject_CancellationTokenTriggeredTests__TestSou
             }
         },
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

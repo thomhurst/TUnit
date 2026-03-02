@@ -40,7 +40,6 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
             new global::TUnit.Core.ArgumentsAttribute(2),
             new global::TUnit.Core.ArgumentsAttribute(3),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_DataSource_Method__int_string = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.DataDrivenTests>(
@@ -69,7 +68,6 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
             new global::TUnit.Core.ArgumentsAttribute(2, "String2"),
             new global::TUnit.Core.ArgumentsAttribute(3, "String3"),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_EnumValue__TestEnum = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.DataDrivenTests>(
@@ -91,7 +89,6 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
             new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.TestEnum.Two),
             new global::TUnit.Core.ArgumentsAttribute(-1),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_NullValue__string_ = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.DataDrivenTests>(
@@ -111,7 +108,6 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
         {
             new global::TUnit.Core.ArgumentsAttribute(null),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_EmptyString__string_ = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.DataDrivenTests>(
@@ -131,7 +127,6 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
         {
             new global::TUnit.Core.ArgumentsAttribute(""),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_NonEmptyString__string_ = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.DataDrivenTests>(
@@ -151,7 +146,6 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
         {
             new global::TUnit.Core.ArgumentsAttribute("Foo bar!"),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_BooleanString__bool_ = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.DataDrivenTests>(
@@ -173,7 +167,6 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
             new global::TUnit.Core.ArgumentsAttribute(false),
             new global::TUnit.Core.ArgumentsAttribute(true),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_Type__Type = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.DataDrivenTests>(
@@ -193,7 +186,6 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
         {
             new global::TUnit.Core.ArgumentsAttribute(typeof(object)),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_IntegerArray__int__ = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.DataDrivenTests>(
@@ -213,7 +205,6 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
         {
             new global::TUnit.Core.ArgumentsAttribute(new[] { 1, 2, 3 }),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_IntMaxValue__int = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.DataDrivenTests>(
@@ -233,7 +224,6 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
         {
             new global::TUnit.Core.ArgumentsAttribute(2147483647),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_DataSource_Method__int, metadata_DataSource_Method__int_string, metadata_EnumValue__TestEnum, metadata_NullValue__string_, metadata_EmptyString__string_, metadata_NonEmptyString__string_, metadata_BooleanString__bool_, metadata_Type__Type, metadata_IntegerArray__int__, metadata_IntMaxValue__int };
@@ -632,7 +622,6 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
         new global::TUnit.Core.ArgumentsAttribute(2),
         new global::TUnit.Core.ArgumentsAttribute(3),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -677,7 +666,6 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
         new global::TUnit.Core.ArgumentsAttribute(2, "String2"),
         new global::TUnit.Core.ArgumentsAttribute(3, "String3"),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -715,7 +703,6 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
         new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.TestEnum.Two),
         new global::TUnit.Core.ArgumentsAttribute(-1),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -751,7 +738,6 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
     {
         new global::TUnit.Core.ArgumentsAttribute(null),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -787,7 +773,6 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
     {
         new global::TUnit.Core.ArgumentsAttribute(""),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -823,7 +808,6 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
     {
         new global::TUnit.Core.ArgumentsAttribute("Foo bar!"),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -861,7 +845,6 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
         new global::TUnit.Core.ArgumentsAttribute(false),
         new global::TUnit.Core.ArgumentsAttribute(true),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -897,7 +880,6 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
     {
         new global::TUnit.Core.ArgumentsAttribute(typeof(object)),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -933,7 +915,6 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
     {
         new global::TUnit.Core.ArgumentsAttribute(new[] { 1, 2, 3 }),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -969,7 +950,6 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
     {
         new global::TUnit.Core.ArgumentsAttribute(2147483647),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

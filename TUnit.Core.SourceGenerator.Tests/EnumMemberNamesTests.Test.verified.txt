@@ -40,7 +40,6 @@ internal static class TUnit_TestProject_Bugs__1432_EnumMemberNamesTests__TestSou
             new global::TUnit.Core.ArgumentsAttribute("B"),
             new global::TUnit.Core.ArgumentsAttribute("C"),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_SomeTest__string };
@@ -124,7 +123,6 @@ internal static class TUnit_TestProject_Bugs__1432_EnumMemberNamesTests__TestSou
         new global::TUnit.Core.ArgumentsAttribute("B"),
         new global::TUnit.Core.ArgumentsAttribute("C"),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

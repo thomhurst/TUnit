@@ -39,7 +39,6 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests2__TestSource
             new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1>(),
             new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2>(),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_Base_Derived2 = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.ClassDataSourceDrivenTests2>(
@@ -51,7 +50,6 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests2__TestSource
             new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1>(),
             new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2>(),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_Base_Derived1, metadata_Base_Derived2 };
@@ -155,7 +153,6 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests2__TestSource
         new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1>(),
         new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2>(),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -192,7 +189,6 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests2__TestSource
         new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1>(),
         new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2>(),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

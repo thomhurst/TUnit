@@ -39,7 +39,6 @@ internal static class TUnit_TestProject_NullableByteArgumentTests__TestSource
             new global::TUnit.Core.ArgumentsAttribute((byte) 1),
             new global::TUnit.Core.ArgumentsAttribute(null),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_Test2__byte_byte_ = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.NullableByteArgumentTests>(
@@ -67,7 +66,6 @@ internal static class TUnit_TestProject_NullableByteArgumentTests__TestSource
             new global::TUnit.Core.ArgumentsAttribute((byte) 1, (byte) 1),
             new global::TUnit.Core.ArgumentsAttribute((byte) 1, null),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_Test__byte_, metadata_Test2__byte_byte_ };
@@ -185,7 +183,6 @@ internal static class TUnit_TestProject_NullableByteArgumentTests__TestSource
         new global::TUnit.Core.ArgumentsAttribute((byte) 1),
         new global::TUnit.Core.ArgumentsAttribute(null),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -229,7 +226,6 @@ internal static class TUnit_TestProject_NullableByteArgumentTests__TestSource
         new global::TUnit.Core.ArgumentsAttribute((byte) 1, (byte) 1),
         new global::TUnit.Core.ArgumentsAttribute((byte) 1, null),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

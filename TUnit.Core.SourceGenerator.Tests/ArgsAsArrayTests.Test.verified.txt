@@ -38,7 +38,6 @@ internal static class TUnit_TestProject_ArgsAsArrayTests__TestSource
         {
             new global::TUnit.Core.ArgumentsAttribute("arg1", "arg2", "arg3"),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_ParamsEnumerable__IEnumerable_string_ = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.ArgsAsArrayTests>(
@@ -58,7 +57,6 @@ internal static class TUnit_TestProject_ArgsAsArrayTests__TestSource
         {
             new global::TUnit.Core.ArgumentsAttribute("arg1", "arg2", "arg3"),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_Following_Non_Params__int_IEnumerable_string_ = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.ArgsAsArrayTests>(
@@ -85,7 +83,6 @@ internal static class TUnit_TestProject_ArgsAsArrayTests__TestSource
         {
             new global::TUnit.Core.ArgumentsAttribute(1, "arg1", "arg2", "arg3"),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_Params__string__, metadata_ParamsEnumerable__IEnumerable_string_, metadata_Following_Non_Params__int_IEnumerable_string_ };
@@ -326,7 +323,6 @@ internal static class TUnit_TestProject_ArgsAsArrayTests__TestSource
     {
         new global::TUnit.Core.ArgumentsAttribute("arg1", "arg2", "arg3"),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -362,7 +358,6 @@ internal static class TUnit_TestProject_ArgsAsArrayTests__TestSource
     {
         new global::TUnit.Core.ArgumentsAttribute("arg1", "arg2", "arg3"),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -405,7 +400,6 @@ internal static class TUnit_TestProject_ArgsAsArrayTests__TestSource
     {
         new global::TUnit.Core.ArgumentsAttribute(1, "arg1", "arg2", "arg3"),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

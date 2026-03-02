@@ -39,7 +39,6 @@ internal static class TUnit_TestProject_Bugs__1692_Tests__TestSource
             new global::TUnit.Core.ArgumentsAttribute(null),
             new global::TUnit.Core.ArgumentsAttribute(null),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_NullTest__string_ };
@@ -121,7 +120,6 @@ internal static class TUnit_TestProject_Bugs__1692_Tests__TestSource
         new global::TUnit.Core.ArgumentsAttribute(null),
         new global::TUnit.Core.ArgumentsAttribute(null),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

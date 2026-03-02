@@ -26,7 +26,6 @@ internal static class TUnit_TestProject_RepeatTests__TestSource
             __InvokeTest_One, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("One", __classType, typeof(void), __classMetadata),
             repeatCount: 1,
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_Two = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.RepeatTests>(
@@ -34,7 +33,6 @@ internal static class TUnit_TestProject_RepeatTests__TestSource
             __InvokeTest_Two, __CreateAttributes_1, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Two", __classType, typeof(void), __classMetadata),
             repeatCount: 2,
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_Three = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.RepeatTests>(
@@ -42,7 +40,6 @@ internal static class TUnit_TestProject_RepeatTests__TestSource
             __InvokeTest_Three, __CreateAttributes_2, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Three", __classType, typeof(void), __classMetadata),
             repeatCount: 3,
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_One, metadata_Two, metadata_Three };
@@ -179,7 +176,6 @@ internal static class TUnit_TestProject_RepeatTests__TestSource
             __InvokeTest_One, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("One", __classType, typeof(void), __classMetadata),
             repeatCount: 1,
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -203,7 +199,6 @@ internal static class TUnit_TestProject_RepeatTests__TestSource
             __InvokeTest_Two, __CreateAttributes_1, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Two", __classType, typeof(void), __classMetadata),
             repeatCount: 2,
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -227,7 +222,6 @@ internal static class TUnit_TestProject_RepeatTests__TestSource
             __InvokeTest_Three, __CreateAttributes_2, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Three", __classType, typeof(void), __classMetadata),
             repeatCount: 3,
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

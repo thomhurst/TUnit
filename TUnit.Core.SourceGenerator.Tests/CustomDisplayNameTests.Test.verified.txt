@@ -38,14 +38,12 @@ internal static class TUnit_TestProject_CustomDisplayNameTests__TestSource
             "Test", "Test", 11,
             __InvokeTest_Test, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_Test2 = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.CustomDisplayNameTests>(
             "Test2", "Test2", 18,
             __InvokeTest_Test2, __CreateAttributes_1, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Test2", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_Test3__string_int_bool = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.CustomDisplayNameTests>(
@@ -80,7 +78,6 @@ internal static class TUnit_TestProject_CustomDisplayNameTests__TestSource
             new global::TUnit.Core.ArgumentsAttribute("foo", 1, true),
             new global::TUnit.Core.ArgumentsAttribute("bar", 2, false),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_MethodDataSourceTest__string = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.CustomDisplayNameTests>(
@@ -111,7 +108,6 @@ internal static class TUnit_TestProject_CustomDisplayNameTests__TestSource
                 }
             },
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_TestParameterNamePrefixBug__int_string = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.CustomDisplayNameTests>(
@@ -140,7 +136,6 @@ internal static class TUnit_TestProject_CustomDisplayNameTests__TestSource
             new global::TUnit.Core.ArgumentsAttribute(200, "Type2"),
             new global::TUnit.Core.ArgumentsAttribute(300, "Type1"),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_PasswordTest__string = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.CustomDisplayNameTests>(
@@ -160,28 +155,24 @@ internal static class TUnit_TestProject_CustomDisplayNameTests__TestSource
         {
             new global::TUnit.TestProject.CustomDisplayNameTests.MyGenerator(),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_SameClassConstantTest = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.CustomDisplayNameTests>(
             "SameClassConstantTest", "SameClassConstantTest", 72,
             __InvokeTest_SameClassConstantTest, __CreateAttributes_6, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("SameClassConstantTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_DifferentClassConstantTest = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.CustomDisplayNameTests>(
             "DifferentClassConstantTest", "DifferentClassConstantTest", 79,
             __InvokeTest_DifferentClassConstantTest, __CreateAttributes_6, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("DifferentClassConstantTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_NestedClassConstantTest = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.CustomDisplayNameTests>(
             "NestedClassConstantTest", "NestedClassConstantTest", 86,
             __InvokeTest_NestedClassConstantTest, __CreateAttributes_6, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("NestedClassConstantTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_Test, metadata_Test2, metadata_Test3__string_int_bool, metadata_MethodDataSourceTest__string, metadata_TestParameterNamePrefixBug__int_string, metadata_PasswordTest__string, metadata_SameClassConstantTest, metadata_DifferentClassConstantTest, metadata_NestedClassConstantTest };
@@ -548,7 +539,6 @@ internal static class TUnit_TestProject_CustomDisplayNameTests__TestSource
             "Test", "Test", 11,
             __InvokeTest_Test, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -584,7 +574,6 @@ internal static class TUnit_TestProject_CustomDisplayNameTests__TestSource
             "Test2", "Test2", 18,
             __InvokeTest_Test2, __CreateAttributes_1, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Test2", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -648,7 +637,6 @@ internal static class TUnit_TestProject_CustomDisplayNameTests__TestSource
         new global::TUnit.Core.ArgumentsAttribute("foo", 1, true),
         new global::TUnit.Core.ArgumentsAttribute("bar", 2, false),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -708,7 +696,6 @@ internal static class TUnit_TestProject_CustomDisplayNameTests__TestSource
             }
         },
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -766,7 +753,6 @@ internal static class TUnit_TestProject_CustomDisplayNameTests__TestSource
         new global::TUnit.Core.ArgumentsAttribute(200, "Type2"),
         new global::TUnit.Core.ArgumentsAttribute(300, "Type1"),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -815,7 +801,6 @@ internal static class TUnit_TestProject_CustomDisplayNameTests__TestSource
     {
         new global::TUnit.TestProject.CustomDisplayNameTests.MyGenerator(),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -851,7 +836,6 @@ internal static class TUnit_TestProject_CustomDisplayNameTests__TestSource
             "SameClassConstantTest", "SameClassConstantTest", 72,
             __InvokeTest_SameClassConstantTest, __CreateAttributes_6, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("SameClassConstantTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -887,7 +871,6 @@ internal static class TUnit_TestProject_CustomDisplayNameTests__TestSource
             "DifferentClassConstantTest", "DifferentClassConstantTest", 79,
             __InvokeTest_DifferentClassConstantTest, __CreateAttributes_6, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("DifferentClassConstantTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -923,7 +906,6 @@ internal static class TUnit_TestProject_CustomDisplayNameTests__TestSource
             "NestedClassConstantTest", "NestedClassConstantTest", 86,
             __InvokeTest_NestedClassConstantTest, __CreateAttributes_6, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("NestedClassConstantTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

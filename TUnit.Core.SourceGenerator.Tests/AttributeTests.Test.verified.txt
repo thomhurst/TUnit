@@ -25,7 +25,6 @@ internal static class TUnit_TestProject_AttributeTests__TestSource
             "MyTest", "MyTest", 7,
             __InvokeTest_MyTest, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("MyTest", __classType, typeof(void), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_MyTest };
@@ -97,7 +96,6 @@ internal static class TUnit_TestProject_AttributeTests__TestSource
             "MyTest", "MyTest", 7,
             __InvokeTest_MyTest, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("MyTest", __classType, typeof(void), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

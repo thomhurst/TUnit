@@ -46,7 +46,6 @@ internal static class TUnit_TestProject_Bugs__2112_Tests__TestSource
             new global::TUnit.Core.ArgumentsAttribute(0, 1L),
             new global::TUnit.Core.ArgumentsAttribute(0, 1L),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_Test2__int_long__ = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.Bugs._2112.Tests>(
@@ -74,7 +73,6 @@ internal static class TUnit_TestProject_Bugs__2112_Tests__TestSource
             new global::TUnit.Core.ArgumentsAttribute(0, 1L, 2L, 3L),
             new global::TUnit.Core.ArgumentsAttribute(0, 1L, 2L, 3L),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_Test__int_long__, metadata_Test2__int_long__ };
@@ -259,7 +257,6 @@ internal static class TUnit_TestProject_Bugs__2112_Tests__TestSource
         new global::TUnit.Core.ArgumentsAttribute(0, 1L),
         new global::TUnit.Core.ArgumentsAttribute(0, 1L),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -303,7 +300,6 @@ internal static class TUnit_TestProject_Bugs__2112_Tests__TestSource
         new global::TUnit.Core.ArgumentsAttribute(0, 1L, 2L, 3L),
         new global::TUnit.Core.ArgumentsAttribute(0, 1L, 2L, 3L),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

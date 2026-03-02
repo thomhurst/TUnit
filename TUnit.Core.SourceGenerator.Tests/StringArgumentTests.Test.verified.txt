@@ -49,7 +49,6 @@ internal static class TUnit_TestProject_StringArgumentTests__TestSource
                 """
         ),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_Nullable__string_ = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.StringArgumentTests>(
@@ -76,7 +75,6 @@ internal static class TUnit_TestProject_StringArgumentTests__TestSource
             new global::TUnit.Core.ArgumentsAttribute("\\\\t"),
             new global::TUnit.Core.ArgumentsAttribute(null),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_Normal__string, metadata_Nullable__string_ };
@@ -204,7 +202,6 @@ internal static class TUnit_TestProject_StringArgumentTests__TestSource
             """
     ),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -247,7 +244,6 @@ internal static class TUnit_TestProject_StringArgumentTests__TestSource
         new global::TUnit.Core.ArgumentsAttribute("\\\\t"),
         new global::TUnit.Core.ArgumentsAttribute(null),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

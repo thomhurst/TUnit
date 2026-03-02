@@ -95,7 +95,6 @@ internal static class TUnit_TestProject_EnumerableTupleDataSourceDrivenTests__Te
                 }
             },
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_DataSource_TupleMethod__int_string_bool };
@@ -234,7 +233,6 @@ internal static class TUnit_TestProject_EnumerableTupleDataSourceDrivenTests__Te
             }
         },
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

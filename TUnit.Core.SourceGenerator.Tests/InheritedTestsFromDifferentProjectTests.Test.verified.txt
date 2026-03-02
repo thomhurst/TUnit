@@ -25,7 +25,6 @@ internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
             "Test", "Test", 9,
             __InvokeTest_Test, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(void), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_GenericMethodDataSource__string = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(
@@ -45,7 +44,6 @@ internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
         {
             new global::TUnit.Core.MethodDataSourceAttribute<global::TUnit.TestProject.TestData>("Foo"),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_NonGenericMethodDataSource__string = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(
@@ -76,14 +74,12 @@ internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
                 }
             },
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_VerifyInheritedCategoriesAreAvailable = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(
             "VerifyInheritedCategoriesAreAvailable", "VerifyInheritedCategoriesAreAvailable", 26,
             __InvokeTest_VerifyInheritedCategoriesAreAvailable, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("VerifyInheritedCategoriesAreAvailable", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_Test, metadata_GenericMethodDataSource__string, metadata_NonGenericMethodDataSource__string, metadata_VerifyInheritedCategoriesAreAvailable };
@@ -242,7 +238,6 @@ internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
             "Test", "Test", 9,
             __InvokeTest_Test, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(void), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -278,7 +273,6 @@ internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
     {
         new global::TUnit.Core.MethodDataSourceAttribute<global::TUnit.TestProject.TestData>("Foo"),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -325,7 +319,6 @@ internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
             }
         },
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -348,7 +341,6 @@ internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
             "VerifyInheritedCategoriesAreAvailable", "VerifyInheritedCategoriesAreAvailable", 26,
             __InvokeTest_VerifyInheritedCategoriesAreAvailable, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("VerifyInheritedCategoriesAreAvailable", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

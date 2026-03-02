@@ -25,7 +25,6 @@ internal static class TUnit_TestProject_Bugs__1539_Tests__TestSource
             "Test", "Test", 8,
             __InvokeTest_Test, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(void), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_Test };
@@ -90,7 +89,6 @@ internal static class TUnit_TestProject_Bugs__1539_Tests__TestSource
             "Test", "Test", 8,
             __InvokeTest_Test, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(void), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

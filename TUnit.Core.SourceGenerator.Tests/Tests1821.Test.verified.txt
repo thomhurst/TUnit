@@ -51,7 +51,6 @@ internal static class TUnit_TestProject_Bugs__1821_Tests__TestSource
         {
             new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>(),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_MatrixDataSource__string = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.Bugs._1821.Tests>(
@@ -75,7 +74,6 @@ internal static class TUnit_TestProject_Bugs__1821_Tests__TestSource
         {
             new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>(),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_MethodDataSource__string, metadata_MatrixDataSource__string };
@@ -204,7 +202,6 @@ internal static class TUnit_TestProject_Bugs__1821_Tests__TestSource
     {
         new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>(),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -253,7 +250,6 @@ internal static class TUnit_TestProject_Bugs__1821_Tests__TestSource
     {
         new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>(),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

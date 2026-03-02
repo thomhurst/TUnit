@@ -25,7 +25,6 @@ internal static class TUnit_TestProject_AbstractTests_ConcreteClass2__TestSource
             "SecondTest", "SecondTest", 11,
             __InvokeTest_SecondTest, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("SecondTest", __classType, typeof(void), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_SecondTest };
@@ -87,7 +86,6 @@ internal static class TUnit_TestProject_AbstractTests_ConcreteClass2__TestSource
             "SecondTest", "SecondTest", 11,
             __InvokeTest_SecondTest, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("SecondTest", __classType, typeof(void), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

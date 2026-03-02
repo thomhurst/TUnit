@@ -182,7 +182,105 @@ internal static class TUnit_TestProject_PropertySetterTests__TestSource
                 DataSource = new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<string>(),
             },
         },
-            filePath: @"",
+            propertyInjections: new global::TUnit.Core.PropertyInjectionData[]
+        {
+            new global::TUnit.Core.PropertyInjectionData
+            {
+                PropertyName = "Property2",
+                PropertyType = typeof(string),
+                #if NET8_0_OR_GREATER
+                Setter = (instance, value) => GetProperty2BackingField((global::TUnit.TestProject.PropertySetterTests)instance) = (string)value,
+                #else
+                Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
+                #endif
+                ValueFactory = () => throw new global::System.InvalidOperationException("ValueFactory should be provided by TestDataCombination"),
+                NestedPropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
+                NestedPropertyValueFactory = obj =>
+                {
+                    return new global::System.Collections.Generic.Dictionary<string, object?>();
+                }
+            },
+            new global::TUnit.Core.PropertyInjectionData
+            {
+                PropertyName = "Property3",
+                PropertyType = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+                #if NET8_0_OR_GREATER
+                Setter = (instance, value) => GetProperty3BackingField((global::TUnit.TestProject.PropertySetterTests)instance) = (global::TUnit.TestProject.PropertySetterTests.InnerModel)value,
+                #else
+                Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
+                #endif
+                ValueFactory = () => throw new global::System.InvalidOperationException("ValueFactory should be provided by TestDataCombination"),
+                NestedPropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
+                NestedPropertyValueFactory = obj =>
+                {
+                    return new global::System.Collections.Generic.Dictionary<string, object?>();
+                }
+            },
+            new global::TUnit.Core.PropertyInjectionData
+            {
+                PropertyName = "Property4",
+                PropertyType = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+                #if NET8_0_OR_GREATER
+                Setter = (instance, value) => GetProperty4BackingField((global::TUnit.TestProject.PropertySetterTests)instance) = (global::TUnit.TestProject.PropertySetterTests.InnerModel)value,
+                #else
+                Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
+                #endif
+                ValueFactory = () => throw new global::System.InvalidOperationException("ValueFactory should be provided by TestDataCombination"),
+                NestedPropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
+                NestedPropertyValueFactory = obj =>
+                {
+                    return new global::System.Collections.Generic.Dictionary<string, object?>();
+                }
+            },
+            new global::TUnit.Core.PropertyInjectionData
+            {
+                PropertyName = "Property5",
+                PropertyType = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+                #if NET8_0_OR_GREATER
+                Setter = (instance, value) => GetProperty5BackingField((global::TUnit.TestProject.PropertySetterTests)instance) = (global::TUnit.TestProject.PropertySetterTests.InnerModel)value,
+                #else
+                Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
+                #endif
+                ValueFactory = () => throw new global::System.InvalidOperationException("ValueFactory should be provided by TestDataCombination"),
+                NestedPropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
+                NestedPropertyValueFactory = obj =>
+                {
+                    return new global::System.Collections.Generic.Dictionary<string, object?>();
+                }
+            },
+            new global::TUnit.Core.PropertyInjectionData
+            {
+                PropertyName = "Property6",
+                PropertyType = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+                #if NET8_0_OR_GREATER
+                Setter = (instance, value) => GetProperty6BackingField((global::TUnit.TestProject.PropertySetterTests)instance) = (global::TUnit.TestProject.PropertySetterTests.InnerModel)value,
+                #else
+                Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
+                #endif
+                ValueFactory = () => throw new global::System.InvalidOperationException("ValueFactory should be provided by TestDataCombination"),
+                NestedPropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
+                NestedPropertyValueFactory = obj =>
+                {
+                    return new global::System.Collections.Generic.Dictionary<string, object?>();
+                }
+            },
+            new global::TUnit.Core.PropertyInjectionData
+            {
+                PropertyName = "Property7",
+                PropertyType = typeof(string),
+                #if NET8_0_OR_GREATER
+                Setter = (instance, value) => GetProperty7BackingField((global::TUnit.TestProject.PropertySetterTests)instance) = (string)value,
+                #else
+                Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
+                #endif
+                ValueFactory = () => throw new global::System.InvalidOperationException("ValueFactory should be provided by TestDataCombination"),
+                NestedPropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
+                NestedPropertyValueFactory = obj =>
+                {
+                    return new global::System.Collections.Generic.Dictionary<string, object?>();
+                }
+            },
+        },
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_Test };
@@ -386,7 +484,105 @@ internal static class TUnit_TestProject_PropertySetterTests__TestSource
             DataSource = new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<string>(),
         },
     },
-            filePath: @"",
+            propertyInjections: new global::TUnit.Core.PropertyInjectionData[]
+    {
+        new global::TUnit.Core.PropertyInjectionData
+        {
+            PropertyName = "Property2",
+            PropertyType = typeof(string),
+            #if NET8_0_OR_GREATER
+            Setter = (instance, value) => GetProperty2BackingField((global::TUnit.TestProject.PropertySetterTests)instance) = (string)value,
+            #else
+            Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
+            #endif
+            ValueFactory = () => throw new global::System.InvalidOperationException("ValueFactory should be provided by TestDataCombination"),
+            NestedPropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
+            NestedPropertyValueFactory = obj =>
+            {
+                return new global::System.Collections.Generic.Dictionary<string, object?>();
+            }
+        },
+        new global::TUnit.Core.PropertyInjectionData
+        {
+            PropertyName = "Property3",
+            PropertyType = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+            #if NET8_0_OR_GREATER
+            Setter = (instance, value) => GetProperty3BackingField((global::TUnit.TestProject.PropertySetterTests)instance) = (global::TUnit.TestProject.PropertySetterTests.InnerModel)value,
+            #else
+            Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
+            #endif
+            ValueFactory = () => throw new global::System.InvalidOperationException("ValueFactory should be provided by TestDataCombination"),
+            NestedPropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
+            NestedPropertyValueFactory = obj =>
+            {
+                return new global::System.Collections.Generic.Dictionary<string, object?>();
+            }
+        },
+        new global::TUnit.Core.PropertyInjectionData
+        {
+            PropertyName = "Property4",
+            PropertyType = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+            #if NET8_0_OR_GREATER
+            Setter = (instance, value) => GetProperty4BackingField((global::TUnit.TestProject.PropertySetterTests)instance) = (global::TUnit.TestProject.PropertySetterTests.InnerModel)value,
+            #else
+            Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
+            #endif
+            ValueFactory = () => throw new global::System.InvalidOperationException("ValueFactory should be provided by TestDataCombination"),
+            NestedPropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
+            NestedPropertyValueFactory = obj =>
+            {
+                return new global::System.Collections.Generic.Dictionary<string, object?>();
+            }
+        },
+        new global::TUnit.Core.PropertyInjectionData
+        {
+            PropertyName = "Property5",
+            PropertyType = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+            #if NET8_0_OR_GREATER
+            Setter = (instance, value) => GetProperty5BackingField((global::TUnit.TestProject.PropertySetterTests)instance) = (global::TUnit.TestProject.PropertySetterTests.InnerModel)value,
+            #else
+            Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
+            #endif
+            ValueFactory = () => throw new global::System.InvalidOperationException("ValueFactory should be provided by TestDataCombination"),
+            NestedPropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
+            NestedPropertyValueFactory = obj =>
+            {
+                return new global::System.Collections.Generic.Dictionary<string, object?>();
+            }
+        },
+        new global::TUnit.Core.PropertyInjectionData
+        {
+            PropertyName = "Property6",
+            PropertyType = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
+            #if NET8_0_OR_GREATER
+            Setter = (instance, value) => GetProperty6BackingField((global::TUnit.TestProject.PropertySetterTests)instance) = (global::TUnit.TestProject.PropertySetterTests.InnerModel)value,
+            #else
+            Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
+            #endif
+            ValueFactory = () => throw new global::System.InvalidOperationException("ValueFactory should be provided by TestDataCombination"),
+            NestedPropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
+            NestedPropertyValueFactory = obj =>
+            {
+                return new global::System.Collections.Generic.Dictionary<string, object?>();
+            }
+        },
+        new global::TUnit.Core.PropertyInjectionData
+        {
+            PropertyName = "Property7",
+            PropertyType = typeof(string),
+            #if NET8_0_OR_GREATER
+            Setter = (instance, value) => GetProperty7BackingField((global::TUnit.TestProject.PropertySetterTests)instance) = (string)value,
+            #else
+            Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
+            #endif
+            ValueFactory = () => throw new global::System.InvalidOperationException("ValueFactory should be provided by TestDataCombination"),
+            NestedPropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
+            NestedPropertyValueFactory = obj =>
+            {
+                return new global::System.Collections.Generic.Dictionary<string, object?>();
+            }
+        },
+    },
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

@@ -25,14 +25,12 @@ internal static class TUnit_TestProject_BeforeTests_SetupTests__TestSource
             "Test1", "Test1", 98,
             __InvokeTest_Test1, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Test1", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_Test2 = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.BeforeTests.SetupTests>(
             "Test2", "Test2", 104,
             __InvokeTest_Test2, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Test2", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_Test1, metadata_Test2 };
@@ -117,7 +115,6 @@ internal static class TUnit_TestProject_BeforeTests_SetupTests__TestSource
             "Test1", "Test1", 98,
             __InvokeTest_Test1, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Test1", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -140,7 +137,6 @@ internal static class TUnit_TestProject_BeforeTests_SetupTests__TestSource
             "Test2", "Test2", 104,
             __InvokeTest_Test2, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Test2", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

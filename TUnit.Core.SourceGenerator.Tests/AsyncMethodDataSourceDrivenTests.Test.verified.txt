@@ -59,7 +59,6 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
                 }
             },
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_AsyncMethodDataSource_Tuples__int_string = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
@@ -107,7 +106,6 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
                 }
             },
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_AsyncMethodDataSource_Enumerable__int = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
@@ -148,7 +146,6 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
                 }
             },
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_AsyncMethodDataSource_Func__int = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
@@ -189,7 +186,6 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
                 }
             },
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_AsyncMethodDataSource_WithArguments__int = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
@@ -230,7 +226,6 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
                 }
             },
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_AsyncMethodDataSource_ExternalClass__string = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
@@ -271,7 +266,6 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
                 }
             },
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_ValueTaskMethodDataSource_SingleValue__int = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
@@ -312,7 +306,6 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
                 }
             },
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_AsyncMethodDataSource_SingleValue__int, metadata_AsyncMethodDataSource_Tuples__int_string, metadata_AsyncMethodDataSource_Enumerable__int, metadata_AsyncMethodDataSource_Func__int, metadata_AsyncMethodDataSource_WithArguments__int, metadata_AsyncMethodDataSource_ExternalClass__string, metadata_ValueTaskMethodDataSource_SingleValue__int };
@@ -618,7 +611,6 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
             }
         },
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -682,7 +674,6 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
             }
         },
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -739,7 +730,6 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
             }
         },
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -796,7 +786,6 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
             }
         },
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -853,7 +842,6 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
             }
         },
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -910,7 +898,6 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
             }
         },
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -967,7 +954,6 @@ internal static class TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSo
             }
         },
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

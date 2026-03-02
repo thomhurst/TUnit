@@ -25,21 +25,18 @@ internal static class TUnit_TestProject_BasicTests__TestSource
             "SynchronousTest", "SynchronousTest", 5,
             __InvokeTest_SynchronousTest, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("SynchronousTest", __classType, typeof(void), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_AsynchronousTest = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.BasicTests>(
             "AsynchronousTest", "AsynchronousTest", 11,
             __InvokeTest_AsynchronousTest, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("AsynchronousTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_ValueTaskAsynchronousTest = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.BasicTests>(
             "ValueTaskAsynchronousTest", "ValueTaskAsynchronousTest", 17,
             __InvokeTest_ValueTaskAsynchronousTest, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("ValueTaskAsynchronousTest", __classType, typeof(global::System.Threading.Tasks.ValueTask), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_SynchronousTest, metadata_AsynchronousTest, metadata_ValueTaskAsynchronousTest };
@@ -151,7 +148,6 @@ internal static class TUnit_TestProject_BasicTests__TestSource
             "SynchronousTest", "SynchronousTest", 5,
             __InvokeTest_SynchronousTest, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("SynchronousTest", __classType, typeof(void), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -174,7 +170,6 @@ internal static class TUnit_TestProject_BasicTests__TestSource
             "AsynchronousTest", "AsynchronousTest", 11,
             __InvokeTest_AsynchronousTest, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("AsynchronousTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -197,7 +192,6 @@ internal static class TUnit_TestProject_BasicTests__TestSource
             "ValueTaskAsynchronousTest", "ValueTaskAsynchronousTest", 17,
             __InvokeTest_ValueTaskAsynchronousTest, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("ValueTaskAsynchronousTest", __classType, typeof(global::System.Threading.Tasks.ValueTask), __classMetadata),
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

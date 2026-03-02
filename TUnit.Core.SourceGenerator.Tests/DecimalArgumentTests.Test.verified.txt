@@ -47,7 +47,6 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
             new global::TUnit.Core.ArgumentsAttribute(2_000.00000000000000001m, 123_999m),
             new global::TUnit.Core.ArgumentsAttribute(2_000.00000000000000001m, 123_999.00000000000000001m),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_SimpleDecimal__decimal = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.DecimalArgumentTests>(
@@ -67,7 +66,6 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
         {
             new global::TUnit.Core.ArgumentsAttribute(123.456m),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_SmallDecimal__decimal = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.DecimalArgumentTests>(
@@ -87,7 +85,6 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
         {
             new global::TUnit.Core.ArgumentsAttribute(0.00000000000000001m),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_MaxDecimal__decimal = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.DecimalArgumentTests>(
@@ -107,7 +104,6 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
         {
             new global::TUnit.Core.ArgumentsAttribute("79228162514264337593543950335"),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_MinDecimal__decimal = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.DecimalArgumentTests>(
@@ -127,7 +123,6 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
         {
             new global::TUnit.Core.ArgumentsAttribute("-79228162514264337593543950335"),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_ExplicitDecimalValue__decimal = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.DecimalArgumentTests>(
@@ -147,7 +142,6 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
         {
             new global::TUnit.Core.ArgumentsAttribute("123.456"),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_MultipleDecimals__decimal_decimal_decimal = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.DecimalArgumentTests>(
@@ -181,7 +175,6 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
         {
             new global::TUnit.Core.ArgumentsAttribute(1.1m, 2.2m, 3.3m),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_Test__decimal = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.DecimalArgumentTests>(
@@ -203,7 +196,6 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
             new global::TUnit.Core.ArgumentsAttribute(0.75m),
             new global::TUnit.Core.ArgumentsAttribute(1m),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_TransactionDiscountCalculations__decimal_decimal_decimal_decimal_decimal_bool = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.DecimalArgumentTests>(
@@ -260,7 +252,6 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
             new global::TUnit.Core.ArgumentsAttribute(70m, 75m, 70m, 5m, 5m, true),
             new global::TUnit.Core.ArgumentsAttribute(70m, 75m, 70m, 5m, 0m, false),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_Equality3__decimal = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.DecimalArgumentTests>(
@@ -280,7 +271,6 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
         {
             new global::TUnit.Core.ArgumentsAttribute(2_000.00000000000000001m),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_Equality4__decimal = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.DecimalArgumentTests>(
@@ -300,7 +290,6 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
         {
             new global::TUnit.Core.ArgumentsAttribute(123_999.00000000000000001m),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_TestMethod__decimal = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.DecimalArgumentTests>(
@@ -320,7 +309,6 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
         {
             new global::TUnit.Core.ArgumentsAttribute(42),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_Transfer__decimal_decimal, metadata_SimpleDecimal__decimal, metadata_SmallDecimal__decimal, metadata_MaxDecimal__decimal, metadata_MinDecimal__decimal, metadata_ExplicitDecimalValue__decimal, metadata_MultipleDecimals__decimal_decimal_decimal, metadata_Test__decimal, metadata_TransactionDiscountCalculations__decimal_decimal_decimal_decimal_decimal_bool, metadata_Equality3__decimal, metadata_Equality4__decimal, metadata_TestMethod__decimal };
@@ -786,7 +774,6 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
         new global::TUnit.Core.ArgumentsAttribute(2_000.00000000000000001m, 123_999m),
         new global::TUnit.Core.ArgumentsAttribute(2_000.00000000000000001m, 123_999.00000000000000001m),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -822,7 +809,6 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
     {
         new global::TUnit.Core.ArgumentsAttribute(123.456m),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -858,7 +844,6 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
     {
         new global::TUnit.Core.ArgumentsAttribute(0.00000000000000001m),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -894,7 +879,6 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
     {
         new global::TUnit.Core.ArgumentsAttribute("79228162514264337593543950335"),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -930,7 +914,6 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
     {
         new global::TUnit.Core.ArgumentsAttribute("-79228162514264337593543950335"),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -966,7 +949,6 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
     {
         new global::TUnit.Core.ArgumentsAttribute("123.456"),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -1016,7 +998,6 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
     {
         new global::TUnit.Core.ArgumentsAttribute(1.1m, 2.2m, 3.3m),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -1054,7 +1035,6 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
         new global::TUnit.Core.ArgumentsAttribute(0.75m),
         new global::TUnit.Core.ArgumentsAttribute(1m),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -1127,7 +1107,6 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
         new global::TUnit.Core.ArgumentsAttribute(70m, 75m, 70m, 5m, 5m, true),
         new global::TUnit.Core.ArgumentsAttribute(70m, 75m, 70m, 5m, 0m, false),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -1163,7 +1142,6 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
     {
         new global::TUnit.Core.ArgumentsAttribute(2_000.00000000000000001m),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -1199,7 +1177,6 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
     {
         new global::TUnit.Core.ArgumentsAttribute(123_999.00000000000000001m),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -1235,7 +1212,6 @@ internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
     {
         new global::TUnit.Core.ArgumentsAttribute(42),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

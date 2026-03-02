@@ -39,7 +39,6 @@ internal static class TUnit_TestProject_Bugs__1594_MyTests__TestSource
             new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1594.MyFixture>()
         {Shared = global::TUnit.Core.SharedType.None,},
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_Test1 };
@@ -116,7 +115,6 @@ internal static class TUnit_TestProject_Bugs__1594_MyTests__TestSource
         new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1594.MyFixture>()
     {Shared = global::TUnit.Core.SharedType.None,},
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

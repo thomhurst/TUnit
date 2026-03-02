@@ -49,7 +49,6 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
                 }
             },
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_DataSource_Method2__int = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.MethodDataSourceDrivenTests>(
@@ -80,7 +79,6 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
                 }
             },
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_DataSource_Method_WithAction__Action = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.MethodDataSourceDrivenTests>(
@@ -111,7 +109,6 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
                 }
             },
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_DataSource_Method3__int = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.MethodDataSourceDrivenTests>(
@@ -157,7 +154,6 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
                 }
             },
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_DataSource_Method4__int = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.MethodDataSourceDrivenTests>(
@@ -230,7 +226,6 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
                 }
             },
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_DataSource_WithBaseReturn__BaseValue = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.MethodDataSourceDrivenTests>(
@@ -261,7 +256,6 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
                 }
             },
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         var metadata_EnumerableFuncArrayTest__string__ = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.MethodDataSourceDrivenTests>(
@@ -302,7 +296,6 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
                 }
             },
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_DataSource_Method__int, metadata_DataSource_Method2__int, metadata_DataSource_Method_WithAction__Action, metadata_DataSource_Method3__int, metadata_DataSource_Method4__int, metadata_DataSource_WithBaseReturn__BaseValue, metadata_EnumerableFuncArrayTest__string__ };
@@ -604,7 +597,6 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
             }
         },
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -651,7 +643,6 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
             }
         },
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -698,7 +689,6 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
             }
         },
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -760,7 +750,6 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
             }
         },
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -849,7 +838,6 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
             }
         },
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -896,7 +884,6 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
             }
         },
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
@@ -953,7 +940,6 @@ internal static class TUnit_TestProject_MethodDataSourceDrivenTests__TestSource
             }
         },
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };

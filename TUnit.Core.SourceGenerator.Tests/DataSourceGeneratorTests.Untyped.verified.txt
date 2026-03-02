@@ -59,7 +59,6 @@ internal static class TUnit_TestProject_AutoDataTests__TestSource
         {
             new global::TUnit.TestProject.Attributes.AutoDataAttribute(),
         },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata_Test1__string_int_double_bool };
@@ -160,7 +159,6 @@ internal static class TUnit_TestProject_AutoDataTests__TestSource
     {
         new global::TUnit.TestProject.Attributes.AutoDataAttribute(),
     },
-            filePath: @"",
             testSessionId: testSessionId
         );
         return new global::TUnit.Core.TestMetadata[] { metadata };
