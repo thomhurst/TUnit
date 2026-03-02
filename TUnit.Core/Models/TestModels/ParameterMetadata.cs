@@ -26,7 +26,9 @@ public record ParameterMetadata([DynamicallyAccessedMembers(DynamicallyAccessedM
     public required TypeInfo TypeInfo { get; init; }
     public ParameterInfo ReflectionInfo
     {
-        get => field ??= ReflectionInfoFactory?.Invoke() ?? null!;
+        get => field ??= ReflectionInfoFactory?.Invoke()
+            ?? throw new InvalidOperationException(
+                $"ReflectionInfo for parameter '{Name}' was not set and no ReflectionInfoFactory was provided.");
         set;
     } = null!;
 
