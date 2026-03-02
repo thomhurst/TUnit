@@ -982,21 +982,13 @@ mark{background:rgba(251,191,36,.25);color:inherit;border-radius:2px;padding:0 1
 :root[data-theme="light"] .sticky-bar{background:rgba(248,249,251,.85)}
 
 /* ── Feature 9: 100% Pass Celebration ────────────── */
-@keyframes shimmer{
-  0%{background-position:200% 0}
-  100%{background-position:-200% 0}
-}
 @keyframes ring-glow{
   0%,100%{filter:drop-shadow(0 0 6px rgba(52,211,153,.3))}
   50%{filter:drop-shadow(0 0 16px rgba(52,211,153,.6))}
 }
-.dash.celebrate .stat{
-  background-image:linear-gradient(90deg,transparent 30%,rgba(52,211,153,.06) 50%,transparent 70%);
-  background-size:200% 100%;animation:shimmer 3s linear infinite;
-}
 .dash.celebrate .ring{animation:ring-glow 2.5s ease-in-out infinite}
 @media(prefers-reduced-motion:reduce){
-  .dash.celebrate .stat,.dash.celebrate .ring{animation:none}
+  .dash.celebrate .ring{animation:none}
 }
 
 /* ── Feature 10: Duration Histogram ──────────────── */
