@@ -2650,10 +2650,20 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 // Pre-generate attribute factory bodies and deduplicate
                 var methodsList = g.Where(m => m is not null).Select(m => m!).ToList();
                 var attrBodies = methodsList.Select(m => PreGenerateAttributeFactoryBody(m)).ToList();
-                var distinctBodies = attrBodies.Distinct().ToList();
-                var attrIndexMap = attrBodies.Select(body => distinctBodies.IndexOf(body)).ToList();
+                var bodyToIndex = new Dictionary<string, int>();
+                var distinctBodies = new List<string>();
+                foreach (var body in attrBodies)
+                {
+                    if (!bodyToIndex.ContainsKey(body))
+                    {
+                        bodyToIndex[body] = distinctBodies.Count;
+                        distinctBodies.Add(body);
+                    }
+                }
+                var attrIndexMap = attrBodies.Select(body => bodyToIndex[body]).ToList();
 
                 // Pre-generate code for each method
+                var usedMethodIds = new HashSet<string>();
                 var methodSourceCodes = new List<TestMethodSourceCode>();
                 for (int i = 0; i < methodsList.Count; i++)
                 {
@@ -2663,7 +2673,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     // Ensure unique methodId within the class (handle multiple overloads with same signature)
                     var originalMethodId = methodId;
                     var suffix = 2;
-                    while (methodSourceCodes.Any(existing => existing.MethodId == methodId))
+                    while (!usedMethodIds.Add(methodId))
                     {
                         methodId = $"{originalMethodId}_{suffix}";
                         suffix++;
