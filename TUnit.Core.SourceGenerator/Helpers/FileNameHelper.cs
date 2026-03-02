@@ -92,11 +92,11 @@ internal static class FileNameHelper
     }
 
     /// <summary>
-    /// Generates a deterministic class helper name for a test class.
-    /// Format: {Namespace}_{ClassName}__ClassHelper
+    /// Generates a deterministic per-class TestSource name for a test class.
+    /// Format: {Namespace}_{ClassName}__TestSource
     /// Must produce the same name for the same type across both per-class and per-method pipelines.
     /// </summary>
-    public static string GetSafeClassHelperName(INamedTypeSymbol typeSymbol)
+    public static string GetSafeTestSourceName(INamedTypeSymbol typeSymbol)
     {
         var sb = new StringBuilder();
 
@@ -137,7 +137,7 @@ internal static class FileNameHelper
         }
 
         var baseName = sb.ToString();
-        var helperSuffix = "__ClassHelper";
+        var helperSuffix = "__TestSource";
 
         // Truncate and append a hash if the name would exceed the limit
         const int fileExtLength = 5; // ".g.cs"
@@ -149,6 +149,32 @@ internal static class FileNameHelper
         }
 
         return baseName + helperSuffix;
+    }
+
+    /// <summary>
+    /// Generates a safe unique method identifier within a class.
+    /// Returns just the method name for non-overloaded methods,
+    /// or MethodName__ParamType1_ParamType2 for overloads.
+    /// </summary>
+    public static string GetSafeMethodId(IMethodSymbol methodSymbol)
+    {
+        var baseName = SanitizeForFileName(methodSymbol.Name);
+
+        if (methodSymbol.Parameters.Length == 0)
+        {
+            return baseName;
+        }
+
+        var sb = new StringBuilder(baseName);
+        sb.Append("__");
+        for (int i = 0; i < methodSymbol.Parameters.Length; i++)
+        {
+            if (i > 0) sb.Append('_');
+            sb.Append(SanitizeForFileName(
+                methodSymbol.Parameters[i].Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)));
+        }
+
+        return sb.ToString();
     }
 
     /// <summary>
