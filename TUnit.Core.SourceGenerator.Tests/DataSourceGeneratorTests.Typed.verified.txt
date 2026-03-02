@@ -18,27 +18,9 @@ internal static class TUnit_TestProject_DataSourceGeneratorTests__TestSource
             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
             Parameters = new global::TUnit.Core.ParameterMetadata[]
             {
-                new global::TUnit.Core.ParameterMetadata(typeof(int))
-                {
-                    Name = "value",
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-                    IsNullable = false,
-                    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[0]
-                },
-                new global::TUnit.Core.ParameterMetadata(typeof(string))
-                {
-                    Name = "value2",
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-                    IsNullable = false,
-                    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[1]
-                },
-                new global::TUnit.Core.ParameterMetadata(typeof(bool))
-                {
-                    Name = "value3",
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-                    IsNullable = false,
-                    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[2]
-                }
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[0]),
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value2", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[1]),
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "value3", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[2])
             },
             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
             Parent = null
@@ -49,13 +31,7 @@ internal static class TUnit_TestProject_DataSourceGeneratorTests__TestSource
             __InvokeTest_GeneratedData_Method__int, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("GeneratedData_Method", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -73,27 +49,9 @@ internal static class TUnit_TestProject_DataSourceGeneratorTests__TestSource
             __InvokeTest_GeneratedData_Method2__int_string_bool, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("GeneratedData_Method2", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[0]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(string))
-        {
-        Name = "value2",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[1]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(bool))
-        {
-        Name = "value3",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[2]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[0]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value2", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[1]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "value3", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[2])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -111,27 +69,9 @@ internal static class TUnit_TestProject_DataSourceGeneratorTests__TestSource
             __InvokeTest_GeneratedData_Method3__int_string_bool, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("GeneratedData_Method3", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[0]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(string))
-        {
-        Name = "value2",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[1]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(bool))
-        {
-        Name = "value3",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[2]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[0]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value2", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[1]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "value3", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[2])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -275,27 +215,9 @@ internal static class TUnit_TestProject_DataSourceGeneratorTests__TestSource
             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
             Parameters = new global::TUnit.Core.ParameterMetadata[]
             {
-                new global::TUnit.Core.ParameterMetadata(typeof(int))
-                {
-                    Name = "value",
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-                    IsNullable = false,
-                    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[0]
-                },
-                new global::TUnit.Core.ParameterMetadata(typeof(string))
-                {
-                    Name = "value2",
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-                    IsNullable = false,
-                    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[1]
-                },
-                new global::TUnit.Core.ParameterMetadata(typeof(bool))
-                {
-                    Name = "value3",
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-                    IsNullable = false,
-                    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[2]
-                }
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[0]),
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value2", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[1]),
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "value3", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[2])
             },
             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
             Parent = null
@@ -306,13 +228,7 @@ internal static class TUnit_TestProject_DataSourceGeneratorTests__TestSource
             __InvokeTest_GeneratedData_Method__int, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("GeneratedData_Method", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(int))
-    {
-    Name = "value",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -338,27 +254,9 @@ internal static class TUnit_TestProject_DataSourceGeneratorTests__TestSource
             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
             Parameters = new global::TUnit.Core.ParameterMetadata[]
             {
-                new global::TUnit.Core.ParameterMetadata(typeof(int))
-                {
-                    Name = "value",
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-                    IsNullable = false,
-                    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[0]
-                },
-                new global::TUnit.Core.ParameterMetadata(typeof(string))
-                {
-                    Name = "value2",
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-                    IsNullable = false,
-                    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[1]
-                },
-                new global::TUnit.Core.ParameterMetadata(typeof(bool))
-                {
-                    Name = "value3",
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-                    IsNullable = false,
-                    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[2]
-                }
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[0]),
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value2", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[1]),
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "value3", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[2])
             },
             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
             Parent = null
@@ -369,27 +267,9 @@ internal static class TUnit_TestProject_DataSourceGeneratorTests__TestSource
             __InvokeTest_GeneratedData_Method2__int_string_bool, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("GeneratedData_Method2", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(int))
-    {
-    Name = "value",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[0]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(string))
-    {
-    Name = "value2",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[1]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(bool))
-    {
-    Name = "value3",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[2]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[0]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value2", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[1]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "value3", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[2])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -415,27 +295,9 @@ internal static class TUnit_TestProject_DataSourceGeneratorTests__TestSource
             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
             Parameters = new global::TUnit.Core.ParameterMetadata[]
             {
-                new global::TUnit.Core.ParameterMetadata(typeof(int))
-                {
-                    Name = "value",
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-                    IsNullable = false,
-                    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[0]
-                },
-                new global::TUnit.Core.ParameterMetadata(typeof(string))
-                {
-                    Name = "value2",
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-                    IsNullable = false,
-                    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[1]
-                },
-                new global::TUnit.Core.ParameterMetadata(typeof(bool))
-                {
-                    Name = "value3",
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-                    IsNullable = false,
-                    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[2]
-                }
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[0]),
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value2", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[1]),
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "value3", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[2])
             },
             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
             Parent = null
@@ -446,27 +308,9 @@ internal static class TUnit_TestProject_DataSourceGeneratorTests__TestSource
             __InvokeTest_GeneratedData_Method3__int_string_bool, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("GeneratedData_Method3", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(int))
-    {
-    Name = "value",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[0]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(string))
-    {
-    Name = "value2",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[1]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(bool))
-    {
-    Name = "value3",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[2]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[0]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value2", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[1]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "value3", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[2])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {

@@ -18,13 +18,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
             Parameters = new global::TUnit.Core.ParameterMetadata[]
             {
-                new global::TUnit.Core.ParameterMetadata(typeof(int))
-                {
-                    Name = "value",
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-                    IsNullable = false,
-                    ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
-                }
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0])
             },
             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
             Parent = null
@@ -35,13 +29,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
             __InvokeTest_DefaultTest__CancellationToken, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("DefaultTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(global::System.Threading.CancellationToken))
-        {
-        Name = "cancellationToken",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("DefaultTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("DefaultTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0])
         }),
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -75,13 +63,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
             __InvokeTest_BasicTest__CancellationToken, __CreateAttributes_1, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("BasicTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(global::System.Threading.CancellationToken))
-        {
-        Name = "cancellationToken",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("BasicTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("BasicTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0])
         }),
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -115,13 +97,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
             __InvokeTest_InheritedTimeoutAttribute__CancellationToken, __CreateAttributes_2, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("InheritedTimeoutAttribute", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(global::System.Threading.CancellationToken))
-        {
-        Name = "cancellationToken",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("InheritedTimeoutAttribute", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("InheritedTimeoutAttribute", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0])
         }),
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -155,20 +131,8 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
             __InvokeTest_DataTest__int_CancellationToken, __CreateAttributes_3, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("DataTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("DataTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(global::System.Threading.CancellationToken))
-        {
-        Name = "cancellationToken",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("DataTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("DataTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("DataTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -206,20 +170,8 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
             __InvokeTest_DataSourceTest__int_CancellationToken, __CreateAttributes_4, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("DataSourceTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("DataSourceTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(global::System.Threading.CancellationToken))
-        {
-        Name = "cancellationToken",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("DataSourceTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("DataSourceTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("DataSourceTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -278,20 +230,8 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
             __InvokeTest_MatrixTest__int_CancellationToken, __CreateAttributes_5, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("MatrixTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("MatrixTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(global::System.Threading.CancellationToken))
-        {
-        Name = "cancellationToken",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("MatrixTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("MatrixTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("MatrixTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -590,13 +530,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
             Parameters = new global::TUnit.Core.ParameterMetadata[]
             {
-                new global::TUnit.Core.ParameterMetadata(typeof(int))
-                {
-                    Name = "value",
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-                    IsNullable = false,
-                    ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
-                }
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0])
             },
             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
             Parent = null
@@ -607,13 +541,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
             __InvokeTest_DefaultTest__CancellationToken, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("DefaultTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(global::System.Threading.CancellationToken))
-    {
-    Name = "cancellationToken",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("DefaultTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("DefaultTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0])
     }),
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -655,13 +583,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
             Parameters = new global::TUnit.Core.ParameterMetadata[]
             {
-                new global::TUnit.Core.ParameterMetadata(typeof(int))
-                {
-                    Name = "value",
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-                    IsNullable = false,
-                    ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
-                }
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0])
             },
             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
             Parent = null
@@ -672,13 +594,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
             __InvokeTest_BasicTest__CancellationToken, __CreateAttributes_1, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("BasicTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(global::System.Threading.CancellationToken))
-    {
-    Name = "cancellationToken",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("BasicTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("BasicTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0])
     }),
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -720,13 +636,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
             Parameters = new global::TUnit.Core.ParameterMetadata[]
             {
-                new global::TUnit.Core.ParameterMetadata(typeof(int))
-                {
-                    Name = "value",
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-                    IsNullable = false,
-                    ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
-                }
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0])
             },
             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
             Parent = null
@@ -737,13 +647,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
             __InvokeTest_InheritedTimeoutAttribute__CancellationToken, __CreateAttributes_2, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("InheritedTimeoutAttribute", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(global::System.Threading.CancellationToken))
-    {
-    Name = "cancellationToken",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("InheritedTimeoutAttribute", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("InheritedTimeoutAttribute", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0])
     }),
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -785,13 +689,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
             Parameters = new global::TUnit.Core.ParameterMetadata[]
             {
-                new global::TUnit.Core.ParameterMetadata(typeof(int))
-                {
-                    Name = "value",
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-                    IsNullable = false,
-                    ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
-                }
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0])
             },
             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
             Parent = null
@@ -802,20 +700,8 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
             __InvokeTest_DataTest__int_CancellationToken, __CreateAttributes_3, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("DataTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(int))
-    {
-    Name = "value",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("DataTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(global::System.Threading.CancellationToken))
-    {
-    Name = "cancellationToken",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("DataTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("DataTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("DataTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -861,13 +747,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
             Parameters = new global::TUnit.Core.ParameterMetadata[]
             {
-                new global::TUnit.Core.ParameterMetadata(typeof(int))
-                {
-                    Name = "value",
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-                    IsNullable = false,
-                    ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
-                }
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0])
             },
             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
             Parent = null
@@ -878,20 +758,8 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
             __InvokeTest_DataSourceTest__int_CancellationToken, __CreateAttributes_4, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("DataSourceTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(int))
-    {
-    Name = "value",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("DataSourceTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(global::System.Threading.CancellationToken))
-    {
-    Name = "cancellationToken",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("DataSourceTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("DataSourceTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("DataSourceTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -958,13 +826,7 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
             Parameters = new global::TUnit.Core.ParameterMetadata[]
             {
-                new global::TUnit.Core.ParameterMetadata(typeof(int))
-                {
-                    Name = "value",
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-                    IsNullable = false,
-                    ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
-                }
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0])
             },
             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
             Parent = null
@@ -975,20 +837,8 @@ internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
             __InvokeTest_MatrixTest__int_CancellationToken, __CreateAttributes_5, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("MatrixTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(int))
-    {
-    Name = "value",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("MatrixTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(global::System.Threading.CancellationToken))
-    {
-    Name = "cancellationToken",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("MatrixTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("MatrixTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("MatrixTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -1057,13 +907,7 @@ internal static class TUnit_TestProject_TimeoutDoesNotFireTests__TestSource
             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
             Parameters = new global::TUnit.Core.ParameterMetadata[]
             {
-                new global::TUnit.Core.ParameterMetadata(typeof(int))
-                {
-                    Name = "value",
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-                    IsNullable = false,
-                    ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
-                }
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0])
             },
             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
             Parent = null
@@ -1074,13 +918,7 @@ internal static class TUnit_TestProject_TimeoutDoesNotFireTests__TestSource
             __InvokeTest_QuickTestDoesNotTimeout__CancellationToken, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("QuickTestDoesNotTimeout", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(global::System.Threading.CancellationToken))
-        {
-        Name = "cancellationToken",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests).GetMethod("QuickTestDoesNotTimeout", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests).GetMethod("QuickTestDoesNotTimeout", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0])
         }),
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -1162,13 +1000,7 @@ internal static class TUnit_TestProject_TimeoutDoesNotFireTests__TestSource
             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
             Parameters = new global::TUnit.Core.ParameterMetadata[]
             {
-                new global::TUnit.Core.ParameterMetadata(typeof(int))
-                {
-                    Name = "value",
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-                    IsNullable = false,
-                    ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
-                }
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0])
             },
             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
             Parent = null
@@ -1179,13 +1011,7 @@ internal static class TUnit_TestProject_TimeoutDoesNotFireTests__TestSource
             __InvokeTest_QuickTestDoesNotTimeout__CancellationToken, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("QuickTestDoesNotTimeout", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(global::System.Threading.CancellationToken))
-    {
-    Name = "cancellationToken",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests).GetMethod("QuickTestDoesNotTimeout", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests).GetMethod("QuickTestDoesNotTimeout", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0])
     }),
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -1250,13 +1076,7 @@ internal static class TUnit_TestProject_CancellationTokenTriggeredTests__TestSou
             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
             Parameters = new global::TUnit.Core.ParameterMetadata[]
             {
-                new global::TUnit.Core.ParameterMetadata(typeof(int))
-                {
-                    Name = "value",
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-                    IsNullable = false,
-                    ReflectionInfo = typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
-                }
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0])
             },
             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
             Parent = null
@@ -1267,13 +1087,7 @@ internal static class TUnit_TestProject_CancellationTokenTriggeredTests__TestSou
             __InvokeTest_CancellationTokenIsTriggered__CancellationToken, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("CancellationTokenIsTriggered", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(global::System.Threading.CancellationToken))
-        {
-        Name = "cancellationToken",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests).GetMethod("CancellationTokenIsTriggered", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests).GetMethod("CancellationTokenIsTriggered", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0])
         }),
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -1355,13 +1169,7 @@ internal static class TUnit_TestProject_CancellationTokenTriggeredTests__TestSou
             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
             Parameters = new global::TUnit.Core.ParameterMetadata[]
             {
-                new global::TUnit.Core.ParameterMetadata(typeof(int))
-                {
-                    Name = "value",
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-                    IsNullable = false,
-                    ReflectionInfo = typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
-                }
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0])
             },
             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
             Parent = null
@@ -1372,13 +1180,7 @@ internal static class TUnit_TestProject_CancellationTokenTriggeredTests__TestSou
             __InvokeTest_CancellationTokenIsTriggered__CancellationToken, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("CancellationTokenIsTriggered", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(global::System.Threading.CancellationToken))
-    {
-    Name = "cancellationToken",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests).GetMethod("CancellationTokenIsTriggered", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests).GetMethod("CancellationTokenIsTriggered", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0])
     }),
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {

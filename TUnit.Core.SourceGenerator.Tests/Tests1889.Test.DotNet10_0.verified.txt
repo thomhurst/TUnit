@@ -144,13 +144,7 @@ internal sealed class TUnit_TestProject_Bugs__1889_DerivedTest_Test2__bool_TestS
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
-                    new global::TUnit.Core.ParameterMetadata(typeof(bool))
-                    {
-                        Name = "condition",
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-                        IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>).GetMethod("Test2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool) }, null)!.GetParameters()[0]
-                    }
+                    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "condition", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>).GetMethod("Test2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool) }, null)!.GetParameters()[0])
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1889.DerivedTest", new global::TUnit.Core.ClassMetadata
                 {
@@ -273,13 +267,7 @@ internal sealed class TUnit_TestProject_Bugs__1889_DerivedTest_Test3__bool_TestS
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
-                    new global::TUnit.Core.ParameterMetadata(typeof(bool))
-                    {
-                        Name = "condition",
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-                        IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>).GetMethod("Test3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool) }, null)!.GetParameters()[0]
-                    }
+                    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "condition", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>).GetMethod("Test3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool) }, null)!.GetParameters()[0])
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1889.DerivedTest", new global::TUnit.Core.ClassMetadata
                 {

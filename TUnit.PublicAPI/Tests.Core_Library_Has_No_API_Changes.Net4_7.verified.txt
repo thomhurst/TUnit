@@ -1059,9 +1059,14 @@ namespace
         public bool IsParams { get; }
         public required string Name { get; init; }
         public int Position { get; init; }
-        public required .ParameterInfo ReflectionInfo { get; set; }
+        public .ParameterInfo ReflectionInfo { get; set; }
+        public <.ParameterInfo>? ReflectionInfoFactory { get; init; }
         public  Type { get; init; }
         public required .TypeInfo TypeInfo { get; init; }
+    }
+    public static class ParameterMetadataFactory
+    {
+        public static .ParameterMetadata Create( type, string name, .TypeInfo typeInfo, bool isNullable, <.ParameterInfo>? reflectionInfoFactory = null) { }
     }
     [.DebuggerDisplay("{Type} {Name}")]
     public class ParameterMetadata<T> : .ParameterMetadata, <.ParameterMetadata<T>>

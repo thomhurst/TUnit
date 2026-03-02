@@ -26,13 +26,7 @@ internal static class TUnit_TestProject_ArgumentWithImplicitConverterTests__Test
             __InvokeTest_Explicit__ExplicitInteger, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Explicit", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.ExplicitInteger))
-        {
-        Name = "integer",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ExplicitInteger)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests).GetMethod("Explicit", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.ExplicitInteger) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.ExplicitInteger), "integer", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ExplicitInteger)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests).GetMethod("Explicit", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.ExplicitInteger) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -47,13 +41,7 @@ internal static class TUnit_TestProject_ArgumentWithImplicitConverterTests__Test
             __InvokeTest_Implicit__ImplicitInteger, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Implicit", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.ImplicitInteger))
-        {
-        Name = "integer",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ImplicitInteger)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests).GetMethod("Implicit", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.ImplicitInteger) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.ImplicitInteger), "integer", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ImplicitInteger)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests).GetMethod("Implicit", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.ImplicitInteger) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -165,13 +153,7 @@ internal static class TUnit_TestProject_ArgumentWithImplicitConverterTests__Test
             __InvokeTest_Explicit__ExplicitInteger, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Explicit", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.ExplicitInteger))
-    {
-    Name = "integer",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ExplicitInteger)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests).GetMethod("Explicit", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.ExplicitInteger) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.ExplicitInteger), "integer", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ExplicitInteger)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests).GetMethod("Explicit", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.ExplicitInteger) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -202,13 +184,7 @@ internal static class TUnit_TestProject_ArgumentWithImplicitConverterTests__Test
             __InvokeTest_Implicit__ImplicitInteger, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Implicit", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.ImplicitInteger))
-    {
-    Name = "integer",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ImplicitInteger)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests).GetMethod("Implicit", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.ImplicitInteger) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.ImplicitInteger), "integer", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ImplicitInteger)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests).GetMethod("Implicit", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.ImplicitInteger) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {

@@ -18,13 +18,7 @@ internal static class TUnit_TestProject_Bugs__1594_MyTests__TestSource
             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
             Parameters = new global::TUnit.Core.ParameterMetadata[]
             {
-                new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Bugs._1594.MyFixture))
-                {
-                    Name = "myFixture",
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1594.MyFixture)),
-                    IsNullable = false,
-                    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1594.MyTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.Bugs._1594.MyFixture) })!.GetParameters()[0]
-                }
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Bugs._1594.MyFixture), "myFixture", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1594.MyFixture)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._1594.MyTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.Bugs._1594.MyFixture) })!.GetParameters()[0])
             },
             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
             Parent = null
@@ -94,13 +88,7 @@ internal static class TUnit_TestProject_Bugs__1594_MyTests__TestSource
             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
             Parameters = new global::TUnit.Core.ParameterMetadata[]
             {
-                new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Bugs._1594.MyFixture))
-                {
-                    Name = "myFixture",
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1594.MyFixture)),
-                    IsNullable = false,
-                    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1594.MyTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.Bugs._1594.MyFixture) })!.GetParameters()[0]
-                }
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Bugs._1594.MyFixture), "myFixture", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1594.MyFixture)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._1594.MyTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.Bugs._1594.MyFixture) })!.GetParameters()[0])
             },
             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
             Parent = null

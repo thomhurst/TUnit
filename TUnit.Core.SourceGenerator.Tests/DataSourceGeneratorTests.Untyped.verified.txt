@@ -26,34 +26,10 @@ internal static class TUnit_TestProject_AutoDataTests__TestSource
             __InvokeTest_Test1__string_int_double_bool, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Test1", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(string))
-        {
-        Name = "value1",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.AutoDataTests).GetMethod("Test1", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(double), typeof(bool) }, null)!.GetParameters()[0]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "value2",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.AutoDataTests).GetMethod("Test1", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(double), typeof(bool) }, null)!.GetParameters()[1]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(double))
-        {
-        Name = "value3",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(double)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.AutoDataTests).GetMethod("Test1", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(double), typeof(bool) }, null)!.GetParameters()[2]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(bool))
-        {
-        Name = "value4",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.AutoDataTests).GetMethod("Test1", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(double), typeof(bool) }, null)!.GetParameters()[3]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value1", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.AutoDataTests).GetMethod("Test1", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(double), typeof(bool) }, null)!.GetParameters()[0]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value2", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.AutoDataTests).GetMethod("Test1", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(double), typeof(bool) }, null)!.GetParameters()[1]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(double), "value3", new global::TUnit.Core.ConcreteType(typeof(double)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.AutoDataTests).GetMethod("Test1", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(double), typeof(bool) }, null)!.GetParameters()[2]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "value4", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.AutoDataTests).GetMethod("Test1", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(double), typeof(bool) }, null)!.GetParameters()[3])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -126,34 +102,10 @@ internal static class TUnit_TestProject_AutoDataTests__TestSource
             __InvokeTest_Test1__string_int_double_bool, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Test1", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(string))
-    {
-    Name = "value1",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.AutoDataTests).GetMethod("Test1", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(double), typeof(bool) }, null)!.GetParameters()[0]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(int))
-    {
-    Name = "value2",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.AutoDataTests).GetMethod("Test1", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(double), typeof(bool) }, null)!.GetParameters()[1]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(double))
-    {
-    Name = "value3",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(double)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.AutoDataTests).GetMethod("Test1", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(double), typeof(bool) }, null)!.GetParameters()[2]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(bool))
-    {
-    Name = "value4",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.AutoDataTests).GetMethod("Test1", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(double), typeof(bool) }, null)!.GetParameters()[3]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value1", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.AutoDataTests).GetMethod("Test1", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(double), typeof(bool) }, null)!.GetParameters()[0]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value2", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.AutoDataTests).GetMethod("Test1", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(double), typeof(bool) }, null)!.GetParameters()[1]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(double), "value3", new global::TUnit.Core.ConcreteType(typeof(double)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.AutoDataTests).GetMethod("Test1", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(double), typeof(bool) }, null)!.GetParameters()[2]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "value4", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.AutoDataTests).GetMethod("Test1", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(double), typeof(bool) }, null)!.GetParameters()[3])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {

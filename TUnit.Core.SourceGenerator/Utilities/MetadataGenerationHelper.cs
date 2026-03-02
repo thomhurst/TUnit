@@ -133,8 +133,9 @@ internal static class MetadataGenerationHelper
     /// <summary>
     /// Generates a ParameterMetadata[] expression for a method's parameters as a string.
     /// Returns null if the method has no parameters.
+    /// When hoistedParamsVar is provided, uses indexed references instead of inline reflection.
     /// </summary>
-    public static string? GenerateParameterMetadataArrayForMethodExpression(IMethodSymbol method, int indentLevel = 0)
+    public static string? GenerateParameterMetadataArrayForMethodExpression(IMethodSymbol method, int indentLevel = 0, string? hoistedParamsVar = null)
     {
         if (method.Parameters.Length == 0)
         {
@@ -142,7 +143,7 @@ internal static class MetadataGenerationHelper
         }
 
         var writer = new CodeWriter("", includeHeader: false).SetIndentLevel(indentLevel);
-        WriteParameterMetadataArrayForMethod(writer, method);
+        WriteParameterMetadataArrayForMethod(writer, method, hoistedParamsVar);
         return writer.ToString();
     }
 
@@ -218,50 +219,21 @@ internal static class MetadataGenerationHelper
     {
         // For type parameters in generic context, we still can't use T directly
         var safeType = CodeGenerationHelpers.ContainsTypeParameter(parameter.Type) ? "object" : parameter.Type.GloballyQualified();
-        var reflectionInfo = GenerateReflectionInfoForParameter(parameter, containingMethod);
+        var reflectionInfoExpr = GenerateReflectionInfoForParameter(parameter, containingMethod);
 
-        writer.AppendLine($"new global::TUnit.Core.ParameterMetadata<{safeType}>");
-        writer.AppendLine("{");
-
-        // Manually increment indent level without calling EnsureNewLine
-        var currentIndent = writer.IndentLevel;
-        writer.SetIndentLevel(currentIndent + 1);
-
-        writer.AppendLine($"Name = \"{parameter.Name}\",");
-        writer.AppendLine($"TypeInfo = {CodeGenerationHelpers.GenerateTypeInfo(parameter.Type)},");
-        writer.Append($"ReflectionInfo = {reflectionInfo}");
-
-        // Manually restore indent level
-        writer.SetIndentLevel(currentIndent);
-        writer.AppendLine();
-        writer.Append("}");
+        writer.Append($"global::TUnit.Core.ParameterMetadataFactory.Create(typeof({safeType}), \"{parameter.Name}\", {CodeGenerationHelpers.GenerateTypeInfo(parameter.Type)}, false, reflectionInfoFactory: static () => {reflectionInfoExpr})");
     }
 
     /// <summary>
     /// Generates code for creating a ParameterMetadata instance (non-generic version)
     /// </summary>
-    public static void WriteParameterMetadata(ICodeWriter writer, IParameterSymbol parameter, IMethodSymbol? containingMethod = null)
+    public static void WriteParameterMetadata(ICodeWriter writer, IParameterSymbol parameter, IMethodSymbol? containingMethod = null, string? reflectionInfoOverride = null)
     {
         // For type parameters, we need to use typeof(object) instead of typeof(T)
         var typeForConstructor = CodeGenerationHelpers.ContainsTypeParameter(parameter.Type) ? "object" : parameter.Type.GloballyQualified();
-        var reflectionInfo = GenerateReflectionInfoForParameter(parameter, containingMethod);
+        var reflectionInfoExpr = reflectionInfoOverride ?? GenerateReflectionInfoForParameter(parameter, containingMethod);
 
-        writer.AppendLine($"new global::TUnit.Core.ParameterMetadata(typeof({typeForConstructor}))");
-        writer.AppendLine("{");
-
-        // Manually increment indent level without calling EnsureNewLine
-        var currentIndent = writer.IndentLevel;
-        writer.SetIndentLevel(currentIndent + 1);
-
-        writer.AppendLine($"Name = \"{parameter.Name}\",");
-        writer.AppendLine($"TypeInfo = {CodeGenerationHelpers.GenerateTypeInfo(parameter.Type)},");
-        writer.AppendLine($"IsNullable = {parameter.Type.IsNullable().ToString().ToLowerInvariant()},");
-        writer.Append($"ReflectionInfo = {reflectionInfo}");
-
-        // Manually restore indent level
-        writer.SetIndentLevel(currentIndent);
-        writer.AppendLine();
-        writer.Append("}");
+        writer.Append($"global::TUnit.Core.ParameterMetadataFactory.Create(typeof({typeForConstructor}), \"{parameter.Name}\", {CodeGenerationHelpers.GenerateTypeInfo(parameter.Type)}, {parameter.Type.IsNullable().ToString().ToLowerInvariant()}, reflectionInfoFactory: static () => {reflectionInfoExpr})");
     }
 
     /// <summary>
@@ -339,6 +311,54 @@ internal static class MetadataGenerationHelper
     }
 
     /// <summary>
+    /// Generates the expression for the ParameterInfo[] array of a method/constructor, without indexing.
+    /// E.g.: typeof(X).GetMethod("M", flags, null, paramTypes, null)!.GetParameters()
+    /// </summary>
+    public static string GenerateParameterInfoArrayExpression(IMethodSymbol method)
+    {
+        var containingType = method.ContainingType.GloballyQualified();
+
+        if (method.MethodKind == MethodKind.Constructor)
+        {
+            if (method.Parameters.Any(p => CodeGenerationHelpers.ContainsTypeParameter(p.Type)))
+            {
+                return $@"global::System.Linq.Enumerable.FirstOrDefault(typeof({containingType}).GetConstructors(), c => c.GetParameters().Length == {method.Parameters.Length})?.GetParameters()!";
+            }
+
+            var paramTypes = GenerateParameterTypesArrayForReflection(method);
+            return $@"typeof({containingType}).GetConstructor({paramTypes})!.GetParameters()";
+        }
+
+        if (method.TypeParameters.Length > 0 || method.Parameters.Any(p => CodeGenerationHelpers.ContainsTypeParameter(p.Type)))
+        {
+            return $@"global::System.Linq.Enumerable.FirstOrDefault(typeof({containingType}).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == ""{method.Name}"" && m.GetParameters().Length == {method.Parameters.Length})?.GetParameters()!";
+        }
+
+        {
+            var bindingFlags = method.IsStatic
+                ? "global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static"
+                : "global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance";
+            var paramTypes = GenerateParameterTypesArrayForReflection(method);
+            return $@"typeof({containingType}).GetMethod(""{method.Name}"", {bindingFlags}, null, {paramTypes}, null)!.GetParameters()";
+        }
+    }
+
+    /// <summary>
+    /// Generates a hoisted local variable statement for a method's ParameterInfo[] array.
+    /// Returns null if the method has &lt;= 1 parameter (hoisting not beneficial).
+    /// E.g.: var __params_M = typeof(X).GetMethod("M", ...).GetParameters();
+    /// </summary>
+    public static string? GenerateParameterInfoHoistStatement(IMethodSymbol method, string varName)
+    {
+        if (method.Parameters.Length <= 1)
+        {
+            return null;
+        }
+
+        return $"var {varName} = {GenerateParameterInfoArrayExpression(method)};";
+    }
+
+    /// <summary>
     /// Generates code for creating a PropertyMetadata instance
     /// </summary>
     public static void WritePropertyMetadata(ICodeWriter writer, IPropertySymbol property, INamedTypeSymbol containingType)
@@ -398,9 +418,10 @@ internal static class MetadataGenerationHelper
     }
 
     /// <summary>
-    /// Writes an array of ParameterMetadata objects for method parameters with proper reflection info
+    /// Writes an array of ParameterMetadata objects for method parameters with proper reflection info.
+    /// When hoistedParamsVar is provided, uses indexed references instead of inline reflection.
     /// </summary>
-    private static void WriteParameterMetadataArrayForMethod(ICodeWriter writer, IMethodSymbol method)
+    private static void WriteParameterMetadataArrayForMethod(ICodeWriter writer, IMethodSymbol method, string? hoistedParamsVar = null)
     {
         if (method.Parameters.Length == 0)
         {
@@ -418,7 +439,8 @@ internal static class MetadataGenerationHelper
         for (var i = 0; i < method.Parameters.Length; i++)
         {
             var param = method.Parameters[i];
-            WriteParameterMetadata(writer, param, method);
+            var reflectionInfoOverride = hoistedParamsVar != null ? $"{hoistedParamsVar}[{i}]" : null;
+            WriteParameterMetadata(writer, param, method, reflectionInfoOverride);
 
             if (i < method.Parameters.Length - 1)
             {

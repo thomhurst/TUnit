@@ -26,13 +26,7 @@ internal static class TUnit_TestProject_ConstantArgumentsTests__TestSource
             __InvokeTest_String1__string, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("String1", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(string))
-        {
-        Name = "dummy",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("String1", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "dummy", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("String1", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -45,13 +39,7 @@ internal static class TUnit_TestProject_ConstantArgumentsTests__TestSource
             __InvokeTest_Int__int, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Int", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "dummy",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Int", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "dummy", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Int", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -64,13 +52,7 @@ internal static class TUnit_TestProject_ConstantArgumentsTests__TestSource
             __InvokeTest_Double__double, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Double", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(double))
-        {
-        Name = "dummy",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(double)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Double", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(double) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(double), "dummy", new global::TUnit.Core.ConcreteType(typeof(double)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Double", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(double) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -83,13 +65,7 @@ internal static class TUnit_TestProject_ConstantArgumentsTests__TestSource
             __InvokeTest_Float__float, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Float", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(float))
-        {
-        Name = "dummy",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(float)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Float", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(float) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(float), "dummy", new global::TUnit.Core.ConcreteType(typeof(float)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Float", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(float) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -102,13 +78,7 @@ internal static class TUnit_TestProject_ConstantArgumentsTests__TestSource
             __InvokeTest_Long__long, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Long", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(long))
-        {
-        Name = "dummy",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(long)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Long", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(long) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(long), "dummy", new global::TUnit.Core.ConcreteType(typeof(long)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Long", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(long) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -121,13 +91,7 @@ internal static class TUnit_TestProject_ConstantArgumentsTests__TestSource
             __InvokeTest_UInt__uint, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("UInt", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(uint))
-        {
-        Name = "dummy",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(uint)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("UInt", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(uint) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(uint), "dummy", new global::TUnit.Core.ConcreteType(typeof(uint)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("UInt", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(uint) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -140,13 +104,7 @@ internal static class TUnit_TestProject_ConstantArgumentsTests__TestSource
             __InvokeTest_ULong__ulong, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("ULong", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(ulong))
-        {
-        Name = "dummy",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(ulong)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("ULong", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(ulong) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(ulong), "dummy", new global::TUnit.Core.ConcreteType(typeof(ulong)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("ULong", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(ulong) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -424,13 +382,7 @@ internal static class TUnit_TestProject_ConstantArgumentsTests__TestSource
             __InvokeTest_String1__string, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("String1", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(string))
-    {
-    Name = "dummy",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("String1", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "dummy", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("String1", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -459,13 +411,7 @@ internal static class TUnit_TestProject_ConstantArgumentsTests__TestSource
             __InvokeTest_Int__int, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Int", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(int))
-    {
-    Name = "dummy",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Int", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "dummy", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Int", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -494,13 +440,7 @@ internal static class TUnit_TestProject_ConstantArgumentsTests__TestSource
             __InvokeTest_Double__double, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Double", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(double))
-    {
-    Name = "dummy",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(double)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Double", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(double) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(double), "dummy", new global::TUnit.Core.ConcreteType(typeof(double)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Double", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(double) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -529,13 +469,7 @@ internal static class TUnit_TestProject_ConstantArgumentsTests__TestSource
             __InvokeTest_Float__float, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Float", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(float))
-    {
-    Name = "dummy",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(float)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Float", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(float) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(float), "dummy", new global::TUnit.Core.ConcreteType(typeof(float)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Float", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(float) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -564,13 +498,7 @@ internal static class TUnit_TestProject_ConstantArgumentsTests__TestSource
             __InvokeTest_Long__long, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Long", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(long))
-    {
-    Name = "dummy",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(long)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Long", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(long) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(long), "dummy", new global::TUnit.Core.ConcreteType(typeof(long)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Long", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(long) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -599,13 +527,7 @@ internal static class TUnit_TestProject_ConstantArgumentsTests__TestSource
             __InvokeTest_UInt__uint, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("UInt", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(uint))
-    {
-    Name = "dummy",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(uint)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("UInt", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(uint) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(uint), "dummy", new global::TUnit.Core.ConcreteType(typeof(uint)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("UInt", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(uint) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -634,13 +556,7 @@ internal static class TUnit_TestProject_ConstantArgumentsTests__TestSource
             __InvokeTest_ULong__ulong, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("ULong", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(ulong))
-    {
-    Name = "dummy",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(ulong)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("ULong", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(ulong) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(ulong), "dummy", new global::TUnit.Core.ConcreteType(typeof(ulong)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("ULong", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(ulong) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {

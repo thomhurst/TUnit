@@ -2618,8 +2618,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     /// <summary>
     /// Generates a MethodMetadataFactory.Create(...) call expression referencing __classType and __classMetadata.
+    /// When hoistedParamsVar is provided, parameter metadata uses indexed references instead of inline reflection.
     /// </summary>
-    private static string GenerateMethodMetadataFactoryCall(IMethodSymbol methodSymbol)
+    private static string GenerateMethodMetadataFactoryCall(IMethodSymbol methodSymbol, string? hoistedParamsVar = null)
     {
         var returnType = methodSymbol.ReturnType.GloballyQualified();
         var sb = new System.Text.StringBuilder();
@@ -2632,7 +2633,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         if (methodSymbol.Parameters.Length > 0)
         {
-            var paramExpr = MetadataGenerationHelper.GenerateParameterMetadataArrayForMethodExpression(methodSymbol);
+            var paramExpr = MetadataGenerationHelper.GenerateParameterMetadataArrayForMethodExpression(methodSymbol, hoistedParamsVar: hoistedParamsVar);
             if (paramExpr != null)
             {
                 sb.Append($", parameters: {paramExpr}");

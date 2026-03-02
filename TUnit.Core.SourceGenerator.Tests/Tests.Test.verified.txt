@@ -26,20 +26,8 @@ internal static class TUnit_TestProject_Bugs__1304_Tests__TestSource
             __InvokeTest_TryParse_InvalidString_ReturnsFailure__string__CancellationToken, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("TryParse_InvalidString_ReturnsFailure", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(string))
-        {
-        Name = "input",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-        IsNullable = true,
-        ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1304.Tests).GetMethod("TryParse_InvalidString_ReturnsFailure", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(global::System.Threading.CancellationToken))
-        {
-        Name = "cancellationToken",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1304.Tests).GetMethod("TryParse_InvalidString_ReturnsFailure", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "input", new global::TUnit.Core.ConcreteType(typeof(string)), true, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._1304.Tests).GetMethod("TryParse_InvalidString_ReturnsFailure", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._1304.Tests).GetMethod("TryParse_InvalidString_ReturnsFailure", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -56,13 +44,7 @@ internal static class TUnit_TestProject_Bugs__1304_Tests__TestSource
             __InvokeTest_Parse_InvalidString_ThrowsException__string_, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Parse_InvalidString_ThrowsException", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(string))
-        {
-        Name = "input",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-        IsNullable = true,
-        ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1304.Tests).GetMethod("Parse_InvalidString_ThrowsException", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "input", new global::TUnit.Core.ConcreteType(typeof(string)), true, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._1304.Tests).GetMethod("Parse_InvalidString_ThrowsException", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -79,13 +61,7 @@ internal static class TUnit_TestProject_Bugs__1304_Tests__TestSource
             __InvokeTest_TryParse_ValidString_ReturnsAccountId__string, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("TryParse_ValidString_ReturnsAccountId", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(string))
-        {
-        Name = "input",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1304.Tests).GetMethod("TryParse_ValidString_ReturnsAccountId", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "input", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._1304.Tests).GetMethod("TryParse_ValidString_ReturnsAccountId", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -229,20 +205,8 @@ internal static class TUnit_TestProject_Bugs__1304_Tests__TestSource
             __InvokeTest_TryParse_InvalidString_ReturnsFailure__string__CancellationToken, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("TryParse_InvalidString_ReturnsFailure", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(string))
-    {
-    Name = "input",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-    IsNullable = true,
-    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1304.Tests).GetMethod("TryParse_InvalidString_ReturnsFailure", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(global::System.Threading.CancellationToken))
-    {
-    Name = "cancellationToken",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1304.Tests).GetMethod("TryParse_InvalidString_ReturnsFailure", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "input", new global::TUnit.Core.ConcreteType(typeof(string)), true, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._1304.Tests).GetMethod("TryParse_InvalidString_ReturnsFailure", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._1304.Tests).GetMethod("TryParse_InvalidString_ReturnsFailure", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -275,13 +239,7 @@ internal static class TUnit_TestProject_Bugs__1304_Tests__TestSource
             __InvokeTest_Parse_InvalidString_ThrowsException__string_, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Parse_InvalidString_ThrowsException", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(string))
-    {
-    Name = "input",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-    IsNullable = true,
-    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1304.Tests).GetMethod("Parse_InvalidString_ThrowsException", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "input", new global::TUnit.Core.ConcreteType(typeof(string)), true, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._1304.Tests).GetMethod("Parse_InvalidString_ThrowsException", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -314,13 +272,7 @@ internal static class TUnit_TestProject_Bugs__1304_Tests__TestSource
             __InvokeTest_TryParse_ValidString_ReturnsAccountId__string, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("TryParse_ValidString_ReturnsAccountId", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(string))
-    {
-    Name = "input",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1304.Tests).GetMethod("TryParse_ValidString_ReturnsAccountId", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "input", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._1304.Tests).GetMethod("TryParse_ValidString_ReturnsAccountId", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {

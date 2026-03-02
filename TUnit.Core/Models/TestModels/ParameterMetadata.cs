@@ -24,7 +24,18 @@ public record ParameterMetadata([DynamicallyAccessedMembers(DynamicallyAccessedM
     public required string Name { get; init; }
 
     public required TypeInfo TypeInfo { get; init; }
-    public required ParameterInfo ReflectionInfo { get; set; }
+    public ParameterInfo ReflectionInfo
+    {
+        get => field ??= ReflectionInfoFactory?.Invoke() ?? null!;
+        set;
+    } = null!;
+
+    /// <summary>
+    /// Lazy factory for ReflectionInfo. Set by source generator to defer reflection to first access.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public Func<ParameterInfo>? ReflectionInfoFactory { get; init; }
+
     public bool IsParams => CachedIsParams ?? ReflectionInfo.IsDefined(typeof(ParamArrayAttribute), false);
     public bool IsOptional => CachedIsOptional ?? ReflectionInfo.IsOptional;
     public bool IsNullable { get; init; }
