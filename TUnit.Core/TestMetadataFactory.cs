@@ -22,6 +22,7 @@ public static class TestMetadataFactory
         Func<Attribute[]> attributeFactory,
         Func<Type[], object?[], T> instanceFactory,
         MethodMetadata methodMetadata,
+        string testSessionId,
         string filePath = "",
         int inheritanceDepth = 0,
         TestDependency[]? dependencies = null,
@@ -29,8 +30,7 @@ public static class TestMetadataFactory
         IDataSourceAttribute[]? classDataSources = null,
         PropertyDataSource[]? propertyDataSources = null,
         PropertyInjectionData[]? propertyInjections = null,
-        int? repeatCount = null,
-        string? testSessionId = null
+        int? repeatCount = null
     ) where T : class
     {
         return new TestMetadata<T>
@@ -51,7 +51,7 @@ public static class TestMetadataFactory
             InstanceFactory = instanceFactory,
             InvokeTypedTest = invokeTypedTest,
             RepeatCount = repeatCount,
-            TestSessionId = testSessionId ?? Guid.NewGuid().ToString(),
+            TestSessionId = testSessionId,
         };
     }
 }
