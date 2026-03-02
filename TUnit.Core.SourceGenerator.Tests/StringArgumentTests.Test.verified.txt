@@ -26,13 +26,7 @@ internal static class TUnit_TestProject_StringArgumentTests__TestSource
             __InvokeTest_Normal__string, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Normal", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(string))
-        {
-        Name = "s",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.StringArgumentTests).GetMethod("Normal", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "s", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.StringArgumentTests).GetMethod("Normal", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -56,13 +50,7 @@ internal static class TUnit_TestProject_StringArgumentTests__TestSource
             __InvokeTest_Nullable__string_, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Nullable", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(string))
-        {
-        Name = "s",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-        IsNullable = true,
-        ReflectionInfo = typeof(global::TUnit.TestProject.StringArgumentTests).GetMethod("Nullable", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "s", new global::TUnit.Core.ConcreteType(typeof(string)), true, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.StringArgumentTests).GetMethod("Nullable", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -179,13 +167,7 @@ internal static class TUnit_TestProject_StringArgumentTests__TestSource
             __InvokeTest_Normal__string, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Normal", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(string))
-    {
-    Name = "s",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.StringArgumentTests).GetMethod("Normal", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "s", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.StringArgumentTests).GetMethod("Normal", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -225,13 +207,7 @@ internal static class TUnit_TestProject_StringArgumentTests__TestSource
             __InvokeTest_Nullable__string_, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Nullable", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(string))
-    {
-    Name = "s",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-    IsNullable = true,
-    ReflectionInfo = typeof(global::TUnit.TestProject.StringArgumentTests).GetMethod("Nullable", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "s", new global::TUnit.Core.ConcreteType(typeof(string)), true, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.StringArgumentTests).GetMethod("Nullable", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {

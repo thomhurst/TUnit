@@ -28,27 +28,9 @@ internal static class TUnit_TestProject_ClassTupleDataSourceDrivenTests__TestSou
             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
             Parameters = new global::TUnit.Core.ParameterMetadata[]
             {
-                new global::TUnit.Core.ParameterMetadata(typeof(int))
-                {
-                    Name = "value",
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-                    IsNullable = false,
-                    ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[0]
-                },
-                new global::TUnit.Core.ParameterMetadata(typeof(string))
-                {
-                    Name = "value2",
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-                    IsNullable = false,
-                    ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[1]
-                },
-                new global::TUnit.Core.ParameterMetadata(typeof(bool))
-                {
-                    Name = "value3",
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-                    IsNullable = false,
-                    ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[2]
-                }
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[0]),
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value2", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[1]),
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "value3", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[2])
             },
             Properties = new global::TUnit.Core.PropertyMetadata[]
             {
@@ -105,27 +87,9 @@ internal static class TUnit_TestProject_ClassTupleDataSourceDrivenTests__TestSou
             __InvokeTest_DataSource_TupleMethod__int_string_bool, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("DataSource_TupleMethod", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetMethod("DataSource_TupleMethod", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[0]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(string))
-        {
-        Name = "value2",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetMethod("DataSource_TupleMethod", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[1]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(bool))
-        {
-        Name = "value3",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetMethod("DataSource_TupleMethod", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[2]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetMethod("DataSource_TupleMethod", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[0]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value2", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetMethod("DataSource_TupleMethod", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[1]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "value3", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetMethod("DataSource_TupleMethod", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[2])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -382,27 +346,9 @@ internal static class TUnit_TestProject_ClassTupleDataSourceDrivenTests__TestSou
             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
             Parameters = new global::TUnit.Core.ParameterMetadata[]
             {
-                new global::TUnit.Core.ParameterMetadata(typeof(int))
-                {
-                    Name = "value",
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-                    IsNullable = false,
-                    ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[0]
-                },
-                new global::TUnit.Core.ParameterMetadata(typeof(string))
-                {
-                    Name = "value2",
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-                    IsNullable = false,
-                    ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[1]
-                },
-                new global::TUnit.Core.ParameterMetadata(typeof(bool))
-                {
-                    Name = "value3",
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-                    IsNullable = false,
-                    ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[2]
-                }
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[0]),
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value2", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[1]),
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "value3", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[2])
             },
             Properties = new global::TUnit.Core.PropertyMetadata[]
             {
@@ -459,27 +405,9 @@ internal static class TUnit_TestProject_ClassTupleDataSourceDrivenTests__TestSou
             __InvokeTest_DataSource_TupleMethod__int_string_bool, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("DataSource_TupleMethod", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(int))
-    {
-    Name = "value",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetMethod("DataSource_TupleMethod", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[0]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(string))
-    {
-    Name = "value2",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetMethod("DataSource_TupleMethod", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[1]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(bool))
-    {
-    Name = "value3",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetMethod("DataSource_TupleMethod", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[2]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetMethod("DataSource_TupleMethod", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[0]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value2", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetMethod("DataSource_TupleMethod", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[1]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "value3", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetMethod("DataSource_TupleMethod", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[2])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {

@@ -497,13 +497,7 @@ internal static class TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWit
                     ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                     Parameters = new global::TUnit.Core.ParameterMetadata[]
                     {
-                        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.Core.ClassHookContext))
-                        {
-                            Name = "context",
-                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.Core.ClassHookContext)),
-                            IsNullable = false,
-                            ReflectionInfo = typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("BeforeAllSetUpWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.ClassHookContext) }, null)!.GetParameters()[0]
-                        }
+                        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.Core.ClassHookContext), "context", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.Core.ClassHookContext)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("BeforeAllSetUpWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.ClassHookContext) }, null)!.GetParameters()[0])
                     },
                     Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.SetupTests", new global::TUnit.Core.ClassMetadata
                     {
@@ -572,13 +566,7 @@ internal static class TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUp__C
                     ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                     Parameters = new global::TUnit.Core.ParameterMetadata[]
                     {
-                        new global::TUnit.Core.ParameterMetadata(typeof(global::System.Threading.CancellationToken))
-                        {
-                            Name = "cancellationToken",
-                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)),
-                            IsNullable = false,
-                            ReflectionInfo = typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("BeforeAllSetUp", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
-                        }
+                        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("BeforeAllSetUp", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0])
                     },
                     Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.SetupTests", new global::TUnit.Core.ClassMetadata
                     {
@@ -647,20 +635,8 @@ internal static class TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWit
                     ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                     Parameters = new global::TUnit.Core.ParameterMetadata[]
                     {
-                        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.Core.ClassHookContext))
-                        {
-                            Name = "context",
-                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.Core.ClassHookContext)),
-                            IsNullable = false,
-                            ReflectionInfo = typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("BeforeAllSetUpWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.ClassHookContext), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
-                        },
-                        new global::TUnit.Core.ParameterMetadata(typeof(global::System.Threading.CancellationToken))
-                        {
-                            Name = "cancellationToken",
-                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)),
-                            IsNullable = false,
-                            ReflectionInfo = typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("BeforeAllSetUpWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.ClassHookContext), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1]
-                        }
+                        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.Core.ClassHookContext), "context", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.Core.ClassHookContext)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("BeforeAllSetUpWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.ClassHookContext), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]),
+                        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("BeforeAllSetUpWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.ClassHookContext), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1])
                     },
                     Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.SetupTests", new global::TUnit.Core.ClassMetadata
                     {
@@ -796,13 +772,7 @@ internal static class TUnit_TestProject_BeforeTests_SetupTests_Setup__Cancellati
                     ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                     Parameters = new global::TUnit.Core.ParameterMetadata[]
                     {
-                        new global::TUnit.Core.ParameterMetadata(typeof(global::System.Threading.CancellationToken))
-                        {
-                            Name = "cancellationToken",
-                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)),
-                            IsNullable = false,
-                            ReflectionInfo = typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("Setup", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
-                        }
+                        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("Setup", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0])
                     },
                     Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.SetupTests", new global::TUnit.Core.ClassMetadata
                     {
@@ -871,13 +841,7 @@ internal static class TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext_
                     ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                     Parameters = new global::TUnit.Core.ParameterMetadata[]
                     {
-                        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.Core.TestContext))
-                        {
-                            Name = "testContext",
-                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.Core.TestContext)),
-                            IsNullable = false,
-                            ReflectionInfo = typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("SetupWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext) }, null)!.GetParameters()[0]
-                        }
+                        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.Core.TestContext), "testContext", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.Core.TestContext)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("SetupWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext) }, null)!.GetParameters()[0])
                     },
                     Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.SetupTests", new global::TUnit.Core.ClassMetadata
                     {
@@ -946,20 +910,8 @@ internal static class TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext_
                     ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                     Parameters = new global::TUnit.Core.ParameterMetadata[]
                     {
-                        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.Core.TestContext))
-                        {
-                            Name = "testContext",
-                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.Core.TestContext)),
-                            IsNullable = false,
-                            ReflectionInfo = typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("SetupWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
-                        },
-                        new global::TUnit.Core.ParameterMetadata(typeof(global::System.Threading.CancellationToken))
-                        {
-                            Name = "cancellationToken",
-                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)),
-                            IsNullable = false,
-                            ReflectionInfo = typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("SetupWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1]
-                        }
+                        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.Core.TestContext), "testContext", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.Core.TestContext)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("SetupWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]),
+                        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("SetupWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1])
                     },
                     Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.SetupTests", new global::TUnit.Core.ClassMetadata
                     {

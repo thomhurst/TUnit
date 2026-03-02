@@ -43,13 +43,7 @@ internal static class TUnit_TestProject_Bugs__1924_None_BaseClass__TestSource
             __InvokeTest_Test__int, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1924.None.BaseClass).GetMethod("Test", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._1924.None.BaseClass).GetMethod("Test", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -168,13 +162,7 @@ internal static class TUnit_TestProject_Bugs__1924_None_BaseClass__TestSource
             __InvokeTest_Test__int, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(int))
-    {
-    Name = "value",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1924.None.BaseClass).GetMethod("Test", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._1924.None.BaseClass).GetMethod("Test", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -303,13 +291,7 @@ internal sealed class TUnit_TestProject_Bugs__1924_None_Tests_Test__int_TestSour
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
-                    new global::TUnit.Core.ParameterMetadata(typeof(int))
-                    {
-                        Name = "value",
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-                        IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1924.None.BaseClass).GetMethod("Test", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
-                    }
+                    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._1924.None.BaseClass).GetMethod("Test", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0])
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1924.None.Tests", new global::TUnit.Core.ClassMetadata
                 {
@@ -467,13 +449,7 @@ internal sealed class TUnit_TestProject_Bugs__1924_None_Tests2_Test__int_TestSou
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
-                    new global::TUnit.Core.ParameterMetadata(typeof(int))
-                    {
-                        Name = "value",
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-                        IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1924.None.BaseClass).GetMethod("Test", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
-                    }
+                    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._1924.None.BaseClass).GetMethod("Test", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0])
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1924.None.Tests2", new global::TUnit.Core.ClassMetadata
                 {
@@ -631,13 +607,7 @@ internal sealed class TUnit_TestProject_Bugs__1924_None_Tests3_Test__int_TestSou
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
-                    new global::TUnit.Core.ParameterMetadata(typeof(int))
-                    {
-                        Name = "value",
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-                        IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1924.None.BaseClass).GetMethod("Test", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
-                    }
+                    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._1924.None.BaseClass).GetMethod("Test", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0])
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1924.None.Tests3", new global::TUnit.Core.ClassMetadata
                 {

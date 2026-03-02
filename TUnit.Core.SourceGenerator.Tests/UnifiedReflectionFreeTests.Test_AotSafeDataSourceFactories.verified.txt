@@ -26,27 +26,9 @@ internal static class TUnit_TestProject_AotDataSourceTest__TestSource
             __InvokeTest_TestWithDataSource__int_int_int, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("TestWithDataSource", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "a",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.AotDataSourceTest).GetMethod("TestWithDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int) }, null)!.GetParameters()[0]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "b",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.AotDataSourceTest).GetMethod("TestWithDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int) }, null)!.GetParameters()[1]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "c",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.AotDataSourceTest).GetMethod("TestWithDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int) }, null)!.GetParameters()[2]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "a", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.AotDataSourceTest).GetMethod("TestWithDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int) }, null)!.GetParameters()[0]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "b", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.AotDataSourceTest).GetMethod("TestWithDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int) }, null)!.GetParameters()[1]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "c", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.AotDataSourceTest).GetMethod("TestWithDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int) }, null)!.GetParameters()[2])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -121,27 +103,9 @@ internal static class TUnit_TestProject_AotDataSourceTest__TestSource
             __InvokeTest_TestWithDataSource__int_int_int, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("TestWithDataSource", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(int))
-    {
-    Name = "a",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.AotDataSourceTest).GetMethod("TestWithDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int) }, null)!.GetParameters()[0]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(int))
-    {
-    Name = "b",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.AotDataSourceTest).GetMethod("TestWithDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int) }, null)!.GetParameters()[1]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(int))
-    {
-    Name = "c",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.AotDataSourceTest).GetMethod("TestWithDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int) }, null)!.GetParameters()[2]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "a", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.AotDataSourceTest).GetMethod("TestWithDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int) }, null)!.GetParameters()[0]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "b", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.AotDataSourceTest).GetMethod("TestWithDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int) }, null)!.GetParameters()[1]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "c", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.AotDataSourceTest).GetMethod("TestWithDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int) }, null)!.GetParameters()[2])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {

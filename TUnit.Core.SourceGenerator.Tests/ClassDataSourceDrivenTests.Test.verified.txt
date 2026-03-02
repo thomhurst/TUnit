@@ -26,13 +26,7 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests__TestSource
             __InvokeTest_DataSource_Class__SomeAsyncDisposableClass, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("DataSource_Class", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("DataSource_Class", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass), "value", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("DataSource_Class", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -45,13 +39,7 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests__TestSource
             __InvokeTest_DataSource_Class_Generic__SomeAsyncDisposableClass, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("DataSource_Class_Generic", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("DataSource_Class_Generic", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass), "value", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("DataSource_Class_Generic", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -64,13 +52,7 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests__TestSource
             __InvokeTest_IsInitialized_With_1_ClassDataSource__InitializableClass, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("IsInitialized_With_1_ClassDataSource", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.InitializableClass))
-        {
-        Name = "class1",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_1_ClassDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.InitializableClass), "class1", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_1_ClassDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -83,20 +65,8 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests__TestSource
             __InvokeTest_IsInitialized_With_2_ClassDataSources__InitializableClass_InitializableClass, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("IsInitialized_With_2_ClassDataSources", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.InitializableClass))
-        {
-        Name = "class1",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_2_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[0]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.InitializableClass))
-        {
-        Name = "class2",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_2_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[1]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.InitializableClass), "class1", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_2_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[0]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.InitializableClass), "class2", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_2_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[1])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -109,27 +79,9 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests__TestSource
             __InvokeTest_IsInitialized_With_3_ClassDataSources__InitializableClass_InitializableClass_InitializableClass, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("IsInitialized_With_3_ClassDataSources", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.InitializableClass))
-        {
-        Name = "class1",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_3_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[0]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.InitializableClass))
-        {
-        Name = "class2",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_3_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[1]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.InitializableClass))
-        {
-        Name = "class3",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_3_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[2]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.InitializableClass), "class1", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_3_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[0]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.InitializableClass), "class2", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_3_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[1]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.InitializableClass), "class3", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_3_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[2])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -142,34 +94,10 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests__TestSource
             __InvokeTest_IsInitialized_With_4_ClassDataSources__InitializableClass_InitializableClass_InitializableClass_InitializableClass, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("IsInitialized_With_4_ClassDataSources", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.InitializableClass))
-        {
-        Name = "class1",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_4_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[0]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.InitializableClass))
-        {
-        Name = "class2",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_4_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[1]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.InitializableClass))
-        {
-        Name = "class3",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_4_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[2]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.InitializableClass))
-        {
-        Name = "class4",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_4_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[3]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.InitializableClass), "class1", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_4_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[0]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.InitializableClass), "class2", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_4_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[1]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.InitializableClass), "class3", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_4_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[2]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.InitializableClass), "class4", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_4_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[3])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -182,41 +110,11 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests__TestSource
             __InvokeTest_IsInitialized_With_5_ClassDataSources__InitializableClass_InitializableClass_InitializableClass_InitializableClass_InitializableClass, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("IsInitialized_With_5_ClassDataSources", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.InitializableClass))
-        {
-        Name = "class1",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[0]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.InitializableClass))
-        {
-        Name = "class2",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[1]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.InitializableClass))
-        {
-        Name = "class3",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[2]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.InitializableClass))
-        {
-        Name = "class4",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[3]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.InitializableClass))
-        {
-        Name = "class5",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[4]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.InitializableClass), "class1", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[0]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.InitializableClass), "class2", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[1]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.InitializableClass), "class3", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[2]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.InitializableClass), "class4", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[3]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.InitializableClass), "class5", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[4])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -496,13 +394,7 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests__TestSource
             __InvokeTest_DataSource_Class__SomeAsyncDisposableClass, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("DataSource_Class", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass))
-    {
-    Name = "value",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("DataSource_Class", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass), "value", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("DataSource_Class", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -531,13 +423,7 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests__TestSource
             __InvokeTest_DataSource_Class_Generic__SomeAsyncDisposableClass, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("DataSource_Class_Generic", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass))
-    {
-    Name = "value",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("DataSource_Class_Generic", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass), "value", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("DataSource_Class_Generic", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -566,13 +452,7 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests__TestSource
             __InvokeTest_IsInitialized_With_1_ClassDataSource__InitializableClass, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("IsInitialized_With_1_ClassDataSource", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.InitializableClass))
-    {
-    Name = "class1",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_1_ClassDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.InitializableClass), "class1", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_1_ClassDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -601,20 +481,8 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests__TestSource
             __InvokeTest_IsInitialized_With_2_ClassDataSources__InitializableClass_InitializableClass, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("IsInitialized_With_2_ClassDataSources", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.InitializableClass))
-    {
-    Name = "class1",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_2_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[0]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.InitializableClass))
-    {
-    Name = "class2",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_2_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[1]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.InitializableClass), "class1", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_2_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[0]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.InitializableClass), "class2", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_2_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[1])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -643,27 +511,9 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests__TestSource
             __InvokeTest_IsInitialized_With_3_ClassDataSources__InitializableClass_InitializableClass_InitializableClass, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("IsInitialized_With_3_ClassDataSources", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.InitializableClass))
-    {
-    Name = "class1",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_3_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[0]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.InitializableClass))
-    {
-    Name = "class2",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_3_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[1]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.InitializableClass))
-    {
-    Name = "class3",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_3_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[2]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.InitializableClass), "class1", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_3_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[0]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.InitializableClass), "class2", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_3_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[1]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.InitializableClass), "class3", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_3_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[2])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -692,34 +542,10 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests__TestSource
             __InvokeTest_IsInitialized_With_4_ClassDataSources__InitializableClass_InitializableClass_InitializableClass_InitializableClass, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("IsInitialized_With_4_ClassDataSources", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.InitializableClass))
-    {
-    Name = "class1",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_4_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[0]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.InitializableClass))
-    {
-    Name = "class2",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_4_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[1]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.InitializableClass))
-    {
-    Name = "class3",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_4_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[2]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.InitializableClass))
-    {
-    Name = "class4",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_4_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[3]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.InitializableClass), "class1", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_4_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[0]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.InitializableClass), "class2", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_4_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[1]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.InitializableClass), "class3", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_4_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[2]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.InitializableClass), "class4", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_4_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[3])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -748,41 +574,11 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests__TestSource
             __InvokeTest_IsInitialized_With_5_ClassDataSources__InitializableClass_InitializableClass_InitializableClass_InitializableClass_InitializableClass, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("IsInitialized_With_5_ClassDataSources", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.InitializableClass))
-    {
-    Name = "class1",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[0]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.InitializableClass))
-    {
-    Name = "class2",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[1]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.InitializableClass))
-    {
-    Name = "class3",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[2]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.InitializableClass))
-    {
-    Name = "class4",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[3]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.InitializableClass))
-    {
-    Name = "class5",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[4]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.InitializableClass), "class1", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[0]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.InitializableClass), "class2", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[1]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.InitializableClass), "class3", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[2]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.InitializableClass), "class4", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[3]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Library.Models.InitializableClass), "class5", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.InitializableClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass), typeof(global::TUnit.TestProject.Library.Models.InitializableClass) }, null)!.GetParameters()[4])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {

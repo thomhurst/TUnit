@@ -26,13 +26,7 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
             __InvokeTest_DataSource_Method__int, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("DataSource_Method", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("DataSource_Method", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("DataSource_Method", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -47,20 +41,8 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
             __InvokeTest_DataSource_Method__int_string, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("DataSource_Method", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("DataSource_Method", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string) }, null)!.GetParameters()[0]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(string))
-        {
-        Name = "value2",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("DataSource_Method", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string) }, null)!.GetParameters()[1]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("DataSource_Method", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string) }, null)!.GetParameters()[0]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value2", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("DataSource_Method", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string) }, null)!.GetParameters()[1])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -75,13 +57,7 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
             __InvokeTest_EnumValue__TestEnum, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("EnumValue", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.TestEnum))
-        {
-        Name = "testEnum",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TestEnum)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("EnumValue", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.TestEnum) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.TestEnum), "testEnum", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TestEnum)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("EnumValue", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.TestEnum) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -96,13 +72,7 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
             __InvokeTest_NullValue__string_, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("NullValue", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(string))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-        IsNullable = true,
-        ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("NullValue", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new global::TUnit.Core.ConcreteType(typeof(string)), true, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("NullValue", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -115,13 +85,7 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
             __InvokeTest_EmptyString__string_, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("EmptyString", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(string))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-        IsNullable = true,
-        ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("EmptyString", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new global::TUnit.Core.ConcreteType(typeof(string)), true, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("EmptyString", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -134,13 +98,7 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
             __InvokeTest_NonEmptyString__string_, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("NonEmptyString", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(string))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-        IsNullable = true,
-        ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("NonEmptyString", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new global::TUnit.Core.ConcreteType(typeof(string)), true, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("NonEmptyString", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -153,13 +111,7 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
             __InvokeTest_BooleanString__bool_, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("BooleanString", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(bool?))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool?)),
-        IsNullable = true,
-        ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("BooleanString", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool?) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool?), "value", new global::TUnit.Core.ConcreteType(typeof(bool?)), true, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("BooleanString", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool?) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -174,13 +126,7 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
             __InvokeTest_Type__Type, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Type", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(global::System.Type))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Type)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("Type", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Type) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Type), "value", new global::TUnit.Core.ConcreteType(typeof(global::System.Type)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("Type", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Type) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -193,13 +139,7 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
             __InvokeTest_IntegerArray__int__, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("IntegerArray", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(int[]))
-        {
-        Name = "values",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int[])),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("IntegerArray", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int[]) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int[]), "values", new global::TUnit.Core.ConcreteType(typeof(int[])), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("IntegerArray", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int[]) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -212,13 +152,7 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
             __InvokeTest_IntMaxValue__int, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("IntMaxValue", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("IntMaxValue", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("IntMaxValue", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -608,13 +542,7 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
             __InvokeTest_DataSource_Method__int, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("DataSource_Method", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(int))
-    {
-    Name = "value",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("DataSource_Method", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("DataSource_Method", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -645,20 +573,8 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
             __InvokeTest_DataSource_Method__int_string, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("DataSource_Method", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(int))
-    {
-    Name = "value",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("DataSource_Method", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string) }, null)!.GetParameters()[0]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(string))
-    {
-    Name = "value2",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("DataSource_Method", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string) }, null)!.GetParameters()[1]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("DataSource_Method", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string) }, null)!.GetParameters()[0]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value2", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("DataSource_Method", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string) }, null)!.GetParameters()[1])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -689,13 +605,7 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
             __InvokeTest_EnumValue__TestEnum, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("EnumValue", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.TestEnum))
-    {
-    Name = "testEnum",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TestEnum)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("EnumValue", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.TestEnum) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.TestEnum), "testEnum", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TestEnum)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("EnumValue", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.TestEnum) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -726,13 +636,7 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
             __InvokeTest_NullValue__string_, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("NullValue", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(string))
-    {
-    Name = "value",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-    IsNullable = true,
-    ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("NullValue", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new global::TUnit.Core.ConcreteType(typeof(string)), true, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("NullValue", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -761,13 +665,7 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
             __InvokeTest_EmptyString__string_, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("EmptyString", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(string))
-    {
-    Name = "value",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-    IsNullable = true,
-    ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("EmptyString", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new global::TUnit.Core.ConcreteType(typeof(string)), true, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("EmptyString", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -796,13 +694,7 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
             __InvokeTest_NonEmptyString__string_, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("NonEmptyString", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(string))
-    {
-    Name = "value",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-    IsNullable = true,
-    ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("NonEmptyString", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new global::TUnit.Core.ConcreteType(typeof(string)), true, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("NonEmptyString", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -831,13 +723,7 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
             __InvokeTest_BooleanString__bool_, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("BooleanString", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(bool?))
-    {
-    Name = "value",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool?)),
-    IsNullable = true,
-    ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("BooleanString", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool?) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool?), "value", new global::TUnit.Core.ConcreteType(typeof(bool?)), true, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("BooleanString", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool?) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -868,13 +754,7 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
             __InvokeTest_Type__Type, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Type", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(global::System.Type))
-    {
-    Name = "value",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Type)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("Type", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Type) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Type), "value", new global::TUnit.Core.ConcreteType(typeof(global::System.Type)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("Type", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Type) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -903,13 +783,7 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
             __InvokeTest_IntegerArray__int__, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("IntegerArray", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(int[]))
-    {
-    Name = "values",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int[])),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("IntegerArray", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int[]) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int[]), "values", new global::TUnit.Core.ConcreteType(typeof(int[])), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("IntegerArray", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int[]) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -938,13 +812,7 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
             __InvokeTest_IntMaxValue__int, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("IntMaxValue", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(int))
-    {
-    Name = "value",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("IntMaxValue", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("IntMaxValue", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {

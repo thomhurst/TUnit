@@ -26,13 +26,7 @@ internal static class TUnit_TestProject_Bugs__2085_Tests__TestSource
             __InvokeTest_Double_SpecialConsts__double, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Double_SpecialConsts", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(double))
-        {
-        Name = "d",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(double)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2085.Tests).GetMethod("Double_SpecialConsts", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(double) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(double), "d", new global::TUnit.Core.ConcreteType(typeof(double)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._2085.Tests).GetMethod("Double_SpecialConsts", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(double) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -45,13 +39,7 @@ internal static class TUnit_TestProject_Bugs__2085_Tests__TestSource
             __InvokeTest_Float_SpecialConsts__float, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Float_SpecialConsts", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(float))
-        {
-        Name = "d",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(float)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2085.Tests).GetMethod("Float_SpecialConsts", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(float) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(float), "d", new global::TUnit.Core.ConcreteType(typeof(float)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._2085.Tests).GetMethod("Float_SpecialConsts", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(float) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -159,13 +147,7 @@ internal static class TUnit_TestProject_Bugs__2085_Tests__TestSource
             __InvokeTest_Double_SpecialConsts__double, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Double_SpecialConsts", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(double))
-    {
-    Name = "d",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(double)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2085.Tests).GetMethod("Double_SpecialConsts", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(double) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(double), "d", new global::TUnit.Core.ConcreteType(typeof(double)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._2085.Tests).GetMethod("Double_SpecialConsts", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(double) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -194,13 +176,7 @@ internal static class TUnit_TestProject_Bugs__2085_Tests__TestSource
             __InvokeTest_Float_SpecialConsts__float, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Float_SpecialConsts", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(float))
-    {
-    Name = "d",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(float)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2085.Tests).GetMethod("Float_SpecialConsts", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(float) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(float), "d", new global::TUnit.Core.ConcreteType(typeof(float)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._2085.Tests).GetMethod("Float_SpecialConsts", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(float) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {

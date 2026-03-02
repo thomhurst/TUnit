@@ -212,112 +212,68 @@ internal static class MetadataGenerationHelper
     }
 
     /// <summary>
-    /// Generates code for creating a ParameterMetadata instance (generic version)
+    /// Generates code for creating a ParameterMetadata instance (generic version).
+    /// Delegates to <see cref="WriteParameterMetadata"/> for consistency.
     /// </summary>
     public static void WriteParameterMetadataGeneric(ICodeWriter writer, IParameterSymbol parameter, IMethodSymbol? containingMethod = null)
     {
-        // For type parameters in generic context, we still can't use T directly
-        var safeType = CodeGenerationHelpers.ContainsTypeParameter(parameter.Type) ? "object" : parameter.Type.GloballyQualified();
-        var reflectionInfo = GenerateReflectionInfoForParameter(parameter, containingMethod);
-
-        writer.AppendLine($"new global::TUnit.Core.ParameterMetadata<{safeType}>");
-        writer.AppendLine("{");
-
-        // Manually increment indent level without calling EnsureNewLine
-        var currentIndent = writer.IndentLevel;
-        writer.SetIndentLevel(currentIndent + 1);
-
-        writer.AppendLine($"Name = \"{parameter.Name}\",");
-        writer.AppendLine($"TypeInfo = {CodeGenerationHelpers.GenerateTypeInfo(parameter.Type)},");
-        writer.Append($"ReflectionInfo = {reflectionInfo}");
-
-        // Manually restore indent level
-        writer.SetIndentLevel(currentIndent);
-        writer.AppendLine();
-        writer.Append("}");
+        WriteParameterMetadata(writer, parameter, containingMethod);
     }
 
     /// <summary>
-    /// Generates code for creating a ParameterMetadata instance (non-generic version)
+    /// Generates code for creating a ParameterMetadata instance via ParameterMetadataFactory.Create().
     /// </summary>
     public static void WriteParameterMetadata(ICodeWriter writer, IParameterSymbol parameter, IMethodSymbol? containingMethod = null)
     {
-        // For type parameters, we need to use typeof(object) instead of typeof(T)
-        var typeForConstructor = CodeGenerationHelpers.ContainsTypeParameter(parameter.Type) ? "object" : parameter.Type.GloballyQualified();
-        var reflectionInfo = GenerateReflectionInfoForParameter(parameter, containingMethod);
+        var safeType = CodeGenerationHelpers.ContainsTypeParameter(parameter.Type) ? "object" : parameter.Type.GloballyQualified();
+        var reflectionInfoExpr = GenerateReflectionInfoForParameter(parameter, containingMethod);
 
-        writer.AppendLine($"new global::TUnit.Core.ParameterMetadata(typeof({typeForConstructor}))");
-        writer.AppendLine("{");
-
-        // Manually increment indent level without calling EnsureNewLine
-        var currentIndent = writer.IndentLevel;
-        writer.SetIndentLevel(currentIndent + 1);
-
-        writer.AppendLine($"Name = \"{parameter.Name}\",");
-        writer.AppendLine($"TypeInfo = {CodeGenerationHelpers.GenerateTypeInfo(parameter.Type)},");
-        writer.AppendLine($"IsNullable = {parameter.Type.IsNullable().ToString().ToLowerInvariant()},");
-        writer.Append($"ReflectionInfo = {reflectionInfo}");
-
-        // Manually restore indent level
-        writer.SetIndentLevel(currentIndent);
-        writer.AppendLine();
-        writer.Append("}");
+        writer.Append($"global::TUnit.Core.ParameterMetadataFactory.Create(typeof({safeType}), \"{parameter.Name}\", {CodeGenerationHelpers.GenerateTypeInfo(parameter.Type)}, {parameter.Type.IsNullable().ToString().ToLowerInvariant()}, reflectionInfoFactory: static () => {reflectionInfoExpr})");
     }
 
     /// <summary>
-    /// Generates reflection info code for a parameter
+    /// Generates reflection info code for a parameter.
+    /// Delegates to <see cref="GenerateParameterInfoArrayExpression"/> to avoid duplicating the reflection lookup logic.
     /// </summary>
     private static string GenerateReflectionInfoForParameter(IParameterSymbol parameter, IMethodSymbol? providedMethod = null)
     {
-        // Use provided method or try to get it from the parameter's containing symbol
         var method = providedMethod ?? parameter.ContainingSymbol as IMethodSymbol;
 
         if (method == null)
         {
-            // If we can't determine the method, fall back to null
             return "null!";
         }
 
-        // Find the parameter index
         var parameterIndex = method.Parameters.IndexOf(parameter);
         if (parameterIndex == -1)
         {
-            // Fallback if we can't find the parameter (shouldn't happen)
             return "null!";
         }
 
         var containingType = method.ContainingType.GloballyQualified();
 
-        // Check if it's a constructor
         if (method.MethodKind == MethodKind.Constructor)
         {
             if (method.Parameters.Any(p => CodeGenerationHelpers.ContainsTypeParameter(p.Type)))
             {
-                // For constructors with generic parameters, we need to find it dynamically
                 return $@"global::System.Linq.Enumerable.FirstOrDefault(typeof({containingType}).GetConstructors(), c => c.GetParameters().Length == {method.Parameters.Length})?.GetParameters()[{parameterIndex}]!";
             }
-            else
-            {
-                // For non-generic constructors, we can use specific parameter types
-                var paramTypes = GenerateParameterTypesArrayForReflection(method);
-                return $@"typeof({containingType}).GetConstructor({paramTypes})!.GetParameters()[{parameterIndex}]";
-            }
+
+            var paramTypes = GenerateParameterTypesArrayForReflection(method);
+            return $@"typeof({containingType}).GetConstructor({paramTypes})!.GetParameters()[{parameterIndex}]";
         }
-        else
+
+        if (method.TypeParameters.Length > 0 || method.Parameters.Any(p => CodeGenerationHelpers.ContainsTypeParameter(p.Type)))
         {
-            // It's a regular method
-            if (method.TypeParameters.Length > 0 || method.Parameters.Any(p => CodeGenerationHelpers.ContainsTypeParameter(p.Type)))
-            {
-                // For generic methods, use GetMethods and find by name
-                return $@"global::System.Linq.Enumerable.FirstOrDefault(typeof({containingType}).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == ""{method.Name}"" && m.GetParameters().Length == {method.Parameters.Length})?.GetParameters()[{parameterIndex}]!";
-            }
-            else
-            {
-                // For non-generic methods, we can use GetMethod with parameter types
-                var bindingFlags = method.IsStatic ? "global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static" : "global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance";
-                var paramTypes = GenerateParameterTypesArrayForReflection(method);
-                return $@"typeof({containingType}).GetMethod(""{method.Name}"", {bindingFlags}, null, {paramTypes}, null)!.GetParameters()[{parameterIndex}]";
-            }
+            return $@"global::System.Linq.Enumerable.FirstOrDefault(typeof({containingType}).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == ""{method.Name}"" && m.GetParameters().Length == {method.Parameters.Length})?.GetParameters()[{parameterIndex}]!";
+        }
+
+        {
+            var bindingFlags = method.IsStatic
+                ? "global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static"
+                : "global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance";
+            var paramTypes = GenerateParameterTypesArrayForReflection(method);
+            return $@"typeof({containingType}).GetMethod(""{method.Name}"", {bindingFlags}, null, {paramTypes}, null)!.GetParameters()[{parameterIndex}]";
         }
     }
 
@@ -398,7 +354,7 @@ internal static class MetadataGenerationHelper
     }
 
     /// <summary>
-    /// Writes an array of ParameterMetadata objects for method parameters with proper reflection info
+    /// Writes an array of ParameterMetadata objects for method parameters with proper reflection info.
     /// </summary>
     private static void WriteParameterMetadataArrayForMethod(ICodeWriter writer, IMethodSymbol method)
     {

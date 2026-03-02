@@ -32,13 +32,7 @@ internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
             __InvokeTest_GenericMethodDataSource__string, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("GenericMethodDataSource", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(string))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests).GetMethod("GenericMethodDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests).GetMethod("GenericMethodDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -51,13 +45,7 @@ internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
             __InvokeTest_NonGenericMethodDataSource__string, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("NonGenericMethodDataSource", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(string))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests).GetMethod("NonGenericMethodDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests).GetMethod("NonGenericMethodDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -261,13 +249,7 @@ internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
             __InvokeTest_GenericMethodDataSource__string, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("GenericMethodDataSource", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(string))
-    {
-    Name = "value",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests).GetMethod("GenericMethodDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests).GetMethod("GenericMethodDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -296,13 +278,7 @@ internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
             __InvokeTest_NonGenericMethodDataSource__string, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("NonGenericMethodDataSource", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(string))
-    {
-    Name = "value",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests).GetMethod("NonGenericMethodDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests).GetMethod("NonGenericMethodDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {

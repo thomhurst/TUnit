@@ -26,13 +26,7 @@ internal static class TUnit_TestProject_Bugs__2083_Tests__TestSource
             __InvokeTest_MyTest__long, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("MyTest", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(long))
-        {
-        Name = "value",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(long)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2083.Tests).GetMethod("MyTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(long) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(long), "value", new global::TUnit.Core.ConcreteType(typeof(long)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._2083.Tests).GetMethod("MyTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(long) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -112,13 +106,7 @@ internal static class TUnit_TestProject_Bugs__2083_Tests__TestSource
             __InvokeTest_MyTest__long, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("MyTest", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(long))
-    {
-    Name = "value",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(long)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2083.Tests).GetMethod("MyTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(long) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(long), "value", new global::TUnit.Core.ConcreteType(typeof(long)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._2083.Tests).GetMethod("MyTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(long) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {

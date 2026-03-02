@@ -26,27 +26,9 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             __InvokeTest_MatrixTest_One__string_int_bool, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("MatrixTest_One", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(string))
-        {
-        Name = "str",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_One", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(bool) }, null)!.GetParameters()[0]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "i",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_One", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(bool) }, null)!.GetParameters()[1]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(bool))
-        {
-        Name = "boolean",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_One", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(bool) }, null)!.GetParameters()[2]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "str", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_One", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(bool) }, null)!.GetParameters()[0]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "i", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_One", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(bool) }, null)!.GetParameters()[1]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "boolean", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_One", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(bool) }, null)!.GetParameters()[2])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -59,34 +41,10 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             __InvokeTest_MatrixTest_Two__int_int_int_bool, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("MatrixTest_Two", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "i",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Two", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int), typeof(bool) }, null)!.GetParameters()[0]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "i2",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Two", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int), typeof(bool) }, null)!.GetParameters()[1]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "i3",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Two", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int), typeof(bool) }, null)!.GetParameters()[2]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(bool))
-        {
-        Name = "boolean",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Two", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int), typeof(bool) }, null)!.GetParameters()[3]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "i", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Two", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int), typeof(bool) }, null)!.GetParameters()[0]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "i2", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Two", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int), typeof(bool) }, null)!.GetParameters()[1]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "i3", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Two", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int), typeof(bool) }, null)!.GetParameters()[2]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "boolean", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Two", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int), typeof(bool) }, null)!.GetParameters()[3])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -99,27 +57,9 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             __InvokeTest_MatrixTest_Enum__int_TestEnum_TestEnum_, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("MatrixTest_Enum", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "i",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Enum", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::TUnit.TestProject.TestEnum), typeof(global::TUnit.TestProject.TestEnum?) }, null)!.GetParameters()[0]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.TestEnum))
-        {
-        Name = "testEnum",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TestEnum)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Enum", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::TUnit.TestProject.TestEnum), typeof(global::TUnit.TestProject.TestEnum?) }, null)!.GetParameters()[1]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.TestEnum?))
-        {
-        Name = "testEnum2",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TestEnum?)),
-        IsNullable = true,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Enum", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::TUnit.TestProject.TestEnum), typeof(global::TUnit.TestProject.TestEnum?) }, null)!.GetParameters()[2]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "i", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Enum", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::TUnit.TestProject.TestEnum), typeof(global::TUnit.TestProject.TestEnum?) }, null)!.GetParameters()[0]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.TestEnum), "testEnum", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TestEnum)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Enum", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::TUnit.TestProject.TestEnum), typeof(global::TUnit.TestProject.TestEnum?) }, null)!.GetParameters()[1]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.TestEnum?), "testEnum2", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TestEnum?)), true, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Enum", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::TUnit.TestProject.TestEnum), typeof(global::TUnit.TestProject.TestEnum?) }, null)!.GetParameters()[2])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -132,20 +72,8 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             __InvokeTest_AutoGenerateBools__string_bool, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("AutoGenerateBools", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(string))
-        {
-        Name = "str",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("AutoGenerateBools", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(bool) }, null)!.GetParameters()[0]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(bool))
-        {
-        Name = "boolean",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("AutoGenerateBools", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(bool) }, null)!.GetParameters()[1]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "str", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("AutoGenerateBools", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(bool) }, null)!.GetParameters()[0]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "boolean", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("AutoGenerateBools", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(bool) }, null)!.GetParameters()[1])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -158,20 +86,8 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             __InvokeTest_AutoGenerateBools2__string_bool_, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("AutoGenerateBools2", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(string))
-        {
-        Name = "str",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("AutoGenerateBools2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(bool?) }, null)!.GetParameters()[0]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(bool?))
-        {
-        Name = "boolean",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool?)),
-        IsNullable = true,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("AutoGenerateBools2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(bool?) }, null)!.GetParameters()[1]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "str", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("AutoGenerateBools2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(bool?) }, null)!.GetParameters()[0]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool?), "boolean", new global::TUnit.Core.ConcreteType(typeof(bool?)), true, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("AutoGenerateBools2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(bool?) }, null)!.GetParameters()[1])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -184,20 +100,8 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             __InvokeTest_ImplicitConversion__OneOf_TestEnum__TestEnum2__bool, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("ImplicitConversion", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>))
-        {
-        Name = "enum",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("ImplicitConversion", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>), typeof(bool) }, null)!.GetParameters()[0]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(bool))
-        {
-        Name = "boolean",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("ImplicitConversion", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>), typeof(bool) }, null)!.GetParameters()[1]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>), "enum", new global::TUnit.Core.ConcreteType(typeof(OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("ImplicitConversion", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>), typeof(bool) }, null)!.GetParameters()[0]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "boolean", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("ImplicitConversion", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>), typeof(bool) }, null)!.GetParameters()[1])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -210,20 +114,8 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             __InvokeTest_ExcludingAutoGeneratedMatrixValues__CountToTenEnum_bool, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("ExcludingAutoGeneratedMatrixValues", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum))
-        {
-        Name = "enum",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("ExcludingAutoGeneratedMatrixValues", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum), typeof(bool) }, null)!.GetParameters()[0]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(bool))
-        {
-        Name = "boolean",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("ExcludingAutoGeneratedMatrixValues", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum), typeof(bool) }, null)!.GetParameters()[1]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum), "enum", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("ExcludingAutoGeneratedMatrixValues", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum), typeof(bool) }, null)!.GetParameters()[0]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "boolean", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("ExcludingAutoGeneratedMatrixValues", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum), typeof(bool) }, null)!.GetParameters()[1])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -236,13 +128,7 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             __InvokeTest_Method1__int, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Method1", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "item",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Method1", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "item", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Method1", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -255,13 +141,7 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             __InvokeTest_Method2__int, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Method2", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "item",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Method2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "item", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Method2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -274,13 +154,7 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             __InvokeTest_Method3__int, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Method3", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "item",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Method3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "item", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Method3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -293,13 +167,7 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             __InvokeTest_Method4__int, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Method4", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "item",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Method4", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "item", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Method4", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -312,20 +180,8 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             __InvokeTest_Exclusion__int_int, __CreateAttributes_1, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Exclusion", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "item",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Exclusion", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int) }, null)!.GetParameters()[0]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "item2",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Exclusion", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int) }, null)!.GetParameters()[1]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "item", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Exclusion", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int) }, null)!.GetParameters()[0]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "item2", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Exclusion", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int) }, null)!.GetParameters()[1])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -338,20 +194,8 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             __InvokeTest_MatrixMethod_WithEnumParameter_UsesOnlyMethodValues__bool_CountToTenEnum, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("MatrixMethod_WithEnumParameter_UsesOnlyMethodValues", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(bool))
-        {
-        Name = "flag",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixMethod_WithEnumParameter_UsesOnlyMethodValues", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum) }, null)!.GetParameters()[0]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum))
-        {
-        Name = "enum",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixMethod_WithEnumParameter_UsesOnlyMethodValues", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum) }, null)!.GetParameters()[1]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "flag", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixMethod_WithEnumParameter_UsesOnlyMethodValues", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum) }, null)!.GetParameters()[0]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum), "enum", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixMethod_WithEnumParameter_UsesOnlyMethodValues", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum) }, null)!.GetParameters()[1])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -844,27 +688,9 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             __InvokeTest_MatrixTest_One__string_int_bool, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("MatrixTest_One", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(string))
-    {
-    Name = "str",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_One", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(bool) }, null)!.GetParameters()[0]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(int))
-    {
-    Name = "i",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_One", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(bool) }, null)!.GetParameters()[1]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(bool))
-    {
-    Name = "boolean",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_One", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(bool) }, null)!.GetParameters()[2]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "str", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_One", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(bool) }, null)!.GetParameters()[0]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "i", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_One", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(bool) }, null)!.GetParameters()[1]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "boolean", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_One", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(bool) }, null)!.GetParameters()[2])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -893,34 +719,10 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             __InvokeTest_MatrixTest_Two__int_int_int_bool, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("MatrixTest_Two", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(int))
-    {
-    Name = "i",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Two", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int), typeof(bool) }, null)!.GetParameters()[0]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(int))
-    {
-    Name = "i2",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Two", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int), typeof(bool) }, null)!.GetParameters()[1]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(int))
-    {
-    Name = "i3",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Two", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int), typeof(bool) }, null)!.GetParameters()[2]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(bool))
-    {
-    Name = "boolean",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Two", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int), typeof(bool) }, null)!.GetParameters()[3]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "i", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Two", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int), typeof(bool) }, null)!.GetParameters()[0]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "i2", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Two", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int), typeof(bool) }, null)!.GetParameters()[1]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "i3", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Two", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int), typeof(bool) }, null)!.GetParameters()[2]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "boolean", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Two", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int), typeof(bool) }, null)!.GetParameters()[3])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -949,27 +751,9 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             __InvokeTest_MatrixTest_Enum__int_TestEnum_TestEnum_, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("MatrixTest_Enum", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(int))
-    {
-    Name = "i",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Enum", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::TUnit.TestProject.TestEnum), typeof(global::TUnit.TestProject.TestEnum?) }, null)!.GetParameters()[0]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.TestEnum))
-    {
-    Name = "testEnum",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TestEnum)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Enum", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::TUnit.TestProject.TestEnum), typeof(global::TUnit.TestProject.TestEnum?) }, null)!.GetParameters()[1]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.TestEnum?))
-    {
-    Name = "testEnum2",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TestEnum?)),
-    IsNullable = true,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Enum", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::TUnit.TestProject.TestEnum), typeof(global::TUnit.TestProject.TestEnum?) }, null)!.GetParameters()[2]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "i", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Enum", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::TUnit.TestProject.TestEnum), typeof(global::TUnit.TestProject.TestEnum?) }, null)!.GetParameters()[0]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.TestEnum), "testEnum", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TestEnum)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Enum", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::TUnit.TestProject.TestEnum), typeof(global::TUnit.TestProject.TestEnum?) }, null)!.GetParameters()[1]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.TestEnum?), "testEnum2", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TestEnum?)), true, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Enum", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::TUnit.TestProject.TestEnum), typeof(global::TUnit.TestProject.TestEnum?) }, null)!.GetParameters()[2])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -998,20 +782,8 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             __InvokeTest_AutoGenerateBools__string_bool, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("AutoGenerateBools", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(string))
-    {
-    Name = "str",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("AutoGenerateBools", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(bool) }, null)!.GetParameters()[0]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(bool))
-    {
-    Name = "boolean",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("AutoGenerateBools", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(bool) }, null)!.GetParameters()[1]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "str", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("AutoGenerateBools", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(bool) }, null)!.GetParameters()[0]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "boolean", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("AutoGenerateBools", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(bool) }, null)!.GetParameters()[1])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -1040,20 +812,8 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             __InvokeTest_AutoGenerateBools2__string_bool_, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("AutoGenerateBools2", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(string))
-    {
-    Name = "str",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("AutoGenerateBools2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(bool?) }, null)!.GetParameters()[0]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(bool?))
-    {
-    Name = "boolean",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool?)),
-    IsNullable = true,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("AutoGenerateBools2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(bool?) }, null)!.GetParameters()[1]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "str", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("AutoGenerateBools2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(bool?) }, null)!.GetParameters()[0]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool?), "boolean", new global::TUnit.Core.ConcreteType(typeof(bool?)), true, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("AutoGenerateBools2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(bool?) }, null)!.GetParameters()[1])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -1082,20 +842,8 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             __InvokeTest_ImplicitConversion__OneOf_TestEnum__TestEnum2__bool, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("ImplicitConversion", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>))
-    {
-    Name = "enum",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("ImplicitConversion", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>), typeof(bool) }, null)!.GetParameters()[0]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(bool))
-    {
-    Name = "boolean",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("ImplicitConversion", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>), typeof(bool) }, null)!.GetParameters()[1]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>), "enum", new global::TUnit.Core.ConcreteType(typeof(OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("ImplicitConversion", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>), typeof(bool) }, null)!.GetParameters()[0]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "boolean", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("ImplicitConversion", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>), typeof(bool) }, null)!.GetParameters()[1])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -1124,20 +872,8 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             __InvokeTest_ExcludingAutoGeneratedMatrixValues__CountToTenEnum_bool, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("ExcludingAutoGeneratedMatrixValues", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum))
-    {
-    Name = "enum",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("ExcludingAutoGeneratedMatrixValues", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum), typeof(bool) }, null)!.GetParameters()[0]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(bool))
-    {
-    Name = "boolean",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("ExcludingAutoGeneratedMatrixValues", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum), typeof(bool) }, null)!.GetParameters()[1]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum), "enum", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("ExcludingAutoGeneratedMatrixValues", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum), typeof(bool) }, null)!.GetParameters()[0]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "boolean", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("ExcludingAutoGeneratedMatrixValues", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum), typeof(bool) }, null)!.GetParameters()[1])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -1166,13 +902,7 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             __InvokeTest_Method1__int, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Method1", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(int))
-    {
-    Name = "item",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Method1", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "item", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Method1", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -1201,13 +931,7 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             __InvokeTest_Method2__int, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Method2", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(int))
-    {
-    Name = "item",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Method2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "item", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Method2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -1236,13 +960,7 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             __InvokeTest_Method3__int, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Method3", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(int))
-    {
-    Name = "item",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Method3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "item", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Method3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -1271,13 +989,7 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             __InvokeTest_Method4__int, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Method4", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(int))
-    {
-    Name = "item",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Method4", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "item", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Method4", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -1306,20 +1018,8 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             __InvokeTest_Exclusion__int_int, __CreateAttributes_1, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Exclusion", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(int))
-    {
-    Name = "item",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Exclusion", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int) }, null)!.GetParameters()[0]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(int))
-    {
-    Name = "item2",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Exclusion", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int) }, null)!.GetParameters()[1]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "item", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Exclusion", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int) }, null)!.GetParameters()[0]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "item2", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Exclusion", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int) }, null)!.GetParameters()[1])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -1348,20 +1048,8 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
             __InvokeTest_MatrixMethod_WithEnumParameter_UsesOnlyMethodValues__bool_CountToTenEnum, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("MatrixMethod_WithEnumParameter_UsesOnlyMethodValues", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(bool))
-    {
-    Name = "flag",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixMethod_WithEnumParameter_UsesOnlyMethodValues", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum) }, null)!.GetParameters()[0]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum))
-    {
-    Name = "enum",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixMethod_WithEnumParameter_UsesOnlyMethodValues", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum) }, null)!.GetParameters()[1]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "flag", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixMethod_WithEnumParameter_UsesOnlyMethodValues", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum) }, null)!.GetParameters()[0]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum), "enum", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixMethod_WithEnumParameter_UsesOnlyMethodValues", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum) }, null)!.GetParameters()[1])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {

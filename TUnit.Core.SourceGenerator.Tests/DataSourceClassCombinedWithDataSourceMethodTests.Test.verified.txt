@@ -18,13 +18,7 @@ internal static class TUnit_TestProject_DataSourceClassCombinedWithDataSourceMet
             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
             Parameters = new global::TUnit.Core.ParameterMetadata[]
             {
-                new global::TUnit.Core.ParameterMetadata(typeof(int))
-                {
-                    Name = "i",
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-                    IsNullable = false,
-                    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
-                }
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "i", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0])
             },
             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
             Parent = null
@@ -35,13 +29,7 @@ internal static class TUnit_TestProject_DataSourceClassCombinedWithDataSourceMet
             __InvokeTest_DataSourceClassCombinedWithDataSourceMethodTest__int, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("DataSourceClassCombinedWithDataSourceMethodTest", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "i",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod).GetMethod("DataSourceClassCombinedWithDataSourceMethodTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "i", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod).GetMethod("DataSourceClassCombinedWithDataSourceMethodTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -185,13 +173,7 @@ internal static class TUnit_TestProject_DataSourceClassCombinedWithDataSourceMet
             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
             Parameters = new global::TUnit.Core.ParameterMetadata[]
             {
-                new global::TUnit.Core.ParameterMetadata(typeof(int))
-                {
-                    Name = "i",
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-                    IsNullable = false,
-                    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
-                }
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "i", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0])
             },
             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
             Parent = null
@@ -202,13 +184,7 @@ internal static class TUnit_TestProject_DataSourceClassCombinedWithDataSourceMet
             __InvokeTest_DataSourceClassCombinedWithDataSourceMethodTest__int, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("DataSourceClassCombinedWithDataSourceMethodTest", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(int))
-    {
-    Name = "i",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod).GetMethod("DataSourceClassCombinedWithDataSourceMethodTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "i", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod).GetMethod("DataSourceClassCombinedWithDataSourceMethodTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {

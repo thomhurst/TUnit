@@ -26,13 +26,7 @@ internal static class TUnit_TestProject_ArgsAsArrayTests__TestSource
             __InvokeTest_Params__string__, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Params", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(string[]))
-        {
-        Name = "arguments",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string[])),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Params", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string[]) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "arguments", new global::TUnit.Core.ConcreteType(typeof(string[])), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Params", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string[]) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -45,13 +39,7 @@ internal static class TUnit_TestProject_ArgsAsArrayTests__TestSource
             __InvokeTest_ParamsEnumerable__IEnumerable_string_, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("ParamsEnumerable", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(global::System.Collections.Generic.IEnumerable<string>))
-        {
-        Name = "arguments",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Collections.Generic.IEnumerable<string>)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("ParamsEnumerable", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[0]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Collections.Generic.IEnumerable<string>), "arguments", new global::TUnit.Core.ConcreteType(typeof(global::System.Collections.Generic.IEnumerable<string>)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("ParamsEnumerable", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[0])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -64,20 +52,8 @@ internal static class TUnit_TestProject_ArgsAsArrayTests__TestSource
             __InvokeTest_Following_Non_Params__int_IEnumerable_string_, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Following_Non_Params", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
         {
-        new global::TUnit.Core.ParameterMetadata(typeof(int))
-        {
-        Name = "i",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Following_Non_Params", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[0]
-        },
-        new global::TUnit.Core.ParameterMetadata(typeof(global::System.Collections.Generic.IEnumerable<string>))
-        {
-        Name = "arguments",
-        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Collections.Generic.IEnumerable<string>)),
-        IsNullable = false,
-        ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Following_Non_Params", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[1]
-        }
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "i", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Following_Non_Params", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[0]),
+        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Collections.Generic.IEnumerable<string>), "arguments", new global::TUnit.Core.ConcreteType(typeof(global::System.Collections.Generic.IEnumerable<string>)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Following_Non_Params", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[1])
         }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
         {
@@ -311,13 +287,7 @@ internal static class TUnit_TestProject_ArgsAsArrayTests__TestSource
             __InvokeTest_Params__string__, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Params", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(string[]))
-    {
-    Name = "arguments",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string[])),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Params", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string[]) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "arguments", new global::TUnit.Core.ConcreteType(typeof(string[])), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Params", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string[]) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -346,13 +316,7 @@ internal static class TUnit_TestProject_ArgsAsArrayTests__TestSource
             __InvokeTest_ParamsEnumerable__IEnumerable_string_, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("ParamsEnumerable", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(global::System.Collections.Generic.IEnumerable<string>))
-    {
-    Name = "arguments",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Collections.Generic.IEnumerable<string>)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("ParamsEnumerable", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[0]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Collections.Generic.IEnumerable<string>), "arguments", new global::TUnit.Core.ConcreteType(typeof(global::System.Collections.Generic.IEnumerable<string>)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("ParamsEnumerable", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[0])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {
@@ -381,20 +345,8 @@ internal static class TUnit_TestProject_ArgsAsArrayTests__TestSource
             __InvokeTest_Following_Non_Params__int_IEnumerable_string_, __CreateAttributes_0, CreateInstance,
             global::TUnit.Core.MethodMetadataFactory.Create("Following_Non_Params", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
     {
-    new global::TUnit.Core.ParameterMetadata(typeof(int))
-    {
-    Name = "i",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Following_Non_Params", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[0]
-    },
-    new global::TUnit.Core.ParameterMetadata(typeof(global::System.Collections.Generic.IEnumerable<string>))
-    {
-    Name = "arguments",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Collections.Generic.IEnumerable<string>)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Following_Non_Params", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[1]
-    }
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "i", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Following_Non_Params", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[0]),
+    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Collections.Generic.IEnumerable<string>), "arguments", new global::TUnit.Core.ConcreteType(typeof(global::System.Collections.Generic.IEnumerable<string>)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Following_Non_Params", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[1])
     }),
             dataSources: new global::TUnit.Core.IDataSourceAttribute[]
     {

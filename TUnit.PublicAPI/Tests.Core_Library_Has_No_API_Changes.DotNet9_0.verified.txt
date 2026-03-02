@@ -1098,10 +1098,16 @@ namespace
         public bool IsParams { get; }
         public required string Name { get; init; }
         public int Position { get; init; }
-        public required .ParameterInfo ReflectionInfo { get; set; }
+        public .ParameterInfo ReflectionInfo { get; set; }
+        public <.ParameterInfo>? ReflectionInfoFactory { get; init; }
         [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties)]
         public  Type { get; init; }
         public required .TypeInfo TypeInfo { get; init; }
+    }
+    public static class ParameterMetadataFactory
+    {
+        [.("ReflectionAnalysis", "IL2067", Justification="Factory is only called from generated code that always passes concrete types")]
+        public static .ParameterMetadata Create([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties)]  type, string name, .TypeInfo typeInfo, bool isNullable, <.ParameterInfo>? reflectionInfoFactory = null) { }
     }
     [.DebuggerDisplay("{Type} {Name}")]
     public class ParameterMetadata<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties)]  T> : .ParameterMetadata, <.ParameterMetadata<T>>

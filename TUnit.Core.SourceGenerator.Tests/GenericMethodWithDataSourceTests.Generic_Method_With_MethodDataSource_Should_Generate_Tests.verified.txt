@@ -266,13 +266,7 @@ internal sealed class TUnit_TestProject_Bugs__4431_GenericClassWithMethodDataSou
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
-                    new global::TUnit.Core.ParameterMetadata(typeof(int))
-                    {
-                        Name = "number",
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-                        IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<>).GetMethod("Should_Have_Number", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
-                    }
+                    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "number", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<>).GetMethod("Should_Have_Number", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0])
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<>", new global::TUnit.Core.ClassMetadata
                 {
@@ -355,13 +349,7 @@ internal sealed class TUnit_TestProject_Bugs__4431_GenericClassWithMethodDataSou
                         ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                         Parameters = new global::TUnit.Core.ParameterMetadata[]
                         {
-                            new global::TUnit.Core.ParameterMetadata(typeof(int))
-                            {
-                                Name = "number",
-                                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-                                IsNullable = false,
-                                ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<>).GetMethod("Should_Have_Number", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
-                            }
+                            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "number", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<>).GetMethod("Should_Have_Number", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0])
                         },
                         Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<>", new global::TUnit.Core.ClassMetadata
                         {
@@ -450,13 +438,7 @@ internal sealed class TUnit_TestProject_Bugs__4431_GenericClassWithMethodDataSou
                         ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                         Parameters = new global::TUnit.Core.ParameterMetadata[]
                         {
-                            new global::TUnit.Core.ParameterMetadata(typeof(int))
-                            {
-                                Name = "number",
-                                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
-                                IsNullable = false,
-                                ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<>).GetMethod("Should_Have_Number", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
-                            }
+                            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "number", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<>).GetMethod("Should_Have_Number", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0])
                         },
                         Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<>", new global::TUnit.Core.ClassMetadata
                         {
@@ -855,13 +837,7 @@ internal sealed class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMet
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
-                    new global::TUnit.Core.ParameterMetadata(typeof(string))
-                    {
-                        Name = "input",
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-                        IsNullable = false,
-                        ReflectionInfo = global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "GenericMethod_With_DataSource" && m.GetParameters().Length == 1)?.GetParameters()[0]!
-                    }
+                    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "input", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "GenericMethod_With_DataSource" && m.GetParameters().Length == 1)?.GetParameters()[0]!)
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource", new global::TUnit.Core.ClassMetadata
                 {
@@ -939,13 +915,7 @@ internal sealed class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMet
                         ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                         Parameters = new global::TUnit.Core.ParameterMetadata[]
                         {
-                            new global::TUnit.Core.ParameterMetadata(typeof(string))
-                            {
-                                Name = "input",
-                                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-                                IsNullable = false,
-                                ReflectionInfo = global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "GenericMethod_With_DataSource" && m.GetParameters().Length == 1)?.GetParameters()[0]!
-                            }
+                            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "input", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "GenericMethod_With_DataSource" && m.GetParameters().Length == 1)?.GetParameters()[0]!)
                         },
                         Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource", new global::TUnit.Core.ClassMetadata
                         {
@@ -1035,13 +1005,7 @@ internal sealed class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMet
                         ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                         Parameters = new global::TUnit.Core.ParameterMetadata[]
                         {
-                            new global::TUnit.Core.ParameterMetadata(typeof(string))
-                            {
-                                Name = "input",
-                                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
-                                IsNullable = false,
-                                ReflectionInfo = global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "GenericMethod_With_DataSource" && m.GetParameters().Length == 1)?.GetParameters()[0]!
-                            }
+                            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "input", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "GenericMethod_With_DataSource" && m.GetParameters().Length == 1)?.GetParameters()[0]!)
                         },
                         Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource", new global::TUnit.Core.ClassMetadata
                         {
@@ -2559,13 +2523,7 @@ internal sealed class TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWith
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
-                    new global::TUnit.Core.ParameterMetadata(typeof(bool))
-                    {
-                        Name = "flag",
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-                        IsNullable = false,
-                        ReflectionInfo = global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "FullyGeneric_With_DataSources" && m.GetParameters().Length == 1)?.GetParameters()[0]!
-                    }
+                    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "flag", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "FullyGeneric_With_DataSources" && m.GetParameters().Length == 1)?.GetParameters()[0]!)
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>", new global::TUnit.Core.ClassMetadata
                 {
@@ -2690,13 +2648,7 @@ internal sealed class TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWith
                         ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                         Parameters = new global::TUnit.Core.ParameterMetadata[]
                         {
-                            new global::TUnit.Core.ParameterMetadata(typeof(bool))
-                            {
-                                Name = "flag",
-                                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-                                IsNullable = false,
-                                ReflectionInfo = global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "FullyGeneric_With_DataSources" && m.GetParameters().Length == 1)?.GetParameters()[0]!
-                            }
+                            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "flag", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "FullyGeneric_With_DataSources" && m.GetParameters().Length == 1)?.GetParameters()[0]!)
                         },
                         Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>", new global::TUnit.Core.ClassMetadata
                         {
@@ -2827,13 +2779,7 @@ internal sealed class TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWith
                         ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                         Parameters = new global::TUnit.Core.ParameterMetadata[]
                         {
-                            new global::TUnit.Core.ParameterMetadata(typeof(bool))
-                            {
-                                Name = "flag",
-                                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-                                IsNullable = false,
-                                ReflectionInfo = global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "FullyGeneric_With_DataSources" && m.GetParameters().Length == 1)?.GetParameters()[0]!
-                            }
+                            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "flag", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "FullyGeneric_With_DataSources" && m.GetParameters().Length == 1)?.GetParameters()[0]!)
                         },
                         Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>", new global::TUnit.Core.ClassMetadata
                         {
@@ -2964,13 +2910,7 @@ internal sealed class TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWith
                         ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                         Parameters = new global::TUnit.Core.ParameterMetadata[]
                         {
-                            new global::TUnit.Core.ParameterMetadata(typeof(bool))
-                            {
-                                Name = "flag",
-                                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-                                IsNullable = false,
-                                ReflectionInfo = global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "FullyGeneric_With_DataSources" && m.GetParameters().Length == 1)?.GetParameters()[0]!
-                            }
+                            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "flag", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "FullyGeneric_With_DataSources" && m.GetParameters().Length == 1)?.GetParameters()[0]!)
                         },
                         Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>", new global::TUnit.Core.ClassMetadata
                         {
@@ -3101,13 +3041,7 @@ internal sealed class TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWith
                         ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                         Parameters = new global::TUnit.Core.ParameterMetadata[]
                         {
-                            new global::TUnit.Core.ParameterMetadata(typeof(bool))
-                            {
-                                Name = "flag",
-                                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
-                                IsNullable = false,
-                                ReflectionInfo = global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "FullyGeneric_With_DataSources" && m.GetParameters().Length == 1)?.GetParameters()[0]!
-                            }
+                            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "flag", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "FullyGeneric_With_DataSources" && m.GetParameters().Length == 1)?.GetParameters()[0]!)
                         },
                         Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>", new global::TUnit.Core.ClassMetadata
                         {
