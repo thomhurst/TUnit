@@ -12,6 +12,9 @@ namespace TUnit.AspNetCore;
 /// </summary>
 internal sealed class ActivityPropagationHandler : DelegatingHandler
 {
+    // Intentionally process-scoped: lives for the test process lifetime and is
+    // cleaned up on process exit. Not disposed explicitly because multiple handler
+    // instances share this source across concurrent tests.
     private static readonly ActivitySource HttpActivitySource = new("TUnit.AspNetCore.Http");
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
