@@ -71,16 +71,16 @@ internal static class TUnit_TestProject_AbstractTests_ConcreteClass2__TestSource
     private static global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> __Materialize_SecondTest(string testSessionId)
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AbstractTests.ConcreteClass2", new global::TUnit.Core.ClassMetadata
-    {
-    Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2)),
-    Name = "ConcreteClass2",
-    Namespace = "TUnit.TestProject.AbstractTests",
-    Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-    Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-    Parent = null
-    });
+        {
+        Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2)),
+        Name = "ConcreteClass2",
+        Namespace = "TUnit.TestProject.AbstractTests",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+        });
         var __classType = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.AbstractTests.ConcreteClass2>(
             "SecondTest", "SecondTest", 11,

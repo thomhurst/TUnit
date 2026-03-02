@@ -2552,9 +2552,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var filePath = (testMethod.FilePath ?? "").Replace("\\", "\\\\");
 
         // Inline shared locals (can't reference GetTests locals from a separate method)
-        var classMetadataExpr = MetadataGenerationHelper.GenerateClassMetadataGetOrAddWithParentExpression(testMethod.TypeSymbol, writer.IndentLevel);
-        writer.AppendLine($"var __classMetadata = {classMetadataExpr};");
-        writer.AppendLine($"var __classType = typeof({className});");
+        // Use AppendRaw to properly indent the multi-line ClassMetadata expression
+        writer.AppendRaw(PreGenerateSharedLocals(testMethod.TypeSymbol, className));
 
         // Build MethodMetadata factory call
         var methodMetadataCall = GenerateMethodMetadataFactoryCall(testMethod.MethodSymbol);

@@ -408,16 +408,16 @@ internal static class TUnit_TestProject_ConstantArgumentsTests__TestSource
     private static global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> __Materialize_String1__string(string testSessionId)
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ConstantArgumentsTests", new global::TUnit.Core.ClassMetadata
-    {
-    Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ConstantArgumentsTests)),
-    Name = "ConstantArgumentsTests",
-    Namespace = "TUnit.TestProject",
-    Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-    Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-    Parent = null
-    });
+        {
+        Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ConstantArgumentsTests)),
+        Name = "ConstantArgumentsTests",
+        Namespace = "TUnit.TestProject",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+        });
         var __classType = typeof(global::TUnit.TestProject.ConstantArgumentsTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.ConstantArgumentsTests>(
             "String1", "String1", 16,
@@ -443,16 +443,16 @@ internal static class TUnit_TestProject_ConstantArgumentsTests__TestSource
     private static global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> __Materialize_Int__int(string testSessionId)
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ConstantArgumentsTests", new global::TUnit.Core.ClassMetadata
-    {
-    Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ConstantArgumentsTests)),
-    Name = "ConstantArgumentsTests",
-    Namespace = "TUnit.TestProject",
-    Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-    Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-    Parent = null
-    });
+        {
+        Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ConstantArgumentsTests)),
+        Name = "ConstantArgumentsTests",
+        Namespace = "TUnit.TestProject",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+        });
         var __classType = typeof(global::TUnit.TestProject.ConstantArgumentsTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.ConstantArgumentsTests>(
             "Int", "Int", 23,
@@ -478,16 +478,16 @@ internal static class TUnit_TestProject_ConstantArgumentsTests__TestSource
     private static global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> __Materialize_Double__double(string testSessionId)
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ConstantArgumentsTests", new global::TUnit.Core.ClassMetadata
-    {
-    Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ConstantArgumentsTests)),
-    Name = "ConstantArgumentsTests",
-    Namespace = "TUnit.TestProject",
-    Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-    Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-    Parent = null
-    });
+        {
+        Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ConstantArgumentsTests)),
+        Name = "ConstantArgumentsTests",
+        Namespace = "TUnit.TestProject",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+        });
         var __classType = typeof(global::TUnit.TestProject.ConstantArgumentsTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.ConstantArgumentsTests>(
             "Double", "Double", 30,
@@ -513,16 +513,16 @@ internal static class TUnit_TestProject_ConstantArgumentsTests__TestSource
     private static global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> __Materialize_Float__float(string testSessionId)
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ConstantArgumentsTests", new global::TUnit.Core.ClassMetadata
-    {
-    Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ConstantArgumentsTests)),
-    Name = "ConstantArgumentsTests",
-    Namespace = "TUnit.TestProject",
-    Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-    Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-    Parent = null
-    });
+        {
+        Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ConstantArgumentsTests)),
+        Name = "ConstantArgumentsTests",
+        Namespace = "TUnit.TestProject",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+        });
         var __classType = typeof(global::TUnit.TestProject.ConstantArgumentsTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.ConstantArgumentsTests>(
             "Float", "Float", 37,
@@ -548,16 +548,16 @@ internal static class TUnit_TestProject_ConstantArgumentsTests__TestSource
     private static global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> __Materialize_Long__long(string testSessionId)
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ConstantArgumentsTests", new global::TUnit.Core.ClassMetadata
-    {
-    Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ConstantArgumentsTests)),
-    Name = "ConstantArgumentsTests",
-    Namespace = "TUnit.TestProject",
-    Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-    Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-    Parent = null
-    });
+        {
+        Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ConstantArgumentsTests)),
+        Name = "ConstantArgumentsTests",
+        Namespace = "TUnit.TestProject",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+        });
         var __classType = typeof(global::TUnit.TestProject.ConstantArgumentsTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.ConstantArgumentsTests>(
             "Long", "Long", 44,
@@ -583,16 +583,16 @@ internal static class TUnit_TestProject_ConstantArgumentsTests__TestSource
     private static global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> __Materialize_UInt__uint(string testSessionId)
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ConstantArgumentsTests", new global::TUnit.Core.ClassMetadata
-    {
-    Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ConstantArgumentsTests)),
-    Name = "ConstantArgumentsTests",
-    Namespace = "TUnit.TestProject",
-    Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-    Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-    Parent = null
-    });
+        {
+        Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ConstantArgumentsTests)),
+        Name = "ConstantArgumentsTests",
+        Namespace = "TUnit.TestProject",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+        });
         var __classType = typeof(global::TUnit.TestProject.ConstantArgumentsTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.ConstantArgumentsTests>(
             "UInt", "UInt", 51,
@@ -618,16 +618,16 @@ internal static class TUnit_TestProject_ConstantArgumentsTests__TestSource
     private static global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> __Materialize_ULong__ulong(string testSessionId)
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ConstantArgumentsTests", new global::TUnit.Core.ClassMetadata
-    {
-    Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ConstantArgumentsTests)),
-    Name = "ConstantArgumentsTests",
-    Namespace = "TUnit.TestProject",
-    Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-    Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-    Parent = null
-    });
+        {
+        Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ConstantArgumentsTests)),
+        Name = "ConstantArgumentsTests",
+        Namespace = "TUnit.TestProject",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+        });
         var __classType = typeof(global::TUnit.TestProject.ConstantArgumentsTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.ConstantArgumentsTests>(
             "ULong", "ULong", 58,

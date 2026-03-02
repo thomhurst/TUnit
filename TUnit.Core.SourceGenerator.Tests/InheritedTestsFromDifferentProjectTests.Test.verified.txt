@@ -223,16 +223,16 @@ internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
     private static global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> __Materialize_Test(string testSessionId)
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests", new global::TUnit.Core.ClassMetadata
-    {
-    Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)),
-    Name = "InheritedTestsFromDifferentProjectTests",
-    Namespace = "TUnit.TestProject",
-    Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-    Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-    Parent = null
-    });
+        {
+        Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)),
+        Name = "InheritedTestsFromDifferentProjectTests",
+        Namespace = "TUnit.TestProject",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+        });
         var __classType = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(
             "Test", "Test", 9,
@@ -245,16 +245,16 @@ internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
     private static global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> __Materialize_GenericMethodDataSource__string(string testSessionId)
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests", new global::TUnit.Core.ClassMetadata
-    {
-    Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)),
-    Name = "InheritedTestsFromDifferentProjectTests",
-    Namespace = "TUnit.TestProject",
-    Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-    Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-    Parent = null
-    });
+        {
+        Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)),
+        Name = "InheritedTestsFromDifferentProjectTests",
+        Namespace = "TUnit.TestProject",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+        });
         var __classType = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(
             "GenericMethodDataSource", "GenericMethodDataSource", 14,
@@ -280,16 +280,16 @@ internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
     private static global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> __Materialize_NonGenericMethodDataSource__string(string testSessionId)
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests", new global::TUnit.Core.ClassMetadata
-    {
-    Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)),
-    Name = "InheritedTestsFromDifferentProjectTests",
-    Namespace = "TUnit.TestProject",
-    Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-    Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-    Parent = null
-    });
+        {
+        Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)),
+        Name = "InheritedTestsFromDifferentProjectTests",
+        Namespace = "TUnit.TestProject",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+        });
         var __classType = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(
             "NonGenericMethodDataSource", "NonGenericMethodDataSource", 20,
@@ -326,16 +326,16 @@ internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
     private static global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> __Materialize_VerifyInheritedCategoriesAreAvailable(string testSessionId)
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests", new global::TUnit.Core.ClassMetadata
-    {
-    Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)),
-    Name = "InheritedTestsFromDifferentProjectTests",
-    Namespace = "TUnit.TestProject",
-    Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-    Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-    Parent = null
-    });
+        {
+        Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)),
+        Name = "InheritedTestsFromDifferentProjectTests",
+        Namespace = "TUnit.TestProject",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+        });
         var __classType = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(
             "VerifyInheritedCategoriesAreAvailable", "VerifyInheritedCategoriesAreAvailable", 26,

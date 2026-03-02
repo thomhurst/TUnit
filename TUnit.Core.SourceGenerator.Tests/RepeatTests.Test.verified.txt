@@ -160,16 +160,16 @@ internal static class TUnit_TestProject_RepeatTests__TestSource
     private static global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> __Materialize_One(string testSessionId)
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.RepeatTests", new global::TUnit.Core.ClassMetadata
-    {
-    Type = typeof(global::TUnit.TestProject.RepeatTests),
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.RepeatTests)),
-    Name = "RepeatTests",
-    Namespace = "TUnit.TestProject",
-    Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-    Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-    Parent = null
-    });
+        {
+        Type = typeof(global::TUnit.TestProject.RepeatTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.RepeatTests)),
+        Name = "RepeatTests",
+        Namespace = "TUnit.TestProject",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+        });
         var __classType = typeof(global::TUnit.TestProject.RepeatTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.RepeatTests>(
             "One", "One", 9,
@@ -183,16 +183,16 @@ internal static class TUnit_TestProject_RepeatTests__TestSource
     private static global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> __Materialize_Two(string testSessionId)
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.RepeatTests", new global::TUnit.Core.ClassMetadata
-    {
-    Type = typeof(global::TUnit.TestProject.RepeatTests),
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.RepeatTests)),
-    Name = "RepeatTests",
-    Namespace = "TUnit.TestProject",
-    Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-    Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-    Parent = null
-    });
+        {
+        Type = typeof(global::TUnit.TestProject.RepeatTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.RepeatTests)),
+        Name = "RepeatTests",
+        Namespace = "TUnit.TestProject",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+        });
         var __classType = typeof(global::TUnit.TestProject.RepeatTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.RepeatTests>(
             "Two", "Two", 16,
@@ -206,16 +206,16 @@ internal static class TUnit_TestProject_RepeatTests__TestSource
     private static global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> __Materialize_Three(string testSessionId)
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.RepeatTests", new global::TUnit.Core.ClassMetadata
-    {
-    Type = typeof(global::TUnit.TestProject.RepeatTests),
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.RepeatTests)),
-    Name = "RepeatTests",
-    Namespace = "TUnit.TestProject",
-    Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-    Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-    Parent = null
-    });
+        {
+        Type = typeof(global::TUnit.TestProject.RepeatTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.RepeatTests)),
+        Name = "RepeatTests",
+        Namespace = "TUnit.TestProject",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+        });
         var __classType = typeof(global::TUnit.TestProject.RepeatTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.RepeatTests>(
             "Three", "Three", 23,

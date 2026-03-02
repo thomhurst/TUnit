@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 
 namespace TUnit.Core;
@@ -8,6 +9,7 @@ namespace TUnit.Core;
 /// (reference types share native code), so replacing 1,000 inline object initializers with calls
 /// to this shared factory dramatically reduces JIT-compiled native code size.
 /// </summary>
+[EditorBrowsable(EditorBrowsableState.Never)]
 public static class TestMetadataFactory
 {
     [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2091",

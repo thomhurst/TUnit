@@ -133,16 +133,16 @@ internal static class TUnit_TestProject_BasicTests__TestSource
     private static global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> __Materialize_SynchronousTest(string testSessionId)
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BasicTests", new global::TUnit.Core.ClassMetadata
-    {
-    Type = typeof(global::TUnit.TestProject.BasicTests),
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BasicTests)),
-    Name = "BasicTests",
-    Namespace = "TUnit.TestProject",
-    Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-    Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-    Parent = null
-    });
+        {
+        Type = typeof(global::TUnit.TestProject.BasicTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BasicTests)),
+        Name = "BasicTests",
+        Namespace = "TUnit.TestProject",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+        });
         var __classType = typeof(global::TUnit.TestProject.BasicTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.BasicTests>(
             "SynchronousTest", "SynchronousTest", 5,
@@ -155,16 +155,16 @@ internal static class TUnit_TestProject_BasicTests__TestSource
     private static global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> __Materialize_AsynchronousTest(string testSessionId)
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BasicTests", new global::TUnit.Core.ClassMetadata
-    {
-    Type = typeof(global::TUnit.TestProject.BasicTests),
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BasicTests)),
-    Name = "BasicTests",
-    Namespace = "TUnit.TestProject",
-    Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-    Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-    Parent = null
-    });
+        {
+        Type = typeof(global::TUnit.TestProject.BasicTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BasicTests)),
+        Name = "BasicTests",
+        Namespace = "TUnit.TestProject",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+        });
         var __classType = typeof(global::TUnit.TestProject.BasicTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.BasicTests>(
             "AsynchronousTest", "AsynchronousTest", 11,
@@ -177,16 +177,16 @@ internal static class TUnit_TestProject_BasicTests__TestSource
     private static global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> __Materialize_ValueTaskAsynchronousTest(string testSessionId)
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BasicTests", new global::TUnit.Core.ClassMetadata
-    {
-    Type = typeof(global::TUnit.TestProject.BasicTests),
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BasicTests)),
-    Name = "BasicTests",
-    Namespace = "TUnit.TestProject",
-    Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-    Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-    Parent = null
-    });
+        {
+        Type = typeof(global::TUnit.TestProject.BasicTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BasicTests)),
+        Name = "BasicTests",
+        Namespace = "TUnit.TestProject",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+        });
         var __classType = typeof(global::TUnit.TestProject.BasicTests);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.BasicTests>(
             "ValueTaskAsynchronousTest", "ValueTaskAsynchronousTest", 17,

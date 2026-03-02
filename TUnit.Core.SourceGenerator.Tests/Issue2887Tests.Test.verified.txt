@@ -79,25 +79,25 @@ internal static class TUnit_TestProject_Bugs__Issue2887_ActualTestClass__TestSou
     private static global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> __Materialize_Test1(string testSessionId)
     {
         var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._Issue2887.ActualTestClass", new global::TUnit.Core.ClassMetadata
-    {
-    Type = typeof(global::TUnit.TestProject.Bugs._Issue2887.ActualTestClass),
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._Issue2887.ActualTestClass)),
-    Name = "ActualTestClass",
-    Namespace = "TUnit.TestProject.Bugs._Issue2887",
-    Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-    Parameters = new global::TUnit.Core.ParameterMetadata[]
-    {
-    new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Bugs._Issue2887.IServiceProvider))
-    {
-    Name = "serviceProvider",
-    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._Issue2887.IServiceProvider)),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._Issue2887.ActualTestClass).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.Bugs._Issue2887.IServiceProvider) })!.GetParameters()[0]
-    }
-    },
-    Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-    Parent = null
-    });
+        {
+        Type = typeof(global::TUnit.TestProject.Bugs._Issue2887.ActualTestClass),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._Issue2887.ActualTestClass)),
+        Name = "ActualTestClass",
+        Namespace = "TUnit.TestProject.Bugs._Issue2887",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = new global::TUnit.Core.ParameterMetadata[]
+        {
+        new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Bugs._Issue2887.IServiceProvider))
+        {
+        Name = "serviceProvider",
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._Issue2887.IServiceProvider)),
+        IsNullable = false,
+        ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._Issue2887.ActualTestClass).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.Bugs._Issue2887.IServiceProvider) })!.GetParameters()[0]
+        }
+        },
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+        });
         var __classType = typeof(global::TUnit.TestProject.Bugs._Issue2887.ActualTestClass);
         var metadata = global::TUnit.Core.TestMetadataFactory.Create<global::TUnit.TestProject.Bugs._Issue2887.ActualTestClass>(
             "Test1", "Test1", 26,

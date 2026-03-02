@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 
 namespace TUnit.Core;
@@ -7,6 +8,7 @@ namespace TUnit.Core;
 /// Replaces inline <c>new MethodMetadata { ... }</c> object initializers in generated code,
 /// reducing per-method IL size and JIT-compiled native code.
 /// </summary>
+[EditorBrowsable(EditorBrowsableState.Never)]
 public static class MethodMetadataFactory
 {
     [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2067",
