@@ -5,7 +5,7 @@
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
-internal sealed class TUnit_TestProject_PropertySetterTests__TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal static class TUnit_TestProject_PropertySetterTests__TestSource
 {
     #if NET8_0_OR_GREATER
     [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "<Property2>k__BackingField")]
@@ -21,7 +21,7 @@ internal sealed class TUnit_TestProject_PropertySetterTests__TestSource : global
     [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "<Property7>k__BackingField")]
     private static extern ref string GetProperty7BackingField(global::TUnit.TestProject.PropertySetterTests instance);
     #endif
-    public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
+    public static global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
         var metadata_Test = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.PropertySetterTests>
         {
@@ -304,7 +304,7 @@ internal sealed class TUnit_TestProject_PropertySetterTests__TestSource : global
         metadata_Test.UseRuntimeDataGeneration(testSessionId);
         return new global::TUnit.Core.TestMetadata[] { metadata_Test };
     }
-    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    public static global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
         yield return new global::TUnit.Core.TestDescriptor
         {
@@ -641,6 +641,6 @@ internal sealed class TUnit_TestProject_PropertySetterTests__TestSource : global
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     internal static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PropertySetterTests), new TUnit_TestProject_PropertySetterTests__TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PropertySetterTests), TUnit_TestProject_PropertySetterTests__TestSource.GetTests, TUnit_TestProject_PropertySetterTests__TestSource.EnumerateTestDescriptors);
     }
 }

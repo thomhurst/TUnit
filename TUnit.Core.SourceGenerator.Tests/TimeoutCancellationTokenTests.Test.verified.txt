@@ -5,9 +5,9 @@
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
-internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests__TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSource
 {
-    public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
+    public static global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
         var metadata_DefaultTest__CancellationToken = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>
         {
@@ -548,7 +548,7 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
         metadata_MatrixTest__int_CancellationToken.UseRuntimeDataGeneration(testSessionId);
         return new global::TUnit.Core.TestMetadata[] { metadata_DefaultTest__CancellationToken, metadata_BasicTest__CancellationToken, metadata_InheritedTimeoutAttribute__CancellationToken, metadata_DataTest__int_CancellationToken, metadata_DataSourceTest__int_CancellationToken, metadata_MatrixTest__int_CancellationToken };
     }
-    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    public static global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
         yield return new global::TUnit.Core.TestDescriptor
         {
@@ -1369,7 +1369,7 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     internal static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), new TUnit_TestProject_TimeoutCancellationTokenTests__TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), TUnit_TestProject_TimeoutCancellationTokenTests__TestSource.GetTests, TUnit_TestProject_TimeoutCancellationTokenTests__TestSource.EnumerateTestDescriptors);
     }
 }
 
@@ -1383,9 +1383,9 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests__TestSourc
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
-internal sealed class TUnit_TestProject_TimeoutDoesNotFireTests__TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal static class TUnit_TestProject_TimeoutDoesNotFireTests__TestSource
 {
-    public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
+    public static global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
         var metadata_QuickTestDoesNotTimeout__CancellationToken = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.TimeoutDoesNotFireTests>
         {
@@ -1470,7 +1470,7 @@ internal sealed class TUnit_TestProject_TimeoutDoesNotFireTests__TestSource : gl
         metadata_QuickTestDoesNotTimeout__CancellationToken.UseRuntimeDataGeneration(testSessionId);
         return new global::TUnit.Core.TestMetadata[] { metadata_QuickTestDoesNotTimeout__CancellationToken };
     }
-    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    public static global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
         yield return new global::TUnit.Core.TestDescriptor
         {
@@ -1602,7 +1602,7 @@ internal sealed class TUnit_TestProject_TimeoutDoesNotFireTests__TestSource : gl
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     internal static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests), new TUnit_TestProject_TimeoutDoesNotFireTests__TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests), TUnit_TestProject_TimeoutDoesNotFireTests__TestSource.GetTests, TUnit_TestProject_TimeoutDoesNotFireTests__TestSource.EnumerateTestDescriptors);
     }
 }
 
@@ -1616,9 +1616,9 @@ internal sealed class TUnit_TestProject_TimeoutDoesNotFireTests__TestSource : gl
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
-internal sealed class TUnit_TestProject_CancellationTokenTriggeredTests__TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal static class TUnit_TestProject_CancellationTokenTriggeredTests__TestSource
 {
-    public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
+    public static global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
         var metadata_CancellationTokenIsTriggered__CancellationToken = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.CancellationTokenTriggeredTests>
         {
@@ -1703,7 +1703,7 @@ internal sealed class TUnit_TestProject_CancellationTokenTriggeredTests__TestSou
         metadata_CancellationTokenIsTriggered__CancellationToken.UseRuntimeDataGeneration(testSessionId);
         return new global::TUnit.Core.TestMetadata[] { metadata_CancellationTokenIsTriggered__CancellationToken };
     }
-    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    public static global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
         yield return new global::TUnit.Core.TestDescriptor
         {
@@ -1835,6 +1835,6 @@ internal sealed class TUnit_TestProject_CancellationTokenTriggeredTests__TestSou
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     internal static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests), new TUnit_TestProject_CancellationTokenTriggeredTests__TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests), TUnit_TestProject_CancellationTokenTriggeredTests__TestSource.GetTests, TUnit_TestProject_CancellationTokenTriggeredTests__TestSource.EnumerateTestDescriptors);
     }
 }

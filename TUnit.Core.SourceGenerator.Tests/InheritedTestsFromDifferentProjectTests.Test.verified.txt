@@ -5,9 +5,9 @@
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
-internal sealed class TUnit_TestProject_InheritedTestsFromDifferentProjectTests__TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests__TestSource
 {
-    public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
+    public static global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
         var metadata_Test = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>
         {
@@ -202,7 +202,7 @@ internal sealed class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
         metadata_VerifyInheritedCategoriesAreAvailable.UseRuntimeDataGeneration(testSessionId);
         return new global::TUnit.Core.TestMetadata[] { metadata_Test, metadata_GenericMethodDataSource__string, metadata_NonGenericMethodDataSource__string, metadata_VerifyInheritedCategoriesAreAvailable };
     }
-    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    public static global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
         yield return new global::TUnit.Core.TestDescriptor
         {
@@ -552,7 +552,7 @@ internal sealed class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     internal static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), new TUnit_TestProject_InheritedTestsFromDifferentProjectTests__TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), TUnit_TestProject_InheritedTestsFromDifferentProjectTests__TestSource.GetTests, TUnit_TestProject_InheritedTestsFromDifferentProjectTests__TestSource.EnumerateTestDescriptors);
     }
 }
 

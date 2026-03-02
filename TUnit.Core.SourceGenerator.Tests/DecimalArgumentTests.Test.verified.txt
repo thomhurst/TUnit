@@ -5,9 +5,9 @@
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
-internal sealed class TUnit_TestProject_DecimalArgumentTests__TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal static class TUnit_TestProject_DecimalArgumentTests__TestSource
 {
-    public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
+    public static global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
         var metadata_Transfer__decimal_decimal = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.DecimalArgumentTests>
         {
@@ -685,7 +685,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests__TestSource : globa
         metadata_TestMethod__decimal.UseRuntimeDataGeneration(testSessionId);
         return new global::TUnit.Core.TestMetadata[] { metadata_Transfer__decimal_decimal, metadata_SimpleDecimal__decimal, metadata_SmallDecimal__decimal, metadata_MaxDecimal__decimal, metadata_MinDecimal__decimal, metadata_ExplicitDecimalValue__decimal, metadata_MultipleDecimals__decimal_decimal_decimal, metadata_Test__decimal, metadata_TransactionDiscountCalculations__decimal_decimal_decimal_decimal_decimal_bool, metadata_Equality3__decimal, metadata_Equality4__decimal, metadata_TestMethod__decimal };
     }
-    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    public static global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
         yield return new global::TUnit.Core.TestDescriptor
         {
@@ -1835,6 +1835,6 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests__TestSource : globa
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     internal static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new TUnit_TestProject_DecimalArgumentTests__TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), TUnit_TestProject_DecimalArgumentTests__TestSource.GetTests, TUnit_TestProject_DecimalArgumentTests__TestSource.EnumerateTestDescriptors);
     }
 }

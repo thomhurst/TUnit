@@ -5,9 +5,9 @@
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
-internal sealed class TUnit_TestProject_BasicTests__TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal static class TUnit_TestProject_BasicTests__TestSource
 {
-    public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
+    public static global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
         var metadata_SynchronousTest = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.BasicTests>
         {
@@ -128,7 +128,7 @@ internal sealed class TUnit_TestProject_BasicTests__TestSource : global::TUnit.C
         metadata_ValueTaskAsynchronousTest.UseRuntimeDataGeneration(testSessionId);
         return new global::TUnit.Core.TestMetadata[] { metadata_SynchronousTest, metadata_AsynchronousTest, metadata_ValueTaskAsynchronousTest };
     }
-    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    public static global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
         yield return new global::TUnit.Core.TestDescriptor
         {
@@ -353,6 +353,6 @@ internal sealed class TUnit_TestProject_BasicTests__TestSource : global::TUnit.C
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     internal static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.BasicTests), new TUnit_TestProject_BasicTests__TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.BasicTests), TUnit_TestProject_BasicTests__TestSource.GetTests, TUnit_TestProject_BasicTests__TestSource.EnumerateTestDescriptors);
     }
 }

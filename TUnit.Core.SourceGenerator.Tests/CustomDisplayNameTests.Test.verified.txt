@@ -5,9 +5,9 @@
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
-internal sealed class TUnit_TestProject_CustomDisplayNameTests__TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal static class TUnit_TestProject_CustomDisplayNameTests__TestSource
 {
-    public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
+    public static global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
         var metadata_Test = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
         {
@@ -562,7 +562,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests__TestSource : glo
         metadata_NestedClassConstantTest.UseRuntimeDataGeneration(testSessionId);
         return new global::TUnit.Core.TestMetadata[] { metadata_Test, metadata_Test2, metadata_Test3__string_int_bool, metadata_MethodDataSourceTest__string, metadata_TestParameterNamePrefixBug__int_string, metadata_PasswordTest__string, metadata_SameClassConstantTest, metadata_DifferentClassConstantTest, metadata_NestedClassConstantTest };
     }
-    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    public static global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
         yield return new global::TUnit.Core.TestDescriptor
         {
@@ -1487,6 +1487,6 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests__TestSource : glo
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     internal static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), new TUnit_TestProject_CustomDisplayNameTests__TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.CustomDisplayNameTests), TUnit_TestProject_CustomDisplayNameTests__TestSource.GetTests, TUnit_TestProject_CustomDisplayNameTests__TestSource.EnumerateTestDescriptors);
     }
 }

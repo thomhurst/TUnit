@@ -5,9 +5,9 @@
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
-internal sealed class TUnit_TestProject_DataDrivenTests__TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal static class TUnit_TestProject_DataDrivenTests__TestSource
 {
-    public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
+    public static global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
     {
         var metadata_DataSource_Method__int = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.DataDrivenTests>
         {
@@ -536,7 +536,7 @@ internal sealed class TUnit_TestProject_DataDrivenTests__TestSource : global::TU
         metadata_IntMaxValue__int.UseRuntimeDataGeneration(testSessionId);
         return new global::TUnit.Core.TestMetadata[] { metadata_DataSource_Method__int, metadata_DataSource_Method__int_string, metadata_EnumValue__TestEnum, metadata_NullValue__string_, metadata_EmptyString__string_, metadata_NonEmptyString__string_, metadata_BooleanString__bool_, metadata_Type__Type, metadata_IntegerArray__int__, metadata_IntMaxValue__int };
     }
-    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
+    public static global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
     {
         yield return new global::TUnit.Core.TestDescriptor
         {
@@ -1469,6 +1469,6 @@ internal sealed class TUnit_TestProject_DataDrivenTests__TestSource : global::TU
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     internal static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DataDrivenTests), new TUnit_TestProject_DataDrivenTests__TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DataDrivenTests), TUnit_TestProject_DataDrivenTests__TestSource.GetTests, TUnit_TestProject_DataDrivenTests__TestSource.EnumerateTestDescriptors);
     }
 }

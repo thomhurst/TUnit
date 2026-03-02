@@ -2713,7 +2713,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             writer.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]");
             writer.AppendLine($"[global::System.CodeDom.Compiler.GeneratedCode(\"TUnit\", \"{typeof(TestMetadataGenerator).Assembly.GetName().Version}\")]");
-            writer.AppendLine($"internal sealed class {classGroup.TestSourceName} : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource");
+            writer.AppendLine($"internal static class {classGroup.TestSourceName}");
             writer.AppendLine("{");
             writer.Indent();
 
@@ -2724,7 +2724,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
 
             // GetTests() — returns metadata for ALL methods in this class
-            writer.AppendLine("public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)");
+            writer.AppendLine("public static global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)");
             writer.AppendLine("{");
             writer.Indent();
 
@@ -2745,7 +2745,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("}");
 
             // EnumerateTestDescriptors() — yields descriptors for ALL methods
-            writer.AppendLine("public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()");
+            writer.AppendLine("public static global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()");
             writer.AppendLine("{");
             writer.Indent();
             foreach (var method in classGroup.Methods)
@@ -2786,12 +2786,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.Unindent();
             writer.AppendLine("}");
 
-            // ModuleInitializer — registers ONE instance
+            // ModuleInitializer — registers via delegates (no .ctor allocation)
             writer.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
             writer.AppendLine("internal static void Initialize()");
             writer.AppendLine("{");
             writer.Indent();
-            writer.AppendLine($"global::TUnit.Core.SourceRegistrar.Register(typeof({classGroup.ClassFullyQualified}), new {classGroup.TestSourceName}());");
+            writer.AppendLine($"global::TUnit.Core.SourceRegistrar.Register(typeof({classGroup.ClassFullyQualified}), {classGroup.TestSourceName}.GetTests, {classGroup.TestSourceName}.EnumerateTestDescriptors);");
             writer.Unindent();
             writer.AppendLine("}");
 
