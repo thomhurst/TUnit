@@ -76,15 +76,20 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
         {
 #if NET
             _activityCollector?.Stop();
-            TraceRegistry.Clear();
 #endif
 
             if (_updates.Count == 0)
             {
+#if NET
+                TraceRegistry.Clear();
+#endif
                 return;
             }
 
             var reportData = BuildReportData();
+#if NET
+            TraceRegistry.Clear();
+#endif
             var html = HtmlReportGenerator.GenerateHtml(reportData);
 
             if (string.IsNullOrEmpty(html))
