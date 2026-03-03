@@ -557,10 +557,15 @@ internal sealed class TestBuilder : ITestBuilder
 
             if (!string.IsNullOrEmpty(capturedOutput) || !string.IsNullOrEmpty(capturedErrorOutput))
             {
-                // Also route to TestSessionContext so shared data source output is accessible
-                // there regardless of which test's build context triggered construction.
-                // (For SharedType.PerTestSession, the factory runs exactly once; the output only
-                // lands in the winning test's buildContext, so session-level routing is required.)
+                // Also route ALL build-time output to TestSessionContext.
+                // This intentionally covers all sharing types (None, PerClass, PerAssembly, etc.),
+                // making TestSessionContext a superset of every data source's build-time output.
+                // The primary motivation is SharedType.PerTestSession: a single Lazy<T>
+                // (ExecutionAndPublication) means the factory runs exactly once in whichever
+                // test's buildContext wins the parallel-build race, so the output would otherwise
+                // be lost from every other test. Session-level routing removes that race.
+                // Note: the winning test batch also receives the output via SetBuildTimeOutput
+                // below, so its output appears in both TestContext and TestSessionContext.
                 if (!string.IsNullOrEmpty(capturedOutput))
                     TestSessionContext.Current?.OutputWriter.Write(capturedOutput);
                 if (!string.IsNullOrEmpty(capturedErrorOutput))
