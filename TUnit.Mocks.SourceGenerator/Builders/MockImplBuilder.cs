@@ -74,11 +74,7 @@ internal static class MockImplBuilder
             }
 
             // Static abstract member stubs
-            foreach (var staticMember in model.StaticAbstractMembers)
-            {
-                writer.AppendLine();
-                GenerateStaticAbstractStub(writer, staticMember);
-            }
+            GenerateStaticAbstractStubs(writer, model);
 
             // IRaisable.RaiseEvent dispatch
             writer.AppendLine();
@@ -120,11 +116,7 @@ internal static class MockImplBuilder
             }
 
             // Static abstract member stubs
-            foreach (var staticMember in model.StaticAbstractMembers)
-            {
-                writer.AppendLine();
-                GenerateStaticAbstractStub(writer, staticMember);
-            }
+            GenerateStaticAbstractStubs(writer, model);
 
             // IRaisable.RaiseEvent dispatch
             writer.AppendLine();
@@ -394,11 +386,7 @@ internal static class MockImplBuilder
             }
 
             // Static abstract member stubs
-            foreach (var staticMember in model.StaticAbstractMembers)
-            {
-                writer.AppendLine();
-                GenerateStaticAbstractStub(writer, staticMember);
-            }
+            GenerateStaticAbstractStubs(writer, model);
 
             // IRaisable.RaiseEvent dispatch
             writer.AppendLine();
@@ -934,9 +922,12 @@ internal static class MockImplBuilder
         }
     }
 
-    private static string GetParameterList(MockMemberModel method)
+    private static string GetParameterList(MockMemberModel method) =>
+        FormatParameterList(method.Parameters);
+
+    private static string FormatParameterList(EquatableArray<MockParameterModel> parameters)
     {
-        return string.Join(", ", method.Parameters.Select(p =>
+        return string.Join(", ", parameters.Select(p =>
         {
             var direction = p.Direction switch
             {
@@ -949,16 +940,22 @@ internal static class MockImplBuilder
         }));
     }
 
-    private static string GetTypeParameterList(MockMemberModel method)
+    private static string GetTypeParameterList(MockMemberModel method) =>
+        FormatTypeParameterList(method.TypeParameters);
+
+    private static string FormatTypeParameterList(EquatableArray<MockTypeParameterModel> typeParameters)
     {
-        if (method.TypeParameters.Length == 0) return "";
-        return "<" + string.Join(", ", method.TypeParameters.Select(tp => tp.Name)) + ">";
+        if (typeParameters.Length == 0) return "";
+        return "<" + string.Join(", ", typeParameters.Select(tp => tp.Name)) + ">";
     }
 
-    private static string GetConstraintClauses(MockMemberModel method)
+    private static string GetConstraintClauses(MockMemberModel method) =>
+        FormatConstraintClauses(method.TypeParameters);
+
+    private static string FormatConstraintClauses(EquatableArray<MockTypeParameterModel> typeParameters)
     {
         var clauses = new List<string>();
-        foreach (var tp in method.TypeParameters)
+        foreach (var tp in typeParameters)
         {
             if (!string.IsNullOrEmpty(tp.Constraints))
             {
@@ -1107,6 +1104,15 @@ internal static class MockImplBuilder
     /// Generates an explicit interface implementation stub for a static abstract member.
     /// The stub throws <see cref="System.NotSupportedException"/> since static abstract members cannot be mocked.
     /// </summary>
+    private static void GenerateStaticAbstractStubs(CodeWriter writer, MockTypeModel model)
+    {
+        foreach (var staticMember in model.StaticAbstractMembers)
+        {
+            writer.AppendLine();
+            GenerateStaticAbstractStub(writer, staticMember);
+        }
+    }
+
     private static void GenerateStaticAbstractStub(CodeWriter writer, MockStaticAbstractMemberModel member)
     {
         const string throwExpr = "throw new global::System.NotSupportedException(\"Static abstract interface members cannot be mocked.\")";
@@ -1127,35 +1133,9 @@ internal static class MockImplBuilder
         }
         else
         {
-            var paramList = string.Join(", ", member.Parameters.Select(p =>
-            {
-                var direction = p.Direction switch
-                {
-                    ParameterDirection.Out => "out ",
-                    ParameterDirection.Ref => "ref ",
-                    ParameterDirection.In_Readonly => "in ",
-                    _ => ""
-                };
-                return $"{direction}{p.FullyQualifiedType} {p.Name}";
-            }));
-
-            var typeParams = member.TypeParameters.Length > 0
-                ? "<" + string.Join(", ", member.TypeParameters.Select(tp => tp.Name)) + ">"
-                : "";
-
-            var constraints = "";
-            var constraintClauses = new List<string>();
-            foreach (var tp in member.TypeParameters)
-            {
-                if (!string.IsNullOrEmpty(tp.Constraints))
-                {
-                    constraintClauses.Add($"where {tp.Name} : {tp.Constraints}");
-                }
-            }
-            if (constraintClauses.Count > 0)
-            {
-                constraints = " " + string.Join(" ", constraintClauses);
-            }
+            var paramList = FormatParameterList(member.Parameters);
+            var typeParams = FormatTypeParameterList(member.TypeParameters);
+            var constraints = FormatConstraintClauses(member.TypeParameters);
 
             var returnType = member.IsVoid ? "void" : member.ReturnType;
             writer.AppendLine($"static {returnType} {member.InterfaceFullyQualifiedName}.{member.Name}{typeParams}({paramList}){constraints}");

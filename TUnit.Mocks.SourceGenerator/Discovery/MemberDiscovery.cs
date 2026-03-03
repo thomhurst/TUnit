@@ -606,7 +606,8 @@ internal static class MemberDiscovery
         {
             case IMethodSymbol method when method.MethodKind == MethodKind.Ordinary:
             {
-                var paramTypes = string.Join(",", method.Parameters.Select(p => p.Type.GetFullyQualifiedName()));
+                var paramTypes = string.Join(",", method.Parameters.Select(p =>
+                    p.Type.GetFullyQualifiedName() + (p.RefKind != RefKind.None ? "&" : "")));
                 var typeParamsSuffix = method.TypeParameters.Length > 0 ? $"`{method.TypeParameters.Length}" : "";
                 var key = $"SA:{interfaceFqn}.{method.Name}{typeParamsSuffix}({paramTypes})";
                 if (!seen.Add(key)) break;
@@ -622,10 +623,8 @@ internal static class MemberDiscovery
                         method.Parameters.Select(p => new MockParameterModel
                         {
                             Name = p.Name,
-                            Type = p.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat),
                             FullyQualifiedType = p.Type.GetFullyQualifiedName(),
                             Direction = p.GetParameterDirection(),
-                            IsValueType = p.Type.IsValueType,
                         }).ToImmutableArray()
                     ),
                     TypeParameters = new EquatableArray<MockTypeParameterModel>(

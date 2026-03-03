@@ -79,6 +79,7 @@ internal sealed record MockStaticAbstractMemberModel : IEquatable<MockStaticAbst
             hash = hash * 31 + Name.GetHashCode();
             hash = hash * 31 + ReturnType.GetHashCode();
             hash = hash * 31 + Parameters.GetHashCode();
+            hash = hash * 31 + TypeParameters.GetHashCode();
             return hash;
         }
     }
