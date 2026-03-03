@@ -557,6 +557,15 @@ internal sealed class TestBuilder : ITestBuilder
 
             if (!string.IsNullOrEmpty(capturedOutput) || !string.IsNullOrEmpty(capturedErrorOutput))
             {
+                // Also route to TestSessionContext so shared data source output is accessible
+                // there regardless of which test's build context triggered construction.
+                // (For SharedType.PerTestSession, the factory runs exactly once; the output only
+                // lands in the winning test's buildContext, so session-level routing is required.)
+                if (!string.IsNullOrEmpty(capturedOutput))
+                    TestSessionContext.Current?.OutputWriter.Write(capturedOutput);
+                if (!string.IsNullOrEmpty(capturedErrorOutput))
+                    TestSessionContext.Current?.ErrorOutputWriter.Write(capturedErrorOutput);
+
                 foreach (var test in tests)
                 {
                     test.Context.SetBuildTimeOutput(capturedOutput, capturedErrorOutput);

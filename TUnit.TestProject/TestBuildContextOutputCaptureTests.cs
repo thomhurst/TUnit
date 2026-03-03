@@ -140,10 +140,11 @@ public class TestBuildContextOutputCaptureTests
     [ClassDataSource<SharedDataSource>(Shared = SharedType.PerTestSession)]
     public async Task Test_SharedDataSource_FirstTest(SharedDataSource data)
     {
-        var output = TestContext.Current!.GetStandardOutput();
-
-        // Should contain the shared data source construction output
-        await Assert.That(output).Contains("SharedDataSource constructor:");
+        // Shared data source construction output is routed to TestSessionContext because
+        // the factory only runs once (for whichever test wins the build race), so it can't
+        // reliably end up in any individual test's output.
+        var sessionOutput = TestSessionContext.Current!.GetStandardOutput();
+        await Assert.That(sessionOutput).Contains("SharedDataSource constructor:");
         await Assert.That(data.Value).IsEqualTo("SharedValue");
     }
 
