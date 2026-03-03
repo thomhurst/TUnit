@@ -93,7 +93,7 @@ public class SpanReturnTests
     public async Task Returns_ReadOnlySpan_With_Arg_Any()
     {
         var mock = Mock.Of<ISpanProducer>();
-        mock.GetBytes(Arg.Any<string>()).Returns(new ReadOnlySpan<byte>([0xFF]));
+        mock.GetBytes(Any()).Returns(new ReadOnlySpan<byte>([0xFF]));
 
         var result = mock.Object.GetBytes("anything");
         var len = result.Length;
@@ -187,14 +187,14 @@ public class SpanReturnTests
     public async Task Span_Return_Verify_With_Specific_Args()
     {
         var mock = Mock.Of<ISpanProducer>();
-        mock.GetBytes(Arg.Any<string>()).Returns(new ReadOnlySpan<byte>([1]));
+        mock.GetBytes(Any()).Returns(new ReadOnlySpan<byte>([1]));
 
         mock.Object.GetBytes("hello");
         mock.Object.GetBytes("world");
 
         mock.GetBytes("hello").WasCalled(Times.Once);
         mock.GetBytes("world").WasCalled(Times.Once);
-        mock.GetBytes(Arg.Any<string>()).WasCalled(Times.Exactly(2));
+        mock.GetBytes(Any()).WasCalled(Times.Exactly(2));
         await Assert.That(true).IsTrue();
     }
 

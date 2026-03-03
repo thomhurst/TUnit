@@ -67,6 +67,18 @@ public abstract class MemoryAssertionBase<TMemory, TItem> : Assertion<TMemory>, 
         return new IsNotAssignableToAssertion<TTarget, TMemory>(Context);
     }
 
+    public IsAssignableFromAssertion<TSource, TMemory> IsAssignableFrom<TSource>()
+    {
+        Context.ExpressionBuilder.Append($".IsAssignableFrom<{typeof(TSource).Name}>()");
+        return new IsAssignableFromAssertion<TSource, TMemory>(Context);
+    }
+
+    public IsNotAssignableFromAssertion<TSource, TMemory> IsNotAssignableFrom<TSource>()
+    {
+        Context.ExpressionBuilder.Append($".IsNotAssignableFrom<{typeof(TSource).Name}>()");
+        return new IsNotAssignableFromAssertion<TSource, TMemory>(Context);
+    }
+
     public IsNotTypeOfAssertion<TMemory, TExpected> IsNotTypeOf<TExpected>()
     {
         Context.ExpressionBuilder.Append($".IsNotTypeOf<{typeof(TExpected).Name}>()");

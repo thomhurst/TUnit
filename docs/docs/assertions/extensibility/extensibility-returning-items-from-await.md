@@ -1,3 +1,7 @@
+---
+sidebar_position: 4
+---
+
 # Returning Data via `await`
 
 Sometimes, you may want your assertion to return a value, such as an item found in a collection, so you can use it in further assertions or logic.

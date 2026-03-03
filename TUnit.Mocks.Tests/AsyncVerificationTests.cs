@@ -9,12 +9,12 @@ public class AsyncVerificationTests
     public async Task WasCalled_Times_Once_Passes()
     {
         var mock = Mock.Of<ICalculator>();
-        mock.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(42);
+        mock.Add(Any(), Any()).Returns(42);
 
         ICalculator calc = mock.Object;
         _ = calc.Add(1, 2);
 
-        await Assert.That(mock.Add(Arg.Any<int>(), Arg.Any<int>()))
+        await Assert.That(mock.Add(Any(), Any()))
             .WasCalled(Times.Once);
     }
 
@@ -22,14 +22,14 @@ public class AsyncVerificationTests
     public async Task WasCalled_Times_Exactly_Passes()
     {
         var mock = Mock.Of<ICalculator>();
-        mock.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(42);
+        mock.Add(Any(), Any()).Returns(42);
 
         ICalculator calc = mock.Object;
         _ = calc.Add(1, 2);
         _ = calc.Add(3, 4);
         _ = calc.Add(5, 6);
 
-        await Assert.That(mock.Add(Arg.Any<int>(), Arg.Any<int>()))
+        await Assert.That(mock.Add(Any(), Any()))
             .WasCalled(Times.Exactly(3));
     }
 
@@ -37,13 +37,13 @@ public class AsyncVerificationTests
     public async Task WasCalled_Wrong_Count_Fails()
     {
         var mock = Mock.Of<ICalculator>();
-        mock.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(42);
+        mock.Add(Any(), Any()).Returns(42);
 
         ICalculator calc = mock.Object;
         _ = calc.Add(1, 2);
 
         await Assert.ThrowsAsync(async () =>
-            await Assert.That(mock.Add(Arg.Any<int>(), Arg.Any<int>()))
+            await Assert.That(mock.Add(Any(), Any()))
                 .WasCalled(Times.Exactly(5)));
     }
 
@@ -52,7 +52,7 @@ public class AsyncVerificationTests
     {
         var mock = Mock.Of<ICalculator>();
 
-        await Assert.That(mock.Add(Arg.Any<int>(), Arg.Any<int>()))
+        await Assert.That(mock.Add(Any(), Any()))
             .WasNeverCalled();
     }
 
@@ -60,13 +60,13 @@ public class AsyncVerificationTests
     public async Task WasNeverCalled_Fails_When_Called()
     {
         var mock = Mock.Of<ICalculator>();
-        mock.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(42);
+        mock.Add(Any(), Any()).Returns(42);
 
         ICalculator calc = mock.Object;
         _ = calc.Add(1, 2);
 
         await Assert.ThrowsAsync(async () =>
-            await Assert.That(mock.Add(Arg.Any<int>(), Arg.Any<int>()))
+            await Assert.That(mock.Add(Any(), Any()))
                 .WasNeverCalled());
     }
 
@@ -74,13 +74,13 @@ public class AsyncVerificationTests
     public async Task WasCalled_AtLeastOnce_Passes()
     {
         var mock = Mock.Of<ICalculator>();
-        mock.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(42);
+        mock.Add(Any(), Any()).Returns(42);
 
         ICalculator calc = mock.Object;
         _ = calc.Add(1, 2);
         _ = calc.Add(3, 4);
 
-        await Assert.That(mock.Add(Arg.Any<int>(), Arg.Any<int>()))
+        await Assert.That(mock.Add(Any(), Any()))
             .WasCalled(Times.AtLeastOnce);
     }
 
@@ -123,7 +123,7 @@ public class AsyncVerificationTests
     public async Task Multiple_Verifications_In_Sequence()
     {
         var mock = Mock.Of<ICalculator>();
-        mock.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(42);
+        mock.Add(Any(), Any()).Returns(42);
         mock.GetName().Returns("test");
 
         ICalculator calc = mock.Object;
@@ -131,7 +131,7 @@ public class AsyncVerificationTests
         _ = calc.GetName();
         _ = calc.GetName();
 
-        await Assert.That(mock.Add(Arg.Any<int>(), Arg.Any<int>()))
+        await Assert.That(mock.Add(Any(), Any()))
             .WasCalled(Times.Once);
 
         await Assert.That(mock.GetName())

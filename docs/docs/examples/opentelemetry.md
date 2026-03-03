@@ -117,3 +117,9 @@ dotnet add package OpenTelemetry.Exporter.Zipkin
 
 .AddZipkinExporter(opts => opts.Endpoint = new Uri("http://localhost:9411/api/v2/spans"))
 ```
+
+## HTML Report Integration
+
+TUnit's built-in [HTML test report](/docs/guides/html-report) automatically captures activity spans and renders them as trace timelines — no OpenTelemetry SDK required. The report also captures spans from instrumented libraries like HttpClient, ASP.NET Core, and EF Core when they execute within a test's context.
+
+For details on distributed trace collection, linking external traces, and accessing the test's `Activity`, see the [Distributed Tracing](/docs/guides/html-report#distributed-tracing) section of the HTML report guide.

@@ -1,3 +1,7 @@
+---
+sidebar_position: 1
+---
+
 # Awaiting
 
 In TUnit you `await` your assertions, and this serves two purposes:
@@ -175,77 +179,6 @@ public async Task CustomAssertionConditions()
 }
 ```
 
-### DateTime and TimeSpan Assertions
-
-```csharp
-[Test]
-public async Task DateTimeAssertions()
-{
-    var order = await CreateOrderAsync();
-
-    // Complex datetime assertions
-    await Assert.That(order.CreatedAt)
-        .IsGreaterThan(DateTime.UtcNow.AddMinutes(-1))
-        .And.IsLessThan(DateTime.UtcNow.AddMinutes(1));
-
-    // TimeSpan assertions
-    var processingTime = order.CompletedAt - order.CreatedAt;
-    await Assert.That(processingTime)
-        .IsLessThan(TimeSpan.FromMinutes(5))
-        .And.IsGreaterThan(TimeSpan.Zero);
-}
-```
-
-### Floating Point Comparisons
-
-```csharp
-[Test]
-public async Task FloatingPointAssertions()
-{
-    var calculations = await PerformComplexCalculationsAsync();
-
-    // Use tolerance for floating point comparisons
-    await Assert.That(calculations.Pi)
-        .IsEqualTo(Math.PI).Within(0.0001);
-
-    // Assert on collections of floating point numbers
-    await Assert.That(calculations.Results)
-        .All(r => Math.Abs(r) < 1000000); // No overflow
-
-    // Check for approximate value in collection
-    var hasApproximate42 = calculations.Results.Any(r => Math.Abs(r - 42.0) < 0.1);
-    await Assert.That(hasApproximate42).IsTrue();
-
-    // Assert on sum with tolerance
-    var sum = calculations.Results.Sum();
-    await Assert.That(sum).IsEqualTo(expectedSum).Within(0.01);
-}
-```
-
-### String Pattern Matching
-
-```csharp
-[Test]
-public async Task StringPatternAssertions()
-{
-    var logs = await GetLogEntriesAsync();
-
-    // Complex string assertions
-    await Assert.That(logs)
-        .All(log => Regex.IsMatch(log, @"^\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]"))
-        .And.Any(log => log.Contains("ERROR"))
-        .And.DoesNotContain(log => log.Contains("SENSITIVE_DATA"));
-
-    // Assert on formatted output
-    var report = await GenerateReportAsync();
-    await Assert.That(report)
-        .StartsWith("Report Generated:")
-        .And.Contains("Total Items:")
-        .And.DoesNotContain("null")
-        .And.Length().IsBetween(1000, 5000);
-}
-```
-
 ### Combining Or and And Conditions
 
 ```csharp
@@ -275,58 +208,4 @@ public async Task ComplexLogicalConditions()
 }
 ```
 
-### Performance Assertions
-
-```csharp
-[Test]
-public async Task PerformanceAssertions()
-{
-    var stopwatch = Stopwatch.StartNew();
-    var results = new List<long>();
-    
-    // Measure multiple operations
-    for (int i = 0; i < 100; i++)
-    {
-        var start = stopwatch.ElapsedMilliseconds;
-        await PerformOperationAsync();
-        results.Add(stopwatch.ElapsedMilliseconds - start);
-    }
-    
-    // Assert on performance metrics
-    await Assert.That(results.Average())
-        .IsLessThan(100); // Average under 100ms
-    
-    await Assert.That(results.Max())
-        .IsLessThan(500); // No operation over 500ms
-    
-    await Assert.That(results.Where(r => r > 200).Count())
-        .IsLessThan(5); // Less than 5% over 200ms
-}
-```
-
-### State Machine Assertions
-
-```csharp
-[Test]
-public async Task StateMachineAssertions()
-{
-    var workflow = new OrderWorkflow();
-
-    // Initial state
-    await Assert.That(workflow.State).IsEqualTo(OrderState.New);
-
-    // State transition assertions
-    await workflow.StartProcessing();
-    await Assert.That(workflow.State).IsEqualTo(OrderState.Processing);
-    await Assert.That(workflow.CanTransitionTo(OrderState.Completed)).IsTrue();
-    await Assert.That(workflow.CanTransitionTo(OrderState.New)).IsFalse();
-
-    // Complex workflow validation
-    await workflow.Complete();
-    await Assert.That(workflow.State).IsEqualTo(OrderState.Completed);
-    await Assert.That(workflow.CompletedAt).IsNotNull();
-    await Assert.That(workflow.History).Contains(h => h.State == OrderState.Processing);
-}
-```
-
-These examples demonstrate the power and flexibility of TUnit's assertion system, showing how you can build complex, readable assertions for various testing scenarios.
+For more assertion examples, see the dedicated pages for [collections](collections.md), [strings](string.md), [numeric](numeric.md), and [datetime](datetime.md) assertions.

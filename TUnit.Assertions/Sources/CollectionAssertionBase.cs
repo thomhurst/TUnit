@@ -67,6 +67,18 @@ public abstract class CollectionAssertionBase<TCollection, TItem> : Assertion<TC
         return new IsNotAssignableToAssertion<TTarget, TCollection>(Context);
     }
 
+    public IsAssignableFromAssertion<TSource, TCollection> IsAssignableFrom<TSource>()
+    {
+        Context.ExpressionBuilder.Append($".IsAssignableFrom<{typeof(TSource).Name}>()");
+        return new IsAssignableFromAssertion<TSource, TCollection>(Context);
+    }
+
+    public IsNotAssignableFromAssertion<TSource, TCollection> IsNotAssignableFrom<TSource>()
+    {
+        Context.ExpressionBuilder.Append($".IsNotAssignableFrom<{typeof(TSource).Name}>()");
+        return new IsNotAssignableFromAssertion<TSource, TCollection>(Context);
+    }
+
     /// <summary>
     /// Asserts that the collection is NOT of the specified type.
     /// This allows chaining additional assertions on the value.

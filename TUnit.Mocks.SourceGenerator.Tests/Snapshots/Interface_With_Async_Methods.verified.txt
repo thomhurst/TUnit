@@ -115,6 +115,13 @@ namespace TUnit.Mocks.Generated
             return new IAsyncService_GetValueAsync_M0_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 0, "GetValueAsync", matchers);
         }
 
+        public static IAsyncService_GetValueAsync_M0_MockCall GetValueAsync(this global::TUnit.Mocks.Mock<global::IAsyncService> mock, global::System.Func<string, bool> key)
+        {
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_key = key;
+            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_key.Matcher };
+            return new IAsyncService_GetValueAsync_M0_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 0, "GetValueAsync", matchers);
+        }
+
         public static global::TUnit.Mocks.VoidMockMethodCall DoWorkAsync(this global::TUnit.Mocks.Mock<global::IAsyncService> mock)
         {
             var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
@@ -127,9 +134,23 @@ namespace TUnit.Mocks.Generated
             return new IAsyncService_ComputeAsync_M2_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 2, "ComputeAsync", matchers);
         }
 
+        public static IAsyncService_ComputeAsync_M2_MockCall ComputeAsync(this global::TUnit.Mocks.Mock<global::IAsyncService> mock, global::System.Func<int, bool> input)
+        {
+            global::TUnit.Mocks.Arguments.Arg<int> __fa_input = input;
+            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_input.Matcher };
+            return new IAsyncService_ComputeAsync_M2_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 2, "ComputeAsync", matchers);
+        }
+
         public static IAsyncService_InitializeAsync_M3_MockCall InitializeAsync(this global::TUnit.Mocks.Mock<global::IAsyncService> mock, global::TUnit.Mocks.Arguments.Arg<global::System.Threading.CancellationToken> ct)
         {
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { ct.Matcher };
+            return new IAsyncService_InitializeAsync_M3_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 3, "InitializeAsync", matchers);
+        }
+
+        public static IAsyncService_InitializeAsync_M3_MockCall InitializeAsync(this global::TUnit.Mocks.Mock<global::IAsyncService> mock, global::System.Func<global::System.Threading.CancellationToken, bool> ct)
+        {
+            global::TUnit.Mocks.Arguments.Arg<global::System.Threading.CancellationToken> __fa_ct = ct;
+            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_ct.Matcher };
             return new IAsyncService_InitializeAsync_M3_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 3, "InitializeAsync", matchers);
         }
     }

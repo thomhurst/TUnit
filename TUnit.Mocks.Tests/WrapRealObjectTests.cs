@@ -64,7 +64,7 @@ public class WrapRealObjectTests
         // Arrange
         var real = new RealCalculator(10);
         var mock = Mock.Wrap(real);
-        mock.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(99);
+        mock.Add(Any(), Any()).Returns(99);
 
         // Act
         var result = mock.Object.Add(3, 4);
@@ -111,7 +111,7 @@ public class WrapRealObjectTests
         // Arrange
         var real = new RealCalculator(42);
         var mock = Mock.Wrap(real);
-        mock.Describe(Arg.Any<string>()).Returns("mocked description");
+        mock.Describe(Any()).Returns("mocked description");
 
         // Act
         var result = mock.Object.Describe("test");
@@ -131,7 +131,7 @@ public class WrapRealObjectTests
         mock.Object.Log("test message");
 
         // Assert — call was recorded for verification
-        mock.Log(Arg.Any<string>()).WasCalled(Times.Once);
+        mock.Log(Any()).WasCalled(Times.Once);
     }
 
     [Test]
@@ -147,8 +147,8 @@ public class WrapRealObjectTests
         mock.Object.Multiply(5, 6);
 
         // Assert — calls are still tracked
-        mock.Add(Arg.Any<int>(), Arg.Any<int>()).WasCalled(Times.Exactly(2));
-        mock.Multiply(Arg.Any<int>(), Arg.Any<int>()).WasCalled(Times.Once);
+        mock.Add(Any(), Any()).WasCalled(Times.Exactly(2));
+        mock.Multiply(Any(), Any()).WasCalled(Times.Once);
     }
 
     [Test]
@@ -182,7 +182,7 @@ public class WrapRealObjectTests
         // Arrange — strict mode with explicit setup
         var real = new RealCalculator(10);
         var mock = Mock.Wrap(MockBehavior.Strict, real);
-        mock.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(42);
+        mock.Add(Any(), Any()).Returns(42);
 
         // Act
         var result = mock.Object.Add(2, 3);
@@ -197,7 +197,7 @@ public class WrapRealObjectTests
         // Arrange
         var real = new RealCalculator(100);
         var mock = Mock.Wrap(real);
-        mock.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(0);
+        mock.Add(Any(), Any()).Returns(0);
 
         // Act
         var result = mock.Object.Add(5, 7);
@@ -212,7 +212,7 @@ public class WrapRealObjectTests
         // Arrange
         var real = new RealCalculator();
         var mock = Mock.Wrap(real);
-        mock.Add(Arg.Any<int>(), Arg.Any<int>())
+        mock.Add(Any(), Any())
             .Throws(new InvalidOperationException("mock error"));
 
         // Act & Assert

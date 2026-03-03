@@ -47,7 +47,7 @@ public class DiagnosticsTests
     {
         var mock = Mock.Of<ICalculator>();
 
-        mock.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(42);
+        mock.Add(Any(), Any()).Returns(42);
 
         ICalculator calc = mock.Object;
         _ = calc.Add(1, 2);
@@ -78,7 +78,7 @@ public class DiagnosticsTests
     public async Task Matcher_Descriptions_Populated()
     {
         var mock = Mock.Of<ICalculator>();
-        mock.Add(Arg.Any<int>(), Arg.Is<int>(x => x > 0)).Returns(1);
+        mock.Add(Any(), Is<int>(x => x > 0)).Returns(1);
 
         var diag = Mock.GetDiagnostics(mock);
 

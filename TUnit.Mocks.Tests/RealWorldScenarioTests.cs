@@ -149,7 +149,7 @@ public class RealWorldScenarioTests
         var mock = Mock.Of<IUserRepository>();
         var user = new UserDto { Id = 1, Name = "Alice", Email = "alice@example.com" };
 
-        mock.CreateAsync(Arg.Any<UserDto>()).Returns(user);
+        mock.CreateAsync(Any()).Returns(user);
         mock.GetByIdAsync(1).Returns(user);
         mock.ExistsAsync(1).Returns(true);
 
@@ -173,9 +173,9 @@ public class RealWorldScenarioTests
         await Assert.That(exists).IsTrue();
 
         // Verify all calls
-        mock.CreateAsync(Arg.Any<UserDto>()).WasCalled(Times.Once);
+        mock.CreateAsync(Any()).WasCalled(Times.Once);
         mock.GetByIdAsync(1).WasCalled(Times.Once);
-        mock.UpdateAsync(Arg.Any<UserDto>()).WasCalled(Times.Once);
+        mock.UpdateAsync(Any()).WasCalled(Times.Once);
         mock.ExistsAsync(1).WasCalled(Times.Once);
     }
 
@@ -189,7 +189,7 @@ public class RealWorldScenarioTests
             new() { Id = 1, Name = "Alice Smith", Email = "alice@example.com" },
             new() { Id = 2, Name = "Alice Jones", Email = "alicej@example.com" },
         };
-        mock.FindByNameAsync("Alice", Arg.Any<CancellationToken>())
+        mock.FindByNameAsync("Alice", Any())
             .Returns((IReadOnlyList<UserDto>)users);
 
         IUserRepository repo = mock.Object;
@@ -202,7 +202,7 @@ public class RealWorldScenarioTests
         await Assert.That(result[0].Name).IsEqualTo("Alice Smith");
 
         // Verify
-        mock.FindByNameAsync("Alice", Arg.Any<CancellationToken>()).WasCalled(Times.Once);
+        mock.FindByNameAsync("Alice", Any()).WasCalled(Times.Once);
     }
 
     [Test]
@@ -222,7 +222,7 @@ public class RealWorldScenarioTests
 
         // Assert
         mockUow.BeginTransactionAsync().WasCalled(Times.Once);
-        mockUow.SaveChangesAsync(Arg.Any<CancellationToken>()).WasCalled(Times.Once);
+        mockUow.SaveChangesAsync(Any()).WasCalled(Times.Once);
         mockTx.CommitAsync().WasCalled(Times.Once);
         mockTx.RollbackAsync().WasNeverCalled();
     }
@@ -234,7 +234,7 @@ public class RealWorldScenarioTests
         var mockTx = Mock.Of<ITransaction>();
         var mockUow = Mock.Of<IUnitOfWork>();
         mockUow.BeginTransactionAsync().Returns(mockTx.Object);
-        mockUow.SaveChangesAsync(Arg.Any<CancellationToken>())
+        mockUow.SaveChangesAsync(Any())
             .Throws<InvalidOperationException>();
 
         IUnitOfWork uow = mockUow.Object;
@@ -310,9 +310,9 @@ public class RealWorldScenarioTests
         var twoArgCallCount = 0;
         var threeArgCallCount = 0;
 
-        mock.Log(Arg.Any<string>(), Arg.Any<string>())
+        mock.Log(Any(), Any())
             .Callback(() => twoArgCallCount++);
-        mock.Log(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Exception?>())
+        mock.Log(Any(), Any(), Any<Exception?>())
             .Callback(() => threeArgCallCount++);
 
         ILogger logger = mock.Object;
@@ -326,8 +326,8 @@ public class RealWorldScenarioTests
         await Assert.That(threeArgCallCount).IsEqualTo(1);
 
         // Verify
-        mock.Log(Arg.Any<string>(), Arg.Any<string>()).WasCalled(Times.Once);
-        mock.Log(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Exception?>()).WasCalled(Times.Once);
+        mock.Log(Any(), Any()).WasCalled(Times.Once);
+        mock.Log(Any(), Any(), Any<Exception?>()).WasCalled(Times.Once);
     }
 
     [Test]
@@ -363,8 +363,8 @@ public class RealWorldScenarioTests
     {
         // Arrange — SendSmsAsync returns true for one number, false for another
         var mock = Mock.Of<INotificationService>();
-        mock.SendSmsAsync("+1234567890", Arg.Any<string>()).Returns(true);
-        mock.SendSmsAsync("+0000000000", Arg.Any<string>()).Returns(false);
+        mock.SendSmsAsync("+1234567890", Any()).Returns(true);
+        mock.SendSmsAsync("+0000000000", Any()).Returns(false);
 
         INotificationService notify = mock.Object;
 
@@ -514,7 +514,7 @@ public class RealWorldScenarioTests
 
         // Verify email was NEVER sent
         mockNotify.SendEmailAsync(
-            Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>()
+            Any(), Any(), Any()
         ).WasNeverCalled();
     }
 
@@ -526,13 +526,13 @@ public class RealWorldScenarioTests
         var mockNotify = Mock.Of<INotificationService>();
         var mockLogger = Mock.Of<ILogger>();
 
-        var bodyArg = Arg.Any<string>();
+        var bodyArg = Any<string>();
 
         var user = new UserDto { Id = 7, Name = "Charlie", Email = "charlie@example.com" };
         mockRepo.GetByIdAsync(7).Returns(user);
         // SendEmailAsync returns Task (void-async), so use Callback to capture args
         mockNotify.SendEmailAsync(
-            Arg.Any<string>(), Arg.Any<string>(), bodyArg
+            Any(), Any(), bodyArg
         ).Callback(() => { });
 
         var service = new OrderService(mockRepo.Object, mockNotify.Object, mockLogger.Object);
@@ -571,9 +571,9 @@ public class RealWorldScenarioTests
         // Arrange
         var mock = Mock.Of<INullableService>();
         var callCount = 0;
-        mock.Process(Arg.IsNull<string>(), Arg.Any<int?>())
+        mock.Process(IsNull<string>(), Any<int?>())
             .Callback(() => callCount++);
-        mock.Process(Arg.IsNotNull<string>(), Arg.Any<int?>())
+        mock.Process(IsNotNull<string>(), Any<int?>())
             .Callback(() => callCount += 10);
 
         INullableService svc = mock.Object;
@@ -592,7 +592,7 @@ public class RealWorldScenarioTests
     {
         // Arrange
         var mock = Mock.Of<INullableService>();
-        mock.FindUserAsync(Arg.Any<string?>()).Returns((UserDto?)null);
+        mock.FindUserAsync(Any<string?>()).Returns((UserDto?)null);
 
         INullableService svc = mock.Object;
 

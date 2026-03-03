@@ -41,13 +41,13 @@ public class ResetTests
         calc.Add(5, 6);
 
         // Verify calls were recorded
-        mock.Add(Arg.Any<int>(), Arg.Any<int>()).WasCalled(Times.Exactly(3));
+        mock.Add(Any(), Any()).WasCalled(Times.Exactly(3));
 
         // Act
         Mock.Reset(mock);
 
         // Assert — after reset, call history is cleared
-        mock.Add(Arg.Any<int>(), Arg.Any<int>()).WasNeverCalled();
+        mock.Add(Any(), Any()).WasNeverCalled();
         await Assert.That(true).IsTrue();
     }
 
@@ -141,13 +141,13 @@ public class ResetTests
         calc.Log("message1");
         calc.Log("message2");
 
-        mock.Log(Arg.Any<string>()).WasCalled(Times.Exactly(2));
+        mock.Log(Any()).WasCalled(Times.Exactly(2));
 
         // Act
         Mock.Reset(mock);
 
         // Assert — void method call history is cleared
-        mock.Log(Arg.Any<string>()).WasNeverCalled();
+        mock.Log(Any()).WasNeverCalled();
         await Assert.That(true).IsTrue();
     }
 

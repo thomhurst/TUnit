@@ -18,14 +18,14 @@ format. To use TUnit with F# Interactive, follow these steps:
    Alternatively, you can specify a specific version:
 
    ```fsharp
-   #r "nuget: TUnit, 0.20.16"
+   #r "nuget: TUnit, 1.6.0"
    ```
 
 2. **Write your tests**: You can write your tests in the same way you would in a regular F# project. For example:
 
    ```fsharp
-      #r "nuget: TUnit, 0.20.16"
-      #r "nuget: TUnit.Assertions.Fsharp, 0.20.16"
+      #r "nuget: TUnit"
+      #r "nuget: TUnit.Assertions.Fsharp"
 
       open System
       open TUnit

@@ -6,34 +6,6 @@ using TUnit.Assertions.Core;
 namespace TUnit.Assertions.Conditions;
 
 /// <summary>
-/// Asserts that a value is null.
-/// </summary>
-[AssertionExtension("IsNull")]
-public class NullAssertion<TValue> : Assertion<TValue>
-{
-    public NullAssertion(
-        AssertionContext<TValue> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (value == null)
-        {
-            return AssertionResult._passedTask;
-        }
-
-        return Task.FromResult(AssertionResult.Failed($"received {value}"));
-    }
-
-    protected override string GetExpectation() => "to be null";
-}
-
-/// <summary>
 /// Asserts that a value is not null.
 /// </summary>
 public class NotNullAssertion<TValue> : Assertion<TValue>

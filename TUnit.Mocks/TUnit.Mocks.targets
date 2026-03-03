@@ -2,6 +2,7 @@
     <ItemGroup Condition="'$(TUnitMockImplicitUsings)' == 'enable'">
         <Using Include="TUnit.Mocks" />
         <Using Include="TUnit.Mocks.Arguments" />
+        <Using Include="TUnit.Mocks.Arguments.Arg" Static="true" />
         <Using Include="TUnit.Mocks.Generated" />
     </ItemGroup>
 </Project>

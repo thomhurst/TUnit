@@ -28,13 +28,18 @@ public static class InstanceFactoryGenerator
     /// </summary>
     public static void GenerateClassConstructorStub(CodeWriter writer)
     {
-        writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
+        writer.AppendLine("InstanceFactory = static (typeArgs, args) =>");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("// ClassConstructor attribute is present - instance creation handled at runtime");
-        writer.AppendLine("throw new global::System.NotSupportedException(\"Instance creation for classes with ClassConstructor attribute is handled at runtime\");");
+        GenerateClassConstructorStubBody(writer);
         writer.Unindent();
         writer.AppendLine("},");
+    }
+
+    private static void GenerateClassConstructorStubBody(CodeWriter writer)
+    {
+        writer.AppendLine("// ClassConstructor attribute is present - instance creation handled at runtime");
+        writer.AppendLine("throw new global::System.NotSupportedException(\"Instance creation for classes with ClassConstructor attribute is handled at runtime\");");
     }
 
     /// <summary>
@@ -111,11 +116,11 @@ public static class InstanceFactoryGenerator
 
             if (!requiredProperties.Any())
             {
-                writer.AppendLine($"InstanceFactory = (typeArgs, args) => new {className}(),");
+                writer.AppendLine($"InstanceFactory = static (typeArgs, args) => new {className}(),");
             }
             else
             {
-                writer.AppendLine($"InstanceFactory = (typeArgs, args) => new {className}()");
+                writer.AppendLine($"InstanceFactory = static (typeArgs, args) => new {className}()");
                 writer.AppendLine("{");
                 writer.Indent();
 
@@ -129,6 +134,117 @@ public static class InstanceFactoryGenerator
                 writer.AppendLine("},");
             }
         }
+    }
+
+    /// <summary>
+    /// Generates the InstanceFactory as a named static method instead of a lambda,
+    /// to avoid generating a &lt;&gt;c display class.
+    /// </summary>
+    public static void GenerateInstanceFactoryAsMethod(CodeWriter writer, ITypeSymbol typeSymbol)
+    {
+        var className = typeSymbol.GloballyQualified();
+
+        writer.AppendLine($"private static {className} __CreateInstance(global::System.Type[] typeArgs, object?[] args)");
+        writer.AppendLine("{");
+        writer.Indent();
+
+        if (typeSymbol is INamedTypeSymbol namedTypeSymbol && HasClassConstructorAttribute(namedTypeSymbol))
+        {
+            GenerateClassConstructorStubBody(writer);
+        }
+        else if (typeSymbol.HasParameterizedConstructor())
+        {
+            var constructor = GetPrimaryConstructor(typeSymbol);
+            if (constructor != null)
+            {
+                GenerateTypedConstructorCallBody(writer, className, constructor);
+            }
+            else
+            {
+                writer.AppendLine("return null!;");
+            }
+        }
+        else
+        {
+            var requiredProperties = RequiredPropertyHelper.GetAllRequiredProperties(typeSymbol);
+
+            if (!requiredProperties.Any())
+            {
+                writer.AppendLine($"return new {className}();");
+            }
+            else
+            {
+                writer.AppendLine($"return new {className}()");
+                writer.AppendLine("{");
+                writer.Indent();
+
+                foreach (var property in requiredProperties)
+                {
+                    var defaultValue = RequiredPropertyHelper.GetDefaultValueForType(property.Type);
+                    writer.AppendLine($"{property.Name} = {defaultValue},");
+                }
+
+                writer.Unindent();
+                writer.AppendLine("};");
+            }
+        }
+
+        writer.Unindent();
+        writer.AppendLine("}");
+    }
+
+    /// <summary>
+    /// Pre-generates the instance factory method body as a string.
+    /// Used by the per-class helper pipeline where ISymbol is available during the transform step
+    /// but not during source output.
+    /// </summary>
+    public static string GenerateInstanceFactoryBody(ITypeSymbol typeSymbol)
+    {
+        var bodyWriter = new CodeWriter(includeHeader: false);
+        var className = typeSymbol.GloballyQualified();
+
+        if (typeSymbol is INamedTypeSymbol namedTypeSymbol && HasClassConstructorAttribute(namedTypeSymbol))
+        {
+            GenerateClassConstructorStubBody(bodyWriter);
+        }
+        else if (typeSymbol.HasParameterizedConstructor())
+        {
+            var constructor = GetPrimaryConstructor(typeSymbol);
+            if (constructor != null)
+            {
+                GenerateTypedConstructorCallBody(bodyWriter, className, constructor);
+            }
+            else
+            {
+                bodyWriter.AppendLine("return null!;");
+            }
+        }
+        else
+        {
+            var requiredProperties = RequiredPropertyHelper.GetAllRequiredProperties(typeSymbol);
+
+            if (!requiredProperties.Any())
+            {
+                bodyWriter.AppendLine($"return new {className}();");
+            }
+            else
+            {
+                bodyWriter.AppendLine($"return new {className}()");
+                bodyWriter.AppendLine("{");
+                bodyWriter.Indent();
+
+                foreach (var property in requiredProperties)
+                {
+                    var defaultValue = RequiredPropertyHelper.GetDefaultValueForType(property.Type);
+                    bodyWriter.AppendLine($"{property.Name} = {defaultValue},");
+                }
+
+                bodyWriter.Unindent();
+                bodyWriter.AppendLine("};");
+            }
+        }
+
+        return bodyWriter.ToString();
     }
 
     private static IMethodSymbol? GetPrimaryConstructor(ITypeSymbol typeSymbol)
@@ -163,10 +279,16 @@ public static class InstanceFactoryGenerator
 
     private static void GenerateTypedConstructorCall(CodeWriter writer, string className, IMethodSymbol constructor)
     {
-        writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
+        writer.AppendLine("InstanceFactory = static (typeArgs, args) =>");
         writer.AppendLine("{");
         writer.Indent();
+        GenerateTypedConstructorCallBody(writer, className, constructor);
+        writer.Unindent();
+        writer.AppendLine("},");
+    }
 
+    private static void GenerateTypedConstructorCallBody(CodeWriter writer, string className, IMethodSymbol constructor)
+    {
         // Check for required properties
         var requiredProperties = RequiredPropertyHelper.GetAllRequiredProperties(constructor.ContainingType);
 
@@ -216,14 +338,11 @@ public static class InstanceFactoryGenerator
 
             writer.AppendLine(";");
         }
-
-        writer.Unindent();
-        writer.AppendLine("},");
     }
 
     private static void GenerateGenericInstanceFactory(CodeWriter writer, INamedTypeSymbol genericType)
     {
-        writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
+        writer.AppendLine("InstanceFactory = static (typeArgs, args) =>");
         writer.AppendLine("{");
         writer.Indent();
 

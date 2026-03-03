@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+using TUnit.Mocks.Matchers;
 
 namespace TUnit.Mocks.Arguments;
 
@@ -32,5 +32,11 @@ public readonly struct Arg<T>
 
     /// <summary>Implicitly converts a raw value to an <see cref="Arg{T}"/> using exact equality matching.</summary>
     /// <param name="value">The value to match against.</param>
-    public static implicit operator Arg<T>(T value) => new(new TUnit.Mocks.Matchers.ExactMatcher<T>(value));
+    public static implicit operator Arg<T>(T value) => new(new ExactMatcher<T>(value));
+
+    /// <summary>Implicitly converts a predicate to an <see cref="Arg{T}"/> using predicate matching.</summary>
+    /// <param name="predicate">The predicate that determines whether an argument matches.</param>
+    public static implicit operator Arg<T>(Func<T, bool> predicate) => new(new PredicateMatcher<T>(predicate!));
+
+    public static implicit operator Arg<T>(AnyArg _) => new(new AnyMatcher<T>());
 }

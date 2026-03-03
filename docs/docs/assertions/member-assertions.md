@@ -1,3 +1,7 @@
+---
+sidebar_position: 12
+---
+
 # Member Assertions
 
 The `.Member()` method allows you to assert on object properties while maintaining the parent object's context for chaining. This is useful when you need to validate multiple properties of the same object.

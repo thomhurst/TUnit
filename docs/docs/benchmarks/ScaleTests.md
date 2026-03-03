@@ -7,7 +7,7 @@ sidebar_position: 6
 # ScaleTests Benchmark
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-02-26** from the latest CI run.
+This benchmark was automatically generated on **2026-03-03** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.103
 :::
@@ -16,11 +16,11 @@ This benchmark was automatically generated on **2026-02-26** from the latest CI 
 
 | Framework | Version | Mean | Median | StdDev |
 |-----------|---------|------|--------|--------|
-| **TUnit** | 1.17.25 | 499.13 ms | 497.94 ms | 9.192 ms |
-| NUnit | 4.5.0 | 634.78 ms | 632.47 ms | 11.845 ms |
-| MSTest | 4.1.0 | 599.34 ms | 597.29 ms | 10.133 ms |
-| xUnit3 | 3.2.2 | 653.14 ms | 652.57 ms | 9.228 ms |
-| **TUnit (AOT)** | 1.17.25 | 34.96 ms | 35.01 ms | 2.221 ms |
+| **TUnit** | 1.18.0 | 537.20 ms | 537.31 ms | 12.648 ms |
+| NUnit | 4.5.0 | 638.79 ms | 635.65 ms | 8.332 ms |
+| MSTest | 4.1.0 | 665.79 ms | 665.51 ms | 6.173 ms |
+| xUnit3 | 3.2.2 | 670.78 ms | 670.18 ms | 8.163 ms |
+| **TUnit (AOT)** | 1.18.0 | 38.41 ms | 38.86 ms | 1.170 ms |
 
 ## 📈 Visual Comparison
 
@@ -29,7 +29,7 @@ This benchmark was automatically generated on **2026-02-26** from the latest CI 
   'theme':'base',
   'themeVariables': {
     'primaryColor': '#2563eb',
-    'primaryTextColor': '#ffffff',
+    'primaryTextColor': '#1f2937',
     'primaryBorderColor': '#1e40af',
     'lineColor': '#6b7280',
     'secondaryColor': '#7c3aed',
@@ -58,8 +58,8 @@ This benchmark was automatically generated on **2026-02-26** from the latest CI 
 xychart-beta
   title "ScaleTests Performance Comparison"
   x-axis ["TUnit", "NUnit", "MSTest", "xUnit3", "TUnit_AOT"]
-  y-axis "Time (ms)" 0 --> 784
-  bar [499.13, 634.78, 599.34, 653.14, 34.96]
+  y-axis "Time (ms)" 0 --> 805
+  bar [537.2, 638.79, 665.79, 670.78, 38.41]
 ```
 
 ## 🎯 Key Insights
@@ -72,4 +72,4 @@ This benchmark compares TUnit's performance against NUnit, MSTest, xUnit3 using 
 View the [benchmarks overview](/docs/benchmarks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-02-26T00:44:41.004Z*
+*Last generated: 2026-03-03T00:37:44.286Z*

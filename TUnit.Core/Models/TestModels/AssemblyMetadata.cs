@@ -12,6 +12,11 @@ public record AssemblyMetadata
         return Cache.GetOrAdd(name, static (_, factory) => factory(), factory);
     }
 
+    public static AssemblyMetadata GetOrAdd(string key, string name)
+    {
+        return Cache.GetOrAdd(key, static (_, n) => new AssemblyMetadata { Name = n }, name);
+    }
+
     public virtual bool Equals(AssemblyMetadata? other)
     {
         if (other is null)

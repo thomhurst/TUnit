@@ -22,7 +22,7 @@ internal static class MockCallSequence
 public sealed class MockEngine<T> : IMockEngineAccess where T : class
 {
     private readonly Dictionary<int, List<MethodSetup>> _setupsByMember = new();
-    private readonly System.Threading.Lock _setupLock = new();
+    private readonly Lock _setupLock = new();
     private readonly ConcurrentQueue<CallRecord> _callHistory = new();
     private readonly ConcurrentDictionary<string, object?> _autoTrackValues = new();
     private readonly ConcurrentQueue<(string EventName, bool IsSubscribe)> _eventSubscriptions = new();
@@ -134,7 +134,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         {
             behavior.Execute(args);
             // Set out/ref assignments after Execute to avoid reentrancy overwrite from callbacks
-            Setup.OutRefContext.Set(matchedSetup?.OutRefAssignments);
+            OutRefContext.Set(matchedSetup?.OutRefAssignments);
             if (matchedSetup is not null)
             {
 
@@ -144,7 +144,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         }
 
         // Set out/ref assignments for generated code to consume
-        Setup.OutRefContext.Set(matchedSetup?.OutRefAssignments);
+        OutRefContext.Set(matchedSetup?.OutRefAssignments);
 
         // A matching setup with no explicit behavior means "allow this call" (e.g., void setup with no callback)
         if (setupFound)
@@ -181,7 +181,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         {
             var result = behavior.Execute(args);
             // Set out/ref assignments after Execute to avoid reentrancy overwrite from callbacks
-            Setup.OutRefContext.Set(matchedSetup?.OutRefAssignments);
+            OutRefContext.Set(matchedSetup?.OutRefAssignments);
             if (matchedSetup is not null)
             {
 
@@ -194,7 +194,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         }
 
         // Set out/ref assignments for generated code to consume
-        Setup.OutRefContext.Set(matchedSetup?.OutRefAssignments);
+        OutRefContext.Set(matchedSetup?.OutRefAssignments);
 
         // A matching setup with no explicit behavior returns the default value
         if (setupFound)
@@ -273,7 +273,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         {
             behavior.Execute(args);
             // Set out/ref assignments after Execute to avoid reentrancy overwrite from callbacks
-            Setup.OutRefContext.Set(matchedSetup?.OutRefAssignments);
+            OutRefContext.Set(matchedSetup?.OutRefAssignments);
             if (matchedSetup is not null)
             {
 
@@ -283,7 +283,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         }
 
         // Set out/ref assignments for generated code to consume
-        Setup.OutRefContext.Set(matchedSetup?.OutRefAssignments);
+        OutRefContext.Set(matchedSetup?.OutRefAssignments);
 
         if (setupFound && matchedSetup is not null)
         {
@@ -322,7 +322,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         {
             var behaviorResult = behavior.Execute(args);
             // Set out/ref assignments after Execute to avoid reentrancy overwrite from callbacks
-            Setup.OutRefContext.Set(matchedSetup?.OutRefAssignments);
+            OutRefContext.Set(matchedSetup?.OutRefAssignments);
             if (matchedSetup is not null)
             {
 
@@ -336,7 +336,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         }
 
         // Set out/ref assignments for generated code to consume
-        Setup.OutRefContext.Set(matchedSetup?.OutRefAssignments);
+        OutRefContext.Set(matchedSetup?.OutRefAssignments);
 
         if (setupFound)
         {

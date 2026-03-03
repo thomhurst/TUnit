@@ -4,7 +4,7 @@ When using TUnit in a CI/CD pipeline, you'll want to run tests, collect results,
 
 The best practice is to use the .NET SDK CLI (`dotnet test` or `dotnet run`) directly to maintain full control over execution, ensure reproducibility across environments, and allow for local debugging.
 
-> **Note**: The `--` separator is required to pass arguments to the test runner when using `dotnet test`. CLI flags/args from extension packages (such as `--coverage`, `--report-trx`, `--results-directory`) must come after the `--` separator so they are parsed as program arguments to the TUnit test runner, not as `dotnet test` arguments. For example: `dotnet test -- --coverage --report-trx` instead of `dotnet test --coverage --report-trx`.
+> **Note**: The `--` separator is required to pass arguments to the test runner when using `dotnet test`. CLI flags/args from extension packages (such as `--coverage`, `--report-trx`) must come after the `--` separator so they are parsed as program arguments to the TUnit test runner, not as `dotnet test` arguments. For example: `dotnet test -- --coverage --report-trx` instead of `dotnet test --coverage --report-trx`.
 
 ## GitHub Actions
 
@@ -48,7 +48,7 @@ jobs:
       run: dotnet build --configuration Release --no-restore
 
     - name: Run tests with coverage
-      run: dotnet test --configuration Release --no-build -- --coverage --report-trx --results-directory ./TestResults
+      run: dotnet test --configuration Release --no-build --results-directory ./TestResults -- --coverage --report-trx
 
     - name: Upload test results
       if: always()  # Run even if tests fail
@@ -140,7 +140,7 @@ jobs:
         dotnet-version: '9.0.x'
 
     - name: Run tests
-      run: dotnet test --configuration Release -- --report-trx --results-directory ./TestResults
+      run: dotnet test --configuration Release --results-directory ./TestResults -- --report-trx
 
     - name: Comment PR with results
       if: always()
@@ -219,9 +219,9 @@ stages:
       displayName: 'Build solution'
 
     - script: |
-        dotnet test --configuration $(buildConfiguration) --no-build -- \
+        dotnet test --configuration $(buildConfiguration) --no-build --results-directory $(Agent.TempDirectory) -- \
           --coverage --coverage-output-format cobertura \
-          --report-trx --results-directory $(Agent.TempDirectory)
+          --report-trx
       displayName: 'Run tests with coverage'
       continueOnError: true
 
@@ -311,9 +311,9 @@ test:unit:
   dependencies:
     - build
   script:
-    - dotnet test --configuration $BUILD_CONFIGURATION --no-build --
+    - dotnet test --configuration $BUILD_CONFIGURATION --no-build --results-directory ./TestResults --
       --coverage --coverage-output-format cobertura
-      --report-trx --results-directory ./TestResults
+      --report-trx
   coverage: '/Total\s+\|\s+(\d+\.?\d*)%/'
   artifacts:
     when: always
@@ -330,9 +330,9 @@ test:integration:
   dependencies:
     - build
   script:
-    - dotnet test --configuration $BUILD_CONFIGURATION --no-build --
+    - dotnet test --configuration $BUILD_CONFIGURATION --no-build --results-directory ./TestResults --
       --treenode-filter "/*/*/*/*[Category=Integration]"
-      --report-trx --results-directory ./TestResults
+      --report-trx
   artifacts:
     when: always
     paths:
@@ -420,9 +420,9 @@ jobs:
       - run:
           name: Run tests
           command: |
-            dotnet test --configuration Release --no-build -- \
+            dotnet test --configuration Release --no-build --results-directory ./TestResults -- \
               --coverage --coverage-output-format cobertura \
-              --report-trx --results-directory ./TestResults
+              --report-trx
 
       - run:
           name: Process test results
@@ -489,8 +489,8 @@ RUN dotnet build --configuration Release --no-restore
 # Run tests
 FROM build AS test
 WORKDIR /src
-RUN dotnet test --configuration Release --no-build -- \
-    --coverage --report-trx --results-directory /testresults
+RUN dotnet test --configuration Release --no-build --results-directory /testresults -- \
+    --coverage --report-trx
 
 # Export test results
 FROM scratch AS export
