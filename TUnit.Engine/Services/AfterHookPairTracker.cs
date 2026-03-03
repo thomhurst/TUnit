@@ -45,12 +45,13 @@ internal sealed class AfterHookPairTracker
         _sessionHookRegistered = true;
 
         // Register callback to run After hook on cancellation
-        var registration = cancellationToken.Register(() =>
+        var registration = cancellationToken.Register(static state =>
         {
+            var (pairTracker, afterHookExecutor) = ((AfterHookPairTracker, Func<ValueTask<List<Exception>>>))state!;
             // Use sync-over-async here because CancellationToken.Register requires Action (not Func<Task>)
             // Fire-and-forget is acceptable here - exceptions will be collected when hooks run normally
-            _ = GetOrCreateAfterTestSessionTask(afterHookExecutor);
-        });
+            _ = pairTracker.GetOrCreateAfterTestSessionTask(afterHookExecutor);
+        }, (this, afterHookExecutor));
 
         _registrations.Add(registration);
     }
@@ -64,10 +65,11 @@ internal sealed class AfterHookPairTracker
         CancellationToken cancellationToken,
         Func<Assembly, ValueTask<List<Exception>>> afterHookExecutor)
     {
-        var registration = cancellationToken.Register(() =>
+        var registration = cancellationToken.Register(static state =>
         {
-            _ = GetOrCreateAfterAssemblyTask(assembly, afterHookExecutor);
-        });
+            var (pairTracker, assembly, afterHookExecutor) = ((AfterHookPairTracker, Assembly, Func<Assembly, ValueTask<List<Exception>>>))state!;
+            _ = pairTracker.GetOrCreateAfterAssemblyTask(assembly, afterHookExecutor);
+        }, (this, assembly, afterHookExecutor));
 
         _registrations.Add(registration);
     }
@@ -76,16 +78,19 @@ internal sealed class AfterHookPairTracker
     /// Registers Class After hooks to run on cancellation or normal completion.
     /// Ensures After hooks run exactly once even if called both ways.
     /// </summary>
+     [UnconditionalSuppressMessage("Trimming", "IL2077",
+            Justification = "Type parameter is annotated at the method boundary.")]
     public void RegisterAfterClassHook(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type testClass,
         HookExecutor hookExecutor,
         CancellationToken cancellationToken)
     {
-        var registration = cancellationToken.Register(() =>
+        var registration = cancellationToken.Register(static state =>
         {
-            _ = GetOrCreateAfterClassTask(testClass, hookExecutor, CancellationToken.None);
-        });
+            var (pairTracker, testClass, hookExecutor) = ((AfterHookPairTracker, Type, HookExecutor))state!;
+            _ = pairTracker.GetOrCreateAfterClassTask(testClass, hookExecutor, CancellationToken.None);
+        }, (this, testClass, hookExecutor));
 
         _registrations.Add(registration);
     }
