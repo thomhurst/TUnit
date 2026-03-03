@@ -73,6 +73,13 @@ internal static class MockImplBuilder
                 GenerateEvent(writer, evt);
             }
 
+            // Static abstract member stubs
+            foreach (var staticMember in model.StaticAbstractMembers)
+            {
+                writer.AppendLine();
+                GenerateStaticAbstractStub(writer, staticMember);
+            }
+
             // IRaisable.RaiseEvent dispatch
             writer.AppendLine();
             GenerateRaiseEventDispatch(writer, model);
@@ -110,6 +117,13 @@ internal static class MockImplBuilder
             {
                 writer.AppendLine();
                 GeneratePartialEvent(writer, evt);
+            }
+
+            // Static abstract member stubs
+            foreach (var staticMember in model.StaticAbstractMembers)
+            {
+                writer.AppendLine();
+                GenerateStaticAbstractStub(writer, staticMember);
             }
 
             // IRaisable.RaiseEvent dispatch
@@ -377,6 +391,13 @@ internal static class MockImplBuilder
             {
                 writer.AppendLine();
                 GeneratePartialEvent(writer, evt);
+            }
+
+            // Static abstract member stubs
+            foreach (var staticMember in model.StaticAbstractMembers)
+            {
+                writer.AppendLine();
+                GenerateStaticAbstractStub(writer, staticMember);
             }
 
             // IRaisable.RaiseEvent dispatch
@@ -1080,5 +1101,65 @@ internal static class MockImplBuilder
             name += "_" + string.Join("_", model.AdditionalInterfaceNames);
         }
         return GetSafeName(name);
+    }
+
+    /// <summary>
+    /// Generates an explicit interface implementation stub for a static abstract member.
+    /// The stub throws <see cref="System.NotSupportedException"/> since static abstract members cannot be mocked.
+    /// </summary>
+    private static void GenerateStaticAbstractStub(CodeWriter writer, MockStaticAbstractMemberModel member)
+    {
+        const string throwExpr = "throw new global::System.NotSupportedException(\"Static abstract interface members cannot be mocked.\")";
+
+        if (member.IsProperty)
+        {
+            writer.AppendLine($"static {member.ReturnType} {member.InterfaceFullyQualifiedName}.{member.Name}");
+            writer.OpenBrace();
+            if (member.HasGetter)
+            {
+                writer.AppendLine($"get => {throwExpr};");
+            }
+            if (member.HasSetter)
+            {
+                writer.AppendLine($"set => {throwExpr};");
+            }
+            writer.CloseBrace();
+        }
+        else
+        {
+            var paramList = string.Join(", ", member.Parameters.Select(p =>
+            {
+                var direction = p.Direction switch
+                {
+                    ParameterDirection.Out => "out ",
+                    ParameterDirection.Ref => "ref ",
+                    ParameterDirection.In_Readonly => "in ",
+                    _ => ""
+                };
+                return $"{direction}{p.FullyQualifiedType} {p.Name}";
+            }));
+
+            var typeParams = member.TypeParameters.Length > 0
+                ? "<" + string.Join(", ", member.TypeParameters.Select(tp => tp.Name)) + ">"
+                : "";
+
+            var constraints = "";
+            var constraintClauses = new List<string>();
+            foreach (var tp in member.TypeParameters)
+            {
+                if (!string.IsNullOrEmpty(tp.Constraints))
+                {
+                    constraintClauses.Add($"where {tp.Name} : {tp.Constraints}");
+                }
+            }
+            if (constraintClauses.Count > 0)
+            {
+                constraints = " " + string.Join(" ", constraintClauses);
+            }
+
+            var returnType = member.IsVoid ? "void" : member.ReturnType;
+            writer.AppendLine($"static {returnType} {member.InterfaceFullyQualifiedName}.{member.Name}{typeParams}({paramList}){constraints}");
+            writer.AppendLine($"    => {throwExpr};");
+        }
     }
 }

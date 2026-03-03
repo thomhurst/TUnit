@@ -296,4 +296,39 @@ public class MockGeneratorTests : SnapshotTestBase
 
         return VerifyGeneratorOutput(source);
     }
+
+    [Test]
+    public Task Interface_With_Static_Abstract_Transitive_Return_Type()
+    {
+        // Simulates the AWS SDK scenario: a main interface returns a base interface
+        // that has static abstract members. The source generator should NOT generate a
+        // transitive mock for the base interface (which would trigger CS8920).
+        var source = """
+            using TUnit.Mocks;
+
+            public class ClientConfig { }
+
+            public interface IConfigProvider
+            {
+                ClientConfig Config { get; }
+                static abstract ClientConfig CreateDefault();
+            }
+
+            public interface IMyService
+            {
+                string GetValue(string key);
+                IConfigProvider GetConfigProvider();
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<IMyService>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
 }

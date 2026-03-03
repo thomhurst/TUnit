@@ -144,7 +144,7 @@ internal static class MockTypeDiscovery
 
         // Build multi-type model (generates impl + factory only)
         var allTypes = new[] { namedType }.Concat(additionalTypes).ToArray();
-        var (methods, properties, events) = MemberDiscovery.DiscoverMembersFromMultipleTypes(allTypes);
+        var (methods, properties, events, staticAbstractMembers) = MemberDiscovery.DiscoverMembersFromMultipleTypes(allTypes);
 
         var additionalInterfaceNames = ImmutableArray.CreateBuilder<string>(additionalTypes.Count);
         foreach (var t in additionalTypes)
@@ -169,7 +169,8 @@ internal static class MockTypeDiscovery
                     .ToImmutableArray()
             ),
             AdditionalInterfaceNames = new EquatableArray<string>(additionalInterfaceNames.MoveToImmutable()),
-            Constructors = singleTypeModel.Constructors
+            Constructors = singleTypeModel.Constructors,
+            StaticAbstractMembers = staticAbstractMembers
         };
 
         return ImmutableArray.Create(singleTypeModel, multiTypeModel);
@@ -197,6 +198,9 @@ internal static class MockTypeDiscovery
 
         foreach (var member in members)
         {
+            // Skip static members — static abstract return types should not be auto-mocked
+            if (member.IsStatic) continue;
+
             ITypeSymbol? returnType = member switch
             {
                 IMethodSymbol m when !m.ReturnsVoid => m.ReturnType,
@@ -216,6 +220,12 @@ internal static class MockTypeDiscovery
             // that the mock generator cannot handle, and auto-mocking them is rarely useful.
             var ns = namedReturn.ContainingNamespace?.ToDisplayString() ?? "";
             if (IsFrameworkNamespace(ns))
+                continue;
+
+            // Skip interfaces that have static abstract members — using them as type arguments
+            // in Mock<T>/MockEngine<T> triggers CS8920 because the static abstract members
+            // don't have a most specific implementation in the interface.
+            if (HasStaticAbstractMembers(namedReturn))
                 continue;
 
             var returnFqn = namedReturn.GetFullyQualifiedName();
@@ -256,6 +266,33 @@ internal static class MockTypeDiscovery
         ns == "Microsoft" || ns.StartsWith("Microsoft.") ||
         ns == "Windows"   || ns.StartsWith("Windows.");
 
+    /// <summary>
+    /// Returns true if the interface (or any of its base interfaces) has static abstract members
+    /// without a most specific implementation. Such interfaces cannot be used as generic type arguments
+    /// (CS8920) and should not have transitive mock factories generated.
+    /// </summary>
+    private static bool HasStaticAbstractMembers(INamedTypeSymbol interfaceType)
+    {
+        // Check the interface itself
+        foreach (var member in interfaceType.GetMembers())
+        {
+            if (member.IsStatic && member.IsAbstract)
+                return true;
+        }
+
+        // Check all inherited interfaces
+        foreach (var baseInterface in interfaceType.AllInterfaces)
+        {
+            foreach (var member in baseInterface.GetMembers())
+            {
+                if (member.IsStatic && member.IsAbstract)
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
     private static MockTypeModel? BuildDelegateTypeModel(INamedTypeSymbol delegateType)
     {
         var invokeMethod = delegateType.DelegateInvokeMethod;
@@ -283,7 +320,7 @@ internal static class MockTypeDiscovery
 
     private static MockTypeModel? BuildSingleTypeModel(INamedTypeSymbol namedType, bool isPartialMock)
     {
-        var (methods, properties, events) = MemberDiscovery.DiscoverMembers(namedType);
+        var (methods, properties, events, staticAbstractMembers) = MemberDiscovery.DiscoverMembers(namedType);
 
         // Discover constructors for partial mocks of classes
         var constructors = isPartialMock && namedType.TypeKind == TypeKind.Class
@@ -306,7 +343,8 @@ internal static class MockTypeDiscovery
                     .Select(i => i.GetFullyQualifiedName())
                     .ToImmutableArray()
             ),
-            Constructors = constructors
+            Constructors = constructors,
+            StaticAbstractMembers = staticAbstractMembers
         };
     }
 }

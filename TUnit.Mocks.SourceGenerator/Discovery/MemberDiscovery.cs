@@ -14,16 +14,18 @@ namespace TUnit.Mocks.SourceGenerator.Discovery;
 /// </summary>
 internal static class MemberDiscovery
 {
-    public static (EquatableArray<MockMemberModel> Methods, EquatableArray<MockMemberModel> Properties, EquatableArray<MockEventModel> Events)
+    public static (EquatableArray<MockMemberModel> Methods, EquatableArray<MockMemberModel> Properties, EquatableArray<MockEventModel> Events, EquatableArray<MockStaticAbstractMemberModel> StaticAbstractMembers)
         DiscoverMembers(ITypeSymbol typeSymbol)
     {
         var methods = new List<MockMemberModel>();
         var properties = new List<MockMemberModel>();
         var events = new List<MockEventModel>();
+        var staticAbstractMembers = new List<MockStaticAbstractMemberModel>();
 
         var seenMethods = new HashSet<string>();
         var seenProperties = new Dictionary<string, int>();
         var seenEvents = new HashSet<string>();
+        var seenStaticAbstract = new HashSet<string>();
 
         int memberIdCounter = 0;
 
@@ -45,7 +47,14 @@ internal static class MemberDiscovery
 
             foreach (var member in iface.GetMembers())
             {
-                if (member.IsStatic) continue;
+                if (member.IsStatic)
+                {
+                    if (member.IsAbstract)
+                    {
+                        CollectStaticAbstractMember(member, iface, staticAbstractMembers, seenStaticAbstract);
+                    }
+                    continue;
+                }
 
                 switch (member)
                 {
@@ -104,7 +113,8 @@ internal static class MemberDiscovery
         return (
             new EquatableArray<MockMemberModel>(methods.ToImmutableArray()),
             new EquatableArray<MockMemberModel>(properties.ToImmutableArray()),
-            new EquatableArray<MockEventModel>(events.ToImmutableArray())
+            new EquatableArray<MockEventModel>(events.ToImmutableArray()),
+            new EquatableArray<MockStaticAbstractMemberModel>(staticAbstractMembers.ToImmutableArray())
         );
     }
 
@@ -112,16 +122,18 @@ internal static class MemberDiscovery
     /// Discovers members from multiple type symbols, merging and deduplicating across all.
     /// Used for multi-interface mocks like Mock.Of&lt;T1, T2&gt;().
     /// </summary>
-    public static (EquatableArray<MockMemberModel> Methods, EquatableArray<MockMemberModel> Properties, EquatableArray<MockEventModel> Events)
+    public static (EquatableArray<MockMemberModel> Methods, EquatableArray<MockMemberModel> Properties, EquatableArray<MockEventModel> Events, EquatableArray<MockStaticAbstractMemberModel> StaticAbstractMembers)
         DiscoverMembersFromMultipleTypes(INamedTypeSymbol[] typeSymbols)
     {
         var methods = new List<MockMemberModel>();
         var properties = new List<MockMemberModel>();
         var events = new List<MockEventModel>();
+        var staticAbstractMembers = new List<MockStaticAbstractMemberModel>();
 
         var seenMethods = new HashSet<string>();
         var seenProperties = new Dictionary<string, int>();
         var seenEvents = new HashSet<string>();
+        var seenStaticAbstract = new HashSet<string>();
 
         int memberIdCounter = 0;
 
@@ -136,7 +148,14 @@ internal static class MemberDiscovery
             {
                 foreach (var member in iface.GetMembers())
                 {
-                    if (member.IsStatic) continue;
+                    if (member.IsStatic)
+                    {
+                        if (member.IsAbstract)
+                        {
+                            CollectStaticAbstractMember(member, iface, staticAbstractMembers, seenStaticAbstract);
+                        }
+                        continue;
+                    }
 
                     switch (member)
                     {
@@ -194,7 +213,8 @@ internal static class MemberDiscovery
         return (
             new EquatableArray<MockMemberModel>(methods.ToImmutableArray()),
             new EquatableArray<MockMemberModel>(properties.ToImmutableArray()),
-            new EquatableArray<MockEventModel>(events.ToImmutableArray())
+            new EquatableArray<MockEventModel>(events.ToImmutableArray()),
+            new EquatableArray<MockStaticAbstractMemberModel>(staticAbstractMembers.ToImmutableArray())
         );
     }
 
@@ -568,5 +588,74 @@ internal static class MemberDiscovery
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Collects a static abstract interface member for stub generation in the mock impl class.
+    /// Only methods and properties are collected; events are not expected to be static abstract.
+    /// </summary>
+    private static void CollectStaticAbstractMember(
+        ISymbol member,
+        ITypeSymbol declaringInterface,
+        List<MockStaticAbstractMemberModel> staticAbstractMembers,
+        HashSet<string> seen)
+    {
+        var interfaceFqn = declaringInterface.GetFullyQualifiedName();
+
+        switch (member)
+        {
+            case IMethodSymbol method when method.MethodKind == MethodKind.Ordinary:
+            {
+                var paramTypes = string.Join(",", method.Parameters.Select(p => p.Type.GetFullyQualifiedName()));
+                var typeParamsSuffix = method.TypeParameters.Length > 0 ? $"`{method.TypeParameters.Length}" : "";
+                var key = $"SA:{interfaceFqn}.{method.Name}{typeParamsSuffix}({paramTypes})";
+                if (!seen.Add(key)) break;
+
+                staticAbstractMembers.Add(new MockStaticAbstractMemberModel
+                {
+                    InterfaceFullyQualifiedName = interfaceFqn,
+                    Name = method.Name,
+                    ReturnType = method.ReturnType.GetFullyQualifiedName(),
+                    IsVoid = method.ReturnsVoid,
+                    IsProperty = false,
+                    Parameters = new EquatableArray<MockParameterModel>(
+                        method.Parameters.Select(p => new MockParameterModel
+                        {
+                            Name = p.Name,
+                            Type = p.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat),
+                            FullyQualifiedType = p.Type.GetFullyQualifiedName(),
+                            Direction = p.GetParameterDirection(),
+                            IsValueType = p.Type.IsValueType,
+                        }).ToImmutableArray()
+                    ),
+                    TypeParameters = new EquatableArray<MockTypeParameterModel>(
+                        method.TypeParameters.Select(tp => new MockTypeParameterModel
+                        {
+                            Name = tp.Name,
+                            Constraints = tp.GetGenericConstraints()
+                        }).ToImmutableArray()
+                    )
+                });
+                break;
+            }
+
+            case IPropertySymbol property:
+            {
+                var key = $"SA:{interfaceFqn}.{property.Name}";
+                if (!seen.Add(key)) break;
+
+                staticAbstractMembers.Add(new MockStaticAbstractMemberModel
+                {
+                    InterfaceFullyQualifiedName = interfaceFqn,
+                    Name = property.Name,
+                    ReturnType = property.Type.GetFullyQualifiedName(),
+                    IsVoid = false,
+                    IsProperty = true,
+                    HasGetter = property.GetMethod is not null,
+                    HasSetter = property.SetMethod is not null,
+                });
+                break;
+            }
+        }
     }
 }
