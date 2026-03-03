@@ -5461,6 +5461,59 @@ public class NUnitMigrationAnalyzerTests
     }
 
     [Test]
+    public async Task NUnit_Ignore_From_Different_Namespace_Not_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    [MyCompany.Attributes.Ignore("Not an NUnit attribute")]
+                    public void MyMethod()
+                    {
+                        Assert.That(true, Is.True);
+                    }
+                }
+
+                namespace MyCompany.Attributes
+                {
+                    public class IgnoreAttribute : System.Attribute
+                    {
+                        public IgnoreAttribute() { }
+                        public IgnoreAttribute(string reason) { }
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    [Test]
+                    [MyCompany.Attributes.Ignore("Not an NUnit attribute")]
+                    public async Task MyMethod()
+                    {
+                        await Assert.That(true).IsTrue();
+                    }
+                }
+
+                namespace MyCompany.Attributes
+                {
+                    public class IgnoreAttribute : System.Attribute
+                    {
+                        public IgnoreAttribute() { }
+                        public IgnoreAttribute(string reason) { }
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
     public async Task NUnit_Global_Using_Flagged()
     {
         await Verifier.VerifyAnalyzerAsync(
