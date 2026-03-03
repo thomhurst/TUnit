@@ -202,10 +202,19 @@ public class CodeWriter : ICodeWriter
             endIndex--;
         }
 
-        // Process remaining lines
+        // Process remaining lines, preserving blank lines within the content
         for (var i = startIndex; i <= endIndex; i++)
         {
-            AppendLine(lines[i].TrimEnd());
+            var line = lines[i].TrimEnd();
+            if (line.Length == 0)
+            {
+                // Preserve blank lines by forcing a newline even when already at line start
+                _builder.AppendLine();
+            }
+            else
+            {
+                AppendLine(line);
+            }
         }
 
         return this;

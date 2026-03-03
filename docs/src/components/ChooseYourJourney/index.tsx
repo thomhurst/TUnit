@@ -23,7 +23,7 @@ const journeys: JourneyCard[] = [
       { label: 'Installation', href: '/docs/getting-started/installation' },
       { label: 'Write Your First Test', href: '/docs/getting-started/writing-your-first-test' },
       { label: 'Philosophy', href: '/docs/guides/philosophy' },
-      { label: 'Core Concepts', href: '/docs/test-authoring/things-to-know' },
+      { label: 'Core Concepts', href: '/docs/writing-tests/things-to-know' },
     ],
   },
   {
@@ -32,7 +32,7 @@ const journeys: JourneyCard[] = [
     icon: '🔄',
     color: '#3b82f6',
     links: [
-      { label: 'Migration Overview', href: '/docs/migration/testcontext-interface-organization' },
+      { label: 'Migration Overview', href: '/docs/comparison/framework-differences' },
       { label: 'From xUnit', href: '/docs/migration/xunit' },
       { label: 'From NUnit', href: '/docs/migration/nunit' },
       { label: 'From MSTest', href: '/docs/migration/mstest' },
@@ -46,8 +46,8 @@ const journeys: JourneyCard[] = [
     links: [
       { label: 'Assertions Library', href: '/docs/assertions/library' },
       { label: 'Assertion Basics', href: '/docs/assertions/getting-started' },
-      { label: 'Data Driven Testing', href: '/docs/test-authoring/arguments' },
-      { label: 'Test Lifecycle', href: '/docs/test-lifecycle/setup' },
+      { label: 'Data Driven Testing', href: '/docs/writing-tests/arguments' },
+      { label: 'Test Lifecycle', href: '/docs/writing-tests/lifecycle' },
     ],
   },
   {
@@ -58,8 +58,8 @@ const journeys: JourneyCard[] = [
     links: [
       { label: 'Best Practices', href: '/docs/guides/best-practices' },
       { label: 'Performance Benchmarks', href: '/docs/benchmarks' },
-      { label: 'Parallel Execution', href: '/docs/parallelism/not-in-parallel' },
-      { label: 'Customization', href: '/docs/customization-extensibility/data-source-generators' },
+      { label: 'Parallel Execution', href: '/docs/execution/parallelism' },
+      { label: 'Customization', href: '/docs/extending/data-source-generators' },
     ],
   },
 ];

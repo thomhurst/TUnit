@@ -107,7 +107,7 @@ public class GenericTests
         repo.Save(customer);
 
         // Assert
-        mock.Save<Customer>(Arg.Any<Customer>()).WasCalled(Times.Once);
+        mock.Save<Customer>(Any()).WasCalled(Times.Once);
         await Assert.That(true).IsTrue();
     }
 
@@ -117,7 +117,7 @@ public class GenericTests
         // Arrange
         var mock = Mock.Of<IRepository>();
         var customer = new Customer { Id = 1, Name = "Any" };
-        mock.Get<Customer>(Arg.Any<int>()).Returns(customer);
+        mock.Get<Customer>(Any()).Returns(customer);
 
         // Act
         IRepository repo = mock.Object;
@@ -135,7 +135,7 @@ public class GenericTests
         // Arrange
         var mock = Mock.Of<IRepository>();
         var order = new Order { OrderId = 10 };
-        mock.Transform<Customer, Order>(Arg.Any<Customer>()).Returns(order);
+        mock.Transform<Customer, Order>(Any()).Returns(order);
 
         // Act
         IRepository repo = mock.Object;

@@ -13,12 +13,11 @@ namespace TUnit.Mocks.SourceGenerator.Builders;
 internal static class MockMembersBuilder
 {
     private const int MaxTypedParams = 8;
+    private const int MaxFuncOverloadParams = 4;
 
     private static readonly HashSet<string> MockMemberNames = new(System.StringComparer.Ordinal)
     {
-        "Object", "Engine", "Behavior", "Invocations", "DefaultValueProvider",
-        "SetupAllProperties", "Reset", "VerifyAll", "VerifyNoOtherCalls",
-        "GetAutoMock", "GetDiagnostics", "SetState", "InState",
+        "Object",
         "GetHashCode", "GetType", "ToString", "Equals"
     };
 
@@ -48,8 +47,9 @@ internal static class MockMembersBuilder
                 }
 
                 // Properties -- extension properties via C# 14 extension blocks
+                // (skip ref struct properties — can't use PropertyMockCall<RefStruct>)
                 var memberProps = model.Properties
-                    .Where(p => !p.IsIndexer && (p.HasGetter || p.HasSetter))
+                    .Where(p => !p.IsIndexer && !p.IsRefStructReturn && (p.HasGetter || p.HasSetter))
                     .ToList();
                 if (memberProps.Count > 0)
                 {
@@ -83,13 +83,19 @@ internal static class MockMembersBuilder
     {
         if (method.IsGenericMethod) return false;
 
-        var nonOutParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out).ToList();
-        if (nonOutParams.Count == 0)
+        // Exclude out params and ref struct params (can't be boxed or used as type args)
+        var matchableParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out && !p.IsRefStruct).ToList();
+        if (matchableParams.Count == 0)
         {
-            var hasOutRefParams = method.Parameters.Any(p => p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref);
-            return hasEvents || hasOutRefParams;
+            // Include span-type ref struct out/ref params (supported via array conversion)
+            var hasOutRefParams = method.Parameters.Any(p =>
+                (!p.IsRefStruct || p.SpanElementType is not null) &&
+                (p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref));
+            // Span return types need a typed wrapper for the generated Returns(SpanType) method
+            var hasSpanReturn = method.SpanReturnElementType is not null;
+            return hasEvents || hasOutRefParams || hasSpanReturn;
         }
-        return nonOutParams.Count <= MaxTypedParams;
+        return matchableParams.Count <= MaxTypedParams;
     }
 
     private static string GetWrapperName(string safeName, MockMemberModel method)
@@ -106,21 +112,24 @@ internal static class MockMembersBuilder
             : method.ReturnType;
 
         var wrapperName = GetWrapperName(safeName, method);
-        var nonOutParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out).ToList();
+        var matchableParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out && !p.IsRefStruct).ToList();
+        var hasRefStructParams = method.HasRefStructParams;
+        var allNonOutParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out).ToList();
 
-        if (method.IsVoid)
+        // Ref struct returns use the void wrapper (can't use generic type args with ref structs)
+        if (method.IsVoid || method.IsRefStructReturn)
         {
-            GenerateVoidUnifiedClass(writer, wrapperName, nonOutParams, events, method.Parameters);
+            GenerateVoidUnifiedClass(writer, wrapperName, matchableParams, events, method.Parameters, hasRefStructParams, allNonOutParams, method.SpanReturnElementType, method.ReturnType);
         }
         else
         {
-            GenerateReturnUnifiedClass(writer, wrapperName, nonOutParams, setupReturnType, events, method.Parameters);
+            GenerateReturnUnifiedClass(writer, wrapperName, matchableParams, setupReturnType, events, method.Parameters, hasRefStructParams, allNonOutParams);
         }
     }
 
     private static void GenerateReturnUnifiedClass(CodeWriter writer, string wrapperName,
         List<MockParameterModel> nonOutParams, string returnType, EquatableArray<MockEventModel> events,
-        EquatableArray<MockParameterModel> allParameters)
+        EquatableArray<MockParameterModel> allParameters, bool hasRefStructParams, List<MockParameterModel> allNonOutParams)
     {
         var builderType = $"global::TUnit.Mocks.Setup.MethodSetupBuilder<{returnType}>";
         var hasOutRef = allParameters.Any(p => p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref);
@@ -194,11 +203,30 @@ internal static class MockMembersBuilder
             if (nonOutParams.Count >= 1)
             {
                 writer.AppendLine();
-                GenerateTypedReturnsOverload(writer, nonOutParams, returnType, wrapperName);
-                writer.AppendLine();
-                GenerateTypedCallbackOverload(writer, nonOutParams, wrapperName);
-                writer.AppendLine();
-                GenerateTypedThrowsOverload(writer, nonOutParams, wrapperName);
+                if (hasRefStructParams)
+                {
+                    writer.AppendLine("#if NET9_0_OR_GREATER");
+                    GenerateTypedReturnsOverload(writer, nonOutParams, returnType, wrapperName, allNonOutParams);
+                    writer.AppendLine();
+                    GenerateTypedCallbackOverload(writer, nonOutParams, wrapperName, allNonOutParams);
+                    writer.AppendLine();
+                    GenerateTypedThrowsOverload(writer, nonOutParams, wrapperName, allNonOutParams);
+                    writer.AppendLine("#else");
+                    GenerateTypedReturnsOverload(writer, nonOutParams, returnType, wrapperName);
+                    writer.AppendLine();
+                    GenerateTypedCallbackOverload(writer, nonOutParams, wrapperName);
+                    writer.AppendLine();
+                    GenerateTypedThrowsOverload(writer, nonOutParams, wrapperName);
+                    writer.AppendLine("#endif");
+                }
+                else
+                {
+                    GenerateTypedReturnsOverload(writer, nonOutParams, returnType, wrapperName);
+                    writer.AppendLine();
+                    GenerateTypedCallbackOverload(writer, nonOutParams, wrapperName);
+                    writer.AppendLine();
+                    GenerateTypedThrowsOverload(writer, nonOutParams, wrapperName);
+                }
             }
 
             // Typed out/ref parameter setters
@@ -235,7 +263,8 @@ internal static class MockMembersBuilder
 
     private static void GenerateVoidUnifiedClass(CodeWriter writer, string wrapperName,
         List<MockParameterModel> nonOutParams, EquatableArray<MockEventModel> events,
-        EquatableArray<MockParameterModel> allParameters)
+        EquatableArray<MockParameterModel> allParameters, bool hasRefStructParams, List<MockParameterModel> allNonOutParams,
+        string? spanReturnElementType = null, string? spanReturnType = null)
     {
         var builderType = "global::TUnit.Mocks.Setup.VoidMethodSetupBuilder";
         var hasOutRef = allParameters.Any(p => p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref);
@@ -299,13 +328,36 @@ internal static class MockMembersBuilder
             writer.AppendLine($"/// <inheritdoc />");
             writer.AppendLine($"public {wrapperName} Then() {{ EnsureSetup().Then(); return this; }}");
 
+            // Span return support: generate Returns(SpanType) that stores via SetsOutParameter(-1, ...)
+            if (spanReturnElementType is not null && spanReturnType is not null)
+            {
+                writer.AppendLine();
+                writer.AppendLine($"/// <summary>Configure the return value for this span-returning method.</summary>");
+                writer.AppendLine($"public {wrapperName} Returns({spanReturnType} value) {{ EnsureSetup().SetsOutParameter(global::TUnit.Mocks.Setup.OutRefContext.SpanReturnValueIndex, value.ToArray()); return this; }}");
+            }
+
             // Typed parameter overloads (only for methods with typed params)
             if (nonOutParams.Count >= 1)
             {
                 writer.AppendLine();
-                GenerateTypedCallbackOverload(writer, nonOutParams, wrapperName);
-                writer.AppendLine();
-                GenerateTypedThrowsOverload(writer, nonOutParams, wrapperName);
+                if (hasRefStructParams)
+                {
+                    writer.AppendLine("#if NET9_0_OR_GREATER");
+                    GenerateTypedCallbackOverload(writer, nonOutParams, wrapperName, allNonOutParams);
+                    writer.AppendLine();
+                    GenerateTypedThrowsOverload(writer, nonOutParams, wrapperName, allNonOutParams);
+                    writer.AppendLine("#else");
+                    GenerateTypedCallbackOverload(writer, nonOutParams, wrapperName);
+                    writer.AppendLine();
+                    GenerateTypedThrowsOverload(writer, nonOutParams, wrapperName);
+                    writer.AppendLine("#endif");
+                }
+                else
+                {
+                    GenerateTypedCallbackOverload(writer, nonOutParams, wrapperName);
+                    writer.AppendLine();
+                    GenerateTypedThrowsOverload(writer, nonOutParams, wrapperName);
+                }
             }
 
             // Typed out/ref parameter setters
@@ -341,11 +393,11 @@ internal static class MockMembersBuilder
     }
 
     private static void GenerateTypedReturnsOverload(CodeWriter writer, List<MockParameterModel> nonOutParams,
-        string returnType, string wrapperName)
+        string returnType, string wrapperName, List<MockParameterModel>? allNonOutParams = null)
     {
         var typeList = string.Join(", ", nonOutParams.Select(p => p.FullyQualifiedType));
         var funcType = $"global::System.Func<{typeList}, {returnType}>";
-        var castArgs = BuildCastArgs(nonOutParams);
+        var castArgs = BuildCastArgs(nonOutParams, allNonOutParams);
 
         writer.AppendLine("/// <summary>Configure a typed computed return value using the actual method parameters.</summary>");
         using (writer.Block($"public {wrapperName} Returns({funcType} factory)"))
@@ -356,11 +408,11 @@ internal static class MockMembersBuilder
     }
 
     private static void GenerateTypedCallbackOverload(CodeWriter writer, List<MockParameterModel> nonOutParams,
-        string wrapperName)
+        string wrapperName, List<MockParameterModel>? allNonOutParams = null)
     {
         var typeList = string.Join(", ", nonOutParams.Select(p => p.FullyQualifiedType));
         var actionType = $"global::System.Action<{typeList}>";
-        var castArgs = BuildCastArgs(nonOutParams);
+        var castArgs = BuildCastArgs(nonOutParams, allNonOutParams);
 
         writer.AppendLine("/// <summary>Execute a typed callback using the actual method parameters.</summary>");
         using (writer.Block($"public {wrapperName} Callback({actionType} callback)"))
@@ -371,11 +423,11 @@ internal static class MockMembersBuilder
     }
 
     private static void GenerateTypedThrowsOverload(CodeWriter writer, List<MockParameterModel> nonOutParams,
-        string wrapperName)
+        string wrapperName, List<MockParameterModel>? allNonOutParams = null)
     {
         var typeList = string.Join(", ", nonOutParams.Select(p => p.FullyQualifiedType));
         var funcType = $"global::System.Func<{typeList}, global::System.Exception>";
-        var castArgs = BuildCastArgs(nonOutParams);
+        var castArgs = BuildCastArgs(nonOutParams, allNonOutParams);
 
         writer.AppendLine("/// <summary>Configure a typed computed exception using the actual method parameters.</summary>");
         using (writer.Block($"public {wrapperName} Throws({funcType} exceptionFactory)"))
@@ -426,50 +478,84 @@ internal static class MockMembersBuilder
             if (param.Direction != ParameterDirection.Out && param.Direction != ParameterDirection.Ref)
                 continue;
 
+            // Skip non-span ref structs (can't be boxed)
+            if (param.IsRefStruct && param.SpanElementType is null)
+                continue;
+
             var prefix = param.Direction == ParameterDirection.Out ? "SetsOut" : "SetsRef";
             var methodName = prefix + ToPascalCase(param.Name);
             var dirLabel = param.Direction == ParameterDirection.Out ? "out" : "ref";
 
             writer.AppendLine($"/// <summary>Sets the '{param.Name}' {dirLabel} parameter to the specified value when this setup matches.</summary>");
-            writer.AppendLine($"public {wrapperName} {methodName}({param.FullyQualifiedType} {param.Name}) {{ EnsureSetup().SetsOutParameter({i}, {param.Name}); return this; }}");
+            if (param.SpanElementType is not null)
+            {
+                // Span types: convert to array for storage, reconstruct at invocation time
+                writer.AppendLine($"public {wrapperName} {methodName}({param.FullyQualifiedType} {param.Name}) {{ EnsureSetup().SetsOutParameter({i}, {param.Name}.ToArray()); return this; }}");
+            }
+            else
+            {
+                writer.AppendLine($"public {wrapperName} {methodName}({param.FullyQualifiedType} {param.Name}) {{ EnsureSetup().SetsOutParameter({i}, {param.Name}); return this; }}");
+            }
         }
     }
 
     private static string ToPascalCase(string name)
         => string.IsNullOrEmpty(name) ? name : char.ToUpperInvariant(name[0]) + name[1..];
 
-    private static string BuildCastArgs(List<MockParameterModel> nonOutParams)
+    private static string BuildCastArgs(List<MockParameterModel> nonOutParams, List<MockParameterModel>? allNonOutParams = null)
     {
-        return string.Join(", ", nonOutParams.Select((p, i) =>
-            $"({p.FullyQualifiedType})args[{i}]!"));
+        if (allNonOutParams is null)
+            return string.Join(", ", nonOutParams.Select((p, i) => $"({p.FullyQualifiedType})args[{i}]!"));
+
+        var indexMap = allNonOutParams.Select((p, i) => (p, i)).ToDictionary(x => x.p, x => x.i);
+        return string.Join(", ", nonOutParams.Select(p => $"({p.FullyQualifiedType})args[{indexMap[p]}]!"));
     }
 
     private static void GenerateMemberMethod(CodeWriter writer, MockMemberModel method, MockTypeModel model, string safeName)
     {
-        // For async methods (Task<T>/ValueTask<T>), unwrap the return type so users write .Returns(5) not .Returns(Task.FromResult(5))
-        // For void-async methods (Task/ValueTask), IsVoid is already true
+        if (method.HasRefStructParams)
+        {
+            writer.AppendLine("#if NET9_0_OR_GREATER");
+            EmitMemberMethodBody(writer, method, model, safeName, includeRefStructArgs: true);
+            EmitFuncOverloads(writer, method, model, safeName, includeRefStructArgs: true);
+            writer.AppendLine("#else");
+            EmitMemberMethodBody(writer, method, model, safeName, includeRefStructArgs: false);
+            EmitFuncOverloads(writer, method, model, safeName, includeRefStructArgs: false);
+            writer.AppendLine("#endif");
+        }
+        else
+        {
+            EmitMemberMethodBody(writer, method, model, safeName, includeRefStructArgs: false);
+            EmitFuncOverloads(writer, method, model, safeName, includeRefStructArgs: false);
+        }
+    }
+
+    private static (bool UseTypedWrapper, string ReturnType, string SetupReturnType) GetReturnTypeInfo(
+        MockMemberModel method, MockTypeModel model, string safeName)
+    {
         var setupReturnType = method.IsAsync && !method.IsVoid
             ? method.UnwrappedReturnType
             : method.ReturnType;
 
         var hasEvents = model.Events.Length > 0;
         var useTypedWrapper = ShouldGenerateTypedWrapper(method, hasEvents);
+
         string returnType;
-
         if (useTypedWrapper)
-        {
             returnType = GetWrapperName(safeName, method);
-        }
-        else if (method.IsVoid)
-        {
+        else if (method.IsVoid || method.IsRefStructReturn)
             returnType = "global::TUnit.Mocks.VoidMockMethodCall";
-        }
         else
-        {
             returnType = $"global::TUnit.Mocks.MockMethodCall<{setupReturnType}>";
-        }
 
-        var paramList = GetArgParameterList(method);
+        return (useTypedWrapper, returnType, setupReturnType);
+    }
+
+    private static void EmitMemberMethodBody(CodeWriter writer, MockMemberModel method, MockTypeModel model, string safeName, bool includeRefStructArgs)
+    {
+        var (useTypedWrapper, returnType, setupReturnType) = GetReturnTypeInfo(method, model, safeName);
+
+        var paramList = GetArgParameterList(method, includeRefStructArgs);
         var typeParams = GetTypeParameterList(method);
         var constraints = GetConstraintClauses(method);
 
@@ -480,30 +566,150 @@ internal static class MockMembersBuilder
         using (writer.Block($"public static {returnType} {safeMemberName}{typeParams}({fullParamList}){constraints}"))
         {
             // Build matchers array
-            var nonOutParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out).ToList();
+            var matchableParams = includeRefStructArgs
+                ? method.Parameters.Where(p => p.Direction != ParameterDirection.Out).ToList()
+                : method.Parameters.Where(p => p.Direction != ParameterDirection.Out && !p.IsRefStruct).ToList();
 
-            if (nonOutParams.Count == 0)
+            if (matchableParams.Count == 0)
             {
                 writer.AppendLine("var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();");
             }
             else
             {
-                var matcherArgs = string.Join(", ", nonOutParams.Select(p => $"{p.Name}.Matcher"));
+                var matcherArgs = string.Join(", ", matchableParams.Select(p => $"{p.Name}.Matcher"));
                 writer.AppendLine($"var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] {{ {matcherArgs} }};");
             }
 
             if (useTypedWrapper)
             {
                 var wrapperName = GetWrapperName(safeName, method);
-                writer.AppendLine($"return new {wrapperName}(mock.Engine, {method.MemberId}, \"{method.Name}\", matchers);");
+                writer.AppendLine($"return new {wrapperName}(global::TUnit.Mocks.Mock.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
             }
-            else if (method.IsVoid)
+            else if (method.IsVoid || method.IsRefStructReturn)
             {
-                writer.AppendLine($"return new global::TUnit.Mocks.VoidMockMethodCall(mock.Engine, {method.MemberId}, \"{method.Name}\", matchers);");
+                writer.AppendLine($"return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.Mock.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
             }
             else
             {
-                writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<{setupReturnType}>(mock.Engine, {method.MemberId}, \"{method.Name}\", matchers);");
+                writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<{setupReturnType}>(global::TUnit.Mocks.Mock.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
+            }
+        }
+    }
+
+    private static List<int> GetFuncEligibleParamIndices(MockMemberModel method)
+    {
+        var indices = new List<int>();
+        for (int i = 0; i < method.Parameters.Length; i++)
+        {
+            var p = method.Parameters[i];
+            if ((p.Direction == ParameterDirection.In || p.Direction == ParameterDirection.In_Readonly)
+                && !p.IsRefStruct)
+            {
+                indices.Add(i);
+            }
+        }
+        return indices;
+    }
+
+    private static void EmitFuncOverloads(CodeWriter writer, MockMemberModel method, MockTypeModel model,
+        string safeName, bool includeRefStructArgs)
+    {
+        var eligible = GetFuncEligibleParamIndices(method);
+        if (eligible.Count == 0 || eligible.Count > MaxFuncOverloadParams) return;
+
+        int totalMasks = (1 << eligible.Count) - 1;
+        for (int mask = 1; mask <= totalMasks; mask++)
+        {
+            writer.AppendLine();
+            EmitSingleFuncOverload(writer, method, model, safeName, eligible, mask, includeRefStructArgs);
+        }
+    }
+
+    private static void EmitSingleFuncOverload(CodeWriter writer, MockMemberModel method, MockTypeModel model,
+        string safeName, List<int> eligibleIndices, int funcMask, bool includeRefStructArgs)
+    {
+        // Determine which parameter indices use Func<T, bool>
+        var funcIndices = new HashSet<int>();
+        for (int bit = 0; bit < eligibleIndices.Count; bit++)
+        {
+            if ((funcMask & (1 << bit)) != 0)
+                funcIndices.Add(eligibleIndices[bit]);
+        }
+
+        var (useTypedWrapper, returnType, setupReturnType) = GetReturnTypeInfo(method, model, safeName);
+
+        // Build mixed parameter list
+        var paramParts = new List<string>();
+        for (int i = 0; i < method.Parameters.Length; i++)
+        {
+            var p = method.Parameters[i];
+            if (p.Direction == ParameterDirection.Out) continue;
+
+            if (funcIndices.Contains(i))
+            {
+                paramParts.Add($"global::System.Func<{p.FullyQualifiedType}, bool> {p.Name}");
+            }
+            else if (p.IsRefStruct)
+            {
+                if (includeRefStructArgs)
+                    paramParts.Add($"global::TUnit.Mocks.Arguments.RefStructArg<{p.FullyQualifiedType}> {p.Name}");
+            }
+            else
+            {
+                paramParts.Add($"global::TUnit.Mocks.Arguments.Arg<{p.FullyQualifiedType}> {p.Name}");
+            }
+        }
+
+        var paramList = string.Join(", ", paramParts);
+        var typeParams = GetTypeParameterList(method);
+        var constraints = GetConstraintClauses(method);
+
+        var safeMemberName = GetSafeMemberName(method.Name);
+        var extensionParam = $"this global::TUnit.Mocks.Mock<{model.FullyQualifiedName}> mock";
+        var fullParamList = string.IsNullOrEmpty(paramList) ? extensionParam : $"{extensionParam}, {paramList}";
+
+        using (writer.Block($"public static {returnType} {safeMemberName}{typeParams}({fullParamList}){constraints}"))
+        {
+            // Convert Func params to Arg<T> via implicit conversion
+            foreach (var idx in funcIndices.OrderBy(i => i))
+            {
+                var p = method.Parameters[idx];
+                writer.AppendLine($"global::TUnit.Mocks.Arguments.Arg<{p.FullyQualifiedType}> __fa_{p.Name} = {p.Name};");
+            }
+
+            // Build matchers array
+            var matcherExprs = new List<string>();
+            for (int i = 0; i < method.Parameters.Length; i++)
+            {
+                var p = method.Parameters[i];
+                if (p.Direction == ParameterDirection.Out) continue;
+                if (!includeRefStructArgs && p.IsRefStruct) continue;
+
+                matcherExprs.Add(funcIndices.Contains(i) ? $"__fa_{p.Name}.Matcher" : $"{p.Name}.Matcher");
+            }
+
+            if (matcherExprs.Count == 0)
+            {
+                writer.AppendLine("var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();");
+            }
+            else
+            {
+                writer.AppendLine($"var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] {{ {string.Join(", ", matcherExprs)} }};");
+            }
+
+            // Return statement
+            if (useTypedWrapper)
+            {
+                var wrapperName = GetWrapperName(safeName, method);
+                writer.AppendLine($"return new {wrapperName}(global::TUnit.Mocks.Mock.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
+            }
+            else if (method.IsVoid || method.IsRefStructReturn)
+            {
+                writer.AppendLine($"return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.Mock.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
+            }
+            else
+            {
+                writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<{setupReturnType}>(global::TUnit.Mocks.Mock.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
             }
         }
     }
@@ -526,7 +732,7 @@ internal static class MockMembersBuilder
                 var safePropName = GetSafeMemberName(prop.Name);
 
                 writer.AppendLine($"public global::TUnit.Mocks.PropertyMockCall<{prop.ReturnType}> {safePropName}");
-                writer.AppendLine($"    => new(mock.Engine, {getterMemberId}, {setterMemberId}, \"{prop.Name}\", {hasGetter}, {hasSetter});");
+                writer.AppendLine($"    => new(global::TUnit.Mocks.Mock.GetEngine(mock), {getterMemberId}, {setterMemberId}, \"{prop.Name}\", {hasGetter}, {hasSetter});");
             }
         }
     }
@@ -565,17 +771,28 @@ internal static class MockMembersBuilder
 
             using (writer.Block($"public static void Raise{evt.Name}({raiseParams})"))
             {
-                writer.AppendLine($"((global::TUnit.Mocks.IRaisable)mock.Engine.Raisable!).RaiseEvent(\"{evt.Name}\", {argsExpr});");
+                writer.AppendLine($"((global::TUnit.Mocks.IRaisable)global::TUnit.Mocks.Mock.GetEngine(mock).Raisable!).RaiseEvent(\"{evt.Name}\", {argsExpr});");
             }
         }
     }
 
-    private static string GetArgParameterList(MockMemberModel method)
+    private static string GetArgParameterList(MockMemberModel method, bool includeRefStructArgs)
     {
-        // Only include non-out parameters as Arg<T> in setup
-        return string.Join(", ", method.Parameters
-            .Where(p => p.Direction != ParameterDirection.Out)
-            .Select(p => $"global::TUnit.Mocks.Arguments.Arg<{p.FullyQualifiedType}> {p.Name}"));
+        var parts = new List<string>();
+        foreach (var p in method.Parameters)
+        {
+            if (p.Direction == ParameterDirection.Out) continue;
+            if (p.IsRefStruct)
+            {
+                if (includeRefStructArgs)
+                    parts.Add($"global::TUnit.Mocks.Arguments.RefStructArg<{p.FullyQualifiedType}> {p.Name}");
+            }
+            else
+            {
+                parts.Add($"global::TUnit.Mocks.Arguments.Arg<{p.FullyQualifiedType}> {p.Name}");
+            }
+        }
+        return string.Join(", ", parts);
     }
 
     private static string GetTypeParameterList(MockMemberModel method)

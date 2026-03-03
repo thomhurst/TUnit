@@ -24,6 +24,7 @@ public interface ITestOutput
     /// Gets the collection of timing measurements recorded during test execution.
     /// Useful for performance profiling and identifying bottlenecks.
     /// </summary>
+    [Obsolete("Use OpenTelemetry activity spans instead. Hook timings are now automatically recorded as OTel child spans of the test activity.")]
     IReadOnlyCollection<Timing> Timings { get; }
 
     /// <summary>
@@ -37,6 +38,7 @@ public interface ITestOutput
     /// Thread-safe for concurrent calls.
     /// </summary>
     /// <param name="timing">The timing information to record</param>
+    [Obsolete("Use OpenTelemetry activity spans instead. Hook timings are now automatically recorded as OTel child spans of the test activity.")]
     void RecordTiming(Timing timing);
 
     /// <summary>

@@ -1,8 +1,8 @@
 # Installing TUnit
 
-## Easily
+## Quick Start
 
-Assuming you have the .NET SDK installed, simply run:
+Assuming you have the .NET SDK installed, run:
 
 `dotnet new install TUnit.Templates`
 
@@ -22,10 +22,10 @@ To that project add the `TUnit` package:
 
 ```powershell
 cd YourTestProjectNameHere
-dotnet add package TUnit --prerelease
+dotnet add package TUnit
 ```
 
-And then remove any automatically generated `Program.cs` or main method, as this'll be taken care of by the TUnit package.
+And then remove any automatically generated `Program.cs` or main method, as this is handled by the TUnit package.
 
 ### Global Usings
 
@@ -54,16 +54,16 @@ public class MyTests  // No [TestClass] needed!
 
 When you install the **TUnit** meta package, you automatically get several useful extensions without any additional installation:
 
-#### ✅ Built-In Extensions
+#### Built-In Extensions
 
 **Microsoft.Testing.Extensions.CodeCoverage**
-- 📊 Code coverage support via `--coverage` flag
-- 📈 Outputs Cobertura and XML formats
-- 🔄 Replacement for Coverlet (which is **not compatible** with TUnit)
+- Code coverage support via `--coverage` flag
+- Outputs Cobertura and XML formats
+- Replacement for Coverlet (which is **not compatible** with TUnit)
 
 **Microsoft.Testing.Extensions.TrxReport**
-- 📝 TRX test report generation via `--report-trx` flag
-- 🤝 Compatible with Azure DevOps and other CI/CD systems
+- TRX test report generation via `--report-trx` flag
+- Compatible with Azure DevOps and other CI/CD systems
 
 This means you can run tests with coverage and reports right away:
 
@@ -81,8 +81,8 @@ dotnet run --configuration Release --coverage --report-trx
 **Important:** Do **not** install `coverlet.collector` or `coverlet.msbuild`. These packages are incompatible with TUnit because they require the VSTest platform, while TUnit uses the modern Microsoft.Testing.Platform.
 
 For more details, see:
-- [Code Coverage Documentation](../extensions/extensions.md#code-coverage)
-- [Extensions Overview](../extensions/extensions.md)
+- [Code Coverage Documentation](../extending/built-in-extensions.md#code-coverage)
+- [Extensions Overview](../extending/built-in-extensions.md)
 
 That's it. We're ready to write our first test.
 
@@ -128,3 +128,5 @@ If you prefer to manage the Polyfill version yourself, you can:
 TUnit automatically sets `<PolyUseEmbeddedAttribute>true</PolyUseEmbeddedAttribute>` to ensure that Polyfill types are embedded in each project. This prevents type conflicts when using `InternalsVisibleTo` or when multiple projects in your solution reference Polyfill. Each project gets its own isolated copy of the polyfill types, following the [recommended Polyfill consuming pattern](https://github.com/SimonCropp/Polyfill/blob/main/consuming.md#recommended-consuming-pattern).
 
 You can override this behavior by setting `<PolyUseEmbeddedAttribute>false</PolyUseEmbeddedAttribute>` in your project file if needed.
+
+**Next:** [Write Your First Test →](writing-your-first-test.md)

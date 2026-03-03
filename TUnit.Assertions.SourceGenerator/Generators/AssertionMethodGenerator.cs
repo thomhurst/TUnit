@@ -26,7 +26,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                 predicate: (node, _) => node is ClassDeclarationSyntax,
                 transform: (ctx, _) => GetGenericCreateAssertionAttributeData(ctx, "AssertionFromAttribute"))
             .Where(x => x != null)
-            .SelectMany((x, _) => x!.ToImmutableArray());
+            .SelectMany((x, _) => x!);
 
         // Combine all sources
         var allAttributeData = nonGenericAssertionFromData.Collect()

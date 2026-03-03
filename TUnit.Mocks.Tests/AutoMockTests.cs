@@ -122,16 +122,14 @@ public class AutoMockTests
     }
 
     [Test]
-    public async Task Auto_Mock_Configurable_Via_GetAutoMock()
+    public async Task Auto_Mock_Configurable_Via_Mock_Get()
     {
         // Arrange
         var mock = Mock.Of<IServiceA>();
 
-        // Trigger auto-mock creation
+        // Trigger auto-mock creation and retrieve the wrapper
         var serviceB = mock.Object.GetServiceB();
-
-        // Retrieve and configure the auto-mock
-        var autoMock = mock.GetAutoMock<IServiceB>("GetServiceB");
+        var autoMock = Mock.Get(serviceB);
         autoMock.GetValue().Returns(42);
 
         // Act

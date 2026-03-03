@@ -1,4 +1,6 @@
 using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
+using TUnit.Mocks.Diagnostics;
 using TUnit.Mocks.Verification;
 
 namespace TUnit.Mocks;
@@ -8,6 +10,10 @@ namespace TUnit.Mocks;
 /// </summary>
 public static class Mock
 {
+    // Maps mock implementation objects back to their Mock<T> wrappers.
+    // ConditionalWeakTable so mocks can be GC'd normally.
+    private static readonly ConditionalWeakTable<object, IMock> _objectToMock = new();
+
     // The source generator registers factories via this method at module initialization time.
     // ConcurrentDictionary is used because module initializers from multiple assemblies
     // can run concurrently when test assemblies are loaded in parallel.
@@ -24,6 +30,49 @@ public static class Mock
 
     // Separate registry for wrap mock factories that accept a real instance.
     private static readonly ConcurrentDictionary<Type, Func<MockBehavior, object, object>> _wrapFactories = new();
+
+    /// <summary>
+    /// Registers the mapping from a mock implementation object to its <see cref="Mock{T}"/> wrapper.
+    /// Called from the <see cref="Mock{T}"/> constructor. Not intended for direct use.
+    /// </summary>
+    internal static void Register(object mockObject, IMock mockWrapper)
+    {
+#if NET7_0_OR_GREATER
+        _objectToMock.AddOrUpdate(mockObject, mockWrapper);
+#else
+        // ConditionalWeakTable.AddOrUpdate not available before .NET 7.
+        // Each mock object is unique (created by new), so Add will not throw.
+        _objectToMock.Add(mockObject, mockWrapper);
+#endif
+    }
+
+    /// <summary>
+    /// Retrieves the <see cref="Mock{T}"/> wrapper for a mock implementation object.
+    /// Use this to access the mock wrapper from auto-mocked return values or any mocked object.
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// var mock = Mock.Of&lt;IServiceA&gt;();
+    /// var serviceB = mock.Object.GetServiceB(); // auto-mocked
+    /// var autoMock = Mock.Get(serviceB);         // get the wrapper
+    /// autoMock.GetValue().Returns(42);
+    /// </code>
+    /// </example>
+    public static Mock<T> Get<T>(T mockedObject) where T : class
+    {
+        if (_objectToMock.TryGetValue(mockedObject, out var mock))
+        {
+            if (mock is Mock<T> typed)
+                return typed;
+
+            throw new InvalidOperationException(
+                $"The object is a mock of '{mock.GetType().GenericTypeArguments[0].Name}', not '{typeof(T).Name}'.");
+        }
+
+        throw new InvalidOperationException(
+            $"The object of type '{typeof(T).Name}' is not a mock. " +
+            $"Mock.Get can only be used with objects created by Mock.Of, auto-mocking, or other Mock factory methods.");
+    }
 
     /// <summary>
     /// Registers a factory for creating mocks of type T. Called by generated code.
@@ -82,7 +131,7 @@ public static class Mock
     public static Mock<T> Of<T>(MockBehavior behavior, IDefaultValueProvider defaultValueProvider) where T : class
     {
         var mock = Of<T>(behavior);
-        mock.DefaultValueProvider = defaultValueProvider;
+        GetEngine(mock).DefaultValueProvider = defaultValueProvider;
         return mock;
     }
 
@@ -250,5 +299,94 @@ public static class Mock
     public static void VerifyInOrder(Action verificationActions)
     {
         OrderedVerification.Verify(verificationActions);
+    }
+
+    // ──────────────────────────────────────────────────────────
+    //  Static helpers – expose control surface without cluttering Mock<T>
+    // ──────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Gets the mock engine for generated code. Not intended for direct use.
+    /// </summary>
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    public static MockEngine<T> GetEngine<T>(Mock<T> mock) where T : class
+        => ((IMockEngineAccess<T>)mock).Engine;
+
+    /// <summary>All calls made to this mock, in order.</summary>
+    public static IReadOnlyList<CallRecord> GetInvocations<T>(Mock<T> mock) where T : class
+        => GetEngine(mock).GetAllCalls();
+
+    /// <summary>Returns the mock behavior (Loose or Strict).</summary>
+    public static MockBehavior GetBehavior<T>(Mock<T> mock) where T : class
+        => GetEngine(mock).Behavior;
+
+    /// <summary>
+    /// Gets the custom default value provider for unconfigured methods in loose mode.
+    /// When set, this provider is consulted before auto-mocking and built-in defaults.
+    /// </summary>
+    public static IDefaultValueProvider? GetDefaultValueProvider<T>(Mock<T> mock) where T : class
+        => GetEngine(mock).DefaultValueProvider;
+
+    /// <summary>
+    /// Sets the custom default value provider for unconfigured methods in loose mode.
+    /// When set, this provider is consulted before auto-mocking and built-in defaults.
+    /// </summary>
+    public static void SetDefaultValueProvider<T>(Mock<T> mock, IDefaultValueProvider? provider) where T : class
+        => GetEngine(mock).DefaultValueProvider = provider;
+
+    /// <summary>
+    /// Enables auto-tracking for all properties. Property setters store values and getters return them,
+    /// acting like real auto-properties. Explicit setups take precedence over auto-tracked values.
+    /// </summary>
+    public static void SetupAllProperties<T>(Mock<T> mock) where T : class
+        => GetEngine(mock).AutoTrackProperties = true;
+
+    /// <summary>Clears all setups and call history.</summary>
+    public static void Reset<T>(Mock<T> mock) where T : class
+        => GetEngine(mock).Reset();
+
+    /// <summary>
+    /// Verifies all registered setups were invoked at least once.
+    /// Throws <see cref="Exceptions.MockVerificationException"/> listing uninvoked setups.
+    /// </summary>
+    public static void VerifyAll<T>(Mock<T> mock) where T : class
+        => ((IMock)mock).VerifyAll();
+
+    /// <summary>
+    /// Fails if any recorded call was not matched by a prior verification statement.
+    /// Throws <see cref="Exceptions.MockVerificationException"/> listing unverified calls.
+    /// </summary>
+    public static void VerifyNoOtherCalls<T>(Mock<T> mock) where T : class
+        => ((IMock)mock).VerifyNoOtherCalls();
+
+    /// <summary>
+    /// Returns a diagnostic report of this mock's setup coverage and call matching.
+    /// </summary>
+    public static MockDiagnostics GetDiagnostics<T>(Mock<T> mock) where T : class
+        => GetEngine(mock).GetDiagnostics();
+
+    /// <summary>
+    /// Sets the current state for state machine mocking. Null clears the state.
+    /// </summary>
+    public static void SetState<T>(Mock<T> mock, string? stateName) where T : class
+        => GetEngine(mock).TransitionTo(stateName);
+
+    /// <summary>
+    /// Configures setups scoped to a specific state. All setups registered inside
+    /// the <paramref name="configure"/> action will only match when the engine is in the specified state.
+    /// </summary>
+    public static void InState<T>(Mock<T> mock, string stateName, Action<Mock<T>> configure) where T : class
+    {
+        var engine = GetEngine(mock);
+        var previous = engine.PendingRequiredState;
+        engine.PendingRequiredState = stateName;
+        try
+        {
+            configure(mock);
+        }
+        finally
+        {
+            engine.PendingRequiredState = previous;
+        }
     }
 }

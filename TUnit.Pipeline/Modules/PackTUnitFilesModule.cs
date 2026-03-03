@@ -10,7 +10,6 @@ namespace TUnit.Pipeline.Modules;
 
 [DependsOn<GetPackageProjectsModule>]
 [DependsOn<GenerateVersionModule>]
-[DependsOn<RunEngineTestsModule>]
 public class PackTUnitFilesModule : Module<List<PackedProject>>
 {
     // Packages in beta get a "-beta" suffix appended to their version.

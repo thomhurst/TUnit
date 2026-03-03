@@ -67,7 +67,7 @@ public class OutRefTests
     {
         // Arrange
         var mock = Mock.Of<IDictionary>();
-        mock.TryGet(Arg.Any<string>()).Returns(true);
+        mock.TryGet(Any()).Returns(true);
 
         // Act
         IDictionary dict = mock.Object;

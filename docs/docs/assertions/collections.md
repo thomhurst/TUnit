@@ -799,25 +799,6 @@ public async Task Nested_Collections()
 }
 ```
 
-## Collection of Collections
-
-```csharp
-[Test]
-public async Task Collection_Of_Collections()
-{
-    var groups = new List<List<int>>
-    {
-        new() { 1, 2 },
-        new() { 3, 4, 5 },
-        new() { 6 }
-    };
-
-    await Assert.That(groups)
-        .Count().IsEqualTo(3)
-        .And.All(group => group.Count > 0);
-}
-```
-
 ## Chaining Collection Assertions
 
 ```csharp
@@ -915,21 +896,6 @@ public async Task Validate_All_With_Assertion()
     await Assert.That(users).All(u =>
         !string.IsNullOrEmpty(u.Name) && u.Age > 0
     );
-}
-```
-
-### Find and Assert
-
-```csharp
-[Test]
-public async Task Find_And_Assert()
-{
-    var users = GetUsers();
-
-    var admin = await Assert.That(users)
-        .Contains(u => u.Role == "Admin");
-
-    await Assert.That(admin.Permissions).IsNotEmpty();
 }
 ```
 

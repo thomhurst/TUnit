@@ -69,6 +69,10 @@ public abstract class InvokableTestBase(TestMode testMode)
                 ]
             )
             .WithWorkingDirectory(testProject.DirectoryName!)
+            .WithEnvironmentVariables(new Dictionary<string, string?>
+            {
+                ["TUNIT_DISABLE_HTML_REPORTER"] = "true"
+            })
             .WithValidation(CommandResultValidation.None);
 
         await RunWithFailureLogging(command, runOptions, trxFilename, assertions, assertionExpression);
@@ -101,6 +105,10 @@ public abstract class InvokableTestBase(TestMode testMode)
                     ..runOptions.AdditionalArguments
                 ]
             )
+            .WithEnvironmentVariables(new Dictionary<string, string?>
+            {
+                ["TUNIT_DISABLE_HTML_REPORTER"] = "true"
+            })
             .WithValidation(CommandResultValidation.None);
 
         await RunWithFailureLogging(command, runOptions, trxFilename, assertions, assertionExpression);

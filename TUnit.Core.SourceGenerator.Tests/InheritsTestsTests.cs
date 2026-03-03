@@ -28,7 +28,7 @@ internal class InheritsTestsTests : TestsBase
             var hasTests1 = generatedFiles.Any(f => f.Contains("Tests_Test_") && !f.Contains("Tests2") && !f.Contains("Tests3"));
             var hasTests2 = generatedFiles.Any(f => f.Contains("Tests2_Test_"));
             var hasTests3 = generatedFiles.Any(f => f.Contains("Tests3_Test_"));
-            var hasBaseClass = generatedFiles.Any(f => f.Contains("BaseClass_Test_"));
+            var hasBaseClass = generatedFiles.Any(f => f.Contains("BaseClass__TestSource"));
             
             await Assert.That(hasBaseClass).IsTrue();
             await Assert.That(hasTests1).IsTrue();

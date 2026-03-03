@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 namespace TUnit.Mocks.SourceGenerator.Models;
 
@@ -29,6 +30,19 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
     public bool IsAbstractMember { get; init; }
     public bool IsVirtualMember { get; init; }
     public bool IsProtected { get; init; }
+    public bool IsRefStructReturn { get; init; }
+
+    /// <summary>
+    /// For methods returning ReadOnlySpan&lt;T&gt; or Span&lt;T&gt;, the fully qualified element type.
+    /// Null for non-span return types. Used to support configurable span return values via array conversion.
+    /// </summary>
+    public string? SpanReturnElementType { get; init; }
+
+    /// <summary>
+    /// Returns true if the method has any non-out ref struct parameters.
+    /// Computed from <see cref="Parameters"/> — does not participate in equality.
+    /// </summary>
+    public bool HasRefStructParams => Parameters.Any(p => p.IsRefStruct && p.Direction != ParameterDirection.Out);
 
     public bool Equals(MockMemberModel? other)
     {
@@ -54,7 +68,9 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             && UnwrappedSmartDefault == other.UnwrappedSmartDefault
             && IsAbstractMember == other.IsAbstractMember
             && IsVirtualMember == other.IsVirtualMember
-            && IsProtected == other.IsProtected;
+            && IsProtected == other.IsProtected
+            && IsRefStructReturn == other.IsRefStructReturn
+            && SpanReturnElementType == other.SpanReturnElementType;
     }
 
     public override int GetHashCode()

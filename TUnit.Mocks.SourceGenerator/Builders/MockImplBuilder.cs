@@ -188,7 +188,7 @@ internal static class MockImplBuilder
             }
         }
 
-        var argsArray = GetArgsArrayExpression(method);
+        var argsArray = EmitArgsArrayVariable(writer, method);
         var argPassList = GetArgPassList(method);
 
         if (method.IsVoid && !method.IsAsync)
@@ -238,6 +238,24 @@ internal static class MockImplBuilder
             writer.AppendLine("}");
             writer.AppendLine($"return _wrappedInstance.{method.Name}({argPassList});");
         }
+        else if (method.IsRefStructReturn)
+        {
+            writer.AppendLine($"if (_engine.TryHandleCall({method.MemberId}, \"{method.Name}\", {argsArray}))");
+            writer.AppendLine("{");
+            writer.IncreaseIndent();
+            if (method.SpanReturnElementType is not null)
+            {
+                EmitSpanReturnReadback(writer, method);
+            }
+            else
+            {
+                EmitOutRefReadback(writer, method);
+                writer.AppendLine("return default;");
+            }
+            writer.DecreaseIndent();
+            writer.AppendLine("}");
+            writer.AppendLine($"return _wrappedInstance.{method.Name}({argPassList});");
+        }
         else
         {
             writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{method.ReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.SmartDefault}, out var __result))");
@@ -259,7 +277,31 @@ internal static class MockImplBuilder
 
         if (prop.HasGetter)
         {
-            if (prop.IsAbstractMember)
+            if (prop.IsRefStructReturn)
+            {
+                if (prop.IsAbstractMember)
+                {
+                    writer.AppendLine("get");
+                    writer.OpenBrace();
+                    writer.AppendLine($"_engine.HandleCall({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>());");
+                    writer.AppendLine("return default;");
+                    writer.CloseBrace();
+                }
+                else
+                {
+                    writer.AppendLine("get");
+                    writer.OpenBrace();
+                    writer.AppendLine($"if (_engine.TryHandleCall({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>()))");
+                    writer.AppendLine("{");
+                    writer.IncreaseIndent();
+                    writer.AppendLine("return default;");
+                    writer.DecreaseIndent();
+                    writer.AppendLine("}");
+                    writer.AppendLine($"return _wrappedInstance.{prop.Name};");
+                    writer.CloseBrace();
+                }
+            }
+            else if (prop.IsAbstractMember)
             {
                 writer.AppendLine($"get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault});");
             }
@@ -280,15 +322,19 @@ internal static class MockImplBuilder
 
         if (prop.HasSetter)
         {
+            var setterArgs = prop.IsRefStructReturn
+                ? "global::System.Array.Empty<object?>()"
+                : "new object?[] { value }";
+
             if (prop.IsAbstractMember)
             {
-                writer.AppendLine($"set => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", new object?[] {{ value }});");
+                writer.AppendLine($"set => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", {setterArgs});");
             }
             else
             {
                 writer.AppendLine("set");
                 writer.OpenBrace();
-                writer.AppendLine($"if (!_engine.TryHandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", new object?[] {{ value }}))");
+                writer.AppendLine($"if (!_engine.TryHandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", {setterArgs}))");
                 writer.AppendLine("{");
                 writer.IncreaseIndent();
                 writer.AppendLine($"_wrappedInstance.{prop.Name} = value;");
@@ -422,7 +468,7 @@ internal static class MockImplBuilder
             }
         }
 
-        var argsArray = GetArgsArrayExpression(method);
+        var argsArray = EmitArgsArrayVariable(writer, method);
         var argPassList = GetArgPassList(method);
 
         if (method.IsVoid && !method.IsAsync)
@@ -475,6 +521,25 @@ internal static class MockImplBuilder
             writer.AppendLine("}");
             writer.AppendLine($"return base.{method.Name}({argPassList});");
         }
+        else if (method.IsRefStructReturn)
+        {
+            // synchronous method returning ref struct — use void dispatch, fall back to base
+            writer.AppendLine($"if (_engine.TryHandleCall({method.MemberId}, \"{method.Name}\", {argsArray}))");
+            writer.AppendLine("{");
+            writer.IncreaseIndent();
+            if (method.SpanReturnElementType is not null)
+            {
+                EmitSpanReturnReadback(writer, method);
+            }
+            else
+            {
+                EmitOutRefReadback(writer, method);
+                writer.AppendLine("return default;");
+            }
+            writer.DecreaseIndent();
+            writer.AppendLine("}");
+            writer.AppendLine($"return base.{method.Name}({argPassList});");
+        }
         else
         {
             // synchronous method with return value
@@ -500,7 +565,7 @@ internal static class MockImplBuilder
             }
         }
 
-        var argsArray = GetArgsArrayExpression(method);
+        var argsArray = EmitArgsArrayVariable(writer, method);
 
         var hasOutRef = HasOutRefParams(method);
 
@@ -566,6 +631,23 @@ internal static class MockImplBuilder
                 }
             }
         }
+        else if (method.IsRefStructReturn)
+        {
+            // Synchronous method returning a ref struct — can't use HandleCallWithReturn<T> because
+            // ref structs can't be generic type arguments. Use void dispatch for call tracking,
+            // callbacks, and throws.
+            writer.AppendLine($"_engine.HandleCall({method.MemberId}, \"{method.Name}\", {argsArray});");
+            if (method.SpanReturnElementType is not null)
+            {
+                // Span return: read back out/ref params AND extract return value from OutRefContext index -1
+                EmitSpanReturnReadback(writer, method);
+            }
+            else
+            {
+                EmitOutRefReadback(writer, method);
+                writer.AppendLine("return default;");
+            }
+        }
         else
         {
             // Synchronous method with return value — need to read back out/ref before returning
@@ -589,12 +671,32 @@ internal static class MockImplBuilder
 
         if (prop.HasGetter)
         {
-            writer.AppendLine($"get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault});");
+            if (prop.IsRefStructReturn)
+            {
+                // ref struct property — can't use HandleCallWithReturn<T>, use void dispatch + return default
+                writer.AppendLine("get");
+                writer.OpenBrace();
+                writer.AppendLine($"_engine.HandleCall({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>());");
+                writer.AppendLine("return default;");
+                writer.CloseBrace();
+            }
+            else
+            {
+                writer.AppendLine($"get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault});");
+            }
         }
 
         if (prop.HasSetter)
         {
-            writer.AppendLine($"set => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", new object?[] {{ value }});");
+            if (prop.IsRefStructReturn)
+            {
+                // ref struct property — can't box value, use empty args
+                writer.AppendLine($"set => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", global::System.Array.Empty<object?>());");
+            }
+            else
+            {
+                writer.AppendLine($"set => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", new object?[] {{ value }});");
+            }
         }
 
         writer.CloseBrace();
@@ -608,7 +710,31 @@ internal static class MockImplBuilder
 
         if (prop.HasGetter)
         {
-            if (prop.IsAbstractMember)
+            if (prop.IsRefStructReturn)
+            {
+                if (prop.IsAbstractMember)
+                {
+                    writer.AppendLine("get");
+                    writer.OpenBrace();
+                    writer.AppendLine($"_engine.HandleCall({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>());");
+                    writer.AppendLine("return default;");
+                    writer.CloseBrace();
+                }
+                else
+                {
+                    writer.AppendLine("get");
+                    writer.OpenBrace();
+                    writer.AppendLine($"if (_engine.TryHandleCall({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>()))");
+                    writer.AppendLine("{");
+                    writer.IncreaseIndent();
+                    writer.AppendLine("return default;");
+                    writer.DecreaseIndent();
+                    writer.AppendLine("}");
+                    writer.AppendLine($"return base.{prop.Name};");
+                    writer.CloseBrace();
+                }
+            }
+            else if (prop.IsAbstractMember)
             {
                 writer.AppendLine($"get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault});");
             }
@@ -630,16 +756,20 @@ internal static class MockImplBuilder
 
         if (prop.HasSetter)
         {
+            var setterArgs = prop.IsRefStructReturn
+                ? "global::System.Array.Empty<object?>()"
+                : "new object?[] { value }";
+
             if (prop.IsAbstractMember)
             {
-                writer.AppendLine($"set => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", new object?[] {{ value }});");
+                writer.AppendLine($"set => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", {setterArgs});");
             }
             else
             {
                 // Virtual property setter: try engine, fall back to base
                 writer.AppendLine("set");
                 writer.OpenBrace();
-                writer.AppendLine($"if (!_engine.TryHandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", new object?[] {{ value }}))");
+                writer.AppendLine($"if (!_engine.TryHandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", {setterArgs}))");
                 writer.AppendLine("{");
                 writer.IncreaseIndent();
                 writer.AppendLine($"base.{prop.Name} = value;");
@@ -835,10 +965,44 @@ internal static class MockImplBuilder
         writer.AppendLine("var __outRef = global::TUnit.Mocks.Setup.OutRefContext.Consume();");
         using (writer.Block("if (__outRef is not null)"))
         {
-            for (int i = 0; i < method.Parameters.Length; i++)
+            EmitOutRefParamAssignments(writer, method);
+        }
+    }
+
+    /// <summary>
+    /// For ref struct return methods with span support: emits code to consume OutRefContext,
+    /// read back out/ref params, extract span return value, and return.
+    /// Always ends with "return default;" as fallback.
+    /// </summary>
+    private static void EmitSpanReturnReadback(CodeWriter writer, MockMemberModel method)
+    {
+        writer.AppendLine("var __outRef = global::TUnit.Mocks.Setup.OutRefContext.Consume();");
+        using (writer.Block("if (__outRef is not null)"))
+        {
+            EmitOutRefParamAssignments(writer, method);
+            writer.AppendLine($"if (__outRef.TryGetValue(global::TUnit.Mocks.Setup.OutRefContext.SpanReturnValueIndex, out var __spanRet)) return new {method.ReturnType}(({method.SpanReturnElementType}[])__spanRet!);");
+        }
+        writer.AppendLine("return default;");
+    }
+
+    /// <summary>
+    /// Emits individual out/ref parameter assignments from the __outRef dictionary.
+    /// Shared by <see cref="EmitOutRefReadback"/> and <see cref="EmitSpanReturnReadback"/>.
+    /// </summary>
+    private static void EmitOutRefParamAssignments(CodeWriter writer, MockMemberModel method)
+    {
+        for (int i = 0; i < method.Parameters.Length; i++)
+        {
+            var p = method.Parameters[i];
+            if (p.IsRefStruct && p.SpanElementType is null) continue; // non-span ref structs can't be cast from object
+            if (p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref)
             {
-                var p = method.Parameters[i];
-                if (p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref)
+                if (p.SpanElementType is not null)
+                {
+                    // Span types: reconstruct from stored array
+                    writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i})) {p.Name} = new {p.FullyQualifiedType}(({p.SpanElementType}[])__v{i}!);");
+                }
+                else
                 {
                     writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i})) {p.Name} = ({p.FullyQualifiedType})__v{i}!;");
                 }
@@ -846,13 +1010,32 @@ internal static class MockImplBuilder
         }
     }
 
-    private static string GetArgsArrayExpression(MockMemberModel method)
+    private static string EmitArgsArrayVariable(CodeWriter writer, MockMemberModel method)
     {
-        // Only include non-out parameters in args array
-        var matchableParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out).ToList();
+        if (!method.HasRefStructParams)
+            return GetArgsArrayExpression(method, false);
+
+        writer.AppendLine("#if NET9_0_OR_GREATER");
+        writer.AppendLine($"var __args = {GetArgsArrayExpression(method, true)};");
+        writer.AppendLine("#else");
+        writer.AppendLine($"var __args = {GetArgsArrayExpression(method, false)};");
+        writer.AppendLine("#endif");
+        return "__args";
+    }
+
+    private static string GetArgsArrayExpression(MockMemberModel method, bool includeRefStructSentinels)
+    {
+        var nonOutParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out).ToList();
+        if (includeRefStructSentinels)
+        {
+            if (nonOutParams.Count == 0) return "global::System.Array.Empty<object?>()";
+            var args = string.Join(", ", nonOutParams.Select(p => p.IsRefStruct ? "null" : p.Name));
+            return $"new object?[] {{ {args} }}";
+        }
+        var matchableParams = nonOutParams.Where(p => !p.IsRefStruct).ToList();
         if (matchableParams.Count == 0) return "global::System.Array.Empty<object?>()";
-        var args = string.Join(", ", matchableParams.Select(p => p.Name));
-        return $"new object?[] {{ {args} }}";
+        var argsStr = string.Join(", ", matchableParams.Select(p => p.Name));
+        return $"new object?[] {{ {argsStr} }}";
     }
 
     /// <summary>

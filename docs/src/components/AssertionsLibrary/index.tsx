@@ -65,6 +65,7 @@ const assertionsData: Assertion[] = [
   { name: 'IsTypeOf', category: 'Type', description: 'Asserts the value is exactly the specified type', syntax: 'await Assert.That(actual).IsTypeOf<TType>()', example: 'await Assert.That(obj).IsTypeOf<MyClass>()' },
   { name: 'IsAssignableTo', category: 'Type', description: 'Asserts the value is assignable to the specified type', syntax: 'await Assert.That(actual).IsAssignableTo<TType>()', example: 'await Assert.That(derived).IsAssignableTo<BaseClass>()' },
   { name: 'IsAssignableFrom', category: 'Type', description: 'Asserts the type is assignable from the value', syntax: 'await Assert.That(actual).IsAssignableFrom<TType>()', example: 'await Assert.That(baseInstance).IsAssignableFrom<DerivedClass>()' },
+  { name: 'IsNotAssignableFrom', category: 'Type', description: 'Asserts the type is not assignable from the value', syntax: 'await Assert.That(actual).IsNotAssignableFrom<TType>()', example: 'await Assert.That(dog).IsNotAssignableFrom<string>()' },
 
   // DateTime
   { name: 'IsAfter', category: 'DateTime', description: 'Asserts the date is after the expected date', syntax: 'await Assert.That(actual).IsAfter(expected)', example: 'await Assert.That(DateTime.Now).IsAfter(yesterday)' },

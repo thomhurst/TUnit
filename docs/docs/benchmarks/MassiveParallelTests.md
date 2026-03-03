@@ -7,7 +7,7 @@ sidebar_position: 4
 # MassiveParallelTests Benchmark
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-02-24** from the latest CI run.
+This benchmark was automatically generated on **2026-03-03** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.103
 :::
@@ -16,11 +16,11 @@ This benchmark was automatically generated on **2026-02-24** from the latest CI 
 
 | Framework | Version | Mean | Median | StdDev |
 |-----------|---------|------|--------|--------|
-| **TUnit** | 1.17.7 | 671.5 ms | 671.2 ms | 5.22 ms |
-| NUnit | 4.5.0 | 1,201.6 ms | 1,204.0 ms | 11.23 ms |
-| MSTest | 4.1.0 | 2,958.9 ms | 2,958.6 ms | 7.82 ms |
-| xUnit3 | 3.2.2 | 3,086.7 ms | 3,083.6 ms | 14.03 ms |
-| **TUnit (AOT)** | 1.17.7 | 228.9 ms | 228.8 ms | 0.57 ms |
+| **TUnit** | 1.18.0 | 673.1 ms | 672.4 ms | 3.18 ms |
+| NUnit | 4.5.0 | 1,181.3 ms | 1,176.5 ms | 10.94 ms |
+| MSTest | 4.1.0 | 2,941.7 ms | 2,941.3 ms | 11.11 ms |
+| xUnit3 | 3.2.2 | 3,064.7 ms | 3,063.8 ms | 7.46 ms |
+| **TUnit (AOT)** | 1.18.0 | 230.6 ms | 230.6 ms | 0.53 ms |
 
 ## 📈 Visual Comparison
 
@@ -29,7 +29,7 @@ This benchmark was automatically generated on **2026-02-24** from the latest CI 
   'theme':'base',
   'themeVariables': {
     'primaryColor': '#2563eb',
-    'primaryTextColor': '#ffffff',
+    'primaryTextColor': '#1f2937',
     'primaryBorderColor': '#1e40af',
     'lineColor': '#6b7280',
     'secondaryColor': '#7c3aed',
@@ -58,8 +58,8 @@ This benchmark was automatically generated on **2026-02-24** from the latest CI 
 xychart-beta
   title "MassiveParallelTests Performance Comparison"
   x-axis ["TUnit", "NUnit", "MSTest", "xUnit3", "TUnit_AOT"]
-  y-axis "Time (ms)" 0 --> 3705
-  bar [671.5, 1201.6, 2958.9, 3086.7, 228.9]
+  y-axis "Time (ms)" 0 --> 3678
+  bar [673.1, 1181.3, 2941.7, 3064.7, 230.6]
 ```
 
 ## 🎯 Key Insights
@@ -72,4 +72,4 @@ This benchmark compares TUnit's performance against NUnit, MSTest, xUnit3 using 
 View the [benchmarks overview](/docs/benchmarks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-02-24T00:34:42.340Z*
+*Last generated: 2026-03-03T00:37:44.285Z*

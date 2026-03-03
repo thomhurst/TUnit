@@ -7,7 +7,7 @@ sidebar_position: 5
 # MatrixTests Benchmark
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-02-24** from the latest CI run.
+This benchmark was automatically generated on **2026-03-03** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.103
 :::
@@ -16,11 +16,11 @@ This benchmark was automatically generated on **2026-02-24** from the latest CI 
 
 | Framework | Version | Mean | Median | StdDev |
 |-----------|---------|------|--------|--------|
-| **TUnit** | 1.17.7 | 566.2 ms | 566.2 ms | 3.47 ms |
-| NUnit | 4.5.0 | 1,566.1 ms | 1,562.6 ms | 16.44 ms |
-| MSTest | 4.1.0 | 1,478.5 ms | 1,477.0 ms | 8.39 ms |
-| xUnit3 | 3.2.2 | 1,606.6 ms | 1,606.9 ms | 4.92 ms |
-| **TUnit (AOT)** | 1.17.7 | 126.4 ms | 126.3 ms | 0.31 ms |
+| **TUnit** | 1.18.0 | 589.1 ms | 588.3 ms | 2.98 ms |
+| NUnit | 4.5.0 | 1,563.1 ms | 1,561.3 ms | 6.66 ms |
+| MSTest | 4.1.0 | 1,488.1 ms | 1,488.9 ms | 5.60 ms |
+| xUnit3 | 3.2.2 | 1,615.8 ms | 1,614.0 ms | 7.36 ms |
+| **TUnit (AOT)** | 1.18.0 | 129.5 ms | 129.5 ms | 0.25 ms |
 
 ## 📈 Visual Comparison
 
@@ -29,7 +29,7 @@ This benchmark was automatically generated on **2026-02-24** from the latest CI 
   'theme':'base',
   'themeVariables': {
     'primaryColor': '#2563eb',
-    'primaryTextColor': '#ffffff',
+    'primaryTextColor': '#1f2937',
     'primaryBorderColor': '#1e40af',
     'lineColor': '#6b7280',
     'secondaryColor': '#7c3aed',
@@ -58,8 +58,8 @@ This benchmark was automatically generated on **2026-02-24** from the latest CI 
 xychart-beta
   title "MatrixTests Performance Comparison"
   x-axis ["TUnit", "NUnit", "MSTest", "xUnit3", "TUnit_AOT"]
-  y-axis "Time (ms)" 0 --> 1928
-  bar [566.2, 1566.1, 1478.5, 1606.6, 126.4]
+  y-axis "Time (ms)" 0 --> 1939
+  bar [589.1, 1563.1, 1488.1, 1615.8, 129.5]
 ```
 
 ## 🎯 Key Insights
@@ -72,4 +72,4 @@ This benchmark compares TUnit's performance against NUnit, MSTest, xUnit3 using 
 View the [benchmarks overview](/docs/benchmarks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-02-24T00:34:42.340Z*
+*Last generated: 2026-03-03T00:37:44.286Z*

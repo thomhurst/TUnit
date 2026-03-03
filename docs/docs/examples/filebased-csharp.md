@@ -10,13 +10,13 @@ To use TUnit with a file-based C# application, you can follow these steps:
 2.  **Add TUnit to your project**: You can add TUnit as a package reference in your file. At the top of your `Program.cs`, add the following line:
 
     ```csharp
-    #:package TUnit@0.*
+    #:package TUnit@1.*
     ```
 
     -   Alternatively, you can specify a specific version:
 
         ```csharp
-        #:package TUnit@0.25.0
+        #:package TUnit@1.6.0
         ```
 
     -   You can also use msbuild props files to include TUnit. By creating a `Directory.build.props` file in the same directory as the csharp file.
@@ -31,34 +31,32 @@ To use TUnit with a file-based C# application, you can follow these steps:
 
 3.  **Write your tests**: You can write your tests in the same way you would in a regular C# project. For example:
 
-        ```csharp
-        #:package TUnit@0.*
+    ```csharp
+    #:package TUnit@1.*
 
-        using TUnit;
-        public class Tests
+    using TUnit;
+    public class Tests
+    {
+        [Test]
+        public void Basic()
         {
-            [Test]
-            public void Basic()
-            {
-                Console.WriteLine("This is a basic test");
-            }
-
-            [Test]
-            [Arguments(1, 2, 3)]
-            [Arguments(2, 3, 5)]
-            public async Task DataDrivenArguments(int a, int b, int c)
-            {
-                Console.WriteLine("This one can accept arguments from an attribute");
-                var result = a + b;
-                await Assert.That(result).IsEqualTo(c);
-            }
-
+            Console.WriteLine("This is a basic test");
         }
 
-        ```
+        [Test]
+        [Arguments(1, 2, 3)]
+        [Arguments(2, 3, 5)]
+        public async Task DataDrivenArguments(int a, int b, int c)
+        {
+            Console.WriteLine("This one can accept arguments from an attribute");
+            var result = a + b;
+            await Assert.That(result).IsEqualTo(c);
+        }
+    }
+    ```
 
 4.  **Run your tests**: You can run your tests by executing the script using `dotnet run`. The results will be printed to the console.
-    To run the script, you can use the following command
+    To run the script, you can use the following command:
 
     ```powershell
     dotnet run Program.cs
@@ -66,9 +64,9 @@ To use TUnit with a file-based C# application, you can follow these steps:
 
 If you need to convert the file based application to a regular C# project, you can run the following command:
 
-    ```powershell
-    dotnet project convert Program.cs
-    ```
+```powershell
+dotnet project convert Program.cs
+```
 
 ## Using msbuild props with File-Based C# Application
 

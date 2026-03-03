@@ -65,4 +65,4 @@ Here are TUnit's equivalent attributes to other test frameworks.
 |--------------------|-------|------------------------|--------|
 | [Culture("en-US")] | -     | [SetCulture("en-US")]  | -      |
 | -                  | -     | [Culture("en-US")]     | -      |
-| -                  | -     | [SetUICulture("en-US") | -      |
+| -                  | -     | [SetUICulture("en-US")] | -      |

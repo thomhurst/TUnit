@@ -88,11 +88,11 @@ public readonly struct TestDescriptor
     /// Only invoked for tests that pass filtering.
     /// </summary>
     /// <remarks>
-    /// The delegate accepts a test session ID and cancellation token, returning an async enumerable
-    /// of TestMetadata. For non-parameterized tests, this yields a single item.
-    /// For parameterized tests, this yields one item per data row.
+    /// The delegate accepts a test session ID and returns a list of TestMetadata.
+    /// For non-parameterized tests, this returns a single-element list.
+    /// For parameterized tests, this returns one element per data row.
     /// </remarks>
-    public required Func<string, CancellationToken, IAsyncEnumerable<TestMetadata>> Materializer { get; init; }
+    public required Func<string, IReadOnlyList<TestMetadata>> Materializer { get; init; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TestDescriptor"/> struct.

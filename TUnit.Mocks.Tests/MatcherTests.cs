@@ -13,7 +13,7 @@ public class MatcherTests
     {
         // Arrange
         var mock = Mock.Of<ICalculator>();
-        mock.Add(Arg.IsInRange(1, 10), Arg.Any<int>()).Returns(99);
+        mock.Add(IsInRange(1, 10), Any()).Returns(99);
 
         // Act
         ICalculator calc = mock.Object;
@@ -29,7 +29,7 @@ public class MatcherTests
     {
         // Arrange
         var mock = Mock.Of<ICalculator>();
-        mock.Add(Arg.IsInRange(1, 10), Arg.Any<int>()).Returns(99);
+        mock.Add(IsInRange(1, 10), Any()).Returns(99);
 
         // Act
         ICalculator calc = mock.Object;
@@ -46,7 +46,7 @@ public class MatcherTests
     {
         // Arrange
         var mock = Mock.Of<ICalculator>();
-        mock.Add(Arg.IsIn(1, 3, 5), Arg.Any<int>()).Returns(77);
+        mock.Add(IsIn(1, 3, 5), Any()).Returns(77);
 
         // Act
         ICalculator calc = mock.Object;
@@ -62,7 +62,7 @@ public class MatcherTests
     {
         // Arrange
         var mock = Mock.Of<ICalculator>();
-        mock.Add(Arg.IsIn(1, 3, 5), Arg.Any<int>()).Returns(77);
+        mock.Add(IsIn(1, 3, 5), Any()).Returns(77);
 
         // Act
         ICalculator calc = mock.Object;
@@ -79,7 +79,7 @@ public class MatcherTests
     {
         // Arrange
         var mock = Mock.Of<ICalculator>();
-        mock.Add(Arg.IsNotIn(1, 3, 5), Arg.Any<int>()).Returns(88);
+        mock.Add(IsNotIn(1, 3, 5), Any()).Returns(88);
 
         // Act
         ICalculator calc = mock.Object;
@@ -96,7 +96,7 @@ public class MatcherTests
     {
         // Arrange
         var mock = Mock.Of<ICalculator>();
-        mock.Add(Arg.IsNotIn(1, 3, 5), Arg.Any<int>()).Returns(88);
+        mock.Add(IsNotIn(1, 3, 5), Any()).Returns(88);
 
         // Act
         ICalculator calc = mock.Object;
@@ -112,7 +112,7 @@ public class MatcherTests
     {
         // Arrange — Not(Is(5)) should match everything except 5
         var mock = Mock.Of<ICalculator>();
-        mock.Add(Arg.Not(Arg.Is(5)), Arg.Any<int>()).Returns(66);
+        mock.Add(Not(Is(5)), Any()).Returns(66);
 
         // Act
         ICalculator calc = mock.Object;
@@ -129,7 +129,7 @@ public class MatcherTests
     {
         // Arrange — Not(Is<int>(x => x > 0)) should match non-positive values
         var mock = Mock.Of<ICalculator>();
-        mock.Add(Arg.Not(Arg.Is<int>(x => x > 0)), Arg.Any<int>()).Returns(55);
+        mock.Add(Not(Is<int>(x => x > 0)), Any()).Returns(55);
 
         // Act
         ICalculator calc = mock.Object;

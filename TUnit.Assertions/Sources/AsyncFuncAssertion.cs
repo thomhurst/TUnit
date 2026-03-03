@@ -55,6 +55,18 @@ public class AsyncFuncAssertion<TValue> : IAssertionSource<TValue>, IDelegateAss
         return new IsNotAssignableToAssertion<TTarget, TValue>(Context);
     }
 
+    public IsAssignableFromAssertion<TSource, TValue> IsAssignableFrom<TSource>()
+    {
+        Context.ExpressionBuilder.Append($".IsAssignableFrom<{typeof(TSource).Name}>()");
+        return new IsAssignableFromAssertion<TSource, TValue>(Context);
+    }
+
+    public IsNotAssignableFromAssertion<TSource, TValue> IsNotAssignableFrom<TSource>()
+    {
+        Context.ExpressionBuilder.Append($".IsNotAssignableFrom<{typeof(TSource).Name}>()");
+        return new IsNotAssignableFromAssertion<TSource, TValue>(Context);
+    }
+
     /// <summary>
     /// Asserts that the async function result is NOT of the specified type.
     /// Example: await Assert.That(async () => await GetValueAsync()).IsNotTypeOf<int>();

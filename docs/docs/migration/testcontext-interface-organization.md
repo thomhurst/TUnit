@@ -212,7 +212,7 @@ public class CustomTestBuilder
 
 **Before:**
 ```csharp
-[Before(HookType.Test)]
+[Before(Test)]
 public void Setup()
 {
     var externalCts = new CancellationTokenSource();
@@ -224,7 +224,7 @@ public void Setup()
 
 **After:**
 ```csharp
-[Before(HookType.Test)]
+[Before(Test)]
 public void Setup()
 {
     var externalCts = new CancellationTokenSource();
