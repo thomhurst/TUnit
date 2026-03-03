@@ -5461,52 +5461,69 @@ public class NUnitMigrationAnalyzerTests
     }
 
     [Test]
-    public async Task NUnit_Ignore_From_Different_Namespace_Not_Converted()
+    [Arguments("Test")]
+    [Arguments("Theory")]
+    [Arguments("TestCase")]
+    [Arguments("TestCaseSource")]
+    [Arguments("SetUp")]
+    [Arguments("TearDown")]
+    [Arguments("OneTimeSetUp")]
+    [Arguments("OneTimeTearDown")]
+    [Arguments("TestFixture")]
+    [Arguments("Category")]
+    [Arguments("Ignore")]
+    [Arguments("Explicit")]
+    [Arguments("Description")]
+    [Arguments("Author")]
+    [Arguments("Apartment")]
+    [Arguments("Parallelizable")]
+    [Arguments("NonParallelizable")]
+    [Arguments("Repeat")]
+    [Arguments("Values")]
+    [Arguments("Range")]
+    [Arguments("ValueSource")]
+    [Arguments("Sequential")]
+    [Arguments("Combinatorial")]
+    [Arguments("Platform")]
+    [Arguments("ExpectedException")]
+    [Arguments("FixtureLifeCycle")]
+    public async Task NUnit_Attribute_From_Different_Namespace_Not_Converted(string attributeName)
     {
         await CodeFixer.VerifyCodeFixAsync(
-            """
+            $$"""
                 using NUnit.Framework;
 
                 {|#0:public class MyClass|}
                 {
-                    [Test]
-                    [MyCompany.Attributes.Ignore("Not an NUnit attribute")]
-                    public void MyMethod()
-                    {
-                        Assert.That(true, Is.True);
-                    }
+                    [NUnit.Framework.Test]
+                    [MyCompany.Attributes.{{attributeName}}]
+                    public void MyMethod1() { }
+
+                    [NUnit.Framework.Test]
+                    public void MyMethod2() { }
                 }
 
                 namespace MyCompany.Attributes
                 {
-                    public class IgnoreAttribute : System.Attribute
-                    {
-                        public IgnoreAttribute() { }
-                        public IgnoreAttribute(string reason) { }
-                    }
+                    public class {{attributeName}}Attribute : System.Attribute { }
                 }
                 """,
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
-            """
-                using System.Threading.Tasks;
+            $$"""
 
                 public class MyClass
                 {
                     [Test]
-                    [MyCompany.Attributes.Ignore("Not an NUnit attribute")]
-                    public async Task MyMethod()
-                    {
-                        await Assert.That(true).IsTrue();
-                    }
+                    [MyCompany.Attributes.{{attributeName}}]
+                    public void MyMethod1() { }
+
+                    [Test]
+                    public void MyMethod2() { }
                 }
 
                 namespace MyCompany.Attributes
                 {
-                    public class IgnoreAttribute : System.Attribute
-                    {
-                        public IgnoreAttribute() { }
-                        public IgnoreAttribute(string reason) { }
-                    }
+                    public class {{attributeName}}Attribute : System.Attribute { }
                 }
                 """,
             ConfigureNUnitTest

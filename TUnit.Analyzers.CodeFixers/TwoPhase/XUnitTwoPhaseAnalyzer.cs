@@ -816,6 +816,11 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
 
     #region Attribute Analysis
 
+    protected override bool IsFrameworkNamespace(string? ns)
+    {
+        return ns != null && ns.StartsWith("Xunit");
+    }
+
     protected override bool ShouldRemoveAttribute(AttributeSyntax node)
     {
         var name = GetAttributeName(node);

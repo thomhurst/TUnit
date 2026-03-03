@@ -245,6 +245,10 @@ public abstract class MigrationAnalyzer
         {
             try
             {
+                // Skip attributes that don't belong to the source framework
+                if (!IsFrameworkAttribute(originalNode))
+                    continue;
+
                 // Check for removal first
                 if (ShouldRemoveAttribute(originalNode))
                 {
@@ -307,6 +311,29 @@ public abstract class MigrationAnalyzer
     protected abstract AttributeConversion? AnalyzeAttribute(AttributeSyntax node);
 
     /// <summary>
+    /// Returns true if the given namespace belongs to the source framework being migrated.
+    /// Used to verify that attributes actually belong to the framework before converting them.
+    /// </summary>
+    protected abstract bool IsFrameworkNamespace(string? ns);
+
+    /// <summary>
+    /// Returns true if the attribute belongs to the source framework being migrated,
+    /// verified via the semantic model. Returns true when the symbol cannot be resolved
+    /// to preserve existing behavior for unresolved types.
+    /// </summary>
+    protected bool IsFrameworkAttribute(AttributeSyntax node)
+    {
+        var symbolInfo = SemanticModel.GetSymbolInfo(node);
+        var symbol = symbolInfo.Symbol ?? symbolInfo.CandidateSymbols.FirstOrDefault();
+        var ns = symbol?.ContainingType?.ContainingNamespace?.ToDisplayString();
+
+        if (ns == null)
+            return true; // If we can't resolve, assume framework (preserves existing behavior)
+
+        return IsFrameworkNamespace(ns);
+    }
+
+    /// <summary>
     /// Analyzes parameter attributes (e.g., [Range] on method parameters).
     /// </summary>
     protected virtual CompilationUnitSyntax AnalyzeParameterAttributes(CompilationUnitSyntax root)
@@ -324,6 +351,9 @@ public abstract class MigrationAnalyzer
                 {
                     try
                     {
+                        if (!IsFrameworkAttribute(originalAttr))
+                            continue;
+
                         var conversion = AnalyzeParameterAttribute(originalAttr, parameter);
                         if (conversion != null)
                         {

@@ -786,6 +786,11 @@ public class MSTestTwoPhaseAnalyzer : MigrationAnalyzer
         return null;
     }
 
+    protected override bool IsFrameworkNamespace(string? ns)
+    {
+        return ns != null && ns.StartsWith("Microsoft.VisualStudio.TestTools.UnitTesting");
+    }
+
     protected override bool ShouldRemoveAttribute(AttributeSyntax node)
     {
         var name = MigrationHelpers.GetAttributeName(node);
