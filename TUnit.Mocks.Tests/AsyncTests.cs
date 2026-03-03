@@ -42,7 +42,7 @@ public class AsyncTests
     {
         // Arrange
         var mock = Mock.Of<IAsyncService>();
-        mock.GetNameAsync(Arg.Any<string>()).Returns("hello");
+        mock.GetNameAsync(Any()).Returns("hello");
 
         IAsyncService service = mock.Object;
 

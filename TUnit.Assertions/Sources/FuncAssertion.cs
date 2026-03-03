@@ -55,6 +55,18 @@ public class FuncAssertion<TValue> : IAssertionSource<TValue>, IDelegateAssertio
         return new IsNotAssignableToAssertion<TTarget, TValue>(Context);
     }
 
+    public IsAssignableFromAssertion<TSource, TValue> IsAssignableFrom<TSource>()
+    {
+        Context.ExpressionBuilder.Append($".IsAssignableFrom<{typeof(TSource).Name}>()");
+        return new IsAssignableFromAssertion<TSource, TValue>(Context);
+    }
+
+    public IsNotAssignableFromAssertion<TSource, TValue> IsNotAssignableFrom<TSource>()
+    {
+        Context.ExpressionBuilder.Append($".IsNotAssignableFrom<{typeof(TSource).Name}>()");
+        return new IsNotAssignableFromAssertion<TSource, TValue>(Context);
+    }
+
     /// <summary>
     /// Asserts that the value is NOT of the specified type.
     /// Example: await Assert.That(() => GetValue()).IsNotTypeOf<int>();

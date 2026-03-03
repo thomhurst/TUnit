@@ -21,6 +21,6 @@ public static class WebApplicationFactoryExtensions
         this WebApplicationFactory<TEntryPoint> factory)
         where TEntryPoint : class
     {
-        return factory.CreateDefaultClient(new TUnitTestIdHandler());
+        return factory.CreateDefaultClient(new ActivityPropagationHandler(), new TUnitTestIdHandler());
     }
 }

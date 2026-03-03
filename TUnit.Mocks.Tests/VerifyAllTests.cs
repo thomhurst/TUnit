@@ -14,8 +14,8 @@ public class VerifyAllTests
     public async Task VerifyAll_Passes_When_All_Setups_Invoked()
     {
         var mock = Mock.Of<IService>();
-        mock.GetValue(Arg.Any<string>()).Returns("value");
-        mock.Process(Arg.Any<int>());
+        mock.GetValue(Any()).Returns("value");
+        mock.Process(Any());
 
         var svc = mock.Object;
         svc.GetValue("key");
@@ -29,8 +29,8 @@ public class VerifyAllTests
     public async Task VerifyAll_Fails_When_Setup_Not_Invoked()
     {
         var mock = Mock.Of<IService>();
-        mock.GetValue(Arg.Any<string>()).Returns("value");
-        mock.Process(Arg.Any<int>());
+        mock.GetValue(Any()).Returns("value");
+        mock.Process(Any());
 
         var svc = mock.Object;
         svc.GetValue("key"); // Only call GetValue, not Process
@@ -43,7 +43,7 @@ public class VerifyAllTests
     public async Task VerifyAll_Fails_When_No_Setups_Called()
     {
         var mock = Mock.Of<IService>();
-        mock.GetValue(Arg.Any<string>()).Returns("value");
+        mock.GetValue(Any()).Returns("value");
 
         var ex = Assert.Throws<MockVerificationException>(() => Mock.VerifyAll(mock));
         await Assert.That(ex.Message).Contains("GetValue");

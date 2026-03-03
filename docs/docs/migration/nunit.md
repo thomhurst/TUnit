@@ -24,7 +24,7 @@ Migrating from NUnit to TUnit can improve test execution speed. Check the [bench
 | `Assert.AreEqual(expected, actual)` | `await Assert.That(actual).IsEqualTo(expected)` |
 | `Assert.That(actual, Is.EqualTo(expected))` | `await Assert.That(actual).IsEqualTo(expected)` |
 | `Assert.Throws<T>(() => ...)` | `await Assert.ThrowsAsync<T>(() => ...)` |
-| `TestContext.WriteLine(...)` | `TestContext` parameter with `context.OutputWriter.WriteLine(...)` |
+| `TestContext.WriteLine(...)` | `TestContext` parameter with `context.Output.WriteLine(...)` |
 | `TestContext.AddTestAttachment(path, name)` | `TestContext.Current!.Output.AttachArtifact(new Artifact { File = new FileInfo(path), DisplayName = name })` |
 | `CollectionAssert.AreEqual(expected, actual)` | `await Assert.That(actual).IsEquivalentTo(expected)` |
 | `StringAssert.Contains(substring, text)` | `await Assert.That(text).Contains(substring)` |
@@ -214,13 +214,13 @@ dotnet run -- --list-tests
 
 ### Setup and Teardown
 
-`[SetUp]` becomes `[Before(HookType.Test)]`
+`[SetUp]` becomes `[Before(Test)]`
 
-`[TearDown]` becomes `[After(HookType.Test)]`
+`[TearDown]` becomes `[After(Test)]`
 
-`[OneTimeSetUp]` becomes `[Before(HookType.Class)]`
+`[OneTimeSetUp]` becomes `[Before(Class)]`
 
-`[OneTimeTearDown]` becomes `[After(HookType.Class)]`
+`[OneTimeTearDown]` becomes `[After(Class)]`
 
 ### Assertions
 
@@ -358,8 +358,8 @@ TestContext.Out.WriteLine("More output");
 // TUnit (inject TestContext)
 public async Task MyTest(TestContext context)
 {
-    context.OutputWriter.WriteLine("Test output");
-    context.OutputWriter.WriteLine("More output");
+    context.Output.WriteLine("Test output");
+    context.Output.WriteLine("More output");
 }
 ```
 
@@ -394,7 +394,7 @@ public async Task TestWithAttachment()
 }
 ```
 
-For more information about working with test artifacts, including session-level artifacts and best practices, see the [Test Artifacts guide](../test-lifecycle/artifacts.md).
+For more information about working with test artifacts, including session-level artifacts and best practices, see the [Test Artifacts guide](../writing-tests/artifacts.md).
 
 ### Combinatorial Testing
 
@@ -692,9 +692,9 @@ public void Test_WithContextProperties()
 [Test]
 public async Task Test_WithContextProperties(TestContext context)
 {
-    context.OutputWriter.WriteLine($"Test Name: {context.Metadata.TestName}");
-    context.OutputWriter.WriteLine($"Test ID: {context.Metadata.TestDetails.TestId}");
-    context.OutputWriter.WriteLine($"Class Name: {context.Metadata.TestDetails.ClassType.Name}");
+    context.Output.WriteLine($"Test Name: {context.Metadata.TestName}");
+    context.Output.WriteLine($"Test ID: {context.Metadata.TestDetails.TestId}");
+    context.Output.WriteLine($"Class Name: {context.Metadata.TestDetails.ClassType.Name}");
 
     // Test implementation
 }
@@ -838,171 +838,6 @@ public static class AssemblyHooks
 
 ## Code Coverage
 
-### Important: Coverlet is Not Compatible with TUnit
+TUnit includes built-in code coverage support. Do **not** use Coverlet — it is incompatible with TUnit's Microsoft.Testing.Platform.
 
-If you're using **Coverlet** (`coverlet.collector` or `coverlet.msbuild`) for code coverage in your NUnit projects, you'll need to migrate to **Microsoft.Testing.Extensions.CodeCoverage**.
-
-**Why?** TUnit uses the modern `Microsoft.Testing.Platform` instead of VSTest, and Coverlet only works with the legacy VSTest platform.
-
-### Good News: Coverage is Built In! 🎉
-
-When you install the **TUnit** meta package, it automatically includes `Microsoft.Testing.Extensions.CodeCoverage` for you. You don't need to install it separately!
-
-### Migration Steps
-
-#### 1. Remove Coverlet Packages
-
-Remove any Coverlet packages from your project file:
-
-**Remove these lines from your `.csproj`:**
-```xml
-<!-- Remove these -->
-<PackageReference Include="coverlet.collector" Version="x.x.x" />
-<PackageReference Include="coverlet.msbuild" Version="x.x.x" />
-```
-
-#### 2. Verify TUnit Meta Package
-
-Ensure you're using the **TUnit** meta package (not just TUnit.Core):
-
-**Your `.csproj` should have:**
-```xml
-<PackageReference Include="TUnit" Version="0.x.x" />
-```
-
-This automatically brings in:
-- `Microsoft.Testing.Extensions.CodeCoverage` (coverage support)
-- `Microsoft.Testing.Extensions.TrxReport` (test result reports)
-
-#### 3. Update Your Coverage Commands
-
-Replace your old Coverlet commands with the new Microsoft coverage syntax:
-
-**Old (Coverlet with NUnit):**
-```bash
-# With coverlet.collector
-dotnet test --collect:"XPlat Code Coverage"
-
-# With coverlet.msbuild
-dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
-```
-
-**New (TUnit with Microsoft Coverage):**
-```bash
-# Run tests with coverage
-dotnet run --configuration Release --coverage
-
-# Specify output location
-dotnet run --configuration Release --coverage --coverage-output ./coverage/
-
-# Specify coverage format (default is cobertura)
-dotnet run --configuration Release --coverage --coverage-output-format cobertura
-
-# Multiple formats
-dotnet run --configuration Release --coverage --coverage-output-format cobertura --coverage-output-format xml
-```
-
-#### 4. Update CI/CD Pipelines
-
-If you have CI/CD pipelines that reference Coverlet, update them to use the new commands:
-
-**GitHub Actions Example:**
-```yaml
-# Old (NUnit with Coverlet)
-- name: Run tests with coverage
-  run: dotnet test --collect:"XPlat Code Coverage"
-
-# New (TUnit with Microsoft Coverage)
-- name: Run tests with coverage
-  run: dotnet run --project ./tests/MyProject.Tests --configuration Release --coverage
-```
-
-**Azure Pipelines Example:**
-```yaml
-# Old (NUnit with Coverlet)
-- task: DotNetCoreCLI@2
-  inputs:
-    command: 'test'
-    arguments: '--collect:"XPlat Code Coverage"'
-
-# New (TUnit with Microsoft Coverage)
-- task: DotNetCoreCLI@2
-  inputs:
-    command: 'run'
-    arguments: '--configuration Release --coverage --coverage-output $(Agent.TempDirectory)/coverage/'
-```
-
-### Coverage Output Formats
-
-The Microsoft coverage tool supports multiple output formats:
-
-```bash
-# Cobertura (default, widely supported)
-dotnet run --configuration Release --coverage --coverage-output-format cobertura
-
-# XML (Visual Studio format)
-dotnet run --configuration Release --coverage --coverage-output-format xml
-
-# Cobertura + XML
-dotnet run --configuration Release --coverage \
-  --coverage-output-format cobertura \
-  --coverage-output-format xml
-```
-
-### Viewing Coverage Results
-
-Coverage files are generated in your test output directory:
-
-```
-TestResults/
-  ├── coverage.cobertura.xml
-  └── <guid>/
-      └── coverage.xml
-```
-
-You can view these with:
-- **Visual Studio** - Built-in coverage viewer
-- **VS Code** - Extensions like "Coverage Gutters"
-- **ReportGenerator** - Generate HTML reports: `reportgenerator -reports:coverage.cobertura.xml -targetdir:coveragereport`
-- **CI Tools** - Most CI systems can parse Cobertura format natively
-
-### Advanced Coverage Configuration
-
-You can customize coverage behavior with a `testconfig.json` file:
-
-**testconfig.json:**
-```json
-{
-  "codeCoverage": {
-    "Configuration": {
-      "CodeCoverage": {
-        "ModulePaths": {
-          "Include": [".*\\.dll$"],
-          "Exclude": [".*tests\\.dll$"]
-        }
-      }
-    }
-  }
-}
-```
-
-Place the `testconfig.json` file in the same directory as your test project. It will be picked up automatically when running tests.
-
-**Alternatively, you can use an XML coverage settings file:**
-```bash
-dotnet run --configuration Release --coverage --coverage-settings coverage.config
-```
-
-### Troubleshooting
-
-**Coverage files not generated?**
-- Ensure you're using the TUnit meta package, not just TUnit.Engine
-- Verify you have a recent .NET SDK installed
-
-**Missing coverage for some assemblies?**
-- Use a `testconfig.json` file to explicitly include/exclude modules
-- See [Microsoft's documentation](https://github.com/microsoft/codecoverage/blob/main/docs/configuration.md)
-
-**Need help?**
-- See [TUnit Code Coverage Documentation](../extensions/extensions.md#code-coverage)
-- Check [Microsoft's Code Coverage Guide](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-code-coverage)
+See the [Code Coverage guide](../extending/code-coverage.md) for setup and configuration.

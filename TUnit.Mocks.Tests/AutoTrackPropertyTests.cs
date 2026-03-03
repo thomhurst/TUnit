@@ -125,7 +125,7 @@ public class AutoTrackPropertyTests
     {
         // Arrange — strict mode requires explicit SetupAllProperties
         var mock = Mock.Of<IAutoTrackEntity>(MockBehavior.Strict);
-        mock.Name.Set(Arg.Any<string>());
+        mock.Name.Set(Any());
         mock.Name.Returns("");
 
         // Act
@@ -141,7 +141,7 @@ public class AutoTrackPropertyTests
         // Arrange — strict mode with explicit opt-in
         var mock = Mock.Of<IAutoTrackEntity>(MockBehavior.Strict);
         Mock.SetupAllProperties(mock);
-        mock.Name.Set(Arg.Any<string>());
+        mock.Name.Set(Any());
         mock.Name.Returns("");
 
         // Act

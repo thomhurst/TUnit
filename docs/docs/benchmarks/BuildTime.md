@@ -7,7 +7,7 @@ sidebar_position: 8
 # Build Performance Benchmark
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-02-26** from the latest CI run.
+This benchmark was automatically generated on **2026-03-03** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.103
 :::
@@ -18,10 +18,10 @@ Compilation time comparison across frameworks:
 
 | Framework | Version | Mean | Median | StdDev |
 |-----------|---------|------|--------|--------|
-| **TUnit** | 1.17.25 | 2.252 s | 2.263 s | 0.0343 s |
-| Build_NUnit | 4.5.0 | 1.872 s | 1.871 s | 0.0197 s |
-| Build_MSTest | 4.1.0 | 1.933 s | 1.932 s | 0.0186 s |
-| Build_xUnit3 | 3.2.2 | 1.839 s | 1.838 s | 0.0242 s |
+| **TUnit** | 1.18.0 | 2.031 s | 2.031 s | 0.0269 s |
+| Build_NUnit | 4.5.0 | 1.699 s | 1.696 s | 0.0253 s |
+| Build_MSTest | 4.1.0 | 1.756 s | 1.756 s | 0.0133 s |
+| Build_xUnit3 | 3.2.2 | 1.669 s | 1.668 s | 0.0186 s |
 
 ## 📈 Visual Comparison
 
@@ -30,7 +30,7 @@ Compilation time comparison across frameworks:
   'theme':'base',
   'themeVariables': {
     'primaryColor': '#2563eb',
-    'primaryTextColor': '#ffffff',
+    'primaryTextColor': '#1f2937',
     'primaryBorderColor': '#1e40af',
     'lineColor': '#6b7280',
     'secondaryColor': '#7c3aed',
@@ -60,7 +60,7 @@ xychart-beta
   title "Build Time Comparison"
   x-axis ["Build_TUnit", "Build_NUnit", "Build_MSTest", "Build_xUnit3"]
   y-axis "Time (s)" 0 --> 3
-  bar [2.252, 1.872, 1.933, 1.839]
+  bar [2.031, 1.699, 1.756, 1.669]
 ```
 
 ---
@@ -69,4 +69,4 @@ xychart-beta
 View the [benchmarks overview](/docs/benchmarks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-02-26T00:44:41.005Z*
+*Last generated: 2026-03-03T00:37:44.287Z*

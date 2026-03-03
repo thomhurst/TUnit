@@ -4,7 +4,7 @@ As TUnit is built on-top of the newer Microsoft.Testing.Platform, and combined w
 
 :::info
 
-Please note that for the coverage and trx report, you need to install [additional extensions](../extensions/extensions.md)
+Coverage and TRX reporting are built in. See [Extensions](../extending/built-in-extensions.md) for usage flags.
 
 :::
 
@@ -53,7 +53,7 @@ dotnet YourTestProject.dll --report-trx --coverage
 ## Published Test Project
 
 When you publish your test project, you'll be given an executable.
-On windows this'll be a `.exe` and on Linux/MacOS there'll be no extension.
+On Windows this will be a `.exe` and on Linux/macOS there will be no extension.
 
 This can be invoked directly and passed any flags.
 
@@ -64,7 +64,7 @@ cd 'C:/Your/Test/Directory/bin/Release/net8.0/win-x64/publish'
 ./YourTestProject.exe --report-trx --coverage
 ```
 
-# IDE Support
+## IDE Support
 
 ## Visual Studio
 Visual Studio is supported. The "Use testing platform server mode" option must be selected in Tools > Manage Preview Features.
@@ -98,16 +98,15 @@ To continue your journey with TUnit, explore these topics:
 
 **Core Testing Concepts:**
 - **[Assertions](../assertions/getting-started.md)** - Learn TUnit's fluent assertion syntax
-- **[Test Lifecycle](../test-lifecycle/setup.md)** - Set up and tear down test state with hooks
-- **[Data-Driven Testing](../test-authoring/arguments.md)** - Run tests with multiple input values
+- **[Test Lifecycle](../writing-tests/lifecycle.md)** - Understand the test execution lifecycle
+- **[Data-Driven Testing](../writing-tests/arguments.md)** - Run tests with multiple input values
 
 **Common Tasks:**
-- **[Mocking](../test-authoring/mocking/index.md)** - Use mocks and fakes in your tests
-- **[Best Practices](../guides/best-practices.md)** - Write maintainable, reliable tests
-- **[Cookbook](../guides/cookbook.md)** - Common testing patterns and recipes
+- **[Mocking](../writing-tests/mocking/index.md)** - Use mocks and fakes in your tests
+- **[Tips & Pitfalls](../guides/best-practices.md)** - TUnit-specific tips to avoid common mistakes
 
 **Advanced Features:**
-- **[Parallelism](../parallelism/not-in-parallel.md)** - Control how tests run in parallel
+- **[Parallelism](../execution/parallelism.md)** - Control how tests run in parallel
 - **[CI/CD Integration](../execution/ci-cd-reporting.md)** - Integrate TUnit into your pipeline
 
 Need help? Check the [Troubleshooting & FAQ](../troubleshooting.md) guide.

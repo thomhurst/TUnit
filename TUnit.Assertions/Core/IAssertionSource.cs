@@ -42,4 +42,14 @@ public interface IAssertionSource<TValue> : IAssertionSource
     /// Asserts that the value's type is NOT assignable to the specified type.
     /// </summary>
     IsNotAssignableToAssertion<TExpected, TValue> IsNotAssignableTo<TExpected>();
+
+    /// <summary>
+    /// Asserts that the value's type is assignable from the specified type.
+    /// </summary>
+    IsAssignableFromAssertion<TExpected, TValue> IsAssignableFrom<TExpected>();
+
+    /// <summary>
+    /// Asserts that the value's type is NOT assignable from the specified type.
+    /// </summary>
+    IsNotAssignableFromAssertion<TExpected, TValue> IsNotAssignableFrom<TExpected>();
 }

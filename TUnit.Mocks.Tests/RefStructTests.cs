@@ -182,7 +182,7 @@ public class RefStructTests
         // Assert — verify by the string destination (non-ref-struct param)
         mock.Send("server-a").WasCalled(Times.Exactly(2));
         mock.Send("server-b").WasCalled(Times.Once);
-        mock.Send(Arg.Any<string>()).WasCalled(Times.Exactly(3));
+        mock.Send(Any()).WasCalled(Times.Exactly(3));
         await Assert.That(true).IsTrue();
     }
 
@@ -259,7 +259,7 @@ public class RefStructTests
 
         // Assert — verify with both Arg<string> and RefStructArg<ReadOnlySpan<byte>>
         mock.Send("server-a", RefStructArg<ReadOnlySpan<byte>>.Any).WasCalled(Times.Once);
-        mock.Send(Arg.Any<string>(), RefStructArg<ReadOnlySpan<byte>>.Any).WasCalled(Times.Exactly(2));
+        mock.Send(Any(), RefStructArg<ReadOnlySpan<byte>>.Any).WasCalled(Times.Exactly(2));
         await Assert.That(true).IsTrue();
     }
 
@@ -348,7 +348,7 @@ public class RefStructTests
         // Assert — verify by the string destination (non-ref-struct param) with RefStructArg.Any
         mock.Send("server-a", RefStructArg<ReadOnlySpan<byte>>.Any).WasCalled(Times.Exactly(2));
         mock.Send("server-b", RefStructArg<ReadOnlySpan<byte>>.Any).WasCalled(Times.Once);
-        mock.Send(Arg.Any<string>(), RefStructArg<ReadOnlySpan<byte>>.Any).WasCalled(Times.Exactly(3));
+        mock.Send(Any(), RefStructArg<ReadOnlySpan<byte>>.Any).WasCalled(Times.Exactly(3));
         await Assert.That(true).IsTrue();
     }
 

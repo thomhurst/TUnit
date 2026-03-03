@@ -206,7 +206,7 @@ public class VerifyAllMessageTests
     {
         // Arrange
         var mock = Mock.Of<ICalculator>();
-        mock.Add(Arg.Any<int>(), Arg.Is<int>(x => x > 0)).Returns(1);
+        mock.Add(Any(), Is<int>(x => x > 0)).Returns(1);
 
         // Act — don't call the method
 
@@ -239,7 +239,7 @@ public class VerifyAllMessageTests
     {
         // Arrange
         var mock = Mock.Of<ICalculator>();
-        mock.Add(Arg.Any<int>(), Arg.Any<int>()).Returns(1);
+        mock.Add(Any(), Any()).Returns(1);
         mock.GetName().Returns("name");
 
         // Act — invoke all setups

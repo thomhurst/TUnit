@@ -27,7 +27,7 @@ public class WebApplicationFactory : TestWebApplicationFactory<Program>
         {
             config.AddInMemoryCollection(new Dictionary<string, string?>
             {
-                { "ConnectionStrings:Default", "..." }
+                { "ConnectionStrings:Default", "Server=localhost;Database=TestDb" }
             });
         });
     }
@@ -322,7 +322,7 @@ public abstract class TodoTestBase : TestsBase
         });
     }
 
-    [After(HookType.Test)]
+    [After(Test)]
     public async Task CleanupTable()
     {
         await DropTableAsync(TableName);
@@ -412,7 +412,7 @@ public abstract class EfCoreTodoTestBase : WebApplicationTest<EfCoreWebApplicati
         });
     }
 
-    [After(HookType.Test)]
+    [After(Test)]
     public async Task CleanupSchema()
     {
         await using var connection = new NpgsqlConnection(
@@ -635,7 +635,7 @@ public class UserTests : DatabaseTestBase
 ### 3. Clean Up Resources
 
 ```csharp
-[After(HookType.Test)]
+[After(Test)]
 public async Task Cleanup()
 {
     await CleanupTestDataAsync();
@@ -712,7 +712,7 @@ public abstract class TodoTestBase : TestsBase
         });
     }
 
-    [After(HookType.Test)]
+    [After(Test)]
     public async Task Cleanup() => await DropTableAsync();
 
     private async Task CreateTableAsync() { /* ... */ }
@@ -825,7 +825,7 @@ protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
 
 **Solution:** This is by design. `ConfigureTestOptions` runs before `SetupAsync` because test options affect how the infrastructure is set up. If you need async setup before options, consider:
 
-1. Moving the logic to a `[Before(HookType.Test)]` method that runs even earlier
+1. Moving the logic to a `[Before(Test)]` method that runs even earlier
 2. Using lazy initialization in `SetupAsync`
 
 ### Why are my parallel tests interfering with each other?

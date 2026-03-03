@@ -25,7 +25,7 @@ public class AutoRaiseEventTests
 
         mock.Object.StatusChanged += (sender, status) => receivedStatus = status;
 
-        mock.Process(Arg.Any<int>())
+        mock.Process(Any())
             .Returns(true)
             .RaisesStatusChanged("completed");
 
@@ -42,7 +42,7 @@ public class AutoRaiseEventTests
 
         mock.Object.StatusChanged += (sender, status) => receivedStatus = status;
 
-        mock.Execute(Arg.Any<string>())
+        mock.Execute(Any())
             .RaisesStatusChanged("executed");
 
         mock.Object.Execute("run");
@@ -58,7 +58,7 @@ public class AutoRaiseEventTests
 
         mock.Object.StatusChanged += (sender, status) => receivedStatuses.Add(status);
 
-        mock.Process(Arg.Any<int>())
+        mock.Process(Any())
             .Returns(true)
             .RaisesStatusChanged("first")
             .RaisesStatusChanged("second");
@@ -75,7 +75,7 @@ public class AutoRaiseEventTests
     {
         var mock = Mock.Of<IProcessService>();
 
-        mock.Process(Arg.Any<int>())
+        mock.Process(Any())
             .Returns(true)
             .RaisesStatusChanged("ignored");
 
@@ -93,7 +93,7 @@ public class AutoRaiseEventTests
 
         mock.Object.StatusChanged += (sender, status) => callCount++;
 
-        mock.Process(Arg.Any<int>())
+        mock.Process(Any())
             .Returns(true)
             .RaisesStatusChanged("ping");
 

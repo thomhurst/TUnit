@@ -31,7 +31,7 @@ The collapsible style provides a clean, concise summary with expandable details:
 | 5 | Failed |
 
 <details>
-<summary>📊 Test Details (click to expand)</summary>
+<summary>Test Details (click to expand)</summary>
 
 ### Details
 | Test | Status | Details | Duration |
@@ -189,17 +189,21 @@ dotnet test --logger "console;verbosity=detailed"
 
 ### GitLab CI
 
-GitLab can parse test results in various formats:
+GitLab's test report feature expects JUnit XML format. TRX files are **not** JUnit XML, so you need a conversion step:
 
 ```yaml
 test:
   script:
     - dotnet test -- --report-trx
+    - dotnet tool install -g trx2junit
+    - trx2junit TestResults/*.trx
   artifacts:
     reports:
       junit:
-        - TestResults/*.trx
+        - TestResults/*.xml
 ```
+
+The `trx2junit` tool converts TRX output to JUnit XML that GitLab can parse.
 
 ## Environment Detection
 

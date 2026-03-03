@@ -89,6 +89,13 @@ namespace TUnit.Mocks.Generated
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { data.Matcher };
             return new IReadWriter_Write_M2_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 2, "Write", matchers);
         }
+
+        public static IReadWriter_Write_M2_MockCall Write(this global::TUnit.Mocks.Mock<global::IReadWriter> mock, global::System.Func<string, bool> data)
+        {
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_data = data;
+            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_data.Matcher };
+            return new IReadWriter_Write_M2_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 2, "Write", matchers);
+        }
     }
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]

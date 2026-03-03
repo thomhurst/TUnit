@@ -1,3 +1,7 @@
+---
+sidebar_position: 3
+---
+
 # Chaining and Converting
 
 TUnit allows you to chain assertions that change the type being asserted, enabling fluent and expressive test code.

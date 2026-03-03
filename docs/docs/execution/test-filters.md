@@ -27,17 +27,78 @@ TUnit supports several operators for building complex filters:
 
 For full information on the treenode filters, see [Microsoft's documentation](https://github.com/microsoft/testfx/blob/main/docs/mstest-runner-graphqueryfiltering/graph-query-filtering.md)
 
-So an example could be:
+## Examples
 
-`dotnet run --treenode-filter /*/*/LoginTests/*` - To run all tests in the class `LoginTests`
+### Filter by class name
 
-or
+Run all tests in the `LoginTests` class:
 
-`dotnet run --treenode-filter /*/*/*/AcceptCookiesTest` - To run all tests with the name `AcceptCookiesTest`
+```bash
+dotnet run --treenode-filter "/*/*/LoginTests/*"
+```
 
-TUnit also supports filtering by your own [properties](../test-lifecycle/properties.md). So you could do:
+### Filter by test name
 
-`dotnet run --treenode-filter /*/*/*/*[MyFilterName=*SomeValue*]`
+Run all tests with the name `AcceptCookiesTest`:
 
-And if your test had a property with the name "MyFilterName" and its value contained "SomeValue", then your test would be executed.
+```bash
+dotnet run --treenode-filter "/*/*/*/AcceptCookiesTest"
+```
 
+### Filter by namespace
+
+Run all tests in a specific namespace:
+
+```bash
+dotnet run --treenode-filter "/*/MyProject.Tests.Integration/*/*"
+```
+
+Use a wildcard to match namespace prefixes:
+
+```bash
+dotnet run --treenode-filter "/*/MyProject.Tests.Api*/*/*"
+```
+
+### Filter by custom property value
+
+TUnit supports filtering by [custom properties](../writing-tests/test-context.md#custom-properties). If a test has a property with a matching name and value, it will be included:
+
+```bash
+dotnet run --treenode-filter "/*/*/*/*[Category=Smoke]"
+```
+
+Use a wildcard to match partial property values:
+
+```bash
+dotnet run --treenode-filter "/*/*/*/*[Owner=*Team-Backend*]"
+```
+
+### Exclude tests by property
+
+Use `!=` to exclude tests with a specific property value:
+
+```bash
+dotnet run --treenode-filter "/*/*/*/*[Category!=Slow]"
+```
+
+### Combined filters
+
+Combine multiple conditions with `&` to narrow results. Run only high-priority smoke tests:
+
+```bash
+dotnet run --treenode-filter "/*/*/*/*[Category=Smoke]&[Priority=High]"
+```
+
+Combine namespace and property filters. Run integration tests tagged as critical:
+
+```bash
+dotnet run --treenode-filter "/*/MyProject.Tests.Integration/*/*/*[Priority=Critical]"
+```
+
+### OR filter across classes
+
+Run tests from either of two classes:
+
+```bash
+dotnet run --treenode-filter "/*/*/(LoginTests)|(SignupTests)/*"
+```

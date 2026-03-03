@@ -78,9 +78,53 @@ namespace TUnit.Mocks.Generated
             return new ICalculator_Add_M0_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 0, "Add", matchers);
         }
 
+        public static ICalculator_Add_M0_MockCall Add(this global::TUnit.Mocks.Mock<global::ICalculator> mock, global::System.Func<int, bool> a, global::TUnit.Mocks.Arguments.Arg<int> b)
+        {
+            global::TUnit.Mocks.Arguments.Arg<int> __fa_a = a;
+            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_a.Matcher, b.Matcher };
+            return new ICalculator_Add_M0_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 0, "Add", matchers);
+        }
+
+        public static ICalculator_Add_M0_MockCall Add(this global::TUnit.Mocks.Mock<global::ICalculator> mock, global::TUnit.Mocks.Arguments.Arg<int> a, global::System.Func<int, bool> b)
+        {
+            global::TUnit.Mocks.Arguments.Arg<int> __fa_b = b;
+            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { a.Matcher, __fa_b.Matcher };
+            return new ICalculator_Add_M0_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 0, "Add", matchers);
+        }
+
+        public static ICalculator_Add_M0_MockCall Add(this global::TUnit.Mocks.Mock<global::ICalculator> mock, global::System.Func<int, bool> a, global::System.Func<int, bool> b)
+        {
+            global::TUnit.Mocks.Arguments.Arg<int> __fa_a = a;
+            global::TUnit.Mocks.Arguments.Arg<int> __fa_b = b;
+            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_a.Matcher, __fa_b.Matcher };
+            return new ICalculator_Add_M0_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 0, "Add", matchers);
+        }
+
         public static ICalculator_Subtract_M1_MockCall Subtract(this global::TUnit.Mocks.Mock<global::ICalculator> mock, global::TUnit.Mocks.Arguments.Arg<int> a, global::TUnit.Mocks.Arguments.Arg<int> b)
         {
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { a.Matcher, b.Matcher };
+            return new ICalculator_Subtract_M1_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 1, "Subtract", matchers);
+        }
+
+        public static ICalculator_Subtract_M1_MockCall Subtract(this global::TUnit.Mocks.Mock<global::ICalculator> mock, global::System.Func<int, bool> a, global::TUnit.Mocks.Arguments.Arg<int> b)
+        {
+            global::TUnit.Mocks.Arguments.Arg<int> __fa_a = a;
+            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_a.Matcher, b.Matcher };
+            return new ICalculator_Subtract_M1_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 1, "Subtract", matchers);
+        }
+
+        public static ICalculator_Subtract_M1_MockCall Subtract(this global::TUnit.Mocks.Mock<global::ICalculator> mock, global::TUnit.Mocks.Arguments.Arg<int> a, global::System.Func<int, bool> b)
+        {
+            global::TUnit.Mocks.Arguments.Arg<int> __fa_b = b;
+            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { a.Matcher, __fa_b.Matcher };
+            return new ICalculator_Subtract_M1_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 1, "Subtract", matchers);
+        }
+
+        public static ICalculator_Subtract_M1_MockCall Subtract(this global::TUnit.Mocks.Mock<global::ICalculator> mock, global::System.Func<int, bool> a, global::System.Func<int, bool> b)
+        {
+            global::TUnit.Mocks.Arguments.Arg<int> __fa_a = a;
+            global::TUnit.Mocks.Arguments.Arg<int> __fa_b = b;
+            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_a.Matcher, __fa_b.Matcher };
             return new ICalculator_Subtract_M1_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 1, "Subtract", matchers);
         }
 

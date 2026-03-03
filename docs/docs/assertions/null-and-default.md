@@ -233,7 +233,7 @@ public async Task Uninitialized_Field()
 [Test]
 public async Task Constructor_Injection()
 {
-    var logger = new Mock<ILogger>();
+    var logger = Mock.Of<ILogger>();
     var service = new UserService(logger.Object);
 
     // Verify dependency was injected
@@ -398,48 +398,6 @@ public async Task DateTime_Default()
 
     await Assert.That(date).IsDefault();
     await Assert.That(date).IsEqualTo(DateTime.MinValue);
-}
-```
-
-## Combining with Other Assertions
-
-### Null Coalescing Validation
-
-```csharp
-[Test]
-public async Task Null_Coalescing_Default()
-{
-    string? input = GetOptionalInput();
-    string result = input ?? "default";
-
-    if (input == null)
-    {
-        await Assert.That(result).IsEqualTo("default");
-    }
-    else
-    {
-        await Assert.That(result).IsEqualTo(input);
-    }
-}
-```
-
-### Null Conditional Operator
-
-```csharp
-[Test]
-public async Task Null_Conditional()
-{
-    Person? person = FindPerson("id");
-    string? name = person?.Name;
-
-    if (person == null)
-    {
-        await Assert.That(name).IsNull();
-    }
-    else
-    {
-        await Assert.That(name).IsNotNull();
-    }
 }
 ```
 

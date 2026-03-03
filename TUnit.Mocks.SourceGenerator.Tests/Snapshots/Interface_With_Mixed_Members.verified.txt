@@ -144,9 +144,23 @@ namespace TUnit.Mocks.Generated
             return new IService_GetAsync_M3_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 3, "GetAsync", matchers);
         }
 
+        public static IService_GetAsync_M3_MockCall GetAsync(this global::TUnit.Mocks.Mock<global::IService> mock, global::System.Func<int, bool> id)
+        {
+            global::TUnit.Mocks.Arguments.Arg<int> __fa_id = id;
+            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_id.Matcher };
+            return new IService_GetAsync_M3_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 3, "GetAsync", matchers);
+        }
+
         public static IService_Process_M4_MockCall Process(this global::TUnit.Mocks.Mock<global::IService> mock, global::TUnit.Mocks.Arguments.Arg<string> data)
         {
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { data.Matcher };
+            return new IService_Process_M4_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 4, "Process", matchers);
+        }
+
+        public static IService_Process_M4_MockCall Process(this global::TUnit.Mocks.Mock<global::IService> mock, global::System.Func<string, bool> data)
+        {
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_data = data;
+            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_data.Matcher };
             return new IService_Process_M4_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 4, "Process", matchers);
         }
 

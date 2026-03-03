@@ -420,7 +420,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
                     try
                     {
-                        var metadata = await BuildTestMetadata(type, resolvedMethod).ConfigureAwait(false);
+                        var metadata = BuildTestMetadata(type, resolvedMethod);
                         discoveredTests.Add(metadata);
                     }
                     catch (Exception ex)
@@ -562,7 +562,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
                     try
                     {
-                        testMetadata = await BuildTestMetadata(type, resolvedMethod).ConfigureAwait(false);
+                        testMetadata = BuildTestMetadata(type, resolvedMethod);
                     }
                     catch (Exception ex)
                     {
@@ -639,7 +639,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
                             // Build test metadata for the concrete type
                             // No class data for GenerateGenericTest - it just provides type arguments
-                            var testMetadata = await BuildTestMetadata(concreteType, resolvedMethod, null).ConfigureAwait(false);
+                            var testMetadata = BuildTestMetadata(concreteType, resolvedMethod, null);
                             discoveredTests.Add(testMetadata);
                         }
                     }
@@ -709,7 +709,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                                 // The concrete type already has its generic arguments resolved
                                 // For generic types with primary constructors that were resolved from class-level data sources,
                                 // we need to ensure the class data sources contain the specific data for this instantiation
-                                var testMetadata = await BuildTestMetadata(concreteType, resolvedMethod, dataRow).ConfigureAwait(false);
+                                var testMetadata = BuildTestMetadata(concreteType, resolvedMethod, dataRow);
 
                                 discoveredTests.Add(testMetadata);
                             }
@@ -793,7 +793,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
                             // Build test metadata for the concrete type
                             // No class data for GenerateGenericTest - it just provides type arguments
-                            var testMetadata = await BuildTestMetadata(concreteType, resolvedMethod, null).ConfigureAwait(false);
+                            var testMetadata = BuildTestMetadata(concreteType, resolvedMethod, null);
 
                             successfulTests ??= [];
                             successfulTests.Add(testMetadata);
@@ -899,7 +899,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                                 // The concrete type already has its generic arguments resolved
                                 // For generic types with primary constructors that were resolved from class-level data sources,
                                 // we need to ensure the class data sources contain the specific data for this instantiation
-                                var testMetadata = await BuildTestMetadata(concreteType, resolvedMethod, dataRow).ConfigureAwait(false);
+                                var testMetadata = BuildTestMetadata(concreteType, resolvedMethod, dataRow);
 
                                 successfulTests ??= [];
                                 successfulTests.Add(testMetadata);
@@ -1008,7 +1008,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return depth;
     }
 
-    private static Task<TestMetadata> BuildTestMetadata(
+    private static TestMetadata BuildTestMetadata(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)]
         Type testClass,
         MethodInfo testMethod,
@@ -1041,7 +1041,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         try
         {
-            return Task.FromResult<TestMetadata>(new ReflectionTestMetadata(testClass, testMethod)
+            return new ReflectionTestMetadata(testClass, testMethod)
             {
                 TestName = testName,
                 TestClassType = typeForGenericResolution, // Use resolved type for generic resolution (may be constructed generic base)
@@ -1066,11 +1066,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     ?? testClass.Assembly.GetCustomAttribute<RepeatAttribute>()?.Times,
                 PropertyInjections = PropertySourceRegistry.DiscoverInjectableProperties(testClass),
                 InheritanceDepth = inheritanceDepth
-            });
+            };
         }
         catch (Exception ex)
         {
-            return Task.FromResult(CreateFailedTestMetadata(testClass, testMethod, ex));
+            return CreateFailedTestMetadata(testClass, testMethod, ex);
         }
     }
 
@@ -2519,51 +2519,46 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
     }
 
-    private static Func<string, CancellationToken, IAsyncEnumerable<TestMetadata>> CreateReflectionMaterializer(
+    private static Func<string, IReadOnlyList<TestMetadata>> CreateReflectionMaterializer(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)]
         Type type,
         MethodInfo method)
     {
-        return (testSessionId, cancellationToken) => MaterializeSingleTestAsync(type, method, cancellationToken);
+        return testSessionId => MaterializeSingleTest(type, method);
     }
 
-    private static async IAsyncEnumerable<TestMetadata> MaterializeSingleTestAsync(
+    private static TestMetadata[] MaterializeSingleTest(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)]
         Type type,
-        MethodInfo method,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        MethodInfo method)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-
         TestMetadata metadata;
         try
         {
-            metadata = await BuildTestMetadata(type, method).ConfigureAwait(false);
+            metadata = BuildTestMetadata(type, method);
         }
         catch (Exception ex)
         {
             metadata = CreateFailedTestMetadata(type, method, ex);
         }
 
-        yield return metadata;
+        return [metadata];
     }
 
     /// <summary>
     /// Materializes full test metadata from filtered descriptors.
     /// Only called for tests that passed filtering.
     /// </summary>
-    public async IAsyncEnumerable<TestMetadata> MaterializeFromDescriptorsAsync(
+    public IEnumerable<TestMetadata> MaterializeFromDescriptors(
         IEnumerable<TestDescriptor> descriptors,
-        string testSessionId,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        string testSessionId)
     {
         foreach (var descriptor in descriptors)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            await foreach (var metadata in descriptor.Materializer(testSessionId, cancellationToken).ConfigureAwait(false))
+            var materialized = descriptor.Materializer(testSessionId);
+            for (var i = 0; i < materialized.Count; i++)
             {
-                yield return metadata;
+                yield return materialized[i];
             }
         }
     }

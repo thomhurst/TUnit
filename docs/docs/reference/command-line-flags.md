@@ -2,7 +2,7 @@
 
 :::info
 
-Please note that for the coverage and trx report, you need to install [additional extensions](../extensions/extensions.md)
+Please note that for the coverage and trx report, you need to install [additional extensions](../extending/built-in-extensions.md)
 
 :::
 

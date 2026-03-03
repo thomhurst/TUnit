@@ -33,7 +33,7 @@ internal class InheritsTestsAbstractTests : TestsBase
             
             // Verify ConcreteClass2 has both inherited test and its own test
             var hasConcreteClass2InheritedTest = testFiles.Any(f => f.Contains("ConcreteClass2_AssertClassName"));
-            var hasConcreteClass2OwnTest = testFiles.Any(f => f.Contains("ConcreteClass2_SecondTest"));
+            var hasConcreteClass2OwnTest = testFiles.Any(f => f.Contains("ConcreteClass2__TestSource") && f.Contains("SecondTest"));
             
             await Assert.That(hasConcreteClass2InheritedTest).IsTrue();
             await Assert.That(hasConcreteClass2OwnTest).IsTrue();

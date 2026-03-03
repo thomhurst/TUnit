@@ -52,10 +52,10 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         {
             // Single-pass two-phase discovery: enumerate all descriptors once,
             // apply type and descriptor filters during enumeration, expand dependencies from index
-            standardTestMetadatas = await CollectTestsWithTwoPhaseDiscoveryAsync(
+            standardTestMetadatas = CollectTestsWithTwoPhaseDiscovery(
                 Sources.TestSources,
                 testSessionId,
-                filterHints).ConfigureAwait(false);
+                filterHints);
         }
         else
         {
@@ -69,7 +69,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             }
 
             var testSourcesList = testSourcesByType.SelectMany(kvp => kvp.Value).ToList();
-            standardTestMetadatas = await CollectTestsTraditionalAsync(testSourcesList, testSessionId).ConfigureAwait(false);
+            standardTestMetadatas = CollectTestsTraditional(testSourcesList, testSessionId);
         }
 
         // Dynamic tests are typically rare, collect sequentially
@@ -92,7 +92,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
     /// enumerated descriptors to find dependencies, and then this method enumerated
     /// them again for filtering and materialization.
     /// </summary>
-    private async Task<IEnumerable<TestMetadata>> CollectTestsWithTwoPhaseDiscoveryAsync(
+    private IEnumerable<TestMetadata> CollectTestsWithTwoPhaseDiscovery(
         IEnumerable<KeyValuePair<Type, ConcurrentQueue<ITestSource>>> allSourcesByType,
         string testSessionId,
         FilterHints filterHints)
@@ -209,9 +209,10 @@ internal sealed class AotTestDataCollector : ITestDataCollector
 
         foreach (var descriptor in descriptorsToMaterialize)
         {
-            await foreach (var metadata in descriptor.Materializer(testSessionId, CancellationToken.None).ConfigureAwait(false))
+            var materialized = descriptor.Materializer(testSessionId);
+            for (var i = 0; i < materialized.Count; i++)
             {
-                results.Add(metadata);
+                results.Add(materialized[i]);
             }
         }
 
@@ -222,29 +223,20 @@ internal sealed class AotTestDataCollector : ITestDataCollector
     /// Traditional collection: materialize all tests from sources.
     /// Used when filter hints are not available or sources don't support ITestDescriptorSource.
     /// </summary>
-    private async Task<IEnumerable<TestMetadata>> CollectTestsTraditionalAsync(
+    private IEnumerable<TestMetadata> CollectTestsTraditional(
         List<ITestSource> testSourcesList,
         string testSessionId)
     {
-        // Use sequential processing for small test source sets to avoid task scheduling overhead
-        if (testSourcesList.Count < Building.ParallelThresholds.MinItemsForParallel)
+        var results = new List<TestMetadata>();
+        foreach (var testSource in testSourcesList)
         {
-            var results = new List<TestMetadata>();
-            foreach (var testSource in testSourcesList)
+            var tests = testSource.GetTests(testSessionId);
+            for (var i = 0; i < tests.Count; i++)
             {
-                await foreach (var metadata in testSource.GetTestsAsync(testSessionId))
-                {
-                    results.Add(metadata);
-                }
+                results.Add(tests[i]);
             }
-            return results;
         }
-        else
-        {
-            return await testSourcesList
-                .SelectManyAsync(testSource => testSource.GetTestsAsync(testSessionId))
-                .ProcessInParallel();
-        }
+        return results;
     }
 
     [RequiresUnreferencedCode("Dynamic test collection requires expression compilation and reflection")]
@@ -568,19 +560,16 @@ internal sealed class AotTestDataCollector : ITestDataCollector
     /// Materializes full test metadata from filtered descriptors.
     /// Only called for tests that passed filtering, avoiding unnecessary materialization.
     /// </summary>
-    public async IAsyncEnumerable<TestMetadata> MaterializeFromDescriptorsAsync(
+    public IEnumerable<TestMetadata> MaterializeFromDescriptors(
         IEnumerable<TestDescriptor> descriptors,
-        string testSessionId,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        string testSessionId)
     {
         foreach (var descriptor in descriptors)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            // Use the materializer delegate to create full TestMetadata
-            await foreach (var metadata in descriptor.Materializer(testSessionId, cancellationToken).ConfigureAwait(false))
+            var materialized = descriptor.Materializer(testSessionId);
+            for (var i = 0; i < materialized.Count; i++)
             {
-                yield return metadata;
+                yield return materialized[i];
             }
         }
     }
