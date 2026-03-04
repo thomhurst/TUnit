@@ -1355,6 +1355,11 @@ public class NUnitTwoPhaseAnalyzer : MigrationAnalyzer
         return (AssertionConversionKind.NotEqual, assertion, true, null);
     }
 
+    protected override bool IsFrameworkNamespace(string? ns)
+    {
+        return ns != null && ns.StartsWith("NUnit.Framework");
+    }
+
     protected override bool ShouldRemoveAttribute(AttributeSyntax node)
     {
         var name = MigrationHelpers.GetAttributeName(node);

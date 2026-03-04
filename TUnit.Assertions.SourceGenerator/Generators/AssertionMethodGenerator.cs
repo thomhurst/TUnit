@@ -779,7 +779,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                 // Extension method - call it like an instance method
                 sourceBuilder.Append($"        var result = actualValue.{methodName}(");
                 var paramList = parameters.Select(p => $"_{p.Name}").ToArray();
-                sourceBuilder.Append(string.Join(", ", paramList));
+                sourceBuilder.AppendJoin(", ", paramList);
                 sourceBuilder.AppendLine(");");
             }
             else if (attributeData.TreatAsInstance)
@@ -828,7 +828,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                     // Instance method on the target type itself
                     sourceBuilder.Append($"        var result = actualValue.{methodName}(");
                     var paramList = parameters.Select(p => $"_{p.Name}").ToArray();
-                    sourceBuilder.Append(string.Join(", ", paramList));
+                    sourceBuilder.AppendJoin(", ", paramList);
                     sourceBuilder.AppendLine(");");
                 }
             }
@@ -853,7 +853,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                     sourceBuilder.AppendLine($"        var instance = new {containingType.ToDisplayString()}();");
                     sourceBuilder.Append($"        var result = instance.{methodName}(");
                     var paramList = parameters.Select(p => $"_{p.Name}").ToArray();
-                    sourceBuilder.Append(string.Join(", ", paramList));
+                    sourceBuilder.AppendJoin(", ", paramList);
                     sourceBuilder.AppendLine(");");
                 }
             }
@@ -862,7 +862,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                 // Default instance method behavior
                 sourceBuilder.Append($"        var result = actualValue.{methodName}(");
                 var paramList = parameters.Select(p => $"_{p.Name}").ToArray();
-                sourceBuilder.Append(string.Join(", ", paramList));
+                sourceBuilder.AppendJoin(", ", paramList);
                 sourceBuilder.AppendLine(");");
             }
         }

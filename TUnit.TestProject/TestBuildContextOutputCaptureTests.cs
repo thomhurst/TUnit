@@ -140,10 +140,11 @@ public class TestBuildContextOutputCaptureTests
     [ClassDataSource<SharedDataSource>(Shared = SharedType.PerTestSession)]
     public async Task Test_SharedDataSource_FirstTest(SharedDataSource data)
     {
-        var output = TestContext.Current!.GetStandardOutput();
-
-        // Should contain the shared data source construction output
-        await Assert.That(output).Contains("SharedDataSource constructor:");
+        // Shared data source construction output is routed to TestSessionContext because
+        // the factory only runs once (for whichever test wins the build race), so it can't
+        // reliably end up in any individual test's output.
+        var sessionOutput = TestSessionContext.Current!.GetStandardOutput();
+        await Assert.That(sessionOutput).Contains("SharedDataSource constructor:");
         await Assert.That(data.Value).IsEqualTo("SharedValue");
     }
 
@@ -151,12 +152,11 @@ public class TestBuildContextOutputCaptureTests
     [ClassDataSource<SharedDataSource>(Shared = SharedType.PerTestSession)]
     public async Task Test_SharedDataSource_SecondTest(SharedDataSource data)
     {
-        // NOTE: For PerTestSession shared data sources, the constructor only runs once
-        // when the first test triggers creation. Subsequent tests use the already-created
-        // instance, so they won't have the constructor output in their build context.
-        // This is expected behavior.
-
-        // Just verify the data source works
+        // Both tests can access shared data source output via TestSessionContext,
+        // regardless of which test triggered the Lazy<T> factory during building.
+        // This is the regression test that covers the other side of the build-order race.
+        var sessionOutput = TestSessionContext.Current!.GetStandardOutput();
+        await Assert.That(sessionOutput).Contains("SharedDataSource constructor:");
         await Assert.That(data.Value).IsEqualTo("SharedValue");
     }
 
