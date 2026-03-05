@@ -11,16 +11,19 @@ using TUnit.Pipeline.Modules.Abstract;
 
 namespace TUnit.Pipeline.Modules;
 
+[NotInParallel("NugetTester")]
 public class TestNugetPackageModule : AbstractTestNugetPackageModule
 {
     public override string ProjectName => "TUnit.NugetTester.csproj";
 }
 
+[NotInParallel("NugetTester")]
 public class TestFSharpNugetPackageModule : AbstractTestNugetPackageModule
 {
     public override string ProjectName => "TUnit.NugetTester.FSharp.fsproj";
 }
 
+[NotInParallel("NugetTester")]
 public class TestVBNugetPackageModule : AbstractTestNugetPackageModule
 {
     public override string ProjectName => "TUnit.NugetTester.VB.vbproj";

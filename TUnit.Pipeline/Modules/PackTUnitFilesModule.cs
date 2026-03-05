@@ -2,6 +2,8 @@
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
+using ModularPipelines.Extensions;
+using ModularPipelines.Git.Extensions;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
 using ModularPipelines.Options;
@@ -30,6 +32,32 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
 
         var version = versionResult.ValueOrDefault!;
 
+        // Rebuild all library projects with the pack version to ensure consistent assembly versions.
+        // Without this, project references may retain stale MinVer-computed versions from the
+        // initial 'dotnet build' step, causing CS1705 assembly version mismatches on PR branches.
+        await context.DotNet()
+            .Build(
+                new DotNetBuildOptions
+                {
+                    ProjectSolution = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.sln").AssertExists().Path,
+                    Properties =
+                    [
+                        new KeyValue("Version", version.SemVer!),
+                        new KeyValue("AssemblyFileVersion", version.SemVer!),
+                        new KeyValue("IsPackTarget", "true")
+                    ],
+                    Configuration = "Release",
+                }, new CommandExecutionOptions
+                {
+                    LogSettings = new CommandLoggingOptions
+                    {
+                        ShowCommandArguments = true,
+                        ShowStandardError = true,
+                        ShowExecutionTime = true,
+                        ShowExitCode = true
+                    }
+                }, cancellationToken);
+
         var packedProjects = new List<PackedProject>();
 
         foreach (var project in projects.ValueOrDefault!)
@@ -52,6 +80,7 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
                         ],
                         IncludeSource = project == Sourcy.DotNet.Projects.TUnit_Templates ? false : true,
                         Configuration = "Release",
+                        NoBuild = true,
                     }, new CommandExecutionOptions
                     {
                         LogSettings = new CommandLoggingOptions
