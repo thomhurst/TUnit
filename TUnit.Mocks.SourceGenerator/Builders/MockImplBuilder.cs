@@ -1139,7 +1139,9 @@ internal static class MockImplBuilder
 
             var returnType = member.IsVoid ? "void" : member.ReturnType;
             writer.AppendLine($"static {returnType} {member.InterfaceFullyQualifiedName}.{member.Name}{typeParams}({paramList}){constraints}");
-            writer.AppendLine($"    => {throwExpr};");
+            writer.OpenBrace();
+            writer.AppendLine($"{throwExpr};");
+            writer.CloseBrace();
         }
     }
 }
