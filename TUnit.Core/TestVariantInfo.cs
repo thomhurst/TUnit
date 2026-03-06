@@ -4,7 +4,7 @@ namespace TUnit.Core;
 /// Information about a test variant that was created at runtime.
 /// Returned by <see cref="Extensions.TestContextExtensions.CreateTestVariant"/>.
 /// </summary>
-public sealed class TestVariantInfo
+public sealed record TestVariantInfo
 {
     internal TestVariantInfo(string testId, string displayName)
     {

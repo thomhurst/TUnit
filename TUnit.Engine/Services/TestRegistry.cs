@@ -242,7 +242,10 @@ internal sealed class TestRegistry : ITestRegistry
             DisplayName = displayName
         };
 
-        // Process the variant inline so we can return its info
+        // Process the variant inline (bypassing _pendingTests queue and ProcessPendingDynamicTests)
+        // so we can capture the built test and return TestVariantInfo to the caller.
+        // AddDynamicTest uses the queue-based path instead. If batching/ordering logic is added
+        // to ProcessPendingDynamicTests, consider whether it should also apply here.
         if (_sessionId == null)
         {
             throw new InvalidOperationException("Cannot create test variant: session ID is not set");

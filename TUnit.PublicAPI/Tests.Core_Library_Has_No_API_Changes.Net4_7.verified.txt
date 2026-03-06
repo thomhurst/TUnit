@@ -1596,7 +1596,7 @@ namespace
         public static bool IsSuccess(this .TestState state) { }
         public static bool IsTransient(this .TestState state) { }
     }
-    public sealed class TestVariantInfo
+    public sealed class TestVariantInfo : <.TestVariantInfo>
     {
         public string DisplayName { get; }
         public string TestId { get; }
