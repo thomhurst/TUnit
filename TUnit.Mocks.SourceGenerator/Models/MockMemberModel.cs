@@ -31,6 +31,7 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
     public bool IsVirtualMember { get; init; }
     public bool IsProtected { get; init; }
     public bool IsRefStructReturn { get; init; }
+    public bool IsStaticAbstract { get; init; }
 
     /// <summary>
     /// For methods returning ReadOnlySpan&lt;T&gt; or Span&lt;T&gt;, the fully qualified element type.
@@ -70,6 +71,7 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             && IsVirtualMember == other.IsVirtualMember
             && IsProtected == other.IsProtected
             && IsRefStructReturn == other.IsRefStructReturn
+            && IsStaticAbstract == other.IsStaticAbstract
             && SpanReturnElementType == other.SpanReturnElementType;
     }
 
@@ -82,6 +84,7 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             hash = hash * 31 + MemberId;
             hash = hash * 31 + ReturnType.GetHashCode();
             hash = hash * 31 + Parameters.GetHashCode();
+            hash = hash * 31 + IsStaticAbstract.GetHashCode();
             return hash;
         }
     }

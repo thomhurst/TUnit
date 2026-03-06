@@ -10,17 +10,26 @@ public class MockGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        // Step 1: Find all Mock.Of<T>() invocations and transform to model arrays
+        // Step 1a: Find all Mock.Of<T>() invocations and transform to model arrays
         var mockTypes = context.SyntaxProvider
             .CreateSyntaxProvider(
                 predicate: MockTypeDiscovery.IsMockOfInvocation,
                 transform: MockTypeDiscovery.TransformToModels)
             .SelectMany((models, _) => models);
 
-        // Step 2: Deduplicate
+        // Step 1b: Find all [assembly: GenerateMock(typeof(T))] attributes
+        var attributeTypes = context.SyntaxProvider
+            .ForAttributeWithMetadataName(
+                "TUnit.Mocks.GenerateMockAttribute",
+                predicate: static (node, _) => true,
+                transform: MockTypeDiscovery.TransformGenerateMockAttribute)
+            .SelectMany((models, _) => models);
+
+        // Step 2: Merge both sources and deduplicate
         var distinctTypes = mockTypes
             .Collect()
-            .SelectMany((models, _) => models.Distinct());
+            .Combine(attributeTypes.Collect())
+            .SelectMany((pair, _) => pair.Left.AddRange(pair.Right).Distinct());
 
         // Step 3: Generate source for each unique type
         context.RegisterSourceOutput(distinctTypes, (spc, model) =>
@@ -52,6 +61,13 @@ public class MockGenerator : IIncrementalGenerator
     private static void GenerateSingleTypeMock(SourceProductionContext spc, MockTypeModel model)
     {
         var fileName = GetSafeFileName(model);
+
+        // Generate bridge interface for types with static abstract members (resolves CS8920)
+        if (model.HasStaticAbstractMembers)
+        {
+            var bridgeSource = MockBridgeBuilder.Build(model);
+            spc.AddSource($"{fileName}_MockBridge.g.cs", bridgeSource);
+        }
 
         // Generate mock implementation
         var implSource = MockImplBuilder.Build(model);

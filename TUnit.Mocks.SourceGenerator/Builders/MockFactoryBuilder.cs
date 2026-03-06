@@ -34,6 +34,7 @@ internal static class MockFactoryBuilder
 
     private static void BuildInterfaceFactory(CodeWriter writer, MockTypeModel model, string safeName)
     {
+        var mockableType = MockImplBuilder.GetMockableTypeName(model);
         var factoryClassName = model.AdditionalInterfaceNames.Length > 0
             ? $"{safeName}_Multi_MockFactory"
             : $"{safeName}_MockFactory";
@@ -54,17 +55,17 @@ internal static class MockFactoryBuilder
                 }
                 else
                 {
-                    writer.AppendLine($"global::TUnit.Mocks.Mock.RegisterFactory<{model.FullyQualifiedName}>(Create);");
+                    writer.AppendLine($"global::TUnit.Mocks.Mock.RegisterFactory<{mockableType}>(Create);");
                 }
             }
             writer.AppendLine();
 
-            using (writer.Block($"private static global::TUnit.Mocks.Mock<{model.FullyQualifiedName}> Create(global::TUnit.Mocks.MockBehavior behavior)"))
+            using (writer.Block($"private static global::TUnit.Mocks.Mock<{mockableType}> Create(global::TUnit.Mocks.MockBehavior behavior)"))
             {
-                writer.AppendLine($"var engine = new global::TUnit.Mocks.MockEngine<{model.FullyQualifiedName}>(behavior);");
+                writer.AppendLine($"var engine = new global::TUnit.Mocks.MockEngine<{mockableType}>(behavior);");
                 writer.AppendLine($"var impl = new {safeName}_MockImpl(engine);");
                 writer.AppendLine("engine.Raisable = impl;");
-                writer.AppendLine($"var mock = new global::TUnit.Mocks.Mock<{model.FullyQualifiedName}>(impl, engine);");
+                writer.AppendLine($"var mock = new global::TUnit.Mocks.Mock<{mockableType}>(impl, engine);");
                 writer.AppendLine("return mock;");
             }
         }

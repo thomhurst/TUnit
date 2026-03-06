@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 namespace TUnit.Mocks.SourceGenerator.Models;
 
@@ -22,7 +23,9 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
     public EquatableArray<string> AllInterfaces { get; init; } = EquatableArray<string>.Empty;
     public EquatableArray<string> AdditionalInterfaceNames { get; init; } = EquatableArray<string>.Empty;
     public EquatableArray<MockConstructorModel> Constructors { get; init; } = EquatableArray<MockConstructorModel>.Empty;
-    public EquatableArray<MockStaticAbstractMemberModel> StaticAbstractMembers { get; init; } = EquatableArray<MockStaticAbstractMemberModel>.Empty;
+
+    public bool HasStaticAbstractMembers =>
+        Methods.Any(m => m.IsStaticAbstract) || Properties.Any(p => p.IsStaticAbstract);
 
     public bool Equals(MockTypeModel? other)
     {
@@ -40,8 +43,7 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
             && Events.Equals(other.Events)
             && AllInterfaces.Equals(other.AllInterfaces)
             && AdditionalInterfaceNames.Equals(other.AdditionalInterfaceNames)
-            && Constructors.Equals(other.Constructors)
-            && StaticAbstractMembers.Equals(other.StaticAbstractMembers);
+            && Constructors.Equals(other.Constructors);
     }
 
     public override int GetHashCode()
@@ -57,7 +59,6 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
             hash = hash * 31 + Properties.GetHashCode();
             hash = hash * 31 + Events.GetHashCode();
             hash = hash * 31 + AdditionalInterfaceNames.GetHashCode();
-            hash = hash * 31 + StaticAbstractMembers.GetHashCode();
             return hash;
         }
     }

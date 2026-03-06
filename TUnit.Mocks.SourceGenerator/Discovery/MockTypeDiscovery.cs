@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Mocks.SourceGenerator.Extensions;
 using TUnit.Mocks.SourceGenerator.Models;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace TUnit.Mocks.SourceGenerator.Discovery;
 
@@ -50,7 +51,16 @@ internal static class MockTypeDiscovery
         var invocation = (InvocationExpressionSyntax)context.Node;
 
         var symbolInfo = context.SemanticModel.GetSymbolInfo(invocation, ct);
-        if (symbolInfo.Symbol is not IMethodSymbol method)
+
+        // When the interface has static abstract members, CS8920 prevents normal symbol
+        // resolution (OverloadResolutionFailure). Fall back to CandidateSymbols.
+        IMethodSymbol? method = symbolInfo.Symbol as IMethodSymbol;
+        if (method is null && symbolInfo.CandidateReason == CandidateReason.OverloadResolutionFailure)
+        {
+            method = symbolInfo.CandidateSymbols.OfType<IMethodSymbol>().FirstOrDefault();
+        }
+
+        if (method is null)
             return ImmutableArray<MockTypeModel>.Empty;
 
         // Verify this is TUnit.Mocks.Mock.Of<T>() / OfPartial<T>()
@@ -69,6 +79,10 @@ internal static class MockTypeDiscovery
 
         var typeToMock = method.TypeArguments[0];
         if (typeToMock is not INamedTypeSymbol namedType)
+            return ImmutableArray<MockTypeModel>.Empty;
+
+        // Skip error types (unresolvable type arguments, e.g. referencing a generated bridge type)
+        if (namedType.TypeKind == TypeKind.Error)
             return ImmutableArray<MockTypeModel>.Empty;
 
         // Delegate mocking
@@ -144,7 +158,7 @@ internal static class MockTypeDiscovery
 
         // Build multi-type model (generates impl + factory only)
         var allTypes = new[] { namedType }.Concat(additionalTypes).ToArray();
-        var (methods, properties, events, staticAbstractMembers) = MemberDiscovery.DiscoverMembersFromMultipleTypes(allTypes);
+        var (methods, properties, events) = MemberDiscovery.DiscoverMembersFromMultipleTypes(allTypes);
 
         var additionalInterfaceNames = ImmutableArray.CreateBuilder<string>(additionalTypes.Count);
         foreach (var t in additionalTypes)
@@ -169,8 +183,7 @@ internal static class MockTypeDiscovery
                     .ToImmutableArray()
             ),
             AdditionalInterfaceNames = new EquatableArray<string>(additionalInterfaceNames.MoveToImmutable()),
-            Constructors = singleTypeModel.Constructors,
-            StaticAbstractMembers = staticAbstractMembers
+            Constructors = singleTypeModel.Constructors
         };
 
         return ImmutableArray.Create(singleTypeModel, multiTypeModel);
@@ -320,7 +333,7 @@ internal static class MockTypeDiscovery
 
     private static MockTypeModel? BuildSingleTypeModel(INamedTypeSymbol namedType, bool isPartialMock)
     {
-        var (methods, properties, events, staticAbstractMembers) = MemberDiscovery.DiscoverMembers(namedType);
+        var (methods, properties, events) = MemberDiscovery.DiscoverMembers(namedType);
 
         // Discover constructors for partial mocks of classes
         var constructors = isPartialMock && namedType.TypeKind == TypeKind.Class
@@ -343,8 +356,69 @@ internal static class MockTypeDiscovery
                     .Select(i => i.GetFullyQualifiedName())
                     .ToImmutableArray()
             ),
-            Constructors = constructors,
-            StaticAbstractMembers = staticAbstractMembers
+            Constructors = constructors
         };
+    }
+
+    // ─── [assembly: GenerateMock(typeof(T))] discovery ────────────────────
+
+    /// <summary>
+    /// Syntax predicate: quick check if a node is an attribute that might be
+    /// <c>[assembly: GenerateMock(typeof(T))]</c>.
+    /// </summary>
+    public static bool IsGenerateMockAttribute(SyntaxNode node, CancellationToken ct)
+    {
+        if (node is not AttributeSyntax attribute)
+            return false;
+
+        // Check the attribute name ends with "GenerateMock" or is "GenerateMock"
+        var name = attribute.Name switch
+        {
+            IdentifierNameSyntax id => id.Identifier.ValueText,
+            QualifiedNameSyntax q => q.Right.Identifier.ValueText,
+            AliasQualifiedNameSyntax a => a.Name.Identifier.ValueText,
+            _ => null
+        };
+
+        return name is "GenerateMock" or "GenerateMockAttribute";
+    }
+
+    /// <summary>
+    /// Semantic transform for <c>[assembly: GenerateMock(typeof(T))]</c>.
+    /// Extracts the type argument and builds a <see cref="MockTypeModel"/>.
+    /// </summary>
+    public static ImmutableArray<MockTypeModel> TransformGenerateMockAttribute(
+        GeneratorAttributeSyntaxContext context, CancellationToken ct)
+    {
+        // The target symbol for an assembly attribute is the assembly itself
+        // The attribute constructor argument is typeof(T)
+        foreach (var attr in context.Attributes)
+        {
+            if (attr.AttributeClass?.Name is not ("GenerateMockAttribute" or "GenerateMock"))
+                continue;
+            if (attr.AttributeClass?.ContainingNamespace?.ToDisplayString() != "TUnit.Mocks")
+                continue;
+
+            if (attr.ConstructorArguments.Length != 1)
+                continue;
+
+            var typeArg = attr.ConstructorArguments[0];
+            if (typeArg.Value is not INamedTypeSymbol namedType)
+                continue;
+
+            // Can't mock sealed classes or structs
+            if (namedType.IsSealed && namedType.TypeKind != TypeKind.Interface)
+                continue;
+            if (namedType.IsValueType)
+                continue;
+
+            var model = BuildSingleTypeModel(namedType, isPartialMock: false);
+            if (model is null)
+                continue;
+
+            return ImmutableArray.Create(model);
+        }
+
+        return ImmutableArray<MockTypeModel>.Empty;
     }
 }
