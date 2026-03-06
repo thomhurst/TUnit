@@ -500,7 +500,10 @@ internal static class MockMembersBuilder
     }
 
     private static string ToPascalCase(string name)
-        => string.IsNullOrEmpty(name) ? name : char.ToUpperInvariant(name[0]) + name[1..];
+    {
+        if (name.StartsWith("@")) name = name[1..];
+        return string.IsNullOrEmpty(name) ? name : char.ToUpperInvariant(name[0]) + name[1..];
+    }
 
     private static string BuildCastArgs(List<MockParameterModel> nonOutParams, List<MockParameterModel>? allNonOutParams = null)
     {
@@ -674,7 +677,8 @@ internal static class MockMembersBuilder
             foreach (var idx in funcIndices.OrderBy(i => i))
             {
                 var p = method.Parameters[idx];
-                writer.AppendLine($"global::TUnit.Mocks.Arguments.Arg<{p.FullyQualifiedType}> __fa_{p.Name} = {p.Name};");
+                var rawName = p.Name.StartsWith("@") ? p.Name[1..] : p.Name;
+                writer.AppendLine($"global::TUnit.Mocks.Arguments.Arg<{p.FullyQualifiedType}> __fa_{rawName} = {p.Name};");
             }
 
             // Build matchers array
@@ -685,7 +689,8 @@ internal static class MockMembersBuilder
                 if (p.Direction == ParameterDirection.Out) continue;
                 if (!includeRefStructArgs && p.IsRefStruct) continue;
 
-                matcherExprs.Add(funcIndices.Contains(i) ? $"__fa_{p.Name}.Matcher" : $"{p.Name}.Matcher");
+                var rawName = p.Name.StartsWith("@") ? p.Name[1..] : p.Name;
+                matcherExprs.Add(funcIndices.Contains(i) ? $"__fa_{rawName}.Matcher" : $"{p.Name}.Matcher");
             }
 
             if (matcherExprs.Count == 0)
