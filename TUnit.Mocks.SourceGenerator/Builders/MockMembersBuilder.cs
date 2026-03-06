@@ -557,8 +557,8 @@ internal static class MockMembersBuilder
         var (useTypedWrapper, returnType, setupReturnType) = GetReturnTypeInfo(method, model, safeName);
 
         var paramList = GetArgParameterList(method, includeRefStructArgs);
-        var typeParams = GetTypeParameterList(method);
-        var constraints = GetConstraintClauses(method);
+        var typeParams = MockImplBuilder.GetTypeParameterList(method);
+        var constraints = MockImplBuilder.GetConstraintClauses(method);
 
         var safeMemberName = GetSafeMemberName(method.Name);
         var mockableType = MockImplBuilder.GetMockableTypeName(model);
@@ -663,8 +663,8 @@ internal static class MockMembersBuilder
         }
 
         var paramList = string.Join(", ", paramParts);
-        var typeParams = GetTypeParameterList(method);
-        var constraints = GetConstraintClauses(method);
+        var typeParams = MockImplBuilder.GetTypeParameterList(method);
+        var constraints = MockImplBuilder.GetConstraintClauses(method);
 
         var safeMemberName = GetSafeMemberName(method.Name);
         var mockableType = MockImplBuilder.GetMockableTypeName(model);
@@ -800,22 +800,4 @@ internal static class MockMembersBuilder
         return string.Join(", ", parts);
     }
 
-    private static string GetTypeParameterList(MockMemberModel method)
-    {
-        if (method.TypeParameters.Length == 0) return "";
-        return "<" + string.Join(", ", method.TypeParameters.Select(tp => tp.Name)) + ">";
-    }
-
-    private static string GetConstraintClauses(MockMemberModel method)
-    {
-        var clauses = new List<string>();
-        foreach (var tp in method.TypeParameters)
-        {
-            if (!string.IsNullOrEmpty(tp.Constraints))
-            {
-                clauses.Add($"where {tp.Name} : {tp.Constraints}");
-            }
-        }
-        return clauses.Count > 0 ? " " + string.Join(" ", clauses) : "";
-    }
 }

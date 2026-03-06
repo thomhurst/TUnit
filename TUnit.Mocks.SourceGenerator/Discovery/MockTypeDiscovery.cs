@@ -183,7 +183,8 @@ internal static class MockTypeDiscovery
                     .ToImmutableArray()
             ),
             AdditionalInterfaceNames = new EquatableArray<string>(additionalInterfaceNames.MoveToImmutable()),
-            Constructors = singleTypeModel.Constructors
+            Constructors = singleTypeModel.Constructors,
+            HasStaticAbstractMembers = methods.Any(m => m.IsStaticAbstract) || properties.Any(p => p.IsStaticAbstract)
         };
 
         return ImmutableArray.Create(singleTypeModel, multiTypeModel);
@@ -356,32 +357,12 @@ internal static class MockTypeDiscovery
                     .Select(i => i.GetFullyQualifiedName())
                     .ToImmutableArray()
             ),
-            Constructors = constructors
+            Constructors = constructors,
+            HasStaticAbstractMembers = methods.Any(m => m.IsStaticAbstract) || properties.Any(p => p.IsStaticAbstract)
         };
     }
 
     // ─── [assembly: GenerateMock(typeof(T))] discovery ────────────────────
-
-    /// <summary>
-    /// Syntax predicate: quick check if a node is an attribute that might be
-    /// <c>[assembly: GenerateMock(typeof(T))]</c>.
-    /// </summary>
-    public static bool IsGenerateMockAttribute(SyntaxNode node, CancellationToken ct)
-    {
-        if (node is not AttributeSyntax attribute)
-            return false;
-
-        // Check the attribute name ends with "GenerateMock" or is "GenerateMock"
-        var name = attribute.Name switch
-        {
-            IdentifierNameSyntax id => id.Identifier.ValueText,
-            QualifiedNameSyntax q => q.Right.Identifier.ValueText,
-            AliasQualifiedNameSyntax a => a.Name.Identifier.ValueText,
-            _ => null
-        };
-
-        return name is "GenerateMock" or "GenerateMockAttribute";
-    }
 
     /// <summary>
     /// Semantic transform for <c>[assembly: GenerateMock(typeof(T))]</c>.

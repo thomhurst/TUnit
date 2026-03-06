@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 
 namespace TUnit.Mocks.SourceGenerator.Models;
 
@@ -23,9 +22,7 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
     public EquatableArray<string> AllInterfaces { get; init; } = EquatableArray<string>.Empty;
     public EquatableArray<string> AdditionalInterfaceNames { get; init; } = EquatableArray<string>.Empty;
     public EquatableArray<MockConstructorModel> Constructors { get; init; } = EquatableArray<MockConstructorModel>.Empty;
-
-    public bool HasStaticAbstractMembers =>
-        Methods.Any(m => m.IsStaticAbstract) || Properties.Any(p => p.IsStaticAbstract);
+    public bool HasStaticAbstractMembers { get; init; }
 
     public bool Equals(MockTypeModel? other)
     {
