@@ -1650,6 +1650,11 @@ namespace
         public static bool IsSuccess(this .TestState state) { }
         public static bool IsTransient(this .TestState state) { }
     }
+    public sealed class TestVariantInfo
+    {
+        public string DisplayName { get; }
+        public string TestId { get; }
+    }
     [(.Assembly | .Class | .Method)]
     public class TimeoutAttribute : .TUnitAttribute, .IScopedAttribute, ., ., .
     {
@@ -2058,7 +2063,7 @@ namespace .Extensions
         public static . AddDynamicTest<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicFields | ..NonPublicFields | ..PublicProperties)]  T>(this .TestContext context, .DynamicTest<T> dynamicTest)
             where T :  class { }
         [.("Creating test variants requires runtime compilation and reflection")]
-        public static . CreateTestVariant(this .TestContext context, object?[]? arguments = null, .<string, object?>? properties = null, . relationship = 3, string? displayName = null) { }
+        public static .<.TestVariantInfo> CreateTestVariant(this .TestContext context, object?[]? methodArguments = null, object?[]? classArguments = null, .<string, object?>? properties = null, . relationship = 3, string? displayName = null) { }
         public static string GetClassTypeName(this .TestContext context) { }
     }
 }
@@ -2471,6 +2476,7 @@ namespace .Interfaces
     public interface ITestDependencies
     {
         .<.TestDetails> DependsOn { get; }
+        bool IsVariant { get; }
         string? ParentTestId { get; }
         . Relationship { get; }
         .<.TestContext> GetTests(<.TestContext, bool> predicate);
@@ -2610,7 +2616,7 @@ namespace .Interfaces
             where T :  class;
         [.("Creating test variants requires runtime compilation and reflection which are not " +
             "supported in native AOT scenarios.")]
-        . CreateTestVariant(.TestContext currentContext, object?[]? arguments, .<string, object?>? properties, . relationship, string? displayName);
+        .<.TestVariantInfo> CreateTestVariant(.TestContext currentContext, object?[]? methodArguments, object?[]? classArguments, .<string, object?>? properties, . relationship, string? displayName);
     }
     public interface ITestRetryEventReceiver : .
     {

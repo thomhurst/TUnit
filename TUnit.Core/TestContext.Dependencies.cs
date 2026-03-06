@@ -12,6 +12,7 @@ public partial class TestContext
     internal TestRelationship Relationship { get; set; } = TestRelationship.None;
 
     IReadOnlyList<TestDetails> ITestDependencies.DependsOn => _dependencies;
+    bool ITestDependencies.IsVariant => ParentTestId != null;
     string? ITestDependencies.ParentTestId => ParentTestId;
     TestRelationship ITestDependencies.Relationship => Relationship;
 

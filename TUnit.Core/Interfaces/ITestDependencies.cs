@@ -1,4 +1,5 @@
 using TUnit.Core.Enums;
+using TUnit.Core.Extensions;
 
 namespace TUnit.Core.Interfaces;
 
@@ -13,6 +14,12 @@ public interface ITestDependencies
     /// Tests in this collection will execute before this test runs.
     /// </summary>
     IReadOnlyList<TestDetails> DependsOn { get; }
+
+    /// <summary>
+    /// Gets whether this test is a variant created at runtime via <see cref="TestContextExtensions.CreateTestVariant"/>.
+    /// Use this to guard against infinite recursion when a test creates variants of itself.
+    /// </summary>
+    bool IsVariant { get; }
 
     /// <summary>
     /// Gets the parent test ID if this test is part of a relationship.

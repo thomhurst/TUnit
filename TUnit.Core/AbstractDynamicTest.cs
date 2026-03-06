@@ -44,7 +44,7 @@ public class DynamicDiscoveryResult : DiscoveryResult
 
     public Enums.TestRelationship? Relationship { get; set; }
 
-    public Dictionary<string, object?>? Properties { get; set; }
+    public IReadOnlyDictionary<string, object?>? Properties { get; set; }
 
     public string? DisplayName { get; set; }
 

@@ -6,35 +6,33 @@ namespace TUnit.TestProject;
 public class TestVariantTests
 {
     [Test]
-    public async Task CreateTestVariant_ShouldCreateVariantWithDifferentArguments()
-    {
-        var context = TestContext.Current;
-
-        if (context == null)
-        {
-            throw new InvalidOperationException("TestContext.Current is null");
-        }
-
-        await context.CreateTestVariant(
-            arguments: new object?[] { 42 },
-            properties: new Dictionary<string, object?>
-            {
-                { "AttemptNumber", 1 }
-            },
-            relationship: TUnit.Core.Enums.TestRelationship.Derived,
-            displayName: "Shrink Attempt"
-        );
-    }
-
-    [Test]
     [Arguments(10)]
-    public async Task VariantTarget_WithArguments(int value)
+    public async Task CreateTestVariant_ShouldCreateVariantWithDifferentArguments(int value)
     {
-        var context = TestContext.Current;
+        var context = TestContext.Current!;
 
-        if (context == null)
+        // Only the original test creates a variant; variants skip to avoid infinite recursion
+        if (!context.Dependencies.IsVariant)
         {
-            throw new InvalidOperationException("TestContext.Current is null");
+            var variantInfo = await context.CreateTestVariant(
+                methodArguments: [42],
+                properties: new Dictionary<string, object?>
+                {
+                    { "AttemptNumber", 1 }
+                },
+                relationship: TUnit.Core.Enums.TestRelationship.Derived,
+                displayName: "Shrink Attempt"
+            );
+
+            if (string.IsNullOrEmpty(variantInfo.TestId))
+            {
+                throw new InvalidOperationException("Expected TestVariantInfo.TestId to be set");
+            }
+
+            if (variantInfo.DisplayName != "Shrink Attempt")
+            {
+                throw new InvalidOperationException($"Expected DisplayName 'Shrink Attempt' but got '{variantInfo.DisplayName}'");
+            }
         }
 
         if (value < 0)
@@ -42,7 +40,7 @@ public class TestVariantTests
             throw new InvalidOperationException($"Expected non-negative value but got {value}");
         }
 
-        if (context.StateBag.Items.ContainsKey("AttemptNumber"))
+        if (context.Dependencies.IsVariant)
         {
             var attemptNumber = context.StateBag.Items["AttemptNumber"];
             context.Output.StandardOutput.WriteLine($"Shrink attempt {attemptNumber} with value {value}");
@@ -57,5 +55,29 @@ public class TestVariantTests
                 throw new InvalidOperationException("Expected ParentTestId to be set for shrink attempt");
             }
         }
+    }
+
+    // Regression tests for #5093 - CreateTestVariant must handle all test return types.
+    // Each return type produces a different expression tree shape:
+    //   Task      → direct MethodCallExpression
+    //   ValueTask → MethodCallExpression wrapped in AsTask() call
+    //   void      → BlockExpression (tested via unit tests in ExpressionHelperTests)
+
+    [Test]
+    public async Task CreateTestVariant_FromTaskMethod()
+    {
+        await TestContext.Current!.CreateTestVariant(
+            displayName: "VariantFromTaskMethod",
+            relationship: TUnit.Core.Enums.TestRelationship.Generated
+        );
+    }
+
+    [Test]
+    public async ValueTask CreateTestVariant_FromValueTaskMethod()
+    {
+        await TestContext.Current!.CreateTestVariant(
+            displayName: "VariantFromValueTaskMethod",
+            relationship: TUnit.Core.Enums.TestRelationship.Generated
+        );
     }
 }
