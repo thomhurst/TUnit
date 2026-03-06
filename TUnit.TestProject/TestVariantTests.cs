@@ -66,18 +66,24 @@ public class TestVariantTests
     [Test]
     public async Task CreateTestVariant_FromTaskMethod()
     {
-        await TestContext.Current!.CreateTestVariant(
-            displayName: "VariantFromTaskMethod",
-            relationship: TUnit.Core.Enums.TestRelationship.Generated
-        );
+        if (!TestContext.Current!.Dependencies.IsVariant)
+        {
+            await TestContext.Current!.CreateTestVariant(
+                displayName: "VariantFromTaskMethod",
+                relationship: TUnit.Core.Enums.TestRelationship.Generated
+            );
+        }
     }
 
     [Test]
     public async ValueTask CreateTestVariant_FromValueTaskMethod()
     {
-        await TestContext.Current!.CreateTestVariant(
-            displayName: "VariantFromValueTaskMethod",
-            relationship: TUnit.Core.Enums.TestRelationship.Generated
-        );
+        if (!TestContext.Current!.Dependencies.IsVariant)
+        {
+            await TestContext.Current!.CreateTestVariant(
+                displayName: "VariantFromValueTaskMethod",
+                relationship: TUnit.Core.Enums.TestRelationship.Generated
+            );
+        }
     }
 }

@@ -19,7 +19,11 @@ public interface ITestDependencies
     /// Gets whether this test is a variant created at runtime via <see cref="TestContextExtensions.CreateTestVariant"/>.
     /// Use this to guard against infinite recursion when a test creates variants of itself.
     /// </summary>
+#if NET6_0_OR_GREATER
+    bool IsVariant => ParentTestId != null;
+#else
     bool IsVariant { get; }
+#endif
 
     /// <summary>
     /// Gets the parent test ID if this test is part of a relationship.

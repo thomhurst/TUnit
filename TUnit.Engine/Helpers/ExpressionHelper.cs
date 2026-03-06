@@ -39,6 +39,8 @@ internal static class ExpressionHelper
             ?? throw new InvalidOperationException("Could not extract method info from dynamic test expression");
     }
 
+    // Void-returning block shape: Block(Call(instance, testMethod), Constant(Task.CompletedTask))
+    // The test method call is always the first MethodCallExpression in the block.
     private static MethodCallExpression? FindMethodCall(BlockExpression blockExpression)
     {
         foreach (var expr in blockExpression.Expressions)
