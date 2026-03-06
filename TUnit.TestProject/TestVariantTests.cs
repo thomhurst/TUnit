@@ -61,9 +61,12 @@ public class TestVariantTests
 
     // Regression tests for #5093 - CreateTestVariant must handle all test return types.
     // Each return type produces a different expression tree shape:
-    //   Task      → direct MethodCallExpression
-    //   ValueTask → MethodCallExpression wrapped in AsTask() call
-    //   void      → BlockExpression (tested via unit tests in ExpressionHelperTests)
+    //   Task        → direct MethodCallExpression
+    //   ValueTask   → MethodCallExpression wrapped in AsTask() call
+    //   Task<T>     → UnaryExpression (Convert) wrapping MethodCallExpression
+    //   void        → BlockExpression (only reachable via AddDynamicTest, not CreateTestVariant)
+    //   ValueTask<T>→ source generator doesn't support this return type yet
+    // void and ValueTask<T> are covered by unit tests in ExpressionHelperTests.
 
     [Test]
     public async Task CreateTestVariant_FromTaskMethod()
@@ -88,6 +91,21 @@ public class TestVariantTests
             );
         }
     }
+
+    [Test]
+    public async Task<int> CreateTestVariant_FromGenericTaskMethod()
+    {
+        if (!TestContext.Current!.Dependencies.IsVariant())
+        {
+            await TestContext.Current!.CreateTestVariant(
+                displayName: "VariantFromGenericTaskMethod",
+                relationship: TUnit.Core.Enums.TestRelationship.Generated
+            );
+        }
+
+        return 42;
+    }
+
 }
 
 [Arguments("original")]
