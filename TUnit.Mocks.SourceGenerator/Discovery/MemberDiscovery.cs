@@ -551,19 +551,16 @@ internal static class MemberDiscovery
     }
 
     /// <summary>
-    /// For ReadOnlySpan&lt;T&gt; or Span&lt;T&gt; types, returns the fully qualified element type.
-    /// Returns null for all other types.
-    /// </summary>
-    /// <summary>
     /// Escapes a parameter name that is a C# reserved keyword by prepending '@'.
     /// E.g., "event" → "@event", "class" → "@class", "return" → "@return".
     /// </summary>
-    private static string EscapeIdentifier(string name)
-    {
-        var kind = SyntaxFacts.GetKeywordKind(name);
-        return SyntaxFacts.IsKeywordKind(kind) ? "@" + name : name;
-    }
+    private static string EscapeIdentifier(string name) =>
+        SyntaxFacts.GetKeywordKind(name) != SyntaxKind.None ? "@" + name : name;
 
+    /// <summary>
+    /// For ReadOnlySpan&lt;T&gt; or Span&lt;T&gt; types, returns the fully qualified element type.
+    /// Returns null for all other types.
+    /// </summary>
     private static string? GetSpanElementType(ITypeSymbol type)
     {
         if (type is not INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1 } namedType)

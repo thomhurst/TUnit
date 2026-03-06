@@ -677,7 +677,7 @@ internal static class MockMembersBuilder
             foreach (var idx in funcIndices.OrderBy(i => i))
             {
                 var p = method.Parameters[idx];
-                var rawName = p.Name.TrimStart('@');
+                var rawName = p.Name.StartsWith("@") ? p.Name[1..] : p.Name;
                 writer.AppendLine($"global::TUnit.Mocks.Arguments.Arg<{p.FullyQualifiedType}> __fa_{rawName} = {p.Name};");
             }
 
@@ -689,7 +689,7 @@ internal static class MockMembersBuilder
                 if (p.Direction == ParameterDirection.Out) continue;
                 if (!includeRefStructArgs && p.IsRefStruct) continue;
 
-                var rawName = p.Name.TrimStart('@');
+                var rawName = p.Name.StartsWith("@") ? p.Name[1..] : p.Name;
                 matcherExprs.Add(funcIndices.Contains(i) ? $"__fa_{rawName}.Matcher" : $"{p.Name}.Matcher");
             }
 
