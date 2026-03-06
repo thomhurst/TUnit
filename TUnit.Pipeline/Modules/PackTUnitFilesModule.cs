@@ -39,7 +39,7 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
             .Build(
                 new DotNetBuildOptions
                 {
-                    ProjectSolution = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.sln").AssertExists().Path,
+                    ProjectSolution = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.slnx").AssertExists().Path,
                     Properties =
                     [
                         new KeyValue("Version", version.SemVer!),
