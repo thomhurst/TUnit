@@ -85,6 +85,12 @@ public static class TestContextExtensions
         return prefix != null ? $"{prefix}+{type.Name}" : type.Name;
     }
 
+    /// <summary>
+    /// Gets whether this test is a variant created at runtime via <see cref="CreateTestVariant"/>.
+    /// Use this to guard against infinite recursion when a test creates variants of itself.
+    /// </summary>
+    public static bool IsVariant(this Interfaces.ITestDependencies dependencies) => dependencies.ParentTestId != null;
+
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Dynamic test metadata creation uses reflection")]
     #endif

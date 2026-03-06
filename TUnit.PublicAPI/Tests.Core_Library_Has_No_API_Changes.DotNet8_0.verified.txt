@@ -2065,6 +2065,7 @@ namespace .Extensions
         [.("Creating test variants requires runtime compilation and reflection")]
         public static .<.TestVariantInfo> CreateTestVariant(this .TestContext context, object?[]? methodArguments = null, object?[]? classArguments = null, .<string, object?>? properties = null, . relationship = 3, string? displayName = null) { }
         public static string GetClassTypeName(this .TestContext context) { }
+        public static bool IsVariant(this . dependencies) { }
     }
 }
 namespace .Helpers
@@ -2476,7 +2477,6 @@ namespace .Interfaces
     public interface ITestDependencies
     {
         .<.TestDetails> DependsOn { get; }
-        bool IsVariant { get; }
         string? ParentTestId { get; }
         . Relationship { get; }
         .<.TestContext> GetTests(<.TestContext, bool> predicate);

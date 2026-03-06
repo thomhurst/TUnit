@@ -246,14 +246,14 @@ internal sealed class TestRegistry : ITestRegistry
         // so we can capture the built test and return TestVariantInfo to the caller.
         // AddDynamicTest uses the queue-based path instead. If batching/ordering logic is added
         // to ProcessPendingDynamicTests, consider whether it should also apply here.
-        if (_sessionId == null)
+        if (_sessionId == null || _testBuilderPipeline == null)
         {
-            throw new InvalidOperationException("Cannot create test variant: session ID is not set");
+            throw new InvalidOperationException("Cannot create test variant: TestRegistry is not fully initialized");
         }
 
         var metadata = CreateMetadataFromDynamicDiscoveryResult(discoveryResult);
         var buildingContext = new Building.TestBuildingContext(IsForExecution: false, Filter: null);
-        var builtTests = await _testBuilderPipeline!.BuildTestsFromMetadataAsync([metadata], buildingContext);
+        var builtTests = await _testBuilderPipeline.BuildTestsFromMetadataAsync([metadata], buildingContext);
 
         var builtTest = builtTests.FirstOrDefault()
             ?? throw new InvalidOperationException("Failed to build test variant");

@@ -12,7 +12,7 @@ public class TestVariantTests
         var context = TestContext.Current!;
 
         // Only the original test creates a variant; variants skip to avoid infinite recursion
-        if (!context.Dependencies.IsVariant)
+        if (!context.Dependencies.IsVariant())
         {
             var variantInfo = await context.CreateTestVariant(
                 methodArguments: [42],
@@ -40,7 +40,7 @@ public class TestVariantTests
             throw new InvalidOperationException($"Expected non-negative value but got {value}");
         }
 
-        if (context.Dependencies.IsVariant)
+        if (context.Dependencies.IsVariant())
         {
             var attemptNumber = context.StateBag.Items["AttemptNumber"];
             context.Output.StandardOutput.WriteLine($"Shrink attempt {attemptNumber} with value {value}");
@@ -66,7 +66,7 @@ public class TestVariantTests
     [Test]
     public async Task CreateTestVariant_FromTaskMethod()
     {
-        if (!TestContext.Current!.Dependencies.IsVariant)
+        if (!TestContext.Current!.Dependencies.IsVariant())
         {
             await TestContext.Current!.CreateTestVariant(
                 displayName: "VariantFromTaskMethod",
@@ -78,12 +78,41 @@ public class TestVariantTests
     [Test]
     public async ValueTask CreateTestVariant_FromValueTaskMethod()
     {
-        if (!TestContext.Current!.Dependencies.IsVariant)
+        if (!TestContext.Current!.Dependencies.IsVariant())
         {
             await TestContext.Current!.CreateTestVariant(
                 displayName: "VariantFromValueTaskMethod",
                 relationship: TUnit.Core.Enums.TestRelationship.Generated
             );
+        }
+    }
+}
+
+[Arguments("original")]
+public class TestVariantWithClassArgsTests(string label)
+{
+    [Test]
+    public async Task CreateTestVariant_ShouldPassClassArguments()
+    {
+        var context = TestContext.Current!;
+
+        if (!context.Dependencies.IsVariant())
+        {
+            await context.CreateTestVariant(
+                classArguments: ["variant-label"],
+                displayName: "VariantWithClassArgs"
+            );
+        }
+
+        // Both original and variant should have a non-null label
+        if (string.IsNullOrEmpty(label))
+        {
+            throw new InvalidOperationException("Expected label to be set");
+        }
+
+        if (context.Dependencies.IsVariant() && label != "variant-label")
+        {
+            throw new InvalidOperationException($"Expected variant label 'variant-label' but got '{label}'");
         }
     }
 }

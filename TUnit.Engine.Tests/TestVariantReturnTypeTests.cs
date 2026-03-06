@@ -9,10 +9,10 @@ public class TestVariantReturnTypeTests(TestMode testMode) : InvokableTestBase(t
     public async Task Test()
     {
         await RunTestsWithFilter(
-            "/*/*/TestVariantTests/*",
+            "/*/*/TestVariant*/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
-                result => result.ResultSummary.Counters.Passed.ShouldBeGreaterThanOrEqualTo(6),
+                result => result.ResultSummary.Counters.Passed.ShouldBeGreaterThanOrEqualTo(8),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0),
                 result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0)
             ]);
