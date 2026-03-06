@@ -7,7 +7,7 @@ sidebar_position: 1
 # Performance Benchmarks
 
 :::info Last Updated
-These benchmarks were automatically generated on **2026-03-05** from the latest CI run.
+These benchmarks were automatically generated on **2026-03-06** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.103
 :::
@@ -56,7 +56,7 @@ The benchmarks measure real-world testing patterns:
 ### Environment
 
 - **OS**: Ubuntu Latest (GitHub Actions)
-- **Runtime**: .NET 10.0.3 (10.0.3, 10.0.326.7603), X64 RyuJIT x86-64-v4
+- **Runtime**: .NET 10.0.3 (10.0.3, 10.0.326.7603), X64 RyuJIT x86-64-v3
 - **SDK**: .NET SDK 10.0.103
 - **Hardware**: GitHub Actions Standard Runner (Ubuntu)
 - **Tool**: BenchmarkDotNet v0.15.8, Linux Ubuntu 24.04.3 LTS (Noble Numbat)
@@ -80,4 +80,4 @@ These benchmarks run automatically daily via [GitHub Actions](https://github.com
 Each benchmark runs multiple iterations with statistical analysis to ensure accuracy. Results may vary based on hardware and test characteristics.
 :::
 
-*Last generated: 2026-03-05T00:35:59.979Z*
+*Last generated: 2026-03-06T00:40:48.923Z*
