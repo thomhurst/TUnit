@@ -298,6 +298,30 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public Task Interface_With_Keyword_Parameter_Names()
+    {
+        var source = """
+            using TUnit.Mocks;
+
+            public interface ITest
+            {
+                void Test(string @event);
+                string Get(int @class, string @return);
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<ITest>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
     public Task Interface_With_Static_Abstract_Members()
     {
         var source = """
@@ -323,7 +347,6 @@ public class MockGeneratorTests : SnapshotTestBase
 
         return VerifyGeneratorOutput(source);
     }
-
 
     [Test]
     public Task Interface_With_Inherited_Static_Abstract_Members()

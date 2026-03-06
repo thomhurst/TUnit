@@ -116,6 +116,10 @@ internal class TestExecutor
 
             executableTest.Context.ClassContext.RestoreExecutionContext();
 
+            // Initialize test objects (IAsyncInitializer) AFTER BeforeClass hooks
+            // This ensures resources like Docker containers are not started until needed
+            await testInitializer.InitializeTestObjectsAsync(executableTest, cancellationToken).ConfigureAwait(false);
+
 #if NET
             if (TUnitActivitySource.Source.HasListeners())
             {
@@ -135,10 +139,6 @@ internal class TestExecutor
                     ]);
             }
 #endif
-
-            // Initialize test objects (IAsyncInitializer) AFTER BeforeClass hooks
-            // This ensures resources like Docker containers are not started until needed
-            await testInitializer.InitializeTestObjectsAsync(executableTest, cancellationToken).ConfigureAwait(false);
 
             executableTest.Context.RestoreExecutionContext();
 

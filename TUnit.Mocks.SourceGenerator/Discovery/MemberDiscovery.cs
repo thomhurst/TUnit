@@ -1,4 +1,5 @@
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Mocks.SourceGenerator.Extensions;
 using TUnit.Mocks.SourceGenerator.Models;
 using System.Collections.Generic;
@@ -311,7 +312,7 @@ internal static class MemberDiscovery
             Parameters = new EquatableArray<MockParameterModel>(
                 method.Parameters.Select(p => new MockParameterModel
                 {
-                    Name = p.Name,
+                    Name = EscapeIdentifier(p.Name),
                     Type = p.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat),
                     FullyQualifiedType = p.Type.GetFullyQualifiedName(),
                     Direction = p.GetParameterDirection(),
@@ -409,7 +410,7 @@ internal static class MemberDiscovery
                 Parameters = new EquatableArray<MockParameterModel>(
                     ctor.Parameters.Select(p => new MockParameterModel
                     {
-                        Name = p.Name,
+                        Name = EscapeIdentifier(p.Name),
                         Type = p.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat),
                         FullyQualifiedType = p.Type.GetFullyQualifiedName(),
                         Direction = p.GetParameterDirection(),
@@ -446,7 +447,7 @@ internal static class MemberDiscovery
             Parameters = new EquatableArray<MockParameterModel>(
                 indexer.Parameters.Select(p => new MockParameterModel
                 {
-                    Name = p.Name,
+                    Name = EscapeIdentifier(p.Name),
                     Type = p.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat),
                     FullyQualifiedType = p.Type.GetFullyQualifiedName(),
                     Direction = ParameterDirection.In
@@ -485,8 +486,8 @@ internal static class MemberDiscovery
         {
             // EventHandler pattern: skip sender (first param), expose remaining as raise params
             var argsParams = invokeMethod.Parameters.Skip(1).ToArray();
-            raiseParameters = string.Join(", ", argsParams.Select(p => $"{p.Type.GetFullyQualifiedName()} {p.Name}"));
-            invokeArgs = "this, " + string.Join(", ", argsParams.Select(p => p.Name));
+            raiseParameters = string.Join(", ", argsParams.Select(p => $"{p.Type.GetFullyQualifiedName()} {EscapeIdentifier(p.Name)}"));
+            invokeArgs = "this, " + string.Join(", ", argsParams.Select(p => EscapeIdentifier(p.Name)));
             eventArgsType = argsParams.Length == 1
                 ? argsParams[0].Type.GetFullyQualifiedName()
                 : raiseParameters; // fallback for multi-arg EventHandler subtypes
@@ -495,8 +496,8 @@ internal static class MemberDiscovery
         else
         {
             // Custom delegate (Action<T>, Func<T>, user-defined): expose all params
-            raiseParameters = string.Join(", ", invokeMethod.Parameters.Select(p => $"{p.Type.GetFullyQualifiedName()} {p.Name}"));
-            invokeArgs = string.Join(", ", invokeMethod.Parameters.Select(p => p.Name));
+            raiseParameters = string.Join(", ", invokeMethod.Parameters.Select(p => $"{p.Type.GetFullyQualifiedName()} {EscapeIdentifier(p.Name)}"));
+            invokeArgs = string.Join(", ", invokeMethod.Parameters.Select(p => EscapeIdentifier(p.Name)));
             eventArgsType = raiseParameters;
             raiseParams = invokeMethod.Parameters.ToArray();
         }
@@ -504,7 +505,7 @@ internal static class MemberDiscovery
         var raiseParameterList = new EquatableArray<MockParameterModel>(
             raiseParams.Select(p => new MockParameterModel
             {
-                Name = p.Name,
+                Name = EscapeIdentifier(p.Name),
                 FullyQualifiedType = p.Type.GetFullyQualifiedName(),
                 Type = p.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat),
                 Direction = ParameterDirection.In
@@ -565,6 +566,13 @@ internal static class MemberDiscovery
         if (value is char c) return $"'{c}'";
         return value.ToString();
     }
+
+    /// <summary>
+    /// Escapes a parameter name that is a C# reserved keyword by prepending '@'.
+    /// E.g., "event" → "@event", "class" → "@class", "return" → "@return".
+    /// </summary>
+    private static string EscapeIdentifier(string name) =>
+        SyntaxFacts.GetKeywordKind(name) != SyntaxKind.None ? "@" + name : name;
 
     /// <summary>
     /// For ReadOnlySpan&lt;T&gt; or Span&lt;T&gt; types, returns the fully qualified element type.
