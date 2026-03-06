@@ -2201,22 +2201,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             throw new InvalidOperationException("Dynamic test discovery result must have a test class type and method");
         }
 
-        // Extract method info from the expression
-        MethodInfo? methodInfo = null;
-        var lambdaExpression = result.TestMethod as System.Linq.Expressions.LambdaExpression;
-        if (lambdaExpression?.Body is System.Linq.Expressions.MethodCallExpression methodCall)
-        {
-            methodInfo = methodCall.Method;
-        }
-        else if (lambdaExpression?.Body is System.Linq.Expressions.UnaryExpression { Operand: System.Linq.Expressions.MethodCallExpression unaryMethodCall })
-        {
-            methodInfo = unaryMethodCall.Method;
-        }
-
-        if (methodInfo == null)
-        {
-            throw new InvalidOperationException("Could not extract method info from dynamic test expression");
-        }
+        var methodInfo = ExpressionHelper.ExtractMethodInfo(result.TestMethod);
 
         var testName = GenerateTestName(result.TestClassType, methodInfo);
 
@@ -2293,32 +2278,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             try
             {
-                if (result.TestMethod == null)
-                {
-                    throw new InvalidOperationException("Dynamic test method expression is null");
-                }
-
-                // Extract method info from the expression
-                var lambdaExpression = result.TestMethod as System.Linq.Expressions.LambdaExpression;
-                if (lambdaExpression == null)
-                {
-                    throw new InvalidOperationException("Dynamic test method must be a lambda expression");
-                }
-
-                MethodInfo? methodInfo = null;
-                if (lambdaExpression.Body is System.Linq.Expressions.MethodCallExpression methodCall)
-                {
-                    methodInfo = methodCall.Method;
-                }
-                else if (lambdaExpression.Body is System.Linq.Expressions.UnaryExpression { Operand: System.Linq.Expressions.MethodCallExpression unaryMethodCall })
-                {
-                    methodInfo = unaryMethodCall.Method;
-                }
-
-                if (methodInfo == null)
-                {
-                    throw new InvalidOperationException("Could not extract method info from dynamic test expression");
-                }
+                var methodInfo = ExpressionHelper.ExtractMethodInfo(result.TestMethod);
 
                 var testInstance = instance ?? throw new InvalidOperationException("Test instance is null");
 
