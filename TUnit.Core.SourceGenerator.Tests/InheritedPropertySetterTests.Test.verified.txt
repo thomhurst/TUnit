@@ -4,7 +4,7 @@
 #nullable enable
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
-[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_PropertySetterTests__TestSource
 {
     #if NET8_0_OR_GREATER
@@ -616,7 +616,7 @@ internal static class TUnit_TestProject_PropertySetterTests__TestSource
 #nullable enable
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
-[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal sealed class TUnit_TestProject_InheritedPropertySetterTests_Test_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
 {
     #if NET8_0_OR_GREATER
