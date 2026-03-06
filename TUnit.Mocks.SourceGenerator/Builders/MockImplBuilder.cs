@@ -56,7 +56,7 @@ internal static class MockImplBuilder
                 writer.AppendLine("_engine = engine;");
                 if (model.HasStaticAbstractMembers)
                 {
-                    writer.AppendLine($"{safeName}_StaticEngine.Engine = engine;");
+                    EmitStaticEngineAssignment(writer, safeName);
                 }
             }
 
@@ -144,7 +144,7 @@ internal static class MockImplBuilder
                 writer.AppendLine("_engine = engine;");
                 writer.AppendLine("_wrappedInstance = wrappedInstance;");
                 if (model.HasStaticAbstractMembers)
-                    writer.AppendLine($"{safeName}_StaticEngine.Engine = engine;");
+                    EmitStaticEngineAssignment(writer, safeName);
             }
             return;
         }
@@ -158,7 +158,7 @@ internal static class MockImplBuilder
                     writer.AppendLine("_engine = engine;");
                     writer.AppendLine("_wrappedInstance = wrappedInstance;");
                     if (model.HasStaticAbstractMembers)
-                        writer.AppendLine($"{safeName}_StaticEngine.Engine = engine;");
+                        EmitStaticEngineAssignment(writer, safeName);
                 }
             }
             else
@@ -170,7 +170,7 @@ internal static class MockImplBuilder
                     writer.AppendLine("_engine = engine;");
                     writer.AppendLine("_wrappedInstance = wrappedInstance;");
                     if (model.HasStaticAbstractMembers)
-                        writer.AppendLine($"{safeName}_StaticEngine.Engine = engine;");
+                        EmitStaticEngineAssignment(writer, safeName);
                 }
             }
         }
@@ -423,7 +423,7 @@ internal static class MockImplBuilder
             {
                 writer.AppendLine("_engine = engine;");
                 if (model.HasStaticAbstractMembers)
-                    writer.AppendLine($"{safeName}_StaticEngine.Engine = engine;");
+                    EmitStaticEngineAssignment(writer, safeName);
             }
             return;
         }
@@ -437,7 +437,7 @@ internal static class MockImplBuilder
                 {
                     writer.AppendLine("_engine = engine;");
                     if (model.HasStaticAbstractMembers)
-                        writer.AppendLine($"{safeName}_StaticEngine.Engine = engine;");
+                        EmitStaticEngineAssignment(writer, safeName);
                 }
             }
             else
@@ -449,7 +449,7 @@ internal static class MockImplBuilder
                 {
                     writer.AppendLine("_engine = engine;");
                     if (model.HasStaticAbstractMembers)
-                        writer.AppendLine($"{safeName}_StaticEngine.Engine = engine;");
+                        EmitStaticEngineAssignment(writer, safeName);
                 }
             }
         }
@@ -1137,6 +1137,21 @@ internal static class MockImplBuilder
         if (!model.HasStaticAbstractMembers) return model.FullyQualifiedName;
         var safeName = GetCompositeSafeName(model);
         return $"global::TUnit.Mocks.Generated.{safeName}_Mockable";
+    }
+
+    /// <summary>
+    /// Emits the static engine assignment with a guard that detects multiple mocks of the same
+    /// static-abstract interface type within a single test context.
+    /// </summary>
+    internal static void EmitStaticEngineAssignment(CodeWriter writer, string safeName)
+    {
+        writer.AppendLine($"if ({safeName}_StaticEngine.Engine is not null)");
+        writer.OpenBrace();
+        writer.AppendLine($"throw new global::System.InvalidOperationException(");
+        writer.AppendLine($"    \"Multiple mocks of an interface with static abstract members cannot be created in the same test context. \" +");
+        writer.AppendLine($"    \"Static member calls are routed via a shared AsyncLocal engine, so only one mock instance per type is supported per test.\");");
+        writer.CloseBrace();
+        writer.AppendLine($"{safeName}_StaticEngine.Engine = engine;");
     }
 
 }
