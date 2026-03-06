@@ -19,6 +19,7 @@ internal sealed record MockEventModel : IEquatable<MockEventModel>
     public string EventArgsType { get; init; } = "";
 
     public string? ExplicitInterfaceName { get; init; }
+    public bool IsStaticAbstract { get; init; }
 
     /// <summary>
     /// Structured representation of raise parameters. Use this instead of parsing RaiseParameters
@@ -34,6 +35,7 @@ internal sealed record MockEventModel : IEquatable<MockEventModel>
             && InvokeArgs == other.InvokeArgs
             && EventArgsType == other.EventArgsType
             && ExplicitInterfaceName == other.ExplicitInterfaceName
+            && IsStaticAbstract == other.IsStaticAbstract
             && RaiseParameterList == other.RaiseParameterList;
     }
 

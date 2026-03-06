@@ -43,10 +43,18 @@ internal static class MemberDiscovery
         foreach (var iface in interfaces)
         {
             string? explicitInterfaceName = null;
+            var interfaceFqn = iface.GetFullyQualifiedName();
 
             foreach (var member in iface.GetMembers())
             {
-                if (member.IsStatic) continue;
+                if (member.IsStatic)
+                {
+                    if (member.IsAbstract)
+                    {
+                        CollectStaticAbstractMember(member, interfaceFqn, methods, properties, events, seenMethods, seenProperties, seenEvents, ref memberIdCounter);
+                    }
+                    continue;
+                }
 
                 switch (member)
                 {
@@ -135,9 +143,18 @@ internal static class MemberDiscovery
 
             foreach (var iface in interfaces)
             {
+                var interfaceFqn = iface.GetFullyQualifiedName();
+
                 foreach (var member in iface.GetMembers())
                 {
-                    if (member.IsStatic) continue;
+                    if (member.IsStatic)
+                    {
+                        if (member.IsAbstract)
+                        {
+                            CollectStaticAbstractMember(member, interfaceFqn, methods, properties, events, seenMethods, seenProperties, seenEvents, ref memberIdCounter);
+                        }
+                        continue;
+                    }
 
                     switch (member)
                     {
@@ -576,5 +593,65 @@ internal static class MemberDiscovery
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Collects a static abstract interface member as a full MockMemberModel with IsStaticAbstract=true.
+    /// Uses the existing CreateMethodModel/CreatePropertyModel to generate models with MemberIds,
+    /// enabling full setup/verify support through the mock engine.
+    /// </summary>
+    private static void CollectStaticAbstractMember(
+        ISymbol member,
+        string interfaceFqn,
+        List<MockMemberModel> methods,
+        List<MockMemberModel> properties,
+        List<MockEventModel> events,
+        HashSet<string> seenMethods,
+        Dictionary<string, int> seenProperties,
+        HashSet<string> seenEvents,
+        ref int memberIdCounter)
+    {
+        switch (member)
+        {
+            case IMethodSymbol method when method.MethodKind == MethodKind.Ordinary:
+            {
+                var key = GetMethodKey(method);
+                if (!seenMethods.Add(key)) break;
+
+                var model = CreateMethodModel(method, ref memberIdCounter, interfaceFqn) with
+                {
+                    IsStaticAbstract = true
+                };
+                methods.Add(model);
+                break;
+            }
+
+            case IPropertySymbol property when !property.IsIndexer:
+            {
+                var key = $"P:{property.Name}";
+                if (seenProperties.ContainsKey(key)) break;
+
+                seenProperties[key] = properties.Count;
+                var model = CreatePropertyModel(property, ref memberIdCounter, interfaceFqn) with
+                {
+                    IsStaticAbstract = true
+                };
+                properties.Add(model);
+                break;
+            }
+
+            case IEventSymbol evt:
+            {
+                var key = $"E:{evt.Name}";
+                if (!seenEvents.Add(key)) break;
+
+                var model = CreateEventModel(evt, interfaceFqn) with
+                {
+                    IsStaticAbstract = true
+                };
+                events.Add(model);
+                break;
+            }
+        }
     }
 }

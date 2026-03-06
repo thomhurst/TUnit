@@ -22,6 +22,7 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
     public EquatableArray<string> AllInterfaces { get; init; } = EquatableArray<string>.Empty;
     public EquatableArray<string> AdditionalInterfaceNames { get; init; } = EquatableArray<string>.Empty;
     public EquatableArray<MockConstructorModel> Constructors { get; init; } = EquatableArray<MockConstructorModel>.Empty;
+    public bool HasStaticAbstractMembers { get; init; }
 
     public bool Equals(MockTypeModel? other)
     {
@@ -39,7 +40,8 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
             && Events.Equals(other.Events)
             && AllInterfaces.Equals(other.AllInterfaces)
             && AdditionalInterfaceNames.Equals(other.AdditionalInterfaceNames)
-            && Constructors.Equals(other.Constructors);
+            && Constructors.Equals(other.Constructors)
+            && HasStaticAbstractMembers == other.HasStaticAbstractMembers;
     }
 
     public override int GetHashCode()
@@ -55,6 +57,7 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
             hash = hash * 31 + Properties.GetHashCode();
             hash = hash * 31 + Events.GetHashCode();
             hash = hash * 31 + AdditionalInterfaceNames.GetHashCode();
+            hash = hash * 31 + HasStaticAbstractMembers.GetHashCode();
             return hash;
         }
     }
