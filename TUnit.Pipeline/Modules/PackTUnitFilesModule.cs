@@ -39,12 +39,13 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
                 ? $"{version.SemVer!}-beta"
                 : version.SemVer!;
 
-            var properties = new List<KeyValue>();
-
-            if (isBeta)
+            var properties = new List<KeyValue>
             {
-                properties.Add(new KeyValue("PackageVersion", packageVersion));
-            }
+                // Explicitly set PackageVersion to match the version the pipeline uses
+                // for downstream operations (template install, nuget test, etc.).
+                // GitVersion.MsBuild handles AssemblyVersion/FileVersion automatically.
+                new KeyValue("PackageVersion", packageVersion),
+            };
 
             await context.DotNet()
                 .Pack(
