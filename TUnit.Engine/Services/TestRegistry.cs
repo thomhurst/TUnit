@@ -252,6 +252,9 @@ internal sealed class TestRegistry : ITestRegistry
         }
 
         var metadata = CreateMetadataFromDynamicDiscoveryResult(discoveryResult);
+
+        // Use IsForExecution: false to bypass filtering — this variant was explicitly requested
+        // by the test and should always be registered, regardless of any active test filter.
         var buildingContext = new Building.TestBuildingContext(IsForExecution: false, Filter: null);
         var builtTests = await _testBuilderPipeline.BuildTestsFromMetadataAsync([metadata], buildingContext);
 

@@ -42,8 +42,10 @@ public class TestVariantTests
 
         if (context.Dependencies.IsVariant())
         {
-            var attemptNumber = context.StateBag.Items["AttemptNumber"];
-            context.Output.StandardOutput.WriteLine($"Shrink attempt {attemptNumber} with value {value}");
+            if (context.StateBag.Items.TryGetValue("AttemptNumber", out var attemptNumber))
+            {
+                context.Output.StandardOutput.WriteLine($"Shrink attempt {attemptNumber} with value {value}");
+            }
 
             if (context.Dependencies.Relationship != TUnit.Core.Enums.TestRelationship.Derived)
             {
