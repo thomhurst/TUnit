@@ -184,7 +184,7 @@ internal static class MockTypeDiscovery
             ),
             AdditionalInterfaceNames = new EquatableArray<string>(additionalInterfaceNames.MoveToImmutable()),
             Constructors = singleTypeModel.Constructors,
-            HasStaticAbstractMembers = methods.Any(m => m.IsStaticAbstract) || properties.Any(p => p.IsStaticAbstract)
+            HasStaticAbstractMembers = methods.Any(m => m.IsStaticAbstract) || properties.Any(p => p.IsStaticAbstract) || events.Any(e => e.IsStaticAbstract)
         };
 
         return ImmutableArray.Create(singleTypeModel, multiTypeModel);
@@ -358,7 +358,7 @@ internal static class MockTypeDiscovery
                     .ToImmutableArray()
             ),
             Constructors = constructors,
-            HasStaticAbstractMembers = methods.Any(m => m.IsStaticAbstract) || properties.Any(p => p.IsStaticAbstract)
+            HasStaticAbstractMembers = methods.Any(m => m.IsStaticAbstract) || properties.Any(p => p.IsStaticAbstract) || events.Any(e => e.IsStaticAbstract)
         };
     }
 

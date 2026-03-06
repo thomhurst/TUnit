@@ -57,6 +57,15 @@ internal static class MockBridgeBuilder
                 first = false;
                 GenerateStaticPropertyDim(writer, prop, safeName);
             }
+
+            // Static abstract events — provide no-op DIM implementations
+            foreach (var evt in model.Events)
+            {
+                if (!evt.IsStaticAbstract) continue;
+                if (!first) writer.AppendLine();
+                first = false;
+                GenerateStaticEventDim(writer, evt);
+            }
         }
     }
 
@@ -113,6 +122,15 @@ internal static class MockBridgeBuilder
             writer.CloseBrace();
         }
 
+        writer.CloseBrace();
+    }
+
+    private static void GenerateStaticEventDim(CodeWriter writer, MockEventModel evt)
+    {
+        writer.AppendLine($"static event {evt.EventHandlerType} {evt.ExplicitInterfaceName}.{evt.Name}");
+        writer.OpenBrace();
+        writer.AppendLine("add { }");
+        writer.AppendLine("remove { }");
         writer.CloseBrace();
     }
 

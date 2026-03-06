@@ -50,7 +50,7 @@ internal static class MemberDiscovery
                 {
                     if (member.IsAbstract)
                     {
-                        CollectStaticAbstractMember(member, interfaceFqn, methods, properties, seenMethods, seenProperties, ref memberIdCounter);
+                        CollectStaticAbstractMember(member, interfaceFqn, methods, properties, events, seenMethods, seenProperties, seenEvents, ref memberIdCounter);
                     }
                     continue;
                 }
@@ -150,7 +150,7 @@ internal static class MemberDiscovery
                     {
                         if (member.IsAbstract)
                         {
-                            CollectStaticAbstractMember(member, interfaceFqn, methods, properties, seenMethods, seenProperties, ref memberIdCounter);
+                            CollectStaticAbstractMember(member, interfaceFqn, methods, properties, events, seenMethods, seenProperties, seenEvents, ref memberIdCounter);
                         }
                         continue;
                     }
@@ -597,8 +597,10 @@ internal static class MemberDiscovery
         string interfaceFqn,
         List<MockMemberModel> methods,
         List<MockMemberModel> properties,
+        List<MockEventModel> events,
         HashSet<string> seenMethods,
         Dictionary<string, int> seenProperties,
+        HashSet<string> seenEvents,
         ref int memberIdCounter)
     {
         switch (member)
@@ -627,6 +629,19 @@ internal static class MemberDiscovery
                     IsStaticAbstract = true
                 };
                 properties.Add(model);
+                break;
+            }
+
+            case IEventSymbol evt:
+            {
+                var key = $"E:{evt.Name}";
+                if (!seenEvents.Add(key)) break;
+
+                var model = CreateEventModel(evt, interfaceFqn) with
+                {
+                    IsStaticAbstract = true
+                };
+                events.Add(model);
                 break;
             }
         }

@@ -77,9 +77,10 @@ internal static class MockImplBuilder
                 GenerateInterfaceProperty(writer, prop, model);
             }
 
-            // Events
+            // Events — skip static abstract (they're in bridge DIMs)
             foreach (var evt in model.Events)
             {
+                if (evt.IsStaticAbstract) continue;
                 writer.AppendLine();
                 GenerateEvent(writer, evt);
             }
@@ -120,9 +121,10 @@ internal static class MockImplBuilder
                 GenerateWrapProperty(writer, prop, model);
             }
 
-            // Events
+            // Events — skip static abstract (they're in bridge DIMs)
             foreach (var evt in model.Events)
             {
+                if (evt.IsStaticAbstract) continue;
                 writer.AppendLine();
                 GeneratePartialEvent(writer, evt);
             }
@@ -399,9 +401,10 @@ internal static class MockImplBuilder
                 GeneratePartialProperty(writer, prop, model);
             }
 
-            // Events - for partial mocks, events need override
+            // Events — skip static abstract (they're in bridge DIMs)
             foreach (var evt in model.Events)
             {
+                if (evt.IsStaticAbstract) continue;
                 writer.AppendLine();
                 GeneratePartialEvent(writer, evt);
             }
@@ -888,7 +891,8 @@ internal static class MockImplBuilder
         writer.AppendLine("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
         using (writer.Block("public void RaiseEvent(string eventName, object? args)"))
         {
-            if (model.Events.Length == 0)
+            var instanceEvents = model.Events.Where(e => !e.IsStaticAbstract).ToArray();
+            if (instanceEvents.Length == 0)
             {
                 writer.AppendLine("throw new global::System.InvalidOperationException($\"No event named '{eventName}' exists on this mock.\");");
             }
@@ -896,7 +900,7 @@ internal static class MockImplBuilder
             {
                 using (writer.Block("switch (eventName)"))
                 {
-                    foreach (var evt in model.Events)
+                    foreach (var evt in instanceEvents)
                     {
                         writer.AppendLine($"case \"{evt.Name}\":");
                         writer.IncreaseIndent();
