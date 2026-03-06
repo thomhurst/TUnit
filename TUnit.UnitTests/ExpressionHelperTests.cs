@@ -15,9 +15,9 @@ public class ExpressionHelperTests
     {
         public Task TaskMethod() => Task.CompletedTask;
         public void VoidMethod() { }
-        public ValueTask ValueTaskMethod() => ValueTask.CompletedTask;
+        public ValueTask ValueTaskMethod() => default;
         public Task<int> GenericTaskMethod() => Task.FromResult(42);
-        public ValueTask<int> GenericValueTaskMethod() => ValueTask.FromResult(42);
+        public ValueTask<int> GenericValueTaskMethod() => new(42);
     }
 
     [Test]
