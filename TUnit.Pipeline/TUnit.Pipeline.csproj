@@ -4,7 +4,6 @@
     <TargetFrameworks>net10.0</TargetFrameworks>
     <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
     <IsPackable>false</IsPackable>
-    <GenerateGitVersionInformation>false</GenerateGitVersionInformation>
   </PropertyGroup>
 
   <PropertyGroup>

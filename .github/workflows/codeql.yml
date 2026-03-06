@@ -56,6 +56,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
 
     - name: Setup .NET 9
       uses: actions/setup-dotnet@v5
