@@ -34,22 +34,24 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
 
         foreach (var project in projects.ValueOrDefault!)
         {
-            var packageVersion = BetaPackages.Contains(project.NameWithoutExtension)
+            var isBeta = BetaPackages.Contains(project.NameWithoutExtension);
+            var packageVersion = isBeta
                 ? $"{version.SemVer!}-beta"
                 : version.SemVer!;
+
+            var properties = new List<KeyValue>();
+
+            if (isBeta)
+            {
+                properties.Add(new KeyValue("PackageVersion", packageVersion));
+            }
 
             await context.DotNet()
                 .Pack(
                     new DotNetPackOptions
                     {
                         ProjectSolution = project.Path,
-                        Properties =
-                        [
-                            new KeyValue("Version", packageVersion),
-                            new KeyValue("PackageVersion", packageVersion),
-                            new KeyValue("AssemblyFileVersion", version.SemVer!),
-                            new KeyValue("IsPackTarget", "true")
-                        ],
+                        Properties = properties,
                         IncludeSource = project == Sourcy.DotNet.Projects.TUnit_Templates ? false : true,
                         Configuration = "Release",
                     }, new CommandExecutionOptions
