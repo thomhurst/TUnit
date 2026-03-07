@@ -24,6 +24,7 @@ internal static class HtmlReportGenerator
         sb.AppendLine("<head>");
         sb.AppendLine("<meta charset=\"UTF-8\">");
         sb.AppendLine("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">");
+        sb.AppendLine("<link rel=\"icon\" href=\"data:,\">");
         sb.Append("<title>Test Report \u2014 ");
         sb.Append(WebUtility.HtmlEncode(data.AssemblyName));
         sb.AppendLine("</title>");
@@ -1204,7 +1205,7 @@ const statusOrder = {failed:0,error:0,timedOut:1,inProgress:2,unknown:3,passed:4
 function sortTests(tests) {
     if (sortMode === 'duration') return [...tests].sort((a,b) => b.durationMs - a.durationMs);
     if (sortMode === 'name') return [...tests].sort((a,b) => a.displayName.localeCompare(b.displayName));
-    return [...tests].sort((a,b) => (statusOrder[a.status]||9) - (statusOrder[b.status]||9));
+    return [...tests].sort((a,b) => (statusOrder[a.status]??9) - (statusOrder[b.status]??9));
 }
 
 function computeDisplayGroups() {
@@ -1532,10 +1533,20 @@ function renderSlowestSection() {
     sec.innerHTML = h;
 }
 
+function sortGroups(grps) {
+    if (sortMode === 'duration') {
+        const maxDur = new Map(grps.map(g => [g, g.tests.length ? Math.max(...g.tests.map(t => t.durationMs)) : 0]));
+        return [...grps].sort((a,b) => maxDur.get(b) - maxDur.get(a));
+    }
+    if (sortMode === 'name') return [...grps].sort((a,b) => a.label.localeCompare(b.label));
+    const minStatus = new Map(grps.map(g => [g, g.tests.length ? Math.min(...g.tests.map(t => statusOrder[t.status] ?? 9)) : 9]));
+    return [...grps].sort((a,b) => minStatus.get(a) - minStatus.get(b));
+}
+
 function render() {
     let total = 0;
     let html = '';
-    const displayGroups = computeDisplayGroups();
+    const displayGroups = sortGroups(computeDisplayGroups());
     const limited = displayGroups.slice(0, renderLimit);
     limited.forEach((g,gi)=>{
         const ft = sortTests(g.tests.filter(matchesFilter));
