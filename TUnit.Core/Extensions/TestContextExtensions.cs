@@ -85,6 +85,12 @@ public static class TestContextExtensions
         return prefix != null ? $"{prefix}+{type.Name}" : type.Name;
     }
 
+    /// <summary>
+    /// Gets whether this test is a variant created at runtime via <see cref="CreateTestVariant"/>.
+    /// Use this to guard against infinite recursion when a test creates variants of itself.
+    /// </summary>
+    public static bool IsVariant(this Interfaces.ITestDependencies dependencies) => dependencies.ParentTestId != null;
+
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Dynamic test metadata creation uses reflection")]
     #endif
@@ -106,21 +112,23 @@ public static class TestContextExtensions
     /// This is the primary mechanism for implementing property-based test shrinking and retry logic.
     /// </summary>
     /// <param name="context">The current test context</param>
-    /// <param name="arguments">Method arguments for the variant (null to reuse current arguments)</param>
+    /// <param name="methodArguments">Method arguments for the variant (null to reuse current arguments)</param>
+    /// <param name="classArguments">Constructor arguments for the variant's test class (null to reuse current arguments)</param>
     /// <param name="properties">Key-value pairs for user-defined metadata (e.g., attempt count, custom data)</param>
     /// <param name="relationship">The relationship category of this variant to its parent test (defaults to Derived)</param>
     /// <param name="displayName">Optional user-facing display name for the variant (e.g., "Shrink Attempt", "Mutant")</param>
-    /// <returns>A task that completes when the variant has been queued</returns>
+    /// <returns>Information about the created test variant, including its TestId and DisplayName</returns>
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Creating test variants requires runtime compilation and reflection")]
     #endif
-    public static async Task CreateTestVariant(
+    public static async Task<TestVariantInfo> CreateTestVariant(
         this TestContext context,
-        object?[]? arguments = null,
-        Dictionary<string, object?>? properties = null,
+        object?[]? methodArguments = null,
+        object?[]? classArguments = null,
+        IReadOnlyDictionary<string, object?>? properties = null,
         Enums.TestRelationship relationship = Enums.TestRelationship.Derived,
         string? displayName = null)
     {
-        await context.Services.GetService<ITestRegistry>()!.CreateTestVariant(context, arguments, properties, relationship, displayName);
+        return await context.Services.GetService<ITestRegistry>()!.CreateTestVariant(context, methodArguments, classArguments, properties, relationship, displayName);
     }
 }

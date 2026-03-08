@@ -70,6 +70,17 @@ public class CodeWriter : ICodeWriter
         return this;
     }
 
+    public ICodeWriter AppendJoin<T>(string separator, IEnumerable<T> values)
+    {
+        if (_isNewLine)
+        {
+            _builder.Append(GetIndentation(_indentLevel));
+            _isNewLine = false;
+        }
+        _builder.AppendJoin(separator, values);
+        return this;
+    }
+
     public int IndentLevel => _indentLevel;
 
     /// <summary>

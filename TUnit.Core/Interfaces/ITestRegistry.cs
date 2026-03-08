@@ -33,18 +33,20 @@ public interface ITestRegistry
     /// This is the primary mechanism for implementing property-based test shrinking and retry logic.
     /// </summary>
     /// <param name="currentContext">The current test context to base the variant on</param>
-    /// <param name="arguments">Method arguments for the variant (null to reuse current arguments)</param>
+    /// <param name="methodArguments">Method arguments for the variant (null to reuse current arguments)</param>
+    /// <param name="classArguments">Constructor arguments for the variant's test class (null to reuse current arguments)</param>
     /// <param name="properties">Key-value pairs for user-defined metadata (e.g., attempt count, custom data)</param>
     /// <param name="relationship">The relationship category of this variant to its parent test</param>
     /// <param name="displayName">Optional user-facing display name for the variant (e.g., "Shrink Attempt", "Mutant")</param>
-    /// <returns>A task that completes when the variant has been queued</returns>
+    /// <returns>A task containing information about the created test variant</returns>
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Creating test variants requires runtime compilation and reflection which are not supported in native AOT scenarios.")]
     #endif
-    Task CreateTestVariant(
+    Task<TestVariantInfo> CreateTestVariant(
         TestContext currentContext,
-        object?[]? arguments,
-        Dictionary<string, object?>? properties,
+        object?[]? methodArguments,
+        object?[]? classArguments,
+        IReadOnlyDictionary<string, object?>? properties,
         Enums.TestRelationship relationship,
         string? displayName);
 }

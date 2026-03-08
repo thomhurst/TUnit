@@ -53,6 +53,12 @@ public class ExternalSessionLevelCancellationTests
     [Before(TestSession)]
     public static async Task SessionSetup(TestSessionContext context)
     {
+        // Only write the marker if this test class is participating in this session
+        if (!context.TestClasses.Any(c => c.ClassType == typeof(ExternalSessionLevelCancellationTests)))
+        {
+            return;
+        }
+
         await File.WriteAllTextAsync(
             Path.Combine(Path.GetTempPath(), "TUnit_3882_External_Session_Before.txt"),
             $"Session Before hook executed at {DateTime.Now:O}");
@@ -61,19 +67,18 @@ public class ExternalSessionLevelCancellationTests
     [After(TestSession)]
     public static async Task SessionCleanup(TestSessionContext context)
     {
-        // This should run even if tests are cancelled externally
-        try
+        // Only write the marker if this test class is participating in this session.
+        // This prevents collisions when multiple concurrent subprocesses each run their
+        // own session teardown but only one of them targeted this class.
+        if (!context.TestClasses.Any(c => c.ClassType == typeof(ExternalSessionLevelCancellationTests)))
         {
-            await File.WriteAllTextAsync(
-                SessionMarkerFile,
-                $"Session After hook executed at {DateTime.Now:O}");
-            Console.WriteLine($"[AfterTestSession] Session After hook completed successfully");
+            return;
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[AfterTestSession] Failed to write marker file: {ex.Message}");
-            throw; // Re-throw to signal failure, but after logging
-        }
+
+        await File.WriteAllTextAsync(
+            SessionMarkerFile,
+            $"Session After hook executed at {DateTime.Now:O}");
+        Console.WriteLine($"[AfterTestSession] Session After hook completed successfully");
     }
 
     [Test]
@@ -94,6 +99,12 @@ public class ExternalAssemblyLevelCancellationTests
     [Before(Assembly)]
     public static async Task AssemblySetup(AssemblyHookContext context)
     {
+        // Only write the marker if this test class is participating in this assembly run
+        if (!context.TestClasses.Any(c => c.ClassType == typeof(ExternalAssemblyLevelCancellationTests)))
+        {
+            return;
+        }
+
         await File.WriteAllTextAsync(
             Path.Combine(Path.GetTempPath(), "TUnit_3882_External_Assembly_Before.txt"),
             $"Assembly Before hook executed at {DateTime.Now:O}");
@@ -102,19 +113,18 @@ public class ExternalAssemblyLevelCancellationTests
     [After(Assembly)]
     public static async Task AssemblyCleanup(AssemblyHookContext context)
     {
-        // This should run even if tests are cancelled externally
-        try
+        // Only write the marker if this test class is participating in this assembly run.
+        // This prevents collisions when multiple concurrent subprocesses each run their
+        // own assembly teardown but only one of them targeted this class.
+        if (!context.TestClasses.Any(c => c.ClassType == typeof(ExternalAssemblyLevelCancellationTests)))
         {
-            await File.WriteAllTextAsync(
-                AssemblyMarkerFile,
-                $"Assembly After hook executed at {DateTime.Now:O}");
-            Console.WriteLine($"[AfterAssembly] Assembly After hook completed successfully");
+            return;
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[AfterAssembly] Failed to write marker file: {ex.Message}");
-            throw; // Re-throw to signal failure, but after logging
-        }
+
+        await File.WriteAllTextAsync(
+            AssemblyMarkerFile,
+            $"Assembly After hook executed at {DateTime.Now:O}");
+        Console.WriteLine($"[AfterAssembly] Assembly After hook completed successfully");
     }
 
     [Test]

@@ -2,15 +2,9 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
-  <PropertyGroup>
-    <!-- Configure MinVer to recognize tags with 'v' prefix (v1.12.102) -->
-    <MinVerTagPrefix>v</MinVerTagPrefix>
-    <!-- Skip MinVer during pack operations - pack module provides explicit versioning -->
-    <MinVerSkip Condition="'$(IsPackTarget)' == 'true'">true</MinVerSkip>
-  </PropertyGroup>
   <ItemGroup>
     <GlobalPackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.103" />
-    <GlobalPackageReference Include="MinVer" Version="7.0.0">
+    <GlobalPackageReference Include="GitVersion.MsBuild" Version="6.6.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </GlobalPackageReference>
@@ -26,7 +20,7 @@
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
     <PackageVersion Include="FsCheck" Version="3.3.2" />
     <PackageVersion Include="FSharp.Core" Version="10.0.103" />
-    <PackageVersion Include="Humanizer" Version="3.0.1" />
+    <PackageVersion Include="Humanizer" Version="3.0.10" />
     <PackageVersion Include="MessagePack" Version="3.1.4" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.3" />
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.3" />
@@ -70,13 +64,13 @@
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
     <PackageVersion Include="NSubstitute" Version="5.3.0" />
     <PackageVersion Include="NuGet.Protocol" Version="7.3.0" />
-    <PackageVersion Include="NUnit" Version="4.5.0" />
-    <PackageVersion Include="NUnit.Analyzers" Version="4.11.2" />
+    <PackageVersion Include="NUnit" Version="4.5.1" />
+    <PackageVersion Include="NUnit.Analyzers" Version="4.12.0" />
     <PackageVersion Include="NUnit3TestAdapter" Version="6.1.0" />
     <PackageVersion Include="OneOf" Version="3.0.271" />
     <PackageVersion Include="OneOf.SourceGenerator" Version="3.0.271" />
-    <PackageVersion Include="Polly" Version="8.6.5" />
-    <PackageVersion Include="Polyfill" Version="9.14.0" />
+    <PackageVersion Include="Polly" Version="8.6.6" />
+    <PackageVersion Include="Polyfill" Version="9.18.0" />
     <PackageVersion Include="PublicApiGenerator" Version="11.5.4" />
     <PackageVersion Include="RandomDataGenerator.Net" Version="1.0.19.1" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
@@ -98,14 +92,14 @@
     <PackageVersion Include="Testcontainers.PostgreSql" Version="4.10.0" />
     <PackageVersion Include="Testcontainers.Redis" Version="4.10.0" />
     <PackageVersion Include="trxparser" Version="0.5.0" />
-    <PackageVersion Include="TUnit.Assertions.FSharp" Version="1.18.9" />
+    <PackageVersion Include="TUnit.Assertions.FSharp" Version="1.19.0" />
     <PackageVersion Include="Verify" Version="31.13.2" />
     <PackageVersion Include="Verify.NUnit" Version="31.13.2" />
-    <PackageVersion Include="TUnit" Version="1.18.9" />
-    <PackageVersion Include="TUnit.AspNetCore" Version="1.18.9" />
-    <PackageVersion Include="TUnit.Core" Version="1.18.9" />
-    <PackageVersion Include="TUnit.Engine" Version="1.18.9" />
-    <PackageVersion Include="TUnit.Assertions" Version="1.18.9" />
+    <PackageVersion Include="TUnit" Version="1.19.0" />
+    <PackageVersion Include="TUnit.AspNetCore" Version="1.19.0" />
+    <PackageVersion Include="TUnit.Core" Version="1.19.0" />
+    <PackageVersion Include="TUnit.Engine" Version="1.19.0" />
+    <PackageVersion Include="TUnit.Assertions" Version="1.19.0" />
     <PackageVersion Include="Verify.TUnit" Version="31.13.2" />
     <PackageVersion Include="Vogen" Version="8.0.4" />
     <PackageVersion Include="xunit" Version="2.9.3" />

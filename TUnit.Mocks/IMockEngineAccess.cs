@@ -15,6 +15,12 @@ public interface IMockEngineAccess
     /// <summary>Registers a new method setup with the engine.</summary>
     void AddSetup(MethodSetup setup);
 
+    /// <summary>Handles a void method call. Records the call and executes matching setup behavior.</summary>
+    void HandleCall(int memberId, string memberName, object?[] args);
+
+    /// <summary>Handles a method call with a return value.</summary>
+    TReturn HandleCallWithReturn<TReturn>(int memberId, string memberName, object?[] args, TReturn defaultValue);
+
     /// <summary>Creates a call verification builder for the specified member.</summary>
     ICallVerification CreateVerification(int memberId, string memberName, IArgumentMatcher[] matchers);
 

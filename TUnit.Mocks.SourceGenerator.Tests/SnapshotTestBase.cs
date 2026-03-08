@@ -35,9 +35,10 @@ public abstract class SnapshotTestBase
     /// Runs the MockGenerator against the given source and returns the generated files
     /// as an array of strings, ordered by hint name for stable snapshot comparison.
     /// </summary>
-    protected static string[] RunGenerator(string source)
+    protected static string[] RunGenerator(string source, CSharpParseOptions? parseOptions = null)
     {
-        var syntaxTree = CSharpSyntaxTree.ParseText(source);
+        parseOptions ??= CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.Preview);
+        var syntaxTree = CSharpSyntaxTree.ParseText(source, parseOptions);
 
         var compilation = CSharpCompilation.Create(
             "TestAssembly",

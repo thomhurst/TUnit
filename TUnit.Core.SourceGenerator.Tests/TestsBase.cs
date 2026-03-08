@@ -217,6 +217,11 @@ public class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, new
         var guidPattern3 = @"_(Before|After|BeforeEvery|AfterEvery)_(Test|Class|Assembly|TestSession|TestDiscovery)_[a-fA-F0-9]{32}";
         scrubbedText = System.Text.RegularExpressions.Regex.Replace(scrubbedText, guidPattern3, "_$1_$2_GUID", System.Text.RegularExpressions.RegexOptions.None);
 
+        // Scrub version numbers in GeneratedCode attributes (e.g., "1.18.40.0" → "VERSION_SCRUBBED")
+        var versionPattern = @"\[global::System\.CodeDom\.Compiler\.GeneratedCode\(""TUnit"", ""[^""]*""\)\]";
+        scrubbedText = System.Text.RegularExpressions.Regex.Replace(scrubbedText, versionPattern,
+            @"[global::System.CodeDom.Compiler.GeneratedCode(""TUnit"", ""VERSION_SCRUBBED"")]", System.Text.RegularExpressions.RegexOptions.None);
+
         // Scrub file paths - Windows style (e.g., D:\\git\\TUnit\\)
         var windowsPathPattern = @"[A-Za-z]:\\\\[^""'\s,)]+";
         scrubbedText = System.Text.RegularExpressions.Regex.Replace(scrubbedText, windowsPathPattern, "PATH_SCRUBBED");

@@ -2620,6 +2620,52 @@ public class XUnitMigrationAnalyzerTests
             """)));
     }
 
+    [Test]
+    [Arguments("Fact")]
+    [Arguments("Theory")]
+    [Arguments("InlineData")]
+    [Arguments("MemberData")]
+    [Arguments("ClassData")]
+    [Arguments("Trait")]
+    [Arguments("Collection")]
+    [Arguments("CollectionDefinition")]
+    public async Task XUnit_Attribute_From_Different_Namespace_Not_Converted(string attributeName)
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            $$"""
+                {|#0:using Xunit;
+
+                public class MyClass
+                {
+                    [Xunit.Fact]
+                    [MyCompany.Attributes.{{attributeName}}]
+                    public void MyMethod() { }
+                }
+
+                namespace MyCompany.Attributes
+                {
+                    public class {{attributeName}}Attribute : System.Attribute { }
+                }|}
+                """,
+            Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+            $$"""
+
+                public class MyClass
+                {
+                    [Test]
+                    [MyCompany.Attributes.{{attributeName}}]
+                    public void MyMethod() { }
+                }
+
+                namespace MyCompany.Attributes
+                {
+                    public class {{attributeName}}Attribute : System.Attribute { }
+                }
+                """,
+            ConfigureXUnitTest
+        );
+    }
+
     private static void ConfigureXUnitTest(Verifier.Test test)
     {
         var globalUsings = ("GlobalUsings.cs", SourceText.From("global using Xunit;"));
