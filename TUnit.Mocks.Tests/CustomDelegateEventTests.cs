@@ -26,7 +26,7 @@ public class CustomDelegateEventTests
         mock.Object.OnSimpleAction += () => wasCalled = true;
 
         // Act
-        mock.Raise!.OnSimpleAction();
+        mock.RaiseOnSimpleAction();
 
         // Assert
         await Assert.That(wasCalled).IsTrue();
@@ -42,7 +42,7 @@ public class CustomDelegateEventTests
         mock.Object.OnStringAction += value => receivedValue = value;
 
         // Act
-        mock.Raise!.OnStringAction("hello");
+        mock.RaiseOnStringAction("hello");
 
         // Assert
         await Assert.That(receivedValue).IsEqualTo("hello");
@@ -63,7 +63,7 @@ public class CustomDelegateEventTests
         };
 
         // Act
-        mock.Raise!.OnMultiParamAction("Alice", 30);
+        mock.RaiseOnMultiParamAction("Alice", 30);
 
         // Assert
         await Assert.That(receivedName).IsEqualTo("Alice");
@@ -80,7 +80,7 @@ public class CustomDelegateEventTests
         mock.Object.OnStandardEvent += (sender, e) => receivedValue = e;
 
         // Act
-        mock.Raise!.OnStandardEvent("world");
+        mock.RaiseOnStandardEvent("world");
 
         // Assert
         await Assert.That(receivedValue).IsEqualTo("world");
@@ -97,7 +97,7 @@ public class CustomDelegateEventTests
         mock.Object.OnStringAction += val => results.Add("sub2:" + val);
 
         // Act
-        mock.Raise!.OnStringAction("test");
+        mock.RaiseOnStringAction("test");
 
         // Assert
         await Assert.That(results).Count().IsEqualTo(2);
@@ -116,9 +116,9 @@ public class CustomDelegateEventTests
         mock.Object.OnStringAction += handler;
 
         // Act — raise, unsubscribe, raise again
-        mock.Raise!.OnStringAction("first");
+        mock.RaiseOnStringAction("first");
         mock.Object.OnStringAction -= handler;
-        mock.Raise!.OnStringAction("second");
+        mock.RaiseOnStringAction("second");
 
         // Assert
         await Assert.That(callCount).IsEqualTo(1);
@@ -131,8 +131,8 @@ public class CustomDelegateEventTests
         var mock = Mock.Of<ICustomEventService>();
 
         // Act & Assert — should not throw
-        mock.Raise!.OnSimpleAction();
-        mock.Raise!.OnStringAction("nobody");
-        mock.Raise!.OnMultiParamAction("nobody", 0);
+        mock.RaiseOnSimpleAction();
+        mock.RaiseOnStringAction("nobody");
+        mock.RaiseOnMultiParamAction("nobody", 0);
     }
 }

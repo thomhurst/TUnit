@@ -44,9 +44,9 @@ All benchmarks use [BenchmarkDotNet](https://benchmarkdotnet.org/), the industry
 [Arguments(1, 2, 3)]
 [Arguments(4, 5, 9)]
 // ... 50 argument sets
-public void TestAddition(int a, int b, int expected)
+public async Task TestAddition(int a, int b, int expected)
 {
-    Assert.That(a + b).IsEqualTo(expected);
+    await Assert.That(a + b).IsEqualTo(expected);
 }
 ```
 
@@ -285,6 +285,4 @@ Found an issue with the benchmarks? [Open an issue](https://github.com/thomhurst
 
 - [BenchmarkDotNet Documentation](https://benchmarkdotnet.org/articles/overview.html)
 - [.NET Performance Best Practices](https://learn.microsoft.com/en-us/dotnet/framework/performance/)
-- [TUnit Performance Best Practices](/docs/advanced/performance-best-practices)
-
-*Last updated: {new Date().toISOString().split('T')[0]}*
+- [TUnit Performance Best Practices](/docs/guides/performance)

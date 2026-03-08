@@ -153,6 +153,18 @@ public class AsyncDelegateAssertion : IAssertionSource<object?>, IDelegateAssert
         return new IsNotAssignableToAssertion<TTarget, object?>(Context);
     }
 
+    public IsAssignableFromAssertion<TSource, object?> IsAssignableFrom<TSource>()
+    {
+        Context.ExpressionBuilder.Append($".IsAssignableFrom<{typeof(TSource).Name}>()");
+        return new IsAssignableFromAssertion<TSource, object?>(Context);
+    }
+
+    public IsNotAssignableFromAssertion<TSource, object?> IsNotAssignableFrom<TSource>()
+    {
+        Context.ExpressionBuilder.Append($".IsNotAssignableFrom<{typeof(TSource).Name}>()");
+        return new IsNotAssignableFromAssertion<TSource, object?>(Context);
+    }
+
     /// <summary>
     /// Explicit interface implementation for Task assignability checking.
     /// Asserts that the task itself is assignable to the specified type.
@@ -171,6 +183,26 @@ public class AsyncDelegateAssertion : IAssertionSource<object?>, IDelegateAssert
     {
         TaskContext.ExpressionBuilder.Append($".IsNotAssignableTo<{typeof(TTarget).Name}>()");
         return new IsNotAssignableToAssertion<TTarget, Task>(TaskContext);
+    }
+
+    /// <summary>
+    /// Explicit interface implementation for Task assignability checking.
+    /// Asserts that the task itself is assignable from the specified type.
+    /// </summary>
+    IsAssignableFromAssertion<TSource, Task> IAssertionSource<Task>.IsAssignableFrom<TSource>()
+    {
+        TaskContext.ExpressionBuilder.Append($".IsAssignableFrom<{typeof(TSource).Name}>()");
+        return new IsAssignableFromAssertion<TSource, Task>(TaskContext);
+    }
+
+    /// <summary>
+    /// Explicit interface implementation for Task assignability checking.
+    /// Asserts that the task itself is not assignable from the specified type.
+    /// </summary>
+    IsNotAssignableFromAssertion<TSource, Task> IAssertionSource<Task>.IsNotAssignableFrom<TSource>()
+    {
+        TaskContext.ExpressionBuilder.Append($".IsNotAssignableFrom<{typeof(TSource).Name}>()");
+        return new IsNotAssignableFromAssertion<TSource, Task>(TaskContext);
     }
 
     /// <summary>

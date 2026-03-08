@@ -44,7 +44,7 @@ public class ClassParametersAnalyzer : ConcurrentDiagnosticAnalyzer
                 .SelectMany(x => x.GetAttributes())
                 .Concat(namedTypeSymbol.ContainingAssembly.GetAttributes())
                 .Any(x => x.IsDataSourceAttribute(context.Compilation) || 
-                          x.IsClassConstructorAttribute(context.Compilation));
+                          x.IsClassConstructorAttribute());
                           
         if (!hasDataSourceOrClassConstructor)
         {

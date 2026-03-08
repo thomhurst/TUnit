@@ -26,7 +26,7 @@ public class EventTests
         svc.OnMessage += (sender, msg) => receivedMessage = msg;
 
         // Act — raise the event through the mock
-        mock.Raise.OnMessage("Hello!");
+        mock.RaiseOnMessage("Hello!");
 
         // Assert
         await Assert.That(receivedMessage).IsEqualTo("Hello!");
@@ -44,7 +44,7 @@ public class EventTests
         svc.OnMessage += (sender, msg) => messages.Add("sub2:" + msg);
 
         // Act
-        mock.Raise.OnMessage("test");
+        mock.RaiseOnMessage("test");
 
         // Assert
         await Assert.That(messages).Count().IsEqualTo(2);
@@ -59,7 +59,7 @@ public class EventTests
         var mock = Mock.Of<IEventService>();
 
         // Act & Assert — should not throw when no subscribers
-        mock.Raise.OnMessage("nobody listening");
+        mock.RaiseOnMessage("nobody listening");
         await Assert.That(true).IsTrue();
     }
 
@@ -75,9 +75,9 @@ public class EventTests
         svc.OnMessage += handler;
 
         // Act — raise once, unsubscribe, raise again
-        mock.Raise.OnMessage("first");
+        mock.RaiseOnMessage("first");
         svc.OnMessage -= handler;
-        mock.Raise.OnMessage("second");
+        mock.RaiseOnMessage("second");
 
         // Assert — only one notification
         await Assert.That(callCount).IsEqualTo(1);

@@ -72,9 +72,7 @@ internal static class MockDelegateFactoryBuilder
                         writer.AppendLine("};");
                     }
 
-                    writer.AppendLine($"var setup = new {safeName}_MockSetup(engine);");
-                    writer.AppendLine($"var verify = new {safeName}_MockVerify(engine);");
-                    writer.AppendLine($"var mock = new global::TUnit.Mocks.Mock<{model.FullyQualifiedName}>(del, setup, verify, engine);");
+                    writer.AppendLine($"var mock = new global::TUnit.Mocks.Mock<{model.FullyQualifiedName}>(del, engine);");
                     writer.AppendLine("return mock;");
                 }
             }

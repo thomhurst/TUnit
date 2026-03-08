@@ -193,6 +193,19 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
         // Compare properties and fields
         var expectedMembers = ReflectionHelper.GetMembersToCompare(expectedType);
 
+        // When there are no public members to compare structurally (e.g., types with only
+        // private state), fall back to Equals(). This respects IEquatable<T> implementations
+        // and avoids false positives from empty member lists.
+        if (expectedMembers.Count == 0)
+        {
+            if (!Equals(actual, expected))
+            {
+                var label = string.IsNullOrEmpty(path) ? "Objects" : $"Property {path}";
+                return AssertionResult.Failed($"{label} did not match{Environment.NewLine}Expected: {FormatValue(expected)}{Environment.NewLine}Received: {FormatValue(actual)}");
+            }
+            return AssertionResult.Passed;
+        }
+
         foreach (var member in expectedMembers)
         {
             var memberPath = string.IsNullOrEmpty(path) ? member.Name : $"{path}.{member.Name}";

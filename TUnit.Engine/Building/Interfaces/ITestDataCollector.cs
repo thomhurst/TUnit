@@ -37,10 +37,8 @@ internal interface ITestDataCollector
     /// </summary>
     /// <param name="descriptors">Descriptors that passed filtering.</param>
     /// <param name="testSessionId">The test session identifier.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Collection of fully materialized test metadata.</returns>
-    IAsyncEnumerable<TestMetadata> MaterializeFromDescriptorsAsync(
+    IEnumerable<TestMetadata> MaterializeFromDescriptors(
         IEnumerable<TestDescriptor> descriptors,
-        string testSessionId,
-        CancellationToken cancellationToken = default);
+        string testSessionId);
 }

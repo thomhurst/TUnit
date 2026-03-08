@@ -33,7 +33,7 @@ public sealed class DynamicTestMetadata : TestMetadata, IDynamicTestMetadata
     /// <summary>
     /// Custom properties for test variants.
     /// </summary>
-    public Dictionary<string, object?>? Properties => _dynamicResult.Properties;
+    public IReadOnlyDictionary<string, object?>? Properties => _dynamicResult.Properties;
 
     [field: AllowNull, MaybeNull]
     public override Func<ExecutableTestCreationContext, TestMetadata, AbstractExecutableTest> CreateExecutableTestFactory

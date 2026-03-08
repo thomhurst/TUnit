@@ -15,26 +15,26 @@ public class StateMachineTests
     public async Task State_Machine_Returns_Different_Values_Per_State()
     {
         var mock = Mock.Of<IConnection>();
-        mock.SetState("disconnected");
+        Mock.SetState(mock, "disconnected");
 
-        mock.InState("disconnected", setup =>
+        Mock.InState(mock, "disconnected", m =>
         {
-            setup.GetStatus().Returns("OFFLINE");
+            m.GetStatus().Returns("OFFLINE");
         });
 
-        mock.InState("connected", setup =>
+        Mock.InState(mock, "connected", m =>
         {
-            setup.GetStatus().Returns("ONLINE");
+            m.GetStatus().Returns("ONLINE");
         });
 
         IConnection conn = mock.Object;
 
         await Assert.That(conn.GetStatus()).IsEqualTo("OFFLINE");
 
-        mock.SetState("connected");
+        Mock.SetState(mock, "connected");
         await Assert.That(conn.GetStatus()).IsEqualTo("ONLINE");
 
-        mock.SetState("disconnected");
+        Mock.SetState(mock, "disconnected");
         await Assert.That(conn.GetStatus()).IsEqualTo("OFFLINE");
     }
 
@@ -42,18 +42,18 @@ public class StateMachineTests
     public async Task TransitionsTo_Changes_State_After_Call()
     {
         var mock = Mock.Of<IConnection>();
-        mock.SetState("disconnected");
+        Mock.SetState(mock, "disconnected");
 
-        mock.InState("disconnected", setup =>
+        Mock.InState(mock, "disconnected", m =>
         {
-            setup.Connect().TransitionsTo("connected");
-            setup.GetStatus().Returns("OFFLINE");
+            m.Connect().TransitionsTo("connected");
+            m.GetStatus().Returns("OFFLINE");
         });
 
-        mock.InState("connected", setup =>
+        Mock.InState(mock, "connected", m =>
         {
-            setup.Disconnect().TransitionsTo("disconnected");
-            setup.GetStatus().Returns("ONLINE");
+            m.Disconnect().TransitionsTo("disconnected");
+            m.GetStatus().Returns("ONLINE");
         });
 
         IConnection conn = mock.Object;
@@ -71,16 +71,16 @@ public class StateMachineTests
     public async Task State_Scoped_Throws()
     {
         var mock = Mock.Of<IConnection>();
-        mock.SetState("connected");
+        Mock.SetState(mock, "connected");
 
-        mock.InState("connected", setup =>
+        Mock.InState(mock, "connected", m =>
         {
-            setup.Connect().Throws<InvalidOperationException>();
+            m.Connect().Throws<InvalidOperationException>();
         });
 
-        mock.InState("disconnected", setup =>
+        Mock.InState(mock, "disconnected", m =>
         {
-            setup.Disconnect().Throws<InvalidOperationException>();
+            m.Disconnect().Throws<InvalidOperationException>();
         });
 
         IConnection conn = mock.Object;
@@ -97,18 +97,18 @@ public class StateMachineTests
     public async Task No_State_Setups_Match_In_Any_State()
     {
         var mock = Mock.Of<IConnection>();
-        mock.SetState("disconnected");
+        Mock.SetState(mock, "disconnected");
 
         // Setup without state guard — matches in any state
-        mock.Setup.GetStatus().Returns("ALWAYS");
+        mock.GetStatus().Returns("ALWAYS");
 
         IConnection conn = mock.Object;
         await Assert.That(conn.GetStatus()).IsEqualTo("ALWAYS");
 
-        mock.SetState("connected");
+        Mock.SetState(mock, "connected");
         await Assert.That(conn.GetStatus()).IsEqualTo("ALWAYS");
 
-        mock.SetState(null);
+        Mock.SetState(mock, null);
         await Assert.That(conn.GetStatus()).IsEqualTo("ALWAYS");
     }
 
@@ -118,12 +118,12 @@ public class StateMachineTests
         var mock = Mock.Of<IConnection>();
 
         // Global setup (no state guard)
-        mock.Setup.GetStatus().Returns("DEFAULT");
+        mock.GetStatus().Returns("DEFAULT");
 
         // State-scoped setup
-        mock.InState("special", setup =>
+        Mock.InState(mock, "special", m =>
         {
-            setup.GetStatus().Returns("SPECIAL");
+            m.GetStatus().Returns("SPECIAL");
         });
 
         IConnection conn = mock.Object;
@@ -132,11 +132,11 @@ public class StateMachineTests
         await Assert.That(conn.GetStatus()).IsEqualTo("DEFAULT");
 
         // State set — scoped setup wins (last-wins semantics, state-scoped was added later)
-        mock.SetState("special");
+        Mock.SetState(mock, "special");
         await Assert.That(conn.GetStatus()).IsEqualTo("SPECIAL");
 
         // Different state — scoped doesn't match, global wins
-        mock.SetState("other");
+        Mock.SetState(mock, "other");
         await Assert.That(conn.GetStatus()).IsEqualTo("DEFAULT");
     }
 
@@ -144,11 +144,11 @@ public class StateMachineTests
     public async Task Strict_Mode_Throws_For_Unconfigured_Call_In_State()
     {
         var mock = Mock.Of<IConnection>(MockBehavior.Strict);
-        mock.SetState("disconnected");
+        Mock.SetState(mock, "disconnected");
 
-        mock.InState("disconnected", setup =>
+        Mock.InState(mock, "disconnected", m =>
         {
-            setup.GetStatus().Returns("OFFLINE");
+            m.GetStatus().Returns("OFFLINE");
         });
 
         // No setup for Connect in "disconnected" state — strict mode should throw
@@ -163,20 +163,20 @@ public class StateMachineTests
     {
         // Regression test: nested InState calls must save/restore PendingRequiredState
         var mock = Mock.Of<IConnection>();
-        mock.SetState("outer");
+        Mock.SetState(mock, "outer");
 
-        mock.InState("outer", outerSetup =>
+        Mock.InState(mock, "outer", m =>
         {
-            outerSetup.GetStatus().Returns("OUTER");
+            m.GetStatus().Returns("OUTER");
 
             // Nested InState should temporarily switch to "inner" scope
-            mock.InState("inner", innerSetup =>
+            Mock.InState(mock, "inner", m =>
             {
-                innerSetup.Connect();
+                m.Connect();
             });
 
             // After inner InState returns, we should be back in "outer" scope
-            outerSetup.Disconnect();
+            m.Disconnect();
         });
 
         IConnection conn = mock.Object;
@@ -186,7 +186,7 @@ public class StateMachineTests
         conn.Disconnect(); // should not throw (setup registered in outer scope)
 
         // In "inner" state, Connect should work (it was set up in inner scope)
-        mock.SetState("inner");
+        Mock.SetState(mock, "inner");
         conn.Connect(); // should not throw
     }
 
@@ -196,21 +196,21 @@ public class StateMachineTests
         var mock = Mock.Of<IConnection>();
 
         // Global (no-state) setup — added first
-        mock.Setup.GetStatus().Returns("NO_STATE");
+        mock.GetStatus().Returns("NO_STATE");
 
         // State-scoped setup — added second, wins when in "connected" state
-        mock.InState("connected", setup =>
+        Mock.InState(mock, "connected", m =>
         {
-            setup.GetStatus().Returns("ONLINE");
+            m.GetStatus().Returns("ONLINE");
         });
 
-        mock.SetState("connected");
+        Mock.SetState(mock, "connected");
 
         IConnection conn = mock.Object;
         await Assert.That(conn.GetStatus()).IsEqualTo("ONLINE");
 
         // Clear state — scoped setup no longer matches, global setup wins
-        mock.SetState(null);
+        Mock.SetState(mock, null);
         await Assert.That(conn.GetStatus()).IsEqualTo("NO_STATE");
     }
 
@@ -218,29 +218,29 @@ public class StateMachineTests
     public async Task Reset_Clears_State()
     {
         var mock = Mock.Of<IConnection>();
-        mock.SetState("connected");
+        Mock.SetState(mock, "connected");
 
-        mock.Reset();
+        Mock.Reset(mock);
 
-        // After reset, Engine.CurrentState should be null
-        await Assert.That(mock.Engine.CurrentState).IsNull();
+        // After reset, current state should be null
+        await Assert.That(Mock.GetEngine(mock).CurrentState).IsNull();
     }
 
     [Test]
     public async Task Verify_Works_With_State_Scoped_Setups()
     {
         var mock = Mock.Of<IConnection>();
-        mock.SetState("disconnected");
+        Mock.SetState(mock, "disconnected");
 
-        mock.InState("disconnected", setup =>
+        Mock.InState(mock, "disconnected", m =>
         {
-            setup.Connect().TransitionsTo("connected");
+            m.Connect().TransitionsTo("connected");
         });
 
         IConnection conn = mock.Object;
         conn.Connect();
 
         // Verification should still work — the call was recorded
-        mock.Verify!.Connect().WasCalled(Times.Once);
+        mock.Connect().WasCalled(Times.Once);
     }
 }

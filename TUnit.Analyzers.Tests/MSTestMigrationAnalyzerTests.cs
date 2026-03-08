@@ -1951,6 +1951,61 @@ public class MSTestMigrationAnalyzerTests
         );
     }
 
+    [Test]
+    [Arguments("TestClass")]
+    [Arguments("TestMethod")]
+    [Arguments("DataRow")]
+    [Arguments("DynamicData")]
+    [Arguments("TestInitialize")]
+    [Arguments("TestCleanup")]
+    [Arguments("TestCategory")]
+    [Arguments("Ignore")]
+    [Arguments("Priority")]
+    [Arguments("Owner")]
+    [Arguments("ExpectedException")]
+    public async Task MSTest_Attribute_From_Different_Namespace_Not_Converted(string attributeName)
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            $$"""
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+                {|#0:public class MyClass|}
+                {
+                    [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
+                    [MyCompany.Attributes.{{attributeName}}]
+                    public void MyMethod1() { }
+
+                    [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod]
+                    public void MyMethod2() { }
+                }
+
+                namespace MyCompany.Attributes
+                {
+                    public class {{attributeName}}Attribute : System.Attribute { }
+                }
+                """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
+            $$"""
+
+                public class MyClass
+                {
+                    [Test]
+                    [MyCompany.Attributes.{{attributeName}}]
+                    public void MyMethod1() { }
+
+                    [Test]
+                    public void MyMethod2() { }
+                }
+
+                namespace MyCompany.Attributes
+                {
+                    public class {{attributeName}}Attribute : System.Attribute { }
+                }
+                """,
+            ConfigureMSTestTest
+        );
+    }
+
     private static void ConfigureMSTestTest(Verifier.Test test)
     {
         test.TestState.AdditionalReferences.Add(typeof(TestMethodAttribute).Assembly);

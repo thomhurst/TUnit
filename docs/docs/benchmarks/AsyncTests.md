@@ -7,7 +7,7 @@ sidebar_position: 2
 # AsyncTests Benchmark
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-02-23** from the latest CI run.
+This benchmark was automatically generated on **2026-03-08** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.103
 :::
@@ -16,11 +16,11 @@ This benchmark was automatically generated on **2026-02-23** from the latest CI 
 
 | Framework | Version | Mean | Median | StdDev |
 |-----------|---------|------|--------|--------|
-| **TUnit** | 1.17.7 | 518.4 ms | 517.5 ms | 3.34 ms |
-| NUnit | 4.5.0 | 659.8 ms | 661.5 ms | 5.07 ms |
-| MSTest | 4.1.0 | 600.7 ms | 600.5 ms | 7.01 ms |
-| xUnit3 | 3.2.2 | 719.2 ms | 718.9 ms | 3.77 ms |
-| **TUnit (AOT)** | 1.17.7 | 122.0 ms | 121.9 ms | 0.49 ms |
+| **TUnit** | 1.19.0 | 546.5 ms | 545.9 ms | 4.80 ms |
+| NUnit | 4.5.1 | 658.6 ms | 656.8 ms | 10.62 ms |
+| MSTest | 4.1.0 | 597.9 ms | 596.5 ms | 4.81 ms |
+| xUnit3 | 3.2.2 | 720.6 ms | 721.5 ms | 5.38 ms |
+| **TUnit (AOT)** | 1.19.0 | 125.0 ms | 125.0 ms | 0.43 ms |
 
 ## 📈 Visual Comparison
 
@@ -29,7 +29,7 @@ This benchmark was automatically generated on **2026-02-23** from the latest CI 
   'theme':'base',
   'themeVariables': {
     'primaryColor': '#2563eb',
-    'primaryTextColor': '#ffffff',
+    'primaryTextColor': '#1f2937',
     'primaryBorderColor': '#1e40af',
     'lineColor': '#6b7280',
     'secondaryColor': '#7c3aed',
@@ -58,8 +58,8 @@ This benchmark was automatically generated on **2026-02-23** from the latest CI 
 xychart-beta
   title "AsyncTests Performance Comparison"
   x-axis ["TUnit", "NUnit", "MSTest", "xUnit3", "TUnit_AOT"]
-  y-axis "Time (ms)" 0 --> 864
-  bar [518.4, 659.8, 600.7, 719.2, 122]
+  y-axis "Time (ms)" 0 --> 865
+  bar [546.5, 658.6, 597.9, 720.6, 125]
 ```
 
 ## 🎯 Key Insights
@@ -72,4 +72,4 @@ This benchmark compares TUnit's performance against NUnit, MSTest, xUnit3 using 
 View the [benchmarks overview](/docs/benchmarks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-02-23T00:36:36.334Z*
+*Last generated: 2026-03-08T00:36:35.441Z*

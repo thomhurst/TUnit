@@ -7,7 +7,7 @@ sidebar_position: 3
 # DataDrivenTests Benchmark
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-02-23** from the latest CI run.
+This benchmark was automatically generated on **2026-03-08** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.103
 :::
@@ -16,11 +16,11 @@ This benchmark was automatically generated on **2026-02-23** from the latest CI 
 
 | Framework | Version | Mean | Median | StdDev |
 |-----------|---------|------|--------|--------|
-| **TUnit** | 1.17.7 | 473.82 ms | 473.53 ms | 6.748 ms |
-| NUnit | 4.5.0 | 587.57 ms | 581.39 ms | 22.324 ms |
-| MSTest | 4.1.0 | 593.52 ms | 592.70 ms | 8.373 ms |
-| xUnit3 | 3.2.2 | 619.29 ms | 620.31 ms | 9.083 ms |
-| **TUnit (AOT)** | 1.17.7 | 24.34 ms | 24.15 ms | 0.680 ms |
+| **TUnit** | 1.19.0 | 514.13 ms | 514.86 ms | 3.516 ms |
+| NUnit | 4.5.1 | 578.13 ms | 576.64 ms | 8.222 ms |
+| MSTest | 4.1.0 | 596.12 ms | 599.82 ms | 9.231 ms |
+| xUnit3 | 3.2.2 | 622.62 ms | 623.09 ms | 5.036 ms |
+| **TUnit (AOT)** | 1.19.0 | 25.73 ms | 25.71 ms | 0.128 ms |
 
 ## 📈 Visual Comparison
 
@@ -29,7 +29,7 @@ This benchmark was automatically generated on **2026-02-23** from the latest CI 
   'theme':'base',
   'themeVariables': {
     'primaryColor': '#2563eb',
-    'primaryTextColor': '#ffffff',
+    'primaryTextColor': '#1f2937',
     'primaryBorderColor': '#1e40af',
     'lineColor': '#6b7280',
     'secondaryColor': '#7c3aed',
@@ -58,8 +58,8 @@ This benchmark was automatically generated on **2026-02-23** from the latest CI 
 xychart-beta
   title "DataDrivenTests Performance Comparison"
   x-axis ["TUnit", "NUnit", "MSTest", "xUnit3", "TUnit_AOT"]
-  y-axis "Time (ms)" 0 --> 744
-  bar [473.82, 587.57, 593.52, 619.29, 24.34]
+  y-axis "Time (ms)" 0 --> 748
+  bar [514.13, 578.13, 596.12, 622.62, 25.73]
 ```
 
 ## 🎯 Key Insights
@@ -72,4 +72,4 @@ This benchmark compares TUnit's performance against NUnit, MSTest, xUnit3 using 
 View the [benchmarks overview](/docs/benchmarks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-02-23T00:36:36.334Z*
+*Last generated: 2026-03-08T00:36:35.442Z*

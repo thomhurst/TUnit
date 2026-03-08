@@ -78,18 +78,18 @@ public static class AssertionExtensions
     /// <summary>
     /// Asserts that the numeric value is greater than zero (positive).
     /// </summary>
-    public static GreaterThanAssertion<TValue> IsPositive<TValue>(
+    public static TValue_IsGreaterThan_TValue_Assertion<TValue> IsPositive<TValue>(
         this IAssertionSource<TValue> source)
         where TValue : IComparable<TValue>
     {
         source.Context.ExpressionBuilder.Append(".IsPositive()");
-        return new GreaterThanAssertion<TValue>(source.Context, default(TValue)!);
+        return new TValue_IsGreaterThan_TValue_Assertion<TValue>(source.Context, default(TValue)!);
     }
 
     /// <summary>
     /// Asserts that the nullable numeric value is greater than zero (positive).
     /// </summary>
-    public static GreaterThanAssertion<TValue> IsPositive<TValue>(
+    public static TValue_IsGreaterThan_TValue_Assertion<TValue> IsPositive<TValue>(
         this IAssertionSource<TValue?> source)
         where TValue : struct, IComparable<TValue>
     {
@@ -103,24 +103,24 @@ public static class AssertionExtensions
 
             return nullableValue.Value;
         });
-        return new GreaterThanAssertion<TValue>(mappedContext, default(TValue)!);
+        return new TValue_IsGreaterThan_TValue_Assertion<TValue>(mappedContext, default(TValue)!);
     }
 
     /// <summary>
     /// Asserts that the numeric value is less than zero (negative).
     /// </summary>
-    public static LessThanAssertion<TValue> IsNegative<TValue>(
+    public static TValue_IsLessThan_TValue_Assertion<TValue> IsNegative<TValue>(
         this IAssertionSource<TValue> source)
         where TValue : IComparable<TValue>
     {
         source.Context.ExpressionBuilder.Append(".IsNegative()");
-        return new LessThanAssertion<TValue>(source.Context, default(TValue)!);
+        return new TValue_IsLessThan_TValue_Assertion<TValue>(source.Context, default(TValue)!);
     }
 
     /// <summary>
     /// Asserts that the nullable numeric value is less than zero (negative).
     /// </summary>
-    public static LessThanAssertion<TValue> IsNegative<TValue>(
+    public static TValue_IsLessThan_TValue_Assertion<TValue> IsNegative<TValue>(
         this IAssertionSource<TValue?> source)
         where TValue : struct, IComparable<TValue>
     {
@@ -134,7 +134,7 @@ public static class AssertionExtensions
 
             return nullableValue.Value;
         });
-        return new LessThanAssertion<TValue>(mappedContext, default(TValue)!);
+        return new TValue_IsLessThan_TValue_Assertion<TValue>(mappedContext, default(TValue)!);
     }
 
     /// <summary>
@@ -1219,104 +1219,104 @@ public static class AssertionExtensions
     /// Asserts that the DateTime is after or equal to the expected DateTime.
     /// Alias for IsGreaterThanOrEqualTo for better readability with dates.
     /// </summary>
-    public static GreaterThanOrEqualAssertion<DateTime> IsAfterOrEqualTo(
+    public static TValue_IsGreaterThanOrEqualTo_TValue_Assertion<DateTime> IsAfterOrEqualTo(
         this IAssertionSource<DateTime> source,
         DateTime expected,
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
         source.Context.ExpressionBuilder.Append($".IsAfterOrEqualTo({expression})");
-        return new GreaterThanOrEqualAssertion<DateTime>(source.Context, expected);
+        return new TValue_IsGreaterThanOrEqualTo_TValue_Assertion<DateTime>(source.Context, expected);
     }
 
     /// <summary>
     /// Asserts that the DateTime is after the expected DateTime.
     /// Alias for IsGreaterThan for better readability with dates.
     /// </summary>
-    public static GreaterThanAssertion<DateTime> IsAfter(
+    public static TValue_IsGreaterThan_TValue_Assertion<DateTime> IsAfter(
         this IAssertionSource<DateTime> source,
         DateTime expected,
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
         source.Context.ExpressionBuilder.Append($".IsAfter({expression})");
-        return new GreaterThanAssertion<DateTime>(source.Context, expected);
+        return new TValue_IsGreaterThan_TValue_Assertion<DateTime>(source.Context, expected);
     }
 
     /// <summary>
     /// Asserts that the DateTime is before the expected DateTime.
     /// Alias for IsLessThan for better readability with dates.
     /// </summary>
-    public static LessThanAssertion<DateTime> IsBefore(
+    public static TValue_IsLessThan_TValue_Assertion<DateTime> IsBefore(
         this IAssertionSource<DateTime> source,
         DateTime expected,
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
         source.Context.ExpressionBuilder.Append($".IsBefore({expression})");
-        return new LessThanAssertion<DateTime>(source.Context, expected);
+        return new TValue_IsLessThan_TValue_Assertion<DateTime>(source.Context, expected);
     }
 
     /// <summary>
     /// Asserts that the DateTime is before or equal to the expected DateTime.
     /// Alias for IsLessThanOrEqualTo for better readability with dates.
     /// </summary>
-    public static LessThanOrEqualAssertion<DateTime> IsBeforeOrEqualTo(
+    public static TValue_IsLessThanOrEqualTo_TValue_Assertion<DateTime> IsBeforeOrEqualTo(
         this IAssertionSource<DateTime> source,
         DateTime expected,
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
         source.Context.ExpressionBuilder.Append($".IsBeforeOrEqualTo({expression})");
-        return new LessThanOrEqualAssertion<DateTime>(source.Context, expected);
+        return new TValue_IsLessThanOrEqualTo_TValue_Assertion<DateTime>(source.Context, expected);
     }
 
     /// <summary>
     /// Asserts that the DateTimeOffset is after the expected DateTimeOffset.
     /// Alias for IsGreaterThan for better readability with dates.
     /// </summary>
-    public static GreaterThanAssertion<DateTimeOffset> IsAfter(
+    public static TValue_IsGreaterThan_TValue_Assertion<DateTimeOffset> IsAfter(
         this IAssertionSource<DateTimeOffset> source,
         DateTimeOffset expected,
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
         source.Context.ExpressionBuilder.Append($".IsAfter({expression})");
-        return new GreaterThanAssertion<DateTimeOffset>(source.Context, expected);
+        return new TValue_IsGreaterThan_TValue_Assertion<DateTimeOffset>(source.Context, expected);
     }
 
     /// <summary>
     /// Asserts that the DateTimeOffset is before the expected DateTimeOffset.
     /// Alias for IsLessThan for better readability with dates.
     /// </summary>
-    public static LessThanAssertion<DateTimeOffset> IsBefore(
+    public static TValue_IsLessThan_TValue_Assertion<DateTimeOffset> IsBefore(
         this IAssertionSource<DateTimeOffset> source,
         DateTimeOffset expected,
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
         source.Context.ExpressionBuilder.Append($".IsBefore({expression})");
-        return new LessThanAssertion<DateTimeOffset>(source.Context, expected);
+        return new TValue_IsLessThan_TValue_Assertion<DateTimeOffset>(source.Context, expected);
     }
 
     /// <summary>
     /// Asserts that the DateTimeOffset is after or equal to the expected DateTimeOffset.
     /// Alias for IsGreaterThanOrEqualTo for better readability with dates.
     /// </summary>
-    public static GreaterThanOrEqualAssertion<DateTimeOffset> IsAfterOrEqualTo(
+    public static TValue_IsGreaterThanOrEqualTo_TValue_Assertion<DateTimeOffset> IsAfterOrEqualTo(
         this IAssertionSource<DateTimeOffset> source,
         DateTimeOffset expected,
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
         source.Context.ExpressionBuilder.Append($".IsAfterOrEqualTo({expression})");
-        return new GreaterThanOrEqualAssertion<DateTimeOffset>(source.Context, expected);
+        return new TValue_IsGreaterThanOrEqualTo_TValue_Assertion<DateTimeOffset>(source.Context, expected);
     }
 
     /// <summary>
     /// Asserts that the DateTimeOffset is before or equal to the expected DateTimeOffset.
     /// Alias for IsLessThanOrEqualTo for better readability with dates.
     /// </summary>
-    public static LessThanOrEqualAssertion<DateTimeOffset> IsBeforeOrEqualTo(
+    public static TValue_IsLessThanOrEqualTo_TValue_Assertion<DateTimeOffset> IsBeforeOrEqualTo(
         this IAssertionSource<DateTimeOffset> source,
         DateTimeOffset expected,
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
         source.Context.ExpressionBuilder.Append($".IsBeforeOrEqualTo({expression})");
-        return new LessThanOrEqualAssertion<DateTimeOffset>(source.Context, expected);
+        return new TValue_IsLessThanOrEqualTo_TValue_Assertion<DateTimeOffset>(source.Context, expected);
     }
 
 #if NET6_0_OR_GREATER
@@ -1324,104 +1324,104 @@ public static class AssertionExtensions
     /// Asserts that the DateOnly is after the expected DateOnly.
     /// Alias for IsGreaterThan for better readability with dates.
     /// </summary>
-    public static GreaterThanAssertion<DateOnly> IsAfter(
+    public static TValue_IsGreaterThan_TValue_Assertion<DateOnly> IsAfter(
         this IAssertionSource<DateOnly> source,
         DateOnly expected,
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
         source.Context.ExpressionBuilder.Append($".IsAfter({expression})");
-        return new GreaterThanAssertion<DateOnly>(source.Context, expected);
+        return new TValue_IsGreaterThan_TValue_Assertion<DateOnly>(source.Context, expected);
     }
 
     /// <summary>
     /// Asserts that the DateOnly is before the expected DateOnly.
     /// Alias for IsLessThan for better readability with dates.
     /// </summary>
-    public static LessThanAssertion<DateOnly> IsBefore(
+    public static TValue_IsLessThan_TValue_Assertion<DateOnly> IsBefore(
         this IAssertionSource<DateOnly> source,
         DateOnly expected,
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
         source.Context.ExpressionBuilder.Append($".IsBefore({expression})");
-        return new LessThanAssertion<DateOnly>(source.Context, expected);
+        return new TValue_IsLessThan_TValue_Assertion<DateOnly>(source.Context, expected);
     }
 
     /// <summary>
     /// Asserts that the DateOnly is after or equal to the expected DateOnly.
     /// Alias for IsGreaterThanOrEqualTo for better readability with dates.
     /// </summary>
-    public static GreaterThanOrEqualAssertion<DateOnly> IsAfterOrEqualTo(
+    public static TValue_IsGreaterThanOrEqualTo_TValue_Assertion<DateOnly> IsAfterOrEqualTo(
         this IAssertionSource<DateOnly> source,
         DateOnly expected,
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
         source.Context.ExpressionBuilder.Append($".IsAfterOrEqualTo({expression})");
-        return new GreaterThanOrEqualAssertion<DateOnly>(source.Context, expected);
+        return new TValue_IsGreaterThanOrEqualTo_TValue_Assertion<DateOnly>(source.Context, expected);
     }
 
     /// <summary>
     /// Asserts that the DateOnly is before or equal to the expected DateOnly.
     /// Alias for IsLessThanOrEqualTo for better readability with dates.
     /// </summary>
-    public static LessThanOrEqualAssertion<DateOnly> IsBeforeOrEqualTo(
+    public static TValue_IsLessThanOrEqualTo_TValue_Assertion<DateOnly> IsBeforeOrEqualTo(
         this IAssertionSource<DateOnly> source,
         DateOnly expected,
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
         source.Context.ExpressionBuilder.Append($".IsBeforeOrEqualTo({expression})");
-        return new LessThanOrEqualAssertion<DateOnly>(source.Context, expected);
+        return new TValue_IsLessThanOrEqualTo_TValue_Assertion<DateOnly>(source.Context, expected);
     }
 
     /// <summary>
     /// Asserts that the TimeOnly is after the expected TimeOnly.
     /// Alias for IsGreaterThan for better readability with times.
     /// </summary>
-    public static GreaterThanAssertion<TimeOnly> IsAfter(
+    public static TValue_IsGreaterThan_TValue_Assertion<TimeOnly> IsAfter(
         this IAssertionSource<TimeOnly> source,
         TimeOnly expected,
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
         source.Context.ExpressionBuilder.Append($".IsAfter({expression})");
-        return new GreaterThanAssertion<TimeOnly>(source.Context, expected);
+        return new TValue_IsGreaterThan_TValue_Assertion<TimeOnly>(source.Context, expected);
     }
 
     /// <summary>
     /// Asserts that the TimeOnly is before the expected TimeOnly.
     /// Alias for IsLessThan for better readability with times.
     /// </summary>
-    public static LessThanAssertion<TimeOnly> IsBefore(
+    public static TValue_IsLessThan_TValue_Assertion<TimeOnly> IsBefore(
         this IAssertionSource<TimeOnly> source,
         TimeOnly expected,
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
         source.Context.ExpressionBuilder.Append($".IsBefore({expression})");
-        return new LessThanAssertion<TimeOnly>(source.Context, expected);
+        return new TValue_IsLessThan_TValue_Assertion<TimeOnly>(source.Context, expected);
     }
 
     /// <summary>
     /// Asserts that the TimeOnly is after or equal to the expected TimeOnly.
     /// Alias for IsGreaterThanOrEqualTo for better readability with times.
     /// </summary>
-    public static GreaterThanOrEqualAssertion<TimeOnly> IsAfterOrEqualTo(
+    public static TValue_IsGreaterThanOrEqualTo_TValue_Assertion<TimeOnly> IsAfterOrEqualTo(
         this IAssertionSource<TimeOnly> source,
         TimeOnly expected,
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
         source.Context.ExpressionBuilder.Append($".IsAfterOrEqualTo({expression})");
-        return new GreaterThanOrEqualAssertion<TimeOnly>(source.Context, expected);
+        return new TValue_IsGreaterThanOrEqualTo_TValue_Assertion<TimeOnly>(source.Context, expected);
     }
 
     /// <summary>
     /// Asserts that the TimeOnly is before or equal to the expected TimeOnly.
     /// Alias for IsLessThanOrEqualTo for better readability with times.
     /// </summary>
-    public static LessThanOrEqualAssertion<TimeOnly> IsBeforeOrEqualTo(
+    public static TValue_IsLessThanOrEqualTo_TValue_Assertion<TimeOnly> IsBeforeOrEqualTo(
         this IAssertionSource<TimeOnly> source,
         TimeOnly expected,
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
         source.Context.ExpressionBuilder.Append($".IsBeforeOrEqualTo({expression})");
-        return new LessThanOrEqualAssertion<TimeOnly>(source.Context, expected);
+        return new TValue_IsLessThanOrEqualTo_TValue_Assertion<TimeOnly>(source.Context, expected);
     }
 #endif
 
@@ -1548,32 +1548,6 @@ public static class AssertionExtensions
     }
 
     /// <summary>
-    /// Asserts that a flags enum has the specified flag set.
-    /// </summary>
-    public static Assertions.Enums.HasFlagAssertion<TEnum> HasFlag<TEnum>(
-        this IAssertionSource<TEnum> source,
-        TEnum expectedFlag,
-        [CallerArgumentExpression(nameof(expectedFlag))] string? expression = null)
-        where TEnum : struct, Enum
-    {
-        source.Context.ExpressionBuilder.Append($".HasFlag({expression})");
-        return new Assertions.Enums.HasFlagAssertion<TEnum>(source.Context, expectedFlag);
-    }
-
-    /// <summary>
-    /// Asserts that a flags enum does NOT have the specified flag set.
-    /// </summary>
-    public static Assertions.Enums.DoesNotHaveFlagAssertion<TEnum> DoesNotHaveFlag<TEnum>(
-        this IAssertionSource<TEnum> source,
-        TEnum unexpectedFlag,
-        [CallerArgumentExpression(nameof(unexpectedFlag))] string? expression = null)
-        where TEnum : struct, Enum
-    {
-        source.Context.ExpressionBuilder.Append($".DoesNotHaveFlag({expression})");
-        return new Assertions.Enums.DoesNotHaveFlagAssertion<TEnum>(source.Context, unexpectedFlag);
-    }
-
-    /// <summary>
     /// Asserts that an enum value is defined in its enum type.
     /// </summary>
     public static Assertions.Enums.IsDefinedAssertion<TEnum> IsDefined<TEnum>(
@@ -1593,58 +1567,6 @@ public static class AssertionExtensions
     {
         source.Context.ExpressionBuilder.Append(".IsNotDefined()");
         return new Assertions.Enums.IsNotDefinedAssertion<TEnum>(source.Context);
-    }
-
-    /// <summary>
-    /// Asserts that two enum values have the same name.
-    /// </summary>
-    public static Assertions.Enums.HasSameNameAsAssertion<TEnum> HasSameNameAs<TEnum>(
-        this IAssertionSource<TEnum> source,
-        Enum otherEnumValue,
-        [CallerArgumentExpression(nameof(otherEnumValue))] string? expression = null)
-        where TEnum : struct, Enum
-    {
-        source.Context.ExpressionBuilder.Append($".HasSameNameAs({expression})");
-        return new Assertions.Enums.HasSameNameAsAssertion<TEnum>(source.Context, otherEnumValue);
-    }
-
-    /// <summary>
-    /// Asserts that two enum values have the same underlying value.
-    /// </summary>
-    public static Assertions.Enums.HasSameValueAsAssertion<TEnum> HasSameValueAs<TEnum>(
-        this IAssertionSource<TEnum> source,
-        Enum otherEnumValue,
-        [CallerArgumentExpression(nameof(otherEnumValue))] string? expression = null)
-        where TEnum : struct, Enum
-    {
-        source.Context.ExpressionBuilder.Append($".HasSameValueAs({expression})");
-        return new Assertions.Enums.HasSameValueAsAssertion<TEnum>(source.Context, otherEnumValue);
-    }
-
-    /// <summary>
-    /// Asserts that two enum values do NOT have the same name.
-    /// </summary>
-    public static Assertions.Enums.DoesNotHaveSameNameAsAssertion<TEnum> DoesNotHaveSameNameAs<TEnum>(
-        this IAssertionSource<TEnum> source,
-        Enum otherEnumValue,
-        [CallerArgumentExpression(nameof(otherEnumValue))] string? expression = null)
-        where TEnum : struct, Enum
-    {
-        source.Context.ExpressionBuilder.Append($".DoesNotHaveSameNameAs({expression})");
-        return new Assertions.Enums.DoesNotHaveSameNameAsAssertion<TEnum>(source.Context, otherEnumValue);
-    }
-
-    /// <summary>
-    /// Asserts that two enum values do NOT have the same underlying value.
-    /// </summary>
-    public static Assertions.Enums.DoesNotHaveSameValueAsAssertion<TEnum> DoesNotHaveSameValueAs<TEnum>(
-        this IAssertionSource<TEnum> source,
-        Enum otherEnumValue,
-        [CallerArgumentExpression(nameof(otherEnumValue))] string? expression = null)
-        where TEnum : struct, Enum
-    {
-        source.Context.ExpressionBuilder.Append($".DoesNotHaveSameValueAs({expression})");
-        return new Assertions.Enums.DoesNotHaveSameValueAsAssertion<TEnum>(source.Context, otherEnumValue);
     }
 
 }

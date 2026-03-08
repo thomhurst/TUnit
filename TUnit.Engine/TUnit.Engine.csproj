@@ -33,7 +33,7 @@
   <ItemGroup>
     <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />
   </ItemGroup>
-  <ItemGroup Condition="'$(IsPackTarget)' == 'true'">
+  <ItemGroup>
     <PackageReference Include="Microsoft.Testing.Platform.MSBuild" />
   </ItemGroup>
 

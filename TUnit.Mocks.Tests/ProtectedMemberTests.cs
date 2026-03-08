@@ -33,14 +33,14 @@ public class ProtectedMemberTests
     {
         // Arrange
         var mock = Mock.OfPartial<ProtectedServiceBase>();
-        mock.Setup.GetName().Returns("Test");
-        mock.Setup.FormatResult(Arg.Any<int>()).Returns("formatted");
+        mock.GetName().Returns("Test");
+        mock.FormatResult(Any()).Returns("formatted");
 
         // Act — ComputeValue is protected virtual, not configured → calls base (input * 2)
         var result = mock.Object.ProcessAndFormat(5);
 
         // Assert — FormatResult receives 10 (5 * 2 from base ComputeValue)
-        mock.Verify!.FormatResult(Arg.Is(10)).WasCalled();
+        mock.FormatResult(Is(10)).WasCalled();
         await Assert.That(result).IsEqualTo("formatted");
     }
 
@@ -49,15 +49,15 @@ public class ProtectedMemberTests
     {
         // Arrange
         var mock = Mock.OfPartial<ProtectedServiceBase>();
-        mock.Setup.GetName().Returns("Test");
-        mock.Setup.ComputeValue(Arg.Any<int>()).Returns(42);
-        mock.Setup.FormatResult(Arg.Any<int>()).Returns("configured");
+        mock.GetName().Returns("Test");
+        mock.ComputeValue(Any()).Returns(42);
+        mock.FormatResult(Any()).Returns("configured");
 
         // Act — ComputeValue is configured to return 42
         var result = mock.Object.ProcessAndFormat(5);
 
         // Assert — FormatResult receives 42 (from configured ComputeValue)
-        mock.Verify!.FormatResult(Arg.Is(42)).WasCalled();
+        mock.FormatResult(Is(42)).WasCalled();
         await Assert.That(result).IsEqualTo("configured");
     }
 
@@ -66,8 +66,8 @@ public class ProtectedMemberTests
     {
         // Arrange
         var mock = Mock.OfPartial<ProtectedServiceBase>();
-        mock.Setup.GetName().Returns("Test");
-        mock.Setup.FormatResult(Arg.Any<int>()).Returns("custom format");
+        mock.GetName().Returns("Test");
+        mock.FormatResult(Any()).Returns("custom format");
 
         // Act
         var result = mock.Object.ProcessAndFormat(3);
@@ -81,14 +81,14 @@ public class ProtectedMemberTests
     {
         // Arrange
         var mock = Mock.OfPartial<ProtectedServiceBase>();
-        mock.Setup.GetName().Returns("Test");
-        mock.Setup.FormatResult(Arg.Any<int>()).Returns("result");
+        mock.GetName().Returns("Test");
+        mock.FormatResult(Any()).Returns("result");
 
         // Act
         mock.Object.ProcessAndFormat(7);
 
         // Assert — both ComputeValue (base call) and FormatResult are recorded
-        await Assert.That(mock.Invocations).Count().IsGreaterThanOrEqualTo(2);
+        await Assert.That(Mock.GetInvocations(mock)).Count().IsGreaterThanOrEqualTo(2);
     }
 
     [Test]
@@ -96,14 +96,14 @@ public class ProtectedMemberTests
     {
         // Arrange
         var mock = Mock.OfPartial<ProtectedServiceBase>();
-        mock.Setup.GetName().Returns("Test");
-        mock.Setup.FormatResult(Arg.Any<int>()).Returns("result");
+        mock.GetName().Returns("Test");
+        mock.FormatResult(Any()).Returns("result");
 
         // Act
         mock.Object.ProcessAndFormat(5);
 
         // Assert — verify protected methods were called
-        mock.Verify!.ComputeValue(Arg.Is(5)).WasCalled();
-        mock.Verify!.FormatResult(Arg.Any<int>()).WasCalled();
+        mock.ComputeValue(Is(5)).WasCalled();
+        mock.FormatResult(Any()).WasCalled();
     }
 }

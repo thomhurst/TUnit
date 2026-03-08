@@ -7,7 +7,7 @@ sidebar_position: 5
 # MatrixTests Benchmark
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-02-23** from the latest CI run.
+This benchmark was automatically generated on **2026-03-08** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.103
 :::
@@ -16,11 +16,11 @@ This benchmark was automatically generated on **2026-02-23** from the latest CI 
 
 | Framework | Version | Mean | Median | StdDev |
 |-----------|---------|------|--------|--------|
-| **TUnit** | 1.17.7 | 588.6 ms | 585.1 ms | 6.94 ms |
-| NUnit | 4.5.0 | 1,574.7 ms | 1,574.0 ms | 6.37 ms |
-| MSTest | 4.1.0 | 1,499.6 ms | 1,499.1 ms | 6.14 ms |
-| xUnit3 | 3.2.2 | 1,634.2 ms | 1,634.6 ms | 7.46 ms |
-| **TUnit (AOT)** | 1.17.7 | 127.2 ms | 127.3 ms | 0.54 ms |
+| **TUnit** | 1.19.0 | 617.7 ms | 617.0 ms | 2.50 ms |
+| NUnit | 4.5.1 | 1,585.8 ms | 1,587.8 ms | 5.80 ms |
+| MSTest | 4.1.0 | 1,508.0 ms | 1,505.1 ms | 9.78 ms |
+| xUnit3 | 3.2.2 | 1,634.9 ms | 1,635.5 ms | 3.63 ms |
+| **TUnit (AOT)** | 1.19.0 | 130.9 ms | 130.9 ms | 0.15 ms |
 
 ## 📈 Visual Comparison
 
@@ -29,7 +29,7 @@ This benchmark was automatically generated on **2026-02-23** from the latest CI 
   'theme':'base',
   'themeVariables': {
     'primaryColor': '#2563eb',
-    'primaryTextColor': '#ffffff',
+    'primaryTextColor': '#1f2937',
     'primaryBorderColor': '#1e40af',
     'lineColor': '#6b7280',
     'secondaryColor': '#7c3aed',
@@ -59,7 +59,7 @@ xychart-beta
   title "MatrixTests Performance Comparison"
   x-axis ["TUnit", "NUnit", "MSTest", "xUnit3", "TUnit_AOT"]
   y-axis "Time (ms)" 0 --> 1962
-  bar [588.6, 1574.7, 1499.6, 1634.2, 127.2]
+  bar [617.7, 1585.8, 1508, 1634.9, 130.9]
 ```
 
 ## 🎯 Key Insights
@@ -72,4 +72,4 @@ This benchmark compares TUnit's performance against NUnit, MSTest, xUnit3 using 
 View the [benchmarks overview](/docs/benchmarks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-02-23T00:36:36.335Z*
+*Last generated: 2026-03-08T00:36:35.442Z*

@@ -121,6 +121,7 @@ namespace
         public required string Name { get; init; }
         public virtual bool Equals(.AssemblyMetadata? other) { }
         public override int GetHashCode() { }
+        public static .AssemblyMetadata GetOrAdd(string key, string name) { }
         public static .AssemblyMetadata GetOrAdd(string name, <.AssemblyMetadata> factory) { }
     }
     public static class AsyncConvert
@@ -378,6 +379,7 @@ namespace
         public virtual bool Equals(.ClassMetadata? other) { }
         public override int GetHashCode() { }
         public static .ClassMetadata GetOrAdd(string name, <.ClassMetadata> factory) { }
+        public static .ClassMetadata GetOrAdd(string name, .ClassMetadata value) { }
     }
     [(.Class | .Method)]
     public sealed class CombinedDataSourcesAttribute : .AsyncUntypedDataSourceGeneratorAttribute
@@ -1021,6 +1023,11 @@ namespace
         public override int GetHashCode() { }
         protected virtual bool PrintMembers(.StringBuilder stringBuilder) { }
     }
+    public static class MethodMetadataFactory
+    {
+        [.("ReflectionAnalysis", "IL2067", Justification="Factory is only called from generated code that always passes concrete types")]
+        public static .MethodMetadata Create(string name,  type,  returnType, .ClassMetadata classMetadata, int genericTypeCount = 0, .ParameterMetadata[]? parameters = null) { }
+    }
     [(.Assembly | .Class | .Method, AllowMultiple=false, Inherited=true)]
     public class NotDiscoverableAttribute : .TUnitAttribute, ., .
     {
@@ -1091,10 +1098,16 @@ namespace
         public bool IsParams { get; }
         public required string Name { get; init; }
         public int Position { get; init; }
-        public required .ParameterInfo ReflectionInfo { get; set; }
+        public .ParameterInfo ReflectionInfo { get; set; }
+        public <.ParameterInfo>? ReflectionInfoFactory { get; init; }
         [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties)]
         public  Type { get; init; }
         public required .TypeInfo TypeInfo { get; init; }
+    }
+    public static class ParameterMetadataFactory
+    {
+        [.("ReflectionAnalysis", "IL2067", Justification="Factory is only called from generated code that always passes concrete types")]
+        public static .ParameterMetadata Create([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties)]  type, string name, .TypeInfo typeInfo, bool isNullable, <.ParameterInfo>? reflectionInfoFactory = null) { }
     }
     [.DebuggerDisplay("{Type} {Name}")]
     public class ParameterMetadata<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties)]  T> : .ParameterMetadata, <.ParameterMetadata<T>>
@@ -1257,6 +1270,7 @@ namespace
         public static bool IsEnabled { get; set; }
         public static void Register(..ITestSource testSource) { }
         public static void Register( testClassType, ..ITestSource testSource) { }
+        public static void Register( testClassType, <string, .<.TestMetadata>> getTests, <.<.TestDescriptor>> enumerateDescriptors) { }
         public static void RegisterAssembly(<.Assembly> assemblyLoader) { }
         public static void RegisterDynamic(.IDynamicTestSource testSource) { }
         public static void RegisterGlobalInitializer(<.> initializer) { }
@@ -1343,6 +1357,7 @@ namespace
     public class TestContext : .Context, ., ., ., ., ., ., ., .
     {
         public TestContext(string testName,  serviceProvider, .ClassHookContext classContext, .TestBuilderContext testBuilderContext, .CancellationToken cancellationToken) { }
+        public new .Activity? Activity { get; }
         public .ClassHookContext ClassContext { get; }
         public . Dependencies { get; }
         public . Events { get; }
@@ -1361,6 +1376,7 @@ namespace
         public static string WorkingDirectory { get; set; }
         public override string GetErrorOutput() { }
         public override string GetStandardOutput() { }
+        public void RegisterTrace(.ActivityTraceId traceId) { }
         public static .TestContext? GetById(string id) { }
     }
     public class TestContextEvents : .
@@ -1438,7 +1454,7 @@ namespace
         public required string FullyQualifiedName { get; init; }
         public bool HasDataSource { get; init; }
         public required int LineNumber { get; init; }
-        public required <string, .CancellationToken, .<.TestMetadata>> Materializer { get; init; }
+        public required <string, .<.TestMetadata>> Materializer { get; init; }
         public required string MethodName { get; init; }
         public string[] Properties { get; init; }
         public int RepeatCount { get; init; }
@@ -1531,6 +1547,29 @@ namespace
         public required string TestName { get; init; }
         public string TestSessionId { get; set; }
     }
+    public static class TestMetadataFactory
+    {
+        [.("ReflectionAnalysis", "IL2087", Justification="Factory is only called from generated code that always passes concrete types")]
+        [.("ReflectionAnalysis", "IL2091", Justification="Factory is only called from generated code that always passes concrete types")]
+        public static .TestMetadata<T> Create<T>(
+                    string testName,
+                    string testMethodName,
+                    int lineNumber,
+                    <T, object?[], .CancellationToken, .> invokeTypedTest,
+                    <[]> attributeFactory,
+                    <[], object?[], T> instanceFactory,
+                    .MethodMetadata methodMetadata,
+                    string testSessionId,
+                    string filePath = "",
+                    int inheritanceDepth = 0,
+                    .TestDependency[]? dependencies = null,
+                    .IDataSourceAttribute[]? dataSources = null,
+                    .IDataSourceAttribute[]? classDataSources = null,
+                    .PropertyDataSource[]? propertyDataSources = null,
+                    .PropertyInjectionData[]? propertyInjections = null,
+                    int? repeatCount = default)
+            where T :  class { }
+    }
     public class TestMetadata<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  T> : .TestMetadata, .
         where T :  class
     {
@@ -1611,6 +1650,11 @@ namespace
         public static bool IsSuccess(this .TestState state) { }
         public static bool IsTransient(this .TestState state) { }
     }
+    public sealed class TestVariantInfo : <.TestVariantInfo>
+    {
+        public string DisplayName { get; }
+        public string TestId { get; }
+    }
     [(.Assembly | .Class | .Method)]
     public class TimeoutAttribute : .TUnitAttribute, .IScopedAttribute, ., ., .
     {
@@ -1621,6 +1665,8 @@ namespace
         public . OnHookRegistered(.HookRegisteredContext context) { }
         public . OnTestDiscovered(.DiscoveredTestContext context) { }
     }
+    [("Use OpenTelemetry activity spans instead. Hook timings are now automatically reco" +
+        "rded as OTel child spans of the test activity.")]
     public class Timing : <.Timing>
     {
         public Timing(string StepName,  Start,  End) { }
@@ -2017,8 +2063,9 @@ namespace .Extensions
         public static . AddDynamicTest<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicFields | ..NonPublicFields | ..PublicProperties)]  T>(this .TestContext context, .DynamicTest<T> dynamicTest)
             where T :  class { }
         [.("Creating test variants requires runtime compilation and reflection")]
-        public static . CreateTestVariant(this .TestContext context, object?[]? arguments = null, .<string, object?>? properties = null, . relationship = 3, string? displayName = null) { }
+        public static .<.TestVariantInfo> CreateTestVariant(this .TestContext context, object?[]? methodArguments = null, object?[]? classArguments = null, .<string, object?>? properties = null, . relationship = 3, string? displayName = null) { }
         public static string GetClassTypeName(this .TestContext context) { }
+        public static bool IsVariant(this . dependencies) { }
     }
 }
 namespace .Helpers
@@ -2537,11 +2584,15 @@ namespace .Interfaces
         .<.Artifact> Artifacts { get; }
         .TextWriter ErrorOutput { get; }
         .TextWriter StandardOutput { get; }
+        [("Use OpenTelemetry activity spans instead. Hook timings are now automatically reco" +
+            "rded as OTel child spans of the test activity.")]
         .<.Timing> Timings { get; }
         void AttachArtifact(.Artifact artifact);
         void AttachArtifact(string filePath, string? displayName = null, string? description = null);
         string GetErrorOutput();
         string GetStandardOutput();
+        [("Use OpenTelemetry activity spans instead. Hook timings are now automatically reco" +
+            "rded as OTel child spans of the test activity.")]
         void RecordTiming(.Timing timing);
         void WriteError(string message);
         void WriteLine(string message);
@@ -2565,7 +2616,7 @@ namespace .Interfaces
             where T :  class;
         [.("Creating test variants requires runtime compilation and reflection which are not " +
             "supported in native AOT scenarios.")]
-        . CreateTestVariant(.TestContext currentContext, object?[]? arguments, .<string, object?>? properties, . relationship, string? displayName);
+        .<.TestVariantInfo> CreateTestVariant(.TestContext currentContext, object?[]? methodArguments, object?[]? classArguments, .<string, object?>? properties, . relationship, string? displayName);
     }
     public interface ITestRetryEventReceiver : .
     {
@@ -2610,7 +2661,7 @@ namespace .
     }
     public interface ITestSource
     {
-        .<.TestMetadata> GetTestsAsync(string testSessionId, .CancellationToken cancellationToken = default);
+        .<.TestMetadata> GetTests(string testSessionId);
     }
     public sealed class PropertyInjectionMetadata
     {

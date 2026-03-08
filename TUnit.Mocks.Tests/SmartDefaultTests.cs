@@ -126,8 +126,8 @@ public class SmartDefaultTests
     {
         // Arrange
         var mock = Mock.Of<IDefaultsService>();
-        mock.Setup.GetName().Returns("custom");
-        mock.Setup.GetCount().Returns(42);
+        mock.GetName().Returns("custom");
+        mock.GetCount().Returns(42);
 
         // Act
         IDefaultsService svc = mock.Object;

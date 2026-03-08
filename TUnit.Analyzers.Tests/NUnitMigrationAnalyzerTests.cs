@@ -5461,6 +5461,76 @@ public class NUnitMigrationAnalyzerTests
     }
 
     [Test]
+    [Arguments("Test")]
+    [Arguments("Theory")]
+    [Arguments("TestCase")]
+    [Arguments("TestCaseSource")]
+    [Arguments("SetUp")]
+    [Arguments("TearDown")]
+    [Arguments("OneTimeSetUp")]
+    [Arguments("OneTimeTearDown")]
+    [Arguments("TestFixture")]
+    [Arguments("Category")]
+    [Arguments("Ignore")]
+    [Arguments("Explicit")]
+    [Arguments("Description")]
+    [Arguments("Author")]
+    [Arguments("Apartment")]
+    [Arguments("Parallelizable")]
+    [Arguments("NonParallelizable")]
+    [Arguments("Repeat")]
+    [Arguments("Values")]
+    [Arguments("Range")]
+    [Arguments("ValueSource")]
+    [Arguments("Sequential")]
+    [Arguments("Combinatorial")]
+    [Arguments("Platform")]
+    [Arguments("ExpectedException")]
+    [Arguments("FixtureLifeCycle")]
+    public async Task NUnit_Attribute_From_Different_Namespace_Not_Converted(string attributeName)
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            $$"""
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [NUnit.Framework.Test]
+                    [MyCompany.Attributes.{{attributeName}}]
+                    public void MyMethod1() { }
+
+                    [NUnit.Framework.Test]
+                    public void MyMethod2() { }
+                }
+
+                namespace MyCompany.Attributes
+                {
+                    public class {{attributeName}}Attribute : System.Attribute { }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            $$"""
+
+                public class MyClass
+                {
+                    [Test]
+                    [MyCompany.Attributes.{{attributeName}}]
+                    public void MyMethod1() { }
+
+                    [Test]
+                    public void MyMethod2() { }
+                }
+
+                namespace MyCompany.Attributes
+                {
+                    public class {{attributeName}}Attribute : System.Attribute { }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
     public async Task NUnit_Global_Using_Flagged()
     {
         await Verifier.VerifyAnalyzerAsync(

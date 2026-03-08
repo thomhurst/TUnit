@@ -53,7 +53,7 @@ class MyTestClassThatNeedsUniqueTestIds
 {
     private IDatabase isolatedRedisDb = null!;
 
-    [Before(HookType.Test)]
+    [Before(Test)]
     public void BeforeEach()
     {
         // Call the extension method to retrieve the unique test id:

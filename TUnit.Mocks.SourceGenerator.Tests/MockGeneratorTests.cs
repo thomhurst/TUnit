@@ -243,6 +243,32 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public Task Interface_With_RefStruct_Parameters()
+    {
+        var source = """
+            using System;
+            using TUnit.Mocks;
+
+            public interface IBufferProcessor
+            {
+                void Process(ReadOnlySpan<byte> data);
+                int Parse(ReadOnlySpan<char> text);
+                string GetName();
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<IBufferProcessor>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
     public Task Interface_With_Mixed_Members()
     {
         var source = """
@@ -264,6 +290,125 @@ public class MockGeneratorTests : SnapshotTestBase
                 void M()
                 {
                     var mock = Mock.Of<IService>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
+    public Task Interface_With_Keyword_Parameter_Names()
+    {
+        var source = """
+            using TUnit.Mocks;
+
+            public interface ITest
+            {
+                void Test(string @event);
+                string Get(int @class, string @return);
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<ITest>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
+    public Task Interface_With_Static_Abstract_Members()
+    {
+        var source = """
+            using TUnit.Mocks;
+
+            public class ClientConfig { }
+
+            public interface IServiceFactory
+            {
+                string GetName();
+                static abstract ClientConfig CreateDefaultConfig();
+                static abstract string ServiceId { get; set; }
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<IServiceFactory>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
+    public Task Interface_With_Inherited_Static_Abstract_Members()
+    {
+        // Tests the case where an interface inherits static abstract members from a base interface.
+        // The generator resolves the call via CandidateSymbols (CS8920 workaround)
+        // and generates engine-dispatching implementations in the mock impl class.
+        var source = """
+            using TUnit.Mocks;
+
+            public class ClientConfig { }
+
+            public interface IServiceBase
+            {
+                static abstract ClientConfig CreateDefaultConfig();
+            }
+
+            public interface IMyService : IServiceBase
+            {
+                string GetName();
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<IMyService>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
+    public Task Interface_With_Static_Abstract_Transitive_Return_Type()
+    {
+        // Simulates the AWS SDK scenario: a main interface returns a base interface
+        // that has static abstract members. The source generator should NOT generate a
+        // transitive mock for the base interface (which would trigger CS8920).
+        var source = """
+            using TUnit.Mocks;
+
+            public class ClientConfig { }
+
+            public interface IConfigProvider
+            {
+                ClientConfig Config { get; }
+                static abstract ClientConfig CreateDefault();
+            }
+
+            public interface IMyService
+            {
+                string GetValue(string key);
+                IConfigProvider GetConfigProvider();
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<IMyService>();
                 }
             }
             """;

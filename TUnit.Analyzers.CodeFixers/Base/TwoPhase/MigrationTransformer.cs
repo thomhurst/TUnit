@@ -229,9 +229,12 @@ public class MigrationTransformer
 
                     if (objectCreation?.Initializer != null)
                     {
-                        // Build array type: T[]
+                        // Build the element type: T for single, (T1, T2) for multi
+                        var elementTypeSyntax = BuildElementType(conversion.ElementTypes);
+
+                        // Build array type: T[] or (T1, T2)[]
                         var arrayType = SyntaxFactory.ArrayType(
-                            SyntaxFactory.ParseTypeName(conversion.ElementType),
+                            elementTypeSyntax,
                             SyntaxFactory.SingletonList(
                                 SyntaxFactory.ArrayRankSpecifier(
                                     SyntaxFactory.SingletonSeparatedList<ExpressionSyntax>(
@@ -241,21 +244,40 @@ public class MigrationTransformer
                             )
                         ).WithoutTrailingTrivia();
 
-                        // Get the open brace token and ensure it has proper newline trivia
+                        // Get the open brace token and ensure it has proper newline trivia.
+                        // When the brace is on a separate line (e.g., new Type\n{), the newline
+                        // may be trailing trivia of the preceding token, not leading trivia of {.
+                        // Preserve existing whitespace indentation when adding the newline.
                         var openBrace = objectCreation.Initializer.OpenBraceToken;
                         if (!openBrace.LeadingTrivia.Any(t => t.IsKind(SyntaxKind.EndOfLineTrivia)))
                         {
-                            // Add newline and proper indentation before the brace
+                            var existingWhitespace = openBrace.LeadingTrivia
+                                .LastOrDefault(t => t.IsKind(SyntaxKind.WhitespaceTrivia));
+
+                            var whitespace = existingWhitespace.IsKind(SyntaxKind.WhitespaceTrivia)
+                                ? existingWhitespace
+                                : SyntaxFactory.Whitespace("    ");
+
                             openBrace = openBrace.WithLeadingTrivia(
                                 SyntaxFactory.EndOfLine("\n"),
-                                SyntaxFactory.Whitespace("    "));
+                                whitespace);
+                        }
+
+                        // For multi-type TheoryData, convert complex initializer expressions
+                        // { val1, val2 } to tuple expressions (val1, val2)
+                        var expressions = objectCreation.Initializer.Expressions;
+                        if (conversion.IsMultiType)
+                        {
+                            expressions = SyntaxFactory.SeparatedList(
+                                expressions.Select(expr => ConvertToTupleExpression(expr)),
+                                expressions.GetSeparators());
                         }
 
                         // Create array initializer from the collection initializer
                         var newInitializer = SyntaxFactory.InitializerExpression(
                             SyntaxKind.ArrayInitializerExpression,
                             openBrace,
-                            objectCreation.Initializer.Expressions,
+                            expressions,
                             objectCreation.Initializer.CloseBraceToken);
 
                         // Build the array creation expression
@@ -273,7 +295,7 @@ public class MigrationTransformer
                     }
                 }
 
-                // Then, transform the type declaration from TheoryData<T> to IEnumerable<T>
+                // Then, transform the type declaration from TheoryData<T> to IEnumerable<T> or IEnumerable<(T1, T2)>
                 if (conversion.TypeAnnotation != null)
                 {
                     var genericName = currentRoot.DescendantNodes()
@@ -282,10 +304,13 @@ public class MigrationTransformer
 
                     if (genericName != null)
                     {
+                        var elementTypeSyntax = BuildElementType(conversion.ElementTypes);
+                        var typeArgList = SyntaxFactory.TypeArgumentList(
+                            SyntaxFactory.SingletonSeparatedList(elementTypeSyntax));
+
                         var enumerableType = SyntaxFactory.GenericName(
                             SyntaxFactory.Identifier("IEnumerable"),
-                            SyntaxFactory.TypeArgumentList(
-                                SyntaxFactory.SeparatedList(genericName.TypeArgumentList.Arguments)))
+                            typeArgList)
                             .WithLeadingTrivia(genericName.GetLeadingTrivia())
                             .WithTrailingTrivia(genericName.GetTrailingTrivia());
 
@@ -306,6 +331,47 @@ public class MigrationTransformer
         }
 
         return currentRoot;
+    }
+
+    /// <summary>
+    /// Builds the element TypeSyntax from the stored type argument strings.
+    /// Single type: returns the type directly (e.g., "TimeSpan" → TimeSpan).
+    /// Multi type: returns a tuple type (e.g., ["string", "int"] → (string, int)).
+    /// </summary>
+    private static TypeSyntax BuildElementType(IReadOnlyList<string> elementTypes)
+    {
+        if (elementTypes.Count == 1)
+        {
+            return SyntaxFactory.ParseTypeName(elementTypes[0]);
+        }
+
+        return SyntaxFactory.TupleType(
+            SyntaxFactory.SeparatedList(
+                elementTypes.Select(t =>
+                    SyntaxFactory.TupleElement(SyntaxFactory.ParseTypeName(t)))));
+    }
+
+    /// <summary>
+    /// Converts a complex initializer expression { val1, val2 } to a tuple expression (val1, val2).
+    /// For simple expressions (single-value), returns the expression unchanged.
+    /// </summary>
+    private static ExpressionSyntax ConvertToTupleExpression(ExpressionSyntax expression)
+    {
+        if (expression is not InitializerExpressionSyntax initializer
+            || !initializer.IsKind(SyntaxKind.ComplexElementInitializerExpression))
+        {
+            return expression;
+        }
+
+        var arguments = initializer.Expressions.Select(
+            expr => SyntaxFactory.Argument(expr.WithoutLeadingTrivia().WithoutTrailingTrivia()));
+
+        var tupleExpression = SyntaxFactory.TupleExpression(
+            SyntaxFactory.SeparatedList(arguments))
+            .WithLeadingTrivia(initializer.GetLeadingTrivia())
+            .WithTrailingTrivia(initializer.GetTrailingTrivia());
+
+        return tupleExpression;
     }
 
     private CompilationUnitSyntax TransformAssertions(CompilationUnitSyntax root)

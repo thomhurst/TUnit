@@ -1,6 +1,5 @@
 using System.ComponentModel;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TUnit.AspNetCore.Interception;
@@ -76,15 +75,17 @@ public abstract class WebApplicationTest<TFactory, TEntryPoint> : WebApplication
     [ClassDataSource(Shared = [SharedType.PerTestSession])]
     public TFactory GlobalFactory { get; set; } = null!;
 
-    private WebApplicationFactory<TEntryPoint>? _factory;
+    private TracedWebApplicationFactory<TEntryPoint>? _factory;
 
     private readonly WebApplicationTestOptions _options = new();
 
     /// <summary>
-    /// Gets the per-test delegating factory. This factory is isolated to the current test.
+    /// Gets the per-test factory, isolated to the current test.
+    /// All <see cref="TracedWebApplicationFactory{TEntryPoint}.CreateClient()"/> calls on this factory
+    /// automatically inject activity tracing and test context propagation handlers.
     /// </summary>
     /// <exception cref="InvalidOperationException">Thrown if accessed before test setup.</exception>
-    public WebApplicationFactory<TEntryPoint> Factory => _factory ?? throw new InvalidOperationException(
+    public TracedWebApplicationFactory<TEntryPoint> Factory => _factory ?? throw new InvalidOperationException(
             "Factory is not initialized. Ensure the test has started and the BeforeTest hook has run. " +
             "Do not access Factory during test discovery or in data source methods.");
 
@@ -109,13 +110,14 @@ public abstract class WebApplicationTest<TFactory, TEntryPoint> : WebApplication
         await SetupAsync();
 
         // Then create factory with sync configuration (required by ASP.NET Core hosting)
-        _factory = GlobalFactory.GetIsolatedFactory(
-            testContext,
-            _options,
-            ConfigureTestServices,
-            ConfigureTestConfiguration,
-            (_, config) => ConfigureTestConfiguration(config),
-            ConfigureWebHostBuilder);
+        _factory = new TracedWebApplicationFactory<TEntryPoint>(
+            GlobalFactory.GetIsolatedFactory(
+                testContext,
+                _options,
+                ConfigureTestServices,
+                ConfigureTestConfiguration,
+                (_, config) => ConfigureTestConfiguration(config),
+                ConfigureWebHostBuilder));
 
         // Eagerly start the test server to catch configuration errors early
         _ = _factory.Server;

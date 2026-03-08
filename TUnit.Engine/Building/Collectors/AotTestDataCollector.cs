@@ -9,6 +9,7 @@ using TUnit.Core;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Interfaces.SourceGenerator;
 using TUnit.Engine.Building.Interfaces;
+using TUnit.Engine.Helpers;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Building.Collectors;
@@ -52,10 +53,10 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         {
             // Single-pass two-phase discovery: enumerate all descriptors once,
             // apply type and descriptor filters during enumeration, expand dependencies from index
-            standardTestMetadatas = await CollectTestsWithTwoPhaseDiscoveryAsync(
+            standardTestMetadatas = CollectTestsWithTwoPhaseDiscovery(
                 Sources.TestSources,
                 testSessionId,
-                filterHints).ConfigureAwait(false);
+                filterHints);
         }
         else
         {
@@ -69,7 +70,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             }
 
             var testSourcesList = testSourcesByType.SelectMany(kvp => kvp.Value).ToList();
-            standardTestMetadatas = await CollectTestsTraditionalAsync(testSourcesList, testSessionId).ConfigureAwait(false);
+            standardTestMetadatas = CollectTestsTraditional(testSourcesList, testSessionId);
         }
 
         // Dynamic tests are typically rare, collect sequentially
@@ -92,7 +93,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
     /// enumerated descriptors to find dependencies, and then this method enumerated
     /// them again for filtering and materialization.
     /// </summary>
-    private async Task<IEnumerable<TestMetadata>> CollectTestsWithTwoPhaseDiscoveryAsync(
+    private IEnumerable<TestMetadata> CollectTestsWithTwoPhaseDiscovery(
         IEnumerable<KeyValuePair<Type, ConcurrentQueue<ITestSource>>> allSourcesByType,
         string testSessionId,
         FilterHints filterHints)
@@ -209,9 +210,10 @@ internal sealed class AotTestDataCollector : ITestDataCollector
 
         foreach (var descriptor in descriptorsToMaterialize)
         {
-            await foreach (var metadata in descriptor.Materializer(testSessionId, CancellationToken.None).ConfigureAwait(false))
+            var materialized = descriptor.Materializer(testSessionId);
+            for (var i = 0; i < materialized.Count; i++)
             {
-                results.Add(metadata);
+                results.Add(materialized[i]);
             }
         }
 
@@ -222,29 +224,20 @@ internal sealed class AotTestDataCollector : ITestDataCollector
     /// Traditional collection: materialize all tests from sources.
     /// Used when filter hints are not available or sources don't support ITestDescriptorSource.
     /// </summary>
-    private async Task<IEnumerable<TestMetadata>> CollectTestsTraditionalAsync(
+    private IEnumerable<TestMetadata> CollectTestsTraditional(
         List<ITestSource> testSourcesList,
         string testSessionId)
     {
-        // Use sequential processing for small test source sets to avoid task scheduling overhead
-        if (testSourcesList.Count < Building.ParallelThresholds.MinItemsForParallel)
+        var results = new List<TestMetadata>();
+        foreach (var testSource in testSourcesList)
         {
-            var results = new List<TestMetadata>();
-            foreach (var testSource in testSourcesList)
+            var tests = testSource.GetTests(testSessionId);
+            for (var i = 0; i < tests.Count; i++)
             {
-                await foreach (var metadata in testSource.GetTestsAsync(testSessionId))
-                {
-                    results.Add(metadata);
-                }
+                results.Add(tests[i]);
             }
-            return results;
         }
-        else
-        {
-            return await testSourcesList
-                .SelectManyAsync(testSource => testSource.GetTestsAsync(testSessionId))
-                .ProcessInParallel();
-        }
+        return results;
     }
 
     [RequiresUnreferencedCode("Dynamic test collection requires expression compilation and reflection")]
@@ -322,22 +315,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             throw new InvalidOperationException("Dynamic test discovery result must have a test class type and method");
         }
 
-        // Extract method info from the expression
-        MethodInfo? methodInfo = null;
-        var lambdaExpression = result.TestMethod as LambdaExpression;
-        if (lambdaExpression?.Body is MethodCallExpression methodCall)
-        {
-            methodInfo = methodCall.Method;
-        }
-        else if (lambdaExpression?.Body is UnaryExpression { Operand: MethodCallExpression unaryMethodCall })
-        {
-            methodInfo = unaryMethodCall.Method;
-        }
-
-        if (methodInfo == null)
-        {
-            throw new InvalidOperationException("Could not extract method info from dynamic test expression");
-        }
+        var methodInfo = ExpressionHelper.ExtractMethodInfo(result.TestMethod);
 
         var testName = methodInfo.Name;
 
@@ -421,32 +399,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         {
             try
             {
-                if (result.TestMethod == null)
-                {
-                    throw new InvalidOperationException("Dynamic test method expression is null");
-                }
-
-                // Extract method info from the expression
-                var lambdaExpression = result.TestMethod as LambdaExpression;
-                if (lambdaExpression == null)
-                {
-                    throw new InvalidOperationException("Dynamic test method must be a lambda expression");
-                }
-
-                MethodInfo? methodInfo = null;
-                if (lambdaExpression.Body is MethodCallExpression methodCall)
-                {
-                    methodInfo = methodCall.Method;
-                }
-                else if (lambdaExpression.Body is UnaryExpression { Operand: MethodCallExpression unaryMethodCall })
-                {
-                    methodInfo = unaryMethodCall.Method;
-                }
-
-                if (methodInfo == null)
-                {
-                    throw new InvalidOperationException("Could not extract method info from dynamic test expression");
-                }
+                var methodInfo = ExpressionHelper.ExtractMethodInfo(result.TestMethod);
 
                 var testInstance = instance ?? throw new InvalidOperationException("Test instance is null");
 
@@ -568,19 +521,16 @@ internal sealed class AotTestDataCollector : ITestDataCollector
     /// Materializes full test metadata from filtered descriptors.
     /// Only called for tests that passed filtering, avoiding unnecessary materialization.
     /// </summary>
-    public async IAsyncEnumerable<TestMetadata> MaterializeFromDescriptorsAsync(
+    public IEnumerable<TestMetadata> MaterializeFromDescriptors(
         IEnumerable<TestDescriptor> descriptors,
-        string testSessionId,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        string testSessionId)
     {
         foreach (var descriptor in descriptors)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            // Use the materializer delegate to create full TestMetadata
-            await foreach (var metadata in descriptor.Materializer(testSessionId, cancellationToken).ConfigureAwait(false))
+            var materialized = descriptor.Materializer(testSessionId);
+            for (var i = 0; i < materialized.Count; i++)
             {
-                yield return metadata;
+                yield return materialized[i];
             }
         }
     }

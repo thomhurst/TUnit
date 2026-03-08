@@ -130,15 +130,6 @@ internal sealed class TestBuilderPipeline
             .ProcessInParallel(cancellationToken: cancellationToken);
     }
 
-    private async IAsyncEnumerable<TestMetadata> ToAsyncEnumerable(IEnumerable<TestMetadata> metadata)
-    {
-        await Task.Yield(); // Yield control once at the start to maintain async context
-        foreach (var item in metadata)
-        {
-            yield return item;
-        }
-    }
-
     /// <summary>
     /// Builds tests from pre-collected metadata.
     /// Use this when metadata has already been collected with filter-aware optimization.

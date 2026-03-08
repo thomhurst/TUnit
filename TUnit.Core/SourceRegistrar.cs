@@ -56,6 +56,21 @@ public class SourceRegistrar
     }
 
     /// <summary>
+    /// Registers a test source for a specific test class type using delegates.
+    /// This avoids allocating a unique TestSource type per class, reducing JIT overhead.
+    /// </summary>
+    /// <param name="testClassType">The test class type.</param>
+    /// <param name="getTests">Delegate that returns test metadata.</param>
+    /// <param name="enumerateDescriptors">Delegate that enumerates test descriptors.</param>
+    public static void Register(
+        Type testClassType,
+        Func<string, IReadOnlyList<TestMetadata>> getTests,
+        Func<IEnumerable<TestDescriptor>> enumerateDescriptors)
+    {
+        Register(testClassType, new DelegateTestSource(getTests, enumerateDescriptors));
+    }
+
+    /// <summary>
     /// Registers a test source.
     /// </summary>
     /// <param name="testSource">The test source to register.</param>

@@ -1,21 +1,16 @@
+using System.ComponentModel;
 using TUnit.Mocks.Exceptions;
 using TUnit.Mocks.Verification;
 
 namespace TUnit.Mocks;
 
 /// <summary>
-/// Wraps a generated mock implementation and provides access to Setup, Verify, and Raise surfaces.
-/// <para>
-/// The source generator produces extension methods on <c>IMockSetup&lt;T&gt;</c>, <c>IMockVerify&lt;T&gt;</c>,
-/// and <c>IMockRaise&lt;T&gt;</c> that provide strongly-typed setup/verify/raise members.
-/// This approach is fully AOT-compatible — no dynamic dispatch is needed.
-/// </para>
+/// Wraps a generated mock implementation. Source-generated extension methods on <c>Mock&lt;T&gt;</c>
+/// provide strongly-typed setup and verification members directly.
 /// </summary>
-public class Mock<T> : IMock where T : class
+public class Mock<T> : IMock, IMockEngineAccess<T> where T : class
 {
-    /// <summary>The mock engine. Used by generated code. Not intended for direct use.</summary>
-    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public MockEngine<T> Engine { get; }
+    private readonly MockEngine<T> _engine;
 
     /// <summary>The mock object that implements T.</summary>
     public T Object { get; }
@@ -23,77 +18,22 @@ public class Mock<T> : IMock where T : class
     /// <inheritdoc />
     object IMock.ObjectInstance => Object;
 
-    /// <summary>The mock behavior (Loose or Strict).</summary>
-    public MockBehavior Behavior => Engine.Behavior;
+    /// <inheritdoc />
+    MockEngine<T> IMockEngineAccess<T>.Engine => _engine;
 
-    /// <summary>
-    /// Gets or sets the custom default value provider for unconfigured methods in loose mode.
-    /// When set, this provider is consulted before auto-mocking and built-in defaults.
-    /// </summary>
-    public IDefaultValueProvider? DefaultValueProvider
+    /// <summary>Creates a Mock wrapping the given object and engine. Used by generated code.</summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public Mock(T mockObject, MockEngine<T> engine)
     {
-        get => Engine.DefaultValueProvider;
-        set => Engine.DefaultValueProvider = value;
-    }
-
-    /// <summary>
-    /// Generated setup surface -- extension methods provide T's members with <c>Arg{T}</c> parameters.
-    /// </summary>
-    public IMockSetup<T> Setup { get; }
-
-    /// <summary>
-    /// Generated verification surface -- extension methods provide T's members with <c>Arg{T}</c> parameters.
-    /// </summary>
-    public IMockVerify<T> Verify { get; internal set; }
-
-    /// <summary>
-    /// Generated event-raising surface (if T has events).
-    /// </summary>
-    public IMockRaise<T>? Raise { get; internal set; }
-
-    /// <summary>Creates a Mock with an existing engine, setup, and verify surfaces. Used by generated code.</summary>
-    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public Mock(T mockObject, IMockSetup<T> setup, IMockVerify<T> verify, MockEngine<T> engine)
-    {
-        Engine = engine;
+        _engine = engine;
         Object = mockObject;
-        Setup = setup;
-        Verify = verify;
+        Mock.Register(mockObject, this);
     }
 
-    /// <summary>Creates a Mock with an existing engine, setup, verify, and raise surfaces. Used by generated code.</summary>
-    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public Mock(T mockObject, IMockSetup<T> setup, IMockVerify<T> verify, IMockRaise<T>? raise, MockEngine<T> engine)
+    /// <inheritdoc />
+    void IMock.VerifyAll()
     {
-        Engine = engine;
-        Object = mockObject;
-        Setup = setup;
-        Verify = verify;
-        Raise = raise;
-    }
-
-    /// <summary>All calls made to this mock, in order.</summary>
-    public IReadOnlyList<CallRecord> Invocations => Engine.GetAllCalls();
-
-    /// <summary>
-    /// Enables auto-tracking for all properties. Property setters store values and getters return them,
-    /// acting like real auto-properties. Explicit setups take precedence over auto-tracked values.
-    /// </summary>
-    public void SetupAllProperties()
-    {
-        Engine.AutoTrackProperties = true;
-    }
-
-    /// <summary>Clears all setups and call history.</summary>
-    public void Reset() => Engine.Reset();
-
-    /// <summary>
-    /// Verifies all registered setups were invoked at least once.
-    /// Throws <see cref="MockVerificationException"/> listing uninvoked setups.
-    /// </summary>
-    public void VerifyAll()
-    {
-        var setups = Engine.GetSetups();
+        var setups = _engine.GetSetups();
         var uninvoked = new List<string>();
         foreach (var setup in setups)
         {
@@ -115,13 +55,10 @@ public class Mock<T> : IMock where T : class
         }
     }
 
-    /// <summary>
-    /// Fails if any recorded call was not matched by a prior verification statement.
-    /// Throws <see cref="MockVerificationException"/> listing unverified calls.
-    /// </summary>
-    public void VerifyNoOtherCalls()
+    /// <inheritdoc />
+    void IMock.VerifyNoOtherCalls()
     {
-        var unverified = Engine.GetUnverifiedCalls();
+        var unverified = _engine.GetUnverifiedCalls();
         if (unverified.Count > 0)
         {
             var message = $"VerifyNoOtherCalls failed. The following calls were not verified:\n" +
@@ -130,50 +67,8 @@ public class Mock<T> : IMock where T : class
         }
     }
 
-    /// <summary>
-    /// Retrieves the auto-mock wrapper for a child interface returned by this mock.
-    /// Use this to configure auto-mocked return values.
-    /// </summary>
-    public Mock<TChild> GetAutoMock<TChild>(string memberName) where TChild : class
-    {
-        var cacheKey = memberName + "|" + typeof(TChild).FullName;
-        if (Engine.TryGetAutoMock(cacheKey, out var mock))
-        {
-            return (Mock<TChild>)mock;
-        }
-
-        throw new InvalidOperationException(
-            $"No auto-mock found for member '{memberName}' returning type '{typeof(TChild).Name}'. " +
-            $"Ensure the method was called at least once before retrieving its auto-mock.");
-    }
-
-    /// <summary>
-    /// Returns a diagnostic report of this mock's setup coverage and call matching.
-    /// </summary>
-    public Diagnostics.MockDiagnostics GetDiagnostics() => Engine.GetDiagnostics();
-
-    /// <summary>
-    /// Sets the current state for state machine mocking. Null clears the state.
-    /// </summary>
-    public void SetState(string? stateName) => Engine.TransitionTo(stateName);
-
-    /// <summary>
-    /// Configures setups scoped to a specific state. All setups registered inside
-    /// the <paramref name="configure"/> action will only match when the engine is in the specified state.
-    /// </summary>
-    public void InState(string stateName, Action<IMockSetup<T>> configure)
-    {
-        var previous = Engine.PendingRequiredState;
-        Engine.PendingRequiredState = stateName;
-        try
-        {
-            configure(Setup);
-        }
-        finally
-        {
-            Engine.PendingRequiredState = previous;
-        }
-    }
+    /// <inheritdoc />
+    void IMock.Reset() => _engine.Reset();
 
     /// <summary>Implicit conversion to T -- no .Object needed.</summary>
     public static implicit operator T(Mock<T> mock) => mock.Object;

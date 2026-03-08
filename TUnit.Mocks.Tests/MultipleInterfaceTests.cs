@@ -52,14 +52,14 @@ public class MultipleInterfaceTests
     {
         // Arrange
         var mock = Mock.Of<IMultiLogger, IMultiDisposable>();
-        mock.Setup.Log(Arg.Any<string>());
+        mock.Log(Any());
 
         // Act
         var logger = mock.Object;
         logger.Log("test message");
 
         // Assert — call recorded and verifiable
-        mock.Verify.Log(Arg.Is("test message")).WasCalled();
+        mock.Log(Is("test message")).WasCalled();
     }
 
     [Test]
@@ -107,14 +107,14 @@ public class MultipleInterfaceTests
     {
         // Arrange
         var mock = Mock.Of<IMultiLogger, IMultiDisposable>();
-        mock.Setup.Log(Arg.Any<string>());
+        mock.Log(Any());
 
         // Act — call primary and secondary interface methods
         mock.Object.Log("hello");
         ((IMultiDisposable)mock.Object).Dispose();
 
         // Assert — all calls recorded in invocations
-        await Assert.That(mock.Invocations).Count().IsEqualTo(2);
+        await Assert.That(Mock.GetInvocations(mock)).Count().IsEqualTo(2);
     }
 
     [Test]
@@ -135,13 +135,13 @@ public class MultipleInterfaceTests
     {
         // Arrange
         var mock = Mock.Of<IMultiLogger, IMultiDisposable, IMultiSerializable, IMultiCloneable>();
-        mock.Setup.Log(Arg.Any<string>());
+        mock.Log(Any());
 
         // Act
         mock.Object.Log("hello from four-interface mock");
 
         // Assert
-        mock.Verify.Log("hello from four-interface mock").WasCalled(Times.Once);
+        mock.Log("hello from four-interface mock").WasCalled(Times.Once);
         await Assert.That(true).IsTrue();
     }
 
@@ -180,7 +180,7 @@ public class MultipleInterfaceTests
         ((IMultiCloneable)mock.Object).Clone();
 
         // Assert — all 4 calls tracked
-        await Assert.That(mock.Invocations).Count().IsEqualTo(4);
+        await Assert.That(Mock.GetInvocations(mock)).Count().IsEqualTo(4);
     }
 
     [Test]
@@ -190,6 +190,6 @@ public class MultipleInterfaceTests
         var mock = Mock.Of<IMultiLogger, IMultiDisposable>(MockBehavior.Strict);
 
         // Assert — strict behavior inherited
-        await Assert.That(mock.Behavior).IsEqualTo(MockBehavior.Strict);
+        await Assert.That(Mock.GetBehavior(mock)).IsEqualTo(MockBehavior.Strict);
     }
 }

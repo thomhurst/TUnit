@@ -15,13 +15,13 @@ public class VerifyNoOtherCallsTests
     public async Task VerifyNoOtherCalls_Passes_When_All_Calls_Verified()
     {
         var mock = Mock.Of<IService>();
-        mock.Setup.GetValue(Arg.Any<string>()).Returns("value");
+        mock.GetValue(Any()).Returns("value");
 
         var svc = mock.Object;
         svc.GetValue("key1");
 
-        mock.Verify!.GetValue("key1").WasCalled(Times.Once);
-        mock.VerifyNoOtherCalls();
+        mock.GetValue("key1").WasCalled(Times.Once);
+        Mock.VerifyNoOtherCalls(mock);
 
         await Assert.That(true).IsTrue();
     }
@@ -30,16 +30,16 @@ public class VerifyNoOtherCallsTests
     public async Task VerifyNoOtherCalls_Fails_When_Unverified_Calls_Exist()
     {
         var mock = Mock.Of<IService>();
-        mock.Setup.GetValue(Arg.Any<string>()).Returns("value");
+        mock.GetValue(Any()).Returns("value");
 
         var svc = mock.Object;
         svc.GetValue("key1");
         svc.Process(42);
 
         // Only verify GetValue, not Process
-        mock.Verify!.GetValue("key1").WasCalled(Times.Once);
+        mock.GetValue("key1").WasCalled(Times.Once);
 
-        var ex = Assert.Throws<MockVerificationException>(() => mock.VerifyNoOtherCalls());
+        var ex = Assert.Throws<MockVerificationException>(() => Mock.VerifyNoOtherCalls(mock));
         await Assert.That(ex.Message).Contains("Process(42)");
     }
 
@@ -47,7 +47,7 @@ public class VerifyNoOtherCallsTests
     public async Task VerifyNoOtherCalls_Passes_When_No_Calls_Made()
     {
         var mock = Mock.Of<IService>();
-        mock.VerifyNoOtherCalls();
+        Mock.VerifyNoOtherCalls(mock);
         await Assert.That(true).IsTrue();
     }
 
@@ -55,13 +55,13 @@ public class VerifyNoOtherCallsTests
     public async Task VerifyNoOtherCalls_Works_After_Reset()
     {
         var mock = Mock.Of<IService>();
-        mock.Setup.GetValue(Arg.Any<string>()).Returns("value");
+        mock.GetValue(Any()).Returns("value");
 
         var svc = mock.Object;
         svc.GetValue("key1");
 
-        mock.Reset();
-        mock.VerifyNoOtherCalls(); // should pass — history cleared
+        Mock.Reset(mock);
+        Mock.VerifyNoOtherCalls(mock); // should pass — history cleared
 
         await Assert.That(true).IsTrue();
     }
@@ -70,7 +70,7 @@ public class VerifyNoOtherCallsTests
     public async Task VerifyNoOtherCalls_Multiple_Unverified_Shows_All()
     {
         var mock = Mock.Of<IService>();
-        mock.Setup.GetValue(Arg.Any<string>()).Returns("value");
+        mock.GetValue(Any()).Returns("value");
 
         var svc = mock.Object;
         svc.GetValue("a");
@@ -78,7 +78,7 @@ public class VerifyNoOtherCallsTests
         svc.Reset();
 
         // Verify none
-        var ex = Assert.Throws<MockVerificationException>(() => mock.VerifyNoOtherCalls());
+        var ex = Assert.Throws<MockVerificationException>(() => Mock.VerifyNoOtherCalls(mock));
         await Assert.That(ex.Message).Contains("GetValue(a)");
         await Assert.That(ex.Message).Contains("Process(1)");
     }

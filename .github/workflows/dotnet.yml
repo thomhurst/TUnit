@@ -87,7 +87,7 @@ jobs:
 
       - name: Docker Setup Docker
         if: matrix.os == 'ubuntu-latest'
-        uses: docker/setup-docker-action@v4.7.0
+        uses: docker/setup-docker-action@v5.0.0
 
       - name: Cache Playwright Browsers
         uses: actions/cache@v5
@@ -122,6 +122,13 @@ jobs:
       - name: Publish AOT
         run: dotnet publish TUnit.TestProject/TUnit.TestProject.csproj -c Release --use-current-runtime -p:Aot=true -o TESTPROJECT_AOT --framework net10.0
 
+      - name: Expose GitHub Actions Runtime
+        uses: actions/github-script@v8
+        with:
+          script: |
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env['ACTIONS_RUNTIME_TOKEN']);
+            core.exportVariable('ACTIONS_RESULTS_URL', process.env['ACTIONS_RESULTS_URL']);
+
       - name: Run Pipeline
         uses: ./.github/actions/execute-pipeline
         with:
@@ -131,21 +138,21 @@ jobs:
           publish-packages: ${{ (github.event.inputs.publish-packages || false) && matrix.os == 'ubuntu-latest' }}
 
       - name: Upload Diagnostic Logs
-        uses: actions/upload-artifact@v6.0.0
+        uses: actions/upload-artifact@v7.0.0
         if: always()
         with:
           name: TestingPlatformDiagnosticLogs${{matrix.os}}
           path: '**/log_*.diag'
 
       - name: Upload Hang Dumps
-        uses: actions/upload-artifact@v6.0.0
+        uses: actions/upload-artifact@v7.0.0
         if: always()
         with:
           name: HangDump${{matrix.os}}
           path: '**/hangdump*'
 
       - name: NuGet Packages Artifacts
-        uses: actions/upload-artifact@v6.0.0
+        uses: actions/upload-artifact@v7.0.0
         if: always()
         with:
           name: 'NuGetPackages-${{matrix.os}}'

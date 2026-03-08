@@ -73,7 +73,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             .CreateSyntaxProvider(
                 predicate: static (node, _) => node is TypeDeclarationSyntax or PropertyDeclarationSyntax,
                 transform: static (ctx, _) => ExtractConcreteGenericTypes(ctx))
-            .Where(static x => x.Length > 0)
+            .Where(static x => x.Count > 0)
             .SelectMany(static (types, _) => types);
 
         // Collect and deduplicate by fully qualified type name
@@ -326,17 +326,17 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
     /// 1. Inheritance chains (base types)
     /// 2. IDataSourceAttribute type arguments
     /// </summary>
-    private static ImmutableArray<ConcreteGenericTypeModel> ExtractConcreteGenericTypes(GeneratorSyntaxContext context)
+    private static List<ConcreteGenericTypeModel> ExtractConcreteGenericTypes(GeneratorSyntaxContext context)
     {
         var semanticModel = context.SemanticModel;
-        var results = new List<ConcreteGenericTypeModel>();
 
         var dataSourceInterface = semanticModel.Compilation.GetTypeByMetadataName("TUnit.Core.IDataSourceAttribute");
         var asyncInitializerInterface = semanticModel.Compilation.GetTypeByMetadataName("TUnit.Core.Interfaces.IAsyncInitializer");
 
         if (dataSourceInterface == null || asyncInitializerInterface == null)
-            return ImmutableArray<ConcreteGenericTypeModel>.Empty;
+            return [];
 
+        var results = new List<ConcreteGenericTypeModel>();
         // Discovery from type declarations (inheritance chains)
         if (context.Node is TypeDeclarationSyntax typeDecl)
         {
@@ -432,7 +432,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             }
         }
 
-        return results.Count > 0 ? results.ToImmutableArray() : ImmutableArray<ConcreteGenericTypeModel>.Empty;
+        return results;
     }
 
     /// <summary>

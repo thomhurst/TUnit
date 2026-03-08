@@ -1,4 +1,5 @@
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Mocks.SourceGenerator.Extensions;
 using TUnit.Mocks.SourceGenerator.Models;
 using System.Collections.Generic;
@@ -42,10 +43,18 @@ internal static class MemberDiscovery
         foreach (var iface in interfaces)
         {
             string? explicitInterfaceName = null;
+            var interfaceFqn = iface.GetFullyQualifiedName();
 
             foreach (var member in iface.GetMembers())
             {
-                if (member.IsStatic) continue;
+                if (member.IsStatic)
+                {
+                    if (member.IsAbstract)
+                    {
+                        CollectStaticAbstractMember(member, interfaceFqn, methods, properties, events, seenMethods, seenProperties, seenEvents, ref memberIdCounter);
+                    }
+                    continue;
+                }
 
                 switch (member)
                 {
@@ -134,9 +143,18 @@ internal static class MemberDiscovery
 
             foreach (var iface in interfaces)
             {
+                var interfaceFqn = iface.GetFullyQualifiedName();
+
                 foreach (var member in iface.GetMembers())
                 {
-                    if (member.IsStatic) continue;
+                    if (member.IsStatic)
+                    {
+                        if (member.IsAbstract)
+                        {
+                            CollectStaticAbstractMember(member, interfaceFqn, methods, properties, events, seenMethods, seenProperties, seenEvents, ref memberIdCounter);
+                        }
+                        continue;
+                    }
 
                     switch (member)
                     {
@@ -294,12 +312,15 @@ internal static class MemberDiscovery
             Parameters = new EquatableArray<MockParameterModel>(
                 method.Parameters.Select(p => new MockParameterModel
                 {
-                    Name = p.Name,
+                    Name = EscapeIdentifier(p.Name),
                     Type = p.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat),
                     FullyQualifiedType = p.Type.GetFullyQualifiedName(),
                     Direction = p.GetParameterDirection(),
                     HasDefaultValue = p.HasExplicitDefaultValue,
-                    DefaultValueExpression = p.HasExplicitDefaultValue ? FormatDefaultValue(p) : null
+                    DefaultValueExpression = p.HasExplicitDefaultValue ? FormatDefaultValue(p) : null,
+                    IsValueType = p.Type.IsValueType,
+                    IsRefStruct = p.Type.IsRefLikeType,
+                    SpanElementType = GetSpanElementType(p.Type)
                 }).ToImmutableArray()
             ),
             TypeParameters = new EquatableArray<MockTypeParameterModel>(
@@ -316,7 +337,9 @@ internal static class MemberDiscovery
             IsAbstractMember = method.IsAbstract,
             IsVirtualMember = method.IsVirtual || method.IsOverride,
             IsProtected = method.DeclaredAccessibility == Accessibility.Protected
-                       || method.DeclaredAccessibility == Accessibility.ProtectedOrInternal
+                       || method.DeclaredAccessibility == Accessibility.ProtectedOrInternal,
+            IsRefStructReturn = returnType.IsRefLikeType,
+            SpanReturnElementType = returnType.IsRefLikeType ? GetSpanElementType(returnType) : null
         };
     }
 
@@ -365,7 +388,9 @@ internal static class MemberDiscovery
             IsAbstractMember = property.IsAbstract,
             IsVirtualMember = property.IsVirtual || property.IsOverride,
             IsProtected = property.DeclaredAccessibility == Accessibility.Protected
-                       || property.DeclaredAccessibility == Accessibility.ProtectedOrInternal
+                       || property.DeclaredAccessibility == Accessibility.ProtectedOrInternal,
+            IsRefStructReturn = property.Type.IsRefLikeType,
+            SpanReturnElementType = property.Type.IsRefLikeType ? GetSpanElementType(property.Type) : null
         };
     }
 
@@ -385,13 +410,14 @@ internal static class MemberDiscovery
                 Parameters = new EquatableArray<MockParameterModel>(
                     ctor.Parameters.Select(p => new MockParameterModel
                     {
-                        Name = p.Name,
+                        Name = EscapeIdentifier(p.Name),
                         Type = p.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat),
                         FullyQualifiedType = p.Type.GetFullyQualifiedName(),
                         Direction = p.GetParameterDirection(),
                         HasDefaultValue = p.HasExplicitDefaultValue,
                         DefaultValueExpression = p.HasExplicitDefaultValue ? FormatDefaultValue(p) : null,
-                        IsValueType = p.Type.IsValueType
+                        IsValueType = p.Type.IsValueType,
+                        IsRefStruct = p.Type.IsRefLikeType
                     }).ToImmutableArray()
                 )
             });
@@ -421,7 +447,7 @@ internal static class MemberDiscovery
             Parameters = new EquatableArray<MockParameterModel>(
                 indexer.Parameters.Select(p => new MockParameterModel
                 {
-                    Name = p.Name,
+                    Name = EscapeIdentifier(p.Name),
                     Type = p.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat),
                     FullyQualifiedType = p.Type.GetFullyQualifiedName(),
                     Direction = ParameterDirection.In
@@ -460,8 +486,8 @@ internal static class MemberDiscovery
         {
             // EventHandler pattern: skip sender (first param), expose remaining as raise params
             var argsParams = invokeMethod.Parameters.Skip(1).ToArray();
-            raiseParameters = string.Join(", ", argsParams.Select(p => $"{p.Type.GetFullyQualifiedName()} {p.Name}"));
-            invokeArgs = "this, " + string.Join(", ", argsParams.Select(p => p.Name));
+            raiseParameters = string.Join(", ", argsParams.Select(p => $"{p.Type.GetFullyQualifiedName()} {EscapeIdentifier(p.Name)}"));
+            invokeArgs = "this, " + string.Join(", ", argsParams.Select(p => EscapeIdentifier(p.Name)));
             eventArgsType = argsParams.Length == 1
                 ? argsParams[0].Type.GetFullyQualifiedName()
                 : raiseParameters; // fallback for multi-arg EventHandler subtypes
@@ -470,8 +496,8 @@ internal static class MemberDiscovery
         else
         {
             // Custom delegate (Action<T>, Func<T>, user-defined): expose all params
-            raiseParameters = string.Join(", ", invokeMethod.Parameters.Select(p => $"{p.Type.GetFullyQualifiedName()} {p.Name}"));
-            invokeArgs = string.Join(", ", invokeMethod.Parameters.Select(p => p.Name));
+            raiseParameters = string.Join(", ", invokeMethod.Parameters.Select(p => $"{p.Type.GetFullyQualifiedName()} {EscapeIdentifier(p.Name)}"));
+            invokeArgs = string.Join(", ", invokeMethod.Parameters.Select(p => EscapeIdentifier(p.Name)));
             eventArgsType = raiseParameters;
             raiseParams = invokeMethod.Parameters.ToArray();
         }
@@ -479,7 +505,7 @@ internal static class MemberDiscovery
         var raiseParameterList = new EquatableArray<MockParameterModel>(
             raiseParams.Select(p => new MockParameterModel
             {
-                Name = p.Name,
+                Name = EscapeIdentifier(p.Name),
                 FullyQualifiedType = p.Type.GetFullyQualifiedName(),
                 Type = p.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat),
                 Direction = ParameterDirection.In
@@ -539,5 +565,93 @@ internal static class MemberDiscovery
         if (value is bool b) return b ? "true" : "false";
         if (value is char c) return $"'{c}'";
         return value.ToString();
+    }
+
+    /// <summary>
+    /// Escapes a parameter name that is a C# reserved keyword by prepending '@'.
+    /// E.g., "event" → "@event", "class" → "@class", "return" → "@return".
+    /// </summary>
+    private static string EscapeIdentifier(string name) =>
+        SyntaxFacts.GetKeywordKind(name) != SyntaxKind.None ? "@" + name : name;
+
+    /// <summary>
+    /// For ReadOnlySpan&lt;T&gt; or Span&lt;T&gt; types, returns the fully qualified element type.
+    /// Returns null for all other types.
+    /// </summary>
+    private static string? GetSpanElementType(ITypeSymbol type)
+    {
+        if (type is not INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1 } namedType)
+            return null;
+
+        var constructed = namedType.ConstructedFrom;
+        var ns = constructed.ContainingNamespace?.ToDisplayString();
+        var name = constructed.MetadataName;
+
+        if (ns == "System" && name is "ReadOnlySpan`1" or "Span`1")
+        {
+            return namedType.TypeArguments[0].GetFullyQualifiedName();
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Collects a static abstract interface member as a full MockMemberModel with IsStaticAbstract=true.
+    /// Uses the existing CreateMethodModel/CreatePropertyModel to generate models with MemberIds,
+    /// enabling full setup/verify support through the mock engine.
+    /// </summary>
+    private static void CollectStaticAbstractMember(
+        ISymbol member,
+        string interfaceFqn,
+        List<MockMemberModel> methods,
+        List<MockMemberModel> properties,
+        List<MockEventModel> events,
+        HashSet<string> seenMethods,
+        Dictionary<string, int> seenProperties,
+        HashSet<string> seenEvents,
+        ref int memberIdCounter)
+    {
+        switch (member)
+        {
+            case IMethodSymbol method when method.MethodKind == MethodKind.Ordinary:
+            {
+                var key = GetMethodKey(method);
+                if (!seenMethods.Add(key)) break;
+
+                var model = CreateMethodModel(method, ref memberIdCounter, interfaceFqn) with
+                {
+                    IsStaticAbstract = true
+                };
+                methods.Add(model);
+                break;
+            }
+
+            case IPropertySymbol property when !property.IsIndexer:
+            {
+                var key = $"P:{property.Name}";
+                if (seenProperties.ContainsKey(key)) break;
+
+                seenProperties[key] = properties.Count;
+                var model = CreatePropertyModel(property, ref memberIdCounter, interfaceFqn) with
+                {
+                    IsStaticAbstract = true
+                };
+                properties.Add(model);
+                break;
+            }
+
+            case IEventSymbol evt:
+            {
+                var key = $"E:{evt.Name}";
+                if (!seenEvents.Add(key)) break;
+
+                var model = CreateEventModel(evt, interfaceFqn) with
+                {
+                    IsStaticAbstract = true
+                };
+                events.Add(model);
+                break;
+            }
+        }
     }
 }

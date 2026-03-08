@@ -14,14 +14,14 @@ public class VerificationTests
     {
         // Arrange
         var mock = Mock.Of<ICalculator>();
-        mock.Setup.Add(1, 2).Returns(3);
+        mock.Add(1, 2).Returns(3);
 
         // Act
         ICalculator calc = mock.Object;
         calc.Add(1, 2);
 
         // Assert
-        mock.Verify.Add(1, 2).WasCalled(Times.Once);
+        mock.Add(1, 2).WasCalled(Times.Once);
         await Assert.That(true).IsTrue(); // test completes without exception
     }
 
@@ -38,7 +38,7 @@ public class VerificationTests
         // Assert — verify expects exactly twice, should fail
         var exception = Assert.Throws<MockVerificationException>(() =>
         {
-            mock.Verify.Add(1, 2).WasCalled(Times.Exactly(2));
+            mock.Add(1, 2).WasCalled(Times.Exactly(2));
         });
 
         await Assert.That(exception.Message).Contains("Mock verification failed");
@@ -55,7 +55,7 @@ public class VerificationTests
         // Act — don't call anything
 
         // Assert
-        mock.Verify.Add(1, 2).WasNeverCalled();
+        mock.Add(1, 2).WasNeverCalled();
         await Assert.That(true).IsTrue();
     }
 
@@ -72,7 +72,7 @@ public class VerificationTests
         // Assert
         var exception = Assert.Throws<MockVerificationException>(() =>
         {
-            mock.Verify.Add(1, 2).WasNeverCalled();
+            mock.Add(1, 2).WasNeverCalled();
         });
 
         await Assert.That(exception.ActualCount).IsEqualTo(1);
@@ -91,7 +91,7 @@ public class VerificationTests
         calc.Add(1, 2);
 
         // Assert — at least 2 should pass
-        mock.Verify.Add(1, 2).WasCalled(Times.AtLeast(2));
+        mock.Add(1, 2).WasCalled(Times.AtLeast(2));
         await Assert.That(true).IsTrue();
     }
 
@@ -107,7 +107,7 @@ public class VerificationTests
         calc.Add(1, 2);
 
         // Assert — at most 3 should pass
-        mock.Verify.Add(1, 2).WasCalled(Times.AtMost(3));
+        mock.Add(1, 2).WasCalled(Times.AtMost(3));
         await Assert.That(true).IsTrue();
     }
 
@@ -126,7 +126,7 @@ public class VerificationTests
         // Assert — at most 2 should fail
         var exception = Assert.Throws<MockVerificationException>(() =>
         {
-            mock.Verify.Add(1, 2).WasCalled(Times.AtMost(2));
+            mock.Add(1, 2).WasCalled(Times.AtMost(2));
         });
 
         await Assert.That(exception.ActualCount).IsEqualTo(3);
@@ -144,7 +144,7 @@ public class VerificationTests
         calc.Add(1, 2);
 
         // Assert — between 1 and 3 should pass
-        mock.Verify.Add(1, 2).WasCalled(Times.Between(1, 3));
+        mock.Add(1, 2).WasCalled(Times.Between(1, 3));
         await Assert.That(true).IsTrue();
     }
 
@@ -161,7 +161,7 @@ public class VerificationTests
         // Assert — between 2 and 4 should fail (only 1 call)
         var exception = Assert.Throws<MockVerificationException>(() =>
         {
-            mock.Verify.Add(1, 2).WasCalled(Times.Between(2, 4));
+            mock.Add(1, 2).WasCalled(Times.Between(2, 4));
         });
 
         await Assert.That(exception.ActualCount).IsEqualTo(1);
@@ -180,8 +180,8 @@ public class VerificationTests
         calc.Add(1, 2);
 
         // Assert — only calls with (1, 2) should count
-        mock.Verify.Add(1, 2).WasCalled(Times.Exactly(2));
-        mock.Verify.Add(3, 4).WasCalled(Times.Once);
+        mock.Add(1, 2).WasCalled(Times.Exactly(2));
+        mock.Add(3, 4).WasCalled(Times.Once);
         await Assert.That(true).IsTrue();
     }
 
@@ -196,7 +196,7 @@ public class VerificationTests
         calc.Add(1, 2);
 
         // Assert — WasCalled() means at least once
-        mock.Verify.Add(1, 2).WasCalled();
+        mock.Add(1, 2).WasCalled();
         await Assert.That(true).IsTrue();
     }
 
@@ -209,7 +209,7 @@ public class VerificationTests
         // Assert — WasCalled() should fail when not called
         var exception = Assert.Throws<MockVerificationException>(() =>
         {
-            mock.Verify.Add(1, 2).WasCalled();
+            mock.Add(1, 2).WasCalled();
         });
 
         await Assert.That(exception.ActualCount).IsEqualTo(0);
@@ -227,8 +227,8 @@ public class VerificationTests
         calc.Log("world");
 
         // Assert
-        mock.Verify.Log("hello").WasCalled(Times.Once);
-        mock.Verify.Log("world").WasCalled(Times.Once);
+        mock.Log("hello").WasCalled(Times.Once);
+        mock.Log("world").WasCalled(Times.Once);
         await Assert.That(true).IsTrue();
     }
 
@@ -237,7 +237,7 @@ public class VerificationTests
     {
         // Arrange
         var mock = Mock.Of<IGreeter>();
-        mock.Setup.Greet("Alice").Returns("Hello, Alice!");
+        mock.Greet("Alice").Returns("Hello, Alice!");
 
         // Act
         IGreeter greeter = mock.Object;
@@ -245,8 +245,8 @@ public class VerificationTests
         greeter.Greet("Bob");
 
         // Assert
-        mock.Verify.Greet("Alice").WasCalled(Times.Once);
-        mock.Verify.Greet("Bob").WasCalled(Times.Once);
+        mock.Greet("Alice").WasCalled(Times.Once);
+        mock.Greet("Bob").WasCalled(Times.Once);
         await Assert.That(true).IsTrue();
     }
 }

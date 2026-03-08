@@ -43,6 +43,11 @@ internal class Bugs2971NullableTypeTest : TestsBase
         var guidPattern2 = @"_ModuleInitializer_[a-fA-F0-9]{32}";
         scrubbedText = System.Text.RegularExpressions.Regex.Replace(scrubbedText, guidPattern2, "_ModuleInitializer_GUID", System.Text.RegularExpressions.RegexOptions.None);
 
+        // Scrub version numbers in GeneratedCode attributes
+        var versionPattern = @"\[global::System\.CodeDom\.Compiler\.GeneratedCode\(""TUnit"", ""[^""]*""\)\]";
+        scrubbedText = System.Text.RegularExpressions.Regex.Replace(scrubbedText, versionPattern,
+            @"[global::System.CodeDom.Compiler.GeneratedCode(""TUnit"", ""VERSION_SCRUBBED"")]", System.Text.RegularExpressions.RegexOptions.None);
+
         return scrubbedText;
     }
 }
