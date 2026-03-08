@@ -9,6 +9,7 @@ using TUnit.Core;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Interfaces.SourceGenerator;
 using TUnit.Engine.Building.Interfaces;
+using TUnit.Engine.Helpers;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Building.Collectors;
@@ -314,22 +315,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             throw new InvalidOperationException("Dynamic test discovery result must have a test class type and method");
         }
 
-        // Extract method info from the expression
-        MethodInfo? methodInfo = null;
-        var lambdaExpression = result.TestMethod as LambdaExpression;
-        if (lambdaExpression?.Body is MethodCallExpression methodCall)
-        {
-            methodInfo = methodCall.Method;
-        }
-        else if (lambdaExpression?.Body is UnaryExpression { Operand: MethodCallExpression unaryMethodCall })
-        {
-            methodInfo = unaryMethodCall.Method;
-        }
-
-        if (methodInfo == null)
-        {
-            throw new InvalidOperationException("Could not extract method info from dynamic test expression");
-        }
+        var methodInfo = ExpressionHelper.ExtractMethodInfo(result.TestMethod);
 
         var testName = methodInfo.Name;
 
@@ -413,32 +399,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         {
             try
             {
-                if (result.TestMethod == null)
-                {
-                    throw new InvalidOperationException("Dynamic test method expression is null");
-                }
-
-                // Extract method info from the expression
-                var lambdaExpression = result.TestMethod as LambdaExpression;
-                if (lambdaExpression == null)
-                {
-                    throw new InvalidOperationException("Dynamic test method must be a lambda expression");
-                }
-
-                MethodInfo? methodInfo = null;
-                if (lambdaExpression.Body is MethodCallExpression methodCall)
-                {
-                    methodInfo = methodCall.Method;
-                }
-                else if (lambdaExpression.Body is UnaryExpression { Operand: MethodCallExpression unaryMethodCall })
-                {
-                    methodInfo = unaryMethodCall.Method;
-                }
-
-                if (methodInfo == null)
-                {
-                    throw new InvalidOperationException("Could not extract method info from dynamic test expression");
-                }
+                var methodInfo = ExpressionHelper.ExtractMethodInfo(result.TestMethod);
 
                 var testInstance = instance ?? throw new InvalidOperationException("Test instance is null");
 

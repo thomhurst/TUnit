@@ -3,7 +3,7 @@
 
 using TUnit.Core.Logging;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
-[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "1.0.0.0")]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 file static class TUnitInfrastructure
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]

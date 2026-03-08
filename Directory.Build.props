@@ -14,6 +14,8 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <!-- We only need GitVersion.MsBuild for version properties, not the generated class -->
+    <GenerateGitVersionInformation>false</GenerateGitVersionInformation>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>preview</LangVersion>

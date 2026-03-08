@@ -24,6 +24,7 @@ internal static class HtmlReportGenerator
         sb.AppendLine("<head>");
         sb.AppendLine("<meta charset=\"UTF-8\">");
         sb.AppendLine("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">");
+        sb.AppendLine("<link rel=\"icon\" href=\"data:,\">");
         sb.Append("<title>Test Report \u2014 ");
         sb.Append(WebUtility.HtmlEncode(data.AssemblyName));
         sb.AppendLine("</title>");
@@ -308,7 +309,7 @@ internal static class HtmlReportGenerator
 
         // Feature 2: Expand/Collapse All + Feature 3: Sort Toggle
         sb.AppendLine("<div class=\"bar-actions\">");
-        sb.AppendLine("<button id=\"expandAll\" class=\"bar-btn\" aria-label=\"Expand all groups\" title=\"Expand all groups\"><svg viewBox=\"0 0 16 16\" fill=\"currentColor\" width=\"14\" height=\"14\" aria-hidden=\"true\"><path d=\"M1.75 10a.75.75 0 0 1 .75.75v2.5h2.5a.75.75 0 0 1 0 1.5h-3.25a.75.75 0 0 1-.75-.75v-3.25a.75.75 0 0 1 .75-.75Zm12.5 0a.75.75 0 0 1 .75.75v3.25a.75.75 0 0 1-.75.75h-3.25a.75.75 0 0 1 0-1.5h2.5v-2.5a.75.75 0 0 1 .75-.75ZM2.5 2.25h-2.5v2.5a.75.75 0 0 1-1.5 0v-3.25a.75.75 0 0 1 .75-.75h3.25a.75.75 0 0 1 0 1.5Zm8.75-1.5a.75.75 0 0 1 0-1.5h3.25a.75.75 0 0 1 .75.75v3.25a.75.75 0 0 1-1.5 0v-2.5h-2.5Z\"/></svg></button>");
+        sb.AppendLine("<button id=\"expandAll\" class=\"bar-btn\" aria-label=\"Expand all groups\" title=\"Expand all groups\"><svg viewBox=\"0 0 16 16\" fill=\"currentColor\" width=\"14\" height=\"14\" aria-hidden=\"true\"><path d=\"M1.75 10a.75.75 0 0 1 .75.75v2.5h2.5a.75.75 0 0 1 0 1.5h-3.25a.75.75 0 0 1-.75-.75v-3.25a.75.75 0 0 1 .75-.75Zm12.5 0a.75.75 0 0 1 .75.75v3.25a.75.75 0 0 1-.75.75h-3.25a.75.75 0 0 1 0-1.5h2.5v-2.5a.75.75 0 0 1 .75-.75ZM1.75 6a.75.75 0 0 0 .75-.75v-2.5h2.5a.75.75 0 0 0 0-1.5h-3.25a.75.75 0 0 0-.75.75v3.25a.75.75 0 0 0 .75.75ZM14.25 6a.75.75 0 0 0 .75-.75v-3.25a.75.75 0 0 0-.75-.75h-3.25a.75.75 0 0 0 0 1.5h2.5v2.5a.75.75 0 0 0 .75.75Z\"/></svg></button>");
         sb.AppendLine("<button id=\"collapseAll\" class=\"bar-btn\" aria-label=\"Collapse all groups\" title=\"Collapse all groups\"><svg viewBox=\"0 0 16 16\" fill=\"currentColor\" width=\"14\" height=\"14\" aria-hidden=\"true\"><path d=\"M3.75 14a.75.75 0 0 1-.75-.75v-2.5h-2.5a.75.75 0 0 1 0-1.5h3.25a.75.75 0 0 1 .75.75v3.25a.75.75 0 0 1-.75.75Zm8.5 0a.75.75 0 0 1-.75-.75v-3.25a.75.75 0 0 1 .75-.75h3.25a.75.75 0 0 1 0 1.5h-2.5v2.5a.75.75 0 0 1-.75.75ZM.5 4.75a.75.75 0 0 1 0-1.5h2.5v-2.5a.75.75 0 0 1 1.5 0v3.25a.75.75 0 0 1-.75.75H.5Zm11 0a.75.75 0 0 1-.75-.75v-3.25a.75.75 0 0 1 1.5 0v2.5h2.5a.75.75 0 0 1 0 1.5h-3.25Z\"/></svg></button>");
         sb.AppendLine("<span class=\"bar-sep\"></span>");
         sb.AppendLine("<span class=\"bar-lbl\" id=\"groupLabel\">Group:</span>");
@@ -430,8 +431,38 @@ internal static class HtmlReportGenerator
 :root[data-theme="light"] .grain{opacity:.008}
 
 /* ── Theme Transition ─────────────────────────────── */
-.theme-transition,.theme-transition *,.theme-transition *::before,.theme-transition *::after{
-  transition:background-color .3s var(--ease),color .3s var(--ease),border-color .3s var(--ease),box-shadow .3s var(--ease)!important;
+/* Register color tokens as typed properties so the browser can interpolate
+   them directly on :root — every element using var(--x) then animates in
+   sync with a single transition declaration, with zero per-element cost. */
+@property --bg        { syntax:'<color>'; inherits:true; initial-value:#0b0d11 }
+@property --surface-0 { syntax:'<color>'; inherits:true; initial-value:#12151c }
+@property --surface-1 { syntax:'<color>'; inherits:true; initial-value:#181c25 }
+@property --surface-2 { syntax:'<color>'; inherits:true; initial-value:#1f2430 }
+@property --surface-3 { syntax:'<color>'; inherits:true; initial-value:#282e3a }
+@property --border    { syntax:'<color>'; inherits:true; initial-value:rgba(255,255,255,.06) }
+@property --border-h  { syntax:'<color>'; inherits:true; initial-value:rgba(255,255,255,.10) }
+@property --text      { syntax:'<color>'; inherits:true; initial-value:#e2e4e9 }
+@property --text-2    { syntax:'<color>'; inherits:true; initial-value:#9ba1b0 }
+@property --text-3    { syntax:'<color>'; inherits:true; initial-value:#5f6678 }
+@property --emerald-d { syntax:'<color>'; inherits:true; initial-value:rgba(52,211,153,.12) }
+@property --rose-d    { syntax:'<color>'; inherits:true; initial-value:rgba(251,113,133,.12) }
+@property --amber-d   { syntax:'<color>'; inherits:true; initial-value:rgba(251,191,36,.10) }
+@property --slate-d   { syntax:'<color>'; inherits:true; initial-value:rgba(148,163,184,.10) }
+@property --indigo-d  { syntax:'<color>'; inherits:true; initial-value:rgba(129,140,248,.10) }
+
+:root {
+  transition:
+    --bg .3s var(--ease), --surface-0 .3s var(--ease), --surface-1 .3s var(--ease),
+    --surface-2 .3s var(--ease), --surface-3 .3s var(--ease),
+    --border .3s var(--ease), --border-h .3s var(--ease),
+    --text .3s var(--ease), --text-2 .3s var(--ease), --text-3 .3s var(--ease),
+    --emerald-d .3s var(--ease), --rose-d .3s var(--ease), --amber-d .3s var(--ease),
+    --slate-d .3s var(--ease), --indigo-d .3s var(--ease);
+}
+/* Suppress per-element transitions during theme switch so only the
+   @property variable interpolations drive the animation — no stagger. */
+.theme-transitioning *,.theme-transitioning *::before,.theme-transitioning *::after{
+  transition:none!important;
 }
 
 /* ── Reset & Base ──────────────────────────────────── */
@@ -657,7 +688,7 @@ body{
 .grp-hd.fail .grp-indicator{background:var(--rose)}
 .grp-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s var(--ease)}
 .grp.open .grp-body{grid-template-rows:1fr}
-.grp-body-inner{overflow:hidden;min-height:0}
+.grp-body-inner{overflow:hidden;min-height:0;content-visibility:auto;contain-intrinsic-size:auto 400px}
 .grp-body-pad{border-top:1px solid var(--border)}
 
 /* ── Test Rows ─────────────────────────────────────── */
@@ -1101,6 +1132,8 @@ const raw = document.getElementById('test-data');
 if (!raw) return;
 const data = JSON.parse(raw.textContent);
 const groups = data.groups || [];
+const testById = Object.create(null);
+groups.forEach(function(g){g.tests.forEach(function(t){testById[t.id]=t;});});
 const spans = data.spans || [];
 const container = document.getElementById('testGroups');
 const searchInput = document.getElementById('searchInput');
@@ -1172,7 +1205,7 @@ const statusOrder = {failed:0,error:0,timedOut:1,inProgress:2,unknown:3,passed:4
 function sortTests(tests) {
     if (sortMode === 'duration') return [...tests].sort((a,b) => b.durationMs - a.durationMs);
     if (sortMode === 'name') return [...tests].sort((a,b) => a.displayName.localeCompare(b.displayName));
-    return [...tests].sort((a,b) => (statusOrder[a.status]||9) - (statusOrder[b.status]||9));
+    return [...tests].sort((a,b) => (statusOrder[a.status]??9) - (statusOrder[b.status]??9));
 }
 
 function computeDisplayGroups() {
@@ -1500,10 +1533,20 @@ function renderSlowestSection() {
     sec.innerHTML = h;
 }
 
+function sortGroups(grps) {
+    if (sortMode === 'duration') {
+        const maxDur = new Map(grps.map(g => [g, g.tests.length ? Math.max(...g.tests.map(t => t.durationMs)) : 0]));
+        return [...grps].sort((a,b) => maxDur.get(b) - maxDur.get(a));
+    }
+    if (sortMode === 'name') return [...grps].sort((a,b) => a.label.localeCompare(b.label));
+    const minStatus = new Map(grps.map(g => [g, g.tests.length ? Math.min(...g.tests.map(t => statusOrder[t.status] ?? 9)) : 9]));
+    return [...grps].sort((a,b) => minStatus.get(a) - minStatus.get(b));
+}
+
 function render() {
     let total = 0;
     let html = '';
-    const displayGroups = computeDisplayGroups();
+    const displayGroups = sortGroups(computeDisplayGroups());
     const limited = displayGroups.slice(0, renderLimit);
     limited.forEach((g,gi)=>{
         const ft = sortTests(g.tests.filter(matchesFilter));
@@ -1541,9 +1584,7 @@ function render() {
             html += '<button class="t-link-btn" data-link-tid="'+t.id+'" title="Copy link">'+linkIcon+'</button>';
             html += '<span class="t-dur">'+fmt(t.durationMs)+'</span>';
             html += '</div>';
-            html += '<div class="t-detail" data-gi="'+gi+'" data-ti="'+ti+'"><div class="t-detail-inner"><div class="t-detail-pad">';
-            html += renderDetail(t);
-            html += '</div></div></div>';
+            html += '<div class="t-detail" data-gi="'+gi+'" data-ti="'+ti+'" data-tid="'+t.id+'"><div class="t-detail-inner"><div class="t-detail-pad"></div></div></div>';
         });
         html += '</div></div></div></div>';
     });
@@ -1619,7 +1660,7 @@ function scrollToTest(testId) {
     if (grp && !grp.classList.contains('open')) grp.classList.add('open');
     // Expand detail panel
     const det = row.nextElementSibling;
-    if (det && det.classList.contains('t-detail') && !det.classList.contains('open')) det.classList.add('open');
+    if (det && det.classList.contains('t-detail') && !det.classList.contains('open')) { ensureDetailRendered(det); det.classList.add('open'); }
     // Scroll into view
     row.scrollIntoView({behavior:'smooth',block:'center'});
     // Flash highlight
@@ -1645,6 +1686,15 @@ document.addEventListener('click',function(e){
     if(ct){ct.parentElement.classList.toggle('d-col-open');return;}
 });
 
+function ensureDetailRendered(det) {
+    if (!det || det.dataset.rendered) return;
+    det.dataset.rendered = '1';
+    var t = testById[det.dataset.tid];
+    if (!t) return;
+    var pad = det.querySelector('.t-detail-pad');
+    if (pad) pad.innerHTML = renderDetail(t);
+}
+
 container.addEventListener('click',function(e){
     // Feature 5: Deep-link copy button
     const lb = e.target.closest('.t-link-btn');
@@ -1665,7 +1715,7 @@ container.addEventListener('click',function(e){
     const row = e.target.closest('.t-row');
     if(row){
         const det = container.querySelector('.t-detail[data-gi="'+row.dataset.gi+'"][data-ti="'+row.dataset.ti+'"]');
-        if(det) det.classList.toggle('open');
+        if(det) { ensureDetailRendered(det); det.classList.toggle('open'); }
         if(row.dataset.tid) history.replaceState(null,'','#test-'+row.dataset.tid);
         return;
     }
@@ -1694,7 +1744,7 @@ clearBtn.addEventListener('click',function(){searchInput.value='';clearBtn.style
 // Feature 2: Expand/Collapse All
 document.getElementById('expandAll').addEventListener('click',function(){
     container.querySelectorAll('.grp').forEach(function(g){g.classList.add('open');});
-    container.querySelectorAll('.t-detail').forEach(function(d){d.classList.add('open');});
+    container.querySelectorAll('.t-detail').forEach(function(d){ensureDetailRendered(d);d.classList.add('open');});
     document.querySelectorAll('.qa-section').forEach(function(s){s.classList.add('tl-open');});
 });
 document.getElementById('collapseAll').addEventListener('click',function(){
@@ -1762,12 +1812,14 @@ checkHash();
 
 // Theme toggle handler
 document.getElementById('themeToggle').addEventListener('click', function(){
-    document.body.classList.add('theme-transition');
-    const current = document.documentElement.getAttribute('data-theme');
-    const next = current === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', next);
+    const root = document.documentElement;
+    // Suppress element-level transitions so only @property variable
+    // interpolations drive the animation — prevents stagger.
+    root.classList.add('theme-transitioning');
+    const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
     localStorage.setItem('tunit-theme', next);
-    setTimeout(function(){document.body.classList.remove('theme-transition');}, 350);
+    setTimeout(function(){root.classList.remove('theme-transitioning');}, 350);
 });
 
 // ── Feature 7: Keyboard Navigation ──────────────────
@@ -1815,7 +1867,7 @@ document.addEventListener('keydown',function(e){
     if(e.key==='k'){e.preventDefault();setKbFocus(Math.max(kbIdx-1,0));return;}
     if(e.key==='Enter'&&kbIdx>=0){
         e.preventDefault();const rows=getVisibleRows();const row=rows[kbIdx];
-        if(row){const det=container.querySelector('.t-detail[data-gi="'+row.dataset.gi+'"][data-ti="'+row.dataset.ti+'"]');if(det)det.classList.toggle('open');}
+        if(row){const det=container.querySelector('.t-detail[data-gi="'+row.dataset.gi+'"][data-ti="'+row.dataset.ti+'"]');if(det){ensureDetailRendered(det);det.classList.toggle('open');}}
         return;
     }
     if(e.key==='Escape'){

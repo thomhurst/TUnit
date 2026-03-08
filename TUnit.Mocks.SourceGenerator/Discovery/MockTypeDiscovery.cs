@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Mocks.SourceGenerator.Extensions;
 using TUnit.Mocks.SourceGenerator.Models;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace TUnit.Mocks.SourceGenerator.Discovery;
 
@@ -50,7 +51,16 @@ internal static class MockTypeDiscovery
         var invocation = (InvocationExpressionSyntax)context.Node;
 
         var symbolInfo = context.SemanticModel.GetSymbolInfo(invocation, ct);
-        if (symbolInfo.Symbol is not IMethodSymbol method)
+
+        // When the interface has static abstract members, CS8920 prevents normal symbol
+        // resolution (OverloadResolutionFailure). Fall back to CandidateSymbols.
+        IMethodSymbol? method = symbolInfo.Symbol as IMethodSymbol;
+        if (method is null && symbolInfo.CandidateReason == CandidateReason.OverloadResolutionFailure)
+        {
+            method = symbolInfo.CandidateSymbols.OfType<IMethodSymbol>().FirstOrDefault();
+        }
+
+        if (method is null)
             return ImmutableArray<MockTypeModel>.Empty;
 
         // Verify this is TUnit.Mocks.Mock.Of<T>() / OfPartial<T>()
@@ -69,6 +79,10 @@ internal static class MockTypeDiscovery
 
         var typeToMock = method.TypeArguments[0];
         if (typeToMock is not INamedTypeSymbol namedType)
+            return ImmutableArray<MockTypeModel>.Empty;
+
+        // Skip error types (unresolvable type arguments, e.g. referencing a generated bridge type)
+        if (namedType.TypeKind == TypeKind.Error)
             return ImmutableArray<MockTypeModel>.Empty;
 
         // Delegate mocking
@@ -169,7 +183,8 @@ internal static class MockTypeDiscovery
                     .ToImmutableArray()
             ),
             AdditionalInterfaceNames = new EquatableArray<string>(additionalInterfaceNames.MoveToImmutable()),
-            Constructors = singleTypeModel.Constructors
+            Constructors = singleTypeModel.Constructors,
+            HasStaticAbstractMembers = methods.Any(m => m.IsStaticAbstract) || properties.Any(p => p.IsStaticAbstract) || events.Any(e => e.IsStaticAbstract)
         };
 
         return ImmutableArray.Create(singleTypeModel, multiTypeModel);
@@ -197,6 +212,9 @@ internal static class MockTypeDiscovery
 
         foreach (var member in members)
         {
+            // Skip static members — static abstract return types should not be auto-mocked
+            if (member.IsStatic) continue;
+
             ITypeSymbol? returnType = member switch
             {
                 IMethodSymbol m when !m.ReturnsVoid => m.ReturnType,
@@ -216,6 +234,12 @@ internal static class MockTypeDiscovery
             // that the mock generator cannot handle, and auto-mocking them is rarely useful.
             var ns = namedReturn.ContainingNamespace?.ToDisplayString() ?? "";
             if (IsFrameworkNamespace(ns))
+                continue;
+
+            // Skip interfaces that have static abstract members — using them as type arguments
+            // in Mock<T>/MockEngine<T> triggers CS8920 because the static abstract members
+            // don't have a most specific implementation in the interface.
+            if (HasStaticAbstractMembers(namedReturn))
                 continue;
 
             var returnFqn = namedReturn.GetFullyQualifiedName();
@@ -255,6 +279,33 @@ internal static class MockTypeDiscovery
         ns == "System"    || ns.StartsWith("System.") ||
         ns == "Microsoft" || ns.StartsWith("Microsoft.") ||
         ns == "Windows"   || ns.StartsWith("Windows.");
+
+    /// <summary>
+    /// Returns true if the interface (or any of its base interfaces) has static abstract members
+    /// without a most specific implementation. Such interfaces cannot be used as generic type arguments
+    /// (CS8920) and should not have transitive mock factories generated.
+    /// </summary>
+    private static bool HasStaticAbstractMembers(INamedTypeSymbol interfaceType)
+    {
+        // Check the interface itself
+        foreach (var member in interfaceType.GetMembers())
+        {
+            if (member.IsStatic && member.IsAbstract)
+                return true;
+        }
+
+        // Check all inherited interfaces
+        foreach (var baseInterface in interfaceType.AllInterfaces)
+        {
+            foreach (var member in baseInterface.GetMembers())
+            {
+                if (member.IsStatic && member.IsAbstract)
+                    return true;
+            }
+        }
+
+        return false;
+    }
 
     private static MockTypeModel? BuildDelegateTypeModel(INamedTypeSymbol delegateType)
     {
@@ -306,7 +357,49 @@ internal static class MockTypeDiscovery
                     .Select(i => i.GetFullyQualifiedName())
                     .ToImmutableArray()
             ),
-            Constructors = constructors
+            Constructors = constructors,
+            HasStaticAbstractMembers = methods.Any(m => m.IsStaticAbstract) || properties.Any(p => p.IsStaticAbstract) || events.Any(e => e.IsStaticAbstract)
         };
+    }
+
+    // ─── [assembly: GenerateMock(typeof(T))] discovery ────────────────────
+
+    /// <summary>
+    /// Semantic transform for <c>[assembly: GenerateMock(typeof(T))]</c>.
+    /// Extracts the type argument and builds a <see cref="MockTypeModel"/>.
+    /// </summary>
+    public static ImmutableArray<MockTypeModel> TransformGenerateMockAttribute(
+        GeneratorAttributeSyntaxContext context, CancellationToken ct)
+    {
+        // The target symbol for an assembly attribute is the assembly itself
+        // The attribute constructor argument is typeof(T)
+        foreach (var attr in context.Attributes)
+        {
+            if (attr.AttributeClass?.Name is not ("GenerateMockAttribute" or "GenerateMock"))
+                continue;
+            if (attr.AttributeClass?.ContainingNamespace?.ToDisplayString() != "TUnit.Mocks")
+                continue;
+
+            if (attr.ConstructorArguments.Length != 1)
+                continue;
+
+            var typeArg = attr.ConstructorArguments[0];
+            if (typeArg.Value is not INamedTypeSymbol namedType)
+                continue;
+
+            // Can't mock sealed classes or structs
+            if (namedType.IsSealed && namedType.TypeKind != TypeKind.Interface)
+                continue;
+            if (namedType.IsValueType)
+                continue;
+
+            var model = BuildSingleTypeModel(namedType, isPartialMock: false);
+            if (model is null)
+                continue;
+
+            return ImmutableArray.Create(model);
+        }
+
+        return ImmutableArray<MockTypeModel>.Empty;
     }
 }
