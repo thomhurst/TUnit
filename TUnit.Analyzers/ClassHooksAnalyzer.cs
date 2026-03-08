@@ -33,8 +33,7 @@ public class ClassHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         var attributes = methodSymbol.GetAttributes();
 
         var onlyOnceAttributes = attributes
-                .Where(x => x.IsStandardHook(context.Compilation, out _, out var level, out _) && level == HookLevel.Class)
-                .ToList();
+                .Where(x => x.IsStandardHook(context.Compilation, out _, out var level, out _) && level == HookLevel.Class);
 
         if (!onlyOnceAttributes.Any())
         {

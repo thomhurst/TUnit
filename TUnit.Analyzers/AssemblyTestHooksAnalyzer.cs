@@ -34,8 +34,7 @@ public class AssemblyTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         var attributes = methodSymbol.GetAttributes();
 
         var onlyOnceAttributes = attributes
-            .Where(x => x.IsStandardHook(context.Compilation, out _, out var level, out _) && level == HookLevel.Assembly)
-            .ToList();
+            .Where(x => x.IsStandardHook(context.Compilation, out _, out var level, out _) && level == HookLevel.Assembly);
 
         if (!onlyOnceAttributes.Any())
         {

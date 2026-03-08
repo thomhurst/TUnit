@@ -494,8 +494,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                 .OfType<IPropertySymbol>()
                 .Where(p => p.Type.SpecialType == SpecialType.System_Boolean &&
                     p is { GetMethod: not null, IsStatic: false } &&
-                    SymbolEqualityComparer.Default.Equals(p.ContainingType, attributeData.TargetType))
-                .ToList();
+                    SymbolEqualityComparer.Default.Equals(p.ContainingType, attributeData.TargetType));
 
             var matchingMethods = methodMembers.ToList();
 

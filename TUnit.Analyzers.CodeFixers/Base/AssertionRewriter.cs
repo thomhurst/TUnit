@@ -70,7 +70,7 @@ public abstract class AssertionRewriter : CSharpSyntaxRewriter
                 // Conversion added trivia (TODO comments). Structure should be:
                 // [original whitespace] [TODO comment] [newline] [original whitespace] [await expression]
                 var whitespaceTrivia = originalTrivia.Where(t => t.IsKind(SyntaxKind.WhitespaceTrivia)).ToList();
-                var nonWhitespaceTrivia = originalTrivia.Where(t => !t.IsKind(SyntaxKind.WhitespaceTrivia)).ToList();
+                var nonWhitespaceTrivia = originalTrivia.Where(t => !t.IsKind(SyntaxKind.WhitespaceTrivia));
 
                 var builder = new List<SyntaxTrivia>();
                 builder.AddRange(nonWhitespaceTrivia); // Add any non-whitespace (e.g., leading newlines)

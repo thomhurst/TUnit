@@ -23,9 +23,9 @@ public class SingleTUnitAttributeAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var attributes = symbol.GetAttributes();
 
-        var singleAttributes = attributes.Select(ToClassInheritingSingleAttribute).OfType<INamedTypeSymbol>().ToList();
+        var singleAttributes = attributes.Select(ToClassInheritingSingleAttribute).OfType<INamedTypeSymbol>();
 
-        var notDistinctAttributes = singleAttributes.GroupBy(x => x, SymbolEqualityComparer.Default).Where(x => x.Count() > 1).Select(x => x.Key!).ToList();
+        var notDistinctAttributes = singleAttributes.GroupBy(x => x, SymbolEqualityComparer.Default).Where(x => x.Count() > 1).Select(x => x.Key!);
 
         foreach (var notDistinctAttribute in notDistinctAttributes)
         {
