@@ -181,8 +181,8 @@ public sealed class RequestMatcher
         if (_exactPath != null) parts.Add(_exactPath);
         if (_pathPrefix != null) parts.Add($"{_pathPrefix}*");
         if (_pathPattern != null) parts.Add($"~/{_pathPattern}/");
-        if (_requiredHeaders.Count > 0) parts.Add($"headers:{string.Join(",", _requiredHeaders.Keys)}");
+        if (_requiredHeaders.Count > 0) parts.Add($"headers:{string.Join(',', _requiredHeaders.Keys)}");
         if (_bodyContains != null) parts.Add($"body contains \"{_bodyContains}\"");
-        return parts.Count > 0 ? string.Join(" ", parts) : "*";
+        return parts.Count > 0 ? string.Join(' ', parts) : "*";
     }
 }

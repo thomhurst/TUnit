@@ -271,6 +271,6 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
         }
 
         hierarchy.Reverse();
-        return string.Join("+", hierarchy);
+        return string.Join('+', hierarchy);
     }
 }

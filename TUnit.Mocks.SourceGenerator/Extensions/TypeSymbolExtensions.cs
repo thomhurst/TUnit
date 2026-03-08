@@ -118,13 +118,13 @@ internal static class TypeSymbolExtensions
     {
         if (member is IMethodSymbol method)
         {
-            var paramTypes = string.Join(",", method.Parameters.Select(p => p.Type.GetFullyQualifiedName() + (p.RefKind != RefKind.None ? "&" : "")));
+            var paramTypes = string.Join(',', method.Parameters.Select(p => p.Type.GetFullyQualifiedName() + (p.RefKind != RefKind.None ? "&" : "")));
             var typeParams = method.TypeParameters.Length > 0 ? $"`{method.TypeParameters.Length}" : "";
             return $"M:{method.Name}{typeParams}({paramTypes})";
         }
         if (member is IPropertySymbol prop)
         {
-            var paramTypes = string.Join(",", prop.Parameters.Select(p => p.Type.GetFullyQualifiedName()));
+            var paramTypes = string.Join(',', prop.Parameters.Select(p => p.Type.GetFullyQualifiedName()));
             return prop.Parameters.Length > 0 ? $"P:{prop.Name}[{paramTypes}]" : $"P:{prop.Name}";
         }
         if (member is IEventSymbol evt)

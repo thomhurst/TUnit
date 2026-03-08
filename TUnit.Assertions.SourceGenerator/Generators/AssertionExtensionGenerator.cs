@@ -422,7 +422,7 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         if (allConstraints.Count > 0)
         {
             sourceBuilder.AppendLine();
-            sourceBuilder.Append($"        {string.Join(" ", allConstraints)}");
+            sourceBuilder.Append($"        {string.Join(' ', allConstraints)}");
         }
 
         sourceBuilder.AppendLine();

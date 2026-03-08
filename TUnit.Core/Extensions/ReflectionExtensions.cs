@@ -13,7 +13,7 @@ public static class ReflectionExtensions
             return type.Name;
         }
 
-        var genericArguments = string.Join(",", type.GetGenericArguments().Select(GetFormattedName));
+        var genericArguments = string.Join(',', type.GetGenericArguments().Select(GetFormattedName));
 
         var backtickIndex = type.Name.IndexOf("`", StringComparison.Ordinal);
         if (backtickIndex == -1)
