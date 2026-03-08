@@ -137,7 +137,6 @@ namespace
     {
         protected AsyncDataSourceGeneratorAttribute() { }
         protected abstract .<<.<T>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata);
-        [.(typeof(.AsyncDataSourceGeneratorAttribute<T>.<GetTypedDataRowsAsync>d__1))]
         public override sealed .<<.<T>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method, AllowMultiple=true)]
@@ -145,7 +144,6 @@ namespace
     {
         protected AsyncDataSourceGeneratorAttribute() { }
         protected abstract .<<.<<T1, T2>>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata);
-        [.(typeof(.AsyncDataSourceGeneratorAttribute<T1, T2>.<GetTypedDataRowsAsync>d__1))]
         public override sealed .<<.<<T1, T2>>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method, AllowMultiple=true)]
@@ -153,7 +151,6 @@ namespace
     {
         protected AsyncDataSourceGeneratorAttribute() { }
         protected abstract .<<.<<T1, T2, T3>>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata);
-        [.(typeof(.AsyncDataSourceGeneratorAttribute<T1, T2, T3>.<GetTypedDataRowsAsync>d__1))]
         public override sealed .<<.<<T1, T2, T3>>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method, AllowMultiple=true)]
@@ -161,7 +158,6 @@ namespace
     {
         protected AsyncDataSourceGeneratorAttribute() { }
         protected abstract .<<.<<T1, T2, T3, T4>>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata);
-        [.(typeof(.AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4>.<GetTypedDataRowsAsync>d__1))]
         public override .<<.<<T1, T2, T3, T4>>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method, AllowMultiple=true)]
@@ -169,7 +165,6 @@ namespace
     {
         protected AsyncDataSourceGeneratorAttribute() { }
         protected abstract .<<.<<T1, T2, T3, T4, T5>>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata);
-        [.(typeof(.AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4, T5>.<GetTypedDataRowsAsync>d__1))]
         public override .<<.<<T1, T2, T3, T4, T5>>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     public class AsyncEvent<TEventArgs>
@@ -192,7 +187,6 @@ namespace
     {
         protected AsyncUntypedDataSourceGeneratorAttribute() { }
         public virtual bool SkipIfEmpty { get; set; }
-        [.(typeof(.AsyncUntypedDataSourceGeneratorAttribute.<GenerateAsync>d__5))]
         public .<<.<object?[]?>>> GenerateAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
         protected abstract .<<.<object?[]?>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata);
         public .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
