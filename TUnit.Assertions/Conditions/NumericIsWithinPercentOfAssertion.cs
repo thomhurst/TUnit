@@ -63,8 +63,11 @@ public class DoubleIsWithinPercentOfAssertion : Assertion<double>
             return AssertionResult._passedTask;
         }
 
+        var actualPercent = _expected != 0 ? (diff / Math.Abs(_expected)) * 100 : double.PositiveInfinity;
+
         return Task.FromResult(AssertionResult.Failed(
-            $"found {value}, which differs by {diff} ({(diff / Math.Abs(_expected)) * 100:F2}% of expected)"));
+            $"found {value}, which differs by {diff} ({actualPercent:F2}% of expected)"));
+
     }
 
     protected override string GetExpectation() =>
@@ -126,12 +129,9 @@ public class FloatIsWithinPercentOfAssertion : Assertion<float>
         var diff = Math.Abs(value - _expected);
         var allowedDelta = Math.Abs(_expected * _percent / 100.0f);
 
-        if (diff <= allowedDelta)
-        {
-            return AssertionResult._passedTask;
-        }
-
-        return Task.FromResult(AssertionResult.Failed(
+        return diff <= allowedDelta
+            ? AssertionResult._passedTask
+            : Task.FromResult(AssertionResult.Failed(
             $"found {value}, which differs by {diff} ({(diff / Math.Abs(_expected)) * 100:F2}% of expected)"));
     }
 
@@ -178,6 +178,7 @@ public class IntIsWithinPercentOfAssertion : Assertion<int>
         }
 
         var actualPercent = _expected != 0 ? (diff / Math.Abs(_expected)) * 100 : double.PositiveInfinity;
+
         return Task.FromResult(AssertionResult.Failed(
             $"found {value}, which differs by {(long)diff} ({actualPercent:F2}% of expected)"));
     }
@@ -225,6 +226,7 @@ public class LongIsWithinPercentOfAssertion : Assertion<long>
         }
 
         var actualPercent = _expected != 0 ? (diff / Math.Abs(_expected)) * 100 : double.PositiveInfinity;
+
         return Task.FromResult(AssertionResult.Failed(
             $"found {value}, which differs by {(long)diff} ({actualPercent:F2}% of expected)"));
     }
@@ -273,6 +275,7 @@ public class DecimalIsWithinPercentOfAssertion : Assertion<decimal>
 
         var actualPercent = _expected != 0 ? (diff / Math.Abs(_expected)) * 100m : -1m;
         var percentDisplay = actualPercent >= 0 ? $"{actualPercent:F2}%" : "Infinity%";
+
         return Task.FromResult(AssertionResult.Failed(
             $"found {value}, which differs by {diff} ({percentDisplay} of expected)"));
     }

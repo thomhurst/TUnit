@@ -9,21 +9,15 @@ public partial class Tests
 {
     [Test]
     public Task Core_Library_Has_No_API_Changes()
-    {
-        return VerifyPublicApi(typeof(TestAttribute).Assembly);
-    }
+        => VerifyPublicApi(typeof(TestAttribute).Assembly);
 
     [Test]
     public Task Assertions_Library_Has_No_API_Changes()
-    {
-        return VerifyPublicApi(typeof(Assertions.Assert).Assembly);
-    }
+        => VerifyPublicApi(typeof(Assertions.Assert).Assembly);
 
     [Test]
     public Task Playwright_Library_Has_No_API_Changes()
-    {
-        return VerifyPublicApi(typeof(Playwright.PageTest).Assembly);
-    }
+        => VerifyPublicApi(typeof(Playwright.PageTest).Assembly);
 
     private async Task VerifyPublicApi(Assembly assembly)
     {
@@ -36,17 +30,14 @@ public partial class Tests
         });
 
         await VerifyTUnit.Verify(publicApi)
-            .AddScrubber(sb => Scrub(sb))
+            .AddScrubber(Scrub)
             .AddScrubber(sb => new StringBuilder(sb.ToString().Replace("\r\n", "\n")))
             .ScrubLinesWithReplace(x => x.Replace("\r\n", "\n"))
             .ScrubLinesWithReplace(line =>
             {
-                if (line.Contains("public static class AssemblyLoader"))
-                {
-                    return "public static class AssemblyLoader_Guid";
-                }
-
-                return line;
+                return line.Contains("public static class AssemblyLoader")
+                    ? "public static class AssemblyLoader_Guid"
+                    : line;
             })
             .ScrubFilePaths()
             .OnVerifyMismatch(async (pair, message, verify) =>
