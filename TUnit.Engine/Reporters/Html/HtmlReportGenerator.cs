@@ -1378,8 +1378,8 @@ function renderSpanRows(sp, uid) {
         h += '</div>';
         let ex = '<div class="sp-extra" id="sp-' + uid + '-' + i + '">';
         ex += '<strong>Source:</strong> ' + esc(s.source) + ' &middot; <strong>Kind:</strong> ' + esc(s.kind);
-        if (s.tags && s.tags.length) { ex += '<br><strong>Tags:</strong> '; s.tags.forEach(t => { ex += esc(t.key) + '=' + esc(t.value) + ' '; }); }
-        if (s.events && s.events.length) { ex += '<br><strong>Events:</strong> '; s.events.forEach(e => { ex += esc(e.name) + ' '; if (e.tags) e.tags.forEach(t => { ex += esc(t.key) + '=' + esc(t.value) + ' '; }); }); }
+        if (s.tags && s.tags.length) { ex += '<br><strong>Tags:</strong>'; s.tags.forEach(t => { ex += '<br>&nbsp;&nbsp;' + esc(t.key) + '=' + esc(t.value); }); }
+        if (s.events && s.events.length) { ex += '<br><strong>Events:</strong>'; s.events.forEach(e => { ex += '<br>&nbsp;&nbsp;' + esc(e.name); if (e.tags) e.tags.forEach(t => { ex += '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + esc(t.key) + '=' + esc(t.value); }); }); }
         ex += '</div>';
         h += ex;
     });
