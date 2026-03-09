@@ -122,7 +122,7 @@ internal sealed class ActivityCollector : IDisposable
         {
             foreach (var span in kvp.Value)
             {
-                if (!span.Name.StartsWith("test case", StringComparison.Ordinal) || span.Tags is null)
+                if (span.Tags is null)
                 {
                     continue;
                 }
@@ -180,7 +180,7 @@ internal sealed class ActivityCollector : IDisposable
             var value = activity.GetTagItem(tagKey)?.ToString();
             if (!string.IsNullOrEmpty(value))
             {
-                return $"{displayName}: {value}";
+                return value;
             }
         }
 
