@@ -187,6 +187,9 @@ internal sealed class SpanData
     [JsonPropertyName("name")]
     public required string Name { get; init; }
 
+    [JsonPropertyName("spanType")]
+    public string? SpanType { get; init; }
+
     [JsonPropertyName("source")]
     public required string Source { get; init; }
 

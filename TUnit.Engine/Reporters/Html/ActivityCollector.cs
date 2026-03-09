@@ -284,6 +284,7 @@ internal sealed class ActivityCollector : IDisposable
             SpanId = activity.SpanId.ToString(),
             ParentSpanId = parentSpanId,
             Name = EnrichSpanName(activity),
+            SpanType = activity.DisplayName,
             Source = activity.Source.Name,
             Kind = activity.Kind.ToString(),
             StartTimeMs = activity.StartTimeUtc.Subtract(DateTime.UnixEpoch).TotalMilliseconds,
