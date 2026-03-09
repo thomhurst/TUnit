@@ -1379,8 +1379,8 @@ function renderSpanRows(sp, uid) {
         h += '</div>';
         let ex = '<div class="sp-extra" id="sp-' + uid + '-' + i + '">';
         ex += '<strong>Source:</strong> ' + esc(s.source) + ' &middot; <strong>Kind:</strong> ' + esc(s.kind);
-        if (s.tags && s.tags.length) { ex += '<br><strong>Tags:</strong>'; s.tags.forEach(t => { ex += '<div class="sp-tag">' + esc(t.key) + '=' + esc(t.value) + '</div>'; }); }
-        if (s.events && s.events.length) { ex += '<br><strong>Events:</strong>'; s.events.forEach(e => { ex += '<div class="sp-evt">' + esc(e.name) + '</div>'; if (e.tags) e.tags.forEach(t => { ex += '<div class="sp-evt-tag">' + esc(t.key) + '=' + esc(t.value) + '</div>'; }); }); }
+        if (s.tags && s.tags.length) { ex += '<div><strong>Tags:</strong>'; s.tags.forEach(t => { ex += '<div class="sp-tag">' + esc(t.key) + '=' + esc(t.value) + '</div>'; }); ex += '</div>'; }
+        if (s.events && s.events.length) { ex += '<div><strong>Events:</strong>'; s.events.forEach(e => { ex += '<div class="sp-evt">' + esc(e.name) + '</div>'; if (e.tags && e.tags.length) e.tags.forEach(t => { ex += '<div class="sp-evt-tag">' + esc(t.key) + '=' + esc(t.value) + '</div>'; }); }); ex += '</div>'; }
         ex += '</div>';
         h += ex;
     });
