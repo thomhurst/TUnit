@@ -802,7 +802,7 @@ body{
   font-size:.76rem;color:var(--text-2);
 }
 .sp-extra.open{display:block;animation:fade-up .2s var(--ease)}
-.sp-tag{padding-left:1em}.sp-evt{padding-left:1em}.sp-evt-tag{padding-left:2em}
+.sp-tag,.sp-evt{padding-left:1em}.sp-evt-tag{padding-left:2em}
 .global-trace,.suite-trace{
   background:var(--surface-1);border:1px solid var(--border);border-radius:var(--r-lg);
   padding:0;margin-bottom:16px;overflow:hidden;
