@@ -1159,7 +1159,7 @@ spans.forEach(s => {
 // Build suite span lookup: className -> span
 const suiteSpanByClass = {};
 spans.forEach(s => {
-    if (!s.name.startsWith('test suite')) return;
+    if (s.spanType !== 'test suite') return;
     const tag = (s.tags||[]).find(t => t.key === 'test.suite.name');
     if (tag) suiteSpanByClass[tag.value] = s;
 });
@@ -1460,7 +1460,7 @@ function renderSuiteTrace(className) {
     if (!allSpans) return '';
     const all = getDescendants(allSpans, suite.spanId);
     const testCaseIds = new Set();
-    all.forEach(s => { if (s.name.startsWith('test case')) testCaseIds.add(s.spanId); });
+    all.forEach(s => { if (s.spanType === 'test case') testCaseIds.add(s.spanId); });
     const tcDescendants = new Set();
     testCaseIds.forEach(id => { getDescendants(all, id).forEach(s => { if (s.spanId !== id) tcDescendants.add(s.spanId); }); });
     const filtered = all.filter(s => !tcDescendants.has(s.spanId) && !testCaseIds.has(s.spanId));
@@ -1476,7 +1476,7 @@ function renderSuiteTrace(className) {
 
 // Global timeline: session + assembly + suite spans
 function renderGlobalTimeline() {
-    const topSpans = spans.filter(s => s.name.startsWith('test session') || s.name.startsWith('test assembly') || s.name.startsWith('test suite'));
+    const topSpans = spans.filter(s => s.spanType === 'test session' || s.spanType === 'test assembly' || s.spanType === 'test suite');
     if (!topSpans.length) return '';
     return '<div class="global-trace"><div class="tl-toggle">' + tlArrow + 'Execution Timeline</div><div class="tl-content"><div class="tl-content-inner"><div class="tl-content-pad">' + renderSpanRows(topSpans, 'global') + '</div></div></div></div>';
 }
