@@ -321,15 +321,34 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         return stateProperty switch
         {
             FailedTestNodeStateProperty failedTestNodeStateProperty =>
-                failedTestNodeStateProperty.Exception?.ToString() ?? "Test failed",
+                GetTruncatedExceptionMessage(failedTestNodeStateProperty.Exception) ?? "Test failed",
             ErrorTestNodeStateProperty errorTestNodeStateProperty =>
-                errorTestNodeStateProperty.Exception?.ToString() ?? "Test failed",
+                GetTruncatedExceptionMessage(errorTestNodeStateProperty.Exception) ?? "Test failed",
             TimeoutTestNodeStateProperty timeoutTestNodeStateProperty => timeoutTestNodeStateProperty.Explanation,
 #pragma warning disable CS0618 // CancelledTestNodeStateProperty is obsolete
             CancelledTestNodeStateProperty => "Test was cancelled",
 #pragma warning restore CS0618
             _ => null
         };
+    }
+
+    private static string? GetTruncatedExceptionMessage(Exception? exception)
+    {
+        if (exception is null)
+        {
+            return null;
+        }
+
+        var message = exception.Message;
+
+        var firstStackTraceLine = exception.StackTrace?.Split('\n').FirstOrDefault()?.Trim();
+
+        if (string.IsNullOrWhiteSpace(firstStackTraceLine))
+        {
+            return message;
+        }
+
+        return $"{message}\n{firstStackTraceLine}";
     }
 
     private static string GetStatus(IProperty? stateProperty)
