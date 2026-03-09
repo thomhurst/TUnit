@@ -57,12 +57,9 @@ public class DoubleIsCloseToAssertion : Assertion<double>
 
         var diff = Math.Abs(value - _expected);
 
-        if (diff <= _tolerance)
-        {
-            return AssertionResult._passedTask;
-        }
-
-        return Task.FromResult(AssertionResult.Failed($"found {value}, which differs by {diff}"));
+        return diff <= _tolerance
+            ? AssertionResult._passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}, which differs by {diff}"));
     }
 
     protected override string GetExpectation() =>
@@ -167,12 +164,9 @@ public class IntIsCloseToAssertion : Assertion<int>
 
         var diff = Math.Abs((long)value - _expected);
 
-        if (diff <= _tolerance)
-        {
-            return AssertionResult._passedTask;
-        }
-
-        return Task.FromResult(AssertionResult.Failed($"found {value}, which differs by {diff}"));
+        return diff <= _tolerance
+            ? AssertionResult._passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}, which differs by {diff}"));
     }
 
     protected override string GetExpectation() =>
@@ -209,14 +203,11 @@ public class LongIsCloseToAssertion : Assertion<long>
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
         }
 
-        var diff = Math.Abs((double)value - _expected);
+        var diff = Math.Abs((double) value - (double) _expected);
 
-        if (diff <= (double)_tolerance)
-        {
-            return AssertionResult._passedTask;
-        }
-
-        return Task.FromResult(AssertionResult.Failed($"found {value}, which differs by {diff}"));
+        return diff <= (double) _tolerance
+            ? AssertionResult._passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}, which differs by {diff}"));
     }
 
     protected override string GetExpectation() =>
@@ -255,12 +246,9 @@ public class DecimalIsCloseToAssertion : Assertion<decimal>
 
         var diff = Math.Abs(value - _expected);
 
-        if (diff <= _tolerance)
-        {
-            return AssertionResult._passedTask;
-        }
-
-        return Task.FromResult(AssertionResult.Failed($"found {value}, which differs by {diff}"));
+        return diff <= _tolerance
+            ? AssertionResult._passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}, which differs by {diff}"));
     }
 
     protected override string GetExpectation() =>

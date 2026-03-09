@@ -988,7 +988,22 @@ namespace .Conditions
         protected override bool AreExactlyEqual(decimal actual, decimal expected) { }
         protected override object CalculateDifference(decimal actual, decimal expected) { }
         protected override bool HasToleranceValue() { }
+        protected override bool IsWithinRelativeTolerance(decimal actual, decimal expected, double percentTolerance) { }
         protected override bool IsWithinTolerance(decimal actual, decimal expected, decimal tolerance) { }
+    }
+    [.("IsCloseTo", OverloadResolutionPriority=2)]
+    public class DecimalIsCloseToAssertion : .<decimal>
+    {
+        public DecimalIsCloseToAssertion(.<decimal> context, decimal expected, decimal tolerance) { }
+        protected override .<.> CheckAsync(.<decimal> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.("IsWithinPercentOf", OverloadResolutionPriority=2)]
+    public class DecimalIsWithinPercentOfAssertion : .<decimal>
+    {
+        public DecimalIsWithinPercentOfAssertion(.<decimal> context, decimal expected, decimal percent) { }
+        protected override .<.> CheckAsync(.<decimal> metadata) { }
+        protected override string GetExpectation() { }
     }
     public class DictionaryAllKeysAssertion<TDictionary, TKey, TValue> : .<TDictionary, TKey, TValue>
         where TDictionary : .<TKey, TValue>
@@ -1103,7 +1118,22 @@ namespace .Conditions
         protected override bool AreExactlyEqual(double actual, double expected) { }
         protected override object CalculateDifference(double actual, double expected) { }
         protected override bool HasToleranceValue() { }
+        protected override bool IsWithinRelativeTolerance(double actual, double expected, double percentTolerance) { }
         protected override bool IsWithinTolerance(double actual, double expected, double tolerance) { }
+    }
+    [.("IsCloseTo", OverloadResolutionPriority=2)]
+    public class DoubleIsCloseToAssertion : .<double>
+    {
+        public DoubleIsCloseToAssertion(.<double> context, double expected, double tolerance) { }
+        protected override .<.> CheckAsync(.<double> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.("IsWithinPercentOf", OverloadResolutionPriority=2)]
+    public class DoubleIsWithinPercentOfAssertion : .<double>
+    {
+        public DoubleIsWithinPercentOfAssertion(.<double> context, double expected, double percent) { }
+        protected override .<.> CheckAsync(.<double> metadata) { }
+        protected override string GetExpectation() { }
     }
     [.("IsEqualTo")]
     public class EqualsAssertion<TValue> : .<TValue>
@@ -1215,7 +1245,38 @@ namespace .Conditions
         protected override bool AreExactlyEqual(float actual, float expected) { }
         protected override object CalculateDifference(float actual, float expected) { }
         protected override bool HasToleranceValue() { }
+        protected override bool IsWithinRelativeTolerance(float actual, float expected, double percentTolerance) { }
         protected override bool IsWithinTolerance(float actual, float expected, float tolerance) { }
+    }
+    [.("IsCloseTo", OverloadResolutionPriority=2)]
+    public class FloatIsCloseToAssertion : .<float>
+    {
+        public FloatIsCloseToAssertion(.<float> context, float expected, float tolerance) { }
+        protected override .<.> CheckAsync(.<float> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.("IsWithinPercentOf", OverloadResolutionPriority=2)]
+    public class FloatIsWithinPercentOfAssertion : .<float>
+    {
+        public FloatIsWithinPercentOfAssertion(.<float> context, float expected, float percent) { }
+        protected override .<.> CheckAsync(.<float> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.("IsGreaterThan")]
+    public class GreaterThanAssertion<TValue> : .<TValue>
+        where TValue : <TValue>
+    {
+        public GreaterThanAssertion(.<TValue> context, TValue minimum) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.("IsGreaterThanOrEqualTo")]
+    public class GreaterThanOrEqualAssertion<TValue> : .<TValue>
+        where TValue : <TValue>
+    {
+        public GreaterThanOrEqualAssertion(.<TValue> context, TValue minimum) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
     }
     public class HasDistinctItemsAssertion<TCollection, TItem> : .<TCollection, TItem>
         where TCollection : .<TItem>
@@ -1317,6 +1378,20 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<int> metadata) { }
         protected override string GetExpectation() { }
         public . Within(int tolerance) { }
+    }
+    [.("IsCloseTo", OverloadResolutionPriority=2)]
+    public class IntIsCloseToAssertion : .<int>
+    {
+        public IntIsCloseToAssertion(.<int> context, int expected, int tolerance) { }
+        protected override .<.> CheckAsync(.<int> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.("IsWithinPercentOf", OverloadResolutionPriority=2)]
+    public class IntIsWithinPercentOfAssertion : .<int>
+    {
+        public IntIsWithinPercentOfAssertion(.<int> context, int expected, double percent) { }
+        protected override .<.> CheckAsync(.<int> metadata) { }
+        protected override string GetExpectation() { }
     }
     public class IsAssignableFromAssertion<TSource, TValue> : .<TValue>
     {
@@ -1515,6 +1590,20 @@ namespace .Conditions
         protected override object CalculateDifference(long actual, long expected) { }
         protected override bool HasToleranceValue() { }
         protected override bool IsWithinTolerance(long actual, long expected, long tolerance) { }
+    }
+    [.("IsCloseTo", OverloadResolutionPriority=2)]
+    public class LongIsCloseToAssertion : .<long>
+    {
+        public LongIsCloseToAssertion(.<long> context, long expected, long tolerance) { }
+        protected override .<.> CheckAsync(.<long> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.("IsWithinPercentOf", OverloadResolutionPriority=2)]
+    public class LongIsWithinPercentOfAssertion : .<long>
+    {
+        public LongIsWithinPercentOfAssertion(.<long> context, long expected, double percent) { }
+        protected override .<.> CheckAsync(.<long> metadata) { }
+        protected override string GetExpectation() { }
     }
     public class MappedSatisfiesAssertion<TValue, TMapped> : .<TValue>
     {
@@ -2075,10 +2164,13 @@ namespace .Conditions
         protected abstract object CalculateDifference(TValue actual, TValue expected);
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected virtual string FormatDifferenceMessage(TValue actual, object difference) { }
+        protected virtual string FormatRelativeDifferenceMessage(TValue actual, object difference, double percentTolerance) { }
         protected override string GetExpectation() { }
         protected abstract bool HasToleranceValue();
+        protected virtual bool IsWithinRelativeTolerance(TValue actual, TValue expected, double percentTolerance) { }
         protected abstract bool IsWithinTolerance(TValue actual, TValue expected, TTolerance tolerance);
         public .<TValue, TTolerance> Within(TTolerance tolerance) { }
+        public .<TValue, TTolerance> WithinRelativeTolerance(double percentTolerance) { }
     }
     [.<>("ContainsGenericParameters", CustomName="DoesNotContainGenericParameters", ExpectationMessage="contain generic parameters", NegateLogic=true)]
     [.<>("ContainsGenericParameters", ExpectationMessage="contain generic parameters")]
@@ -3319,6 +3411,14 @@ namespace .Extensions
     {
         public static . IsEqualTo(this .<decimal> source, decimal expected, [.("expected")] string? expectedExpression = null) { }
     }
+    public static class DecimalIsCloseToAssertionExtensions
+    {
+        public static . IsCloseTo(this .<decimal> source, decimal expected, decimal tolerance, [.("expected")] string? expectedExpression = null, [.("tolerance")] string? toleranceExpression = null) { }
+    }
+    public static class DecimalIsWithinPercentOfAssertionExtensions
+    {
+        public static . IsWithinPercentOf(this .<decimal> source, decimal expected, decimal percent, [.("expected")] string? expectedExpression = null, [.("percent")] string? percentExpression = null) { }
+    }
     public sealed class Decimal_IsNotZero_Assertion : .<decimal>
     {
         public Decimal_IsNotZero_Assertion(.<decimal> context) { }
@@ -3443,6 +3543,10 @@ namespace .Extensions
     {
         public static . IsEqualTo(this .<double> source, double expected, [.("expected")] string? expectedExpression = null) { }
     }
+    public static class DoubleIsCloseToAssertionExtensions
+    {
+        public static . IsCloseTo(this .<double> source, double expected, double tolerance, [.("expected")] string? expectedExpression = null, [.("tolerance")] string? toleranceExpression = null) { }
+    }
     public class DoubleIsFiniteWithDoubleAssertion : .<double>
     {
         public DoubleIsFiniteWithDoubleAssertion(.<double> context, bool negated = false) { }
@@ -3484,6 +3588,10 @@ namespace .Extensions
         public DoubleIsSubnormalWithDoubleAssertion(.<double> context, bool negated = false) { }
         protected override .<.> CheckAsync(.<double> metadata) { }
         protected override string GetExpectation() { }
+    }
+    public static class DoubleIsWithinPercentOfAssertionExtensions
+    {
+        public static . IsWithinPercentOf(this .<double> source, double expected, double percent, [.("expected")] string? expectedExpression = null, [.("percent")] string? percentExpression = null) { }
     }
     public sealed class Double_IsNotZero_Assertion : .<double>
     {
@@ -3770,6 +3878,10 @@ namespace .Extensions
     {
         public static . IsEqualTo(this .<float> source, float expected, [.("expected")] string? expectedExpression = null) { }
     }
+    public static class FloatIsCloseToAssertionExtensions
+    {
+        public static . IsCloseTo(this .<float> source, float expected, float tolerance, [.("expected")] string? expectedExpression = null, [.("tolerance")] string? toleranceExpression = null) { }
+    }
     public class FloatIsFiniteWithFloatAssertion : .<float>
     {
         public FloatIsFiniteWithFloatAssertion(.<float> context, bool negated = false) { }
@@ -3811,6 +3923,10 @@ namespace .Extensions
         public FloatIsSubnormalWithFloatAssertion(.<float> context, bool negated = false) { }
         protected override .<.> CheckAsync(.<float> metadata) { }
         protected override string GetExpectation() { }
+    }
+    public static class FloatIsWithinPercentOfAssertionExtensions
+    {
+        public static . IsWithinPercentOf(this .<float> source, float expected, float percent, [.("expected")] string? expectedExpression = null, [.("percent")] string? percentExpression = null) { }
     }
     public sealed class Float_IsNotZero_Assertion : .<float>
     {
@@ -4133,6 +4249,14 @@ namespace .Extensions
     {
         public static . IsEqualTo(this .<int> source, int expected, [.("expected")] string? expectedExpression = null) { }
     }
+    public static class IntIsCloseToAssertionExtensions
+    {
+        public static . IsCloseTo(this .<int> source, int expected, int tolerance, [.("expected")] string? expectedExpression = null, [.("tolerance")] string? toleranceExpression = null) { }
+    }
+    public static class IntIsWithinPercentOfAssertionExtensions
+    {
+        public static . IsWithinPercentOf(this .<int> source, int expected, double percent, [.("expected")] string? expectedExpression = null, [.("percent")] string? percentExpression = null) { }
+    }
     public sealed class Int_IsEven_Assertion : .<int>
     {
         public Int_IsEven_Assertion(.<int> context) { }
@@ -4379,6 +4503,14 @@ namespace .Extensions
     public static class LongEqualsAssertionExtensions
     {
         public static . IsEqualTo(this .<long> source, long expected, [.("expected")] string? expectedExpression = null) { }
+    }
+    public static class LongIsCloseToAssertionExtensions
+    {
+        public static . IsCloseTo(this .<long> source, long expected, long tolerance, [.("expected")] string? expectedExpression = null, [.("tolerance")] string? toleranceExpression = null) { }
+    }
+    public static class LongIsWithinPercentOfAssertionExtensions
+    {
+        public static . IsWithinPercentOf(this .<long> source, long expected, double percent, [.("expected")] string? expectedExpression = null, [.("percent")] string? percentExpression = null) { }
     }
     public sealed class Long_IsEven_Assertion : .<long>
     {
