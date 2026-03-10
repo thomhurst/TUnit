@@ -400,7 +400,7 @@ public class InfrastructureGenerator : IIncrementalGenerator
                     sourceBuilder.AppendLine("try");
                     sourceBuilder.AppendLine("{");
                     sourceBuilder.Indent();
-                    sourceBuilder.AppendLine($"global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer:{model.AssemblyName}] Loading {model.TypesToReference.Length} assembly reference(s)...\");");
+                    sourceBuilder.AppendLine($"global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogTrace(\"[ModuleInitializer:{model.AssemblyName}] Loading {model.TypesToReference.Length} assembly reference(s)...\");");
                     sourceBuilder.Unindent();
                     sourceBuilder.AppendLine("}");
                     sourceBuilder.AppendLine("catch { /* TUnit.Core not available - skip logging */ }");
@@ -415,7 +415,7 @@ public class InfrastructureGenerator : IIncrementalGenerator
                     sourceBuilder.AppendLine("try");
                     sourceBuilder.AppendLine("{");
                     sourceBuilder.Indent();
-                    sourceBuilder.AppendLine($"global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer:{model.AssemblyName}] Loading assembly containing: {typeName.Replace("\"", "\\\"")}\");");
+                    sourceBuilder.AppendLine($"global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogTrace(\"[ModuleInitializer:{model.AssemblyName}] Loading assembly containing: {typeName.Replace("\"", "\\\"")}\");");
                     sourceBuilder.Unindent();
                     sourceBuilder.AppendLine("}");
                     sourceBuilder.AppendLine("catch { /* TUnit.Core not available - skip logging */ }");
@@ -426,7 +426,7 @@ public class InfrastructureGenerator : IIncrementalGenerator
                     sourceBuilder.AppendLine("try");
                     sourceBuilder.AppendLine("{");
                     sourceBuilder.Indent();
-                    sourceBuilder.AppendLine($"global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer:{model.AssemblyName}] Assembly initialized: {typeName.Replace("\"", "\\\"")}\");");
+                    sourceBuilder.AppendLine($"global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogTrace(\"[ModuleInitializer:{model.AssemblyName}] Assembly initialized: {typeName.Replace("\"", "\\\"")}\");");
                     sourceBuilder.Unindent();
                     sourceBuilder.AppendLine("}");
                     sourceBuilder.AppendLine("catch { /* TUnit.Core not available - skip logging */ }");
@@ -438,7 +438,7 @@ public class InfrastructureGenerator : IIncrementalGenerator
                     sourceBuilder.AppendLine("try");
                     sourceBuilder.AppendLine("{");
                     sourceBuilder.Indent();
-                    sourceBuilder.AppendLine($"global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug(\"[ModuleInitializer:{model.AssemblyName}] Failed to load {typeName.Replace("\"", "\\\"")}: \" + ex.Message);");
+                    sourceBuilder.AppendLine($"global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogTrace(\"[ModuleInitializer:{model.AssemblyName}] Failed to load {typeName.Replace("\"", "\\\"")}: \" + ex.Message);");
                     sourceBuilder.Unindent();
                     sourceBuilder.AppendLine("}");
                     sourceBuilder.AppendLine("catch { /* TUnit.Core not available - skip logging */ }");

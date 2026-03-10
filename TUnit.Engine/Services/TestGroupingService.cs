@@ -199,13 +199,13 @@ internal sealed class TestGroupingService : ITestGroupingService
         };
 
         // Log summary of test categorization
-        await _logger.LogDebugAsync("═══ Test Grouping Summary ═══").ConfigureAwait(false);
-        await _logger.LogDebugAsync($"  Parallel (no constraints): {parallelTests.Count} tests").ConfigureAwait(false);
-        await _logger.LogDebugAsync($"  ParallelGroups: {parallelGroups.Count} groups").ConfigureAwait(false);
-        await _logger.LogDebugAsync($"  ConstrainedParallelGroups: {finalConstrainedGroups.Count} groups").ConfigureAwait(false);
-        await _logger.LogDebugAsync($"  NotInParallel (global): {sortedNotInParallel.Length} tests").ConfigureAwait(false);
-        await _logger.LogDebugAsync($"  KeyedNotInParallel: {keyedArrays.Length} tests").ConfigureAwait(false);
-        await _logger.LogDebugAsync("════════════════════════════").ConfigureAwait(false);
+        await _logger.LogTraceAsync("═══ Test Grouping Summary ═══").ConfigureAwait(false);
+        await _logger.LogTraceAsync($"  Parallel (no constraints): {parallelTests.Count} tests").ConfigureAwait(false);
+        await _logger.LogTraceAsync($"  ParallelGroups: {parallelGroups.Count} groups").ConfigureAwait(false);
+        await _logger.LogTraceAsync($"  ConstrainedParallelGroups: {finalConstrainedGroups.Count} groups").ConfigureAwait(false);
+        await _logger.LogTraceAsync($"  NotInParallel (global): {sortedNotInParallel.Length} tests").ConfigureAwait(false);
+        await _logger.LogTraceAsync($"  KeyedNotInParallel: {keyedArrays.Length} tests").ConfigureAwait(false);
+        await _logger.LogTraceAsync("════════════════════════════").ConfigureAwait(false);
 
         return result;
     }
