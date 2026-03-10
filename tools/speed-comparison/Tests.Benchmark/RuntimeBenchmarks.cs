@@ -21,7 +21,8 @@ public class RuntimeBenchmarks : BenchmarkBase
             .WithArguments(["--treenode-filter",  $"/*/*/{ClassName}/*"])
             .WithEnvironmentVariables(new Dictionary<string, string?>
             {
-                ["TUNIT_DISABLE_GITHUB_REPORTER"] = "true"
+                ["TUNIT_DISABLE_GITHUB_REPORTER"] = "true",
+                ["TUNIT_DISABLE_HTML_REPORTER"] = "true"
             })
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteBufferedAsync();
@@ -37,7 +38,8 @@ public class RuntimeBenchmarks : BenchmarkBase
             .WithArguments(["--treenode-filter",  $"/*/*/{ClassName}/*"])
             .WithEnvironmentVariables(new Dictionary<string, string?>
             {
-                ["TUNIT_DISABLE_GITHUB_REPORTER"] = "true"
+                ["TUNIT_DISABLE_GITHUB_REPORTER"] = "true",
+                ["TUNIT_DISABLE_HTML_REPORTER"] = "true"
             })
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteBufferedAsync();
