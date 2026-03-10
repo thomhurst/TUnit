@@ -802,6 +802,7 @@ body{
   font-size:.76rem;color:var(--text-2);
 }
 .sp-extra.open{display:block;animation:fade-up .2s var(--ease)}
+.sp-tag,.sp-evt{padding-left:1em}.sp-evt-tag{padding-left:2em}
 .global-trace,.suite-trace{
   background:var(--surface-1);border:1px solid var(--border);border-radius:var(--r-lg);
   padding:0;margin-bottom:16px;overflow:hidden;
@@ -1378,8 +1379,8 @@ function renderSpanRows(sp, uid) {
         h += '</div>';
         let ex = '<div class="sp-extra" id="sp-' + uid + '-' + i + '">';
         ex += '<strong>Source:</strong> ' + esc(s.source) + ' &middot; <strong>Kind:</strong> ' + esc(s.kind);
-        if (s.tags && s.tags.length) { ex += '<br><strong>Tags:</strong> '; s.tags.forEach(t => { ex += esc(t.key) + '=' + esc(t.value) + ' '; }); }
-        if (s.events && s.events.length) { ex += '<br><strong>Events:</strong> '; s.events.forEach(e => { ex += esc(e.name) + ' '; if (e.tags) e.tags.forEach(t => { ex += esc(t.key) + '=' + esc(t.value) + ' '; }); }); }
+        if (s.tags && s.tags.length) { ex += '<div><strong>Tags:</strong>'; s.tags.forEach(t => { ex += '<div class="sp-tag">' + esc(t.key) + '=' + esc(t.value) + '</div>'; }); ex += '</div>'; }
+        if (s.events && s.events.length) { ex += '<div><strong>Events:</strong>'; s.events.forEach(e => { ex += '<div class="sp-evt">' + esc(e.name) + '</div>'; if (e.tags && e.tags.length) e.tags.forEach(t => { ex += '<div class="sp-evt-tag">' + esc(t.key) + '=' + esc(t.value) + '</div>'; }); }); ex += '</div>'; }
         ex += '</div>';
         h += ex;
     });
