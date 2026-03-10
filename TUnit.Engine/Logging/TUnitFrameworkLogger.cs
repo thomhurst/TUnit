@@ -95,6 +95,8 @@ public class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDevi
 
     public bool IsDebugEnabled => _minimumLogLevel <= LogLevel.Debug;
 
+    public bool IsTraceEnabled => _minimumLogLevel <= LogLevel.Trace;
+
     public async Task LogErrorAsync(string message)
     {
         await LogAsync(LogLevel.Error, message, null, (s, _) => s);

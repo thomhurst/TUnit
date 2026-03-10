@@ -169,8 +169,8 @@ internal sealed class TestScheduler : ITestScheduler
 
         if (groupedTests.Parallel.Length > 0)
         {
-            if (_logger.IsDebugEnabled)
-                await _logger.LogDebugAsync($"Starting {groupedTests.Parallel.Length} parallel tests").ConfigureAwait(false);
+            if (_logger.IsTraceEnabled)
+                await _logger.LogTraceAsync($"Starting {groupedTests.Parallel.Length} parallel tests").ConfigureAwait(false);
             await ExecuteTestsAsync(groupedTests.Parallel, cancellationToken).ConfigureAwait(false);
         }
 
@@ -183,16 +183,16 @@ internal sealed class TestScheduler : ITestScheduler
             }
             var orderedTestsArray = orderedTests.ToArray();
 
-            if (_logger.IsDebugEnabled)
-                await _logger.LogDebugAsync($"Starting parallel group '{group.Key}' with {orderedTestsArray.Length} orders").ConfigureAwait(false);
+            if (_logger.IsTraceEnabled)
+                await _logger.LogTraceAsync($"Starting parallel group '{group.Key}' with {orderedTestsArray.Length} orders").ConfigureAwait(false);
             await ExecuteTestsAsync(orderedTestsArray, cancellationToken).ConfigureAwait(false);
         }
 
         foreach (var kvp in groupedTests.ConstrainedParallelGroups)
         {
             var constrainedTests = kvp.Value;
-            if (_logger.IsDebugEnabled)
-                await _logger.LogDebugAsync($"Starting constrained parallel group '{kvp.Key}' with {constrainedTests.UnconstrainedTests.Length} unconstrained and {constrainedTests.KeyedTests.Length} keyed tests").ConfigureAwait(false);
+            if (_logger.IsTraceEnabled)
+                await _logger.LogTraceAsync($"Starting constrained parallel group '{kvp.Key}' with {constrainedTests.UnconstrainedTests.Length} unconstrained and {constrainedTests.KeyedTests.Length} keyed tests").ConfigureAwait(false);
 
             var tasks = new List<Task>();
             if (constrainedTests.UnconstrainedTests.Length > 0)
@@ -211,15 +211,15 @@ internal sealed class TestScheduler : ITestScheduler
 
         if (groupedTests.KeyedNotInParallel.Length > 0)
         {
-            if (_logger.IsDebugEnabled)
-                await _logger.LogDebugAsync($"Starting {groupedTests.KeyedNotInParallel.Length} keyed NotInParallel tests").ConfigureAwait(false);
+            if (_logger.IsTraceEnabled)
+                await _logger.LogTraceAsync($"Starting {groupedTests.KeyedNotInParallel.Length} keyed NotInParallel tests").ConfigureAwait(false);
             await _constraintKeyScheduler.ExecuteTestsWithConstraintsAsync(groupedTests.KeyedNotInParallel, cancellationToken).ConfigureAwait(false);
         }
 
         if (groupedTests.NotInParallel.Length > 0)
         {
-            if (_logger.IsDebugEnabled)
-                await _logger.LogDebugAsync($"Starting {groupedTests.NotInParallel.Length} global NotInParallel tests").ConfigureAwait(false);
+            if (_logger.IsTraceEnabled)
+                await _logger.LogTraceAsync($"Starting {groupedTests.NotInParallel.Length} global NotInParallel tests").ConfigureAwait(false);
             await ExecuteSequentiallyAsync(groupedTests.NotInParallel, cancellationToken).ConfigureAwait(false);
         }
 
@@ -250,8 +250,8 @@ internal sealed class TestScheduler : ITestScheduler
             // Execute the batch of dynamic tests if any were found
             if (dynamicTests.Count > 0)
             {
-                if (_logger.IsDebugEnabled)
-                    await _logger.LogDebugAsync($"Executing {dynamicTests.Count} dynamic test(s)").ConfigureAwait(false);
+                if (_logger.IsTraceEnabled)
+                    await _logger.LogTraceAsync($"Executing {dynamicTests.Count} dynamic test(s)").ConfigureAwait(false);
 
                 // Group and execute just like regular tests
                 var dynamicTestsArray = dynamicTests.ToArray();
@@ -283,8 +283,8 @@ internal sealed class TestScheduler : ITestScheduler
 
         if (dynamicTests.Count > 0)
         {
-            if (_logger.IsDebugEnabled)
-                await _logger.LogDebugAsync($"Executing {dynamicTests.Count} remaining dynamic test(s)").ConfigureAwait(false);
+            if (_logger.IsTraceEnabled)
+                await _logger.LogTraceAsync($"Executing {dynamicTests.Count} remaining dynamic test(s)").ConfigureAwait(false);
 
             var dynamicTestsArray = dynamicTests.ToArray();
             var groupedDynamicTests = await _groupingService.GroupTestsByConstraintsAsync(dynamicTestsArray).ConfigureAwait(false);

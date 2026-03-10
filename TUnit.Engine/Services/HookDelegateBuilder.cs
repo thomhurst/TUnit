@@ -94,14 +94,14 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
 
         foreach (var hook in sourceHooks)
         {
-            await _logger.LogDebugAsync($"Creating delegate for {hookTypeName} hook: {hook.Name}").ConfigureAwait(false);
+            await _logger.LogTraceAsync($"Creating delegate for {hookTypeName} hook: {hook.Name}").ConfigureAwait(false);
             var hookFunc = await createDelegate(hook);
             hooks.Add((hook.Order, hook.RegistrationIndex, hookFunc));
         }
 
         if (hooks.Count > 0)
         {
-            await _logger.LogDebugAsync($"Built {hooks.Count} {hookTypeName} hook delegate(s)").ConfigureAwait(false);
+            await _logger.LogTraceAsync($"Built {hooks.Count} {hookTypeName} hook delegate(s)").ConfigureAwait(false);
         }
 
         return hooks
