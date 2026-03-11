@@ -228,7 +228,9 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         }
 
         // Compute paramTypes once to avoid repeated LINQ allocations
-        var paramTypes = GetParameterTypes(dataGeneratorMetadata.TestInformation?.Parameters);
+        // Use MembersToGenerate which contains the correct parameters for this data generator type
+        // (constructor params for class-level, method params for method-level)
+        var paramTypes = GetMemberTypes(dataGeneratorMetadata.MembersToGenerate);
 
         // If it's IAsyncEnumerable, handle it specially
         if (IsAsyncEnumerable(methodResult.GetType()))
@@ -310,17 +312,23 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         }
     }
 
-    private static Type[]? GetParameterTypes(ParameterMetadata[]? parameters)
+    private static Type[]? GetMemberTypes(IMemberMetadata[]? members)
     {
-        if (parameters == null || parameters.Length == 0)
+        if (members == null || members.Length == 0)
         {
             return null;
         }
 
-        var types = new Type[parameters.Length];
-        for (var i = 0; i < parameters.Length; i++)
+        var types = new Type[members.Length];
+        for (var i = 0; i < members.Length; i++)
         {
-            types[i] = parameters[i].Type;
+            types[i] = members[i] switch
+            {
+                ParameterMetadata param => param.Type,
+                PropertyMetadata prop => prop.Type,
+                _ => throw new InvalidOperationException(
+                    $"Unexpected member metadata type {members[i].GetType().Name} in GetMemberTypes")
+            };
         }
         return types;
     }

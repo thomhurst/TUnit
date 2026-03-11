@@ -842,7 +842,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             // MethodDataSource(string) overload
             methodName = attr.ConstructorArguments[0].Value?.ToString();
-            targetType = typeSymbol;
+
+            // Check for MethodDataSource<T> generic variant - extract T from type arguments
+            if (attr.AttributeClass is { IsGenericType: true })
+            {
+                targetType = attr.AttributeClass.TypeArguments[0];
+            }
+            else
+            {
+                targetType = typeSymbol;
+            }
         }
 
         if (string.IsNullOrEmpty(methodName))
@@ -894,7 +903,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            // MethodDataSource(string) constructor
+            // MethodDataSource(string) constructor — ClassProvidingDataSource is intentionally null here
+            // because the Factory delegate (set below) already encodes the correct target type directly.
+            // The runtime attribute only needs ClassProvidingDataSource for reflection-based lookup.
             writer.AppendLine($"new {attrTypeName}(\"{methodName}\")");
         }
         writer.AppendLine("{");
