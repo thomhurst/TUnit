@@ -842,7 +842,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             // MethodDataSource(string) overload
             methodName = attr.ConstructorArguments[0].Value?.ToString();
-            targetType = typeSymbol;
+
+            // Check for MethodDataSource<T> generic variant - extract T from type arguments
+            if (attr.AttributeClass is { IsGenericType: true, TypeArguments.Length: > 0 })
+            {
+                targetType = attr.AttributeClass.TypeArguments[0];
+            }
+            else
+            {
+                targetType = typeSymbol;
+            }
         }
 
         if (string.IsNullOrEmpty(methodName))

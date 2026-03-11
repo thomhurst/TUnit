@@ -228,7 +228,9 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         }
 
         // Compute paramTypes once to avoid repeated LINQ allocations
-        var paramTypes = GetParameterTypes(dataGeneratorMetadata.TestInformation?.Parameters);
+        // Use MembersToGenerate which contains the correct parameters for this data generator type
+        // (constructor params for class-level, method params for method-level)
+        var paramTypes = GetMemberTypes(dataGeneratorMetadata.MembersToGenerate);
 
         // If it's IAsyncEnumerable, handle it specially
         if (IsAsyncEnumerable(methodResult.GetType()))
@@ -321,6 +323,26 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         for (var i = 0; i < parameters.Length; i++)
         {
             types[i] = parameters[i].Type;
+        }
+        return types;
+    }
+
+    private static Type[]? GetMemberTypes(IMemberMetadata[]? members)
+    {
+        if (members == null || members.Length == 0)
+        {
+            return null;
+        }
+
+        var types = new Type[members.Length];
+        for (var i = 0; i < members.Length; i++)
+        {
+            types[i] = members[i] switch
+            {
+                ParameterMetadata param => param.Type,
+                PropertyMetadata prop => prop.Type,
+                _ => typeof(object)
+            };
         }
         return types;
     }
