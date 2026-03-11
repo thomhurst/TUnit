@@ -34,12 +34,20 @@ internal static class GitHubArtifactUploader
         // Step 1: CreateArtifact (deduplicate name on 409 conflict)
         var createUrl = $"{origin}/twirp/github.actions.results.api.v1.ArtifactService/CreateArtifact";
         string? signedUploadUrl = null;
+        string? acceptedArtifactName = null;
+        var nameWithoutExt = Path.GetFileNameWithoutExtension(fileName);
+        var ext = Path.GetExtension(fileName);
 
         for (var nameAttempt = 0; nameAttempt < 3 && signedUploadUrl is null; nameAttempt++)
         {
-            var artifactName = nameAttempt == 0
-                ? fileName
-                : $"{Path.GetFileNameWithoutExtension(fileName)}-{nameAttempt + 1}{Path.GetExtension(fileName)}";
+            var artifactName = nameAttempt switch
+            {
+                0 => fileName,
+                // On first conflict, append the job backend ID to uniquely identify this matrix job
+                1 => $"{nameWithoutExt}-{GetShortJobId(workflowJobRunBackendId)}{ext}",
+                // On further conflicts, add an extra numeric suffix
+                _ => $"{nameWithoutExt}-{GetShortJobId(workflowJobRunBackendId)}-{nameAttempt}{ext}",
+            };
 
             var createBody = BuildCreateArtifactJson(workflowRunBackendId, workflowJobRunBackendId, artifactName);
 
@@ -66,6 +74,11 @@ internal static class GitHubArtifactUploader
                 using var doc = JsonDocument.Parse(json);
                 return doc.RootElement.GetProperty("signed_upload_url").GetString();
             }, cancellationToken);
+
+            if (signedUploadUrl is not null)
+            {
+                acceptedArtifactName = artifactName;
+            }
         }
 
         if (signedUploadUrl is null)
@@ -105,7 +118,7 @@ internal static class GitHubArtifactUploader
 
         // Step 3: FinalizeArtifact
         var finalizeUrl = $"{origin}/twirp/github.actions.results.api.v1.ArtifactService/FinalizeArtifact";
-        var finalizeBody = BuildFinalizeArtifactJson(workflowRunBackendId, workflowJobRunBackendId, fileName, fileBytes.Length, sha256Hash);
+        var finalizeBody = BuildFinalizeArtifactJson(workflowRunBackendId, workflowJobRunBackendId, acceptedArtifactName!, fileBytes.Length, sha256Hash);
 
         var artifactId = await RetryAsync(async () =>
         {
@@ -125,6 +138,13 @@ internal static class GitHubArtifactUploader
         }, cancellationToken);
 
         return artifactId;
+    }
+
+    private static string GetShortJobId(string jobRunBackendId)
+    {
+        return jobRunBackendId.Length > 8
+            ? jobRunBackendId[..8]
+            : jobRunBackendId;
     }
 
     private static string BuildCreateArtifactJson(string runId, string jobId, string fileName)
