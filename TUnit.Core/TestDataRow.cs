@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace TUnit.Core;
 
 /// <summary>
@@ -20,7 +22,7 @@ internal interface ITestDataRow
 /// <typeparam name="T">The type of the test data.</typeparam>
 /// <param name="Data">The actual test data to be passed to the test method.</param>
 /// <param name="DisplayName">
-/// Optional custom display name for the test case.
+/// Optional custom display name for the test case. If not specified, the argument expression from <paramref name="Data"/> is used.
 /// Supports parameter substitution using $paramName or $arg1, $arg2, etc.
 /// </param>
 /// <param name="Skip">
@@ -33,7 +35,7 @@ internal interface ITestDataRow
 /// <code>
 /// public static IEnumerable&lt;TestDataRow&lt;(string Username, string Password)&gt;&gt; GetLoginData()
 /// {
-///     yield return new(("admin", "secret123"), DisplayName: "Admin login");
+///     yield return new(("admin", "secret123")); // DisplayName '("admin", "secret123")' is inferred
 ///     yield return new(("guest", "guest"), DisplayName: "Guest login");
 ///     yield return new(("", ""), DisplayName: "Empty credentials", Skip: "Not implemented yet");
 /// }
@@ -41,7 +43,7 @@ internal interface ITestDataRow
 /// </example>
 public record TestDataRow<T>(
     T Data,
-    string? DisplayName = null,
+    [CallerArgumentExpression(nameof(Data))] string? DisplayName = null,
     string? Skip = null,
     string[]? Categories = null
 ) : ITestDataRow
