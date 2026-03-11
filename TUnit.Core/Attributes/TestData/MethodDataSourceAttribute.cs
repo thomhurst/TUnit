@@ -312,21 +312,6 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         }
     }
 
-    private static Type[]? GetParameterTypes(ParameterMetadata[]? parameters)
-    {
-        if (parameters == null || parameters.Length == 0)
-        {
-            return null;
-        }
-
-        var types = new Type[parameters.Length];
-        for (var i = 0; i < parameters.Length; i++)
-        {
-            types[i] = parameters[i].Type;
-        }
-        return types;
-    }
-
     private static Type[]? GetMemberTypes(IMemberMetadata[]? members)
     {
         if (members == null || members.Length == 0)
