@@ -903,7 +903,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            // MethodDataSource(string) constructor
+            // MethodDataSource(string) constructor — ClassProvidingDataSource is intentionally null here
+            // because the Factory delegate (set below) already encodes the correct target type directly.
+            // The runtime attribute only needs ClassProvidingDataSource for reflection-based lookup.
             writer.AppendLine($"new {attrTypeName}(\"{methodName}\")");
         }
         writer.AppendLine("{");

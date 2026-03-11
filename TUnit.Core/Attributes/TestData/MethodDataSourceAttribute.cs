@@ -326,7 +326,8 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             {
                 ParameterMetadata param => param.Type,
                 PropertyMetadata prop => prop.Type,
-                _ => typeof(object)
+                _ => throw new InvalidOperationException(
+                    $"Unexpected member metadata type {members[i].GetType().Name} in GetMemberTypes")
             };
         }
         return types;
