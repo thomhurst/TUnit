@@ -143,7 +143,7 @@ internal static class GitHubArtifactUploader
     private static string GetShortJobId(string jobRunBackendId)
     {
         return jobRunBackendId.Length > 8
-            ? jobRunBackendId.Substring(0, 8)
+            ? jobRunBackendId[..8]
             : jobRunBackendId;
     }
 
