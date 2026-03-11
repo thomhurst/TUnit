@@ -31,19 +31,23 @@ internal static class GitHubArtifactUploader
         var origin = new Uri(resultsUrl).GetLeftPart(UriPartial.Authority);
         var fileName = Path.GetFileName(filePath);
 
-        // Build a unique artifact name using the job backend ID to avoid collisions in matrix builds
-        var baseFileName = BuildUniqueArtifactName(fileName, workflowJobRunBackendId);
-
         // Step 1: CreateArtifact (deduplicate name on 409 conflict)
         var createUrl = $"{origin}/twirp/github.actions.results.api.v1.ArtifactService/CreateArtifact";
         string? signedUploadUrl = null;
         string? acceptedArtifactName = null;
+        var nameWithoutExt = Path.GetFileNameWithoutExtension(fileName);
+        var ext = Path.GetExtension(fileName);
 
         for (var nameAttempt = 0; nameAttempt < 3 && signedUploadUrl is null; nameAttempt++)
         {
-            var artifactName = nameAttempt == 0
-                ? baseFileName
-                : $"{Path.GetFileNameWithoutExtension(baseFileName)}-{nameAttempt + 1}{Path.GetExtension(baseFileName)}";
+            var artifactName = nameAttempt switch
+            {
+                0 => fileName,
+                // On first conflict, append the job backend ID to uniquely identify this matrix job
+                1 => $"{nameWithoutExt}-{GetShortJobId(workflowJobRunBackendId)}{ext}",
+                // On further conflicts, add an extra numeric suffix
+                _ => $"{nameWithoutExt}-{GetShortJobId(workflowJobRunBackendId)}-{nameAttempt}{ext}",
+            };
 
             var createBody = BuildCreateArtifactJson(workflowRunBackendId, workflowJobRunBackendId, artifactName);
 
@@ -136,18 +140,11 @@ internal static class GitHubArtifactUploader
         return artifactId;
     }
 
-    private static string BuildUniqueArtifactName(string fileName, string jobRunBackendId)
+    private static string GetShortJobId(string jobRunBackendId)
     {
-        // Use the first 8 characters of the job backend ID as a short unique suffix.
-        // This ensures each matrix job gets a distinct artifact name without relying
-        // on environment variables that may not differentiate matrix combinations.
-        var shortId = jobRunBackendId.Length > 8
+        return jobRunBackendId.Length > 8
             ? jobRunBackendId.Substring(0, 8)
             : jobRunBackendId;
-
-        var nameWithoutExt = Path.GetFileNameWithoutExtension(fileName);
-        var ext = Path.GetExtension(fileName);
-        return $"{nameWithoutExt}-{shortId}{ext}";
     }
 
     private static string BuildCreateArtifactJson(string runId, string jobId, string fileName)
