@@ -615,7 +615,9 @@ internal static class MemberDiscovery
         foreach (var member in namedType.GetMembers())
         {
             if (member.IsStatic && member.IsAbstract)
+            {
                 return true;
+            }
         }
 
         foreach (var baseInterface in namedType.AllInterfaces)
@@ -623,7 +625,9 @@ internal static class MemberDiscovery
             foreach (var member in baseInterface.GetMembers())
             {
                 if (member.IsStatic && member.IsAbstract)
+                {
                     return true;
+                }
             }
         }
 

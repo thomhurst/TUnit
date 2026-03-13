@@ -18,7 +18,7 @@ public class ClientConfig
 public class AWSCredentials
 {
     public string AccessKey { get; set; } = "";
-    public string SecretKey { get; set; } = "";
+    public string AuthSignature { get; set; } = "";
 }
 
 public interface IClientConfig
@@ -207,7 +207,7 @@ public class StaticAbstractMemberTests
     public async Task Static_Abstract_CreateDefaultServiceClient_Verification()
     {
         var mock = Mock.Of<TUnit_Mocks_Tests_IAmazonService_Mockable>();
-        var creds = new AWSCredentials { AccessKey = "AKID", SecretKey = "secret" };
+        var creds = new AWSCredentials { AccessKey = "AKID", AuthSignature = "test-sig" };
         var config = new ClientConfig { Region = "us-west-2" };
 
         CallCreateDefaultServiceClient<TUnit_Mocks_Tests_IAmazonService_Mockable>(creds, config);

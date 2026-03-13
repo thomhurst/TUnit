@@ -253,9 +253,13 @@ internal static class MockImplBuilder
             writer.AppendLine("{");
             writer.IncreaseIndent();
             if (method.IsReturnTypeStaticAbstractInterface)
+            {
                 writer.AppendLine($"var __result = ({method.UnwrappedReturnType})__rawResult!;");
+            }
             else
+            {
                 writer.AppendLine($"var __result = __rawResult;");
+            }
             EmitOutRefReadback(writer, method);
             if (method.IsValueTask)
             {
@@ -584,9 +588,13 @@ internal static class MockImplBuilder
             writer.AppendLine("{");
             writer.IncreaseIndent();
             if (method.IsReturnTypeStaticAbstractInterface)
+            {
                 writer.AppendLine($"var __result = ({method.UnwrappedReturnType})__rawResult!;");
+            }
             else
+            {
                 writer.AppendLine($"var __result = __rawResult;");
+            }
             EmitOutRefReadback(writer, method);
             if (method.IsValueTask)
             {
@@ -702,9 +710,13 @@ internal static class MockImplBuilder
             using (writer.Block("try"))
             {
                 if (method.IsReturnTypeStaticAbstractInterface)
-                    writer.AppendLine($"var __result = ({method.UnwrappedReturnType})_engine.HandleCallWithReturn<object?>({method.MemberId}, \"{method.Name}\", {argsArray}, null)!;");
+                {
+                    writer.AppendLine($"var __result = ({method.UnwrappedReturnType})_engine.HandleCallWithReturn<{unwrappedArg}>({method.MemberId}, \"{method.Name}\", {argsArray}, {unwrappedDefault})!;");
+                }
                 else
-                    writer.AppendLine($"var __result = _engine.HandleCallWithReturn<{method.UnwrappedReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.UnwrappedSmartDefault});");
+                {
+                    writer.AppendLine($"var __result = _engine.HandleCallWithReturn<{unwrappedArg}>({method.MemberId}, \"{method.Name}\", {argsArray}, {unwrappedDefault});");
+                }
                 EmitOutRefReadback(writer, method);
                 if (method.IsValueTask)
                 {
