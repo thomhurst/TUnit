@@ -52,7 +52,7 @@ internal static class MockMembersBuilder
                 // Properties -- extension properties via C# 14 extension blocks
                 // (skip ref struct properties — can't use PropertyMockCall<RefStruct>)
                 var memberProps = model.Properties
-                    .Where(p => !p.IsIndexer && !p.IsRefStructReturn && (p.HasGetter || p.HasSetter))
+                    .Where(p => !p.IsIndexer && !p.IsRefStructReturn && !p.IsReturnTypeStaticAbstractInterface && (p.HasGetter || p.HasSetter))
                     .ToList();
                 if (memberProps.Count > 0)
                 {
@@ -121,8 +121,9 @@ internal static class MockMembersBuilder
         var hasRefStructParams = method.HasRefStructParams;
         var allNonOutParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out).ToList();
 
-        // Ref struct returns use the void wrapper (can't use generic type args with ref structs)
-        if (method.IsVoid || method.IsRefStructReturn)
+        // Ref struct / static-abstract-interface returns use the void wrapper
+        // (can't use these types as generic type args — ref structs and CS8920)
+        if (method.IsVoid || method.IsRefStructReturn || method.IsReturnTypeStaticAbstractInterface)
         {
             GenerateVoidUnifiedClass(writer, wrapperName, matchableParams, events, method.Parameters, hasRefStructParams, allNonOutParams, method.SpanReturnElementType, method.ReturnType);
         }
@@ -551,7 +552,7 @@ internal static class MockMembersBuilder
         string returnType;
         if (useTypedWrapper)
             returnType = GetWrapperName(safeName, method);
-        else if (method.IsVoid || method.IsRefStructReturn)
+        else if (method.IsVoid || method.IsRefStructReturn || method.IsReturnTypeStaticAbstractInterface)
             returnType = "global::TUnit.Mocks.VoidMockMethodCall";
         else
             returnType = $"global::TUnit.Mocks.MockMethodCall<{setupReturnType}>";
@@ -594,7 +595,7 @@ internal static class MockMembersBuilder
                 var wrapperName = GetWrapperName(safeName, method);
                 writer.AppendLine($"return new {wrapperName}(global::TUnit.Mocks.Mock.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
             }
-            else if (method.IsVoid || method.IsRefStructReturn)
+            else if (method.IsVoid || method.IsRefStructReturn || method.IsReturnTypeStaticAbstractInterface)
             {
                 writer.AppendLine($"return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.Mock.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
             }
@@ -715,7 +716,7 @@ internal static class MockMembersBuilder
                 var wrapperName = GetWrapperName(safeName, method);
                 writer.AppendLine($"return new {wrapperName}(global::TUnit.Mocks.Mock.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
             }
-            else if (method.IsVoid || method.IsRefStructReturn)
+            else if (method.IsVoid || method.IsRefStructReturn || method.IsReturnTypeStaticAbstractInterface)
             {
                 writer.AppendLine($"return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.Mock.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
             }

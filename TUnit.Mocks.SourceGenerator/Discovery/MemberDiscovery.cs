@@ -298,6 +298,11 @@ internal static class MemberDiscovery
         var (unwrappedType, isVoidAsync) = returnType.GetUnwrappedReturnType();
         var isVoid = method.ReturnsVoid || isVoidAsync;
 
+        // Check if the effective return type (unwrapped for async) is an interface with
+        // static abstract members. Such types cannot be used as generic type arguments (CS8920).
+        var effectiveReturnTypeSymbol = returnType.GetAsyncInnerTypeSymbol() ?? returnType;
+        var returnTypeHasStaticAbstract = !isVoid && IsInterfaceWithStaticAbstractMembers(effectiveReturnTypeSymbol);
+
         return new MockMemberModel
         {
             Name = method.Name,
@@ -339,6 +344,7 @@ internal static class MemberDiscovery
             IsProtected = method.DeclaredAccessibility == Accessibility.Protected
                        || method.DeclaredAccessibility == Accessibility.ProtectedOrInternal,
             IsRefStructReturn = returnType.IsRefLikeType,
+            IsReturnTypeStaticAbstractInterface = returnTypeHasStaticAbstract,
             SpanReturnElementType = returnType.IsRefLikeType ? GetSpanElementType(returnType) : null
         };
     }
@@ -390,6 +396,7 @@ internal static class MemberDiscovery
             IsProtected = property.DeclaredAccessibility == Accessibility.Protected
                        || property.DeclaredAccessibility == Accessibility.ProtectedOrInternal,
             IsRefStructReturn = property.Type.IsRefLikeType,
+            IsReturnTypeStaticAbstractInterface = IsInterfaceWithStaticAbstractMembers(property.Type),
             SpanReturnElementType = property.Type.IsRefLikeType ? GetSpanElementType(property.Type) : null
         };
     }
@@ -593,6 +600,34 @@ internal static class MemberDiscovery
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Returns true when the given type symbol is an interface that contains static abstract members
+    /// (directly or via inherited interfaces) without a most specific implementation.
+    /// Such types cannot be used as generic type arguments (CS8920).
+    /// </summary>
+    private static bool IsInterfaceWithStaticAbstractMembers(ITypeSymbol type)
+    {
+        if (type is not INamedTypeSymbol { TypeKind: TypeKind.Interface } namedType)
+            return false;
+
+        foreach (var member in namedType.GetMembers())
+        {
+            if (member.IsStatic && member.IsAbstract)
+                return true;
+        }
+
+        foreach (var baseInterface in namedType.AllInterfaces)
+        {
+            foreach (var member in baseInterface.GetMembers())
+            {
+                if (member.IsStatic && member.IsAbstract)
+                    return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>
