@@ -59,7 +59,7 @@ internal sealed class HookExecutor
             try
             {
                 _contextProvider.TestSessionContext.RestoreExecutionContext();
-                await hook(_contextProvider.TestSessionContext, cancellationToken).ConfigureAwait(false);
+                await ExecuteHookWithActivityAsync(hook, _contextProvider.TestSessionContext, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -98,7 +98,7 @@ internal sealed class HookExecutor
             try
             {
                 _contextProvider.TestSessionContext.RestoreExecutionContext();
-                await hook(_contextProvider.TestSessionContext, cancellationToken).ConfigureAwait(false);
+                await ExecuteHookWithActivityAsync(hook, _contextProvider.TestSessionContext, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -170,7 +170,7 @@ internal sealed class HookExecutor
             {
                 var context = _contextProvider.GetOrCreateAssemblyContext(assembly);
                 context.RestoreExecutionContext();
-                await hook(context, cancellationToken).ConfigureAwait(false);
+                await ExecuteHookWithActivityAsync(hook, context, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -210,7 +210,7 @@ internal sealed class HookExecutor
             {
                 var context = _contextProvider.GetOrCreateAssemblyContext(assembly);
                 context.RestoreExecutionContext();
-                await hook(context, cancellationToken).ConfigureAwait(false);
+                await ExecuteHookWithActivityAsync(hook, context, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -285,7 +285,7 @@ internal sealed class HookExecutor
             {
                 var context = _contextProvider.GetOrCreateClassContext(testClass);
                 context.RestoreExecutionContext();
-                await hook(context, cancellationToken).ConfigureAwait(false);
+                await ExecuteHookWithActivityAsync(hook, context, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -327,7 +327,7 @@ internal sealed class HookExecutor
             {
                 var context = _contextProvider.GetOrCreateClassContext(testClass);
                 context.RestoreExecutionContext();
-                await hook(context, cancellationToken).ConfigureAwait(false);
+                await ExecuteHookWithActivityAsync(hook, context, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -384,7 +384,7 @@ internal sealed class HookExecutor
                 try
                 {
                     test.Context.RestoreExecutionContext();
-                    await hook(test.Context, cancellationToken).ConfigureAwait(false);
+                    await ExecuteHookWithActivityAsync(hook, test.Context, cancellationToken).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -413,7 +413,7 @@ internal sealed class HookExecutor
                 try
                 {
                     test.Context.RestoreExecutionContext();
-                    await hook(test.Context, cancellationToken).ConfigureAwait(false);
+                    await ExecuteHookWithActivityAsync(hook, test.Context, cancellationToken).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -449,7 +449,7 @@ internal sealed class HookExecutor
                 try
                 {
                     test.Context.RestoreExecutionContext();
-                    await hook(test.Context, cancellationToken).ConfigureAwait(false);
+                    await ExecuteHookWithActivityAsync(hook, test.Context, cancellationToken).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -469,7 +469,7 @@ internal sealed class HookExecutor
                 try
                 {
                     test.Context.RestoreExecutionContext();
-                    await hook(test.Context, cancellationToken).ConfigureAwait(false);
+                    await ExecuteHookWithActivityAsync(hook, test.Context, cancellationToken).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -496,7 +496,7 @@ internal sealed class HookExecutor
             try
             {
                 _contextProvider.BeforeTestDiscoveryContext.RestoreExecutionContext();
-                await hook(_contextProvider.BeforeTestDiscoveryContext, cancellationToken).ConfigureAwait(false);
+                await ExecuteHookWithActivityAsync(hook, _contextProvider.BeforeTestDiscoveryContext, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -519,7 +519,7 @@ internal sealed class HookExecutor
             try
             {
                 _contextProvider.TestDiscoveryContext.RestoreExecutionContext();
-                await hook(_contextProvider.TestDiscoveryContext, cancellationToken).ConfigureAwait(false);
+                await ExecuteHookWithActivityAsync(hook, _contextProvider.TestDiscoveryContext, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -527,4 +527,40 @@ internal sealed class HookExecutor
             }
         }
     }
+
+#if NET
+    private static async ValueTask ExecuteHookWithActivityAsync<TContext>(NamedHookDelegate<TContext> hook, TContext context, CancellationToken cancellationToken)
+        where TContext : Context
+    {
+        System.Diagnostics.Activity? hookActivity = null;
+
+        if (TUnitActivitySource.Source.HasListeners())
+        {
+            hookActivity = TUnitActivitySource.StartActivity(
+                $"hook: {hook.Name}",
+                System.Diagnostics.ActivityKind.Internal,
+                context.Activity?.Context ?? default);
+        }
+
+        try
+        {
+            await hook.Invoke(context, cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            TUnitActivitySource.RecordException(hookActivity, ex);
+            throw;
+        }
+        finally
+        {
+            TUnitActivitySource.StopActivity(hookActivity);
+        }
+    }
+#else
+    private static async ValueTask ExecuteHookWithActivityAsync<TContext>(NamedHookDelegate<TContext> hook, TContext context, CancellationToken cancellationToken)
+        where TContext : Context
+    {
+        await hook.Invoke(context, cancellationToken).ConfigureAwait(false);
+    }
+#endif
 }
