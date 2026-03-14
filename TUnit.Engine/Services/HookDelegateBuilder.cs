@@ -118,47 +118,32 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
         => BuildGlobalHooksAsync(Sources.AfterEveryTestHooks, CreateStaticHookDelegateAsync, "AfterEveryTest");
 
     private Task<IReadOnlyList<NamedHookDelegate<TestSessionContext>>> BuildGlobalBeforeTestSessionHooksAsync()
-        => BuildGlobalHooksAsync(Sources.BeforeTestSessionHooks, CreateTestSessionHookDelegateAsync, "BeforeTestSession");
+        => BuildGlobalHooksAsync(Sources.BeforeTestSessionHooks, CreateStaticHookDelegateAsync, "BeforeTestSession");
 
     private Task<IReadOnlyList<NamedHookDelegate<TestSessionContext>>> BuildGlobalAfterTestSessionHooksAsync()
-        => BuildGlobalHooksAsync(Sources.AfterTestSessionHooks, CreateTestSessionHookDelegateAsync, "AfterTestSession");
+        => BuildGlobalHooksAsync(Sources.AfterTestSessionHooks, CreateStaticHookDelegateAsync, "AfterTestSession");
 
     private Task<IReadOnlyList<NamedHookDelegate<BeforeTestDiscoveryContext>>> BuildGlobalBeforeTestDiscoveryHooksAsync()
-        => BuildGlobalHooksAsync(Sources.BeforeTestDiscoveryHooks, CreateBeforeTestDiscoveryHookDelegateAsync, "BeforeTestDiscovery");
+        => BuildGlobalHooksAsync(Sources.BeforeTestDiscoveryHooks, CreateStaticHookDelegateAsync, "BeforeTestDiscovery");
 
     private Task<IReadOnlyList<NamedHookDelegate<TestDiscoveryContext>>> BuildGlobalAfterTestDiscoveryHooksAsync()
-        => BuildGlobalHooksAsync(Sources.AfterTestDiscoveryHooks, CreateTestDiscoveryHookDelegateAsync, "AfterTestDiscovery");
+        => BuildGlobalHooksAsync(Sources.AfterTestDiscoveryHooks, CreateStaticHookDelegateAsync, "AfterTestDiscovery");
 
     private Task<IReadOnlyList<NamedHookDelegate<ClassHookContext>>> BuildGlobalBeforeEveryClassHooksAsync()
-        => BuildGlobalHooksAsync(Sources.BeforeEveryClassHooks, CreateClassHookDelegateAsync, "BeforeEveryClass");
+        => BuildGlobalHooksAsync(Sources.BeforeEveryClassHooks, CreateStaticHookDelegateAsync, "BeforeEveryClass");
 
     private Task<IReadOnlyList<NamedHookDelegate<ClassHookContext>>> BuildGlobalAfterEveryClassHooksAsync()
-        => BuildGlobalHooksAsync(Sources.AfterEveryClassHooks, CreateClassHookDelegateAsync, "AfterEveryClass");
+        => BuildGlobalHooksAsync(Sources.AfterEveryClassHooks, CreateStaticHookDelegateAsync, "AfterEveryClass");
 
     private Task<IReadOnlyList<NamedHookDelegate<AssemblyHookContext>>> BuildGlobalBeforeEveryAssemblyHooksAsync()
-        => BuildGlobalHooksAsync(Sources.BeforeEveryAssemblyHooks, CreateAssemblyHookDelegateAsync, "BeforeEveryAssembly");
+        => BuildGlobalHooksAsync(Sources.BeforeEveryAssemblyHooks, CreateStaticHookDelegateAsync, "BeforeEveryAssembly");
 
     private Task<IReadOnlyList<NamedHookDelegate<AssemblyHookContext>>> BuildGlobalAfterEveryAssemblyHooksAsync()
-        => BuildGlobalHooksAsync(Sources.AfterEveryAssemblyHooks, CreateAssemblyHookDelegateAsync, "AfterEveryAssembly");
+        => BuildGlobalHooksAsync(Sources.AfterEveryAssemblyHooks, CreateStaticHookDelegateAsync, "AfterEveryAssembly");
 
-    private static void SortAndAddHooks<TDelegate>(
-        List<NamedHookDelegate<TestContext>> target,
-        List<(int order, int registrationIndex, TDelegate hook)> hooks)
-        where TDelegate : struct
-    {
-        hooks.Sort((a, b) => a.order != b.order
-            ? a.order.CompareTo(b.order)
-            : a.registrationIndex.CompareTo(b.registrationIndex));
-
-        foreach (var (_, _, hook) in hooks)
-        {
-            target.Add((NamedHookDelegate<TestContext>)(object)hook);
-        }
-    }
-
-    private static void SortAndAddClassHooks(
-        List<NamedHookDelegate<ClassHookContext>> target,
-        List<(int order, int registrationIndex, NamedHookDelegate<ClassHookContext> hook)> hooks)
+    private static void SortAndAddHooks<TContext>(
+        List<NamedHookDelegate<TContext>> target,
+        List<(int order, int registrationIndex, NamedHookDelegate<TContext> hook)> hooks)
     {
         hooks.Sort((a, b) => a.order != b.order
             ? a.order.CompareTo(b.order)
@@ -359,7 +344,7 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
             {
                 foreach (var hook in sourceHooks)
                 {
-                    var namedHook = await CreateClassHookDelegateAsync(hook);
+                    var namedHook = await CreateStaticHookDelegateAsync(hook);
                     typeHooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
                 }
             }
@@ -372,7 +357,7 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
                 {
                     foreach (var hook in openTypeHooks)
                     {
-                        var namedHook = await CreateClassHookDelegateAsync(hook);
+                        var namedHook = await CreateStaticHookDelegateAsync(hook);
                         typeHooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
                     }
                 }
@@ -391,7 +376,7 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
         var finalHooks = new List<NamedHookDelegate<ClassHookContext>>();
         foreach (var (_, typeHooks) in hooksByType)
         {
-            SortAndAddClassHooks(finalHooks, typeHooks);
+            SortAndAddHooks(finalHooks, typeHooks);
         }
 
         return finalHooks;
@@ -423,7 +408,7 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
             {
                 foreach (var hook in sourceHooks)
                 {
-                    var namedHook = await CreateClassHookDelegateAsync(hook);
+                    var namedHook = await CreateStaticHookDelegateAsync(hook);
                     typeHooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
                 }
             }
@@ -436,7 +421,7 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
                 {
                     foreach (var hook in openTypeHooks)
                     {
-                        var namedHook = await CreateClassHookDelegateAsync(hook);
+                        var namedHook = await CreateStaticHookDelegateAsync(hook);
                         typeHooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
                     }
                 }
@@ -453,7 +438,7 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
         var finalHooks = new List<NamedHookDelegate<ClassHookContext>>();
         foreach (var (_, typeHooks) in hooksByType)
         {
-            SortAndAddClassHooks(finalHooks, typeHooks);
+            SortAndAddHooks(finalHooks, typeHooks);
         }
 
         return finalHooks;
@@ -482,7 +467,7 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
 
         foreach (var hook in assemblyHooks)
         {
-            var namedHook = await CreateAssemblyHookDelegateAsync(hook);
+            var namedHook = await CreateStaticHookDelegateAsync(hook);
             allHooks.Add((hook.Order, namedHook));
         }
 
@@ -515,7 +500,7 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
 
         foreach (var hook in assemblyHooks)
         {
-            var namedHook = await CreateAssemblyHookDelegateAsync(hook);
+            var namedHook = await CreateStaticHookDelegateAsync(hook);
             allHooks.Add((hook.Order, namedHook));
         }
 
@@ -612,84 +597,11 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
         });
     }
 
-    private async Task<NamedHookDelegate<TestContext>> CreateStaticHookDelegateAsync(StaticHookMethod<TestContext> hook)
+    private async Task<NamedHookDelegate<TContext>> CreateStaticHookDelegateAsync<TContext>(StaticHookMethod<TContext> hook)
     {
-        // Process hook registration event receivers
         await ProcessHookRegistrationAsync(hook);
 
-        return new NamedHookDelegate<TestContext>(hook.Name, (context, cancellationToken) => HookTimeoutHelper.CreateTimeoutHookAction(
-            hook,
-            context,
-            cancellationToken));
-    }
-
-    private async Task<NamedHookDelegate<ClassHookContext>> CreateClassHookDelegateAsync(StaticHookMethod<ClassHookContext> hook)
-    {
-        // Process hook registration event receivers
-        await ProcessHookRegistrationAsync(hook);
-
-        return new NamedHookDelegate<ClassHookContext>(hook.Name, (context, cancellationToken) =>
-        {
-            return HookTimeoutHelper.CreateTimeoutHookAction(
-                hook,
-                context,
-                cancellationToken);
-        });
-    }
-
-    private async Task<NamedHookDelegate<AssemblyHookContext>> CreateAssemblyHookDelegateAsync(StaticHookMethod<AssemblyHookContext> hook)
-    {
-        // Process hook registration event receivers
-        await ProcessHookRegistrationAsync(hook);
-
-        return new NamedHookDelegate<AssemblyHookContext>(hook.Name, (context, cancellationToken) =>
-        {
-            return HookTimeoutHelper.CreateTimeoutHookAction(
-                hook,
-                context,
-                cancellationToken);
-        });
-    }
-
-    private async Task<NamedHookDelegate<TestSessionContext>> CreateTestSessionHookDelegateAsync(StaticHookMethod<TestSessionContext> hook)
-    {
-        // Process hook registration event receivers
-        await ProcessHookRegistrationAsync(hook);
-
-        return new NamedHookDelegate<TestSessionContext>(hook.Name, (context, cancellationToken) =>
-        {
-            return HookTimeoutHelper.CreateTimeoutHookAction(
-                hook,
-                context,
-                cancellationToken);
-        });
-    }
-
-    private async Task<NamedHookDelegate<BeforeTestDiscoveryContext>> CreateBeforeTestDiscoveryHookDelegateAsync(StaticHookMethod<BeforeTestDiscoveryContext> hook)
-    {
-        // Process hook registration event receivers
-        await ProcessHookRegistrationAsync(hook);
-
-        return new NamedHookDelegate<BeforeTestDiscoveryContext>(hook.Name, (context, cancellationToken) =>
-        {
-            return HookTimeoutHelper.CreateTimeoutHookAction(
-                hook,
-                context,
-                cancellationToken);
-        });
-    }
-
-    private async Task<NamedHookDelegate<TestDiscoveryContext>> CreateTestDiscoveryHookDelegateAsync(StaticHookMethod<TestDiscoveryContext> hook)
-    {
-        // Process hook registration event receivers
-        await ProcessHookRegistrationAsync(hook);
-
-        return new NamedHookDelegate<TestDiscoveryContext>(hook.Name, (context, cancellationToken) =>
-        {
-            return HookTimeoutHelper.CreateTimeoutHookAction(
-                hook,
-                context,
-                cancellationToken);
-        });
+        return new NamedHookDelegate<TContext>(hook.Name, (context, cancellationToken) =>
+            HookTimeoutHelper.CreateTimeoutHookAction(hook, context, cancellationToken));
     }
 }
