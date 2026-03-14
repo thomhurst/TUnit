@@ -477,7 +477,7 @@ internal sealed class HookExecutor
             }
         }
 
-        return exceptions == null ? Array.Empty<Exception>() : exceptions;
+        return exceptions ?? [];
     }
 
     public async ValueTask ExecuteBeforeTestDiscoveryHooksAsync(CancellationToken cancellationToken)

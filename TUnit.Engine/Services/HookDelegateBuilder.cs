@@ -84,7 +84,7 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
     /// </summary>
     private async Task<IReadOnlyList<NamedHookDelegate<TContext>>> BuildGlobalHooksAsync<THookMethod, TContext>(
         IEnumerable<THookMethod> sourceHooks,
-        Func<THookMethod, Task<NamedHookDelegate<TContext>>> createDelegate,
+        Func<THookMethod, ValueTask<NamedHookDelegate<TContext>>> createDelegate,
         string hookTypeName)
         where THookMethod : HookMethod
     {
@@ -463,17 +463,18 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
             return [];
         }
 
-        var allHooks = new List<(int order, NamedHookDelegate<AssemblyHookContext> hook)>(assemblyHooks.Count);
+        var allHooks = new List<(int order, int registrationIndex, NamedHookDelegate<AssemblyHookContext> hook)>(assemblyHooks.Count);
 
         foreach (var hook in assemblyHooks)
         {
             var namedHook = await CreateStaticHookDelegateAsync(hook);
-            allHooks.Add((hook.Order, namedHook));
+            allHooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
         }
 
         return allHooks
-            .OrderBy(h => h.order)
-            .Select(h => h.hook)
+            .OrderBy(static h => h.order)
+            .ThenBy(static h => h.registrationIndex)
+            .Select(static h => h.hook)
             .ToList();
     }
 
@@ -496,17 +497,18 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
             return [];
         }
 
-        var allHooks = new List<(int order, NamedHookDelegate<AssemblyHookContext> hook)>(assemblyHooks.Count);
+        var allHooks = new List<(int order, int registrationIndex, NamedHookDelegate<AssemblyHookContext> hook)>(assemblyHooks.Count);
 
         foreach (var hook in assemblyHooks)
         {
             var namedHook = await CreateStaticHookDelegateAsync(hook);
-            allHooks.Add((hook.Order, namedHook));
+            allHooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
         }
 
         return allHooks
-            .OrderBy(h => h.order)
-            .Select(h => h.hook)
+            .OrderBy(static h => h.order)
+            .ThenBy(static h => h.registrationIndex)
+            .Select(static h => h.hook)
             .ToList();
     }
 
@@ -550,7 +552,7 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
         return new ValueTask<IReadOnlyList<NamedHookDelegate<AssemblyHookContext>>>(_afterEveryAssemblyHooks ?? []);
     }
 
-    private async Task<NamedHookDelegate<TestContext>> CreateInstanceHookDelegateAsync(InstanceHookMethod hook)
+    private async ValueTask<NamedHookDelegate<TestContext>> CreateInstanceHookDelegateAsync(InstanceHookMethod hook)
     {
         // Process hook registration event receivers
         await ProcessHookRegistrationAsync(hook);
@@ -597,7 +599,7 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
         });
     }
 
-    private async Task<NamedHookDelegate<TContext>> CreateStaticHookDelegateAsync<TContext>(StaticHookMethod<TContext> hook)
+    private async ValueTask<NamedHookDelegate<TContext>> CreateStaticHookDelegateAsync<TContext>(StaticHookMethod<TContext> hook)
     {
         await ProcessHookRegistrationAsync(hook);
 
