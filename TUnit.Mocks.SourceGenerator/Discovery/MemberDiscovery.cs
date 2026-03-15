@@ -532,7 +532,9 @@ internal static class MemberDiscovery
     private static bool IsEventHandlerType(ITypeSymbol type)
     {
         if (type is not INamedTypeSymbol namedType)
+        {
             return false;
+        }
 
         // Check if the type is System.EventHandler or System.EventHandler<T>
         var fullName = namedType.ConstructedFrom.ToDisplayString();
@@ -588,7 +590,9 @@ internal static class MemberDiscovery
     private static string? GetSpanElementType(ITypeSymbol type)
     {
         if (type is not INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1 } namedType)
+        {
             return null;
+        }
 
         var constructed = namedType.ConstructedFrom;
         var ns = constructed.ContainingNamespace?.ToDisplayString();
@@ -610,28 +614,15 @@ internal static class MemberDiscovery
     private static bool IsInterfaceWithStaticAbstractMembers(ITypeSymbol type)
     {
         if (type is not INamedTypeSymbol { TypeKind: TypeKind.Interface } namedType)
+        {
             return false;
-
-        foreach (var member in namedType.GetMembers())
-        {
-            if (member.IsStatic && member.IsAbstract)
-            {
-                return true;
-            }
         }
 
-        foreach (var baseInterface in namedType.AllInterfaces)
-        {
-            foreach (var member in baseInterface.GetMembers())
-            {
-                if (member.IsStatic && member.IsAbstract)
-                {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        // Check both direct members and inherited interface members.
+        // AllInterfaces does NOT include the type itself, so we check both.
+        return namedType.GetMembers()
+            .Concat(namedType.AllInterfaces.SelectMany(i => i.GetMembers()))
+            .Any(m => m.IsStatic && m.IsAbstract);
     }
 
     /// <summary>

@@ -204,6 +204,24 @@ public class StaticAbstractMemberTests
     }
 
     [Test]
+    public async Task Static_Abstract_CreateDefaultServiceClient_Returns_Configured_Value()
+    {
+        // Arrange — .Returns() works via MockMethodCall<object?> (not VoidMockMethodCall)
+        // because the return type (IAmazonService) has static abstract members (CS8920).
+        var mock = Mock.Of<TUnit_Mocks_Tests_IAmazonService_Mockable>();
+        var expectedService = mock.Object;
+        mock.CreateDefaultServiceClient(Arg.Any<AWSCredentials>(), Arg.Any<ClientConfig>())
+            .Returns(expectedService);
+
+        // Act
+        var result = CallCreateDefaultServiceClient<TUnit_Mocks_Tests_IAmazonService_Mockable>(
+            new AWSCredentials(), new ClientConfig());
+
+        // Assert — the configured value is returned through the object? → IAmazonService cast
+        await Assert.That((object?)result).IsSameReferenceAs(expectedService);
+    }
+
+    [Test]
     public async Task Static_Abstract_CreateDefaultServiceClient_Verification()
     {
         var mock = Mock.Of<TUnit_Mocks_Tests_IAmazonService_Mockable>();
@@ -212,7 +230,7 @@ public class StaticAbstractMemberTests
 
         CallCreateDefaultServiceClient<TUnit_Mocks_Tests_IAmazonService_Mockable>(creds, config);
 
-        // VoidMockMethodCall supports verification even though the return type
+        // MockMethodCall<object?> supports verification even though the return type
         // (IAmazonService) cannot be used as a generic type argument (CS8920).
         mock.CreateDefaultServiceClient(Arg.Any<AWSCredentials>(), Arg.Any<ClientConfig>()).WasCalled();
     }

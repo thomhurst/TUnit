@@ -146,7 +146,9 @@ internal static class MockImplBuilder
                 writer.AppendLine("_engine = engine;");
                 writer.AppendLine("_wrappedInstance = wrappedInstance;");
                 if (model.HasStaticAbstractMembers)
+                {
                     EmitStaticEngineAssignment(writer, safeName);
+                }
             }
             return;
         }
@@ -160,7 +162,9 @@ internal static class MockImplBuilder
                     writer.AppendLine("_engine = engine;");
                     writer.AppendLine("_wrappedInstance = wrappedInstance;");
                     if (model.HasStaticAbstractMembers)
+                    {
                         EmitStaticEngineAssignment(writer, safeName);
+                    }
                 }
             }
             else
@@ -172,7 +176,9 @@ internal static class MockImplBuilder
                     writer.AppendLine("_engine = engine;");
                     writer.AppendLine("_wrappedInstance = wrappedInstance;");
                     if (model.HasStaticAbstractMembers)
+                    {
                         EmitStaticEngineAssignment(writer, safeName);
+                    }
                 }
             }
         }
@@ -247,18 +253,18 @@ internal static class MockImplBuilder
         }
         else if (method.IsAsync)
         {
-            var tryArg = method.IsReturnTypeStaticAbstractInterface ? "object?" : method.UnwrappedReturnType;
-            var tryDefault = method.IsReturnTypeStaticAbstractInterface ? "null" : method.UnwrappedSmartDefault;
-            writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{tryArg}>({method.MemberId}, \"{method.Name}\", {argsArray}, {tryDefault}, out var __rawResult))");
-            writer.AppendLine("{");
-            writer.IncreaseIndent();
             if (method.IsReturnTypeStaticAbstractInterface)
             {
+                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?>({method.MemberId}, \"{method.Name}\", {argsArray}, null, out var __rawResult))");
+                writer.AppendLine("{");
+                writer.IncreaseIndent();
                 writer.AppendLine($"var __result = ({method.UnwrappedReturnType})__rawResult!;");
             }
             else
             {
-                writer.AppendLine($"var __result = __rawResult;");
+                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{method.UnwrappedReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.UnwrappedSmartDefault}, out var __result))");
+                writer.AppendLine("{");
+                writer.IncreaseIndent();
             }
             EmitOutRefReadback(writer, method);
             if (method.IsValueTask)
@@ -465,7 +471,9 @@ internal static class MockImplBuilder
             {
                 writer.AppendLine("_engine = engine;");
                 if (model.HasStaticAbstractMembers)
+                {
                     EmitStaticEngineAssignment(writer, safeName);
+                }
             }
             return;
         }
@@ -479,7 +487,9 @@ internal static class MockImplBuilder
                 {
                     writer.AppendLine("_engine = engine;");
                     if (model.HasStaticAbstractMembers)
+                    {
                         EmitStaticEngineAssignment(writer, safeName);
+                    }
                 }
             }
             else
@@ -491,7 +501,9 @@ internal static class MockImplBuilder
                 {
                     writer.AppendLine("_engine = engine;");
                     if (model.HasStaticAbstractMembers)
+                    {
                         EmitStaticEngineAssignment(writer, safeName);
+                    }
                 }
             }
         }
@@ -582,18 +594,18 @@ internal static class MockImplBuilder
         else if (method.IsAsync)
         {
             // async method with return (Task<T>/ValueTask<T>)
-            var tryArg = method.IsReturnTypeStaticAbstractInterface ? "object?" : method.UnwrappedReturnType;
-            var tryDefault = method.IsReturnTypeStaticAbstractInterface ? "null" : method.UnwrappedSmartDefault;
-            writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{tryArg}>({method.MemberId}, \"{method.Name}\", {argsArray}, {tryDefault}, out var __rawResult))");
-            writer.AppendLine("{");
-            writer.IncreaseIndent();
             if (method.IsReturnTypeStaticAbstractInterface)
             {
+                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?>({method.MemberId}, \"{method.Name}\", {argsArray}, null, out var __rawResult))");
+                writer.AppendLine("{");
+                writer.IncreaseIndent();
                 writer.AppendLine($"var __result = ({method.UnwrappedReturnType})__rawResult!;");
             }
             else
             {
-                writer.AppendLine($"var __result = __rawResult;");
+                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{method.UnwrappedReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.UnwrappedSmartDefault}, out var __result))");
+                writer.AppendLine("{");
+                writer.IncreaseIndent();
             }
             EmitOutRefReadback(writer, method);
             if (method.IsValueTask)
@@ -1168,7 +1180,9 @@ internal static class MockImplBuilder
     internal static string EmitArgsArrayVariable(CodeWriter writer, MockMemberModel method)
     {
         if (!method.HasRefStructParams)
+        {
             return GetArgsArrayExpression(method, false);
+        }
 
         writer.AppendLine("#if NET9_0_OR_GREATER");
         writer.AppendLine($"var __args = {GetArgsArrayExpression(method, true)};");

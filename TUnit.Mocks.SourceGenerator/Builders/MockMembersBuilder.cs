@@ -121,11 +121,16 @@ internal static class MockMembersBuilder
         var hasRefStructParams = method.HasRefStructParams;
         var allNonOutParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out).ToList();
 
-        // Ref struct / static-abstract-interface returns use the void wrapper
-        // (can't use these types as generic type args — ref structs and CS8920)
-        if (method.IsVoid || method.IsRefStructReturn || method.IsReturnTypeStaticAbstractInterface)
+        // Ref struct returns use the void wrapper (can't use ref structs as generic type args)
+        if (method.IsVoid || method.IsRefStructReturn)
         {
             GenerateVoidUnifiedClass(writer, wrapperName, matchableParams, events, method.Parameters, hasRefStructParams, allNonOutParams, method.SpanReturnElementType, method.ReturnType);
+        }
+        else if (method.IsReturnTypeStaticAbstractInterface)
+        {
+            // Static-abstract interface returns can't be used as generic type args (CS8920)
+            // Use object? to preserve .Returns() capability
+            GenerateReturnUnifiedClass(writer, wrapperName, matchableParams, "object?", events, method.Parameters, hasRefStructParams, allNonOutParams);
         }
         else
         {
@@ -198,7 +203,9 @@ internal static class MockMembersBuilder
             writer.AppendLine($"public {wrapperName} Raises(string eventName, object? args = null) {{ EnsureSetup().Raises(eventName, args); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
             if (hasOutRef)
+            {
                 writer.AppendLine("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
+            }
             writer.AppendLine($"public {wrapperName} SetsOutParameter(int paramIndex, object? value) {{ EnsureSetup().SetsOutParameter(paramIndex, value); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
             writer.AppendLine($"public {wrapperName} TransitionsTo(string stateName) {{ EnsureSetup().TransitionsTo(stateName); return this; }}");
@@ -327,7 +334,9 @@ internal static class MockMembersBuilder
             writer.AppendLine($"public {wrapperName} Raises(string eventName, object? args = null) {{ EnsureSetup().Raises(eventName, args); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
             if (hasOutRef)
+            {
                 writer.AppendLine("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
+            }
             writer.AppendLine($"public {wrapperName} SetsOutParameter(int paramIndex, object? value) {{ EnsureSetup().SetsOutParameter(paramIndex, value); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
             writer.AppendLine($"public {wrapperName} TransitionsTo(string stateName) {{ EnsureSetup().TransitionsTo(stateName); return this; }}");
@@ -482,11 +491,15 @@ internal static class MockMembersBuilder
         {
             var param = allParameters[i];
             if (param.Direction != ParameterDirection.Out && param.Direction != ParameterDirection.Ref)
+            {
                 continue;
+            }
 
             // Skip non-span ref structs (can't be boxed)
             if (param.IsRefStruct && param.SpanElementType is null)
+            {
                 continue;
+            }
 
             var prefix = param.Direction == ParameterDirection.Out ? "SetsOut" : "SetsRef";
             var methodName = prefix + ToPascalCase(param.Name);
@@ -514,7 +527,9 @@ internal static class MockMembersBuilder
     private static string BuildCastArgs(List<MockParameterModel> nonOutParams, List<MockParameterModel>? allNonOutParams = null)
     {
         if (allNonOutParams is null)
+        {
             return string.Join(", ", nonOutParams.Select((p, i) => $"({p.FullyQualifiedType})args[{i}]!"));
+        }
 
         var indexMap = allNonOutParams.Select((p, i) => (p, i)).ToDictionary(x => x.p, x => x.i);
         return string.Join(", ", nonOutParams.Select(p => $"({p.FullyQualifiedType})args[{indexMap[p]}]!"));
@@ -551,11 +566,21 @@ internal static class MockMembersBuilder
 
         string returnType;
         if (useTypedWrapper)
+        {
             returnType = GetWrapperName(safeName, method);
-        else if (method.IsVoid || method.IsRefStructReturn || method.IsReturnTypeStaticAbstractInterface)
+        }
+        else if (method.IsVoid || method.IsRefStructReturn)
+        {
             returnType = "global::TUnit.Mocks.VoidMockMethodCall";
+        }
+        else if (method.IsReturnTypeStaticAbstractInterface)
+        {
+            returnType = "global::TUnit.Mocks.MockMethodCall<object?>";
+        }
         else
+        {
             returnType = $"global::TUnit.Mocks.MockMethodCall<{setupReturnType}>";
+        }
 
         return (useTypedWrapper, returnType, setupReturnType);
     }
@@ -595,9 +620,13 @@ internal static class MockMembersBuilder
                 var wrapperName = GetWrapperName(safeName, method);
                 writer.AppendLine($"return new {wrapperName}(global::TUnit.Mocks.Mock.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
             }
-            else if (method.IsVoid || method.IsRefStructReturn || method.IsReturnTypeStaticAbstractInterface)
+            else if (method.IsVoid || method.IsRefStructReturn)
             {
                 writer.AppendLine($"return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.Mock.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
+            }
+            else if (method.IsReturnTypeStaticAbstractInterface)
+            {
+                writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<object?>(global::TUnit.Mocks.Mock.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
             }
             else
             {
@@ -643,7 +672,9 @@ internal static class MockMembersBuilder
         for (int bit = 0; bit < eligibleIndices.Count; bit++)
         {
             if ((funcMask & (1 << bit)) != 0)
+            {
                 funcIndices.Add(eligibleIndices[bit]);
+            }
         }
 
         var (useTypedWrapper, returnType, setupReturnType) = GetReturnTypeInfo(method, model, safeName);
@@ -662,7 +693,9 @@ internal static class MockMembersBuilder
             else if (p.IsRefStruct)
             {
                 if (includeRefStructArgs)
+                {
                     paramParts.Add($"global::TUnit.Mocks.Arguments.RefStructArg<{p.FullyQualifiedType}> {p.Name}");
+                }
             }
             else
             {
@@ -716,9 +749,13 @@ internal static class MockMembersBuilder
                 var wrapperName = GetWrapperName(safeName, method);
                 writer.AppendLine($"return new {wrapperName}(global::TUnit.Mocks.Mock.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
             }
-            else if (method.IsVoid || method.IsRefStructReturn || method.IsReturnTypeStaticAbstractInterface)
+            else if (method.IsVoid || method.IsRefStructReturn)
             {
                 writer.AppendLine($"return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.Mock.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
+            }
+            else if (method.IsReturnTypeStaticAbstractInterface)
+            {
+                writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<object?>(global::TUnit.Mocks.Mock.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
             }
             else
             {
@@ -800,7 +837,9 @@ internal static class MockMembersBuilder
             if (p.IsRefStruct)
             {
                 if (includeRefStructArgs)
+                {
                     parts.Add($"global::TUnit.Mocks.Arguments.RefStructArg<{p.FullyQualifiedType}> {p.Name}");
+                }
             }
             else
             {
