@@ -1372,7 +1372,7 @@ function renderSpanRows(sp, uid) {
         const cls = s.status === 'Error' ? 'err' : s.status === 'Ok' ? 'ok' : 'unk';
         h += '<div class="sp-row" data-si="' + i + '">';
         h += '<div class="sp-lbl" style="padding-left:' + (d * 14) + 'px">';
-        h += '<span class="sp-name">' + esc(s.name) + '</span>';
+        h += '<span class="sp-name" title="' + esc(s.name) + '">' + esc(s.name) + '</span>';
         h += '<span class="sp-dur">' + fmt(s.durationMs) + '</span>';
         h += '</div>';
         h += '<div class="sp-track"><div class="sp-bar ' + cls + '" style="left:' + l + '%;width:' + w + '%" title="' + esc(s.name) + ' (' + fmt(s.durationMs) + ')"></div></div>';

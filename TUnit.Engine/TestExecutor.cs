@@ -147,36 +147,7 @@ internal class TestExecutor
 
             executableTest.Context.RestoreExecutionContext();
 
-#if NET
-            Activity? beforeTestActivity = null;
-            if (TUnitActivitySource.Source.HasListeners())
-            {
-                beforeTestActivity = TUnitActivitySource.StartActivity(
-                    "hook: BeforeTest",
-                    ActivityKind.Internal,
-                    executableTest.Context.Activity?.Context ?? default);
-            }
-#endif
-            try
-            {
-                await _hookExecutor.ExecuteBeforeTestHooksAsync(executableTest, cancellationToken).ConfigureAwait(false);
-            }
-            catch
-#if NET
-            (Exception ex)
-#endif
-            {
-#if NET
-                TUnitActivitySource.RecordException(beforeTestActivity, ex);
-#endif
-                throw;
-            }
-            finally
-            {
-#if NET
-                TUnitActivitySource.StopActivity(beforeTestActivity);
-#endif
-            }
+            await _hookExecutor.ExecuteBeforeTestHooksAsync(executableTest, cancellationToken).ConfigureAwait(false);
 
             // Late stage test start receivers run after instance-level hooks (default behavior)
             await _eventReceiverOrchestrator.InvokeTestStartEventReceiversAsync(executableTest.Context, cancellationToken, EventReceiverStage.Late).ConfigureAwait(false);
@@ -245,31 +216,7 @@ internal class TestExecutor
             // Early stage test end receivers run before instance-level hooks
             var earlyStageExceptions = await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(executableTest.Context, CancellationToken.None, EventReceiverStage.Early).ConfigureAwait(false);
 
-            IReadOnlyList<Exception> hookExceptions = [];
-#if NET
-            Activity? afterTestActivity = null;
-            if (TUnitActivitySource.Source.HasListeners())
-            {
-                afterTestActivity = TUnitActivitySource.StartActivity(
-                    "hook: AfterTest",
-                    ActivityKind.Internal,
-                    executableTest.Context.Activity?.Context ?? default);
-            }
-#endif
-            try
-            {
-                hookExceptions = await _hookExecutor.ExecuteAfterTestHooksAsync(executableTest, CancellationToken.None).ConfigureAwait(false);
-            }
-            finally
-            {
-#if NET
-                if (hookExceptions.Count > 0 && afterTestActivity is not null)
-                {
-                    afterTestActivity.SetStatus(ActivityStatusCode.Error);
-                }
-                TUnitActivitySource.StopActivity(afterTestActivity);
-#endif
-            }
+            var hookExceptions = await _hookExecutor.ExecuteAfterTestHooksAsync(executableTest, CancellationToken.None).ConfigureAwait(false);
 
             // Late stage test end receivers run after instance-level hooks (default behavior)
             var lateStageExceptions = await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(executableTest.Context, CancellationToken.None, EventReceiverStage.Late).ConfigureAwait(false);

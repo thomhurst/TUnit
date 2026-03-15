@@ -7,10 +7,10 @@ namespace TUnit.Assertions.Conditions;
 
 /// <summary>
 /// Asserts that a string is equal to an expected value.
-/// Generic to support both nullable and non-nullable string sources.
+/// Supports string comparison options like case-insensitivity, trimming, etc.
 /// </summary>
 [AssertionExtension("IsEqualTo")]
-public class StringEqualsAssertion<TActual> : Assertion<TActual>
+public class StringEqualsAssertion : Assertion<string>
 {
     private readonly string? _expected;
     private readonly IEqualityComparer<string>? _comparer;
@@ -20,7 +20,7 @@ public class StringEqualsAssertion<TActual> : Assertion<TActual>
     private bool _ignoringWhitespace;
 
     public StringEqualsAssertion(
-        AssertionContext<TActual> context,
+        AssertionContext<string> context,
         string? expected)
         : base(context)
     {
@@ -28,7 +28,7 @@ public class StringEqualsAssertion<TActual> : Assertion<TActual>
     }
 
     public StringEqualsAssertion(
-        AssertionContext<TActual> context,
+        AssertionContext<string> context,
         string? expected,
         StringComparison comparison)
         : base(context)
@@ -38,7 +38,7 @@ public class StringEqualsAssertion<TActual> : Assertion<TActual>
     }
 
     public StringEqualsAssertion(
-        AssertionContext<TActual> context,
+        AssertionContext<string> context,
         string? expected,
         IEqualityComparer<string> comparer)
         : base(context)
@@ -50,7 +50,7 @@ public class StringEqualsAssertion<TActual> : Assertion<TActual>
     /// <summary>
     /// Makes the comparison case-insensitive.
     /// </summary>
-    public StringEqualsAssertion<TActual> IgnoringCase()
+    public StringEqualsAssertion IgnoringCase()
     {
         _comparison = StringComparison.OrdinalIgnoreCase;
         Context.ExpressionBuilder.Append(".IgnoringCase()");
@@ -60,7 +60,7 @@ public class StringEqualsAssertion<TActual> : Assertion<TActual>
     /// <summary>
     /// Specifies a custom string comparison type.
     /// </summary>
-    public StringEqualsAssertion<TActual> WithComparison(StringComparison comparison)
+    public StringEqualsAssertion WithComparison(StringComparison comparison)
     {
         _comparison = comparison;
         Context.ExpressionBuilder.Append($".WithComparison({comparison})");
@@ -70,7 +70,7 @@ public class StringEqualsAssertion<TActual> : Assertion<TActual>
     /// <summary>
     /// Trims both strings before comparing.
     /// </summary>
-    public StringEqualsAssertion<TActual> WithTrimming()
+    public StringEqualsAssertion WithTrimming()
     {
         _trimming = true;
         Context.ExpressionBuilder.Append(".WithTrimming()");
@@ -80,7 +80,7 @@ public class StringEqualsAssertion<TActual> : Assertion<TActual>
     /// <summary>
     /// Treats null and empty string as equal.
     /// </summary>
-    public StringEqualsAssertion<TActual> WithNullAndEmptyEquality()
+    public StringEqualsAssertion WithNullAndEmptyEquality()
     {
         _nullAndEmptyEquality = true;
         Context.ExpressionBuilder.Append(".WithNullAndEmptyEquality()");
@@ -90,16 +90,16 @@ public class StringEqualsAssertion<TActual> : Assertion<TActual>
     /// <summary>
     /// Removes all whitespace from both strings before comparing.
     /// </summary>
-    public StringEqualsAssertion<TActual> IgnoringWhitespace()
+    public StringEqualsAssertion IgnoringWhitespace()
     {
         _ignoringWhitespace = true;
         Context.ExpressionBuilder.Append(".IgnoringWhitespace()");
         return this;
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TActual> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
     {
-        var value = metadata.Value as string;
+        var value = metadata.Value;
         var exception = metadata.Exception;
 
         var actualValue = value;
