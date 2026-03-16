@@ -146,7 +146,9 @@ internal static class MockImplBuilder
                 writer.AppendLine("_engine = engine;");
                 writer.AppendLine("_wrappedInstance = wrappedInstance;");
                 if (model.HasStaticAbstractMembers)
+                {
                     EmitStaticEngineAssignment(writer, safeName);
+                }
             }
             return;
         }
@@ -160,7 +162,9 @@ internal static class MockImplBuilder
                     writer.AppendLine("_engine = engine;");
                     writer.AppendLine("_wrappedInstance = wrappedInstance;");
                     if (model.HasStaticAbstractMembers)
+                    {
                         EmitStaticEngineAssignment(writer, safeName);
+                    }
                 }
             }
             else
@@ -172,7 +176,9 @@ internal static class MockImplBuilder
                     writer.AppendLine("_engine = engine;");
                     writer.AppendLine("_wrappedInstance = wrappedInstance;");
                     if (model.HasStaticAbstractMembers)
+                    {
                         EmitStaticEngineAssignment(writer, safeName);
+                    }
                 }
             }
         }
@@ -247,9 +253,19 @@ internal static class MockImplBuilder
         }
         else if (method.IsAsync)
         {
-            writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{method.UnwrappedReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.UnwrappedSmartDefault}, out var __result))");
-            writer.AppendLine("{");
-            writer.IncreaseIndent();
+            if (method.IsReturnTypeStaticAbstractInterface)
+            {
+                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?>({method.MemberId}, \"{method.Name}\", {argsArray}, null, out var __rawResult))");
+                writer.AppendLine("{");
+                writer.IncreaseIndent();
+                writer.AppendLine($"var __result = ({method.UnwrappedReturnType})__rawResult!;");
+            }
+            else
+            {
+                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{method.UnwrappedReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.UnwrappedSmartDefault}, out var __result))");
+                writer.AppendLine("{");
+                writer.IncreaseIndent();
+            }
             EmitOutRefReadback(writer, method);
             if (method.IsValueTask)
             {
@@ -277,6 +293,18 @@ internal static class MockImplBuilder
                 EmitOutRefReadback(writer, method);
                 writer.AppendLine("return default;");
             }
+            writer.DecreaseIndent();
+            writer.AppendLine("}");
+            writer.AppendLine($"return _wrappedInstance.{method.Name}({argPassList});");
+        }
+        else if (method.IsReturnTypeStaticAbstractInterface)
+        {
+            writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?>({method.MemberId}, \"{method.Name}\", {argsArray}, null, out var __rawResult))");
+            writer.AppendLine("{");
+            writer.IncreaseIndent();
+            writer.AppendLine($"var __result = ({method.ReturnType})__rawResult!;");
+            EmitOutRefReadback(writer, method);
+            writer.AppendLine("return __result;");
             writer.DecreaseIndent();
             writer.AppendLine("}");
             writer.AppendLine($"return _wrappedInstance.{method.Name}({argPassList});");
@@ -326,9 +354,26 @@ internal static class MockImplBuilder
                     writer.CloseBrace();
                 }
             }
+            else if (prop.IsAbstractMember && prop.IsReturnTypeStaticAbstractInterface)
+            {
+                writer.AppendLine($"get => ({prop.ReturnType})_engine.HandleCallWithReturn<object?>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null)!;");
+            }
             else if (prop.IsAbstractMember)
             {
                 writer.AppendLine($"get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault});");
+            }
+            else if (prop.IsReturnTypeStaticAbstractInterface)
+            {
+                writer.AppendLine("get");
+                writer.OpenBrace();
+                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null, out var __rawResult))");
+                writer.AppendLine("{");
+                writer.IncreaseIndent();
+                writer.AppendLine($"return ({prop.ReturnType})__rawResult!;");
+                writer.DecreaseIndent();
+                writer.AppendLine("}");
+                writer.AppendLine($"return _wrappedInstance.{prop.Name};");
+                writer.CloseBrace();
             }
             else
             {
@@ -426,7 +471,9 @@ internal static class MockImplBuilder
             {
                 writer.AppendLine("_engine = engine;");
                 if (model.HasStaticAbstractMembers)
+                {
                     EmitStaticEngineAssignment(writer, safeName);
+                }
             }
             return;
         }
@@ -440,7 +487,9 @@ internal static class MockImplBuilder
                 {
                     writer.AppendLine("_engine = engine;");
                     if (model.HasStaticAbstractMembers)
+                    {
                         EmitStaticEngineAssignment(writer, safeName);
+                    }
                 }
             }
             else
@@ -452,7 +501,9 @@ internal static class MockImplBuilder
                 {
                     writer.AppendLine("_engine = engine;");
                     if (model.HasStaticAbstractMembers)
+                    {
                         EmitStaticEngineAssignment(writer, safeName);
+                    }
                 }
             }
         }
@@ -543,9 +594,19 @@ internal static class MockImplBuilder
         else if (method.IsAsync)
         {
             // async method with return (Task<T>/ValueTask<T>)
-            writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{method.UnwrappedReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.UnwrappedSmartDefault}, out var __result))");
-            writer.AppendLine("{");
-            writer.IncreaseIndent();
+            if (method.IsReturnTypeStaticAbstractInterface)
+            {
+                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?>({method.MemberId}, \"{method.Name}\", {argsArray}, null, out var __rawResult))");
+                writer.AppendLine("{");
+                writer.IncreaseIndent();
+                writer.AppendLine($"var __result = ({method.UnwrappedReturnType})__rawResult!;");
+            }
+            else
+            {
+                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{method.UnwrappedReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.UnwrappedSmartDefault}, out var __result))");
+                writer.AppendLine("{");
+                writer.IncreaseIndent();
+            }
             EmitOutRefReadback(writer, method);
             if (method.IsValueTask)
             {
@@ -574,6 +635,18 @@ internal static class MockImplBuilder
                 EmitOutRefReadback(writer, method);
                 writer.AppendLine("return default;");
             }
+            writer.DecreaseIndent();
+            writer.AppendLine("}");
+            writer.AppendLine($"return base.{method.Name}({argPassList});");
+        }
+        else if (method.IsReturnTypeStaticAbstractInterface)
+        {
+            writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?>({method.MemberId}, \"{method.Name}\", {argsArray}, null, out var __rawResult))");
+            writer.AppendLine("{");
+            writer.IncreaseIndent();
+            writer.AppendLine($"var __result = ({method.ReturnType})__rawResult!;");
+            EmitOutRefReadback(writer, method);
+            writer.AppendLine("return __result;");
             writer.DecreaseIndent();
             writer.AppendLine("}");
             writer.AppendLine($"return base.{method.Name}({argPassList});");
@@ -644,9 +717,18 @@ internal static class MockImplBuilder
         else if (method.IsAsync)
         {
             // Async method with return value (Task<T> or ValueTask<T>)
+            var unwrappedArg = method.IsReturnTypeStaticAbstractInterface ? "object?" : method.UnwrappedReturnType;
+            var unwrappedDefault = method.IsReturnTypeStaticAbstractInterface ? "null" : method.UnwrappedSmartDefault;
             using (writer.Block("try"))
             {
-                writer.AppendLine($"var __result = _engine.HandleCallWithReturn<{method.UnwrappedReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.UnwrappedSmartDefault});");
+                if (method.IsReturnTypeStaticAbstractInterface)
+                {
+                    writer.AppendLine($"var __result = ({method.UnwrappedReturnType})_engine.HandleCallWithReturn<{unwrappedArg}>({method.MemberId}, \"{method.Name}\", {argsArray}, {unwrappedDefault})!;");
+                }
+                else
+                {
+                    writer.AppendLine($"var __result = _engine.HandleCallWithReturn<{unwrappedArg}>({method.MemberId}, \"{method.Name}\", {argsArray}, {unwrappedDefault});");
+                }
                 EmitOutRefReadback(writer, method);
                 if (method.IsValueTask)
                 {
@@ -686,6 +768,21 @@ internal static class MockImplBuilder
                 writer.AppendLine("return default;");
             }
         }
+        else if (method.IsReturnTypeStaticAbstractInterface)
+        {
+            // Return type is an interface with static abstract members — CS8920 prevents using it
+            // as a generic type argument. Use object? and cast.
+            if (hasOutRef)
+            {
+                writer.AppendLine($"var __result = ({method.ReturnType})_engine.HandleCallWithReturn<object?>({method.MemberId}, \"{method.Name}\", {argsArray}, null)!;");
+                EmitOutRefReadback(writer, method);
+                writer.AppendLine("return __result;");
+            }
+            else
+            {
+                writer.AppendLine($"return ({method.ReturnType})_engine.HandleCallWithReturn<object?>({method.MemberId}, \"{method.Name}\", {argsArray}, null)!;");
+            }
+        }
         else
         {
             // Synchronous method with return value — need to read back out/ref before returning
@@ -717,6 +814,10 @@ internal static class MockImplBuilder
                 writer.AppendLine($"_engine.HandleCall({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>());");
                 writer.AppendLine("return default;");
                 writer.CloseBrace();
+            }
+            else if (prop.IsReturnTypeStaticAbstractInterface)
+            {
+                writer.AppendLine($"get => ({prop.ReturnType})_engine.HandleCallWithReturn<object?>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null)!;");
             }
             else
             {
@@ -772,9 +873,27 @@ internal static class MockImplBuilder
                     writer.CloseBrace();
                 }
             }
+            else if (prop.IsAbstractMember && prop.IsReturnTypeStaticAbstractInterface)
+            {
+                writer.AppendLine($"get => ({prop.ReturnType})_engine.HandleCallWithReturn<object?>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null)!;");
+            }
             else if (prop.IsAbstractMember)
             {
                 writer.AppendLine($"get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault});");
+            }
+            else if (prop.IsReturnTypeStaticAbstractInterface)
+            {
+                // Virtual property getter: try engine, fall back to base (CS8920-safe)
+                writer.AppendLine("get");
+                writer.OpenBrace();
+                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null, out var __rawResult))");
+                writer.AppendLine("{");
+                writer.IncreaseIndent();
+                writer.AppendLine($"return ({prop.ReturnType})__rawResult!;");
+                writer.DecreaseIndent();
+                writer.AppendLine("}");
+                writer.AppendLine($"return base.{prop.Name};");
+                writer.CloseBrace();
             }
             else
             {
@@ -1061,7 +1180,9 @@ internal static class MockImplBuilder
     internal static string EmitArgsArrayVariable(CodeWriter writer, MockMemberModel method)
     {
         if (!method.HasRefStructParams)
+        {
             return GetArgsArrayExpression(method, false);
+        }
 
         writer.AppendLine("#if NET9_0_OR_GREATER");
         writer.AppendLine($"var __args = {GetArgsArrayExpression(method, true)};");
