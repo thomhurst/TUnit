@@ -2067,6 +2067,7 @@ namespace .Helpers
     public static class ArgumentFormatter
     {
         public static string Format(object? o, .<<object?, string?>> formatters) { }
+        public static string Format(object? o, ? parameterType, .<<object?, string?>> formatters) { }
         public static string FormatArguments(.<object?> arguments) { }
         public static string GetConstantValue(.TestContext testContext, object? o) { }
     }

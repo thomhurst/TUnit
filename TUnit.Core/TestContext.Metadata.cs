@@ -35,6 +35,7 @@ public partial class TestContext
         }
 
         var argsLength = TestDetails.TestMethodArguments.Length;
+        var parameters = TestDetails.MethodMetadata.Parameters;
         var sb = StringBuilderPool.Get();
         try
         {
@@ -47,7 +48,8 @@ public partial class TestContext
                 {
                     sb.Append(", ");
                 }
-                sb.Append(ArgumentFormatter.Format(TestDetails.TestMethodArguments[i], ArgumentDisplayFormatters));
+                var parameterType = i < parameters.Length ? parameters[i].Type : null;
+                sb.Append(ArgumentFormatter.Format(TestDetails.TestMethodArguments[i], parameterType, ArgumentDisplayFormatters));
             }
 
             sb.Append(')');

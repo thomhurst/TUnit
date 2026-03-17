@@ -55,7 +55,7 @@ public sealed class DisplayNameAttribute(string displayName) : DisplayNameFormat
         foreach (var parameter in methodParameters)
         {
             mutableDisplayName = mutableDisplayName.Replace($"${parameter.ParameterInfo.Name}",
-                ArgumentFormatter.Format(parameter.TestArgument, context.ArgumentDisplayFormatters));
+                ArgumentFormatter.Format(parameter.TestArgument, parameter.ParameterInfo.Type, context.ArgumentDisplayFormatters));
         }
 
         // If there are still placeholders and we have class parameters, try to substitute them
@@ -71,7 +71,7 @@ public sealed class DisplayNameAttribute(string displayName) : DisplayNameFormat
             foreach (var parameter in classParameters)
             {
                 mutableDisplayName = mutableDisplayName.Replace($"${parameter.ParameterInfo.Name}",
-                    ArgumentFormatter.Format(parameter.TestArgument, context.ArgumentDisplayFormatters));
+                    ArgumentFormatter.Format(parameter.TestArgument, parameter.ParameterInfo.Type, context.ArgumentDisplayFormatters));
             }
         }
 
