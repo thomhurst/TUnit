@@ -84,11 +84,11 @@ public static class ArgumentFormatter
             try
             {
                 var enumValue = Enum.ToObject(resolvedParameterType, o);
-                return enumValue.ToString()!;
+                return enumValue.ToString() ?? type.Name;
             }
-            catch
+            catch (ArgumentException)
             {
-                // Fall through to default formatting
+                // Value cannot be converted to the enum type - fall through to default formatting
             }
         }
 
