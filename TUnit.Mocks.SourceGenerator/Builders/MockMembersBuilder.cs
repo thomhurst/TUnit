@@ -598,6 +598,16 @@ internal static class MockMembersBuilder
         var extensionParam = $"this global::TUnit.Mocks.Mock<{mockableType}> mock";
         var fullParamList = string.IsNullOrEmpty(paramList) ? extensionParam : $"{extensionParam}, {paramList}";
 
+        if (method.IsReturnTypeStaticAbstractInterface)
+        {
+            writer.AppendLine($"/// <summary>Configure the mock setup for <c>{method.Name}</c>.</summary>");
+            writer.AppendLine($"/// <returns>");
+            writer.AppendLine($"/// A <see cref=\"global::TUnit.Mocks.MockMethodCall{{T}}\"/> typed as <c>object?</c> because the return type");
+            writer.AppendLine($"/// contains static abstract members and cannot be used as a generic type argument (CS8920).");
+            writer.AppendLine($"/// Pass a value that implements the return interface to <c>.Returns()</c> — incorrect types will cause an <see cref=\"global::System.InvalidCastException\"/> at call time.");
+            writer.AppendLine($"/// </returns>");
+        }
+
         using (writer.Block($"public static {returnType} {safeMemberName}{typeParams}({fullParamList}){constraints}"))
         {
             // Build matchers array
@@ -711,6 +721,16 @@ internal static class MockMembersBuilder
         var mockableType = MockImplBuilder.GetMockableTypeName(model);
         var extensionParam = $"this global::TUnit.Mocks.Mock<{mockableType}> mock";
         var fullParamList = string.IsNullOrEmpty(paramList) ? extensionParam : $"{extensionParam}, {paramList}";
+
+        if (method.IsReturnTypeStaticAbstractInterface)
+        {
+            writer.AppendLine($"/// <summary>Configure the mock setup for <c>{method.Name}</c>.</summary>");
+            writer.AppendLine($"/// <returns>");
+            writer.AppendLine($"/// A <see cref=\"global::TUnit.Mocks.MockMethodCall{{T}}\"/> typed as <c>object?</c> because the return type");
+            writer.AppendLine($"/// contains static abstract members and cannot be used as a generic type argument (CS8920).");
+            writer.AppendLine($"/// Pass a value that implements the return interface to <c>.Returns()</c> — incorrect types will cause an <see cref=\"global::System.InvalidCastException\"/> at call time.");
+            writer.AppendLine($"/// </returns>");
+        }
 
         using (writer.Block($"public static {returnType} {safeMemberName}{typeParams}({fullParamList}){constraints}"))
         {
