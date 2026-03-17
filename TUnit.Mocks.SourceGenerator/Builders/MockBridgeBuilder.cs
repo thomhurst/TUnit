@@ -108,7 +108,14 @@ internal static class MockBridgeBuilder
             writer.OpenBrace();
             writer.AppendLine($"var __engine = {safeName}_StaticEngine.Engine;");
             writer.AppendLine("if (__engine is null) return default!;");
-            writer.AppendLine($"return __engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault});");
+            if (prop.IsReturnTypeStaticAbstractInterface)
+            {
+                writer.AppendLine($"return ({prop.ReturnType})__engine.HandleCallWithReturn<object?>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null)!;");
+            }
+            else
+            {
+                writer.AppendLine($"return __engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault});");
+            }
             writer.CloseBrace();
         }
 
@@ -158,50 +165,121 @@ internal static class MockBridgeBuilder
         else if (method.IsVoid && method.IsAsync)
         {
             if (method.IsValueTask)
+            {
                 writer.AppendLine("if (__engine is null) return default(global::System.Threading.Tasks.ValueTask);");
+            }
             else
+            {
                 writer.AppendLine("if (__engine is null) return global::System.Threading.Tasks.Task.CompletedTask;");
+            }
 
             using (writer.Block("try"))
             {
                 writer.AppendLine($"__engine.HandleCall({method.MemberId}, \"{method.Name}\", {argsArray});");
                 MockImplBuilder.EmitOutRefReadback(writer, method);
                 if (method.IsValueTask)
+                {
                     writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
+                }
                 else
+                {
                     writer.AppendLine("return global::System.Threading.Tasks.Task.CompletedTask;");
+                }
             }
             using (writer.Block("catch (global::System.Exception __ex)"))
             {
                 if (method.IsValueTask)
+                {
                     writer.AppendLine("return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(__ex));");
+                }
                 else
+                {
                     writer.AppendLine("return global::System.Threading.Tasks.Task.FromException(__ex);");
+                }
+            }
+        }
+        else if (method.IsAsync && method.IsReturnTypeStaticAbstractInterface)
+        {
+            // Async method whose unwrapped return type has static abstract members (CS8920).
+            // Use object? and cast instead.
+            if (method.IsValueTask)
+            {
+                writer.AppendLine($"if (__engine is null) return new global::System.Threading.Tasks.ValueTask<{method.UnwrappedReturnType}>(default!);");
+            }
+            else
+            {
+                writer.AppendLine($"if (__engine is null) return global::System.Threading.Tasks.Task.FromResult<{method.UnwrappedReturnType}>(default!);");
+            }
+
+            using (writer.Block("try"))
+            {
+                writer.AppendLine($"var __result = ({method.UnwrappedReturnType})__engine.HandleCallWithReturn<object?>({method.MemberId}, \"{method.Name}\", {argsArray}, null)!;");
+                MockImplBuilder.EmitOutRefReadback(writer, method);
+                if (method.IsValueTask)
+                {
+                    writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask<{method.UnwrappedReturnType}>(__result);");
+                }
+                else
+                {
+                    writer.AppendLine($"return global::System.Threading.Tasks.Task.FromResult<{method.UnwrappedReturnType}>(__result);");
+                }
+            }
+            using (writer.Block("catch (global::System.Exception __ex)"))
+            {
+                if (method.IsValueTask)
+                {
+                    writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask<{method.UnwrappedReturnType}>(global::System.Threading.Tasks.Task.FromException<{method.UnwrappedReturnType}>(__ex));");
+                }
+                else
+                {
+                    writer.AppendLine($"return global::System.Threading.Tasks.Task.FromException<{method.UnwrappedReturnType}>(__ex);");
+                }
             }
         }
         else if (method.IsAsync)
         {
             if (method.IsValueTask)
+            {
                 writer.AppendLine($"if (__engine is null) return new global::System.Threading.Tasks.ValueTask<{method.UnwrappedReturnType}>({method.UnwrappedSmartDefault});");
+            }
             else
+            {
                 writer.AppendLine($"if (__engine is null) return global::System.Threading.Tasks.Task.FromResult<{method.UnwrappedReturnType}>({method.UnwrappedSmartDefault});");
+            }
 
             using (writer.Block("try"))
             {
                 writer.AppendLine($"var __result = __engine.HandleCallWithReturn<{method.UnwrappedReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.UnwrappedSmartDefault});");
                 MockImplBuilder.EmitOutRefReadback(writer, method);
                 if (method.IsValueTask)
+                {
                     writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask<{method.UnwrappedReturnType}>(__result);");
+                }
                 else
+                {
                     writer.AppendLine($"return global::System.Threading.Tasks.Task.FromResult<{method.UnwrappedReturnType}>(__result);");
+                }
             }
             using (writer.Block("catch (global::System.Exception __ex)"))
             {
                 if (method.IsValueTask)
+                {
                     writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask<{method.UnwrappedReturnType}>(global::System.Threading.Tasks.Task.FromException<{method.UnwrappedReturnType}>(__ex));");
+                }
                 else
+                {
                     writer.AppendLine($"return global::System.Threading.Tasks.Task.FromException<{method.UnwrappedReturnType}>(__ex);");
+                }
             }
+        }
+        else if (method.IsReturnTypeStaticAbstractInterface)
+        {
+            // Return type has static abstract members — can't use as generic type argument (CS8920).
+            // Use object? and cast instead.
+            writer.AppendLine("if (__engine is null) return default!;");
+            writer.AppendLine($"var __result = __engine.HandleCallWithReturn<object?>({method.MemberId}, \"{method.Name}\", {argsArray}, null);");
+            MockImplBuilder.EmitOutRefReadback(writer, method);
+            writer.AppendLine($"return ({method.ReturnType})__result!;");
         }
         else
         {

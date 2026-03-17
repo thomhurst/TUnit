@@ -34,6 +34,13 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
     public bool IsStaticAbstract { get; init; }
 
     /// <summary>
+    /// True when the (unwrapped) return type is an interface that has static abstract members
+    /// without a most specific implementation. Such types cannot be used as generic type arguments
+    /// (CS8920), so the generator must fall back to the void wrapper path.
+    /// </summary>
+    public bool IsReturnTypeStaticAbstractInterface { get; init; }
+
+    /// <summary>
     /// For methods returning ReadOnlySpan&lt;T&gt; or Span&lt;T&gt;, the fully qualified element type.
     /// Null for non-span return types. Used to support configurable span return values via array conversion.
     /// </summary>
@@ -72,6 +79,7 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             && IsProtected == other.IsProtected
             && IsRefStructReturn == other.IsRefStructReturn
             && IsStaticAbstract == other.IsStaticAbstract
+            && IsReturnTypeStaticAbstractInterface == other.IsReturnTypeStaticAbstractInterface
             && SpanReturnElementType == other.SpanReturnElementType;
     }
 
@@ -85,6 +93,7 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             hash = hash * 31 + ReturnType.GetHashCode();
             hash = hash * 31 + Parameters.GetHashCode();
             hash = hash * 31 + IsStaticAbstract.GetHashCode();
+            hash = hash * 31 + IsReturnTypeStaticAbstractInterface.GetHashCode();
             return hash;
         }
     }

@@ -1,4 +1,5 @@
 #if NET7_0_OR_GREATER
+using System.Diagnostics.CodeAnalysis;
 using TUnit.Mocks;
 using TUnit.Mocks.Generated;
 
@@ -14,6 +15,17 @@ public class ClientConfig
     public string Region { get; set; } = "us-east-1";
 }
 
+public class AWSCredentials
+{
+    public string AccessKey { get; set; } = "";
+    public string AuthSignature { get; set; } = "";
+}
+
+public interface IClientConfig
+{
+    string Region { get; }
+}
+
 public interface IServiceConfig
 {
     static abstract ClientConfig CreateDefaultConfig();
@@ -22,8 +34,24 @@ public interface IServiceConfig
 
 public interface IAmazonService : IServiceConfig
 {
+    /// <summary>A readonly view of the configuration for the service client.</summary>
+    IClientConfig Config { get; }
+
     string GetEndpoint();
     void Initialize(string region);
+
+    /// <summary>Factory method for creating the service client config object.</summary>
+    static abstract ClientConfig CreateDefaultClientConfig();
+
+    /// <summary>
+    /// Factory method for creating the default implementation of the AWS service interface.
+    /// Returns <see cref="IAmazonService"/>, which itself has static abstract members —
+    /// this is the CS8920 transitive scenario our fix addresses.
+    /// </summary>
+    [UnconditionalSuppressMessage("AssemblyLoadTrimming", "IL2026")]
+    static abstract IAmazonService CreateDefaultServiceClient(
+        AWSCredentials awsCredentials,
+        ClientConfig clientConfig);
 }
 
 /// <summary>
@@ -133,6 +161,93 @@ public class StaticAbstractMemberTests
         await Assert.That(config!.Region).IsEqualTo("ap-southeast-1");
     }
 
+    // --- CreateDefaultClientConfig (static abstract, returns concrete ClientConfig) ---
+
+    [Test]
+    public async Task Static_Abstract_CreateDefaultClientConfig_Returns_Configured_Value()
+    {
+        var mock = Mock.Of<TUnit_Mocks_Tests_IAmazonService_Mockable>();
+        var expected = new ClientConfig { Region = "sa-east-1" };
+        mock.CreateDefaultClientConfig().Returns(expected);
+
+        var result = CallCreateDefaultClientConfig<TUnit_Mocks_Tests_IAmazonService_Mockable>();
+
+        await Assert.That(result).IsSameReferenceAs(expected);
+    }
+
+    [Test]
+    public async Task Static_Abstract_CreateDefaultClientConfig_Verification()
+    {
+        var mock = Mock.Of<TUnit_Mocks_Tests_IAmazonService_Mockable>();
+        mock.CreateDefaultClientConfig().Returns(new ClientConfig());
+
+        CallCreateDefaultClientConfig<TUnit_Mocks_Tests_IAmazonService_Mockable>();
+        CallCreateDefaultClientConfig<TUnit_Mocks_Tests_IAmazonService_Mockable>();
+
+        mock.CreateDefaultClientConfig().WasCalled(Times.Exactly(2));
+    }
+
+    // --- CreateDefaultServiceClient (static abstract, returns IAmazonService — the CS8920 transitive scenario) ---
+
+    [Test]
+    public async Task Static_Abstract_CreateDefaultServiceClient_Returns_Null_By_Default()
+    {
+        // No setup — the generator uses HandleCallWithReturn<object?> + cast,
+        // so the default null value is cast to IAmazonService and returned.
+        var mock = Mock.Of<TUnit_Mocks_Tests_IAmazonService_Mockable>();
+
+        var result = CallCreateDefaultServiceClient<TUnit_Mocks_Tests_IAmazonService_Mockable>(
+            new AWSCredentials(), new ClientConfig());
+
+        // Cast to object? — using IAmazonService directly as a type argument triggers CS8920.
+        await Assert.That((object?)result).IsNull();
+    }
+
+    [Test]
+    public async Task Static_Abstract_CreateDefaultServiceClient_Returns_Configured_Value()
+    {
+        // Arrange — .Returns() works via MockMethodCall<object?> (not VoidMockMethodCall)
+        // because the return type (IAmazonService) has static abstract members (CS8920).
+        var mock = Mock.Of<TUnit_Mocks_Tests_IAmazonService_Mockable>();
+        var expectedService = mock.Object;
+        mock.CreateDefaultServiceClient(Arg.Any<AWSCredentials>(), Arg.Any<ClientConfig>())
+            .Returns(expectedService);
+
+        // Act
+        var result = CallCreateDefaultServiceClient<TUnit_Mocks_Tests_IAmazonService_Mockable>(
+            new AWSCredentials(), new ClientConfig());
+
+        // Assert — the configured value is returned through the object? → IAmazonService cast
+        await Assert.That((object?)result).IsSameReferenceAs(expectedService);
+    }
+
+    [Test]
+    public async Task Static_Abstract_CreateDefaultServiceClient_Verification()
+    {
+        var mock = Mock.Of<TUnit_Mocks_Tests_IAmazonService_Mockable>();
+        var creds = new AWSCredentials { AccessKey = "AKID", AuthSignature = "test-sig" };
+        var config = new ClientConfig { Region = "us-west-2" };
+
+        CallCreateDefaultServiceClient<TUnit_Mocks_Tests_IAmazonService_Mockable>(creds, config);
+
+        // MockMethodCall<object?> supports verification even though the return type
+        // (IAmazonService) cannot be used as a generic type argument (CS8920).
+        mock.CreateDefaultServiceClient(Arg.Any<AWSCredentials>(), Arg.Any<ClientConfig>()).WasCalled();
+    }
+
+    [Test]
+    public async Task Static_Abstract_CreateDefaultServiceClient_Throws_Configured_Exception()
+    {
+        var mock = Mock.Of<TUnit_Mocks_Tests_IAmazonService_Mockable>();
+        mock.CreateDefaultServiceClient(Arg.Any<AWSCredentials>(), Arg.Any<ClientConfig>())
+            .Throws(new InvalidOperationException("service unavailable"));
+
+        await Assert.That(() => CallCreateDefaultServiceClient<TUnit_Mocks_Tests_IAmazonService_Mockable>(
+                new AWSCredentials(), new ClientConfig()))
+            .ThrowsExactly<InvalidOperationException>()
+            .WithMessage("service unavailable");
+    }
+
     /// <summary>
     /// Calls the static abstract method through a constrained generic, which is the only
     /// way to invoke static abstract members in C#.
@@ -145,5 +260,12 @@ public class StaticAbstractMemberTests
 
     private static void SetStaticAbstractProperty<T>(string value) where T : IServiceConfig
         => T.ServiceId = value;
+
+    private static ClientConfig? CallCreateDefaultClientConfig<T>() where T : IAmazonService
+        => T.CreateDefaultClientConfig();
+
+    private static IAmazonService? CallCreateDefaultServiceClient<T>(AWSCredentials creds, ClientConfig config)
+        where T : IAmazonService
+        => T.CreateDefaultServiceClient(creds, config);
 }
 #endif

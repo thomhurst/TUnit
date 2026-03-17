@@ -46,7 +46,7 @@ namespace TUnit.Mocks.Generated
 
         public global::IConfigProvider GetConfigProvider()
         {
-            return _engine.HandleCallWithReturn<global::IConfigProvider>(1, "GetConfigProvider", global::System.Array.Empty<object?>(), default!);
+            return (global::IConfigProvider)_engine.HandleCallWithReturn<object?>(1, "GetConfigProvider", global::System.Array.Empty<object?>(), null)!;
         }
 
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
@@ -80,10 +80,16 @@ namespace TUnit.Mocks.Generated
             return new IMyService_GetValue_M0_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 0, "GetValue", matchers);
         }
 
-        public static global::TUnit.Mocks.MockMethodCall<global::IConfigProvider> GetConfigProvider(this global::TUnit.Mocks.Mock<global::IMyService> mock)
+        /// <summary>Configure the mock setup for <c>GetConfigProvider</c>.</summary>
+        /// <returns>
+        /// A <see cref="global::TUnit.Mocks.MockMethodCall{T}"/> typed as <c>object?</c> because the return type
+        /// contains static abstract members and cannot be used as a generic type argument (CS8920).
+        /// Pass a value that implements the return interface to <c>.Returns()</c> — incorrect types will cause an <see cref="global::System.InvalidCastException"/> at call time.
+        /// </returns>
+        public static global::TUnit.Mocks.MockMethodCall<object?> GetConfigProvider(this global::TUnit.Mocks.Mock<global::IMyService> mock)
         {
             var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
-            return new global::TUnit.Mocks.MockMethodCall<global::IConfigProvider>(global::TUnit.Mocks.Mock.GetEngine(mock), 1, "GetConfigProvider", matchers);
+            return new global::TUnit.Mocks.MockMethodCall<object?>(global::TUnit.Mocks.Mock.GetEngine(mock), 1, "GetConfigProvider", matchers);
         }
     }
 

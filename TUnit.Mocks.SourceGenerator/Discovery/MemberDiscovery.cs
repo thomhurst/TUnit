@@ -298,6 +298,11 @@ internal static class MemberDiscovery
         var (unwrappedType, isVoidAsync) = returnType.GetUnwrappedReturnType();
         var isVoid = method.ReturnsVoid || isVoidAsync;
 
+        // Check if the effective return type (unwrapped for async) is an interface with
+        // static abstract members. Such types cannot be used as generic type arguments (CS8920).
+        var effectiveReturnTypeSymbol = returnType.GetAsyncInnerTypeSymbol() ?? returnType;
+        var returnTypeHasStaticAbstract = !isVoid && IsInterfaceWithStaticAbstractMembers(effectiveReturnTypeSymbol);
+
         return new MockMemberModel
         {
             Name = method.Name,
@@ -339,6 +344,7 @@ internal static class MemberDiscovery
             IsProtected = method.DeclaredAccessibility == Accessibility.Protected
                        || method.DeclaredAccessibility == Accessibility.ProtectedOrInternal,
             IsRefStructReturn = returnType.IsRefLikeType,
+            IsReturnTypeStaticAbstractInterface = returnTypeHasStaticAbstract,
             SpanReturnElementType = returnType.IsRefLikeType ? GetSpanElementType(returnType) : null
         };
     }
@@ -390,6 +396,7 @@ internal static class MemberDiscovery
             IsProtected = property.DeclaredAccessibility == Accessibility.Protected
                        || property.DeclaredAccessibility == Accessibility.ProtectedOrInternal,
             IsRefStructReturn = property.Type.IsRefLikeType,
+            IsReturnTypeStaticAbstractInterface = IsInterfaceWithStaticAbstractMembers(property.Type),
             SpanReturnElementType = property.Type.IsRefLikeType ? GetSpanElementType(property.Type) : null
         };
     }
@@ -525,7 +532,9 @@ internal static class MemberDiscovery
     private static bool IsEventHandlerType(ITypeSymbol type)
     {
         if (type is not INamedTypeSymbol namedType)
+        {
             return false;
+        }
 
         // Check if the type is System.EventHandler or System.EventHandler<T>
         var fullName = namedType.ConstructedFrom.ToDisplayString();
@@ -581,7 +590,9 @@ internal static class MemberDiscovery
     private static string? GetSpanElementType(ITypeSymbol type)
     {
         if (type is not INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1 } namedType)
+        {
             return null;
+        }
 
         var constructed = namedType.ConstructedFrom;
         var ns = constructed.ContainingNamespace?.ToDisplayString();
@@ -593,6 +604,25 @@ internal static class MemberDiscovery
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Returns true when the given type symbol is an interface that contains static abstract members
+    /// (directly or via inherited interfaces) without a most specific implementation.
+    /// Such types cannot be used as generic type arguments (CS8920).
+    /// </summary>
+    private static bool IsInterfaceWithStaticAbstractMembers(ITypeSymbol type)
+    {
+        if (type is not INamedTypeSymbol { TypeKind: TypeKind.Interface } namedType)
+        {
+            return false;
+        }
+
+        // Check both direct members and inherited interface members.
+        // AllInterfaces does NOT include the type itself, so we check both.
+        return namedType.GetMembers()
+            .Concat(namedType.AllInterfaces.SelectMany(i => i.GetMembers()))
+            .Any(m => m.IsStatic && m.IsAbstract);
     }
 
     /// <summary>
