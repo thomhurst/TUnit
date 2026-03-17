@@ -18,6 +18,20 @@ public static class ArgumentFormatter
         return FormatDefault(o);
     }
 
+    public static string Format(object? o, Type? parameterType, List<Func<object?, string?>> formatters)
+    {
+        foreach (var formatter in formatters)
+        {
+            var result = formatter(o);
+            if (result != null)
+            {
+                return result;
+            }
+        }
+
+        return FormatDefault(o, parameterType);
+    }
+
     public static string GetConstantValue(TestContext testContext, object? o)
     {
         return Format(o, testContext.ArgumentDisplayFormatters);
@@ -49,12 +63,34 @@ public static class ArgumentFormatter
 
     private static string FormatDefault(object? o)
     {
+        return FormatDefault(o, parameterType: null);
+    }
+
+    private static string FormatDefault(object? o, Type? parameterType)
+    {
         if (o is null)
         {
             return "null";
         }
 
         var type = o.GetType();
+
+        // If the value is a numeric type but the parameter type is an enum,
+        // convert to the enum for display purposes (e.g., MatrixDataSource
+        // stores enum values as their underlying numeric type)
+        var resolvedParameterType = parameterType != null ? Nullable.GetUnderlyingType(parameterType) ?? parameterType : null;
+        if (resolvedParameterType is { IsEnum: true } && !type.IsEnum)
+        {
+            try
+            {
+                var enumValue = Enum.ToObject(resolvedParameterType, o);
+                return enumValue.ToString()!;
+            }
+            catch
+            {
+                // Fall through to default formatting
+            }
+        }
 
         if (TupleHelper.IsTupleType(type))
         {

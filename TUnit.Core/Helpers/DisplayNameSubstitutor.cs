@@ -37,7 +37,7 @@ internal static class DisplayNameSubstitutor
                 var placeholder = $"${paramName}";
                 if (result.Contains(placeholder))
                 {
-                    var formatted = ArgumentFormatter.Format(arguments[i], effectiveFormatters);
+                    var formatted = ArgumentFormatter.Format(arguments[i], parameters[i].Type, effectiveFormatters);
                     result = result.Replace(placeholder, formatted);
                 }
             }
@@ -49,7 +49,8 @@ internal static class DisplayNameSubstitutor
             var placeholder = $"$arg{i + 1}";
             if (result.Contains(placeholder))
             {
-                var formatted = ArgumentFormatter.Format(arguments[i], effectiveFormatters);
+                var parameterType = i < parameters.Length ? parameters[i].Type : null;
+                var formatted = ArgumentFormatter.Format(arguments[i], parameterType, effectiveFormatters);
                 result = result.Replace(placeholder, formatted);
             }
         }

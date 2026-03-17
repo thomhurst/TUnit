@@ -207,8 +207,7 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
         if (resolvedType.IsEnum)
         {
             var enumValues = Enum.GetValuesAsUnderlyingType(resolvedType)
-                                 .Cast<object?>()
-                                 .Select(v => v != null ? Enum.ToObject(resolvedType, v) : null);
+                                 .Cast<object?>();
 
             if (isNullable)
             {
@@ -220,7 +219,7 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
             }
 
             return enumValues
-               .Except(matrixAttribute?.Excluding?.Select(e => e != null ? (object?)Enum.ToObject(resolvedType, e) : null) ?? [])
+               .Except(matrixAttribute?.Excluding?.Select(e => Convert.ChangeType(e, Enum.GetUnderlyingType(resolvedType))) ?? [])
                 .ToArray();
         }
 
