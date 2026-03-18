@@ -369,15 +369,15 @@ internal static class HtmlReportGenerator
         // Show milliseconds for anything under 1 second (avoids rounding 999ms to "1.00s")
         if (Math.Round(ms) < 1000)
         {
-            return string.Create(CultureInfo.InvariantCulture, $"{ms:F0}ms");
+            return ms.ToString("F0", CultureInfo.InvariantCulture) + "ms";
         }
 
         if (ms < 60000)
         {
-            return string.Create(CultureInfo.InvariantCulture, $"{ms / 1000:F2}s");
+            return (ms / 1000).ToString("F2", CultureInfo.InvariantCulture) + "s";
         }
 
-        return string.Create(CultureInfo.InvariantCulture, $"{ms / 60000:F1}m");
+        return (ms / 60000).ToString("F1", CultureInfo.InvariantCulture) + "m";
     }
 
     private static string GetCss()
