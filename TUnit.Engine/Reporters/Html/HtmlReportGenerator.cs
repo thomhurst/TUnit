@@ -255,7 +255,7 @@ internal static class HtmlReportGenerator
         sb.Append(len.ToString("F2"));
         sb.Append(' ');
         sb.Append((circumference - len).ToString("F2"));
-        sb.Append("\" stroke-dashoffset=\"-");
+        sb.Append("\" stroke-dashoffset=\"");
         sb.Append(offset.ToString("F2"));
         sb.AppendLine("\" transform=\"rotate(-90 60 60)\"/>");
     }
