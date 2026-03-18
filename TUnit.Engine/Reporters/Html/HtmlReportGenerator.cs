@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net;
 using System.Text;
 using System.Text.Json;
@@ -220,7 +221,7 @@ internal static class HtmlReportGenerator
 
         sb.AppendLine("</svg>");
         sb.Append("<div class=\"ring-center\"><span class=\"ring-pct\">");
-        sb.Append(passRate.ToString("F0"));
+        sb.Append(passRate.ToString("F0", CultureInfo.InvariantCulture));
         sb.Append("<small>%</small></span><span class=\"ring-lbl\">");
         sb.Append(summary.Total > 0 ? "pass rate" : "no tests");
         sb.AppendLine("</span></div>");
@@ -252,11 +253,11 @@ internal static class HtmlReportGenerator
         sb.Append("<circle class=\"ring-seg\" cx=\"60\" cy=\"60\" r=\"54\" fill=\"none\" stroke=\"");
         sb.Append(color);
         sb.Append("\" stroke-width=\"10\" stroke-linecap=\"round\" stroke-dasharray=\"");
-        sb.Append(len.ToString("F2"));
+        sb.Append(len.ToString("F2", CultureInfo.InvariantCulture));
         sb.Append(' ');
-        sb.Append((circumference - len).ToString("F2"));
+        sb.Append((circumference - len).ToString("F2", CultureInfo.InvariantCulture));
         sb.Append("\" stroke-dashoffset=\"-");
-        sb.Append(offset.ToString("F2"));
+        sb.Append(offset.ToString("F2", CultureInfo.InvariantCulture));
         sb.AppendLine("\" transform=\"rotate(-90 60 60)\"/>");
     }
 
@@ -368,15 +369,15 @@ internal static class HtmlReportGenerator
         // Show milliseconds for anything under 1 second (avoids rounding 999ms to "1.00s")
         if (Math.Round(ms) < 1000)
         {
-            return $"{ms:F0}ms";
+            return ms.ToString("F0", CultureInfo.InvariantCulture) + "ms";
         }
 
         if (ms < 60000)
         {
-            return $"{ms / 1000:F2}s";
+            return (ms / 1000).ToString("F2", CultureInfo.InvariantCulture) + "s";
         }
 
-        return $"{ms / 60000:F1}m";
+        return (ms / 60000).ToString("F1", CultureInfo.InvariantCulture) + "m";
     }
 
     private static string GetCss()
