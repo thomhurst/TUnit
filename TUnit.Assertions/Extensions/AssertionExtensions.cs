@@ -481,7 +481,7 @@ public static class AssertionExtensions
     [OverloadResolutionPriority(1)]
     public static MemberAssertionResult<TObject> Member<TObject, TMember, TTransformed>(
         this IAssertionSource<TObject> source,
-        Expression<Func<TObject, TMember>> memberSelector,
+        Expression<Func<TObject, TMember?>> memberSelector,
         Func<IAssertionSource<TMember>, Assertion<TTransformed>> assertions)
     {
         var parentContext = source.Context;
@@ -532,7 +532,7 @@ public static class AssertionExtensions
     /// </summary>
     public static MemberAssertionResult<TObject> Member<TObject, TMember>(
         this IAssertionSource<TObject> source,
-        Expression<Func<TObject, TMember>> memberSelector,
+        Expression<Func<TObject, TMember?>> memberSelector,
         Func<IAssertionSource<TMember>, Assertion<TMember>> assertions)
     {
         var parentContext = source.Context;
@@ -585,7 +585,7 @@ public static class AssertionExtensions
     [RequiresDynamicCode("Uses reflection for legacy compatibility. For AOT compatibility, use the Member<TObject, TMember, TTransformed> overload with strongly-typed assertions.")]
     public static MemberAssertionResult<TObject> Member<TObject, TMember>(
         this IAssertionSource<TObject> source,
-        Expression<Func<TObject, TMember>> memberSelector,
+        Expression<Func<TObject, TMember?>> memberSelector,
         Func<IAssertionSource<TMember>, object> assertions)
     {
         var parentContext = source.Context;

@@ -20,7 +20,7 @@ public static class PropertyAssertionExtensions
     /// </summary>
     public static MemberAssertionResult<TObject> HasProperty<TObject, TProperty>(
         this IAssertionSource<TObject> source,
-        Expression<Func<TObject, TProperty>> propertySelector,
+        Expression<Func<TObject, TProperty?>> propertySelector,
         TProperty expectedValue,
         [CallerArgumentExpression(nameof(expectedValue))] string? expression = null)
     {
@@ -39,7 +39,7 @@ public static class PropertyAssertionExtensions
     /// </summary>
     public static PropertyAssertion<TObject, TProperty> HasProperty<TObject, TProperty>(
         this IAssertionSource<TObject> source,
-        Expression<Func<TObject, TProperty>> propertySelector)
+        Expression<Func<TObject, TProperty?>> propertySelector)
     {
         var parentContext = source.Context;
         var memberPath = GetMemberPath(propertySelector);
