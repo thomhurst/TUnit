@@ -63,6 +63,9 @@ public class WebApplicationFactory : TestWebApplicationFactory<Program>
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         Interlocked.Increment(ref _configureWebHostCallCount);
+
+        // Always update order tracking (not just first call) so each test can reliably
+        // verify the lifecycle order using its own per-test counter via GetNextOrderCallback.
         if (GetNextOrderCallback != null)
         {
             ConfigureWebHostCalledOrder = GetNextOrderCallback();
@@ -85,6 +88,8 @@ public class WebApplicationFactory : TestWebApplicationFactory<Program>
     protected override void ConfigureStartupConfiguration(IConfigurationBuilder configurationBuilder)
     {
         Interlocked.Increment(ref _configureStartupConfigurationCallCount);
+
+        // Always update order tracking (not just first call) for per-test verification.
         if (GetNextOrderCallback != null)
         {
             ConfigureStartupConfigurationCalledOrder = GetNextOrderCallback();
