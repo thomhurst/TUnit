@@ -174,6 +174,11 @@ public abstract class WebApplicationTest<TFactory, TEntryPoint> : WebApplication
     /// Called synchronously during factory creation (ASP.NET Core requirement).
     /// For async setup, use <see cref="SetupAsync"/> instead.
     /// </summary>
+    /// <remarks>
+    /// This runs after <see cref="ConfigureWebHostBuilder"/> (step 7 in the lifecycle).
+    /// Services registered here override any services registered by the factory's
+    /// <c>ConfigureWebHost</c> method, allowing tests to replace factory defaults.
+    /// </remarks>
     /// <param name="services">The service collection to configure.</param>
     /// <example>
     /// <code>
@@ -192,6 +197,11 @@ public abstract class WebApplicationTest<TFactory, TEntryPoint> : WebApplication
     /// Called synchronously during factory creation (ASP.NET Core requirement).
     /// For async setup, use <see cref="SetupAsync"/> instead.
     /// </summary>
+    /// <remarks>
+    /// This runs after the factory's <c>ConfigureWebHost</c> and <c>ConfigureStartupConfiguration</c>
+    /// methods (step 5 in the lifecycle), so configuration added here overrides factory defaults.
+    /// It runs before <see cref="ConfigureWebHostBuilder"/> and <see cref="ConfigureTestServices"/>.
+    /// </remarks>
     /// <param name="config">The configuration builder to configure.</param>
     /// <example>
     /// <code>
@@ -211,7 +221,8 @@ public abstract class WebApplicationTest<TFactory, TEntryPoint> : WebApplication
     /// <summary>
     /// Override to configure the web host builder directly.
     /// This is an escape hatch for advanced scenarios not covered by other configuration methods.
-    /// Called first, before <see cref="ConfigureTestServices"/> and <see cref="ConfigureTestConfiguration"/>.
+    /// Called after <see cref="ConfigureTestConfiguration"/> but before <see cref="ConfigureTestServices"/>
+    /// (step 6 in the lifecycle).
     /// </summary>
     /// <param name="builder">The web host builder to configure.</param>
     /// <example>

@@ -63,7 +63,7 @@ public class WebApplicationFactory : TestWebApplicationFactory<Program>
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         Interlocked.Increment(ref _configureWebHostCallCount);
-        if (GetNextOrderCallback != null && ConfigureWebHostCalledOrder == 0)
+        if (GetNextOrderCallback != null)
         {
             ConfigureWebHostCalledOrder = GetNextOrderCallback();
         }
@@ -85,7 +85,7 @@ public class WebApplicationFactory : TestWebApplicationFactory<Program>
     protected override void ConfigureStartupConfiguration(IConfigurationBuilder configurationBuilder)
     {
         Interlocked.Increment(ref _configureStartupConfigurationCallCount);
-        if (GetNextOrderCallback != null && ConfigureStartupConfigurationCalledOrder == 0)
+        if (GetNextOrderCallback != null)
         {
             ConfigureStartupConfigurationCalledOrder = GetNextOrderCallback();
         }

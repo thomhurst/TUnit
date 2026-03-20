@@ -78,6 +78,36 @@ public class FactoryMethodOrderTests : TestsBase
     }
 
     [Test]
+    [DisplayName("Factory.ConfigureWebHost runs before ConfigureTestConfiguration")]
+    public async Task Factory_ConfigureWebHost_Runs_Before_ConfigureTestConfiguration()
+    {
+        _ = Factory.CreateClient();
+
+        await Assert.That(FactoryConfigureWebHostCalledOrder)
+            .IsGreaterThan(0)
+            .Because("Factory.ConfigureWebHost should have been called");
+
+        await Assert.That(FactoryConfigureWebHostCalledOrder)
+            .IsLessThan(ConfigureTestConfigurationCalledOrder)
+            .Because("Factory.ConfigureWebHost (step 3) should run before ConfigureTestConfiguration (step 5) so tests can override factory defaults");
+    }
+
+    [Test]
+    [DisplayName("Factory.ConfigureStartupConfiguration runs before ConfigureTestConfiguration")]
+    public async Task Factory_ConfigureStartupConfiguration_Runs_Before_ConfigureTestConfiguration()
+    {
+        _ = Factory.CreateClient();
+
+        await Assert.That(FactoryConfigureStartupConfigurationCalledOrder)
+            .IsGreaterThan(0)
+            .Because("Factory.ConfigureStartupConfiguration should have been called");
+
+        await Assert.That(FactoryConfigureStartupConfigurationCalledOrder)
+            .IsLessThan(ConfigureTestConfigurationCalledOrder)
+            .Because("Factory.ConfigureStartupConfiguration (step 4) should run before ConfigureTestConfiguration (step 5) so tests can override factory defaults");
+    }
+
+    [Test]
     [DisplayName("All test hooks run before Startup")]
     public async Task All_Test_Hooks_Run_Before_Startup()
     {
@@ -105,7 +135,7 @@ public class FactoryMethodOrderTests : TestsBase
     }
 
     [Test]
-    [DisplayName("Complete relative execution order: Options → Setup → Config → WebHost → Services → Startup")]
+    [DisplayName("Complete relative execution order: Options → Setup → Factory.ConfigureWebHost → Factory.ConfigureStartupConfig → TestConfig → WebHostBuilder → Services → Startup")]
     public async Task Full_Relative_Order()
     {
         _ = Factory.CreateClient();
@@ -113,6 +143,8 @@ public class FactoryMethodOrderTests : TestsBase
         // Verify all hooks were called
         await Assert.That(ConfigureTestOptionsCalledOrder).IsGreaterThan(0);
         await Assert.That(SetupCalledOrder).IsGreaterThan(0);
+        await Assert.That(FactoryConfigureWebHostCalledOrder).IsGreaterThan(0);
+        await Assert.That(FactoryConfigureStartupConfigurationCalledOrder).IsGreaterThan(0);
         await Assert.That(ConfigureTestConfigurationCalledOrder).IsGreaterThan(0);
         await Assert.That(ConfigureWebHostBuilderCalledOrder).IsGreaterThan(0);
         await Assert.That(ConfigureTestServicesCalledOrder).IsGreaterThan(0);
@@ -124,8 +156,16 @@ public class FactoryMethodOrderTests : TestsBase
             .Because("ConfigureTestOptions runs before SetupAsync");
 
         await Assert.That(SetupCalledOrder)
+            .IsLessThan(FactoryConfigureWebHostCalledOrder)
+            .Because("SetupAsync runs before Factory.ConfigureWebHost");
+
+        await Assert.That(FactoryConfigureWebHostCalledOrder)
+            .IsLessThan(FactoryConfigureStartupConfigurationCalledOrder)
+            .Because("Factory.ConfigureWebHost runs before Factory.ConfigureStartupConfiguration");
+
+        await Assert.That(FactoryConfigureStartupConfigurationCalledOrder)
             .IsLessThan(ConfigureTestConfigurationCalledOrder)
-            .Because("SetupAsync runs before ConfigureTestConfiguration");
+            .Because("Factory.ConfigureStartupConfiguration runs before ConfigureTestConfiguration");
 
         await Assert.That(ConfigureTestConfigurationCalledOrder)
             .IsLessThan(ConfigureWebHostBuilderCalledOrder)
