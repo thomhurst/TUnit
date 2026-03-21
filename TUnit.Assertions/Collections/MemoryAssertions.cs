@@ -1,6 +1,9 @@
 #if NET5_0_OR_GREATER
+using System.Diagnostics.CodeAnalysis;
 using TUnit.Assertions.Abstractions;
+using TUnit.Assertions.Conditions.Helpers;
 using TUnit.Assertions.Core;
+using TUnit.Assertions.Enums;
 using TUnit.Assertions.Sources;
 
 namespace TUnit.Assertions.Collections;
@@ -159,6 +162,71 @@ public class MemoryDoesNotContainAssertion<TMemory, TItem> : MemoryAssertionBase
     }
 
     protected override string GetExpectation() => $"to not contain {_expected}";
+}
+
+/// <summary>
+/// Asserts that a memory is equivalent to an expected collection.
+/// </summary>
+public class MemoryIsEquivalentToAssertion<TMemory, TItem> : MemoryAssertionBase<TMemory, TItem>
+{
+    private readonly Func<TMemory, ICollectionAdapter<TItem>> _adapterFactory;
+    private readonly IEnumerable<TItem> _expected;
+    private readonly IEqualityComparer<TItem> _comparer;
+    private readonly CollectionOrdering _ordering;
+
+    [RequiresUnreferencedCode("Collection equivalency uses structural comparison for complex objects, which requires reflection and is not compatible with AOT")]
+    public MemoryIsEquivalentToAssertion(
+        AssertionContext<TMemory> context,
+        Func<TMemory, ICollectionAdapter<TItem>> adapterFactory,
+        IEnumerable<TItem> expected,
+        CollectionOrdering ordering = CollectionOrdering.Any)
+        : this(context, adapterFactory, expected, StructuralEqualityComparer<TItem>.Instance, ordering)
+    {
+    }
+
+    public MemoryIsEquivalentToAssertion(
+        AssertionContext<TMemory> context,
+        Func<TMemory, ICollectionAdapter<TItem>> adapterFactory,
+        IEnumerable<TItem> expected,
+        IEqualityComparer<TItem> comparer,
+        CollectionOrdering ordering = CollectionOrdering.Any)
+        : base(context)
+    {
+        _adapterFactory = adapterFactory;
+        _expected = expected ?? throw new ArgumentNullException(nameof(expected));
+        _comparer = comparer;
+        _ordering = ordering;
+    }
+
+    protected override ICollectionAdapter<TItem> CreateAdapter(TMemory value) => _adapterFactory(value);
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TMemory> metadata)
+    {
+        if (metadata.Exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+        }
+
+        if (metadata.Value == null)
+        {
+            return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
+
+        var adapter = _adapterFactory(metadata.Value);
+
+        var result = CollectionEquivalencyChecker.AreEquivalent(
+            adapter.AsEnumerable(),
+            _expected,
+            _ordering,
+            _comparer);
+
+        return Task.FromResult(result.AreEquivalent
+            ? AssertionResult.Passed
+            : AssertionResult.Failed(result.ErrorMessage!));
+    }
+
+    protected override string GetExpectation() =>
+        $"to be equivalent to [{string.Join(", ", _expected)}]";
 }
 
 /// <summary>
