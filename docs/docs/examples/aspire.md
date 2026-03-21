@@ -92,6 +92,7 @@ public class ApiTests(AppFixture fixture)
 │                  FIXTURE LIFECYCLE                                │
 ├──────────────────────────────────────────────────────────────────┤
 │  1. CreateAsync<TAppHost>()    Build the Aspire test builder     │
+│     ↳ ConfigureAppHost()       Configure options & host settings │
 │  2. ConfigureBuilder()         Your customization hook           │
 │  3. BuildAsync()               Build the distributed app         │
 │  4. StartAsync()               Start containers & projects       │
@@ -197,6 +198,7 @@ When a timeout occurs, the error includes:
 | `InitializeAsync()` | Full lifecycle | Override to add post-start logic (migrations, seeding) |
 | `DisposeAsync()` | Stop and dispose app | Override to add custom cleanup |
 | `Args` | Empty | Command-line arguments passed to the AppHost entry point |
+| `ConfigureAppHost(options, settings)` | No-op | Configure `DistributedApplicationOptions` and `HostApplicationBuilderSettings` during builder creation |
 | `ConfigureBuilder(builder)` | No-op | Customize the builder before building |
 | `ResourceTimeout` | 60 seconds | How long to wait for startup and resources |
 | `WaitBehavior` | `AllHealthy` | Which resources to wait for |
@@ -246,8 +248,9 @@ public class AppFixture : AspireFixture<Projects.MyAppHost>
 }
 ```
 
-:::tip When to use `Args` vs `ConfigureBuilder`
+:::tip When to use `Args` vs `ConfigureAppHost` vs `ConfigureBuilder`
 - Use **`Args`** for configuration values that the AppHost reads during `CreateBuilder(args)` — these must be set *before* the builder is created.
+- Use **`ConfigureAppHost`** to configure `DistributedApplicationOptions` (e.g., `DisableDashboard`) and `HostApplicationBuilderSettings` — these are passed to `CreateAsync` during builder creation.
 - Use **`ConfigureBuilder`** for service registrations, HTTP client defaults, and other configuration that can be applied *after* the builder is created.
 :::
 
