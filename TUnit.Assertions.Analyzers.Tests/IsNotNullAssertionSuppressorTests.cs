@@ -6,7 +6,7 @@ namespace TUnit.Assertions.Analyzers.Tests;
 
 /// <summary>
 /// Tests for the IsNotNullAssertionSuppressor which suppresses nullability warnings
-/// (CS8600, CS8602, CS8604, CS8618) for variables after Assert.That(x).IsNotNull().
+/// (CS8600, CS8602, CS8604, CS8618, CS8629) for variables after Assert.That(x).IsNotNull().
 ///
 /// Note: These tests verify that the suppressor correctly identifies and suppresses
 /// nullability warnings. The suppressor does not change null-state flow analysis,
@@ -16,6 +16,7 @@ public class IsNotNullAssertionSuppressorTests
 {
     private static readonly DiagnosticResult CS8602 = new("CS8602", DiagnosticSeverity.Warning);
     private static readonly DiagnosticResult CS8604 = new("CS8604", DiagnosticSeverity.Warning);
+    private static readonly DiagnosticResult CS8629 = new("CS8629", DiagnosticSeverity.Warning);
 
     [Test]
     public async Task Suppresses_CS8602_After_IsNotNull_Assertion()
@@ -419,6 +420,108 @@ public class IsNotNullAssertionSuppressorTests
                 CS8602.WithLocation(0).WithIsSuppressed(true),
                 CS8602.WithLocation(1).WithIsSuppressed(true)
             )
+            .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
+            .RunAsync();
+    }
+
+    [Test]
+    public async Task Suppresses_CS8629_After_IsNotNull_Assertion_On_Simple_Nullable_Value_Type()
+    {
+        const string code = """
+            #nullable enable
+            using System.Threading.Tasks;
+            using TUnit.Assertions;
+            using TUnit.Assertions.Extensions;
+
+            public class MyTests
+            {
+                public async Task TestMethod()
+                {
+                    int? nullableInt = GetNullableInt();
+
+                    await Assert.That(nullableInt).IsNotNull();
+
+                    // This would normally produce CS8629: Nullable value type may be null
+                    // But the suppressor should suppress it after IsNotNull assertion
+                    int value = {|#0:nullableInt|}.Value;
+                }
+
+                private int? GetNullableInt() => 42;
+            }
+            """;
+
+        await AnalyzerTestHelpers
+            .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .IgnoringDiagnostics("CS1591")
+            .WithSpecificDiagnostics(CS8629)
+            .WithExpectedDiagnosticsResults(CS8629.WithLocation(0).WithIsSuppressed(true))
+            .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
+            .RunAsync();
+    }
+
+    [Test]
+    public async Task Does_Not_Suppress_CS8629_Without_IsNotNull_Assertion()
+    {
+        const string code = """
+            #nullable enable
+            using System.Threading.Tasks;
+            using TUnit.Assertions;
+            using TUnit.Assertions.Extensions;
+
+            public class MyTests
+            {
+                public void TestMethod()
+                {
+                    int? nullableInt = GetNullableInt();
+
+                    // No IsNotNull assertion here
+
+                    // This should still produce CS8629 warning
+                    int value = {|#0:nullableInt|}.Value;
+                }
+
+                private int? GetNullableInt() => 42;
+            }
+            """;
+
+        await AnalyzerTestHelpers
+            .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .IgnoringDiagnostics("CS1591")
+            .WithSpecificDiagnostics(CS8629)
+            .WithExpectedDiagnosticsResults(CS8629.WithLocation(0).WithIsSuppressed(false))
+            .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
+            .RunAsync();
+    }
+
+    [Test]
+    public async Task Suppresses_CS8629_On_Member_Access_Nullable_Value_Type()
+    {
+        const string code = """
+            #nullable enable
+            using System.Threading.Tasks;
+            using TUnit.Assertions;
+            using TUnit.Assertions.Extensions;
+
+            public class MyTests
+            {
+                public async Task TestMethod(int? id)
+                {
+                    var value = new { Id = id };
+
+                    await Assert.That(value.Id).IsNotNull();
+
+                    // This would normally produce CS8629: Nullable value type may be null
+                    // But the suppressor should suppress it after IsNotNull assertion on value.Id
+                    int idValue = {|#0:value.Id|}.Value;
+                }
+            }
+            """;
+
+        await AnalyzerTestHelpers
+            .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .IgnoringDiagnostics("CS1591")
+            .WithSpecificDiagnostics(CS8629)
+            .WithExpectedDiagnosticsResults(CS8629.WithLocation(0).WithIsSuppressed(true))
             .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
             .RunAsync();
     }
