@@ -525,4 +525,44 @@ public class IsNotNullAssertionSuppressorTests
             .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
             .RunAsync();
     }
+
+    [Test]
+    public async Task Suppresses_CS8629_On_Named_Type_Member_Access()
+    {
+        const string code = """
+            #nullable enable
+            using System.Threading.Tasks;
+            using TUnit.Assertions;
+            using TUnit.Assertions.Extensions;
+
+            public class MyModel
+            {
+                public int? Id { get; set; }
+            }
+
+            public class MyTests
+            {
+                public async Task TestMethod()
+                {
+                    var model = GetModel();
+
+                    await Assert.That(model.Id).IsNotNull();
+
+                    // This would normally produce CS8629: Nullable value type may be null
+                    // But the suppressor should suppress it after IsNotNull assertion on model.Id
+                    int idValue = {|#0:model.Id|}.Value;
+                }
+
+                private MyModel GetModel() => new MyModel { Id = 42 };
+            }
+            """;
+
+        await AnalyzerTestHelpers
+            .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .IgnoringDiagnostics("CS1591")
+            .WithSpecificDiagnostics(CS8629)
+            .WithExpectedDiagnosticsResults(CS8629.WithLocation(0).WithIsSuppressed(true))
+            .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
+            .RunAsync();
+    }
 }

@@ -75,7 +75,9 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
             IdentifierNameSyntax identifier => identifier,
             MemberAccessExpressionSyntax memberAccess => memberAccess,
             ArgumentSyntax { Expression: var expression } => expression,
-            _ => node.DescendantNodesAndSelf().OfType<ExpressionSyntax>().FirstOrDefault()
+            _ => node.DescendantNodesAndSelf()
+                .OfType<ExpressionSyntax>()
+                .FirstOrDefault(e => e is IdentifierNameSyntax or MemberAccessExpressionSyntax)
         };
     }
 
@@ -175,13 +177,29 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
         // For simple identifiers, compare using semantic symbols (handles renames, etc.)
         if (assertArgument is IdentifierNameSyntax && targetExpression is IdentifierNameSyntax)
         {
-            var argumentSymbol = semanticModel.GetSymbolInfo(assertArgument, cancellationToken).Symbol;
-            var targetSymbol = semanticModel.GetSymbolInfo(targetExpression, cancellationToken).Symbol;
-            return argumentSymbol is not null && SymbolEqualityComparer.Default.Equals(argumentSymbol, targetSymbol);
+            return SymbolsMatch(assertArgument, targetExpression, semanticModel, cancellationToken);
         }
 
-        // For complex expressions (member access chains like value.Id), compare structurally
-        return assertArgument.IsEquivalentTo(targetExpression);
+        // For member access chains (e.g., value.Id), recursively compare member and receiver
+        if (assertArgument is MemberAccessExpressionSyntax assertMember &&
+            targetExpression is MemberAccessExpressionSyntax targetMember)
+        {
+            return SymbolsMatch(assertMember, targetMember, semanticModel, cancellationToken) &&
+                   ExpressionsMatch(assertMember.Expression, targetMember.Expression, semanticModel, cancellationToken);
+        }
+
+        return false;
+    }
+
+    private bool SymbolsMatch(
+        ExpressionSyntax expr1,
+        ExpressionSyntax expr2,
+        SemanticModel semanticModel,
+        CancellationToken cancellationToken)
+    {
+        var symbol1 = semanticModel.GetSymbolInfo(expr1, cancellationToken).Symbol;
+        var symbol2 = semanticModel.GetSymbolInfo(expr2, cancellationToken).Symbol;
+        return symbol1 is not null && SymbolEqualityComparer.Default.Equals(symbol1, symbol2);
     }
 
     private InvocationExpressionSyntax? FindAssertThatInChain(InvocationExpressionSyntax invocation)
