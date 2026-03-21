@@ -2555,10 +2555,10 @@ namespace .Extensions
         [.("Uses reflection for legacy compatibility. For AOT compatibility, use the Member<T" +
             "Object, TItem, TTransformed> overload with strongly-typed assertions.")]
         public static .<TObject> Member<TObject, TItem>(this .<TObject> source, .<<TObject, .<TItem>>> memberSelector, <.<.<TItem>, TItem>, object> assertions) { }
-        public static .<TObject> Member<TObject, TMember>(this .<TObject> source, .<<TObject, TMember>> memberSelector, <.<TMember>, .<TMember>> assertions) { }
+        public static .<TObject> Member<TObject, TMember>(this .<TObject> source, .<<TObject, TMember?>> memberSelector, <.<TMember>, .<TMember>> assertions) { }
         [.("Uses reflection for legacy compatibility. For AOT compatibility, use the Member<T" +
             "Object, TMember, TTransformed> overload with strongly-typed assertions.")]
-        public static .<TObject> Member<TObject, TMember>(this .<TObject> source, .<<TObject, TMember>> memberSelector, <.<TMember>, object> assertions) { }
+        public static .<TObject> Member<TObject, TMember>(this .<TObject> source, .<<TObject, TMember?>> memberSelector, <.<TMember>, object> assertions) { }
         public static .<TObject> Member<TObject, TItem, TTransformed>(this .<TObject> source, .<<TObject, .<TItem>>> memberSelector, <.<.<TItem>, TItem>, .<TTransformed>> assertions) { }
         public static .<TObject> Member<TObject, TKey, TValue>(this .<TObject> source, .<<TObject, .<TKey, TValue>>> memberSelector, <.<.<TKey, TValue>, TKey, TValue>, .<.<TKey, TValue>>> assertions)
             where TKey :  notnull { }
@@ -2566,7 +2566,7 @@ namespace .Extensions
             "Object, TKey, TValue, TTransformed> overload with strongly-typed assertions.")]
         public static .<TObject> Member<TObject, TKey, TValue>(this .<TObject> source, .<<TObject, .<TKey, TValue>>> memberSelector, <.<.<TKey, TValue>, TKey, TValue>, object> assertions)
             where TKey :  notnull { }
-        public static .<TObject> Member<TObject, TMember, TTransformed>(this .<TObject> source, .<<TObject, TMember>> memberSelector, <.<TMember>, .<TTransformed>> assertions) { }
+        public static .<TObject> Member<TObject, TMember, TTransformed>(this .<TObject> source, .<<TObject, TMember?>> memberSelector, <.<TMember>, .<TTransformed>> assertions) { }
         public static .<TObject> Member<TObject, TKey, TValue, TTransformed>(this .<TObject> source, .<<TObject, .<TKey, TValue>>> memberSelector, <.<.<TKey, TValue>, TKey, TValue>, .<TTransformed>> assertions)
             where TKey :  notnull { }
         public static .<TValue> Satisfies<TValue>(this .<TValue> source, <TValue?, bool> predicate, [.("predicate")] string? expression = null) { }
@@ -4469,8 +4469,8 @@ namespace .Extensions
     }
     public static class PropertyAssertionExtensions
     {
-        public static .<TObject, TProperty> HasProperty<TObject, TProperty>(this .<TObject> source, .<<TObject, TProperty>> propertySelector) { }
-        public static .<TObject> HasProperty<TObject, TProperty>(this .<TObject> source, .<<TObject, TProperty>> propertySelector, TProperty expectedValue, [.("expectedValue")] string? expression = null) { }
+        public static .<TObject, TProperty> HasProperty<TObject, TProperty>(this .<TObject> source, .<<TObject, TProperty?>> propertySelector) { }
+        public static .<TObject> HasProperty<TObject, TProperty>(this .<TObject> source, .<<TObject, TProperty?>> propertySelector, TProperty expectedValue, [.("expectedValue")] string? expression = null) { }
     }
     public static class RangeAssertionExtensions
     {
