@@ -10,7 +10,7 @@ namespace TUnit.Example.Asp.Net.TestProject;
 ///
 /// This allows:
 /// - Factory to provide base configuration shared across tests
-/// - Tests to override factory defaults via ConfigureTestConfiguration (order 5)
+/// - Tests to override factory defaults via ConfigureTestConfiguration (order 6)
 /// </summary>
 public class FactoryMethodOrderTests : TestsBase
 {
@@ -105,7 +105,7 @@ public class FactoryMethodOrderTests : TestsBase
     }
 
     [Test]
-    [DisplayName("Complete relative execution order: Options → Setup → Config → WebHost → Services → Startup")]
+    [DisplayName("Complete relative execution order: Options → Setup → WebHost → Config → Services → Startup")]
     public async Task Full_Relative_Order()
     {
         _ = Factory.CreateClient();
@@ -113,8 +113,8 @@ public class FactoryMethodOrderTests : TestsBase
         // Verify all hooks were called
         await Assert.That(ConfigureTestOptionsCalledOrder).IsGreaterThan(0);
         await Assert.That(SetupCalledOrder).IsGreaterThan(0);
-        await Assert.That(ConfigureTestConfigurationCalledOrder).IsGreaterThan(0);
         await Assert.That(ConfigureWebHostBuilderCalledOrder).IsGreaterThan(0);
+        await Assert.That(ConfigureTestConfigurationCalledOrder).IsGreaterThan(0);
         await Assert.That(ConfigureTestServicesCalledOrder).IsGreaterThan(0);
         await Assert.That(StartupCalledOrder).IsGreaterThan(0);
 
@@ -124,16 +124,16 @@ public class FactoryMethodOrderTests : TestsBase
             .Because("ConfigureTestOptions runs before SetupAsync");
 
         await Assert.That(SetupCalledOrder)
-            .IsLessThan(ConfigureTestConfigurationCalledOrder)
-            .Because("SetupAsync runs before ConfigureTestConfiguration");
-
-        await Assert.That(ConfigureTestConfigurationCalledOrder)
             .IsLessThan(ConfigureWebHostBuilderCalledOrder)
-            .Because("ConfigureTestConfiguration runs before ConfigureWebHostBuilder");
+            .Because("SetupAsync runs before ConfigureWebHostBuilder");
 
         await Assert.That(ConfigureWebHostBuilderCalledOrder)
+            .IsLessThan(ConfigureTestConfigurationCalledOrder)
+            .Because("ConfigureWebHostBuilder runs before ConfigureTestConfiguration");
+
+        await Assert.That(ConfigureTestConfigurationCalledOrder)
             .IsLessThan(ConfigureTestServicesCalledOrder)
-            .Because("ConfigureWebHostBuilder runs before ConfigureTestServices");
+            .Because("ConfigureTestConfiguration runs before ConfigureTestServices");
 
         await Assert.That(ConfigureTestServicesCalledOrder)
             .IsLessThan(StartupCalledOrder)

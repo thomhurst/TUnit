@@ -124,8 +124,8 @@ Understanding the execution order is critical for writing correct tests. Here's 
 │  3. Factory.ConfigureWebHost    Base factory configuration      │
 │  4. Factory.ConfigureStartup... Base factory startup config     │
 │  ───────────────────────────────────────────────────────────    │
-│  5. ConfigureTestConfiguration  Test config (overrides factory) │
-│  6. ConfigureWebHostBuilder     Escape hatch (low-level access) │
+│  5. ConfigureWebHostBuilder     Escape hatch (low-level access) │
+│  6. ConfigureTestConfiguration  Test config (overrides factory) │
 │  7. ConfigureTestServices       Test services (overrides)       │
 │  ───────────────────────────────────────────────────────────    │
 │  8. Application Startup         Server starts                   │
@@ -143,8 +143,8 @@ Understanding the execution order is critical for writing correct tests. Here's 
 | `SetupAsync` | Per-test | Async operations before config (create DB tables) |
 | `Factory.ConfigureWebHost` | Shared | Base configuration for all tests |
 | `Factory.ConfigureStartupConfiguration` | Shared | Base startup configuration |
-| `ConfigureTestConfiguration` | Per-test | Override factory configuration |
 | `ConfigureWebHostBuilder` | Per-test | Low-level escape hatch |
+| `ConfigureTestConfiguration` | Per-test | Override factory configuration |
 | `ConfigureTestServices` | Per-test | Override factory services |
 
 :::tip Tests Can Override Factory
@@ -790,7 +790,7 @@ The key benefits:
 
 **Problem:** You set a value in `ConfigureTestConfiguration` but the factory's value is still used.
 
-**Solution:** Make sure you're using the same configuration key. The test configuration runs **after** the factory configuration (step 5 vs steps 3-4), so it should override. Check that:
+**Solution:** Make sure you're using the same configuration key. The test configuration runs **after** the factory configuration (step 6 vs steps 3-4), so it should override. Check that:
 
 1. You're using `AddInMemoryCollection` which adds to the config sources
 2. The configuration key path is exactly the same
@@ -927,14 +927,14 @@ public class LifecycleDebugTest : WebApplicationTest<WebApplicationFactory, Prog
         await base.SetupAsync();
     }
 
-    protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
-    {
-        Console.WriteLine("5. ConfigureTestConfiguration");
-    }
-
     protected override void ConfigureWebHostBuilder(IWebHostBuilder builder)
     {
-        Console.WriteLine("6. ConfigureWebHostBuilder");
+        Console.WriteLine("5. ConfigureWebHostBuilder");
+    }
+
+    protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
+    {
+        Console.WriteLine("6. ConfigureTestConfiguration");
     }
 
     protected override void ConfigureTestServices(IServiceCollection services)

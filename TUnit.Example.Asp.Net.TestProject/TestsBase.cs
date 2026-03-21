@@ -67,13 +67,8 @@ public abstract class TestsBase : WebApplicationTest<WebApplicationFactory, Prog
 
     protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
     {
-        // Track first call only (this method is called twice - once for startup config, once for app config)
-        if (ConfigureTestConfigurationCalledOrder == 0)
-        {
-            ConfigureTestConfigurationCalledOrder = GetNextOrder();
-            ConfigureTestConfigurationCalledAt = DateTime.UtcNow;
-        }
-
+        ConfigureTestConfigurationCalledOrder = GetNextOrder();
+        ConfigureTestConfigurationCalledAt = DateTime.UtcNow;
         base.ConfigureTestConfiguration(config);
     }
 
