@@ -86,8 +86,19 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
         SemanticModel semanticModel,
         CancellationToken cancellationToken)
     {
-        // Find the containing method/block
-        var containingMethod = targetExpression.FirstAncestorOrSelf<MethodDeclarationSyntax>();
+        // Find the innermost containing scope (lambda, local function, or method)
+        SyntaxNode? containingMethod = null;
+        foreach (var ancestor in targetExpression.Ancestors())
+        {
+            if (ancestor is MethodDeclarationSyntax
+                or LocalFunctionStatementSyntax
+                or AnonymousFunctionExpressionSyntax)
+            {
+                containingMethod = ancestor;
+                break;
+            }
+        }
+
         if (containingMethod is null)
         {
             return false;
@@ -188,6 +199,8 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
                    ExpressionsMatch(assertMember.Expression, targetMember.Expression, semanticModel, cancellationToken);
         }
 
+        // Mismatched expression types (e.g., identifier vs member access) are intentionally
+        // not matched — asserting `id` should not suppress warnings on `wrapper.Id` or vice versa.
         return false;
     }
 
@@ -240,9 +253,7 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
 
     private void Suppress(SuppressionAnalysisContext context, Diagnostic diagnostic)
     {
-        var suppression = SupportedSuppressions.FirstOrDefault(s => s.SuppressedDiagnosticId == diagnostic.Id);
-
-        if (suppression is not null)
+        if (SuppressionsByDiagnosticId.TryGetValue(diagnostic.Id, out var suppression))
         {
             context.ReportSuppression(
                 Suppression.Create(
@@ -253,14 +264,20 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
         }
     }
 
+    private static readonly SuppressionDescriptor[] Descriptors =
+    [
+        CreateDescriptor("CS8600"),
+        CreateDescriptor("CS8602"),
+        CreateDescriptor("CS8604"),
+        CreateDescriptor("CS8618"),
+        CreateDescriptor("CS8629"),
+    ];
+
+    private static readonly Dictionary<string, SuppressionDescriptor> SuppressionsByDiagnosticId =
+        Descriptors.ToDictionary(d => d.SuppressedDiagnosticId);
+
     public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions { get; } =
-        ImmutableArray.Create(
-            CreateDescriptor("CS8600"),
-            CreateDescriptor("CS8602"),
-            CreateDescriptor("CS8604"),
-            CreateDescriptor("CS8618"),
-            CreateDescriptor("CS8629")
-        );
+        ImmutableArray.Create(Descriptors);
 
     private static SuppressionDescriptor CreateDescriptor(string id)
         => new(

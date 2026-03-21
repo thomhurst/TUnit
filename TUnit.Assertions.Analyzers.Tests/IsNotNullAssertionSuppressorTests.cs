@@ -527,6 +527,85 @@ public class IsNotNullAssertionSuppressorTests
     }
 
     [Test]
+    public async Task Suppresses_Inside_Lambda()
+    {
+        const string code = """
+            #nullable enable
+            using System;
+            using System.Threading.Tasks;
+            using TUnit.Assertions;
+            using TUnit.Assertions.Extensions;
+
+            public class MyTests
+            {
+                public async Task TestMethod()
+                {
+                    string? nullableString = GetNullableString();
+
+                    Func<Task> act = async () =>
+                    {
+                        await Assert.That(nullableString).IsNotNull();
+
+                        // Should be suppressed inside a lambda
+                        var length = {|#0:nullableString|}.Length;
+                    };
+
+                    await act();
+                }
+
+                private string? GetNullableString() => "test";
+            }
+            """;
+
+        await AnalyzerTestHelpers
+            .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .IgnoringDiagnostics("CS1591")
+            .WithSpecificDiagnostics(CS8602)
+            .WithExpectedDiagnosticsResults(CS8602.WithLocation(0).WithIsSuppressed(true))
+            .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
+            .RunAsync();
+    }
+
+    [Test]
+    public async Task Suppresses_Inside_Local_Function()
+    {
+        const string code = """
+            #nullable enable
+            using System.Threading.Tasks;
+            using TUnit.Assertions;
+            using TUnit.Assertions.Extensions;
+
+            public class MyTests
+            {
+                public async Task TestMethod()
+                {
+                    string? nullableString = GetNullableString();
+
+                    async Task LocalFunc()
+                    {
+                        await Assert.That(nullableString).IsNotNull();
+
+                        // Should be suppressed inside a local function
+                        var length = {|#0:nullableString|}.Length;
+                    }
+
+                    await LocalFunc();
+                }
+
+                private string? GetNullableString() => "test";
+            }
+            """;
+
+        await AnalyzerTestHelpers
+            .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .IgnoringDiagnostics("CS1591")
+            .WithSpecificDiagnostics(CS8602)
+            .WithExpectedDiagnosticsResults(CS8602.WithLocation(0).WithIsSuppressed(true))
+            .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
+            .RunAsync();
+    }
+
+    [Test]
     public async Task Suppresses_CS8629_On_Named_Type_Member_Access()
     {
         const string code = """
