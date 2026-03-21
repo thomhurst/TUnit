@@ -5,6 +5,7 @@ using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
 
@@ -124,6 +125,16 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
     protected virtual string[] Args => [];
 
     /// <summary>
+    /// Override to configure the <see cref="DistributedApplicationOptions"/> and
+    /// <see cref="Microsoft.Extensions.Hosting.HostApplicationBuilderSettings"/> passed to
+    /// <see cref="DistributedApplicationTestingBuilder.CreateAsync{TEntryPoint}(string[], Action{DistributedApplicationOptions, Microsoft.Extensions.Hosting.HostApplicationBuilderSettings}, CancellationToken)"/>.
+    /// This callback is invoked during builder creation, before <see cref="ConfigureBuilder"/>.
+    /// </summary>
+    /// <param name="options">The distributed application options.</param>
+    /// <param name="settings">The host application builder settings.</param>
+    protected virtual void ConfigureAppHost(DistributedApplicationOptions options, HostApplicationBuilderSettings settings) { }
+
+    /// <summary>
     /// Override to customize the builder before building the application.
     /// </summary>
     /// <param name="builder">The distributed application testing builder.</param>
@@ -201,7 +212,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         var sw = Stopwatch.StartNew();
 
         LogProgress($"Creating distributed application builder for {typeof(TAppHost).Name}...");
-        var builder = await DistributedApplicationTestingBuilder.CreateAsync<TAppHost>(Args);
+        var builder = await DistributedApplicationTestingBuilder.CreateAsync<TAppHost>(Args, ConfigureAppHost);
         ConfigureBuilder(builder);
         LogProgress($"Builder created in {sw.Elapsed.TotalSeconds:0.0}s");
 
