@@ -567,6 +567,16 @@ namespace .Collections
         protected override .<TItem> CreateAdapter(TMemory value) { }
         protected override string GetExpectation() { }
     }
+    public class MemoryIsEquivalentToAssertion<TMemory, TItem> : .<TMemory, TItem>
+    {
+        [.("Collection equivalency uses structural comparison for complex objects, which requ" +
+            "ires reflection and is not compatible with AOT")]
+        public MemoryIsEquivalentToAssertion(.<TMemory> context, <TMemory, .<TItem>> adapterFactory, .<TItem> expected, . ordering = 0) { }
+        public MemoryIsEquivalentToAssertion(.<TMemory> context, <TMemory, .<TItem>> adapterFactory, .<TItem> expected, .<TItem> comparer, . ordering = 0) { }
+        protected override .<.> CheckAsync(.<TMemory> metadata) { }
+        protected override .<TItem> CreateAdapter(TMemory value) { }
+        protected override string GetExpectation() { }
+    }
     public class MemoryIsInDescendingOrderAssertion<TMemory, TItem> : .<TMemory, TItem>
     {
         public MemoryIsInDescendingOrderAssertion(.<TMemory> context, <TMemory, .<TItem>> adapterFactory, .<TItem>? comparer = null) { }
@@ -5973,6 +5983,10 @@ namespace .Sources
         public .<TSource, TMemory> IsAssignableFrom<TSource>() { }
         public .<TTarget, TMemory> IsAssignableTo<TTarget>() { }
         public .<TMemory, TItem> IsEmpty() { }
+        [.("Collection equivalency uses structural comparison for complex objects, which requ" +
+            "ires reflection and is not compatible with AOT")]
+        public .<TMemory, TItem> IsEquivalentTo(.<TItem> expected, . ordering = 0, [.("expected")] string? expectedExpression = null, [.("ordering")] string? orderingExpression = null) { }
+        public .<TMemory, TItem> IsEquivalentTo(.<TItem> expected, .<TItem> comparer, . ordering = 0, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null, [.("ordering")] string? orderingExpression = null) { }
         public .<TMemory, TItem> IsInDescendingOrder() { }
         public .<TMemory, TItem> IsInOrder() { }
         public .<TSource, TMemory> IsNotAssignableFrom<TSource>() { }

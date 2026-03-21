@@ -1,4 +1,6 @@
 #if NET5_0_OR_GREATER
+using TUnit.Assertions.Enums;
+
 namespace TUnit.Assertions.Tests;
 
 public class MemoryAssertionTests
@@ -129,6 +131,68 @@ public class MemoryAssertionTests
     {
         ReadOnlyMemory<int> memory = new[] { 1, 2, 3 };
         await Assert.That(memory).IsNotEmpty().And.Contains(2);
+    }
+
+    // IsEquivalentTo tests
+    [Test]
+    public async Task Test_Memory_IsEquivalentTo()
+    {
+        Memory<int> memory = new[] { 3, 1, 2 };
+        await Assert.That(memory).IsEquivalentTo(new[] { 1, 2, 3 });
+    }
+
+    [Test]
+    public async Task Test_Memory_IsEquivalentTo_Ordered()
+    {
+        Memory<int> memory = new[] { 1, 2, 3 };
+        await Assert.That(memory).IsEquivalentTo(new[] { 1, 2, 3 }, CollectionOrdering.Matching);
+    }
+
+    [Test]
+    public async Task Test_Memory_IsEquivalentTo_Fails()
+    {
+        Memory<int> memory = new[] { 1, 2, 3 };
+        var action = async () => await Assert.That(memory).IsEquivalentTo(new[] { 1, 2, 4 });
+
+        var exception = await Assert.That(action).Throws<AssertionException>();
+
+        await Assert.That(exception.Message).Contains("does not contain expected item: 4");
+    }
+
+    [Test]
+    public async Task Test_Memory_IsEquivalentTo_DifferentCount_Fails()
+    {
+        Memory<int> memory = new[] { 1, 2, 3 };
+        var action = async () => await Assert.That(memory).IsEquivalentTo(new[] { 1, 2 });
+
+        var exception = await Assert.That(action).Throws<AssertionException>();
+
+        await Assert.That(exception.Message).Contains("3 items but expected 2");
+    }
+
+    [Test]
+    public async Task Test_ReadOnlyMemory_IsEquivalentTo()
+    {
+        ReadOnlyMemory<byte> memory = new byte[] { 0x01, 0x02, 0x03 };
+        await Assert.That(memory).IsEquivalentTo(new byte[] { 0x01, 0x02, 0x03 });
+    }
+
+    [Test]
+    public async Task Test_ReadOnlyMemory_IsEquivalentTo_Unordered()
+    {
+        ReadOnlyMemory<byte> memory = new byte[] { 0x03, 0x01, 0x02 };
+        await Assert.That(memory).IsEquivalentTo(new byte[] { 0x01, 0x02, 0x03 });
+    }
+
+    [Test]
+    public async Task Test_ReadOnlyMemory_IsEquivalentTo_Fails()
+    {
+        ReadOnlyMemory<byte> memory = new byte[] { 0x01, 0x02, 0x03 };
+        var action = async () => await Assert.That(memory).IsEquivalentTo(new byte[] { 0x01, 0x02, 0x04 });
+
+        var exception = await Assert.That(action).Throws<AssertionException>();
+
+        await Assert.That(exception.Message).Contains("does not contain expected item");
     }
 
     // Failure tests

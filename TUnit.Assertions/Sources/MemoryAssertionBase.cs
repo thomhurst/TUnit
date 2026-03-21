@@ -1,4 +1,5 @@
 #if NET5_0_OR_GREATER
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Text;
 using TUnit.Assertions.Abstractions;
@@ -6,6 +7,7 @@ using TUnit.Assertions.Adapters;
 using TUnit.Assertions.Collections;
 using TUnit.Assertions.Conditions;
 using TUnit.Assertions.Core;
+using TUnit.Assertions.Enums;
 
 namespace TUnit.Assertions.Sources;
 
@@ -209,6 +211,66 @@ public abstract class MemoryAssertionBase<TMemory, TItem> : Assertion<TMemory>, 
     {
         Context.ExpressionBuilder.Append(".IsInDescendingOrder()");
         return new MemoryIsInDescendingOrderAssertion<TMemory, TItem>(Context, CreateAdapter);
+    }
+
+    /// <summary>
+    /// Asserts that the memory is equivalent to the expected collection.
+    /// Two collections are equivalent if they contain the same elements, regardless of order (default).
+    /// </summary>
+    [RequiresUnreferencedCode("Collection equivalency uses structural comparison for complex objects, which requires reflection and is not compatible with AOT")]
+    public MemoryIsEquivalentToAssertion<TMemory, TItem> IsEquivalentTo(
+        IEnumerable<TItem> expected,
+        CollectionOrdering ordering = CollectionOrdering.Any,
+        [CallerArgumentExpression(nameof(expected))] string? expectedExpression = null,
+        [CallerArgumentExpression(nameof(ordering))] string? orderingExpression = null)
+    {
+        Context.ExpressionBuilder.Append(".IsEquivalentTo(");
+        var added = false;
+        if (expectedExpression != null)
+        {
+            Context.ExpressionBuilder.Append(expectedExpression);
+            added = true;
+        }
+        if (orderingExpression != null)
+        {
+            Context.ExpressionBuilder.Append(added ? ", " : "");
+            Context.ExpressionBuilder.Append(orderingExpression);
+        }
+        Context.ExpressionBuilder.Append(')');
+        return new MemoryIsEquivalentToAssertion<TMemory, TItem>(Context, CreateAdapter, expected, ordering);
+    }
+
+    /// <summary>
+    /// Asserts that the memory is equivalent to the expected collection using a custom equality comparer.
+    /// </summary>
+    public MemoryIsEquivalentToAssertion<TMemory, TItem> IsEquivalentTo(
+        IEnumerable<TItem> expected,
+        IEqualityComparer<TItem> comparer,
+        CollectionOrdering ordering = CollectionOrdering.Any,
+        [CallerArgumentExpression(nameof(expected))] string? expectedExpression = null,
+        [CallerArgumentExpression(nameof(comparer))] string? comparerExpression = null,
+        [CallerArgumentExpression(nameof(ordering))] string? orderingExpression = null)
+    {
+        Context.ExpressionBuilder.Append(".IsEquivalentTo(");
+        var added = false;
+        if (expectedExpression != null)
+        {
+            Context.ExpressionBuilder.Append(expectedExpression);
+            added = true;
+        }
+        if (comparerExpression != null)
+        {
+            Context.ExpressionBuilder.Append(added ? ", " : "");
+            Context.ExpressionBuilder.Append(comparerExpression);
+            added = true;
+        }
+        if (orderingExpression != null)
+        {
+            Context.ExpressionBuilder.Append(added ? ", " : "");
+            Context.ExpressionBuilder.Append(orderingExpression);
+        }
+        Context.ExpressionBuilder.Append(')');
+        return new MemoryIsEquivalentToAssertion<TMemory, TItem>(Context, CreateAdapter, expected, comparer, ordering);
     }
 
     /// <summary>
