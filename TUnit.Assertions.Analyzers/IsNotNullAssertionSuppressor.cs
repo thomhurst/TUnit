@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace TUnit.Assertions.Analyzers;
 
 /// <summary>
-/// Suppresses nullability warnings (CS8600, CS8602, CS8604, CS8618) for variables
+/// Suppresses nullability warnings (CS8600, CS8602, CS8604, CS8618, CS8629) for variables
 /// after they have been asserted as non-null using Assert.That(x).IsNotNull().
 ///
 /// Note: This suppressor only hides the warnings; it does not change the compiler's
@@ -43,15 +43,15 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
 
             var semanticModel = context.GetSemanticModel(sourceTree);
 
-            // Find the variable being referenced that caused the warning
-            var identifierName = GetIdentifierFromNode(node);
-            if (identifierName is null)
+            // Find the variable/expression being referenced that caused the warning
+            var targetExpression = GetTargetExpression(node);
+            if (targetExpression is null)
             {
                 continue;
             }
 
-            // Check if this variable was previously asserted as non-null
-            if (WasAssertedNotNull(identifierName, semanticModel, context.CancellationToken))
+            // Check if this variable/expression was previously asserted as non-null
+            if (WasAssertedNotNull(targetExpression, semanticModel, context.CancellationToken))
             {
                 Suppress(context, diagnostic);
             }
@@ -63,34 +63,42 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
         return diagnosticId is "CS8600" // Converting null literal or possible null value to non-nullable type
             or "CS8602" // Dereference of a possibly null reference
             or "CS8604" // Possible null reference argument
-            or "CS8618"; // Non-nullable field/property uninitialized
+            or "CS8618" // Non-nullable field/property uninitialized
+            or "CS8629"; // Nullable value type may be null
     }
 
-    private IdentifierNameSyntax? GetIdentifierFromNode(SyntaxNode node)
+    private ExpressionSyntax? GetTargetExpression(SyntaxNode node)
     {
-        // The warning might be on the identifier itself or a parent node
+        // The warning might be on the identifier itself, a member access, or a parent node
         return node switch
         {
             IdentifierNameSyntax identifier => identifier,
-            MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax identifier } => identifier,
-            ArgumentSyntax { Expression: IdentifierNameSyntax identifier } => identifier,
-            _ => node.DescendantNodesAndSelf().OfType<IdentifierNameSyntax>().FirstOrDefault()
+            MemberAccessExpressionSyntax memberAccess => memberAccess,
+            ArgumentSyntax { Expression: var expression } => expression,
+            _ => node.DescendantNodesAndSelf()
+                .OfType<ExpressionSyntax>()
+                .FirstOrDefault(e => e is IdentifierNameSyntax or MemberAccessExpressionSyntax)
         };
     }
 
     private bool WasAssertedNotNull(
-        IdentifierNameSyntax identifierName,
+        ExpressionSyntax targetExpression,
         SemanticModel semanticModel,
         CancellationToken cancellationToken)
     {
-        var symbol = semanticModel.GetSymbolInfo(identifierName, cancellationToken).Symbol;
-        if (symbol is null)
+        // Find the innermost containing scope (lambda, local function, or method)
+        SyntaxNode? containingMethod = null;
+        foreach (var ancestor in targetExpression.Ancestors())
         {
-            return false;
+            if (ancestor is MethodDeclarationSyntax
+                or LocalFunctionStatementSyntax
+                or AnonymousFunctionExpressionSyntax)
+            {
+                containingMethod = ancestor;
+                break;
+            }
         }
 
-        // Find the containing method/block
-        var containingMethod = identifierName.FirstAncestorOrSelf<MethodDeclarationSyntax>();
         if (containingMethod is null)
         {
             return false;
@@ -98,7 +106,7 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
 
         // Look for Assert.That(variable).IsNotNull() patterns before this usage
         var allStatements = containingMethod.DescendantNodes().OfType<StatementSyntax>().ToList();
-        var identifierStatement = identifierName.FirstAncestorOrSelf<StatementSyntax>();
+        var identifierStatement = targetExpression.FirstAncestorOrSelf<StatementSyntax>();
 
         if (identifierStatement is null)
         {
@@ -117,7 +125,7 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
             var statement = allStatements[i];
 
             // Look for await Assert.That(x).IsNotNull() pattern
-            if (IsNotNullAssertion(statement, symbol, semanticModel, cancellationToken))
+            if (IsNotNullAssertion(statement, targetExpression, semanticModel, cancellationToken))
             {
                 return true;
             }
@@ -128,7 +136,7 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
 
     private bool IsNotNullAssertion(
         StatementSyntax statement,
-        ISymbol targetSymbol,
+        ExpressionSyntax targetExpression,
         SemanticModel semanticModel,
         CancellationToken cancellationToken)
     {
@@ -161,17 +169,50 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
 
             var argument = assertThatCall.ArgumentList.Arguments[0].Expression;
 
-            // Get the symbol of the argument
-            var argumentSymbol = semanticModel.GetSymbolInfo(argument, cancellationToken).Symbol;
-
-            // Check if it's the same symbol we're looking for
-            if (SymbolEqualityComparer.Default.Equals(argumentSymbol, targetSymbol))
+            // Check if the argument matches the target expression
+            if (ExpressionsMatch(argument, targetExpression, semanticModel, cancellationToken))
             {
                 return true;
             }
         }
 
         return false;
+    }
+
+    private bool ExpressionsMatch(
+        ExpressionSyntax assertArgument,
+        ExpressionSyntax targetExpression,
+        SemanticModel semanticModel,
+        CancellationToken cancellationToken)
+    {
+        // For simple identifiers, compare using semantic symbols (handles renames, etc.)
+        if (assertArgument is IdentifierNameSyntax && targetExpression is IdentifierNameSyntax)
+        {
+            return SymbolsMatch(assertArgument, targetExpression, semanticModel, cancellationToken);
+        }
+
+        // For member access chains (e.g., value.Id), recursively compare member and receiver
+        if (assertArgument is MemberAccessExpressionSyntax assertMember &&
+            targetExpression is MemberAccessExpressionSyntax targetMember)
+        {
+            return SymbolsMatch(assertMember, targetMember, semanticModel, cancellationToken) &&
+                   ExpressionsMatch(assertMember.Expression, targetMember.Expression, semanticModel, cancellationToken);
+        }
+
+        // Mismatched expression types (e.g., identifier vs member access) are intentionally
+        // not matched — asserting `id` should not suppress warnings on `wrapper.Id` or vice versa.
+        return false;
+    }
+
+    private bool SymbolsMatch(
+        ExpressionSyntax expr1,
+        ExpressionSyntax expr2,
+        SemanticModel semanticModel,
+        CancellationToken cancellationToken)
+    {
+        var symbol1 = semanticModel.GetSymbolInfo(expr1, cancellationToken).Symbol;
+        var symbol2 = semanticModel.GetSymbolInfo(expr2, cancellationToken).Symbol;
+        return symbol1 is not null && SymbolEqualityComparer.Default.Equals(symbol1, symbol2);
     }
 
     private InvocationExpressionSyntax? FindAssertThatInChain(InvocationExpressionSyntax invocation)
@@ -212,9 +253,7 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
 
     private void Suppress(SuppressionAnalysisContext context, Diagnostic diagnostic)
     {
-        var suppression = SupportedSuppressions.FirstOrDefault(s => s.SuppressedDiagnosticId == diagnostic.Id);
-
-        if (suppression is not null)
+        if (SuppressionsByDiagnosticId.TryGetValue(diagnostic.Id, out var suppression))
         {
             context.ReportSuppression(
                 Suppression.Create(
@@ -225,13 +264,20 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
         }
     }
 
+    private static readonly SuppressionDescriptor[] Descriptors =
+    [
+        CreateDescriptor("CS8600"),
+        CreateDescriptor("CS8602"),
+        CreateDescriptor("CS8604"),
+        CreateDescriptor("CS8618"),
+        CreateDescriptor("CS8629"),
+    ];
+
+    private static readonly Dictionary<string, SuppressionDescriptor> SuppressionsByDiagnosticId =
+        Descriptors.ToDictionary(d => d.SuppressedDiagnosticId);
+
     public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions { get; } =
-        ImmutableArray.Create(
-            CreateDescriptor("CS8600"),
-            CreateDescriptor("CS8602"),
-            CreateDescriptor("CS8604"),
-            CreateDescriptor("CS8618")
-        );
+        ImmutableArray.Create(Descriptors);
 
     private static SuppressionDescriptor CreateDescriptor(string id)
         => new(
