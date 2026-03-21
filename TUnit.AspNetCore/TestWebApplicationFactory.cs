@@ -21,7 +21,6 @@ public abstract class TestWebApplicationFactory<TEntryPoint> : WebApplicationFac
         TestContext testContext,
         WebApplicationTestOptions options,
         Action<IServiceCollection> configureIsolatedServices,
-        Action<IConfigurationBuilder> configureIsolatedStartupConfiguration,
         Action<WebHostBuilderContext, IConfigurationBuilder> configureIsolatedAppConfiguration,
         Action<IWebHostBuilder>? configureWebHostBuilder = null)
     {
@@ -29,7 +28,6 @@ public abstract class TestWebApplicationFactory<TEntryPoint> : WebApplicationFac
         {
             var configurationBuilder = new ConfigurationManager();
             ConfigureStartupConfiguration(configurationBuilder);
-            configureIsolatedStartupConfiguration(configurationBuilder);
 
             foreach (var keyValuePair in configurationBuilder.AsEnumerable())
             {

@@ -115,7 +115,6 @@ public abstract class WebApplicationTest<TFactory, TEntryPoint> : WebApplication
                 testContext,
                 _options,
                 ConfigureTestServices,
-                ConfigureTestConfiguration,
                 (_, config) => ConfigureTestConfiguration(config),
                 ConfigureWebHostBuilder));
 
