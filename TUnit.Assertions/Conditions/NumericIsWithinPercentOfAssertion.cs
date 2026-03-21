@@ -19,6 +19,16 @@ public class DoubleIsWithinPercentOfAssertion : Assertion<double>
         double percent)
         : base(context)
     {
+        if (double.IsNaN(percent))
+        {
+            throw new ArgumentOutOfRangeException(nameof(percent), "Percent cannot be NaN.");
+        }
+
+        if (percent < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(percent), "Percent cannot be negative.");
+        }
+
         _expected = expected;
         _percent = percent;
     }
@@ -90,6 +100,16 @@ public class FloatIsWithinPercentOfAssertion : Assertion<float>
         float percent)
         : base(context)
     {
+        if (float.IsNaN(percent))
+        {
+            throw new ArgumentOutOfRangeException(nameof(percent), "Percent cannot be NaN.");
+        }
+
+        if (percent < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(percent), "Percent cannot be negative.");
+        }
+
         _expected = expected;
         _percent = percent;
     }
@@ -129,10 +149,17 @@ public class FloatIsWithinPercentOfAssertion : Assertion<float>
         var diff = Math.Abs(value - _expected);
         var allowedDelta = Math.Abs(_expected * _percent / 100.0f);
 
-        return diff <= allowedDelta
-            ? AssertionResult._passedTask
-            : Task.FromResult(AssertionResult.Failed(
-            $"found {value}, which differs by {diff} ({(diff / Math.Abs(_expected)) * 100:F2}% of expected)"));
+        if (diff <= allowedDelta)
+        {
+            return AssertionResult._passedTask;
+        }
+
+        var actualPercent = _expected != 0f
+            ? (diff / Math.Abs(_expected)) * 100f
+            : float.PositiveInfinity;
+
+        return Task.FromResult(AssertionResult.Failed(
+            $"found {value}, which differs by {diff} ({actualPercent:F2}% of expected)"));
     }
 
     protected override string GetExpectation() =>
@@ -155,6 +182,11 @@ public class IntIsWithinPercentOfAssertion : Assertion<int>
         double percent)
         : base(context)
     {
+        if (percent < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(percent), "Percent cannot be negative.");
+        }
+
         _expected = expected;
         _percent = percent;
     }
@@ -203,6 +235,11 @@ public class LongIsWithinPercentOfAssertion : Assertion<long>
         double percent)
         : base(context)
     {
+        if (percent < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(percent), "Percent cannot be negative.");
+        }
+
         _expected = expected;
         _percent = percent;
     }
@@ -251,6 +288,11 @@ public class DecimalIsWithinPercentOfAssertion : Assertion<decimal>
         decimal percent)
         : base(context)
     {
+        if (percent < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(percent), "Percent cannot be negative.");
+        }
+
         _expected = expected;
         _percent = percent;
     }
@@ -273,8 +315,9 @@ public class DecimalIsWithinPercentOfAssertion : Assertion<decimal>
             return AssertionResult._passedTask;
         }
 
-        var actualPercent = _expected != 0 ? (diff / Math.Abs(_expected)) * 100m : -1m;
-        var percentDisplay = actualPercent >= 0 ? $"{actualPercent:F2}%" : "Infinity%";
+        var percentDisplay = _expected == 0m
+            ? "Infinity%"
+            : $"{(diff / Math.Abs(_expected)) * 100m:F2}%";
 
         return Task.FromResult(AssertionResult.Failed(
             $"found {value}, which differs by {diff} ({percentDisplay} of expected)"));

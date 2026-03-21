@@ -1,4 +1,5 @@
 using TUnit.Assertions.Attributes;
+using TUnit.Assertions.Chaining;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
@@ -19,6 +20,16 @@ public class DoubleIsCloseToAssertion : Assertion<double>
         double tolerance)
         : base(context)
     {
+        if (double.IsNaN(tolerance))
+        {
+            throw new ArgumentOutOfRangeException(nameof(tolerance), "Tolerance cannot be NaN.");
+        }
+
+        if (tolerance < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(tolerance), "Tolerance cannot be negative.");
+        }
+
         _expected = expected;
         _tolerance = tolerance;
     }
@@ -82,6 +93,16 @@ public class FloatIsCloseToAssertion : Assertion<float>
         float tolerance)
         : base(context)
     {
+        if (float.IsNaN(tolerance))
+        {
+            throw new ArgumentOutOfRangeException(nameof(tolerance), "Tolerance cannot be NaN.");
+        }
+
+        if (tolerance < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(tolerance), "Tolerance cannot be negative.");
+        }
+
         _expected = expected;
         _tolerance = tolerance;
     }
@@ -148,6 +169,11 @@ public class IntIsCloseToAssertion : Assertion<int>
         int tolerance)
         : base(context)
     {
+        if (tolerance < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(tolerance), "Tolerance cannot be negative.");
+        }
+
         _expected = expected;
         _tolerance = tolerance;
     }
@@ -189,6 +215,11 @@ public class LongIsCloseToAssertion : Assertion<long>
         long tolerance)
         : base(context)
     {
+        if (tolerance < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(tolerance), "Tolerance cannot be negative.");
+        }
+
         _expected = expected;
         _tolerance = tolerance;
     }
@@ -203,15 +234,13 @@ public class LongIsCloseToAssertion : Assertion<long>
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
         }
 
-        var diff = Math.Abs((double) value - (double) _expected);
-
-        return diff <= (double) _tolerance
+        var diff = Math.Abs((decimal) value - _expected);
+        return diff <= _tolerance
             ? AssertionResult._passedTask
             : Task.FromResult(AssertionResult.Failed($"found {value}, which differs by {diff}"));
     }
 
-    protected override string GetExpectation() =>
-        $"to be close to {_expected} within tolerance {_tolerance}";
+    protected override string GetExpectation() => $"to be close to {_expected} within tolerance {_tolerance}";
 }
 
 /// <summary>
@@ -230,6 +259,11 @@ public class DecimalIsCloseToAssertion : Assertion<decimal>
         decimal tolerance)
         : base(context)
     {
+        if (tolerance < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(tolerance), "Tolerance cannot be negative.");
+        }
+
         _expected = expected;
         _tolerance = tolerance;
     }

@@ -242,51 +242,41 @@ public class FloatEqualsAssertion : ToleranceBasedEqualsAssertion<float, float>
 /// Asserts that an int value is equal to another, with optional tolerance.
 /// </summary>
 [AssertionExtension("IsEqualTo", OverloadResolutionPriority = 2)]
-public class IntEqualsAssertion : Assertion<int>
+public class IntEqualsAssertion : ToleranceBasedEqualsAssertion<int, int>
 {
-    private readonly int _expected;
-    private int? _tolerance;
-
     public IntEqualsAssertion(
         AssertionContext<int> context,
         int expected)
-        : base(context)
+        : base(context, expected)
     {
-        _expected = expected;
     }
 
-    public IntEqualsAssertion Within(int tolerance)
+    protected override bool HasToleranceValue() => true;
+
+    protected override bool IsWithinTolerance(int actual, int expected, int tolerance)
     {
-        _tolerance = tolerance;
-        Context.ExpressionBuilder.Append($".Within({tolerance})");
-        return this;
+        var diff = Math.Abs(actual - expected);
+        return diff <= tolerance;
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<int> metadata)
+    protected override bool IsWithinRelativeTolerance(int actual, int expected, double percentTolerance)
     {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
+        var diff = Math.Abs((double) actual - expected);
 
-        if (exception != null)
+        if (expected == 0)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return diff == 0d;
         }
 
-        if (_tolerance.HasValue)
-        {
-            var diff = Math.Abs(value - _expected);
-            return diff <= _tolerance.Value
-                ? AssertionResult._passedTask
-                : Task.FromResult(AssertionResult.Failed($"found {value}, which differs by {diff}"));
-        }
-
-        return value == _expected ? AssertionResult._passedTask : Task.FromResult(AssertionResult.Failed($"found {value}"));
+        var allowedDifference = Math.Abs(expected) * (percentTolerance / 100d);
+        return diff <= allowedDifference;
     }
 
-    protected override string GetExpectation() =>
-        _tolerance.HasValue
-            ? $"to be within {_tolerance} of {_expected}"
-            : $"to be {_expected}";
+    protected override object CalculateDifference(int actual, int expected)
+        => Math.Abs(actual - expected);
+
+    protected override bool AreExactlyEqual(int actual, int expected)
+        => actual == expected;
 }
 
 /// <summary>
@@ -308,6 +298,19 @@ public class LongEqualsAssertion : ToleranceBasedEqualsAssertion<long, long>
     {
         var diff = Math.Abs(actual - expected);
         return diff <= tolerance;
+    }
+
+    protected override bool IsWithinRelativeTolerance(long actual, long expected, double percentTolerance)
+    {
+        var diff = Math.Abs((decimal) actual - expected);
+
+        if (expected == 0L)
+        {
+            return diff == 0m;
+        }
+
+        var allowedDifference = Math.Abs(expected) * ((decimal) percentTolerance / 100m);
+        return diff <= allowedDifference;
     }
 
     protected override object CalculateDifference(long actual, long expected)
