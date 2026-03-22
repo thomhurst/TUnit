@@ -138,20 +138,17 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
             if (disposalTasks is { Count: > 0 })
             {
+                var whenAllTask = Task.WhenAll(disposalTasks);
                 try
                 {
-                    await Task.WhenAll(disposalTasks).ConfigureAwait(false);
+                    await whenAllTask.ConfigureAwait(false);
                 }
-                catch (AggregateException ae)
+                catch
                 {
-                    foreach (var e in ae.InnerExceptions)
+                    foreach (var e in whenAllTask.Exception!.InnerExceptions)
                     {
                         cleanupExceptions.Add(e);
                     }
-                }
-                catch (Exception e)
-                {
-                    cleanupExceptions.Add(e);
                 }
             }
         }
