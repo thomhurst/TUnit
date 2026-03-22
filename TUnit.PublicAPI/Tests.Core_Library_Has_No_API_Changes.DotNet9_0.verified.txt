@@ -1787,6 +1787,7 @@ namespace .Data
         public .<TKey> Keys { get; }
         public .<TValue> Values { get; }
         public TValue GetOrAdd(TKey key, <TKey, TValue> func) { }
+        public TValue GetOrAdd<TArg>(TKey key, <TKey, TArg, TValue> func, TArg arg) { }
         public TValue? Remove(TKey key) { }
         public bool TryGetValue(TKey key, [.(true)] out TValue? value) { }
     }

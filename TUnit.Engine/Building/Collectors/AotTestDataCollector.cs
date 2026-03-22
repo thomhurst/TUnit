@@ -39,14 +39,11 @@ internal sealed class AotTestDataCollector : ITestDataCollector
     #endif
     public async Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId, ITestExecutionFilter? filter)
     {
-        // Extract hints from filter for pre-filtering test sources by type
         var filterHints = MetadataFilterMatcher.ExtractFilterHints(filter);
 
         var allResults = new List<TestMetadata>();
 
         // Phase A: Collect from TestEntry sources (new fast path)
-        // Filter data is pure data — no JIT needed.
-        // Only matching entries trigger materialization (deferred JIT).
         if (!Sources.TestEntries.IsEmpty)
         {
             var entryResults = CollectTestsFromTestEntries(testSessionId, filterHints);
@@ -75,7 +72,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
                 }
 
                 var testSourcesList = testSourcesByType.SelectMany(kvp => kvp.Value).ToList();
-                standardTestMetadatas = CollectTestsTraditional(testSourcesList, testSessionId);
+                standardTestMetadatas = CollectTests(testSourcesList, testSessionId);
             }
 
             allResults.AddRange(standardTestMetadatas);
@@ -342,24 +339,33 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         return results;
     }
 
-    /// <summary>
-    /// Traditional collection: materialize all tests from sources.
-    /// Used when filter hints are not available or sources don't support ITestDescriptorSource.
-    /// </summary>
-    private IEnumerable<TestMetadata> CollectTestsTraditional(
+    private List<TestMetadata> CollectTests(
         List<ITestSource> testSourcesList,
         string testSessionId)
     {
-        var results = new List<TestMetadata>();
-        foreach (var testSource in testSourcesList)
+        var batches = new IReadOnlyList<TestMetadata>[testSourcesList.Count];
+
+        Parallel.For(0, testSourcesList.Count, i =>
         {
-            var tests = testSource.GetTests(testSessionId);
-            for (var i = 0; i < tests.Count; i++)
+            batches[i] = testSourcesList[i].GetTests(testSessionId);
+        });
+
+        var totalCount = 0;
+        for (var i = 0; i < batches.Length; i++)
+        {
+            totalCount += batches[i].Count;
+        }
+
+        var combined = new List<TestMetadata>(totalCount);
+        for (var i = 0; i < batches.Length; i++)
+        {
+            var batch = batches[i];
+            for (var j = 0; j < batch.Count; j++)
             {
-                results.Add(tests[i]);
+                combined.Add(batch[j]);
             }
         }
-        return results;
+        return combined;
     }
 
     [RequiresUnreferencedCode("Dynamic test collection requires expression compilation and reflection")]
