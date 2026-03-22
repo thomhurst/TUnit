@@ -332,7 +332,7 @@ public partial class TestContext : Context,
 
     internal AbstractExecutableTest InternalExecutableTest { get; set; } = null!;
 
-    internal Dictionary<int, HashSet<object>> TrackedObjects { get; } = new();
+    internal SortedList<int, HashSet<object>> TrackedObjects { get; } = new();
 
     /// <summary>
     /// Sets the output captured during test building phase.
