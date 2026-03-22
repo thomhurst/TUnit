@@ -106,6 +106,11 @@ file static class TUnitInfrastructure
         catch (global::System.TypeLoadException) { /* Type not emitted - no test registrations */ }
         try
         {
+            global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::TUnit.Generated.TUnit_HookRegistration).TypeHandle);
+        }
+        catch (global::System.TypeLoadException) { /* Type not emitted - no hook registrations */ }
+        try
+        {
             global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug("[ModuleInitializer:TestsBase`1] TUnit infrastructure initialized");
         }
         catch { /* TUnit.Core not available - skip logging */ }
@@ -115,4 +120,6 @@ namespace TUnit.Generated
 {
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
     internal static partial class TUnit_TestRegistration { }
+    [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+    internal static partial class TUnit_HookRegistration { }
 }

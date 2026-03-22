@@ -379,20 +379,36 @@ public class HookMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("using HookType = global::TUnit.Core.HookType;");
         writer.AppendLine();
 
-        writer.AppendLine($"namespace TUnit.Generated.Hooks.{safeFileName};");
-        writer.AppendLine();
+        writer.AppendLine($"namespace TUnit.Generated.Hooks.{safeFileName}");
+        writer.AppendLine("{");
+        writer.Indent();
 
         using (writer.BeginBlock($"internal static class {safeFileName}Initializer"))
         {
-            writer.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
-            using (writer.BeginBlock("public static void Initialize()"))
+            // Returns int so it can be called from a field initializer on the shared partial class.
+            using (writer.BeginBlock("public static int Initialize()"))
             {
                 GenerateHookRegistration(writer, hook);
+                writer.AppendLine("return 0;");
             }
 
             writer.AppendLine();
             GenerateHookDelegate(writer, hook);
         }
+
+        writer.Unindent();
+        writer.AppendLine("}");
+
+        // Partial class field in TUnit.Generated namespace — contributes to a shared .cctor
+        // instead of a per-hook [ModuleInitializer].
+        writer.AppendLine();
+        writer.AppendLine("namespace TUnit.Generated");
+        writer.AppendLine("{");
+        writer.AppendLine($"    internal static partial class TUnit_HookRegistration");
+        writer.AppendLine("    {");
+        writer.AppendLine($"        static readonly int _h_{safeFileName} = global::TUnit.Generated.Hooks.{safeFileName}.{safeFileName}Initializer.Initialize();");
+        writer.AppendLine("    }");
+        writer.AppendLine("}");
 
         context.AddSource($"{safeFileName}.Hook.g.cs", writer.ToString());
     }
