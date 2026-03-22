@@ -287,13 +287,17 @@ internal sealed class EventReceiverOrchestrator
 
     public async ValueTask InvokeHookRegistrationEventReceiversAsync(HookRegisteredContext hookContext, CancellationToken cancellationToken)
     {
-        // Filter scoped attributes to ensure only the highest priority one of each type is invoked
+        // Pre-sort by Order before filtering so that FilterScopedAttributes (which uses TryAdd
+        // and keeps the first encountered item per ScopeType) retains the lowest-Order attribute.
+        // After filtering, sort the result in-place for final invocation order.
         var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(
             hookContext.HookMethod.Attributes
                 .OfType<IHookRegisteredEventReceiver>()
-                .OrderBy(static r => r.Order));
+                .OrderBy(static x => x.Order));
 
-        foreach (var receiver in filteredReceivers.OrderBy(static r => r.Order))
+        Array.Sort(filteredReceivers, static (a, b) => a.Order.CompareTo(b.Order));
+
+        foreach (var receiver in filteredReceivers)
         {
             await receiver.OnHookRegistered(hookContext);
         }

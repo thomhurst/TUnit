@@ -148,11 +148,10 @@ internal static class TestContextExtensions
         }
 
         // Sort by Order
-        receivers.Sort((a, b) => a.Order.CompareTo(b.Order));
+        receivers.Sort(static (a, b) => a.Order.CompareTo(b.Order));
 
-        // Apply scoped attribute filtering and return as array
-        var filtered = ScopedAttributeFilter.FilterScopedAttributes(receivers);
-        return filtered.ToArray();
+        // Apply scoped attribute filtering - FilterScopedAttributes already returns T[]
+        return ScopedAttributeFilter.FilterScopedAttributes(receivers);
     }
 
     public static IEnumerable<object> GetEligibleEventObjects(this TestContext testContext)
