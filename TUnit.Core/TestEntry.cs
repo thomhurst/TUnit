@@ -101,6 +101,10 @@ public sealed class TestEntry<
     /// <summary>
     /// Constructs a TestMetadata&lt;T&gt; from this entry's data and delegates.
     /// </summary>
+    // Cached property arrays — built once from immutable InjectableProperties
+    private PropertyDataSource[]? _cachedPropertyDataSources;
+    private PropertyInjectionData[]? _cachedPropertyInjections;
+
     internal TestMetadata<T> ToTestMetadata(string testSessionId)
     {
         return new TestMetadata<T>
@@ -111,8 +115,8 @@ public sealed class TestEntry<
             Dependencies = Dependencies,
             DataSources = TestDataSources,
             ClassDataSources = ClassDataSources,
-            PropertyDataSources = BuildPropertyDataSources(),
-            PropertyInjections = BuildPropertyInjections(),
+            PropertyDataSources = _cachedPropertyDataSources ??= BuildPropertyDataSources(),
+            PropertyInjections = _cachedPropertyInjections ??= BuildPropertyInjections(),
             InstanceFactory = CreateInstance,
             ClassInvoker = InvokeBody,
             InvokeMethodIndex = MethodIndex,
