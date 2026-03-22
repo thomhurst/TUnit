@@ -146,9 +146,8 @@ internal static class TUnit_TestProject_Bugs__5118_AsyncClassMethodDataSourceTes
     {
         return new global::TUnit.TestProject.Bugs._5118.AsyncClassMethodDataSourceTests(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<global::System.DateTime>(args[2]));
     }
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._5118.AsyncClassMethodDataSourceTests), TUnit_TestProject_Bugs__5118_AsyncClassMethodDataSourceTests__TestSource.GetTests, TUnit_TestProject_Bugs__5118_AsyncClassMethodDataSourceTests__TestSource.EnumerateTestDescriptors);
-    }
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__5118_AsyncClassMethodDataSourceTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterReturn(typeof(global::TUnit.TestProject.Bugs._5118.AsyncClassMethodDataSourceTests), TUnit_TestProject_Bugs__5118_AsyncClassMethodDataSourceTests__TestSource.GetTests, TUnit_TestProject_Bugs__5118_AsyncClassMethodDataSourceTests__TestSource.EnumerateTestDescriptors);
 }

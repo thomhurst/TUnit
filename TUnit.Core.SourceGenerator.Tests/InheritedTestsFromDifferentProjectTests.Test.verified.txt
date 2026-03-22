@@ -347,11 +347,10 @@ internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
     {
         return new global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests();
     }
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), TUnit_TestProject_InheritedTestsFromDifferentProjectTests__TestSource.GetTests, TUnit_TestProject_InheritedTestsFromDifferentProjectTests__TestSource.EnumerateTestDescriptors);
-    }
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_InheritedTestsFromDifferentProjectTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterReturn(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), TUnit_TestProject_InheritedTestsFromDifferentProjectTests__TestSource.GetTests, TUnit_TestProject_InheritedTestsFromDifferentProjectTests__TestSource.EnumerateTestDescriptors);
 }
 
 
@@ -455,13 +454,9 @@ internal sealed class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
         }
     }
 }
-internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_BaseTest_ModuleInitializer
+internal static partial class TUnit_TestRegistration
 {
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), new TUnit_TestProject_InheritedTestsFromDifferentProjectTests_BaseTest_TestSource());
-    }
+    static readonly int _r_TUnit_TestProject_InheritedTestsFromDifferentProjectTests_BaseTest_TestSource = global::TUnit.Core.SourceRegistrar.RegisterReturn(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), new TUnit_TestProject_InheritedTestsFromDifferentProjectTests_BaseTest_TestSource());
 }
 
 
@@ -566,11 +561,7 @@ internal sealed class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
         }
     }
 }
-internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_BaseTestWithMultipleCategories_ModuleInitializer
+internal static partial class TUnit_TestRegistration
 {
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), new TUnit_TestProject_InheritedTestsFromDifferentProjectTests_BaseTestWithMultipleCategories_TestSource());
-    }
+    static readonly int _r_TUnit_TestProject_InheritedTestsFromDifferentProjectTests_BaseTestWithMultipleCategories_TestSource = global::TUnit.Core.SourceRegistrar.RegisterReturn(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), new TUnit_TestProject_InheritedTestsFromDifferentProjectTests_BaseTestWithMultipleCategories_TestSource());
 }

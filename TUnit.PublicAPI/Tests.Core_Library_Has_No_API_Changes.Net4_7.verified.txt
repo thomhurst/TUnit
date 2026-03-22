@@ -1224,6 +1224,8 @@ namespace
         public static void RegisterDynamic(.IDynamicTestSource testSource) { }
         public static void RegisterGlobalInitializer(<.> initializer) { }
         public static void RegisterProperty(..IPropertySource propertySource) { }
+        public static int RegisterReturn( testClassType, ..ITestSource testSource) { }
+        public static int RegisterReturn( testClassType, <string, .<.TestMetadata>> getTests, <.<.TestDescriptor>> enumerateDescriptors) { }
     }
     public static class Sources
     {

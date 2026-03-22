@@ -1063,9 +1063,8 @@ internal static class TUnit_TestProject_MatrixTests__TestSource
     {
         return new global::TUnit.TestProject.MatrixTests();
     }
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), TUnit_TestProject_MatrixTests__TestSource.GetTests, TUnit_TestProject_MatrixTests__TestSource.EnumerateTestDescriptors);
-    }
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_MatrixTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterReturn(typeof(global::TUnit.TestProject.MatrixTests), TUnit_TestProject_MatrixTests__TestSource.GetTests, TUnit_TestProject_MatrixTests__TestSource.EnumerateTestDescriptors);
 }

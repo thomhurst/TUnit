@@ -826,9 +826,8 @@ internal static class TUnit_TestProject_DataDrivenTests__TestSource
     {
         return new global::TUnit.TestProject.DataDrivenTests();
     }
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DataDrivenTests), TUnit_TestProject_DataDrivenTests__TestSource.GetTests, TUnit_TestProject_DataDrivenTests__TestSource.EnumerateTestDescriptors);
-    }
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_DataDrivenTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterReturn(typeof(global::TUnit.TestProject.DataDrivenTests), TUnit_TestProject_DataDrivenTests__TestSource.GetTests, TUnit_TestProject_DataDrivenTests__TestSource.EnumerateTestDescriptors);
 }

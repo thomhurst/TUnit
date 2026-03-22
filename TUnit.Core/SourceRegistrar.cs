@@ -96,4 +96,25 @@ public class SourceRegistrar
     {
         Sources.PropertySources.Enqueue(propertySource);
     }
+
+    /// <summary>
+    /// Wrapper around <see cref="Register(Type, ITestSource)"/> that returns a dummy value for use as a field initializer.
+    /// </summary>
+    public static int RegisterReturn(Type testClassType, ITestSource testSource)
+    {
+        Register(testClassType, testSource);
+        return 0;
+    }
+
+    /// <summary>
+    /// Wrapper around <see cref="Register(Type, Func{string, IReadOnlyList{TestMetadata}}, Func{IEnumerable{TestDescriptor}})"/> that returns a dummy value for use as a field initializer.
+    /// </summary>
+    public static int RegisterReturn(
+        Type testClassType,
+        Func<string, IReadOnlyList<TestMetadata>> getTests,
+        Func<IEnumerable<TestDescriptor>> enumerateDescriptors)
+    {
+        Register(testClassType, getTests, enumerateDescriptors);
+        return 0;
+    }
 }

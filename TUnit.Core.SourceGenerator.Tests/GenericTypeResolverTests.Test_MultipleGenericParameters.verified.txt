@@ -208,11 +208,7 @@ internal sealed class TUnit_TestProject_MultiGenericTestClass_T1_T2_TestMethod_T
         };
     }
 }
-internal static class TUnit_TestProject_MultiGenericTestClass_T1_T2_TestMethod_ModuleInitializer
+internal static partial class TUnit_TestRegistration
 {
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MultiGenericTestClass<,>), new TUnit_TestProject_MultiGenericTestClass_T1_T2_TestMethod_TestSource());
-    }
+    static readonly int _r_TUnit_TestProject_MultiGenericTestClass_T1_T2_TestMethod_TestSource = global::TUnit.Core.SourceRegistrar.RegisterReturn(typeof(global::TUnit.TestProject.MultiGenericTestClass<,>), new TUnit_TestProject_MultiGenericTestClass_T1_T2_TestMethod_TestSource());
 }
