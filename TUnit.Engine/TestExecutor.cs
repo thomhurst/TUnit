@@ -59,7 +59,7 @@ internal class TestExecutor
         // Register After Session hook to run on cancellation (guarantees cleanup)
         _afterHookPairTracker.RegisterAfterTestSessionHook(
             cancellationToken,
-            () => new ValueTask<List<Exception>>(_hookExecutor.ExecuteAfterTestSessionHooksAsync(CancellationToken.None).AsTask()));
+            () => _hookExecutor.ExecuteAfterTestSessionHooksAsync(CancellationToken.None));
     }
 
     /// <summary>
@@ -95,7 +95,7 @@ internal class TestExecutor
             _afterHookPairTracker.RegisterAfterAssemblyHook(
                 testAssembly,
                 cancellationToken,
-                (assembly) => new ValueTask<List<Exception>>(_hookExecutor.ExecuteAfterAssemblyHooksAsync(assembly, CancellationToken.None).AsTask()));
+                (assembly) => _hookExecutor.ExecuteAfterAssemblyHooksAsync(assembly, CancellationToken.None));
 
             await _eventReceiverOrchestrator.InvokeFirstTestInAssemblyEventReceiversAsync(
                 executableTest.Context,
@@ -351,7 +351,7 @@ internal class TestExecutor
             // Use AfterHookPairTracker to prevent double execution if already triggered by cancellation
             var assemblyExceptions = await _afterHookPairTracker.GetOrCreateAfterAssemblyTask(
                 testAssembly,
-                (assembly) => new ValueTask<List<Exception>>(_hookExecutor.ExecuteAfterAssemblyHooksAsync(assembly, cancellationToken).AsTask())).ConfigureAwait(false);
+                (assembly) => _hookExecutor.ExecuteAfterAssemblyHooksAsync(assembly, cancellationToken)).ConfigureAwait(false);
             exceptions.AddRange(assemblyExceptions);
         }
 
@@ -367,7 +367,7 @@ internal class TestExecutor
     {
         // Use AfterHookPairTracker to prevent double execution if already triggered by cancellation
         var exceptions = await _afterHookPairTracker.GetOrCreateAfterTestSessionTask(
-            () => new ValueTask<List<Exception>>(_hookExecutor.ExecuteAfterTestSessionHooksAsync(cancellationToken).AsTask())).ConfigureAwait(false);
+            () => _hookExecutor.ExecuteAfterTestSessionHooksAsync(cancellationToken)).ConfigureAwait(false);
 
         return exceptions;
     }
@@ -375,17 +375,17 @@ internal class TestExecutor
     /// <summary>
     /// Execute discovery-level before hooks.
     /// </summary>
-    public Task ExecuteBeforeTestDiscoveryHooksAsync(CancellationToken cancellationToken)
+    public ValueTask ExecuteBeforeTestDiscoveryHooksAsync(CancellationToken cancellationToken)
     {
-        return _hookExecutor.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken).AsTask();
+        return _hookExecutor.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken);
     }
 
     /// <summary>
     /// Execute discovery-level after hooks.
     /// </summary>
-    public Task ExecuteAfterTestDiscoveryHooksAsync(CancellationToken cancellationToken)
+    public ValueTask ExecuteAfterTestDiscoveryHooksAsync(CancellationToken cancellationToken)
     {
-        return _hookExecutor.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken).AsTask();
+        return _hookExecutor.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken);
     }
 
     /// <summary>
