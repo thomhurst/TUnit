@@ -18,86 +18,7 @@ namespace TUnit.Core.Data;
 public class ThreadSafeDictionary<TKey, TValue>
     where TKey : notnull
 {
-    // Inlines factory + args to avoid the separate closure that Lazy<T> requires.
-    // Lazy<T> with ExecutionAndPublication costs 3 heap objects per new key:
-    //   Lazy<T> + LazyHelper (internal lock object) + closure capturing factory args.
-    // These custom subclasses reduce that to 1 allocation per new key.
-    private abstract class LazyValue
-    {
-        private TValue? _value;
-        private volatile int _initialized;
-
-        protected abstract TValue Create();
-
-        public TValue Value
-        {
-            get
-            {
-                if (_initialized == 1)
-                {
-                    return _value!;
-                }
-
-                lock (this)
-                {
-                    if (_initialized == 0)
-                    {
-                        _value = Create();
-                        _initialized = 1;
-                    }
-                }
-
-                return _value!;
-            }
-        }
-
-        public bool IsValueCreated => _initialized == 1;
-    }
-
-    private sealed class LazyValueFromFunc : LazyValue
-    {
-        private Func<TKey, TValue>? _factory;
-        private TKey _key;
-
-        public LazyValueFromFunc(TKey key, Func<TKey, TValue> factory)
-        {
-            _key = key;
-            _factory = factory;
-        }
-
-        protected override TValue Create()
-        {
-            var result = _factory!(_key);
-            _factory = null; // allow factory closure to be GC'd after initialization
-            _key = default!;
-            return result;
-        }
-    }
-
-    private sealed class LazyValueWithArg<TArg> : LazyValue
-    {
-        private Func<TKey, TArg, TValue>? _factory;
-        private TKey _key;
-        private TArg _arg;
-
-        public LazyValueWithArg(TKey key, Func<TKey, TArg, TValue> factory, TArg arg)
-        {
-            _key = key;
-            _factory = factory;
-            _arg = arg;
-        }
-
-        protected override TValue Create()
-        {
-            var result = _factory!(_key, _arg);
-            _factory = null; // allow factory closure to be GC'd after initialization
-            _key = default!;
-            _arg = default!;
-            return result;
-        }
-    }
-
-    private readonly ConcurrentDictionary<TKey, LazyValue> _innerDictionary = new();
+    private readonly ConcurrentDictionary<TKey, Lazy<TValue>> _innerDictionary = new();
 
     /// <summary>
     /// Gets a collection containing the keys in the dictionary.
@@ -105,14 +26,19 @@ public class ThreadSafeDictionary<TKey, TValue>
     public ICollection<TKey> Keys => _innerDictionary.Keys;
 
     /// <summary>
-    /// Gets an enumerable collection of values in the dictionary, forcing initialization of any uninitialized entries.
+    /// Gets an enumerable collection of values in the dictionary.
     /// </summary>
-    public IEnumerable<TValue> Values => _innerDictionary.Values.Select(static lv => lv.Value);
+    public IEnumerable<TValue> Values => _innerDictionary.Values.Select(static lazy => lazy.Value);
 
     /// <summary>
     /// Gets the value associated with the specified key, or creates it if it doesn't exist.
     /// The factory is guaranteed to run at most once per key even under concurrent access.
     /// </summary>
+    /// <remarks>
+    /// Uses a fast-path TryGetValue to avoid allocating a Lazy on repeated calls,
+    /// then falls back to GetOrAdd with a pre-created Lazy to prevent the factory
+    /// running multiple times during a race.
+    /// </remarks>
     public TValue GetOrAdd(TKey key, Func<TKey, TValue> func)
     {
         if (_innerDictionary.TryGetValue(key, out var existingLazy))
@@ -120,15 +46,14 @@ public class ThreadSafeDictionary<TKey, TValue>
             return existingLazy.Value;
         }
 
-        var winning = _innerDictionary.GetOrAdd(key,
-            static (k, f) => new LazyValueFromFunc(k, f),
-            func);
+        var newLazy = new Lazy<TValue>(() => func(key), LazyThreadSafetyMode.ExecutionAndPublication);
+        var winning = _innerDictionary.GetOrAdd(key, newLazy);
         return winning.Value;
     }
 
     /// <summary>
     /// Gets the value associated with the specified key, or creates it using the factory and arg if it doesn't exist.
-    /// Avoids closure allocation by accepting the factory argument explicitly.
+    /// Avoids closure allocation at the call site by accepting the factory argument explicitly.
     /// </summary>
     public TValue GetOrAdd<TArg>(TKey key, Func<TKey, TArg, TValue> func, TArg arg)
     {
@@ -137,9 +62,8 @@ public class ThreadSafeDictionary<TKey, TValue>
             return existingLazy.Value;
         }
 
-        var winning = _innerDictionary.GetOrAdd(key,
-            static (k, state) => new LazyValueWithArg<TArg>(k, state.func, state.arg),
-            (func, arg));
+        var newLazy = new Lazy<TValue>(() => func(key, arg), LazyThreadSafetyMode.ExecutionAndPublication);
+        var winning = _innerDictionary.GetOrAdd(key, newLazy);
         return winning.Value;
     }
 
