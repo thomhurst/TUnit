@@ -15,7 +15,7 @@ namespace TUnit.Core.Data;
 #if !DEBUG
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
-public class ThreadSafeDictionary<TKey, TValue>
+public class ThreadSafeDictionary<TKey, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] TValue>
     where TKey : notnull
 {
     private readonly ConcurrentDictionary<TKey, Lazy<TValue>> _innerDictionary = new();

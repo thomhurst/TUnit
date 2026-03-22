@@ -1779,7 +1779,7 @@ namespace .Data
         public ScopedDictionary() { }
         public object? GetOrCreate(TScope scope,  type, <, object?> factory) { }
     }
-    public class ThreadSafeDictionary<TKey, TValue>
+    public class ThreadSafeDictionary<TKey, [.(..PublicParameterlessConstructor)]  TValue>
         where TKey :  notnull
     {
         public ThreadSafeDictionary() { }
