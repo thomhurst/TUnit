@@ -32,13 +32,27 @@ internal static class TimeoutHelper
         return new ValueTask(ExecuteWithTimeoutCoreAsync(valueTaskFactory, timeout.Value, cancellationToken, timeoutMessage));
     }
 
+    /// <summary>
+    /// Executes a ValueTask-returning operation with a required timeout.
+    /// Callers that have already checked for a timeout value should use this overload
+    /// to avoid redundant null checks.
+    /// </summary>
+    public static ValueTask ExecuteWithTimeoutAsync(
+        Func<CancellationToken, ValueTask> valueTaskFactory,
+        TimeSpan timeout,
+        CancellationToken cancellationToken,
+        string? timeoutMessage = null)
+    {
+        return new ValueTask(ExecuteWithTimeoutCoreAsync(valueTaskFactory, timeout, cancellationToken, timeoutMessage));
+    }
+
     private static async Task ExecuteWithTimeoutCoreAsync(
         Func<CancellationToken, ValueTask> valueTaskFactory,
         TimeSpan timeout,
         CancellationToken cancellationToken,
         string? timeoutMessage)
     {
-        await ExecuteWithTimeoutAsync<bool>(
+        await ExecuteWithTimeoutCoreAsync<bool>(
             async ct =>
             {
                 await valueTaskFactory(ct).ConfigureAwait(false);
@@ -66,13 +80,20 @@ internal static class TimeoutHelper
         CancellationToken cancellationToken,
         string? timeoutMessage = null)
     {
-        await ExecuteWithTimeoutAsync(
+        // Fast path: no timeout specified - invoke directly
+        if (!timeout.HasValue)
+        {
+            await taskFactory(cancellationToken).ConfigureAwait(false);
+            return;
+        }
+
+        await ExecuteWithTimeoutCoreAsync<bool>(
             async ct =>
             {
                 await taskFactory(ct).ConfigureAwait(false);
                 return true;
             },
-            timeout,
+            timeout.Value,
             cancellationToken,
             timeoutMessage).ConfigureAwait(false);
     }
@@ -95,20 +116,25 @@ internal static class TimeoutHelper
         CancellationToken cancellationToken,
         string? timeoutMessage = null)
     {
-        // Fast path: no timeout specified
+        // Fast path: no timeout specified - invoke directly, no CTS/TCS/WhenAny overhead
         if (!timeout.HasValue)
         {
-#if NET6_0_OR_GREATER
-            // Use WaitAsync to stop waiting immediately on cancellation while avoiding
-            // TCS + CancellationTokenRegistration allocations. The task still runs to completion
-            // but we return control to the caller immediately.
-            return await taskFactory(cancellationToken).WaitAsync(cancellationToken).ConfigureAwait(false);
-#else
-            // On older frameworks, rely on cooperative cancellation
             return await taskFactory(cancellationToken).ConfigureAwait(false);
-#endif
         }
 
+        return await ExecuteWithTimeoutCoreAsync(taskFactory, timeout.Value, cancellationToken, timeoutMessage).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Core timeout implementation. Only called when a timeout is actually configured.
+    /// Allocates CancellationTokenSource, TaskCompletionSource, and uses Task.WhenAny.
+    /// </summary>
+    private static async Task<T> ExecuteWithTimeoutCoreAsync<T>(
+        Func<CancellationToken, Task<T>> taskFactory,
+        TimeSpan timeout,
+        CancellationToken cancellationToken,
+        string? timeoutMessage)
+    {
         // Timeout path: create linked token so task can observe both timeout and external cancellation.
         using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
@@ -120,7 +146,7 @@ internal static class TimeoutHelper
             cancelledTcs);
 
         // Now schedule the timeout - registration is guaranteed to catch it
-        timeoutCts.CancelAfter(timeout.Value);
+        timeoutCts.CancelAfter(timeout);
 
         var executionTask = taskFactory(timeoutCts.Token);
 
@@ -156,7 +182,7 @@ internal static class TimeoutHelper
             }
 
             // Even if task completed during grace period, timeout already elapsed so we throw
-            var baseMessage = timeoutMessage ?? $"Operation timed out after {timeout.Value}";
+            var baseMessage = timeoutMessage ?? $"Operation timed out after {timeout}";
             var diagnosticMessage = TimeoutDiagnostics.BuildTimeoutDiagnosticsMessage(baseMessage, executionTask);
             throw new TimeoutException(diagnosticMessage);
         }
