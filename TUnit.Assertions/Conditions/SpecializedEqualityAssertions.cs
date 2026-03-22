@@ -1,4 +1,3 @@
-using System.Text;
 using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Core;
 
@@ -24,10 +23,7 @@ public class DateOnlyEqualsAssertion : ToleranceBasedEqualsAssertion<DateOnly, i
         return this;
     }
 
-    protected override bool HasToleranceValue()
-    {
-        return true; // int? always has meaningful value when not null
-    }
+    protected override bool HasToleranceValue() => true; // int? always has meaningful value when not null
 
     protected override bool IsWithinTolerance(DateOnly actual, DateOnly expected, int toleranceDays)
     {
@@ -36,19 +32,13 @@ public class DateOnlyEqualsAssertion : ToleranceBasedEqualsAssertion<DateOnly, i
     }
 
     protected override object CalculateDifference(DateOnly actual, DateOnly expected)
-    {
-        return Math.Abs(actual.DayNumber - expected.DayNumber);
-    }
+        => Math.Abs(actual.DayNumber - expected.DayNumber);
 
     protected override bool AreExactlyEqual(DateOnly actual, DateOnly expected)
-    {
-        return actual == expected;
-    }
+        => actual == expected;
 
     protected override string FormatDifferenceMessage(DateOnly actual, object difference)
-    {
-        return $"found {actual}, which is {difference} days from expected";
-    }
+        => $"found {actual}, which is {difference} days from expected";
 
     protected override string GetExpectation()
     {
@@ -73,31 +63,26 @@ public class TimeOnlyEqualsAssertion : ToleranceBasedEqualsAssertion<TimeOnly, T
     {
     }
 
-    protected override bool HasToleranceValue()
-    {
-        return true; // TimeSpan? always has meaningful value when not null
-    }
+    protected override bool HasToleranceValue() => true; // TimeSpan? always has meaningful value when not null
 
     protected override bool IsWithinTolerance(TimeOnly actual, TimeOnly expected, TimeSpan tolerance)
     {
-        var diff = actual > expected ? actual.ToTimeSpan() - expected.ToTimeSpan() : expected.ToTimeSpan() - actual.ToTimeSpan();
+        var diff = actual > expected
+            ? actual.ToTimeSpan() - expected.ToTimeSpan()
+            : expected.ToTimeSpan() - actual.ToTimeSpan();
         return diff <= tolerance;
     }
 
     protected override object CalculateDifference(TimeOnly actual, TimeOnly expected)
-    {
-        return actual > expected ? actual.ToTimeSpan() - expected.ToTimeSpan() : expected.ToTimeSpan() - actual.ToTimeSpan();
-    }
+        => actual > expected
+            ? actual.ToTimeSpan() - expected.ToTimeSpan()
+            : expected.ToTimeSpan() - actual.ToTimeSpan();
 
     protected override bool AreExactlyEqual(TimeOnly actual, TimeOnly expected)
-    {
-        return actual == expected;
-    }
+        => actual == expected;
 
     protected override string FormatDifferenceMessage(TimeOnly actual, object difference)
-    {
-        return $"found {actual}, which is {difference} from expected";
-    }
+        => $"found {actual}, which is {difference} from expected";
 }
 #endif
 
@@ -109,19 +94,14 @@ public class DoubleEqualsAssertion : ToleranceBasedEqualsAssertion<double, doubl
 {
     public DoubleEqualsAssertion(
         AssertionContext<double> context,
-        double expected)
-        : base(context, expected)
+        double expected) : base(context, expected)
     {
     }
 
-    protected override bool HasToleranceValue()
-    {
-        return true; // double? always has meaningful value when not null
-    }
+    protected override bool HasToleranceValue() => true; // double? always has meaningful value when not null
 
     protected override bool IsWithinTolerance(double actual, double expected, double tolerance)
     {
-        // Handle NaN comparisons: NaN is only equal to NaN
         if (double.IsNaN(actual) && double.IsNaN(expected))
         {
             return true;
@@ -132,7 +112,6 @@ public class DoubleEqualsAssertion : ToleranceBasedEqualsAssertion<double, doubl
             return false;
         }
 
-        // Handle infinity: infinity equals infinity
         if (double.IsPositiveInfinity(actual) && double.IsPositiveInfinity(expected))
         {
             return true;
@@ -147,15 +126,41 @@ public class DoubleEqualsAssertion : ToleranceBasedEqualsAssertion<double, doubl
         return diff <= tolerance;
     }
 
-    protected override object CalculateDifference(double actual, double expected)
+    protected override bool IsWithinRelativeTolerance(double actual, double expected, double percentTolerance)
     {
-        return Math.Abs(actual - expected);
+        if (double.IsNaN(actual) && double.IsNaN(expected))
+        {
+            return true;
+        }
+
+        if (double.IsNaN(actual) || double.IsNaN(expected))
+        {
+            return false;
+        }
+
+        if (double.IsInfinity(actual) || double.IsInfinity(expected))
+        {
+            return double.Equals(actual, expected);
+        }
+
+        var diff = Math.Abs(actual - expected);
+
+        // Relative tolerance around zero is not meaningful.
+        // Require exact equality in that case.
+        if (expected == 0d)
+        {
+            return diff == 0d;
+        }
+
+        var allowedDifference = Math.Abs(expected) * (percentTolerance / 100d);
+        return diff <= allowedDifference;
     }
 
+    protected override object CalculateDifference(double actual, double expected)
+        => Math.Abs(actual - expected);
+
     protected override bool AreExactlyEqual(double actual, double expected)
-    {
-        return double.Equals(actual, expected);
-    }
+        => double.Equals(actual, expected);
 }
 
 /// <summary>
@@ -166,19 +171,14 @@ public class FloatEqualsAssertion : ToleranceBasedEqualsAssertion<float, float>
 {
     public FloatEqualsAssertion(
         AssertionContext<float> context,
-        float expected)
-        : base(context, expected)
+        float expected) : base(context, expected)
     {
     }
 
-    protected override bool HasToleranceValue()
-    {
-        return true; // float? always has meaningful value when not null
-    }
+    protected override bool HasToleranceValue() => true;
 
     protected override bool IsWithinTolerance(float actual, float expected, float tolerance)
     {
-        // Handle NaN comparisons: NaN is only equal to NaN
         if (float.IsNaN(actual) && float.IsNaN(expected))
         {
             return true;
@@ -189,7 +189,6 @@ public class FloatEqualsAssertion : ToleranceBasedEqualsAssertion<float, float>
             return false;
         }
 
-        // Handle infinity: infinity equals infinity
         if (float.IsPositiveInfinity(actual) && float.IsPositiveInfinity(expected))
         {
             return true;
@@ -204,74 +203,80 @@ public class FloatEqualsAssertion : ToleranceBasedEqualsAssertion<float, float>
         return diff <= tolerance;
     }
 
-    protected override object CalculateDifference(float actual, float expected)
+    protected override bool IsWithinRelativeTolerance(float actual, float expected, double percentTolerance)
     {
-        return Math.Abs(actual - expected);
+        if (float.IsNaN(actual) && float.IsNaN(expected))
+        {
+            return true;
+        }
+
+        if (float.IsNaN(actual) || float.IsNaN(expected))
+        {
+            return false;
+        }
+
+        if (float.IsInfinity(actual) || float.IsInfinity(expected))
+        {
+            return float.Equals(actual, expected);
+        }
+
+        var diff = Math.Abs(actual - expected);
+
+        if (expected == 0f)
+        {
+            return diff == 0f;
+        }
+
+        var allowedDifference = Math.Abs(expected) * ((float) percentTolerance / 100f);
+        return diff <= allowedDifference;
     }
 
+    protected override object CalculateDifference(float actual, float expected)
+        => Math.Abs(actual - expected);
+
     protected override bool AreExactlyEqual(float actual, float expected)
-    {
-        return float.Equals(actual, expected);
-    }
+        => float.Equals(actual, expected);
 }
 
 /// <summary>
 /// Asserts that an int value is equal to another, with optional tolerance.
 /// </summary>
 [AssertionExtension("IsEqualTo", OverloadResolutionPriority = 2)]
-public class IntEqualsAssertion : Assertion<int>
+public class IntEqualsAssertion : ToleranceBasedEqualsAssertion<int, int>
 {
-    private readonly int _expected;
-    private int? _tolerance;
-
     public IntEqualsAssertion(
         AssertionContext<int> context,
         int expected)
-        : base(context)
+        : base(context, expected)
     {
-        _expected = expected;
     }
 
-    public IntEqualsAssertion Within(int tolerance)
+    protected override bool HasToleranceValue() => true;
+
+    protected override bool IsWithinTolerance(int actual, int expected, int tolerance)
     {
-        _tolerance = tolerance;
-        Context.ExpressionBuilder.Append($".Within({tolerance})");
-        return this;
+        var diff = Math.Abs(actual - expected);
+        return diff <= tolerance;
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<int> metadata)
+    protected override bool IsWithinRelativeTolerance(int actual, int expected, double percentTolerance)
     {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
+        var diff = Math.Abs((double) actual - expected);
 
-        if (exception != null)
+        if (expected == 0)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return diff == 0d;
         }
 
-        if (_tolerance.HasValue)
-        {
-            var diff = Math.Abs(value - _expected);
-            if (diff <= _tolerance.Value)
-            {
-                return AssertionResult._passedTask;
-            }
-
-            return Task.FromResult(AssertionResult.Failed($"found {value}, which differs by {diff}"));
-        }
-
-        if (value == _expected)
-        {
-            return AssertionResult._passedTask;
-        }
-
-        return Task.FromResult(AssertionResult.Failed($"found {value}"));
+        var allowedDifference = Math.Abs(expected) * (percentTolerance / 100d);
+        return diff <= allowedDifference;
     }
 
-    protected override string GetExpectation() =>
-        _tolerance.HasValue
-            ? $"to be within {_tolerance} of {_expected}"
-            : $"to be {_expected}";
+    protected override object CalculateDifference(int actual, int expected)
+        => Math.Abs(actual - expected);
+
+    protected override bool AreExactlyEqual(int actual, int expected)
+        => actual == expected;
 }
 
 /// <summary>
@@ -287,10 +292,7 @@ public class LongEqualsAssertion : ToleranceBasedEqualsAssertion<long, long>
     {
     }
 
-    protected override bool HasToleranceValue()
-    {
-        return true; // long? always has meaningful value when not null
-    }
+    protected override bool HasToleranceValue() => true; // long? always has meaningful value when not null
 
     protected override bool IsWithinTolerance(long actual, long expected, long tolerance)
     {
@@ -298,15 +300,24 @@ public class LongEqualsAssertion : ToleranceBasedEqualsAssertion<long, long>
         return diff <= tolerance;
     }
 
-    protected override object CalculateDifference(long actual, long expected)
+    protected override bool IsWithinRelativeTolerance(long actual, long expected, double percentTolerance)
     {
-        return Math.Abs(actual - expected);
+        var diff = Math.Abs((decimal) actual - expected);
+
+        if (expected == 0L)
+        {
+            return diff == 0m;
+        }
+
+        var allowedDifference = Math.Abs(expected) * ((decimal) percentTolerance / 100m);
+        return diff <= allowedDifference;
     }
 
+    protected override object CalculateDifference(long actual, long expected)
+        => Math.Abs(actual - expected);
+
     protected override bool AreExactlyEqual(long actual, long expected)
-    {
-        return actual == expected;
-    }
+        => actual == expected;
 }
 
 /// <summary>
@@ -317,15 +328,11 @@ public class DecimalEqualsAssertion : ToleranceBasedEqualsAssertion<decimal, dec
 {
     public DecimalEqualsAssertion(
         AssertionContext<decimal> context,
-        decimal expected)
-        : base(context, expected)
+        decimal expected) : base(context, expected)
     {
     }
 
-    protected override bool HasToleranceValue()
-    {
-        return true; // decimal? always has meaningful value when not null
-    }
+    protected override bool HasToleranceValue() => true;
 
     protected override bool IsWithinTolerance(decimal actual, decimal expected, decimal tolerance)
     {
@@ -333,15 +340,24 @@ public class DecimalEqualsAssertion : ToleranceBasedEqualsAssertion<decimal, dec
         return diff <= tolerance;
     }
 
-    protected override object CalculateDifference(decimal actual, decimal expected)
+    protected override bool IsWithinRelativeTolerance(decimal actual, decimal expected, double percentTolerance)
     {
-        return Math.Abs(actual - expected);
+        var diff = Math.Abs(actual - expected);
+
+        if (expected == 0m)
+        {
+            return diff == 0m;
+        }
+
+        var allowedDifference = Math.Abs(expected) * ((decimal) percentTolerance / 100m);
+        return diff <= allowedDifference;
     }
 
+    protected override object CalculateDifference(decimal actual, decimal expected)
+        => Math.Abs(actual - expected);
+
     protected override bool AreExactlyEqual(decimal actual, decimal expected)
-    {
-        return actual == expected;
-    }
+        => actual == expected;
 }
 
 /// <summary>
@@ -357,26 +373,23 @@ public class DateTimeOffsetEqualsAssertion : ToleranceBasedEqualsAssertion<DateT
     {
     }
 
-    protected override bool HasToleranceValue()
-    {
-        return true; // TimeSpan? always has meaningful value when not null
-    }
+    protected override bool HasToleranceValue() => true; // TimeSpan? always has meaningful value when not null
 
     protected override bool IsWithinTolerance(DateTimeOffset actual, DateTimeOffset expected, TimeSpan tolerance)
     {
-        var diff = actual > expected ? actual - expected : expected - actual;
+        var diff = actual > expected
+            ? actual - expected
+            : expected - actual;
         return diff <= tolerance;
     }
 
     protected override object CalculateDifference(DateTimeOffset actual, DateTimeOffset expected)
-    {
-        return actual > expected ? actual - expected : expected - actual;
-    }
+        => actual > expected
+            ? actual - expected
+            : expected - actual;
 
     protected override bool AreExactlyEqual(DateTimeOffset actual, DateTimeOffset expected)
-    {
-        return actual == expected;
-    }
+        => actual == expected;
 }
 
 /// <summary>
@@ -415,21 +428,17 @@ public class TimeSpanEqualsAssertion : Assertion<TimeSpan>
 
         if (_tolerance.HasValue)
         {
-            var diff = value > _expected ? value - _expected : _expected - value;
-            if (diff <= _tolerance.Value)
-            {
-                return AssertionResult._passedTask;
-            }
-
-            return Task.FromResult(AssertionResult.Failed($"found {value}, which differs by {diff}"));
+            var diff = value > _expected
+                ? value - _expected
+                : _expected - value;
+            return diff <= _tolerance.Value
+                ? AssertionResult._passedTask
+                : Task.FromResult(AssertionResult.Failed($"found {value}, which differs by {diff}"));
         }
 
-        if (value == _expected)
-        {
-            return AssertionResult._passedTask;
-        }
-
-        return Task.FromResult(AssertionResult.Failed($"found {value}"));
+        return value == _expected
+            ? AssertionResult._passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation() =>
