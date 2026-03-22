@@ -2025,6 +2025,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     }
 
     /// <summary>
+    /// Returns ALL attributes including data source attributes.
+    /// Used by the per-class path where the engine extracts data sources from the attribute array.
+    /// </summary>
+    private static IEnumerable<AttributeData> GetAllAttributes(TestMethodMetadata testMethod)
+    {
+        return testMethod.MethodSymbol.GetAttributes()
+            .Concat(testMethod.TypeSymbol.GetAttributesIncludingBaseTypes())
+            .Concat(testMethod.TypeSymbol.ContainingAssembly.GetAttributes());
+    }
+
+    /// <summary>
     /// Emits the AttributeFactory as a named static method to avoid generating a display class.
     /// </summary>
     private static void EmitAttributeFactoryMethod(CodeWriter writer, TestMethodMetadata testMethod)
@@ -2608,6 +2619,45 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         var writer = new CodeWriter(includeHeader: false);
 
+        // Include ALL attributes (including data source attributes like [Arguments], [MethodDataSource]).
+        // The engine extracts IDataSourceAttribute from the attribute array at materialization time.
+        writer.AppendLine("return");
+        writer.AppendLine("[");
+        writer.Indent();
+        testMethod.CompilationContext.AttributeWriter.WriteAttributes(writer, GetAllAttributes(testMethod));
+        writer.Unindent();
+        writer.AppendLine("];");
+
+        return writer.ToString();
+    }
+
+    /// <summary>
+    /// Pre-generates the InvokeBody static lambda body for a test method.
+    /// Output: the try/catch wrapper around instance.MethodName().
+    /// Used inside a static lambda: static (instance, args, ct) => { ... }
+    /// </summary>
+    private static string PreGenerateInvokeBodyCode(TestMethodMetadata testMethod)
+    {
+        var writer = new CodeWriter(includeHeader: false);
+
+        var (hasCancellationToken, parametersFromArgs) = ParseInvokerParameters(testMethod.MethodSymbol);
+        var returnPattern = GetReturnPattern(testMethod.MethodSymbol);
+
+        GenerateConcreteTestInvokerBody(writer, testMethod.MethodSymbol.Name, returnPattern, hasCancellationToken, parametersFromArgs);
+
+        return writer.ToString();
+    }
+
+    /// <summary>
+    /// Pre-generates the CreateAttributes static lambda body for a test method.
+    /// Returns ALL attributes including data source attributes.
+    /// Output: return [new TestAttribute(), new ArgumentsAttribute(1), ...];
+    /// </summary>
+    private static string PreGenerateCreateAttributesCode(TestMethodMetadata testMethod)
+    {
+        var writer = new CodeWriter(includeHeader: false);
+
+        // Non-data-source attributes only — data sources are emitted separately on TestEntry
         writer.AppendLine("return");
         writer.AppendLine("[");
         writer.Indent();
@@ -2619,14 +2669,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     }
 
     /// <summary>
-    /// Pre-generates a TestRegistrationEntry struct initializer for the Entries array.
-    /// Contains pure data (no delegates or method references) for zero-JIT filtering.
+    /// Pre-generates the pure data fields for a TestEntry initializer.
+    /// These are the filter-relevant fields: MethodName, FullyQualifiedName, FilePath, etc.
     /// </summary>
-    private static string PreGenerateRegistrationEntryBlock(
-        TestMethodMetadata testMethod,
-        string methodId,
-        int methodIndex,
-        int classTypeIndex)
+    private static string PreGenerateTestEntryDataFields(TestMethodMetadata testMethod)
     {
         var writer = new CodeWriter(includeHeader: false);
 
@@ -2655,103 +2701,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             ? "global::System.Array.Empty<string>()"
             : $"new string[] {{ {string.Join(", ", dependsOn.Select(d => $"\"{EscapeString(d)}\""))} }}";
 
-        writer.AppendLine("new global::TUnit.Core.TestRegistrationEntry");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine($"TestId = \"{EscapeString(fullyQualifiedName)}\",");
-        writer.AppendLine($"ClassName = \"{EscapeString(simpleClassName)}\",");
         writer.AppendLine($"MethodName = \"{EscapeString(methodName)}\",");
         writer.AppendLine($"FullyQualifiedName = \"{EscapeString(fullyQualifiedName)}\",");
         writer.AppendLine($"FilePath = @\"{(testMethod.FilePath ?? "").Replace("\\", "\\\\")}\",");
         writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
         writer.AppendLine($"Categories = {categoriesArray},");
-        writer.AppendLine($"Properties = {propertiesArray},");
+        writer.AppendLine($"CustomProperties = {propertiesArray},");
         writer.AppendLine($"HasDataSource = {(hasDataSource ? "true" : "false")},");
         writer.AppendLine($"RepeatCount = {repeatCount},");
         writer.AppendLine($"DependsOn = {dependsOnArray},");
-        writer.AppendLine($"ClassTypeIndex = {classTypeIndex},");
-        writer.AppendLine($"MethodIndex = {methodIndex},");
-        writer.Unindent();
-        writer.AppendLine("},");
-
-        return writer.ToString();
-    }
-
-    /// <summary>
-    /// Pre-generates a switch case body for the Materialize method.
-    /// Creates TestMetadata for a specific method index using shared locals.
-    /// </summary>
-    private static string PreGenerateMaterializeSwitchCase(
-        TestMethodMetadata testMethod,
-        string className,
-        string methodId,
-        int attributeGroupIndex,
-        int methodIndex)
-    {
-        var writer = new CodeWriter(includeHeader: false);
-
-        var methodName = testMethod.MethodSymbol.Name;
-        var filePath = (testMethod.FilePath ?? "").Replace("\\", "\\\\");
-
-        // Build MethodMetadata factory call
-        var methodMetadataCall = GenerateMethodMetadataFactoryCall(testMethod.MethodSymbol);
-
-        writer.AppendLine($"case {methodIndex}:");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        // TestMetadataFactory.Create call — uses classInvoker + classAttributeFactory
-        // instead of per-method delegates, enabling O(1) JIT per class
-        writer.AppendLine($"var metadata = global::TUnit.Core.TestMetadataFactory.Create<{className}>(");
-        writer.Indent();
-        writer.AppendLine($"\"{methodName}\", \"{methodName}\", {testMethod.LineNumber},");
-        writer.AppendLine("invokeTypedTest: null, attributeFactory: null, CreateInstance,");
-        writer.Append(methodMetadataCall);
-
-        // Add optional named parameters
-        AppendOptionalFactoryParameters(writer, testMethod, className);
-
-        writer.AppendLine(",");
-        if (!string.IsNullOrEmpty(filePath))
-        {
-            writer.AppendLine($"filePath: @\"{filePath}\",");
-        }
-        writer.AppendLine("testSessionId: testSessionId,");
-        writer.AppendLine($"classInvoker: __InvokeByIndex,");
-        writer.AppendLine($"invokeMethodIndex: {methodIndex},");
-        writer.AppendLine($"classAttributeFactory: __CreateAttributesByIndex,");
-        writer.Append($"attributeGroupIndex: {attributeGroupIndex}");
-
-        writer.Unindent();
-        writer.AppendLine(");");
-        writer.AppendLine("return new global::TUnit.Core.TestMetadata[] { metadata };");
-
-        writer.Unindent();
-        writer.AppendLine("}");
-
-        return writer.ToString();
-    }
-
-    /// <summary>
-    /// Pre-generates a switch case for the consolidated __InvokeByIndex method.
-    /// Contains the actual test method invocation code.
-    /// </summary>
-    private static string PreGenerateInvokeSwitchCase(
-        TestMethodMetadata testMethod,
-        string className,
-        int methodIndex)
-    {
-        var writer = new CodeWriter(includeHeader: false);
-
-        var (hasCancellationToken, parametersFromArgs) = ParseInvokerParameters(testMethod.MethodSymbol);
-        var returnPattern = GetReturnPattern(testMethod.MethodSymbol);
-
-        writer.AppendLine($"case {methodIndex}:");
-        writer.AppendLine("{");
-        writer.Indent();
-        GenerateConcreteTestInvokerBody(writer, testMethod.MethodSymbol.Name, returnPattern, hasCancellationToken, parametersFromArgs);
-        writer.Unindent();
-        writer.AppendLine("}");
 
         return writer.ToString();
     }
@@ -2767,6 +2725,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"var __classMetadata = {classMetadataExpr};");
         writer.AppendLine($"var __classType = typeof({className});");
         return writer.ToString();
+    }
+
+    /// <summary>
+    /// Pre-generates a MethodMetadataFactory.Create(...) expression for one method.
+    /// Called during the transform step where ISymbol is available.
+    /// </summary>
+    private static string PreGenerateMethodMetadataExpression(TestMethodMetadata testMethod)
+    {
+        return GenerateMethodMetadataFactoryCall(testMethod.MethodSymbol);
     }
 
     /// <summary>
@@ -3012,32 +2979,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static IEnumerable<ClassTestGroup> GroupMethodsByClass(ImmutableArray<TestMethodMetadata?> methods)
     {
-        var classTypeIndex = 0;
         return methods
             .Where(m => m is not null)
             .GroupBy(m => m!.TypeSymbol, SymbolEqualityComparer.Default)
             .Select(g =>
             {
-                var currentClassTypeIndex = classTypeIndex++;
                 var first = g.First()!;
                 var typeSymbol = first.TypeSymbol;
                 var className = typeSymbol.GloballyQualified();
                 var testSourceName = FileNameHelper.GetSafeTestSourceName(typeSymbol);
 
-                // Pre-generate attribute factory bodies and deduplicate
                 var methodsList = g.Where(m => m is not null).Select(m => m!).ToList();
-                var attrBodies = methodsList.Select(m => PreGenerateAttributeFactoryBody(m)).ToList();
-                var bodyToIndex = new Dictionary<string, int>();
-                var distinctBodies = new List<string>();
-                foreach (var body in attrBodies)
-                {
-                    if (!bodyToIndex.ContainsKey(body))
-                    {
-                        bodyToIndex[body] = distinctBodies.Count;
-                        distinctBodies.Add(body);
-                    }
-                }
-                var attrIndexMap = attrBodies.Select(body => bodyToIndex[body]).ToList();
 
                 // Pre-generate code for each method
                 var usedMethodIds = new HashSet<string>();
@@ -3047,7 +2999,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     var m = methodsList[i];
                     var methodId = FileNameHelper.GetSafeMethodId(m.MethodSymbol);
 
-                    // Ensure unique methodId within the class (handle multiple overloads with same signature)
                     var originalMethodId = methodId;
                     var suffix = 2;
                     while (!usedMethodIds.Add(methodId))
@@ -3056,20 +3007,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         suffix++;
                     }
 
-                    var attrGroupIndex = attrIndexMap[i];
-
                     methodSourceCodes.Add(new TestMethodSourceCode
                     {
                         MethodId = methodId,
-                        MetadataCode = PreGenerateMetadataBlock(m, className, methodId, attrGroupIndex),
-                        DescriptorCode = PreGenerateDescriptorBlock(m, methodId),
-                        InvokeTestMethod = PreGenerateInvokeTestMethod(m, className, methodId),
-                        MaterializerMethod = PreGenerateMaterializerMethod(m, className, methodId, attrGroupIndex),
-                        AttributeGroupIndex = attrGroupIndex,
                         MethodIndex = i,
-                        RegistrationEntryCode = PreGenerateRegistrationEntryBlock(m, methodId, i, currentClassTypeIndex),
-                        MaterializeSwitchCaseCode = PreGenerateMaterializeSwitchCase(m, className, methodId, attrGroupIndex, i),
-                        InvokeSwitchCaseCode = PreGenerateInvokeSwitchCase(m, className, i),
+                        MethodMetadataCode = PreGenerateMethodMetadataExpression(m),
+                        InvokeBodyCode = PreGenerateInvokeBodyCode(m),
+                        CreateAttributesCode = PreGenerateCreateAttributesCode(m),
+                        TestEntryDataFieldsCode = PreGenerateTestEntryDataFields(m),
+                        TestDataSourcesCode = PreGenerateMethodDataSourcesExpression(m),
+                        ClassDataSourcesCode = PreGenerateClassDataSourcesExpression(m),
+                        DependenciesCode = PreGenerateDependenciesExpression(m.MethodSymbol),
                     });
                 }
 
@@ -3078,11 +3026,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     ClassFullyQualified = className,
                     TestSourceName = testSourceName,
                     Methods = methodSourceCodes.ToEquatableArray(),
-                    AttributeGroups = distinctBodies.ToEquatableArray(),
                     InstanceFactoryBodyCode = InstanceFactoryGenerator.GenerateInstanceFactoryBody(typeSymbol),
                     ReflectionFieldAccessorsCode = PreGenerateReflectionFieldAccessors(typeSymbol),
                     SharedLocalsCode = PreGenerateSharedLocals(typeSymbol, className),
-                    ClassTypeIndex = currentClassTypeIndex,
                 };
             });
     }
@@ -3106,105 +3052,95 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendRaw(classGroup.ReflectionFieldAccessorsCode);
             }
 
-            // Static Entries array — pure data, no delegates, loaded from PE without JIT
-            writer.AppendLine("public static readonly global::TUnit.Core.TestRegistrationEntry[] Entries = new global::TUnit.Core.TestRegistrationEntry[]");
+            // MethodMetadata array — shared across all entries, built once via static initializer
+            writer.AppendLine($"private static readonly global::TUnit.Core.MethodMetadata[] __methodMetadatas = __InitMethodMetadatas();");
+            writer.AppendLine("private static global::TUnit.Core.MethodMetadata[] __InitMethodMetadatas()");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendRaw(classGroup.SharedLocalsCode);
+            writer.AppendLine("return new global::TUnit.Core.MethodMetadata[]");
             writer.AppendLine("{");
             writer.Indent();
             foreach (var method in classGroup.Methods)
             {
-                writer.AppendRaw(method.RegistrationEntryCode);
+                writer.AppendLine($"{method.MethodMetadataCode},");
             }
             writer.Unindent();
             writer.AppendLine("};");
-
-            // Switch-based Materialize method — 1 JIT per class, deferred to first materialization
-            writer.AppendLine("public static global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> Materialize(int methodIndex, string testSessionId)");
-            writer.AppendLine("{");
-            writer.Indent();
-
-            // Shared locals: __classMetadata and __classType
-            writer.AppendRaw(classGroup.SharedLocalsCode);
-
-            writer.AppendLine("switch (methodIndex)");
-            writer.AppendLine("{");
-            writer.Indent();
-            foreach (var method in classGroup.Methods)
-            {
-                writer.AppendRaw(method.MaterializeSwitchCaseCode);
-            }
-            writer.AppendLine("default:");
-            writer.Indent();
-            writer.AppendLine($"throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex), methodIndex, $\"Invalid method index {{methodIndex}} for {classGroup.TestSourceName}\");");
-            writer.Unindent();
             writer.Unindent();
             writer.AppendLine("}");
 
-            writer.Unindent();
-            writer.AppendLine("}");
-
-            // Consolidated __InvokeByIndex — ONE switch method for ALL invocations in this class
-            // 1 JIT per class instead of N per method
-            writer.AppendLine($"private static global::System.Threading.Tasks.ValueTask __InvokeByIndex({classGroup.ClassFullyQualified} instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("switch (methodIndex)");
-            writer.AppendLine("{");
-            writer.Indent();
-            foreach (var method in classGroup.Methods)
-            {
-                writer.AppendRaw(method.InvokeSwitchCaseCode);
-            }
-            writer.AppendLine("default:");
-            writer.Indent();
-            writer.AppendLine($"throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));");
-            writer.Unindent();
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.Unindent();
-            writer.AppendLine("}");
-
-            // Consolidated __CreateAttributesByIndex — ONE switch method for ALL attribute groups
-            if (classGroup.AttributeGroups.Length > 0)
-            {
-                writer.AppendLine("private static global::System.Attribute[] __CreateAttributesByIndex(int groupIndex)");
-                writer.AppendLine("{");
-                writer.Indent();
-                writer.AppendLine("switch (groupIndex)");
-                writer.AppendLine("{");
-                writer.Indent();
-                for (int i = 0; i < classGroup.AttributeGroups.Length; i++)
-                {
-                    writer.AppendLine($"case {i}:");
-                    writer.AppendLine("{");
-                    writer.Indent();
-                    writer.AppendRaw(classGroup.AttributeGroups[i]);
-                    writer.Unindent();
-                    writer.AppendLine("}");
-                }
-                writer.AppendLine("default:");
-                writer.Indent();
-                writer.AppendLine("throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));");
-                writer.Unindent();
-                writer.Unindent();
-                writer.AppendLine("}");
-                writer.Unindent();
-                writer.AppendLine("}");
-            }
-
-            // CreateInstance method (shared for all methods)
-            writer.AppendLine($"internal static {classGroup.ClassFullyQualified} CreateInstance(global::System.Type[] typeArgs, object?[] args)");
+            // CreateInstance — shared across all entries
+            writer.AppendLine($"private static {classGroup.ClassFullyQualified} __CreateInstance(global::System.Type[] typeArgs, object?[] args)");
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendRaw(classGroup.InstanceFactoryBodyCode);
             writer.Unindent();
             writer.AppendLine("}");
 
+            // Per-method InvokeBody static methods (named for debuggability)
+            foreach (var method in classGroup.Methods)
+            {
+                writer.AppendLine($"private static global::System.Threading.Tasks.ValueTask __Invoke_{method.MethodId}({classGroup.ClassFullyQualified} instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendRaw(method.InvokeBodyCode);
+                writer.Unindent();
+                writer.AppendLine("}");
+            }
+
+            // Per-method CreateAttributes static methods (named for debuggability)
+            foreach (var method in classGroup.Methods)
+            {
+                writer.AppendLine($"private static global::System.Attribute[] __Attributes_{method.MethodId}()");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendRaw(method.CreateAttributesCode);
+                writer.Unindent();
+                writer.AppendLine("}");
+            }
+
+            // TestEntry<T>[] array — the complete registration unit per test
+            writer.AppendLine($"public static readonly global::TUnit.Core.TestEntry<{classGroup.ClassFullyQualified}>[] Entries = new global::TUnit.Core.TestEntry<{classGroup.ClassFullyQualified}>[]");
+            writer.AppendLine("{");
+            writer.Indent();
+            foreach (var method in classGroup.Methods)
+            {
+                writer.AppendLine($"new global::TUnit.Core.TestEntry<{classGroup.ClassFullyQualified}>");
+                writer.AppendLine("{");
+                writer.Indent();
+                // Data fields (pre-generated)
+                writer.AppendRaw(method.TestEntryDataFieldsCode);
+                // Structural metadata
+                writer.AppendLine($"MethodMetadata = __methodMetadatas[{method.MethodIndex}],");
+                // Behavioral delegates
+                writer.AppendLine($"CreateInstance = __CreateInstance,");
+                writer.AppendLine($"InvokeBody = __Invoke_{method.MethodId},");
+                writer.AppendLine($"CreateAttributes = __Attributes_{method.MethodId},");
+                if (method.TestDataSourcesCode != null)
+                {
+                    writer.AppendLine($"TestDataSources = {method.TestDataSourcesCode},");
+                }
+                if (method.ClassDataSourcesCode != null)
+                {
+                    writer.AppendLine($"ClassDataSources = {method.ClassDataSourcesCode},");
+                }
+                if (method.DependenciesCode != null)
+                {
+                    writer.AppendLine($"Dependencies = {method.DependenciesCode},");
+                }
+                writer.Unindent();
+                writer.AppendLine("},");
+            }
+            writer.Unindent();
+            writer.AppendLine("};");
+
             writer.Unindent();
             writer.AppendLine("}");
 
-            // Registration: data-table pattern — stores pure data array + materializer delegate
+            // Registration
             EmitRegistrationField(writer, classGroup.TestSourceName,
-                $"global::TUnit.Core.SourceRegistrar.RegisterTableEntries({classGroup.ClassTypeIndex}, typeof({classGroup.ClassFullyQualified}), {classGroup.TestSourceName}.Entries, {classGroup.TestSourceName}.Materialize)");
+                $"global::TUnit.Core.SourceRegistrar.RegisterEntries({classGroup.TestSourceName}.Entries)");
 
             context.AddSource($"{classGroup.TestSourceName}.g.cs", SourceText.From(writer.ToString(), Encoding.UTF8));
         }

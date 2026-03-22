@@ -1,7 +1,7 @@
 namespace TUnit.Core.SourceGenerator.Models;
 
 /// <summary>
-/// A per-class grouping model for generating a consolidated TestSource.
+/// A per-class grouping model for generating a TestSource with TestEntry&lt;T&gt; array.
 /// Contains only primitives/strings (no ISymbol references) for incremental caching.
 /// </summary>
 public sealed record ClassTestGroup
@@ -24,15 +24,7 @@ public sealed record ClassTestGroup
     public required EquatableArray<TestMethodSourceCode> Methods { get; init; }
 
     /// <summary>
-    /// Deduplicated attribute factory method bodies.
-    /// Index corresponds to TestMethodSourceCode.AttributeGroupIndex.
-    /// Methods with identical attributes share the same body.
-    /// </summary>
-    public required EquatableArray<string> AttributeGroups { get; init; }
-
-    /// <summary>
     /// Pre-generated C# code for the CreateInstance method body.
-    /// Generated during the transform step where ISymbol is available.
     /// </summary>
     public required string InstanceFactoryBodyCode { get; init; }
 
@@ -44,13 +36,7 @@ public sealed record ClassTestGroup
 
     /// <summary>
     /// Pre-generated shared local variable declarations (ClassMetadata, classType)
-    /// emitted once at the top of GetTests() and Materialize().
+    /// used in __InitMethodMetadatas().
     /// </summary>
     public required string SharedLocalsCode { get; init; }
-
-    /// <summary>
-    /// Sequential 0-based index of this class in the assembly's class type array.
-    /// Used for ClassTypeIndex in TestRegistrationEntry.
-    /// </summary>
-    public required int ClassTypeIndex { get; init; }
 }

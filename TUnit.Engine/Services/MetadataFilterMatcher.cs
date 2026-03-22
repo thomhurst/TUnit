@@ -96,13 +96,7 @@ internal readonly struct FilterHints
     public bool CouldDescriptorMatch(TestDescriptor descriptor)
         => CouldMatch(descriptor.ClassName, descriptor.MethodName);
 
-    /// <summary>
-    /// Check if a test registration entry could match this filter based on the hints.
-    /// </summary>
-    public bool CouldEntryMatch(TestRegistrationEntry entry)
-        => CouldMatch(entry.ClassName, entry.MethodName);
-
-    private bool CouldMatch(string testClassName, string testMethodName)
+    public bool CouldMatch(string testClassName, string testMethodName)
     {
         if (ClassName != null)
         {

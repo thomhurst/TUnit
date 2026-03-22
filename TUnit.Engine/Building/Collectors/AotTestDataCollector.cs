@@ -44,13 +44,13 @@ internal sealed class AotTestDataCollector : ITestDataCollector
 
         var allResults = new List<TestMetadata>();
 
-        // Phase A: Collect from data-table registered sources (new fast path)
-        // These entries are pure data — no JIT needed for filtering.
+        // Phase A: Collect from TestEntry sources (new fast path)
+        // Filter data is pure data — no JIT needed.
         // Only matching entries trigger materialization (deferred JIT).
-        if (!Sources.TableEntries.IsEmpty)
+        if (!Sources.TestEntries.IsEmpty)
         {
-            var tableResults = CollectTestsFromTableEntries(testSessionId, filterHints);
-            allResults.AddRange(tableResults);
+            var entryResults = CollectTestsFromTestEntries(testSessionId, filterHints);
+            allResults.AddRange(entryResults);
         }
 
         // Phase B: Collect from ITestSource registered sources (generic/inherited tests)
@@ -91,34 +91,34 @@ internal sealed class AotTestDataCollector : ITestDataCollector
     }
 
     /// <summary>
-    /// Collects tests from data-table registered sources (the new fast path).
-    /// Iterates over TestRegistrationEntry[] arrays (pure data, no JIT) for filtering,
-    /// then calls materializers only for matching entries (deferred JIT, 1 per class).
+    /// Collects tests from TestEntry sources (the new fast path).
+    /// Uses TestEntryFilterData for pure-data filtering, then materializes only matching entries.
     /// </summary>
-    private IEnumerable<TestMetadata> CollectTestsFromTableEntries(
+    #if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Materialization uses source-generated metadata")]
+    #endif
+    private IEnumerable<TestMetadata> CollectTestsFromTestEntries(
         string testSessionId,
         FilterHints filterHints)
     {
-        // Phase 1: Filter entries. Dependency indices are lazy-initialized only if needed.
-        var matchingEntries = new List<(Type ClassType, TestRegistrationEntry Entry)>();
-        Dictionary<(string ClassName, string MethodName), (Type ClassType, TestRegistrationEntry Entry)>? entriesByClassAndMethod = null;
-        Dictionary<string, List<(Type ClassType, TestRegistrationEntry Entry)>>? entriesByClass = null;
+        // Phase 1: Filter using pure data (no JIT of test-specific methods)
+        var matching = new List<(ITestEntrySource Source, int Index)>();
         var hasDependencies = false;
 
-        foreach (var kvp in Sources.TableEntries)
+        foreach (var kvp in Sources.TestEntries)
         {
             var classType = kvp.Key;
-            var entries = kvp.Value;
+            var source = kvp.Value;
             var typeMatches = !filterHints.HasHints || filterHints.CouldTypeMatch(classType);
 
-            for (var i = 0; i < entries.Length; i++)
+            for (var i = 0; i < source.Count; i++)
             {
-                var entry = entries[i];
+                var filterData = source.GetFilterData(i);
 
-                if (typeMatches && CouldEntryMatch(entry, filterHints))
+                if (typeMatches && (!filterHints.HasHints || filterHints.CouldMatch(filterData.ClassName, filterData.MethodName)))
                 {
-                    matchingEntries.Add((classType, entry));
-                    if (entry.DependsOn.Length > 0)
+                    matching.Add((source, i));
+                    if (filterData.DependsOn.Length > 0)
                     {
                         hasDependencies = true;
                     }
@@ -126,63 +126,56 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             }
         }
 
-        // Phase 2: Expand dependencies via BFS (only if any matching entry has them)
-        HashSet<(Type, TestRegistrationEntry)>? expandedSet = null;
+        // Phase 2: Expand dependencies via BFS (only if needed)
+        HashSet<(ITestEntrySource, int)>? expandedSet = null;
         if (hasDependencies)
         {
-            // Build dependency indices lazily — only needed when dependencies exist
-            entriesByClassAndMethod = new(capacity: Sources.TableEntries.Sum(kvp => kvp.Value.Length));
-            entriesByClass = new(capacity: Sources.TableEntries.Count);
+            var byClassAndMethod = new Dictionary<(string, string), (ITestEntrySource Source, int Index)>();
+            var byClass = new Dictionary<string, List<(ITestEntrySource Source, int Index)>>();
 
-            foreach (var kvp in Sources.TableEntries)
+            foreach (var kvp in Sources.TestEntries)
             {
-                var classType = kvp.Key;
-                var entries = kvp.Value;
-                for (var i = 0; i < entries.Length; i++)
+                var source = kvp.Value;
+                for (var i = 0; i < source.Count; i++)
                 {
-                    var entry = entries[i];
-                    var pair = (classType, entry);
-                    entriesByClassAndMethod[(entry.ClassName, entry.MethodName)] = pair;
+                    var fd = source.GetFilterData(i);
+                    var pair = (source, i);
+                    byClassAndMethod[(fd.ClassName, fd.MethodName)] = pair;
 
-                    if (!entriesByClass.TryGetValue(entry.ClassName, out var classEntries))
+                    if (!byClass.TryGetValue(fd.ClassName, out var list))
                     {
-                        classEntries = [];
-                        entriesByClass[entry.ClassName] = classEntries;
+                        list = [];
+                        byClass[fd.ClassName] = list;
                     }
-                    classEntries.Add(pair);
+                    list.Add(pair);
                 }
             }
 
-            expandedSet = new HashSet<(Type, TestRegistrationEntry)>(matchingEntries);
-            var queue = new Queue<(Type ClassType, TestRegistrationEntry Entry)>(matchingEntries);
+            expandedSet = new HashSet<(ITestEntrySource, int)>(matching);
+            var queue = new Queue<(ITestEntrySource Source, int Index)>(matching);
 
             while (queue.Count > 0)
             {
                 var current = queue.Dequeue();
-                var dependsOn = current.Entry.DependsOn;
+                var fd = current.Source.GetFilterData(current.Index);
 
-                for (var i = 0; i < dependsOn.Length; i++)
+                foreach (var dep in fd.DependsOn)
                 {
-                    var dependency = dependsOn[i];
-                    var separatorIndex = dependency.IndexOf(':');
-                    if (separatorIndex < 0) continue;
+                    var sep = dep.IndexOf(':');
+                    if (sep < 0) continue;
 
-                    var depClassName = separatorIndex == 0
-                        ? current.Entry.ClassName
-                        : dependency.Substring(0, separatorIndex);
-                    var depMethodName = dependency.Substring(separatorIndex + 1);
+                    var depClass = sep == 0 ? fd.ClassName : dep[..sep];
+                    var depMethod = dep[(sep + 1)..];
 
-                    if (depMethodName.Length > 0)
+                    if (depMethod.Length > 0)
                     {
-                        if (entriesByClassAndMethod.TryGetValue((depClassName, depMethodName), out var depEntry))
-                        {
-                            if (expandedSet.Add(depEntry))
-                                queue.Enqueue(depEntry);
-                        }
+                        if (byClassAndMethod.TryGetValue((depClass, depMethod), out var depEntry)
+                            && expandedSet.Add(depEntry))
+                            queue.Enqueue(depEntry);
                     }
                     else
                     {
-                        if (entriesByClass.TryGetValue(depClassName, out var classEntries))
+                        if (byClass.TryGetValue(depClass, out var classEntries))
                         {
                             foreach (var depEntry in classEntries)
                             {
@@ -195,37 +188,20 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             }
         }
 
-        // Phase 3: Materialize matching entries
-        var entriesToMaterialize = expandedSet ?? (IEnumerable<(Type ClassType, TestRegistrationEntry Entry)>)matchingEntries;
+        // Phase 3: Materialize
+        var toMaterialize = expandedSet ?? (IEnumerable<(ITestEntrySource Source, int Index)>)matching;
         var results = new List<TestMetadata>();
 
-        foreach (var (classType, entry) in entriesToMaterialize)
+        foreach (var (source, index) in toMaterialize)
         {
-            if (Sources.TableMaterializers.TryGetValue(classType, out var materializer))
+            var materialized = source.Materialize(index, testSessionId);
+            for (var i = 0; i < materialized.Count; i++)
             {
-                var materialized = materializer(entry.MethodIndex, testSessionId);
-                for (var i = 0; i < materialized.Count; i++)
-                {
-                    results.Add(materialized[i]);
-                }
+                results.Add(materialized[i]);
             }
         }
 
         return results;
-    }
-
-    /// <summary>
-    /// Checks if a TestRegistrationEntry could match the given filter hints.
-    /// Pure data comparison — no JIT of any test-specific methods.
-    /// </summary>
-    private static bool CouldEntryMatch(TestRegistrationEntry entry, FilterHints filterHints)
-    {
-        if (!filterHints.HasHints)
-        {
-            return true;
-        }
-
-        return filterHints.CouldEntryMatch(entry);
     }
 
     /// <summary>
