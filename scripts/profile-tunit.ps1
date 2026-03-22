@@ -1,7 +1,7 @@
 #Requires -Version 7.0
 <#
 .SYNOPSIS
-    Build and profile a TUnit test project using dotnet-trace and dotnet-counters.
+    Build, profile, and analyze a TUnit test project using dotnet-trace.
 
 .DESCRIPTION
     Produces:
@@ -10,14 +10,21 @@
       <output-dir>/counters.csv        - Runtime counters (GC, threadpool, CPU, etc.)
       <output-dir>/dump.dmp            - (optional) Full memory dump for heap analysis
 
+    After collection, automatically runs `dotnet-trace report topN` to print
+    the hottest functions directly in the terminal.
+
     Prerequisites:
       dotnet tool install -g dotnet-trace
       dotnet tool install -g dotnet-counters
       dotnet tool install -g dotnet-dump  (optional, for -Dump)
 
 .EXAMPLE
-    # Profile specific tests
-    .\scripts\profile-tunit.ps1 -Filter "/*/*/BasicTests/*"
+    # Profile with the default profiling project (TUnit.Profile)
+    .\scripts\profile-tunit.ps1
+
+.EXAMPLE
+    # Profile specific tests in TUnit.TestProject
+    .\scripts\profile-tunit.ps1 -Project TUnit.TestProject -Filter "/*/*/BasicTests/*"
 
 .EXAMPLE
     # Profile a different project with a memory dump
@@ -26,11 +33,15 @@
 .EXAMPLE
     # Use GC-verbose tracing on net9.0
     .\scripts\profile-tunit.ps1 -TraceProfile gc-verbose -Framework net9.0
+
+.EXAMPLE
+    # Show top 50 hot functions
+    .\scripts\profile-tunit.ps1 -Top 50
 #>
 
 [CmdletBinding()]
 param(
-    [string]$Project = "TUnit.TestProject",
+    [string]$Project = "TUnit.Profile",
     [string]$Framework = "net10.0",
     [string]$Configuration = "Release",
     [string]$Filter = "",
@@ -40,8 +51,10 @@ param(
     [ValidateSet("speedscope", "chromium", "nettrace")]
     [string]$TraceFormat = "speedscope",
     [int]$CountersInterval = 1,
+    [int]$Top = 30,
     [switch]$Dump,
     [switch]$NoBuild,
+    [switch]$NoAnalyze,
     [Parameter(ValueFromRemainingArguments)]
     [string[]]$ExtraArgs
 )
@@ -50,12 +63,8 @@ $ErrorActionPreference = "Stop"
 
 # ── Resolve paths ─────────────────────────────────────────────────────────────
 
-$RepoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-if (-not $RepoRoot) { $RepoRoot = Split-Path -Parent $PSScriptRoot }
-# Handle running from repo root
-if (Test-Path (Join-Path $PSScriptRoot "..\$Project")) {
-    $RepoRoot = Split-Path -Parent $PSScriptRoot
-}
+# $PSScriptRoot is the "scripts" directory; repo root is one level up
+$RepoRoot = Split-Path -Parent $PSScriptRoot
 
 $ProjectDir = Join-Path $RepoRoot $Project
 if (-not (Test-Path $ProjectDir)) {
@@ -102,7 +111,7 @@ if (-not $NoBuild) {
     Write-Host "   Build complete" -ForegroundColor Green
     Write-Host ""
 } else {
-    Write-Host ">> Skipping build (--NoBuild)" -ForegroundColor Yellow
+    Write-Host ">> Skipping build (-NoBuild)" -ForegroundColor Yellow
     Write-Host ""
 }
 
@@ -146,9 +155,14 @@ if ($TraceProfile -ne "none") {
         # Convert to requested format
         if ($TraceFormat -ne "nettrace") {
             Write-Host "   Converting to $TraceFormat..."
-            $ConvertedFile = Join-Path $OutputDir "trace.$TraceFormat"
-            & dotnet-trace convert $TraceFile --format $TraceFormat --output $ConvertedFile 2>$null
-            if (Test-Path $ConvertedFile) {
+            $ConvertedFile = Join-Path $OutputDir "trace.$TraceFormat.json"
+            # dotnet-trace convert appends its own extension, so use a temp name
+            $TempConvertTarget = Join-Path $OutputDir "trace-convert"
+            & dotnet-trace convert $TraceFile --format $TraceFormat --output $TempConvertTarget 2>$null
+            # Find whatever file it actually created and rename
+            $created = Get-ChildItem -Path $OutputDir -Filter "trace-convert*" | Select-Object -First 1
+            if ($created) {
+                Move-Item -Path $created.FullName -Destination $ConvertedFile -Force
                 Write-Host "   Converted: $ConvertedFile" -ForegroundColor Green
             }
         }
@@ -232,6 +246,27 @@ if ($Dump) {
     Write-Host ""
 }
 
+# ── Step 5: Analyze trace ────────────────────────────────────────────────────
+
+if (-not $NoAnalyze -and (Test-Path $TraceFile)) {
+    Write-Host "===================================================================" -ForegroundColor Magenta
+    Write-Host "  Hot Path Analysis (top $Top by exclusive time)" -ForegroundColor Magenta
+    Write-Host "===================================================================" -ForegroundColor Magenta
+    Write-Host ""
+
+    & dotnet-trace report $TraceFile topN -n $Top 2>&1 | Tee-Object -FilePath (Join-Path $OutputDir "report-exclusive.txt")
+
+    Write-Host ""
+    Write-Host "===================================================================" -ForegroundColor Magenta
+    Write-Host "  Hot Path Analysis (top $Top by inclusive time)" -ForegroundColor Magenta
+    Write-Host "===================================================================" -ForegroundColor Magenta
+    Write-Host ""
+
+    & dotnet-trace report $TraceFile topN --inclusive -n $Top 2>&1 | Tee-Object -FilePath (Join-Path $OutputDir "report-inclusive.txt")
+
+    Write-Host ""
+}
+
 # ── Summary ───────────────────────────────────────────────────────────────────
 
 Write-Host "===================================================================" -ForegroundColor Cyan
@@ -248,12 +283,12 @@ Get-ChildItem -Path $OutputDir -File | ForEach-Object {
 }
 
 Write-Host ""
-Write-Host "  How to analyze:" -ForegroundColor White
+Write-Host "  Further analysis:" -ForegroundColor White
 Write-Host ""
 Write-Host "  Trace (.nettrace):" -ForegroundColor Gray
 Write-Host "    - Visual Studio: File > Open > trace.nettrace"
 Write-Host "    - PerfView:      perfview.exe trace.nettrace"
-Write-Host "    - speedscope:    https://speedscope.app (open trace.speedscope)"
+Write-Host "    - speedscope:    https://speedscope.app (open trace.speedscope.json)"
 Write-Host ""
 Write-Host "  Counters (.csv):" -ForegroundColor Gray
 Write-Host "    - Excel: Open counters.csv"
