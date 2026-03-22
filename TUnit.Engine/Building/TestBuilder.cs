@@ -1109,6 +1109,7 @@ internal sealed class TestBuilder : ITestBuilder
 
         var testDetails = CreateFailedTestDetails(metadata, testId);
         var context = CreateFailedTestContext(metadata, testDetails);
+        var now = DateTimeOffset.UtcNow;
 
         return new FailedExecutableTest(exception)
         {
@@ -1121,8 +1122,8 @@ internal sealed class TestBuilder : ITestBuilder
             Result = new TestResult
             {
                 State = TestState.Failed,
-                Start = DateTimeOffset.UtcNow,
-                End = DateTimeOffset.UtcNow,
+                Start = now,
+                End = now,
                 Duration = TimeSpan.Zero,
                 Exception = exception,
                 ComputerName = EnvironmentHelper.MachineName,

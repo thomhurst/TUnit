@@ -8,18 +8,14 @@ namespace TUnit.Engine.Services.TestExecution;
 /// </summary>
 internal sealed class TestMethodInvoker
 {
-    public async Task InvokeTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    public ValueTask InvokeTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         if (test.Context.InternalDiscoveredTest?.TestExecutor is { } testExecutor)
         {
-            await testExecutor.ExecuteTest(test.Context,
-                async () => await test.InvokeTestAsync(test.Context.Metadata.TestDetails.ClassInstance, cancellationToken))
-                .ConfigureAwait(false);
+            return testExecutor.ExecuteTest(test.Context,
+                () => new ValueTask(test.InvokeTestAsync(test.Context.Metadata.TestDetails.ClassInstance, cancellationToken)));
         }
-        else
-        {
-            await test.InvokeTestAsync(test.Context.Metadata.TestDetails.ClassInstance, cancellationToken)
-                .ConfigureAwait(false);
-        }
+
+        return new ValueTask(test.InvokeTestAsync(test.Context.Metadata.TestDetails.ClassInstance, cancellationToken));
     }
 }

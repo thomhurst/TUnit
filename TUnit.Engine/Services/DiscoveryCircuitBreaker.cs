@@ -11,7 +11,11 @@ public sealed class DiscoveryCircuitBreaker
 {
     private readonly long _maxMemoryBytes;
     private readonly TimeSpan _maxGenerationTime;
+#if NET
+    private readonly long _startTimestamp;
+#else
     private readonly Stopwatch _stopwatch;
+#endif
     private readonly long _initialMemoryUsage;
 
     /// <summary>
@@ -23,13 +27,26 @@ public sealed class DiscoveryCircuitBreaker
     {
         _maxMemoryBytes = (long)(GetAvailableMemoryBytes() * maxMemoryPercentage);
         _maxGenerationTime = maxGenerationTime ?? EngineDefaults.MaxGenerationTime;
+#if NET
+        _startTimestamp = Stopwatch.GetTimestamp();
+#else
         _stopwatch = Stopwatch.StartNew();
-        
+#endif
+
         // Track initial memory to calculate growth
         GC.Collect();
         GC.WaitForPendingFinalizers();
         GC.Collect();
         _initialMemoryUsage = GC.GetTotalMemory(false);
+    }
+
+    private TimeSpan GetElapsed()
+    {
+#if NET
+        return Stopwatch.GetElapsedTime(_startTimestamp);
+#else
+        return _stopwatch.Elapsed;
+#endif
     }
 
     /// <summary>
@@ -39,14 +56,14 @@ public sealed class DiscoveryCircuitBreaker
     /// <returns>True if generation should continue, false if circuit breaker trips</returns>
     public bool ShouldContinue(int currentTestCount = 0)
     {
-        if (_stopwatch.Elapsed > _maxGenerationTime)
+        if (GetElapsed() > _maxGenerationTime)
         {
             return false;
         }
 
         var currentMemoryUsage = GC.GetTotalMemory(false);
         var memoryGrowth = currentMemoryUsage - _initialMemoryUsage;
-        
+
         if (memoryGrowth > _maxMemoryBytes)
         {
             return false;
@@ -62,14 +79,15 @@ public sealed class DiscoveryCircuitBreaker
     {
         var currentMemoryUsage = GC.GetTotalMemory(false);
         var memoryGrowth = currentMemoryUsage - _initialMemoryUsage;
-        
+        var elapsed = GetElapsed();
+
         return new DiscoveryResourceUsage
         {
-            ElapsedTime = _stopwatch.Elapsed,
+            ElapsedTime = elapsed,
             MaxTime = _maxGenerationTime,
             MemoryGrowthBytes = memoryGrowth,
             MaxMemoryBytes = _maxMemoryBytes,
-            TimeUsagePercentage = _stopwatch.Elapsed.TotalMilliseconds / _maxGenerationTime.TotalMilliseconds,
+            TimeUsagePercentage = elapsed.TotalMilliseconds / _maxGenerationTime.TotalMilliseconds,
             MemoryUsagePercentage = (double)memoryGrowth / _maxMemoryBytes
         };
     }
@@ -110,7 +128,9 @@ public sealed class DiscoveryCircuitBreaker
 
     public void Dispose()
     {
-        _stopwatch?.Stop();
+#if !NET
+        _stopwatch.Stop();
+#endif
     }
 }
 
