@@ -66,7 +66,10 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     public override void Flush()
     {
         var content = GetLineBuffer().FlushIfNonEmpty();
-        RouteToSinks(content);
+        if (content != null)
+        {
+            RouteToSinks(content);
+        }
     }
 
     public override async Task FlushAsync()
