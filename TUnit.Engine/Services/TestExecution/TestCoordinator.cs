@@ -52,11 +52,9 @@ internal sealed class TestCoordinator : ITestCoordinator
         var task = _executionGuard.TryStartExecutionAsync(test.TestId,
             () => ExecuteTestInternalAsync(test, cancellationToken));
 
-        // Avoid async state machine by handling the common synchronous completion path
+        // Fast path: avoid async state machine when the task completed synchronously
         if (task.IsCompletedSuccessfully)
         {
-            // Consume the result to observe any exceptions
-            _ = task.Result;
             return default;
         }
 
