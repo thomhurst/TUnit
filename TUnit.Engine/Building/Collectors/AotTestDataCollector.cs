@@ -39,20 +39,11 @@ internal sealed class AotTestDataCollector : ITestDataCollector
     #endif
     public async Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId, ITestExecutionFilter? filter)
     {
-        // Extract hints from filter for pre-filtering test sources by type
         var filterHints = MetadataFilterMatcher.ExtractFilterHints(filter);
-
-        // Try two-phase discovery with single-pass filtering when all sources support descriptors.
-        // This avoids double-enumeration: previously ExpandSourcesForDependencies enumerated
-        // descriptors to find dependencies, then CollectTestsWithTwoPhaseDiscoveryAsync enumerated
-        // them again. Now we pass ALL sources and do type-level + descriptor-level filtering
-        // in a single pass, while indexing everything for dependency resolution.
         IEnumerable<TestMetadata> standardTestMetadatas;
 
         if (filterHints.HasHints && Sources.TestSources.All(static kvp => kvp.Value.All(static s => s is ITestDescriptorSource)))
         {
-            // Single-pass two-phase discovery: enumerate all descriptors once,
-            // apply type and descriptor filters during enumeration, expand dependencies from index
             standardTestMetadatas = CollectTestsWithTwoPhaseDiscovery(
                 Sources.TestSources,
                 testSessionId,
@@ -60,8 +51,6 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         }
         else
         {
-            // Fallback: Use traditional collection (for legacy sources or no filter hints)
-            // Apply type-level pre-filtering when hints are available
             IEnumerable<KeyValuePair<Type, ConcurrentQueue<ITestSource>>> testSourcesByType = Sources.TestSources;
 
             if (filterHints.HasHints)
@@ -70,7 +59,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             }
 
             var testSourcesList = testSourcesByType.SelectMany(kvp => kvp.Value).ToList();
-            standardTestMetadatas = CollectTestsTraditional(testSourcesList, testSessionId);
+            standardTestMetadatas = CollectTests(testSourcesList, testSessionId);
         }
 
         // Dynamic tests are typically rare, collect sequentially
@@ -220,24 +209,33 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         return results;
     }
 
-    /// <summary>
-    /// Traditional collection: materialize all tests from sources.
-    /// Used when filter hints are not available or sources don't support ITestDescriptorSource.
-    /// </summary>
-    private IEnumerable<TestMetadata> CollectTestsTraditional(
+    private List<TestMetadata> CollectTests(
         List<ITestSource> testSourcesList,
         string testSessionId)
     {
-        var results = new List<TestMetadata>();
-        foreach (var testSource in testSourcesList)
+        var batches = new IReadOnlyList<TestMetadata>[testSourcesList.Count];
+
+        Parallel.For(0, testSourcesList.Count, i =>
         {
-            var tests = testSource.GetTests(testSessionId);
-            for (var i = 0; i < tests.Count; i++)
+            batches[i] = testSourcesList[i].GetTests(testSessionId);
+        });
+
+        var totalCount = 0;
+        for (var i = 0; i < batches.Length; i++)
+        {
+            totalCount += batches[i].Count;
+        }
+
+        var combined = new List<TestMetadata>(totalCount);
+        for (var i = 0; i < batches.Length; i++)
+        {
+            var batch = batches[i];
+            for (var j = 0; j < batch.Count; j++)
             {
-                results.Add(tests[i]);
+                combined.Add(batch[j]);
             }
         }
-        return results;
+        return combined;
     }
 
     [RequiresUnreferencedCode("Dynamic test collection requires expression compilation and reflection")]
