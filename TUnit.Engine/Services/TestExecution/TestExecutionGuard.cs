@@ -10,12 +10,12 @@ internal sealed class TestExecutionGuard
 {
     private readonly ConcurrentDictionary<string, TaskCompletionSource<bool>> _executingTests = new();
 
-    public ValueTask<bool> TryStartExecutionAsync(string testId, Func<ValueTask> executionFunc)
+    public ValueTask TryStartExecutionAsync(string testId, Func<ValueTask> executionFunc)
     {
         // Fast path: check if test is already executing without allocating a TCS
         if (_executingTests.TryGetValue(testId, out var existingTcs))
         {
-            return new ValueTask<bool>(WaitForExistingExecutionAsync(existingTcs));
+            return new ValueTask(WaitForExistingExecutionAsync(existingTcs));
         }
 
         var tcs = new TaskCompletionSource<bool>();
@@ -23,25 +23,23 @@ internal sealed class TestExecutionGuard
 
         if (existingTcs != tcs)
         {
-            return new ValueTask<bool>(WaitForExistingExecutionAsync(existingTcs));
+            return new ValueTask(WaitForExistingExecutionAsync(existingTcs));
         }
 
         return ExecuteAndCompleteAsync(testId, tcs, executionFunc);
     }
 
-    private static async Task<bool> WaitForExistingExecutionAsync(TaskCompletionSource<bool> tcs)
+    private static async Task WaitForExistingExecutionAsync(TaskCompletionSource<bool> tcs)
     {
         await tcs.Task.ConfigureAwait(false);
-        return false;
     }
 
-    private async ValueTask<bool> ExecuteAndCompleteAsync(string testId, TaskCompletionSource<bool> tcs, Func<ValueTask> executionFunc)
+    private async ValueTask ExecuteAndCompleteAsync(string testId, TaskCompletionSource<bool> tcs, Func<ValueTask> executionFunc)
     {
         try
         {
             await executionFunc().ConfigureAwait(false);
             tcs.SetResult(true);
-            return true;
         }
         catch (Exception ex)
         {

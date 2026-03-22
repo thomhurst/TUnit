@@ -48,23 +48,8 @@ internal sealed class TestCoordinator : ITestCoordinator
     }
 
     public ValueTask ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
-    {
-        var task = _executionGuard.TryStartExecutionAsync(test.TestId,
+        => _executionGuard.TryStartExecutionAsync(test.TestId,
             () => ExecuteTestInternalAsync(test, cancellationToken));
-
-        // Fast path: avoid async state machine when the task completed synchronously
-        if (task.IsCompletedSuccessfully)
-        {
-            return default;
-        }
-
-        return AwaitAndDiscard(task);
-
-        static async ValueTask AwaitAndDiscard(ValueTask<bool> t)
-        {
-            await t.ConfigureAwait(false);
-        }
-    }
 
     private async ValueTask ExecuteTestInternalAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
