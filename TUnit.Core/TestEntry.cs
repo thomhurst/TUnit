@@ -101,12 +101,17 @@ public sealed class TestEntry<
     /// <summary>
     /// Constructs a TestMetadata&lt;T&gt; from this entry's data and delegates.
     /// </summary>
-    // Cached property arrays — built once from immutable InjectableProperties
+    // Cached delegates and arrays — built once from immutable fields
+    private Func<T, object?[], CancellationToken, ValueTask>? _cachedInvokeTypedTest;
+    private Func<Attribute[]>? _cachedAttributeFactory;
     private PropertyDataSource[]? _cachedPropertyDataSources;
     private PropertyInjectionData[]? _cachedPropertyInjections;
 
     internal TestMetadata<T> ToTestMetadata(string testSessionId)
     {
+        _cachedInvokeTypedTest ??= (instance, args, ct) => InvokeBody(instance, MethodIndex, args, ct);
+        _cachedAttributeFactory ??= () => CreateAttributes(AttributeGroupIndex);
+
         return new TestMetadata<T>
         {
             TestName = MethodName,
@@ -118,8 +123,8 @@ public sealed class TestEntry<
             PropertyDataSources = _cachedPropertyDataSources ??= BuildPropertyDataSources(),
             PropertyInjections = _cachedPropertyInjections ??= BuildPropertyInjections(),
             InstanceFactory = CreateInstance,
-            InvokeTypedTest = (instance, args, ct) => InvokeBody(instance, MethodIndex, args, ct),
-            AttributeFactory = () => CreateAttributes(AttributeGroupIndex),
+            InvokeTypedTest = _cachedInvokeTypedTest,
+            AttributeFactory = _cachedAttributeFactory,
             FilePath = FilePath,
             LineNumber = LineNumber,
             MethodMetadata = MethodMetadata,
