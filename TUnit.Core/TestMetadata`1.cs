@@ -56,28 +56,6 @@ public class TestMetadata<
     /// </summary>
     public Func<T, object?[], CancellationToken, ValueTask>? InvokeTypedTest { get; init; }
 
-    /// <summary>
-    /// Consolidated class-level invoker that dispatches by method index.
-    /// Used by the data-table registration path for non-generic tests.
-    /// One switch method per class instead of N separate invoke stubs.
-    /// </summary>
-    internal Func<T, int, object?[], CancellationToken, ValueTask>? ClassInvoker { get; init; }
-
-    /// <summary>
-    /// Method index for <see cref="ClassInvoker"/> dispatch.
-    /// </summary>
-    internal int InvokeMethodIndex { get; init; } = -1;
-
-    /// <summary>
-    /// Consolidated class-level attribute factory that dispatches by group index.
-    /// One switch method per class instead of M separate attribute factory methods.
-    /// </summary>
-    internal Func<int, Attribute[]>? ClassAttributeFactory { get; init; }
-
-    /// <summary>
-    /// Attribute group index for <see cref="ClassAttributeFactory"/> dispatch.
-    /// </summary>
-    internal int AttributeGroupIndex { get; init; } = -1;
 
 
 
@@ -94,20 +72,14 @@ public class TestMetadata<
                 return _cachedExecutableTestFactory;
             }
 
-            // For AOT mode, create delegates from the strongly-typed ones
-            var hasPerMethodInvoker = InvokeTypedTest != null;
-            var hasClassInvoker = ClassInvoker != null && InvokeMethodIndex >= 0;
-
-            if (InstanceFactory != null && (hasPerMethodInvoker || hasClassInvoker))
+            if (InstanceFactory != null && InvokeTypedTest != null)
             {
                 _cachedExecutableTestFactory = (context, metadata) =>
                 {
                     var typedMetadata = (TestMetadata<T>)metadata;
 
-                    // Create instance delegate that uses context
                     Func<TestContext, Task<object>> createInstance = async testContext =>
                     {
-                        // If we have a factory from discovery, use it (for lazy instance creation)
                         if (context.TestClassInstanceFactory != null)
                         {
                             return await context.TestClassInstanceFactory();
@@ -128,25 +100,10 @@ public class TestMetadata<
                         return typedMetadata.InstanceFactory!(context.ResolvedClassGenericArguments, context.ClassArguments);
                     };
 
-                    // Use class-level consolidated invoker when available (index-based dispatch,
-                    // 1 JIT per class instead of N per method). Fall back to per-method delegate.
-                    Func<object, object?[], TestContext, CancellationToken, Task> invokeTest;
-                    if (typedMetadata.ClassInvoker != null && typedMetadata.InvokeMethodIndex >= 0)
+                    Func<object, object?[], TestContext, CancellationToken, Task> invokeTest = async (instance, args, testContext, cancellationToken) =>
                     {
-                        var classInvoker = typedMetadata.ClassInvoker;
-                        var methodIndex = typedMetadata.InvokeMethodIndex;
-                        invokeTest = async (instance, args, testContext, cancellationToken) =>
-                        {
-                            await classInvoker((T)instance, methodIndex, args, cancellationToken).ConfigureAwait(false);
-                        };
-                    }
-                    else
-                    {
-                        invokeTest = async (instance, args, testContext, cancellationToken) =>
-                        {
-                            await typedMetadata.InvokeTypedTest!((T)instance, args, cancellationToken).ConfigureAwait(false);
-                        };
-                    }
+                        await typedMetadata.InvokeTypedTest!((T)instance, args, cancellationToken).ConfigureAwait(false);
+                    };
 
                     return new ExecutableTest(createInstance, invokeTest)
                     {

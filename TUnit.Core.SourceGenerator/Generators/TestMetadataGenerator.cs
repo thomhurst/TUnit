@@ -3870,11 +3870,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("}");
 
             // Consolidated __Attributes switch — 1 method for ALL attribute groups in this class
+            // Always emitted (even if no groups) since TestEntry references it unconditionally
+            writer.AppendLine("private static global::System.Attribute[] __Attributes(int groupIndex)");
+            writer.AppendLine("{");
+            writer.Indent();
             if (classGroup.AttributeGroups.Length > 0)
             {
-                writer.AppendLine("private static global::System.Attribute[] __Attributes(int groupIndex)");
-                writer.AppendLine("{");
-                writer.Indent();
                 writer.AppendLine("switch (groupIndex)");
                 writer.AppendLine("{");
                 writer.Indent();
@@ -3893,9 +3894,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.Unindent();
                 writer.Unindent();
                 writer.AppendLine("}");
-                writer.Unindent();
-                writer.AppendLine("}");
             }
+            else
+            {
+                writer.AppendLine("throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));");
+            }
+            writer.Unindent();
+            writer.AppendLine("}");
 
             // TestEntry<T>[] array — all entries share the same 3 delegates
             writer.AppendLine($"public static readonly global::TUnit.Core.TestEntry<{classGroup.ClassFullyQualified}>[] Entries = new global::TUnit.Core.TestEntry<{classGroup.ClassFullyQualified}>[]");
