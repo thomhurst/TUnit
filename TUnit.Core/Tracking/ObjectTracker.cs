@@ -58,28 +58,29 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     }
 
     /// <summary>
-    /// Checks if an object exists in any of the depth-keyed HashSets without allocating a flattened set.
+    /// Takes a snapshot of currently tracked objects before new discovery mutates the dictionary.
+    /// Uses ReferenceEqualityComparer to match object identity semantics.
     /// </summary>
-    private static bool IsAlreadyTracked(Dictionary<int, HashSet<object>> trackedObjects, object obj)
+    private static HashSet<object> SnapshotTrackedObjects(Dictionary<int, HashSet<object>> trackedObjects)
     {
+        var snapshot = new HashSet<object>(Helpers.ReferenceEqualityComparer.Instance);
         foreach (var kvp in trackedObjects)
         {
-            if (kvp.Value.Contains(obj))
+            foreach (var obj in kvp.Value)
             {
-                return true;
+                snapshot.Add(obj);
             }
         }
 
-        return false;
+        return snapshot;
     }
 
     public void TrackObjects(TestContext testContext)
     {
-        var alreadyTracked = testContext.TrackedObjects;
+        var alreadyTrackedSnapshot = SnapshotTrackedObjects(testContext.TrackedObjects);
 
-        // Get new trackable objects
         var trackableDict = trackableObjectGraphProvider.GetTrackableObjects(testContext);
-        if (trackableDict.Count == 0 && alreadyTracked.Count == 0)
+        if (trackableDict.Count == 0 && alreadyTrackedSnapshot.Count == 0)
         {
             return;
         }
@@ -90,7 +91,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
             {
                 foreach (var obj in kvp.Value)
                 {
-                    if (!IsAlreadyTracked(alreadyTracked, obj))
+                    if (!alreadyTrackedSnapshot.Contains(obj))
                     {
                         TrackObject(obj);
                     }
