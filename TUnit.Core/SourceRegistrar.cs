@@ -144,4 +144,33 @@ public class SourceRegistrar
         Register(testClassType, getTests, enumerateDescriptors);
         return 0;
     }
+
+    /// <summary>
+    /// Registers per-class entries with a materializer delegate using the data-table pattern.
+    /// This avoids per-test JIT compilation by storing pure data for filtering and deferring
+    /// method compilation to materialization time.
+    /// Returns a dummy value for use as a static field initializer.
+    /// </summary>
+    /// <param name="classTypeIndex">The class type index in the registration table.</param>
+    /// <param name="classType">The test class type.</param>
+    /// <param name="entries">The test registration entries for this class (pure data, no delegates).</param>
+    /// <param name="materializer">Switch-based materializer that creates TestMetadata for a given method index.</param>
+    /// <returns>A dummy value (0) for use as a static field initializer.</returns>
+    public static int RegisterTableEntries(
+        int classTypeIndex,
+        Type classType,
+        TestRegistrationEntry[] entries,
+        Func<int, string, IReadOnlyList<TestMetadata>> materializer)
+    {
+        if (entries is null || entries.Length == 0)
+        {
+            throw new InvalidOperationException(
+                $"Source-generated test registration failed: no entries provided for class '{classType.FullName}'. " +
+                "This indicates a source generator bug. Please report this issue.");
+        }
+
+        Sources.TableEntries[classType] = entries;
+        Sources.TableMaterializers[classType] = materializer;
+        return 0;
+    }
 }

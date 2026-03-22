@@ -35,4 +35,8 @@ public static class Sources
 
     public static readonly ConcurrentQueue<Func<Task>> GlobalInitializers = [];
     public static readonly ConcurrentQueue<IPropertySource> PropertySources = [];
+
+    // Data-table registration path (source-gen startup performance optimization)
+    public static readonly ConcurrentDictionary<Type, Func<int, string, IReadOnlyList<TestMetadata>>> TableMaterializers = new();
+    public static readonly ConcurrentDictionary<Type, TestRegistrationEntry[]> TableEntries = new();
 }

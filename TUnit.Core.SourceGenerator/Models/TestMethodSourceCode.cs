@@ -43,4 +43,29 @@ public sealed record TestMethodSourceCode
     /// Methods with identical attribute factory bodies share the same index.
     /// </summary>
     public required int AttributeGroupIndex { get; init; }
+
+    /// <summary>
+    /// Sequential 0-based index of this method within its class, used for
+    /// switch-based dispatch in the Materialize method and for MethodIndex
+    /// in TestRegistrationEntry.
+    /// </summary>
+    public required int MethodIndex { get; init; }
+
+    /// <summary>
+    /// Pre-generated TestRegistrationEntry struct initializer for the Entries array.
+    /// Contains pure data (no delegates or method references).
+    /// </summary>
+    public required string RegistrationEntryCode { get; init; }
+
+    /// <summary>
+    /// Pre-generated switch case body for the Materialize method.
+    /// Creates TestMetadata for this specific method index.
+    /// </summary>
+    public required string MaterializeSwitchCaseCode { get; init; }
+
+    /// <summary>
+    /// Pre-generated switch case body for the consolidated __InvokeByIndex method.
+    /// Contains the actual test method invocation for this method index.
+    /// </summary>
+    public required string InvokeSwitchCaseCode { get; init; }
 }

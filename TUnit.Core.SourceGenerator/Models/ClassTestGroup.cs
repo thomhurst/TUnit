@@ -44,7 +44,13 @@ public sealed record ClassTestGroup
 
     /// <summary>
     /// Pre-generated shared local variable declarations (ClassMetadata, classType)
-    /// emitted once at the top of GetTests().
+    /// emitted once at the top of GetTests() and Materialize().
     /// </summary>
     public required string SharedLocalsCode { get; init; }
+
+    /// <summary>
+    /// Sequential 0-based index of this class in the assembly's class type array.
+    /// Used for ClassTypeIndex in TestRegistrationEntry.
+    /// </summary>
+    public required int ClassTypeIndex { get; init; }
 }

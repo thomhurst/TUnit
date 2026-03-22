@@ -42,45 +42,190 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         // Extract hints from filter for pre-filtering test sources by type
         var filterHints = MetadataFilterMatcher.ExtractFilterHints(filter);
 
-        // Try two-phase discovery with single-pass filtering when all sources support descriptors.
-        // This avoids double-enumeration: previously ExpandSourcesForDependencies enumerated
-        // descriptors to find dependencies, then CollectTestsWithTwoPhaseDiscoveryAsync enumerated
-        // them again. Now we pass ALL sources and do type-level + descriptor-level filtering
-        // in a single pass, while indexing everything for dependency resolution.
-        IEnumerable<TestMetadata> standardTestMetadatas;
+        var allResults = new List<TestMetadata>();
 
-        if (filterHints.HasHints && Sources.TestSources.All(static kvp => kvp.Value.All(static s => s is ITestDescriptorSource)))
+        // Phase A: Collect from data-table registered sources (new fast path)
+        // These entries are pure data — no JIT needed for filtering.
+        // Only matching entries trigger materialization (deferred JIT).
+        if (!Sources.TableEntries.IsEmpty)
         {
-            // Single-pass two-phase discovery: enumerate all descriptors once,
-            // apply type and descriptor filters during enumeration, expand dependencies from index
-            standardTestMetadatas = CollectTestsWithTwoPhaseDiscovery(
-                Sources.TestSources,
-                testSessionId,
-                filterHints);
+            var tableResults = CollectTestsFromTableEntries(testSessionId, filterHints);
+            allResults.AddRange(tableResults);
         }
-        else
-        {
-            // Fallback: Use traditional collection (for legacy sources or no filter hints)
-            // Apply type-level pre-filtering when hints are available
-            IEnumerable<KeyValuePair<Type, ConcurrentQueue<ITestSource>>> testSourcesByType = Sources.TestSources;
 
-            if (filterHints.HasHints)
+        // Phase B: Collect from ITestSource registered sources (generic/inherited tests)
+        if (!Sources.TestSources.IsEmpty)
+        {
+            IEnumerable<TestMetadata> standardTestMetadatas;
+
+            if (filterHints.HasHints && Sources.TestSources.All(static kvp => kvp.Value.All(static s => s is ITestDescriptorSource)))
             {
-                testSourcesByType = testSourcesByType.Where(kvp => filterHints.CouldTypeMatch(kvp.Key));
+                standardTestMetadatas = CollectTestsWithTwoPhaseDiscovery(
+                    Sources.TestSources,
+                    testSessionId,
+                    filterHints);
+            }
+            else
+            {
+                IEnumerable<KeyValuePair<Type, ConcurrentQueue<ITestSource>>> testSourcesByType = Sources.TestSources;
+
+                if (filterHints.HasHints)
+                {
+                    testSourcesByType = testSourcesByType.Where(kvp => filterHints.CouldTypeMatch(kvp.Key));
+                }
+
+                var testSourcesList = testSourcesByType.SelectMany(kvp => kvp.Value).ToList();
+                standardTestMetadatas = CollectTestsTraditional(testSourcesList, testSessionId);
             }
 
-            var testSourcesList = testSourcesByType.SelectMany(kvp => kvp.Value).ToList();
-            standardTestMetadatas = CollectTestsTraditional(testSourcesList, testSessionId);
+            allResults.AddRange(standardTestMetadatas);
         }
 
-        // Dynamic tests are typically rare, collect sequentially
-        var dynamicTestMetadatas = new List<TestMetadata>();
+        // Phase C: Dynamic tests (typically rare)
         await foreach (var metadata in CollectDynamicTestsStreaming(testSessionId))
         {
-            dynamicTestMetadatas.Add(metadata);
+            allResults.Add(metadata);
         }
 
-        return [..standardTestMetadatas, ..dynamicTestMetadatas];
+        return allResults;
+    }
+
+    /// <summary>
+    /// Collects tests from data-table registered sources (the new fast path).
+    /// Iterates over TestRegistrationEntry[] arrays (pure data, no JIT) for filtering,
+    /// then calls materializers only for matching entries (deferred JIT, 1 per class).
+    /// </summary>
+    private IEnumerable<TestMetadata> CollectTestsFromTableEntries(
+        string testSessionId,
+        FilterHints filterHints)
+    {
+        // Phase 1: Filter entries. Dependency indices are lazy-initialized only if needed.
+        var matchingEntries = new List<(Type ClassType, TestRegistrationEntry Entry)>();
+        Dictionary<(string ClassName, string MethodName), (Type ClassType, TestRegistrationEntry Entry)>? entriesByClassAndMethod = null;
+        Dictionary<string, List<(Type ClassType, TestRegistrationEntry Entry)>>? entriesByClass = null;
+        var hasDependencies = false;
+
+        foreach (var kvp in Sources.TableEntries)
+        {
+            var classType = kvp.Key;
+            var entries = kvp.Value;
+            var typeMatches = !filterHints.HasHints || filterHints.CouldTypeMatch(classType);
+
+            for (var i = 0; i < entries.Length; i++)
+            {
+                var entry = entries[i];
+
+                if (typeMatches && CouldEntryMatch(entry, filterHints))
+                {
+                    matchingEntries.Add((classType, entry));
+                    if (entry.DependsOn.Length > 0)
+                    {
+                        hasDependencies = true;
+                    }
+                }
+            }
+        }
+
+        // Phase 2: Expand dependencies via BFS (only if any matching entry has them)
+        HashSet<(Type, TestRegistrationEntry)>? expandedSet = null;
+        if (hasDependencies)
+        {
+            // Build dependency indices lazily — only needed when dependencies exist
+            entriesByClassAndMethod = new(capacity: Sources.TableEntries.Sum(kvp => kvp.Value.Length));
+            entriesByClass = new(capacity: Sources.TableEntries.Count);
+
+            foreach (var kvp in Sources.TableEntries)
+            {
+                var classType = kvp.Key;
+                var entries = kvp.Value;
+                for (var i = 0; i < entries.Length; i++)
+                {
+                    var entry = entries[i];
+                    var pair = (classType, entry);
+                    entriesByClassAndMethod[(entry.ClassName, entry.MethodName)] = pair;
+
+                    if (!entriesByClass.TryGetValue(entry.ClassName, out var classEntries))
+                    {
+                        classEntries = [];
+                        entriesByClass[entry.ClassName] = classEntries;
+                    }
+                    classEntries.Add(pair);
+                }
+            }
+
+            expandedSet = new HashSet<(Type, TestRegistrationEntry)>(matchingEntries);
+            var queue = new Queue<(Type ClassType, TestRegistrationEntry Entry)>(matchingEntries);
+
+            while (queue.Count > 0)
+            {
+                var current = queue.Dequeue();
+                var dependsOn = current.Entry.DependsOn;
+
+                for (var i = 0; i < dependsOn.Length; i++)
+                {
+                    var dependency = dependsOn[i];
+                    var separatorIndex = dependency.IndexOf(':');
+                    if (separatorIndex < 0) continue;
+
+                    var depClassName = separatorIndex == 0
+                        ? current.Entry.ClassName
+                        : dependency.Substring(0, separatorIndex);
+                    var depMethodName = dependency.Substring(separatorIndex + 1);
+
+                    if (depMethodName.Length > 0)
+                    {
+                        if (entriesByClassAndMethod.TryGetValue((depClassName, depMethodName), out var depEntry))
+                        {
+                            if (expandedSet.Add(depEntry))
+                                queue.Enqueue(depEntry);
+                        }
+                    }
+                    else
+                    {
+                        if (entriesByClass.TryGetValue(depClassName, out var classEntries))
+                        {
+                            foreach (var depEntry in classEntries)
+                            {
+                                if (expandedSet.Add(depEntry))
+                                    queue.Enqueue(depEntry);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Phase 3: Materialize matching entries
+        var entriesToMaterialize = expandedSet ?? (IEnumerable<(Type ClassType, TestRegistrationEntry Entry)>)matchingEntries;
+        var results = new List<TestMetadata>();
+
+        foreach (var (classType, entry) in entriesToMaterialize)
+        {
+            if (Sources.TableMaterializers.TryGetValue(classType, out var materializer))
+            {
+                var materialized = materializer(entry.MethodIndex, testSessionId);
+                for (var i = 0; i < materialized.Count; i++)
+                {
+                    results.Add(materialized[i]);
+                }
+            }
+        }
+
+        return results;
+    }
+
+    /// <summary>
+    /// Checks if a TestRegistrationEntry could match the given filter hints.
+    /// Pure data comparison — no JIT of any test-specific methods.
+    /// </summary>
+    private static bool CouldEntryMatch(TestRegistrationEntry entry, FilterHints filterHints)
+    {
+        if (!filterHints.HasHints)
+        {
+            return true;
+        }
+
+        return filterHints.CouldEntryMatch(entry);
     }
 
     /// <summary>

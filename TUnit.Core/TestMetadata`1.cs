@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
@@ -51,9 +52,32 @@ public class TestMetadata<
 
     /// <summary>
     /// Strongly typed test invoker with CancellationToken support.
-    /// Used by source generation mode.
+    /// Used by source generation mode (per-method delegates, generic/inherited tests).
     /// </summary>
     public Func<T, object?[], CancellationToken, ValueTask>? InvokeTypedTest { get; init; }
+
+    /// <summary>
+    /// Consolidated class-level invoker that dispatches by method index.
+    /// Used by the data-table registration path for non-generic tests.
+    /// One switch method per class instead of N separate invoke stubs.
+    /// </summary>
+    internal Func<T, int, object?[], CancellationToken, ValueTask>? ClassInvoker { get; init; }
+
+    /// <summary>
+    /// Method index for <see cref="ClassInvoker"/> dispatch.
+    /// </summary>
+    internal int InvokeMethodIndex { get; init; } = -1;
+
+    /// <summary>
+    /// Consolidated class-level attribute factory that dispatches by group index.
+    /// One switch method per class instead of M separate attribute factory methods.
+    /// </summary>
+    internal Func<int, Attribute[]>? ClassAttributeFactory { get; init; }
+
+    /// <summary>
+    /// Attribute group index for <see cref="ClassAttributeFactory"/> dispatch.
+    /// </summary>
+    internal int AttributeGroupIndex { get; init; } = -1;
 
 
 
@@ -71,7 +95,10 @@ public class TestMetadata<
             }
 
             // For AOT mode, create delegates from the strongly-typed ones
-            if (InstanceFactory != null && InvokeTypedTest != null)
+            var hasPerMethodInvoker = InvokeTypedTest != null;
+            var hasClassInvoker = ClassInvoker != null && InvokeMethodIndex >= 0;
+
+            if (InstanceFactory != null && (hasPerMethodInvoker || hasClassInvoker))
             {
                 _cachedExecutableTestFactory = (context, metadata) =>
                 {
@@ -101,11 +128,25 @@ public class TestMetadata<
                         return typedMetadata.InstanceFactory!(context.ResolvedClassGenericArguments, context.ClassArguments);
                     };
 
-                    // Convert InvokeTypedTest to the expected signature
-                    Func<object, object?[], TestContext, CancellationToken, Task> invokeTest = async (instance, args, testContext, cancellationToken) =>
+                    // Use class-level consolidated invoker when available (index-based dispatch,
+                    // 1 JIT per class instead of N per method). Fall back to per-method delegate.
+                    Func<object, object?[], TestContext, CancellationToken, Task> invokeTest;
+                    if (typedMetadata.ClassInvoker != null && typedMetadata.InvokeMethodIndex >= 0)
                     {
-                        await typedMetadata.InvokeTypedTest!((T)instance, args, cancellationToken).ConfigureAwait(false);
-                    };
+                        var classInvoker = typedMetadata.ClassInvoker;
+                        var methodIndex = typedMetadata.InvokeMethodIndex;
+                        invokeTest = async (instance, args, testContext, cancellationToken) =>
+                        {
+                            await classInvoker((T)instance, methodIndex, args, cancellationToken).ConfigureAwait(false);
+                        };
+                    }
+                    else
+                    {
+                        invokeTest = async (instance, args, testContext, cancellationToken) =>
+                        {
+                            await typedMetadata.InvokeTypedTest!((T)instance, args, cancellationToken).ConfigureAwait(false);
+                        };
+                    }
 
                     return new ExecutableTest(createInstance, invokeTest)
                     {

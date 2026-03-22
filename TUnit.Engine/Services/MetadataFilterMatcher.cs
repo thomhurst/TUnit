@@ -94,32 +94,34 @@ internal readonly struct FilterHints
     /// contains pre-computed dependency information from DependsOnAttribute.
     /// </remarks>
     public bool CouldDescriptorMatch(TestDescriptor descriptor)
+        => CouldMatch(descriptor.ClassName, descriptor.MethodName);
+
+    /// <summary>
+    /// Check if a test registration entry could match this filter based on the hints.
+    /// </summary>
+    public bool CouldEntryMatch(TestRegistrationEntry entry)
+        => CouldMatch(entry.ClassName, entry.MethodName);
+
+    private bool CouldMatch(string testClassName, string testMethodName)
     {
-        // Check class name hint
         if (ClassName != null)
         {
-            // The filter ClassName may be "OuterClass+InnerClass" or just "InnerClass"
-            // The descriptor ClassName now includes nested hierarchy (e.g., "OuterClass+InnerClass")
-            if (descriptor.ClassName != ClassName
-                && !descriptor.ClassName.StartsWith(ClassName + "`")
-                && !descriptor.ClassName.EndsWith("+" + ClassName)
-                && !descriptor.ClassName.StartsWith(ClassName + "+"))
+            if (testClassName != ClassName
+                && !testClassName.StartsWith(ClassName + "`")
+                && !testClassName.EndsWith("+" + ClassName)
+                && !testClassName.StartsWith(ClassName + "+"))
             {
                 return false;
             }
         }
 
-        // Check method name hint
         if (MethodName != null)
         {
-            if (descriptor.MethodName != MethodName)
+            if (testMethodName != MethodName)
             {
                 return false;
             }
         }
-
-        // Note: We don't check assembly/namespace here because descriptors don't store that info
-        // The type-level filtering in CouldTypeMatch handles those hints during source enumeration
 
         return true;
     }
