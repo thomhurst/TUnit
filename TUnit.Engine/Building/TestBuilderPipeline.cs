@@ -473,6 +473,7 @@ internal sealed class TestBuilderPipeline
 
         context.Metadata.TestDetails = testDetails;
 
+        var now = DateTimeOffset.UtcNow;
 
         return new FailedExecutableTest(exception)
         {
@@ -485,8 +486,8 @@ internal sealed class TestBuilderPipeline
             Result = new TestResult
             {
                 State = TestState.Failed,
-                Start = DateTimeOffset.UtcNow,
-                End = DateTimeOffset.UtcNow,
+                Start = now,
+                End = now,
                 Duration = TimeSpan.Zero,
                 Exception = exception,
                 ComputerName = EnvironmentHelper.MachineName,
@@ -525,6 +526,8 @@ internal sealed class TestBuilderPipeline
 
         context.Metadata.TestDetails = testDetails;
 
+        var now = DateTimeOffset.UtcNow;
+
         return new FailedExecutableTest(exception)
         {
             TestId = testId,
@@ -536,8 +539,8 @@ internal sealed class TestBuilderPipeline
             Result = new TestResult
             {
                 State = TestState.Failed,
-                Start = DateTimeOffset.UtcNow,
-                End = DateTimeOffset.UtcNow,
+                Start = now,
+                End = now,
                 Duration = TimeSpan.Zero,
                 Exception = exception,
                 ComputerName = EnvironmentHelper.MachineName,

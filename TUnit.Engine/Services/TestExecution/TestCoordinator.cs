@@ -117,10 +117,8 @@ internal sealed class TestCoordinator : ITestCoordinator
                 // Slow path: use retry wrapper
                 // Timeout is handled inside TestExecutor.ExecuteAsync, wrapping only the test body
                 // (not hooks or data source initialization) — fixes #4772
-                await RetryHelper.ExecuteWithRetry(test.Context, async () =>
-                {
-                    await ExecuteTestLifecycleAsync(test, cancellationToken).ConfigureAwait(false);
-                }).ConfigureAwait(false);
+                await RetryHelper.ExecuteWithRetry(test.Context,
+                    () => ExecuteTestLifecycleAsync(test, cancellationToken)).ConfigureAwait(false);
             }
 
             _stateManager.MarkCompleted(test);

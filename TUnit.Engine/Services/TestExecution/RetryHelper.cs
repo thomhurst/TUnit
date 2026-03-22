@@ -4,7 +4,7 @@ namespace TUnit.Engine.Services.TestExecution;
 
 internal static class RetryHelper
 {
-    public static async Task ExecuteWithRetry(TestContext testContext, Func<Task> action)
+    public static async Task ExecuteWithRetry(TestContext testContext, Func<ValueTask> action)
     {
         var maxRetries = testContext.Metadata.TestDetails.RetryLimit;
 
@@ -57,29 +57,29 @@ internal static class RetryHelper
         }
     }
 
-    private static async Task<bool> ShouldRetry(TestContext testContext, Exception ex, int attempt)
+    private static Task<bool> ShouldRetry(TestContext testContext, Exception ex, int attempt)
     {
         if (attempt >= testContext.Metadata.TestDetails.RetryLimit)
         {
-            return false;
+            return Task.FromResult(false);
         }
 
         if (testContext.RetryFunc == null)
         {
             // Default behavior: retry on any exception if within retry limit
-            return true;
+            return Task.FromResult(true);
         }
 
-        return await testContext.RetryFunc(testContext, ex, attempt + 1).ConfigureAwait(false);
+        return testContext.RetryFunc(testContext, ex, attempt + 1);
     }
 
-    private static async Task ApplyBackoffDelay(TestContext testContext, int attempt)
+    private static Task ApplyBackoffDelay(TestContext testContext, int attempt)
     {
         var backoffMs = testContext.Metadata.TestDetails.RetryBackoffMs;
 
         if (backoffMs <= 0)
         {
-            return;
+            return Task.CompletedTask;
         }
 
         var multiplier = testContext.Metadata.TestDetails.RetryBackoffMultiplier;
@@ -87,7 +87,9 @@ internal static class RetryHelper
 
         if (delayMs > 0)
         {
-            await Task.Delay(delayMs, testContext.CancellationToken).ConfigureAwait(false);
+            return Task.Delay(delayMs, testContext.CancellationToken);
         }
+
+        return Task.CompletedTask;
     }
 }

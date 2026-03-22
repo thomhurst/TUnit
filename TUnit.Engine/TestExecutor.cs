@@ -323,7 +323,7 @@ internal class TestExecutor
         if (executableTest.Context.InternalDiscoveredTest?.TestExecutor is { } testExecutor)
         {
             await testExecutor.ExecuteTest(executableTest.Context,
-                async () => await executableTest.InvokeTestAsync(executableTest.Context.Metadata.TestDetails.ClassInstance, cancellationToken)).ConfigureAwait(false);
+                () => new ValueTask(executableTest.InvokeTestAsync(executableTest.Context.Metadata.TestDetails.ClassInstance, cancellationToken))).ConfigureAwait(false);
         }
         else
         {
@@ -375,17 +375,17 @@ internal class TestExecutor
     /// <summary>
     /// Execute discovery-level before hooks.
     /// </summary>
-    public async Task ExecuteBeforeTestDiscoveryHooksAsync(CancellationToken cancellationToken)
+    public Task ExecuteBeforeTestDiscoveryHooksAsync(CancellationToken cancellationToken)
     {
-        await _hookExecutor.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
+        return _hookExecutor.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken).AsTask();
     }
 
     /// <summary>
     /// Execute discovery-level after hooks.
     /// </summary>
-    public async Task ExecuteAfterTestDiscoveryHooksAsync(CancellationToken cancellationToken)
+    public Task ExecuteAfterTestDiscoveryHooksAsync(CancellationToken cancellationToken)
     {
-        await _hookExecutor.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
+        return _hookExecutor.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken).AsTask();
     }
 
     /// <summary>
