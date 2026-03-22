@@ -1,6 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
+using System.Collections.Concurrent;
 using TUnit.Core.Helpers;
 
 namespace TUnit.Core.Tracking;
@@ -19,9 +17,6 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     // Use ReferenceEqualityComparer to prevent objects with custom Equals from sharing state
     private static readonly ConcurrentDictionary<object, Counter> s_trackedObjects =
         new(Helpers.ReferenceEqualityComparer.Instance);
-
-    // Lock for atomic decrement-check-dispose operations to prevent race conditions
-    private static readonly Lock s_disposalLock = new();
 
     // Collects errors from async disposal callbacks for post-session review
     private static readonly ConcurrentBag<Exception> s_asyncCallbackErrors = new();
@@ -49,86 +44,113 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         s_trackedObjects.GetOrAdd(obj, static _ => new Counter());
 
     /// <summary>
-    /// Flattens a ConcurrentDictionary of depth-keyed HashSets into a single ISet.
-    /// Thread-safe: locks each HashSet while copying.
-    /// Pre-calculates capacity to avoid HashSet resizing during population.
+    /// Counts total tracked objects across all depth levels without allocating a new collection.
     /// </summary>
-    private static ISet<object> FlattenTrackedObjects(Dictionary<int, HashSet<object>> trackedObjects)
+    private static int CountTrackedObjects(Dictionary<int, HashSet<object>> trackedObjects)
     {
-        if (trackedObjects.Count == 0)
+        var count = 0;
+        foreach (var kvp in trackedObjects)
         {
-            return ImmutableHashSet<object>.Empty;
+            count += kvp.Value.Count;
         }
 
-        var result = new HashSet<object>(Helpers.ReferenceEqualityComparer.Instance);
+        return count;
+    }
 
+    /// <summary>
+    /// Takes a snapshot of currently tracked objects before new discovery mutates the dictionary.
+    /// Uses ReferenceEqualityComparer to match object identity semantics.
+    /// </summary>
+    private static HashSet<object> SnapshotTrackedObjects(Dictionary<int, HashSet<object>> trackedObjects)
+    {
+        var snapshot = new HashSet<object>(Helpers.ReferenceEqualityComparer.Instance);
         foreach (var kvp in trackedObjects)
         {
             foreach (var obj in kvp.Value)
             {
-                result.Add(obj);
+                snapshot.Add(obj);
             }
         }
 
-        return result;
+        return snapshot;
     }
 
     public void TrackObjects(TestContext testContext)
     {
-        // Get already tracked objects (DRY: use helper method)
-        var alreadyTracked = FlattenTrackedObjects(testContext.TrackedObjects);
+        var alreadyTrackedSnapshot = SnapshotTrackedObjects(testContext.TrackedObjects);
 
-        // Get new trackable objects
         var trackableDict = trackableObjectGraphProvider.GetTrackableObjects(testContext);
-        if (trackableDict.Count == 0 && alreadyTracked.Count == 0)
+        if (trackableDict.Count == 0 && alreadyTrackedSnapshot.Count == 0)
         {
             return;
         }
 
-        var newTrackableObjects = new HashSet<object>(Helpers.ReferenceEqualityComparer.Instance);
         foreach (var kvp in trackableDict)
         {
             lock (kvp.Value)
             {
                 foreach (var obj in kvp.Value)
                 {
-                    if (!alreadyTracked.Contains(obj))
+                    if (!alreadyTrackedSnapshot.Contains(obj))
                     {
-                        newTrackableObjects.Add(obj);
+                        TrackObject(obj);
                     }
                 }
             }
-        }
-
-        foreach (var obj in newTrackableObjects)
-        {
-            TrackObject(obj);
         }
     }
 
     public ValueTask UntrackObjects(TestContext testContext, List<Exception> cleanupExceptions)
     {
-        // Get all objects to untrack (DRY: use helper method)
-        var objectsToUntrack = FlattenTrackedObjects(testContext.TrackedObjects);
-        if (objectsToUntrack.Count == 0)
+        var trackedObjects = testContext.TrackedObjects;
+
+        if (CountTrackedObjects(trackedObjects) == 0)
         {
             return ValueTask.CompletedTask;
         }
 
-        return UntrackObjectsAsync(cleanupExceptions, objectsToUntrack);
+        return UntrackObjectsAsync(cleanupExceptions, trackedObjects);
     }
 
-    private async ValueTask UntrackObjectsAsync(List<Exception> cleanupExceptions, ISet<object> objectsToUntrack)
+    private async ValueTask UntrackObjectsAsync(List<Exception> cleanupExceptions, Dictionary<int, HashSet<object>> trackedObjects)
     {
-        foreach (var obj in objectsToUntrack)
+        foreach (var depth in trackedObjects.Keys.OrderByDescending(k => k))
         {
-            try
+            var bucket = trackedObjects[depth];
+            List<Task>? disposalTasks = null;
+
+            foreach (var obj in bucket)
             {
-                await UntrackObject(obj);
+                try
+                {
+                    var task = UntrackObject(obj);
+
+                    if (!task.IsCompletedSuccessfully)
+                    {
+                        disposalTasks ??= [];
+                        disposalTasks.Add(task.AsTask());
+                    }
+                }
+                catch (Exception e)
+                {
+                    cleanupExceptions.Add(e);
+                }
             }
-            catch (Exception e)
+
+            if (disposalTasks is { Count: > 0 })
             {
-                cleanupExceptions.Add(e);
+                var whenAllTask = Task.WhenAll(disposalTasks);
+                try
+                {
+                    await whenAllTask.ConfigureAwait(false);
+                }
+                catch
+                {
+                    foreach (var e in whenAllTask.Exception!.InnerExceptions)
+                    {
+                        cleanupExceptions.Add(e);
+                    }
+                }
             }
         }
     }
@@ -172,26 +194,23 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
         var shouldDispose = false;
 
-        // Use lock to make decrement-check-remove atomic and prevent race conditions
-        // where multiple tests could try to dispose the same object simultaneously
-        lock (s_disposalLock)
+        if (s_trackedObjects.TryGetValue(obj, out var counter))
         {
-            if (s_trackedObjects.TryGetValue(obj, out var counter))
+            int count;
+            try { count = counter.Decrement(); }
+            catch { s_trackedObjects.TryRemove(obj, out _); throw; }
+
+            if (count < 0)
             {
-                var count = counter.Decrement();
+                throw new InvalidOperationException("Reference count for object went below zero. This indicates a bug in the reference counting logic.");
+            }
 
-                if (count < 0)
-                {
-                    throw new InvalidOperationException("Reference count for object went below zero. This indicates a bug in the reference counting logic.");
-                }
-
-                if (count == 0)
-                {
-                    // Remove from tracking dictionary to prevent memory leak
-                    // Use TryRemove to ensure atomicity - only remove if still in dictionary
-                    s_trackedObjects.TryRemove(obj, out _);
-                    shouldDispose = true;
-                }
+            if (count == 0)
+            {
+                // Remove from tracking dictionary to prevent memory leak
+                // Use TryRemove to ensure atomicity - only remove if still in dictionary
+                s_trackedObjects.TryRemove(obj, out _);
+                shouldDispose = true;
             }
         }
 
