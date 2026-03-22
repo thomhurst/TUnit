@@ -44,7 +44,6 @@ internal sealed class AotTestDataCollector : ITestDataCollector
 
         if (filterHints.HasHints && Sources.TestSources.All(static kvp => kvp.Value.All(static s => s is ITestDescriptorSource)))
         {
-            // Filtered: enumerate descriptors, apply filters, expand dependencies, materialize matches
             standardTestMetadatas = CollectTestsWithTwoPhaseDiscovery(
                 Sources.TestSources,
                 testSessionId,
@@ -210,11 +209,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         return results;
     }
 
-    /// <summary>
-    /// Materializes TestMetadata from every source in parallel.
-    /// Each source's GetTests is independent and safe to call concurrently.
-    /// </summary>
-    private IEnumerable<TestMetadata> CollectTests(
+    private List<TestMetadata> CollectTests(
         List<ITestSource> testSourcesList,
         string testSessionId)
     {
@@ -225,7 +220,13 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             batches[i] = testSourcesList[i].GetTests(testSessionId);
         });
 
-        var combined = new List<TestMetadata>();
+        var totalCount = 0;
+        for (var i = 0; i < batches.Length; i++)
+        {
+            totalCount += batches[i].Count;
+        }
+
+        var combined = new List<TestMetadata>(totalCount);
         for (var i = 0; i < batches.Length; i++)
         {
             var batch = batches[i];
