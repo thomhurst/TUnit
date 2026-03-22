@@ -46,7 +46,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     /// <summary>
     /// Counts total tracked objects across all depth levels without allocating a new collection.
     /// </summary>
-    private static int CountTrackedObjects(Dictionary<int, HashSet<object>> trackedObjects)
+    private static int CountTrackedObjects(SortedList<int, HashSet<object>> trackedObjects)
     {
         var count = 0;
         foreach (var kvp in trackedObjects)
@@ -61,7 +61,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     /// Takes a snapshot of currently tracked objects before new discovery mutates the dictionary.
     /// Uses ReferenceEqualityComparer to match object identity semantics.
     /// </summary>
-    private static HashSet<object> SnapshotTrackedObjects(Dictionary<int, HashSet<object>> trackedObjects)
+    private static HashSet<object> SnapshotTrackedObjects(SortedList<int, HashSet<object>> trackedObjects)
     {
         var snapshot = new HashSet<object>(Helpers.ReferenceEqualityComparer.Instance);
         foreach (var kvp in trackedObjects)
@@ -111,11 +111,15 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         return UntrackObjectsAsync(cleanupExceptions, trackedObjects);
     }
 
-    private async ValueTask UntrackObjectsAsync(List<Exception> cleanupExceptions, Dictionary<int, HashSet<object>> trackedObjects)
+    private async ValueTask UntrackObjectsAsync(List<Exception> cleanupExceptions, SortedList<int, HashSet<object>> trackedObjects)
     {
-        foreach (var depth in trackedObjects.Keys.OrderByDescending(k => k))
+        // SortedList keeps keys in ascending order; iterate by index in reverse for descending depth.
+        var keys = trackedObjects.Keys;
+        var values = trackedObjects.Values;
+
+        for (var i = keys.Count - 1; i >= 0; i--)
         {
-            var bucket = trackedObjects[depth];
+            var bucket = values[i];
             List<Task>? disposalTasks = null;
 
             foreach (var obj in bucket)

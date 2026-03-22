@@ -220,34 +220,24 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     /// </summary>
     private async Task InitializeTrackedObjectsAsync(TestContext testContext, CancellationToken cancellationToken)
     {
-        // Get levels without LINQ - use Array.Sort with reverse comparison for descending order
+        // SortedList keeps keys in ascending order; iterate by index in reverse for descending depth.
         var trackedObjects = testContext.TrackedObjects;
-        var levelCount = trackedObjects.Count;
+        var values = trackedObjects.Values;
 
-        if (levelCount > 0)
+        for (var i = values.Count - 1; i >= 0; i--)
         {
-            var levels = new int[levelCount];
-            trackedObjects.Keys.CopyTo(levels, 0);
-            Array.Sort(levels, (a, b) => b.CompareTo(a)); // Descending order
+            var objectsAtLevel = values[i];
 
-            foreach (var level in levels)
+            // Initialize all objects at this level in parallel
+            var tasks = new List<Task>(objectsAtLevel.Count);
+            foreach (var obj in objectsAtLevel)
             {
-                if (!trackedObjects.TryGetValue(level, out var objectsAtLevel))
-                {
-                    continue;
-                }
+                tasks.Add(InitializeObjectWithNestedAsync(obj, cancellationToken));
+            }
 
-                // Initialize all objects at this level in parallel
-                var tasks = new List<Task>(objectsAtLevel.Count);
-                foreach (var obj in objectsAtLevel)
-                {
-                    tasks.Add(InitializeObjectWithNestedAsync(obj, cancellationToken));
-                }
-
-                if (tasks.Count > 0)
-                {
-                    await Task.WhenAll(tasks);
-                }
+            if (tasks.Count > 0)
+            {
+                await Task.WhenAll(tasks);
             }
         }
 

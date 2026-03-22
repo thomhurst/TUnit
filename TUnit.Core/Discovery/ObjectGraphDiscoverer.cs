@@ -148,7 +148,7 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
     /// <param name="testContext">The test context to discover objects from.</param>
     /// <param name="cancellationToken">Cancellation token for the operation.</param>
     /// <returns>The tracked objects dictionary (same as testContext.TrackedObjects).</returns>
-    public Dictionary<int, HashSet<object>> DiscoverAndTrackObjects(TestContext testContext, CancellationToken cancellationToken = default)
+    public SortedList<int, HashSet<object>> DiscoverAndTrackObjects(TestContext testContext, CancellationToken cancellationToken = default)
     {
         var visitedObjects = testContext.TrackedObjects;
 
@@ -212,7 +212,7 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
     /// </summary>
     private void DiscoverNestedObjectsForTracking(
         object obj,
-        Dictionary<int, HashSet<object>> visitedObjects,
+        IDictionary<int, HashSet<object>> visitedObjects,
         int currentDepth,
         CancellationToken cancellationToken)
     {
@@ -264,7 +264,7 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
     /// <summary>
     /// Add to HashSet at specified depth. Returns true if added (not duplicate).
     /// </summary>
-    private static bool TryAddToHashSet(Dictionary<int, HashSet<object>> dict, int depth, object obj)
+    private static bool TryAddToHashSet(IDictionary<int, HashSet<object>> dict, int depth, object obj)
     {
         var hashSet = dict.GetOrAdd(depth, _ => new HashSet<object>(ReferenceComparer));
         return hashSet.Add(obj);
