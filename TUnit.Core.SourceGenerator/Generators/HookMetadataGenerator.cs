@@ -379,34 +379,29 @@ public class HookMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("using HookType = global::TUnit.Core.HookType;");
         writer.AppendLine();
 
+        // Hook delegate body — kept in its own namespace to avoid name collisions.
         writer.AppendLine($"namespace TUnit.Generated.Hooks.{safeFileName}");
         writer.AppendLine("{");
         writer.Indent();
 
         using (writer.BeginBlock($"internal static class {safeFileName}Initializer"))
         {
-            // Returns int so it can be called from a field initializer on the shared partial class.
-            using (writer.BeginBlock("public static int Initialize()"))
-            {
-                GenerateHookRegistration(writer, hook);
-                writer.AppendLine("return 0;");
-            }
-
-            writer.AppendLine();
             GenerateHookDelegate(writer, hook);
         }
 
         writer.Unindent();
         writer.AppendLine("}");
 
-        // Partial class field in TUnit.Generated namespace — contributes to a shared .cctor
-        // instead of a per-hook [ModuleInitializer].
+        // Partial class field — registration is a single expression, so the .cctor contains
+        // no per-hook method calls. All hook registrations compile into ONE JIT'd method.
         writer.AppendLine();
         writer.AppendLine("namespace TUnit.Generated");
         writer.AppendLine("{");
-        writer.AppendLine($"    internal static partial class TUnit_HookRegistration");
+        writer.AppendLine("    internal static partial class TUnit_HookRegistration");
         writer.AppendLine("    {");
-        writer.AppendLine($"        static readonly int _h_{safeFileName} = global::TUnit.Generated.Hooks.{safeFileName}.{safeFileName}Initializer.Initialize();");
+        writer.Append($"        static readonly int _h_{safeFileName} = ");
+        GenerateInlineHookRegistration(writer, hook, safeFileName);
+        writer.AppendLine(";");
         writer.AppendLine("    }");
         writer.AppendLine("}");
 
@@ -460,6 +455,62 @@ public class HookMetadataGenerator : IIncrementalGenerator
         // Get the last segment (simple type name)
         var lastDot = typeName.LastIndexOf('.');
         return lastDot >= 0 ? typeName.Substring(lastDot + 1) : typeName;
+    }
+
+    /// <summary>
+    /// Emits a single SourceRegistrar.RegisterHook(...) expression for use as a field initializer.
+    /// The hook object is constructed inline, so no per-hook method needs JIT.
+    /// </summary>
+    private static void GenerateInlineHookRegistration(CodeWriter writer, HookModel hook, string safeFileName)
+    {
+        var typeDisplay = hook.FullyQualifiedTypeName;
+        var isInstance = hook.HookKind is "Before" or "After" && hook.HookType == "Test";
+        var delegatePrefix = $"global::TUnit.Generated.Hooks.{safeFileName}.{safeFileName}Initializer.";
+
+        // Determine collection name and key expression
+        var (collectionName, keyExpr) = GetHookCollectionAndKey(hook, typeDisplay, isInstance);
+
+        if (keyExpr != null)
+        {
+            // Keyed registration: RegisterHook(dict, key, hookObj)
+            writer.AppendLine($"global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.{collectionName}, {keyExpr},");
+        }
+        else
+        {
+            // Global registration: RegisterHook(bag, hookObj)
+            writer.AppendLine($"global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.{collectionName},");
+        }
+
+        writer.Indent();
+        GenerateHookObject(writer, hook, isInstance, delegatePrefix);
+        writer.Unindent();
+        writer.Append(")");
+    }
+
+    private static (string collectionName, string? keyExpr) GetHookCollectionAndKey(HookModel hook, string typeDisplay, bool isInstance)
+    {
+        return (hook.HookType, hook.HookKind, isInstance) switch
+        {
+            ("Test", "Before", true) => ("BeforeTestHooks", $"typeof({typeDisplay})"),
+            ("Test", "After", true) => ("AfterTestHooks", $"typeof({typeDisplay})"),
+            ("Test", "Before", false) => ("BeforeEveryTestHooks", null),
+            ("Test", "After", false) => ("AfterEveryTestHooks", null),
+            ("Test", "BeforeEvery", _) => ("BeforeEveryTestHooks", null),
+            ("Test", "AfterEvery", _) => ("AfterEveryTestHooks", null),
+            ("Class", "Before", _) => ("BeforeClassHooks", $"typeof({typeDisplay})"),
+            ("Class", "After", _) => ("AfterClassHooks", $"typeof({typeDisplay})"),
+            ("Class", "BeforeEvery", _) => ("BeforeEveryClassHooks", null),
+            ("Class", "AfterEvery", _) => ("AfterEveryClassHooks", null),
+            ("Assembly", "Before", _) => ("BeforeAssemblyHooks", $"typeof({typeDisplay}).Assembly"),
+            ("Assembly", "After", _) => ("AfterAssemblyHooks", $"typeof({typeDisplay}).Assembly"),
+            ("Assembly", "BeforeEvery", _) => ("BeforeEveryAssemblyHooks", null),
+            ("Assembly", "AfterEvery", _) => ("AfterEveryAssemblyHooks", null),
+            ("TestSession", "Before" or "BeforeEvery", _) => ("BeforeTestSessionHooks", null),
+            ("TestSession", "After" or "AfterEvery", _) => ("AfterTestSessionHooks", null),
+            ("TestDiscovery", "Before" or "BeforeEvery", _) => ("BeforeTestDiscoveryHooks", null),
+            ("TestDiscovery", "After" or "AfterEvery", _) => ("AfterTestDiscoveryHooks", null),
+            _ => throw new ArgumentException($"Unknown hook: {hook.HookType}/{hook.HookKind}")
+        };
     }
 
     private static void GenerateHookRegistration(CodeWriter writer, HookModel hook)
@@ -643,7 +694,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
 
         if (isInstanceHook)
         {
-            using (writer.BeginBlock($"private static async ValueTask {delegateKey}_Body(object instance, {contextType} context, CancellationToken cancellationToken)"))
+            using (writer.BeginBlock($"internal static async ValueTask {delegateKey}_Body(object instance, {contextType} context, CancellationToken cancellationToken)"))
             {
                 if (hook.ClassIsOpenGeneric)
                 {
@@ -657,7 +708,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            using (writer.BeginBlock($"private static async ValueTask {delegateKey}_Body({contextType} context, CancellationToken cancellationToken)"))
+            using (writer.BeginBlock($"internal static async ValueTask {delegateKey}_Body({contextType} context, CancellationToken cancellationToken)"))
             {
                 if (hook is { ClassIsOpenGeneric: true, IsStatic: true })
                 {
@@ -817,10 +868,11 @@ public class HookMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"await AsyncConvert.Convert(() => {methodCall});");
     }
 
-    private static void GenerateHookObject(CodeWriter writer, HookModel hook, bool isInstance)
+    private static void GenerateHookObject(CodeWriter writer, HookModel hook, bool isInstance, string? delegatePrefix = null)
     {
         var hookClass = GetHookClass(hook.HookType, hook.HookKind, !isInstance);
         var delegateKey = GetDelegateKey(hook);
+        var bodyRef = $"{delegatePrefix ?? ""}{delegateKey}_Body";
 
         writer.AppendLine($"new {hookClass}");
         writer.AppendLine("{");
@@ -839,7 +891,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"HookExecutor = {HookExecutorHelper.GetHookExecutor(hook.HookExecutorTypeName)},");
         writer.AppendLine($"Order = {hook.Order},");
         writer.AppendLine($"RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNext{GetHookIndexMethodName(hook)},");
-        writer.AppendLine($"Body = {delegateKey}_Body" + (isInstance ? "" : ","));
+        writer.AppendLine($"Body = {bodyRef}" + (isInstance ? "" : ","));
 
         if (!isInstance)
         {

@@ -98,6 +98,33 @@ public class SourceRegistrar
     }
 
     /// <summary>
+    /// Registers a hook into a type-keyed dictionary and returns a dummy value for use as a field initializer.
+    /// </summary>
+    public static int RegisterHook<T>(ConcurrentDictionary<Type, ConcurrentBag<T>> dictionary, Type key, T hook)
+    {
+        dictionary.GetOrAdd(key, static _ => new ConcurrentBag<T>()).Add(hook);
+        return 0;
+    }
+
+    /// <summary>
+    /// Registers a hook into an assembly-keyed dictionary and returns a dummy value for use as a field initializer.
+    /// </summary>
+    public static int RegisterHook<T>(ConcurrentDictionary<Assembly, ConcurrentBag<T>> dictionary, Assembly key, T hook)
+    {
+        dictionary.GetOrAdd(key, static _ => new ConcurrentBag<T>()).Add(hook);
+        return 0;
+    }
+
+    /// <summary>
+    /// Registers a hook into a global bag and returns a dummy value for use as a field initializer.
+    /// </summary>
+    public static int RegisterHook<T>(ConcurrentBag<T> bag, T hook)
+    {
+        bag.Add(hook);
+        return 0;
+    }
+
+    /// <summary>
     /// Wrapper around <see cref="Register(Type, ITestSource)"/> that returns a dummy value for use as a field initializer.
     /// </summary>
     public static int RegisterReturn(Type testClassType, ITestSource testSource)
