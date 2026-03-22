@@ -15,49 +15,52 @@ using global::TUnit.Core.Hooks;
 using global::TUnit.Core.Interfaces.SourceGenerator;
 using global::TUnit.Core.Models;
 using HookType = global::TUnit.Core.HookType;
-namespace TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_Base1_BeforeAll1_Before_Class;
-internal static class TUnit_TestProject_BeforeTests_Base1_BeforeAll1_Before_ClassInitializer
+namespace TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_Base1_BeforeAll1_Before_Class
 {
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
+    internal static class TUnit_TestProject_BeforeTests_Base1_BeforeAll1_Before_ClassInitializer
     {
-        global::TUnit.Core.Sources.BeforeClassHooks.GetOrAdd(typeof(global::TUnit.TestProject.BeforeTests.Base1), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.BeforeClassHookMethod>());
-        global::TUnit.Core.Sources.BeforeClassHooks[typeof(global::TUnit.TestProject.BeforeTests.Base1)].Add(
-            new BeforeClassHookMethod
-            {
-                MethodInfo = new global::TUnit.Core.MethodMetadata
-                {
-                    Type = typeof(global::TUnit.TestProject.BeforeTests.Base1),
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.Base1)),
-                    Name = "BeforeAll1",
-                    GenericTypeCount = 0,
-                    ReturnType = typeof(global::System.Threading.Tasks.Task),
-                    ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
-                    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.Base1", new global::TUnit.Core.ClassMetadata
-                    {
-                        Type = typeof(global::TUnit.TestProject.BeforeTests.Base1),
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.Base1)),
-                        Name = "Base1",
-                        Namespace = "TUnit.TestProject.BeforeTests",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-                        Parent = null
-                    })
-                },
-                HookExecutor = DefaultExecutor.Instance,
-                Order = 0,
-                RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeClassHookIndex(),
-                Body = global_TUnit_TestProject_BeforeTests_Base1_BeforeAll1_0Params_Body,
-                FilePath = @"",
-                LineNumber = 5
-            }
-        );
+        internal static async ValueTask global_TUnit_TestProject_BeforeTests_Base1_BeforeAll1_0Params_Body(ClassHookContext context, CancellationToken cancellationToken)
+        {
+            await AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.Base1.BeforeAll1());
+        }
     }
-    private static async ValueTask global_TUnit_TestProject_BeforeTests_Base1_BeforeAll1_0Params_Body(ClassHookContext context, CancellationToken cancellationToken)
+}
+namespace TUnit.Generated
+{
+    internal static partial class TUnit_HookRegistration
     {
-        await AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.Base1.BeforeAll1());
+        static readonly int _h_TUnit_TestProject_BeforeTests_Base1_BeforeAll1_Before_Class = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeClassHooks, typeof(global::TUnit.TestProject.BeforeTests.Base1),
+    new BeforeClassHookMethod
+    {
+        MethodInfo = new global::TUnit.Core.MethodMetadata
+        {
+            Type = typeof(global::TUnit.TestProject.BeforeTests.Base1),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.Base1)),
+            Name = "BeforeAll1",
+            GenericTypeCount = 0,
+            ReturnType = typeof(global::System.Threading.Tasks.Task),
+            ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
+            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+            Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.Base1", new global::TUnit.Core.ClassMetadata
+            {
+                Type = typeof(global::TUnit.TestProject.BeforeTests.Base1),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.Base1)),
+                Name = "Base1",
+                Namespace = "TUnit.TestProject.BeforeTests",
+                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                Parent = null
+            })
+        },
+        HookExecutor = DefaultExecutor.Instance,
+        Order = 0,
+        RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeClassHookIndex(),
+        Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_Base1_BeforeAll1_Before_Class.TUnit_TestProject_BeforeTests_Base1_BeforeAll1_Before_ClassInitializer.global_TUnit_TestProject_BeforeTests_Base1_BeforeAll1_0Params_Body,
+        FilePath = @"",
+        LineNumber = 5
+    }
+);
     }
 }
 
@@ -81,49 +84,52 @@ using global::TUnit.Core.Hooks;
 using global::TUnit.Core.Interfaces.SourceGenerator;
 using global::TUnit.Core.Models;
 using HookType = global::TUnit.Core.HookType;
-namespace TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_Base1_BeforeEach1_Before_Test;
-internal static class TUnit_TestProject_BeforeTests_Base1_BeforeEach1_Before_TestInitializer
+namespace TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_Base1_BeforeEach1_Before_Test
 {
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
+    internal static class TUnit_TestProject_BeforeTests_Base1_BeforeEach1_Before_TestInitializer
     {
-        global::TUnit.Core.Sources.BeforeTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.BeforeTests.Base1), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
-        global::TUnit.Core.Sources.BeforeTestHooks[typeof(global::TUnit.TestProject.BeforeTests.Base1)].Add(
-            new InstanceHookMethod
-            {
-                InitClassType = typeof(global::TUnit.TestProject.BeforeTests.Base1),
-                MethodInfo = new global::TUnit.Core.MethodMetadata
-                {
-                    Type = typeof(global::TUnit.TestProject.BeforeTests.Base1),
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.Base1)),
-                    Name = "BeforeEach1",
-                    GenericTypeCount = 0,
-                    ReturnType = typeof(global::System.Threading.Tasks.Task),
-                    ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
-                    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.Base1", new global::TUnit.Core.ClassMetadata
-                    {
-                        Type = typeof(global::TUnit.TestProject.BeforeTests.Base1),
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.Base1)),
-                        Name = "Base1",
-                        Namespace = "TUnit.TestProject.BeforeTests",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-                        Parent = null
-                    })
-                },
-                HookExecutor = DefaultExecutor.Instance,
-                Order = 0,
-                RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeTestHookIndex(),
-                Body = global_TUnit_TestProject_BeforeTests_Base1_BeforeEach1_0Params_Body
-            }
-        );
+        internal static async ValueTask global_TUnit_TestProject_BeforeTests_Base1_BeforeEach1_0Params_Body(object instance, TestContext context, CancellationToken cancellationToken)
+        {
+            var typedInstance = (global::TUnit.TestProject.BeforeTests.Base1)instance;
+            await AsyncConvert.Convert(() => typedInstance.BeforeEach1());
+        }
     }
-    private static async ValueTask global_TUnit_TestProject_BeforeTests_Base1_BeforeEach1_0Params_Body(object instance, TestContext context, CancellationToken cancellationToken)
+}
+namespace TUnit.Generated
+{
+    internal static partial class TUnit_HookRegistration
     {
-        var typedInstance = (global::TUnit.TestProject.BeforeTests.Base1)instance;
-        await AsyncConvert.Convert(() => typedInstance.BeforeEach1());
+        static readonly int _h_TUnit_TestProject_BeforeTests_Base1_BeforeEach1_Before_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeTestHooks, typeof(global::TUnit.TestProject.BeforeTests.Base1),
+    new InstanceHookMethod
+    {
+        InitClassType = typeof(global::TUnit.TestProject.BeforeTests.Base1),
+        MethodInfo = new global::TUnit.Core.MethodMetadata
+        {
+            Type = typeof(global::TUnit.TestProject.BeforeTests.Base1),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.Base1)),
+            Name = "BeforeEach1",
+            GenericTypeCount = 0,
+            ReturnType = typeof(global::System.Threading.Tasks.Task),
+            ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
+            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+            Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.Base1", new global::TUnit.Core.ClassMetadata
+            {
+                Type = typeof(global::TUnit.TestProject.BeforeTests.Base1),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.Base1)),
+                Name = "Base1",
+                Namespace = "TUnit.TestProject.BeforeTests",
+                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                Parent = null
+            })
+        },
+        HookExecutor = DefaultExecutor.Instance,
+        Order = 0,
+        RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeTestHookIndex(),
+        Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_Base1_BeforeEach1_Before_Test.TUnit_TestProject_BeforeTests_Base1_BeforeEach1_Before_TestInitializer.global_TUnit_TestProject_BeforeTests_Base1_BeforeEach1_0Params_Body
+    }
+);
     }
 }
 
@@ -147,49 +153,52 @@ using global::TUnit.Core.Hooks;
 using global::TUnit.Core.Interfaces.SourceGenerator;
 using global::TUnit.Core.Models;
 using HookType = global::TUnit.Core.HookType;
-namespace TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_Base2_BeforeAll2_Before_Class;
-internal static class TUnit_TestProject_BeforeTests_Base2_BeforeAll2_Before_ClassInitializer
+namespace TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_Base2_BeforeAll2_Before_Class
 {
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
+    internal static class TUnit_TestProject_BeforeTests_Base2_BeforeAll2_Before_ClassInitializer
     {
-        global::TUnit.Core.Sources.BeforeClassHooks.GetOrAdd(typeof(global::TUnit.TestProject.BeforeTests.Base2), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.BeforeClassHookMethod>());
-        global::TUnit.Core.Sources.BeforeClassHooks[typeof(global::TUnit.TestProject.BeforeTests.Base2)].Add(
-            new BeforeClassHookMethod
-            {
-                MethodInfo = new global::TUnit.Core.MethodMetadata
-                {
-                    Type = typeof(global::TUnit.TestProject.BeforeTests.Base2),
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.Base2)),
-                    Name = "BeforeAll2",
-                    GenericTypeCount = 0,
-                    ReturnType = typeof(global::System.Threading.Tasks.Task),
-                    ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
-                    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.Base2", new global::TUnit.Core.ClassMetadata
-                    {
-                        Type = typeof(global::TUnit.TestProject.BeforeTests.Base2),
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.Base2)),
-                        Name = "Base2",
-                        Namespace = "TUnit.TestProject.BeforeTests",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-                        Parent = null
-                    })
-                },
-                HookExecutor = DefaultExecutor.Instance,
-                Order = 0,
-                RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeClassHookIndex(),
-                Body = global_TUnit_TestProject_BeforeTests_Base2_BeforeAll2_0Params_Body,
-                FilePath = @"",
-                LineNumber = 20
-            }
-        );
+        internal static async ValueTask global_TUnit_TestProject_BeforeTests_Base2_BeforeAll2_0Params_Body(ClassHookContext context, CancellationToken cancellationToken)
+        {
+            await AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.Base2.BeforeAll2());
+        }
     }
-    private static async ValueTask global_TUnit_TestProject_BeforeTests_Base2_BeforeAll2_0Params_Body(ClassHookContext context, CancellationToken cancellationToken)
+}
+namespace TUnit.Generated
+{
+    internal static partial class TUnit_HookRegistration
     {
-        await AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.Base2.BeforeAll2());
+        static readonly int _h_TUnit_TestProject_BeforeTests_Base2_BeforeAll2_Before_Class = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeClassHooks, typeof(global::TUnit.TestProject.BeforeTests.Base2),
+    new BeforeClassHookMethod
+    {
+        MethodInfo = new global::TUnit.Core.MethodMetadata
+        {
+            Type = typeof(global::TUnit.TestProject.BeforeTests.Base2),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.Base2)),
+            Name = "BeforeAll2",
+            GenericTypeCount = 0,
+            ReturnType = typeof(global::System.Threading.Tasks.Task),
+            ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
+            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+            Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.Base2", new global::TUnit.Core.ClassMetadata
+            {
+                Type = typeof(global::TUnit.TestProject.BeforeTests.Base2),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.Base2)),
+                Name = "Base2",
+                Namespace = "TUnit.TestProject.BeforeTests",
+                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                Parent = null
+            })
+        },
+        HookExecutor = DefaultExecutor.Instance,
+        Order = 0,
+        RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeClassHookIndex(),
+        Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_Base2_BeforeAll2_Before_Class.TUnit_TestProject_BeforeTests_Base2_BeforeAll2_Before_ClassInitializer.global_TUnit_TestProject_BeforeTests_Base2_BeforeAll2_0Params_Body,
+        FilePath = @"",
+        LineNumber = 20
+    }
+);
     }
 }
 
@@ -213,49 +222,52 @@ using global::TUnit.Core.Hooks;
 using global::TUnit.Core.Interfaces.SourceGenerator;
 using global::TUnit.Core.Models;
 using HookType = global::TUnit.Core.HookType;
-namespace TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_Base2_BeforeEach2_Before_Test;
-internal static class TUnit_TestProject_BeforeTests_Base2_BeforeEach2_Before_TestInitializer
+namespace TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_Base2_BeforeEach2_Before_Test
 {
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
+    internal static class TUnit_TestProject_BeforeTests_Base2_BeforeEach2_Before_TestInitializer
     {
-        global::TUnit.Core.Sources.BeforeTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.BeforeTests.Base2), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
-        global::TUnit.Core.Sources.BeforeTestHooks[typeof(global::TUnit.TestProject.BeforeTests.Base2)].Add(
-            new InstanceHookMethod
-            {
-                InitClassType = typeof(global::TUnit.TestProject.BeforeTests.Base2),
-                MethodInfo = new global::TUnit.Core.MethodMetadata
-                {
-                    Type = typeof(global::TUnit.TestProject.BeforeTests.Base2),
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.Base2)),
-                    Name = "BeforeEach2",
-                    GenericTypeCount = 0,
-                    ReturnType = typeof(global::System.Threading.Tasks.Task),
-                    ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
-                    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.Base2", new global::TUnit.Core.ClassMetadata
-                    {
-                        Type = typeof(global::TUnit.TestProject.BeforeTests.Base2),
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.Base2)),
-                        Name = "Base2",
-                        Namespace = "TUnit.TestProject.BeforeTests",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-                        Parent = null
-                    })
-                },
-                HookExecutor = DefaultExecutor.Instance,
-                Order = 0,
-                RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeTestHookIndex(),
-                Body = global_TUnit_TestProject_BeforeTests_Base2_BeforeEach2_0Params_Body
-            }
-        );
+        internal static async ValueTask global_TUnit_TestProject_BeforeTests_Base2_BeforeEach2_0Params_Body(object instance, TestContext context, CancellationToken cancellationToken)
+        {
+            var typedInstance = (global::TUnit.TestProject.BeforeTests.Base2)instance;
+            await AsyncConvert.Convert(() => typedInstance.BeforeEach2());
+        }
     }
-    private static async ValueTask global_TUnit_TestProject_BeforeTests_Base2_BeforeEach2_0Params_Body(object instance, TestContext context, CancellationToken cancellationToken)
+}
+namespace TUnit.Generated
+{
+    internal static partial class TUnit_HookRegistration
     {
-        var typedInstance = (global::TUnit.TestProject.BeforeTests.Base2)instance;
-        await AsyncConvert.Convert(() => typedInstance.BeforeEach2());
+        static readonly int _h_TUnit_TestProject_BeforeTests_Base2_BeforeEach2_Before_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeTestHooks, typeof(global::TUnit.TestProject.BeforeTests.Base2),
+    new InstanceHookMethod
+    {
+        InitClassType = typeof(global::TUnit.TestProject.BeforeTests.Base2),
+        MethodInfo = new global::TUnit.Core.MethodMetadata
+        {
+            Type = typeof(global::TUnit.TestProject.BeforeTests.Base2),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.Base2)),
+            Name = "BeforeEach2",
+            GenericTypeCount = 0,
+            ReturnType = typeof(global::System.Threading.Tasks.Task),
+            ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
+            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+            Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.Base2", new global::TUnit.Core.ClassMetadata
+            {
+                Type = typeof(global::TUnit.TestProject.BeforeTests.Base2),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.Base2)),
+                Name = "Base2",
+                Namespace = "TUnit.TestProject.BeforeTests",
+                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                Parent = null
+            })
+        },
+        HookExecutor = DefaultExecutor.Instance,
+        Order = 0,
+        RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeTestHookIndex(),
+        Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_Base2_BeforeEach2_Before_Test.TUnit_TestProject_BeforeTests_Base2_BeforeEach2_Before_TestInitializer.global_TUnit_TestProject_BeforeTests_Base2_BeforeEach2_0Params_Body
+    }
+);
     }
 }
 
@@ -279,49 +291,52 @@ using global::TUnit.Core.Hooks;
 using global::TUnit.Core.Interfaces.SourceGenerator;
 using global::TUnit.Core.Models;
 using HookType = global::TUnit.Core.HookType;
-namespace TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_Base3_BeforeAll3_Before_Class;
-internal static class TUnit_TestProject_BeforeTests_Base3_BeforeAll3_Before_ClassInitializer
+namespace TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_Base3_BeforeAll3_Before_Class
 {
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
+    internal static class TUnit_TestProject_BeforeTests_Base3_BeforeAll3_Before_ClassInitializer
     {
-        global::TUnit.Core.Sources.BeforeClassHooks.GetOrAdd(typeof(global::TUnit.TestProject.BeforeTests.Base3), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.BeforeClassHookMethod>());
-        global::TUnit.Core.Sources.BeforeClassHooks[typeof(global::TUnit.TestProject.BeforeTests.Base3)].Add(
-            new BeforeClassHookMethod
-            {
-                MethodInfo = new global::TUnit.Core.MethodMetadata
-                {
-                    Type = typeof(global::TUnit.TestProject.BeforeTests.Base3),
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.Base3)),
-                    Name = "BeforeAll3",
-                    GenericTypeCount = 0,
-                    ReturnType = typeof(global::System.Threading.Tasks.Task),
-                    ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
-                    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.Base3", new global::TUnit.Core.ClassMetadata
-                    {
-                        Type = typeof(global::TUnit.TestProject.BeforeTests.Base3),
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.Base3)),
-                        Name = "Base3",
-                        Namespace = "TUnit.TestProject.BeforeTests",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-                        Parent = null
-                    })
-                },
-                HookExecutor = DefaultExecutor.Instance,
-                Order = 0,
-                RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeClassHookIndex(),
-                Body = global_TUnit_TestProject_BeforeTests_Base3_BeforeAll3_0Params_Body,
-                FilePath = @"",
-                LineNumber = 35
-            }
-        );
+        internal static async ValueTask global_TUnit_TestProject_BeforeTests_Base3_BeforeAll3_0Params_Body(ClassHookContext context, CancellationToken cancellationToken)
+        {
+            await AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.Base3.BeforeAll3());
+        }
     }
-    private static async ValueTask global_TUnit_TestProject_BeforeTests_Base3_BeforeAll3_0Params_Body(ClassHookContext context, CancellationToken cancellationToken)
+}
+namespace TUnit.Generated
+{
+    internal static partial class TUnit_HookRegistration
     {
-        await AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.Base3.BeforeAll3());
+        static readonly int _h_TUnit_TestProject_BeforeTests_Base3_BeforeAll3_Before_Class = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeClassHooks, typeof(global::TUnit.TestProject.BeforeTests.Base3),
+    new BeforeClassHookMethod
+    {
+        MethodInfo = new global::TUnit.Core.MethodMetadata
+        {
+            Type = typeof(global::TUnit.TestProject.BeforeTests.Base3),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.Base3)),
+            Name = "BeforeAll3",
+            GenericTypeCount = 0,
+            ReturnType = typeof(global::System.Threading.Tasks.Task),
+            ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
+            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+            Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.Base3", new global::TUnit.Core.ClassMetadata
+            {
+                Type = typeof(global::TUnit.TestProject.BeforeTests.Base3),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.Base3)),
+                Name = "Base3",
+                Namespace = "TUnit.TestProject.BeforeTests",
+                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                Parent = null
+            })
+        },
+        HookExecutor = DefaultExecutor.Instance,
+        Order = 0,
+        RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeClassHookIndex(),
+        Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_Base3_BeforeAll3_Before_Class.TUnit_TestProject_BeforeTests_Base3_BeforeAll3_Before_ClassInitializer.global_TUnit_TestProject_BeforeTests_Base3_BeforeAll3_0Params_Body,
+        FilePath = @"",
+        LineNumber = 35
+    }
+);
     }
 }
 
@@ -345,49 +360,52 @@ using global::TUnit.Core.Hooks;
 using global::TUnit.Core.Interfaces.SourceGenerator;
 using global::TUnit.Core.Models;
 using HookType = global::TUnit.Core.HookType;
-namespace TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_Base3_BeforeEach3_Before_Test;
-internal static class TUnit_TestProject_BeforeTests_Base3_BeforeEach3_Before_TestInitializer
+namespace TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_Base3_BeforeEach3_Before_Test
 {
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
+    internal static class TUnit_TestProject_BeforeTests_Base3_BeforeEach3_Before_TestInitializer
     {
-        global::TUnit.Core.Sources.BeforeTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.BeforeTests.Base3), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
-        global::TUnit.Core.Sources.BeforeTestHooks[typeof(global::TUnit.TestProject.BeforeTests.Base3)].Add(
-            new InstanceHookMethod
-            {
-                InitClassType = typeof(global::TUnit.TestProject.BeforeTests.Base3),
-                MethodInfo = new global::TUnit.Core.MethodMetadata
-                {
-                    Type = typeof(global::TUnit.TestProject.BeforeTests.Base3),
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.Base3)),
-                    Name = "BeforeEach3",
-                    GenericTypeCount = 0,
-                    ReturnType = typeof(global::System.Threading.Tasks.Task),
-                    ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
-                    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.Base3", new global::TUnit.Core.ClassMetadata
-                    {
-                        Type = typeof(global::TUnit.TestProject.BeforeTests.Base3),
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.Base3)),
-                        Name = "Base3",
-                        Namespace = "TUnit.TestProject.BeforeTests",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-                        Parent = null
-                    })
-                },
-                HookExecutor = DefaultExecutor.Instance,
-                Order = 0,
-                RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeTestHookIndex(),
-                Body = global_TUnit_TestProject_BeforeTests_Base3_BeforeEach3_0Params_Body
-            }
-        );
+        internal static async ValueTask global_TUnit_TestProject_BeforeTests_Base3_BeforeEach3_0Params_Body(object instance, TestContext context, CancellationToken cancellationToken)
+        {
+            var typedInstance = (global::TUnit.TestProject.BeforeTests.Base3)instance;
+            await AsyncConvert.Convert(() => typedInstance.BeforeEach3());
+        }
     }
-    private static async ValueTask global_TUnit_TestProject_BeforeTests_Base3_BeforeEach3_0Params_Body(object instance, TestContext context, CancellationToken cancellationToken)
+}
+namespace TUnit.Generated
+{
+    internal static partial class TUnit_HookRegistration
     {
-        var typedInstance = (global::TUnit.TestProject.BeforeTests.Base3)instance;
-        await AsyncConvert.Convert(() => typedInstance.BeforeEach3());
+        static readonly int _h_TUnit_TestProject_BeforeTests_Base3_BeforeEach3_Before_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeTestHooks, typeof(global::TUnit.TestProject.BeforeTests.Base3),
+    new InstanceHookMethod
+    {
+        InitClassType = typeof(global::TUnit.TestProject.BeforeTests.Base3),
+        MethodInfo = new global::TUnit.Core.MethodMetadata
+        {
+            Type = typeof(global::TUnit.TestProject.BeforeTests.Base3),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.Base3)),
+            Name = "BeforeEach3",
+            GenericTypeCount = 0,
+            ReturnType = typeof(global::System.Threading.Tasks.Task),
+            ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
+            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+            Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.Base3", new global::TUnit.Core.ClassMetadata
+            {
+                Type = typeof(global::TUnit.TestProject.BeforeTests.Base3),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.Base3)),
+                Name = "Base3",
+                Namespace = "TUnit.TestProject.BeforeTests",
+                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                Parent = null
+            })
+        },
+        HookExecutor = DefaultExecutor.Instance,
+        Order = 0,
+        RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeTestHookIndex(),
+        Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_Base3_BeforeEach3_Before_Test.TUnit_TestProject_BeforeTests_Base3_BeforeEach3_Before_TestInitializer.global_TUnit_TestProject_BeforeTests_Base3_BeforeEach3_0Params_Body
+    }
+);
     }
 }
 
@@ -411,49 +429,52 @@ using global::TUnit.Core.Hooks;
 using global::TUnit.Core.Interfaces.SourceGenerator;
 using global::TUnit.Core.Models;
 using HookType = global::TUnit.Core.HookType;
-namespace TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUp_Before_Class;
-internal static class TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUp_Before_ClassInitializer
+namespace TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUp_Before_Class
 {
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
+    internal static class TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUp_Before_ClassInitializer
     {
-        global::TUnit.Core.Sources.BeforeClassHooks.GetOrAdd(typeof(global::TUnit.TestProject.BeforeTests.SetupTests), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.BeforeClassHookMethod>());
-        global::TUnit.Core.Sources.BeforeClassHooks[typeof(global::TUnit.TestProject.BeforeTests.SetupTests)].Add(
-            new BeforeClassHookMethod
-            {
-                MethodInfo = new global::TUnit.Core.MethodMetadata
-                {
-                    Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.SetupTests)),
-                    Name = "BeforeAllSetUp",
-                    GenericTypeCount = 0,
-                    ReturnType = typeof(global::System.Threading.Tasks.Task),
-                    ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
-                    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.SetupTests", new global::TUnit.Core.ClassMetadata
-                    {
-                        Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.SetupTests)),
-                        Name = "SetupTests",
-                        Namespace = "TUnit.TestProject.BeforeTests",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-                        Parent = null
-                    })
-                },
-                HookExecutor = DefaultExecutor.Instance,
-                Order = 0,
-                RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeClassHookIndex(),
-                Body = global_TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUp_0Params_Body,
-                FilePath = @"",
-                LineNumber = 50
-            }
-        );
+        internal static async ValueTask global_TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUp_0Params_Body(ClassHookContext context, CancellationToken cancellationToken)
+        {
+            await AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.SetupTests.BeforeAllSetUp());
+        }
     }
-    private static async ValueTask global_TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUp_0Params_Body(ClassHookContext context, CancellationToken cancellationToken)
+}
+namespace TUnit.Generated
+{
+    internal static partial class TUnit_HookRegistration
     {
-        await AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.SetupTests.BeforeAllSetUp());
+        static readonly int _h_TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUp_Before_Class = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeClassHooks, typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+    new BeforeClassHookMethod
+    {
+        MethodInfo = new global::TUnit.Core.MethodMetadata
+        {
+            Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.SetupTests)),
+            Name = "BeforeAllSetUp",
+            GenericTypeCount = 0,
+            ReturnType = typeof(global::System.Threading.Tasks.Task),
+            ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
+            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+            Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.SetupTests", new global::TUnit.Core.ClassMetadata
+            {
+                Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.SetupTests)),
+                Name = "SetupTests",
+                Namespace = "TUnit.TestProject.BeforeTests",
+                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                Parent = null
+            })
+        },
+        HookExecutor = DefaultExecutor.Instance,
+        Order = 0,
+        RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeClassHookIndex(),
+        Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUp_Before_Class.TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUp_Before_ClassInitializer.global_TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUp_0Params_Body,
+        FilePath = @"",
+        LineNumber = 50
+    }
+);
     }
 }
 
@@ -477,52 +498,55 @@ using global::TUnit.Core.Hooks;
 using global::TUnit.Core.Interfaces.SourceGenerator;
 using global::TUnit.Core.Models;
 using HookType = global::TUnit.Core.HookType;
-namespace TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWithContext__ClassHookContext_Before_Class;
-internal static class TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWithContext__ClassHookContext_Before_ClassInitializer
+namespace TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWithContext__ClassHookContext_Before_Class
 {
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
+    internal static class TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWithContext__ClassHookContext_Before_ClassInitializer
     {
-        global::TUnit.Core.Sources.BeforeClassHooks.GetOrAdd(typeof(global::TUnit.TestProject.BeforeTests.SetupTests), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.BeforeClassHookMethod>());
-        global::TUnit.Core.Sources.BeforeClassHooks[typeof(global::TUnit.TestProject.BeforeTests.SetupTests)].Add(
-            new BeforeClassHookMethod
-            {
-                MethodInfo = new global::TUnit.Core.MethodMetadata
-                {
-                    Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.SetupTests)),
-                    Name = "BeforeAllSetUpWithContext",
-                    GenericTypeCount = 0,
-                    ReturnType = typeof(global::System.Threading.Tasks.Task),
-                    ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
-                    Parameters = new global::TUnit.Core.ParameterMetadata[]
-                    {
-                        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.Core.ClassHookContext), "context", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.Core.ClassHookContext)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("BeforeAllSetUpWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.ClassHookContext) }, null)!.GetParameters()[0])
-                    },
-                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.SetupTests", new global::TUnit.Core.ClassMetadata
-                    {
-                        Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.SetupTests)),
-                        Name = "SetupTests",
-                        Namespace = "TUnit.TestProject.BeforeTests",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-                        Parent = null
-                    })
-                },
-                HookExecutor = DefaultExecutor.Instance,
-                Order = 0,
-                RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeClassHookIndex(),
-                Body = global_TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWithContext_1Params_Body,
-                FilePath = @"",
-                LineNumber = 56
-            }
-        );
+        internal static async ValueTask global_TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWithContext_1Params_Body(ClassHookContext context, CancellationToken cancellationToken)
+        {
+            await AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.SetupTests.BeforeAllSetUpWithContext(context));
+        }
     }
-    private static async ValueTask global_TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWithContext_1Params_Body(ClassHookContext context, CancellationToken cancellationToken)
+}
+namespace TUnit.Generated
+{
+    internal static partial class TUnit_HookRegistration
     {
-        await AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.SetupTests.BeforeAllSetUpWithContext(context));
+        static readonly int _h_TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWithContext__ClassHookContext_Before_Class = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeClassHooks, typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+    new BeforeClassHookMethod
+    {
+        MethodInfo = new global::TUnit.Core.MethodMetadata
+        {
+            Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.SetupTests)),
+            Name = "BeforeAllSetUpWithContext",
+            GenericTypeCount = 0,
+            ReturnType = typeof(global::System.Threading.Tasks.Task),
+            ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
+            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            {
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.Core.ClassHookContext), "context", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.Core.ClassHookContext)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("BeforeAllSetUpWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.ClassHookContext) }, null)!.GetParameters()[0])
+            },
+            Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.SetupTests", new global::TUnit.Core.ClassMetadata
+            {
+                Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.SetupTests)),
+                Name = "SetupTests",
+                Namespace = "TUnit.TestProject.BeforeTests",
+                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                Parent = null
+            })
+        },
+        HookExecutor = DefaultExecutor.Instance,
+        Order = 0,
+        RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeClassHookIndex(),
+        Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWithContext__ClassHookContext_Before_Class.TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWithContext__ClassHookContext_Before_ClassInitializer.global_TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWithContext_1Params_Body,
+        FilePath = @"",
+        LineNumber = 56
+    }
+);
     }
 }
 
@@ -546,52 +570,55 @@ using global::TUnit.Core.Hooks;
 using global::TUnit.Core.Interfaces.SourceGenerator;
 using global::TUnit.Core.Models;
 using HookType = global::TUnit.Core.HookType;
-namespace TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUp__CancellationToken_Before_Class;
-internal static class TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUp__CancellationToken_Before_ClassInitializer
+namespace TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUp__CancellationToken_Before_Class
 {
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
+    internal static class TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUp__CancellationToken_Before_ClassInitializer
     {
-        global::TUnit.Core.Sources.BeforeClassHooks.GetOrAdd(typeof(global::TUnit.TestProject.BeforeTests.SetupTests), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.BeforeClassHookMethod>());
-        global::TUnit.Core.Sources.BeforeClassHooks[typeof(global::TUnit.TestProject.BeforeTests.SetupTests)].Add(
-            new BeforeClassHookMethod
-            {
-                MethodInfo = new global::TUnit.Core.MethodMetadata
-                {
-                    Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.SetupTests)),
-                    Name = "BeforeAllSetUp",
-                    GenericTypeCount = 0,
-                    ReturnType = typeof(global::System.Threading.Tasks.Task),
-                    ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
-                    Parameters = new global::TUnit.Core.ParameterMetadata[]
-                    {
-                        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("BeforeAllSetUp", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0])
-                    },
-                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.SetupTests", new global::TUnit.Core.ClassMetadata
-                    {
-                        Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.SetupTests)),
-                        Name = "SetupTests",
-                        Namespace = "TUnit.TestProject.BeforeTests",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-                        Parent = null
-                    })
-                },
-                HookExecutor = DefaultExecutor.Instance,
-                Order = 0,
-                RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeClassHookIndex(),
-                Body = global_TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUp_1Params_Body,
-                FilePath = @"",
-                LineNumber = 62
-            }
-        );
+        internal static async ValueTask global_TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUp_1Params_Body(ClassHookContext context, CancellationToken cancellationToken)
+        {
+            await AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.SetupTests.BeforeAllSetUp(cancellationToken));
+        }
     }
-    private static async ValueTask global_TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUp_1Params_Body(ClassHookContext context, CancellationToken cancellationToken)
+}
+namespace TUnit.Generated
+{
+    internal static partial class TUnit_HookRegistration
     {
-        await AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.SetupTests.BeforeAllSetUp(cancellationToken));
+        static readonly int _h_TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUp__CancellationToken_Before_Class = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeClassHooks, typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+    new BeforeClassHookMethod
+    {
+        MethodInfo = new global::TUnit.Core.MethodMetadata
+        {
+            Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.SetupTests)),
+            Name = "BeforeAllSetUp",
+            GenericTypeCount = 0,
+            ReturnType = typeof(global::System.Threading.Tasks.Task),
+            ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
+            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            {
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("BeforeAllSetUp", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0])
+            },
+            Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.SetupTests", new global::TUnit.Core.ClassMetadata
+            {
+                Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.SetupTests)),
+                Name = "SetupTests",
+                Namespace = "TUnit.TestProject.BeforeTests",
+                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                Parent = null
+            })
+        },
+        HookExecutor = DefaultExecutor.Instance,
+        Order = 0,
+        RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeClassHookIndex(),
+        Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUp__CancellationToken_Before_Class.TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUp__CancellationToken_Before_ClassInitializer.global_TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUp_1Params_Body,
+        FilePath = @"",
+        LineNumber = 62
+    }
+);
     }
 }
 
@@ -615,53 +642,56 @@ using global::TUnit.Core.Hooks;
 using global::TUnit.Core.Interfaces.SourceGenerator;
 using global::TUnit.Core.Models;
 using HookType = global::TUnit.Core.HookType;
-namespace TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWithContext__ClassHookContext_CancellationToken_Before_Class;
-internal static class TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWithContext__ClassHookContext_CancellationToken_Before_ClassInitializer
+namespace TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWithContext__ClassHookContext_CancellationToken_Before_Class
 {
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
+    internal static class TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWithContext__ClassHookContext_CancellationToken_Before_ClassInitializer
     {
-        global::TUnit.Core.Sources.BeforeClassHooks.GetOrAdd(typeof(global::TUnit.TestProject.BeforeTests.SetupTests), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.BeforeClassHookMethod>());
-        global::TUnit.Core.Sources.BeforeClassHooks[typeof(global::TUnit.TestProject.BeforeTests.SetupTests)].Add(
-            new BeforeClassHookMethod
-            {
-                MethodInfo = new global::TUnit.Core.MethodMetadata
-                {
-                    Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.SetupTests)),
-                    Name = "BeforeAllSetUpWithContext",
-                    GenericTypeCount = 0,
-                    ReturnType = typeof(global::System.Threading.Tasks.Task),
-                    ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
-                    Parameters = new global::TUnit.Core.ParameterMetadata[]
-                    {
-                        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.Core.ClassHookContext), "context", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.Core.ClassHookContext)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("BeforeAllSetUpWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.ClassHookContext), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]),
-                        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("BeforeAllSetUpWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.ClassHookContext), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1])
-                    },
-                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.SetupTests", new global::TUnit.Core.ClassMetadata
-                    {
-                        Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.SetupTests)),
-                        Name = "SetupTests",
-                        Namespace = "TUnit.TestProject.BeforeTests",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-                        Parent = null
-                    })
-                },
-                HookExecutor = DefaultExecutor.Instance,
-                Order = 0,
-                RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeClassHookIndex(),
-                Body = global_TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWithContext_2Params_Body,
-                FilePath = @"",
-                LineNumber = 68
-            }
-        );
+        internal static async ValueTask global_TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWithContext_2Params_Body(ClassHookContext context, CancellationToken cancellationToken)
+        {
+            await AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.SetupTests.BeforeAllSetUpWithContext(context, cancellationToken));
+        }
     }
-    private static async ValueTask global_TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWithContext_2Params_Body(ClassHookContext context, CancellationToken cancellationToken)
+}
+namespace TUnit.Generated
+{
+    internal static partial class TUnit_HookRegistration
     {
-        await AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.SetupTests.BeforeAllSetUpWithContext(context, cancellationToken));
+        static readonly int _h_TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWithContext__ClassHookContext_CancellationToken_Before_Class = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeClassHooks, typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+    new BeforeClassHookMethod
+    {
+        MethodInfo = new global::TUnit.Core.MethodMetadata
+        {
+            Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.SetupTests)),
+            Name = "BeforeAllSetUpWithContext",
+            GenericTypeCount = 0,
+            ReturnType = typeof(global::System.Threading.Tasks.Task),
+            ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
+            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            {
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.Core.ClassHookContext), "context", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.Core.ClassHookContext)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("BeforeAllSetUpWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.ClassHookContext), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]),
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("BeforeAllSetUpWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.ClassHookContext), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1])
+            },
+            Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.SetupTests", new global::TUnit.Core.ClassMetadata
+            {
+                Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.SetupTests)),
+                Name = "SetupTests",
+                Namespace = "TUnit.TestProject.BeforeTests",
+                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                Parent = null
+            })
+        },
+        HookExecutor = DefaultExecutor.Instance,
+        Order = 0,
+        RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeClassHookIndex(),
+        Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWithContext__ClassHookContext_CancellationToken_Before_Class.TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWithContext__ClassHookContext_CancellationToken_Before_ClassInitializer.global_TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWithContext_2Params_Body,
+        FilePath = @"",
+        LineNumber = 68
+    }
+);
     }
 }
 
@@ -685,49 +715,52 @@ using global::TUnit.Core.Hooks;
 using global::TUnit.Core.Interfaces.SourceGenerator;
 using global::TUnit.Core.Models;
 using HookType = global::TUnit.Core.HookType;
-namespace TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_SetupTests_Setup_Before_Test;
-internal static class TUnit_TestProject_BeforeTests_SetupTests_Setup_Before_TestInitializer
+namespace TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_SetupTests_Setup_Before_Test
 {
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
+    internal static class TUnit_TestProject_BeforeTests_SetupTests_Setup_Before_TestInitializer
     {
-        global::TUnit.Core.Sources.BeforeTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.BeforeTests.SetupTests), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
-        global::TUnit.Core.Sources.BeforeTestHooks[typeof(global::TUnit.TestProject.BeforeTests.SetupTests)].Add(
-            new InstanceHookMethod
-            {
-                InitClassType = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
-                MethodInfo = new global::TUnit.Core.MethodMetadata
-                {
-                    Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.SetupTests)),
-                    Name = "Setup",
-                    GenericTypeCount = 0,
-                    ReturnType = typeof(global::System.Threading.Tasks.Task),
-                    ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
-                    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.SetupTests", new global::TUnit.Core.ClassMetadata
-                    {
-                        Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.SetupTests)),
-                        Name = "SetupTests",
-                        Namespace = "TUnit.TestProject.BeforeTests",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-                        Parent = null
-                    })
-                },
-                HookExecutor = DefaultExecutor.Instance,
-                Order = 0,
-                RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeTestHookIndex(),
-                Body = global_TUnit_TestProject_BeforeTests_SetupTests_Setup_0Params_Body
-            }
-        );
+        internal static async ValueTask global_TUnit_TestProject_BeforeTests_SetupTests_Setup_0Params_Body(object instance, TestContext context, CancellationToken cancellationToken)
+        {
+            var typedInstance = (global::TUnit.TestProject.BeforeTests.SetupTests)instance;
+            await AsyncConvert.Convert(() => typedInstance.Setup());
+        }
     }
-    private static async ValueTask global_TUnit_TestProject_BeforeTests_SetupTests_Setup_0Params_Body(object instance, TestContext context, CancellationToken cancellationToken)
+}
+namespace TUnit.Generated
+{
+    internal static partial class TUnit_HookRegistration
     {
-        var typedInstance = (global::TUnit.TestProject.BeforeTests.SetupTests)instance;
-        await AsyncConvert.Convert(() => typedInstance.Setup());
+        static readonly int _h_TUnit_TestProject_BeforeTests_SetupTests_Setup_Before_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeTestHooks, typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+    new InstanceHookMethod
+    {
+        InitClassType = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+        MethodInfo = new global::TUnit.Core.MethodMetadata
+        {
+            Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.SetupTests)),
+            Name = "Setup",
+            GenericTypeCount = 0,
+            ReturnType = typeof(global::System.Threading.Tasks.Task),
+            ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
+            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+            Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.SetupTests", new global::TUnit.Core.ClassMetadata
+            {
+                Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.SetupTests)),
+                Name = "SetupTests",
+                Namespace = "TUnit.TestProject.BeforeTests",
+                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                Parent = null
+            })
+        },
+        HookExecutor = DefaultExecutor.Instance,
+        Order = 0,
+        RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeTestHookIndex(),
+        Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_SetupTests_Setup_Before_Test.TUnit_TestProject_BeforeTests_SetupTests_Setup_Before_TestInitializer.global_TUnit_TestProject_BeforeTests_SetupTests_Setup_0Params_Body
+    }
+);
     }
 }
 
@@ -751,52 +784,55 @@ using global::TUnit.Core.Hooks;
 using global::TUnit.Core.Interfaces.SourceGenerator;
 using global::TUnit.Core.Models;
 using HookType = global::TUnit.Core.HookType;
-namespace TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_SetupTests_Setup__CancellationToken_Before_Test;
-internal static class TUnit_TestProject_BeforeTests_SetupTests_Setup__CancellationToken_Before_TestInitializer
+namespace TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_SetupTests_Setup__CancellationToken_Before_Test
 {
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
+    internal static class TUnit_TestProject_BeforeTests_SetupTests_Setup__CancellationToken_Before_TestInitializer
     {
-        global::TUnit.Core.Sources.BeforeTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.BeforeTests.SetupTests), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
-        global::TUnit.Core.Sources.BeforeTestHooks[typeof(global::TUnit.TestProject.BeforeTests.SetupTests)].Add(
-            new InstanceHookMethod
-            {
-                InitClassType = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
-                MethodInfo = new global::TUnit.Core.MethodMetadata
-                {
-                    Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.SetupTests)),
-                    Name = "Setup",
-                    GenericTypeCount = 0,
-                    ReturnType = typeof(global::System.Threading.Tasks.Task),
-                    ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
-                    Parameters = new global::TUnit.Core.ParameterMetadata[]
-                    {
-                        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("Setup", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0])
-                    },
-                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.SetupTests", new global::TUnit.Core.ClassMetadata
-                    {
-                        Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.SetupTests)),
-                        Name = "SetupTests",
-                        Namespace = "TUnit.TestProject.BeforeTests",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-                        Parent = null
-                    })
-                },
-                HookExecutor = DefaultExecutor.Instance,
-                Order = 0,
-                RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeTestHookIndex(),
-                Body = global_TUnit_TestProject_BeforeTests_SetupTests_Setup_1Params_Body
-            }
-        );
+        internal static async ValueTask global_TUnit_TestProject_BeforeTests_SetupTests_Setup_1Params_Body(object instance, TestContext context, CancellationToken cancellationToken)
+        {
+            var typedInstance = (global::TUnit.TestProject.BeforeTests.SetupTests)instance;
+            await AsyncConvert.Convert(() => typedInstance.Setup(cancellationToken));
+        }
     }
-    private static async ValueTask global_TUnit_TestProject_BeforeTests_SetupTests_Setup_1Params_Body(object instance, TestContext context, CancellationToken cancellationToken)
+}
+namespace TUnit.Generated
+{
+    internal static partial class TUnit_HookRegistration
     {
-        var typedInstance = (global::TUnit.TestProject.BeforeTests.SetupTests)instance;
-        await AsyncConvert.Convert(() => typedInstance.Setup(cancellationToken));
+        static readonly int _h_TUnit_TestProject_BeforeTests_SetupTests_Setup__CancellationToken_Before_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeTestHooks, typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+    new InstanceHookMethod
+    {
+        InitClassType = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+        MethodInfo = new global::TUnit.Core.MethodMetadata
+        {
+            Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.SetupTests)),
+            Name = "Setup",
+            GenericTypeCount = 0,
+            ReturnType = typeof(global::System.Threading.Tasks.Task),
+            ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
+            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            {
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("Setup", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0])
+            },
+            Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.SetupTests", new global::TUnit.Core.ClassMetadata
+            {
+                Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.SetupTests)),
+                Name = "SetupTests",
+                Namespace = "TUnit.TestProject.BeforeTests",
+                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                Parent = null
+            })
+        },
+        HookExecutor = DefaultExecutor.Instance,
+        Order = 0,
+        RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeTestHookIndex(),
+        Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_SetupTests_Setup__CancellationToken_Before_Test.TUnit_TestProject_BeforeTests_SetupTests_Setup__CancellationToken_Before_TestInitializer.global_TUnit_TestProject_BeforeTests_SetupTests_Setup_1Params_Body
+    }
+);
     }
 }
 
@@ -820,52 +856,55 @@ using global::TUnit.Core.Hooks;
 using global::TUnit.Core.Interfaces.SourceGenerator;
 using global::TUnit.Core.Models;
 using HookType = global::TUnit.Core.HookType;
-namespace TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext__TestContext_Before_Test;
-internal static class TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext__TestContext_Before_TestInitializer
+namespace TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext__TestContext_Before_Test
 {
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
+    internal static class TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext__TestContext_Before_TestInitializer
     {
-        global::TUnit.Core.Sources.BeforeTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.BeforeTests.SetupTests), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
-        global::TUnit.Core.Sources.BeforeTestHooks[typeof(global::TUnit.TestProject.BeforeTests.SetupTests)].Add(
-            new InstanceHookMethod
-            {
-                InitClassType = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
-                MethodInfo = new global::TUnit.Core.MethodMetadata
-                {
-                    Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.SetupTests)),
-                    Name = "SetupWithContext",
-                    GenericTypeCount = 0,
-                    ReturnType = typeof(global::System.Threading.Tasks.Task),
-                    ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
-                    Parameters = new global::TUnit.Core.ParameterMetadata[]
-                    {
-                        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.Core.TestContext), "testContext", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.Core.TestContext)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("SetupWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext) }, null)!.GetParameters()[0])
-                    },
-                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.SetupTests", new global::TUnit.Core.ClassMetadata
-                    {
-                        Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.SetupTests)),
-                        Name = "SetupTests",
-                        Namespace = "TUnit.TestProject.BeforeTests",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-                        Parent = null
-                    })
-                },
-                HookExecutor = DefaultExecutor.Instance,
-                Order = 0,
-                RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeTestHookIndex(),
-                Body = global_TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext_1Params_Body
-            }
-        );
+        internal static async ValueTask global_TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext_1Params_Body(object instance, TestContext context, CancellationToken cancellationToken)
+        {
+            var typedInstance = (global::TUnit.TestProject.BeforeTests.SetupTests)instance;
+            await AsyncConvert.Convert(() => typedInstance.SetupWithContext(context));
+        }
     }
-    private static async ValueTask global_TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext_1Params_Body(object instance, TestContext context, CancellationToken cancellationToken)
+}
+namespace TUnit.Generated
+{
+    internal static partial class TUnit_HookRegistration
     {
-        var typedInstance = (global::TUnit.TestProject.BeforeTests.SetupTests)instance;
-        await AsyncConvert.Convert(() => typedInstance.SetupWithContext(context));
+        static readonly int _h_TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext__TestContext_Before_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeTestHooks, typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+    new InstanceHookMethod
+    {
+        InitClassType = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+        MethodInfo = new global::TUnit.Core.MethodMetadata
+        {
+            Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.SetupTests)),
+            Name = "SetupWithContext",
+            GenericTypeCount = 0,
+            ReturnType = typeof(global::System.Threading.Tasks.Task),
+            ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
+            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            {
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.Core.TestContext), "testContext", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.Core.TestContext)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("SetupWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext) }, null)!.GetParameters()[0])
+            },
+            Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.SetupTests", new global::TUnit.Core.ClassMetadata
+            {
+                Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.SetupTests)),
+                Name = "SetupTests",
+                Namespace = "TUnit.TestProject.BeforeTests",
+                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                Parent = null
+            })
+        },
+        HookExecutor = DefaultExecutor.Instance,
+        Order = 0,
+        RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeTestHookIndex(),
+        Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext__TestContext_Before_Test.TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext__TestContext_Before_TestInitializer.global_TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext_1Params_Body
+    }
+);
     }
 }
 
@@ -889,52 +928,55 @@ using global::TUnit.Core.Hooks;
 using global::TUnit.Core.Interfaces.SourceGenerator;
 using global::TUnit.Core.Models;
 using HookType = global::TUnit.Core.HookType;
-namespace TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext__TestContext_CancellationToken_Before_Test;
-internal static class TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext__TestContext_CancellationToken_Before_TestInitializer
+namespace TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext__TestContext_CancellationToken_Before_Test
 {
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
+    internal static class TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext__TestContext_CancellationToken_Before_TestInitializer
     {
-        global::TUnit.Core.Sources.BeforeTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.BeforeTests.SetupTests), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
-        global::TUnit.Core.Sources.BeforeTestHooks[typeof(global::TUnit.TestProject.BeforeTests.SetupTests)].Add(
-            new InstanceHookMethod
-            {
-                InitClassType = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
-                MethodInfo = new global::TUnit.Core.MethodMetadata
-                {
-                    Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.SetupTests)),
-                    Name = "SetupWithContext",
-                    GenericTypeCount = 0,
-                    ReturnType = typeof(global::System.Threading.Tasks.Task),
-                    ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
-                    Parameters = new global::TUnit.Core.ParameterMetadata[]
-                    {
-                        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.Core.TestContext), "testContext", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.Core.TestContext)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("SetupWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]),
-                        global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("SetupWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1])
-                    },
-                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.SetupTests", new global::TUnit.Core.ClassMetadata
-                    {
-                        Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.SetupTests)),
-                        Name = "SetupTests",
-                        Namespace = "TUnit.TestProject.BeforeTests",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-                        Parent = null
-                    })
-                },
-                HookExecutor = DefaultExecutor.Instance,
-                Order = 0,
-                RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeTestHookIndex(),
-                Body = global_TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext_2Params_Body
-            }
-        );
+        internal static async ValueTask global_TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext_2Params_Body(object instance, TestContext context, CancellationToken cancellationToken)
+        {
+            var typedInstance = (global::TUnit.TestProject.BeforeTests.SetupTests)instance;
+            await AsyncConvert.Convert(() => typedInstance.SetupWithContext(context, cancellationToken));
+        }
     }
-    private static async ValueTask global_TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext_2Params_Body(object instance, TestContext context, CancellationToken cancellationToken)
+}
+namespace TUnit.Generated
+{
+    internal static partial class TUnit_HookRegistration
     {
-        var typedInstance = (global::TUnit.TestProject.BeforeTests.SetupTests)instance;
-        await AsyncConvert.Convert(() => typedInstance.SetupWithContext(context, cancellationToken));
+        static readonly int _h_TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext__TestContext_CancellationToken_Before_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeTestHooks, typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+    new InstanceHookMethod
+    {
+        InitClassType = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+        MethodInfo = new global::TUnit.Core.MethodMetadata
+        {
+            Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.SetupTests)),
+            Name = "SetupWithContext",
+            GenericTypeCount = 0,
+            ReturnType = typeof(global::System.Threading.Tasks.Task),
+            ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
+            Parameters = new global::TUnit.Core.ParameterMetadata[]
+            {
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.Core.TestContext), "testContext", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.Core.TestContext)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("SetupWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]),
+                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("SetupWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1])
+            },
+            Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.SetupTests", new global::TUnit.Core.ClassMetadata
+            {
+                Type = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.SetupTests)),
+                Name = "SetupTests",
+                Namespace = "TUnit.TestProject.BeforeTests",
+                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                Parent = null
+            })
+        },
+        HookExecutor = DefaultExecutor.Instance,
+        Order = 0,
+        RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeTestHookIndex(),
+        Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext__TestContext_CancellationToken_Before_Test.TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext__TestContext_CancellationToken_Before_TestInitializer.global_TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext_2Params_Body
+    }
+);
     }
 }

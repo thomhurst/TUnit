@@ -893,9 +893,8 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
     {
         return new global::TUnit.TestProject.STAThreadTests();
     }
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), TUnit_TestProject_STAThreadTests__TestSource.GetTests, TUnit_TestProject_STAThreadTests__TestSource.EnumerateTestDescriptors);
-    }
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_STAThreadTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterReturn(typeof(global::TUnit.TestProject.STAThreadTests), TUnit_TestProject_STAThreadTests__TestSource.GetTests, TUnit_TestProject_STAThreadTests__TestSource.EnumerateTestDescriptors);
 }

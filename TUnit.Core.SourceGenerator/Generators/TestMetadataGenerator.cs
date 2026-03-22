@@ -450,7 +450,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         if (!useClassHelper)
         {
-            GenerateModuleInitializer(writer, testMethod, uniqueClassName);
+            GenerateTestRegistrationField(writer, testMethod, uniqueClassName);
         }
     }
 
@@ -2404,19 +2404,23 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             .Replace("\t", "\\t");
     }
 
-    private static void GenerateModuleInitializer(CodeWriter writer, TestMethodMetadata testMethod, string uniqueClassName)
+    private static void GenerateTestRegistrationField(CodeWriter writer, TestMethodMetadata testMethod, string uniqueClassName)
+    {
+        EmitRegistrationField(writer, uniqueClassName,
+            $"global::TUnit.Core.SourceRegistrar.RegisterReturn({GenerateTypeReference(testMethod.TypeSymbol, testMethod.IsGenericType)}, new {uniqueClassName}())");
+    }
+
+    /// <summary>
+    /// Emits a static field on the shared TUnit_TestRegistration partial class.
+    /// All contributions merge into a single .cctor, reducing JIT overhead from O(N) methods to O(1).
+    /// </summary>
+    private static void EmitRegistrationField(CodeWriter writer, string fieldName, string registrarCall)
     {
         writer.AppendLine();
-        writer.AppendLine($"internal static class {uniqueClassName.Replace("_TestSource", "_ModuleInitializer")}");
+        writer.AppendLine("internal static partial class TUnit_TestRegistration");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
-        writer.AppendLine("public static void Initialize()");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine($"global::TUnit.Core.SourceRegistrar.Register({GenerateTypeReference(testMethod.TypeSymbol, testMethod.IsGenericType)}, new {uniqueClassName}());");
-        writer.Unindent();
-        writer.AppendLine("}");
+        writer.AppendLine($"static readonly int _r_{fieldName} = {registrarCall};");
         writer.Unindent();
         writer.AppendLine("}");
     }
@@ -3023,17 +3027,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.Unindent();
             writer.AppendLine("}");
 
-            // ModuleInitializer — registers via delegates (no .ctor allocation)
-            writer.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
-            writer.AppendLine("internal static void Initialize()");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine($"global::TUnit.Core.SourceRegistrar.Register(typeof({classGroup.ClassFullyQualified}), {classGroup.TestSourceName}.GetTests, {classGroup.TestSourceName}.EnumerateTestDescriptors);");
             writer.Unindent();
             writer.AppendLine("}");
 
-            writer.Unindent();
-            writer.AppendLine("}");
+            EmitRegistrationField(writer, classGroup.TestSourceName,
+                $"global::TUnit.Core.SourceRegistrar.RegisterReturn(typeof({classGroup.ClassFullyQualified}), {classGroup.TestSourceName}.GetTests, {classGroup.TestSourceName}.EnumerateTestDescriptors)");
 
             context.AddSource($"{classGroup.TestSourceName}.g.cs", SourceText.From(writer.ToString(), Encoding.UTF8));
         }

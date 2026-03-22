@@ -1268,7 +1268,12 @@ namespace
         public static void RegisterAssembly(<.Assembly> assemblyLoader) { }
         public static void RegisterDynamic(.IDynamicTestSource testSource) { }
         public static void RegisterGlobalInitializer(<.> initializer) { }
+        public static int RegisterHook<T>(.<T> bag, T hook) { }
+        public static int RegisterHook<T>(.<.Assembly, .<T>> dictionary, .Assembly key, T hook) { }
+        public static int RegisterHook<T>(.<, .<T>> dictionary,  key, T hook) { }
         public static void RegisterProperty(..IPropertySource propertySource) { }
+        public static int RegisterReturn( testClassType, ..ITestSource testSource) { }
+        public static int RegisterReturn( testClassType, <string, .<.TestMetadata>> getTests, <.<.TestDescriptor>> enumerateDescriptors) { }
     }
     public static class Sources
     {

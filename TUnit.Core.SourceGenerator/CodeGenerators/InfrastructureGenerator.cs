@@ -447,6 +447,16 @@ public class InfrastructureGenerator : IIncrementalGenerator
                 }
 
                 sourceBuilder.AppendLine();
+
+                // Trigger consolidated registration .cctors.
+                // Per-class/per-method test sources and per-hook sources contribute static field
+                // initializers to shared partial classes. RunClassConstructor forces each .cctor
+                // to execute, performing all registrations in ONE JIT-compiled method per class.
+                // No try/catch needed — InfrastructureGenerator always emits both shell classes.
+                sourceBuilder.AppendLine("global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::TUnit.Generated.TUnit_TestRegistration).TypeHandle);");
+                sourceBuilder.AppendLine("global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::TUnit.Generated.TUnit_HookRegistration).TypeHandle);");
+                sourceBuilder.AppendLine();
+
                 sourceBuilder.AppendLine("try");
                 sourceBuilder.AppendLine("{");
                 sourceBuilder.Indent();
@@ -456,6 +466,21 @@ public class InfrastructureGenerator : IIncrementalGenerator
                 sourceBuilder.AppendLine("catch { /* TUnit.Core not available - skip logging */ }");
             }
         }
+
+        // Empty partial class shell in TUnit.Generated namespace — per-class and per-method
+        // test source files contribute static field initializers to this class.
+        // The compiler merges all contributions into a single .cctor,
+        // which is triggered by RunClassConstructor above.
+        sourceBuilder.AppendLine();
+        sourceBuilder.AppendLine("namespace TUnit.Generated");
+        sourceBuilder.AppendLine("{");
+        sourceBuilder.Indent();
+        sourceBuilder.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]");
+        sourceBuilder.AppendLine("internal static partial class TUnit_TestRegistration { }");
+        sourceBuilder.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]");
+        sourceBuilder.AppendLine("internal static partial class TUnit_HookRegistration { }");
+        sourceBuilder.Unindent();
+        sourceBuilder.AppendLine("}");
 
         context.AddSource("TUnitInfrastructure.g.cs", sourceBuilder.ToString());
     }

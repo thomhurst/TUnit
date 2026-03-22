@@ -94,13 +94,9 @@ internal sealed class TUnit_TestProject_Bugs__1889_DerivedTest_Test1_TestSource 
         }
     }
 }
-internal static class TUnit_TestProject_Bugs__1889_DerivedTest_Test1_ModuleInitializer
+internal static partial class TUnit_TestRegistration
 {
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest), new TUnit_TestProject_Bugs__1889_DerivedTest_Test1_TestSource());
-    }
+    static readonly int _r_TUnit_TestProject_Bugs__1889_DerivedTest_Test1_TestSource = global::TUnit.Core.SourceRegistrar.RegisterReturn(typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest), new TUnit_TestProject_Bugs__1889_DerivedTest_Test1_TestSource());
 }
 
 
@@ -216,13 +212,9 @@ internal sealed class TUnit_TestProject_Bugs__1889_DerivedTest_Test2__bool_TestS
         }
     }
 }
-internal static class TUnit_TestProject_Bugs__1889_DerivedTest_Test2__bool_ModuleInitializer
+internal static partial class TUnit_TestRegistration
 {
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest), new TUnit_TestProject_Bugs__1889_DerivedTest_Test2__bool_TestSource());
-    }
+    static readonly int _r_TUnit_TestProject_Bugs__1889_DerivedTest_Test2__bool_TestSource = global::TUnit.Core.SourceRegistrar.RegisterReturn(typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest), new TUnit_TestProject_Bugs__1889_DerivedTest_Test2__bool_TestSource());
 }
 
 
@@ -339,11 +331,7 @@ internal sealed class TUnit_TestProject_Bugs__1889_DerivedTest_Test3__bool_TestS
         }
     }
 }
-internal static class TUnit_TestProject_Bugs__1889_DerivedTest_Test3__bool_ModuleInitializer
+internal static partial class TUnit_TestRegistration
 {
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
-    {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest), new TUnit_TestProject_Bugs__1889_DerivedTest_Test3__bool_TestSource());
-    }
+    static readonly int _r_TUnit_TestProject_Bugs__1889_DerivedTest_Test3__bool_TestSource = global::TUnit.Core.SourceRegistrar.RegisterReturn(typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest), new TUnit_TestProject_Bugs__1889_DerivedTest_Test3__bool_TestSource());
 }
