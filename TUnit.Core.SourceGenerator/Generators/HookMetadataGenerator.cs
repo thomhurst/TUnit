@@ -472,12 +472,10 @@ public class HookMetadataGenerator : IIncrementalGenerator
 
         if (keyExpr != null)
         {
-            // Keyed registration: RegisterHook(dict, key, hookObj)
             writer.AppendLine($"global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.{collectionName}, {keyExpr},");
         }
         else
         {
-            // Global registration: RegisterHook(bag, hookObj)
             writer.AppendLine($"global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.{collectionName},");
         }
 
@@ -510,179 +508,6 @@ public class HookMetadataGenerator : IIncrementalGenerator
             ("TestDiscovery", "Before" or "BeforeEvery", _) => ("BeforeTestDiscoveryHooks", null),
             ("TestDiscovery", "After" or "AfterEvery", _) => ("AfterTestDiscoveryHooks", null),
             _ => throw new ArgumentException($"Unknown hook: {hook.HookType}/{hook.HookKind}")
-        };
-    }
-
-    private static void GenerateHookRegistration(CodeWriter writer, HookModel hook)
-    {
-        var typeDisplay = hook.FullyQualifiedTypeName;
-        var isInstance = hook.HookKind is "Before" or "After" && hook.HookType == "Test";
-
-        if (hook.HookType == "Test")
-        {
-            if (hook.HookKind == "Before")
-            {
-                if (isInstance)
-                {
-                    GenerateInstanceHookRegistration(writer, "BeforeTestHooks", typeDisplay, hook);
-                }
-                else
-                {
-                    GenerateGlobalHookRegistration(writer, "BeforeEveryTestHooks", hook);
-                }
-            }
-            else if (hook.HookKind == "After")
-            {
-                if (isInstance)
-                {
-                    GenerateInstanceHookRegistration(writer, "AfterTestHooks", typeDisplay, hook);
-                }
-                else
-                {
-                    GenerateGlobalHookRegistration(writer, "AfterEveryTestHooks", hook);
-                }
-            }
-            else if (hook.HookKind == "BeforeEvery")
-            {
-                GenerateGlobalHookRegistration(writer, "BeforeEveryTestHooks", hook);
-            }
-            else if (hook.HookKind == "AfterEvery")
-            {
-                GenerateGlobalHookRegistration(writer, "AfterEveryTestHooks", hook);
-            }
-        }
-        else if (hook.HookType == "Class")
-        {
-            if (hook.HookKind == "Before")
-            {
-                GenerateTypeHookRegistration(writer, "BeforeClassHooks", typeDisplay, hook);
-            }
-            else if (hook.HookKind == "After")
-            {
-                GenerateTypeHookRegistration(writer, "AfterClassHooks", typeDisplay, hook);
-            }
-            else if (hook.HookKind == "BeforeEvery")
-            {
-                GenerateGlobalHookRegistration(writer, "BeforeEveryClassHooks", hook);
-            }
-            else if (hook.HookKind == "AfterEvery")
-            {
-                GenerateGlobalHookRegistration(writer, "AfterEveryClassHooks", hook);
-            }
-        }
-        else if (hook.HookType == "Assembly")
-        {
-            var assemblyName = hook.AssemblyName.Replace(".", "_").Replace("-", "_");
-            writer.AppendLine($"var {assemblyName}_assembly = typeof({typeDisplay}).Assembly;");
-
-            if (hook.HookKind == "Before")
-            {
-                GenerateAssemblyHookRegistration(writer, "BeforeAssemblyHooks", assemblyName, hook);
-            }
-            else if (hook.HookKind == "After")
-            {
-                GenerateAssemblyHookRegistration(writer, "AfterAssemblyHooks", assemblyName, hook);
-            }
-            else if (hook.HookKind == "BeforeEvery")
-            {
-                GenerateGlobalHookRegistration(writer, "BeforeEveryAssemblyHooks", hook);
-            }
-            else if (hook.HookKind == "AfterEvery")
-            {
-                GenerateGlobalHookRegistration(writer, "AfterEveryAssemblyHooks", hook);
-            }
-        }
-        else if (hook.HookType == "TestSession")
-        {
-            if (hook.HookKind is "Before" or "BeforeEvery")
-            {
-                GenerateGlobalHookRegistration(writer, "BeforeTestSessionHooks", hook);
-            }
-            else if (hook.HookKind is "After" or "AfterEvery")
-            {
-                GenerateGlobalHookRegistration(writer, "AfterTestSessionHooks", hook);
-            }
-        }
-        else if (hook.HookType == "TestDiscovery")
-        {
-            if (hook.HookKind is "Before" or "BeforeEvery")
-            {
-                GenerateGlobalHookRegistration(writer, "BeforeTestDiscoveryHooks", hook);
-            }
-            else if (hook.HookKind is "After" or "AfterEvery")
-            {
-                GenerateGlobalHookRegistration(writer, "AfterTestDiscoveryHooks", hook);
-            }
-        }
-    }
-
-    private static void GenerateInstanceHookRegistration(CodeWriter writer, string dictionaryName, string typeDisplay, HookModel hook)
-    {
-        var hookType = GetConcreteHookType(dictionaryName, true);
-        writer.AppendLine($"global::TUnit.Core.Sources.{dictionaryName}.GetOrAdd(typeof({typeDisplay}), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.{hookType}>());");
-        writer.AppendLine($"global::TUnit.Core.Sources.{dictionaryName}[typeof({typeDisplay})].Add(");
-        writer.Indent();
-        GenerateHookObject(writer, hook, true);
-        writer.Unindent();
-        writer.AppendLine(");");
-    }
-
-    private static void GenerateTypeHookRegistration(CodeWriter writer, string dictionaryName, string typeDisplay, HookModel hook)
-    {
-        var hookType = GetConcreteHookType(dictionaryName, false);
-        writer.AppendLine($"global::TUnit.Core.Sources.{dictionaryName}.GetOrAdd(typeof({typeDisplay}), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.{hookType}>());");
-        writer.AppendLine($"global::TUnit.Core.Sources.{dictionaryName}[typeof({typeDisplay})].Add(");
-        writer.Indent();
-        GenerateHookObject(writer, hook, false);
-        writer.Unindent();
-        writer.AppendLine(");");
-    }
-
-    private static void GenerateAssemblyHookRegistration(CodeWriter writer, string dictionaryName, string assemblyVarName, HookModel hook)
-    {
-        var assemblyVar = assemblyVarName + "_assembly";
-        var hookType = GetConcreteHookType(dictionaryName, false);
-        writer.AppendLine($"global::TUnit.Core.Sources.{dictionaryName}.GetOrAdd({assemblyVar}, static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.{hookType}>());");
-        writer.AppendLine($"global::TUnit.Core.Sources.{dictionaryName}[{assemblyVar}].Add(");
-        writer.Indent();
-        GenerateHookObject(writer, hook, false);
-        writer.Unindent();
-        writer.AppendLine(");");
-    }
-
-    private static void GenerateGlobalHookRegistration(CodeWriter writer, string listName, HookModel hook)
-    {
-        writer.AppendLine($"global::TUnit.Core.Sources.{listName}.Add(");
-        writer.Indent();
-        GenerateHookObject(writer, hook, false);
-        writer.Unindent();
-        writer.AppendLine(");");
-    }
-
-    private static string GetConcreteHookType(string dictionaryName, bool isInstance)
-    {
-        if (isInstance)
-        {
-            return "InstanceHookMethod";
-        }
-
-        return dictionaryName switch
-        {
-            "BeforeClassHooks" => "BeforeClassHookMethod",
-            "AfterClassHooks" => "AfterClassHookMethod",
-            "BeforeAssemblyHooks" => "BeforeAssemblyHookMethod",
-            "AfterAssemblyHooks" => "AfterAssemblyHookMethod",
-            "BeforeTestSessionHooks" => "BeforeTestSessionHookMethod",
-            "AfterTestSessionHooks" => "AfterTestSessionHookMethod",
-            "BeforeTestDiscoveryHooks" => "BeforeTestDiscoveryHookMethod",
-            "AfterTestDiscoveryHooks" => "AfterTestDiscoveryHookMethod",
-            "BeforeEveryTestHooks" => "BeforeTestHookMethod",
-            "AfterEveryTestHooks" => "AfterTestHookMethod",
-            "BeforeEveryClassHooks" => "BeforeClassHookMethod",
-            "AfterEveryClassHooks" => "AfterClassHookMethod",
-            "BeforeEveryAssemblyHooks" => "BeforeAssemblyHookMethod",
-            "AfterEveryAssemblyHooks" => "AfterAssemblyHookMethod",
-            _ => throw new ArgumentException($"Unknown dictionary name: {dictionaryName}")
         };
     }
 
@@ -868,11 +693,11 @@ public class HookMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"await AsyncConvert.Convert(() => {methodCall});");
     }
 
-    private static void GenerateHookObject(CodeWriter writer, HookModel hook, bool isInstance, string? delegatePrefix = null)
+    private static void GenerateHookObject(CodeWriter writer, HookModel hook, bool isInstance, string delegatePrefix)
     {
         var hookClass = GetHookClass(hook.HookType, hook.HookKind, !isInstance);
         var delegateKey = GetDelegateKey(hook);
-        var bodyRef = $"{delegatePrefix ?? ""}{delegateKey}_Body";
+        var bodyRef = $"{delegatePrefix}{delegateKey}_Body";
 
         writer.AppendLine($"new {hookClass}");
         writer.AppendLine("{");
