@@ -38,7 +38,7 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
 
         // Track which constraint keys are currently in use
         var lockedKeys = new HashSet<string>();
-        var lockObject = new object();
+        var lockObject = new Lock();
 
         // Indexed structure for tests waiting for their constraint keys to become available
         var waitingTestIndex = new WaitingTestIndex();
@@ -122,7 +122,7 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
         IReadOnlyList<string> constraintKeys,
         TaskCompletionSource<bool> startSignal,
         HashSet<string> lockedKeys,
-        object lockObject,
+        Lock lockObject,
         WaitingTestIndex waitingTestIndex,
         CancellationToken cancellationToken)
     {
@@ -142,7 +142,7 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
         AbstractExecutableTest test,
         IReadOnlyList<string> constraintKeys,
         HashSet<string> lockedKeys,
-        object lockObject,
+        Lock lockObject,
         WaitingTestIndex waitingTestIndex,
         CancellationToken cancellationToken)
     {
