@@ -102,10 +102,6 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     public ValueTask UntrackObjects(TestContext testContext, List<Exception> cleanupExceptions)
     {
         var trackedObjects = testContext.TrackedObjects;
-        if (trackedObjects.Count == 0)
-        {
-            return ValueTask.CompletedTask;
-        }
 
         if (CountTrackedObjects(trackedObjects) == 0)
         {
@@ -201,7 +197,9 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
         if (s_trackedObjects.TryGetValue(obj, out var counter))
         {
-            var count = counter.Decrement();
+            int count;
+            try { count = counter.Decrement(); }
+            catch { s_trackedObjects.TryRemove(obj, out _); throw; }
 
             if (count < 0)
             {
