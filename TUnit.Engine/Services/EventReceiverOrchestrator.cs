@@ -321,13 +321,9 @@ internal sealed class EventReceiverOrchestrator
             return default;
         }
 
-        if (_firstTestInSessionTasks.TryGetValue("session", out var existingTask))
-        {
-            return new ValueTask(existingTask);
-        }
-
         var task = _firstTestInSessionTasks.GetOrAdd("session",
-            _ => InvokeFirstTestInSessionEventReceiversCoreAsync(context, sessionContext, cancellationToken));
+            static (_, args) => InvokeFirstTestInSessionEventReceiversCoreAsync(args.context, args.sessionContext, args.cancellationToken),
+            (context, sessionContext, cancellationToken));
         return new ValueTask(task);
     }
 
@@ -357,13 +353,9 @@ internal sealed class EventReceiverOrchestrator
 
         var assemblyName = assemblyContext.Assembly.GetName().FullName ?? "";
 
-        if (_firstTestInAssemblyTasks.TryGetValue(assemblyName, out var existingTask))
-        {
-            return new ValueTask(existingTask);
-        }
-
         var task = _firstTestInAssemblyTasks.GetOrAdd(assemblyName,
-            _ => InvokeFirstTestInAssemblyEventReceiversCoreAsync(context, assemblyContext, cancellationToken));
+            static (_, args) => InvokeFirstTestInAssemblyEventReceiversCoreAsync(args.context, args.assemblyContext, args.cancellationToken),
+            (context, assemblyContext, cancellationToken));
         return new ValueTask(task);
     }
 
@@ -393,13 +385,9 @@ internal sealed class EventReceiverOrchestrator
 
         var classType = classContext.ClassType;
 
-        if (_firstTestInClassTasks.TryGetValue(classType, out var existingTask))
-        {
-            return new ValueTask(existingTask);
-        }
-
         var task = _firstTestInClassTasks.GetOrAdd(classType,
-            _ => InvokeFirstTestInClassEventReceiversCoreAsync(context, classContext, cancellationToken));
+            static (_, args) => InvokeFirstTestInClassEventReceiversCoreAsync(args.context, args.classContext, args.cancellationToken),
+            (context, classContext, cancellationToken));
         return new ValueTask(task);
     }
 
