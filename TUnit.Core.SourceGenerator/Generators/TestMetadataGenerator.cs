@@ -298,8 +298,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 return;
             }
 
-            // Non-generic tests are handled by the per-class TestEntry pipeline
-            if (!testMethod.IsGenericType && !testMethod.IsGenericMethod)
+            // Non-generic, non-inherited tests are handled by the per-class TestEntry pipeline.
+            // Inherited tests (InheritanceDepth > 0) come through GenerateInheritedTestSources
+            // and must be handled here.
+            if (!testMethod.IsGenericType && !testMethod.IsGenericMethod && testMethod.InheritanceDepth == 0)
             {
                 return;
             }
@@ -350,15 +352,36 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var uniqueClassName = FileNameHelper.GetDeterministicFileNameForMethod(testMethod.TypeSymbol, testMethod.MethodSymbol)
             .Replace(".g.cs", "_TestSource");
 
-        // Collect all concrete type instantiations for this generic test method
-        var concreteInstantiations = CollectConcreteInstantiations(testMethod, className);
+        List<ConcreteInstantiation> concreteInstantiations;
 
-        if (concreteInstantiations.Count == 0)
+        if (!testMethod.IsGenericType && !testMethod.IsGenericMethod)
         {
-            // No concrete types could be resolved — fall back to ITestSource for GenericTestMetadata
-            // so the engine can report a clear error
-            GenerateTestMetadataLegacyFallback(writer, testMethod, className, uniqueClassName);
-            return;
+            // Non-generic inherited test — create a single concrete instantiation for the class type
+            concreteInstantiations =
+            [
+                new ConcreteInstantiation
+                {
+                    ConcreteClassName = className,
+                    TypeArguments = [],
+                    ClassTypeArgs = [],
+                    MethodTypeArgs = [],
+                    TestName = testMethod.MethodSymbol.Name,
+                    MethodName = testMethod.MethodSymbol.Name,
+                }
+            ];
+        }
+        else
+        {
+            // Collect all concrete type instantiations for this generic test method
+            concreteInstantiations = CollectConcreteInstantiations(testMethod, className);
+
+            if (concreteInstantiations.Count == 0)
+            {
+                // No concrete types could be resolved — skip this method.
+                // The test won't be discovered, which matches the behavior of
+                // not having any data to resolve type arguments.
+                return;
+            }
         }
 
         // Group instantiations by concrete class type for TestEntry<T> emission
@@ -851,7 +874,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         if (InstanceFactoryGenerator.HasClassConstructorAttribute(testMethod.TypeSymbol))
         {
-            // ClassConstructor attribute is present - instance creation handled at runtime
             writer.AppendLine("throw new global::System.NotSupportedException(\"Instance creation for classes with ClassConstructor attribute is handled at runtime\");");
         }
         else if (entry.HasParameterizedConstructor && entry.SpecificArgumentsAttribute is { ConstructorArguments.Length: > 0 } specificAttr &&
@@ -864,6 +886,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         else if (entry.HasParameterizedConstructor)
         {
             writer.AppendLine($"return ({concreteClassName})global::System.Activator.CreateInstance(typeof({concreteClassName}), args)!;");
+        }
+        else if (!testMethod.IsGenericType && !testMethod.IsGenericMethod)
+        {
+            // Non-generic (inherited) tests: use InstanceFactoryGenerator for proper required property handling
+            writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(testMethod.TypeSymbol));
+        }
+        else if (entry.ClassTypeArgs.Length > 0)
+        {
+            // Generic class with resolved type args: construct the concrete closed type
+            var constructedType = testMethod.TypeSymbol.Construct(entry.ClassTypeArgs);
+            writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(constructedType));
         }
         else
         {
