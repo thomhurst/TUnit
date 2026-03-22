@@ -85,9 +85,8 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
             return;
         }
 
-        // No lock needed: TrackedObjects is per-TestContext and TrackObjects is called
-        // from a single thread per test. The previous lock(kvp.Value) caused unnecessary
-        // Monitor.Enter_Slowpath contention (~1.25% CPU) during parallel test execution.
+        // No lock needed: TrackedObjects is per-TestContext and TrackObjects
+        // is called from a single thread per test.
         foreach (var kvp in trackableDict)
         {
             foreach (var obj in kvp.Value)
@@ -214,7 +213,6 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
             }
         }
 
-        // Dispose outside the lock to avoid blocking other untrack operations
         if (shouldDispose)
         {
             await disposer.DisposeAsync(obj).ConfigureAwait(false);
