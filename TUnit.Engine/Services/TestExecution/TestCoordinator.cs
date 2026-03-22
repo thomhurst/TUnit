@@ -47,11 +47,9 @@ internal sealed class TestCoordinator : ITestCoordinator
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
     }
 
-    public async ValueTask ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
-    {
-        await _executionGuard.TryStartExecutionAsync(test.TestId,
+    public ValueTask ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+        => _executionGuard.TryStartExecutionAsync(test.TestId,
             () => ExecuteTestInternalAsync(test, cancellationToken));
-    }
 
     private async ValueTask ExecuteTestInternalAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
