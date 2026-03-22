@@ -7,62 +7,55 @@ namespace TUnit.Generated;
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_CustomDisplayNameTests__TestSource
 {
-    private static readonly global::TUnit.Core.MethodMetadata[] __methodMetadatas = __InitMethodMetadatas();
-    private static global::TUnit.Core.MethodMetadata[] __InitMethodMetadatas()
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", new global::TUnit.Core.ClassMetadata
     {
-        var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", new global::TUnit.Core.ClassMetadata
+        Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.CustomDisplayNameTests)),
+        Name = "CustomDisplayNameTests",
+        Namespace = "TUnit.TestProject",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = new global::TUnit.Core.PropertyMetadata[]
         {
-            Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.CustomDisplayNameTests)),
-            Name = "CustomDisplayNameTests",
-            Namespace = "TUnit.TestProject",
-            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-            Properties = new global::TUnit.Core.PropertyMetadata[]
+            new global::TUnit.Core.PropertyMetadata
             {
-                new global::TUnit.Core.PropertyMetadata
-                {
-                    ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetProperty("Order"),
-                    Type = typeof(int),
-                    Name = "Order",
-                    IsStatic = false,
-                    IsNullable = false,
-                    Getter = o => ((global::TUnit.TestProject.CustomDisplayNameTests)o).Order,
-                    ClassMetadata = null!,
-                    ContainingTypeMetadata = null!
-                }
-            },
-            Parent = null
-        });
-        var __classType = typeof(global::TUnit.TestProject.CustomDisplayNameTests);
-        return new global::TUnit.Core.MethodMetadata[]
-        {
-            global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            global::TUnit.Core.MethodMetadataFactory.Create("Test2", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            global::TUnit.Core.MethodMetadataFactory.Create("Test3", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
+                ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetProperty("Order"),
+                Type = typeof(int),
+                Name = "Order",
+                IsStatic = false,
+                IsNullable = false,
+                Getter = o => ((global::TUnit.TestProject.CustomDisplayNameTests)o).Order,
+                ClassMetadata = null!,
+                ContainingTypeMetadata = null!
+            }
+        },
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.CustomDisplayNameTests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_1 = global::TUnit.Core.MethodMetadataFactory.Create("Test2", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_2 = global::TUnit.Core.MethodMetadataFactory.Create("Test3", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value1", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetMethod("Test3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(bool) }, null)!.GetParameters()[0]),
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value2", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetMethod("Test3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(bool) }, null)!.GetParameters()[1]),
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "value3", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetMethod("Test3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(bool) }, null)!.GetParameters()[2])
-}),
-            global::TUnit.Core.MethodMetadataFactory.Create("MethodDataSourceTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
+});
+    private static readonly global::TUnit.Core.MethodMetadata __mm_3 = global::TUnit.Core.MethodMetadataFactory.Create("MethodDataSourceTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "foo", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetMethod("MethodDataSourceTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0])
-}),
-            global::TUnit.Core.MethodMetadataFactory.Create("TestParameterNamePrefixBug", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
+});
+    private static readonly global::TUnit.Core.MethodMetadata __mm_4 = global::TUnit.Core.MethodMetadataFactory.Create("TestParameterNamePrefixBug", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "someValue", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetMethod("TestParameterNamePrefixBug", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string) }, null)!.GetParameters()[0]),
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "someValueType", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetMethod("TestParameterNamePrefixBug", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string) }, null)!.GetParameters()[1])
-}),
-            global::TUnit.Core.MethodMetadataFactory.Create("PasswordTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
+});
+    private static readonly global::TUnit.Core.MethodMetadata __mm_5 = global::TUnit.Core.MethodMetadataFactory.Create("PasswordTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "password", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetMethod("PasswordTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0])
-}),
-            global::TUnit.Core.MethodMetadataFactory.Create("SameClassConstantTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            global::TUnit.Core.MethodMetadataFactory.Create("DifferentClassConstantTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-            global::TUnit.Core.MethodMetadataFactory.Create("NestedClassConstantTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-        };
-    }
+});
+    private static readonly global::TUnit.Core.MethodMetadata __mm_6 = global::TUnit.Core.MethodMetadataFactory.Create("SameClassConstantTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_7 = global::TUnit.Core.MethodMetadataFactory.Create("DifferentClassConstantTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_8 = global::TUnit.Core.MethodMetadataFactory.Create("NestedClassConstantTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata);
     private static global::TUnit.TestProject.CustomDisplayNameTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.CustomDisplayNameTests();
@@ -289,7 +282,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "password", n
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
             MethodIndex = 0,
@@ -307,7 +300,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "password", n
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[1],
+            MethodMetadata = __mm_1,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
             MethodIndex = 1,
@@ -325,7 +318,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "password", n
             HasDataSource = true,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[2],
+            MethodMetadata = __mm_2,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
             MethodIndex = 2,
@@ -348,7 +341,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "password", n
             HasDataSource = true,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[3],
+            MethodMetadata = __mm_3,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
             MethodIndex = 3,
@@ -381,7 +374,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "password", n
             HasDataSource = true,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[4],
+            MethodMetadata = __mm_4,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
             MethodIndex = 4,
@@ -405,7 +398,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "password", n
             HasDataSource = true,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[5],
+            MethodMetadata = __mm_5,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
             MethodIndex = 5,
@@ -427,7 +420,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "password", n
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[6],
+            MethodMetadata = __mm_6,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
             MethodIndex = 6,
@@ -445,7 +438,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "password", n
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[7],
+            MethodMetadata = __mm_7,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
             MethodIndex = 7,
@@ -463,7 +456,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "password", n
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[8],
+            MethodMetadata = __mm_8,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
             MethodIndex = 8,

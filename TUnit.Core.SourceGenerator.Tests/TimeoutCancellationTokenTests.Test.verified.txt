@@ -7,55 +7,48 @@ namespace TUnit.Generated;
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_TimeoutCancellationTokenTests__TestSource
 {
-    private static readonly global::TUnit.Core.MethodMetadata[] __methodMetadatas = __InitMethodMetadatas();
-    private static global::TUnit.Core.MethodMetadata[] __InitMethodMetadatas()
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.TimeoutCancellationTokenTests", new global::TUnit.Core.ClassMetadata
     {
-        var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.TimeoutCancellationTokenTests", new global::TUnit.Core.ClassMetadata
+        Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests)),
+        Name = "TimeoutCancellationTokenTests",
+        Namespace = "TUnit.TestProject",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = new global::TUnit.Core.ParameterMetadata[]
         {
-            Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
-            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests)),
-            Name = "TimeoutCancellationTokenTests",
-            Namespace = "TUnit.TestProject",
-            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-            Parameters = new global::TUnit.Core.ParameterMetadata[]
-            {
-                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0])
-            },
-            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-            Parent = null
-        });
-        var __classType = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests);
-        return new global::TUnit.Core.MethodMetadata[]
-        {
-            global::TUnit.Core.MethodMetadataFactory.Create("DefaultTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0])
+        },
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("DefaultTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("DefaultTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0])
-}),
-            global::TUnit.Core.MethodMetadataFactory.Create("BasicTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
+});
+    private static readonly global::TUnit.Core.MethodMetadata __mm_1 = global::TUnit.Core.MethodMetadataFactory.Create("BasicTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("BasicTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0])
-}),
-            global::TUnit.Core.MethodMetadataFactory.Create("InheritedTimeoutAttribute", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
+});
+    private static readonly global::TUnit.Core.MethodMetadata __mm_2 = global::TUnit.Core.MethodMetadataFactory.Create("InheritedTimeoutAttribute", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("InheritedTimeoutAttribute", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0])
-}),
-            global::TUnit.Core.MethodMetadataFactory.Create("DataTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
+});
+    private static readonly global::TUnit.Core.MethodMetadata __mm_3 = global::TUnit.Core.MethodMetadataFactory.Create("DataTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("DataTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]),
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("DataTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1])
-}),
-            global::TUnit.Core.MethodMetadataFactory.Create("DataSourceTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
+});
+    private static readonly global::TUnit.Core.MethodMetadata __mm_4 = global::TUnit.Core.MethodMetadataFactory.Create("DataSourceTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("DataSourceTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]),
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("DataSourceTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1])
-}),
-            global::TUnit.Core.MethodMetadataFactory.Create("MatrixTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
+});
+    private static readonly global::TUnit.Core.MethodMetadata __mm_5 = global::TUnit.Core.MethodMetadataFactory.Create("MatrixTest", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("MatrixTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]),
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests).GetMethod("MatrixTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1])
-}),
-        };
-    }
+});
     private static global::TUnit.TestProject.TimeoutCancellationTokenTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.TimeoutCancellationTokenTests(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
@@ -249,7 +242,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
             HasDataSource = true,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
             MethodIndex = 0,
@@ -292,7 +285,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
             HasDataSource = true,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[1],
+            MethodMetadata = __mm_1,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
             MethodIndex = 1,
@@ -335,7 +328,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
             HasDataSource = true,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[2],
+            MethodMetadata = __mm_2,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
             MethodIndex = 2,
@@ -378,7 +371,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
             HasDataSource = true,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[3],
+            MethodMetadata = __mm_3,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
             MethodIndex = 3,
@@ -425,7 +418,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
             HasDataSource = true,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[4],
+            MethodMetadata = __mm_4,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
             MethodIndex = 4,
@@ -493,7 +486,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
             HasDataSource = true,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[5],
+            MethodMetadata = __mm_5,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
             MethodIndex = 5,
@@ -548,32 +541,25 @@ namespace TUnit.Generated;
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_TimeoutDoesNotFireTests__TestSource
 {
-    private static readonly global::TUnit.Core.MethodMetadata[] __methodMetadatas = __InitMethodMetadatas();
-    private static global::TUnit.Core.MethodMetadata[] __InitMethodMetadatas()
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.TimeoutDoesNotFireTests", new global::TUnit.Core.ClassMetadata
     {
-        var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.TimeoutDoesNotFireTests", new global::TUnit.Core.ClassMetadata
+        Type = typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests)),
+        Name = "TimeoutDoesNotFireTests",
+        Namespace = "TUnit.TestProject",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = new global::TUnit.Core.ParameterMetadata[]
         {
-            Type = typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests),
-            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests)),
-            Name = "TimeoutDoesNotFireTests",
-            Namespace = "TUnit.TestProject",
-            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-            Parameters = new global::TUnit.Core.ParameterMetadata[]
-            {
-                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0])
-            },
-            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-            Parent = null
-        });
-        var __classType = typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests);
-        return new global::TUnit.Core.MethodMetadata[]
-        {
-            global::TUnit.Core.MethodMetadataFactory.Create("QuickTestDoesNotTimeout", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0])
+        },
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("QuickTestDoesNotTimeout", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.TimeoutDoesNotFireTests).GetMethod("QuickTestDoesNotTimeout", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0])
-}),
-        };
-    }
+});
     private static global::TUnit.TestProject.TimeoutDoesNotFireTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.TimeoutDoesNotFireTests(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
@@ -629,7 +615,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
             HasDataSource = true,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
             MethodIndex = 0,
@@ -680,32 +666,25 @@ namespace TUnit.Generated;
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_CancellationTokenTriggeredTests__TestSource
 {
-    private static readonly global::TUnit.Core.MethodMetadata[] __methodMetadatas = __InitMethodMetadatas();
-    private static global::TUnit.Core.MethodMetadata[] __InitMethodMetadatas()
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CancellationTokenTriggeredTests", new global::TUnit.Core.ClassMetadata
     {
-        var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CancellationTokenTriggeredTests", new global::TUnit.Core.ClassMetadata
+        Type = typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests)),
+        Name = "CancellationTokenTriggeredTests",
+        Namespace = "TUnit.TestProject",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = new global::TUnit.Core.ParameterMetadata[]
         {
-            Type = typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests),
-            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests)),
-            Name = "CancellationTokenTriggeredTests",
-            Namespace = "TUnit.TestProject",
-            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-            Parameters = new global::TUnit.Core.ParameterMetadata[]
-            {
-                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0])
-            },
-            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-            Parent = null
-        });
-        var __classType = typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests);
-        return new global::TUnit.Core.MethodMetadata[]
-        {
-            global::TUnit.Core.MethodMetadataFactory.Create("CancellationTokenIsTriggered", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0])
+        },
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("CancellationTokenIsTriggered", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.CancellationTokenTriggeredTests).GetMethod("CancellationTokenIsTriggered", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0])
-}),
-        };
-    }
+});
     private static global::TUnit.TestProject.CancellationTokenTriggeredTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.CancellationTokenTriggeredTests(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
@@ -761,7 +740,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
             HasDataSource = true,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
             MethodIndex = 0,

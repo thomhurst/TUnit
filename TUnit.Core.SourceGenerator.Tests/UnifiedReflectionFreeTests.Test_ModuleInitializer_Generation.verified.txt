@@ -7,26 +7,19 @@ namespace TUnit.Generated;
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_ModuleInitializerTest__TestSource
 {
-    private static readonly global::TUnit.Core.MethodMetadata[] __methodMetadatas = __InitMethodMetadatas();
-    private static global::TUnit.Core.MethodMetadata[] __InitMethodMetadatas()
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("UnifiedReflectionFreeTests:global::TUnit.TestProject.ModuleInitializerTest", new global::TUnit.Core.ClassMetadata
     {
-        var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("UnifiedReflectionFreeTests:global::TUnit.TestProject.ModuleInitializerTest", new global::TUnit.Core.ClassMetadata
-        {
-            Type = typeof(global::TUnit.TestProject.ModuleInitializerTest),
-            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ModuleInitializerTest)),
-            Name = "ModuleInitializerTest",
-            Namespace = "TUnit.TestProject",
-            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("UnifiedReflectionFreeTests", "UnifiedReflectionFreeTests"),
-            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-            Parent = null
-        });
-        var __classType = typeof(global::TUnit.TestProject.ModuleInitializerTest);
-        return new global::TUnit.Core.MethodMetadata[]
-        {
-            global::TUnit.Core.MethodMetadataFactory.Create("TestWithModuleInit", __classType, typeof(void), __classMetadata),
-        };
-    }
+        Type = typeof(global::TUnit.TestProject.ModuleInitializerTest),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ModuleInitializerTest)),
+        Name = "ModuleInitializerTest",
+        Namespace = "TUnit.TestProject",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("UnifiedReflectionFreeTests", "UnifiedReflectionFreeTests"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.ModuleInitializerTest);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("TestWithModuleInit", __classType, typeof(void), __classMetadata);
     private static global::TUnit.TestProject.ModuleInitializerTest __CreateInstance(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.ModuleInitializerTest();
@@ -79,7 +72,7 @@ internal static class TUnit_TestProject_ModuleInitializerTest__TestSource
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
             MethodIndex = 0,

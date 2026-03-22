@@ -7,36 +7,29 @@ namespace TUnit.Generated;
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_Bugs__1821_Tests__TestSource
 {
-    private static readonly global::TUnit.Core.MethodMetadata[] __methodMetadatas = __InitMethodMetadatas();
-    private static global::TUnit.Core.MethodMetadata[] __InitMethodMetadatas()
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1821.Tests", new global::TUnit.Core.ClassMetadata
     {
-        var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1821.Tests", new global::TUnit.Core.ClassMetadata
+        Type = typeof(global::TUnit.TestProject.Bugs._1821.Tests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1821.Tests)),
+        Name = "Tests",
+        Namespace = "TUnit.TestProject.Bugs._1821",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = new global::TUnit.Core.ParameterMetadata[]
         {
-            Type = typeof(global::TUnit.TestProject.Bugs._1821.Tests),
-            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1821.Tests)),
-            Name = "Tests",
-            Namespace = "TUnit.TestProject.Bugs._1821",
-            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-            Parameters = new global::TUnit.Core.ParameterMetadata[]
-            {
-                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Bugs._1821.MyData), "data", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1821.MyData)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._1821.Tests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.Bugs._1821.MyData) })!.GetParameters()[0])
-            },
-            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-            Parent = null
-        });
-        var __classType = typeof(global::TUnit.TestProject.Bugs._1821.Tests);
-        return new global::TUnit.Core.MethodMetadata[]
-        {
-            global::TUnit.Core.MethodMetadataFactory.Create("MethodDataSource", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.Bugs._1821.MyData), "data", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1821.MyData)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._1821.Tests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.Bugs._1821.MyData) })!.GetParameters()[0])
+        },
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._1821.Tests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("MethodDataSource", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._1821.Tests).GetMethod("MethodDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0])
-}),
-            global::TUnit.Core.MethodMetadataFactory.Create("MatrixDataSource", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
+});
+    private static readonly global::TUnit.Core.MethodMetadata __mm_1 = global::TUnit.Core.MethodMetadataFactory.Create("MatrixDataSource", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._1821.Tests).GetMethod("MatrixDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0])
-}),
-        };
-    }
+});
     private static global::TUnit.TestProject.Bugs._1821.Tests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.Bugs._1821.Tests(global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._1821.MyData>(args[0]));
@@ -117,7 +110,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new 
             HasDataSource = true,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
             MethodIndex = 0,
@@ -143,7 +136,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new 
             HasDataSource = true,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[1],
+            MethodMetadata = __mm_1,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
             MethodIndex = 1,

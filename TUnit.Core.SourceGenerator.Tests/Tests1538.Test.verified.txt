@@ -7,24 +7,19 @@ namespace TUnit.Generated;
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_Bugs__1538_Tests__TestSource
 {
-    private static readonly global::TUnit.Core.MethodMetadata[] __methodMetadatas = __InitMethodMetadatas();
-    private static global::TUnit.Core.MethodMetadata[] __InitMethodMetadatas()
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1538.Tests", new global::TUnit.Core.ClassMetadata
     {
-        var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1538.Tests", new global::TUnit.Core.ClassMetadata
-        {
-            Type = typeof(global::TUnit.TestProject.Bugs._1538.Tests),
-            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1538.Tests)),
-            Name = "Tests",
-            Namespace = "TUnit.TestProject.Bugs._1538",
-            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-            Parent = null
-        });
-        var __classType = typeof(global::TUnit.TestProject.Bugs._1538.Tests);
-        return new global::TUnit.Core.MethodMetadata[]
-        {
-            global::TUnit.Core.MethodMetadataFactory.Create("Eight_Args", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
+        Type = typeof(global::TUnit.TestProject.Bugs._1538.Tests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1538.Tests)),
+        Name = "Tests",
+        Namespace = "TUnit.TestProject.Bugs._1538",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._1538.Tests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Eight_Args", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "expectedSuccess", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("Eight_Args", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[0]),
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "expectedError", new global::TUnit.Core.ConcreteType(typeof(string)), true, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("Eight_Args", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[1]),
@@ -34,8 +29,8 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "expectedT2",
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "expectedT3", new global::TUnit.Core.ConcreteType(typeof(string)), true, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("Eight_Args", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[5]),
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "expectedT4", new global::TUnit.Core.ConcreteType(typeof(string)), true, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("Eight_Args", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[6]),
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "expectedT5", new global::TUnit.Core.ConcreteType(typeof(string)), true, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("Eight_Args", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[7])
-}),
-            global::TUnit.Core.MethodMetadataFactory.Create("SixteenArgs", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
+});
+    private static readonly global::TUnit.Core.MethodMetadata __mm_1 = global::TUnit.Core.MethodMetadataFactory.Create("SixteenArgs", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "expectedSuccess", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("SixteenArgs", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[0]),
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "item1", new global::TUnit.Core.ConcreteType(typeof(string)), true, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("SixteenArgs", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[1]),
@@ -53,9 +48,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "item12", new
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "item13", new global::TUnit.Core.ConcreteType(typeof(string)), true, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("SixteenArgs", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[13]),
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "item14", new global::TUnit.Core.ConcreteType(typeof(string)), true, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("SixteenArgs", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[14]),
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "item15", new global::TUnit.Core.ConcreteType(typeof(string)), true, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("SixteenArgs", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[15])
-}),
-        };
-    }
+});
     private static global::TUnit.TestProject.Bugs._1538.Tests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.Bugs._1538.Tests();
@@ -137,7 +130,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "item15", new
             HasDataSource = true,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
             MethodIndex = 0,
@@ -180,7 +173,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "item15", new
             HasDataSource = true,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[1],
+            MethodMetadata = __mm_1,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
             MethodIndex = 1,

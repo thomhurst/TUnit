@@ -7,38 +7,31 @@ namespace TUnit.Generated;
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_ArgsAsArrayTests__TestSource
 {
-    private static readonly global::TUnit.Core.MethodMetadata[] __methodMetadatas = __InitMethodMetadatas();
-    private static global::TUnit.Core.MethodMetadata[] __InitMethodMetadatas()
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ArgsAsArrayTests", new global::TUnit.Core.ClassMetadata
     {
-        var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ArgsAsArrayTests", new global::TUnit.Core.ClassMetadata
-        {
-            Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
-            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ArgsAsArrayTests)),
-            Name = "ArgsAsArrayTests",
-            Namespace = "TUnit.TestProject",
-            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-            Parent = null
-        });
-        var __classType = typeof(global::TUnit.TestProject.ArgsAsArrayTests);
-        return new global::TUnit.Core.MethodMetadata[]
-        {
-            global::TUnit.Core.MethodMetadataFactory.Create("Params", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
+        Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ArgsAsArrayTests)),
+        Name = "ArgsAsArrayTests",
+        Namespace = "TUnit.TestProject",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.ArgsAsArrayTests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Params", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "arguments", new global::TUnit.Core.ConcreteType(typeof(string[])), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Params", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string[]) }, null)!.GetParameters()[0])
-}),
-            global::TUnit.Core.MethodMetadataFactory.Create("ParamsEnumerable", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
+});
+    private static readonly global::TUnit.Core.MethodMetadata __mm_1 = global::TUnit.Core.MethodMetadataFactory.Create("ParamsEnumerable", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Collections.Generic.IEnumerable<string>), "arguments", new global::TUnit.Core.ConcreteType(typeof(global::System.Collections.Generic.IEnumerable<string>)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("ParamsEnumerable", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[0])
-}),
-            global::TUnit.Core.MethodMetadataFactory.Create("Following_Non_Params", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
+});
+    private static readonly global::TUnit.Core.MethodMetadata __mm_2 = global::TUnit.Core.MethodMetadataFactory.Create("Following_Non_Params", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "i", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Following_Non_Params", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[0]),
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Collections.Generic.IEnumerable<string>), "arguments", new global::TUnit.Core.ConcreteType(typeof(global::System.Collections.Generic.IEnumerable<string>)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Following_Non_Params", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[1])
-}),
-        };
-    }
+});
     private static global::TUnit.TestProject.ArgsAsArrayTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.ArgsAsArrayTests();
@@ -229,7 +222,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Collect
             HasDataSource = true,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
             MethodIndex = 0,
@@ -251,7 +244,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Collect
             HasDataSource = true,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[1],
+            MethodMetadata = __mm_1,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
             MethodIndex = 1,
@@ -273,7 +266,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Collect
             HasDataSource = true,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[2],
+            MethodMetadata = __mm_2,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
             MethodIndex = 2,

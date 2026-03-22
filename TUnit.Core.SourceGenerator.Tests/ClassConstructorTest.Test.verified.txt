@@ -7,42 +7,35 @@ namespace TUnit.Generated;
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_ClassConstructorTest__TestSource
 {
-    private static readonly global::TUnit.Core.MethodMetadata[] __methodMetadatas = __InitMethodMetadatas();
-    private static global::TUnit.Core.MethodMetadata[] __InitMethodMetadatas()
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ClassConstructorTest", new global::TUnit.Core.ClassMetadata
     {
-        var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ClassConstructorTest", new global::TUnit.Core.ClassMetadata
+        Type = typeof(global::TUnit.TestProject.ClassConstructorTest),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ClassConstructorTest)),
+        Name = "ClassConstructorTest",
+        Namespace = "TUnit.TestProject",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = new global::TUnit.Core.ParameterMetadata[]
         {
-            Type = typeof(global::TUnit.TestProject.ClassConstructorTest),
-            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ClassConstructorTest)),
-            Name = "ClassConstructorTest",
-            Namespace = "TUnit.TestProject",
-            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-            Parameters = new global::TUnit.Core.ParameterMetadata[]
-            {
-                global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.DummyReferenceTypeClass), "dummyReferenceTypeClass", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DummyReferenceTypeClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassConstructorTest).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.DummyReferenceTypeClass) })!.GetParameters()[0])
-            },
-            Properties = new global::TUnit.Core.PropertyMetadata[]
-            {
-                new global::TUnit.Core.PropertyMetadata
-                {
-                    ReflectionInfo = typeof(global::TUnit.TestProject.ClassConstructorTest).GetProperty("DummyReferenceTypeClass"),
-                    Type = typeof(global::TUnit.TestProject.DummyReferenceTypeClass),
-                    Name = "DummyReferenceTypeClass",
-                    IsStatic = false,
-                    IsNullable = false,
-                    Getter = o => ((global::TUnit.TestProject.ClassConstructorTest)o).DummyReferenceTypeClass,
-                    ClassMetadata = null!,
-                    ContainingTypeMetadata = null!
-                }
-            },
-            Parent = null
-        });
-        var __classType = typeof(global::TUnit.TestProject.ClassConstructorTest);
-        return new global::TUnit.Core.MethodMetadata[]
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProject.DummyReferenceTypeClass), "dummyReferenceTypeClass", new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DummyReferenceTypeClass)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.ClassConstructorTest).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.DummyReferenceTypeClass) })!.GetParameters()[0])
+        },
+        Properties = new global::TUnit.Core.PropertyMetadata[]
         {
-            global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(void), __classMetadata),
-        };
-    }
+            new global::TUnit.Core.PropertyMetadata
+            {
+                ReflectionInfo = typeof(global::TUnit.TestProject.ClassConstructorTest).GetProperty("DummyReferenceTypeClass"),
+                Type = typeof(global::TUnit.TestProject.DummyReferenceTypeClass),
+                Name = "DummyReferenceTypeClass",
+                IsStatic = false,
+                IsNullable = false,
+                Getter = o => ((global::TUnit.TestProject.ClassConstructorTest)o).DummyReferenceTypeClass,
+                ClassMetadata = null!,
+                ContainingTypeMetadata = null!
+            }
+        },
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.ClassConstructorTest);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(void), __classMetadata);
     private static global::TUnit.TestProject.ClassConstructorTest __CreateInstance(global::System.Type[] typeArgs, object?[] args)
     {
         // ClassConstructor attribute is present - instance creation handled at runtime
@@ -97,7 +90,7 @@ internal static class TUnit_TestProject_ClassConstructorTest__TestSource
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
             MethodIndex = 0,

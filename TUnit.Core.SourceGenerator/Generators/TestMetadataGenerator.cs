@@ -395,25 +395,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
 
-        // Shared MethodMetadata array (one entry per concrete instantiation for now, but could be deduplicated)
+        // Shared ClassMetadata + classType as static fields + inlined MethodMetadata
         var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
-        writer.AppendLine("private static readonly global::TUnit.Core.MethodMetadata[] __methodMetadatas = __InitMethodMetadatas();");
-        writer.AppendLine("private static global::TUnit.Core.MethodMetadata[] __InitMethodMetadatas()");
-        writer.AppendLine("{");
-        writer.Indent();
-        // We need shared locals for MethodMetadataFactory.Create
         var classMetadataExpr = MetadataGenerationHelper.GenerateClassMetadataGetOrAddWithParentExpression(testMethod.TypeSymbol, writer.IndentLevel);
-        writer.AppendLine($"var __classMetadata = {classMetadataExpr};");
-        writer.AppendLine($"var __classType = typeof({className});");
-        writer.AppendLine("return new global::TUnit.Core.MethodMetadata[]");
-        writer.AppendLine("{");
-        writer.Indent();
-        // One MethodMetadata entry — shared for all instantiations of this method
-        writer.AppendLine($"{GenerateMethodMetadataFactoryCall(testMethod.MethodSymbol)},");
-        writer.Unindent();
-        writer.AppendLine("};");
-        writer.Unindent();
-        writer.AppendLine("}");
+        writer.AppendLine($"private static readonly global::TUnit.Core.ClassMetadata __classMetadata = {classMetadataExpr};");
+        writer.AppendLine($"private static readonly global::System.Type __classType = typeof({className});");
+        writer.AppendLine($"private static readonly global::TUnit.Core.MethodMetadata __mm_0 = {GenerateMethodMetadataFactoryCall(testMethod.MethodSymbol)};");
 
         // Emit per-group helpers and TestEntry arrays
         var registrationIndex = 0;
@@ -1071,7 +1058,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"HasDataSource = {(hasDataSource ? "true" : "false")},");
         writer.AppendLine($"RepeatCount = {repeatCount},");
         writer.AppendLine($"DependsOn = {dependsOnArray},");
-        writer.AppendLine($"MethodMetadata = __methodMetadatas[0],");
+        writer.AppendLine($"MethodMetadata = __mm_0,");
         writer.AppendLine($"CreateInstance = __CreateInstance_{groupIndex},");
         writer.AppendLine($"InvokeBody = __Invoke_{groupIndex},");
         writer.AppendLine($"MethodIndex = {entryIndex},");
@@ -3107,6 +3094,20 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     }
 
     /// <summary>
+    /// Generates __classMetadata and __classType as static readonly fields instead of local variables.
+    /// Used by the per-class path to inline MethodMetadata construction into field initializers,
+    /// eliminating the separate __InitMethodMetadatas method and saving one JIT per class.
+    /// </summary>
+    private static string PreGenerateSharedFields(INamedTypeSymbol typeSymbol, string className)
+    {
+        var writer = new CodeWriter(includeHeader: false);
+        var classMetadataExpr = MetadataGenerationHelper.GenerateClassMetadataGetOrAddWithParentExpression(typeSymbol, writer.IndentLevel);
+        writer.AppendLine($"private static readonly global::TUnit.Core.ClassMetadata __classMetadata = {classMetadataExpr};");
+        writer.AppendLine($"private static readonly global::System.Type __classType = typeof({className});");
+        return writer.ToString();
+    }
+
+    /// <summary>
     /// Pre-generates a MethodMetadataFactory.Create(...) expression for one method.
     /// Called during the transform step where ISymbol is available.
     /// </summary>
@@ -3423,6 +3424,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     InstanceFactoryBodyCode = InstanceFactoryGenerator.GenerateInstanceFactoryBody(typeSymbol),
                     ReflectionFieldAccessorsCode = PreGenerateReflectionFieldAccessors(typeSymbol),
                     SharedLocalsCode = PreGenerateSharedLocals(typeSymbol, className),
+                    SharedFieldsCode = PreGenerateSharedFields(typeSymbol, className),
                 };
             });
     }
@@ -3446,23 +3448,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendRaw(classGroup.ReflectionFieldAccessorsCode);
             }
 
-            // MethodMetadata array — shared across all entries, built once via static initializer
-            writer.AppendLine($"private static readonly global::TUnit.Core.MethodMetadata[] __methodMetadatas = __InitMethodMetadatas();");
-            writer.AppendLine("private static global::TUnit.Core.MethodMetadata[] __InitMethodMetadatas()");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendRaw(classGroup.SharedLocalsCode);
-            writer.AppendLine("return new global::TUnit.Core.MethodMetadata[]");
-            writer.AppendLine("{");
-            writer.Indent();
+            // Shared ClassMetadata + classType as static fields (no separate method needed)
+            writer.AppendRaw(classGroup.SharedFieldsCode);
+
+            // Per-method MethodMetadata as individual static fields (inlined, no array)
             foreach (var method in classGroup.Methods)
             {
-                writer.AppendLine($"{method.MethodMetadataCode},");
+                writer.AppendLine($"private static readonly global::TUnit.Core.MethodMetadata __mm_{method.MethodIndex} = {method.MethodMetadataCode};");
             }
-            writer.Unindent();
-            writer.AppendLine("};");
-            writer.Unindent();
-            writer.AppendLine("}");
 
             // CreateInstance — shared across all entries (1 per class)
             writer.AppendLine($"private static {classGroup.ClassFullyQualified} __CreateInstance(global::System.Type[] typeArgs, object?[] args)");
@@ -3535,7 +3528,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine("{");
                 writer.Indent();
                 writer.AppendRaw(method.TestEntryDataFieldsCode);
-                writer.AppendLine($"MethodMetadata = __methodMetadatas[{method.MethodIndex}],");
+                writer.AppendLine($"MethodMetadata = __mm_{method.MethodIndex},");
                 writer.AppendLine($"CreateInstance = __CreateInstance,");
                 writer.AppendLine($"InvokeBody = __Invoke,");
                 writer.AppendLine($"MethodIndex = {method.MethodIndex},");

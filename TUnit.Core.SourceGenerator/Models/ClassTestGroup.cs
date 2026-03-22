@@ -18,4 +18,10 @@ public sealed record ClassTestGroup
     public required string InstanceFactoryBodyCode { get; init; }
     public required string ReflectionFieldAccessorsCode { get; init; }
     public required string SharedLocalsCode { get; init; }
+
+    /// <summary>
+    /// Pre-generated static readonly field declarations for ClassMetadata and classType.
+    /// Used to inline MethodMetadata construction into field initializers.
+    /// </summary>
+    public required string SharedFieldsCode { get; init; }
 }

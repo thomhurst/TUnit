@@ -7,26 +7,19 @@ namespace TUnit.Generated;
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_Bugs__4431_GenericClassNoDataSource_T_Should_Create_Instance_TestSource
 {
-    private static readonly global::TUnit.Core.MethodMetadata[] __methodMetadatas = __InitMethodMetadatas();
-    private static global::TUnit.Core.MethodMetadata[] __InitMethodMetadatas()
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._4431.GenericClassNoDataSource<>", new global::TUnit.Core.ClassMetadata
     {
-        var __classMetadata =         global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._4431.GenericClassNoDataSource<>", new global::TUnit.Core.ClassMetadata
-        {
-            Type = typeof(global::TUnit.TestProject.Bugs._4431.GenericClassNoDataSource<>),
-            TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassNoDataSource<>), [new global::TUnit.Core.GenericParameter(0, false, "T")]),
-            Name = "GenericClassNoDataSource",
-            Namespace = "TUnit.TestProject.Bugs._4431",
-            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-            Parent = null
-        });
-        var __classType = typeof(global::TUnit.TestProject.Bugs._4431.GenericClassNoDataSource<>);
-        return new global::TUnit.Core.MethodMetadata[]
-        {
-            global::TUnit.Core.MethodMetadataFactory.Create("Should_Create_Instance", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-        };
-    }
+        Type = typeof(global::TUnit.TestProject.Bugs._4431.GenericClassNoDataSource<>),
+        TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassNoDataSource<>), [new global::TUnit.Core.GenericParameter(0, false, "T")]),
+        Name = "GenericClassNoDataSource",
+        Namespace = "TUnit.TestProject.Bugs._4431",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._4431.GenericClassNoDataSource<>);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Should_Create_Instance", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata);
     private static global::TUnit.TestProject.Bugs._4431.GenericClassNoDataSource<global::TUnit.TestProject.Bugs._4431.TypeA> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.Bugs._4431.GenericClassNoDataSource<global::TUnit.TestProject.Bugs._4431.TypeA>();
@@ -65,7 +58,7 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassNoDataSource_T_Sh
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_0,
             InvokeBody = __Invoke_0,
             MethodIndex = 0,
@@ -111,7 +104,7 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassNoDataSource_T_Sh
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_1,
             InvokeBody = __Invoke_1,
             MethodIndex = 0,
@@ -141,29 +134,22 @@ namespace TUnit.Generated;
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_Bugs__4431_GenericClassWithMethodDataSource_T_Should_Have_Number__int_TestSource
 {
-    private static readonly global::TUnit.Core.MethodMetadata[] __methodMetadatas = __InitMethodMetadatas();
-    private static global::TUnit.Core.MethodMetadata[] __InitMethodMetadatas()
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<>", new global::TUnit.Core.ClassMetadata
     {
-        var __classMetadata =         global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<>", new global::TUnit.Core.ClassMetadata
-        {
-            Type = typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<>),
-            TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<>), [new global::TUnit.Core.GenericParameter(0, false, "T")]),
-            Name = "GenericClassWithMethodDataSource",
-            Namespace = "TUnit.TestProject.Bugs._4431",
-            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-            Parent = null
-        });
-        var __classType = typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<>);
-        return new global::TUnit.Core.MethodMetadata[]
-        {
-            global::TUnit.Core.MethodMetadataFactory.Create("Should_Have_Number", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
+        Type = typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<>),
+        TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<>), [new global::TUnit.Core.GenericParameter(0, false, "T")]),
+        Name = "GenericClassWithMethodDataSource",
+        Namespace = "TUnit.TestProject.Bugs._4431",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<>);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Should_Have_Number", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "number", new global::TUnit.Core.ConcreteType(typeof(int)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<>).GetMethod("Should_Have_Number", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0])
-}),
-        };
-    }
+});
     private static global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<global::TUnit.TestProject.Bugs._4431.TypeA> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<global::TUnit.TestProject.Bugs._4431.TypeA>();
@@ -203,7 +189,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "number", new gl
             HasDataSource = true,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_0,
             InvokeBody = __Invoke_0,
             MethodIndex = 0,
@@ -275,7 +261,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "number", new gl
             HasDataSource = true,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_1,
             InvokeBody = __Invoke_1,
             MethodIndex = 0,
@@ -330,26 +316,19 @@ namespace TUnit.Generated;
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMethod_GenericMethod_Should_Work_TestSource
 {
-    private static readonly global::TUnit.Core.MethodMetadata[] __methodMetadatas = __InitMethodMetadatas();
-    private static global::TUnit.Core.MethodMetadata[] __InitMethodMetadatas()
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod", new global::TUnit.Core.ClassMetadata
     {
-        var __classMetadata =         global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod", new global::TUnit.Core.ClassMetadata
-        {
-            Type = typeof(global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod),
-            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod)),
-            Name = "NonGenericClassWithGenericMethod",
-            Namespace = "TUnit.TestProject.Bugs._4431",
-            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-            Parent = null
-        });
-        var __classType = typeof(global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod);
-        return new global::TUnit.Core.MethodMetadata[]
-        {
-            global::TUnit.Core.MethodMetadataFactory.Create("GenericMethod_Should_Work", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1),
-        };
-    }
+        Type = typeof(global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod)),
+        Name = "NonGenericClassWithGenericMethod",
+        Namespace = "TUnit.TestProject.Bugs._4431",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("GenericMethod_Should_Work", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1);
     private static global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod();
@@ -449,7 +428,7 @@ internal static class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMet
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_0,
             InvokeBody = __Invoke_0,
             MethodIndex = 0,
@@ -467,7 +446,7 @@ internal static class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMet
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_0,
             InvokeBody = __Invoke_0,
             MethodIndex = 1,
@@ -485,7 +464,7 @@ internal static class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMet
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_0,
             InvokeBody = __Invoke_0,
             MethodIndex = 2,
@@ -511,29 +490,22 @@ namespace TUnit.Generated;
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMethodAndDataSource_GenericMeth_0AB5EDCD_TestSource
 {
-    private static readonly global::TUnit.Core.MethodMetadata[] __methodMetadatas = __InitMethodMetadatas();
-    private static global::TUnit.Core.MethodMetadata[] __InitMethodMetadatas()
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource", new global::TUnit.Core.ClassMetadata
     {
-        var __classMetadata =         global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource", new global::TUnit.Core.ClassMetadata
-        {
-            Type = typeof(global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource),
-            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource)),
-            Name = "NonGenericClassWithGenericMethodAndDataSource",
-            Namespace = "TUnit.TestProject.Bugs._4431",
-            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-            Parent = null
-        });
-        var __classType = typeof(global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource);
-        return new global::TUnit.Core.MethodMetadata[]
-        {
-            global::TUnit.Core.MethodMetadataFactory.Create("GenericMethod_With_DataSource", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: new global::TUnit.Core.ParameterMetadata[]
+        Type = typeof(global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource)),
+        Name = "NonGenericClassWithGenericMethodAndDataSource",
+        Namespace = "TUnit.TestProject.Bugs._4431",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("GenericMethod_With_DataSource", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "input", new global::TUnit.Core.ConcreteType(typeof(string)), false, reflectionInfoFactory: static () => global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "GenericMethod_With_DataSource" && m.GetParameters().Length == 1)?.GetParameters()[0]!)
-}),
-        };
-    }
+});
     private static global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource();
@@ -611,7 +583,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "input", new 
             HasDataSource = true,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_0,
             InvokeBody = __Invoke_0,
             MethodIndex = 0,
@@ -654,7 +626,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "input", new 
             HasDataSource = true,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_0,
             InvokeBody = __Invoke_0,
             MethodIndex = 1,
@@ -705,26 +677,19 @@ namespace TUnit.Generated;
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod_TClass_BothGeneric_Should_Work_TestSource
 {
-    private static readonly global::TUnit.Core.MethodMetadata[] __methodMetadatas = __InitMethodMetadatas();
-    private static global::TUnit.Core.MethodMetadata[] __InitMethodMetadatas()
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<>", new global::TUnit.Core.ClassMetadata
     {
-        var __classMetadata =         global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<>", new global::TUnit.Core.ClassMetadata
-        {
-            Type = typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<>),
-            TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<>), [new global::TUnit.Core.GenericParameter(0, false, "TClass")]),
-            Name = "GenericClassWithGenericMethod",
-            Namespace = "TUnit.TestProject.Bugs._4431",
-            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-            Parent = null
-        });
-        var __classType = typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<>);
-        return new global::TUnit.Core.MethodMetadata[]
-        {
-            global::TUnit.Core.MethodMetadataFactory.Create("BothGeneric_Should_Work", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1),
-        };
-    }
+        Type = typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<>),
+        TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<>), [new global::TUnit.Core.GenericParameter(0, false, "TClass")]),
+        Name = "GenericClassWithGenericMethod",
+        Namespace = "TUnit.TestProject.Bugs._4431",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<>);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("BothGeneric_Should_Work", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1);
     private static global::TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<global::TUnit.TestProject.Bugs._4431.TypeA> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<global::TUnit.TestProject.Bugs._4431.TypeA>();
@@ -804,7 +769,7 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_0,
             InvokeBody = __Invoke_0,
             MethodIndex = 0,
@@ -822,7 +787,7 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_0,
             InvokeBody = __Invoke_0,
             MethodIndex = 1,
@@ -909,7 +874,7 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_1,
             InvokeBody = __Invoke_1,
             MethodIndex = 0,
@@ -927,7 +892,7 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_1,
             InvokeBody = __Invoke_1,
             MethodIndex = 1,
@@ -957,26 +922,19 @@ namespace TUnit.Generated;
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_Bugs__4431_GenericClassWithConstructor_T_Should_Have_Label_TestSource
 {
-    private static readonly global::TUnit.Core.MethodMetadata[] __methodMetadatas = __InitMethodMetadatas();
-    private static global::TUnit.Core.MethodMetadata[] __InitMethodMetadatas()
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._4431.GenericClassWithConstructor<>", new global::TUnit.Core.ClassMetadata
     {
-        var __classMetadata =         global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._4431.GenericClassWithConstructor<>", new global::TUnit.Core.ClassMetadata
-        {
-            Type = typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithConstructor<>),
-            TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithConstructor<>), [new global::TUnit.Core.GenericParameter(0, false, "T")]),
-            Name = "GenericClassWithConstructor",
-            Namespace = "TUnit.TestProject.Bugs._4431",
-            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-            Parent = null
-        });
-        var __classType = typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithConstructor<>);
-        return new global::TUnit.Core.MethodMetadata[]
-        {
-            global::TUnit.Core.MethodMetadataFactory.Create("Should_Have_Label", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-        };
-    }
+        Type = typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithConstructor<>),
+        TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithConstructor<>), [new global::TUnit.Core.GenericParameter(0, false, "T")]),
+        Name = "GenericClassWithConstructor",
+        Namespace = "TUnit.TestProject.Bugs._4431",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithConstructor<>);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Should_Have_Label", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata);
     private static global::TUnit.TestProject.Bugs._4431.GenericClassWithConstructor<global::TUnit.TestProject.Bugs._4431.TypeA> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.Bugs._4431.GenericClassWithConstructor<global::TUnit.TestProject.Bugs._4431.TypeA>();
@@ -1015,7 +973,7 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithConstructor_T
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_0,
             InvokeBody = __Invoke_0,
             MethodIndex = 0,
@@ -1061,7 +1019,7 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithConstructor_T
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_1,
             InvokeBody = __Invoke_1,
             MethodIndex = 0,
@@ -1091,26 +1049,19 @@ namespace TUnit.Generated;
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_Should_Handle_Multiple_Type__8C0B02C5_TestSource
 {
-    private static readonly global::TUnit.Core.MethodMetadata[] __methodMetadatas = __InitMethodMetadatas();
-    private static global::TUnit.Core.MethodMetadata[] __InitMethodMetadatas()
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._4431.MultipleTypeParameters<,>", new global::TUnit.Core.ClassMetadata
     {
-        var __classMetadata =         global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._4431.MultipleTypeParameters<,>", new global::TUnit.Core.ClassMetadata
-        {
-            Type = typeof(global::TUnit.TestProject.Bugs._4431.MultipleTypeParameters<,>),
-            TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._4431.MultipleTypeParameters<,>), [new global::TUnit.Core.GenericParameter(0, false, "T1"), new global::TUnit.Core.GenericParameter(1, false, "T2")]),
-            Name = "MultipleTypeParameters",
-            Namespace = "TUnit.TestProject.Bugs._4431",
-            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-            Parent = null
-        });
-        var __classType = typeof(global::TUnit.TestProject.Bugs._4431.MultipleTypeParameters<,>);
-        return new global::TUnit.Core.MethodMetadata[]
-        {
-            global::TUnit.Core.MethodMetadataFactory.Create("Should_Handle_Multiple_Type_Parameters", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-        };
-    }
+        Type = typeof(global::TUnit.TestProject.Bugs._4431.MultipleTypeParameters<,>),
+        TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._4431.MultipleTypeParameters<,>), [new global::TUnit.Core.GenericParameter(0, false, "T1"), new global::TUnit.Core.GenericParameter(1, false, "T2")]),
+        Name = "MultipleTypeParameters",
+        Namespace = "TUnit.TestProject.Bugs._4431",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._4431.MultipleTypeParameters<,>);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Should_Handle_Multiple_Type_Parameters", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata);
     private static global::TUnit.TestProject.Bugs._4431.MultipleTypeParameters<global::TUnit.TestProject.Bugs._4431.TypeA, global::TUnit.TestProject.Bugs._4431.TypeC> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.Bugs._4431.MultipleTypeParameters<global::TUnit.TestProject.Bugs._4431.TypeA, global::TUnit.TestProject.Bugs._4431.TypeC>();
@@ -1149,7 +1100,7 @@ internal static class TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_0,
             InvokeBody = __Invoke_0,
             MethodIndex = 0,
@@ -1195,7 +1146,7 @@ internal static class TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_1,
             InvokeBody = __Invoke_1,
             MethodIndex = 0,
@@ -1225,26 +1176,19 @@ namespace TUnit.Generated;
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_Bugs__4431_DerivedGenericClass_T_Should_Create_From_Base_TestSource
 {
-    private static readonly global::TUnit.Core.MethodMetadata[] __methodMetadatas = __InitMethodMetadatas();
-    private static global::TUnit.Core.MethodMetadata[] __InitMethodMetadatas()
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._4431.DerivedGenericClass<>", new global::TUnit.Core.ClassMetadata
     {
-        var __classMetadata =         global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._4431.DerivedGenericClass<>", new global::TUnit.Core.ClassMetadata
-        {
-            Type = typeof(global::TUnit.TestProject.Bugs._4431.DerivedGenericClass<>),
-            TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._4431.DerivedGenericClass<>), [new global::TUnit.Core.GenericParameter(0, false, "T")]),
-            Name = "DerivedGenericClass",
-            Namespace = "TUnit.TestProject.Bugs._4431",
-            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-            Parent = null
-        });
-        var __classType = typeof(global::TUnit.TestProject.Bugs._4431.DerivedGenericClass<>);
-        return new global::TUnit.Core.MethodMetadata[]
-        {
-            global::TUnit.Core.MethodMetadataFactory.Create("Should_Create_From_Base", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-        };
-    }
+        Type = typeof(global::TUnit.TestProject.Bugs._4431.DerivedGenericClass<>),
+        TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._4431.DerivedGenericClass<>), [new global::TUnit.Core.GenericParameter(0, false, "T")]),
+        Name = "DerivedGenericClass",
+        Namespace = "TUnit.TestProject.Bugs._4431",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._4431.DerivedGenericClass<>);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Should_Create_From_Base", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata);
     private static global::TUnit.TestProject.Bugs._4431.DerivedGenericClass<global::TUnit.TestProject.Bugs._4431.TypeA> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.Bugs._4431.DerivedGenericClass<global::TUnit.TestProject.Bugs._4431.TypeA>();
@@ -1283,7 +1227,7 @@ internal static class TUnit_TestProject_Bugs__4431_DerivedGenericClass_T_Should_
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_0,
             InvokeBody = __Invoke_0,
             MethodIndex = 0,
@@ -1329,7 +1273,7 @@ internal static class TUnit_TestProject_Bugs__4431_DerivedGenericClass_T_Should_
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_1,
             InvokeBody = __Invoke_1,
             MethodIndex = 0,
@@ -1359,39 +1303,32 @@ namespace TUnit.Generated;
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_Bugs__4431_GenericClassWithClassDataSource_T_Should_Have_DataSource_TestSource
 {
-    private static readonly global::TUnit.Core.MethodMetadata[] __methodMetadatas = __InitMethodMetadatas();
-    private static global::TUnit.Core.MethodMetadata[] __InitMethodMetadatas()
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<>", new global::TUnit.Core.ClassMetadata
     {
-        var __classMetadata =         global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<>", new global::TUnit.Core.ClassMetadata
+        Type = typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<>),
+        TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<>), [new global::TUnit.Core.GenericParameter(0, false, "T")]),
+        Name = "GenericClassWithClassDataSource",
+        Namespace = "TUnit.TestProject.Bugs._4431",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = new global::TUnit.Core.PropertyMetadata[]
         {
-            Type = typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<>),
-            TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<>), [new global::TUnit.Core.GenericParameter(0, false, "T")]),
-            Name = "GenericClassWithClassDataSource",
-            Namespace = "TUnit.TestProject.Bugs._4431",
-            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-            Properties = new global::TUnit.Core.PropertyMetadata[]
+            new global::TUnit.Core.PropertyMetadata
             {
-                new global::TUnit.Core.PropertyMetadata
-                {
-                    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<>).GetProperty("DataSource"),
-                    Type = typeof(global::TUnit.TestProject.Bugs._4431.TestDataSource),
-                    Name = "DataSource",
-                    IsStatic = false,
-                    IsNullable = false,
-                    Getter = o => ((dynamic)o).DataSource,
-                    ClassMetadata = null!,
-                    ContainingTypeMetadata = null!
-                }
-            },
-            Parent = null
-        });
-        var __classType = typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<>);
-        return new global::TUnit.Core.MethodMetadata[]
-        {
-            global::TUnit.Core.MethodMetadataFactory.Create("Should_Have_DataSource", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-        };
-    }
+                ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<>).GetProperty("DataSource"),
+                Type = typeof(global::TUnit.TestProject.Bugs._4431.TestDataSource),
+                Name = "DataSource",
+                IsStatic = false,
+                IsNullable = false,
+                Getter = o => ((dynamic)o).DataSource,
+                ClassMetadata = null!,
+                ContainingTypeMetadata = null!
+            }
+        },
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<>);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Should_Have_DataSource", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata);
     private static global::TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<global::TUnit.TestProject.Bugs._4431.TypeA> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<global::TUnit.TestProject.Bugs._4431.TypeA>();
@@ -1430,7 +1367,7 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithClassDataSour
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_0,
             InvokeBody = __Invoke_0,
             MethodIndex = 0,
@@ -1476,7 +1413,7 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithClassDataSour
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_1,
             InvokeBody = __Invoke_1,
             MethodIndex = 0,
@@ -1506,42 +1443,35 @@ namespace TUnit.Generated;
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWithDataSources_TClass_FullyGene_0A3B401E_TestSource
 {
-    private static readonly global::TUnit.Core.MethodMetadata[] __methodMetadatas = __InitMethodMetadatas();
-    private static global::TUnit.Core.MethodMetadata[] __InitMethodMetadatas()
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>", new global::TUnit.Core.ClassMetadata
     {
-        var __classMetadata =         global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>", new global::TUnit.Core.ClassMetadata
+        Type = typeof(global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>),
+        TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>), [new global::TUnit.Core.GenericParameter(0, false, "TClass")]),
+        Name = "GenericClassGenericMethodWithDataSources",
+        Namespace = "TUnit.TestProject.Bugs._4431",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = new global::TUnit.Core.PropertyMetadata[]
         {
-            Type = typeof(global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>),
-            TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>), [new global::TUnit.Core.GenericParameter(0, false, "TClass")]),
-            Name = "GenericClassGenericMethodWithDataSources",
-            Namespace = "TUnit.TestProject.Bugs._4431",
-            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-            Properties = new global::TUnit.Core.PropertyMetadata[]
+            new global::TUnit.Core.PropertyMetadata
             {
-                new global::TUnit.Core.PropertyMetadata
-                {
-                    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>).GetProperty("DataSource"),
-                    Type = typeof(global::TUnit.TestProject.Bugs._4431.TestDataSource),
-                    Name = "DataSource",
-                    IsStatic = false,
-                    IsNullable = false,
-                    Getter = o => ((dynamic)o).DataSource,
-                    ClassMetadata = null!,
-                    ContainingTypeMetadata = null!
-                }
-            },
-            Parent = null
-        });
-        var __classType = typeof(global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>);
-        return new global::TUnit.Core.MethodMetadata[]
-        {
-            global::TUnit.Core.MethodMetadataFactory.Create("FullyGeneric_With_DataSources", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: new global::TUnit.Core.ParameterMetadata[]
+                ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>).GetProperty("DataSource"),
+                Type = typeof(global::TUnit.TestProject.Bugs._4431.TestDataSource),
+                Name = "DataSource",
+                IsStatic = false,
+                IsNullable = false,
+                Getter = o => ((dynamic)o).DataSource,
+                ClassMetadata = null!,
+                ContainingTypeMetadata = null!
+            }
+        },
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("FullyGeneric_With_DataSources", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "flag", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "FullyGeneric_With_DataSources" && m.GetParameters().Length == 1)?.GetParameters()[0]!)
-}),
-        };
-    }
+});
     private static global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<global::TUnit.TestProject.Bugs._4431.TypeA> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<global::TUnit.TestProject.Bugs._4431.TypeA>();
@@ -1623,7 +1553,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "flag", new glo
             HasDataSource = true,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_0,
             InvokeBody = __Invoke_0,
             MethodIndex = 0,
@@ -1666,7 +1596,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "flag", new glo
             HasDataSource = true,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_0,
             InvokeBody = __Invoke_0,
             MethodIndex = 1,
@@ -1780,7 +1710,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "flag", new glo
             HasDataSource = true,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_1,
             InvokeBody = __Invoke_1,
             MethodIndex = 0,
@@ -1823,7 +1753,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "flag", new glo
             HasDataSource = true,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_1,
             InvokeBody = __Invoke_1,
             MethodIndex = 1,

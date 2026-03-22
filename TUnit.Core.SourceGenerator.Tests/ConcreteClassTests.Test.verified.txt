@@ -7,26 +7,19 @@ namespace TUnit.Generated;
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_AbstractTests_ConcreteClass2__TestSource
 {
-    private static readonly global::TUnit.Core.MethodMetadata[] __methodMetadatas = __InitMethodMetadatas();
-    private static global::TUnit.Core.MethodMetadata[] __InitMethodMetadatas()
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AbstractTests.ConcreteClass2", new global::TUnit.Core.ClassMetadata
     {
-        var __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AbstractTests.ConcreteClass2", new global::TUnit.Core.ClassMetadata
-        {
-            Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
-            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2)),
-            Name = "ConcreteClass2",
-            Namespace = "TUnit.TestProject.AbstractTests",
-            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-            Parent = null
-        });
-        var __classType = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2);
-        return new global::TUnit.Core.MethodMetadata[]
-        {
-            global::TUnit.Core.MethodMetadataFactory.Create("SecondTest", __classType, typeof(void), __classMetadata),
-        };
-    }
+        Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2)),
+        Name = "ConcreteClass2",
+        Namespace = "TUnit.TestProject.AbstractTests",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("SecondTest", __classType, typeof(void), __classMetadata);
     private static global::TUnit.TestProject.AbstractTests.ConcreteClass2 __CreateInstance(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.AbstractTests.ConcreteClass2();
@@ -81,7 +74,7 @@ internal static class TUnit_TestProject_AbstractTests_ConcreteClass2__TestSource
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
             MethodIndex = 0,
@@ -107,26 +100,19 @@ namespace TUnit.Generated;
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_AbstractTests_ConcreteClass2_AssertClassName_TestSource
 {
-    private static readonly global::TUnit.Core.MethodMetadata[] __methodMetadatas = __InitMethodMetadatas();
-    private static global::TUnit.Core.MethodMetadata[] __InitMethodMetadatas()
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AbstractTests.ConcreteClass2", new global::TUnit.Core.ClassMetadata
     {
-        var __classMetadata =         global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AbstractTests.ConcreteClass2", new global::TUnit.Core.ClassMetadata
-        {
-            Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
-            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2)),
-            Name = "ConcreteClass2",
-            Namespace = "TUnit.TestProject.AbstractTests",
-            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-            Parent = null
-        });
-        var __classType = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2);
-        return new global::TUnit.Core.MethodMetadata[]
-        {
-            global::TUnit.Core.MethodMetadataFactory.Create("AssertClassName", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-        };
-    }
+        Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2)),
+        Name = "ConcreteClass2",
+        Namespace = "TUnit.TestProject.AbstractTests",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("AssertClassName", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata);
     private static global::TUnit.TestProject.AbstractTests.ConcreteClass2 __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.AbstractTests.ConcreteClass2();
@@ -164,7 +150,7 @@ internal static class TUnit_TestProject_AbstractTests_ConcreteClass2_AssertClass
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_0,
             InvokeBody = __Invoke_0,
             MethodIndex = 0,
@@ -190,26 +176,19 @@ namespace TUnit.Generated;
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_AbstractTests_ConcreteClass1_AssertClassName_TestSource
 {
-    private static readonly global::TUnit.Core.MethodMetadata[] __methodMetadatas = __InitMethodMetadatas();
-    private static global::TUnit.Core.MethodMetadata[] __InitMethodMetadatas()
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AbstractTests.ConcreteClass1", new global::TUnit.Core.ClassMetadata
     {
-        var __classMetadata =         global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AbstractTests.ConcreteClass1", new global::TUnit.Core.ClassMetadata
-        {
-            Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass1),
-            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass1)),
-            Name = "ConcreteClass1",
-            Namespace = "TUnit.TestProject.AbstractTests",
-            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-            Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-            Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-            Parent = null
-        });
-        var __classType = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass1);
-        return new global::TUnit.Core.MethodMetadata[]
-        {
-            global::TUnit.Core.MethodMetadataFactory.Create("AssertClassName", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata),
-        };
-    }
+        Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass1),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass1)),
+        Name = "ConcreteClass1",
+        Namespace = "TUnit.TestProject.AbstractTests",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass1);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("AssertClassName", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata);
     private static global::TUnit.TestProject.AbstractTests.ConcreteClass1 __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.AbstractTests.ConcreteClass1();
@@ -246,7 +225,7 @@ internal static class TUnit_TestProject_AbstractTests_ConcreteClass1_AssertClass
             HasDataSource = false,
             RepeatCount = 0,
             DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __methodMetadatas[0],
+            MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_0,
             InvokeBody = __Invoke_0,
             MethodIndex = 0,
