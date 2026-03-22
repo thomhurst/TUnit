@@ -148,6 +148,7 @@ public class SourceRegistrar
     /// <summary>
     /// Registers test entries for a class using the TestEntry pattern.
     /// Returns a dummy value for use as a static field initializer.
+    /// Multiple calls for the same T are additive — entries accumulate.
     /// </summary>
     public static int RegisterEntries<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods)] T>(TestEntry<T>[] entries) where T : class
     {
@@ -158,7 +159,25 @@ public class SourceRegistrar
                 "This indicates a source generator bug. Please report this issue.");
         }
 
-        Sources.TestEntries[typeof(T)] = new TestEntrySource<T>(entries);
-        return 0;
+        var key = typeof(T);
+
+        while (true)
+        {
+            if (Sources.TestEntries.TryGetValue(key, out var existing))
+            {
+                if (existing is TestEntrySource<T> existingSource)
+                {
+                    existingSource.AddEntries(entries);
+                    return 0;
+                }
+            }
+
+            if (Sources.TestEntries.TryAdd(key, new TestEntrySource<T>(entries)))
+            {
+                return 0;
+            }
+
+            // Another thread added it concurrently — retry to merge
+        }
     }
 }

@@ -15,7 +15,7 @@ public sealed class TestEntrySource<
         | DynamicallyAccessedMemberTypes.PublicProperties
         | DynamicallyAccessedMemberTypes.PublicMethods)] T> : ITestEntrySource where T : class
 {
-    private readonly TestEntry<T>[] _entries;
+    private TestEntry<T>[] _entries;
     private readonly string _className;
 
     public TestEntrySource(TestEntry<T>[] entries)
@@ -23,6 +23,23 @@ public sealed class TestEntrySource<
         _entries = entries;
         _className = TUnit.Core.Extensions.TestContextExtensions.GetNestedTypeName(typeof(T));
     }
+
+    /// <summary>
+    /// Appends additional entries. Used when multiple source-gen files register entries for the same T.
+    /// Thread-safe via lock since static field initializers may run concurrently.
+    /// </summary>
+    internal void AddEntries(TestEntry<T>[] additional)
+    {
+        lock (_lock)
+        {
+            var combined = new TestEntry<T>[_entries.Length + additional.Length];
+            Array.Copy(_entries, 0, combined, 0, _entries.Length);
+            Array.Copy(additional, 0, combined, _entries.Length, additional.Length);
+            _entries = combined;
+        }
+    }
+
+    private readonly object _lock = new();
 
     public int Count => _entries.Length;
     public Type ClassType => typeof(T);
