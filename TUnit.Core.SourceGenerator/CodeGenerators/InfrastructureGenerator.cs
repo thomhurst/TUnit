@@ -452,20 +452,9 @@ public class InfrastructureGenerator : IIncrementalGenerator
                 // Per-class/per-method test sources and per-hook sources contribute static field
                 // initializers to shared partial classes. RunClassConstructor forces each .cctor
                 // to execute, performing all registrations in ONE JIT-compiled method per class.
-                sourceBuilder.AppendLine("try");
-                sourceBuilder.AppendLine("{");
-                sourceBuilder.Indent();
+                // No try/catch needed — InfrastructureGenerator always emits both shell classes.
                 sourceBuilder.AppendLine("global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::TUnit.Generated.TUnit_TestRegistration).TypeHandle);");
-                sourceBuilder.Unindent();
-                sourceBuilder.AppendLine("}");
-                sourceBuilder.AppendLine("catch (global::System.TypeLoadException) { /* Type not emitted - no test registrations */ }");
-                sourceBuilder.AppendLine("try");
-                sourceBuilder.AppendLine("{");
-                sourceBuilder.Indent();
                 sourceBuilder.AppendLine("global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::TUnit.Generated.TUnit_HookRegistration).TypeHandle);");
-                sourceBuilder.Unindent();
-                sourceBuilder.AppendLine("}");
-                sourceBuilder.AppendLine("catch (global::System.TypeLoadException) { /* Type not emitted - no hook registrations */ }");
                 sourceBuilder.AppendLine();
 
                 sourceBuilder.AppendLine("try");

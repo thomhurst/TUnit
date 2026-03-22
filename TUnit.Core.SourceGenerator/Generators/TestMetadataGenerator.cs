@@ -2407,7 +2407,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private static void GenerateTestRegistrationField(CodeWriter writer, TestMethodMetadata testMethod, string uniqueClassName)
     {
         EmitRegistrationField(writer, uniqueClassName,
-            $"global::TUnit.Core.SourceRegistrar.RegisterReturn({GenerateTypeReference(testMethod.TypeSymbol, testMethod.IsGenericType)}, new {uniqueClassName}());");
+            $"global::TUnit.Core.SourceRegistrar.RegisterReturn({GenerateTypeReference(testMethod.TypeSymbol, testMethod.IsGenericType)}, new {uniqueClassName}())");
     }
 
     /// <summary>
@@ -2420,7 +2420,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("internal static partial class TUnit_TestRegistration");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine($"static readonly int _r_{fieldName} = {registrarCall}");
+        writer.AppendLine($"static readonly int _r_{fieldName} = {registrarCall};");
         writer.Unindent();
         writer.AppendLine("}");
     }
@@ -3031,7 +3031,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("}");
 
             EmitRegistrationField(writer, classGroup.TestSourceName,
-                $"global::TUnit.Core.SourceRegistrar.RegisterReturn(typeof({classGroup.ClassFullyQualified}), {classGroup.TestSourceName}.GetTests, {classGroup.TestSourceName}.EnumerateTestDescriptors);");
+                $"global::TUnit.Core.SourceRegistrar.RegisterReturn(typeof({classGroup.ClassFullyQualified}), {classGroup.TestSourceName}.GetTests, {classGroup.TestSourceName}.EnumerateTestDescriptors)");
 
             context.AddSource($"{classGroup.TestSourceName}.g.cs", SourceText.From(writer.ToString(), Encoding.UTF8));
         }
