@@ -9,6 +9,14 @@ namespace TUnit.Core;
 /// pure data for filtering, behavioral delegates for execution, and property
 /// descriptors for injection — all without reflection at runtime.
 /// </summary>
+/// <remarks>
+/// <para>
+/// Delegate properties (InvokeBody, CreateAttributes, CreateInstance) are shared
+/// across all entries in a class — they point to class-level switch methods.
+/// Per-test differentiation is via MethodIndex and AttributeGroupIndex.
+/// This means zero per-test methods in the generated assembly.
+/// </para>
+/// </remarks>
 #if !DEBUG
 [EditorBrowsable(EditorBrowsableState.Never)]
 #endif
@@ -54,16 +62,28 @@ public sealed class TestEntry<
     /// <summary>Pre-built method metadata (name, return type, parameters, class metadata).</summary>
     public required MethodMetadata MethodMetadata { get; init; }
 
-    // --- Behavioral delegates (JIT'd on first call, not at registration) ---
+    // --- Class-level shared delegates (1 JIT each, shared by ALL entries in this class) ---
 
-    /// <summary>AOT-safe factory to create test class instances.</summary>
+    /// <summary>
+    /// Consolidated class-level invoker. All tests in the class share this delegate;
+    /// each test dispatches via its MethodIndex. One JIT per class.
+    /// </summary>
+    public required Func<T, int, object?[], CancellationToken, ValueTask> InvokeBody { get; init; }
+
+    /// <summary>Method index for InvokeBody dispatch.</summary>
+    public required int MethodIndex { get; init; }
+
+    /// <summary>
+    /// Consolidated class-level attribute factory. All tests in the class share this delegate;
+    /// each test dispatches via its AttributeGroupIndex. One JIT per class.
+    /// </summary>
+    public required Func<int, Attribute[]> CreateAttributes { get; init; }
+
+    /// <summary>Attribute group index for CreateAttributes dispatch.</summary>
+    public required int AttributeGroupIndex { get; init; }
+
+    /// <summary>AOT-safe factory to create test class instances. Shared by all entries in class.</summary>
     public required Func<Type[], object?[], T> CreateInstance { get; init; }
-
-    /// <summary>Invokes the actual test method body.</summary>
-    public required Func<T, object?[], CancellationToken, ValueTask> InvokeBody { get; init; }
-
-    /// <summary>Returns non-data-source attributes (Test, Category, Property, etc.).</summary>
-    public required Func<Attribute[]> CreateAttributes { get; init; }
 
     // --- Data sources (pre-separated by source generator — no runtime scanning needed) ---
 
@@ -80,7 +100,6 @@ public sealed class TestEntry<
 
     /// <summary>
     /// Constructs a TestMetadata&lt;T&gt; from this entry's data and delegates.
-    /// All fields are pre-built by the source generator — this is a pure copy operation.
     /// </summary>
     internal TestMetadata<T> ToTestMetadata(string testSessionId)
     {
@@ -95,11 +114,14 @@ public sealed class TestEntry<
             PropertyDataSources = BuildPropertyDataSources(),
             PropertyInjections = BuildPropertyInjections(),
             InstanceFactory = CreateInstance,
-            InvokeTypedTest = InvokeBody,
+            ClassInvoker = InvokeBody,
+            InvokeMethodIndex = MethodIndex,
+            ClassAttributeFactory = CreateAttributes,
+            AttributeGroupIndex = AttributeGroupIndex,
+            AttributeFactory = () => CreateAttributes(AttributeGroupIndex),
             FilePath = FilePath,
             LineNumber = LineNumber,
             MethodMetadata = MethodMetadata,
-            AttributeFactory = CreateAttributes,
             RepeatCount = RepeatCount > 0 ? RepeatCount : null,
             TestSessionId = testSessionId,
         };
