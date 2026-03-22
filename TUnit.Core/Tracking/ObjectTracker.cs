@@ -85,16 +85,15 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
             return;
         }
 
+        // No lock needed: TrackedObjects is per-TestContext and TrackObjects
+        // is called from a single thread per test.
         foreach (var kvp in trackableDict)
         {
-            lock (kvp.Value)
+            foreach (var obj in kvp.Value)
             {
-                foreach (var obj in kvp.Value)
+                if (!alreadyTrackedSnapshot.Contains(obj))
                 {
-                    if (!alreadyTrackedSnapshot.Contains(obj))
-                    {
-                        TrackObject(obj);
-                    }
+                    TrackObject(obj);
                 }
             }
         }
@@ -214,7 +213,6 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
             }
         }
 
-        // Dispose outside the lock to avoid blocking other untrack operations
         if (shouldDispose)
         {
             await disposer.DisposeAsync(obj).ConfigureAwait(false);
