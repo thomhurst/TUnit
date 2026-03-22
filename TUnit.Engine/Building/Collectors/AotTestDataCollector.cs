@@ -211,39 +211,27 @@ internal sealed class AotTestDataCollector : ITestDataCollector
     }
 
     /// <summary>
-    /// Materializes TestMetadata from every source.
-    /// Uses parallel processing for large source sets to avoid sequential JIT + metadata creation bottleneck.
+    /// Materializes TestMetadata from every source in parallel.
+    /// Each source's GetTests is independent and safe to call concurrently.
     /// </summary>
     private IEnumerable<TestMetadata> CollectTests(
         List<ITestSource> testSourcesList,
         string testSessionId)
     {
-        if (testSourcesList.Count < ParallelThresholds.MinItemsForParallel)
-        {
-            var results = new List<TestMetadata>();
-            foreach (var testSource in testSourcesList)
-            {
-                var tests = testSource.GetTests(testSessionId);
-                for (var i = 0; i < tests.Count; i++)
-                {
-                    results.Add(tests[i]);
-                }
-            }
-            return results;
-        }
+        var batches = new IReadOnlyList<TestMetadata>[testSourcesList.Count];
 
-        var allResults = new ConcurrentBag<IReadOnlyList<TestMetadata>>();
-        Parallel.ForEach(testSourcesList, testSource =>
+        Parallel.For(0, testSourcesList.Count, i =>
         {
-            allResults.Add(testSource.GetTests(testSessionId));
+            batches[i] = testSourcesList[i].GetTests(testSessionId);
         });
 
         var combined = new List<TestMetadata>();
-        foreach (var batch in allResults)
+        for (var i = 0; i < batches.Length; i++)
         {
-            for (var i = 0; i < batch.Count; i++)
+            var batch = batches[i];
+            for (var j = 0; j < batch.Count; j++)
             {
-                combined.Add(batch[i]);
+                combined.Add(batch[j]);
             }
         }
         return combined;
