@@ -13,57 +13,6 @@ internal static class TimeoutHelper
     private static readonly TimeSpan GracePeriod = EngineDefaults.TimeoutGracePeriod;
 
     /// <summary>
-    /// Executes a ValueTask-returning operation with an optional timeout.
-    /// On the fast path (no timeout), returns the ValueTask directly without Task allocation.
-    /// </summary>
-    public static ValueTask ExecuteWithTimeoutAsync(
-        Func<CancellationToken, ValueTask> valueTaskFactory,
-        TimeSpan? timeout,
-        CancellationToken cancellationToken,
-        string? timeoutMessage = null)
-    {
-        // Fast path: no timeout - return ValueTask directly (zero allocation, no state machine)
-        if (!timeout.HasValue)
-        {
-            return valueTaskFactory(cancellationToken);
-        }
-
-        // Timeout path: convert to Task for WhenAny support
-        return new ValueTask(ExecuteWithTimeoutCoreAsync(valueTaskFactory, timeout.Value, cancellationToken, timeoutMessage));
-    }
-
-    /// <summary>
-    /// Executes a ValueTask-returning operation with a required timeout.
-    /// Callers that have already checked for a timeout value should use this overload
-    /// to avoid redundant null checks.
-    /// </summary>
-    public static ValueTask ExecuteWithTimeoutAsync(
-        Func<CancellationToken, ValueTask> valueTaskFactory,
-        TimeSpan timeout,
-        CancellationToken cancellationToken,
-        string? timeoutMessage = null)
-    {
-        return new ValueTask(ExecuteWithTimeoutCoreAsync(valueTaskFactory, timeout, cancellationToken, timeoutMessage));
-    }
-
-    private static async Task ExecuteWithTimeoutCoreAsync(
-        Func<CancellationToken, ValueTask> valueTaskFactory,
-        TimeSpan timeout,
-        CancellationToken cancellationToken,
-        string? timeoutMessage)
-    {
-        await ExecuteWithTimeoutCoreAsync<bool>(
-            async ct =>
-            {
-                await valueTaskFactory(ct).ConfigureAwait(false);
-                return true;
-            },
-            timeout,
-            cancellationToken,
-            timeoutMessage).ConfigureAwait(false);
-    }
-
-    /// <summary>
     /// Executes a task with an optional timeout. If the timeout elapses before the task completes,
     /// control is returned to the caller immediately with a TimeoutException.
     /// </summary>
@@ -96,33 +45,6 @@ internal static class TimeoutHelper
             timeout.Value,
             cancellationToken,
             timeoutMessage).ConfigureAwait(false);
-    }
-
-    /// <summary>
-    /// Executes a task with an optional timeout and returns a result. If the timeout elapses before the task completes,
-    /// control is returned to the caller immediately with a TimeoutException.
-    /// </summary>
-    /// <typeparam name="T">The type of result returned by the task.</typeparam>
-    /// <param name="taskFactory">Factory function that creates the task to execute.</param>
-    /// <param name="timeout">Optional timeout duration. If null, no timeout is applied.</param>
-    /// <param name="cancellationToken">Cancellation token for the operation.</param>
-    /// <param name="timeoutMessage">Optional custom timeout message. If null, uses default message.</param>
-    /// <returns>The result of the completed task.</returns>
-    /// <exception cref="TimeoutException">Thrown when the timeout elapses before task completion.</exception>
-    /// <exception cref="OperationCanceledException">Thrown when cancellation is requested.</exception>
-    public static async Task<T> ExecuteWithTimeoutAsync<T>(
-        Func<CancellationToken, Task<T>> taskFactory,
-        TimeSpan? timeout,
-        CancellationToken cancellationToken,
-        string? timeoutMessage = null)
-    {
-        // Fast path: no timeout specified - invoke directly, no CTS/TCS/WhenAny overhead
-        if (!timeout.HasValue)
-        {
-            return await taskFactory(cancellationToken).ConfigureAwait(false);
-        }
-
-        return await ExecuteWithTimeoutCoreAsync(taskFactory, timeout.Value, cancellationToken, timeoutMessage).ConfigureAwait(false);
     }
 
     /// <summary>

@@ -173,7 +173,7 @@ internal class TestExecutor
                     var timeoutMessage = $"Test '{executableTest.Context.Metadata.TestDetails.TestName}' timed out after {testTimeout.Value}";
 
                     await TimeoutHelper.ExecuteWithTimeoutAsync(
-                        ct => ExecuteTestAsync(executableTest, ct),
+                        ct => ExecuteTestAsync(executableTest, ct).AsTask(),
                         testTimeout.Value,
                         cancellationToken,
                         timeoutMessage).ConfigureAwait(false);
