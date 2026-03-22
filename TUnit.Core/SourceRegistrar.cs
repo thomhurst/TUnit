@@ -37,43 +37,6 @@ public class SourceRegistrar
     /// Registers a test source.
     /// </summary>
     /// <param name="testSource">The test source to register.</param>
-    public static void Register(ITestSource testSource)
-    {
-        // For backward compatibility, add to all types queue if no type specified
-        var allTypesQueue = Sources.TestSources.GetOrAdd(typeof(object), static _ => new ConcurrentQueue<ITestSource>());
-        allTypesQueue.Enqueue(testSource);
-    }
-
-    /// <summary>
-    /// Registers a test source for a specific test class type.
-    /// </summary>
-    /// <param name="testClassType">The test class type.</param>
-    /// <param name="testSource">The test source to register.</param>
-    public static void Register(Type testClassType, ITestSource testSource)
-    {
-        var queue = Sources.TestSources.GetOrAdd(testClassType, static _ => new ConcurrentQueue<ITestSource>());
-        queue.Enqueue(testSource);
-    }
-
-    /// <summary>
-    /// Registers a test source for a specific test class type using delegates.
-    /// This avoids allocating a unique TestSource type per class, reducing JIT overhead.
-    /// </summary>
-    /// <param name="testClassType">The test class type.</param>
-    /// <param name="getTests">Delegate that returns test metadata.</param>
-    /// <param name="enumerateDescriptors">Delegate that enumerates test descriptors.</param>
-    public static void Register(
-        Type testClassType,
-        Func<string, IReadOnlyList<TestMetadata>> getTests,
-        Func<IEnumerable<TestDescriptor>> enumerateDescriptors)
-    {
-        Register(testClassType, new DelegateTestSource(getTests, enumerateDescriptors));
-    }
-
-    /// <summary>
-    /// Registers a test source.
-    /// </summary>
-    /// <param name="testSource">The test source to register.</param>
     public static void RegisterDynamic(IDynamicTestSource testSource)
     {
         Sources.DynamicTestSources.Enqueue(testSource);
@@ -121,27 +84,6 @@ public class SourceRegistrar
     public static int RegisterHook<T>(ConcurrentBag<T> bag, T hook)
     {
         bag.Add(hook);
-        return 0;
-    }
-
-    /// <summary>
-    /// Wrapper around <see cref="Register(Type, ITestSource)"/> that returns a dummy value for use as a field initializer.
-    /// </summary>
-    public static int RegisterReturn(Type testClassType, ITestSource testSource)
-    {
-        Register(testClassType, testSource);
-        return 0;
-    }
-
-    /// <summary>
-    /// Wrapper around <see cref="Register(Type, Func{string, IReadOnlyList{TestMetadata}}, Func{IEnumerable{TestDescriptor}})"/> that returns a dummy value for use as a field initializer.
-    /// </summary>
-    public static int RegisterReturn(
-        Type testClassType,
-        Func<string, IReadOnlyList<TestMetadata>> getTests,
-        Func<IEnumerable<TestDescriptor>> enumerateDescriptors)
-    {
-        Register(testClassType, getTests, enumerateDescriptors);
         return 0;
     }
 
