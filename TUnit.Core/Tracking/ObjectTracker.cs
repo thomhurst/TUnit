@@ -113,11 +113,12 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
     private async ValueTask UntrackObjectsAsync(List<Exception> cleanupExceptions, Dictionary<int, HashSet<object>> trackedObjects)
     {
-        List<Task>? disposalTasks = null;
-
-        foreach (var kvp in trackedObjects)
+        foreach (var depth in trackedObjects.Keys.OrderByDescending(k => k))
         {
-            foreach (var obj in kvp.Value)
+            var bucket = trackedObjects[depth];
+            List<Task>? disposalTasks = null;
+
+            foreach (var obj in bucket)
             {
                 try
                 {
@@ -134,24 +135,24 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
                     cleanupExceptions.Add(e);
                 }
             }
-        }
 
-        if (disposalTasks is { Count: > 0 })
-        {
-            try
+            if (disposalTasks is { Count: > 0 })
             {
-                await Task.WhenAll(disposalTasks).ConfigureAwait(false);
-            }
-            catch (AggregateException ae)
-            {
-                foreach (var e in ae.InnerExceptions)
+                try
+                {
+                    await Task.WhenAll(disposalTasks).ConfigureAwait(false);
+                }
+                catch (AggregateException ae)
+                {
+                    foreach (var e in ae.InnerExceptions)
+                    {
+                        cleanupExceptions.Add(e);
+                    }
+                }
+                catch (Exception e)
                 {
                     cleanupExceptions.Add(e);
                 }
-            }
-            catch (Exception e)
-            {
-                cleanupExceptions.Add(e);
             }
         }
     }
