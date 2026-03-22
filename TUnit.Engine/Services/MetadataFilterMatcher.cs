@@ -82,20 +82,6 @@ internal readonly struct FilterHints
         return true;
     }
 
-    /// <summary>
-    /// Check if a test descriptor could match this filter based on the hints.
-    /// Uses pre-computed filter hints in the descriptor for fast matching.
-    /// Returns true if no hints or if the descriptor matches all available hints.
-    /// </summary>
-    /// <remarks>
-    /// This method can filter by both ClassName and MethodName because dependency
-    /// expansion at the descriptor level ensures that dependencies are included
-    /// before this filter is applied. The DependsOn property on TestDescriptor
-    /// contains pre-computed dependency information from DependsOnAttribute.
-    /// </remarks>
-    public bool CouldDescriptorMatch(TestDescriptor descriptor)
-        => CouldMatch(descriptor.ClassName, descriptor.MethodName);
-
     public bool CouldMatch(string testClassName, string testMethodName)
     {
         if (ClassName != null)
