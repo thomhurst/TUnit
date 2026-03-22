@@ -12,8 +12,14 @@ internal sealed class TestExecutionGuard
 
     public ValueTask<bool> TryStartExecutionAsync(string testId, Func<ValueTask> executionFunc)
     {
+        // Fast path: check if test is already executing without allocating a TCS
+        if (_executingTests.TryGetValue(testId, out var existingTcs))
+        {
+            return new ValueTask<bool>(WaitForExistingExecutionAsync(existingTcs));
+        }
+
         var tcs = new TaskCompletionSource<bool>();
-        var existingTcs = _executingTests.GetOrAdd(testId, tcs);
+        existingTcs = _executingTests.GetOrAdd(testId, tcs);
 
         if (existingTcs != tcs)
         {

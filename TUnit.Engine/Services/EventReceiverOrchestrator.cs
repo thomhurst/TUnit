@@ -317,6 +317,11 @@ internal sealed class EventReceiverOrchestrator
             return default;
         }
 
+        if (_firstTestInSessionTasks.TryGetValue("session", out var existingTask))
+        {
+            return new ValueTask(existingTask);
+        }
+
         var task = _firstTestInSessionTasks.GetOrAdd("session",
             _ => InvokeFirstTestInSessionEventReceiversCoreAsync(context, sessionContext, cancellationToken));
         return new ValueTask(task);
@@ -347,6 +352,12 @@ internal sealed class EventReceiverOrchestrator
         }
 
         var assemblyName = assemblyContext.Assembly.GetName().FullName ?? "";
+
+        if (_firstTestInAssemblyTasks.TryGetValue(assemblyName, out var existingTask))
+        {
+            return new ValueTask(existingTask);
+        }
+
         var task = _firstTestInAssemblyTasks.GetOrAdd(assemblyName,
             _ => InvokeFirstTestInAssemblyEventReceiversCoreAsync(context, assemblyContext, cancellationToken));
         return new ValueTask(task);
@@ -377,6 +388,12 @@ internal sealed class EventReceiverOrchestrator
         }
 
         var classType = classContext.ClassType;
+
+        if (_firstTestInClassTasks.TryGetValue(classType, out var existingTask))
+        {
+            return new ValueTask(existingTask);
+        }
+
         var task = _firstTestInClassTasks.GetOrAdd(classType,
             _ => InvokeFirstTestInClassEventReceiversCoreAsync(context, classContext, cancellationToken));
         return new ValueTask(task);
@@ -448,7 +465,12 @@ internal sealed class EventReceiverOrchestrator
 
         var assemblyName = assemblyContext.Assembly.GetName().FullName ?? "";
 
-        var assemblyCount = _assemblyTestCounts.GetOrAdd(assemblyName, static _ => new Counter()).Decrement();
+        if (!_assemblyTestCounts.TryGetValue(assemblyName, out var assemblyCounter))
+        {
+            assemblyCounter = _assemblyTestCounts.GetOrAdd(assemblyName, static _ => new Counter());
+        }
+
+        var assemblyCount = assemblyCounter.Decrement();
 
         if (assemblyCount == 0)
         {
@@ -491,7 +513,12 @@ internal sealed class EventReceiverOrchestrator
 
         var classType = classContext.ClassType;
 
-        var classCount = _classTestCounts.GetOrAdd(classType, static _ => new Counter()).Decrement();
+        if (!_classTestCounts.TryGetValue(classType, out var classCounter))
+        {
+            classCounter = _classTestCounts.GetOrAdd(classType, static _ => new Counter());
+        }
+
+        var classCount = classCounter.Decrement();
 
         if (classCount == 0)
         {
@@ -536,13 +563,21 @@ internal sealed class EventReceiverOrchestrator
 
         foreach (var group in contexts.GroupBy(c => c.ClassContext.AssemblyContext.Assembly.GetName().FullName))
         {
-            var counter = _assemblyTestCounts.GetOrAdd(group.Key, static _ => new Counter());
+            if (!_assemblyTestCounts.TryGetValue(group.Key, out var counter))
+            {
+                counter = _assemblyTestCounts.GetOrAdd(group.Key, static _ => new Counter());
+            }
+
             counter.Add(group.Count());
         }
 
         foreach (var group in contexts.GroupBy(c => c.ClassContext.ClassType))
         {
-            var counter = _classTestCounts.GetOrAdd(group.Key, static _ => new Counter());
+            if (!_classTestCounts.TryGetValue(group.Key, out var counter))
+            {
+                counter = _classTestCounts.GetOrAdd(group.Key, static _ => new Counter());
+            }
+
             counter.Add(group.Count());
         }
     }

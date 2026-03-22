@@ -50,7 +50,7 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
 
     private static Type GetCachedGenericTypeDefinition(Type type)
     {
-        return _genericTypeDefinitionCache.GetOrAdd(type, t => t.GetGenericTypeDefinition());
+        return _genericTypeDefinitionCache.GetOrAdd(type, static t => t.GetGenericTypeDefinition());
     }
 
     public async ValueTask InitializeAsync()
