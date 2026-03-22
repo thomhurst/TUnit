@@ -102,7 +102,8 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         FilterHints filterHints)
     {
         // Phase 1: Filter using pure data (no JIT of test-specific methods)
-        var matching = new List<(ITestEntrySource Source, int Index)>();
+        var totalEntries = Sources.TestEntries.Sum(static kvp => kvp.Value.Count);
+        var matching = new List<(ITestEntrySource Source, int Index)>(totalEntries);
         var hasDependencies = false;
 
         foreach (var kvp in Sources.TestEntries)

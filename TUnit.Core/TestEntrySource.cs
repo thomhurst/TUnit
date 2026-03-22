@@ -21,7 +21,7 @@ public sealed class TestEntrySource<
     public TestEntrySource(TestEntry<T>[] entries)
     {
         _entries = entries;
-        _className = typeof(T).Name;
+        _className = TUnit.Core.Extensions.TestContextExtensions.GetNestedTypeName(typeof(T));
     }
 
     public int Count => _entries.Length;
@@ -37,7 +37,7 @@ public sealed class TestEntrySource<
             FullyQualifiedName = entry.FullyQualifiedName,
             ClassName = _className,
             Categories = entry.Categories,
-            CustomProperties = entry.CustomProperties,
+            Properties = entry.Properties,
             DependsOn = entry.DependsOn,
             HasDataSource = entry.HasDataSource,
             RepeatCount = entry.RepeatCount,

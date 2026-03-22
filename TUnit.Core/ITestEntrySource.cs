@@ -36,7 +36,7 @@ public readonly struct TestEntryFilterData
     public required string FullyQualifiedName { get; init; }
     public required string ClassName { get; init; }
     public required string[] Categories { get; init; }
-    public required string[] CustomProperties { get; init; }
+    public required string[] Properties { get; init; }
     public required string[] DependsOn { get; init; }
     public required bool HasDataSource { get; init; }
     public required int RepeatCount { get; init; }

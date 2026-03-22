@@ -43,7 +43,7 @@ public sealed class TestEntry<
     public string[] Categories { get; init; } = [];
 
     /// <summary>Pre-extracted "key=value" property pairs for fast filtering.</summary>
-    public string[] CustomProperties { get; init; } = [];
+    public string[] Properties { get; init; } = [];
 
     /// <summary>Dependency strings for fast BFS filtering: "ClassName:MethodName".</summary>
     public string[] DependsOn { get; init; } = [];
@@ -96,7 +96,7 @@ public sealed class TestEntry<
     // --- Property injection (source-generated, no reflection needed) ---
 
     /// <summary>Properties with data source attributes that need injection.</summary>
-    public InjectableProperty[] Properties { get; init; } = [];
+    public InjectableProperty[] InjectableProperties { get; init; } = [];
 
     /// <summary>
     /// Constructs a TestMetadata&lt;T&gt; from this entry's data and delegates.
@@ -129,15 +129,15 @@ public sealed class TestEntry<
 
     private PropertyDataSource[] BuildPropertyDataSources()
     {
-        if (Properties.Length == 0) return [];
-        var result = new PropertyDataSource[Properties.Length];
-        for (var i = 0; i < Properties.Length; i++)
+        if (InjectableProperties.Length == 0) return [];
+        var result = new PropertyDataSource[InjectableProperties.Length];
+        for (var i = 0; i < InjectableProperties.Length; i++)
         {
             result[i] = new PropertyDataSource
             {
-                PropertyName = Properties[i].Name,
-                PropertyType = Properties[i].Type,
-                DataSource = Properties[i].DataSource,
+                PropertyName = InjectableProperties[i].Name,
+                PropertyType = InjectableProperties[i].Type,
+                DataSource = InjectableProperties[i].DataSource,
             };
         }
         return result;
@@ -145,11 +145,11 @@ public sealed class TestEntry<
 
     private PropertyInjectionData[] BuildPropertyInjections()
     {
-        if (Properties.Length == 0) return [];
-        var result = new PropertyInjectionData[Properties.Length];
-        for (var i = 0; i < Properties.Length; i++)
+        if (InjectableProperties.Length == 0) return [];
+        var result = new PropertyInjectionData[InjectableProperties.Length];
+        for (var i = 0; i < InjectableProperties.Length; i++)
         {
-            var prop = Properties[i];
+            var prop = InjectableProperties[i];
             result[i] = new PropertyInjectionData
             {
                 PropertyName = prop.Name,

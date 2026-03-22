@@ -2711,7 +2711,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"FilePath = @\"{(testMethod.FilePath ?? "").Replace("\\", "\\\\")}\",");
         writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
         writer.AppendLine($"Categories = {categoriesArray},");
-        writer.AppendLine($"CustomProperties = {propertiesArray},");
+        writer.AppendLine($"Properties = {propertiesArray},");
         writer.AppendLine($"HasDataSource = {(hasDataSource ? "true" : "false")},");
         writer.AppendLine($"RepeatCount = {repeatCount},");
         writer.AppendLine($"DependsOn = {dependsOnArray},");
