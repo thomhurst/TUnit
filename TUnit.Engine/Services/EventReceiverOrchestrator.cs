@@ -322,8 +322,7 @@ internal sealed class EventReceiverOrchestrator
         }
 
         var task = _firstTestInSessionTasks.GetOrAdd("session",
-            static (_, args) => InvokeFirstTestInSessionEventReceiversCoreAsync(args.context, args.sessionContext, args.cancellationToken),
-            (context, sessionContext, cancellationToken));
+            _ => InvokeFirstTestInSessionEventReceiversCoreAsync(context, sessionContext, cancellationToken));
         return new ValueTask(task);
     }
 
@@ -354,8 +353,7 @@ internal sealed class EventReceiverOrchestrator
         var assemblyName = assemblyContext.Assembly.GetName().FullName ?? "";
 
         var task = _firstTestInAssemblyTasks.GetOrAdd(assemblyName,
-            static (_, args) => InvokeFirstTestInAssemblyEventReceiversCoreAsync(args.context, args.assemblyContext, args.cancellationToken),
-            (context, assemblyContext, cancellationToken));
+            _ => InvokeFirstTestInAssemblyEventReceiversCoreAsync(context, assemblyContext, cancellationToken));
         return new ValueTask(task);
     }
 
@@ -386,8 +384,7 @@ internal sealed class EventReceiverOrchestrator
         var classType = classContext.ClassType;
 
         var task = _firstTestInClassTasks.GetOrAdd(classType,
-            static (_, args) => InvokeFirstTestInClassEventReceiversCoreAsync(args.context, args.classContext, args.cancellationToken),
-            (context, classContext, cancellationToken));
+            _ => InvokeFirstTestInClassEventReceiversCoreAsync(context, classContext, cancellationToken));
         return new ValueTask(task);
     }
 
