@@ -2,7 +2,7 @@
 
 public static class ThreadSafeOutput
 {
-    private static readonly object OutputLock = new();
+    private static readonly Lock OutputLock = new();
 
     public static void WriteLine(string value)
     {

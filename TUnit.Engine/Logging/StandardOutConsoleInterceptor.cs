@@ -1,4 +1,3 @@
-using System.Text;
 using TUnit.Core;
 using TUnit.Core.Logging;
 
@@ -12,7 +11,7 @@ internal class StandardOutConsoleInterceptor : OptimizedConsoleInterceptor
 
     protected override LogLevel SinkLogLevel => LogLevel.Information;
 
-    protected override (StringBuilder Buffer, object Lock) GetLineBuffer() => Context.Current.GetConsoleStdOutLineBuffer();
+    protected override ConsoleLineBuffer GetLineBuffer() => Context.Current.ConsoleStdOutLineBuffer;
 
     static StandardOutConsoleInterceptor()
     {

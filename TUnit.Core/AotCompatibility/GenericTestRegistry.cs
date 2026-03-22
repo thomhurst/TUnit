@@ -12,7 +12,7 @@ public static class GenericTestRegistry
     private static readonly ConcurrentDictionary<GenericMethodKey, MethodInfo> _compiledMethods = new();
     private static readonly ConcurrentDictionary<Type, HashSet<Type[]>> _registeredCombinations = new();
     private static readonly ConcurrentDictionary<GenericMethodKey, Delegate> _directInvocationDelegates = new();
-    private static readonly object _combinationsLock = new();
+    private static readonly Lock _combinationsLock = new();
 
     /// <summary>
     /// Registers a pre-compiled generic method instance.

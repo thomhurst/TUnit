@@ -11,7 +11,7 @@ namespace TUnit.Mocks.Http;
 public sealed class MockHttpHandler : HttpMessageHandler
 {
     private readonly List<RequestSetup> _setups = new();
-    private readonly object _setupsLock = new();
+    private readonly Lock _setupsLock = new();
     private readonly ConcurrentQueue<CapturedRequest> _requests = new();
     private HttpStatusCode _defaultStatusCode = HttpStatusCode.NotFound;
     private bool _throwOnUnmatched;

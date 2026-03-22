@@ -17,7 +17,7 @@ public class BrowserTest : PlaywrightTest
     public IBrowser Browser { get; internal set; } = null!;
 
     private readonly List<IBrowserContext> _contexts = [];
-    private readonly object _contextsLock = new();
+    private readonly Lock _contextsLock = new();
     private readonly BrowserTypeLaunchOptions _options;
 
     public async Task<IBrowserContext> NewContext(BrowserNewContextOptions options)
