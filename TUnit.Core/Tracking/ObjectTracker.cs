@@ -114,9 +114,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
     private async ValueTask UntrackObjectsAsync(List<Exception> cleanupExceptions, Dictionary<int, HashSet<object>> trackedObjects)
     {
-        // Find the maximum depth key without LINQ allocation.
-        // Depth keys are small non-negative integers (typically 0-3),
-        // so iterating from max down to 0 is allocation-free.
+        // Find max depth key to iterate descending without LINQ allocation.
         var maxDepth = -1;
         foreach (var key in trackedObjects.Keys)
         {
