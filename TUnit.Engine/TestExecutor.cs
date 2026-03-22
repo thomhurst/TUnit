@@ -168,15 +168,21 @@ internal class TestExecutor
 #endif
             try
             {
-                var timeoutMessage = testTimeout.HasValue
-                    ? $"Test '{executableTest.Context.Metadata.TestDetails.TestName}' timed out after {testTimeout.Value}"
-                    : null;
+                if (testTimeout.HasValue)
+                {
+                    var timeoutMessage = $"Test '{executableTest.Context.Metadata.TestDetails.TestName}' timed out after {testTimeout.Value}";
 
-                await TimeoutHelper.ExecuteWithTimeoutAsync(
-                    ct => ExecuteTestAsync(executableTest, ct),
-                    testTimeout,
-                    cancellationToken,
-                    timeoutMessage).ConfigureAwait(false);
+                    await TimeoutHelper.ExecuteWithTimeoutAsync(
+                        ct => ExecuteTestAsync(executableTest, ct).AsTask(),
+                        testTimeout.Value,
+                        cancellationToken,
+                        timeoutMessage).ConfigureAwait(false);
+                }
+                else
+                {
+                    // Fast path: no timeout — invoke directly, no CTS/TCS/WhenAny overhead
+                    await ExecuteTestAsync(executableTest, cancellationToken).ConfigureAwait(false);
+                }
             }
             catch
 #if NET
