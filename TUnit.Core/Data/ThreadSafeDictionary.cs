@@ -84,6 +84,16 @@ public class ThreadSafeDictionary<TKey,
         return GetOrAddSlow(key, func);
     }
 
+    public TValue GetOrAdd<TArg>(TKey key, Func<TKey, TArg, TValue> func, TArg arg)
+    {
+        if (_innerDictionary.TryGetValue(key, out var existingLazy))
+        {
+            return existingLazy.Value;
+        }
+
+        return GetOrAddSlow(key, k => func(k, arg));
+    }
+
     private TValue GetOrAddSlow(TKey key, Func<TKey, TValue> func)
     {
         // Slow path: Key not found, need to create
