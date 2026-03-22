@@ -4,6 +4,9 @@ namespace TUnit.Engine.Services.TestExecution;
 
 internal static class RetryHelper
 {
+    private static readonly Task<bool> s_shouldRetryTrue = Task.FromResult(true);
+    private static readonly Task<bool> s_shouldRetryFalse = Task.FromResult(false);
+
     public static async Task ExecuteWithRetry(TestContext testContext, Func<ValueTask> action)
     {
         var maxRetries = testContext.Metadata.TestDetails.RetryLimit;
@@ -61,13 +64,13 @@ internal static class RetryHelper
     {
         if (attempt >= testContext.Metadata.TestDetails.RetryLimit)
         {
-            return Task.FromResult(false);
+            return s_shouldRetryFalse;
         }
 
         if (testContext.RetryFunc == null)
         {
             // Default behavior: retry on any exception if within retry limit
-            return Task.FromResult(true);
+            return s_shouldRetryTrue;
         }
 
         return testContext.RetryFunc(testContext, ex, attempt + 1);

@@ -44,9 +44,8 @@ internal sealed class TestStateManager
         }
         else
         {
-            var now = DateTimeOffset.UtcNow;
             test.State = TestState.Failed;
-            test.EndTime ??= now;
+            test.EndTime ??= DateTimeOffset.UtcNow;
             test.Result = new TestResult
             {
                 State = TestState.Failed,
