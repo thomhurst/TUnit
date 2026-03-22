@@ -13,11 +13,11 @@ internal static class TimeoutHelper
     private static readonly TimeSpan GracePeriod = EngineDefaults.TimeoutGracePeriod;
 
     /// <summary>
-    /// Executes a task with an optional timeout. If the timeout elapses before the task completes,
+    /// Executes a task with a timeout. If the timeout elapses before the task completes,
     /// control is returned to the caller immediately with a TimeoutException.
     /// </summary>
     /// <param name="taskFactory">Factory function that creates the task to execute.</param>
-    /// <param name="timeout">Optional timeout duration. If null, no timeout is applied.</param>
+    /// <param name="timeout">Timeout duration.</param>
     /// <param name="cancellationToken">Cancellation token for the operation.</param>
     /// <param name="timeoutMessage">Optional custom timeout message. If null, uses default message.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -25,24 +25,17 @@ internal static class TimeoutHelper
     /// <exception cref="OperationCanceledException">Thrown when cancellation is requested.</exception>
     public static async Task ExecuteWithTimeoutAsync(
         Func<CancellationToken, Task> taskFactory,
-        TimeSpan? timeout,
+        TimeSpan timeout,
         CancellationToken cancellationToken,
         string? timeoutMessage = null)
     {
-        // Fast path: no timeout specified - invoke directly
-        if (!timeout.HasValue)
-        {
-            await taskFactory(cancellationToken).ConfigureAwait(false);
-            return;
-        }
-
         await ExecuteWithTimeoutCoreAsync<bool>(
             async ct =>
             {
                 await taskFactory(ct).ConfigureAwait(false);
                 return true;
             },
-            timeout.Value,
+            timeout,
             cancellationToken,
             timeoutMessage).ConfigureAwait(false);
     }
