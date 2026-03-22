@@ -91,7 +91,9 @@ public class ThreadSafeDictionary<TKey,
             return existingLazy.Value;
         }
 
-        return GetOrAddSlow(key, k => func(k, arg));
+        var newLazy = new Lazy<TValue>(() => func(key, arg), LazyThreadSafetyMode.ExecutionAndPublication);
+        var winningLazy = _innerDictionary.GetOrAdd(key, newLazy);
+        return winningLazy.Value;
     }
 
     private TValue GetOrAddSlow(TKey key, Func<TKey, TValue> func)
