@@ -170,6 +170,9 @@ public class SourceRegistrar
                     existingSource.AddEntries(entries);
                     return 0;
                 }
+
+                throw new InvalidOperationException(
+                    $"Type mismatch in TestEntries for '{typeof(T).FullName}': expected TestEntrySource<{typeof(T).Name}>, found {existing.GetType().Name}");
             }
 
             if (Sources.TestEntries.TryAdd(key, new TestEntrySource<T>(entries)))
@@ -177,7 +180,7 @@ public class SourceRegistrar
                 return 0;
             }
 
-            // Another thread added it concurrently — retry to merge
+            // Another thread added between TryGetValue and TryAdd — retry to merge
         }
     }
 }

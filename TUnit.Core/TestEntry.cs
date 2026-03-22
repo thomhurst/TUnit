@@ -156,6 +156,9 @@ public sealed class TestEntry<
                 PropertyName = prop.Name,
                 PropertyType = prop.Type,
                 Setter = prop.SetValue,
+                // ValueFactory is populated by the engine's data generation pipeline at execution time.
+                // PropertyDataSources (on TestMetadata) provides the IDataSourceAttribute that generates
+                // the actual value; this factory is a placeholder that gets replaced before injection.
                 ValueFactory = static () => null,
             };
         }

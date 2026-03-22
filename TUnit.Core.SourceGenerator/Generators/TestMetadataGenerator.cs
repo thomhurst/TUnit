@@ -1172,39 +1172,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
     }
 
-    /// <summary>
-    /// Fallback for generic tests where no concrete types could be resolved.
-    /// Emits the legacy ITestSource pattern so the engine can report a clear error.
-    /// </summary>
-    private static void GenerateTestMetadataLegacyFallback(CodeWriter writer, TestMethodMetadata testMethod, string className, string uniqueClassName)
-    {
-        writer.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]");
-        writer.AppendLine($"[global::System.CodeDom.Compiler.GeneratedCode(\"TUnit\", \"{typeof(TestMetadataGenerator).Assembly.GetName().Version}\")]");
-        writer.AppendLine($"internal sealed class {uniqueClassName} : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        GenerateReflectionFieldAccessors(writer, testMethod.TypeSymbol);
-
-        writer.AppendLine("public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();");
-        writer.AppendLine();
-        GenerateTestMetadataInstance(writer, testMethod, className);
-        writer.AppendLine("return __results;");
-        writer.Unindent();
-        writer.AppendLine("}");
-
-        writer.AppendLine();
-        GenerateEnumerateTestDescriptors(writer, testMethod);
-
-        writer.Unindent();
-        writer.AppendLine("}");
-
-        GenerateTestRegistrationField(writer, testMethod, uniqueClassName);
-    }
-
     private static void GenerateTestMetadataInstance(CodeWriter writer, TestMethodMetadata testMethod, string className, bool addToResultsList = true, bool useNamedMethods = false)
     {
         var methodName = testMethod.MethodSymbol.Name;
