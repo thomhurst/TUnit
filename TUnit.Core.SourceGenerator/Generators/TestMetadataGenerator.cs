@@ -724,7 +724,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 var inferredTypes = InferTypesFromMethodDataSource(testMethod, mdsAttr);
                 if (inferredTypes is { Length: > 0 })
                 {
-                    TryAddInstantiation(inferredTypes);
+                    TryAddInstantiation(inferredTypes, mdsAttr);
                 }
             }
         }
