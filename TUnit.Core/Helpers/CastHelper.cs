@@ -127,7 +127,6 @@ public static class CastHelper
             }
         }
 
-        // Handle string-to-parseable-type conversions
         if (value is string stringValue && TryParseFromString(targetType, stringValue, out result))
         {
             return true;
@@ -151,39 +150,30 @@ public static class CastHelper
     private static bool TryParseFromString(Type targetType, string value, out object? result)
     {
 #if NET
-        // Use IParsable<T> for types that implement it (.NET 7+)
         if (TryParsableConvert(targetType, value, out result))
         {
             return true;
         }
 #else
-        // Fallback for netstandard2.0: handle well-known types explicitly
-        try
+        if (targetType == typeof(DateTime) && DateTime.TryParse(value, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var dateTime))
         {
-            if (targetType == typeof(DateTime))
-            {
-                result = DateTime.Parse(value, System.Globalization.CultureInfo.InvariantCulture);
-                return true;
-            }
-            if (targetType == typeof(DateTimeOffset))
-            {
-                result = DateTimeOffset.Parse(value, System.Globalization.CultureInfo.InvariantCulture);
-                return true;
-            }
-            if (targetType == typeof(TimeSpan))
-            {
-                result = TimeSpan.Parse(value, System.Globalization.CultureInfo.InvariantCulture);
-                return true;
-            }
-            if (targetType == typeof(Guid))
-            {
-                result = Guid.Parse(value);
-                return true;
-            }
+            result = dateTime;
+            return true;
         }
-        catch
+        if (targetType == typeof(DateTimeOffset) && DateTimeOffset.TryParse(value, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var dateTimeOffset))
         {
-            // Parse failed
+            result = dateTimeOffset;
+            return true;
+        }
+        if (targetType == typeof(TimeSpan) && TimeSpan.TryParse(value, System.Globalization.CultureInfo.InvariantCulture, out var timeSpan))
+        {
+            result = timeSpan;
+            return true;
+        }
+        if (targetType == typeof(Guid) && Guid.TryParse(value, out var guid))
+        {
+            result = guid;
+            return true;
         }
 #endif
 
@@ -199,7 +189,6 @@ public static class CastHelper
     {
         var parseMethod = ParseMethodCache.GetOrAdd(targetType, static type =>
         {
-            // Check if type implements IParsable<TSelf>
             var iParsableInterface = type.GetInterfaces()
                 .FirstOrDefault(i => i.IsGenericType
                     && i.GetGenericTypeDefinition() == typeof(IParsable<>)
@@ -210,7 +199,6 @@ public static class CastHelper
                 return null;
             }
 
-            // Get the static Parse(string, IFormatProvider?) method
             return type.GetMethod("Parse",
                 BindingFlags.Public | BindingFlags.Static,
                 null,
@@ -225,9 +213,9 @@ public static class CastHelper
                 result = parseMethod.Invoke(null, [value, System.Globalization.CultureInfo.InvariantCulture]);
                 return true;
             }
-            catch
+            catch (Exception ex) when (ex is FormatException or OverflowException or ArgumentException or TargetInvocationException { InnerException: FormatException or OverflowException or ArgumentException })
             {
-                // Parse failed
+                // Parse failed for the given string value
             }
         }
 
