@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using TUnit.Analyzers.Extensions;
 using TUnit.Core.SourceGenerator.Extensions;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Formatting;
@@ -221,6 +222,13 @@ public class TypedConstantFormatter : ITypedConstantFormatter
                     }
 
                     return $"{value.ToInvariantString()}m";
+            }
+
+            if (value is string strForParsing && targetType.SpecialType != SpecialType.System_String && targetType.IsParsableFromString())
+            {
+                var fullyQualifiedName = targetType.GloballyQualified();
+                var escapedValue = SymbolDisplay.FormatLiteral(strForParsing, quote: true);
+                return $"{fullyQualifiedName}.Parse({escapedValue}, global::System.Globalization.CultureInfo.InvariantCulture)";
             }
         }
 

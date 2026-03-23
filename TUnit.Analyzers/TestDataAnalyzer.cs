@@ -974,6 +974,13 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             }
         }
 
+        if (argument.Type?.SpecialType == SpecialType.System_String &&
+            argument.Value is string &&
+            methodParameterType.IsParsableFromString())
+        {
+            return true;
+        }
+
         return CanConvert(context, argument.Type, methodParameterType);
     }
 
