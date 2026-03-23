@@ -2542,8 +2542,12 @@ namespace .Extensions
         public static . IsNotCollectible(this .<.Assembly> source) { }
         public static . IsNotDynamic(this .<.Assembly> source) { }
         public static . IsNotFullyTrusted(this .<.Assembly> source) { }
-        public static ._IsNotSigned_Assertion IsNotSigned(this .<.Assembly> source) { }
-        public static ._IsSigned_Assertion IsSigned(this .<.Assembly> source) { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsNotSigned_Assertion IsNotSigned<TActual>(this .<TActual> source)
+            where TActual : .Assembly { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsSigned_Assertion IsSigned<TActual>(this .<TActual> source)
+            where TActual : .Assembly { }
     }
     public class AssemblyIsCollectibleAssertion : .<.Assembly>
     {
@@ -3029,15 +3033,27 @@ namespace .Extensions
     }
     public static class CultureInfoAssertionExtensions
     {
-        public static ._IsEnglish_Assertion IsEnglish(this .<.CultureInfo> source) { }
-        public static ._IsInvariant_Assertion IsInvariant(this .<.CultureInfo> source) { }
-        public static ._IsLeftToRight_Assertion IsLeftToRight(this .<.CultureInfo> source) { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsEnglish_Assertion IsEnglish<TActual>(this .<TActual> source)
+            where TActual : .CultureInfo { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsInvariant_Assertion IsInvariant<TActual>(this .<TActual> source)
+            where TActual : .CultureInfo { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsLeftToRight_Assertion IsLeftToRight<TActual>(this .<TActual> source)
+            where TActual : .CultureInfo { }
         public static . IsNeutralCulture(this .<.CultureInfo> source) { }
-        public static ._IsNotEnglish_Assertion IsNotEnglish(this .<.CultureInfo> source) { }
-        public static ._IsNotInvariant_Assertion IsNotInvariant(this .<.CultureInfo> source) { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsNotEnglish_Assertion IsNotEnglish<TActual>(this .<TActual> source)
+            where TActual : .CultureInfo { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsNotInvariant_Assertion IsNotInvariant<TActual>(this .<TActual> source)
+            where TActual : .CultureInfo { }
         public static . IsNotNeutralCulture(this .<.CultureInfo> source) { }
         public static . IsReadOnly(this .<.CultureInfo> source) { }
-        public static ._IsRightToLeft_Assertion IsRightToLeft(this .<.CultureInfo> source) { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsRightToLeft_Assertion IsRightToLeft<TActual>(this .<TActual> source)
+            where TActual : .CultureInfo { }
     }
     public class CultureInfoIsNeutralCultureAssertion : .<.CultureInfo>
     {
@@ -3594,14 +3610,26 @@ namespace .Extensions
     }
     public static class EncodingAssertionExtensions
     {
-        public static ._IsASCII_Assertion IsASCII(this .<.Encoding> source) { }
-        public static ._IsBigEndianUnicode_Assertion IsBigEndianUnicode(this .<.Encoding> source) { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsASCII_Assertion IsASCII<TActual>(this .<TActual> source)
+            where TActual : .Encoding { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsBigEndianUnicode_Assertion IsBigEndianUnicode<TActual>(this .<TActual> source)
+            where TActual : .Encoding { }
         public static . IsNotSingleByte(this .<.Encoding> source) { }
-        public static ._IsNotUTF8_Assertion IsNotUTF8(this .<.Encoding> source) { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsNotUTF8_Assertion IsNotUTF8<TActual>(this .<TActual> source)
+            where TActual : .Encoding { }
         public static . IsSingleByte(this .<.Encoding> source) { }
-        public static ._IsUTF32_Assertion IsUTF32(this .<.Encoding> source) { }
-        public static ._IsUTF8_Assertion IsUTF8(this .<.Encoding> source) { }
-        public static ._IsUnicode_Assertion IsUnicode(this .<.Encoding> source) { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsUTF32_Assertion IsUTF32<TActual>(this .<TActual> source)
+            where TActual : .Encoding { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsUTF8_Assertion IsUTF8<TActual>(this .<TActual> source)
+            where TActual : .Encoding { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsUnicode_Assertion IsUnicode<TActual>(this .<TActual> source)
+            where TActual : .Encoding { }
     }
     public class EncodingIsSingleByteAssertion : .<.Encoding>
     {
@@ -3678,18 +3706,38 @@ namespace .Extensions
     }
     public static class ExceptionAssertionExtensions
     {
-        public static ._HasHelpLink_Assertion HasHelpLink(this .<> source) { }
-        public static ._HasInnerException_Assertion HasInnerException(this .<> source) { }
-        public static ._HasNoData_Assertion HasNoData(this .<> source) { }
-        public static ._HasNoHelpLink_Assertion HasNoHelpLink(this .<> source) { }
-        public static ._HasNoInnerException_Assertion HasNoInnerException(this .<> source) { }
-        public static ._HasNoSource_Assertion HasNoSource(this .<> source) { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._HasHelpLink_Assertion HasHelpLink<TActual>(this .<TActual> source)
+            where TActual :  { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._HasInnerException_Assertion HasInnerException<TActual>(this .<TActual> source)
+            where TActual :  { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._HasNoData_Assertion HasNoData<TActual>(this .<TActual> source)
+            where TActual :  { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._HasNoHelpLink_Assertion HasNoHelpLink<TActual>(this .<TActual> source)
+            where TActual :  { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._HasNoInnerException_Assertion HasNoInnerException<TActual>(this .<TActual> source)
+            where TActual :  { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._HasNoSource_Assertion HasNoSource<TActual>(this .<TActual> source)
+            where TActual :  { }
         [.(" uses reflection which may be trimmed in AOT scenarios")]
-        public static ._HasNoTargetSite_Assertion HasNoTargetSite(this .<> source) { }
-        public static ._HasSource_Assertion HasSource(this .<> source) { }
-        public static ._HasStackTrace_Assertion HasStackTrace(this .<> source) { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._HasNoTargetSite_Assertion HasNoTargetSite<TActual>(this .<TActual> source)
+            where TActual :  { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._HasSource_Assertion HasSource<TActual>(this .<TActual> source)
+            where TActual :  { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._HasStackTrace_Assertion HasStackTrace<TActual>(this .<TActual> source)
+            where TActual :  { }
         [.(" uses reflection which may be trimmed in AOT scenarios")]
-        public static ._HasTargetSite_Assertion HasTargetSite(this .<> source) { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._HasTargetSite_Assertion HasTargetSite<TActual>(this .<TActual> source)
+            where TActual :  { }
     }
     public sealed class Exception_HasHelpLink_Assertion : .<>
     {
@@ -3967,23 +4015,53 @@ namespace .Extensions
     }
     public static class HttpResponseMessageAssertionExtensions
     {
-        public static ._HasContentType_String_Assertion HasContentType(this .<.> source, string contentType, [.("contentType")] string? contentTypeExpression = null) { }
-        public static ._HasHeader_String_Assertion HasHeader(this .<.> source, string headerName, [.("headerName")] string? headerNameExpression = null) { }
-        public static ._HasJsonContent_Assertion HasJsonContent(this .<.> source) { }
-        public static ._HasStatusCode_HttpStatusCode_Assertion HasStatusCode(this .<.> source, .HttpStatusCode statusCode, [.("statusCode")] string? statusCodeExpression = null) { }
-        public static ._IsBadRequest_Assertion IsBadRequest(this .<.> source) { }
-        public static ._IsClientErrorStatusCode_Assertion IsClientErrorStatusCode(this .<.> source) { }
-        public static ._IsConflict_Assertion IsConflict(this .<.> source) { }
-        public static ._IsCreated_Assertion IsCreated(this .<.> source) { }
-        public static ._IsForbidden_Assertion IsForbidden(this .<.> source) { }
-        public static ._IsNoContent_Assertion IsNoContent(this .<.> source) { }
-        public static ._IsNotFound_Assertion IsNotFound(this .<.> source) { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._HasContentType_String_Assertion HasContentType<TActual>(this .<TActual> source, string contentType, [.("contentType")] string? contentTypeExpression = null)
+            where TActual : . { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._HasHeader_String_Assertion HasHeader<TActual>(this .<TActual> source, string headerName, [.("headerName")] string? headerNameExpression = null)
+            where TActual : . { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._HasJsonContent_Assertion HasJsonContent<TActual>(this .<TActual> source)
+            where TActual : . { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._HasStatusCode_HttpStatusCode_Assertion HasStatusCode<TActual>(this .<TActual> source, .HttpStatusCode statusCode, [.("statusCode")] string? statusCodeExpression = null)
+            where TActual : . { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsBadRequest_Assertion IsBadRequest<TActual>(this .<TActual> source)
+            where TActual : . { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsClientErrorStatusCode_Assertion IsClientErrorStatusCode<TActual>(this .<TActual> source)
+            where TActual : . { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsConflict_Assertion IsConflict<TActual>(this .<TActual> source)
+            where TActual : . { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsCreated_Assertion IsCreated<TActual>(this .<TActual> source)
+            where TActual : . { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsForbidden_Assertion IsForbidden<TActual>(this .<TActual> source)
+            where TActual : . { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsNoContent_Assertion IsNoContent<TActual>(this .<TActual> source)
+            where TActual : . { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsNotFound_Assertion IsNotFound<TActual>(this .<TActual> source)
+            where TActual : . { }
         public static . IsNotSuccessStatusCode(this .<.> source) { }
-        public static ._IsOk_Assertion IsOk(this .<.> source) { }
-        public static ._IsRedirectStatusCode_Assertion IsRedirectStatusCode(this .<.> source) { }
-        public static ._IsServerErrorStatusCode_Assertion IsServerErrorStatusCode(this .<.> source) { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsOk_Assertion IsOk<TActual>(this .<TActual> source)
+            where TActual : . { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsRedirectStatusCode_Assertion IsRedirectStatusCode<TActual>(this .<TActual> source)
+            where TActual : . { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsServerErrorStatusCode_Assertion IsServerErrorStatusCode<TActual>(this .<TActual> source)
+            where TActual : . { }
         public static . IsSuccessStatusCode(this .<.> source) { }
-        public static ._IsUnauthorized_Assertion IsUnauthorized(this .<.> source) { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsUnauthorized_Assertion IsUnauthorized<TActual>(this .<TActual> source)
+            where TActual : . { }
     }
     public class HttpResponseMessageIsSuccessStatusCodeAssertion : .<.>
     {
@@ -4379,16 +4457,36 @@ namespace .Extensions
     }
     public static class JsonNodeAssertionExtensions
     {
-        public static ._DoesNotHaveJsonProperty_String_Assertion DoesNotHaveJsonProperty(this .<..JsonNode?> source, string propertyName, [.("propertyName")] string? propertyNameExpression = null) { }
-        public static ._HasJsonArrayCount_Int_Assertion HasJsonArrayCount(this .<..JsonNode?> source, int expected, [.("expected")] string? expectedExpression = null) { }
-        public static ._HasJsonProperty_String_Assertion HasJsonProperty(this .<..JsonNode?> source, string propertyName, [.("propertyName")] string? propertyNameExpression = null) { }
-        public static ._IsDeepEqualTo_JsonNode_Assertion IsDeepEqualTo(this .<..JsonNode?> source, ..JsonNode? expected, [.("expected")] string? expectedExpression = null) { }
-        public static ._IsJsonArray_Assertion IsJsonArray(this .<..JsonNode?> source) { }
-        public static ._IsJsonArrayEmpty_Assertion IsJsonArrayEmpty(this .<..JsonNode?> source) { }
-        public static ._IsJsonArrayNotEmpty_Assertion IsJsonArrayNotEmpty(this .<..JsonNode?> source) { }
-        public static ._IsJsonObject_Assertion IsJsonObject(this .<..JsonNode?> source) { }
-        public static ._IsJsonValue_Assertion IsJsonValue(this .<..JsonNode?> source) { }
-        public static ._IsNotDeepEqualTo_JsonNode_Assertion IsNotDeepEqualTo(this .<..JsonNode?> source, ..JsonNode? expected, [.("expected")] string? expectedExpression = null) { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._DoesNotHaveJsonProperty_String_Assertion DoesNotHaveJsonProperty<TActual>(this .<TActual> source, string propertyName, [.("propertyName")] string? propertyNameExpression = null)
+            where TActual : ..JsonNode { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._HasJsonArrayCount_Int_Assertion HasJsonArrayCount<TActual>(this .<TActual> source, int expected, [.("expected")] string? expectedExpression = null)
+            where TActual : ..JsonNode { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._HasJsonProperty_String_Assertion HasJsonProperty<TActual>(this .<TActual> source, string propertyName, [.("propertyName")] string? propertyNameExpression = null)
+            where TActual : ..JsonNode { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsDeepEqualTo_JsonNode_Assertion IsDeepEqualTo<TActual>(this .<TActual> source, ..JsonNode? expected, [.("expected")] string? expectedExpression = null)
+            where TActual : ..JsonNode { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsJsonArray_Assertion IsJsonArray<TActual>(this .<TActual> source)
+            where TActual : ..JsonNode { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsJsonArrayEmpty_Assertion IsJsonArrayEmpty<TActual>(this .<TActual> source)
+            where TActual : ..JsonNode { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsJsonArrayNotEmpty_Assertion IsJsonArrayNotEmpty<TActual>(this .<TActual> source)
+            where TActual : ..JsonNode { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsJsonObject_Assertion IsJsonObject<TActual>(this .<TActual> source)
+            where TActual : ..JsonNode { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsJsonValue_Assertion IsJsonValue<TActual>(this .<TActual> source)
+            where TActual : ..JsonNode { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsNotDeepEqualTo_JsonNode_Assertion IsNotDeepEqualTo<TActual>(this .<TActual> source, ..JsonNode? expected, [.("expected")] string? expectedExpression = null)
+            where TActual : ..JsonNode { }
     }
     public sealed class JsonNode_DoesNotHaveJsonProperty_String_Assertion : .<..JsonNode?>
     {
@@ -4825,10 +4923,18 @@ namespace .Extensions
         public static . CannotSeek(this .<.Stream> source) { }
         public static . CannotTimeout(this .<.Stream> source) { }
         public static . CannotWrite(this .<.Stream> source) { }
-        public static ._IsAtEnd_Assertion IsAtEnd(this .<.Stream> source) { }
-        public static ._IsAtStart_Assertion IsAtStart(this .<.Stream> source) { }
-        public static ._IsEmpty_Assertion IsEmpty(this .<.Stream> source) { }
-        public static ._IsNotEmpty_Assertion IsNotEmpty(this .<.Stream> source) { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsAtEnd_Assertion IsAtEnd<TActual>(this .<TActual> source)
+            where TActual : .Stream { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsAtStart_Assertion IsAtStart<TActual>(this .<TActual> source)
+            where TActual : .Stream { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsEmpty_Assertion IsEmpty<TActual>(this .<TActual> source)
+            where TActual : .Stream { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static ._IsNotEmpty_Assertion IsNotEmpty<TActual>(this .<TActual> source)
+            where TActual : .Stream { }
     }
     public class StreamCanReadAssertion : .<.Stream>
     {

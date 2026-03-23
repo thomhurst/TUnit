@@ -312,12 +312,17 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             ContainingType = containingTypeData,
         };
 
+        var isCovariantCandidate = CovarianceHelper.IsCovariantCandidate(targetType);
+        var typeName = targetType.ToDisplayString();
+
         var targetTypeData = new TargetTypeData()
         {
-            TypeName = targetType.ToDisplayString(),
+            TypeName = typeName,
             SimpleTypeName = GetSimpleTypeName(targetType),
             IsNullable = targetType.IsReferenceType ||
                          targetType.NullableAnnotation == NullableAnnotation.Annotated,
+            IsCovariantCandidate = isCovariantCandidate,
+            ConstraintTypeName = isCovariantCandidate ? CovarianceHelper.GetConstraintTypeName(typeName, targetType) : typeName,
         };
 
         var data = new AssertionMethodData(
@@ -962,7 +967,22 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         var targetTypeName = data.TargetType.TypeName;
         var methodName = data.Method.Name;
         var genericParams = data.Method.GenericTypeParameters;
-        var genericDeclaration = genericParams.Count > 0 ? $"<{string.Join(", ", genericParams)}>" : "";
+        var isCovariant = data.TargetType.IsCovariantCandidate;
+
+        // Pick a covariant type param name that doesn't collide with existing generic params
+        var covariantParam = isCovariant ? CovarianceHelper.GetCovariantTypeParamName(genericParams) : null;
+
+        // Build generic declaration - prepend covariant param for covariant assertions
+        var genericDeclaration = isCovariant
+            ? genericParams.Count > 0
+                ? $"<{covariantParam}, {string.Join(", ", genericParams)}>"
+                : $"<{covariantParam}>"
+            : genericParams.Count > 0
+                ? $"<{string.Join(", ", genericParams)}>"
+                : "";
+
+        // For the return type, we only need the method's own generic params (not TActual)
+        var returnGenericDeclaration = genericParams.Count > 0 ? $"<{string.Join(", ", genericParams)}>" : "";
 
         // Collect generic constraints from the method
         var genericConstraints = data.Method.GenericConstraints;
@@ -973,7 +993,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         sb.AppendLine("    /// </summary>");
 
         // Add suppression for generic types to avoid trimming warnings
-        if (genericParams.Count > 0)
+        if (isCovariant || genericParams.Count > 0)
         {
             sb.AppendLine($"    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(\"Trimming\", \"IL2091\", Justification = \"Generic type parameter is only used for property access, not instantiation\")]");
         }
@@ -988,8 +1008,10 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         }
 
         // Method signature
-        sb.Append($"    public static {className}{genericDeclaration} {methodName}{genericDeclaration}(");
-        sb.Append($"this IAssertionSource<{targetTypeName}> source");
+        sb.Append($"    public static {className}{returnGenericDeclaration} {methodName}{genericDeclaration}(");
+
+        var sourceTypeName = isCovariant ? covariantParam! : targetTypeName;
+        sb.Append($"this IAssertionSource<{sourceTypeName}> source");
 
         // Additional parameters
         foreach (var param in data.AdditionalParameters)
@@ -1013,6 +1035,12 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         }
 
         sb.AppendLine(")");
+
+        // Apply covariant type constraint
+        if (isCovariant)
+        {
+            sb.AppendLine($"    where {covariantParam} : {data.TargetType.ConstraintTypeName}");
+        }
 
         // Apply generic constraints if present
         if (genericConstraints.Count > 0)
@@ -1040,7 +1068,10 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
 
         // Construct and return assertion
         // Note: Ref struct parameters (like interpolated string handlers) are converted to string
-        sb.Append($"        return new {className}{genericDeclaration}(source.Context");
+        var contextExpr = isCovariant
+            ? CovarianceHelper.GetCovariantContextExpr(targetTypeName)
+            : "source.Context";
+        sb.Append($"        return new {className}{returnGenericDeclaration}({contextExpr}");
         foreach (var param in data.AdditionalParameters)
         {
             if (param.IsRefStruct)
@@ -1311,7 +1342,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         string ContainingNamespace
     );
 
-    private record struct TargetTypeData(string TypeName, string SimpleTypeName, bool IsNullable);
+    private record struct TargetTypeData(string TypeName, string SimpleTypeName, bool IsNullable, bool IsCovariantCandidate, string ConstraintTypeName);
 
     private record struct MethodData(
         string Name,
