@@ -16,7 +16,7 @@ public static class CastHelper
     /// Attempts to cast or convert a value to the specified type T.
     /// Uses a layered approach: fast paths first (AOT-safe), then reflection fallbacks.
     /// </summary>
-    public static T? Cast<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] T>(object? value)
+    public static T? Cast<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | DynamicallyAccessedMemberTypes.Interfaces | DynamicallyAccessedMemberTypes.PublicMethods)] T>(object? value)
     {
         if (value is T t)
         {
@@ -35,7 +35,7 @@ public static class CastHelper
     /// 3. Reflection fallback: custom operators, arrays (throws in AOT)
     /// </summary>
     [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.")]
-    public static object? Cast([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type type, object? value)
+    public static object? Cast([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | DynamicallyAccessedMemberTypes.Interfaces | DynamicallyAccessedMemberTypes.PublicMethods)] Type type, object? value)
     {
         // Fast path: handle null
         if (value is null)
@@ -148,7 +148,7 @@ public static class CastHelper
         return false;
     }
 
-    private static bool TryParseFromString(Type targetType, string value, out object? result)
+    private static bool TryParseFromString([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces | DynamicallyAccessedMemberTypes.PublicMethods)] Type targetType, string value, out object? result)
     {
 #if NET
         if (TryParsableConvert(targetType, value, out result))
@@ -185,27 +185,13 @@ public static class CastHelper
 #if NET
     private static readonly ConcurrentDictionary<Type, MethodInfo?> ParseMethodCache = new();
 
-    [UnconditionalSuppressMessage("Trimming", "IL2070:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute'")]
-    private static bool TryParsableConvert(Type targetType, string value, out object? result)
+    private static bool TryParsableConvert([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces | DynamicallyAccessedMemberTypes.PublicMethods)] Type targetType, string value, out object? result)
     {
-        var parseMethod = ParseMethodCache.GetOrAdd(targetType, static type =>
+        if (!ParseMethodCache.TryGetValue(targetType, out var parseMethod))
         {
-            var iParsableInterface = type.GetInterfaces()
-                .FirstOrDefault(i => i.IsGenericType
-                    && i.GetGenericTypeDefinition() == typeof(IParsable<>)
-                    && i.GenericTypeArguments[0] == type);
-
-            if (iParsableInterface == null)
-            {
-                return null;
-            }
-
-            return type.GetMethod("Parse",
-                BindingFlags.Public | BindingFlags.Static,
-                null,
-                [typeof(string), typeof(IFormatProvider)],
-                null);
-        });
+            parseMethod = FindParseMethod(targetType);
+            ParseMethodCache.TryAdd(targetType, parseMethod);
+        }
 
         if (parseMethod != null)
         {
@@ -222,6 +208,25 @@ public static class CastHelper
 
         result = null;
         return false;
+    }
+
+    private static MethodInfo? FindParseMethod([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces | DynamicallyAccessedMemberTypes.PublicMethods)] Type type)
+    {
+        var iParsableInterface = type.GetInterfaces()
+            .FirstOrDefault(i => i.IsGenericType
+                && i.GetGenericTypeDefinition() == typeof(IParsable<>)
+                && i.GenericTypeArguments[0] == type);
+
+        if (iParsableInterface == null)
+        {
+            return null;
+        }
+
+        return type.GetMethod("Parse",
+            BindingFlags.Public | BindingFlags.Static,
+            null,
+            [typeof(string), typeof(IFormatProvider)],
+            null);
     }
 #endif
 

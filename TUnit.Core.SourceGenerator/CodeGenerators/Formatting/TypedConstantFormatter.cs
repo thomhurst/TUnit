@@ -283,8 +283,6 @@ public class TypedConstantFormatter : ITypedConstantFormatter
         return result;
     }
 
-
-
     private string FormatArrayForCode(TypedConstant constant, ITypeSymbol? targetType = null)
     {
         // For arrays, determine the element type from the target type if available
