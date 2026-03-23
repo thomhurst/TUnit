@@ -109,8 +109,10 @@ public sealed class TestEntry<
 
     internal TestMetadata<T> ToTestMetadata(string testSessionId)
     {
-        _cachedInvokeTypedTest ??= (instance, args, ct) => InvokeBody(instance, MethodIndex, args, ct);
-        _cachedAttributeFactory ??= () => CreateAttributes(AttributeGroupIndex);
+        if (_cachedInvokeTypedTest is null)
+            Interlocked.CompareExchange(ref _cachedInvokeTypedTest, (instance, args, ct) => InvokeBody(instance, MethodIndex, args, ct), null);
+        if (_cachedAttributeFactory is null)
+            Interlocked.CompareExchange(ref _cachedAttributeFactory, () => CreateAttributes(AttributeGroupIndex), null);
 
         return new TestMetadata<T>
         {

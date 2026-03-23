@@ -33,7 +33,6 @@ public interface ITestEntrySource
 public readonly struct TestEntryFilterData
 {
     public required string MethodName { get; init; }
-    public required string FullyQualifiedName { get; init; }
     public required string ClassName { get; init; }
     public required string[] Categories { get; init; }
     public required string[] Properties { get; init; }

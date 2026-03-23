@@ -51,7 +51,6 @@ public sealed class TestEntrySource<
         return new TestEntryFilterData
         {
             MethodName = entry.MethodName,
-            FullyQualifiedName = entry.FullyQualifiedName,
             ClassName = _className,
             Categories = entry.Categories,
             Properties = entry.Properties,
