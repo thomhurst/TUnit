@@ -354,13 +354,14 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
 
         var isCovariantCandidate = !isNullableOverload
             && CovarianceHelper.IsCovariantCandidate(typeParam);
+        var typeParamDisplay = typeParam.ToDisplayString();
 
         if (isNullableOverload)
         {
             // For nullable reference types, we can't use two separate overloads for T and T?
             // because NRT annotations are erased at runtime - they're the same type to the CLR.
             // Instead, just use the nullable version and accept both nullable and non-nullable sources.
-            sourceType = $"IAssertionSource<{typeParam.ToDisplayString()}>";
+            sourceType = $"IAssertionSource<{typeParamDisplay}>";
             genericTypeParam = null;
             genericConstraint = null;
         }
@@ -370,7 +371,6 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         }
         else if (isCovariantCandidate)
         {
-            var typeParamDisplay = typeParam.ToDisplayString();
             var covariantParam = CovarianceHelper.GetCovariantTypeParamName(genericParams);
             sourceType = $"IAssertionSource<{covariantParam}>";
             genericTypeParam = covariantParam;
@@ -378,7 +378,7 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         }
         else
         {
-            sourceType = $"IAssertionSource<{typeParam.ToDisplayString()}>";
+            sourceType = $"IAssertionSource<{typeParamDisplay}>";
         }
 
         sourceBuilder.Append($"    public static {returnType} {methodName}");
@@ -467,7 +467,7 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         }
         else if (isCovariantCandidate)
         {
-            sourceBuilder.Append(CovarianceHelper.GetCovariantContextExpr(typeParam.ToDisplayString()));
+            sourceBuilder.Append(CovarianceHelper.GetCovariantContextExpr(typeParamDisplay));
         }
         else
         {

@@ -17,15 +17,13 @@ internal static class CovarianceHelper
     /// </summary>
     public static string GetCovariantTypeParamName(IEnumerable<string> existingGenericParams)
     {
-        var existing = new HashSet<string>(existingGenericParams);
-        if (!existing.Contains(PreferredName))
+        if (!existingGenericParams.Contains(PreferredName))
         {
             return PreferredName;
         }
 
-        // Append underscores until unique
         var candidate = PreferredName + "_";
-        while (existing.Contains(candidate))
+        while (existingGenericParams.Contains(candidate))
         {
             candidate += "_";
         }
@@ -56,20 +54,12 @@ internal static class CovarianceHelper
     }
 
     /// <summary>
-    /// Returns the nullable cast form of a type name for use in Map lambdas.
-    /// Map's Func takes TValue? and returns TNew?, so the cast must be to the nullable form.
-    /// </summary>
-    public static string GetNullableCastType(string typeName)
-    {
-        return typeName.EndsWith("?") ? typeName : $"{typeName}?";
-    }
-
-    /// <summary>
     /// Generates the context mapping expression for covariant assertions.
+    /// Uses nullable cast since Map's Func takes TValue? and returns TNew?.
     /// </summary>
     public static string GetCovariantContextExpr(string targetTypeName)
     {
-        var nullableCastType = GetNullableCastType(targetTypeName);
+        var nullableCastType = targetTypeName.EndsWith("?") ? targetTypeName : $"{targetTypeName}?";
         return $"source.Context.Map<{targetTypeName}>(static x => ({nullableCastType})x)";
     }
 
