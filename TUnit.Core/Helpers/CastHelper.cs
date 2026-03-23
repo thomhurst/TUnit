@@ -66,6 +66,12 @@ public static class CastHelper
             return result;
         }
 
+        // Layer 1.5: String-to-parseable conversions (uses reflection, but safe with proper annotations)
+        if (value is string stringValue && TryParseFromString(targetType, stringValue, out result))
+        {
+            return result;
+        }
+
         // Layer 2: Reflection-based conversions (not AOT-compatible)
         if (TryReflectionConversion(targetType, sourceType, value, out result))
         {
@@ -125,11 +131,6 @@ public static class CastHelper
             {
                 // Conversion failed
             }
-        }
-
-        if (value is string stringValue && TryParseFromString(targetType, stringValue, out result))
-        {
-            return true;
         }
 
         // Unwrap single-element enumerables (but not strings or arrays)
