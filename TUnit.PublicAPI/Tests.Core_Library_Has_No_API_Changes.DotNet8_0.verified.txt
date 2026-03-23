@@ -2126,7 +2126,11 @@ namespace .Helpers
         [.("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break fu" +
             "nctionality when AOT compiling.")]
         public static object? Cast([.(..None | ..PublicParameterlessConstructor | ..PublicMethods | ..Interfaces)]  type, object? value) { }
-        public static T? Cast<[.(..None | ..PublicParameterlessConstructor | ..PublicMethods | ..Interfaces)]  T>(object? value) { }
+        [.("Trimming", "IL2087:\'type\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in " +
+            "call to target method.", Justification="Cast<T> is called from source-generated code that handles parseable types at comp" +
+            "ile time. The runtime TryParsableConvert fallback is only used in non-AOT scenar" +
+            "ios.")]
+        public static T? Cast<[.(..PublicParameterlessConstructor)]  T>(object? value) { }
     }
     public static class ClassConstructorHelper
     {

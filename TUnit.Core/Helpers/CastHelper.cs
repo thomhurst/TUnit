@@ -16,7 +16,9 @@ public static class CastHelper
     /// Attempts to cast or convert a value to the specified type T.
     /// Uses a layered approach: fast paths first (AOT-safe), then reflection fallbacks.
     /// </summary>
-    public static T? Cast<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | DynamicallyAccessedMemberTypes.Interfaces | DynamicallyAccessedMemberTypes.PublicMethods)] T>(object? value)
+    [UnconditionalSuppressMessage("Trimming", "IL2087:'type' argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method.",
+        Justification = "Cast<T> is called from source-generated code that handles parseable types at compile time. The runtime TryParsableConvert fallback is only used in non-AOT scenarios.")]
+    public static T? Cast<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] T>(object? value)
     {
         if (value is T t)
         {
