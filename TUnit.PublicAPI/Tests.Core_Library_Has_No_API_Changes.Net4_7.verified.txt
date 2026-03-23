@@ -1233,9 +1233,6 @@ namespace
     {
         public SourceRegistrar() { }
         public static bool IsEnabled { get; set; }
-        public static void Register(..ITestSource testSource) { }
-        public static void Register( testClassType, ..ITestSource testSource) { }
-        public static void Register( testClassType, <string, .<.TestMetadata>> getTests, <.<.TestDescriptor>> enumerateDescriptors) { }
         public static void RegisterAssembly(<.Assembly> assemblyLoader) { }
         public static void RegisterDynamic(.IDynamicTestSource testSource) { }
         public static int RegisterEntries<T>(.TestEntry<T>[] entries)
@@ -1245,8 +1242,6 @@ namespace
         public static int RegisterHook<T>(.<.Assembly, .<T>> dictionary, .Assembly key, T hook) { }
         public static int RegisterHook<T>(.<, .<T>> dictionary,  key, T hook) { }
         public static void RegisterProperty(..IPropertySource propertySource) { }
-        public static int RegisterReturn( testClassType, ..ITestSource testSource) { }
-        public static int RegisterReturn( testClassType, <string, .<.TestMetadata>> getTests, <.<.TestDescriptor>> enumerateDescriptors) { }
     }
     public static class Sources
     {
@@ -1271,7 +1266,6 @@ namespace
         public static readonly .<<.>> GlobalInitializers;
         public static readonly .<..IPropertySource> PropertySources;
         public static readonly .<, .ITestEntrySource> TestEntries;
-        public static readonly .<, .<..ITestSource>> TestSources;
     }
     public static class StaticPropertyReflectionInitializer
     {
@@ -1411,24 +1405,6 @@ namespace
         public static .TestDependency FromClass( classType, bool proceedOnFailure = false) { }
         public static .TestDependency FromClassAndMethod( classType, string methodName, bool proceedOnFailure = false) { }
         public static .TestDependency FromMethodName(string methodName, bool proceedOnFailure = false) { }
-    }
-    public readonly struct TestDescriptor
-    {
-        public TestDescriptor() { }
-        public string[] Categories { get; init; }
-        public required string ClassName { get; init; }
-        public string[] DependsOn { get; init; }
-        public required string FilePath { get; init; }
-        public required string FullyQualifiedName { get; init; }
-        public bool HasDataSource { get; init; }
-        public required int LineNumber { get; init; }
-        public required <string, .<.TestMetadata>> Materializer { get; init; }
-        public required string MethodName { get; init; }
-        public string[] Properties { get; init; }
-        public int RepeatCount { get; init; }
-        public required string TestId { get; init; }
-        public bool HasCategory(string category) { }
-        public bool HasProperty(string key, string? value = null) { }
     }
     public class TestDetails : ., ., ., ., ., .
     {
@@ -2657,14 +2633,6 @@ namespace .
         bool ShouldInitialize { get; }
          Type { get; }
         .<..PropertyInjectionMetadata> GetPropertyMetadata();
-    }
-    public interface ITestDescriptorSource
-    {
-        .<.TestDescriptor> EnumerateTestDescriptors();
-    }
-    public interface ITestSource
-    {
-        .<.TestMetadata> GetTests(string testSessionId);
     }
     public sealed class PropertyInjectionMetadata
     {
