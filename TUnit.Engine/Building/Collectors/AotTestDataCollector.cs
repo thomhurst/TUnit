@@ -1,13 +1,10 @@
-using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using EnumerableAsyncProcessor.Extensions;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
-using TUnit.Core.Interfaces.SourceGenerator;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Services;
@@ -40,152 +37,113 @@ internal sealed class AotTestDataCollector : ITestDataCollector
     public async Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId, ITestExecutionFilter? filter)
     {
         var filterHints = MetadataFilterMatcher.ExtractFilterHints(filter);
-        IEnumerable<TestMetadata> standardTestMetadatas;
+        var allResults = new List<TestMetadata>();
 
-        if (filterHints.HasHints && Sources.TestSources.All(static kvp => kvp.Value.All(static s => s is ITestDescriptorSource)))
+        if (!Sources.TestEntries.IsEmpty)
         {
-            standardTestMetadatas = CollectTestsWithTwoPhaseDiscovery(
-                Sources.TestSources,
-                testSessionId,
-                filterHints);
-        }
-        else
-        {
-            IEnumerable<KeyValuePair<Type, ConcurrentQueue<ITestSource>>> testSourcesByType = Sources.TestSources;
-
-            if (filterHints.HasHints)
-            {
-                testSourcesByType = testSourcesByType.Where(kvp => filterHints.CouldTypeMatch(kvp.Key));
-            }
-
-            var testSourcesList = testSourcesByType.SelectMany(kvp => kvp.Value).ToList();
-            standardTestMetadatas = CollectTests(testSourcesList, testSessionId);
+            allResults.AddRange(CollectTestsFromTestEntries(testSessionId, filterHints));
         }
 
-        // Dynamic tests are typically rare, collect sequentially
-        var dynamicTestMetadatas = new List<TestMetadata>();
         await foreach (var metadata in CollectDynamicTestsStreaming(testSessionId))
         {
-            dynamicTestMetadatas.Add(metadata);
+            allResults.Add(metadata);
         }
 
-        return [..standardTestMetadatas, ..dynamicTestMetadatas];
+        return allResults;
     }
 
     /// <summary>
-    /// Two-phase discovery with single-pass filtering and dependency resolution.
-    /// Accepts ALL test sources (with their associated types) and performs type-level
-    /// and descriptor-level filtering in a single enumeration pass, while indexing
-    /// all descriptors for dependency resolution.
-    ///
-    /// This avoids the previous double-enumeration where ExpandSourcesForDependencies
-    /// enumerated descriptors to find dependencies, and then this method enumerated
-    /// them again for filtering and materialization.
+    /// Collects tests from TestEntry sources (the new fast path).
+    /// Uses TestEntryFilterData for pure-data filtering, then materializes only matching entries.
     /// </summary>
-    private IEnumerable<TestMetadata> CollectTestsWithTwoPhaseDiscovery(
-        IEnumerable<KeyValuePair<Type, ConcurrentQueue<ITestSource>>> allSourcesByType,
+    #if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Materialization uses source-generated metadata")]
+    #endif
+    private IEnumerable<TestMetadata> CollectTestsFromTestEntries(
         string testSessionId,
         FilterHints filterHints)
     {
-        // Phase 1: Single-pass enumeration over ALL sources with combined filtering
-        // - Index ALL descriptors (from all types) for dependency resolution
-        // - Apply type-level filter (assembly, namespace, class) per source group
-        // - Apply descriptor-level filter (class name, method name) per descriptor
-        // - Only descriptors passing BOTH filters are added to matchingDescriptors
-        // - Track if any matching descriptor has dependencies
-        var descriptorsByClassAndMethod = new Dictionary<(string ClassName, string MethodName), TestDescriptor>();
-        var descriptorsByClass = new Dictionary<string, List<TestDescriptor>>();
-        var matchingDescriptors = new List<TestDescriptor>();
+        // Phase 1: Filter using pure data (no JIT of test-specific methods)
+        var totalEntries = Sources.TestEntries.Sum(static kvp => kvp.Value.Count);
+        var matching = new List<(ITestEntrySource Source, int Index)>(totalEntries);
         var hasDependencies = false;
 
-        foreach (var kvp in allSourcesByType)
+        foreach (var kvp in Sources.TestEntries)
         {
-            // Check type-level filter once per source group (covers assembly, namespace, class name)
-            var typeMatches = filterHints.CouldTypeMatch(kvp.Key);
+            var classType = kvp.Key;
+            var source = kvp.Value;
+            var typeMatches = !filterHints.HasHints || filterHints.CouldTypeMatch(classType);
 
-            foreach (var source in kvp.Value)
+            for (var i = 0; i < source.Count; i++)
             {
-                var descriptorSource = (ITestDescriptorSource)source;
+                var filterData = source.GetFilterData(i);
 
-                foreach (var descriptor in descriptorSource.EnumerateTestDescriptors())
+                if (typeMatches && (!filterHints.HasHints || filterHints.CouldMatch(filterData.ClassName, filterData.MethodName)))
                 {
-                    // Always index for dependency resolution regardless of filter match
-                    var key = (descriptor.ClassName, descriptor.MethodName);
-                    descriptorsByClassAndMethod[key] = descriptor;
-
-                    if (!descriptorsByClass.TryGetValue(descriptor.ClassName, out var classDescriptors))
+                    matching.Add((source, i));
+                    if (filterData.DependsOn.Length > 0)
                     {
-                        classDescriptors = [];
-                        descriptorsByClass[descriptor.ClassName] = classDescriptors;
-                    }
-                    classDescriptors.Add(descriptor);
-
-                    // Only add to matching set if both type-level and descriptor-level filters pass
-                    if (typeMatches && filterHints.CouldDescriptorMatch(descriptor))
-                    {
-                        matchingDescriptors.Add(descriptor);
-                        if (descriptor.DependsOn.Length > 0)
-                        {
-                            hasDependencies = true;
-                        }
+                        hasDependencies = true;
                     }
                 }
             }
         }
 
-        // Phase 2: Expand dependencies only if any matching descriptor has them.
-        // Because all descriptors are indexed (not just filtered ones), cross-class
-        // and transitive dependencies are resolved correctly even when the dependency
-        // target was filtered out by type/descriptor hints.
-        HashSet<TestDescriptor>? expandedSet = null;
+        // Phase 2: Expand dependencies via BFS (only if needed)
+        HashSet<(ITestEntrySource, int)>? expandedSet = null;
         if (hasDependencies)
         {
-            expandedSet = new HashSet<TestDescriptor>(matchingDescriptors);
-            var queue = new Queue<TestDescriptor>(matchingDescriptors);
+            var byClassAndMethod = new Dictionary<(string, string), (ITestEntrySource Source, int Index)>();
+            var byClass = new Dictionary<string, List<(ITestEntrySource Source, int Index)>>();
+
+            foreach (var kvp in Sources.TestEntries)
+            {
+                var source = kvp.Value;
+                for (var i = 0; i < source.Count; i++)
+                {
+                    var fd = source.GetFilterData(i);
+                    var pair = (source, i);
+                    byClassAndMethod[(fd.ClassName, fd.MethodName)] = pair;
+
+                    if (!byClass.TryGetValue(fd.ClassName, out var list))
+                    {
+                        list = [];
+                        byClass[fd.ClassName] = list;
+                    }
+                    list.Add(pair);
+                }
+            }
+
+            expandedSet = new HashSet<(ITestEntrySource, int)>(matching);
+            var queue = new Queue<(ITestEntrySource Source, int Index)>(matching);
 
             while (queue.Count > 0)
             {
                 var current = queue.Dequeue();
-                var dependsOn = current.DependsOn;
+                var fd = current.Source.GetFilterData(current.Index);
 
-                for (var i = 0; i < dependsOn.Length; i++)
+                foreach (var dep in fd.DependsOn)
                 {
-                    var dependency = dependsOn[i];
+                    var sep = dep.IndexOf(':');
+                    if (sep < 0) continue;
 
-                    // Parse dependency format: "ClassName:MethodName"
-                    var separatorIndex = dependency.IndexOf(':');
-                    if (separatorIndex < 0)
+                    var depClass = sep == 0 ? fd.ClassName : dep[..sep];
+                    var depMethod = dep[(sep + 1)..];
+
+                    if (depMethod.Length > 0)
                     {
-                        continue;
-                    }
-
-                    var depClassName = separatorIndex == 0
-                        ? current.ClassName  // Same-class dependency
-                        : dependency.Substring(0, separatorIndex);
-                    var depMethodName = dependency.Substring(separatorIndex + 1);
-
-                    if (depMethodName.Length > 0)
-                    {
-                        // Specific method dependency
-                        if (descriptorsByClassAndMethod.TryGetValue((depClassName, depMethodName), out var depDescriptor))
-                        {
-                            if (expandedSet.Add(depDescriptor))
-                            {
-                                queue.Enqueue(depDescriptor);
-                            }
-                        }
+                        if (byClassAndMethod.TryGetValue((depClass, depMethod), out var depEntry)
+                            && expandedSet.Add(depEntry))
+                            queue.Enqueue(depEntry);
                     }
                     else
                     {
-                        // Class-level dependency: all tests in class
-                        if (descriptorsByClass.TryGetValue(depClassName, out var classDescriptors))
+                        if (byClass.TryGetValue(depClass, out var classEntries))
                         {
-                            foreach (var depDescriptor in classDescriptors)
+                            foreach (var depEntry in classEntries)
                             {
-                                if (expandedSet.Add(depDescriptor))
-                                {
-                                    queue.Enqueue(depDescriptor);
-                                }
+                                if (expandedSet.Add(depEntry))
+                                    queue.Enqueue(depEntry);
                             }
                         }
                     }
@@ -193,13 +151,13 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             }
         }
 
-        // Phase 3: Materialize matching descriptors (including dependencies)
-        var descriptorsToMaterialize = expandedSet ?? (IEnumerable<TestDescriptor>)matchingDescriptors;
+        // Phase 3: Materialize
+        var toMaterialize = expandedSet ?? (IEnumerable<(ITestEntrySource Source, int Index)>)matching;
         var results = new List<TestMetadata>();
 
-        foreach (var descriptor in descriptorsToMaterialize)
+        foreach (var (source, index) in toMaterialize)
         {
-            var materialized = descriptor.Materializer(testSessionId);
+            var materialized = source.Materialize(index, testSessionId);
             for (var i = 0; i < materialized.Count; i++)
             {
                 results.Add(materialized[i]);
@@ -207,35 +165,6 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         }
 
         return results;
-    }
-
-    private List<TestMetadata> CollectTests(
-        List<ITestSource> testSourcesList,
-        string testSessionId)
-    {
-        var batches = new IReadOnlyList<TestMetadata>[testSourcesList.Count];
-
-        Parallel.For(0, testSourcesList.Count, i =>
-        {
-            batches[i] = testSourcesList[i].GetTests(testSessionId);
-        });
-
-        var totalCount = 0;
-        for (var i = 0; i < batches.Length; i++)
-        {
-            totalCount += batches[i].Count;
-        }
-
-        var combined = new List<TestMetadata>(totalCount);
-        for (var i = 0; i < batches.Length; i++)
-        {
-            var batch = batches[i];
-            for (var j = 0; j < batch.Count; j++)
-            {
-                combined.Add(batch[j]);
-            }
-        }
-        return combined;
     }
 
     [RequiresUnreferencedCode("Dynamic test collection requires expression compilation and reflection")]
@@ -489,65 +418,4 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         }
     }
 
-    /// <summary>
-    /// Enumerates lightweight test descriptors for fast filtering.
-    /// For sources implementing ITestDescriptorSource, returns pre-computed descriptors.
-    /// For legacy sources, creates descriptors with default filter hints.
-    /// </summary>
-    public IEnumerable<TestDescriptor> EnumerateDescriptors()
-    {
-        // Enumerate descriptors from all test sources
-        foreach (var kvp in Sources.TestSources)
-        {
-            foreach (var testSource in kvp.Value)
-            {
-                // Check if the source implements ITestDescriptorSource for optimized enumeration
-                if (testSource is ITestDescriptorSource descriptorSource)
-                {
-                    foreach (var descriptor in descriptorSource.EnumerateTestDescriptors())
-                    {
-                        yield return descriptor;
-                    }
-                }
-                // For legacy sources without ITestDescriptorSource, we can't enumerate descriptors
-                // without materializing - these will need to use the fallback path
-            }
-        }
-    }
-
-    /// <summary>
-    /// Materializes full test metadata from filtered descriptors.
-    /// Only called for tests that passed filtering, avoiding unnecessary materialization.
-    /// </summary>
-    public IEnumerable<TestMetadata> MaterializeFromDescriptors(
-        IEnumerable<TestDescriptor> descriptors,
-        string testSessionId)
-    {
-        foreach (var descriptor in descriptors)
-        {
-            var materialized = descriptor.Materializer(testSessionId);
-            for (var i = 0; i < materialized.Count; i++)
-            {
-                yield return materialized[i];
-            }
-        }
-    }
-
-    /// <summary>
-    /// Gets test sources that don't implement ITestDescriptorSource.
-    /// These sources require full materialization for discovery.
-    /// </summary>
-    public IEnumerable<ITestSource> GetLegacyTestSources()
-    {
-        foreach (var kvp in Sources.TestSources)
-        {
-            foreach (var testSource in kvp.Value)
-            {
-                if (testSource is not ITestDescriptorSource)
-                {
-                    yield return testSource;
-                }
-            }
-        }
-    }
 }

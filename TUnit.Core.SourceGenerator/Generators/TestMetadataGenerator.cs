@@ -298,8 +298,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 return;
             }
 
-            // Non-generic, non-inherited tests are handled by the per-class TestSource pipeline
-            if (testMethod is { IsGenericType: false, IsGenericMethod: false, InheritanceDepth: 0 })
+            // Non-generic, non-inherited tests are handled by the per-class TestEntry pipeline.
+            // Inherited tests (InheritanceDepth > 0) come through GenerateInheritedTestSources
+            // and must be handled here.
+            if (!testMethod.IsGenericType && !testMethod.IsGenericMethod && testMethod.InheritanceDepth == 0)
             {
                 return;
             }
@@ -350,163 +352,810 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var uniqueClassName = FileNameHelper.GetDeterministicFileNameForMethod(testMethod.TypeSymbol, testMethod.MethodSymbol)
             .Replace(".g.cs", "_TestSource");
 
+        List<ConcreteInstantiation> concreteInstantiations;
+
+        if (!testMethod.IsGenericType && !testMethod.IsGenericMethod)
+        {
+            // Non-generic inherited test — create a single concrete instantiation for the class type
+            concreteInstantiations =
+            [
+                new ConcreteInstantiation
+                {
+                    ConcreteClassName = className,
+                    TypeArguments = [],
+                    ClassTypeArgs = [],
+                    MethodTypeArgs = [],
+                    TestName = testMethod.MethodSymbol.Name,
+                    MethodName = testMethod.MethodSymbol.Name,
+                }
+            ];
+        }
+        else
+        {
+            // Collect all concrete type instantiations for this generic test method
+            concreteInstantiations = CollectConcreteInstantiations(testMethod, className);
+
+            if (concreteInstantiations.Count == 0)
+            {
+                // No concrete types could be resolved — skip this method.
+                // The test won't be discovered, which matches the behavior of
+                // not having any data to resolve type arguments.
+                return;
+            }
+        }
+
+        // Group instantiations by concrete class type for TestEntry<T> emission
+        var groupedByConcreteClass = concreteInstantiations
+            .GroupBy(ci => ci.ConcreteClassName)
+            .ToList();
+
         writer.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]");
         writer.AppendLine($"[global::System.CodeDom.Compiler.GeneratedCode(\"TUnit\", \"{typeof(TestMetadataGenerator).Assembly.GetName().Version}\")]");
-        writer.AppendLine($"internal sealed class {uniqueClassName} : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource");
+        writer.AppendLine($"internal static class {uniqueClassName}");
         writer.AppendLine("{");
         writer.Indent();
 
-        GenerateReflectionFieldAccessors(writer, testMethod.TypeSymbol);
+        // Shared ClassMetadata + classType as static fields + inlined MethodMetadata
+        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
+        var classMetadataExpr = MetadataGenerationHelper.GenerateClassMetadataGetOrAddWithParentExpression(testMethod.TypeSymbol, writer.IndentLevel);
+        writer.AppendLine($"private static readonly global::TUnit.Core.ClassMetadata __classMetadata = {classMetadataExpr};");
+        writer.AppendLine($"private static readonly global::System.Type __classType = typeof({className});");
+        writer.AppendLine($"private static readonly global::TUnit.Core.MethodMetadata __mm_0 = {GenerateMethodMetadataFactoryCall(testMethod.MethodSymbol)};");
 
-        writer.AppendLine("public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        var needsList = testMethod.IsGenericType || testMethod is { IsGenericMethod: true, MethodSymbol.TypeParameters.Length: > 0 };
-
-        if (needsList)
+        // Emit per-group helpers and TestEntry arrays
+        var registrationIndex = 0;
+        foreach (var group in groupedByConcreteClass)
         {
-            writer.AppendLine("var __results = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();");
-            writer.AppendLine();
+            var concreteClassName = group.Key;
+            var entries = group.ToList();
+            var groupIndex = registrationIndex;
 
-            var hasTypedDataSource = testMethod.MethodAttributes
-                .Any(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass) &&
-                         InferTypesFromDataSourceAttribute(testMethod.MethodSymbol, a) != null);
+            // CreateInstance for this concrete type
+            writer.AppendLine($"private static {concreteClassName} __CreateInstance_{groupIndex}(global::System.Type[] typeArgs, object?[] args)");
+            writer.AppendLine("{");
+            writer.Indent();
+            EmitConcreteInstanceCreation(writer, testMethod, concreteClassName, entries[0]);
+            writer.Unindent();
+            writer.AppendLine("}");
 
-            var hasGenerateGenericTest = (testMethod.IsGenericMethod && testMethod.MethodAttributes
-                .Any(a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true)) ||
-                (testMethod.IsGenericType && testMethod.TypeSymbol.GetAttributes()
-                .Any(a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true));
-
-            var hasClassArguments = testMethod.TypeSymbol.GetAttributes()
-                .Any(a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.ArgumentsAttribute") is true);
-
-            var hasTypedDataSourceForGenericType = testMethod is { IsGenericType: true, IsGenericMethod: false } && testMethod.MethodAttributes
-                .Any(a => a.AttributeClass != null &&
-                    a.AttributeClass.IsOrInherits("global::TUnit.Core.AsyncDataSourceGeneratorAttribute") &&
-                    InferTypesFromTypedDataSourceForClass(testMethod.TypeSymbol, testMethod.MethodSymbol) != null);
-
-            var hasMethodArgumentsForGenericType = testMethod is { IsGenericType: true, IsGenericMethod: false } && testMethod.MethodAttributes
-                .Any(a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.ArgumentsAttribute") is true);
-
-            var hasMethodDataSourceForGenericType = testMethod is { IsGenericType: true, IsGenericMethod: false } && testMethod.MethodAttributes
-                .Any(a => a.AttributeClass?.Name == "MethodDataSourceAttribute" &&
-                          InferClassTypesFromMethodDataSource(testMethod, a) != null);
-
-            // Check for class-level data sources that could help resolve generic type arguments
-            var hasClassDataSources = testMethod.IsGenericType && testMethod.TypeSymbol.GetAttributesIncludingBaseTypes()
-                .Any(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass));
-
-            if (hasTypedDataSource || hasGenerateGenericTest || testMethod.IsGenericMethod || hasClassArguments || hasTypedDataSourceForGenericType || hasMethodArgumentsForGenericType || hasMethodDataSourceForGenericType || hasClassDataSources)
+            // Invoke switch for this concrete type
+            writer.AppendLine($"private static global::System.Threading.Tasks.ValueTask __Invoke_{groupIndex}({concreteClassName} instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)");
+            writer.AppendLine("{");
+            writer.Indent();
+            if (entries.Count == 1)
             {
-                GenerateGenericTestWithConcreteTypes(writer, testMethod, className);
+                EmitConcreteInvokeBody(writer, testMethod, entries[0]);
             }
             else
             {
-                // For generic classes with no way to resolve type arguments, this will generate
-                // GenericTestMetadata that the engine will fail with a clear error message
-                GenerateTestMetadataInstance(writer, testMethod, className);
+                writer.AppendLine("switch (methodIndex)");
+                writer.AppendLine("{");
+                writer.Indent();
+                for (var i = 0; i < entries.Count; i++)
+                {
+                    writer.AppendLine($"case {i}:");
+                    writer.AppendLine("{");
+                    writer.Indent();
+                    EmitConcreteInvokeBody(writer, testMethod, entries[i]);
+                    writer.Unindent();
+                    writer.AppendLine("}");
+                }
+                writer.AppendLine("default:");
+                writer.Indent();
+                writer.AppendLine("throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));");
+                writer.Unindent();
+                writer.Unindent();
+                writer.AppendLine("}");
             }
+            writer.Unindent();
+            writer.AppendLine("}");
 
-            writer.AppendLine("return __results;");
+            // Attributes switch for this group
+            writer.AppendLine($"private static global::System.Attribute[] __Attributes_{groupIndex}(int groupIndex)");
+            writer.AppendLine("{");
+            writer.Indent();
+            if (entries.Count == 1)
+            {
+                EmitConcreteAttributeFactory(writer, testMethod, entries[0]);
+            }
+            else
+            {
+                writer.AppendLine("switch (groupIndex)");
+                writer.AppendLine("{");
+                writer.Indent();
+                for (var i = 0; i < entries.Count; i++)
+                {
+                    writer.AppendLine($"case {i}:");
+                    writer.AppendLine("{");
+                    writer.Indent();
+                    EmitConcreteAttributeFactory(writer, testMethod, entries[i]);
+                    writer.Unindent();
+                    writer.AppendLine("}");
+                }
+                writer.AppendLine("default:");
+                writer.Indent();
+                writer.AppendLine("throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));");
+                writer.Unindent();
+                writer.Unindent();
+                writer.AppendLine("}");
+            }
+            writer.Unindent();
+            writer.AppendLine("}");
+
+            // TestEntry array
+            writer.AppendLine($"public static readonly global::TUnit.Core.TestEntry<{concreteClassName}>[] Entries_{groupIndex} = new global::TUnit.Core.TestEntry<{concreteClassName}>[]");
+            writer.AppendLine("{");
+            writer.Indent();
+            for (var i = 0; i < entries.Count; i++)
+            {
+                var entry = entries[i];
+                writer.AppendLine($"new global::TUnit.Core.TestEntry<{concreteClassName}>");
+                writer.AppendLine("{");
+                writer.Indent();
+                EmitTestEntryFields(writer, testMethod, entry, i, groupIndex);
+                writer.Unindent();
+                writer.AppendLine("},");
+            }
+            writer.Unindent();
+            writer.AppendLine("};");
+
+            registrationIndex++;
         }
-        else
-        {
-            GenerateTestMetadataInstance(writer, testMethod, className, addToResultsList: false, useNamedMethods: true);
-            writer.AppendLine("return new global::TUnit.Core.TestMetadata[] { metadata };");
-        }
+
         writer.Unindent();
         writer.AppendLine("}");
 
-        writer.AppendLine();
-
-        // Generate EnumerateTestDescriptors method for fast filtering
-        GenerateEnumerateTestDescriptors(writer, testMethod);
-
-        // Non-generic, direct test methods use the per-class helper for instance creation
-        // and module initialization. Generic or inherited tests keep the per-method pattern.
-        var useClassHelper = !needsList && testMethod.InheritanceDepth == 0;
-
-        if (!needsList)
+        // Registration calls
+        registrationIndex = 0;
+        foreach (var group in groupedByConcreteClass)
         {
-            // Emit named static helper methods to avoid generating a <>c display class.
-            // These are referenced by method group in the metadata above.
-            writer.AppendLine();
-            EmitAttributeFactoryMethod(writer, testMethod);
-            if (!useClassHelper)
-            {
-                writer.AppendLine();
-                EmitInstanceFactoryMethod(writer, testMethod);
-            }
-            if (testMethod is { IsGenericType: false, IsGenericMethod: false })
-            {
-                writer.AppendLine();
-                EmitInvokeTestMethod(writer, testMethod, className);
-            }
-        }
-
-        writer.Unindent();
-        writer.AppendLine("}");
-
-        if (!useClassHelper)
-        {
-            GenerateTestRegistrationField(writer, testMethod, uniqueClassName);
+            var concreteClassName = group.Key;
+            EmitRegistrationField(writer, $"{uniqueClassName}_{registrationIndex}",
+                $"global::TUnit.Core.SourceRegistrar.RegisterEntries({uniqueClassName}.Entries_{registrationIndex})");
+            registrationIndex++;
         }
     }
 
-    private static void GenerateTestMetadataInstance(CodeWriter writer, TestMethodMetadata testMethod, string className, bool addToResultsList = true, bool useNamedMethods = false)
+    /// <summary>
+    /// Represents a single concrete instantiation of a generic test.
+    /// </summary>
+    private sealed class ConcreteInstantiation
     {
-        var methodName = testMethod.MethodSymbol.Name;
+        public required string ConcreteClassName { get; init; }
+        public required ITypeSymbol[] TypeArguments { get; init; }
+        public required ITypeSymbol[] ClassTypeArgs { get; init; }
+        public required ITypeSymbol[] MethodTypeArgs { get; init; }
+        public required string TestName { get; init; }
+        public required string MethodName { get; init; }
+        public AttributeData? SpecificArgumentsAttribute { get; init; }
+        public bool HasParameterizedConstructor { get; init; }
+    }
 
-        // For generic types or methods, use GenericTestMetadata; for concrete types, use TestMetadata<T>
-        if (testMethod.IsGenericType || testMethod.IsGenericMethod)
+    /// <summary>
+    /// Collects all concrete type instantiations for this generic test method.
+    /// </summary>
+    private static List<ConcreteInstantiation> CollectConcreteInstantiations(TestMethodMetadata testMethod, string className)
+    {
+        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
+        var methodName = testMethod.MethodSymbol.Name;
+        var results = new List<ConcreteInstantiation>();
+        var processedTypeCombinations = new HashSet<string>();
+
+        var classTypeArgCount = testMethod.IsGenericType ? testMethod.TypeSymbol.TypeParameters.Length : 0;
+        var methodTypeArgCount = testMethod.IsGenericMethod ? testMethod.MethodSymbol.TypeParameters.Length : 0;
+
+        void TryAddInstantiation(ITypeSymbol[] typeArguments, AttributeData? specificAttr = null)
         {
-            writer.AppendLine("var metadata = new global::TUnit.Core.GenericTestMetadata");
+            var typeKey = BuildTypeKey(typeArguments);
+            if (!processedTypeCombinations.Add(typeKey))
+            {
+                return;
+            }
+
+            var classTypeArgs = classTypeArgCount > 0 ? typeArguments.Take(classTypeArgCount).ToArray() : Array.Empty<ITypeSymbol>();
+            var methodTypeArgs = methodTypeArgCount > 0 ? typeArguments.Skip(classTypeArgCount).ToArray() : Array.Empty<ITypeSymbol>();
+
+            // Validate constraints
+            if (classTypeArgs.Length > 0 && !ValidateClassTypeConstraints(testMethod.TypeSymbol, classTypeArgs))
+            {
+                return;
+            }
+            if (methodTypeArgs.Length > 0 && !ValidateTypeConstraints(testMethod.MethodSymbol, methodTypeArgs))
+            {
+                return;
+            }
+
+            // Build concrete class name
+            string concreteClassName;
+            if (testMethod.IsGenericType && classTypeArgs.Length > 0)
+            {
+                var baseClassName = className.Contains("<") ? className.Substring(0, className.IndexOf('<')) : className;
+                concreteClassName = $"{baseClassName}<{string.Join(", ", classTypeArgs.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)))}>";
+            }
+            else
+            {
+                concreteClassName = className;
+            }
+
+            // Build test name
+            string testName;
+            if (methodTypeArgs.Length > 0)
+            {
+                testName = $"{methodName}<{string.Join(", ", methodTypeArgs.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)))}>";
+            }
+            else
+            {
+                testName = methodName;
+            }
+
+            // Check for parameterized constructor
+            var hasParameterizedConstructor = false;
+            if (testMethod.IsGenericType)
+            {
+                var constructor = testMethod.TypeSymbol.Constructors
+                    .Where(c => !c.IsStatic && c.DeclaredAccessibility == Accessibility.Public)
+                    .OrderByDescending(c => c.Parameters.Length)
+                    .FirstOrDefault();
+                if (constructor is { Parameters.Length: > 0 })
+                {
+                    hasParameterizedConstructor = true;
+                }
+            }
+
+            results.Add(new ConcreteInstantiation
+            {
+                ConcreteClassName = concreteClassName,
+                TypeArguments = typeArguments,
+                ClassTypeArgs = classTypeArgs,
+                MethodTypeArgs = methodTypeArgs,
+                TestName = testName,
+                MethodName = methodName,
+                SpecificArgumentsAttribute = specificAttr,
+                HasParameterizedConstructor = hasParameterizedConstructor,
+            });
+        }
+
+        var methodArgumentsAttributes = testMethod.MethodAttributes
+            .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
+            .ToArray();
+
+        var classArgumentsAttributes = testMethod.IsGenericType
+            ? testMethod.TypeSymbol.GetAttributes()
+                .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
+                .ToArray()
+            : Array.Empty<AttributeData>();
+
+        // Handle class+method Arguments combinations
+        if (testMethod is { IsGenericType: true, IsGenericMethod: true } && classArgumentsAttributes.Any() && methodArgumentsAttributes.Any())
+        {
+            foreach (var classAttr in classArgumentsAttributes)
+            {
+                var classTypes = InferTypesFromClassArgumentsAttribute(testMethod.TypeSymbol, classAttr, compilation);
+                if (classTypes == null || classTypes.Length == 0) continue;
+
+                foreach (var methodAttr in methodArgumentsAttributes)
+                {
+                    var methodTypes = InferTypesFromArgumentsAttribute(testMethod.MethodSymbol, methodAttr, compilation);
+                    if (methodTypes == null || methodTypes.Length == 0) continue;
+
+                    var combinedTypes = new ITypeSymbol[classTypes.Length + methodTypes.Length];
+                    Array.Copy(classTypes, 0, combinedTypes, 0, classTypes.Length);
+                    Array.Copy(methodTypes, 0, combinedTypes, classTypes.Length, methodTypes.Length);
+                    TryAddInstantiation(combinedTypes, classAttr);
+                }
+            }
         }
         else
         {
-            writer.AppendLine($"var metadata = new global::TUnit.Core.TestMetadata<{className}>");
+            // Handle class-only or method-only Arguments attributes
+            var allArgumentsAttributes = new List<AttributeData>();
+            if (!(testMethod is { IsGenericType: true, IsGenericMethod: false }))
+            {
+                allArgumentsAttributes.AddRange(methodArgumentsAttributes);
+            }
+            allArgumentsAttributes.AddRange(classArgumentsAttributes);
+
+            foreach (var argAttr in allArgumentsAttributes)
+            {
+                ITypeSymbol[]? inferredTypes;
+                if (testMethod.IsGenericType && classArgumentsAttributes.Contains(argAttr))
+                {
+                    inferredTypes = InferTypesFromClassArgumentsAttribute(testMethod.TypeSymbol, argAttr, compilation);
+                }
+                else
+                {
+                    inferredTypes = InferTypesFromArgumentsAttribute(testMethod.MethodSymbol, argAttr, compilation);
+                }
+                if (inferredTypes is { Length: > 0 })
+                {
+                    TryAddInstantiation(inferredTypes, argAttr);
+                }
+            }
         }
 
-        writer.AppendLine("{");
-        writer.Indent();
-
-        writer.AppendLine($"TestName = \"{methodName}\",");
-        writer.AppendLine($"TestClassType = {GenerateTypeReference(testMethod.TypeSymbol, testMethod.IsGenericType)},");
-        writer.AppendLine($"TestMethodName = \"{methodName}\",");
-
-        GenerateMetadata(writer, testMethod, useNamedMethods);
-
-        if (testMethod.IsGenericType)
+        // Handle generic classes with non-generic methods that have method-level Arguments
+        if (testMethod is { IsGenericType: true, IsGenericMethod: false } && methodArgumentsAttributes.Length > 0)
         {
-            GenerateGenericTypeInfo(writer, testMethod.TypeSymbol);
+            foreach (var methodArgAttr in methodArgumentsAttributes)
+            {
+                var inferredTypes = InferClassTypesFromMethodArguments(testMethod.TypeSymbol, testMethod.MethodSymbol, methodArgAttr, compilation);
+                if (inferredTypes is { Length: > 0 })
+                {
+                    TryAddInstantiation(inferredTypes, methodArgAttr);
+                }
+            }
         }
 
-        // Generate generic method info if needed
+        // Process typed data source attributes
+        foreach (var dataSourceAttr in testMethod.MethodAttributes.Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass)))
+        {
+            var inferredTypes = InferTypesFromDataSourceAttribute(testMethod.MethodSymbol, dataSourceAttr);
+            if (inferredTypes is { Length: > 0 })
+            {
+                TryAddInstantiation(inferredTypes, dataSourceAttr);
+            }
+        }
+
+        // Process IInfersType<T> attributes on parameters
         if (testMethod.IsGenericMethod)
         {
-            GenerateGenericMethodInfo(writer, testMethod.MethodSymbol);
+            var inferredTypes = InferTypesFromTypeInferringAttributes(testMethod.MethodSymbol);
+            if (inferredTypes is { Length: > 0 })
+            {
+                TryAddInstantiation(inferredTypes);
+            }
         }
 
-        // Generate typed invokers and factory
-        GenerateTypedInvokers(writer, testMethod, className, useNamedMethods);
-
-        writer.Unindent();
-        writer.AppendLine("};");
-
-        if (testMethod is { IsGenericType: false, IsGenericMethod: false })
+        // Process MethodDataSource attributes for generic classes (non-generic methods)
+        if (testMethod is { IsGenericType: true, IsGenericMethod: false })
         {
-            writer.AppendLine("metadata.UseRuntimeDataGeneration(testSessionId);");
+            foreach (var mdsAttr in testMethod.MethodAttributes.Where(a => a.AttributeClass?.Name == "MethodDataSourceAttribute"))
+            {
+                var inferredTypes = InferClassTypesFromMethodDataSource(testMethod, mdsAttr);
+                if (inferredTypes is { Length: > 0 })
+                {
+                    TryAddInstantiation(inferredTypes);
+                }
+            }
+
+            // Process typed data source attributes for generic classes
+            var typedDataSourceInferredTypes = InferTypesFromTypedDataSourceForClass(testMethod.TypeSymbol, testMethod.MethodSymbol);
+            if (typedDataSourceInferredTypes is { Length: > 0 })
+            {
+                TryAddInstantiation(typedDataSourceInferredTypes);
+            }
+        }
+
+        // Process MethodDataSource attributes for generic methods
+        if (testMethod.IsGenericMethod)
+        {
+            foreach (var mdsAttr in testMethod.MethodAttributes.Where(a => a.AttributeClass?.Name == "MethodDataSourceAttribute"))
+            {
+                var inferredTypes = InferTypesFromMethodDataSource(testMethod, mdsAttr);
+                if (inferredTypes is { Length: > 0 })
+                {
+                    TryAddInstantiation(inferredTypes, mdsAttr);
+                }
+            }
+        }
+
+        // Process class-level Arguments attributes for generic classes
+        if (testMethod.IsGenericType)
+        {
+            foreach (var argAttr in testMethod.TypeSymbol.GetAttributes().Where(a => a.AttributeClass?.Name == "ArgumentsAttribute"))
+            {
+                var classInferredTypes = InferTypesFromClassArgumentsAttribute(testMethod.TypeSymbol, argAttr, compilation);
+                if (classInferredTypes is { Length: > 0 })
+                {
+                    if (testMethod.IsGenericMethod)
+                    {
+                        foreach (var methodArgAttr in testMethod.MethodAttributes.Where(a => a.AttributeClass?.Name == "ArgumentsAttribute"))
+                        {
+                            var methodInferredTypes = InferTypesFromArgumentsAttribute(testMethod.MethodSymbol, methodArgAttr, compilation);
+                            if (methodInferredTypes is { Length: > 0 })
+                            {
+                                TryAddInstantiation(classInferredTypes.Concat(methodInferredTypes).ToArray(), argAttr);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        TryAddInstantiation(classInferredTypes, argAttr);
+                    }
+                }
+            }
+        }
+
+        // Process GenerateGenericTest attributes
+        // GenerateGenericTestAttribute takes params Type[] in its constructor, so extract from constructor args
+        {
+            var methodGenericTestAttrs = testMethod.IsGenericMethod
+                ? testMethod.MethodAttributes
+                    .Where(a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true)
+                    .Select(ExtractTypeArgsFromGenerateGenericTestAttribute)
+                    .Where(t => t is { Length: > 0 })
+                    .ToList()
+                : new List<ITypeSymbol[]?>();
+
+            var classGenericTestAttrs = testMethod.IsGenericType
+                ? testMethod.TypeSymbol.GetAttributes()
+                    .Where(a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true)
+                    .Select(ExtractTypeArgsFromGenerateGenericTestAttribute)
+                    .Where(t => t is { Length: > 0 })
+                    .ToList()
+                : new List<ITypeSymbol[]?>();
+
+            if (testMethod is { IsGenericType: true, IsGenericMethod: true } && classGenericTestAttrs.Count > 0 && methodGenericTestAttrs.Count > 0)
+            {
+                // Cartesian product of class and method type args
+                foreach (var classTypeArgs in classGenericTestAttrs)
+                {
+                    foreach (var methodTypeArgs in methodGenericTestAttrs)
+                    {
+                        if (classTypeArgs != null && methodTypeArgs != null)
+                        {
+                            var combined = classTypeArgs.Concat(methodTypeArgs).ToArray();
+                            TryAddInstantiation(combined);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // Only class or only method
+                foreach (var typeArgs in classGenericTestAttrs)
+                {
+                    if (typeArgs != null)
+                    {
+                        TryAddInstantiation(typeArgs);
+                    }
+                }
+                foreach (var typeArgs in methodGenericTestAttrs)
+                {
+                    if (typeArgs != null)
+                    {
+                        TryAddInstantiation(typeArgs);
+                    }
+                }
+            }
+        }
+
+        return results;
+    }
+
+    /// <summary>
+    /// Extracts type arguments from a GenerateGenericTestAttribute's constructor arguments.
+    /// The attribute takes params Type[] in its constructor.
+    /// </summary>
+    private static ITypeSymbol[]? ExtractTypeArgsFromGenerateGenericTestAttribute(AttributeData attr)
+    {
+        if (attr.ConstructorArguments.Length == 0)
+        {
+            return null;
+        }
+
+        var firstArg = attr.ConstructorArguments[0];
+
+        // params Type[] can appear as a single array argument or as individual arguments
+        if (firstArg.Kind == TypedConstantKind.Array)
+        {
+            return firstArg.Values
+                .Where(v => v.Value is INamedTypeSymbol)
+                .Select(v => (ITypeSymbol)(INamedTypeSymbol)v.Value!)
+                .ToArray();
+        }
+
+        // Single Type argument (params expansion)
+        if (firstArg.Value is INamedTypeSymbol singleType)
+        {
+            return [singleType];
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Emits instance creation code for a concrete type.
+    /// </summary>
+    private static void EmitConcreteInstanceCreation(CodeWriter writer, TestMethodMetadata testMethod, string concreteClassName, ConcreteInstantiation entry)
+    {
+        if (InstanceFactoryGenerator.HasClassConstructorAttribute(testMethod.TypeSymbol))
+        {
+            writer.AppendLine("throw new global::System.NotSupportedException(\"Instance creation for classes with ClassConstructor attribute is handled at runtime\");");
+        }
+        else if (entry.HasParameterizedConstructor && entry.SpecificArgumentsAttribute is { ConstructorArguments.Length: > 0 } specificAttr &&
+                 specificAttr.ConstructorArguments[0].Kind == TypedConstantKind.Array)
+        {
+            var argumentValues = specificAttr.ConstructorArguments[0].Values;
+            var constructorArgs = string.Join(", ", argumentValues.Select(arg => TypedConstantParser.GetRawTypedConstantValue(arg)));
+            writer.AppendLine($"return ({concreteClassName})global::System.Activator.CreateInstance(typeof({concreteClassName}), new object[] {{ {constructorArgs} }})!;");
+        }
+        else if (entry.HasParameterizedConstructor)
+        {
+            writer.AppendLine($"return ({concreteClassName})global::System.Activator.CreateInstance(typeof({concreteClassName}), args)!;");
+        }
+        else if (!testMethod.IsGenericType && !testMethod.IsGenericMethod)
+        {
+            // Non-generic (inherited) tests: use InstanceFactoryGenerator for proper required property handling
+            writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(testMethod.TypeSymbol));
+        }
+        else if (entry.ClassTypeArgs.Length > 0)
+        {
+            // Generic class with resolved type args: construct the concrete closed type
+            var constructedType = testMethod.TypeSymbol.Construct(entry.ClassTypeArgs);
+            writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(constructedType));
         }
         else
         {
-            // For generic types/methods, set TestSessionId directly
-            writer.AppendLine("metadata.TestSessionId = testSessionId;");
+            writer.AppendLine($"return new {concreteClassName}();");
+        }
+    }
+
+    /// <summary>
+    /// Emits the invoke body for a concrete type instantiation.
+    /// </summary>
+    private static void EmitConcreteInvokeBody(CodeWriter writer, TestMethodMetadata testMethod, ConcreteInstantiation entry)
+    {
+        var methodName = entry.MethodName;
+        var hasCancellationToken = testMethod.MethodSymbol.Parameters.Any(p =>
+            p.Type.Name == "CancellationToken" && p.Type.ContainingNamespace?.ToString() == "System.Threading");
+        var returnPattern = GetReturnPattern(testMethod.MethodSymbol);
+
+        // For any generic context (class or method), we need to substitute type parameters
+        if (entry.MethodTypeArgs.Length > 0 || entry.ClassTypeArgs.Length > 0)
+        {
+            // Build the method call with proper type substitution
+            var parameterCasts = new List<string>();
+            for (var i = 0; i < testMethod.MethodSymbol.Parameters.Length; i++)
+            {
+                var param = testMethod.MethodSymbol.Parameters[i];
+                if (param.Type.Name == "CancellationToken" && param.Type.ContainingNamespace?.ToString() == "System.Threading")
+                {
+                    parameterCasts.Add("cancellationToken");
+                }
+                else
+                {
+                    var paramType = SubstituteTypeParameters(param.Type, testMethod, entry.ClassTypeArgs, entry.MethodTypeArgs);
+                    parameterCasts.Add($"global::TUnit.Core.Helpers.CastHelper.Cast<{paramType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>(args[{i}])");
+                }
+            }
+
+            string methodCall;
+            if (entry.MethodTypeArgs.Length > 0)
+            {
+                var methodTypeArgsString = string.Join(", ", entry.MethodTypeArgs.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
+                methodCall = $"instance.{methodName}<{methodTypeArgsString}>({string.Join(", ", parameterCasts)})";
+            }
+            else
+            {
+                methodCall = $"instance.{methodName}({string.Join(", ", parameterCasts)})";
+            }
+
+            // Wrap in try-catch
+            writer.AppendLine("try");
+            writer.AppendLine("{");
+            writer.Indent();
+
+            switch (returnPattern)
+            {
+                case TestReturnPattern.Void:
+                    writer.AppendLine($"{methodCall};");
+                    writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
+                    break;
+                case TestReturnPattern.ValueTask:
+                    writer.AppendLine($"return {methodCall};");
+                    break;
+                case TestReturnPattern.Task:
+                    writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask({methodCall});");
+                    break;
+                default:
+                    writer.AppendLine($"return global::TUnit.Core.AsyncConvert.Convert(() => {methodCall});");
+                    break;
+            }
+
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.AppendLine("catch (global::System.Exception ex)");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));");
+            writer.Unindent();
+            writer.AppendLine("}");
+        }
+        else
+        {
+            // Non-generic — use standard invoke (shouldn't normally reach here for generic path)
+            var parametersFromArgs = testMethod.MethodSymbol.Parameters
+                .Where(p => p.Type.Name != "CancellationToken" || p.Type.ContainingNamespace?.ToString() != "System.Threading")
+                .ToArray();
+            GenerateConcreteTestInvokerBody(writer, methodName, returnPattern, hasCancellationToken, parametersFromArgs);
+        }
+    }
+
+    /// <summary>
+    /// Emits attribute factory code for a concrete instantiation.
+    /// </summary>
+    private static void EmitConcreteAttributeFactory(CodeWriter writer, TestMethodMetadata testMethod, ConcreteInstantiation entry)
+    {
+        // Build filtered attributes
+        var filteredAttributes = new List<AttributeData>();
+
+        foreach (var attr in testMethod.MethodSymbol.GetAttributes())
+        {
+            if (attr.AttributeClass?.Name == "ArgumentsAttribute" && entry.SpecificArgumentsAttribute != null)
+            {
+                if (AreSameAttribute(attr, entry.SpecificArgumentsAttribute))
+                {
+                    filteredAttributes.Add(attr);
+                }
+            }
+            else
+            {
+                filteredAttributes.Add(attr);
+            }
         }
 
-        if (addToResultsList)
+        filteredAttributes.AddRange(testMethod.TypeSymbol.GetAttributesIncludingBaseTypes());
+        filteredAttributes.AddRange(testMethod.TypeSymbol.ContainingAssembly.GetAttributes());
+
+        writer.AppendLine("return new global::System.Attribute[]");
+        writer.AppendLine("{");
+        writer.Indent();
+        testMethod.CompilationContext.AttributeWriter.WriteAttributes(writer, filteredAttributes);
+        writer.Unindent();
+        writer.AppendLine("};");
+    }
+
+    /// <summary>
+    /// Emits the TestEntry field values for a concrete instantiation.
+    /// </summary>
+    private static void EmitTestEntryFields(CodeWriter writer, TestMethodMetadata testMethod, ConcreteInstantiation entry, int entryIndex, int groupIndex)
+    {
+        var methodName = entry.TestName;
+        var namespaceName = testMethod.TypeSymbol.ContainingNamespace?.ToDisplayString() ?? "";
+        var simpleClassName = testMethod.TypeSymbol.GetNestedClassName();
+
+        // For generic classes, include type arguments in the class name
+        string displayClassName;
+        if (entry.ClassTypeArgs.Length > 0)
         {
-            writer.AppendLine("__results.Add(metadata);");
+            var typeArgsStr = string.Join(",", entry.ClassTypeArgs.Select(t => t.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)));
+            displayClassName = $"{simpleClassName}<{typeArgsStr}>";
+        }
+        else
+        {
+            displayClassName = simpleClassName;
+        }
+
+        var fullyQualifiedName = string.IsNullOrEmpty(namespaceName)
+            ? $"{displayClassName}.{methodName}"
+            : $"{namespaceName}.{displayClassName}.{methodName}";
+
+        var categories = ExtractCategories(testMethod);
+        var categoriesArray = categories.Count == 0
+            ? "global::System.Array.Empty<string>()"
+            : $"new string[] {{ {string.Join(", ", categories.Select(c => $"\"{EscapeString(c)}\""))} }}";
+
+        var properties = ExtractProperties(testMethod);
+        var propertiesArray = properties.Length == 0
+            ? "global::System.Array.Empty<string>()"
+            : $"new string[] {{ {string.Join(", ", properties.Select(p => $"\"{EscapeString(p)}\""))} }}";
+
+        var hasDataSource = HasDataSources(testMethod);
+        var repeatCount = ExtractRepeatCount(testMethod);
+
+        var dependsOn = ExtractDependsOn(testMethod);
+        var dependsOnArray = dependsOn.Length == 0
+            ? "global::System.Array.Empty<string>()"
+            : $"new string[] {{ {string.Join(", ", dependsOn.Select(d => $"\"{EscapeString(d)}\""))} }}";
+
+        writer.AppendLine($"MethodName = \"{EscapeString(entry.TestName)}\",");
+        writer.AppendLine($"FullyQualifiedName = \"{EscapeString(fullyQualifiedName)}\",");
+        writer.AppendLine($"FilePath = @\"{(testMethod.FilePath ?? "").Replace("\\", "\\\\")}\",");
+        writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
+        writer.AppendLine($"Categories = {categoriesArray},");
+        writer.AppendLine($"Properties = {propertiesArray},");
+        writer.AppendLine($"HasDataSource = {(hasDataSource ? "true" : "false")},");
+        writer.AppendLine($"RepeatCount = {repeatCount},");
+        writer.AppendLine($"DependsOn = {dependsOnArray},");
+        writer.AppendLine($"MethodMetadata = __mm_0,");
+        writer.AppendLine($"CreateInstance = __CreateInstance_{groupIndex},");
+        writer.AppendLine($"InvokeBody = __Invoke_{groupIndex},");
+        writer.AppendLine($"MethodIndex = {entryIndex},");
+        writer.AppendLine($"CreateAttributes = __Attributes_{groupIndex},");
+        writer.AppendLine($"AttributeGroupIndex = {entryIndex},");
+
+        // Data sources
+        EmitConcreteDataSources(writer, testMethod, entry);
+
+        // Dependencies
+        var depsExpr = PreGenerateDependenciesExpression(testMethod.MethodSymbol);
+        if (depsExpr != null)
+        {
+            writer.AppendLine($"Dependencies = {depsExpr},");
+        }
+    }
+
+    /// <summary>
+    /// Emits data source fields for a concrete test entry.
+    /// </summary>
+    private static void EmitConcreteDataSources(CodeWriter writer, TestMethodMetadata testMethod, ConcreteInstantiation entry)
+    {
+        var methodSymbol = testMethod.MethodSymbol;
+        var typeSymbol = testMethod.TypeSymbol;
+
+        // Construct concrete type for data source generation
+        INamedTypeSymbol concreteTypeSymbol = typeSymbol;
+        if (testMethod.IsGenericType && entry.ClassTypeArgs.Length > 0)
+        {
+            var classTypeArgCount = typeSymbol.TypeParameters.Length;
+            if (classTypeArgCount > 0 && entry.TypeArguments.Length >= classTypeArgCount)
+            {
+                concreteTypeSymbol = typeSymbol.Construct(entry.ClassTypeArgs);
+            }
+        }
+
+        // Method data sources
+        List<AttributeData> methodDataSources;
+        AttributeData[] classDataSources;
+
+        if (entry.SpecificArgumentsAttribute != null)
+        {
+            methodDataSources = methodSymbol.GetAttributes()
+                .Where(a => AreSameAttribute(a, entry.SpecificArgumentsAttribute))
+                .ToList();
+
+            if (testMethod is { IsGenericType: true, IsGenericMethod: true })
+            {
+                var additionalMethodDataSources = methodSymbol.GetAttributes()
+                    .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute" &&
+                                !AreSameAttribute(a, entry.SpecificArgumentsAttribute));
+                methodDataSources.AddRange(additionalMethodDataSources);
+            }
+
+            classDataSources = typeSymbol.GetAttributesIncludingBaseTypes()
+                .Where(a => AreSameAttribute(a, entry.SpecificArgumentsAttribute))
+                .ToArray();
+        }
+        else
+        {
+            methodDataSources = methodSymbol.GetAttributes()
+                .Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
+                .ToList();
+
+            classDataSources = typeSymbol.GetAttributesIncludingBaseTypes()
+                .Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
+                .ToArray();
+        }
+
+        if (methodDataSources.Count > 0)
+        {
+            var dsWriter = new CodeWriter(includeHeader: false);
+            dsWriter.AppendLine("new global::TUnit.Core.IDataSourceAttribute[]");
+            dsWriter.AppendLine("{");
+            dsWriter.Indent();
+            foreach (var attr in methodDataSources)
+            {
+                GenerateDataSourceAttribute(dsWriter, testMethod.CompilationContext, attr, methodSymbol, concreteTypeSymbol);
+            }
+            dsWriter.Unindent();
+            dsWriter.Append("}");
+            writer.AppendLine($"TestDataSources = {dsWriter},");
+        }
+
+        if (classDataSources.Length > 0)
+        {
+            var dsWriter = new CodeWriter(includeHeader: false);
+            dsWriter.AppendLine("new global::TUnit.Core.IDataSourceAttribute[]");
+            dsWriter.AppendLine("{");
+            dsWriter.Indent();
+            foreach (var attr in classDataSources)
+            {
+                GenerateDataSourceAttribute(dsWriter, testMethod.CompilationContext, attr, methodSymbol, concreteTypeSymbol);
+            }
+            dsWriter.Unindent();
+            dsWriter.Append("}");
+            writer.AppendLine($"ClassDataSources = {dsWriter},");
         }
     }
 
@@ -2025,33 +2674,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     }
 
     /// <summary>
-    /// Emits the AttributeFactory as a named static method to avoid generating a display class.
+    /// Returns ALL attributes including data source attributes.
+    /// Used by the per-class path where the engine extracts data sources from the attribute array.
     /// </summary>
-    private static void EmitAttributeFactoryMethod(CodeWriter writer, TestMethodMetadata testMethod)
+    private static IEnumerable<AttributeData> GetAllAttributes(TestMethodMetadata testMethod)
     {
-        writer.AppendLine("private static global::System.Attribute[] __CreateAttributes()");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        writer.AppendLine("return");
-        writer.AppendLine("[");
-        writer.Indent();
-
-        testMethod.CompilationContext.AttributeWriter.WriteAttributes(writer, GetTestAttributes(testMethod));
-
-        writer.Unindent();
-        writer.AppendLine("];");
-
-        writer.Unindent();
-        writer.AppendLine("}");
-    }
-
-    /// <summary>
-    /// Emits the InstanceFactory as a named static method to avoid generating a display class.
-    /// </summary>
-    private static void EmitInstanceFactoryMethod(CodeWriter writer, TestMethodMetadata testMethod)
-    {
-        InstanceFactoryGenerator.GenerateInstanceFactoryAsMethod(writer, testMethod.TypeSymbol);
+        return testMethod.MethodSymbol.GetAttributes()
+            .Concat(testMethod.TypeSymbol.GetAttributesIncludingBaseTypes())
+            .Concat(testMethod.TypeSymbol.ContainingAssembly.GetAttributes());
     }
 
     private static (bool HasCancellationToken, IParameterSymbol[] ParametersFromArgs) ParseInvokerParameters(IMethodSymbol methodSymbol)
@@ -2066,83 +2696,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             : parameters.ToArray();
 
         return (hasCancellationToken, parametersFromArgs);
-    }
-
-    /// <summary>
-    /// Emits the InvokeTypedTest as a named static method to avoid generating a display class.
-    /// </summary>
-    private static void EmitInvokeTestMethod(CodeWriter writer, TestMethodMetadata testMethod, string className)
-    {
-        var (hasCancellationToken, parametersFromArgs) = ParseInvokerParameters(testMethod.MethodSymbol);
-        var returnPattern = GetReturnPattern(testMethod.MethodSymbol);
-
-        writer.AppendLine($"private static global::System.Threading.Tasks.ValueTask __InvokeTest({className} instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)");
-        writer.AppendLine("{");
-        writer.Indent();
-        GenerateConcreteTestInvokerBody(writer, testMethod.MethodSymbol.Name, returnPattern, hasCancellationToken, parametersFromArgs);
-        writer.Unindent();
-        writer.AppendLine("}");
-    }
-
-    private static void GenerateEnumerateTestDescriptors(CodeWriter writer, TestMethodMetadata testMethod)
-    {
-        var methodName = testMethod.MethodSymbol.Name;
-        var namespaceName = testMethod.TypeSymbol.ContainingNamespace?.ToDisplayString() ?? "";
-        var simpleClassName = testMethod.TypeSymbol.GetNestedClassName();
-        var fullyQualifiedName = string.IsNullOrEmpty(namespaceName)
-            ? $"{simpleClassName}.{methodName}"
-            : $"{namespaceName}.{simpleClassName}.{methodName}";
-
-        // Extract categories from CategoryAttribute at compile time
-        var categories = ExtractCategories(testMethod);
-        var categoriesArray = categories.Count == 0
-            ? "global::System.Array.Empty<string>()"
-            : $"new string[] {{ {string.Join(", ", categories.Select(c => $"\"{EscapeString(c)}\""))} }}";
-
-        // Extract properties from PropertyAttribute at compile time
-        var properties = ExtractProperties(testMethod);
-        var propertiesArray = properties.Length == 0
-            ? "global::System.Array.Empty<string>()"
-            : $"new string[] {{ {string.Join(", ", properties.Select(p => $"\"{EscapeString(p)}\""))} }}";
-
-        // Check if test has data sources
-        var hasDataSource = HasDataSources(testMethod);
-
-        // Extract repeat count from RepeatAttribute
-        var repeatCount = ExtractRepeatCount(testMethod);
-
-        // Extract dependencies from DependsOnAttribute
-        var dependsOn = ExtractDependsOn(testMethod);
-        var dependsOnArray = dependsOn.Length == 0
-            ? "global::System.Array.Empty<string>()"
-            : $"new string[] {{ {string.Join(", ", dependsOn.Select(d => $"\"{EscapeString(d)}\""))} }}";
-
-        writer.AppendLine("public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        writer.AppendLine("yield return new global::TUnit.Core.TestDescriptor");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        writer.AppendLine($"TestId = \"{EscapeString(fullyQualifiedName)}\",");
-        writer.AppendLine($"ClassName = \"{EscapeString(simpleClassName)}\",");
-        writer.AppendLine($"MethodName = \"{EscapeString(methodName)}\",");
-        writer.AppendLine($"FullyQualifiedName = \"{EscapeString(fullyQualifiedName)}\",");
-        writer.AppendLine($"FilePath = @\"{(testMethod.FilePath ?? "").Replace("\\", "\\\\")}\",");
-        writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
-        writer.AppendLine($"Categories = {categoriesArray},");
-        writer.AppendLine($"Properties = {propertiesArray},");
-        writer.AppendLine($"HasDataSource = {(hasDataSource ? "true" : "false")},");
-        writer.AppendLine($"RepeatCount = {repeatCount},");
-        writer.AppendLine($"DependsOn = {dependsOnArray},");
-        writer.AppendLine("Materializer = GetTests");
-
-        writer.Unindent();
-        writer.AppendLine("};");
-
-        writer.Unindent();
-        writer.AppendLine("}");
     }
 
     private static HashSet<string> ExtractCategories(TestMethodMetadata testMethod)
@@ -2404,12 +2957,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             .Replace("\t", "\\t");
     }
 
-    private static void GenerateTestRegistrationField(CodeWriter writer, TestMethodMetadata testMethod, string uniqueClassName)
-    {
-        EmitRegistrationField(writer, uniqueClassName,
-            $"global::TUnit.Core.SourceRegistrar.RegisterReturn({GenerateTypeReference(testMethod.TypeSymbol, testMethod.IsGenericType)}, new {uniqueClassName}())");
-    }
-
     /// <summary>
     /// Emits a static field on the shared TUnit_TestRegistration partial class.
     /// All contributions merge into a single .cctor, reducing JIT overhead from O(N) methods to O(1).
@@ -2425,58 +2972,73 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("}");
     }
 
-    // =====================================================================
-    // Per-class TestSource: Pre-generation methods
-    // These are called during the transform step where ISymbol is available.
-    // They produce pre-generated C# code as strings for storage in ClassTestGroup.
-    // =====================================================================
-
     /// <summary>
-    /// Pre-generates the metadata block for one method's contribution to GetTests().
-    /// Uses TestMetadataFactory.Create and MethodMetadataFactory.Create to reduce JIT native code.
-    /// References shared locals (__classMetadata, __classType) declared at top of GetTests().
+    /// Pre-generates the attribute factory body for a test method.
+    /// Returns the body (return [...];) without the method signature.
     /// </summary>
-    private static string PreGenerateMetadataBlock(
-        TestMethodMetadata testMethod,
-        string className,
-        string methodId,
-        int attributeGroupIndex)
+    private static string PreGenerateAttributeFactoryBody(TestMethodMetadata testMethod)
     {
         var writer = new CodeWriter(includeHeader: false);
-        var methodName = testMethod.MethodSymbol.Name;
-        var filePath = (testMethod.FilePath ?? "").Replace("\\", "\\\\");
 
-        // Build MethodMetadata factory call
-        var methodMetadataCall = GenerateMethodMetadataFactoryCall(testMethod.MethodSymbol);
-
-        // Start TestMetadataFactory.Create call
-        writer.AppendLine($"var metadata_{methodId} = global::TUnit.Core.TestMetadataFactory.Create<{className}>(");
+        // Include ALL attributes (including data source attributes like [Arguments], [MethodDataSource]).
+        // The engine extracts IDataSourceAttribute from the attribute array at materialization time.
+        writer.AppendLine("return");
+        writer.AppendLine("[");
         writer.Indent();
-        writer.AppendLine($"\"{methodName}\", \"{methodName}\", {testMethod.LineNumber},");
-        writer.AppendLine($"__InvokeTest_{methodId}, __CreateAttributes_{attributeGroupIndex}, CreateInstance,");
-        writer.Append(methodMetadataCall);
-
-        // Add optional named parameters only when non-default
-        AppendOptionalFactoryParameters(writer, testMethod, className);
-
-        writer.AppendLine(",");
-        if (!string.IsNullOrEmpty(filePath))
-        {
-            writer.AppendLine($"filePath: @\"{filePath}\",");
-        }
-        writer.Append("testSessionId: testSessionId");
-
+        testMethod.CompilationContext.AttributeWriter.WriteAttributes(writer, GetAllAttributes(testMethod));
         writer.Unindent();
-        writer.AppendLine(");");
+        writer.AppendLine("];");
 
         return writer.ToString();
     }
 
     /// <summary>
-    /// Pre-generates the descriptor block for one method's contribution to EnumerateTestDescriptors().
-    /// Output: yield return new TestDescriptor { ..., Materializer = __Materialize_{id} };
+    /// Pre-generates the InvokeBody static lambda body for a test method.
+    /// Output: the try/catch wrapper around instance.MethodName().
+    /// Used inside a static lambda: static (instance, args, ct) => { ... }
     /// </summary>
-    private static string PreGenerateDescriptorBlock(TestMethodMetadata testMethod, string methodId)
+    private static string PreGenerateInvokeSwitchCase(TestMethodMetadata testMethod, int methodIndex)
+    {
+        var writer = new CodeWriter(includeHeader: false);
+
+        var (hasCancellationToken, parametersFromArgs) = ParseInvokerParameters(testMethod.MethodSymbol);
+        var returnPattern = GetReturnPattern(testMethod.MethodSymbol);
+
+        writer.AppendLine($"case {methodIndex}:");
+        writer.AppendLine("{");
+        writer.Indent();
+        GenerateConcreteTestInvokerBody(writer, testMethod.MethodSymbol.Name, returnPattern, hasCancellationToken, parametersFromArgs);
+        writer.Unindent();
+        writer.AppendLine("}");
+
+        return writer.ToString();
+    }
+
+    /// <summary>
+    /// Pre-generates the CreateAttributes static lambda body for a test method.
+    /// Returns ALL attributes including data source attributes.
+    /// Output: return [new TestAttribute(), new ArgumentsAttribute(1), ...];
+    /// </summary>
+    private static string PreGenerateCreateAttributesCode(TestMethodMetadata testMethod)
+    {
+        var writer = new CodeWriter(includeHeader: false);
+
+        // Non-data-source attributes only — data sources are emitted separately on TestEntry
+        writer.AppendLine("return");
+        writer.AppendLine("[");
+        writer.Indent();
+        testMethod.CompilationContext.AttributeWriter.WriteAttributes(writer, GetTestAttributes(testMethod));
+        writer.Unindent();
+        writer.AppendLine("];");
+
+        return writer.ToString();
+    }
+
+    /// <summary>
+    /// Pre-generates the pure data fields for a TestEntry initializer.
+    /// These are the filter-relevant fields: MethodName, FullyQualifiedName, FilePath, etc.
+    /// </summary>
+    private static string PreGenerateTestEntryDataFields(TestMethodMetadata testMethod)
     {
         var writer = new CodeWriter(includeHeader: false);
 
@@ -2505,11 +3067,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             ? "global::System.Array.Empty<string>()"
             : $"new string[] {{ {string.Join(", ", dependsOn.Select(d => $"\"{EscapeString(d)}\""))} }}";
 
-        writer.AppendLine("yield return new global::TUnit.Core.TestDescriptor");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine($"TestId = \"{EscapeString(fullyQualifiedName)}\",");
-        writer.AppendLine($"ClassName = \"{EscapeString(simpleClassName)}\",");
         writer.AppendLine($"MethodName = \"{EscapeString(methodName)}\",");
         writer.AppendLine($"FullyQualifiedName = \"{EscapeString(fullyQualifiedName)}\",");
         writer.AppendLine($"FilePath = @\"{(testMethod.FilePath ?? "").Replace("\\", "\\\\")}\",");
@@ -2519,107 +3076,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"HasDataSource = {(hasDataSource ? "true" : "false")},");
         writer.AppendLine($"RepeatCount = {repeatCount},");
         writer.AppendLine($"DependsOn = {dependsOnArray},");
-        writer.AppendLine($"Materializer = __Materialize_{methodId}");
-        writer.Unindent();
-        writer.AppendLine("};");
 
         return writer.ToString();
     }
 
     /// <summary>
-    /// Pre-generates the full __InvokeTest_{id} static method (signature + body).
-    /// </summary>
-    private static string PreGenerateInvokeTestMethod(TestMethodMetadata testMethod, string className, string methodId)
-    {
-        var writer = new CodeWriter(includeHeader: false);
-
-        var (hasCancellationToken, parametersFromArgs) = ParseInvokerParameters(testMethod.MethodSymbol);
-        var returnPattern = GetReturnPattern(testMethod.MethodSymbol);
-
-        writer.AppendLine($"private static global::System.Threading.Tasks.ValueTask __InvokeTest_{methodId}({className} instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)");
-        writer.AppendLine("{");
-        writer.Indent();
-        GenerateConcreteTestInvokerBody(writer, testMethod.MethodSymbol.Name, returnPattern, hasCancellationToken, parametersFromArgs);
-        writer.Unindent();
-        writer.AppendLine("}");
-
-        return writer.ToString();
-    }
-
-    /// <summary>
-    /// Pre-generates the full __Materialize_{id} static method.
-    /// This is only called when --treenode-filter is used (never JIT'd in normal runs).
-    /// Uses factory calls for consistency, with inline shared locals (since this is a separate method).
-    /// </summary>
-    private static string PreGenerateMaterializerMethod(
-        TestMethodMetadata testMethod,
-        string className,
-        string methodId,
-        int attributeGroupIndex)
-    {
-        var writer = new CodeWriter(includeHeader: false);
-
-        writer.AppendLine($"private static global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> __Materialize_{methodId}(string testSessionId)");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        var methodName = testMethod.MethodSymbol.Name;
-        var filePath = (testMethod.FilePath ?? "").Replace("\\", "\\\\");
-
-        // Inline shared locals (can't reference GetTests locals from a separate method)
-        // Use AppendRaw to properly indent the multi-line ClassMetadata expression
-        writer.AppendRaw(PreGenerateSharedLocals(testMethod.TypeSymbol, className));
-
-        // Build MethodMetadata factory call
-        var methodMetadataCall = GenerateMethodMetadataFactoryCall(testMethod.MethodSymbol);
-
-        // TestMetadataFactory.Create call
-        writer.AppendLine($"var metadata = global::TUnit.Core.TestMetadataFactory.Create<{className}>(");
-        writer.Indent();
-        writer.AppendLine($"\"{methodName}\", \"{methodName}\", {testMethod.LineNumber},");
-        writer.AppendLine($"__InvokeTest_{methodId}, __CreateAttributes_{attributeGroupIndex}, CreateInstance,");
-        writer.Append(methodMetadataCall);
-
-        // Add optional named parameters
-        AppendOptionalFactoryParameters(writer, testMethod, className);
-
-        writer.AppendLine(",");
-        if (!string.IsNullOrEmpty(filePath))
-        {
-            writer.AppendLine($"filePath: @\"{filePath}\",");
-        }
-        writer.Append("testSessionId: testSessionId");
-
-        writer.Unindent();
-        writer.AppendLine(");");
-        writer.AppendLine("return new global::TUnit.Core.TestMetadata[] { metadata };");
-
-        writer.Unindent();
-        writer.AppendLine("}");
-
-        return writer.ToString();
-    }
-
-    /// <summary>
-    /// Pre-generates the attribute factory body for a test method.
-    /// Returns the body (return [...];) without the method signature.
-    /// </summary>
-    private static string PreGenerateAttributeFactoryBody(TestMethodMetadata testMethod)
-    {
-        var writer = new CodeWriter(includeHeader: false);
-
-        writer.AppendLine("return");
-        writer.AppendLine("[");
-        writer.Indent();
-        testMethod.CompilationContext.AttributeWriter.WriteAttributes(writer, GetTestAttributes(testMethod));
-        writer.Unindent();
-        writer.AppendLine("];");
-
-        return writer.ToString();
-    }
-
-    /// <summary>
-    /// Pre-generates shared local variable declarations for the top of GetTests().
+    /// Pre-generates shared local variable declarations for the top of GetTests() and Materialize().
     /// Generates __classMetadata and __classType locals that are referenced by factory calls.
     /// </summary>
     private static string PreGenerateSharedLocals(INamedTypeSymbol typeSymbol, string className)
@@ -2629,6 +3091,29 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"var __classMetadata = {classMetadataExpr};");
         writer.AppendLine($"var __classType = typeof({className});");
         return writer.ToString();
+    }
+
+    /// <summary>
+    /// Generates __classMetadata and __classType as static readonly fields instead of local variables.
+    /// Used by the per-class path to inline MethodMetadata construction into field initializers,
+    /// eliminating the separate __InitMethodMetadatas method and saving one JIT per class.
+    /// </summary>
+    private static string PreGenerateSharedFields(INamedTypeSymbol typeSymbol, string className)
+    {
+        var writer = new CodeWriter(includeHeader: false);
+        var classMetadataExpr = MetadataGenerationHelper.GenerateClassMetadataGetOrAddWithParentExpression(typeSymbol, writer.IndentLevel);
+        writer.AppendLine($"private static readonly global::TUnit.Core.ClassMetadata __classMetadata = {classMetadataExpr};");
+        writer.AppendLine($"private static readonly global::System.Type __classType = typeof({className});");
+        return writer.ToString();
+    }
+
+    /// <summary>
+    /// Pre-generates a MethodMetadataFactory.Create(...) expression for one method.
+    /// Called during the transform step where ISymbol is available.
+    /// </summary>
+    private static string PreGenerateMethodMetadataExpression(TestMethodMetadata testMethod)
+    {
+        return GenerateMethodMetadataFactoryCall(testMethod.MethodSymbol);
     }
 
     /// <summary>
@@ -2884,9 +3369,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 var className = typeSymbol.GloballyQualified();
                 var testSourceName = FileNameHelper.GetSafeTestSourceName(typeSymbol);
 
-                // Pre-generate attribute factory bodies and deduplicate
                 var methodsList = g.Where(m => m is not null).Select(m => m!).ToList();
-                var attrBodies = methodsList.Select(m => PreGenerateAttributeFactoryBody(m)).ToList();
+
+                // Deduplicate attribute factory bodies
+                var attrBodies = methodsList.Select(PreGenerateCreateAttributesCode).ToList();
                 var bodyToIndex = new Dictionary<string, int>();
                 var distinctBodies = new List<string>();
                 foreach (var body in attrBodies)
@@ -2907,7 +3393,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     var m = methodsList[i];
                     var methodId = FileNameHelper.GetSafeMethodId(m.MethodSymbol);
 
-                    // Ensure unique methodId within the class (handle multiple overloads with same signature)
                     var originalMethodId = methodId;
                     var suffix = 2;
                     while (!usedMethodIds.Add(methodId))
@@ -2916,16 +3401,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         suffix++;
                     }
 
-                    var attrGroupIndex = attrIndexMap[i];
-
                     methodSourceCodes.Add(new TestMethodSourceCode
                     {
                         MethodId = methodId,
-                        MetadataCode = PreGenerateMetadataBlock(m, className, methodId, attrGroupIndex),
-                        DescriptorCode = PreGenerateDescriptorBlock(m, methodId),
-                        InvokeTestMethod = PreGenerateInvokeTestMethod(m, className, methodId),
-                        MaterializerMethod = PreGenerateMaterializerMethod(m, className, methodId, attrGroupIndex),
-                        AttributeGroupIndex = attrGroupIndex,
+                        MethodIndex = i,
+                        AttributeGroupIndex = attrIndexMap[i],
+                        MethodMetadataCode = PreGenerateMethodMetadataExpression(m),
+                        InvokeSwitchCaseCode = PreGenerateInvokeSwitchCase(m, i),
+                        TestEntryDataFieldsCode = PreGenerateTestEntryDataFields(m),
+                        TestDataSourcesCode = PreGenerateMethodDataSourcesExpression(m),
+                        ClassDataSourcesCode = PreGenerateClassDataSourcesExpression(m),
+                        DependenciesCode = PreGenerateDependenciesExpression(m.MethodSymbol),
                     });
                 }
 
@@ -2938,6 +3424,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     InstanceFactoryBodyCode = InstanceFactoryGenerator.GenerateInstanceFactoryBody(typeSymbol),
                     ReflectionFieldAccessorsCode = PreGenerateReflectionFieldAccessors(typeSymbol),
                     SharedLocalsCode = PreGenerateSharedLocals(typeSymbol, className),
+                    SharedFieldsCode = PreGenerateSharedFields(typeSymbol, className),
                 };
             });
     }
@@ -2961,77 +3448,116 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendRaw(classGroup.ReflectionFieldAccessorsCode);
             }
 
-            // GetTests() — returns metadata for ALL methods in this class
-            writer.AppendLine("public static global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)");
-            writer.AppendLine("{");
-            writer.Indent();
+            // Shared ClassMetadata + classType as static fields (no separate method needed)
+            writer.AppendRaw(classGroup.SharedFieldsCode);
 
-            // Shared locals: __classMetadata and __classType (referenced by factory calls)
-            writer.AppendRaw(classGroup.SharedLocalsCode);
-
+            // Per-method MethodMetadata as individual static fields (inlined, no array)
             foreach (var method in classGroup.Methods)
             {
-                writer.AppendRaw(method.MetadataCode);
+                writer.AppendLine($"private static readonly global::TUnit.Core.MethodMetadata __mm_{method.MethodIndex} = {method.MethodMetadataCode};");
             }
 
-            writer.Append("return new global::TUnit.Core.TestMetadata[] { ");
-            for (int i = 0; i < classGroup.Methods.Length; i++)
-            {
-                if (i > 0) writer.Append(", ");
-                writer.Append($"metadata_{classGroup.Methods[i].MethodId}");
-            }
-            writer.AppendLine(" };");
-
-            writer.Unindent();
-            writer.AppendLine("}");
-
-            // EnumerateTestDescriptors() — yields descriptors for ALL methods
-            writer.AppendLine("public static global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()");
-            writer.AppendLine("{");
-            writer.Indent();
-            foreach (var method in classGroup.Methods)
-            {
-                writer.AppendRaw(method.DescriptorCode);
-            }
-            writer.Unindent();
-            writer.AppendLine("}");
-
-            // Shared __CreateAttributes_{index} methods
-            for (int i = 0; i < classGroup.AttributeGroups.Length; i++)
-            {
-                writer.AppendLine($"private static global::System.Attribute[] __CreateAttributes_{i}()");
-                writer.AppendLine("{");
-                writer.Indent();
-                writer.AppendRaw(classGroup.AttributeGroups[i]);
-                writer.Unindent();
-                writer.AppendLine("}");
-            }
-
-            // Per-method __InvokeTest_{id} methods
-            foreach (var method in classGroup.Methods)
-            {
-                writer.AppendRaw(method.InvokeTestMethod);
-            }
-
-            // Per-method __Materialize_{id} methods (never JIT'd in normal runs)
-            foreach (var method in classGroup.Methods)
-            {
-                writer.AppendRaw(method.MaterializerMethod);
-            }
-
-            // CreateInstance method (shared for all methods)
-            writer.AppendLine($"internal static {classGroup.ClassFullyQualified} CreateInstance(global::System.Type[] typeArgs, object?[] args)");
+            // CreateInstance — shared across all entries (1 per class)
+            writer.AppendLine($"private static {classGroup.ClassFullyQualified} __CreateInstance(global::System.Type[] typeArgs, object?[] args)");
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendRaw(classGroup.InstanceFactoryBodyCode);
             writer.Unindent();
             writer.AppendLine("}");
 
+            // Consolidated __Invoke switch — 1 method for ALL tests in this class
+            writer.AppendLine($"private static global::System.Threading.Tasks.ValueTask __Invoke({classGroup.ClassFullyQualified} instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("switch (methodIndex)");
+            writer.AppendLine("{");
+            writer.Indent();
+            foreach (var method in classGroup.Methods)
+            {
+                writer.AppendRaw(method.InvokeSwitchCaseCode);
+            }
+            writer.AppendLine("default:");
+            writer.Indent();
+            writer.AppendLine("throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));");
+            writer.Unindent();
+            writer.Unindent();
+            writer.AppendLine("}");
             writer.Unindent();
             writer.AppendLine("}");
 
+            // Consolidated __Attributes switch — 1 method for ALL attribute groups in this class
+            // Always emitted (even if no groups) since TestEntry references it unconditionally
+            writer.AppendLine("private static global::System.Attribute[] __Attributes(int groupIndex)");
+            writer.AppendLine("{");
+            writer.Indent();
+            if (classGroup.AttributeGroups.Length > 0)
+            {
+                writer.AppendLine("switch (groupIndex)");
+                writer.AppendLine("{");
+                writer.Indent();
+                for (int i = 0; i < classGroup.AttributeGroups.Length; i++)
+                {
+                    writer.AppendLine($"case {i}:");
+                    writer.AppendLine("{");
+                    writer.Indent();
+                    writer.AppendRaw(classGroup.AttributeGroups[i]);
+                    writer.Unindent();
+                    writer.AppendLine("}");
+                }
+                writer.AppendLine("default:");
+                writer.Indent();
+                writer.AppendLine("throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));");
+                writer.Unindent();
+                writer.Unindent();
+                writer.AppendLine("}");
+            }
+            else
+            {
+                writer.AppendLine("throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));");
+            }
+            writer.Unindent();
+            writer.AppendLine("}");
+
+            // TestEntry<T>[] array — all entries share the same 3 delegates
+            writer.AppendLine($"public static readonly global::TUnit.Core.TestEntry<{classGroup.ClassFullyQualified}>[] Entries = new global::TUnit.Core.TestEntry<{classGroup.ClassFullyQualified}>[]");
+            writer.AppendLine("{");
+            writer.Indent();
+            foreach (var method in classGroup.Methods)
+            {
+                writer.AppendLine($"new global::TUnit.Core.TestEntry<{classGroup.ClassFullyQualified}>");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendRaw(method.TestEntryDataFieldsCode);
+                writer.AppendLine($"MethodMetadata = __mm_{method.MethodIndex},");
+                writer.AppendLine($"CreateInstance = __CreateInstance,");
+                writer.AppendLine($"InvokeBody = __Invoke,");
+                writer.AppendLine($"MethodIndex = {method.MethodIndex},");
+                writer.AppendLine($"CreateAttributes = __Attributes,");
+                writer.AppendLine($"AttributeGroupIndex = {method.AttributeGroupIndex},");
+                if (method.TestDataSourcesCode != null)
+                {
+                    writer.AppendLine($"TestDataSources = {method.TestDataSourcesCode},");
+                }
+                if (method.ClassDataSourcesCode != null)
+                {
+                    writer.AppendLine($"ClassDataSources = {method.ClassDataSourcesCode},");
+                }
+                if (method.DependenciesCode != null)
+                {
+                    writer.AppendLine($"Dependencies = {method.DependenciesCode},");
+                }
+                writer.Unindent();
+                writer.AppendLine("},");
+            }
+            writer.Unindent();
+            writer.AppendLine("};");
+
+            writer.Unindent();
+            writer.AppendLine("}");
+
+            // Registration
             EmitRegistrationField(writer, classGroup.TestSourceName,
-                $"global::TUnit.Core.SourceRegistrar.RegisterReturn(typeof({classGroup.ClassFullyQualified}), {classGroup.TestSourceName}.GetTests, {classGroup.TestSourceName}.EnumerateTestDescriptors)");
+                $"global::TUnit.Core.SourceRegistrar.RegisterEntries({classGroup.TestSourceName}.Entries)");
 
             context.AddSource($"{classGroup.TestSourceName}.g.cs", SourceText.From(writer.ToString(), Encoding.UTF8));
         }
