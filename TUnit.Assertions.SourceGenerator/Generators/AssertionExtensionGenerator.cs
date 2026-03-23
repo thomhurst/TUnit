@@ -360,8 +360,14 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         // The extension method extends IAssertionSource<T> where T is the type argument
         // from the Assertion<T> base class.
         string sourceType;
-        string genericTypeParam = null;
-        string genericConstraint = null;
+        string? genericTypeParam = null;
+        string? genericConstraint = null;
+
+        // Determine if the target type supports covariant assertions
+        // Covariance applies to interfaces and non-sealed classes only
+        var isCovariantCandidate = !isNullableOverload
+            && (typeParam.TypeKind == TypeKind.Interface || typeParam.TypeKind == TypeKind.Class)
+            && !typeParam.IsSealed;
 
         if (isNullableOverload)
         {
@@ -375,6 +381,19 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         else if (typeParam is ITypeParameterSymbol baseTypeParam)
         {
             sourceType = $"IAssertionSource<{baseTypeParam.Name}>";
+        }
+        else if (isCovariantCandidate)
+        {
+            // For covariant assertions, use a generic TActual with a type constraint
+            var typeParamDisplay = typeParam.ToDisplayString();
+            var constraintType = typeParamDisplay;
+            if (typeParam.NullableAnnotation == NullableAnnotation.Annotated && typeParamDisplay.EndsWith("?"))
+            {
+                constraintType = typeParamDisplay.Substring(0, typeParamDisplay.Length - 1);
+            }
+            sourceType = "IAssertionSource<TActual>";
+            genericTypeParam = "TActual";
+            genericConstraint = $"where TActual : {constraintType}";
         }
         else
         {
@@ -464,6 +483,15 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         if (isNullableOverload)
         {
             sourceBuilder.Append("source.Context.AsNullable()");
+        }
+        else if (isCovariantCandidate)
+        {
+            // Map the context from TActual to the target type
+            // Use nullable cast since Map's Func takes TValue? and returns TNew?
+            // Explicitly specify TNew to preserve nullability (e.g., JsonNode? vs JsonNode)
+            var typeParamDisplay = typeParam.ToDisplayString();
+            var nullableCastType = typeParamDisplay.EndsWith("?") ? typeParamDisplay : $"{typeParamDisplay}?";
+            sourceBuilder.Append($"source.Context.Map<{typeParamDisplay}>(static x => ({nullableCastType})x)");
         }
         else
         {
