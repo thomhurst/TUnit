@@ -70,10 +70,12 @@ public static partial class AsyncAssertionResultOfTMethodExtensions
     /// <summary>
     /// Generated extension method for ContainsMatchAsync
     /// </summary>
-    public static IEnumerableString_ContainsMatchAsync_String_Assertion ContainsMatchAsync(this IAssertionSource<System.Collections.Generic.IEnumerable<string>> source, string needle, [CallerArgumentExpression(nameof(needle))] string? needleExpression = null)
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
+    public static IEnumerableString_ContainsMatchAsync_String_Assertion ContainsMatchAsync<TActual>(this IAssertionSource<TActual> source, string needle, [CallerArgumentExpression(nameof(needle))] string? needleExpression = null)
+    where TActual : System.Collections.Generic.IEnumerable<string>
     {
         source.Context.ExpressionBuilder.Append($".ContainsMatchAsync({needleExpression})");
-        return new IEnumerableString_ContainsMatchAsync_String_Assertion(source.Context, needle);
+        return new IEnumerableString_ContainsMatchAsync_String_Assertion(source.Context.Map<System.Collections.Generic.IEnumerable<string>>(static x => (System.Collections.Generic.IEnumerable<string>?)x), needle);
     }
 
 }
