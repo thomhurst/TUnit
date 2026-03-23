@@ -2018,6 +2018,15 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<string> metadata) { }
         protected override string GetExpectation() { }
     }
+    public static class StringLengthRangeAssertionExtensions
+    {
+        [.(ExpectationMessage="to have length between {minLength} and {maxLength}")]
+        public static . HasLengthBetween(this string value, int minLength, int maxLength) { }
+        [.(ExpectationMessage="to have a maximum length of {maxLength}")]
+        public static . HasMaxLength(this string value, int maxLength) { }
+        [.(ExpectationMessage="to have a minimum length of {minLength}")]
+        public static . HasMinLength(this string value, int minLength) { }
+    }
     public class StringLengthValueAssertion : .<int>
     {
         public StringLengthValueAssertion(.<string> stringContext) { }
@@ -5068,6 +5077,12 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<string> metadata) { }
         protected override string GetExpectation() { }
     }
+    public static class StringLengthRangeAssertionExtensions
+    {
+        public static ._HasLengthBetween_Int_Int_Assertion HasLengthBetween(this .<string> source, int minLength, int maxLength, [.("minLength")] string? minLengthExpression = null, [.("maxLength")] string? maxLengthExpression = null) { }
+        public static ._HasMaxLength_Int_Assertion HasMaxLength(this .<string> source, int maxLength, [.("maxLength")] string? maxLengthExpression = null) { }
+        public static ._HasMinLength_Int_Assertion HasMinLength(this .<string> source, int minLength, [.("minLength")] string? minLengthExpression = null) { }
+    }
     public static class StringStartsWithAssertionExtensions
     {
         public static . StartsWith(this .<string> source, string expected, [.("expected")] string? expectedExpression = null) { }
@@ -5079,6 +5094,24 @@ namespace .Extensions
         public static . IsNotNullOrWhiteSpace(this .<string> source) { }
         public static . IsNullOrEmpty(this .<string> source) { }
         public static . IsNullOrWhiteSpace(this .<string> source) { }
+    }
+    public sealed class String_HasLengthBetween_Int_Int_Assertion : .<string>
+    {
+        public String_HasLengthBetween_Int_Int_Assertion(.<string> context, int minLength, int maxLength) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class String_HasMaxLength_Int_Assertion : .<string>
+    {
+        public String_HasMaxLength_Int_Assertion(.<string> context, int maxLength) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class String_HasMinLength_Int_Assertion : .<string>
+    {
+        public String_HasMinLength_Int_Assertion(.<string> context, int minLength) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
+        protected override string GetExpectation() { }
     }
     public sealed class String_IsEmpty_Assertion : .<string>
     {
