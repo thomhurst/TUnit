@@ -371,9 +371,10 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         else if (isCovariantCandidate)
         {
             var typeParamDisplay = typeParam.ToDisplayString();
-            sourceType = "IAssertionSource<TActual>";
-            genericTypeParam = "TActual";
-            genericConstraint = $"where TActual : {CovarianceHelper.GetConstraintTypeName(typeParamDisplay, typeParam)}";
+            var covariantParam = CovarianceHelper.GetCovariantTypeParamName(genericParams);
+            sourceType = $"IAssertionSource<{covariantParam}>";
+            genericTypeParam = covariantParam;
+            genericConstraint = $"where {covariantParam} : {CovarianceHelper.GetConstraintTypeName(typeParamDisplay, typeParam)}";
         }
         else
         {

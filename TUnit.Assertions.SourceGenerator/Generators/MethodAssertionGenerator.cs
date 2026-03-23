@@ -969,11 +969,14 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         var genericParams = data.Method.GenericTypeParameters;
         var isCovariant = data.TargetType.IsCovariantCandidate;
 
-        // Build generic declaration - prepend TActual for covariant assertions
+        // Pick a covariant type param name that doesn't collide with existing generic params
+        var covariantParam = isCovariant ? CovarianceHelper.GetCovariantTypeParamName(genericParams) : null;
+
+        // Build generic declaration - prepend covariant param for covariant assertions
         var genericDeclaration = isCovariant
             ? genericParams.Count > 0
-                ? $"<TActual, {string.Join(", ", genericParams)}>"
-                : "<TActual>"
+                ? $"<{covariantParam}, {string.Join(", ", genericParams)}>"
+                : $"<{covariantParam}>"
             : genericParams.Count > 0
                 ? $"<{string.Join(", ", genericParams)}>"
                 : "";
@@ -1007,8 +1010,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         // Method signature
         sb.Append($"    public static {className}{returnGenericDeclaration} {methodName}{genericDeclaration}(");
 
-        // For covariant assertions, use IAssertionSource<TActual> with a type constraint
-        var sourceTypeName = isCovariant ? "TActual" : targetTypeName;
+        var sourceTypeName = isCovariant ? covariantParam! : targetTypeName;
         sb.Append($"this IAssertionSource<{sourceTypeName}> source");
 
         // Additional parameters
@@ -1037,7 +1039,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         // Apply covariant type constraint
         if (isCovariant)
         {
-            sb.AppendLine($"    where TActual : {data.TargetType.ConstraintTypeName}");
+            sb.AppendLine($"    where {covariantParam} : {data.TargetType.ConstraintTypeName}");
         }
 
         // Apply generic constraints if present

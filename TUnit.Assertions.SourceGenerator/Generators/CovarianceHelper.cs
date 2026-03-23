@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 
 namespace TUnit.Assertions.SourceGenerator.Generators;
@@ -7,6 +9,29 @@ namespace TUnit.Assertions.SourceGenerator.Generators;
 /// </summary>
 internal static class CovarianceHelper
 {
+    private const string PreferredName = "TActual";
+
+    /// <summary>
+    /// Returns a type parameter name for the covariant source type that doesn't conflict
+    /// with any existing generic parameters on the method.
+    /// </summary>
+    public static string GetCovariantTypeParamName(IEnumerable<string> existingGenericParams)
+    {
+        var existing = new HashSet<string>(existingGenericParams);
+        if (!existing.Contains(PreferredName))
+        {
+            return PreferredName;
+        }
+
+        // Append underscores until unique
+        var candidate = PreferredName + "_";
+        while (existing.Contains(candidate))
+        {
+            candidate += "_";
+        }
+        return candidate;
+    }
+
     /// <summary>
     /// Determines if a target type supports covariant assertions.
     /// Returns true for interfaces and non-sealed classes that don't contain unresolved type parameters.
