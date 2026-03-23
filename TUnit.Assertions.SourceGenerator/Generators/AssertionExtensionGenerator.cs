@@ -170,11 +170,6 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
                 continue;
             }
 
-            // Check if the type parameter is a nullable reference type (e.g., string?)
-            var typeParam = data.AssertionBaseType.TypeArguments[0];
-            var isNullableReferenceType = typeParam.NullableAnnotation == NullableAnnotation.Annotated &&
-                                         typeParam.IsReferenceType;
-
             // Generate positive assertion method
             GenerateExtensionMethod(sourceBuilder, data, constructor, negated: false, isNullableOverload: false);
 
@@ -242,14 +237,8 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
             requiresUnreferencedCodeMessage = data.RequiresUnreferencedCodeMessage;
         }
 
-        // Build generic type parameters string
-        // Use the assertion class's own type parameters if it has them
         var genericParams = new List<string>();
         var typeConstraints = new List<string>();
-
-        // NEW: Detect if this is a multi-parameter generic assertion (e.g., collection assertions)
-        // Check if the assertion class has multiple type parameters beyond just Assertion<T>
-        var isMultiParameterGeneric = assertionType.TypeParameters.Length > 1;
 
         if (assertionType.IsGenericType && assertionType.TypeParameters.Length > 0)
         {
@@ -363,11 +352,8 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         string? genericTypeParam = null;
         string? genericConstraint = null;
 
-        // Determine if the target type supports covariant assertions
-        // Covariance applies to interfaces and non-sealed classes only
         var isCovariantCandidate = !isNullableOverload
-            && (typeParam.TypeKind == TypeKind.Interface || typeParam.TypeKind == TypeKind.Class)
-            && !typeParam.IsSealed;
+            && CovarianceHelper.IsCovariantCandidate(typeParam);
 
         if (isNullableOverload)
         {
@@ -384,16 +370,10 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         }
         else if (isCovariantCandidate)
         {
-            // For covariant assertions, use a generic TActual with a type constraint
             var typeParamDisplay = typeParam.ToDisplayString();
-            var constraintType = typeParamDisplay;
-            if (typeParam.NullableAnnotation == NullableAnnotation.Annotated && typeParamDisplay.EndsWith("?"))
-            {
-                constraintType = typeParamDisplay.Substring(0, typeParamDisplay.Length - 1);
-            }
             sourceType = "IAssertionSource<TActual>";
             genericTypeParam = "TActual";
-            genericConstraint = $"where TActual : {constraintType}";
+            genericConstraint = $"where TActual : {CovarianceHelper.GetConstraintTypeName(typeParamDisplay, typeParam)}";
         }
         else
         {
@@ -486,12 +466,7 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         }
         else if (isCovariantCandidate)
         {
-            // Map the context from TActual to the target type
-            // Use nullable cast since Map's Func takes TValue? and returns TNew?
-            // Explicitly specify TNew to preserve nullability (e.g., JsonNode? vs JsonNode)
-            var typeParamDisplay = typeParam.ToDisplayString();
-            var nullableCastType = typeParamDisplay.EndsWith("?") ? typeParamDisplay : $"{typeParamDisplay}?";
-            sourceBuilder.Append($"source.Context.Map<{typeParamDisplay}>(static x => ({nullableCastType})x)");
+            sourceBuilder.Append(CovarianceHelper.GetCovariantContextExpr(typeParam.ToDisplayString()));
         }
         else
         {

@@ -312,22 +312,8 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             ContainingType = containingTypeData,
         };
 
-        // Determine if the target type supports covariant assertions
-        // Covariance applies to interfaces and non-sealed classes only
-        // Excludes: value types, sealed classes, type parameters, arrays, error types,
-        // and types containing unresolved type parameters (e.g., Lazy<T>) since adding TActual
-        // would break type inference - the compiler can't infer T from IAssertionSource<TActual>
-        var isCovariantCandidate = (targetType.TypeKind == TypeKind.Interface || targetType.TypeKind == TypeKind.Class)
-            && !targetType.IsSealed
-            && !ContainsTypeParameter(targetType);
-
-        // For constraints, we need the non-nullable form of the type name
+        var isCovariantCandidate = CovarianceHelper.IsCovariantCandidate(targetType);
         var typeName = targetType.ToDisplayString();
-        var constraintTypeName = typeName;
-        if (isCovariantCandidate && targetType.NullableAnnotation == NullableAnnotation.Annotated && typeName.EndsWith("?"))
-        {
-            constraintTypeName = typeName.Substring(0, typeName.Length - 1);
-        }
 
         var targetTypeData = new TargetTypeData()
         {
@@ -336,7 +322,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             IsNullable = targetType.IsReferenceType ||
                          targetType.NullableAnnotation == NullableAnnotation.Annotated,
             IsCovariantCandidate = isCovariantCandidate,
-            ConstraintTypeName = constraintTypeName,
+            ConstraintTypeName = isCovariantCandidate ? CovarianceHelper.GetConstraintTypeName(typeName, targetType) : typeName,
         };
 
         var data = new AssertionMethodData(
@@ -984,13 +970,13 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         var isCovariant = data.TargetType.IsCovariantCandidate;
 
         // Build generic declaration - prepend TActual for covariant assertions
-        var allGenericParams = new List<string>();
-        if (isCovariant)
-        {
-            allGenericParams.Add("TActual");
-        }
-        allGenericParams.AddRange(genericParams);
-        var genericDeclaration = allGenericParams.Count > 0 ? $"<{string.Join(", ", allGenericParams)}>" : "";
+        var genericDeclaration = isCovariant
+            ? genericParams.Count > 0
+                ? $"<TActual, {string.Join(", ", genericParams)}>"
+                : "<TActual>"
+            : genericParams.Count > 0
+                ? $"<{string.Join(", ", genericParams)}>"
+                : "";
 
         // For the return type, we only need the method's own generic params (not TActual)
         var returnGenericDeclaration = genericParams.Count > 0 ? $"<{string.Join(", ", genericParams)}>" : "";
@@ -1004,7 +990,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         sb.AppendLine("    /// </summary>");
 
         // Add suppression for generic types to avoid trimming warnings
-        if (allGenericParams.Count > 0)
+        if (isCovariant || genericParams.Count > 0)
         {
             sb.AppendLine($"    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(\"Trimming\", \"IL2091\", Justification = \"Generic type parameter is only used for property access, not instantiation\")]");
         }
@@ -1079,20 +1065,10 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         }
 
         // Construct and return assertion
-        // For covariant assertions, map the context from TActual to the target type
         // Note: Ref struct parameters (like interpolated string handlers) are converted to string
-        string contextExpr;
-        if (isCovariant)
-        {
-            // Use nullable cast since Map's Func takes TValue? and returns TNew?
-            // Explicitly specify TNew to preserve nullability (e.g., JsonNode? vs JsonNode)
-            var nullableCastType = targetTypeName.EndsWith("?") ? targetTypeName : $"{targetTypeName}?";
-            contextExpr = $"source.Context.Map<{targetTypeName}>(static x => ({nullableCastType})x)";
-        }
-        else
-        {
-            contextExpr = "source.Context";
-        }
+        var contextExpr = isCovariant
+            ? CovarianceHelper.GetCovariantContextExpr(targetTypeName)
+            : "source.Context";
         sb.Append($"        return new {className}{returnGenericDeclaration}({contextExpr}");
         foreach (var param in data.AdditionalParameters)
         {
@@ -1113,32 +1089,6 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         sb.AppendLine(");");
 
         sb.AppendLine("    }");
-    }
-
-    private static bool ContainsTypeParameter(ITypeSymbol type)
-    {
-        if (type is ITypeParameterSymbol)
-        {
-            return true;
-        }
-
-        if (type is INamedTypeSymbol namedType)
-        {
-            foreach (var typeArg in namedType.TypeArguments)
-            {
-                if (ContainsTypeParameter(typeArg))
-                {
-                    return true;
-                }
-            }
-        }
-
-        if (type is IArrayTypeSymbol arrayType)
-        {
-            return ContainsTypeParameter(arrayType.ElementType);
-        }
-
-        return false;
     }
 
     private static string GenerateClassName(AssertionMethodData data)
