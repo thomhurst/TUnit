@@ -117,7 +117,7 @@ jobs:
         shell: pwsh
 
       - name: Build
-        run: dotnet build -c Release
+        run: dotnet build TUnit.CI.slnx -c Release
 
       - name: Publish AOT
         run: dotnet publish TUnit.TestProject/TUnit.TestProject.csproj -c Release --use-current-runtime -p:Aot=true -o TESTPROJECT_AOT --framework net10.0
