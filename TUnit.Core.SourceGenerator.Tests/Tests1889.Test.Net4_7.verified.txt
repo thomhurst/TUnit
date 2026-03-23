@@ -5,83 +5,26 @@
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
-internal sealed class TUnit_TestProject_Bugs__1889_DerivedTest_Test1_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal static class TUnit_TestProject_Bugs__1889_DerivedTest_Test1_TestSource
 {
-    public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1889.DerivedTest", new global::TUnit.Core.ClassMetadata
     {
-        var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.Bugs._1889.DerivedTest>
-        {
-            TestName = "Test1",
-            TestClassType = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
-            TestMethodName = "Test1",
-            Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = __CreateAttributes,
-            DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
-            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
-            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
-            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
-            InheritanceDepth = 1,
-            FilePath = @"",
-            LineNumber = 6,
-            MethodMetadata = new global::TUnit.Core.MethodMetadata
-            {
-                Type = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>),
-                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>)),
-                Name = "Test1",
-                GenericTypeCount = 0,
-                ReturnType = typeof(void),
-                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
-                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1889.DerivedTest", new global::TUnit.Core.ClassMetadata
-                {
-                    Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest)),
-                    Name = "DerivedTest",
-                    Namespace = "TUnit.TestProject.Bugs._1889",
-                    Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-                    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                    Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-                    Parent = null
-                })
-            },
-            InstanceFactory = __CreateInstance,
-            InvokeTypedTest = __InvokeTest,
-        };
-        metadata.UseRuntimeDataGeneration(testSessionId);
-        return new global::TUnit.Core.TestMetadata[] { metadata };
-    }
-    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
-    {
-        yield return new global::TUnit.Core.TestDescriptor
-        {
-            TestId = "TUnit.TestProject.Bugs._1889.DerivedTest.Test1",
-            ClassName = "DerivedTest",
-            MethodName = "Test1",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._1889.DerivedTest.Test1",
-            FilePath = @"",
-            LineNumber = 6,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            Materializer = GetTests
-        };
-    }
-    private static global::System.Attribute[] __CreateAttributes()
-    {
-        return
-        [
-            new global::TUnit.Core.TestAttribute(),
-            new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
-            new global::TUnit.Core.InheritsTestsAttribute()
-        ];
-    }
-    private static global::TUnit.TestProject.Bugs._1889.DerivedTest __CreateInstance(global::System.Type[] typeArgs, object?[] args)
+        Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest)),
+        Name = "DerivedTest",
+        Namespace = "TUnit.TestProject.Bugs._1889",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test1", __classType, typeof(void), __classMetadata);
+    private static global::TUnit.TestProject.Bugs._1889.DerivedTest __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.Bugs._1889.DerivedTest();
     }
-    private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.Bugs._1889.DerivedTest instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._1889.DerivedTest instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
         {
@@ -93,10 +36,40 @@ internal sealed class TUnit_TestProject_Bugs__1889_DerivedTest_Test1_TestSource 
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
     }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
+            new global::TUnit.Core.InheritsTestsAttribute()
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1889.DerivedTest>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1889.DerivedTest>[]
+    {
+        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1889.DerivedTest>
+        {
+            MethodName = "Test1",
+            FullyQualifiedName = "TUnit.TestProject.Bugs._1889.DerivedTest.Test1",
+            FilePath = @"",
+            LineNumber = 6,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = false,
+            RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
+            MethodMetadata = __mm_0,
+            CreateInstance = __CreateInstance_0,
+            InvokeBody = __Invoke_0,
+            MethodIndex = 0,
+            CreateAttributes = __Attributes_0,
+            AttributeGroupIndex = 0,
+        },
+    };
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__1889_DerivedTest_Test1_TestSource = global::TUnit.Core.SourceRegistrar.RegisterReturn(typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest), new TUnit_TestProject_Bugs__1889_DerivedTest_Test1_TestSource());
+    static readonly int _r_TUnit_TestProject_Bugs__1889_DerivedTest_Test1_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries(TUnit_TestProject_Bugs__1889_DerivedTest_Test1_TestSource.Entries_0);
 }
 
 
@@ -109,89 +82,29 @@ internal static partial class TUnit_TestRegistration
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
-internal sealed class TUnit_TestProject_Bugs__1889_DerivedTest_Test2__bool_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal static class TUnit_TestProject_Bugs__1889_DerivedTest_Test2__bool_TestSource
 {
-    public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1889.DerivedTest", new global::TUnit.Core.ClassMetadata
     {
-        var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.Bugs._1889.DerivedTest>
-        {
-            TestName = "Test2",
-            TestClassType = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
-            TestMethodName = "Test2",
-            Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = __CreateAttributes,
-            DataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-                new global::TUnit.Core.MatrixDataSourceAttribute(),
-            },
-            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
-            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
-            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
-            InheritanceDepth = 1,
-            FilePath = @"",
-            LineNumber = 6,
-            MethodMetadata = new global::TUnit.Core.MethodMetadata
-            {
-                Type = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>),
-                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>)),
-                Name = "Test2",
-                GenericTypeCount = 0,
-                ReturnType = typeof(void),
-                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
-                Parameters = new global::TUnit.Core.ParameterMetadata[]
-                {
-                    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "condition", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>).GetMethod("Test2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool) }, null)!.GetParameters()[0])
-                },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1889.DerivedTest", new global::TUnit.Core.ClassMetadata
-                {
-                    Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest)),
-                    Name = "DerivedTest",
-                    Namespace = "TUnit.TestProject.Bugs._1889",
-                    Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-                    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                    Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-                    Parent = null
-                })
-            },
-            InstanceFactory = __CreateInstance,
-            InvokeTypedTest = __InvokeTest,
-        };
-        metadata.UseRuntimeDataGeneration(testSessionId);
-        return new global::TUnit.Core.TestMetadata[] { metadata };
-    }
-    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
-    {
-        yield return new global::TUnit.Core.TestDescriptor
-        {
-            TestId = "TUnit.TestProject.Bugs._1889.DerivedTest.Test2",
-            ClassName = "DerivedTest",
-            MethodName = "Test2",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._1889.DerivedTest.Test2",
-            FilePath = @"",
-            LineNumber = 6,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            Materializer = GetTests
-        };
-    }
-    private static global::System.Attribute[] __CreateAttributes()
-    {
-        return
-        [
-            new global::TUnit.Core.TestAttribute(),
-            new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
-            new global::TUnit.Core.InheritsTestsAttribute()
-        ];
-    }
-    private static global::TUnit.TestProject.Bugs._1889.DerivedTest __CreateInstance(global::System.Type[] typeArgs, object?[] args)
+        Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest)),
+        Name = "DerivedTest",
+        Namespace = "TUnit.TestProject.Bugs._1889",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test2", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "condition", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>).GetMethod("Test2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool) }, null)!.GetParameters()[0])
+});
+    private static global::TUnit.TestProject.Bugs._1889.DerivedTest __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.Bugs._1889.DerivedTest();
     }
-    private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.Bugs._1889.DerivedTest instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._1889.DerivedTest instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
         {
@@ -211,10 +124,45 @@ internal sealed class TUnit_TestProject_Bugs__1889_DerivedTest_Test2__bool_TestS
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
     }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.MatrixDataSourceAttribute(),
+            new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
+            new global::TUnit.Core.InheritsTestsAttribute()
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1889.DerivedTest>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1889.DerivedTest>[]
+    {
+        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1889.DerivedTest>
+        {
+            MethodName = "Test2",
+            FullyQualifiedName = "TUnit.TestProject.Bugs._1889.DerivedTest.Test2",
+            FilePath = @"",
+            LineNumber = 6,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
+            MethodMetadata = __mm_0,
+            CreateInstance = __CreateInstance_0,
+            InvokeBody = __Invoke_0,
+            MethodIndex = 0,
+            CreateAttributes = __Attributes_0,
+            AttributeGroupIndex = 0,
+            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MatrixDataSourceAttribute(),
+},
+        },
+    };
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__1889_DerivedTest_Test2__bool_TestSource = global::TUnit.Core.SourceRegistrar.RegisterReturn(typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest), new TUnit_TestProject_Bugs__1889_DerivedTest_Test2__bool_TestSource());
+    static readonly int _r_TUnit_TestProject_Bugs__1889_DerivedTest_Test2__bool_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries(TUnit_TestProject_Bugs__1889_DerivedTest_Test2__bool_TestSource.Entries_0);
 }
 
 
@@ -227,90 +175,29 @@ internal static partial class TUnit_TestRegistration
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
-internal sealed class TUnit_TestProject_Bugs__1889_DerivedTest_Test3__bool_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource, global::TUnit.Core.Interfaces.SourceGenerator.ITestDescriptorSource
+internal static class TUnit_TestProject_Bugs__1889_DerivedTest_Test3__bool_TestSource
 {
-    public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.TestMetadata> GetTests(string testSessionId)
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1889.DerivedTest", new global::TUnit.Core.ClassMetadata
     {
-        var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.Bugs._1889.DerivedTest>
-        {
-            TestName = "Test3",
-            TestClassType = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
-            TestMethodName = "Test3",
-            Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = __CreateAttributes,
-            DataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-                new global::TUnit.Core.ArgumentsAttribute(false),
-                new global::TUnit.Core.ArgumentsAttribute(true),
-            },
-            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
-            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
-            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
-            InheritanceDepth = 1,
-            FilePath = @"",
-            LineNumber = 6,
-            MethodMetadata = new global::TUnit.Core.MethodMetadata
-            {
-                Type = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>),
-                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>)),
-                Name = "Test3",
-                GenericTypeCount = 0,
-                ReturnType = typeof(void),
-                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
-                Parameters = new global::TUnit.Core.ParameterMetadata[]
-                {
-                    global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "condition", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>).GetMethod("Test3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool) }, null)!.GetParameters()[0])
-                },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1889.DerivedTest", new global::TUnit.Core.ClassMetadata
-                {
-                    Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
-                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest)),
-                    Name = "DerivedTest",
-                    Namespace = "TUnit.TestProject.Bugs._1889",
-                    Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
-                    Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                    Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-                    Parent = null
-                })
-            },
-            InstanceFactory = __CreateInstance,
-            InvokeTypedTest = __InvokeTest,
-        };
-        metadata.UseRuntimeDataGeneration(testSessionId);
-        return new global::TUnit.Core.TestMetadata[] { metadata };
-    }
-    public global::System.Collections.Generic.IEnumerable<global::TUnit.Core.TestDescriptor> EnumerateTestDescriptors()
-    {
-        yield return new global::TUnit.Core.TestDescriptor
-        {
-            TestId = "TUnit.TestProject.Bugs._1889.DerivedTest.Test3",
-            ClassName = "DerivedTest",
-            MethodName = "Test3",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._1889.DerivedTest.Test3",
-            FilePath = @"",
-            LineNumber = 6,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            Materializer = GetTests
-        };
-    }
-    private static global::System.Attribute[] __CreateAttributes()
-    {
-        return
-        [
-            new global::TUnit.Core.TestAttribute(),
-            new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
-            new global::TUnit.Core.InheritsTestsAttribute()
-        ];
-    }
-    private static global::TUnit.TestProject.Bugs._1889.DerivedTest __CreateInstance(global::System.Type[] typeArgs, object?[] args)
+        Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest)),
+        Name = "DerivedTest",
+        Namespace = "TUnit.TestProject.Bugs._1889",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test3", __classType, typeof(void), __classMetadata, parameters: new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "condition", new global::TUnit.Core.ConcreteType(typeof(bool)), false, reflectionInfoFactory: static () => typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>).GetMethod("Test3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool) }, null)!.GetParameters()[0])
+});
+    private static global::TUnit.TestProject.Bugs._1889.DerivedTest __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
         return new global::TUnit.TestProject.Bugs._1889.DerivedTest();
     }
-    private static global::System.Threading.Tasks.ValueTask __InvokeTest(global::TUnit.TestProject.Bugs._1889.DerivedTest instance, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._1889.DerivedTest instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
         {
@@ -330,8 +217,45 @@ internal sealed class TUnit_TestProject_Bugs__1889_DerivedTest_Test3__bool_TestS
             return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
         }
     }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.ArgumentsAttribute(false),
+            new global::TUnit.Core.ArgumentsAttribute(true),
+            new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
+            new global::TUnit.Core.InheritsTestsAttribute()
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1889.DerivedTest>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1889.DerivedTest>[]
+    {
+        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1889.DerivedTest>
+        {
+            MethodName = "Test3",
+            FullyQualifiedName = "TUnit.TestProject.Bugs._1889.DerivedTest.Test3",
+            FilePath = @"",
+            LineNumber = 6,
+            Categories = global::System.Array.Empty<string>(),
+            Properties = global::System.Array.Empty<string>(),
+            HasDataSource = true,
+            RepeatCount = 0,
+            DependsOn = global::System.Array.Empty<string>(),
+            MethodMetadata = __mm_0,
+            CreateInstance = __CreateInstance_0,
+            InvokeBody = __Invoke_0,
+            MethodIndex = 0,
+            CreateAttributes = __Attributes_0,
+            AttributeGroupIndex = 0,
+            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.ArgumentsAttribute(false),
+    new global::TUnit.Core.ArgumentsAttribute(true),
+},
+        },
+    };
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__1889_DerivedTest_Test3__bool_TestSource = global::TUnit.Core.SourceRegistrar.RegisterReturn(typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest), new TUnit_TestProject_Bugs__1889_DerivedTest_Test3__bool_TestSource());
+    static readonly int _r_TUnit_TestProject_Bugs__1889_DerivedTest_Test3__bool_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries(TUnit_TestProject_Bugs__1889_DerivedTest_Test3__bool_TestSource.Entries_0);
 }

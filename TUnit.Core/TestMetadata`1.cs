@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
@@ -51,9 +52,10 @@ public class TestMetadata<
 
     /// <summary>
     /// Strongly typed test invoker with CancellationToken support.
-    /// Used by source generation mode.
+    /// Used by source generation mode (per-method delegates, generic/inherited tests).
     /// </summary>
     public Func<T, object?[], CancellationToken, ValueTask>? InvokeTypedTest { get; init; }
+
 
 
 
@@ -70,17 +72,14 @@ public class TestMetadata<
                 return _cachedExecutableTestFactory;
             }
 
-            // For AOT mode, create delegates from the strongly-typed ones
             if (InstanceFactory != null && InvokeTypedTest != null)
             {
                 _cachedExecutableTestFactory = (context, metadata) =>
                 {
                     var typedMetadata = (TestMetadata<T>)metadata;
 
-                    // Create instance delegate that uses context
                     Func<TestContext, Task<object>> createInstance = async testContext =>
                     {
-                        // If we have a factory from discovery, use it (for lazy instance creation)
                         if (context.TestClassInstanceFactory != null)
                         {
                             return await context.TestClassInstanceFactory();
@@ -101,7 +100,6 @@ public class TestMetadata<
                         return typedMetadata.InstanceFactory!(context.ResolvedClassGenericArguments, context.ClassArguments);
                     };
 
-                    // Convert InvokeTypedTest to the expected signature
                     Func<object, object?[], TestContext, CancellationToken, Task> invokeTest = async (instance, args, testContext, cancellationToken) =>
                     {
                         await typedMetadata.InvokeTypedTest!((T)instance, args, cancellationToken).ConfigureAwait(false);

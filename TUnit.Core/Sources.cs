@@ -10,7 +10,6 @@ namespace TUnit.Core;
 public static class Sources
 {
     public static readonly ConcurrentQueue<Func<Assembly>> AssemblyLoaders = [];
-    public static readonly ConcurrentDictionary<Type, ConcurrentQueue<ITestSource>> TestSources = new(Environment.ProcessorCount * 2, 1000);
     public static readonly ConcurrentQueue<IDynamicTestSource> DynamicTestSources = [];
 
     public static readonly ConcurrentDictionary<Type, ConcurrentBag<Hooks.InstanceHookMethod>> BeforeTestHooks = new();
@@ -35,4 +34,7 @@ public static class Sources
 
     public static readonly ConcurrentQueue<Func<Task>> GlobalInitializers = [];
     public static readonly ConcurrentQueue<IPropertySource> PropertySources = [];
+
+    // TestEntry registration path (source-gen startup performance optimization)
+    public static readonly ConcurrentDictionary<Type, ITestEntrySource> TestEntries = new();
 }

@@ -5,9 +5,9 @@ namespace TUnit.Core;
 
 /// <summary>
 /// Factory for creating TestMetadata instances.
-/// A single generic method <c>Create&lt;T&gt;() where T : class</c> gets JIT'd once by the .NET runtime
-/// (reference types share native code), so replacing 1,000 inline object initializers with calls
-/// to this shared factory dramatically reduces JIT-compiled native code size.
+/// Used by the per-method source generation path (generic/inherited tests).
+/// A single generic method gets JIT'd once by the .NET runtime (reference types
+/// share native code), reducing JIT-compiled native code size.
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
 public static class TestMetadataFactory
