@@ -974,6 +974,15 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             }
         }
 
+        // Allow string-to-parseable-type conversions for common types
+        // These types support Parse(string) and will be converted at runtime or via generated code
+        if (argument.Type?.SpecialType == SpecialType.System_String &&
+            argument.Value is string &&
+            IsParsableFromString(methodParameterType))
+        {
+            return true;
+        }
+
         return CanConvert(context, argument.Type, methodParameterType);
     }
 
@@ -995,6 +1004,39 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         return context.Compilation.HasImplicitConversionOrGenericParameter(argumentType, methodParameterType);
+    }
+
+    private static bool IsParsableFromString(ITypeSymbol? type)
+    {
+        if (type is null)
+        {
+            return false;
+        }
+
+        // Check if the type implements IParsable<TSelf> (.NET 7+)
+        if (type.AllInterfaces.Any(i =>
+                i is { IsGenericType: true, MetadataName: "IParsable`1" }
+                && i.ContainingNamespace?.ToDisplayString() == "System"
+                && SymbolEqualityComparer.Default.Equals(i.TypeArguments[0], type)))
+        {
+            return true;
+        }
+
+        // Fallback for well-known types when IParsable interface is not available
+        // (e.g. when targeting older TFMs where IParsable doesn't exist)
+        if (type.SpecialType == SpecialType.System_DateTime)
+        {
+            return true;
+        }
+
+        var fullyQualifiedName = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+
+        return fullyQualifiedName is
+            "global::System.DateTimeOffset" or
+            "global::System.TimeSpan" or
+            "global::System.Guid" or
+            "global::System.DateOnly" or
+            "global::System.TimeOnly";
     }
 
     private bool IsEnumAndInteger(ITypeSymbol? type1, ITypeSymbol? type2)

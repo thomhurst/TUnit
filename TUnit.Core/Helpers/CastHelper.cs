@@ -127,6 +127,12 @@ public static class CastHelper
             }
         }
 
+        // Handle string-to-parseable-type conversions
+        if (value is string stringValue && TryParseFromString(targetType, stringValue, out result))
+        {
+            return true;
+        }
+
         // Unwrap single-element enumerables (but not strings or arrays)
         if (value is not string && !sourceType.IsArray && value is IEnumerable enumerable && !typeof(IEnumerable).IsAssignableFrom(targetType))
         {
@@ -141,6 +147,94 @@ public static class CastHelper
         result = null;
         return false;
     }
+
+    private static bool TryParseFromString(Type targetType, string value, out object? result)
+    {
+#if NET
+        // Use IParsable<T> for types that implement it (.NET 7+)
+        if (TryParsableConvert(targetType, value, out result))
+        {
+            return true;
+        }
+#else
+        // Fallback for netstandard2.0: handle well-known types explicitly
+        try
+        {
+            if (targetType == typeof(DateTime))
+            {
+                result = DateTime.Parse(value, System.Globalization.CultureInfo.InvariantCulture);
+                return true;
+            }
+            if (targetType == typeof(DateTimeOffset))
+            {
+                result = DateTimeOffset.Parse(value, System.Globalization.CultureInfo.InvariantCulture);
+                return true;
+            }
+            if (targetType == typeof(TimeSpan))
+            {
+                result = TimeSpan.Parse(value, System.Globalization.CultureInfo.InvariantCulture);
+                return true;
+            }
+            if (targetType == typeof(Guid))
+            {
+                result = Guid.Parse(value);
+                return true;
+            }
+        }
+        catch
+        {
+            // Parse failed
+        }
+#endif
+
+        result = null;
+        return false;
+    }
+
+#if NET
+    private static readonly ConcurrentDictionary<Type, MethodInfo?> ParseMethodCache = new();
+
+    [UnconditionalSuppressMessage("Trimming", "IL2070:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute'")]
+    private static bool TryParsableConvert(Type targetType, string value, out object? result)
+    {
+        var parseMethod = ParseMethodCache.GetOrAdd(targetType, static type =>
+        {
+            // Check if type implements IParsable<TSelf>
+            var iParsableInterface = type.GetInterfaces()
+                .FirstOrDefault(i => i.IsGenericType
+                    && i.GetGenericTypeDefinition() == typeof(IParsable<>)
+                    && i.GenericTypeArguments[0] == type);
+
+            if (iParsableInterface == null)
+            {
+                return null;
+            }
+
+            // Get the static Parse(string, IFormatProvider?) method
+            return type.GetMethod("Parse",
+                BindingFlags.Public | BindingFlags.Static,
+                null,
+                [typeof(string), typeof(IFormatProvider)],
+                null);
+        });
+
+        if (parseMethod != null)
+        {
+            try
+            {
+                result = parseMethod.Invoke(null, [value, System.Globalization.CultureInfo.InvariantCulture]);
+                return true;
+            }
+            catch
+            {
+                // Parse failed
+            }
+        }
+
+        result = null;
+        return false;
+    }
+#endif
 
     [RequiresDynamicCode("Uses reflection to find custom conversion operators and create arrays, which is not compatible with AOT compilation.")]
     [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute'")]
