@@ -161,4 +161,123 @@ public class StringLengthAssertionTests
             .Length().IsGreaterThan(3)
             .And.IsLessThan(10);
     }
+
+    [Test]
+    public async Task HasMinLength_Passes_When_At_Minimum()
+    {
+        await Assert.That("Hello").HasMinLength(5);
+    }
+
+    [Test]
+    public async Task HasMinLength_Passes_When_Above_Minimum()
+    {
+        await Assert.That("Hello, World!").HasMinLength(5);
+    }
+
+    [Test]
+    public async Task HasMinLength_Fails_When_Below_Minimum()
+    {
+        await Assert.That(async () => await Assert.That("Hi").HasMinLength(5))
+            .Throws<TUnitAssertionException>()
+            .And.HasMessageContaining("minimum length")
+            .And.HasMessageContaining("found length 2");
+    }
+
+    [Test]
+    public async Task HasMinLength_Fails_For_Null()
+    {
+        string? str = null;
+        await Assert.That(async () => await Assert.That(str!).HasMinLength(1))
+            .Throws<TUnitAssertionException>()
+            .And.HasMessageContaining("null");
+    }
+
+    [Test]
+    public async Task HasMaxLength_Passes_When_At_Maximum()
+    {
+        await Assert.That("Hello").HasMaxLength(5);
+    }
+
+    [Test]
+    public async Task HasMaxLength_Passes_When_Below_Maximum()
+    {
+        await Assert.That("Hi").HasMaxLength(5);
+    }
+
+    [Test]
+    public async Task HasMaxLength_Fails_When_Above_Maximum()
+    {
+        await Assert.That(async () => await Assert.That("Hello, World!").HasMaxLength(5))
+            .Throws<TUnitAssertionException>()
+            .And.HasMessageContaining("maximum length")
+            .And.HasMessageContaining("found length 13");
+    }
+
+    [Test]
+    public async Task HasMaxLength_Fails_For_Null()
+    {
+        string? str = null;
+        await Assert.That(async () => await Assert.That(str!).HasMaxLength(10))
+            .Throws<TUnitAssertionException>()
+            .And.HasMessageContaining("null");
+    }
+
+    [Test]
+    public async Task HasLengthBetween_Passes_When_Within_Range()
+    {
+        await Assert.That("Hello").HasLengthBetween(3, 10);
+    }
+
+    [Test]
+    public async Task HasLengthBetween_Passes_When_At_Lower_Bound()
+    {
+        await Assert.That("Hello").HasLengthBetween(5, 10);
+    }
+
+    [Test]
+    public async Task HasLengthBetween_Passes_When_At_Upper_Bound()
+    {
+        await Assert.That("Hello").HasLengthBetween(1, 5);
+    }
+
+    [Test]
+    public async Task HasLengthBetween_Fails_When_Below_Range()
+    {
+        await Assert.That(async () => await Assert.That("Hi").HasLengthBetween(5, 10))
+            .Throws<TUnitAssertionException>()
+            .And.HasMessageContaining("between")
+            .And.HasMessageContaining("found length 2");
+    }
+
+    [Test]
+    public async Task HasLengthBetween_Fails_When_Above_Range()
+    {
+        await Assert.That(async () => await Assert.That("Hello, World!").HasLengthBetween(1, 5))
+            .Throws<TUnitAssertionException>()
+            .And.HasMessageContaining("between")
+            .And.HasMessageContaining("found length 13");
+    }
+
+    [Test]
+    public async Task HasLengthBetween_Fails_For_Null()
+    {
+        string? str = null;
+        await Assert.That(async () => await Assert.That(str!).HasLengthBetween(1, 10))
+            .Throws<TUnitAssertionException>()
+            .And.HasMessageContaining("null");
+    }
+
+    [Test]
+    public async Task HasLengthBetween_Throws_When_Min_Greater_Than_Max()
+    {
+        await Assert.That(async () => await Assert.That("Hello").HasLengthBetween(10, 3))
+            .Throws<ArgumentOutOfRangeException>()
+            .And.HasMessageContaining("minLength");
+    }
+
+    [Test]
+    public async Task HasMinLength_And_HasMaxLength_Chained()
+    {
+        await Assert.That("Hello").HasMinLength(3).And.HasMaxLength(10);
+    }
 }
