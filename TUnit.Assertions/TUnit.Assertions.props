@@ -16,7 +16,7 @@
         </PropertyGroup>
     </Target>
 
-    <PropertyGroup Condition="'$(XunitPackageReferenceFound)' == 'false'">
+    <PropertyGroup Condition="'$(XunitPackageReferenceFound)' == 'false' And '$(TUnitAssertionsImplicitUsings)' == ''">
         <TUnitAssertionsImplicitUsings>true</TUnitAssertionsImplicitUsings>
     </PropertyGroup>
 

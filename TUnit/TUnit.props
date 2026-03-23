@@ -13,8 +13,8 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <TUnitImplicitUsings>true</TUnitImplicitUsings>
-        <TUnitAssertionsImplicitUsings>true</TUnitAssertionsImplicitUsings>
+        <TUnitImplicitUsings Condition="'$(TUnitImplicitUsings)' == ''">true</TUnitImplicitUsings>
+        <TUnitAssertionsImplicitUsings Condition="'$(TUnitAssertionsImplicitUsings)' == ''">true</TUnitAssertionsImplicitUsings>
     </PropertyGroup>
 
     <ItemGroup>
