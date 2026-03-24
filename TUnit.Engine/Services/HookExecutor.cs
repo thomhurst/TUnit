@@ -157,33 +157,61 @@ internal sealed class HookExecutor
         }
 #endif
 
-        var hooks = await _hookCollectionService.CollectBeforeAssemblyHooksAsync(assembly).ConfigureAwait(false);
+        // Execute BeforeEvery(Assembly) hooks first (global hooks run before specific hooks)
+        var beforeEveryAssemblyHooks = await _hookCollectionService.CollectBeforeEveryAssemblyHooksAsync().ConfigureAwait(false);
 
-        if (hooks.Count == 0)
+        if (beforeEveryAssemblyHooks.Count > 0)
         {
-            return;
+            foreach (var hook in beforeEveryAssemblyHooks)
+            {
+                try
+                {
+                    assemblyContext.RestoreExecutionContext();
+                    await ExecuteHookWithActivityAsync(hook, assemblyContext, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    if (ex is SkipTestException)
+                    {
+                        throw;
+                    }
+
+                    if (ex.InnerException is SkipTestException skipEx)
+                    {
+                        ExceptionDispatchInfo.Capture(skipEx).Throw();
+                    }
+
+                    throw new BeforeAssemblyException($"BeforeEveryAssembly hook failed: {ex.Message}", ex);
+                }
+            }
         }
 
-        foreach (var hook in hooks)
+        // Execute Before(Assembly) hooks after BeforeEvery hooks
+        var hooks = await _hookCollectionService.CollectBeforeAssemblyHooksAsync(assembly).ConfigureAwait(false);
+
+        if (hooks.Count > 0)
         {
-            try
+            foreach (var hook in hooks)
             {
-                assemblyContext.RestoreExecutionContext();
-                await ExecuteHookWithActivityAsync(hook, assemblyContext, cancellationToken).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                if (ex is SkipTestException)
+                try
                 {
-                    throw;
+                    assemblyContext.RestoreExecutionContext();
+                    await ExecuteHookWithActivityAsync(hook, assemblyContext, cancellationToken).ConfigureAwait(false);
                 }
-
-                if (ex.InnerException is SkipTestException skipEx)
+                catch (Exception ex)
                 {
-                    ExceptionDispatchInfo.Capture(skipEx).Throw();
-                }
+                    if (ex is SkipTestException)
+                    {
+                        throw;
+                    }
 
-                throw new BeforeAssemblyException($"BeforeAssembly hook failed: {ex.Message}", ex);
+                    if (ex.InnerException is SkipTestException skipEx)
+                    {
+                        ExceptionDispatchInfo.Capture(skipEx).Throw();
+                    }
+
+                    throw new BeforeAssemblyException($"BeforeAssembly hook failed: {ex.Message}", ex);
+                }
             }
         }
     }
@@ -191,32 +219,49 @@ internal sealed class HookExecutor
     public async ValueTask<List<Exception>> ExecuteAfterAssemblyHooksAsync(Assembly assembly, CancellationToken cancellationToken)
     {
         var afterAssemblyContext = _contextProvider.GetOrCreateAssemblyContext(assembly);
-        var hooks = await _hookCollectionService.CollectAfterAssemblyHooksAsync(assembly).ConfigureAwait(false);
-
-        if (hooks.Count == 0)
-        {
-#if NET
-            FinishAssemblyActivity(assembly, hasErrors: false);
-#endif
-            return [];
-        }
 
         // Defer exception list allocation until actually needed
         List<Exception>? exceptions = null;
 
-        foreach (var hook in hooks)
+        // Execute After(Assembly) hooks first (specific hooks run before global hooks for cleanup)
+        var hooks = await _hookCollectionService.CollectAfterAssemblyHooksAsync(assembly).ConfigureAwait(false);
+
+        if (hooks.Count > 0)
         {
-            try
+            foreach (var hook in hooks)
             {
-                afterAssemblyContext.RestoreExecutionContext();
-                await ExecuteHookWithActivityAsync(hook, afterAssemblyContext, cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    afterAssemblyContext.RestoreExecutionContext();
+                    await ExecuteHookWithActivityAsync(hook, afterAssemblyContext, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    // Collect hook exceptions instead of throwing immediately
+                    // This allows all hooks to run even if some fail
+                    exceptions ??= [];
+                    exceptions.Add(new AfterAssemblyException($"AfterAssembly hook failed: {ex.Message}", ex));
+                }
             }
-            catch (Exception ex)
+        }
+
+        // Execute AfterEvery(Assembly) hooks after After hooks (global hooks run last for cleanup)
+        var afterEveryAssemblyHooks = await _hookCollectionService.CollectAfterEveryAssemblyHooksAsync().ConfigureAwait(false);
+
+        if (afterEveryAssemblyHooks.Count > 0)
+        {
+            foreach (var hook in afterEveryAssemblyHooks)
             {
-                // Collect hook exceptions instead of throwing immediately
-                // This allows all hooks to run even if some fail
-                exceptions ??= [];
-                exceptions.Add(new AfterAssemblyException($"AfterAssembly hook failed: {ex.Message}", ex));
+                try
+                {
+                    afterAssemblyContext.RestoreExecutionContext();
+                    await ExecuteHookWithActivityAsync(hook, afterAssemblyContext, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    exceptions ??= [];
+                    exceptions.Add(new AfterAssemblyException($"AfterEveryAssembly hook failed: {ex.Message}", ex));
+                }
             }
         }
 
@@ -271,33 +316,61 @@ internal sealed class HookExecutor
         }
 #endif
 
-        var hooks = await _hookCollectionService.CollectBeforeClassHooksAsync(testClass).ConfigureAwait(false);
+        // Execute BeforeEvery(Class) hooks first (global hooks run before specific hooks)
+        var beforeEveryClassHooks = await _hookCollectionService.CollectBeforeEveryClassHooksAsync().ConfigureAwait(false);
 
-        if (hooks.Count == 0)
+        if (beforeEveryClassHooks.Count > 0)
         {
-            return;
+            foreach (var hook in beforeEveryClassHooks)
+            {
+                try
+                {
+                    classContext.RestoreExecutionContext();
+                    await ExecuteHookWithActivityAsync(hook, classContext, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    if (ex is SkipTestException)
+                    {
+                        throw;
+                    }
+
+                    if (ex.InnerException is SkipTestException skipEx)
+                    {
+                        ExceptionDispatchInfo.Capture(skipEx).Throw();
+                    }
+
+                    throw new BeforeClassException($"BeforeEveryClass hook failed: {ex.Message}", ex);
+                }
+            }
         }
 
-        foreach (var hook in hooks)
+        // Execute Before(Class) hooks after BeforeEvery hooks
+        var hooks = await _hookCollectionService.CollectBeforeClassHooksAsync(testClass).ConfigureAwait(false);
+
+        if (hooks.Count > 0)
         {
-            try
+            foreach (var hook in hooks)
             {
-                classContext.RestoreExecutionContext();
-                await ExecuteHookWithActivityAsync(hook, classContext, cancellationToken).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                if (ex is SkipTestException)
+                try
                 {
-                    throw;
+                    classContext.RestoreExecutionContext();
+                    await ExecuteHookWithActivityAsync(hook, classContext, cancellationToken).ConfigureAwait(false);
                 }
-
-                if (ex.InnerException is SkipTestException skipEx)
+                catch (Exception ex)
                 {
-                    ExceptionDispatchInfo.Capture(skipEx).Throw();
-                }
+                    if (ex is SkipTestException)
+                    {
+                        throw;
+                    }
 
-                throw new BeforeClassException($"BeforeClass hook failed: {ex.Message}", ex);
+                    if (ex.InnerException is SkipTestException skipEx)
+                    {
+                        ExceptionDispatchInfo.Capture(skipEx).Throw();
+                    }
+
+                    throw new BeforeClassException($"BeforeClass hook failed: {ex.Message}", ex);
+                }
             }
         }
     }
@@ -307,32 +380,49 @@ internal sealed class HookExecutor
         Type testClass, CancellationToken cancellationToken)
     {
         var afterClassContext = _contextProvider.GetOrCreateClassContext(testClass);
-        var hooks = await _hookCollectionService.CollectAfterClassHooksAsync(testClass).ConfigureAwait(false);
-
-        if (hooks.Count == 0)
-        {
-#if NET
-            FinishClassActivity(testClass, hasErrors: false);
-#endif
-            return [];
-        }
 
         // Defer exception list allocation until actually needed
         List<Exception>? exceptions = null;
 
-        foreach (var hook in hooks)
+        // Execute After(Class) hooks first (specific hooks run before global hooks for cleanup)
+        var hooks = await _hookCollectionService.CollectAfterClassHooksAsync(testClass).ConfigureAwait(false);
+
+        if (hooks.Count > 0)
         {
-            try
+            foreach (var hook in hooks)
             {
-                afterClassContext.RestoreExecutionContext();
-                await ExecuteHookWithActivityAsync(hook, afterClassContext, cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    afterClassContext.RestoreExecutionContext();
+                    await ExecuteHookWithActivityAsync(hook, afterClassContext, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    // Collect hook exceptions instead of throwing immediately
+                    // This allows all hooks to run even if some fail
+                    exceptions ??= [];
+                    exceptions.Add(new AfterClassException($"AfterClass hook failed: {ex.Message}", ex));
+                }
             }
-            catch (Exception ex)
+        }
+
+        // Execute AfterEvery(Class) hooks after After hooks (global hooks run last for cleanup)
+        var afterEveryClassHooks = await _hookCollectionService.CollectAfterEveryClassHooksAsync().ConfigureAwait(false);
+
+        if (afterEveryClassHooks.Count > 0)
+        {
+            foreach (var hook in afterEveryClassHooks)
             {
-                // Collect hook exceptions instead of throwing immediately
-                // This allows all hooks to run even if some fail
-                exceptions ??= [];
-                exceptions.Add(new AfterClassException($"AfterClass hook failed: {ex.Message}", ex));
+                try
+                {
+                    afterClassContext.RestoreExecutionContext();
+                    await ExecuteHookWithActivityAsync(hook, afterClassContext, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    exceptions ??= [];
+                    exceptions.Add(new AfterClassException($"AfterEveryClass hook failed: {ex.Message}", ex));
+                }
             }
         }
 
