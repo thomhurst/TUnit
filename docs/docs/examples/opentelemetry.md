@@ -53,10 +53,13 @@ TUnit creates a nested span tree that mirrors the test lifecycle:
 
 ```
 test session
+  ├── test discovery
   └── test assembly
         └── test suite (one per test class)
               └── test case (one per test method invocation)
 ```
+
+The **test discovery** span captures the time spent finding, building, and resolving dependencies for all tests. It appears as a sibling of the assembly spans, giving you a clear view of discovery vs execution time.
 
 ## Attributes
 
@@ -86,7 +89,7 @@ Each span carries tags that follow [OpenTelemetry semantic conventions](https://
 | `tunit.test.method` | test case | Method name |
 | `tunit.test.id` | test case | Unique test instance ID |
 | `tunit.test.categories` | test case | Test categories (string array) |
-| `tunit.test.count` | session/assembly/suite | Total test count |
+| `tunit.test.count` | session/assembly/suite/discovery | Total test count |
 | `tunit.test.retry_attempt` | test case | Current retry attempt (when retrying) |
 | `tunit.test.skip_reason` | test case | Reason the test was skipped |
 
