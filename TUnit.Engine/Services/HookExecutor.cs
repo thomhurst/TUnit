@@ -31,9 +31,41 @@ internal sealed class HookExecutor
 
     public async ValueTask ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)
     {
+        var hooks = await _hookCollectionService.CollectBeforeTestSessionHooksAsync().ConfigureAwait(false);
+
+        if (hooks.Count > 0)
+        {
+            foreach (var hook in hooks)
+            {
+                try
+                {
+                    _contextProvider.TestSessionContext.RestoreExecutionContext();
+                    await ExecuteHookWithActivityAsync(hook, _contextProvider.TestSessionContext, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    if (ex is SkipTestException)
+                    {
+                        throw;
+                    }
+
+                    if (ex.InnerException is SkipTestException skipEx)
+                    {
+                        ExceptionDispatchInfo.Capture(skipEx).Throw();
+                    }
+
+                    throw new BeforeTestSessionException($"BeforeTestSession hook failed: {ex.Message}", ex);
+                }
+            }
+        }
+
+        // Start the session activity AFTER hooks have run, because user hooks
+        // typically set up the TracerProvider / ActivityListener. If we started
+        // the activity before hooks, the ActivitySource would have no listeners
+        // and StartActivity would return null - producing no root span.
+#if NET
         var sessionContext = _contextProvider.TestSessionContext;
 
-#if NET
         if (TUnitActivitySource.Source.HasListeners())
         {
             sessionContext.Activity = TUnitActivitySource.StartActivity(
@@ -46,47 +78,24 @@ internal sealed class HookExecutor
                 ]);
         }
 #endif
-
-        var hooks = await _hookCollectionService.CollectBeforeTestSessionHooksAsync().ConfigureAwait(false);
-
-        if (hooks.Count == 0)
-        {
-            return;
-        }
-
-        foreach (var hook in hooks)
-        {
-            try
-            {
-                _contextProvider.TestSessionContext.RestoreExecutionContext();
-                await ExecuteHookWithActivityAsync(hook, _contextProvider.TestSessionContext, cancellationToken).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                if (ex is SkipTestException)
-                {
-                    throw;
-                }
-
-                if (ex.InnerException is SkipTestException skipEx)
-                {
-                    ExceptionDispatchInfo.Capture(skipEx).Throw();
-                }
-
-                throw new BeforeTestSessionException($"BeforeTestSession hook failed: {ex.Message}", ex);
-            }
-        }
     }
 
     public async ValueTask<List<Exception>> ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken)
     {
+        // Stop the session activity BEFORE hooks run, because user hooks
+        // typically dispose the TracerProvider / ActivityListener. If we
+        // stopped the activity after hooks, the exporter would already be
+        // gone and the root span would never be exported.
+#if NET
+        var hasTestFailures = _contextProvider.TestSessionContext.AllTests
+            .Any(t => t.Result is { State: TestState.Failed or TestState.Timeout or TestState.Cancelled });
+        FinishSessionActivity(hasErrors: hasTestFailures);
+#endif
+
         var hooks = await _hookCollectionService.CollectAfterTestSessionHooksAsync().ConfigureAwait(false);
 
         if (hooks.Count == 0)
         {
-#if NET
-            FinishSessionActivity(hasErrors: false);
-#endif
             return [];
         }
 
@@ -108,10 +117,6 @@ internal sealed class HookExecutor
                 exceptions.Add(new AfterTestSessionException($"AfterTestSession hook failed: {ex.Message}", ex));
             }
         }
-
-#if NET
-        FinishSessionActivity(hasErrors: exceptions is { Count: > 0 });
-#endif
 
         return exceptions ?? [];
     }
