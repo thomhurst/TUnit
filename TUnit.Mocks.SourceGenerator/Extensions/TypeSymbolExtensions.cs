@@ -11,6 +11,26 @@ internal static class TypeSymbolExtensions
         return type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
     }
 
+    public static string GetFullyQualifiedNameWithNullability(this ITypeSymbol type)
+    {
+        var name = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        if (type.NullableAnnotation == NullableAnnotation.Annotated && !type.IsValueType)
+        {
+            name += "?";
+        }
+        return name;
+    }
+
+    public static string GetMinimallyQualifiedNameWithNullability(this ITypeSymbol type)
+    {
+        var name = type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+        if (type.NullableAnnotation == NullableAnnotation.Annotated && !type.IsValueType)
+        {
+            name += "?";
+        }
+        return name;
+    }
+
     public static string GetFullyQualifiedNameWithoutGlobal(this ITypeSymbol type)
     {
         var fqn = type.GetFullyQualifiedName();

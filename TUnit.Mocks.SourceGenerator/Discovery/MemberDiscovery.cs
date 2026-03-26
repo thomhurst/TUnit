@@ -318,8 +318,8 @@ internal static class MemberDiscovery
                 method.Parameters.Select(p => new MockParameterModel
                 {
                     Name = EscapeIdentifier(p.Name),
-                    Type = p.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat),
-                    FullyQualifiedType = p.Type.GetFullyQualifiedName(),
+                    Type = p.Type.GetMinimallyQualifiedNameWithNullability(),
+                    FullyQualifiedType = p.Type.GetFullyQualifiedNameWithNullability(),
                     Direction = p.GetParameterDirection(),
                     HasDefaultValue = p.HasExplicitDefaultValue,
                     DefaultValueExpression = p.HasExplicitDefaultValue ? FormatDefaultValue(p) : null,
@@ -418,8 +418,8 @@ internal static class MemberDiscovery
                     ctor.Parameters.Select(p => new MockParameterModel
                     {
                         Name = EscapeIdentifier(p.Name),
-                        Type = p.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat),
-                        FullyQualifiedType = p.Type.GetFullyQualifiedName(),
+                        Type = p.Type.GetMinimallyQualifiedNameWithNullability(),
+                        FullyQualifiedType = p.Type.GetFullyQualifiedNameWithNullability(),
                         Direction = p.GetParameterDirection(),
                         HasDefaultValue = p.HasExplicitDefaultValue,
                         DefaultValueExpression = p.HasExplicitDefaultValue ? FormatDefaultValue(p) : null,
@@ -455,8 +455,8 @@ internal static class MemberDiscovery
                 indexer.Parameters.Select(p => new MockParameterModel
                 {
                     Name = EscapeIdentifier(p.Name),
-                    Type = p.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat),
-                    FullyQualifiedType = p.Type.GetFullyQualifiedName(),
+                    Type = p.Type.GetMinimallyQualifiedNameWithNullability(),
+                    FullyQualifiedType = p.Type.GetFullyQualifiedNameWithNullability(),
                     Direction = ParameterDirection.In
                 }).ToImmutableArray()
             ),
@@ -513,8 +513,8 @@ internal static class MemberDiscovery
             raiseParams.Select(p => new MockParameterModel
             {
                 Name = EscapeIdentifier(p.Name),
-                FullyQualifiedType = p.Type.GetFullyQualifiedName(),
-                Type = p.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat),
+                FullyQualifiedType = p.Type.GetFullyQualifiedNameWithNullability(),
+                Type = p.Type.GetMinimallyQualifiedNameWithNullability(),
                 Direction = ParameterDirection.In
             }).ToImmutableArray());
 
