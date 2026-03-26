@@ -17,7 +17,7 @@ dotnet add package OpenTelemetry
 dotnet add package OpenTelemetry.Exporter.Console
 ```
 
-Then subscribe to the `"TUnit"` ActivitySource in a `[Before(TestSession)]` hook:
+Then subscribe to the `"TUnit"` ActivitySource in a `[Before(TestDiscovery)]` hook:
 
 ```csharp
 using System.Diagnostics;
@@ -29,7 +29,7 @@ public class TraceSetup
 {
     private static TracerProvider? _tracerProvider;
 
-    [Before(TestSession)]
+    [Before(TestDiscovery)]
     public static void SetupTracing()
     {
         _tracerProvider = Sdk.CreateTracerProviderBuilder()
@@ -60,7 +60,7 @@ public class TraceSetup
 {
     private static ActivityListener? _listener;
 
-    [Before(TestSession)]
+    [Before(TestDiscovery)]
     public static void SetupTracing()
     {
         _listener = new ActivityListener
@@ -81,12 +81,12 @@ public class TraceSetup
 }
 ```
 
-### Why `[Before(TestSession)]`?
+### Why `[Before(TestDiscovery)]`?
 
-The listener **must** be registered in a `[Before(TestSession)]` hook so it is active before test discovery begins. TUnit's hook execution order is:
+The listener **must** be registered in a `[Before(TestDiscovery)]` hook (or earlier, e.g. `[Before(TestSession)]`) so it is active before the discovery span begins. TUnit's hook execution order is:
 
-1. `[Before(TestSession)]` — register your listener here
-2. `[Before(TestDiscovery)]` — discovery hooks run
+1. `[Before(TestSession)]` — session-level setup
+2. `[Before(TestDiscovery)]` — register your listener here
 3. **Test discovery** — the `"test discovery"` span is emitted here
 4. Test execution — assembly, suite, and test case spans are emitted
 5. `[After(TestSession)]` — dispose your listener here
