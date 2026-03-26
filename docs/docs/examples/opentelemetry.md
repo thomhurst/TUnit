@@ -8,6 +8,8 @@ Activity tracing requires .NET 8 or later. It is not available on .NET Framework
 
 ## Setup
 
+### Option A: OpenTelemetry SDK (recommended)
+
 Add the OpenTelemetry packages to your test project:
 
 ```bash
@@ -15,7 +17,7 @@ dotnet add package OpenTelemetry
 dotnet add package OpenTelemetry.Exporter.Console
 ```
 
-Then subscribe to the `"TUnit"` ActivitySource in your test setup:
+Then subscribe to the `"TUnit"` ActivitySource in a `[Before(TestSession)]` hook:
 
 ```csharp
 using System.Diagnostics;
@@ -46,6 +48,50 @@ public class TraceSetup
 ```
 
 Replace `AddConsoleExporter()` with your preferred exporter (Jaeger, Zipkin, OTLP, etc.).
+
+### Option B: Raw `ActivityListener` (no SDK dependency)
+
+If you don't want the OpenTelemetry SDK, you can subscribe directly with a `System.Diagnostics.ActivityListener`:
+
+```csharp
+using System.Diagnostics;
+
+public class TraceSetup
+{
+    private static ActivityListener? _listener;
+
+    [Before(TestSession)]
+    public static void SetupTracing()
+    {
+        _listener = new ActivityListener
+        {
+            ShouldListenTo = source => source.Name == "TUnit",
+            Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded,
+            ActivityStarted = activity => Console.WriteLine($"▶ {activity.OperationName}"),
+            ActivityStopped = activity => Console.WriteLine($"■ {activity.OperationName} ({activity.Duration.TotalMilliseconds:F1}ms)")
+        };
+        ActivitySource.AddActivityListener(_listener);
+    }
+
+    [After(TestSession)]
+    public static void TeardownTracing()
+    {
+        _listener?.Dispose();
+    }
+}
+```
+
+### Why `[Before(TestSession)]`?
+
+The listener **must** be registered in a `[Before(TestSession)]` hook so it is active before test discovery begins. TUnit's hook execution order is:
+
+1. `[Before(TestSession)]` — register your listener here
+2. `[Before(TestDiscovery)]` — discovery hooks run
+3. **Test discovery** — the `"test discovery"` span is emitted here
+4. Test execution — assembly, suite, and test case spans are emitted
+5. `[After(TestSession)]` — dispose your listener here
+
+If you register the listener later (e.g., in `[Before(Assembly)]`), the discovery span will not be captured.
 
 ## Span Hierarchy
 
@@ -107,17 +153,25 @@ When a test is configured with `[Retry]`, each failed attempt produces its own s
 
 ## Using with Jaeger, Zipkin, or OTLP
 
-Swap the exporter in the setup:
+Swap the exporter in the setup code above. Each exporter needs its own NuGet package.
+
+### OTLP (works with Jaeger, Tempo, Honeycomb, etc.)
+
+```bash
+dotnet add package OpenTelemetry.Exporter.OpenTelemetryProtocol
+```
 
 ```csharp
-// OTLP (works with Jaeger, Tempo, Honeycomb, etc.)
-dotnet add package OpenTelemetry.Exporter.OpenTelemetryProtocol
-
 .AddOtlpExporter(opts => opts.Endpoint = new Uri("http://localhost:4317"))
+```
 
-// Zipkin
+### Zipkin
+
+```bash
 dotnet add package OpenTelemetry.Exporter.Zipkin
+```
 
+```csharp
 .AddZipkinExporter(opts => opts.Endpoint = new Uri("http://localhost:9411/api/v2/spans"))
 ```
 
