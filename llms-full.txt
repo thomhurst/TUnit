@@ -12624,6 +12624,8 @@ Activity tracing requires .NET 8 or later. It is not available on .NET Framework
 
 ## Setup
 
+### Option A: OpenTelemetry SDK (recommended)
+
 Add the OpenTelemetry packages to your test project:
 
 ```bash
@@ -12631,7 +12633,7 @@ dotnet add package OpenTelemetry
 dotnet add package OpenTelemetry.Exporter.Console
 ```
 
-Then subscribe to the `"TUnit"` ActivitySource in your test setup:
+Then subscribe to the `"TUnit"` ActivitySource in a `[Before(TestDiscovery)]` hook:
 
 ```csharp
 using System.Diagnostics;
@@ -12643,7 +12645,7 @@ public class TraceSetup
 {
     private static TracerProvider? _tracerProvider;
 
-    [Before(TestSession)]
+    [Before(TestDiscovery)]
     public static void SetupTracing()
     {
         _tracerProvider = Sdk.CreateTracerProviderBuilder()
@@ -12663,16 +12665,63 @@ public class TraceSetup
 
 Replace `AddConsoleExporter()` with your preferred exporter (Jaeger, Zipkin, OTLP, etc.).
 
+### Option B: Raw `ActivityListener` (no SDK dependency)
+
+If you don't want the OpenTelemetry SDK, you can subscribe directly with a `System.Diagnostics.ActivityListener`:
+
+```csharp
+using System.Diagnostics;
+
+public class TraceSetup
+{
+    private static ActivityListener? _listener;
+
+    [Before(TestDiscovery)]
+    public static void SetupTracing()
+    {
+        _listener = new ActivityListener
+        {
+            ShouldListenTo = source => source.Name == "TUnit",
+            Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded,
+            ActivityStarted = activity => Console.WriteLine($"▶ {activity.OperationName}"),
+            ActivityStopped = activity => Console.WriteLine($"■ {activity.OperationName} ({activity.Duration.TotalMilliseconds:F1}ms)")
+        };
+        ActivitySource.AddActivityListener(_listener);
+    }
+
+    [After(TestSession)]
+    public static void TeardownTracing()
+    {
+        _listener?.Dispose();
+    }
+}
+```
+
+### Why `[Before(TestDiscovery)]`?
+
+The listener **must** be registered in a `[Before(TestDiscovery)]` hook (or earlier, e.g. `[Before(TestSession)]`) so it is active before the discovery span begins. TUnit's hook execution order is:
+
+1. `[Before(TestSession)]` — session-level setup
+2. `[Before(TestDiscovery)]` — register your listener here
+3. **Test discovery** — the `"test discovery"` span is emitted here
+4. Test execution — assembly, suite, and test case spans are emitted
+5. `[After(TestSession)]` — dispose your listener here
+
+If you register the listener later (e.g., in `[Before(Assembly)]`), the discovery span will not be captured.
+
 ## Span Hierarchy
 
 TUnit creates a nested span tree that mirrors the test lifecycle:
 
 ```
 test session
+  ├── test discovery
   └── test assembly
         └── test suite (one per test class)
               └── test case (one per test method invocation)
 ```
+
+The **test discovery** span captures the time spent finding, building, and resolving dependencies for all tests. It appears as a sibling of the assembly spans, giving you a clear view of discovery vs execution time.
 
 ## Attributes
 
@@ -12702,7 +12751,7 @@ Each span carries tags that follow [OpenTelemetry semantic conventions](https://
 | `tunit.test.method` | test case | Method name |
 | `tunit.test.id` | test case | Unique test instance ID |
 | `tunit.test.categories` | test case | Test categories (string array) |
-| `tunit.test.count` | session/assembly/suite | Total test count |
+| `tunit.test.count` | session/assembly/suite/discovery | Total test count |
 | `tunit.test.retry_attempt` | test case | Current retry attempt (when retrying) |
 | `tunit.test.skip_reason` | test case | Reason the test was skipped |
 
@@ -12720,17 +12769,25 @@ When a test is configured with `[Retry]`, each failed attempt produces its own s
 
 ## Using with Jaeger, Zipkin, or OTLP
 
-Swap the exporter in the setup:
+Swap the exporter in the setup code above. Each exporter needs its own NuGet package.
+
+### OTLP (works with Jaeger, Tempo, Honeycomb, etc.)
+
+```bash
+dotnet add package OpenTelemetry.Exporter.OpenTelemetryProtocol
+```
 
 ```csharp
-// OTLP (works with Jaeger, Tempo, Honeycomb, etc.)
-dotnet add package OpenTelemetry.Exporter.OpenTelemetryProtocol
-
 .AddOtlpExporter(opts => opts.Endpoint = new Uri("http://localhost:4317"))
+```
 
-// Zipkin
+### Zipkin
+
+```bash
 dotnet add package OpenTelemetry.Exporter.Zipkin
+```
 
+```csharp
 .AddZipkinExporter(opts => opts.Endpoint = new Uri("http://localhost:9411/api/v2/spans"))
 ```
 
