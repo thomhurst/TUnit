@@ -111,8 +111,7 @@ public class LastTestInAssemblyEventReceiverAttribute : Attribute,
 
 // Test for skipped event receivers using [Skip] attribute.
 // After(Test) hooks don't run for statically skipped tests, so we use a
-// separate verification test that runs after the skipped test completes.
-[NotInParallel(nameof(SkippedEventReceiverTests))]
+// DependsOn verification test that runs after the skipped test completes.
 public class SkippedEventReceiverTests
 {
     public static readonly List<string> Events = [];
@@ -126,6 +125,7 @@ public class SkippedEventReceiverTests
     }
 
     [Test]
+    [DependsOn(nameof(SkippedTestWithCustomReason), ProceedOnFailure = true)]
     public async Task Verify_SkipEventReceiver_Fired_Exactly_Once()
     {
         // Events were populated by the SkipEventReceiverAttribute on the skipped test.
