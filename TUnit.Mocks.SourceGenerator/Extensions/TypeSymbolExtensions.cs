@@ -6,10 +6,29 @@ namespace TUnit.Mocks.SourceGenerator.Extensions;
 
 internal static class TypeSymbolExtensions
 {
+    private static readonly SymbolDisplayFormat FullyQualifiedWithNullability =
+        SymbolDisplayFormat.FullyQualifiedFormat.AddMiscellaneousOptions(
+            SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
+
+    private static readonly SymbolDisplayFormat MinimallyQualifiedWithNullability =
+        SymbolDisplayFormat.MinimallyQualifiedFormat.AddMiscellaneousOptions(
+            SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
+
+    /// <summary>
+    /// Returns the fully qualified name without nullable annotations.
+    /// For code generation that must preserve nullable reference type annotations,
+    /// use <see cref="GetFullyQualifiedNameWithNullability"/> instead.
+    /// </summary>
     public static string GetFullyQualifiedName(this ITypeSymbol type)
     {
         return type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
     }
+
+    public static string GetFullyQualifiedNameWithNullability(this ITypeSymbol type)
+        => type.ToDisplayString(FullyQualifiedWithNullability);
+
+    public static string GetMinimallyQualifiedNameWithNullability(this ITypeSymbol type)
+        => type.ToDisplayString(MinimallyQualifiedWithNullability);
 
     public static string GetFullyQualifiedNameWithoutGlobal(this ITypeSymbol type)
     {
@@ -197,9 +216,9 @@ internal static class TypeSymbolExtensions
             var name = named.ConstructedFrom.Name;
             if ((name == "Task" || name == "ValueTask") && named.TypeArguments.Length == 1)
             {
-                return (named.TypeArguments[0].GetFullyQualifiedName(), false);
+                return (named.TypeArguments[0].GetFullyQualifiedNameWithNullability(), false);
             }
         }
-        return (type.GetFullyQualifiedName(), false);
+        return (type.GetFullyQualifiedNameWithNullability(), false);
     }
 }

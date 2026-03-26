@@ -54,7 +54,7 @@ internal static class MethodSymbolExtensions
                 RefKind.In => "in ",
                 _ => ""
             };
-            return $"{direction}{p.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)} {p.Name}";
+            return $"{direction}{p.Type.GetFullyQualifiedNameWithNullability()} {p.Name}";
         }));
     }
 

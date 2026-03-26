@@ -415,4 +415,32 @@ public class MockGeneratorTests : SnapshotTestBase
 
         return VerifyGeneratorOutput(source);
     }
+
+    [Test]
+    public Task Interface_With_Nullable_Reference_Type_Parameters()
+    {
+        var source = """
+            using TUnit.Mocks;
+            using System.Threading.Tasks;
+
+            public interface IFoo
+            {
+                void Bar(object? baz);
+                string? GetValue(string? key, int count);
+                void Process(string nonNull, string? nullable, object? obj);
+                Task<string?> GetAsync(string? key);
+                string? NullableProp { get; set; }
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<IFoo>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
 }
