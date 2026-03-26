@@ -60,7 +60,7 @@ internal sealed class TestDiscoveryService : IDataProducer
         var contextProvider = _testExecutor.GetContextProvider();
         contextProvider.BeforeTestDiscoveryContext.RestoreExecutionContext();
 
-        var allTests = await DiscoverAndResolveTestsAsync(testSessionId, filter, cancellationToken, isForExecution).ConfigureAwait(false);
+        var allTests = await DiscoverAndResolveTestsAsync(testSessionId, filter, isForExecution, cancellationToken).ConfigureAwait(false);
 
         // Add tests to context and run After(TestDiscovery) hooks before event receivers
         // This marks the end of the discovery phase, before registration begins
@@ -104,8 +104,8 @@ internal sealed class TestDiscoveryService : IDataProducer
     private async Task<List<AbstractExecutableTest>> DiscoverAndResolveTestsAsync(
         string testSessionId,
         ITestExecutionFilter? filter,
-        CancellationToken cancellationToken,
-        bool isForExecution)
+        bool isForExecution,
+        CancellationToken cancellationToken)
     {
 #if NET
         Activity? discoveryActivity = null;
@@ -157,14 +157,10 @@ internal sealed class TestDiscoveryService : IDataProducer
                 foreach (var test in testsList)
                 {
                     _cachedTests.Add(test);
+                    _dependencyResolver.RegisterTest(test);
                 }
 
                 allTests.AddRange(testsList);
-            }
-
-            foreach (var test in allTests)
-            {
-                _dependencyResolver.RegisterTest(test);
             }
 
             _dependencyResolver.BatchResolveDependencies(allTests);
@@ -172,15 +168,18 @@ internal sealed class TestDiscoveryService : IDataProducer
 
             return allTests;
         }
+#if NET
         catch (Exception ex)
         {
-#if NET
             TUnitActivitySource.RecordException(discoveryActivity, ex);
-#else
-            _ = ex;
-#endif
             throw;
         }
+#else
+        catch
+        {
+            throw;
+        }
+#endif
         finally
         {
 #if NET
@@ -221,7 +220,7 @@ internal sealed class TestDiscoveryService : IDataProducer
         var contextProvider = _testExecutor.GetContextProvider();
 
         var allTests = await DiscoverAndResolveTestsAsync(
-            testSessionId, filter: null, cancellationToken, isForExecution: false).ConfigureAwait(false);
+            testSessionId, filter: null, isForExecution: false, cancellationToken).ConfigureAwait(false);
 
         // Add tests to context and run After(TestDiscovery) hooks before event receivers
         // This marks the end of the discovery phase, before registration begins
