@@ -28,6 +28,13 @@ public partial class TestContext
             return _cachedDisplayName;
         }
 
+        // Use expression-based display format when no explicit DisplayName was provided
+        if (!string.IsNullOrEmpty(DataSourceExpression))
+        {
+            _cachedDisplayName = $"{TestDetails.TestName}({DataSourceExpression})";
+            return _cachedDisplayName;
+        }
+
         if (TestDetails.TestMethodArguments.Length == 0)
         {
             _cachedDisplayName = TestDetails.TestName;

@@ -49,7 +49,7 @@ internal static class DataSourceMetadataExtractor
             return null;
         }
 
-        return new TestDataRowMetadata(displayName, skip, categories);
+        return new TestDataRowMetadata(displayName, null, skip, categories);
     }
 
     /// <summary>

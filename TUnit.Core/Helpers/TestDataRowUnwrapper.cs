@@ -29,7 +29,7 @@ internal static class TestDataRowUnwrapper
         if (value is ITestDataRow testDataRow)
         {
             data = testDataRow.GetData();
-            metadata = new TestDataRowMetadata(testDataRow.DisplayName, testDataRow.Skip, testDataRow.Categories);
+            metadata = new TestDataRowMetadata(testDataRow.DisplayName, testDataRow.DataExpression, testDataRow.Skip, testDataRow.Categories);
             return true;
         }
 
