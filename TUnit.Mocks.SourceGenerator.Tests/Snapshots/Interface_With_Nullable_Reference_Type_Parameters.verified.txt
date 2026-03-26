@@ -44,14 +44,20 @@ namespace TUnit.Mocks.Generated
             _engine.HandleCall(0, "Bar", new object?[] { baz });
         }
 
-        public string GetValue(string? key, int count)
+        public string? GetValue(string? key, int count)
         {
-            return _engine.HandleCallWithReturn<string>(1, "GetValue", new object?[] { key, count }, default);
+            return _engine.HandleCallWithReturn<string?>(1, "GetValue", new object?[] { key, count }, default);
         }
 
         public void Process(string nonNull, string? nullable, object? obj)
         {
             _engine.HandleCall(2, "Process", new object?[] { nonNull, nullable, obj });
+        }
+
+        public string? NullableProp
+        {
+            get => _engine.HandleCallWithReturn<string?>(3, "get_NullableProp", global::System.Array.Empty<object?>(), default);
+            set => _engine.HandleCall(4, "set_NullableProp", new object?[] { value });
         }
 
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
@@ -172,6 +178,12 @@ namespace TUnit.Mocks.Generated
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_nonNull.Matcher, __fa_nullable.Matcher, __fa_obj.Matcher };
             return new IFoo_Process_M2_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 2, "Process", matchers);
         }
+
+        extension(global::TUnit.Mocks.Mock<global::IFoo> mock)
+        {
+            public global::TUnit.Mocks.PropertyMockCall<string?> NullableProp
+                => new(global::TUnit.Mocks.Mock.GetEngine(mock), 3, 4, "NullableProp", true, true);
+        }
     }
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
@@ -256,7 +268,7 @@ namespace TUnit.Mocks.Generated
         private readonly int _memberId;
         private readonly string _memberName;
         private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
-        private readonly global::System.Lazy<global::TUnit.Mocks.Setup.MethodSetupBuilder<string>> _lazyBuilder;
+        private readonly global::System.Lazy<global::TUnit.Mocks.Setup.MethodSetupBuilder<string?>> _lazyBuilder;
 
         internal IFoo_GetValue_M1_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)
         {
@@ -264,23 +276,23 @@ namespace TUnit.Mocks.Generated
             _memberId = memberId;
             _memberName = memberName;
             _matchers = matchers;
-            _lazyBuilder = new global::System.Lazy<global::TUnit.Mocks.Setup.MethodSetupBuilder<string>>(() =>
+            _lazyBuilder = new global::System.Lazy<global::TUnit.Mocks.Setup.MethodSetupBuilder<string?>>(() =>
             {
                 var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);
                 _engine.AddSetup(setup);
-                return new global::TUnit.Mocks.Setup.MethodSetupBuilder<string>(setup);
+                return new global::TUnit.Mocks.Setup.MethodSetupBuilder<string?>(setup);
             }
             );
         }
 
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<string> EnsureSetup() => _lazyBuilder.Value;
+        private global::TUnit.Mocks.Setup.MethodSetupBuilder<string?> EnsureSetup() => _lazyBuilder.Value;
 
         /// <inheritdoc />
-        public IFoo_GetValue_M1_MockCall Returns(string value) { EnsureSetup().Returns(value); return this; }
+        public IFoo_GetValue_M1_MockCall Returns(string? value) { EnsureSetup().Returns(value); return this; }
         /// <inheritdoc />
-        public IFoo_GetValue_M1_MockCall Returns(global::System.Func<string> factory) { EnsureSetup().Returns(factory); return this; }
+        public IFoo_GetValue_M1_MockCall Returns(global::System.Func<string?> factory) { EnsureSetup().Returns(factory); return this; }
         /// <inheritdoc />
-        public IFoo_GetValue_M1_MockCall ReturnsSequentially(params string[] values) { EnsureSetup().ReturnsSequentially(values); return this; }
+        public IFoo_GetValue_M1_MockCall ReturnsSequentially(params string?[] values) { EnsureSetup().ReturnsSequentially(values); return this; }
         /// <inheritdoc />
         public IFoo_GetValue_M1_MockCall Throws<TException>() where TException : global::System.Exception, new() { EnsureSetup().Throws<TException>(); return this; }
         /// <inheritdoc />
@@ -290,7 +302,7 @@ namespace TUnit.Mocks.Generated
         /// <inheritdoc />
         public IFoo_GetValue_M1_MockCall Callback(global::System.Action<object?[]> callback) { EnsureSetup().Callback(callback); return this; }
         /// <inheritdoc />
-        public IFoo_GetValue_M1_MockCall Returns(global::System.Func<object?[], string> factory) { EnsureSetup().Returns(factory); return this; }
+        public IFoo_GetValue_M1_MockCall Returns(global::System.Func<object?[], string?> factory) { EnsureSetup().Returns(factory); return this; }
         /// <inheritdoc />
         public IFoo_GetValue_M1_MockCall Throws(global::System.Func<object?[], global::System.Exception> exceptionFactory) { EnsureSetup().Throws(exceptionFactory); return this; }
         /// <inheritdoc />
@@ -303,7 +315,7 @@ namespace TUnit.Mocks.Generated
         public IFoo_GetValue_M1_MockCall Then() { EnsureSetup().Then(); return this; }
 
         /// <summary>Configure a typed computed return value using the actual method parameters.</summary>
-        public IFoo_GetValue_M1_MockCall Returns(global::System.Func<string?, int, string> factory)
+        public IFoo_GetValue_M1_MockCall Returns(global::System.Func<string?, int, string?> factory)
         {
             EnsureSetup().Returns(args => factory((string?)args[0]!, (int)args[1]!));
             return this;

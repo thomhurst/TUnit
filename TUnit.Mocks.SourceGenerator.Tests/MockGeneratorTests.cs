@@ -427,6 +427,7 @@ public class MockGeneratorTests : SnapshotTestBase
                 void Bar(object? baz);
                 string? GetValue(string? key, int count);
                 void Process(string nonNull, string? nullable, object? obj);
+                string? NullableProp { get; set; }
             }
 
             public class TestUsage
