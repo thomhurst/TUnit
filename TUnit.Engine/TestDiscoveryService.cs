@@ -60,61 +60,7 @@ internal sealed class TestDiscoveryService : IDataProducer
         var contextProvider = _testExecutor.GetContextProvider();
         contextProvider.BeforeTestDiscoveryContext.RestoreExecutionContext();
 
-        var allTests = new List<AbstractExecutableTest>();
-
-#pragma warning disable TPEXP
-        var isNopFilter = filter is NopFilter;
-#pragma warning restore TPEXP
-        if (filter == null || !isForExecution || isNopFilter)
-        {
-            var buildingContext = new Building.TestBuildingContext(isForExecution, Filter: null);
-            await foreach (var test in DiscoverTestsStreamAsync(testSessionId, buildingContext, cancellationToken).ConfigureAwait(false))
-            {
-                allTests.Add(test);
-            }
-        }
-        else
-        {
-            // Use filter-aware collection to pre-filter by type before materializing all metadata
-            var allMetadata = await _testBuilderPipeline.CollectTestMetadataAsync(testSessionId, filter).ConfigureAwait(false);
-            var allMetadataList = allMetadata.ToList();
-
-            var metadataToInclude = _dependencyExpander.ExpandToIncludeDependencies(allMetadataList, filter);
-
-            // Build tests directly from the pre-collected metadata (avoid re-collecting)
-            // Apply 5-minute discovery timeout matching the streaming path (#4715)
-            using var filterCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            filterCts.CancelAfter(EngineDefaults.DiscoveryTimeout);
-
-            var buildingContext = new Building.TestBuildingContext(isForExecution, Filter: null);
-            var tests = await _testBuilderPipeline.BuildTestsFromMetadataAsync(
-                metadataToInclude,
-                buildingContext,
-                filterCts.Token).ConfigureAwait(false);
-
-            var testsList = tests.ToList();
-
-            // Cache tests so ITestFinder can locate them
-            foreach (var test in testsList)
-            {
-                _cachedTests.Add(test);
-            }
-
-            allTests.AddRange(testsList);
-        }
-
-        foreach (var test in allTests)
-        {
-            _dependencyResolver.RegisterTest(test);
-        }
-
-        // Resolve dependencies in parallel — registration is complete so lookup dictionaries
-        // are effectively read-only, and each test's Dependencies are written independently.
-        _dependencyResolver.BatchResolveDependencies(allTests);
-
-        // Populate TestContext._dependencies for ALL tests before After(TestDiscovery) hooks run.
-        // This ensures hooks can access dependency information on any TestContext (including focused tests).
-        _testBuilderPipeline.PopulateAllDependencies(allTests);
+        var allTests = await DiscoverAndResolveTestsAsync(testSessionId, filter, isForExecution, cancellationToken).ConfigureAwait(false);
 
         // Add tests to context and run After(TestDiscovery) hooks before event receivers
         // This marks the end of the discovery phase, before registration begins
@@ -155,6 +101,94 @@ internal sealed class TestDiscoveryService : IDataProducer
         return new TestDiscoveryResult(filteredTests, finalContext);
     }
 
+    private async Task<List<AbstractExecutableTest>> DiscoverAndResolveTestsAsync(
+        string testSessionId,
+        ITestExecutionFilter? filter,
+        bool isForExecution,
+        CancellationToken cancellationToken)
+    {
+#if NET
+        Activity? discoveryActivity = null;
+        if (TUnitActivitySource.Source.HasListeners())
+        {
+            var sessionActivity = _testExecutor.GetContextProvider().TestSessionContext.Activity;
+            discoveryActivity = TUnitActivitySource.StartActivity(
+                "test discovery",
+                ActivityKind.Internal,
+                sessionActivity?.Context ?? default);
+        }
+#endif
+
+        var allTests = new List<AbstractExecutableTest>();
+
+        try
+        {
+#pragma warning disable TPEXP
+            var isNopFilter = filter is NopFilter;
+#pragma warning restore TPEXP
+            if (filter == null || !isForExecution || isNopFilter)
+            {
+                var buildingContext = new Building.TestBuildingContext(isForExecution, Filter: null);
+                await foreach (var test in DiscoverTestsStreamAsync(testSessionId, buildingContext, cancellationToken).ConfigureAwait(false))
+                {
+                    allTests.Add(test);
+                }
+            }
+            else
+            {
+                // Use filter-aware collection to pre-filter by type before materializing all metadata
+                var allMetadata = await _testBuilderPipeline.CollectTestMetadataAsync(testSessionId, filter).ConfigureAwait(false);
+                var allMetadataList = allMetadata.ToList();
+
+                var metadataToInclude = _dependencyExpander.ExpandToIncludeDependencies(allMetadataList, filter);
+
+                // Apply 5-minute discovery timeout matching the streaming path (#4715)
+                using var filterCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                filterCts.CancelAfter(EngineDefaults.DiscoveryTimeout);
+
+                var buildingContext = new Building.TestBuildingContext(isForExecution, Filter: null);
+                var tests = await _testBuilderPipeline.BuildTestsFromMetadataAsync(
+                    metadataToInclude,
+                    buildingContext,
+                    filterCts.Token).ConfigureAwait(false);
+
+                var testsList = tests.ToList();
+
+                foreach (var test in testsList)
+                {
+                    _cachedTests.Add(test);
+                    _dependencyResolver.RegisterTest(test);
+                }
+
+                allTests.AddRange(testsList);
+            }
+
+            _dependencyResolver.BatchResolveDependencies(allTests);
+            _testBuilderPipeline.PopulateAllDependencies(allTests);
+
+            return allTests;
+        }
+#if NET
+        catch (Exception ex)
+        {
+            TUnitActivitySource.RecordException(discoveryActivity, ex);
+            throw;
+        }
+#else
+        catch
+        {
+            throw;
+        }
+#endif
+        finally
+        {
+#if NET
+            discoveryActivity?.SetTag("tunit.test.count", allTests.Count);
+            TUnitActivitySource.StopActivity(discoveryActivity);
+#endif
+        }
+    }
+
     private async IAsyncEnumerable<AbstractExecutableTest> DiscoverTestsStreamAsync(
         string testSessionId,
         Building.TestBuildingContext buildingContext,
@@ -183,25 +217,13 @@ internal sealed class TestDiscoveryService : IDataProducer
     {
         await _testExecutor.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
 
-        var buildingContext = new Building.TestBuildingContext(IsForExecution: false, Filter: null);
+        var contextProvider = _testExecutor.GetContextProvider();
 
-        var allTests = new List<AbstractExecutableTest>();
-        await foreach (var test in DiscoverTestsStreamAsync(testSessionId, buildingContext, cancellationToken).ConfigureAwait(false))
-        {
-            allTests.Add(test);
-        }
-
-        // Resolve dependencies in parallel — registration is complete so lookup dictionaries
-        // are effectively read-only, and each test's Dependencies are written independently.
-        _dependencyResolver.BatchResolveDependencies(allTests);
-
-        // Populate TestContext._dependencies for ALL tests before After(TestDiscovery) hooks run.
-        // This ensures hooks can access dependency information on any TestContext (including focused tests).
-        _testBuilderPipeline.PopulateAllDependencies(allTests);
+        var allTests = await DiscoverAndResolveTestsAsync(
+            testSessionId, filter: null, isForExecution: false, cancellationToken).ConfigureAwait(false);
 
         // Add tests to context and run After(TestDiscovery) hooks before event receivers
         // This marks the end of the discovery phase, before registration begins
-        var contextProvider = _testExecutor.GetContextProvider();
         contextProvider.TestDiscoveryContext.AddTests(allTests.Select(static t => t.Context));
         await _testExecutor.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
         contextProvider.TestDiscoveryContext.RestoreExecutionContext();
@@ -272,18 +294,6 @@ internal sealed class TestDiscoveryService : IDataProducer
                 remainingTests.Remove(test);
             }
         }
-    }
-
-    private bool AreAllDependenciesSatisfied(AbstractExecutableTest test, ConcurrentDictionary<string, bool> completedTests)
-    {
-        foreach (var dependency in test.Dependencies)
-        {
-            if (!completedTests.ContainsKey(dependency.Test.TestId))
-            {
-                return false;
-            }
-        }
-        return true;
     }
 
 
