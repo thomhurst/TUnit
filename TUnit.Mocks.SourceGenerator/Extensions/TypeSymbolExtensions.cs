@@ -14,6 +14,11 @@ internal static class TypeSymbolExtensions
         SymbolDisplayFormat.MinimallyQualifiedFormat.AddMiscellaneousOptions(
             SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
 
+    /// <summary>
+    /// Returns the fully qualified name without nullable annotations.
+    /// For code generation that must preserve nullable reference type annotations,
+    /// use <see cref="GetFullyQualifiedNameWithNullability"/> instead.
+    /// </summary>
     public static string GetFullyQualifiedName(this ITypeSymbol type)
     {
         return type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);

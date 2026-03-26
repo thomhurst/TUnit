@@ -421,12 +421,14 @@ public class MockGeneratorTests : SnapshotTestBase
     {
         var source = """
             using TUnit.Mocks;
+            using System.Threading.Tasks;
 
             public interface IFoo
             {
                 void Bar(object? baz);
                 string? GetValue(string? key, int count);
                 void Process(string nonNull, string? nullable, object? obj);
+                Task<string?> GetAsync(string? key);
                 string? NullableProp { get; set; }
             }
 
