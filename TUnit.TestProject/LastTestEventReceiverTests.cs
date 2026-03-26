@@ -109,18 +109,14 @@ public class LastTestInAssemblyEventReceiverAttribute : Attribute,
     }
 }
 
-// Test for skipped event receivers
+// Test for skipped event receivers using [Skip] attribute.
+// After(Test) hooks don't run for statically skipped tests, so we use a
+// separate verification test that runs after the skipped test completes.
+[NotInParallel(nameof(SkippedEventReceiverTests))]
 public class SkippedEventReceiverTests
 {
     public static readonly List<string> Events = [];
     public static string? CapturedSkipReason = null;
-
-    [Before(Test)]
-    public void ClearEvents()
-    {
-        Events.Clear();
-        CapturedSkipReason = null;
-    }
 
     [Test, Skip("Testing skip event with custom reason")]
     [SkipEventReceiverAttribute]
@@ -129,18 +125,21 @@ public class SkippedEventReceiverTests
         await Task.Delay(10);
     }
 
-    [After(Test)]
-    public async Task VerifySkipEventFired(TestContext context)
+    [Test]
+    public async Task Verify_SkipEventReceiver_Fired_Exactly_Once()
     {
-        // Give some time for async event receivers to complete
-        await Task.Delay(100);
+        // Events were populated by the SkipEventReceiverAttribute on the skipped test.
+        // No Before(Test) clearing here — we need to observe the cumulative state.
+        await Assert.That(Events).Contains("TestSkipped");
+        await Assert.That(Events).Contains("TestEnd");
+        await Assert.That(CapturedSkipReason).IsEqualTo("Testing skip event with custom reason");
 
-        if (context. Metadata.DisplayName.Contains("SkippedTestWithCustomReason"))
-        {
-            await Assert.That(Events).Contains("TestSkipped");
-            await Assert.That(Events).Contains("TestEnd");
-            await Assert.That(CapturedSkipReason).IsEqualTo("Testing skip event with custom reason");
-        }
+        // Guard against double invocation
+        var skipCount = Events.Count(e => e == "TestSkipped");
+        await Assert.That(skipCount).IsEqualTo(1);
+
+        var endCount = Events.Count(e => e == "TestEnd");
+        await Assert.That(endCount).IsEqualTo(1);
     }
 }
 
@@ -200,7 +199,10 @@ public class RuntimeSkipEventReceiverTests
             await Assert.That(Events).Contains("TestSkipped");
             await Assert.That(Events).Contains("TestEnd");
 
-            // Verify TestEnd is called exactly once (not twice)
+            // Verify events are called exactly once (not twice)
+            var testSkippedCount = Events.Count(e => e == "TestSkipped");
+            await Assert.That(testSkippedCount).IsEqualTo(1);
+
             var testEndCount = Events.Count(e => e == "TestEnd");
             await Assert.That(testEndCount).IsEqualTo(1);
         }
