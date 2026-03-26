@@ -864,6 +864,12 @@ internal sealed class TestBuilder : ITestBuilder
                 context.SetDataSourceDisplayName(dataRowMetadata.DisplayName!);
             }
 
+            // Apply data expression for default display name formatting (only when no explicit DisplayName)
+            if (string.IsNullOrEmpty(dataRowMetadata.DisplayName) && !string.IsNullOrEmpty(dataRowMetadata.DataExpression))
+            {
+                context.SetDataSourceExpression(dataRowMetadata.DataExpression!);
+            }
+
             // Apply skip reason from data source
             if (!string.IsNullOrEmpty(dataRowMetadata.Skip))
             {

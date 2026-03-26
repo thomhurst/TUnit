@@ -1355,9 +1355,10 @@ namespace
     }
     public class TestDataRow<T> : <.TestDataRow<T>>
     {
-        public TestDataRow(T Data, string? DisplayName = null, string? Skip = null, string[]? Categories = null) { }
+        public TestDataRow(T Data, string? DisplayName = null, string? Skip = null, string[]? Categories = null, [.("Data")] string? DataExpression = null) { }
         public string[]? Categories { get; init; }
         public T Data { get; init; }
+        public string? DataExpression { get; init; }
         public string? DisplayName { get; init; }
         public string? Skip { get; init; }
     }

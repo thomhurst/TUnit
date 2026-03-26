@@ -211,6 +211,16 @@ public partial class TestContext : Context,
         DataSourceDisplayName = displayName;
     }
 
+    /// <summary>
+    /// Expression text from CallerArgumentExpression on TestDataRow.
+    /// Used as the argument representation in the default TestName(expression) format.
+    /// </summary>
+    internal string? DataSourceExpression { get; private set; }
+
+    internal void SetDataSourceExpression(string expression)
+    {
+        DataSourceExpression = expression;
+    }
 
     internal TestDetails TestDetails { get; set; } = null!;
 
