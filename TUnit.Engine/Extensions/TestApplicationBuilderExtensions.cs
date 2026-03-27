@@ -84,6 +84,9 @@ public static class TestApplicationBuilderExtensions
         testApplicationBuilder.TestHost.AddTestHostApplicationLifetime(_ => junitReporter);
 
         testApplicationBuilder.TestHost.AddTestHostApplicationLifetime(_ => htmlReporter);
+        // MTP auto-registers IDataConsumer implementations returned from AddTestSessionLifetimeHandler,
+        // so no separate AddDataConsumer call is needed. Adding one causes a startup exception:
+        // "Consumer registered two time for data type TestNodeUpdateMessage".
         testApplicationBuilder.TestHost.AddTestSessionLifetimeHandler(serviceProvider =>
         {
             var commandLineOptions = serviceProvider.GetRequiredService<ICommandLineOptions>();

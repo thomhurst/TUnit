@@ -118,6 +118,8 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             }
 
             var outputPath = _outputPath!;
+            // WriteFileAsync returns false if all retry attempts are exhausted (locked file, bad path, etc.).
+            // Artifact publishing is gated on a successful write — no file means no artifact.
             var written = await WriteFileAsync(outputPath, html, testSessionContext.CancellationToken);
 
             if (written)
@@ -169,6 +171,8 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         _outputPath = path;
     }
 
+    // Called by the AddTestSessionLifetimeHandler factory at startup, before any session events fire,
+    // so _messageBus is guaranteed to be set before OnTestSessionFinishingAsync is invoked.
     internal void SetMessageBus(IMessageBus? messageBus)
     {
         _messageBus = messageBus;

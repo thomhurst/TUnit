@@ -65,17 +65,21 @@ public class HtmlReporterTests
     public async Task PublishArtifactAsync_Is_NoOp_When_MessageBus_Not_Injected()
     {
         var reporter = new HtmlReporter(new MockExtension());
+        var bus = new CapturingMessageBus();
+        // Intentionally not calling reporter.SetMessageBus(bus)
+
         var tempFile = Path.GetTempFileName();
         try
         {
-            // Should not throw
             await reporter.PublishArtifactAsync(tempFile, new SessionUid("test-session-1"), CancellationToken.None);
+            bus.Published.ShouldBeEmpty();
         }
         finally
         {
             File.Delete(tempFile);
         }
     }
+
 
     [Test]
     public async Task PublishArtifactAsync_Publishes_With_Correct_SessionUid()
