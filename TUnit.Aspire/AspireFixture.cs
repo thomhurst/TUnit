@@ -169,7 +169,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
             case ResourceWaitBehavior.AllHealthy:
             {
                 var model = app.Services.GetRequiredService<DistributedApplicationModel>();
-                var names = model.Resources.Select(r => r.Name).ToList();
+                var names = GetWaitableResourceNames(model);
                 await WaitForResourcesWithFailFastAsync(app, notificationService, names, waitForHealthy: true, cancellationToken);
                 break;
             }
@@ -177,7 +177,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
             case ResourceWaitBehavior.AllRunning:
             {
                 var model = app.Services.GetRequiredService<DistributedApplicationModel>();
-                var names = model.Resources.Select(r => r.Name).ToList();
+                var names = GetWaitableResourceNames(model);
                 await WaitForResourcesWithFailFastAsync(app, notificationService, names, waitForHealthy: false, cancellationToken);
                 break;
             }
@@ -521,6 +521,32 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         }
 
         return string.Join(Environment.NewLine, lines);
+    }
+
+    private List<string> GetWaitableResourceNames(DistributedApplicationModel model)
+    {
+        var waitable = new List<string>();
+        List<string>? skipped = null;
+
+        foreach (var r in model.Resources)
+        {
+            if (r is IResourceWithoutLifetime)
+            {
+                skipped ??= [];
+                skipped.Add(r.Name);
+            }
+            else
+            {
+                waitable.Add(r.Name);
+            }
+        }
+
+        if (skipped is { Count: > 0 })
+        {
+            LogProgress($"Skipping {skipped.Count} resource(s) without lifecycle: [{string.Join(", ", skipped)}]");
+        }
+
+        return waitable;
     }
 
     private sealed class ResourceLogWatcher(CancellationTokenSource cts) : IAsyncDisposable
