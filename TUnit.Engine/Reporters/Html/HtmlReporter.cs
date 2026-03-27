@@ -6,8 +6,8 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
-using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Extensions.TestHost;
+using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 using TUnit.Engine.Configuration;
@@ -21,8 +21,9 @@ namespace TUnit.Engine.Reporters.Html;
 internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestHostApplicationLifetime, IFilterReceiver, IDisposable
 {
     private string? _outputPath;
-    private IMessageBus? _messageBus;
-    private SessionUid? _sessionUid;
+#pragma warning disable CS0414 // Field assigned but value never used — consumed in Task 2
+    private (IMessageBus MessageBus, SessionUid SessionUid)? _sessionContext;
+#pragma warning restore CS0414
     private readonly ConcurrentDictionary<string, ConcurrentQueue<TestNodeUpdateMessage>> _updates = [];
 
 #if NET
@@ -139,10 +140,9 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
         _outputPath = path;
     }
 
-    internal void NotifySession(IMessageBus messageBus, SessionUid sessionUid)
+    internal void SetSessionContext(IMessageBus messageBus, SessionUid sessionUid)
     {
-        _messageBus = messageBus;
-        _sessionUid = sessionUid;
+        _sessionContext = (messageBus, sessionUid);
     }
 
     private ReportData BuildReportData()
