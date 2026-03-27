@@ -4,6 +4,8 @@
 
     <PropertyGroup>
         <TargetFrameworks>net10.0</TargetFrameworks>
+        <SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>..\strongname.snk</AssemblyOriginatorKeyFile>
     </PropertyGroup>
 
     <ItemGroup>

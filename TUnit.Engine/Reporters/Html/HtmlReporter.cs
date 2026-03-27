@@ -123,7 +123,7 @@ public sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataPro
         }
     }
 
-    private async Task PublishArtifactAsync(string outputPath, CancellationToken cancellationToken)
+    internal async Task PublishArtifactAsync(string outputPath, CancellationToken cancellationToken)
     {
         if (_sessionContext is not { } ctx)
         {
@@ -136,6 +136,8 @@ public sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataPro
             return;
         }
 
+        // SessionFileArtifact is consumed by MTP itself (not user-defined consumers),
+        // so no AddDataProducer registration is required — same pattern as TUnitMessageBus.
         await ctx.MessageBus.PublishAsync(this, new SessionFileArtifact(
             ctx.SessionUid,
             file,

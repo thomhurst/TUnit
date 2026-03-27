@@ -32,4 +32,71 @@ public class HtmlReporterTests
         var producer = (Microsoft.Testing.Platform.Extensions.Messages.IDataProducer)reporter;
         producer.DataTypesProduced.ShouldContain(typeof(SessionFileArtifact));
     }
+
+    private sealed class CapturingMessageBus : Microsoft.Testing.Platform.Messages.IMessageBus
+    {
+        public List<(Microsoft.Testing.Platform.Extensions.Messages.IDataProducer Producer, Microsoft.Testing.Platform.Extensions.Messages.IData Data)> Published = [];
+
+        public Task PublishAsync(Microsoft.Testing.Platform.Extensions.Messages.IDataProducer dataProducer, Microsoft.Testing.Platform.Extensions.Messages.IData value)
+        {
+            Published.Add((dataProducer, value));
+            return Task.CompletedTask;
+        }
+    }
+
+    [Test]
+    public async Task PublishArtifactAsync_Publishes_SessionFileArtifact_When_SessionContext_Set_And_File_Exists()
+    {
+        // Arrange
+        var reporter = new HtmlReporter(new MockExtension());
+        var bus = new CapturingMessageBus();
+        var sessionUid = new Microsoft.Testing.Platform.TestHost.SessionUid("test-session-1");
+        reporter.SetSessionContext(bus, sessionUid);
+
+        var tempFile = Path.GetTempFileName();
+        try
+        {
+            // Act
+            await reporter.PublishArtifactAsync(tempFile, CancellationToken.None);
+
+            // Assert
+            bus.Published.Count.ShouldBe(1);
+            var artifact = bus.Published[0].Data.ShouldBeOfType<Microsoft.Testing.Platform.Extensions.Messages.SessionFileArtifact>();
+            artifact.FileInfo.FullName.ShouldBe(new FileInfo(tempFile).FullName);
+            artifact.DisplayName.ShouldBe("HTML Test Report");
+        }
+        finally
+        {
+            File.Delete(tempFile);
+        }
+    }
+
+    [Test]
+    public async Task PublishArtifactAsync_Is_NoOp_When_SessionContext_Not_Set()
+    {
+        var reporter = new HtmlReporter(new MockExtension());
+        var tempFile = Path.GetTempFileName();
+        try
+        {
+            // Should not throw
+            await reporter.PublishArtifactAsync(tempFile, CancellationToken.None);
+        }
+        finally
+        {
+            File.Delete(tempFile);
+        }
+    }
+
+    [Test]
+    public async Task PublishArtifactAsync_Is_NoOp_When_File_Does_Not_Exist()
+    {
+        var reporter = new HtmlReporter(new MockExtension());
+        var bus = new CapturingMessageBus();
+        var sessionUid = new Microsoft.Testing.Platform.TestHost.SessionUid("test-session-2");
+        reporter.SetSessionContext(bus, sessionUid);
+
+        await reporter.PublishArtifactAsync("/nonexistent/path/report.html", CancellationToken.None);
+
+        bus.Published.Count.ShouldBe(0);
+    }
 }
