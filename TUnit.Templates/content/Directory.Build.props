@@ -15,7 +15,7 @@
         <Using Include="TUnit.Assertions.Extensions" />
     </ItemGroup>
 
-    <ItemGroup Condition="$(MSBuildProjectName) == 'ExampleNamespace.TestProject' And $(MSBuildProjectDirectory.Contains('TUnit.Aspire.Starter'))">
+    <ItemGroup Condition="'$(MSBuildProjectName)' == 'ExampleNamespace.TestProject' And $(MSBuildProjectDirectory.Contains('TUnit.Aspire.Starter'))">
         <PackageReference Remove="TUnit.Aspire" />
         <ProjectReference Include="$(MSBuildThisFileDirectory)..\..\TUnit.Aspire\TUnit.Aspire.csproj" />
         <Using Include="TUnit.Assertions" />
