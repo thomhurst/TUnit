@@ -116,11 +116,41 @@ jobs:
           New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
         shell: pwsh
 
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v3
+        with:
+          versionSpec: '6.7.x'
+
+      - name: Determine Version
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v3
+
       - name: Build
-        run: dotnet build TUnit.CI.slnx -c Release
+        shell: bash
+        run: >-
+          dotnet build TUnit.CI.slnx -c Release
+          -p:DisableGitVersionTask=true
+          "-p:Version=${{ steps.gitversion.outputs.semVer }}"
+          "-p:AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }}"
+          "-p:FileVersion=${{ steps.gitversion.outputs.assemblySemFileVer }}"
+          "-p:InformationalVersion=${{ steps.gitversion.outputs.informationalVersion }}"
+          "-p:PackageVersion=${{ steps.gitversion.outputs.fullSemVer }}"
+          "-p:RepositoryBranch=${{ steps.gitversion.outputs.branchName }}"
+          "-p:RepositoryCommit=${{ steps.gitversion.outputs.sha }}"
 
       - name: Publish AOT
-        run: dotnet publish TUnit.TestProject/TUnit.TestProject.csproj -c Release --use-current-runtime -p:Aot=true -o TESTPROJECT_AOT --framework net10.0
+        shell: bash
+        run: >-
+          dotnet publish TUnit.TestProject/TUnit.TestProject.csproj -c Release
+          --use-current-runtime -p:Aot=true -o TESTPROJECT_AOT --framework net10.0
+          -p:DisableGitVersionTask=true
+          "-p:Version=${{ steps.gitversion.outputs.semVer }}"
+          "-p:AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }}"
+          "-p:FileVersion=${{ steps.gitversion.outputs.assemblySemFileVer }}"
+          "-p:InformationalVersion=${{ steps.gitversion.outputs.informationalVersion }}"
+          "-p:PackageVersion=${{ steps.gitversion.outputs.fullSemVer }}"
+          "-p:RepositoryBranch=${{ steps.gitversion.outputs.branchName }}"
+          "-p:RepositoryCommit=${{ steps.gitversion.outputs.sha }}"
 
       - name: Expose GitHub Actions Runtime
         uses: actions/github-script@v8
