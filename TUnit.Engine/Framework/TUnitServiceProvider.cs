@@ -57,7 +57,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public CancellationTokenSource FailFastCancellationSource { get; }
     public ParallelLimitLockProvider ParallelLimitLockProvider { get; }
     public ObjectLifecycleService ObjectLifecycleService { get; }
-    public bool AfterSessionHooksFailed { get; set; }
+    public bool SessionFailed { get; set; }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
     [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT scenarios")]

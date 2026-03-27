@@ -99,10 +99,9 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
         // Schedule and execute tests (batch approach to preserve ExecutionContext)
         var success = await _testScheduler.ScheduleAndExecuteAsync(testList, linkedCts.Token);
 
-        // Track whether After(TestSession) hooks failed
         if (!success)
         {
-            _serviceProvider.AfterSessionHooksFailed = true;
+            _serviceProvider.SessionFailed = true;
         }
     }
 

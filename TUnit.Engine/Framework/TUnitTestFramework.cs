@@ -69,24 +69,23 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         }
         catch (Exception e) when (IsCancellationException(e))
         {
-            // Check if this is a normal cancellation or fail-fast cancellation
-            if (context.CancellationToken.IsCancellationRequested)
-            {
-                await GetOrCreateServiceProvider(context).Logger.LogErrorAsync("The test run was cancelled.");
-            }
-            else
-            {
-                // This is likely a fail-fast cancellation
-                await GetOrCreateServiceProvider(context).Logger.LogErrorAsync("Test execution stopped due to fail-fast.");
-            }
+            var message = context.CancellationToken.IsCancellationRequested
+                ? "The test run was cancelled."
+                : "Test execution stopped due to fail-fast.";
+            await GetOrCreateServiceProvider(context).Logger.LogErrorAsync(message);
 
+            // Re-throw is safe here — MTP handles OperationCanceledException specially.
             throw;
         }
         catch (Exception e)
         {
-            await GetOrCreateServiceProvider(context).Logger.LogErrorAsync(e);
+            var serviceProvider = GetOrCreateServiceProvider(context);
+            await serviceProvider.Logger.LogErrorAsync(e);
             await ReportUnhandledException(context, e);
-            throw;
+
+            // Do NOT re-throw — MTP hosts expect errors via CloseTestSessionResult,
+            // not propagated exceptions. Re-throwing breaks JSON-RPC transports (#5263).
+            serviceProvider.SessionFailed = true;
         }
         finally
         {
@@ -100,8 +99,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
         if (_serviceProvidersPerSession.TryRemove(context.SessionUid.Value, out var serviceProvider))
         {
-            // Check if After(TestSession) hooks failed
-            if (serviceProvider.AfterSessionHooksFailed)
+            if (serviceProvider.SessionFailed)
             {
                 isSuccess = false;
             }
