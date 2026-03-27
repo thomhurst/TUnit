@@ -4,7 +4,7 @@
     <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
   </PropertyGroup>
 
-  <PropertyGroup Condition="$(MSBuildProjectName) == 'TUnit.Pipeline'">
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'TUnit.Pipeline'">
     <TargetFrameworks>net10.0</TargetFrameworks>
   </PropertyGroup>
 
@@ -14,7 +14,9 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <!-- We only need GitVersion.MsBuild for version properties, not the generated class -->
+    <!-- Disable GitVersion MSBuild task by default - CI computes version once and passes properties explicitly.
+         This prevents GitVersion from spawning a process per project×TFM (153+ invocations). -->
+    <DisableGitVersionTask>true</DisableGitVersionTask>
     <GenerateGitVersionInformation>false</GenerateGitVersionInformation>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>

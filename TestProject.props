@@ -25,8 +25,8 @@
 
     </PropertyGroup>
 
-    <Target Name="CleanSourceGeneratedViewer" BeforeTargets="BeforeBuild">
-        <Message Text="Removing SourceGeneratedViewer directory..." Importance="high" />
+    <Target Name="CleanSourceGeneratedViewer" BeforeTargets="BeforeBuild"
+            Condition="'$(ContinuousIntegrationBuild)' != 'true' AND Exists('$(ProjectDir)SourceGeneratedViewer')">
         <ItemGroup>
             <FilesToDelete Include="$(ProjectDir)SourceGeneratedViewer\**\*" />
         </ItemGroup>
