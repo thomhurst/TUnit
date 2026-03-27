@@ -24,17 +24,6 @@ public class HtmlReporterTests
         producer.DataTypesProduced.ShouldContain(typeof(SessionFileArtifact));
     }
 
-    private sealed class CapturingMessageBus : Microsoft.Testing.Platform.Messages.IMessageBus
-    {
-        public List<(Microsoft.Testing.Platform.Extensions.Messages.IDataProducer Producer, Microsoft.Testing.Platform.Extensions.Messages.IData Data)> Published = [];
-
-        public Task PublishAsync(Microsoft.Testing.Platform.Extensions.Messages.IDataProducer dataProducer, Microsoft.Testing.Platform.Extensions.Messages.IData value)
-        {
-            Published.Add((dataProducer, value));
-            return Task.CompletedTask;
-        }
-    }
-
     [Test]
     public async Task PublishArtifactAsync_Publishes_SessionFileArtifact_When_SessionContext_Set_And_File_Exists()
     {
