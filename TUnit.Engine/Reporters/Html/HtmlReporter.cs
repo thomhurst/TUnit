@@ -19,7 +19,7 @@ using TUnit.Engine.Framework;
 
 namespace TUnit.Engine.Reporters.Html;
 
-public sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataProducer, ITestHostApplicationLifetime, ITestSessionLifetimeHandler, IFilterReceiver, IDisposable
+internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataProducer, ITestHostApplicationLifetime, ITestSessionLifetimeHandler, IFilterReceiver, IDisposable
 {
     private string? _outputPath;
     private IMessageBus? _messageBus;
@@ -134,13 +134,7 @@ public sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataPro
         }
     }
 
-    internal async Task PublishArtifactAsync(string outputPath, CancellationToken cancellationToken)
-    {
-        // This overload is used by unit tests; use a null SessionUid placeholder.
-        await PublishArtifactAsync(outputPath, new SessionUid(string.Empty), cancellationToken);
-    }
-
-    private async Task PublishArtifactAsync(string outputPath, SessionUid sessionUid, CancellationToken cancellationToken)
+    internal async Task PublishArtifactAsync(string outputPath, SessionUid sessionUid, CancellationToken cancellationToken)
     {
         if (_messageBus is null)
         {

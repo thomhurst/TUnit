@@ -2,6 +2,7 @@
 
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
+using Microsoft.Testing.Platform.TestHost;
 using Shouldly;
 using TUnit.Engine.Reporters.Html;
 
@@ -56,7 +57,7 @@ public class HtmlReporterTests
         try
         {
             // Act
-            await reporter.PublishArtifactAsync(tempFile, CancellationToken.None);
+            await reporter.PublishArtifactAsync(tempFile, new SessionUid("test-session-1"), CancellationToken.None);
 
             // Assert
             bus.Published.Count.ShouldBe(1);
@@ -78,7 +79,7 @@ public class HtmlReporterTests
         try
         {
             // Should not throw
-            await reporter.PublishArtifactAsync(tempFile, CancellationToken.None);
+            await reporter.PublishArtifactAsync(tempFile, new SessionUid("test-session-1"), CancellationToken.None);
         }
         finally
         {
@@ -93,7 +94,7 @@ public class HtmlReporterTests
         var bus = new CapturingMessageBus();
         reporter.SetMessageBus(bus);
 
-        await reporter.PublishArtifactAsync("/nonexistent/path/report.html", CancellationToken.None);
+        await reporter.PublishArtifactAsync("/nonexistent/path/report.html", new SessionUid("test-session-1"), CancellationToken.None);
 
         bus.Published.Count.ShouldBe(0);
     }
