@@ -69,16 +69,10 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         }
         catch (Exception e) when (IsCancellationException(e))
         {
-            // Check if this is a normal cancellation or fail-fast cancellation
-            if (context.CancellationToken.IsCancellationRequested)
-            {
-                await GetOrCreateServiceProvider(context).Logger.LogErrorAsync("The test run was cancelled.");
-            }
-            else
-            {
-                // This is likely a fail-fast cancellation
-                await GetOrCreateServiceProvider(context).Logger.LogErrorAsync("Test execution stopped due to fail-fast.");
-            }
+            var message = context.CancellationToken.IsCancellationRequested
+                ? "The test run was cancelled."
+                : "Test execution stopped due to fail-fast.";
+            await GetOrCreateServiceProvider(context).Logger.LogErrorAsync(message);
 
             throw;
         }
