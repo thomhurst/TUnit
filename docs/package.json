@@ -20,9 +20,9 @@
     "@docusaurus/theme-mermaid": "^3.9.2",
     "@mdx-js/react": "^3.1.1",
     "clsx": "^2.1.1",
-    "prism-react-renderer": "^2.4.0",
-    "react": "^19.2.0",
-    "react-dom": "^19.0.0"
+    "prism-react-renderer": "^2.4.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "3.9.2",
