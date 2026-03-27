@@ -10,7 +10,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.Testing.Platform" />
-    <PackageReference Include="Microsoft.Testing.Extensions.CrashDump" />
+        <PackageReference Include="Microsoft.Testing.Extensions.CrashDump" />
         <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
         <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
         <PackageReference Include="CliWrap" />

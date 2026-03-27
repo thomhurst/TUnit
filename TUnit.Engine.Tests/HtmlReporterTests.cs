@@ -62,7 +62,7 @@ public class HtmlReporterTests
     }
 
     [Test]
-    public async Task PublishArtifactAsync_Is_NoOp_When_SessionContext_Not_Set()
+    public async Task PublishArtifactAsync_Is_NoOp_When_MessageBus_Not_Injected()
     {
         var reporter = new HtmlReporter(new MockExtension());
         var tempFile = Path.GetTempFileName();
