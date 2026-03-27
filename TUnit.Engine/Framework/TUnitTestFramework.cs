@@ -74,6 +74,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                 : "Test execution stopped due to fail-fast.";
             await GetOrCreateServiceProvider(context).Logger.LogErrorAsync(message);
 
+            // Re-throw is safe here — MTP handles OperationCanceledException specially.
             throw;
         }
         catch (Exception e)
