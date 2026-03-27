@@ -114,7 +114,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
     private TUnitServiceProvider GetOrCreateServiceProvider(ExecuteRequestContext context)
     {
-        var serviceProvider = _serviceProvidersPerSession.GetOrAdd(
+        return _serviceProvidersPerSession.GetOrAdd(
             context.Request.Session.SessionUid.Value,
             _ => new TUnitServiceProvider(
                 _extension,
@@ -123,8 +123,6 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                 context.MessageBus,
                 _frameworkServiceProvider,
                 _capabilities));
-
-        return serviceProvider;
     }
 
     private static bool IsCancellationException(Exception e)

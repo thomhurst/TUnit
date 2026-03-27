@@ -1,6 +1,5 @@
 #pragma warning disable TPEXP
 
-using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.TestHost;
 using Shouldly;
@@ -10,15 +9,6 @@ namespace TUnit.Engine.Tests;
 
 public class HtmlReporterTests
 {
-    private sealed class MockExtension : IExtension
-    {
-        public string Uid => "MockExtension";
-        public string DisplayName => "Mock";
-        public string Version => "1.0.0";
-        public string Description => "Mock Extension";
-        public Task<bool> IsEnabledAsync() => Task.FromResult(true);
-    }
-
     [Test]
     public void HtmlReporter_Implements_IDataProducer()
     {
@@ -88,14 +78,24 @@ public class HtmlReporterTests
     }
 
     [Test]
-    public async Task PublishArtifactAsync_Is_NoOp_When_File_Does_Not_Exist()
+    public async Task PublishArtifactAsync_Publishes_With_Correct_SessionUid()
     {
         var reporter = new HtmlReporter(new MockExtension());
         var bus = new CapturingMessageBus();
         reporter.SetMessageBus(bus);
 
-        await reporter.PublishArtifactAsync("/nonexistent/path/report.html", new SessionUid("test-session-1"), CancellationToken.None);
+        var tempFile = Path.GetTempFileName();
+        try
+        {
+            var uid = new SessionUid("my-session-42");
+            await reporter.PublishArtifactAsync(tempFile, uid, CancellationToken.None);
 
-        bus.Published.Count.ShouldBe(0);
+            var artifact = bus.Published[0].Data.ShouldBeOfType<SessionFileArtifact>();
+            artifact.SessionUid.Value.ShouldBe("my-session-42");
+        }
+        finally
+        {
+            File.Delete(tempFile);
+        }
     }
 }

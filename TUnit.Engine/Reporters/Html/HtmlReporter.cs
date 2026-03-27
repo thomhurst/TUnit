@@ -77,11 +77,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
     }
 
     public Task AfterRunAsync(int exitCode, CancellationToken cancellation)
-    {
-        // Report generation and artifact publishing happen in OnTestSessionFinishingAsync
-        // (before the message bus is drained), so AfterRunAsync only handles GitHub integration.
-        return Task.CompletedTask;
-    }
+        => Task.CompletedTask; // All work happens in OnTestSessionFinishingAsync.
 
     public Task OnTestSessionStartingAsync(ITestSessionContext testSessionContext)
         => Task.CompletedTask;
@@ -121,12 +117,16 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                 return;
             }
 
-            await WriteFileAsync(_outputPath!, html, testSessionContext.CancellationToken);
+            var outputPath = _outputPath!;
+            var written = await WriteFileAsync(outputPath, html, testSessionContext.CancellationToken);
 
-            await PublishArtifactAsync(_outputPath!, testSessionContext.SessionUid, testSessionContext.CancellationToken);
+            if (written)
+            {
+                await PublishArtifactAsync(outputPath, testSessionContext.SessionUid, testSessionContext.CancellationToken);
+            }
 
             // GitHub Actions integration (artifact upload + step summary)
-            await TryGitHubIntegrationAsync(_outputPath!, testSessionContext.CancellationToken);
+            await TryGitHubIntegrationAsync(outputPath, testSessionContext.CancellationToken);
         }
         catch (Exception ex)
         {
@@ -141,17 +141,11 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             return;
         }
 
-        var file = new FileInfo(outputPath);
-        if (!file.Exists)
-        {
-            return;
-        }
-
         // SessionFileArtifact is consumed by MTP itself (not user-defined consumers),
         // so no AddDataProducer registration is required — same pattern as TUnitMessageBus.
         await _messageBus.PublishAsync(this, new SessionFileArtifact(
             sessionUid,
-            file,
+            new FileInfo(outputPath),
             "HTML Test Report",
             "TUnit HTML test results report"));
     }
@@ -175,7 +169,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         _outputPath = path;
     }
 
-    internal void SetMessageBus(IMessageBus messageBus)
+    internal void SetMessageBus(IMessageBus? messageBus)
     {
         _messageBus = messageBus;
     }
@@ -583,7 +577,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         return "unknown";
     }
 
-    private static async Task WriteFileAsync(string path, string content, CancellationToken cancellationToken)
+    private static async Task<bool> WriteFileAsync(string path, string content, CancellationToken cancellationToken)
     {
         var directory = Path.GetDirectoryName(path);
         if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
@@ -603,7 +597,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                 File.WriteAllText(path, content, Encoding.UTF8);
 #endif
                 Console.WriteLine($"HTML test report written to: {path}");
-                return;
+                return true;
             }
             catch (IOException ex) when (attempt < maxAttempts && IsFileLocked(ex))
             {
@@ -617,6 +611,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         }
 
         Console.WriteLine($"Failed to write HTML test report to: {path} after {maxAttempts} attempts");
+        return false;
     }
 
     private static bool IsFileLocked(IOException exception)
