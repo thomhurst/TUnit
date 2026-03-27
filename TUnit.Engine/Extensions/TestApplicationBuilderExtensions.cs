@@ -29,7 +29,7 @@ public static class TestApplicationBuilderExtensions
 
         testApplicationBuilder.RegisterTestFramework(
             serviceProvider => new TestFrameworkCapabilities(CreateCapabilities(serviceProvider)),
-            (capabilities, serviceProvider) => new TUnitTestFramework(extension, serviceProvider, capabilities));
+            (capabilities, serviceProvider) => new TUnitTestFramework(extension, serviceProvider, capabilities, htmlReporter));
 
         testApplicationBuilder.AddTreeNodeFilterService(extension);
         testApplicationBuilder.AddMaximumFailedTestsService(extension);
