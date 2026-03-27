@@ -1,4 +1,3 @@
-using Microsoft.Testing.Platform.Extensions;
 using TUnit.Core;
 using TUnit.Engine.Reporters;
 
@@ -7,15 +6,6 @@ namespace TUnit.Engine.Tests;
 [NotInParallel]
 public class JUnitReporterTests
 {
-    private sealed class MockExtension : IExtension
-    {
-        public string Uid => "MockExtension";
-        public string DisplayName => "Mock";
-        public string Version => "1.0.0";
-        public string Description => "Mock Extension";
-        public Task<bool> IsEnabledAsync() => Task.FromResult(true);
-    }
-
     [After(Test)]
     public void Cleanup()
     {

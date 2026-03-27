@@ -7,6 +7,9 @@ using System.Text.Json;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestHost;
+using Microsoft.Testing.Platform.Messages;
+using Microsoft.Testing.Platform.Services;
+using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 using TUnit.Engine.Configuration;
 using TUnit.Engine.Constants;
@@ -16,9 +19,10 @@ using TUnit.Engine.Framework;
 
 namespace TUnit.Engine.Reporters.Html;
 
-internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestHostApplicationLifetime, IFilterReceiver, IDisposable
+internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataProducer, ITestHostApplicationLifetime, ITestSessionLifetimeHandler, IFilterReceiver, IDisposable
 {
     private string? _outputPath;
+    private IMessageBus? _messageBus;
     private readonly ConcurrentDictionary<string, ConcurrentQueue<TestNodeUpdateMessage>> _updates = [];
 
 #if NET
@@ -56,6 +60,8 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
 
     public Type[] DataTypesConsumed { get; } = [typeof(TestNodeUpdateMessage)];
 
+    public Type[] DataTypesProduced { get; } = [typeof(SessionFileArtifact)];
+
     public Task BeforeRunAsync(CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(_outputPath))
@@ -70,7 +76,13 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
         return Task.CompletedTask;
     }
 
-    public async Task AfterRunAsync(int exitCode, CancellationToken cancellation)
+    public Task AfterRunAsync(int exitCode, CancellationToken cancellation)
+        => Task.CompletedTask; // All work happens in OnTestSessionFinishingAsync.
+
+    public Task OnTestSessionStartingAsync(ITestSessionContext testSessionContext)
+        => Task.CompletedTask;
+
+    public async Task OnTestSessionFinishingAsync(ITestSessionContext testSessionContext)
     {
         try
         {
@@ -105,15 +117,39 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
                 return;
             }
 
-            await WriteFileAsync(_outputPath!, html, cancellation);
+            var outputPath = _outputPath!;
+            // WriteFileAsync returns false if all retry attempts are exhausted (locked file, bad path, etc.).
+            // Artifact publishing is gated on a successful write — no file means no artifact.
+            var written = await WriteFileAsync(outputPath, html, testSessionContext.CancellationToken);
+
+            if (written)
+            {
+                await PublishArtifactAsync(outputPath, testSessionContext.SessionUid, testSessionContext.CancellationToken);
+            }
 
             // GitHub Actions integration (artifact upload + step summary)
-            await TryGitHubIntegrationAsync(_outputPath!, cancellation);
+            await TryGitHubIntegrationAsync(outputPath, testSessionContext.CancellationToken);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Warning: HTML report generation failed: {ex.Message}");
         }
+    }
+
+    internal async Task PublishArtifactAsync(string outputPath, SessionUid sessionUid, CancellationToken cancellationToken)
+    {
+        if (_messageBus is null)
+        {
+            return;
+        }
+
+        // SessionFileArtifact is consumed by MTP itself (not user-defined consumers),
+        // so no AddDataProducer registration is required — same pattern as TUnitMessageBus.
+        await _messageBus.PublishAsync(this, new SessionFileArtifact(
+            sessionUid,
+            new FileInfo(outputPath),
+            "HTML Test Report",
+            "TUnit HTML test results report"));
     }
 
     public void Dispose()
@@ -133,6 +169,13 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
         }
 
         _outputPath = path;
+    }
+
+    // Called by the AddTestSessionLifetimeHandler factory at startup, before any session events fire,
+    // so _messageBus is guaranteed to be set before OnTestSessionFinishingAsync is invoked.
+    internal void SetMessageBus(IMessageBus? messageBus)
+    {
+        _messageBus = messageBus;
     }
 
     private ReportData BuildReportData()
@@ -538,7 +581,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
         return "unknown";
     }
 
-    private static async Task WriteFileAsync(string path, string content, CancellationToken cancellationToken)
+    private static async Task<bool> WriteFileAsync(string path, string content, CancellationToken cancellationToken)
     {
         var directory = Path.GetDirectoryName(path);
         if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
@@ -558,7 +601,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
                 File.WriteAllText(path, content, Encoding.UTF8);
 #endif
                 Console.WriteLine($"HTML test report written to: {path}");
-                return;
+                return true;
             }
             catch (IOException ex) when (attempt < maxAttempts && IsFileLocked(ex))
             {
@@ -572,6 +615,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, ITestH
         }
 
         Console.WriteLine($"Failed to write HTML test report to: {path} after {maxAttempts} attempts");
+        return false;
     }
 
     private static bool IsFileLocked(IOException exception)

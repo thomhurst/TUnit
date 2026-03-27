@@ -83,7 +83,11 @@ public static class TestApplicationBuilderExtensions
         });
         testApplicationBuilder.TestHost.AddTestHostApplicationLifetime(_ => junitReporter);
 
-        testApplicationBuilder.TestHost.AddDataConsumer(serviceProvider =>
+        testApplicationBuilder.TestHost.AddTestHostApplicationLifetime(_ => htmlReporter);
+        // MTP auto-registers IDataConsumer implementations returned from AddTestSessionLifetimeHandler,
+        // so no separate AddDataConsumer call is needed. Adding one causes a startup exception:
+        // "Consumer registered two time for data type TestNodeUpdateMessage".
+        testApplicationBuilder.TestHost.AddTestSessionLifetimeHandler(serviceProvider =>
         {
             var commandLineOptions = serviceProvider.GetRequiredService<ICommandLineOptions>();
 
@@ -98,9 +102,12 @@ public static class TestApplicationBuilderExtensions
                 htmlReporter.SetOutputPath(Helpers.PathValidator.ValidateAndNormalizePath(pathArgs[0], HtmlReporterCommandProvider.ReportHtmlFilename));
             }
 
+            // Inject the application-level message bus so PublishArtifactAsync works in
+            // OnTestSessionFinishingAsync (called before the bus is drained/disabled).
+            htmlReporter.SetMessageBus(serviceProvider.GetMessageBus());
+
             return htmlReporter;
         });
-        testApplicationBuilder.TestHost.AddTestHostApplicationLifetime(_ => htmlReporter);
     }
 
     private static IReadOnlyCollection<ITestFrameworkCapability> CreateCapabilities(IServiceProvider serviceProvider)
