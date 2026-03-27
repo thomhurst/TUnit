@@ -50,8 +50,7 @@ public class HtmlReporterTests
         // Arrange
         var reporter = new HtmlReporter(new MockExtension());
         var bus = new CapturingMessageBus();
-        var sessionUid = new Microsoft.Testing.Platform.TestHost.SessionUid("test-session-1");
-        reporter.SetSessionContext(bus, sessionUid);
+        reporter.SetMessageBus(bus);
 
         var tempFile = Path.GetTempFileName();
         try
@@ -92,8 +91,7 @@ public class HtmlReporterTests
     {
         var reporter = new HtmlReporter(new MockExtension());
         var bus = new CapturingMessageBus();
-        var sessionUid = new Microsoft.Testing.Platform.TestHost.SessionUid("test-session-2");
-        reporter.SetSessionContext(bus, sessionUid);
+        reporter.SetMessageBus(bus);
 
         await reporter.PublishArtifactAsync("/nonexistent/path/report.html", CancellationToken.None);
 

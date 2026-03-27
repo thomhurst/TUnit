@@ -186,11 +186,6 @@ public sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataPro
         _messageBus = messageBus;
     }
 
-    internal void SetSessionContext(IMessageBus messageBus, SessionUid sessionUid)
-    {
-        _messageBus = messageBus;
-    }
-
     private ReportData BuildReportData()
     {
         var assemblyName = Assembly.GetEntryAssembly()?.GetName().Name ?? "TestResults";
