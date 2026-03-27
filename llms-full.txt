@@ -15409,6 +15409,88 @@ public class LoggingHookExecutor : IHookExecutor
 }
 ```
 
+### Registering a Hook Executor
+
+There are two ways to register a hook executor:
+
+#### 1. Using the `[HookExecutor<T>]` attribute
+
+Apply the `[HookExecutor<T>]` attribute directly to your hook methods:
+
+```csharp
+// On a specific hook method
+[Before(Test)]
+[HookExecutor<LoggingHookExecutor>]
+public async Task SetUp(TestContext context)
+{
+    // This hook runs through the custom executor
+}
+
+[After(Class)]
+[HookExecutor<LoggingHookExecutor>]
+public static async Task ClassCleanup(ClassHookContext context)
+{
+    // This hook also runs through the custom executor
+}
+```
+
+You can also apply it at the class or assembly level to affect all hooks in that scope:
+
+```csharp
+// Assembly-level (applies to all hooks in the assembly)
+[assembly: HookExecutor<LoggingHookExecutor>]
+
+// Class-level (applies to all hooks in the class)
+[HookExecutor<LoggingHookExecutor>]
+public class MyTestClass
+{
+    [Before(Test)]
+    public async Task SetUp(TestContext context) { }
+
+    [After(Test)]
+    public async Task TearDown(TestContext context) { }
+}
+```
+
+#### 2. Using `SetHookExecutor` programmatically
+
+You can set a hook executor at runtime via `ITestRegisteredEventReceiver`. This is useful when you want the same executor for both tests and hooks:
+
+```csharp
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+public class DispatchAttribute : Attribute, ITestRegisteredEventReceiver
+{
+    public int Order => 0;
+
+    public ValueTask OnTestRegistered(TestRegisteredContext context)
+    {
+        var executor = new MyCustomExecutor();
+        context.SetTestExecutor(executor);
+        context.SetHookExecutor(executor);
+        return default;
+    }
+}
+
+// Usage
+[Dispatch]
+public class MyTestClass
+{
+    [Before(Test)]
+    public async Task SetUp(TestContext context)
+    {
+        // Runs through MyCustomExecutor
+    }
+
+    [Test]
+    public async Task MyTest()
+    {
+        // Also runs through MyCustomExecutor
+    }
+}
+```
+
+**Note:** `SetHookExecutor` applies to test-level hooks (`[Before(Test)]` / `[After(Test)]`). For session, assembly, or class-level hooks, use the `[HookExecutor<T>]` attribute directly on the hook method.
+
 ## Event Receivers
 
 TUnit provides several event receiver interfaces that allow you to hook into different stages of the test lifecycle:
