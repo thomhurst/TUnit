@@ -84,9 +84,13 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         }
         catch (Exception e)
         {
-            await GetOrCreateServiceProvider(context).Logger.LogErrorAsync(e);
+            var serviceProvider = GetOrCreateServiceProvider(context);
+            await serviceProvider.Logger.LogErrorAsync(e);
             await ReportUnhandledException(context, e);
-            throw;
+
+            // Do NOT re-throw — propagating the exception crashes Rider's JSON-RPC
+            // channel and hides the actual error from the user (see #5263).
+            serviceProvider.SessionFailed = true;
         }
         finally
         {
@@ -100,8 +104,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
         if (_serviceProvidersPerSession.TryRemove(context.SessionUid.Value, out var serviceProvider))
         {
-            // Check if After(TestSession) hooks failed
-            if (serviceProvider.AfterSessionHooksFailed)
+            if (serviceProvider.SessionFailed)
             {
                 isSuccess = false;
             }
