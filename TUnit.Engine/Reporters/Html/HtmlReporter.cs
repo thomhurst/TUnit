@@ -8,6 +8,7 @@ using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestHost;
 using Microsoft.Testing.Platform.Messages;
+using Microsoft.Testing.Platform.Services;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 using TUnit.Engine.Configuration;
@@ -18,10 +19,10 @@ using TUnit.Engine.Framework;
 
 namespace TUnit.Engine.Reporters.Html;
 
-public sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataProducer, ITestHostApplicationLifetime, IFilterReceiver, IDisposable
+public sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataProducer, ITestHostApplicationLifetime, ITestSessionLifetimeHandler, IFilterReceiver, IDisposable
 {
     private string? _outputPath;
-    private (IMessageBus MessageBus, SessionUid SessionUid)? _sessionContext;
+    private IMessageBus? _messageBus;
     private readonly ConcurrentDictionary<string, ConcurrentQueue<TestNodeUpdateMessage>> _updates = [];
 
 #if NET
@@ -75,7 +76,17 @@ public sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataPro
         return Task.CompletedTask;
     }
 
-    public async Task AfterRunAsync(int exitCode, CancellationToken cancellation)
+    public Task AfterRunAsync(int exitCode, CancellationToken cancellation)
+    {
+        // Report generation and artifact publishing happen in OnTestSessionFinishingAsync
+        // (before the message bus is drained), so AfterRunAsync only handles GitHub integration.
+        return Task.CompletedTask;
+    }
+
+    public Task OnTestSessionStartingAsync(ITestSessionContext testSessionContext)
+        => Task.CompletedTask;
+
+    public async Task OnTestSessionFinishingAsync(ITestSessionContext testSessionContext)
     {
         try
         {
@@ -110,12 +121,12 @@ public sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataPro
                 return;
             }
 
-            await WriteFileAsync(_outputPath!, html, cancellation);
+            await WriteFileAsync(_outputPath!, html, testSessionContext.CancellationToken);
 
-            await PublishArtifactAsync(_outputPath!, cancellation);
+            await PublishArtifactAsync(_outputPath!, testSessionContext.SessionUid, testSessionContext.CancellationToken);
 
             // GitHub Actions integration (artifact upload + step summary)
-            await TryGitHubIntegrationAsync(_outputPath!, cancellation);
+            await TryGitHubIntegrationAsync(_outputPath!, testSessionContext.CancellationToken);
         }
         catch (Exception ex)
         {
@@ -125,7 +136,13 @@ public sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataPro
 
     internal async Task PublishArtifactAsync(string outputPath, CancellationToken cancellationToken)
     {
-        if (_sessionContext is not { } ctx)
+        // This overload is used by unit tests; use a null SessionUid placeholder.
+        await PublishArtifactAsync(outputPath, new SessionUid(string.Empty), cancellationToken);
+    }
+
+    private async Task PublishArtifactAsync(string outputPath, SessionUid sessionUid, CancellationToken cancellationToken)
+    {
+        if (_messageBus is null)
         {
             return;
         }
@@ -138,8 +155,8 @@ public sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataPro
 
         // SessionFileArtifact is consumed by MTP itself (not user-defined consumers),
         // so no AddDataProducer registration is required — same pattern as TUnitMessageBus.
-        await ctx.MessageBus.PublishAsync(this, new SessionFileArtifact(
-            ctx.SessionUid,
+        await _messageBus.PublishAsync(this, new SessionFileArtifact(
+            sessionUid,
             file,
             "HTML Test Report",
             "TUnit HTML test results report"));
@@ -164,9 +181,14 @@ public sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataPro
         _outputPath = path;
     }
 
+    internal void SetMessageBus(IMessageBus messageBus)
+    {
+        _messageBus = messageBus;
+    }
+
     internal void SetSessionContext(IMessageBus messageBus, SessionUid sessionUid)
     {
-        _sessionContext = (messageBus, sessionUid);
+        _messageBus = messageBus;
     }
 
     private ReportData BuildReportData()

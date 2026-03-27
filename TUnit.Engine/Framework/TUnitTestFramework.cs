@@ -6,7 +6,6 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
-using TUnit.Engine.Reporters.Html;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Framework;
@@ -19,19 +18,16 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     private readonly ITestFrameworkCapabilities _capabilities;
     private readonly ConcurrentDictionary<string, TUnitServiceProvider> _serviceProvidersPerSession = new();
     private readonly IRequestHandler _requestHandler;
-    private readonly HtmlReporter? _htmlReporter;
 
     public TUnitTestFramework(
         IExtension extension,
         IServiceProvider frameworkServiceProvider,
-        ITestFrameworkCapabilities capabilities,
-        HtmlReporter? htmlReporter = null)
+        ITestFrameworkCapabilities capabilities)
     {
         _extension = extension;
         _frameworkServiceProvider = frameworkServiceProvider;
         _capabilities = capabilities;
         _requestHandler = new TestRequestHandler();
-        _htmlReporter = htmlReporter;
     }
 
     public string Uid => _extension.Uid;
@@ -127,8 +123,6 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                 context.MessageBus,
                 _frameworkServiceProvider,
                 _capabilities));
-
-        _htmlReporter?.SetSessionContext(context.MessageBus, context.Request.Session.SessionUid);
 
         return serviceProvider;
     }

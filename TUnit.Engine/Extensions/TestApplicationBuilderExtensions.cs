@@ -29,7 +29,7 @@ public static class TestApplicationBuilderExtensions
 
         testApplicationBuilder.RegisterTestFramework(
             serviceProvider => new TestFrameworkCapabilities(CreateCapabilities(serviceProvider)),
-            (capabilities, serviceProvider) => new TUnitTestFramework(extension, serviceProvider, capabilities, htmlReporter));
+            (capabilities, serviceProvider) => new TUnitTestFramework(extension, serviceProvider, capabilities));
 
         testApplicationBuilder.AddTreeNodeFilterService(extension);
         testApplicationBuilder.AddMaximumFailedTestsService(extension);
@@ -83,7 +83,8 @@ public static class TestApplicationBuilderExtensions
         });
         testApplicationBuilder.TestHost.AddTestHostApplicationLifetime(_ => junitReporter);
 
-        testApplicationBuilder.TestHost.AddDataConsumer(serviceProvider =>
+        testApplicationBuilder.TestHost.AddTestHostApplicationLifetime(_ => htmlReporter);
+        testApplicationBuilder.TestHost.AddTestSessionLifetimeHandler(serviceProvider =>
         {
             var commandLineOptions = serviceProvider.GetRequiredService<ICommandLineOptions>();
 
@@ -98,9 +99,12 @@ public static class TestApplicationBuilderExtensions
                 htmlReporter.SetOutputPath(Helpers.PathValidator.ValidateAndNormalizePath(pathArgs[0], HtmlReporterCommandProvider.ReportHtmlFilename));
             }
 
+            // Inject the application-level message bus so PublishArtifactAsync works in
+            // OnTestSessionFinishingAsync (called before the bus is drained/disabled).
+            htmlReporter.SetMessageBus(serviceProvider.GetMessageBus());
+
             return htmlReporter;
         });
-        testApplicationBuilder.TestHost.AddTestHostApplicationLifetime(_ => htmlReporter);
     }
 
     private static IReadOnlyCollection<ITestFrameworkCapability> CreateCapabilities(IServiceProvider serviceProvider)
