@@ -83,8 +83,8 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             await serviceProvider.Logger.LogErrorAsync(e);
             await ReportUnhandledException(context, e);
 
-            // Do NOT re-throw — propagating the exception crashes Rider's JSON-RPC
-            // channel and hides the actual error from the user (see #5263).
+            // Do NOT re-throw — MTP hosts expect errors via CloseTestSessionResult,
+            // not propagated exceptions. Re-throwing breaks JSON-RPC transports (#5263).
             serviceProvider.SessionFailed = true;
         }
         finally
