@@ -397,13 +397,27 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         // Linked CTS lets us cancel the failure watchers once all resources are ready
         using var failureCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
+        // When waitForHealthy is true, only wait for resources that actually have health
+        // checks. Resources without health checks never report as healthy in Aspire 13.2+,
+        // so we fall back to waiting for Running state for those.
+        HashSet<string>? healthCheckNames = null;
+        if (waitForHealthy)
+        {
+            var model = app.Services.GetRequiredService<DistributedApplicationModel>();
+            healthCheckNames = new HashSet<string>(
+                model.Resources
+                    .Where(r => r.Annotations.OfType<HealthCheckAnnotation>().Any())
+                    .Select(r => r.Name));
+        }
+
         var targetState = waitForHealthy ? "healthy" : "running";
         LogProgress($"Waiting for {resourceNames.Count} resource(s) to become {targetState}: [{string.Join(", ", resourceNames)}]");
 
         // Success path: wait for all resources to reach the desired state
         var readyTask = Task.WhenAll(resourceNames.Select(async name =>
         {
-            if (waitForHealthy)
+            var useHealthy = waitForHealthy && (healthCheckNames?.Contains(name) ?? false);
+            if (useHealthy)
             {
                 await notificationService.WaitForResourceHealthyAsync(name, cancellationToken);
             }
@@ -412,8 +426,9 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
                 await notificationService.WaitForResourceAsync(name, KnownResourceStates.Running, cancellationToken);
             }
 
+            var state = useHealthy ? "healthy" : "running";
             readyResources.Add(name);
-            LogProgress($"  Resource '{name}' is {targetState} ({readyResources.Count}/{resourceNames.Count})");
+            LogProgress($"  Resource '{name}' is {state} ({readyResources.Count}/{resourceNames.Count})");
         }));
 
         // Fail-fast path: complete as soon as ANY resource enters FailedToStart
