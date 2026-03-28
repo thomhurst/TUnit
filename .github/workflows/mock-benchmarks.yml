@@ -1,0 +1,213 @@
+name: Mock Benchmarks
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  run-mock-benchmarks:
+    environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Pull Requests' }}
+    strategy:
+      matrix:
+        benchmark: [MockCreationBenchmarks, SetupBenchmarks, InvocationBenchmarks, VerificationBenchmarks, CallbackBenchmarks, CombinedWorkflowBenchmarks]
+      fail-fast: false
+    runs-on: ubuntu-latest
+    concurrency:
+      group: "mock-benchmarks-${{ matrix.benchmark }}"
+      cancel-in-progress: true
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Run Benchmark
+        run: dotnet run -c Release -- --filter "*${{ matrix.benchmark }}*" --exporters json github
+        working-directory: "TUnit.Mocks.Benchmarks"
+
+      - name: Upload Results
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: mock_benchmark_${{ matrix.benchmark }}
+          path: |
+            **/BenchmarkDotNet.Artifacts/**
+
+  process-and-upload-mock-benchmarks:
+    needs: [run-mock-benchmarks]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.ADMIN_TOKEN }}
+
+      - name: Download All Mock Benchmark Artifacts
+        uses: actions/download-artifact@v8
+        with:
+          path: mock-benchmark-results/
+          pattern: mock_benchmark_*
+          merge-multiple: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Process Mock Benchmark Results
+        run: |
+          node .github/scripts/process-mock-benchmarks.js
+
+      - name: Upload MockCreation Benchmark
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: mock-benchmark-MockCreation
+          path: |
+            docs/docs/benchmarks/mocks/MockCreation.md
+            docs/static/benchmarks/mocks/MockCreation.json
+          retention-days: 90
+
+      - name: Upload Setup Benchmark
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: mock-benchmark-Setup
+          path: |
+            docs/docs/benchmarks/mocks/Setup.md
+            docs/static/benchmarks/mocks/Setup.json
+          retention-days: 90
+
+      - name: Upload Invocation Benchmark
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: mock-benchmark-Invocation
+          path: |
+            docs/docs/benchmarks/mocks/Invocation.md
+            docs/static/benchmarks/mocks/Invocation.json
+          retention-days: 90
+
+      - name: Upload Verification Benchmark
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: mock-benchmark-Verification
+          path: |
+            docs/docs/benchmarks/mocks/Verification.md
+            docs/static/benchmarks/mocks/Verification.json
+          retention-days: 90
+
+      - name: Upload Callback Benchmark
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: mock-benchmark-Callback
+          path: |
+            docs/docs/benchmarks/mocks/Callback.md
+            docs/static/benchmarks/mocks/Callback.json
+          retention-days: 90
+
+      - name: Upload CombinedWorkflow Benchmark
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: mock-benchmark-CombinedWorkflow
+          path: |
+            docs/docs/benchmarks/mocks/CombinedWorkflow.md
+            docs/static/benchmarks/mocks/CombinedWorkflow.json
+          retention-days: 90
+
+      - name: Upload Summary Files
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: mock-benchmark-summary
+          path: |
+            docs/docs/benchmarks/mocks/index.md
+            docs/static/benchmarks/mocks/latest.json
+            docs/static/benchmarks/mocks/summary.json
+          retention-days: 90
+
+      - name: Check for Changes
+        id: check_changes
+        run: |
+          git add docs/docs/benchmarks/mocks/ docs/static/benchmarks/mocks/
+          if git diff --quiet --staged; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "No mock benchmark changes detected"
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "Mock benchmark changes detected"
+          fi
+
+      - name: Create Pull Request
+        if: steps.check_changes.outputs.has_changes == 'true'
+        id: create_pr
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ secrets.ADMIN_TOKEN }}
+          commit-message: 'chore: update mock benchmark results'
+          branch: automated-mock-benchmarks-update
+          delete-branch: true
+          title: '🤖 Update Mock Benchmark Results'
+          body: |
+            ## Automated Mock Benchmark Update
+
+            This PR updates the mock benchmark documentation with the latest results from the Mock Benchmarks workflow.
+
+            ### Benchmarks Produced
+
+            Individual benchmark artifacts are available for download:
+            - `mock-benchmark-MockCreation`
+            - `mock-benchmark-Setup`
+            - `mock-benchmark-Invocation`
+            - `mock-benchmark-Verification`
+            - `mock-benchmark-Callback`
+            - `mock-benchmark-CombinedWorkflow`
+            - `mock-benchmark-summary` (aggregated overview)
+
+            ### Libraries Compared
+            - **TUnit.Mocks** (source-generated, AOT-compatible)
+            - **Moq** (runtime proxy generation)
+            - **NSubstitute** (runtime proxy generation)
+            - **FakeItEasy** (runtime proxy generation)
+
+            ### Changes
+            - Updated mock benchmark data in `docs/static/benchmarks/mocks/latest.json`
+            - Regenerated mock benchmark documentation in `docs/docs/benchmarks/mocks/`
+            - Updated mock benchmark summary in `docs/static/benchmarks/mocks/summary.json`
+
+            ### Workflow Run
+            - **Run ID**: ${{ github.run_id }}
+            - **Triggered**: ${{ github.event_name }}
+
+            ---
+
+            🤖 This PR was automatically created and will be merged automatically once CI checks pass.
+          labels: |
+            automated
+            benchmarks
+            documentation
+            ignore-for-release
+          draft: false
+
+      - name: Merge PR Immediately
+        if: steps.check_changes.outputs.has_changes == 'true' && steps.create_pr.outputs.pull-request-number != ''
+        env:
+          GH_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+        run: |
+          # Wait a moment for PR to be fully created
+          sleep 5
+          gh pr merge ${{ steps.create_pr.outputs.pull-request-number }} --squash --delete-branch --admin

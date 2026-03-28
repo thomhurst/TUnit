@@ -79,6 +79,11 @@
     <Project Path="TUnit.Aspire.Tests.AppHost/TUnit.Aspire.Tests.AppHost.csproj" />
   </Folder>
 
+  <!-- Benchmarks -->
+  <Folder Name="/Benchmarks/">
+    <Project Path="TUnit.Mocks.Benchmarks/TUnit.Mocks.Benchmarks.csproj" />
+  </Folder>
+
   <!-- Build infrastructure -->
   <Folder Name="/Build/">
     <Project Path="TUnit.Pipeline/TUnit.Pipeline.csproj" />
