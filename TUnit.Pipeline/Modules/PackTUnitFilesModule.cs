@@ -41,10 +41,11 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
 
             var properties = new List<KeyValue>
             {
-                // Explicitly set PackageVersion to match the version the pipeline uses
-                // for downstream operations (template install, nuget test, etc.).
-                // GitVersion.MsBuild handles AssemblyVersion/FileVersion automatically.
                 new KeyValue("PackageVersion", packageVersion),
+                new KeyValue("AssemblyVersion", version.AssemblySemVer!),
+                new KeyValue("FileVersion", version.AssemblySemFileVer!),
+                new KeyValue("InformationalVersion", version.InformationalVersion!),
+                new KeyValue("Version", version.SemVer!),
             };
 
             await context.DotNet()
