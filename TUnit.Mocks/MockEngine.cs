@@ -25,12 +25,11 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     private readonly Lock _setupLock = new();
     private readonly ConcurrentQueue<CallRecord> _callHistory = new();
 
-    // Lazily initialized — most mocks never use these features.
-    private ConcurrentDictionary<string, object?>? _autoTrackValues;
-    private ConcurrentQueue<(string EventName, bool IsSubscribe)>? _eventSubscriptions;
-    private ConcurrentDictionary<string, Action>? _onSubscribeCallbacks;
-    private ConcurrentDictionary<string, Action>? _onUnsubscribeCallbacks;
-    private ConcurrentDictionary<string, IMock?>? _autoMockCache;
+    private volatile ConcurrentDictionary<string, object?>? _autoTrackValues;
+    private volatile ConcurrentQueue<(string EventName, bool IsSubscribe)>? _eventSubscriptions;
+    private volatile ConcurrentDictionary<string, Action>? _onSubscribeCallbacks;
+    private volatile ConcurrentDictionary<string, Action>? _onUnsubscribeCallbacks;
+    private volatile ConcurrentDictionary<string, IMock?>? _autoMockCache;
 
     /// <summary>
     /// The current state name for state machine mocking. Null means no state (all setups match).
@@ -80,19 +79,19 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     }
 
     private ConcurrentDictionary<string, object?> AutoTrackValues
-        => _autoTrackValues ??= new();
+        => _autoTrackValues ?? Interlocked.CompareExchange(ref _autoTrackValues, new(), null) ?? _autoTrackValues;
 
     private ConcurrentQueue<(string EventName, bool IsSubscribe)> EventSubscriptions
-        => _eventSubscriptions ??= new();
+        => _eventSubscriptions ?? Interlocked.CompareExchange(ref _eventSubscriptions, new(), null) ?? _eventSubscriptions;
 
     private ConcurrentDictionary<string, Action> OnSubscribeCallbacks
-        => _onSubscribeCallbacks ??= new();
+        => _onSubscribeCallbacks ?? Interlocked.CompareExchange(ref _onSubscribeCallbacks, new(), null) ?? _onSubscribeCallbacks;
 
     private ConcurrentDictionary<string, Action> OnUnsubscribeCallbacks
-        => _onUnsubscribeCallbacks ??= new();
+        => _onUnsubscribeCallbacks ?? Interlocked.CompareExchange(ref _onUnsubscribeCallbacks, new(), null) ?? _onUnsubscribeCallbacks;
 
     private ConcurrentDictionary<string, IMock?> AutoMockCache
-        => _autoMockCache ??= new();
+        => _autoMockCache ?? Interlocked.CompareExchange(ref _autoMockCache, new(), null) ?? _autoMockCache;
 
     /// <summary>
     /// Transitions the engine to the specified state. Null clears the state.
@@ -505,14 +504,11 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         // Drain the queue
         while (_callHistory.TryDequeue(out _)) { }
 
-        _autoTrackValues?.Clear();
-        if (_eventSubscriptions is not null)
-        {
-            while (_eventSubscriptions.TryDequeue(out _)) { }
-        }
-        _onSubscribeCallbacks?.Clear();
-        _onUnsubscribeCallbacks?.Clear();
-        _autoMockCache?.Clear();
+        _autoTrackValues = null;
+        _eventSubscriptions = null;
+        _onSubscribeCallbacks = null;
+        _onUnsubscribeCallbacks = null;
+        _autoMockCache = null;
     }
 
     /// <summary>
