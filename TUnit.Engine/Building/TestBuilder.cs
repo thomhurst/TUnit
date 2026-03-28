@@ -287,10 +287,7 @@ internal sealed class TestBuilder : ITestBuilder
                                     ClassConstructor = testBuilderContext.ClassConstructor
                                 };
 
-                                if (testBuilderContext.RawStateBag is { IsEmpty: false } parentStateBag)
-                                {
-                                    contextAccessor.Current.StateBag = new ConcurrentDictionary<string, object?>(parentStateBag);
-                                }
+                                PropagateStateBag(testBuilderContext, contextAccessor.Current);
 
                                 var (classDataUnwrapped, classRowMetadata) = DataUnwrapper.UnwrapWithMetadata(await classDataFactory() ?? []);
                                 classData = classDataUnwrapped;
@@ -489,10 +486,7 @@ internal sealed class TestBuilder : ITestBuilder
                                     InitializedAttributes = attributes
                                 };
 
-                                if (testBuilderContext.RawStateBag is { IsEmpty: false } skipParentStateBag)
-                                {
-                                    testSpecificContext.StateBag = new ConcurrentDictionary<string, object?>(skipParentStateBag);
-                                }
+                                PropagateStateBag(testBuilderContext, testSpecificContext);
 
                                 var test = await BuildTestAsync(metadata, testData, testSpecificContext, cancellationToken: cancellationToken);
                                 test.Context.SkipReason = skipReason;
@@ -552,10 +546,7 @@ internal sealed class TestBuilder : ITestBuilder
                             InitializedAttributes = attributes
                         };
 
-                        if (testBuilderContext.RawStateBag is { IsEmpty: false } skipClassParentStateBag)
-                        {
-                            testSpecificContext.StateBag = new ConcurrentDictionary<string, object?>(skipClassParentStateBag);
-                        }
+                        PropagateStateBag(testBuilderContext, testSpecificContext);
 
                         var test = await BuildTestAsync(metadata, testData, testSpecificContext, cancellationToken: cancellationToken);
                         test.Context.SkipReason = skipReason;
@@ -1894,5 +1885,13 @@ internal sealed class TestBuilder : ITestBuilder
     internal bool CouldTestMatchFilter(ITestExecutionFilter filter, TestMetadata metadata)
     {
         return _filterMatcher.CouldMatchFilter(metadata, filter);
+    }
+
+    private static void PropagateStateBag(TestBuilderContext source, TestBuilderContext target)
+    {
+        if (source.RawStateBag is { IsEmpty: false } bag)
+        {
+            target.StateBag = new ConcurrentDictionary<string, object?>(bag);
+        }
     }
 }
