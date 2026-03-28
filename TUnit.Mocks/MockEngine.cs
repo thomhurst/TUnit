@@ -505,11 +505,11 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         // Drain the queue
         while (_callHistory.TryDequeue(out _)) { }
 
-        _autoTrackValues = null;
-        _eventSubscriptions = null;
-        _onSubscribeCallbacks = null;
-        _onUnsubscribeCallbacks = null;
-        _autoMockCache = null;
+        Volatile.Write(ref _autoTrackValues, null);
+        Volatile.Write(ref _eventSubscriptions, null);
+        Volatile.Write(ref _onSubscribeCallbacks, null);
+        Volatile.Write(ref _onUnsubscribeCallbacks, null);
+        Volatile.Write(ref _autoMockCache, null);
     }
 
     /// <summary>
