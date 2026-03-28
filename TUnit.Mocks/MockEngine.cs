@@ -4,6 +4,7 @@ using TUnit.Mocks.Setup;
 using TUnit.Mocks.Setup.Behaviors;
 using TUnit.Mocks.Verification;
 using System.Collections.Concurrent;
+using System.Threading;
 using System.ComponentModel;
 
 namespace TUnit.Mocks;
@@ -25,11 +26,11 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     private readonly Lock _setupLock = new();
     private readonly ConcurrentQueue<CallRecord> _callHistory = new();
 
-    private volatile ConcurrentDictionary<string, object?>? _autoTrackValues;
-    private volatile ConcurrentQueue<(string EventName, bool IsSubscribe)>? _eventSubscriptions;
-    private volatile ConcurrentDictionary<string, Action>? _onSubscribeCallbacks;
-    private volatile ConcurrentDictionary<string, Action>? _onUnsubscribeCallbacks;
-    private volatile ConcurrentDictionary<string, IMock?>? _autoMockCache;
+    private ConcurrentDictionary<string, object?>? _autoTrackValues;
+    private ConcurrentQueue<(string EventName, bool IsSubscribe)>? _eventSubscriptions;
+    private ConcurrentDictionary<string, Action>? _onSubscribeCallbacks;
+    private ConcurrentDictionary<string, Action>? _onUnsubscribeCallbacks;
+    private ConcurrentDictionary<string, IMock?>? _autoMockCache;
 
     /// <summary>
     /// The current state name for state machine mocking. Null means no state (all setups match).
@@ -79,19 +80,19 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     }
 
     private ConcurrentDictionary<string, object?> AutoTrackValues
-        => _autoTrackValues ?? Interlocked.CompareExchange(ref _autoTrackValues, new(), null) ?? _autoTrackValues;
+        => LazyInitializer.EnsureInitialized(ref _autoTrackValues);
 
     private ConcurrentQueue<(string EventName, bool IsSubscribe)> EventSubscriptions
-        => _eventSubscriptions ?? Interlocked.CompareExchange(ref _eventSubscriptions, new(), null) ?? _eventSubscriptions;
+        => LazyInitializer.EnsureInitialized(ref _eventSubscriptions);
 
     private ConcurrentDictionary<string, Action> OnSubscribeCallbacks
-        => _onSubscribeCallbacks ?? Interlocked.CompareExchange(ref _onSubscribeCallbacks, new(), null) ?? _onSubscribeCallbacks;
+        => LazyInitializer.EnsureInitialized(ref _onSubscribeCallbacks);
 
     private ConcurrentDictionary<string, Action> OnUnsubscribeCallbacks
-        => _onUnsubscribeCallbacks ?? Interlocked.CompareExchange(ref _onUnsubscribeCallbacks, new(), null) ?? _onUnsubscribeCallbacks;
+        => LazyInitializer.EnsureInitialized(ref _onUnsubscribeCallbacks);
 
     private ConcurrentDictionary<string, IMock?> AutoMockCache
-        => _autoMockCache ?? Interlocked.CompareExchange(ref _autoMockCache, new(), null) ?? _autoMockCache;
+        => LazyInitializer.EnsureInitialized(ref _autoMockCache);
 
     /// <summary>
     /// Transitions the engine to the specified state. Null clears the state.
@@ -227,9 +228,9 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         callRecord.IsUnmatched = true;
 
         // Auto-track property getters: return stored value if available
-        if (AutoTrackProperties && _autoTrackValues is not null && memberName.StartsWith("get_", StringComparison.Ordinal))
+        if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal))
         {
-            if (_autoTrackValues.TryGetValue(memberName[4..], out var trackedValue))
+            if (trackValues.TryGetValue(memberName[4..], out var trackedValue))
             {
                 if (trackedValue is TReturn typed) return typed;
                 if (trackedValue is null) return default(TReturn)!;
@@ -481,12 +482,12 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     [EditorBrowsable(EditorBrowsableState.Never)]
     public bool TryGetAutoMock(string cacheKey, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out IMock? mock)
     {
-        if (_autoMockCache is null)
+        if (Volatile.Read(ref _autoMockCache) is not { } cache)
         {
             mock = null;
             return false;
         }
-        return _autoMockCache.TryGetValue(cacheKey, out mock);
+        return cache.TryGetValue(cacheKey, out mock);
     }
 
     /// <summary>
@@ -539,14 +540,14 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
 
         if (isSubscribe)
         {
-            if (_onSubscribeCallbacks is not null && _onSubscribeCallbacks.TryGetValue(eventName, out var callback))
+            if (Volatile.Read(ref _onSubscribeCallbacks) is { } subCallbacks && subCallbacks.TryGetValue(eventName, out var callback))
             {
                 callback();
             }
         }
         else
         {
-            if (_onUnsubscribeCallbacks is not null && _onUnsubscribeCallbacks.TryGetValue(eventName, out var callback))
+            if (Volatile.Read(ref _onUnsubscribeCallbacks) is { } unsubCallbacks && unsubCallbacks.TryGetValue(eventName, out var callback))
             {
                 callback();
             }
@@ -559,9 +560,9 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     [EditorBrowsable(EditorBrowsableState.Never)]
     public int GetEventSubscriberCount(string eventName)
     {
-        if (_eventSubscriptions is null) return 0;
+        if (Volatile.Read(ref _eventSubscriptions) is not { } subs) return 0;
         int count = 0;
-        foreach (var (name, isSub) in _eventSubscriptions)
+        foreach (var (name, isSub) in subs)
         {
             if (name == eventName)
             {
@@ -577,8 +578,8 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     [EditorBrowsable(EditorBrowsableState.Never)]
     public bool WasEventSubscribed(string eventName)
     {
-        if (_eventSubscriptions is null) return false;
-        foreach (var (name, isSub) in _eventSubscriptions)
+        if (Volatile.Read(ref _eventSubscriptions) is not { } subs) return false;
+        foreach (var (name, isSub) in subs)
         {
             if (name == eventName && isSub) return true;
         }
