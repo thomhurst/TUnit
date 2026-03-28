@@ -287,7 +287,7 @@ internal sealed class TestBuilder : ITestBuilder
                                     ClassConstructor = testBuilderContext.ClassConstructor
                                 };
 
-                                PropagateStateBag(testBuilderContext, contextAccessor.Current);
+                                testBuilderContext.CopyStateBagTo(contextAccessor.Current);
 
                                 var (classDataUnwrapped, classRowMetadata) = DataUnwrapper.UnwrapWithMetadata(await classDataFactory() ?? []);
                                 classData = classDataUnwrapped;
@@ -486,7 +486,7 @@ internal sealed class TestBuilder : ITestBuilder
                                     InitializedAttributes = attributes
                                 };
 
-                                PropagateStateBag(testBuilderContext, testSpecificContext);
+                                testBuilderContext.CopyStateBagTo(testSpecificContext);
 
                                 var test = await BuildTestAsync(metadata, testData, testSpecificContext, cancellationToken: cancellationToken);
                                 test.Context.SkipReason = skipReason;
@@ -546,7 +546,7 @@ internal sealed class TestBuilder : ITestBuilder
                             InitializedAttributes = attributes
                         };
 
-                        PropagateStateBag(testBuilderContext, testSpecificContext);
+                        testBuilderContext.CopyStateBagTo(testSpecificContext);
 
                         var test = await BuildTestAsync(metadata, testData, testSpecificContext, cancellationToken: cancellationToken);
                         test.Context.SkipReason = skipReason;
@@ -1887,11 +1887,4 @@ internal sealed class TestBuilder : ITestBuilder
         return _filterMatcher.CouldMatchFilter(metadata, filter);
     }
 
-    private static void PropagateStateBag(TestBuilderContext source, TestBuilderContext target)
-    {
-        if (source.RawStateBag is { IsEmpty: false } bag)
-        {
-            target.StateBag = new ConcurrentDictionary<string, object?>(bag);
-        }
-    }
 }
